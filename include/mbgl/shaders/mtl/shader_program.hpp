@@ -4,6 +4,7 @@
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/uniform_block.hpp>
 #include <mbgl/mtl/vertex_attribute.hpp>
+#include <mbgl/shaders/shader_source.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLLibrary.hpp>
@@ -11,6 +12,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace mbgl {
 namespace shaders {
@@ -36,6 +38,16 @@ struct TextureInfo {
     std::size_t index;
     std::string_view name;
     StringIdentity nameID;
+};
+struct ReflectionData {
+    const std::string name;
+    const std::string vertexMainFunction;
+    const std::string fragmentMainFunction;
+    const std::vector<const AttributeInfo> attributes;
+    const std::vector<const UniformBlockInfo> uniforms;
+    const std::vector<const TextureInfo> textures;
+    // A link is a Metal shader compiled separate and linked later as a shader library
+    const std::vector<shaders::BuiltIn> links;
 };
 } // namespace shaders
 namespace mtl {

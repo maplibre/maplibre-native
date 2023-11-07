@@ -16,7 +16,6 @@ const headerTemplate = (name, additionalIncludes, infoBlock, dataBlock) => {
     return `${HeaderComment}
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <string_view>
 ${additionalIncludes}
@@ -57,7 +56,7 @@ ${reflectionData}
 // return reflection data provided in a manifest element's entry
 const createReflection = ((elem) => {
     if (!elem.metadata) {
-        return {"hdr": "", "src": ""};
+        return {"hdr": "", "src": "", "reflected": false};
     }
 
     let metadata = []; // Decls placed in the header
@@ -68,97 +67,75 @@ const createReflection = ((elem) => {
     elem.metadata.attributes = typeof elem.metadata.attributes == "object" ? elem.metadata.attributes : [];
     elem.metadata.attributes = elem.metadata.attributes.filter(it => typeof it == "object");
     const numAttrs = elem.metadata.attributes.length;
-    //if (numAttrs > 0) {
-        // Declare this array in the header
-        metadata.push(`    static const std::array<AttributeInfo, ${numAttrs}> attributes;`);
-
-        // And define it in the source TLU
-        srcImplData.push(`const std::array<AttributeInfo, ${numAttrs}> ShaderSource<BuiltIn::${
-            elem.name
-        }, gfx::Backend::Type::Metal>::attributes = {`);
-        elem.metadata.attributes.forEach((attr) => {
-            srcImplData.push(`    AttributeInfo{${
-                attr.index
-            }, gfx::AttributeDataType::${
-                attr.type
-            }, ${
-                attr.count
-            }, "${
-                attr.name
-            }"},`);
-        });
-        srcImplData.push("};");
-    //}
 
     // uniforms
     elem.metadata.uniforms = typeof elem.metadata.uniforms == "object" ? elem.metadata.uniforms : [];
     elem.metadata.uniforms = elem.metadata.uniforms.filter(it => typeof it == "object");
     const numUniforms = elem.metadata.uniforms.length;
-    //if (numUniforms > 0) {
-        // Declare this array in the header
-        metadata.push(`    static const std::array<UniformBlockInfo, ${numUniforms}> uniforms;`);
-
-        // And define it in the source TLU
-        srcImplData.push(`const std::array<UniformBlockInfo, ${numUniforms}> ShaderSource<BuiltIn::${
-            elem.name
-        }, gfx::Backend::Type::Metal>::uniforms = {`);
-        elem.metadata.uniforms.forEach((uniform) => {
-            srcImplData.push(`    UniformBlockInfo{${
-                uniform.index
-            }, ${
-                uniform.bindVertex
-            }, ${
-                uniform.bindFragment
-            }, sizeof(${
-                uniform.structureName
-            }), "${
-                uniform.structureName
-            }"},`);
-        });
-        srcImplData.push("};");
-    //}
 
     // textures
     elem.metadata.textures = typeof elem.metadata.textures == "object" ? elem.metadata.textures : [];
     elem.metadata.textures = elem.metadata.textures.filter(it => typeof it == "object");
     const numTextures = elem.metadata.textures.length;
-    //if (numTextures > 0) {
-        // Declare this array in the header
-        metadata.push(`    static const std::array<TextureInfo, ${numTextures}> textures;`);
-
-        // And define it in the source TLU
-        srcImplData.push(`const std::array<TextureInfo, ${numTextures}> ShaderSource<BuiltIn::${
-            elem.name
-        }, gfx::Backend::Type::Metal>::textures = {`);
-        elem.metadata.textures.forEach((texture) => {
-            srcImplData.push(`    TextureInfo{${
-                texture.index
-            }, "${
-                texture.name
-            }"},`);
-        });
-        srcImplData.push("};");
-    //}
 
     // library links
     elem.program.link = typeof elem.program.link == "object" ? elem.program.link : [];
     elem.program.link = elem.program.link.filter(it => typeof it == "string");
     const numLinks = elem.program.link.length;
-    //if (numLinks > 0) {
-        // Declare this array in the header
-        metadata.push(`    static const std::array<std::string_view, ${numLinks}> links;`);
 
-        // And define it in the source TLU
-        srcImplData.push(`const std::array<std::string_view, ${numLinks}> ShaderSource<BuiltIn::${
-            elem.name
-        }, gfx::Backend::Type::Metal>::links = {`);
-        elem.program.link.forEach((link) => {
-            srcImplData.push(`    std::string_view("${link}")},`);
-        });
-        srcImplData.push("};");
-    //}
+    // runtime reflection data
+    metadata.push(`    static const ReflectionData reflectionData;`);
+    srcImplData.push(`const ReflectionData ShaderSource<BuiltIn::${elem.name}, gfx::Backend::Type::Metal>::reflectionData = {`);
+    srcImplData.push(`    "${elem.name}",`,);
+    srcImplData.push(`    "${elem.program.vertexEntry}",`);
+    srcImplData.push(`    "${elem.program.fragmentEntry}",`);
 
-    return {"hdr": metadata.join("\n"), "src": srcImplData.join("\n")};
+    // attributes
+    srcImplData.push(`    {
+${(() => {
+    let attributes = [];
+    elem.metadata.attributes.forEach((attr) => {
+        attributes.push(`        AttributeInfo{${attr.index}, gfx::AttributeDataType::${attr.type}, ${attr.count}, "${attr.name}"},`);
+    });
+    return attributes.join("\n");
+})()}
+    },`);
+
+    // uniforms
+    srcImplData.push(`    {
+${(() => {
+    let uniforms = [];
+    elem.metadata.uniforms.forEach((uniform) => {
+        uniforms.push(`        UniformBlockInfo{${uniform.index}, ${uniform.bindVertex}, ${uniform.bindFragment}, sizeof(${uniform.structureName}), "${uniform.structureName}"},`);
+    });
+    return uniforms.join("\n");
+})()}
+    },`);
+    
+    // textures
+    srcImplData.push(`    {
+${(() => {
+    let textures = [];
+    elem.metadata.textures.forEach((texture) => {
+        textures.push(`        TextureInfo{${texture.index}, "${texture.name}"},`);
+    });
+    return textures.join("\n");
+})()}
+    },`);
+
+    // links
+    srcImplData.push(`    {
+${(() => {
+    let links = [];
+    elem.program.link.forEach((link) => {
+        links.push(`        BuiltIn::${link},`);
+    });
+    return links.join("\n");
+})()}
+    },`);
+    srcImplData.push(`};`);
+
+    return {"hdr": metadata.join("\n"), "src": srcImplData.join("\n"), "reflected": true};
 });
 
 module.exports = function (outputRoot, args) {
@@ -177,6 +154,7 @@ module.exports = function (outputRoot, args) {
     let generatedHeaders = [];
     let generatedSources = [];
     let shaderNames = [];
+    let reflectedPrograms = {};
     let amalgamation = [];
 
     JSON.parse(fs.readFileSync(path.join(shaderRoot, "manifest.json"))).filter(it => typeof it == "object").forEach((elem) => {
@@ -203,6 +181,7 @@ module.exports = function (outputRoot, args) {
         additionalIncludes = ([...new Set(additionalIncludes.concat(accessor.deps))]).join("\n");
         const accessorFunc = accessor.func;
         const reflectionData = createReflection(elem);
+        reflectedPrograms[elem.name] = reflectionData.reflected;
 
         vprint(args, `Writing shader ${shaderHeaderPath}...`);
 
@@ -211,14 +190,11 @@ module.exports = function (outputRoot, args) {
                 shaderHeaderPath,
                 headerTemplate(
                     elem.name, /* shaderName */
-                    additionalIncludes, ([
-                        `static constexpr const char* name = "${elem.name}";`,
-                        `static constexpr auto vertexMainFunction = "${elem.program.vertexEntry}";`,
-                        `static constexpr auto fragmentMainFunction = "${elem.program.fragmentEntry}";`,
-                    ]).map(elem => "    " + elem).join("\n"), /* infoBlock */
+                    additionalIncludes,
+                    "", /* infoBlock */
                     ([
                         reflectionData.hdr,
-                        emitSource(programSrcPath, srcMetrics),
+                        emitSource(programSrcPath, srcMetrics, false, "source"),
                         accessorFunc,
                     ]).join("\n") /* dataBlock */
                 ),
@@ -235,9 +211,6 @@ module.exports = function (outputRoot, args) {
                 headerTemplate(
                     elem.name, /* shaderName */
                     additionalIncludes, ([
-                        `static constexpr const char* name = "${elem.name}";`,
-                        `static constexpr auto vertexMainFunction = "${elem.program.vertexEntry}";`,
-                        `static constexpr auto fragmentMainFunction = "${elem.program.fragmentEntry}";`,
                         `static constexpr size_t sourceAmalgamationOffset = ${srcMetrics.amalgamationPtr};`,
                         `static constexpr size_t sourceAmalgamationLength = ${srcMetrics.amalgamationPtr + src.length};`,
                     ]).map(elem => "    " + elem).join("\n"), /* infoBlock */
@@ -256,7 +229,7 @@ module.exports = function (outputRoot, args) {
         const header = "#include <mbgl/shaders/mtl/" + elem.header + ".hpp>";
 
         // Write the source contents
-        if (reflectionData.src.length > 0) {
+        if (reflectionData.reflected && reflectionData.src.length > 0) {
             writeFile(shaderSourcePath, srcTemplate(header, reflectionData.src), args.dryrun);
         } else {
             vprint(args, "Not writing source file for shader " + elem.name + ", no metadata to define.");
@@ -272,6 +245,7 @@ module.exports = function (outputRoot, args) {
         "srcs": generatedSources,
         "names": shaderNames,
         "metrics": srcMetrics,
+        "reflectedPrograms": reflectedPrograms,
         "amalgamation": amalgamation
     };
 };

@@ -14,7 +14,7 @@ struct FragmentStage {
     float2 extrude_scale;
 };
 
-struct alignas(16) CollisionCircleUBO {
+struct alignas(16) CollisionUBO {
     float4x4 matrix;
     float2 extrude_scale;
     float camera_to_center_distance;
@@ -22,7 +22,7 @@ struct alignas(16) CollisionCircleUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const CollisionCircleUBO& drawable [[buffer(4)]]) {
+                                device const CollisionUBO& drawable [[buffer(4)]]) {
 
     float4 projectedPoint = drawable.matrix * float4(float2(vertx.anchor_pos), 0, 1);
     float camera_to_anchor_distance = projectedPoint.w;
@@ -54,7 +54,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const CollisionCircleUBO& drawable [[buffer(4)]]) {
+                            device const CollisionUBO& drawable [[buffer(4)]]) {
 
     float alpha = 0.5;
 

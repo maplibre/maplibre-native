@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/immutable.hpp>
 
 #include <array>
@@ -59,7 +59,7 @@ public:
     template <shaders::BuiltIn ShaderType>
     shaders::AttributeSource getAttributeSource(size_t index) {
         using ShaderClass = shaders::ShaderSource<ShaderType, gfx::Backend::Type::Metal>;
-        return getAttributeSource(ShaderClass::attributes[index].nameID);
+        return getAttributeSource(ShaderClass::reflectionData.attributes[index].nameID);
     }
 #endif // MLN_RENDER_BACKEND_METAL
 

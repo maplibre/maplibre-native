@@ -19,6 +19,7 @@ public:
         ProgramSource() = default;
 
         /// @brief Construct a new ProgramSource object
+        /// @note For Metal, only the vertex string is used as the shader is combined.
         /// @param forBackend The provided source code is intended for use with the given rendering backend.
         /// @param vertex_ The vertex shader source code, or empty string if not provided.
         /// @param fragment_ The fragment shader source code, or empty string if not provided.

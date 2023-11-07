@@ -32,16 +32,17 @@ ${generatedMetalHeaders.join('\n')}
 namespace mbgl {
 namespace shaders {
 
+struct ReflectionData;
+
 /// @brief Get the name of the given shader ID as a string
-std::string getProgramName(shaders::BuiltIn programID);
+std::string getProgramName(BuiltIn programID);
 
-namespace gl {
+template <gfx::Backend::Type>
 std::pair<std::string, std::string> getShaderSource(shaders::BuiltIn programID);
-} // namespace gl
 
-namespace metal {
-std::pair<std::string, std::string> getShaderSource(shaders::BuiltIn programID);
-} // namespace metal
+template <gfx::Backend::Type>
+const ReflectionData& getReflectionData(BuiltIn programID);
+
 } // namespace shaders
 } // namespace mbgl
 
@@ -144,6 +145,8 @@ ${amalgamation.join("\n")}
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <type_traits>
 #include <cassert>
+#include <stdexcept>
+#include <string>
 
 namespace std {
 template <>
@@ -178,18 +181,18 @@ std::string getProgramName(shaders::BuiltIn programID) {
     return it->second.c_str();
 }
 
-#if defined(MLN_RENDER_BACKEND_OPENGL)
-namespace gl {
+#if MLN_RENDER_BACKEND_OPENGL
 template<BuiltIn ID>
-using Program = ShaderSource<ID, gfx::Backend::Type::OpenGL>;
+using GLProgram = mbgl::shaders::ShaderSource<ID, gfx::Backend::Type::OpenGL>;
 
-std::pair<std::string, std::string> getShaderSource(shaders::BuiltIn programID) {
+template <>
+std::pair<std::string, std::string> getShaderSource<gfx::Backend::Type::OpenGL>(shaders::BuiltIn programID) {
     switch (programID) {
 ${(() => {
     let branches = [];
     programIDs.forEach((id) => {
         if (GL.names.includes(id)) {
-            branches.push(`        case BuiltIn::${id}: { return std::make_pair(Program<BuiltIn::${id}>::vertex(), Program<BuiltIn::${id}>::fragment()); }`);
+            branches.push(`        case BuiltIn::${id}: { return std::make_pair(GLProgram<BuiltIn::${id}>::vertex(), GLProgram<BuiltIn::${id}>::fragment()); }`);
         }
     });
     return branches.join("\n");
@@ -199,31 +202,47 @@ ${(() => {
         }
     }
 }
-} // namespace gl
 #endif
 
-#if defined(MLN_RENDER_BACKEND_METAL)
-namespace metal {
+#if MLN_RENDER_BACKEND_METAL
 template<BuiltIn ID>
-using Program = ShaderSource<ID, gfx::Backend::Type::Metal>;
+using MtlProgram = mbgl::shaders::ShaderSource<ID, gfx::Backend::Type::Metal>;
 
-std::string getShaderSource(shaders::BuiltIn programID) {
+template <>
+std::pair<std::string, std::string> getShaderSource<gfx::Backend::Type::Metal>(shaders::BuiltIn programID) {
     switch (programID) {
 ${(() => {
     let branches = [];
     programIDs.forEach((id) => {
         if (MTL.names.includes(id)) {
-            branches.push(`        case BuiltIn::${id}: { return Program<BuiltIn::${id}>::shader(); }`);
+            branches.push(`        case BuiltIn::${id}: { return std::make_pair(MtlProgram<BuiltIn::${id}>::source(), ""); }`);
         }
     });
     return branches.join("\n");
 })()}
         default: {
-            return {"", ""};
+            throw std::runtime_error("No source found for program!");
         }
     }
 }
-} // namespace metal
+
+template <>
+const ReflectionData& getReflectionData<gfx::Backend::Type::Metal>(shaders::BuiltIn programID) {
+    switch (programID) {
+${(() => {
+    let branches = [];
+    programIDs.forEach((id) => {
+        if (MTL.names.includes(id) && MTL.reflectedPrograms[id]) {
+            branches.push(`        case BuiltIn::${id}: { return Program<BuiltIn::${id}>::reflectionData; }`);
+        }
+    });
+    return branches.join("\n");
+})()}
+        default: {
+            throw std::runtime_error("No reflection data found for program!");
+        }
+    }
+}
 #endif
 
 } // namespace shaders
@@ -296,7 +315,7 @@ const main = () => {
 
     writeShaderManifest(
         outputRoot,
-        ["#if !defined(MLN_RENDER_BACKEND_METAL) || !MLN_RENDER_BACKEND_METAL"].concat(GL.headers).concat(["#endif"]),
+        ["#if MLN_RENDER_BACKEND_OPENGL"].concat(GL.headers).concat(["#endif"]),
         ["#if MLN_RENDER_BACKEND_METAL"].concat(MTL.headers).concat(["#endif"]),
         args
     );

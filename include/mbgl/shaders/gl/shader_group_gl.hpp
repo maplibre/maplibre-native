@@ -70,8 +70,8 @@ public:
     }
 
 private:
-    ProgramParameters programParameters;
     shaders::BuiltIn programID;
+    ProgramParameters programParameters;
 };
 
 } // namespace gl

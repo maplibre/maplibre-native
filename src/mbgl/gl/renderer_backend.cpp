@@ -85,7 +85,7 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
     (
         [&](shaders::BuiltIn programID) {
             const auto name = shaders::getProgramName(programID);
-            auto [vert, frag] = shaders::gl::getShaderSource(programID);
+            auto [vert, frag] = shaders::gl::getShaderSource<gfx::Backend::Type::OpenGL>(programID);
             auto source = ProgramParameters::ProgramSource(gfx::Backend::Type::OpenGL, std::move(vert), std::move(frag));
 
             if (!registry.registerShaderGroup(

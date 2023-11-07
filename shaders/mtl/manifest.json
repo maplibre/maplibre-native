@@ -9,7 +9,7 @@
     },
     {
         "name": "BackgroundShader",
-        "header": "drawable_background",
+        "header": "background",
         "program": {
             "source": "background.metal",
             "vertexEntry": "vertexMain",
@@ -31,7 +31,7 @@
     },
     {
         "name": "BackgroundPatternShader",
-        "header": "drawable_background_pattern",
+        "header": "background_pattern",
         "program": {
             "source": "background_pattern.metal",
             "vertexEntry": "vertexMain",
@@ -54,7 +54,7 @@
     },
     {
         "name": "CircleShader",
-        "header": "drawable_circle",
+        "header": "circle",
         "program": {
             "source": "circle.metal",
             "vertexEntry": "vertexMain",
@@ -87,14 +87,16 @@
     },
     {
         "name": "ClippingMaskProgram",
-        "header": "drawable_clipping_mask",
+        "header": "clipping_mask",
         "program": {
             "source": "clipping_mask.metal",
             "vertexEntry": "vertexMain",
             "fragmentEntry": "fragmentMain",
             "link": ["Prelude"]
         },
-        "additionalIncludes": [],
+        "additionalIncludes": [
+            "mbgl/shaders/clipping_ubo.hpp"
+        ],
         "metadata": {
             "attributes": [
                 {"index": 0, "type": "Float3", "count": 1, "name": "a_pos"}
@@ -106,7 +108,7 @@
     },
     {
         "name": "CollisionBoxShader",
-        "header": "drawable_collision_box",
+        "header": "collision_box",
         "program": {
             "source": "collision_box.metal",
             "vertexEntry": "vertexMain",
@@ -125,13 +127,13 @@
                 {"index": 4, "type": "Float2", "count": 1, "name": "a_shift"}
             ],
             "uniforms": [
-                {"index": 5, "bindVertex": true, "bindFragment": true, "structureName": "CollisionBoxUBO"}
+                {"index": 5, "bindVertex": true, "bindFragment": true, "structureName": "CollisionUBO"}
             ]
         }
     },
     {
         "name": "CollisionCircleShader",
-        "header": "drawable_collision_circle",
+        "header": "collision_circle",
         "program": {
             "source": "collision_circle.metal",
             "vertexEntry": "vertexMain",
@@ -149,13 +151,13 @@
                 {"index": 3, "type": "UByte2", "count": 1, "name": "a_placed"}
             ],
             "uniforms": [
-                {"index": 4, "bindVertex": true, "bindFragment": true, "structureName": "CollisionCircleUBO"}
+                {"index": 4, "bindVertex": true, "bindFragment": true, "structureName": "CollisionUBO"}
             ]
         }
     },
     {
         "name": "FillExtrusionPatternShader",
-        "header": "drawable_fill_extrusion_pattern",
+        "header": "fill_extrusion_pattern",
         "program": {
             "source": "fill_extrusion_pattern.metal",
             "vertexEntry": "vertexMain",
@@ -189,7 +191,7 @@
     },
     {
         "name": "FillExtrusionShader",
-        "header": "drawable_fill_extrusion",
+        "header": "fill_extrusion",
         "program": {
             "source": "fill_extrusion.metal",
             "vertexEntry": "vertexMain",
@@ -218,7 +220,7 @@
     },
     {
         "name": "FillShader",
-        "header": "drawable_fill",
+        "header": "fill",
         "program": {
             "source": "fill.metal",
             "vertexEntry": "vertexMain",
@@ -247,7 +249,7 @@
     },
     {
         "name": "FillOutlineShader",
-        "header": "drawable_fill_outline",
+        "header": "fill_outline",
         "program": {
             "source": "fill_outline.metal",
             "vertexEntry": "vertexMain",
@@ -276,7 +278,7 @@
     },
     {
         "name": "FillPatternShader",
-        "header": "drawable_fill_pattern",
+        "header": "fill_pattern",
         "program": {
             "source": "fill_pattern.metal",
             "vertexEntry": "vertexMain",
@@ -308,7 +310,7 @@
     },
     {
         "name": "FillOutlinePatternShader",
-        "header": "drawable_fill_outline_pattern",
+        "header": "fill_outline_pattern",
         "program": {
             "source": "fill_outline_pattern.metal",
             "vertexEntry": "vertexMain",
@@ -340,7 +342,7 @@
     },
     {
         "name": "HeatmapTextureShader",
-        "header": "drawable_heatmap_texture",
+        "header": "heatmap_texture",
         "program": {
             "source": "heatmap_texture.metal",
             "vertexEntry": "vertexMain",
@@ -365,7 +367,7 @@
     },
     {
         "name": "HeatmapShader",
-        "header": "drawable_heatmap",
+        "header": "heatmap",
         "program": {
             "source": "heatmap.metal",
             "vertexEntry": "vertexMain",
@@ -392,7 +394,7 @@
     },
     {
         "name": "HillshadePrepareShader",
-        "header": "drawable_hillshade_prepare",
+        "header": "hillshade_prepare",
         "program": {
             "source": "hillshade_prepare.metal",
             "vertexEntry": "vertexMain",
@@ -417,7 +419,7 @@
     },
     {
         "name": "HillshadeShader",
-        "header": "drawable_hillshade",
+        "header": "hillshade",
         "program": {
             "source": "hillshade.metal",
             "vertexEntry": "vertexMain",
@@ -443,7 +445,7 @@
     },
     {
         "name": "LineShader",
-        "header": "drawable_line",
+        "header": "line",
         "program": {
             "source": "line.metal",
             "vertexEntry": "vertexMain",
@@ -475,7 +477,7 @@
     },
     {
         "name": "LinePatternShader",
-        "header": "drawable_line_pattern",
+        "header": "line_pattern",
         "program": {
             "source": "line_pattern.metal",
             "vertexEntry": "vertexMain",
@@ -506,13 +508,13 @@
                 {"index": 14, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
             ],
             "textures": [
-                {"index": 0, "name": "u_image0"}
+                {"index": 0, "name": "u_image"}
             ]
         }
     },
     {
         "name": "LineSDFShader",
-        "header": "drawable_line_sdf",
+        "header": "line_sdf",
         "program": {
             "source": "line_sdf.metal",
             "vertexEntry": "vertexMain",
@@ -542,13 +544,13 @@
                 {"index": 13, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
             ],
             "textures": [
-                {"index": 0, "name": "u_image0"}
+                {"index": 0, "name": "u_image"}
             ]
         }
     },
     {
         "name": "LineGradientShader",
-        "header": "drawable_line_gradient",
+        "header": "line_gradient",
         "program": {
             "source": "line_gradient.metal",
             "vertexEntry": "vertexMain",
@@ -582,7 +584,7 @@
     },
     {
         "name": "RasterShader",
-        "header": "drawable_raster",
+        "header": "raster",
         "program": {
             "source": "raster.metal",
             "vertexEntry": "vertexMain",
@@ -608,7 +610,7 @@
     },
     {
         "name": "SymbolIconShader",
-        "header": "drawable_symbol_icon",
+        "header": "symbol_icon",
         "program": {
             "source": "symbol_icon.metal",
             "vertexEntry": "vertexMain",
@@ -643,7 +645,7 @@
     },
     {
         "name": "SymbolSDFIconShader",
-        "header": "drawable_symbol_sdf_icon",
+        "header": "symbol_sdf",
         "program": {
             "source": "symbol_sdf.metal",
             "vertexEntry": "vertexMain",
@@ -682,7 +684,7 @@
     },
     {
         "name": "SymbolTextAndIconShader",
-        "header": "drawable_symbol_text_and_icon",
+        "header": "symbol_text_and_icon",
         "program": {
             "source": "symbol_text_and_icon.metal",
             "vertexEntry": "vertexMain",
