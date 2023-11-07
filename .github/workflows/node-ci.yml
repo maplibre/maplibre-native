@@ -189,6 +189,7 @@ jobs:
           key: ${{ runner.os }}-${{ runner.arch }}-cmake-node-module-deps
 
       - name: Generate shaders
+        working-directory: ./
         run: node shaders/generate_shader_code.js --root ./ --opengl --metal --strip --compress --amalgamate
 
       - name: Configure maplibre-native (MacOS)

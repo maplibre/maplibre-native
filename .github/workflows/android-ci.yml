@@ -100,6 +100,7 @@ jobs:
             - ${{ env.cache-name }}
 
       - name: Generate shaders
+        working-directory: ./
         run: node shaders/generate_shader_code.js --root ./ --opengl --metal --strip --compress --amalgamate
 
       - name: Check code style

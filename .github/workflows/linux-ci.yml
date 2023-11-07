@@ -92,6 +92,7 @@ jobs:
         run: npm install --ignore-scripts
 
       - name: Generate shaders
+        working-directory: ./
         run: node shaders/generate_shader_code.js --root ./ --opengl --metal --strip --compress --amalgamate
 
       - name: Build MapLibre Native Core
@@ -210,6 +211,7 @@ jobs:
           node test/storage/server.js &
 
       - name: Generate shaders
+        working-directory: ./
         run: node shaders/generate_shader_code.js --root ./ --opengl --metal --strip --compress --amalgamate
 
       - name: Generate coverage report

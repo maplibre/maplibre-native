@@ -94,6 +94,7 @@ jobs:
       - run: cp bazel/example_config.bzl bazel/config.bzl
 
       - name: Generate shaders
+        working-directory: ./
         run: node shaders/generate_shader_code.js --root ./ --opengl --metal --strip --compress --amalgamate
 
       - name: Check debug symbols
