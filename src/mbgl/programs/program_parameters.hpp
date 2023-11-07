@@ -24,8 +24,15 @@ public:
         /// @param fragment_ The fragment shader source code, or empty string if not provided.
         ProgramSource(gfx::Backend::Type forBackend, const std::string& vertex_, const std::string& fragment_)
             : backend(forBackend),
-              vertex(vertex_),
-              fragment(fragment_) {
+            vertex(vertex_),
+            fragment(fragment_) {
+            assert(gfx::Backend::Type::TYPE_MAX != forBackend);
+        }
+
+        ProgramSource(gfx::Backend::Type forBackend, std::string_view vertex_, const std::string_view fragment_)
+            : backend(forBackend),
+            vertex(vertex_),
+            fragment(fragment_) {
             assert(gfx::Backend::Type::TYPE_MAX != forBackend);
         }
     };

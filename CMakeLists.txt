@@ -1114,6 +1114,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_impl.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_manifest.cpp
     )
 
     if(MLN_DRAWABLE_RENDERER)
