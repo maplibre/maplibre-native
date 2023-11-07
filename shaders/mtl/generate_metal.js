@@ -17,7 +17,6 @@ const headerTemplate = (name, additionalIncludes, infoBlock, dataBlock) => {
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
-#include <string_view>
 ${additionalIncludes}
 
 namespace mbgl {
@@ -194,7 +193,7 @@ module.exports = function (outputRoot, args) {
                     "", /* infoBlock */
                     ([
                         reflectionData.hdr,
-                        emitSource(programSrcPath, srcMetrics, false, "source"),
+                        emitSource(programSrcPath, srcMetrics, false, "source", true /* msl */),
                         accessorFunc,
                     ]).join("\n") /* dataBlock */
                 ),
@@ -204,7 +203,7 @@ module.exports = function (outputRoot, args) {
         } else {
             // Each shader is stored in a single buffer (the amalgamation)
             // Shaders store a pointer and length into the decompressed amalgamation (which we compress later)
-            const src = emitSource(programSrcPath, srcMetrics);
+            const src = emitSource(programSrcPath, srcMetrics, false, undefined, true /* msl */);
 
             writeFile(
                 shaderHeaderPath,
@@ -212,7 +211,7 @@ module.exports = function (outputRoot, args) {
                     elem.name, /* shaderName */
                     additionalIncludes, ([
                         `static constexpr size_t sourceAmalgamationOffset = ${srcMetrics.amalgamationPtr};`,
-                        `static constexpr size_t sourceAmalgamationLength = ${srcMetrics.amalgamationPtr + src.length};`,
+                        `static constexpr size_t sourceAmalgamationLength = ${src.length};`,
                     ]).map(elem => "    " + elem).join("\n"), /* infoBlock */
                     ([
                         reflectionData.hdr,

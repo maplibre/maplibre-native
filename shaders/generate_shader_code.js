@@ -148,37 +148,24 @@ ${amalgamation.join("\n")}
 #include <stdexcept>
 #include <string>
 
-namespace std {
-template <>
-struct hash<mbgl::shaders::BuiltIn> {
-    constexpr size_t operator()(const mbgl::shaders::BuiltIn& id) const {
-        return static_cast<size_t>(id);
-    }
-};
-} // namespace std
-
-#include <mapbox/eternal.hpp>
-
 namespace mbgl {
 namespace shaders {
 
-constexpr const auto programNames = mapbox::eternal::hash_map<shaders::BuiltIn, mapbox::eternal::string>({
+constexpr const char* programNames[] = {
+    "None", // shaders::BuiltIn::None = 0,
 ${(() => {
     let branches = [];
     programIDs.forEach((id) => {
         branches.push(`    { shaders::BuiltIn::${id}, "${id}" },`);
     });
-    return branches.join("\n");
+    return programIDs.map((elem) => { return `    "${elem}"`; }).join(",\n");
 })()}
-});
+};
 
 std::string getProgramName(shaders::BuiltIn programID) {
-    const auto it = programNames.find(programID);
-    assert(it != programNames.end());
-    if (it == programNames.end()) {
-        return "";
-    }
-    return it->second.c_str();
+    assert(static_cast<int64_t>(programID) > static_cast<int64_t>(shaders::BuiltIn::None));
+    assert(static_cast<int64_t>(programID) <= ${programIDs.length});
+    return programNames[static_cast<size_t>(programID)];
 }
 
 #if MLN_RENDER_BACKEND_OPENGL

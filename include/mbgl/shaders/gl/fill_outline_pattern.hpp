@@ -1,6 +1,8 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
+
 
 namespace mbgl {
 namespace shaders {
@@ -8,7 +10,9 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillOutlinePatternProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillOutlinePatternProgram";
-    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
+
+
+    static constexpr const char* vertexData = R"(uniform mat4 u_matrix;
 uniform vec2 u_world;
 uniform vec2 u_pixel_coord_upper;
 uniform vec2 u_pixel_coord_lower;
@@ -80,7 +84,7 @@ mediump vec4 pattern_to = u_pattern_to;
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world;
 }
 )";
-    static constexpr const char* fragment = R"(
+    static constexpr const char* fragmentData = R"(
 uniform vec2 u_texsize;
 uniform sampler2D u_image;
 uniform float u_fade;
@@ -142,7 +146,17 @@ mediump vec4 pattern_to = u_pattern_to;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::FillOutlinePatternProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::FillOutlinePatternProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

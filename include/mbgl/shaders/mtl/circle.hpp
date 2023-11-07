@@ -1,26 +1,19 @@
+// Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
-
-#include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/shaders/circle_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "CircleShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 8> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
-    static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = R"(
-
-struct VertexStage {
+    static const ReflectionData reflectionData;
+    static constexpr const char* sourceData = R"(struct VertexStage {
     short2 position [[attribute(0)]];
     float2 color [[attribute(1)]];
     float2 radius [[attribute(2)]];
@@ -171,7 +164,13 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(opacity_t * mix(in.color * in.opacity, in.stroke_color * in.stroke_opacity, color_t));
 }
 )";
+    static std::string source() {
+        using Ty = ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>;
+        return Ty::sourceData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

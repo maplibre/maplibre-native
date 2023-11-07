@@ -1,6 +1,8 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
+
 
 namespace mbgl {
 namespace shaders {
@@ -8,7 +10,9 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "LineSDFShader";
-    static constexpr const char* vertex = R"(// floor(127 / 2) == 63.0
+
+
+    static constexpr const char* vertexData = R"(// floor(127 / 2) == 63.0
 // the maximum allowed miter limit is 2.0 at the moment. the extrude normal is
 // stored in a byte (-128..127). we scale regular normals up to length 63, but
 // there are also "special" normals that have a bigger length (of up to 126 in
@@ -182,7 +186,7 @@ lowp float floorwidth = u_floorwidth;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(
+    static constexpr const char* fragmentData = R"(
 layout (std140) uniform LineSDFUBO {
     highp mat4 u_matrix;
     highp vec2 u_units_to_pixels;
@@ -282,7 +286,17 @@ lowp float floorwidth = u_floorwidth;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

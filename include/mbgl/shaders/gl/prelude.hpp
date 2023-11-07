@@ -1,6 +1,8 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
+
 
 namespace mbgl {
 namespace shaders {
@@ -8,7 +10,9 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "Prelude";
-    static constexpr const char* vertex = R"(#ifdef GL_ES
+
+
+    static constexpr const char* vertexData = R"(#ifdef GL_ES
 precision highp float;
 #else
 
@@ -84,7 +88,7 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
 )";
-    static constexpr const char* fragment = R"(#ifdef GL_ES
+    static constexpr const char* fragmentData = R"(#ifdef GL_ES
 precision mediump float;
 #else
 
@@ -104,7 +108,17 @@ precision mediump float;
 
 out highp vec4 fragColor;
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

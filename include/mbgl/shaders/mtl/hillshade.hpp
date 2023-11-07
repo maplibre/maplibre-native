@@ -1,26 +1,19 @@
+// Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
-
-#include <mbgl/shaders/hillshade_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/shaders/hillshade_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "HillshadeShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 2> attributes;
-    static const std::array<UniformBlockInfo, 2> uniforms;
-    static const std::array<TextureInfo, 1> textures;
 
-    static constexpr auto source = R"(
-
-struct VertexStage {
+    static const ReflectionData reflectionData;
+    static constexpr const char* sourceData = R"(struct VertexStage {
     short2 pos [[attribute(0)]];
     short2 texture_pos [[attribute(1)]];
 };
@@ -107,7 +100,13 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(color);
 }
 )";
+    static std::string source() {
+        using Ty = ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal>;
+        return Ty::sourceData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

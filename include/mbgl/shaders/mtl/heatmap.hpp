@@ -1,26 +1,19 @@
+// Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
-
-#include <mbgl/shaders/heatmap_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/shaders/heatmap_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "HeatmapShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 3> attributes;
-    static const std::array<UniformBlockInfo, 5> uniforms;
-    static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = R"(
-
-struct VertexStage {
+    static const ReflectionData reflectionData;
+    static constexpr const char* sourceData = R"(struct VertexStage {
     short2 pos [[attribute(0)]];
     float2 weight [[attribute(1)]];
     float2 radius [[attribute(2)]];
@@ -129,7 +122,13 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(val, 1.0, 1.0, 1.0);
 }
 )";
+    static std::string source() {
+        using Ty = ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal>;
+        return Ty::sourceData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

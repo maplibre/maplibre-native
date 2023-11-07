@@ -1,6 +1,8 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
+
 
 namespace mbgl {
 namespace shaders {
@@ -8,7 +10,9 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "DebugShader";
-    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
+
+
+    static constexpr const char* vertexData = R"(layout (location = 0) in vec2 a_pos;
 out vec2 v_uv;
 
 layout (std140) uniform DebugUBO {
@@ -27,7 +31,7 @@ void main() {
     gl_Position = u_matrix * vec4(a_pos * u_overlay_scale, 0, 1);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform DebugUBO {
+    static constexpr const char* fragmentData = R"(layout (std140) uniform DebugUBO {
     highp mat4 u_matrix;
     highp vec4 u_color;
     highp float u_overlay_scale;
@@ -45,7 +49,17 @@ void main() {
     fragColor = mix(u_color, overlay_color, overlay_color.a);
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

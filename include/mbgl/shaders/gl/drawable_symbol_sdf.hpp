@@ -1,6 +1,8 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
+
 
 namespace mbgl {
 namespace shaders {
@@ -8,7 +10,9 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "SymbolSDFIconShader";
-    static constexpr const char* vertex = R"(layout (location = 0) in vec4 a_pos_offset;
+
+
+    static constexpr const char* vertexData = R"(layout (location = 0) in vec4 a_pos_offset;
 layout (location = 1) in vec4 a_data;
 layout (location = 2) in vec4 a_pixeloffset;
 layout (location = 3) in vec3 a_projected_pos;
@@ -195,7 +199,7 @@ lowp float halo_blur = u_halo_blur;
     v_data1 = vec3(gamma_scale, size, interpolated_fade_opacity);
 }
 )";
-    static constexpr const char* fragment = R"(#define SDF_PX 8.0
+    static constexpr const char* fragmentData = R"(#define SDF_PX 8.0
 
 layout (std140) uniform SymbolDrawableUBO {
     highp mat4 u_matrix;
@@ -317,7 +321,17 @@ lowp float halo_blur = u_halo_blur;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

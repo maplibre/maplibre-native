@@ -1,6 +1,8 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
+
 
 namespace mbgl {
 namespace shaders {
@@ -8,7 +10,9 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::CircleProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "CircleProgram";
-    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
+
+
+    static constexpr const char* vertexData = R"(uniform mat4 u_matrix;
 uniform bool u_scale_with_map;
 uniform bool u_pitch_with_map;
 uniform vec2 u_extrude_scale;
@@ -142,7 +146,7 @@ lowp float stroke_opacity = u_stroke_opacity;
     v_data = vec3(extrude.x, extrude.y, antialiasblur);
 }
 )";
-    static constexpr const char* fragment = R"(in vec3 v_data;
+    static constexpr const char* fragmentData = R"(in vec3 v_data;
 
 #ifndef HAS_UNIFORM_u_color
 in highp vec4 color;
@@ -224,7 +228,17 @@ lowp float stroke_opacity = u_stroke_opacity;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::CircleProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::CircleProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

@@ -1,8 +1,8 @@
+// Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
-
-#include <mbgl/shaders/mtl/common.hpp>
-#include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
 
 namespace mbgl {
@@ -10,16 +10,10 @@ namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "SymbolTextAndIconShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 9> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
-    static const std::array<TextureInfo, 2> textures;
 
-    static constexpr auto source = R"(
-#define SDF 1.0
+    static const ReflectionData reflectionData;
+    static constexpr const char* sourceData = R"(#define SDF 1.0
 #define ICON 0.0
 
 struct VertexStage {
@@ -183,7 +177,13 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(color * (alpha * in.opacity * fade_opacity));
 }
 )";
+    static std::string source() {
+        using Ty = ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>;
+        return Ty::sourceData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

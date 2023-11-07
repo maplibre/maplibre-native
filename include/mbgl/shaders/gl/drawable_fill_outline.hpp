@@ -1,6 +1,8 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
+
 
 namespace mbgl {
 namespace shaders {
@@ -8,9 +10,12 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillOutlineShader";
-    static constexpr const char* vertex = R"(layout (std140) uniform FillOutlineDrawableUBO {
+
+
+    static constexpr const char* vertexData = R"(layout (std140) uniform FillOutlineDrawableUBO {
     highp mat4 u_matrix;
     highp vec2 u_world;
+    highp vec2 pad1;
 };
 layout (std140) uniform FillOutlineEvaluatedPropsUBO {
     highp vec4 u_outline_color;
@@ -55,7 +60,7 @@ lowp float opacity = u_opacity;
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world;
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform FillOutlineEvaluatedPropsUBO {
+    static constexpr const char* fragmentData = R"(layout (std140) uniform FillOutlineEvaluatedPropsUBO {
     highp vec4 u_outline_color;
     highp float u_opacity;
     highp float padding_props1;
@@ -95,7 +100,17 @@ lowp float opacity = u_opacity;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

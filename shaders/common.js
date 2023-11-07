@@ -14,16 +14,27 @@ const percTrunc = ((num) => {
 });
 
 // Strip out whitespace, formatting and comments.
-const strip = (source) => {
-    return source
-        .replace(/^\s+/gm, "\n") // indentation, leading whitespace
+const strip = (source, msl) => {
+    source = source
         .replace(/\s*\/\/[^\n]*\n/g, "\n") // Single line comments
+        .replace(/\/\*.*\*\//g, "\n") // Multi-line, inline comments
         .replace(/\/\*.*\*\//gs, "\n") // Multi-line comments
-        .replace(/\n+\n/g, "\n") // extra new lines
-        .replace(/\s?([+-\/<>*\?:=,])\s?/g, "$1") // whitespace around operators
-        .replace(/\s+(=)/g, "$1") // whitespace around operators
-        .replace(/(,)\s+/g, "$1") // whitespace around operators
-        .replace(/([;\(\),\{\}])\n(?=[^#])/g, "$1"); // line breaks
+        .replace(/^\s+/gm, "\n") // indentation, leading whitespace
+        .replace(/\n+\n/g, "\n"); // extra new lines
+
+    if (msl) {
+        return source
+            .replace(/\s?([+-\/*\?:=,])\s?/g, "$1") // whitespace around operators
+            .replace(/\s+(=)/g, "$1") // whitespace around operators
+            .replace(/(,)\s+/g, "$1") // whitespace around operators
+            .replace(/([;\(\),])\n(?=[^#])/g, "$1"); // line breaks
+    } else {
+        return source
+            .replace(/\s?([+-\/*\?:=,])\s?/g, "$1") // whitespace around operators
+            .replace(/\s+(=)/g, "$1") // whitespace around operators
+            .replace(/(,)\s+/g, "$1") // whitespace around operators
+            .replace(/([;\(\),\{\}])\n(?=[^#])/g, "$1"); // line breaks
+    }
 };
 
 // Emit a `source()` accessor which reads from a compressed block.
@@ -77,7 +88,7 @@ const emitAccessor = (shaderEnum, backend, name) => {
 // Emit source code (possibly compressed).
 /// sourceProvided: If not present, read source from disk specified by shaderSrcPath
 /// name: If present, generate accessors prefixed with this name. ex: vertex, fragment
-const emitSource = ((shaderSrcPath, srcMetrics, sourceProvided, name) => {
+const emitSource = ((shaderSrcPath, srcMetrics, sourceProvided, name, msl) => {
     name = typeof name == "undefined" ? "data" : name + "Data";
     let source = sourceProvided ? sourceProvided : fs.readFileSync(shaderSrcPath, {encoding: "utf8"});
     const orgSize = source.length;
@@ -85,7 +96,7 @@ const emitSource = ((shaderSrcPath, srcMetrics, sourceProvided, name) => {
 
     let reduced = false;
     if (srcMetrics.args.strip) {
-        source = strip(source);
+        source = strip(source, msl);
         if (!srcMetrics.args.compress) {
             srcMetrics.sizeReduced += source.length;
             reduced = true;

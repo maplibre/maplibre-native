@@ -1,25 +1,19 @@
+// Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
-
-#include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "FillExtrusionShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 5> attributes;
-    static const std::array<UniformBlockInfo, 5> uniforms;
-    static const std::array<TextureInfo, 0> textures;
 
-    static constexpr auto source = R"(
-struct alignas(16) FillExtrusionInterpolateUBO {
+    static const ReflectionData reflectionData;
+    static constexpr const char* sourceData = R"(struct alignas(16) FillExtrusionInterpolateUBO {
     /*  0 */ float base_t;
     /*  4 */ float height_t;
     /*  8 */ float color_t;
@@ -157,7 +151,13 @@ fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]]) {
     return { in.color/*, in.position.z*/ };
 }
 )";
+    static std::string source() {
+        using Ty = ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal>;
+        return Ty::sourceData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

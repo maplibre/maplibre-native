@@ -1,6 +1,8 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
+
 
 namespace mbgl {
 namespace shaders {
@@ -8,7 +10,9 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillProgram";
-    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
+
+
+    static constexpr const char* vertexData = R"(layout (location = 0) in vec2 a_pos;
 
 uniform mat4 u_matrix;
 
@@ -42,7 +46,7 @@ lowp float opacity = u_opacity;
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
 }
 )";
-    static constexpr const char* fragment = R"(#ifndef HAS_UNIFORM_u_color
+    static constexpr const char* fragmentData = R"(#ifndef HAS_UNIFORM_u_color
 in highp vec4 color;
 #else
 uniform highp vec4 u_color;
@@ -68,7 +72,17 @@ lowp float opacity = u_opacity;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::FillProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::FillProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND
