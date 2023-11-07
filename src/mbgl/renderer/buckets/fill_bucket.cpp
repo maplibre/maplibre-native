@@ -55,67 +55,9 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
                             const CanonicalTileID& canonical) {
 
     // generate buffers
-    gfx::generateFillAndOutineBuffers(geometry, vertices, lineSegments, lines, triangleSegments, triangles);
+    gfx::generateFillAndOutineBuffers(geometry, vertices, triangles, triangleSegments, lineVertices, lineIndexes, lineSegments);
 
-/*
-    gfx::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> generator(
-        lineVertices,
-        LineProgram::layoutVertex,
-        lineSegments,
-        [](std::size_t vertexOffset, std::size_t indexOffset) -> Segment<LineAttributes> {
-            return Segment<LineAttributes>(vertexOffset, indexOffset);
-        },
-        [](auto& seg) -> Segment<LineAttributes>& { return seg; },
-        lineIndexes);
 
-    gfx::PolylineGeneratorOptions options;
-    options.type = FeatureType::Polygon;
-
-    for (auto& polygon : classifyRings(geometry)) {
-        // Optimize polygons with many interior rings for earcut tesselation.
-        limitHoles(polygon, 500);
-
-        std::size_t totalVertices = 0;
-
-        for (const auto& ring : polygon) {
-            totalVertices += ring.size();
-            if (totalVertices > std::numeric_limits<uint16_t>::max()) throw GeometryTooLongException();
-        }
-
-        // generate outline
-        for (const auto& ring : polygon) {
-            generator.generate(ring, options);
-        }
-
-        // generate fill
-        std::size_t startVertices = vertices.elements();
-        for (const auto& ring : polygon) {
-            for (auto& p : ring) {
-                vertices.emplace_back(FillProgram::layoutVertex(p));
-            }
-        }
-        std::vector<uint32_t> indices = mapbox::earcut(polygon);
-        std::size_t nIndices = indices.size();
-        assert(nIndices % 3 == 0);
-
-        if (triangleSegments.empty() ||
-            triangleSegments.back().vertexLength + totalVertices > std::numeric_limits<uint16_t>::max()) {
-            triangleSegments.emplace_back(startVertices, triangles.elements());
-        }
-
-        auto& triangleSegment = triangleSegments.back();
-        assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
-        const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
-
-        for (std::size_t i = 0; i < nIndices; i += 3) {
-            triangles.emplace_back(
-                triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
-        }
-
-        triangleSegment.vertexLength += totalVertices;
-        triangleSegment.indexLength += nIndices;
-    }
-*/
     for (auto& pair : paintPropertyBinders) {
         const auto it = patternDependencies.find(pair.first);
         if (it != patternDependencies.end()) {
