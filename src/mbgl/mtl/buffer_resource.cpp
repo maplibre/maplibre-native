@@ -45,8 +45,13 @@ BufferResource::BufferResource(Context& context_,
     }
 
     if (isValid()) {
-        context.renderingStats().numBuffers++;
-        context.renderingStats().memBuffers += size;
+        auto& stats = context.renderingStats();
+        stats.numBuffers++;
+        stats.memBuffers += size;
+        stats.totalBuffers++;
+        if (buffer) {
+            stats.totalBufferObjs++;
+        }
     }
 }
 
@@ -90,6 +95,7 @@ void BufferResource::update(const void* data, std::size_t updateSize, std::size_
     updateSize = std::min(updateSize, size - offset);
 
     if (updateSize > 0) {
+        auto& stats = context.renderingStats();
         if (buffer) {
             if (auto* const content = static_cast<uint8_t*>(buffer->contents())) {
                 // Until we can be sure that the buffer is not still in use to render the
@@ -104,6 +110,11 @@ void BufferResource::update(const void* data, std::size_t updateSize, std::size_
                 if (newBuffer) {
                     buffer = std::move(newBuffer);
 
+                    stats.totalBuffers++;
+                    stats.totalBufferObjs++;
+                    stats.bufferObjUpdates++;
+                    stats.bufferUpdateBytes += updateSize;
+
                     // Apply the update to the new buffer, if necessary
                     if (!updateIsEntireBuffer) {
                         auto* const newContent = static_cast<uint8_t*>(buffer->contents());
@@ -117,7 +128,9 @@ void BufferResource::update(const void* data, std::size_t updateSize, std::size_
             }
         } else {
             std::memcpy(raw.data() + offset, data, updateSize);
+            stats.bufferUpdateBytes += updateSize;
         }
+        stats.bufferUpdates++;
         version++;
     }
 }

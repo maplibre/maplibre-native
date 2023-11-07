@@ -66,9 +66,7 @@ public:
     MTLTexturePtr createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const;
     MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;
 
-    void clear();
-
-    // Actually remove the objects we marked as abandoned with the above methods.
+    /// Called at the end of a frame.
     void performCleanup() override;
 
     void reduceMemoryUsage() override {}
