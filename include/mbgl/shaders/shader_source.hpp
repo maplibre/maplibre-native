@@ -91,8 +91,6 @@ struct ShaderSource<BuiltIn::None, gfx::Backend::Type::Metal> {
     static constexpr const char* source = "";
 };
 
-
-
 } // namespace shaders
 } // namespace mbgl
 

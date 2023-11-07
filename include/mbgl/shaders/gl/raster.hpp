@@ -3,14 +3,12 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::RasterProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "RasterProgram";
-
 
     static constexpr const char* vertexData = R"(uniform mat4 u_matrix;
 uniform vec2 u_tl_parent;

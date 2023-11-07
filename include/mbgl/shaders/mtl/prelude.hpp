@@ -4,15 +4,11 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
-
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::Metal> {
-
-
-
     static constexpr const char* sourceData = R"(#include <metal_stdlib>
 using namespace metal;
 

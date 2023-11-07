@@ -3,14 +3,12 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::LineGradientProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "LineGradientProgram";
-
 
     static constexpr const char* vertexData = R"(
 // the attribute conveying progress along a line is scaled to [0, 2^15)

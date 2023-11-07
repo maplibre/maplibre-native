@@ -107,7 +107,7 @@ std::string decompress(const std::string &raw, int windowBits) {
     return result;
 }
 
-std::string decompress(const uint8_t* data, size_t length, int windowBits) {
+std::string decompress(const uint8_t *data, size_t length, int windowBits) {
     z_stream inflate_stream;
     memset(&inflate_stream, 0, sizeof(inflate_stream));
 

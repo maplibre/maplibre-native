@@ -3,14 +3,12 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::CircleProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "CircleProgram";
-
 
     static constexpr const char* vertexData = R"(uniform mat4 u_matrix;
 uniform bool u_scale_with_map;

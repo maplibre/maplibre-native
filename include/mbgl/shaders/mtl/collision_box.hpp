@@ -10,8 +10,6 @@ namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
-
-
     static const ReflectionData reflectionData;
     static constexpr const char* sourceData = R"(struct VertexStage {
     short2 pos [[attribute(0)]];

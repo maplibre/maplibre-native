@@ -3,14 +3,12 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "HeatmapTextureShader";
-
 
     static constexpr const char* vertexData = R"(layout (location = 0) in vec2 a_pos;
 out vec2 v_pos;

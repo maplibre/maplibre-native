@@ -3,14 +3,12 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::SymbolSDFIconProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "SymbolSDFIconProgram";
-
 
     static constexpr const char* vertexData = R"(layout (location = 0) in vec4 a_pos_offset;
 layout (location = 1) in vec4 a_data;

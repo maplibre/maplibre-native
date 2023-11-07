@@ -10,8 +10,6 @@ namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal> {
-
-
     static const ReflectionData reflectionData;
     static constexpr const char* sourceData = R"(#include <metal_stdlib>
 using namespace metal;

@@ -388,7 +388,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     // Adding a `[[depth(...)]]` output to the shader prevents this error, but the stencil value is
     // still not written to the stencil attachment on those same devices.
 #if STENCIL_INSTANCING
-    encoder->setVertexBuffer(uboBuffer.getMetalBuffer().get(), /*offset=*/0, ShaderClass::reflectionData.uniforms[0].index);
+    encoder->setVertexBuffer(
+        uboBuffer.getMetalBuffer().get(), /*offset=*/0, ShaderClass::reflectionData.uniforms[0].index);
     encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                    indexCount,
                                    MTL::IndexType::IndexTypeUInt16,

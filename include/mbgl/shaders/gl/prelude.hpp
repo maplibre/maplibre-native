@@ -3,14 +3,12 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "Prelude";
-
 
     static constexpr const char* vertexData = R"(#ifdef GL_ES
 precision highp float;

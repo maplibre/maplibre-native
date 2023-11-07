@@ -10,8 +10,6 @@ namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal> {
-
-
     static const ReflectionData reflectionData;
     static constexpr const char* sourceData = R"(struct alignas(16) FillExtrusionDrawableTilePropsUBO {
     /*  0 */ float4 pattern_from;

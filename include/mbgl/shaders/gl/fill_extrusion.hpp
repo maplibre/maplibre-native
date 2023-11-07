@@ -3,14 +3,12 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillExtrusionProgram";
-
 
     static constexpr const char* vertexData = R"(uniform mat4 u_matrix;
 uniform vec3 u_lightcolor;

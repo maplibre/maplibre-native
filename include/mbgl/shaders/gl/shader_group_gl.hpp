@@ -29,9 +29,9 @@ public:
         // We could cache these by key here to avoid creating a string key each time, but we
         // would need another mutex.  We could also push string IDs down into `ShaderGroup`.
         const std::string shaderName = (programID != shaders::BuiltIn::None
-                                           ? std::string(shaders::getProgramName(programID))
-                                           : std::to_string(reinterpret_cast<ptrdiff_t>(
-                                                 this))).append(std::to_string(key)); // A user shader is just the instance address
+                                            ? std::string(shaders::getProgramName(programID))
+                                            : std::to_string(reinterpret_cast<ptrdiff_t>(this)))
+                                           .append(std::to_string(key)); // A user shader is just the instance address
         auto shader = get<gl::ShaderProgramGL>(shaderName);
         if (shader) {
             return shader;

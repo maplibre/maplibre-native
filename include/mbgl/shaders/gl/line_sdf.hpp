@@ -3,14 +3,12 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::LineSDFProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "LineSDFProgram";
-
 
     static constexpr const char* vertexData = R"(// floor(127 / 2) == 63.0
 // the maximum allowed miter limit is 2.0 at the moment. the extrude normal is

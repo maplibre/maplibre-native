@@ -3,14 +3,12 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "HillshadeShader";
-
 
     static constexpr const char* vertexData = R"(layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_texture_pos;

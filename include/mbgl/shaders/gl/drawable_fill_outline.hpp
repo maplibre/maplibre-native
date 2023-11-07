@@ -3,14 +3,12 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillOutlineShader";
-
 
     static constexpr const char* vertexData = R"(layout (std140) uniform FillOutlineDrawableUBO {
     highp mat4 u_matrix;

@@ -29,16 +29,20 @@ public:
 
         if (!shader) {
             auto& context = static_cast<Context&>(gfxContext);
-            
+
             // TODO: Compile the prelude as a library and refer to links in reflection data
             const auto shaderSource =
                 shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::Metal>::source() + "\n" +
-                programParameters.vertexSource(gfx::Backend::Type::Metal); // TODO: Currently using vertex source for metal shaders
-            
-            shader = context.createProgram(reflectionData.name, std::move(shaderSource),
-                reflectionData.vertexMainFunction, reflectionData.fragmentMainFunction,
-                programParameters, {});
-            
+                programParameters.vertexSource(
+                    gfx::Backend::Type::Metal); // TODO: Currently using vertex source for metal shaders
+
+            shader = context.createProgram(reflectionData.name,
+                                           std::move(shaderSource),
+                                           reflectionData.vertexMainFunction,
+                                           reflectionData.fragmentMainFunction,
+                                           programParameters,
+                                           {});
+
             assert(shader);
             if (!shader || !registerShader(shader, reflectionData.name)) {
                 assert(false);

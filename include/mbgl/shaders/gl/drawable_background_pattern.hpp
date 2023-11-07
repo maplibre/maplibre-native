@@ -3,14 +3,12 @@
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "BackgroundPatternShader";
-
 
     static constexpr const char* vertexData = R"(layout (std140) uniform BackgroundDrawableUBO {
     highp mat4 u_matrix;
