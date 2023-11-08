@@ -356,14 +356,14 @@ public:
         static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LineBasicPropertiesUBO");
         if (!linePropertiesUniformBuffer) {
             const shaders::LineBasicPropertiesUBO linePropertiesUBO{/*color =*/color,
-                                                               /*blur =*/0.f,
-                                                               /*opacity =*/opacity,
-                                                               /*gapwidth =*/0.f,
-                                                               /*offset =*/0.f,
-                                                               /*width =*/1.f,
-                                                               0,
-                                                               0,
-                                                               0};
+                                                                    /*blur =*/0.f,
+                                                                    /*opacity =*/opacity,
+                                                                    /*gapwidth =*/0.f,
+                                                                    /*offset =*/0.f,
+                                                                    /*width =*/1.f,
+                                                                    0,
+                                                                    0,
+                                                                    0};
             parameters.context.emplaceOrUpdateUniformBuffer(linePropertiesUniformBuffer, &linePropertiesUBO);
         }
         if (!uniforms.get(idLinePropertiesUBOName)) {
