@@ -14,6 +14,7 @@
         android:roundIcon="@drawable/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".activity.FeatureOverviewActivity"
             android:exported="true"
@@ -717,7 +718,8 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />
-        </activity> <!-- Features -->
+        </activity>
+        <!-- Features -->
         <activity
             android:name=".activity.feature.QueryRenderedFeaturesPropertiesActivity"
             android:description="@string/description_query_rendered_feature_properties_point"
@@ -826,7 +828,9 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />
-        </activity> <!-- Storage -->
+        </activity>
+
+        <!-- Storage -->
         <activity
             android:name=".activity.storage.UrlTransformActivity"
             android:description="@string/description_url_transform"
@@ -862,7 +866,9 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />
-        </activity> <!-- TextureView -->
+        </activity>
+
+        <!-- TextureView -->
         <activity
             android:name=".activity.textureview.TextureViewDebugModeActivity"
             android:description="@string/description_textureview_debug"
@@ -960,6 +966,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
+
         <activity
             android:name=".activity.style.DraggableMarkerActivity"
             android:description="@string/description_draggable_marker"
@@ -1163,6 +1170,19 @@
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
         <activity
+            android:name=".activity.style.ImageInLabelActivity"
+            android:description="@string/description_image_in_label"
+            android:exported="true"
+            android:label="@string/activity_image_in_label">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <!-- Benchmark -->
+        <activity
             android:name=".activity.benchmark.BenchmarkActivity"
             android:description="@string/description_world_tour_benchmark"
             android:exported="true"
@@ -1175,18 +1195,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />
         </activity>
-        <activity
-            android:name=".activity.style.ImageInLabelActivity"
-            android:description="@string/description_image_in_label"
-            android:exported="true"
-            android:label="@string/activity_image_in_label">
-            <meta-data
-                android:name="@string/category"
-                android:value="@string/category_style" />
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.FeatureOverviewActivity" />
-        </activity> <!-- For Instrumentation tests -->
+        <!-- For Instrumentation tests -->
         <activity
             android:name=".activity.style.RuntimeStyleTimingTestActivity"
             android:screenOrientation="portrait" />
@@ -1204,21 +1213,26 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activity.render.RenderTestActivity"
-            android:screenOrientation="landscape" /> <!-- Configuration Settings -->
+            android:screenOrientation="landscape" />
+        <!-- Configuration Settings -->
         <meta-data
             android:name="com.maplibre.TestEventsServer"
             android:value="api-events-staging.tilestream.net" />
         <meta-data
             android:name="com.maplibre.TestEventsAccessToken"
-            android:value="pk.eyJ1IjoiYmxzdGFnaW5nIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ.0IfB7v5Qbm2MGVYt8Kb8fg" /> <!-- Comment out this setting to switch to external storage (and disable internal) in your app -->
+            android:value="pk.eyJ1IjoiYmxzdGFnaW5nIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ.0IfB7v5Qbm2MGVYt8Kb8fg" />
+
+        <!-- Comment out this setting to switch to external storage (and disable internal) in your app -->
         <!-- Alternatively you can rely on FileSource#setResourceCachePath API instead -->
         <!-- <meta-data -->
         <!-- android:name="com.maplibre.SetStorageExternal" -->
         <!-- android:value="true" /> -->
+
         <!-- Set value to true to have tile loading measurements on -->
         <meta-data
             android:name="com.maplibre.MeasureTileDownloadOn"
             android:value="false" />
+
     </application>
 
 </manifest>
