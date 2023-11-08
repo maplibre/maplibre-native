@@ -356,12 +356,8 @@ public:
         static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LineBasicPropertiesUBO");
         if (!linePropertiesUniformBuffer) {
             const shaders::LineBasicPropertiesUBO linePropertiesUBO{/*color =*/color,
-                                                                    /*blur =*/0.f,
                                                                     /*opacity =*/opacity,
-                                                                    /*gapwidth =*/0.f,
-                                                                    /*offset =*/0.f,
                                                                     /*width =*/1.f,
-                                                                    0,
                                                                     0,
                                                                     0};
             parameters.context.emplaceOrUpdateUniformBuffer(linePropertiesUniformBuffer, &linePropertiesUBO);
@@ -369,40 +365,6 @@ public:
         if (!uniforms.get(idLinePropertiesUBOName)) {
             uniforms.addOrReplace(idLinePropertiesUBOName, linePropertiesUniformBuffer);
         }
-
-#if MLN_RENDER_BACKEND_METAL
-        static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
-        if (!expressionUniformBuffer) {
-            const auto expressionUBO = LayerTweaker::buildExpressionUBO(zoom, parameters.frameCount);
-            parameters.context.emplaceOrUpdateUniformBuffer(expressionUniformBuffer, &expressionUBO);
-        }
-        if (!uniforms.get(idExpressionInputsUBOName)) {
-            uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
-        }
-
-        static const StringIdentity idLinePermutationUBOName = stringIndexer().get("LinePermutationUBO");
-        if (!permutationUniformBuffer) {
-            const shaders::LinePermutationUBO permutationUBO = {
-                /* .color = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-                /* .blur = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-                /* .opacity = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-                /* .gapwidth = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-                /* .offset = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-                /* .width = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-                /* .floorwidth = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-                /* .pattern_from = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-                /* .pattern_to = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-                /* .overdrawInspector = */ false,
-                /* .pad = */ 0,
-                0,
-                0,
-                0};
-            parameters.context.emplaceOrUpdateUniformBuffer(permutationUniformBuffer, &permutationUBO);
-        }
-        if (!uniforms.get(idLinePermutationUBOName)) {
-            uniforms.addOrReplace(idLinePermutationUBOName, permutationUniformBuffer);
-        }
-#endif // MLN_RENDER_BACKEND_METAL
     };
 
 private:
@@ -411,11 +373,6 @@ private:
 
     gfx::UniformBufferPtr lineUniformBuffer;
     gfx::UniformBufferPtr linePropertiesUniformBuffer;
-
-#if MLN_RENDER_BACKEND_METAL
-    gfx::UniformBufferPtr expressionUniformBuffer;
-    gfx::UniformBufferPtr permutationUniformBuffer;
-#endif
 };
 
 std::size_t RenderFillLayer::removeAllDrawables() {
@@ -697,10 +654,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         if (!outlineShader && doOutline) {
             static const std::unordered_set<StringIdentity> outlinePropertiesAsUniforms{
                 stringIndexer().get("a_color"),
-                stringIndexer().get("a_blur"),
                 stringIndexer().get("a_opacity"),
-                stringIndexer().get("a_gapwidth"),
-                stringIndexer().get("a_offset"),
                 stringIndexer().get("a_width"),
             };
             outlineShader = std::static_pointer_cast<gfx::ShaderProgramBase>(

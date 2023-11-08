@@ -18,35 +18,23 @@ layout (std140) uniform LineBasicUBO {
 
 layout (std140) uniform LineBasicPropertiesUBO {
     highp vec4 u_color;
-    lowp float u_blur;
     lowp float u_opacity;
-    mediump float u_gapwidth;
-    lowp float u_offset;
     mediump float u_width;
 
-    highp float pad1;
-    highp vec2 pad2;
+    highp vec2 pad1;
 };
 
 out vec2 v_normal;
-out vec2 v_width2;
+out float v_width;
 out float v_gamma_scale;
 out highp float v_linesofar;
 
 void main() {
-    highp vec4 color = u_color;
-    lowp float blur = u_blur;
-    lowp float opacity = u_opacity;
-    mediump float gapwidth = u_gapwidth;
-    lowp float offset = u_offset;
-    mediump float width = u_width;
-
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
     float ANTIALIASING = 1.0 / u_device_pixel_ratio / 2.0;
 
     vec2 a_extrude = a_data.xy - 128.0;
-    float a_direction = mod(a_data.z, 4.0) - 1.0;
 
     v_linesofar = (floor(a_data.z / 4.0) + a_data.w * 64.0) * 2.0;
 
@@ -61,32 +49,20 @@ void main() {
 
     // these transformations used to be applied in the JS and native code bases.
     // moved them into the shader for clarity and simplicity.
-    gapwidth = gapwidth / 2.0;
-    float halfwidth = width / 2.0;
-    offset = -1.0 * offset;
-
-    float inset = gapwidth + (gapwidth > 0.0 ? ANTIALIASING : 0.0);
-    float outset = gapwidth + halfwidth * (gapwidth > 0.0 ? 2.0 : 1.0) + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
+    float halfwidth = u_width / 2.0;
+    float outset = halfwidth + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
 
     // Scale the extrusion vector down to a normal and then up by the line width
     // of this vertex.
     mediump vec2 dist = outset * a_extrude * scale;
 
-    // Calculate the offset when drawing a line that is to the side of the actual line.
-    // We do this by creating a vector that points towards the extrude, but rotate
-    // it when we're drawing round end points (a_direction = -1 or 1) since their
-    // extrude vector points in another direction.
-    mediump float u = 0.5 * a_direction;
-    mediump float t = 1.0 - abs(u);
-    mediump vec2 offset2 = offset * a_extrude * scale * normal.y * mat2(t, -u, u, t);
-
     vec4 projected_extrude = u_matrix * vec4(dist / u_ratio, 0.0, 0.0);
-    gl_Position = u_matrix * vec4(pos + offset2 / u_ratio, 0.0, 1.0) + projected_extrude;
+    gl_Position = u_matrix * vec4(pos, 0.0, 1.0) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
     float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * u_units_to_pixels);
     v_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 
-    v_width2 = vec2(outset, inset);
+    v_width = outset;
 }

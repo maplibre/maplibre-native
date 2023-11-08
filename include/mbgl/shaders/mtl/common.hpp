@@ -149,12 +149,9 @@ struct alignas(16) LinePropertiesUBO {
 
 struct alignas(16) LineBasicPropertiesUBO {
     float4 color;
-    float blur;
     float opacity;
-    float gapwidth;
-    float offset;
     float width;
-    float pad1, pad2, pad3;
+    float pad1, pad2;
 };
 
 struct alignas(16) LineGradientPropertiesUBO {

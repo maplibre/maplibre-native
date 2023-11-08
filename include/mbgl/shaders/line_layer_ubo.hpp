@@ -88,12 +88,9 @@ using LineBasicUBO = LineUBO;
 
 struct alignas(16) LineBasicPropertiesUBO {
     Color color;
-    float blur;
     float opacity;
-    float gapwidth;
-    float offset;
     float width;
-    float pad1, pad2, pad3;
+    float pad1, pad2;
 };
 static_assert(sizeof(LineBasicPropertiesUBO) % 16 == 0);
 
