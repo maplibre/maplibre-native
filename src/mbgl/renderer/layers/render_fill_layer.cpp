@@ -43,7 +43,7 @@ namespace {
 
 #if MLN_DRAWABLE_RENDERER
 constexpr auto FillShaderName = "FillShader";
-constexpr auto FillOutlineShaderName = "LineShader";
+constexpr auto FillOutlineShaderName = "LineBasicShader";
 constexpr auto FillPatternShaderName = "FillPatternShader";
 constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 
@@ -339,12 +339,12 @@ public:
         const auto zoom = parameters.state.getZoom();
         auto& uniforms = drawable.mutableUniformBuffers();
 
-        static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
+        static const StringIdentity idLineUBOName = stringIndexer().get("LineBasicUBO");
         {
             const auto matrix = LayerTweaker::getTileMatrix(
                 tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
 
-            const shaders::LineUBO lineUBO{
+            const shaders::LineBasicUBO lineUBO{
                 /*matrix = */ util::cast<float>(matrix),
                 /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                 /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
@@ -353,9 +353,9 @@ public:
         }
         uniforms.addOrReplace(idLineUBOName, lineUniformBuffer);
 
-        static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
+        static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LineBasicPropertiesUBO");
         if (!linePropertiesUniformBuffer) {
-            const shaders::LinePropertiesUBO linePropertiesUBO{/*color =*/color,
+            const shaders::LineBasicPropertiesUBO linePropertiesUBO{/*color =*/color,
                                                                /*blur =*/0.f,
                                                                /*opacity =*/opacity,
                                                                /*gapwidth =*/0.f,
@@ -368,22 +368,6 @@ public:
         }
         if (!uniforms.get(idLinePropertiesUBOName)) {
             uniforms.addOrReplace(idLinePropertiesUBOName, linePropertiesUniformBuffer);
-        }
-
-        static const StringIdentity idLineInterpolationUBOName = stringIndexer().get("LineInterpolationUBO");
-        if (!lineInterpolationUniformBuffer) {
-            const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
-                                                                     /*blur_t =*/0.f,
-                                                                     /*opacity_t =*/0.f,
-                                                                     /*gapwidth_t =*/0.f,
-                                                                     /*offset_t =*/0.f,
-                                                                     /*width_t =*/0.f,
-                                                                     0,
-                                                                     0};
-            parameters.context.emplaceOrUpdateUniformBuffer(lineInterpolationUniformBuffer, &lineInterpolationUBO);
-        }
-        if (!uniforms.get(idLineInterpolationUBOName)) {
-            uniforms.addOrReplace(idLineInterpolationUBOName, lineInterpolationUniformBuffer);
         }
 
 #if MLN_RENDER_BACKEND_METAL
@@ -427,7 +411,6 @@ private:
 
     gfx::UniformBufferPtr lineUniformBuffer;
     gfx::UniformBufferPtr linePropertiesUniformBuffer;
-    gfx::UniformBufferPtr lineInterpolationUniformBuffer;
 
 #if MLN_RENDER_BACKEND_METAL
     gfx::UniformBufferPtr expressionUniformBuffer;

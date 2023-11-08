@@ -67,5 +67,23 @@ const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LineSDFShader, gfx::Backe
     TextureInfo{0, "u_image"},
 };
 
+const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal>::attributes = {
+    AttributeInfo{0, gfx::AttributeDataType::Short2, 1, "a_pos_normal"},
+    AttributeInfo{1, gfx::AttributeDataType::UByte4, 1, "a_data"},
+    AttributeInfo{2, gfx::AttributeDataType::Float4, 1, "a_color"},
+    AttributeInfo{3, gfx::AttributeDataType::Float2, 1, "a_blur"},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, 1, "a_opacity"},
+    AttributeInfo{5, gfx::AttributeDataType::Float2, 1, "a_gapwidth"},
+    AttributeInfo{6, gfx::AttributeDataType::Float2, 1, "a_offset"},
+    AttributeInfo{7, gfx::AttributeDataType::Float2, 1, "a_width"},
+};
+const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal>::uniforms = {
+    UniformBlockInfo{8, true, true, sizeof(LineBasicUBO), "LineBasicUBO"},
+    UniformBlockInfo{9, true, false, sizeof(LineBasicPropertiesUBO), "LineBasicPropertiesUBO"},
+    UniformBlockInfo{10, true, true, sizeof(LinePermutationUBO), "LinePermutationUBO"},
+    UniformBlockInfo{11, true, false, sizeof(ExpressionInputsUBO), "ExpressionInputsUBO"},
+};
+const std::array<TextureInfo, 0> ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal>::textures = {};
+
 } // namespace shaders
 } // namespace mbgl
