@@ -235,6 +235,7 @@ jobs:
 
       - name: npm install
         run: npm install --ignore-scripts
+        working-directory: ./
 
       - name: Generate shaders
         working-directory: ./
