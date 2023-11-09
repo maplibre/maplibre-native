@@ -13,6 +13,7 @@ std::optional<std::unique_ptr<Sprite>> Converter<std::unique_ptr<Sprite>>::opera
     std::optional<std::string> id;
     auto idValue = objectMember(value, "id");
     if (!idValue) {
+        error.message = "id must be defined for sprite object";
         return std::nullopt;
     }
     id = toString(*idValue);
@@ -20,6 +21,7 @@ std::optional<std::unique_ptr<Sprite>> Converter<std::unique_ptr<Sprite>>::opera
     std::optional<std::string> spriteURL;
     auto urlValue = objectMember(value, "url");
     if (!urlValue) {
+        error.message = "url must be defined for sprite object";
         return std::nullopt;
     }
     spriteURL = toString(*urlValue);

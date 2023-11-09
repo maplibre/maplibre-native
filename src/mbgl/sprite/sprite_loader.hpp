@@ -35,7 +35,7 @@ private:
     const float pixelRatio;
 
     struct Data;
-    std::unordered_map<std::string, std::unique_ptr<Data>> dataMap;
+    std::map<std::string, std::unique_ptr<Data>> dataMap;
     std::mutex dataMapMutex;
 
     SpriteLoaderObserver* observer = nullptr;
