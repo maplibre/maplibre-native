@@ -114,7 +114,7 @@ bool RenderFillLayer::hasCrossfade() const {
     return getCrossfade<FillLayerProperties>(evaluatedProperties).t != 1;
 }
 
-#if MLN_DRAWABLE_RENDERER
+#if MLN_TRIANGULATE_FILL_OUTLINES
 void RenderFillLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
     if (outlineLayerGroup) {
@@ -134,7 +134,28 @@ void RenderFillLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeReque
 
     changeLayerIndex(outlineLayerGroup, newLayerIndex, changes);
 }
-#endif
+
+std::size_t RenderFillLayer::removeAllDrawables() {
+    auto count = RenderLayer::removeAllDrawables();
+    if (outlineLayerGroup) {
+        auto count2 = outlineLayerGroup->clearDrawables();
+        stats.drawablesRemoved += count2;
+        count += count2;
+    }
+    return count;
+}
+
+std::size_t RenderFillLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
+    RenderLayer::removeTile(renderPass, tileID);
+    if (const auto tileGroup = static_cast<TileLayerGroup*>(outlineLayerGroup.get())) {
+        const auto n = tileGroup->removeDrawables(renderPass, tileID).size();
+        stats.drawablesRemoved += n;
+        return n;
+    }
+    return 0;
+}
+
+#endif // MLN_TRIANGULATE_FILL_OUTLINES
 
 #if MLN_LEGACY_RENDERER
 void RenderFillLayer::render(PaintParameters& parameters) {
@@ -325,6 +346,8 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 }
 
 #if MLN_DRAWABLE_RENDERER
+
+#if MLN_TRIANGULATE_FILL_OUTLINES
 class OutlineDrawableTweaker : public gfx::DrawableTweaker {
 public:
     OutlineDrawableTweaker(Color color_, float opacity_)
@@ -378,26 +401,8 @@ private:
     gfx::UniformBufferPtr lineUniformBuffer;
     gfx::UniformBufferPtr linePropertiesUniformBuffer;
 };
+#endif // MLN_TRIANGULATE_FILL_OUTLINES
 
-std::size_t RenderFillLayer::removeAllDrawables() {
-    auto count = RenderLayer::removeAllDrawables();
-    if (outlineLayerGroup) {
-        auto count2 = outlineLayerGroup->clearDrawables();
-        stats.drawablesRemoved += count2;
-        count += count2;
-    }
-    return count;
-}
-
-std::size_t RenderFillLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
-    RenderLayer::removeTile(renderPass, tileID);
-    if (const auto tileGroup = static_cast<TileLayerGroup*>(outlineLayerGroup.get())) {
-        const auto n = tileGroup->removeDrawables(renderPass, tileID).size();
-        stats.drawablesRemoved += n;
-        return n;
-    }
-    return 0;
-}
 
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
@@ -422,13 +427,15 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     }
     auto* fillTileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
+#if MLN_TRIANGULATE_FILL_OUTLINES
     // Set up a layer group for outlines
     if (!outlineLayerGroup) {
         outlineLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
         activateLayerGroup(outlineLayerGroup, isRenderable, changes);
     }
     auto* outlineTileLayerGroup = static_cast<TileLayerGroup*>(outlineLayerGroup.get());
-
+#endif
+    
     if (!layerTweaker) {
         layerTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
@@ -465,6 +472,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         builder.setEnableStencil(true);
     };
 
+#if MLN_TRIANGULATE_FILL_OUTLINES
     for (auto layer : {fillTileLayerGroup, outlineTileLayerGroup}) {
         stats.drawablesRemoved += layer->removeDrawablesIf([&](gfx::Drawable& drawable) {
             // If the render pass has changed or the tile has dropped out of the cover set, remove it.
@@ -472,7 +480,14 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return tileID && !hasRenderTile(*tileID);
         });
     }
-
+#else
+    stats.drawablesRemoved += fillTileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
+        // If the render pass has changed or the tile has dropped out of the cover set, remove it.
+        const auto& tileID = drawable.getTileID();
+        return tileID && !hasRenderTile(*tileID);
+    });
+#endif
+    
     std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
