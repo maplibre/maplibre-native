@@ -140,8 +140,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const SymbolDrawableUBO& drawable [[buffer(10)]],
-                            device const SymbolDrawableTilePropsUBO& props [[buffer(12)]],
-                            device const SymbolPermutationUBO& permutation [[buffer(14)]],
+                            device const SymbolDrawableTilePropsUBO& props [[buffer(13)]],
+                            device const SymbolPermutationUBO& permutation [[buffer(15)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
     if (permutation.overdrawInspector) {

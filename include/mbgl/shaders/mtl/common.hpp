@@ -220,7 +220,7 @@ struct alignas(16) SymbolDrawableUBO {
     float pitch;
     /*bool*/ int rotate_symbol;
     float aspect_ratio;
-    float pad;
+    float2 pad;
 };
 static_assert(sizeof(SymbolDrawableUBO) == 15 * 16, "unexpected padding");
 
