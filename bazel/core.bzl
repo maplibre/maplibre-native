@@ -82,6 +82,7 @@ MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mbgl/shaders/gl/drawable_line_pattern.hpp",
     "include/mbgl/shaders/gl/drawable_line_sdf.hpp",
     "include/mbgl/shaders/gl/drawable_line.hpp",
+    "include/mbgl/shaders/gl/drawable_line_basic.hpp",
     "include/mbgl/shaders/gl/drawable_raster.hpp",
     "include/mbgl/shaders/gl/drawable_symbol_icon.hpp",
     "include/mbgl/shaders/gl/drawable_symbol_sdf.hpp",
