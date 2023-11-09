@@ -21,7 +21,6 @@ public:
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
     static const StringIdentity idSymbolDrawableUBOName;
-    static const StringIdentity idSymbolDynamicUBOName;
     static const StringIdentity idSymbolDrawablePaintUBOName;
     static const StringIdentity idSymbolDrawableTilePropsUBOName;
     static const StringIdentity idSymbolDrawableInterpolateUBOName;

@@ -65,7 +65,6 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 } // namespace
 
 const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = stringIndexer().get("SymbolDynamicUBO");
 const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = stringIndexer().get("SymbolDrawablePaintUBO");
 const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = stringIndexer().get(
     "SymbolDrawableTilePropsUBO");
@@ -188,16 +187,12 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.pitch=*/static_cast<float>(state.getPitch()),
             /*.rotate_symbol=*/rotateInShader,
             /*.aspect_ratio=*/state.getSize().aspectRatio(),
-            /*.pad=*/{0},
+            /*.fade_change=*/parameters.symbolFadeChange,
+            /*.pad=*/0,
         };
-
-        const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
-                                             /*.pad1=*/0,
-                                             /*.pad2=*/{0, 0}};
 
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(idSymbolDrawableUBOName, &drawableUBO, context);
-        uniforms.createOrUpdate(idSymbolDynamicUBOName, &dynamicUBO, context);
         uniforms.addOrReplace(idSymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
 
 #if MLN_RENDER_BACKEND_METAL

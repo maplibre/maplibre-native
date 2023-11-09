@@ -60,7 +60,7 @@ float2 unpack_float(const float packedValue) {
     return float2(v0, packedIntValue - v0 * 256);
 }
 float2 unpack_opacity(const float packedOpacity) {
-    return float2(float(int(packedOpacity) / 2) / 127.0, fmod(packedOpacity, 2.0));
+    return float2(float(int(packedOpacity) / 2) / 127.0, glMod(packedOpacity, 2.0));
 }
 // To minimize the number of attributes needed, we encode a 4-component
 // color into a pair of floats (i.e. a vec2) as follows:
