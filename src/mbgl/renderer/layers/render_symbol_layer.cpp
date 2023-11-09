@@ -748,6 +748,13 @@ SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
     };
 }
 
+// Convert a properties-as-uniforms set to the type expected by `SymbolDrawableData`
+gfx::SymbolDrawableData::PropertyMapType toMap(const std::unordered_set<StringIdentity>& set) {
+    // can we do this without allocating?
+    auto values = std::vector<bool>(set.size());
+    return gfx::SymbolDrawableData::PropertyMapType(set.begin(), set.end(), values.begin(), values.end());
+}
+
 const auto idDataAttibName = stringIndexer().get("a_data");
 const auto posOffsetAttribName = "a_pos_offset";
 const auto idPosOffsetAttribName = stringIndexer().get(posOffsetAttribName);
@@ -811,7 +818,8 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
     }
 }
 
-void updateTileDrawable(gfx::Drawable& drawable,
+void updateTileDrawable(RenderSymbolLayer* ths,
+                        gfx::Drawable& drawable,
                         gfx::Context& context,
                         const SymbolBucket& bucket,
                         const SymbolBucket::PaintProperties& paintProps,
@@ -1193,14 +1201,18 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             // Just update the drawables we already created
             tileLayerGroup->visitDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
+                auto& drawData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
+
                 if (drawable.getLayerTweaker() != layerTweaker) {
                     // This drawable was produced on a previous style/bucket, and should not be updated.
                     return;
                 }
 
-                const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
                 propertiesAsUniforms.clear();
-                updateTileDrawable(drawable,
+
+                const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
+                updateTileDrawable(this,
+                                   drawable,
                                    context,
                                    bucket,
                                    bucketPaintProperties,
@@ -1209,6 +1221,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                    textInterpUBO,
                                    iconInterpUBO,
                                    propertiesAsUniforms);
+                drawData.setPropertiesAsUniforms(toMap(propertiesAsUniforms));
             });
 
             // re-create collision drawables
@@ -1295,9 +1308,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         propertiesAsUniforms.clear();
         gfx::VertexAttributeArray attribs;
         updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, attribs, propertiesAsUniforms);
-        if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-        }
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
@@ -1394,7 +1404,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                         /*.pitchAlignment=*/values.pitchAlignment,
                         /*.rotationAlignment=*/values.rotationAlignment,
                         /*.placement=*/layout.get<SymbolPlacement>(),
-                        /*.textFit=*/layout.get<IconTextFit>());
+                        /*.textFit=*/layout.get<IconTextFit>(),
+                        /*propertiesAsUniforms=*/toMap(propertiesAsUniforms));
 
                     const auto tileUBO = buildTileUBO(bucket, *drawData, currentZoom);
                     drawable->setData(std::move(drawData));
