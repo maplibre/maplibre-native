@@ -195,7 +195,9 @@ void RenderLayer::updateRenderTileIDs() {
         const auto& tileID = tile.get().getOverscaledTileID();
         return std::make_pair(tileID, getRenderTileBucketID(tileID));
     });
+
     renderTileIDs.swap(newRenderTileIDs);
+    newRenderTileIDs.clear();
 }
 
 bool RenderLayer::hasRenderTile(const OverscaledTileID& tileID) const {

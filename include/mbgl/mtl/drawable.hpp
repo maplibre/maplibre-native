@@ -66,16 +66,16 @@ protected:
     // For testing only.
     Drawable(std::unique_ptr<Impl>);
 
-    void bindAttributes(const RenderPass& renderPass) const;
-    void unbindAttributes(const RenderPass& renderPass) const;
+    void bindAttributes(RenderPass&) const noexcept;
+    void unbindAttributes(RenderPass&) const noexcept {}
 
-    void bindUniformBuffers(const RenderPass& renderPass) const;
-    void unbindUniformBuffers(const RenderPass& renderPass) const;
+    void bindUniformBuffers(RenderPass&) const noexcept;
+    void unbindUniformBuffers(RenderPass&) const noexcept {}
 
-    void bindTextures(const RenderPass& renderPass) const;
-    void unbindTextures(const RenderPass& renderPass) const;
+    void bindTextures(RenderPass&) const noexcept;
+    void unbindTextures(RenderPass&) const noexcept;
 
-    void uploadTextures() const;
+    void uploadTextures(UploadPass&) const noexcept;
 
     class Impl;
     const std::unique_ptr<Impl> impl;
