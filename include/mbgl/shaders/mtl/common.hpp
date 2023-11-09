@@ -220,10 +220,16 @@ struct alignas(16) SymbolDrawableUBO {
     float pitch;
     /*bool*/ int rotate_symbol;
     float aspect_ratio;
-    float fade_change;
     float pad;
 };
 static_assert(sizeof(SymbolDrawableUBO) == 15 * 16, "unexpected padding");
+
+struct alignas(16) SymbolDynamicUBO {
+    float fade_change;
+    float pad1;
+    float2 pad2;
+};
+static_assert(sizeof(SymbolDynamicUBO) == 16, "unexpected padding");
 
 struct alignas(16) SymbolDrawablePaintUBO {
     float4 fill_color;

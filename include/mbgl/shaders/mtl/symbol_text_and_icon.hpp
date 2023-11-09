@@ -15,7 +15,7 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 9> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<UniformBlockInfo, 7> uniforms;
     static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto source = R"(
@@ -48,11 +48,12 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolDrawableUBO& drawable [[buffer(9)]],
-                                device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
-                                device const SymbolDrawableTilePropsUBO& props [[buffer(11)]],
-                                device const SymbolDrawableInterpolateUBO& interp [[buffer(12)]],
-                                device const SymbolPermutationUBO& permutation [[buffer(13)]],
-                                device const ExpressionInputsUBO& expr [[buffer(14)]]) {
+                                device const SymbolDynamicUBO& dynamic [[buffer(10)]],
+                                device const SymbolDrawablePaintUBO& paint [[buffer(11)]],
+                                device const SymbolDrawableTilePropsUBO& props [[buffer(12)]],
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(13)]],
+                                device const SymbolPermutationUBO& permutation [[buffer(14)]],
+                                device const ExpressionInputsUBO& expr [[buffer(15)]]) {
 
     const auto fill_color = colorFor(permutation.fill_color, paint.fill_color, vertx.fill_color, interp.fill_color_t, expr);
     const auto halo_color = colorFor(permutation.halo_color, paint.halo_color, vertx.halo_color, interp.halo_color_t, expr);
@@ -124,7 +125,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float gamma_scale = position.w;
 
     const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = (fade_opacity[1] > 0.5) ? drawable.fade_change : -drawable.fade_change;
+    const float fade_change = (fade_opacity[1] > 0.5) ? dynamic.fade_change : -dynamic.fade_change;
     const float interpolated_fade_opacity = max(0.0, min(1.0, fade_opacity[0] + fade_change));
 
     return {
