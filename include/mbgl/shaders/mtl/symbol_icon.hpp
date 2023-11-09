@@ -15,7 +15,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 6> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<UniformBlockInfo, 7> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -37,11 +37,12 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolDrawableUBO& drawable [[buffer(8)]],
-                                device const SymbolDrawablePaintUBO& paint [[buffer(9)]],
-                                device const SymbolDrawableTilePropsUBO& props [[buffer(10)]],
-                                device const SymbolDrawableInterpolateUBO& interp [[buffer(11)]],
-                                device const SymbolPermutationUBO& permutation [[buffer(12)]],
-                                device const ExpressionInputsUBO& expr [[buffer(13)]]) {
+                                device const SymbolDynamicUBO& dynamic [[buffer(9)]],
+                                device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
+                                device const SymbolDrawableTilePropsUBO& props [[buffer(11)]],
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(12)]],
+                                device const SymbolPermutationUBO& permutation [[buffer(13)]],
+                                device const ExpressionInputsUBO& expr [[buffer(14)]]) {
 
     const auto opacity  = valueFor(permutation.opacity, paint.opacity, vertx.opacity, interp.opacity_t, expr);
 
@@ -101,7 +102,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
 
     const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = fade_opacity[1] > 0.5 ? drawable.fade_change : -drawable.fade_change;
+    const float fade_change = fade_opacity[1] > 0.5 ? dynamic.fade_change : -dynamic.fade_change;
 
     return {
         .position     = position,
@@ -113,7 +114,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const SymbolDrawableUBO& drawable [[buffer(8)]],
-                            device const SymbolPermutationUBO& permutation [[buffer(12)]],
+                            device const SymbolPermutationUBO& permutation [[buffer(13)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
     if (permutation.overdrawInspector) {
