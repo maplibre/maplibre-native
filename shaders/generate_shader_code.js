@@ -275,13 +275,13 @@ const main = () => {
             required: false,
             action: "store_true"
         });
-        parser.add_argument("--verbose", "--d", {
-            help: "Perform all steps but don't write anything to disk.",
+        parser.add_argument("--verbose", "--v", {
+            help: "Print extra process information.",
             required: false,
             action: "store_true"
         });
-        parser.add_argument("--dryrun", "--v", {
-            help: "Print extra process information.",
+        parser.add_argument("--dryrun", "--d", {
+            help: "Perform all steps but don't write anything to disk.",
             required: false,
             action: "store_true"
         });
