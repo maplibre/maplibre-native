@@ -4,7 +4,13 @@
 
 #include <cstdint>
 
-using namespace mbgl;
+using mbgl::stringIndexer;
+
+// Allow public default construction
+class StringIndexer : public mbgl::StringIndexer {
+public:
+    StringIndexer() {}
+};
 
 TEST(StringIndexer, SingletonStringIndexer) {
     EXPECT_GE(stringIndexer().size(), 0);
