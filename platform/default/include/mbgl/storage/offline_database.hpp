@@ -110,6 +110,7 @@ private:
     void migrateToVersion5();
     void migrateToVersion3();
     void migrateToVersion6();
+    void migrateToVersion7();
     void cleanup();
     bool disabled();
     void vacuum();
@@ -119,17 +120,17 @@ private:
 
     std::optional<std::pair<Response, uint64_t>> getTile(const Resource::TileData&);
     std::optional<int64_t> hasTile(const Resource::TileData&);
-    bool putTile(const Resource::TileData&, const Response&, const std::string&, bool compressed);
+    bool putTile(const Resource::TileData&, const Response&, const std::string&, bool compressed, bool ambient);
 
     std::optional<std::pair<Response, uint64_t>> getResource(const Resource&);
     std::optional<int64_t> hasResource(const Resource&);
-    bool putResource(const Resource&, const Response&, const std::string&, bool compressed);
+    bool putResource(const Resource&, const Response&, const std::string&, bool compressed, bool ambient);
 
     uint64_t putRegionResourceInternal(int64_t regionID, const Resource&, const Response&);
 
     std::optional<std::pair<Response, uint64_t>> getInternal(const Resource&);
     std::optional<int64_t> hasInternal(const Resource&);
-    std::pair<bool, uint64_t> putInternal(const Resource&, const Response&, bool evict);
+    std::pair<bool, uint64_t> putInternal(const Resource&, const Response&, bool evict, bool ambient);
 
     // Return value is true iff the resource was previously unused by any other regions.
     bool markUsed(int64_t regionID, const Resource&);
