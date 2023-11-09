@@ -11,6 +11,7 @@
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
+#include <mbgl/mtl/vertex_buffer_resource.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
@@ -55,7 +56,7 @@ public:
     // GLfloat pointSize = 0.0f;
     StringIdentity idVertexAttrName = stringIndexer().get("a_pos");
 
-    MTL::Buffer* noBindingBuffer = nullptr;
+    VertexBufferResource* noBindingBuffer = nullptr;
 
     gfx::AttributeBindingArray attributeBindings;
 
