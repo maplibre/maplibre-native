@@ -73,7 +73,7 @@ private:
     std::shared_ptr<FillOutlineProgram> fillOutlineProgram;
     std::shared_ptr<FillOutlinePatternProgram> fillOutlinePatternProgram;
 #endif
-    
+
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderGroupPtr fillShaderGroup;
     gfx::ShaderGroupPtr outlineShaderGroup;
@@ -85,7 +85,7 @@ private:
     gfx::ShaderProgramBasePtr outlineShader;
     class OulineDrawableTweaker;
 #endif // MLN_TRIANGULATE_FILL_OUTLINES
-    
+
 #endif // MLN_DRAWABLE_RENDERER
 };
 

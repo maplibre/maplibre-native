@@ -403,7 +403,6 @@ private:
 };
 #endif // MLN_TRIANGULATE_FILL_OUTLINES
 
-
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
@@ -435,7 +434,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     }
     auto* outlineTileLayerGroup = static_cast<TileLayerGroup*>(outlineLayerGroup.get());
 #endif
-    
+
     if (!layerTweaker) {
         layerTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
@@ -487,7 +486,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         return tileID && !hasRenderTile(*tileID);
     });
 #endif
-    
+
     std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
