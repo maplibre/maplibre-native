@@ -14,7 +14,7 @@
     MLN_TRIANGULATE_FILL_OUTLINES = 0 : Simple line primitives will be generated. Draw using gfx::Lines
     MLN_TRIANGULATE_FILL_OUTLINES = 1 : Generate triangulated lines. Draw using gfx::Triangles and a Line shader.
  */
-#define MLN_TRIANGULATE_FILL_OUTLINES 0
+#define MLN_TRIANGULATE_FILL_OUTLINES 1
 #else // MLN_DRAWABLE_RENDERER
 // Legacy Renderer is incompatible with triangulated lines
 #define MLN_TRIANGULATE_FILL_OUTLINES 0
