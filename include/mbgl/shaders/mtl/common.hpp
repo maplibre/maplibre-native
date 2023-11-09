@@ -60,7 +60,7 @@ float2 unpack_float(const float packedValue) {
     return float2(v0, packedIntValue - v0 * 256);
 }
 float2 unpack_opacity(const float packedOpacity) {
-    return float2(float(int(packedOpacity) / 2) / 127.0, fmod(packedOpacity, 2.0));
+    return float2(float(int(packedOpacity) / 2) / 127.0, glMod(packedOpacity, 2.0));
 }
 // To minimize the number of attributes needed, we encode a 4-component
 // color into a pair of floats (i.e. a vec2) as follows:
@@ -220,10 +220,16 @@ struct alignas(16) SymbolDrawableUBO {
     float pitch;
     /*bool*/ int rotate_symbol;
     float aspect_ratio;
-    float fade_change;
-    float pad;
+    float2 pad;
 };
 static_assert(sizeof(SymbolDrawableUBO) == 15 * 16, "unexpected padding");
+
+struct alignas(16) SymbolDynamicUBO {
+    float fade_change;
+    float pad1;
+    float2 pad2;
+};
+static_assert(sizeof(SymbolDynamicUBO) == 16, "unexpected padding");
 
 struct alignas(16) SymbolDrawablePaintUBO {
     float4 fill_color;
