@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::HillshadeProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "HillshadeProgram";
-    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
+
+    static constexpr const char* vertexData = R"(uniform mat4 u_matrix;
 
 layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_texture_pos;
@@ -20,7 +22,7 @@ void main() {
     v_pos = a_texture_pos / 8192.0;
 }
 )";
-    static constexpr const char* fragment = R"(uniform sampler2D u_image;
+    static constexpr const char* fragmentData = R"(uniform sampler2D u_image;
 in vec2 v_pos;
 
 uniform vec2 u_latrange;
@@ -73,7 +75,17 @@ void main() {
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::HillshadeProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::HillshadeProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

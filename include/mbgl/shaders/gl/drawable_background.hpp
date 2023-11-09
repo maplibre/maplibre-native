@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "BackgroundShader";
-    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
+
+    static constexpr const char* vertexData = R"(layout (location = 0) in vec2 a_pos;
 layout (std140) uniform BackgroundDrawableUBO {
     highp mat4 u_matrix;
 };
@@ -17,7 +19,7 @@ void main() {
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform BackgroundLayerUBO {
+    static constexpr const char* fragmentData = R"(layout (std140) uniform BackgroundLayerUBO {
     highp vec4 u_color;
     highp vec4 u_opacity_pad3;
 };
@@ -29,7 +31,17 @@ void main() {
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

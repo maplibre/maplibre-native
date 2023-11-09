@@ -1,25 +1,17 @@
+// Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
-
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/background_layer_ubo.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/shaders/background_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "BackgroundShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 1> attributes;
-    static const std::array<UniformBlockInfo, 2> uniforms;
-    static const std::array<TextureInfo, 0> textures;
-
-    static constexpr auto source = R"(
-#include <metal_stdlib>
+    static const ReflectionData reflectionData;
+    static constexpr const char* sourceData = R"(#include <metal_stdlib>
 using namespace metal;
 
 struct VertexStage {
@@ -53,9 +45,14 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #else
     return half4(float4(layerUBO.color.rgb, layerUBO.color.a * layerUBO.opacity));
 #endif
-}
-)";
+})";
+    static std::string source() {
+        using Ty = ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal>;
+        return Ty::sourceData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

@@ -336,7 +336,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
             return false;
         }
 
-        attribDesc->setBufferIndex(ShaderClass::attributes[0].index);
+        attribDesc->setBufferIndex(ShaderClass::reflectionData.attributes[0].index);
         attribDesc->setOffset(0);
         attribDesc->setFormat(MTL::VertexFormatShort2);
         layoutDesc->setStride(static_cast<NS::UInteger>(vertexSize));
@@ -380,7 +380,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
     encoder->setCullMode(MTL::CullModeNone);
 
-    mtlRenderPass.bindVertex(vertexRes, /*offset=*/0, ShaderClass::attributes[0].index);
+    mtlRenderPass.bindVertex(vertexRes, /*offset=*/0, ShaderClass::reflectionData.attributes[0].index);
 
     // Instancing is disabled for now because the `[[stencil]]` attribute in the fragment shader output
     // that we need to apply a different stencil value for each tile causes a problem on some older (A8-A11)
@@ -388,7 +388,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     // Adding a `[[depth(...)]]` output to the shader prevents this error, but the stencil value is
     // still not written to the stencil attachment on those same devices.
 #if STENCIL_INSTANCING
-    encoder->setVertexBuffer(uboBuffer.getMetalBuffer().get(), /*offset=*/0, ShaderClass::uniforms[0].index);
+    encoder->setVertexBuffer(
+        uboBuffer.getMetalBuffer().get(), /*offset=*/0, ShaderClass::reflectionData.uniforms[0].index);
     encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                    indexCount,
                                    MTL::IndexType::IndexTypeUInt16,
@@ -398,7 +399,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                    /*baseVertex=*/0,
                                    /*baseInstance=*/0);
 #else
-    const auto uboIndex = ShaderClass::uniforms[0].index;
+    const auto uboIndex = ShaderClass::reflectionData.uniforms[0].index;
     for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
         encoder->setStencilReferenceValue(tileUBOs[ii].stencil_ref);
         mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, uboIndex, /*size=*/uboSize);

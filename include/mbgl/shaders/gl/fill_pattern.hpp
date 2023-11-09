@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillPatternProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillPatternProgram";
-    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
+
+    static constexpr const char* vertexData = R"(uniform mat4 u_matrix;
 uniform vec2 u_pixel_coord_upper;
 uniform vec2 u_pixel_coord_lower;
 uniform vec4 u_scale;
@@ -75,7 +77,7 @@ mediump vec4 pattern_to = u_pattern_to;
     v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, toScale * display_size_b, tileZoomRatio, a_pos);
 }
 )";
-    static constexpr const char* fragment = R"(uniform vec2 u_texsize;
+    static constexpr const char* fragmentData = R"(uniform vec2 u_texsize;
 uniform float u_fade;
 
 uniform sampler2D u_image;
@@ -130,7 +132,17 @@ mediump vec4 pattern_to = u_pattern_to;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::FillPatternProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::FillPatternProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

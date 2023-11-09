@@ -1,25 +1,17 @@
+// Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
-
-#include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "FillExtrusionPatternShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 6> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
-    static const std::array<TextureInfo, 1> textures;
-
-    static constexpr auto source = R"(
-struct alignas(16) FillExtrusionDrawableTilePropsUBO {
+    static const ReflectionData reflectionData;
+    static constexpr const char* sourceData = R"(struct alignas(16) FillExtrusionDrawableTilePropsUBO {
     /*  0 */ float4 pattern_from;
     /* 16 */ float4 pattern_to;
     /* 32 */
@@ -200,7 +192,13 @@ fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
     return {half4(mix(color1, color2, props.fade) * in.lighting)/*, in.position.z*/};
 }
 )";
+    static std::string source() {
+        using Ty = ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal>;
+        return Ty::sourceData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillPatternShader";
-    static constexpr const char* vertex = R"(layout (std140) uniform FillPatternDrawableUBO {
+
+    static constexpr const char* vertexData = R"(layout (std140) uniform FillPatternDrawableUBO {
     highp mat4 u_matrix;
     highp vec4 u_scale;
     highp vec2 u_pixel_coord_upper;
@@ -87,7 +89,7 @@ mediump vec4 pattern_to = u_pattern_to;
     v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, toScale * display_size_b, tileZoomRatio, a_pos);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform FillPatternDrawableUBO {
+    static constexpr const char* fragmentData = R"(layout (std140) uniform FillPatternDrawableUBO {
     highp mat4 u_matrix;
     highp vec4 u_scale;
     highp vec2 u_pixel_coord_upper;
@@ -163,7 +165,17 @@ mediump vec4 pattern_to = u_pattern_to;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "CircleShader";
-    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
+
+    static constexpr const char* vertexData = R"(layout (location = 0) in vec2 a_pos;
 out vec3 v_data;
 
 layout (std140) uniform CircleDrawableUBO {
@@ -150,7 +152,7 @@ lowp float stroke_opacity = u_stroke_opacity;
     v_data = vec3(extrude.x, extrude.y, antialiasblur);
 }
 )";
-    static constexpr const char* fragment = R"(in vec3 v_data;
+    static constexpr const char* fragmentData = R"(in vec3 v_data;
 
 layout (std140) uniform CircleEvaluatedPropsUBO {
     highp vec4 u_color;
@@ -231,7 +233,17 @@ lowp float stroke_opacity = u_stroke_opacity;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

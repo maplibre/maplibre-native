@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::LineGradientProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "LineGradientProgram";
-    static constexpr const char* vertex = R"(
+
+    static constexpr const char* vertexData = R"(
 // the attribute conveying progress along a line is scaled to [0, 2^15)
 #define MAX_LINE_DISTANCE 32767.0
 
@@ -143,7 +145,7 @@ mediump float width = u_width;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(uniform lowp float u_device_pixel_ratio;
+    static constexpr const char* fragmentData = R"(uniform lowp float u_device_pixel_ratio;
 uniform sampler2D u_image;
 
 in vec2 v_width2;
@@ -190,7 +192,17 @@ lowp float opacity = u_opacity;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::LineGradientProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::LineGradientProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

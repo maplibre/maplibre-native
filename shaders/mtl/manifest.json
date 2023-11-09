@@ -1,0 +1,724 @@
+[
+    {
+        "name": "Prelude",
+        "header": "prelude",
+        "program": {
+            "source": "prelude.metal",
+            "isLibrary": true
+        }
+    },
+    {
+        "name": "BackgroundShader",
+        "header": "background",
+        "program": {
+            "source": "background.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/background_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Float3", "count": 1, "name": "a_pos"}
+            ],
+            "uniforms": [
+                {"index": 1, "bindVertex": true, "bindFragment": true, "structureName": "BackgroundLayerUBO"},
+                {"index": 2, "bindVertex": true, "bindFragment": false, "structureName": "BackgroundDrawableUBO"}
+            ]
+        }
+    },
+    {
+        "name": "BackgroundPatternShader",
+        "header": "background_pattern",
+        "program": {
+            "source": "background_pattern.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/background_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Float3", "count": 1, "name": "a_pos"}
+            ],
+            "uniforms": [
+                {"index": 1, "bindVertex": true, "bindFragment": true, "structureName": "BackgroundLayerUBO"},
+                {"index": 2, "bindVertex": true, "bindFragment": false, "structureName": "BackgroundDrawableUBO"},
+                {"index": 3, "bindVertex": true, "bindFragment": false, "structureName": "BackgroundPatternLayerUBO"}
+            ]
+        }
+    },
+    {
+        "name": "CircleShader",
+        "header": "circle",
+        "program": {
+            "source": "circle.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/circle_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "Float2", "count": 1, "name": "a_color"},
+                {"index": 2, "type": "Float2", "count": 1, "name": "a_radius"},
+                {"index": 3, "type": "Float2", "count": 1, "name": "a_blur"},
+                {"index": 4, "type": "Float2", "count": 1, "name": "a_opacity"},
+                {"index": 5, "type": "Float4", "count": 1, "name": "a_stroke_color"},
+                {"index": 6, "type": "Float2", "count": 1, "name": "a_stroke_width"},
+                {"index": 7, "type": "Float2", "count": 1, "name": "a_stroke_opacity"}
+            ],
+            "uniforms": [
+                {"index": 8, "bindVertex": true, "bindFragment": false, "structureName": "CircleDrawableUBO"},
+                {"index": 9, "bindVertex": true, "bindFragment": true, "structureName": "CirclePaintParamsUBO"},
+                {"index": 10, "bindVertex": true, "bindFragment": true, "structureName": "CircleEvaluatedPropsUBO"},
+                {"index": 11, "bindVertex": true, "bindFragment": false, "structureName": "CircleInterpolateUBO"},
+                {"index": 12, "bindVertex": true, "bindFragment": true, "structureName": "CirclePermutationUBO"},
+                {"index": 13, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ]
+        }
+    },
+    {
+        "name": "ClippingMaskProgram",
+        "header": "clipping_mask",
+        "program": {
+            "source": "clipping_mask.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/clipping_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Float3", "count": 1, "name": "a_pos"}
+            ],
+            "uniforms": [
+                {"index": 1, "bindVertex": true, "bindFragment": false, "structureName": "ClipUBO"}
+            ]
+        }
+    },
+    {
+        "name": "CollisionBoxShader",
+        "header": "collision_box",
+        "program": {
+            "source": "collision_box.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/collision_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "Short2", "count": 1, "name": "a_anchor_pos"},
+                {"index": 2, "type": "Short2", "count": 1, "name": "a_extrude"},
+                {"index": 3, "type": "UByte2", "count": 1, "name": "a_placed"},
+                {"index": 4, "type": "Float2", "count": 1, "name": "a_shift"}
+            ],
+            "uniforms": [
+                {"index": 5, "bindVertex": true, "bindFragment": true, "structureName": "CollisionUBO"}
+            ]
+        }
+    },
+    {
+        "name": "CollisionCircleShader",
+        "header": "collision_circle",
+        "program": {
+            "source": "collision_circle.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/collision_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "Short2", "count": 1, "name": "a_anchor_pos"},
+                {"index": 2, "type": "Short2", "count": 1, "name": "a_extrude"},
+                {"index": 3, "type": "UByte2", "count": 1, "name": "a_placed"}
+            ],
+            "uniforms": [
+                {"index": 4, "bindVertex": true, "bindFragment": true, "structureName": "CollisionUBO"}
+            ]
+        }
+    },
+    {
+        "name": "FillExtrusionPatternShader",
+        "header": "fill_extrusion_pattern",
+        "program": {
+            "source": "fill_extrusion_pattern.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/fill_extrusion_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "Short4", "count": 1, "name": "a_normal_ed"},
+                {"index": 2, "type": "Float", "count": 1, "name": "a_base"},
+                {"index": 3, "type": "Float", "count": 1, "name": "a_height"},
+                {"index": 4, "type": "UShort4", "count": 1, "name": "a_pattern_from"},
+                {"index": 5, "type": "UShort4", "count": 1, "name": "a_pattern_to"}
+            ],
+            "uniforms": [
+                {"index": 6, "bindVertex": true, "bindFragment": true, "structureName": "FillExtrusionDrawableUBO"},
+                {"index": 7, "bindVertex": true, "bindFragment": true, "structureName": "FillExtrusionDrawablePropsUBO"},
+                {"index": 8, "bindVertex": true, "bindFragment": false, "structureName": "FillExtrusionDrawableTilePropsUBO"},
+                {"index": 9, "bindVertex": true, "bindFragment": false, "structureName": "FillExtrusionInterpolateUBO"},
+                {"index": 10, "bindVertex": true, "bindFragment": true, "structureName": "FillExtrusionPermutationUBO"},
+                {"index": 11, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_image"}
+            ]
+        }
+    },
+    {
+        "name": "FillExtrusionShader",
+        "header": "fill_extrusion",
+        "program": {
+            "source": "fill_extrusion.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/fill_extrusion_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "Short4", "count": 1, "name": "a_normal_ed"},
+                {"index": 2, "type": "Float4", "count": 1, "name": "a_color"},
+                {"index": 3, "type": "Float", "count": 1, "name": "a_base"},
+                {"index": 4, "type": "Float", "count": 1, "name": "a_height"}
+            ],
+            "uniforms": [
+                {"index": 5, "bindVertex": true, "bindFragment": false, "structureName": "FillExtrusionDrawableUBO"},
+                {"index": 6, "bindVertex": true, "bindFragment": false, "structureName": "FillExtrusionDrawablePropsUBO"},
+                {"index": 7, "bindVertex": true, "bindFragment": false, "structureName": "FillExtrusionInterpolateUBO"},
+                {"index": 8, "bindVertex": true, "bindFragment": false, "structureName": "FillExtrusionPermutationUBO"},
+                {"index": 9, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ]
+        }
+    },
+    {
+        "name": "FillShader",
+        "header": "fill",
+        "program": {
+            "source": "fill.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/fill_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "Float2", "count": 1, "name": "a_color"},
+                {"index": 2, "type": "Float2", "count": 1, "name": "a_opacity"},
+
+                {"index": 8, "type": "Float2", "count": 1, "name": "a_outline_color"}
+            ],
+            "uniforms": [
+                {"index": 3, "bindVertex": true, "bindFragment": false, "structureName": "FillDrawableUBO"},
+                {"index": 4, "bindVertex": true, "bindFragment": true, "structureName": "FillEvaluatedPropsUBO"},
+                {"index": 5, "bindVertex": true, "bindFragment": false, "structureName": "FillInterpolateUBO"},
+                {"index": 6, "bindVertex": true, "bindFragment": true, "structureName": "FillPermutationUBO"},
+                {"index": 7, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ]
+        }
+    },
+    {
+        "name": "FillOutlineShader",
+        "header": "fill_outline",
+        "program": {
+            "source": "fill_outline.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/fill_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "Float2", "count": 1, "name": "a_outline_color"},
+                {"index": 2, "type": "Float2", "count": 1, "name": "a_opacity"},
+
+                {"index": 8, "type": "Float2", "count": 1, "name": "a_color"}
+            ],
+            "uniforms": [
+                {"index": 3, "bindVertex": true, "bindFragment": false, "structureName": "FillOutlineDrawableUBO"},
+                {"index": 4, "bindVertex": true, "bindFragment": true, "structureName": "FillOutlineEvaluatedPropsUBO"},
+                {"index": 5, "bindVertex": true, "bindFragment": false, "structureName": "FillOutlineInterpolateUBO"},
+                {"index": 6, "bindVertex": true, "bindFragment": true, "structureName": "FillOutlinePermutationUBO"},
+                {"index": 7, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ]
+        }
+    },
+    {
+        "name": "FillPatternShader",
+        "header": "fill_pattern",
+        "program": {
+            "source": "fill_pattern.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/fill_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "UShort4", "count": 1, "name": "a_pattern_from"},
+                {"index": 2, "type": "UShort4", "count": 1, "name": "a_pattern_to"},
+                {"index": 3, "type": "Float2", "count": 1, "name": "a_opacity"}
+            ],
+            "uniforms": [
+                {"index": 4, "bindVertex": true, "bindFragment": true, "structureName": "FillPatternDrawableUBO"},
+                {"index": 5, "bindVertex": true, "bindFragment": false, "structureName": "FillPatternTilePropsUBO"},
+                {"index": 6, "bindVertex": true, "bindFragment": true, "structureName": "FillPatternEvaluatedPropsUBO"},
+                {"index": 7, "bindVertex": true, "bindFragment": false, "structureName": "FillPatternInterpolateUBO"},
+                {"index": 8, "bindVertex": true, "bindFragment": true, "structureName": "FillPatternPermutationUBO"},
+                {"index": 9, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_image"}
+            ]
+        }
+    },
+    {
+        "name": "FillOutlinePatternShader",
+        "header": "fill_outline_pattern",
+        "program": {
+            "source": "fill_outline_pattern.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/fill_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "UShort4", "count": 1, "name": "a_pattern_from"},
+                {"index": 2, "type": "UShort4", "count": 1, "name": "a_pattern_to"},
+                {"index": 3, "type": "Float2", "count": 1, "name": "a_opacity"}
+            ],
+            "uniforms": [
+                {"index": 4, "bindVertex": true, "bindFragment": true, "structureName": "FillOutlinePatternDrawableUBO"},
+                {"index": 5, "bindVertex": true, "bindFragment": false, "structureName": "FillOutlinePatternTilePropsUBO"},
+                {"index": 6, "bindVertex": true, "bindFragment": true, "structureName": "FillOutlinePatternEvaluatedPropsUBO"},
+                {"index": 7, "bindVertex": true, "bindFragment": false, "structureName": "FillOutlinePatternInterpolateUBO"},
+                {"index": 8, "bindVertex": true, "bindFragment": true, "structureName": "FillOutlinePatternPermutationUBO"},
+                {"index": 9, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_image"}
+            ]
+        }
+    },
+    {
+        "name": "HeatmapTextureShader",
+        "header": "heatmap_texture",
+        "program": {
+            "source": "heatmap_texture.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/heatmap_texture_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"}
+            ],
+            "uniforms": [
+                {"index": 1, "bindVertex": true, "bindFragment": true, "structureName": "HeatmapTextureDrawableUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_image"},
+                {"index": 1, "name": "u_color_ramp"}
+            ]
+        }
+    },
+    {
+        "name": "HeatmapShader",
+        "header": "heatmap",
+        "program": {
+            "source": "heatmap.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/heatmap_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "Float2", "count": 1, "name": "a_weight"},
+                {"index": 2, "type": "Float2", "count": 1, "name": "a_radius"}
+            ],
+            "uniforms": [
+                {"index": 3, "bindVertex": true, "bindFragment": false, "structureName": "HeatmapDrawableUBO"},
+                {"index": 4, "bindVertex": true, "bindFragment": true, "structureName": "HeatmapEvaluatedPropsUBO"},
+                {"index": 5, "bindVertex": true, "bindFragment": false, "structureName": "HeatmapInterpolateUBO"},
+                {"index": 6, "bindVertex": true, "bindFragment": true, "structureName": "HeatmapPermutationUBO"},
+                {"index": 7, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ]
+        }
+    },
+    {
+        "name": "HillshadePrepareShader",
+        "header": "hillshade_prepare",
+        "program": {
+            "source": "hillshade_prepare.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/hillshade_prepare_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "Short2", "count": 1, "name": "a_texture_pos"}
+            ],
+            "uniforms": [
+                {"index": 2, "bindVertex": true, "bindFragment": true, "structureName": "HillshadePrepareDrawableUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_image"}
+            ]
+        }
+    },
+    {
+        "name": "HillshadeShader",
+        "header": "hillshade",
+        "program": {
+            "source": "hillshade.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/hillshade_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "Short2", "count": 1, "name": "a_texture_pos"}
+            ],
+            "uniforms": [
+                {"index": 2, "bindVertex": true, "bindFragment": true, "structureName": "HillshadeDrawableUBO"},
+                {"index": 3, "bindVertex": false, "bindFragment": true, "structureName": "HillshadeEvaluatedPropsUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_image"}
+            ]
+        }
+    },
+    {
+        "name": "LineShader",
+        "header": "line",
+        "program": {
+            "source": "line.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/line_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos_normal"},
+                {"index": 1, "type": "UByte4", "count": 1, "name": "a_data"},
+                {"index": 2, "type": "Float4", "count": 1, "name": "a_color"},
+                {"index": 3, "type": "Float2", "count": 1, "name": "a_blur"},
+                {"index": 4, "type": "Float2", "count": 1, "name": "a_opacity"},
+                {"index": 5, "type": "Float2", "count": 1, "name": "a_gapwidth"},
+                {"index": 6, "type": "Float2", "count": 1, "name": "a_offset"},
+                {"index": 7, "type": "Float2", "count": 1, "name": "a_width"}
+            ],
+            "uniforms": [
+                {"index": 8, "bindVertex": true, "bindFragment": true, "structureName": "LineUBO"},
+                {"index": 9, "bindVertex": true, "bindFragment": false, "structureName": "LinePropertiesUBO"},
+                {"index": 10, "bindVertex": true, "bindFragment": false, "structureName": "LineInterpolationUBO"},
+                {"index": 11, "bindVertex": true, "bindFragment": true, "structureName": "LinePermutationUBO"},
+                {"index": 12, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ]
+        }
+    },
+    {
+        "name": "LinePatternShader",
+        "header": "line_pattern",
+        "program": {
+            "source": "line_pattern.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/line_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos_normal"},
+                {"index": 1, "type": "UByte4", "count": 1, "name": "a_data"},
+                {"index": 2, "type": "Float2", "count": 1, "name": "a_blur"},
+                {"index": 3, "type": "Float2", "count": 1, "name": "a_opacity"},
+                {"index": 4, "type": "Float2", "count": 1, "name": "a_gapwidth"},
+                {"index": 5, "type": "Float2", "count": 1, "name": "a_offset"},
+                {"index": 6, "type": "Float2", "count": 1, "name": "a_width"},
+                {"index": 7, "type": "UShort4", "count": 1, "name": "a_pattern_from"},
+                {"index": 8, "type": "UShort4", "count": 1, "name": "a_pattern_to"}
+            ],
+            "uniforms": [
+                {"index": 9, "bindVertex": true, "bindFragment": true, "structureName": "LinePatternUBO"},
+                {"index": 10, "bindVertex": true, "bindFragment": false, "structureName": "LinePatternPropertiesUBO"},
+                {"index": 11, "bindVertex": true, "bindFragment": false, "structureName": "LinePatternInterpolationUBO"},
+                {"index": 12, "bindVertex": true, "bindFragment": false, "structureName": "LinePatternTilePropertiesUBO"},
+                {"index": 13, "bindVertex": true, "bindFragment": true, "structureName": "LinePermutationUBO"},
+                {"index": 14, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_image"}
+            ]
+        }
+    },
+    {
+        "name": "LineSDFShader",
+        "header": "line_sdf",
+        "program": {
+            "source": "line_sdf.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/line_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos_normal"},
+                {"index": 1, "type": "UByte4", "count": 1, "name": "a_data"},
+                {"index": 2, "type": "Float4", "count": 1, "name": "a_color"},
+                {"index": 3, "type": "Float2", "count": 1, "name": "a_blur"},
+                {"index": 4, "type": "Float2", "count": 1, "name": "a_opacity"},
+                {"index": 5, "type": "Float2", "count": 1, "name": "a_gapwidth"},
+                {"index": 6, "type": "Float2", "count": 1, "name": "a_offset"},
+                {"index": 7, "type": "Float2", "count": 1, "name": "a_width"},
+                {"index": 8, "type": "Float2", "count": 1, "name": "a_floorwidth"}
+            ],
+            "uniforms": [
+                {"index": 9, "bindVertex": true, "bindFragment": true, "structureName": "LineSDFUBO"},
+                {"index": 10, "bindVertex": true, "bindFragment": false, "structureName": "LineSDFPropertiesUBO"},
+                {"index": 11, "bindVertex": true, "bindFragment": false, "structureName": "LineSDFInterpolationUBO"},
+                {"index": 12, "bindVertex": true, "bindFragment": true, "structureName": "LinePermutationUBO"},
+                {"index": 13, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_image"}
+            ]
+        }
+    },
+    {
+        "name": "LineGradientShader",
+        "header": "line_gradient",
+        "program": {
+            "source": "line_gradient.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/line_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos_normal"},
+                {"index": 1, "type": "UByte4", "count": 1, "name": "a_data"},
+                {"index": 2, "type": "Float2", "count": 1, "name": "a_blur"},
+                {"index": 3, "type": "Float2", "count": 1, "name": "a_opacity"},
+                {"index": 4, "type": "Float2", "count": 1, "name": "a_gapwidth"},
+                {"index": 5, "type": "Float2", "count": 1, "name": "a_offset"},
+                {"index": 6, "type": "Float2", "count": 1, "name": "a_width"}
+            ],
+            "uniforms": [
+                {"index": 7, "bindVertex": true, "bindFragment": true, "structureName": "LineGradientUBO"},
+                {"index": 8, "bindVertex": true, "bindFragment": false, "structureName": "LineGradientPropertiesUBO"},
+                {"index": 9, "bindVertex": true, "bindFragment": false, "structureName": "LineGradientInterpolationUBO"},
+                {"index": 10, "bindVertex": true, "bindFragment": true, "structureName": "LinePermutationUBO"},
+                {"index": 11, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_image"}
+            ]
+        }
+    },
+    {
+        "name": "RasterShader",
+        "header": "raster",
+        "program": {
+            "source": "raster.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/raster_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short2", "count": 1, "name": "a_pos"},
+                {"index": 1, "type": "Short2", "count": 1, "name": "a_texture_pos"}
+            ],
+            "uniforms": [
+                {"index": 2, "bindVertex": true, "bindFragment": true, "structureName": "RasterDrawableUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_image0"},
+                {"index": 1, "name": "u_image1"}
+            ]
+        }
+    },
+    {
+        "name": "SymbolIconShader",
+        "header": "symbol_icon",
+        "program": {
+            "source": "symbol_icon.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/symbol_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short4", "count": 1, "name": "a_pos_offset"},
+                {"index": 1, "type": "UShort4", "count": 1, "name": "a_data"},
+                {"index": 2, "type": "Short4", "count": 1, "name": "a_pixeloffset"},
+                {"index": 3, "type": "Float3", "count": 1, "name": "a_projected_pos"},
+                {"index": 4, "type": "Float", "count": 1, "name": "a_fade_opacity"},
+                
+                {"index": 5, "type": "Float", "count": 1, "name": "a_opacity"}
+            ],
+            "uniforms": [
+                {"index": 8, "bindVertex": true, "bindFragment": true, "structureName": "SymbolDrawableUBO"},
+                {"index": 9, "bindVertex": true, "bindFragment": true, "structureName": "SymbolDrawablePaintUBO"},
+                {"index": 10, "bindVertex": true, "bindFragment": false, "structureName": "SymbolDrawableTilePropsUBO"},
+                {"index": 11, "bindVertex": true, "bindFragment": false, "structureName": "SymbolDrawableInterpolateUBO"},
+                {"index": 12, "bindVertex": true, "bindFragment": true, "structureName": "SymbolPermutationUBO"},
+                {"index": 13, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_texture"}
+            ]
+        }
+    },
+    {
+        "name": "SymbolSDFIconShader",
+        "header": "symbol_sdf",
+        "program": {
+            "source": "symbol_sdf.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/symbol_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short4", "count": 1, "name": "a_pos_offset"},
+                {"index": 1, "type": "UShort4", "count": 1, "name": "a_data"},
+                {"index": 2, "type": "Short4", "count": 1, "name": "a_pixeloffset"},
+                {"index": 3, "type": "Float3", "count": 1, "name": "a_projected_pos"},
+                {"index": 4, "type": "Float", "count": 1, "name": "a_fade_opacity"},
+
+                {"index": 5, "type": "Float4", "count": 1, "name": "a_fill_color"},
+                {"index": 6, "type": "Float4", "count": 1, "name": "a_halo_color"},
+                {"index": 7, "type": "Float", "count": 1, "name": "a_opacity"},
+                {"index": 8, "type": "Float", "count": 1, "name": "a_halo_width"},
+                {"index": 9, "type": "Float", "count": 1, "name": "a_halo_blur"}
+            ],
+            "uniforms": [
+                {"index": 10, "bindVertex": true, "bindFragment": true, "structureName": "SymbolDrawableUBO"},
+                {"index": 11, "bindVertex": true, "bindFragment": false, "structureName": "SymbolDrawablePaintUBO"},
+                {"index": 12, "bindVertex": true, "bindFragment": true, "structureName": "SymbolDrawableTilePropsUBO"},
+                {"index": 13, "bindVertex": true, "bindFragment": false, "structureName": "SymbolDrawableInterpolateUBO"},
+                {"index": 14, "bindVertex": true, "bindFragment": true, "structureName": "SymbolPermutationUBO"},
+                {"index": 15, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_texture"}
+            ]
+        }
+    },
+    {
+        "name": "SymbolTextAndIconShader",
+        "header": "symbol_text_and_icon",
+        "program": {
+            "source": "symbol_text_and_icon.metal",
+            "vertexEntry": "vertexMain",
+            "fragmentEntry": "fragmentMain",
+            "link": ["Prelude"]
+        },
+        "additionalIncludes": [
+            "mbgl/shaders/symbol_layer_ubo.hpp"
+        ],
+        "metadata": {
+            "attributes": [
+                {"index": 0, "type": "Short4", "count": 1, "name": "a_pos_offset"},
+                {"index": 1, "type": "UShort4", "count": 1, "name": "a_data"},
+                {"index": 2, "type": "Float3", "count": 1, "name": "a_projected_pos"},
+                {"index": 3, "type": "Float", "count": 1, "name": "a_fade_opacity"},
+
+                {"index": 4, "type": "Float4", "count": 1, "name": "a_fill_color"},
+                {"index": 5, "type": "Float4", "count": 1, "name": "a_halo_color"},
+                {"index": 6, "type": "Float", "count": 1, "name": "a_opacity"},
+                {"index": 7, "type": "Float", "count": 1, "name": "a_halo_width"},
+                {"index": 8, "type": "Float", "count": 1, "name": "a_halo_blur"}
+            ],
+            "uniforms": [
+                {"index": 9, "bindVertex": true, "bindFragment": true, "structureName": "SymbolDrawableUBO"},
+                {"index": 10, "bindVertex": true, "bindFragment": false, "structureName": "SymbolDrawablePaintUBO"},
+                {"index": 11, "bindVertex": true, "bindFragment": true, "structureName": "SymbolDrawableTilePropsUBO"},
+                {"index": 12, "bindVertex": true, "bindFragment": false, "structureName": "SymbolDrawableInterpolateUBO"},
+                {"index": 13, "bindVertex": true, "bindFragment": true, "structureName": "SymbolPermutationUBO"},
+                {"index": 14, "bindVertex": true, "bindFragment": false, "structureName": "ExpressionInputsUBO"}
+            ],
+            "textures": [
+                {"index": 0, "name": "u_texture"},
+                {"index": 1, "name": "u_texture_icon"}
+            ]
+        }
+    }
+]

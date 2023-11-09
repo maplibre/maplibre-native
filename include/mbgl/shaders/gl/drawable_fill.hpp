@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillShader";
-    static constexpr const char* vertex = R"(layout (std140) uniform FillDrawableUBO {
+
+    static constexpr const char* vertexData = R"(layout (std140) uniform FillDrawableUBO {
     highp mat4 u_matrix;
 };
 layout (std140) uniform FillEvaluatedPropsUBO {
@@ -50,7 +52,7 @@ lowp float opacity = u_opacity;
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform FillEvaluatedPropsUBO {
+    static constexpr const char* fragmentData = R"(layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
     highp float u_opacity;
     highp float padding_props1;
@@ -85,7 +87,17 @@ lowp float opacity = u_opacity;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

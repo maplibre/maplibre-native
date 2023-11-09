@@ -107,6 +107,41 @@ std::string decompress(const std::string &raw, int windowBits) {
     return result;
 }
 
+std::string decompress(const uint8_t *data, size_t length, int windowBits) {
+    z_stream inflate_stream;
+    memset(&inflate_stream, 0, sizeof(inflate_stream));
+
+    // TODO: reuse z_streams
+    if (inflateInit2(&inflate_stream, windowBits) != Z_OK) {
+        throw std::runtime_error("failed to initialize inflate");
+    }
+
+    inflate_stream.next_in = reinterpret_cast<Bytef *>(const_cast<uint8_t *>(data));
+    inflate_stream.avail_in = uInt(length);
+
+    std::string result;
+    char out[15384];
+
+    int code;
+    do {
+        inflate_stream.next_out = reinterpret_cast<Bytef *>(out);
+        inflate_stream.avail_out = sizeof(out);
+        code = inflate(&inflate_stream, 0);
+        // result.append(out, sizeof(out) - inflate_stream.avail_out);
+        if (result.size() < inflate_stream.total_out) {
+            result.append(out, inflate_stream.total_out - result.size());
+        }
+    } while (code == Z_OK);
+
+    inflateEnd(&inflate_stream);
+
+    if (code != Z_STREAM_END) {
+        throw std::runtime_error(inflate_stream.msg ? inflate_stream.msg : "decompression error");
+    }
+
+    return result;
+}
+
 std::uint32_t crc32(const void *raw, size_t size) {
     auto hash = ::crc32(0L, Z_NULL, 0);
     if (raw) {

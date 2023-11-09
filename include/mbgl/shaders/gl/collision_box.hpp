@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::CollisionBoxProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "CollisionBoxProgram";
-    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
+
+    static constexpr const char* vertexData = R"(layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_anchor_pos;
 layout (location = 2) in vec2 a_extrude;
 layout (location = 3) in vec2 a_placed;
@@ -36,7 +38,7 @@ void main() {
     v_notUsed = a_placed.y;
 }
 )";
-    static constexpr const char* fragment = R"(
+    static constexpr const char* fragmentData = R"(
 in float v_placed;
 in float v_notUsed;
 
@@ -57,7 +59,17 @@ void main() {
         fragColor *= .1;
     }
 })";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::CollisionBoxProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::CollisionBoxProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

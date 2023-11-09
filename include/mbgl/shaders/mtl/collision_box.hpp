@@ -1,26 +1,17 @@
+// Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
-
-#include <mbgl/shaders/collision_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
+#include <mbgl/shaders/collision_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "CollisionBoxShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 5> attributes;
-    static const std::array<UniformBlockInfo, 1> uniforms;
-    static const std::array<TextureInfo, 0> textures;
-
-    static constexpr auto source = R"(
-
-struct VertexStage {
+    static const ReflectionData reflectionData;
+    static constexpr const char* sourceData = R"(struct VertexStage {
     short2 pos [[attribute(0)]];
     short2 anchor_pos [[attribute(1)]];
     short2 extrude [[attribute(2)]];
@@ -34,7 +25,7 @@ struct FragmentStage {
     float notUsed;
 };
 
-struct alignas(16) CollisionBoxUBO {
+struct alignas(16) CollisionUBO {
     float4x4 matrix;
     float2 extrude_scale;
     float camera_to_center_distance;
@@ -42,7 +33,7 @@ struct alignas(16) CollisionBoxUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const CollisionBoxUBO& drawable [[buffer(5)]]) {
+                                device const CollisionUBO& drawable [[buffer(5)]]) {
 
     float4 projectedPoint = drawable.matrix * float4(float2(vertx.anchor_pos), 0, 1);
     float camera_to_anchor_distance = projectedPoint.w;
@@ -65,7 +56,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const CollisionBoxUBO& drawable [[buffer(5)]]) {
+                            device const CollisionUBO& drawable [[buffer(5)]]) {
 
     float alpha = 0.5;
 
@@ -85,7 +76,13 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(color);
 }
 )";
+    static std::string source() {
+        using Ty = ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal>;
+        return Ty::sourceData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

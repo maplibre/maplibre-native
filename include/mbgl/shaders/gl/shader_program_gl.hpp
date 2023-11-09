@@ -33,8 +33,8 @@ public:
                                                    const ProgramParameters& programParameters,
                                                    const std::string& name,
                                                    const std::string_view firstAttribName,
-                                                   const std::string& vertexSource,
-                                                   const std::string& fragmentSource,
+                                                   const std::string_view vertexSource,
+                                                   const std::string_view fragmentSource,
                                                    const std::string& additionalDefines = "") noexcept(false);
 
     std::optional<uint32_t> getSamplerLocation(const StringIdentity id) const override;

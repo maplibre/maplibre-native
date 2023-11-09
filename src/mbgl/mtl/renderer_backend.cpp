@@ -10,27 +10,7 @@
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
 
-// ... shader_manifest.hpp
-#include <mbgl/shaders/mtl/background.hpp>
-#include <mbgl/shaders/mtl/background_pattern.hpp>
-#include <mbgl/shaders/mtl/circle.hpp>
-#include <mbgl/shaders/mtl/clipping_mask.hpp>
-#include <mbgl/shaders/mtl/collision_box.hpp>
-#include <mbgl/shaders/mtl/collision_circle.hpp>
-#include <mbgl/shaders/mtl/fill.hpp>
-#include <mbgl/shaders/mtl/fill_extrusion.hpp>
-#include <mbgl/shaders/mtl/fill_extrusion_pattern.hpp>
-#include <mbgl/shaders/mtl/heatmap.hpp>
-#include <mbgl/shaders/mtl/heatmap_texture.hpp>
-#include <mbgl/shaders/mtl/hillshade.hpp>
-#include <mbgl/shaders/mtl/hillshade_prepare.hpp>
-#include <mbgl/shaders/mtl/line.hpp>
-#include <mbgl/shaders/mtl/line_gradient.hpp>
-#include <mbgl/shaders/mtl/fill.hpp>
-#include <mbgl/shaders/mtl/raster.hpp>
-#include <mbgl/shaders/mtl/symbol_icon.hpp>
-#include <mbgl/shaders/mtl/symbol_sdf.hpp>
-#include <mbgl/shaders/mtl/symbol_text_and_icon.hpp>
+#include <mbgl/shaders/shader_manifest.hpp>
 
 #include <cassert>
 #include <string>
@@ -109,15 +89,18 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
     /// failure, we shouldn't expect registration to faill unless the shader
     /// registry instance provided already has conflicting programs present.
     (
-        [&]() {
-            using namespace std::string_literals;
-            using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
-            auto group = std::make_shared<ShaderGroup<ShaderID>>(programParameters);
-            if (!registry.registerShaderGroup(std::move(group), ShaderClass::name)) {
+        [&](shaders::BuiltIn programID) {
+            const auto& reflectionData = mbgl::shaders::getReflectionData<gfx::Backend::Type::Metal>(programID);
+            const auto [programSource, _] = mbgl::shaders::getShaderSource<gfx::Backend::Type::Metal>(programID);
+            auto group = std::make_shared<ShaderGroup>(
+                programID,
+                programParameters.withDefaultSource(
+                    ProgramParameters::ProgramSource(gfx::Backend::Type::Metal, std::move(programSource), "")));
+            if (!registry.registerShaderGroup(std::move(group), reflectionData.name)) {
                 assert(!"duplicate shader group");
-                throw std::runtime_error("Failed to register "s + ShaderClass::name + " with shader registry!");
+                throw std::runtime_error("Failed to register " + reflectionData.name + " with shader registry!");
             }
-        }(),
+        }(ShaderID),
         ...);
 }
 

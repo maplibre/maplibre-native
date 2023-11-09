@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "HeatmapShader";
-    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
+
+    static constexpr const char* vertexData = R"(layout (location = 0) in vec2 a_pos;
 out vec2 v_extrude;
 
 layout (std140) uniform HeatmapDrawableUBO {
@@ -89,7 +91,7 @@ mediump float radius = u_radius;
     gl_Position = u_matrix * pos;
 }
 )";
-    static constexpr const char* fragment = R"(in vec2 v_extrude;
+    static constexpr const char* fragmentData = R"(in vec2 v_extrude;
 
 layout (std140) uniform HeatmapEvaluatedPropsUBO {
     highp float u_weight;
@@ -121,7 +123,17 @@ highp float weight = u_weight;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

@@ -62,8 +62,8 @@ public:
             case gfx::Backend::Type::OpenGL: {
                 program = std::make_unique<gl::Program<Name>>(programParameters.withDefaultSource(
                     {gfx::Backend::Type::OpenGL,
-                     shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::vertex,
-                     shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::fragment}));
+                     shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::vertex(),
+                     shaders::ShaderSource<ShaderSource, gfx::Backend::Type::OpenGL>::fragment()}));
                 break;
             }
 #endif

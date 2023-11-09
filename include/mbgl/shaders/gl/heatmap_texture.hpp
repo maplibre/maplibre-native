@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::HeatmapTextureProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "HeatmapTextureProgram";
-    static constexpr const char* vertex = R"(uniform mat4 u_matrix;
+
+    static constexpr const char* vertexData = R"(uniform mat4 u_matrix;
 uniform vec2 u_world;
 layout (location = 0) in vec2 a_pos;
 out vec2 v_pos;
@@ -20,7 +22,7 @@ void main() {
     v_pos.y = 1.0 - a_pos.y;
 }
 )";
-    static constexpr const char* fragment = R"(uniform sampler2D u_image;
+    static constexpr const char* fragmentData = R"(uniform sampler2D u_image;
 uniform sampler2D u_color_ramp;
 uniform float u_opacity;
 in vec2 v_pos;
@@ -35,7 +37,17 @@ void main() {
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::HeatmapTextureProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::HeatmapTextureProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

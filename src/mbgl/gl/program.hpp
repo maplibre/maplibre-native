@@ -62,18 +62,21 @@ public:
             return std::make_unique<Instance>(context);
 #else
             // Compile the shader
+            const auto preludeVert = shaders::ShaderSource<shaders::BuiltIn::Prelude, backend>::vertex();
+            const auto preludeFrag = shaders::ShaderSource<shaders::BuiltIn::Prelude, backend>::fragment();
+
             std::initializer_list<const char*> vertexSource = {
                 "#version 300 es\n",
                 programParameters.getDefinesString().c_str(),
                 additionalDefines.c_str(),
-                shaders::ShaderSource<shaders::BuiltIn::Prelude, backend>::vertex,
+                preludeVert.c_str(),
                 programParameters.vertexSource(gfx::Backend::Type::OpenGL).c_str()};
 
             std::initializer_list<const char*> fragmentSource = {
                 "#version 300 es\n",
                 programParameters.getDefinesString().c_str(),
                 additionalDefines.c_str(),
-                shaders::ShaderSource<shaders::BuiltIn::Prelude, backend>::fragment,
+                preludeFrag.c_str(),
                 programParameters.fragmentSource(gfx::Backend::Type::OpenGL).c_str()};
 
             return std::make_unique<Instance>(context, vertexSource, fragmentSource);

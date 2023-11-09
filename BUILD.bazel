@@ -9,8 +9,11 @@ load(
     "MLN_DRAWABLES_MTL_HEADERS",
     "MLN_DRAWABLES_MTL_SOURCE",
     "MLN_DRAWABLES_SOURCE",
+    "MLN_GENERATED_METAL_SHADER_HEADERS",
+    "MLN_GENERATED_METAL_SHADER_SOURCE",
     "MLN_GENERATED_OPENGL_SHADER_HEADERS",
     "MLN_GENERATED_SHADER_HEADERS",
+    "MLN_GENERATED_SHADER_SOURCE",
     "MLN_GENERATED_STYLE_SOURCE",
     "MLN_OPENGL_HEADERS",
     "MLN_OPENGL_SOURCE",
@@ -40,85 +43,75 @@ genrule(
 
 filegroup(
     name = "shader_data",
-    srcs = ["shaders/manifest.json"] + glob(
-        ["shaders/*.glsl"],
+    srcs = [
+        "shaders/gl/manifest.json",
+        "shaders/mtl/manifest.json",
+    ] + glob(
+        [
+            "shaders/gl/*.glsl",
+            "shaders/mtl/*.metal",
+        ],
         allow_empty = False,
     ),
 )
 
-genrule(
-    name = "generated_shaders",
-    srcs = ["shader_data"],
-    outs = MLN_GENERATED_SHADER_HEADERS +
-           MLN_GENERATED_OPENGL_SHADER_HEADERS,
-    cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
-    tools = ["shaders/generate_shader_code.js"],
-)
+# genrule(
+#     name = "generated_shaders",
+#     srcs = ["shader_data"],
+#     outs = MLN_GENERATED_SHADER_HEADERS + MLN_GENERATED_SHADER_SOURCE +
+#            MLN_GENERATED_OPENGL_SHADER_HEADERS + MLN_GENERATED_METAL_SHADER_HEADERS +
+#            MLN_GENERATED_METAL_SHADER_SOURCE,
+#     cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR) --opengl --metal --strip --compress --amalgamate",
+#     tools = [
+#         "shaders/generate_shader_code.js",
+#         "shaders/common.js",
+#         "shaders/gl/generate_gl.js",
+#         "shaders/mtl/generate_metal.js",
+#     ],
+# )
 
-# This header only target strips the __generated__ prefix for the compiler
-# search paths, making the location of generated code transparent to the build
-cc_library(
-    name = "mbgl-core-generated-public-artifacts",
-    srcs = [],
-    hdrs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
-           MLN_GENERATED_SHADER_HEADERS +
-           select({
-               "//:metal_renderer": [],
-               "//conditions:default": MLN_GENERATED_OPENGL_SHADER_HEADERS,
-           }),
-    visibility = ["//visibility:public"],
-    deps = [
-        ":generated_shaders",
-        ":generated_style_code",
+BACKEND_BUILD_FLAGS = select({
+    ":legacy_renderer": [
+        "MLN_RENDER_BACKEND_OPENGL=1",
+        "MLN_LEGACY_RENDERER=1",
+        "MLN_DRAWABLE_RENDERER=0",
     ],
-)
-
-# ditto, but for private headers (under the src/ path)
-cc_library(
-    name = "mbgl-core-generated-private-artifacts",
-    srcs = [],
-    hdrs = MLN_PRIVATE_GENERATED_STYLE_HEADERS,
-    visibility = ["//visibility:private"],
-    deps = [
-        ":generated_style_code",
+    ":drawable_renderer": [
+        "MLN_RENDER_BACKEND_OPENGL=1",
+        "MLN_LEGACY_RENDERER=0",
+        "MLN_DRAWABLE_RENDERER=1",
     ],
-)
+    ":metal_renderer": [
+        "MLN_RENDER_BACKEND_METAL=1",
+        "MLN_LEGACY_RENDERER=0",
+        "MLN_DRAWABLE_RENDERER=1",
+    ],
+})
 
 # Generated source is inserted directly into the core target, no need to remove
 # the prefix from the path.
 cc_library(
     name = "mbgl-core",
-    srcs = MLN_CORE_SOURCE +
-           MLN_GENERATED_STYLE_SOURCE + select({
-        ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
+    srcs = MLN_CORE_SOURCE + MLN_GENERATED_SHADER_SOURCE + [":generated_style_code"] + select({
+        ":drawable_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE + MLN_OPENGL_SOURCE,
         ":legacy_renderer": MLN_OPENGL_SOURCE,
-        ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
+        ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE + MLN_GENERATED_METAL_SHADER_SOURCE,
         "//conditions:default": [],
     }),
-    hdrs = MLN_CORE_HEADERS + select({
-        ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
-        ":legacy_renderer": MLN_OPENGL_HEADERS,
-        ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
+    hdrs = MLN_CORE_HEADERS + MLN_GENERATED_SHADER_HEADERS + MLN_PUBLIC_GENERATED_STYLE_HEADERS + select({
+        ":drawable_renderer": MLN_OPENGL_HEADERS +
+            MLN_DRAWABLES_HEADERS +
+            MLN_DRAWABLES_GL_HEADERS +
+            MLN_GENERATED_OPENGL_SHADER_HEADERS,
+        ":legacy_renderer": MLN_OPENGL_HEADERS +
+            MLN_GENERATED_OPENGL_SHADER_HEADERS,
+        ":metal_renderer": MLN_DRAWABLES_HEADERS +
+            MLN_DRAWABLES_MTL_HEADERS +
+            MLN_GENERATED_METAL_SHADER_HEADERS,
         "//conditions:default": [],
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
-    defines = select({
-        ":legacy_renderer": [
-            "MLN_RENDER_BACKEND_OPENGL=1",
-            "MLN_LEGACY_RENDERER=1",
-            "MLN_DRAWABLE_RENDERER=0",
-        ],
-        ":drawable_renderer": [
-            "MLN_RENDER_BACKEND_OPENGL=1",
-            "MLN_LEGACY_RENDERER=0",
-            "MLN_DRAWABLE_RENDERER=1",
-        ],
-        ":metal_renderer": [
-            "MLN_RENDER_BACKEND_METAL=1",
-            "MLN_LEGACY_RENDERER=0",
-            "MLN_DRAWABLE_RENDERER=1",
-        ],
-    }) + select({
+    defines = BACKEND_BUILD_FLAGS + select({
         "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
         "//conditions:default": [],
     }),
@@ -136,8 +129,6 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":mbgl-core-generated-private-artifacts",
-        ":mbgl-core-generated-public-artifacts",
         "//vendor:boost",
         "//vendor:csscolorparser",
         "//vendor:earcut.hpp",

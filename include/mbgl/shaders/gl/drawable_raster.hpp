@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "RasterShader";
-    static constexpr const char* vertex = R"(layout (std140) uniform RasterDrawableUBO {
+
+    static constexpr const char* vertexData = R"(layout (std140) uniform RasterDrawableUBO {
     highp mat4 u_matrix;
     highp vec3 u_spin_weights;
     highp vec2 u_tl_parent;
@@ -41,7 +43,7 @@ void main() {
     v_pos1 = (v_pos0 * u_scale_parent) + u_tl_parent;
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform RasterDrawableUBO {
+    static constexpr const char* fragmentData = R"(layout (std140) uniform RasterDrawableUBO {
     highp mat4 u_matrix;
     highp vec3 u_spin_weights;
     highp vec2 u_tl_parent;
@@ -101,7 +103,17 @@ void main() {
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

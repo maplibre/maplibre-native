@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "HillshadePrepareShader";
-    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
+
+    static constexpr const char* vertexData = R"(layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_texture_pos;
 
 layout (std140) uniform HillshadePrepareDrawableUBO {
@@ -33,7 +35,7 @@ void main() {
     v_pos = (a_texture_pos / 8192.0) * scale + epsilon;
 }
 )";
-    static constexpr const char* fragment = R"(#ifdef GL_ES
+    static constexpr const char* fragmentData = R"(#ifdef GL_ES
 precision highp float;
 #endif
 
@@ -116,7 +118,17 @@ void main() {
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

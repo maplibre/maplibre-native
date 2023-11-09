@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "SymbolIconShader";
-    static constexpr const char* vertex = R"(layout (location = 0) in vec4 a_pos_offset;
+
+    static constexpr const char* vertexData = R"(layout (location = 0) in vec4 a_pos_offset;
 layout (location = 1) in vec4 a_data;
 layout (location = 2) in vec4 a_pixeloffset;
 layout (location = 3) in vec3 a_projected_pos;
@@ -142,7 +144,7 @@ lowp float opacity = u_opacity;
     v_fade_opacity = max(0.0, min(1.0, fade_opacity[0] + fade_change));
 }
 )";
-    static constexpr const char* fragment = R"(uniform sampler2D u_texture;
+    static constexpr const char* fragmentData = R"(uniform sampler2D u_texture;
 
 layout (std140) uniform SymbolDrawablePaintUBO {
     highp vec4 u_fill_color;
@@ -182,7 +184,17 @@ lowp float opacity = u_opacity;
 #endif
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

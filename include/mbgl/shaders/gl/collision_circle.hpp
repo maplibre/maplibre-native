@@ -1,4 +1,5 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -8,7 +9,8 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::CollisionCircleProgram, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "CollisionCircleProgram";
-    static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
+
+    static constexpr const char* vertexData = R"(layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_anchor_pos;
 layout (location = 2) in vec2 a_extrude;
 layout (location = 3) in vec2 a_placed;
@@ -44,7 +46,7 @@ void main() {
     v_extrude_scale = u_extrude_scale * u_camera_to_center_distance * collision_perspective_ratio;
 }
 )";
-    static constexpr const char* fragment = R"(uniform float u_overscale_factor;
+    static constexpr const char* fragmentData = R"(uniform float u_overscale_factor;
 
 in float v_placed;
 in float v_notUsed;
@@ -79,7 +81,17 @@ void main() {
     fragColor = opacity_t * color;
 }
 )";
+    static std::string vertex() {
+        using Ty = ShaderSource<BuiltIn::CollisionCircleProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::vertexData;
+    }
+    static std::string fragment() {
+        using Ty = ShaderSource<BuiltIn::CollisionCircleProgram, gfx::Backend::Type::OpenGL>;
+        return Ty::fragmentData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

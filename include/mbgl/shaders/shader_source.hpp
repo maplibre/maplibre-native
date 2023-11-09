@@ -1,14 +1,19 @@
 // Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
 #include <mbgl/gfx/backend.hpp>
+#include <string>
+#include <utility>
 
+#define MLN_COMPRESSED_SHADERS 0
+#define MLN_AMALGAMATED_SHADERS 0
 namespace mbgl {
 namespace shaders {
 
 /// @brief This enum is used with the ShaderSource template to select
 /// source code for the desired program and graphics back-end.
-enum class BuiltIn {
-    None,
+enum class BuiltIn : uint8_t {
+    None = 0,
     BackgroundShader,
     BackgroundPatternShader,
     CircleShader,
@@ -78,5 +83,15 @@ struct ShaderSource<BuiltIn::None, gfx::Backend::Type::OpenGL> {
     static constexpr const char* fragment = "";
 };
 
+template <>
+struct ShaderSource<BuiltIn::None, gfx::Backend::Type::Metal> {
+    static constexpr const char* name = "";
+    static constexpr const char* vertexMainFunction = "";
+    static constexpr const char* fragmentMainFunction = "";
+    static constexpr const char* source = "";
+};
+
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND

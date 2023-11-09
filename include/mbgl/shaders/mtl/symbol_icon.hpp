@@ -1,8 +1,8 @@
+// Generated code, do not modify this file!
+// NOLINTBEGIN
 #pragma once
-
-#include <mbgl/shaders/mtl/common.hpp>
-#include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
 
 namespace mbgl {
@@ -10,16 +10,8 @@ namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
-    static constexpr auto name = "SymbolIconShader";
-    static constexpr auto vertexMainFunction = "vertexMain";
-    static constexpr auto fragmentMainFunction = "fragmentMain";
-
-    static const std::array<AttributeInfo, 6> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
-    static const std::array<TextureInfo, 1> textures;
-
-    static constexpr auto source = R"(
-struct VertexStage {
+    static const ReflectionData reflectionData;
+    static constexpr const char* sourceData = R"(struct VertexStage {
     float4 pos_offset [[attribute(0)]];
     float4 data [[attribute(1)]];
     float4 pixeloffset [[attribute(2)]];
@@ -123,7 +115,13 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(image.sample(image_sampler, in.tex) * (in.opacity * in.fade_opacity));
 }
 )";
+    static std::string source() {
+        using Ty = ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal>;
+        return Ty::sourceData;
+    }
 };
 
 } // namespace shaders
 } // namespace mbgl
+
+// NOLINTEND
