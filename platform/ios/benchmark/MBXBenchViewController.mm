@@ -4,6 +4,7 @@
 #import "MLNOfflineStorage_Private.h"
 #import "MLNSettings_Private.h"
 
+#include "file_source.hpp"
 #include "locations.hpp"
 
 #include <chrono>
@@ -11,7 +12,9 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
 #include <mbgl/map/map.hpp>
+#include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/style/style.hpp>
+#include <mbgl/util/run_loop.hpp>
 
 @protocol BenchMapDelegate <NSObject>
 - (void)mapDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
@@ -44,6 +47,7 @@ protected:
     std::unique_ptr<BenchMapObserver> observer;
     std::unique_ptr<mbgl::HeadlessFrontend> frontend;
     std::unique_ptr<mbgl::Map> map;
+    mbgl::util::RunLoop runLoop;
 }
 
 @property (nonatomic) UIImageView *imageView;
@@ -93,8 +97,9 @@ protected:
     self.imageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:self.imageView];
     
-    mbgl::Size viewSize = { static_cast<uint32_t>(self.view.bounds.size.width),
-                            static_cast<uint32_t>(self.view.bounds.size.height) };
+    //mbgl::Size viewSize = { static_cast<uint32_t>(self.view.bounds.size.width),
+    //                        static_cast<uint32_t>(self.view.bounds.size.height) };
+    mbgl::Size viewSize = { 512, 128 };
     auto pixelRatio = [[UIScreen mainScreen] scale];
     
     observer = std::make_unique<BenchMapObserver>(self);
@@ -104,23 +109,40 @@ protected:
         mbgl::gfx::HeadlessBackend::SwapBehaviour::Flush,
         mbgl::gfx::ContextMode::Unique,
         /* localFontFamily */ std::nullopt,
-        /* invalidateOnUpdate */ false
+        /* invalidateOnUpdate */ true
     );
     
     mbgl::MapOptions mapOptions;
-    mapOptions.withMapMode(mbgl::MapMode::Continuous)
+    mapOptions.withMapMode(mbgl::MapMode::Static)
               .withSize(viewSize)
               .withPixelRatio(pixelRatio)
               .withConstrainMode(mbgl::ConstrainMode::None)
               .withViewportMode(mbgl::ViewportMode::Default)
               .withCrossSourceCollisions(true);
     
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSString* cachePath = [documentsDirectory stringByAppendingPathComponent:@"cache-style.db"];
+    
     mbgl::TileServerOptions* tileServerOptions = [[MLNSettings sharedSettings] tileServerOptionsInternal];
     mbgl::ResourceOptions resourceOptions;
-    resourceOptions.withCachePath(MLNOfflineStorage.sharedOfflineStorage.databasePath.UTF8String)
+    resourceOptions.withCachePath(cachePath.UTF8String)
                    .withAssetPath([NSBundle mainBundle].resourceURL.path.UTF8String)
                    .withTileServerOptions(*tileServerOptions);
     mbgl::ClientOptions clientOptions;
+    
+    auto* fileSourceManager = mbgl::FileSourceManager::get();
+
+    auto resourceLoaderFactory = fileSourceManager->unRegisterFileSourceFactory(
+        mbgl::FileSourceType::ResourceLoader);
+    auto factory = [defaultFactory = std::move(resourceLoaderFactory)](const mbgl::ResourceOptions& resourceOptions,
+                                                                       const mbgl::ClientOptions& clientOptions) {
+        assert(defaultFactory);
+        std::shared_ptr<mbgl::FileSource> fileSource = defaultFactory(resourceOptions, clientOptions);
+        return std::make_unique<mbgl::ProxyFileSource>(std::move(fileSource), resourceOptions, clientOptions);
+    };
+
+    fileSourceManager->registerFileSourceFactory(mbgl::FileSourceType::ResourceLoader, std::move(factory));
     
     auto apiKey = [[MLNSettings sharedSettings] apiKey];
     if (apiKey) {
@@ -130,9 +152,20 @@ protected:
     map = std::make_unique<mbgl::Map>(*frontend, *observer, mapOptions, resourceOptions, clientOptions);
     map->setSize(viewSize);
     map->setDebug(mbgl::MapDebugOptions::NoDebug);
-    map->getStyle().loadURL([url.absoluteString UTF8String]);
+    //map->getStyle().loadURL([url.absoluteString UTF8String]);
     
-    [self startBenchmarkIteration];
+    NSString* jsonPath = [documentsDirectory stringByAppendingPathComponent:@"style.json"];
+    NSData* jsonData = [NSData dataWithContentsOfFile:jsonPath];
+    NSString* jsonString = [[NSString alloc] initWithBytes:[jsonData bytes]
+                                                    length:[jsonData length]
+                                                  encoding:NSUTF8StringEncoding];
+    
+    map->getStyle().loadJSON(jsonString.UTF8String);
+    
+    //map->getStyle().loadURL("https://api.maptiler.com/maps/2f4c4899-e695-4c8b-a4ef-92fa9d2740ff/style.json?key=G4MQXsYbLiUxOu3SV4lh");
+    
+    //[self startBenchmarkIteration];
+    [self renderFrame];
 }
 
 // For setting the filename
@@ -194,17 +227,19 @@ namespace  mbgl {
 {
     mbgl::gfx::BackendScope guard{*(frontend->getBackend())};
     
-    frontend->renderFrame();
+    //frontend->renderFrame();
     
-    auto image = frontend->readStillImage();
+    //auto image = frontend->readStillImage();
+    
+    auto result = frontend->render(*map);
     
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     CGContextRef bitmapContext = CGBitmapContextCreate(
-       image.data.get(),
-       image.size.width,
-       image.size.height,
+       result.image.data.get(),
+       result.image.size.width,
+       result.image.size.height,
        8,
-       4 * image.size.width,
+       4 * result.image.size.width,
        colorSpace,
        kCGImageAlphaPremultipliedLast | kCGBitmapByteOrderDefault
     );
@@ -280,7 +315,11 @@ namespace  mbgl {
                               frameEncodingTime:(double)frameEncodingTime
                              frameRenderingTime:(double)frameRenderingTime
 {
-    if (state == State::Benchmarking)
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self renderFrame];
+    });
+    
+    /*if (state == State::Benchmarking)
     {
         frames++;
         totalFrameEncodingTime += frameEncodingTime;
@@ -336,7 +375,7 @@ namespace  mbgl {
             [self renderFrame];
         });
         return;
-    }
+    }*/
 }
 
 - (NSUInteger)supportedInterfaceOrientations
