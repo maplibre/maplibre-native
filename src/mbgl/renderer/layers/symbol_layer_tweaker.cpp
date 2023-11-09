@@ -190,7 +190,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.aspect_ratio=*/state.getSize().aspectRatio(),
             /*.pad=*/{0},
         };
-        
+
         const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
                                              /*.pad1=*/0,
                                              /*.pad2=*/{0, 0}};
