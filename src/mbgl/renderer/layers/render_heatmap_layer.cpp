@@ -71,12 +71,12 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
     if (renderTarget) {
         if (auto tileLayerGroup = renderTarget->getLayerGroup(0)) {
             auto newTweaker = std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties);
-            
+
             // propertiesAsUniforms isn't recalculated every update, so carry it over
             if (layerTweaker) {
                 newTweaker->setPropertiesAsUniforms(layerTweaker->getPropertiesAsUniforms());
             }
-            
+
             replaceTweaker(layerTweaker, std::move(newTweaker), {std::move(tileLayerGroup)});
         }
     }
