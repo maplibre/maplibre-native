@@ -226,36 +226,36 @@ void OfflineDatabase::migrateToVersion7() {
 
     mapbox::sqlite::Transaction transaction(*db);
     db->exec(
-             "CREATE TABLE ambient_resources (\n"
-             "  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n"
-             "  url TEXT NOT NULL,\n"
-             "  kind INTEGER NOT NULL,\n"
-             "  expires INTEGER,\n"
-             "  modified INTEGER,\n"
-             "  etag TEXT,\n"
-             "  data BLOB,\n"
-             "  compressed INTEGER NOT NULL DEFAULT 0,\n"
-             "  accessed INTEGER NOT NULL,\n"
-             "  must_revalidate INTEGER NOT NULL DEFAULT 0,\n"
-             "  UNIQUE (url)\n"
-             ");");
+        "CREATE TABLE ambient_resources (\n"
+        "  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n"
+        "  url TEXT NOT NULL,\n"
+        "  kind INTEGER NOT NULL,\n"
+        "  expires INTEGER,\n"
+        "  modified INTEGER,\n"
+        "  etag TEXT,\n"
+        "  data BLOB,\n"
+        "  compressed INTEGER NOT NULL DEFAULT 0,\n"
+        "  accessed INTEGER NOT NULL,\n"
+        "  must_revalidate INTEGER NOT NULL DEFAULT 0,\n"
+        "  UNIQUE (url)\n"
+        ");");
     db->exec(
-             "CREATE TABLE ambient_tiles (\n"
-             "  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n"
-             "  url_template TEXT NOT NULL,\n"
-             "  pixel_ratio INTEGER NOT NULL,\n"
-             "  z INTEGER NOT NULL,\n"
-             "  x INTEGER NOT NULL,\n"
-             "  y INTEGER NOT NULL,\n"
-             "  expires INTEGER,\n"
-             "  modified INTEGER,\n"
-             "  etag TEXT,\n"
-             "  data BLOB,\n"
-             "  compressed INTEGER NOT NULL DEFAULT 0,\n"
-             "  accessed INTEGER NOT NULL,\n"
-             "  must_revalidate INTEGER NOT NULL DEFAULT 0,\n"
-             "  UNIQUE (url_template, pixel_ratio, z, x, y)\n"
-             ");");
+        "CREATE TABLE ambient_tiles (\n"
+        "  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n"
+        "  url_template TEXT NOT NULL,\n"
+        "  pixel_ratio INTEGER NOT NULL,\n"
+        "  z INTEGER NOT NULL,\n"
+        "  x INTEGER NOT NULL,\n"
+        "  y INTEGER NOT NULL,\n"
+        "  expires INTEGER,\n"
+        "  modified INTEGER,\n"
+        "  etag TEXT,\n"
+        "  data BLOB,\n"
+        "  compressed INTEGER NOT NULL DEFAULT 0,\n"
+        "  accessed INTEGER NOT NULL,\n"
+        "  must_revalidate INTEGER NOT NULL DEFAULT 0,\n"
+        "  UNIQUE (url_template, pixel_ratio, z, x, y)\n"
+        ");");
     db->exec("PRAGMA user_version = 7");
     transaction.commit();
 }
@@ -341,7 +341,8 @@ std::pair<bool, uint64_t> OfflineDatabase::put(const Resource& resource, const R
 
 std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
                                                        const Response& response,
-                                                       bool evict_, bool ambient) {
+                                                       bool evict_,
+                                                       bool ambient) {
     checkFlags();
 
     if (response.error) {
@@ -376,14 +377,16 @@ std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
                            compressed      ? compressedData
                            : response.data ? *response.data
                                            : "",
-                           compressed, ambient);
+                           compressed,
+                           ambient);
     } else {
         inserted = putResource(resource,
                                response,
                                compressed      ? compressedData
                                : response.data ? *response.data
                                                : "",
-                               compressed, ambient);
+                               compressed,
+                               ambient);
     }
 
     if (stats) {
@@ -409,15 +412,18 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
                     throw;
                 }
                 // If we don't have any indication that the database is corrupt, continue as usual.
-                Log::Warning(Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
+                Log::Warning(
+                    Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
             }
         }
     };
 
     // Helper lambda to execute the query and construct the response
-    auto queryResource = [this, &resource](const std::string& tableName) -> std::optional<std::pair<Response, uint64_t>> {
-        std::string sql = "SELECT etag, expires, must_revalidate, modified, data, compressed FROM " + tableName + " WHERE url = ?";
-        mapbox::sqlite::Query query{ getStatement(sql.c_str()) };
+    auto queryResource = [this,
+                          &resource](const std::string& tableName) -> std::optional<std::pair<Response, uint64_t>> {
+        std::string sql = "SELECT etag, expires, must_revalidate, modified, data, compressed FROM " + tableName +
+                          " WHERE url = ?";
+        mapbox::sqlite::Query query{getStatement(sql.c_str())};
         query.bind(1, resource.url);
 
         if (!query.run()) {
@@ -445,7 +451,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
 
         return std::make_pair(response, size);
     };
-    
+
     updateAccessedTime("ambient_resources");
     updateAccessedTime("resources");
 
@@ -459,7 +465,6 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const 
     return queryResource("resources");
 }
 
-
 std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
     mapbox::sqlite::Query query{getStatement("SELECT length(data) FROM resources WHERE url = ?")};
     query.bind(1, resource.url);
@@ -470,11 +475,8 @@ std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
     return query.get<std::optional<int64_t>>(0);
 }
 
-bool OfflineDatabase::putResource(const Resource& resource,
-                                  const Response& response,
-                                  const std::string& data,
-                                  bool compressed,
-                                  bool ambient) {
+bool OfflineDatabase::putResource(
+    const Resource& resource, const Response& response, const std::string& data, bool compressed, bool ambient) {
     checkFlags();
 
     // Determine the table name based on the ambient flag
@@ -564,7 +566,6 @@ bool OfflineDatabase::putResource(const Resource& resource,
     return true;
 }
 
-
 std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Resource::TileData& tile) {
     // Helper lambda to update the accessed timestamp for LRU eviction
     auto updateAccessedTimestamp = [this](const std::string& table, const Resource::TileData& tileData) {
@@ -580,7 +581,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
                     "AND y            = ?5 "
                     "AND z            = ?6 ";
                 // clang-format on
-                mapbox::sqlite::Query query{ getStatement(sql.c_str()) };
+                mapbox::sqlite::Query query{getStatement(sql.c_str())};
 
                 query.bind(1, util::now());
                 query.bind(2, tileData.urlTemplate);
@@ -594,8 +595,9 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
                     throw;
                 }
                 // If we don't have any indication that the database is corrupt, continue as usual.
-                Log::Warning(
-                    Event::Database, static_cast<int>(ex.code), "Can't update timestamp in " + table + ": " + std::string(ex.what()));
+                Log::Warning(Event::Database,
+                             static_cast<int>(ex.code),
+                             "Can't update timestamp in " + table + ": " + std::string(ex.what()));
             }
         }
     };
@@ -612,7 +614,7 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
             "AND y            = ?4 "
             "AND z            = ?5 ";
         // clang-format on
-        mapbox::sqlite::Query query{ getStatement(sql.c_str()) };
+        mapbox::sqlite::Query query{getStatement(sql.c_str())};
 
         query.bind(1, tile.urlTemplate);
         query.bind(2, tile.pixelRatio);
@@ -661,19 +663,14 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
     std::cout << "######## GET OFFLINE\n";
     // Finally, try to get tile from regular resources
     auto offlineResult = getTileData("tiles");
-    if(offlineResult)
-    {
+    if (offlineResult) {
         std::cout << "######## OK FROM OFFLINE\n";
-    }
-    else
-    {
-        std::cout << "######## NOT FOUND : " + tile.urlTemplate + " - " +
-            std::to_string(tile.z) + "/" + std::to_string(tile.x) + "/" + std::to_string(tile.y) + "\n";
+    } else {
+        std::cout << "######## NOT FOUND : " + tile.urlTemplate + " - " + std::to_string(tile.z) + "/" +
+                         std::to_string(tile.x) + "/" + std::to_string(tile.y) + "\n";
     }
     return offlineResult;
 }
-
-
 
 std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) {
     // clang-format off
@@ -700,11 +697,8 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
     return size.get<std::optional<int64_t>>(0);
 }
 
-bool OfflineDatabase::putTile(const Resource::TileData& tile,
-                              const Response& response,
-                              const std::string& data,
-                              bool compressed,
-                              bool ambient) {
+bool OfflineDatabase::putTile(
+    const Resource::TileData& tile, const Response& response, const std::string& data, bool compressed, bool ambient) {
     checkFlags();
 
     // Determine the table name based on the ambient flag
@@ -811,7 +805,6 @@ bool OfflineDatabase::putTile(const Resource::TileData& tile,
 
     return true;
 }
-
 
 std::exception_ptr OfflineDatabase::invalidateAmbientCache() try {
     checkFlags();
