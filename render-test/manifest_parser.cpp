@@ -279,7 +279,7 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
         if (!testFilter.empty() && !std::regex_search(testPath.path().string(), std::regex(testFilter))) {
             continue;
         }
-        
+
         /*if (testPath.path().string().find("text-max-width/zoom-and-property-function") == std::string::npos) {
             continue;
         }*/
