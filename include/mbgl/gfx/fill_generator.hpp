@@ -33,5 +33,16 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   gfx::IndexVector<gfx::Triangles>& lineIndexes,
                                   SegmentVector<LineAttributes>& lineSegments);
 
+/// Generate fill and outline buffers, where the outlines are built both with triangle primitives AND with simple lines
+void generateFillAndOutineBuffers(const GeometryCollection& geometry,
+                                  gfx::VertexVector<FillLayoutVertex>& fillVertices,
+                                  gfx::IndexVector<gfx::Triangles>& fillIndexes,
+                                  SegmentVector<FillAttributes>& fillSegments,
+                                  gfx::VertexVector<LineLayoutVertex>& lineVertices,
+                                  gfx::IndexVector<gfx::Triangles>& lineIndexes,
+                                  SegmentVector<LineAttributes>& lineSegments,
+                                  gfx::IndexVector<gfx::Lines>& basicLineIndexes,
+                                  SegmentVector<FillAttributes>& basicLineSegments);
+
 } // namespace gfx
 } // namespace mbgl

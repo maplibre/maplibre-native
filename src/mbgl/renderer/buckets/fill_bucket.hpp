@@ -14,7 +14,7 @@
     MLN_TRIANGULATE_FILL_OUTLINES = 0 : Simple line primitives will be generated. Draw using gfx::Lines
     MLN_TRIANGULATE_FILL_OUTLINES = 1 : Generate triangulated lines. Draw using gfx::Triangles and a Line shader.
  */
-#define MLN_TRIANGULATE_FILL_OUTLINES 1
+#define MLN_TRIANGULATE_FILL_OUTLINES 0
 #else // MLN_DRAWABLE_RENDERER
 // Legacy Renderer is incompatible with triangulated lines
 #define MLN_TRIANGULATE_FILL_OUTLINES 0
@@ -63,16 +63,16 @@ public:
 
     using LineIndexVector = gfx::IndexVector<gfx::Triangles>;
     const std::shared_ptr<LineIndexVector> sharedLineIndexes = std::make_shared<LineIndexVector>();
-    LineIndexVector& lines = *sharedLineIndexes;
+    LineIndexVector& lineIndexes = *sharedLineIndexes;
 
     SegmentVector<LineAttributes> lineSegments;
-#else // !MLN_TRIANGULATE_FILL_OUTLINES
-    using LineIndexVector = gfx::IndexVector<gfx::Lines>;
-    const std::shared_ptr<LineIndexVector> sharedLineIndexes = std::make_shared<LineIndexVector>();
-    LineIndexVector& lines = *sharedLineIndexes;
+#endif // MLN_TRIANGULATE_FILL_OUTLINES
 
-    SegmentVector<FillAttributes> lineSegments;
-#endif
+    using BasicLineIndexVector = gfx::IndexVector<gfx::Lines>;
+    const std::shared_ptr<BasicLineIndexVector> sharedBasicLineIndexes = std::make_shared<BasicLineIndexVector>();
+    BasicLineIndexVector& basicLines = *sharedBasicLineIndexes;
+
+    SegmentVector<FillAttributes> basicLineSegments;
 
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();

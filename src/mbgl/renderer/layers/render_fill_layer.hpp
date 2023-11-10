@@ -82,7 +82,6 @@ private:
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
     LayerGroupBasePtr outlineLayerGroup;
-    gfx::ShaderProgramBasePtr outlineShader;
     class OulineDrawableTweaker;
 #endif // MLN_TRIANGULATE_FILL_OUTLINES
 

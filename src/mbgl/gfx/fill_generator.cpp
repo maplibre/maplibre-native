@@ -184,6 +184,47 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
     }
 }
 
+void generateFillAndOutineBuffers(const GeometryCollection& geometry,
+                                  gfx::VertexVector<FillLayoutVertex>& fillVertices,
+                                  gfx::IndexVector<gfx::Triangles>& fillIndexes,
+                                  SegmentVector<FillAttributes>& fillSegments,
+                                  gfx::VertexVector<LineLayoutVertex>& lineVertices,
+                                  gfx::IndexVector<gfx::Triangles>& lineIndexes,
+                                  SegmentVector<LineAttributes>& lineSegments,
+                                  gfx::IndexVector<gfx::Lines>& basicLineIndexes,
+                                  SegmentVector<FillAttributes>& basicLineSegments) {
+    gfx::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> lineGenerator(
+        lineVertices,
+        LineProgram::layoutVertex,
+        lineSegments,
+        [](std::size_t vertexOffset, std::size_t indexOffset) -> Segment<LineAttributes> {
+            return Segment<LineAttributes>(vertexOffset, indexOffset);
+        },
+        [](auto& seg) -> Segment<LineAttributes>& { return seg; },
+        lineIndexes);
+
+    gfx::PolylineGeneratorOptions lineOptions;
+    lineOptions.type = FeatureType::Polygon;
+
+    for (auto& polygon : classifyRings(geometry)) {
+        // Optimize polygons with many interior rings for earcut tesselation.
+        limitHoles(polygon, 500);
+
+        std::size_t totalVertices = totalVerticesCheck(polygon);
+        std::size_t startVertices = fillVertices.elements();
+
+        for (const auto& ring : polygon) {
+            std::size_t base = fillVertices.elements();
+            std::size_t nVertices = addRingVertices(fillVertices, ring);
+            addOutlineIndices(base, nVertices, basicLineSegments, basicLineIndexes);
+            lineGenerator.generate(ring, lineOptions);
+        }
+
+        std::vector<uint32_t> indices = mapbox::earcut(polygon);
+        addFillIndices(fillSegments, fillIndexes, indices, startVertices, totalVertices);
+    }
+}
+
 } // namespace gfx
 
 } // namespace mbgl
