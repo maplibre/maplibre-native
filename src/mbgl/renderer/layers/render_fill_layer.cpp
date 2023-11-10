@@ -751,8 +751,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
 #if !MLN_TRIANGULATE_FILL_OUTLINES
                     builder->setLineWidth(2.0f);
-                    builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
 #endif
+                    builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setRenderPass(RenderPass::Translucent);
                     outlineBuilder = std::move(builder);
@@ -889,7 +889,16 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (patternBuilder && bucket.sharedTriangles->elements()) {
                 patternBuilder->setShader(fillShader);
                 patternBuilder->setRenderPass(renderPass);
+#if MLN_TRIANGULATE_FILL_OUTLINES
                 patternBuilder->setVertexAttributes(std::move(vertexAttrs));
+#else
+                if (doOutline && outlinePatternBuilder) {
+                    patternBuilder->setVertexAttributes(vertexAttrs);
+                    outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
+                } else {
+                    patternBuilder->setVertexAttributes(std::move(vertexAttrs));
+                }
+#endif
                 patternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 patternBuilder->setSegments(gfx::Triangles(),
                                             bucket.sharedTriangles,
