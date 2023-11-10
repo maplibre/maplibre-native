@@ -679,7 +679,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
-            const auto outlineShader = doOutline ? [&]() -> auto{
+            const auto outlineShader = doOutline ? [&]() -> auto {
                 static const std::unordered_set<StringIdentity> outlinePropertiesAsUniforms{
                     stringIndexer().get("a_color"),
                     stringIndexer().get("a_opacity"),
@@ -687,8 +687,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 };
                 return std::static_pointer_cast<gfx::ShaderProgramBase>(
                     outlineShaderGroup->getOrCreateShader(context, outlinePropertiesAsUniforms));
-            }
-            ()
+            }()
                 : nullptr;
 
             auto createOutline = [&](auto& builder, Color color, float opacity) {
@@ -810,8 +809,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (doOutline && outlineBuilder && bucket.sharedBasicLineIndexes->elements()) {
                 outlineBuilder->setShader(outlineShader);
                 outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
-                outlineBuilder->setSegments(
-                    gfx::Lines(2), bucket.sharedBasicLineIndexes, bucket.basicLineSegments.data(), bucket.basicLineSegments.size());
+                outlineBuilder->setSegments(gfx::Lines(2),
+                                            bucket.sharedBasicLineIndexes,
+                                            bucket.basicLineSegments.data(),
+                                            bucket.basicLineSegments.size());
                 finish(
                     *outlineBuilder, FillLayerTweaker::idFillOutlineInterpolateUBOName, getFillOutlineInterpolateUBO());
             }
@@ -911,8 +912,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlinePatternBuilder->setShader(outlineShader);
                 outlinePatternBuilder->setRenderPass(renderPass);
                 outlinePatternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
-                outlinePatternBuilder->setSegments(
-                    gfx::Lines(2), bucket.sharedBasicLineIndexes, bucket.basicLineSegments.data(), bucket.basicLineSegments.size());
+                outlinePatternBuilder->setSegments(gfx::Lines(2),
+                                                   bucket.sharedBasicLineIndexes,
+                                                   bucket.basicLineSegments.data(),
+                                                   bucket.basicLineSegments.size());
 
                 finish(*outlinePatternBuilder,
                        idFillOutlinePatternInterpolateUBOName,

@@ -33,8 +33,15 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
                             std::size_t index,
                             const CanonicalTileID& canonical) {
     // generate buffers
-    gfx::generateFillAndOutineBuffers(
-        geometry, vertices, triangles, triangleSegments, lineVertices, lineIndexes, lineSegments, basicLines, basicLineSegments);
+    gfx::generateFillAndOutineBuffers(geometry,
+                                      vertices,
+                                      triangles,
+                                      triangleSegments,
+                                      lineVertices,
+                                      lineIndexes,
+                                      lineSegments,
+                                      basicLines,
+                                      basicLineSegments);
 
     for (auto& pair : paintPropertyBinders) {
         const auto it = patternDependencies.find(pair.first);
