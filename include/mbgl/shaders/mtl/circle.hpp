@@ -22,7 +22,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 position [[attribute(0)]];
-    float2 color [[attribute(1)]];
+    float4 color [[attribute(1)]];
     float2 radius [[attribute(2)]];
     float2 blur [[attribute(3)]];
     float2 opacity [[attribute(4)]];
@@ -98,7 +98,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const CirclePermutationUBO& permutation [[buffer(12)]],
                                 device const ExpressionInputsUBO& expr [[buffer(13)]]) {
 
-    const auto color          = colorFor(permutation.color,          props.color,          vertx.color,                                   expr);
+    const auto color          = colorFor(permutation.color,          props.color,          vertx.color,          interp.color_t,          expr);
     const auto radius         = valueFor(permutation.radius,         props.radius,         vertx.radius,         interp.radius_t,         expr);
     const auto blur           = valueFor(permutation.blur,           props.blur,           vertx.blur,           interp.blur_t,           expr);
     const auto opacity        = valueFor(permutation.opacity,        props.opacity,        vertx.opacity,        interp.opacity_t,        expr);
@@ -107,7 +107,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto stroke_opacity = valueFor(permutation.stroke_opacity, props.stroke_opacity, vertx.stroke_opacity, interp.stroke_opacity_t, expr);
 
     // unencode the extrusion vector that we snuck into the a_pos vector
-    const float2 extrude = fmod(float2(vertx.position), 2.0) * 2.0 - 1.0;
+    const float2 extrude = glMod(float2(vertx.position), 2.0) * 2.0 - 1.0;
     const float2 scaled_extrude = extrude * drawable.extrude_scale;
 
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak in extrusion data
