@@ -5,7 +5,7 @@ namespace shaders {
 
 const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-    AttributeInfo{1, gfx::AttributeDataType::Float2, 1, "a_color"},
+    AttributeInfo{1, gfx::AttributeDataType::Float4, 1, "a_color"},
     AttributeInfo{2, gfx::AttributeDataType::Float2, 1, "a_radius"},
     AttributeInfo{3, gfx::AttributeDataType::Float2, 1, "a_blur"},
     AttributeInfo{4, gfx::AttributeDataType::Float2, 1, "a_opacity"},
