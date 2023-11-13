@@ -4,6 +4,7 @@
 #include <mbgl/style/conversion.hpp>
 
 #include <optional>
+#include <memory>
 
 namespace mbgl {
 namespace style {
