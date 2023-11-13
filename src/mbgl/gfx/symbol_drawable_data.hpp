@@ -34,8 +34,6 @@ struct SymbolDrawableData : public DrawableData {
           propertiesAsUniforms(std::move(propertiesAsUniforms_)) {}
     ~SymbolDrawableData() override = default;
 
-    void setPropertiesAsUniforms(PropertyMapType&& value) { propertiesAsUniforms = std::move(value); }
-
     const bool isHalo;
     bool bucketVariablePlacement;
     const style::SymbolType symbolType;
@@ -43,7 +41,7 @@ struct SymbolDrawableData : public DrawableData {
     const style::AlignmentType rotationAlignment;
     const style::SymbolPlacementType placement;
     const style::IconTextFitType textFit;
-    PropertyMapType propertiesAsUniforms;
+    const PropertyMapType propertiesAsUniforms;
 };
 
 using UniqueSymbolDrawableData = std::unique_ptr<SymbolDrawableData>;

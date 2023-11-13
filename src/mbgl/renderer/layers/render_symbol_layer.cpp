@@ -1221,7 +1221,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                    textInterpUBO,
                                    iconInterpUBO,
                                    propertiesAsUniforms);
-                drawData.setPropertiesAsUniforms(toMap(propertiesAsUniforms));
+
+                // We assume that the properties-as-uniforms doesn't change without the style changing.
+                // That would require updating the shader as well.
+                assert(drawData.propertiesAsUniforms == toMap(propertiesAsUniforms));
             });
 
             // re-create collision drawables

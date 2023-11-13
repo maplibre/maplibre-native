@@ -159,6 +159,20 @@ public:
         this->Super::clear();
     }
 
+    bool operator==(const TinyUnorderedMap& other) const {
+        if (size() != other.size()) return false;
+        assert(linearSize == other.linearSize);
+        if (linearSize) {
+            return std::equal(
+                       keys.begin(), keys.begin() + linearSize, other.keys.begin(), other.keys.begin() + linearSize) &&
+                   std::equal(values.begin(),
+                              values.begin() + linearSize,
+                              other.values.begin(),
+                              other.values.begin() + linearSize);
+        }
+        return std::operator==(*this, other);
+    }
+
 private:
     std::size_t linearSize = 0;
     std::array<std::optional<Key>, LinearThreshold> keys;
