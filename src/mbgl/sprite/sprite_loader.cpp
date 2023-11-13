@@ -39,10 +39,10 @@ void SpriteLoader::load(const style::Sprite* sprite, FileSource& fileSource) {
         observer->onSpriteLoaded({});
         return;
     }
-    
+
     std::string id = sprite->id;
     std::string url = sprite->spriteURL;
-    
+
     dataMap[id] = std::make_unique<Data>();
     dataMap[id]->jsonRequest = fileSource.request(Resource::spriteJSON(url, pixelRatio), [this, id](Response res) {
         std::lock_guard<std::mutex> lock(dataMapMutex);
@@ -81,7 +81,6 @@ void SpriteLoader::load(const style::Sprite* sprite, FileSource& fileSource) {
 }
 
 void SpriteLoader::emitSpriteLoadedIfComplete(std::string id) {
-    
     Data* data = dataMap[id].get();
     assert(data);
     if (!data->image || !data->json) {
