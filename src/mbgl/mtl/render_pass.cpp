@@ -93,5 +93,45 @@ void RenderPass::addDebugSignpost(const char* name) {
     }
 }
 
+void RenderPass::bindVertex(const BufferResource& buf, std::size_t offset, std::size_t index, std::size_t size) {
+    assert(0 <= index && index < maxBinds);
+    if (0 <= index && index < maxBinds) {
+        if (auto& bind = vertexBinds[index]) {
+            // Is this the same buffer already bound to this index?
+            if (bind->buf == &buf && !buf.needReBind(bind->version)) {
+                // Yes, but is the offset different?
+                if (bind->offset != offset) {
+                    // Yes, update just the offset
+                    buf.updateVertexBindOffset(encoder, offset, index, size);
+                    bind->offset = offset;
+                }
+                return;
+            }
+        }
+        vertexBinds[index] = BindInfo{&buf, offset};
+    }
+    buf.bindVertex(encoder, offset, index, size);
+}
+
+void RenderPass::bindFragment(const BufferResource& buf, std::size_t offset, std::size_t index, std::size_t size) {
+    assert(0 <= index && index < maxBinds);
+    if (0 <= index && index < maxBinds) {
+        if (auto& bind = fragmentBinds[index]) {
+            // Is this the same buffer already bound to this index?
+            if (bind->buf == &buf && !buf.needReBind(bind->version)) {
+                // Yes, but is the offset different?
+                if (bind->offset != offset) {
+                    // Yes, update just the offset
+                    buf.updateFragmentBindOffset(encoder, offset, index, size);
+                    bind->offset = offset;
+                }
+                return;
+            }
+        }
+        fragmentBinds[index] = BindInfo{&buf, offset};
+    }
+    buf.bindFragment(encoder, offset, index, size);
+}
+
 } // namespace mtl
 } // namespace mbgl

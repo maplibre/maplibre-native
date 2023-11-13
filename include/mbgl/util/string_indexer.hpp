@@ -14,9 +14,10 @@ namespace mbgl {
 using StringIdentity = std::size_t;
 
 class StringIndexer {
-public:
+protected:
     StringIndexer();
 
+public:
     StringIndexer(StringIndexer const&) = delete;
     StringIndexer(StringIndexer&&) = delete;
     void operator=(StringIndexer const&) = delete;
@@ -29,6 +30,8 @@ public:
     size_t size();
 
 protected:
+    friend StringIndexer& stringIndexer();
+
     std::unordered_map<std::string_view, StringIdentity> stringToIdentity;
     std::vector<StringIdentity> identityToString;
     std::vector<char> buffer;

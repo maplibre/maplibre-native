@@ -9,8 +9,7 @@
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/renderer/change_request.hpp>
-
-#include <unordered_map>
+#include <mbgl/util/tiny_unordered_map.hpp>
 #endif // MLN_DRAWABLE_RENDERER
 
 #include <list>
@@ -261,9 +260,13 @@ protected:
     // An optional tweaker that will update drawables
     LayerTweakerPtr layerTweaker;
 
-    // The set of Tile IDs in `renderTiles`, along with the
-    // identity of the bucket from which they were built.
-    std::unordered_map<OverscaledTileID, util::SimpleIdentity> renderTileIDs;
+    // A sorted set of tile IDs in `renderTiles`, along with
+    // the identity of the bucket from which they were built.
+    // We swap between two instances to minimize reallocations.
+    static constexpr auto LinearTileIDs = 12; // From benchmarking, see #1805
+    using RenderTileIDMap = util::TinyUnorderedMap<OverscaledTileID, util::SimpleIdentity, LinearTileIDs>;
+    RenderTileIDMap renderTileIDs;
+    RenderTileIDMap newRenderTileIDs;
 #endif
 
     // Current layer index as specified by the layerIndexChanged event
