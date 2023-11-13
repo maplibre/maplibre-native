@@ -169,16 +169,16 @@ void Parser::parseSprites(const JSValue& value) {
         std::string url = {value.GetString(), value.GetStringLength()};
         auto sprite = std::make_unique<Sprite>("default", url);
         sprites.emplace_back(std::move(sprite));
-    }
-    else if (value.IsArray()) {
+    } else if (value.IsArray()) {
         for (auto& spriteValue : value.GetArray()) {
             if (!spriteValue.IsObject()) {
                 Log::Warning(Event::ParseStyle, "sprite child must be an object");
                 continue;
             }
-            
+
             conversion::Error error;
-            std::optional<std::unique_ptr<Sprite>> sprite = conversion::convert<std::unique_ptr<Sprite>>(spriteValue, error);
+            std::optional<std::unique_ptr<Sprite>> sprite = conversion::convert<std::unique_ptr<Sprite>>(spriteValue,
+                                                                                                         error);
             if (!sprite) {
                 Log::Warning(Event::ParseStyle, error.message);
                 continue;
@@ -186,8 +186,7 @@ void Parser::parseSprites(const JSValue& value) {
 
             sprites.emplace_back(std::move(*sprite));
         }
-    }
-    else {
+    } else {
         Log::Warning(Event::ParseStyle, "sprite must be an object or string");
         return;
     }

@@ -9,10 +9,9 @@ class Sprite {
 public:
     Sprite(std::string id, std::string spriteURL);
     ~Sprite();
-    
+
     std::string id;
     std::string spriteURL;
-    
 };
 
 } // namespace style

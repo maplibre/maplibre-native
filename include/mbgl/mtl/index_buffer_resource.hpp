@@ -8,17 +8,17 @@ namespace mtl {
 
 class IndexBufferResource : public gfx::IndexBufferResource {
 public:
-    IndexBufferResource() = default;
-    IndexBufferResource(BufferResource&&);
-    IndexBufferResource(IndexBufferResource&& other)
+    IndexBufferResource() noexcept = default;
+    IndexBufferResource(BufferResource&&) noexcept;
+    IndexBufferResource(IndexBufferResource&& other) noexcept
         : buffer(std::move(other.buffer)) {}
-    ~IndexBufferResource() override;
+    ~IndexBufferResource() noexcept override;
 
-    std::size_t getSizeInBytes() const { return buffer.getSizeInBytes(); }
-    void* contents() const { return buffer.contents(); }
+    std::size_t getSizeInBytes() const noexcept { return buffer.getSizeInBytes(); }
+    const void* contents() const noexcept { return buffer.contents(); }
 
-    BufferResource& get() { return buffer; }
-    const BufferResource& get() const { return buffer; }
+    BufferResource& get() noexcept { return buffer; }
+    const BufferResource& get() const noexcept { return buffer; }
 
 protected:
     BufferResource buffer;
