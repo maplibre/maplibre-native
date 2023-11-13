@@ -78,11 +78,11 @@ public:
 
     /// Move constructor
     TinyUnorderedMap(TinyUnorderedMap&& rhs)
-        : Super(std::move(rhs)),
-          linearSize(rhs.linearSize),
+        : linearSize(rhs.linearSize),
           keys(std::move(rhs.keys)),
           values(std::move(rhs.values)) {
         rhs.linearSize = 0;
+        Super::operator=(std::move(rhs));
     }
 
     /// Copy constructor
