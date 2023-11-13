@@ -818,8 +818,7 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
     }
 }
 
-void updateTileDrawable(RenderSymbolLayer* ths,
-                        gfx::Drawable& drawable,
+void updateTileDrawable(gfx::Drawable& drawable,
                         gfx::Context& context,
                         const SymbolBucket& bucket,
                         const SymbolBucket::PaintProperties& paintProps,
@@ -1201,8 +1200,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             // Just update the drawables we already created
             tileLayerGroup->visitDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
-                auto& drawData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
-
                 if (drawable.getLayerTweaker() != layerTweaker) {
                     // This drawable was produced on a previous style/bucket, and should not be updated.
                     return;
@@ -1211,8 +1208,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 propertiesAsUniforms.clear();
 
                 const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-                updateTileDrawable(this,
-                                   drawable,
+                updateTileDrawable(drawable,
                                    context,
                                    bucket,
                                    bucketPaintProperties,
@@ -1224,6 +1220,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                 // We assume that the properties-as-uniforms doesn't change without the style changing.
                 // That would require updating the shader as well.
+                [[maybe_unused]] const auto& drawData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
                 assert(drawData.propertiesAsUniforms == toMap(propertiesAsUniforms));
             });
 
