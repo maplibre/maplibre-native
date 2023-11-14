@@ -15,7 +15,10 @@ static_assert(sizeof(BackgroundDrawableUBO) % 16 == 0);
 struct alignas(16) BackgroundLayerUBO {
     /*  0 */ Color color;
     /* 16 */ float opacity;
-    /* 20 */ float pad1, pad2, pad3;
+    // overdrawInspector is used only in Metal, while in GL this is a 16 bytes empty padding.
+    /* 20 */ bool overdrawInspector;
+    /* 21 */ uint8_t pad1, pad2, pad3;
+    /* 24 */ float pad4, pad5;
     /* 32 */
 };
 static_assert(sizeof(BackgroundLayerUBO) == 32);
@@ -35,7 +38,9 @@ struct alignas(16) BackgroundPatternLayerUBO {
     /* 80 */ float scale_b;
     /* 84 */ float mix;
     /* 88 */ float opacity;
-    /* 92 */ float pad;
+    // overdrawInspector is used only in Metal, while in GL this is a 4 bytes empty padding.
+    /* 92 */ bool overdrawInspector;
+    /* 93 */ uint8_t pad1, pad2, pad3;
     /* 96 */
 };
 static_assert(sizeof(BackgroundPatternLayerUBO) == 96);
