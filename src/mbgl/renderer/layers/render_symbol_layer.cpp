@@ -1103,8 +1103,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "box");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionBox->vertices().vector());
-                    collisionBuilder->setVertexAttributes(
-                        getCollisionVertexAttributes(*collisionBox));
+                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(*collisionBox));
                     collisionBuilder->setSegments(gfx::Lines(1.0f),
                                                   collisionBox->sharedLines,
                                                   collisionBox->segments.data(),
@@ -1121,8 +1120,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "circle");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionCircle->vertices().vector());
-                    collisionBuilder->setVertexAttributes(
-                        getCollisionVertexAttributes(*collisionCircle));
+                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(*collisionCircle));
                     collisionBuilder->setSegments(gfx::Triangles(),
                                                   collisionCircle->sharedTriangles,
                                                   collisionCircle->segments.data(),
