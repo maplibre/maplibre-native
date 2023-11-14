@@ -875,7 +875,7 @@ gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::Colli
                                                        bool has_shift_attr) {
     gfx::VertexAttributeArray vertexAttrs;
     using LayoutVertex = gfx::Vertex<CollisionBoxLayoutAttributes>;
-    
+
     if (const auto& attr = vertexAttrs.getOrAdd(idCollisionPosAttribName)) {
         attr->setSharedRawData(buffer.sharedVertices,
                                offsetof(LayoutVertex, a1),
@@ -1106,8 +1106,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "box");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionBox->vertices().vector());
-                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(
-                        *collisionBox, /*has_shift_attr*/ true));
+                    collisionBuilder->setVertexAttributes(
+                        getCollisionVertexAttributes(*collisionBox, /*has_shift_attr*/ true));
                     collisionBuilder->setSegments(gfx::Lines(1.0f),
                                                   collisionBox->sharedLines,
                                                   collisionBox->segments.data(),
@@ -1124,8 +1124,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "circle");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionCircle->vertices().vector());
-                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(
-                        *collisionCircle, /*has_shift_attr*/ false));
+                    collisionBuilder->setVertexAttributes(
+                        getCollisionVertexAttributes(*collisionCircle, /*has_shift_attr*/ false));
                     collisionBuilder->setSegments(gfx::Triangles(),
                                                   collisionCircle->sharedTriangles,
                                                   collisionCircle->segments.data(),
