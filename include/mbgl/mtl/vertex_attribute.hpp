@@ -17,7 +17,7 @@ class VertexAttribute final : public gfx::VertexAttribute {
 private:
     friend VertexAttributeArray;
     VertexAttribute(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
-    : gfx::VertexAttribute(index_, dataType_, count_) {}
+        : gfx::VertexAttribute(index_, dataType_, count_) {}
     VertexAttribute(const VertexAttribute& other)
         : gfx::VertexAttribute(other) {}
     VertexAttribute(VertexAttribute&& other)

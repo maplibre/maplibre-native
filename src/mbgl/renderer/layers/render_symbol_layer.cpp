@@ -871,7 +871,9 @@ const StringIdentity idCollisionExtrudeAttribName = stringIndexer().get("a_extru
 const StringIdentity idCollisionPlacedAttribName = stringIndexer().get("a_placed");
 const StringIdentity idCollisionShiftAttribName = stringIndexer().get("a_shift");
 
-gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::CollisionBuffer& buffer, bool staticCopy, bool has_shift_attr) {
+gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::CollisionBuffer& buffer,
+                                                       bool staticCopy,
+                                                       bool has_shift_attr) {
     gfx::VertexAttributeArray vertexAttrs;
 
     if (staticCopy) {
@@ -900,7 +902,7 @@ gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::Colli
                 attr->set<gfx::VertexAttribute::int2>(index++, {v.a1[0], v.a1[1]});
             }
         }
-        if(has_shift_attr) {
+        if (has_shift_attr) {
             if (auto& attr = vertexAttrs.getOrAdd(idCollisionShiftAttribName, 4, gfx::AttributeDataType::Float2)) {
                 std::size_t index{0};
                 for (auto& v : buffer.dynamicVertices().vector()) {
@@ -940,7 +942,7 @@ gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::Colli
                                    sizeof(DynamicVertex),
                                    gfx::AttributeDataType::UByte2);
         }
-        if(has_shift_attr) {
+        if (has_shift_attr) {
             if (const auto& attr = vertexAttrs.getOrAdd(idCollisionShiftAttribName)) {
                 attr->setSharedRawData(buffer.sharedDynamicVertices,
                                        offsetof(DynamicVertex, a2),
@@ -1151,8 +1153,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "box");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionBox->vertices().vector(), staticVertexAndAttributes);
-                    collisionBuilder->setVertexAttributes(
-                        getCollisionVertexAttributes(*collisionBox, staticVertexAndAttributes,/*has_shift_attr*/ true));
+                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(
+                        *collisionBox, staticVertexAndAttributes, /*has_shift_attr*/ true));
                     collisionBuilder->setSegments(gfx::Lines(1.0f),
                                                   collisionBox->sharedLines,
                                                   collisionBox->segments.data(),
@@ -1169,8 +1171,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "circle");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionCircle->vertices().vector(), staticVertexAndAttributes);
-                    collisionBuilder->setVertexAttributes(
-                        getCollisionVertexAttributes(*collisionCircle, staticVertexAndAttributes, /*has_shift_attr*/false));
+                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(
+                        *collisionCircle, staticVertexAndAttributes, /*has_shift_attr*/ false));
                     collisionBuilder->setSegments(gfx::Triangles(),
                                                   collisionCircle->sharedTriangles,
                                                   collisionCircle->segments.data(),

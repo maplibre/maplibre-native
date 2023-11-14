@@ -17,9 +17,10 @@ namespace {
 class Converter {
 public:
     Converter(gfx::AttributeDataType dataType_, std::uint8_t* buffer_, std::size_t stride_)
-    : dataType(dataType_), buffer(buffer_), stride(stride_)
-    {}
-    
+        : dataType(dataType_),
+          buffer(buffer_),
+          stride(stride_) {}
+
     void operator()(std::int32_t value) {
         switch (dataType) {
             case gfx::AttributeDataType::Byte:
@@ -49,7 +50,7 @@ public:
                 break;
         }
     }
-    
+
     void operator()(VertexAttribute::int2 value) {
         switch (dataType) {
             case gfx::AttributeDataType::Byte2:
@@ -79,7 +80,7 @@ public:
                 break;
         }
     }
-    
+
     void operator()(VertexAttribute::int3 value) {
         switch (dataType) {
             case gfx::AttributeDataType::Byte3:
@@ -109,7 +110,7 @@ public:
                 break;
         }
     }
-    
+
     void operator()(VertexAttribute::int4 value) {
         switch (dataType) {
             case gfx::AttributeDataType::Byte4:
@@ -139,7 +140,7 @@ public:
                 break;
         }
     }
-    
+
     void operator()(float value) {
         switch (dataType) {
             case gfx::AttributeDataType::Byte:
@@ -169,7 +170,7 @@ public:
                 break;
         }
     }
-    
+
     void operator()(VertexAttribute::float2 value) {
         switch (dataType) {
             case gfx::AttributeDataType::Byte2:
@@ -199,7 +200,7 @@ public:
                 break;
         }
     }
-    
+
     void operator()(VertexAttribute::float3 value) {
         switch (dataType) {
             case gfx::AttributeDataType::Byte3:
@@ -229,7 +230,7 @@ public:
                 break;
         }
     }
-    
+
     void operator()(VertexAttribute::float4 value) {
         switch (dataType) {
             case gfx::AttributeDataType::Byte4:
@@ -259,27 +260,42 @@ public:
                 break;
         }
     }
-    
-    void operator()(VertexAttribute::matf3) { assert(false); buffer += stride; }
-    void operator()(VertexAttribute::matf4) { assert(false); buffer += stride; }
-    void operator()(VertexAttribute::ushort8) { assert(false); buffer += stride; }
-    
+
+    void operator()(VertexAttribute::matf3) {
+        assert(false);
+        buffer += stride;
+    }
+    void operator()(VertexAttribute::matf4) {
+        assert(false);
+        buffer += stride;
+    }
+    void operator()(VertexAttribute::ushort8) {
+        assert(false);
+        buffer += stride;
+    }
+
 private:
     gfx::AttributeDataType dataType;
     std::uint8_t* buffer{nullptr};
     std::size_t stride{0};
-    
+
     template <typename To, typename From, typename = std::enable_if_t<std::is_assignable_v<To&, From>>>
     void get(const From value) {
         assert(stride == sizeof(To));
         *reinterpret_cast<To*>(buffer) = static_cast<To>(value);
         buffer += stride;
     }
-    
-    template <typename To, typename From, std::size_t Size, typename = std::enable_if_t<std::is_assignable_v<To&, From>>>
+
+    template <typename To,
+              typename From,
+              std::size_t Size,
+              typename = std::enable_if_t<std::is_assignable_v<To&, From>>>
     void get(const std::array<From, Size>& value) {
         assert(stride == sizeof(std::array<To, Size>));
-        std::transform(std::begin(value), std::end(value), std::begin(*reinterpret_cast<std::array<To, Size>*>(buffer)), [](From x) { return static_cast<To>(x); });
+        std::transform(std::begin(value),
+                       std::end(value),
+                       std::begin(*reinterpret_cast<std::array<To, Size>*>(buffer)),
+                       [](From x) { return static_cast<To>(x); });
         buffer += stride;
     }
 };
@@ -300,7 +316,7 @@ const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAtt
                 const auto count = attrib.getCount();
                 const auto stride = attrib.getStride();
                 assert(stride != 0);
-                
+
                 rawData.resize(count * stride);
                 std::fill(rawData.begin(), rawData.end(), 0);
 
