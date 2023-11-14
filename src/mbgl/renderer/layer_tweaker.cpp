@@ -64,15 +64,6 @@ shaders::ExpressionInputsUBO LayerTweaker::buildExpressionUBO(double zoom, uint6
             /* .pad = */ 0,
             0};
 }
-
-bool LayerTweaker::hasPropertyAsUniform(const StringIdentity attrNameID) const {
-    return propertiesAsUniforms.find(attrNameID) != propertiesAsUniforms.end();
-}
-
-using namespace shaders;
-AttributeSource LayerTweaker::getAttributeSource(const StringIdentity attribNameID) const {
-    return hasPropertyAsUniform(attribNameID) ? AttributeSource::Constant : AttributeSource::PerVertex;
-}
 #endif // MLN_RENDER_BACKEND_METAL
 
 void LayerTweaker::setPropertiesAsUniforms([[maybe_unused]] const std::unordered_set<StringIdentity>& props) {
