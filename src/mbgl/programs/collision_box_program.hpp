@@ -35,7 +35,7 @@ public:
     }
 
     static gfx::Vertex<CollisionBoxDynamicAttributes> dynamicVertex(bool placed, bool notUsed, Point<float> shift) {
-        return {{{static_cast<uint8_t>(placed), static_cast<uint8_t>(notUsed)}}, {{shift.x, shift.y}}};
+        return {{{static_cast<uint16_t>(placed), static_cast<uint16_t>(notUsed)}}, {{shift.x, shift.y}}};
     }
 
     template <class DrawMode>

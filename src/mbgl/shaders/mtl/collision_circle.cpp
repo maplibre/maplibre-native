@@ -12,7 +12,7 @@ const std::array<AttributeInfo, 4> ShaderSource<BuiltIn::CollisionCircleShader, 
 };
 const std::array<UniformBlockInfo, 1>
     ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Metal>::uniforms = {
-        UniformBlockInfo{5, true, true, sizeof(CollisionUBO), "CollisionCircleUBO"},
+        UniformBlockInfo{4, true, true, sizeof(CollisionUBO), "CollisionCircleUBO"},
 };
 const std::array<TextureInfo, 0> ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Metal>::textures = {};
 
