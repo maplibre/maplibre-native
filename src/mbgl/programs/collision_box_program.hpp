@@ -165,6 +165,4 @@ public:
     }
 };
 
-using CollisionBoxVertex = CollisionBoxProgram::LayoutVertex;
-
 } // namespace mbgl
