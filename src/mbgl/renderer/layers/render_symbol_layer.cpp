@@ -878,80 +878,47 @@ const StringIdentity idCollisionExtrudeAttribName = stringIndexer().get("a_extru
 const StringIdentity idCollisionPlacedAttribName = stringIndexer().get("a_placed");
 const StringIdentity idCollisionShiftAttribName = stringIndexer().get("a_shift");
 
-gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::CollisionBuffer& buffer, bool staticCopy) {
+gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::CollisionBuffer& buffer) {
     gfx::VertexAttributeArray vertexAttrs;
+    using LayoutVertex = gfx::Vertex<CollisionBoxLayoutAttributes>;
 
-    if (staticCopy) {
-        if (auto& attr = vertexAttrs.getOrAdd(idCollisionPosAttribName)) {
-            std::size_t index{0};
-            for (auto& v : buffer.vertices().vector()) {
-                attr->set<gfx::VertexAttribute::int2>(index++, {v.a1[0], v.a1[1]});
-            }
-        }
-        if (auto& attr = vertexAttrs.getOrAdd(idCollisionAnchorPosAttribName)) {
-            std::size_t index{0};
-            for (auto& v : buffer.vertices().vector()) {
-                attr->set<gfx::VertexAttribute::int2>(index++, {v.a2[0], v.a2[1]});
-            }
-        }
-        if (auto& attr = vertexAttrs.getOrAdd(idCollisionExtrudeAttribName)) {
-            std::size_t index{0};
-            for (auto& v : buffer.vertices().vector()) {
-                attr->set<gfx::VertexAttribute::int2>(index++, {v.a3[0], v.a3[1]});
-            }
-        }
+    if (const auto& attr = vertexAttrs.getOrAdd(idCollisionPosAttribName)) {
+        attr->setSharedRawData(buffer.sharedVertices,
+                               offsetof(LayoutVertex, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(LayoutVertex),
+                               gfx::AttributeDataType::Short2);
+    }
+    if (const auto& attr = vertexAttrs.getOrAdd(idCollisionAnchorPosAttribName)) {
+        attr->setSharedRawData(buffer.sharedVertices,
+                               offsetof(LayoutVertex, a2),
+                               /*vertexOffset=*/0,
+                               sizeof(LayoutVertex),
+                               gfx::AttributeDataType::Short2);
+    }
+    if (const auto& attr = vertexAttrs.getOrAdd(idCollisionExtrudeAttribName)) {
+        attr->setSharedRawData(buffer.sharedVertices,
+                               offsetof(LayoutVertex, a3),
+                               /*vertexOffset=*/0,
+                               sizeof(LayoutVertex),
+                               gfx::AttributeDataType::Short2);
+    }
 
-        if (auto& attr = vertexAttrs.getOrAdd(idCollisionPlacedAttribName)) {
-            std::size_t index{0};
-            for (auto& v : buffer.dynamicVertices().vector()) {
-                attr->set<gfx::VertexAttribute::int2>(index++, {v.a1[0], v.a1[1]});
-            }
-        }
-        if (auto& attr = vertexAttrs.getOrAdd(idCollisionShiftAttribName)) {
-            std::size_t index{0};
-            for (auto& v : buffer.dynamicVertices().vector()) {
-                attr->set<gfx::VertexAttribute::float2>(index++, {v.a2[0], v.a2[1]});
-            }
-        }
-    } else {
-        if (const auto& attr = vertexAttrs.getOrAdd(idCollisionPosAttribName)) {
-            attr->setSharedRawData(buffer.sharedVertices,
-                                   offsetof(CollisionBoxVertex, a1),
-                                   /*vertexOffset=*/0,
-                                   sizeof(CollisionBoxVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
-        if (const auto& attr = vertexAttrs.getOrAdd(idCollisionAnchorPosAttribName)) {
-            attr->setSharedRawData(buffer.sharedVertices,
-                                   offsetof(CollisionBoxVertex, a2),
-                                   /*vertexOffset=*/0,
-                                   sizeof(CollisionBoxVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
-        if (const auto& attr = vertexAttrs.getOrAdd(idCollisionExtrudeAttribName)) {
-            attr->setSharedRawData(buffer.sharedVertices,
-                                   offsetof(CollisionBoxVertex, a3),
-                                   /*vertexOffset=*/0,
-                                   sizeof(CollisionBoxVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
+    using DynamicVertex = gfx::Vertex<CollisionBoxDynamicAttributes>;
 
-        using DynamicVertex = gfx::Vertex<CollisionBoxDynamicAttributes>;
-
-        if (const auto& attr = vertexAttrs.getOrAdd(idCollisionPlacedAttribName)) {
-            attr->setSharedRawData(buffer.sharedDynamicVertices,
-                                   offsetof(DynamicVertex, a1),
-                                   /*vertexOffset=*/0,
-                                   sizeof(DynamicVertex),
-                                   gfx::AttributeDataType::UByte2);
-        }
-        if (const auto& attr = vertexAttrs.getOrAdd(idCollisionShiftAttribName)) {
-            attr->setSharedRawData(buffer.sharedDynamicVertices,
-                                   offsetof(DynamicVertex, a2),
-                                   /*vertexOffset=*/0,
-                                   sizeof(DynamicVertex),
-                                   gfx::AttributeDataType::Float2);
-        }
+    if (const auto& attr = vertexAttrs.getOrAdd(idCollisionPlacedAttribName)) {
+        attr->setSharedRawData(buffer.sharedDynamicVertices,
+                               offsetof(DynamicVertex, a1),
+                               /*vertexOffset=*/0,
+                               sizeof(DynamicVertex),
+                               gfx::AttributeDataType::UShort2);
+    }
+    if (const auto& attr = vertexAttrs.getOrAdd(idCollisionShiftAttribName)) {
+        attr->setSharedRawData(buffer.sharedDynamicVertices,
+                               offsetof(DynamicVertex, a2),
+                               /*vertexOffset=*/0,
+                               sizeof(DynamicVertex),
+                               gfx::AttributeDataType::Float2);
     }
 
     return vertexAttrs;
@@ -1131,20 +1098,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
             const std::string suffix = isText ? "text/" : "icon/";
 
-            auto addVertices = [&collisionBuilder](const auto& vertices, bool staticCopy) {
-                if (staticCopy) {
-                    std::vector<std::array<int16_t, 2>> verts(vertices.size());
-                    std::transform(
-                        vertices.begin(), vertices.end(), verts.begin(), [](const auto& v) -> std::array<int16_t, 2> {
-                            return v.a1;
-                        });
-                    collisionBuilder->addVertices(verts, 0, verts.size());
-                } else {
-                    collisionBuilder->setRawVertices({}, vertices.size(), gfx::AttributeDataType::Short2);
-                }
+            auto addVertices = [&collisionBuilder](const auto& vertices) {
+                collisionBuilder->setRawVertices({}, vertices.size(), gfx::AttributeDataType::Short2);
             };
-
-            constexpr bool staticVertexAndAttributes = false;
 
             if (hasCollisionBox) {
                 const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
@@ -1153,9 +1109,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                             context, {}, stringIndexer().get(idCollisionPosAttribName)))) {
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "box");
                     collisionBuilder->setShader(shader);
-                    addVertices(collisionBox->vertices().vector(), staticVertexAndAttributes);
-                    collisionBuilder->setVertexAttributes(
-                        getCollisionVertexAttributes(*collisionBox, staticVertexAndAttributes));
+                    addVertices(collisionBox->vertices().vector());
+                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(*collisionBox));
                     collisionBuilder->setSegments(gfx::Lines(1.0f),
                                                   collisionBox->sharedLines,
                                                   collisionBox->segments.data(),
@@ -1171,9 +1126,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                             context, {}, stringIndexer().get(idCollisionPosAttribName)))) {
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "circle");
                     collisionBuilder->setShader(shader);
-                    addVertices(collisionCircle->vertices().vector(), staticVertexAndAttributes);
-                    collisionBuilder->setVertexAttributes(
-                        getCollisionVertexAttributes(*collisionCircle, staticVertexAndAttributes));
+                    addVertices(collisionCircle->vertices().vector());
+                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(*collisionCircle));
                     collisionBuilder->setSegments(gfx::Triangles(),
                                                   collisionCircle->sharedTriangles,
                                                   collisionCircle->segments.data(),

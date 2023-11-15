@@ -24,7 +24,7 @@ struct VertexStage {
     short2 pos [[attribute(0)]];
     short2 anchor_pos [[attribute(1)]];
     short2 extrude [[attribute(2)]];
-    uchar2 placed [[attribute(3)]];
+    ushort2 placed [[attribute(3)]];
 };
 
 struct FragmentStage {
