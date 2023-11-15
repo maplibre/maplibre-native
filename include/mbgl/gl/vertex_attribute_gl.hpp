@@ -19,7 +19,7 @@ class VertexAttributeGL final : public gfx::VertexAttribute {
 private:
     friend VertexAttributeArrayGL;
     VertexAttributeGL(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
-        : VertexAttribute(index_, dataType_, count_, /*stride_=*/0) {}
+        : VertexAttribute(index_, dataType_, count_) {}
     VertexAttributeGL(const VertexAttributeGL& other)
         : VertexAttribute(other),
           glType(other.glType) {}
