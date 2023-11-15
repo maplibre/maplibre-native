@@ -111,7 +111,7 @@ public:
     virtual ~VertexAttribute() = default;
 
     static std::size_t getStrideOf(gfx::AttributeDataType);
-    
+
     /// @brief Get the index of the vertex attribute
     int getIndex() const { return index; }
 
