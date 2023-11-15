@@ -426,14 +426,14 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     }
     auto* fillTileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
-   #if MLN_TRIANGULATE_FILL_OUTLINES
-       // Set up a layer group for outlines
-       if (!outlineLayerGroup) {
-           outlineLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
-           activateLayerGroup(outlineLayerGroup, isRenderable, changes);
-       }
-       auto* outlineTileLayerGroup = static_cast<TileLayerGroup*>(outlineLayerGroup.get());
-   #endif
+#if MLN_TRIANGULATE_FILL_OUTLINES
+    // Set up a layer group for outlines
+    if (!outlineLayerGroup) {
+        outlineLayerGroup = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID());
+        activateLayerGroup(outlineLayerGroup, isRenderable, changes);
+    }
+    auto* outlineTileLayerGroup = static_cast<TileLayerGroup*>(outlineLayerGroup.get());
+#endif
 
     if (!layerTweaker) {
         layerTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
@@ -810,9 +810,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlineBuilder->setShader(outlineShader);
                 outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlineBuilder->setSegments(gfx::Lines(2),
-                                                            bucket.sharedBasicLineIndexes,
-                                                            bucket.basicLineSegments.data(),
-                                                            bucket.basicLineSegments.size());
+                                            bucket.sharedBasicLineIndexes,
+                                            bucket.basicLineSegments.data(),
+                                            bucket.basicLineSegments.size());
                 finish(
                     *outlineBuilder, FillLayerTweaker::idFillOutlineInterpolateUBOName, getFillOutlineInterpolateUBO());
             }
@@ -912,9 +912,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlinePatternBuilder->setRenderPass(renderPass);
                 outlinePatternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlinePatternBuilder->setSegments(gfx::Lines(2),
-                                                                   bucket.sharedBasicLineIndexes,
-                                                                   bucket.basicLineSegments.data(),
-                                                                   bucket.basicLineSegments.size());
+                                                   bucket.sharedBasicLineIndexes,
+                                                   bucket.basicLineSegments.data(),
+                                                   bucket.basicLineSegments.size());
 
                 finish(*outlinePatternBuilder,
                        idFillOutlinePatternInterpolateUBOName,

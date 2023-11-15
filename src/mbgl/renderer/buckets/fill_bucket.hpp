@@ -55,7 +55,7 @@ public:
     float getQueryRadius(const RenderLayer&) const override;
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
-    
+
 #if MLN_TRIANGULATE_FILL_OUTLINES
     using LineVertexVector = gfx::VertexVector<LineLayoutVertex>;
     const std::shared_ptr<LineVertexVector> sharedLineVertices = std::make_shared<LineVertexVector>();

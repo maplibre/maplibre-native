@@ -61,18 +61,18 @@ void addFillIndices(SegmentVector<FillAttributes>& fillSegments,
     assert(nIndices % 3 == 0);
 
     if (fillSegments.empty() ||
-       fillSegments.back().vertexLength + totalVertices > std::numeric_limits<uint16_t>::max()) {
-       fillSegments.emplace_back(startVertices, fillIndexes.elements());
-   }
+        fillSegments.back().vertexLength + totalVertices > std::numeric_limits<uint16_t>::max()) {
+        fillSegments.emplace_back(startVertices, fillIndexes.elements());
+    }
 
-   auto& triangleSegment = fillSegments.back();
-   assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
-   const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
+    auto& triangleSegment = fillSegments.back();
+    assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
+    const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
 
-   for (std::size_t i = 0; i < nIndices; i += 3) {
-       fillIndexes.emplace_back(
-           triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
-   }
+    for (std::size_t i = 0; i < nIndices; i += 3) {
+        fillIndexes.emplace_back(
+            triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
+    }
 
     triangleSegment.vertexLength += totalVertices;
     triangleSegment.indexLength += nIndices;

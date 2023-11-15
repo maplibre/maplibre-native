@@ -44,7 +44,7 @@ protected:
     std::size_t removeAllDrawables() override;
     std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
 #endif // MLN_DRAWABLE_RENDERER
-    
+
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
@@ -78,7 +78,7 @@ private:
     gfx::ShaderGroupPtr outlineShaderGroup;
     gfx::ShaderGroupPtr patternShaderGroup;
     gfx::ShaderGroupPtr outlinePatternShaderGroup;
-    
+
 #if MLN_TRIANGULATE_FILL_OUTLINES
     LayerGroupBasePtr outlineLayerGroup;
     class OulineDrawableTweaker;

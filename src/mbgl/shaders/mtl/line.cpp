@@ -67,7 +67,6 @@ const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LineSDFShader, gfx::Backe
     TextureInfo{0, "u_image"},
 };
 
-
 const std::array<AttributeInfo, 2> ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal>::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, 1, "a_pos_normal"},
     AttributeInfo{1, gfx::AttributeDataType::UByte4, 1, "a_data"},
