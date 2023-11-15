@@ -20,6 +20,7 @@
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #endif
 
@@ -216,7 +217,7 @@ static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatte
 void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::Context& context,
                                    const TransformState& state,
-                                   const std::shared_ptr<UpdateParameters>&,
+                                   const std::shared_ptr<UpdateParameters>& updateParameters,
                                    [[maybe_unused]] const RenderTree& renderTree,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -261,6 +262,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
+    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!hasPattern && !plainShader) {
         plainShader = context.getGenericShader(shaders, std::string(BackgroundPlainShaderName));
