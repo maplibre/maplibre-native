@@ -8,6 +8,22 @@
 #include <mbgl/programs/fill_program.hpp>
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 
+#if MLN_DRAWABLE_RENDERER
+/**
+    Control how the fill outlines are being generated:
+    MLN_TRIANGULATE_FILL_OUTLINES = 0 : Simple line primitives will be generated. Draw using gfx::Lines
+    MLN_TRIANGULATE_FILL_OUTLINES = 1 : Generate triangulated lines. Draw using gfx::Triangles and a Line shader.
+ */
+#define MLN_TRIANGULATE_FILL_OUTLINES 1
+#else // MLN_DRAWABLE_RENDERER
+// Legacy Renderer is incompatible with triangulated lines
+#define MLN_TRIANGULATE_FILL_OUTLINES 0
+#endif // MLN_DRAWABLE_RENDERER
+
+#if MLN_TRIANGULATE_FILL_OUTLINES
+#include <mbgl/programs/line_program.hpp>
+#endif
+
 #include <vector>
 
 namespace mbgl {
@@ -39,20 +55,33 @@ public:
     float getQueryRadius(const RenderLayer&) const override;
 
     void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) override;
+    
+#if MLN_TRIANGULATE_FILL_OUTLINES
+    using LineVertexVector = gfx::VertexVector<LineLayoutVertex>;
+    const std::shared_ptr<LineVertexVector> sharedLineVertices = std::make_shared<LineVertexVector>();
+    LineVertexVector& lineVertices = *sharedLineVertices;
+
+    using LineIndexVector = gfx::IndexVector<gfx::Triangles>;
+    const std::shared_ptr<LineIndexVector> sharedLineIndexes = std::make_shared<LineIndexVector>();
+    LineIndexVector& lineIndexes = *sharedLineIndexes;
+
+    SegmentVector<LineAttributes> lineSegments;
+#endif // MLN_TRIANGULATE_FILL_OUTLINES
+
+    using BasicLineIndexVector = gfx::IndexVector<gfx::Lines>;
+    const std::shared_ptr<BasicLineIndexVector> sharedBasicLineIndexes = std::make_shared<BasicLineIndexVector>();
+    BasicLineIndexVector& basicLines = *sharedBasicLineIndexes;
+
+    SegmentVector<FillAttributes> basicLineSegments;
 
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
 
-    using LineIndexVector = gfx::IndexVector<gfx::Lines>;
-    const std::shared_ptr<LineIndexVector> sharedLines = std::make_shared<LineIndexVector>();
-    LineIndexVector& lines = *sharedLines;
-
     using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& triangles = *sharedTriangles;
 
-    SegmentVector<FillAttributes> lineSegments;
     SegmentVector<FillAttributes> triangleSegments;
 
 #if MLN_LEGACY_RENDERER
