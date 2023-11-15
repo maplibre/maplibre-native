@@ -68,7 +68,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     builder->setEnableDepth(false);
     builder->setColorMode(gfx::ColorMode::unblended());
     builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-    builder->setEnableStencil(false);
     builder->setVertexAttrNameId(idVertexAttribName);
 
     // add or get the layer group for a debug type

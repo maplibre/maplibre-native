@@ -101,7 +101,9 @@ using GetTileIDFunc = const UnwrappedTileID& (*)(const typename TIter::value_typ
 
 using TileMaskIDMap = std::map<UnwrappedTileID, int32_t>;
 
-// `std::includes` adapted to extract tile IDs from arbitrary collection iterators
+// `std::includes` adapted to extract tile IDs from arbitrary collection iterators.
+// This is needed because, although it accepts iterators of different types, they must be:
+// "...such that an object of type InputIt can be dereferenced and then implicitly converted to both of them.​"
 template <class I1, class I2>
 bool includes(I1 beg1, const I1 end1, I2 beg2, const I2 end2, const GetTileIDFunc<I2>& unwrap) {
     for (; beg2 != end2; ++beg1) {
@@ -118,25 +120,20 @@ bool includes(I1 beg1, const I1 end1, I2 beg2, const I2 end2, const GetTileIDFun
     return true;
 }
 
-// Check whether the given set of tile IDs is a subset of the ones already rendered
-template <typename TIter>
-bool tileIDsCovered(TIter beg, TIter end, GetTileIDFunc<TIter>& unwrap, const TileMaskIDMap& idMap) {
-    if (idMap.size() < static_cast<std::size_t>(std::distance(beg, end))) {
-        return false;
-    }
-    assert(std::is_sorted(beg, end, [=](const auto& a, const auto& b) { return unwrap(a) < unwrap(b); }));
-    return includes(idMap.cbegin(), idMap.cend(), beg, end, unwrap);
-}
-
-#if MLN_LEGACY_RENDERER
-const UnwrappedTileID& unwrapRenderTiles(const RenderTiles::element_type::value_type& iter) {
+const UnwrappedTileID& unwrap(const RenderTiles::element_type::value_type& iter) {
     return iter.get().id;
 }
-#else  // !MLN_LEGACY_RENDERER
-const UnwrappedTileID& unwrapIdentity(const UnwrappedTileID& value) {
-    return value;
+
+// Check whether the given set of tile IDs is a subset of the ones already rendered
+bool tileIDsCovered(const RenderTiles& tiles, const TileMaskIDMap& idMap) {
+    if (idMap.size() < tiles->size()) {
+        return false;
+    }
+    assert(std::is_sorted(
+        tiles->begin(), tiles->end(), [=](const auto& a, const auto& b) { return unwrap(a) < unwrap(b); }));
+    return includes(idMap.cbegin(), idMap.cend(), tiles->cbegin(), tiles->cend(), &unwrap);
 }
-#endif // MLN_LEGACY_RENDERER
+
 } // namespace
 
 void PaintParameters::clearStencil() {
@@ -164,35 +161,21 @@ void PaintParameters::clearStencil() {
 #endif
 }
 
-#if MLN_LEGACY_RENDERER
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
-    renderTileClippingMasks((*renderTiles).cbegin(), (*renderTiles).cend(), &unwrapRenderTiles);
-}
-#else  // !MLN_LEGACY_RENDERER
-void PaintParameters::renderTileClippingMasks(const std::set<UnwrappedTileID>& tileIDs) {
-    renderTileClippingMasks(tileIDs.cbegin(), tileIDs.cend(), &unwrapIdentity);
-}
-#endif // MLN_LEGACY_RENDERER
-
-void PaintParameters::clearTileClippingMasks() {
-    if (!tileClippingMaskIDs.empty()) {
-        clearStencil();
+    if (!renderTiles) {
+        return;
     }
-}
-
-template <typename TIter>
-void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFunc<TIter> unwrap) {
     if (!renderPass) {
         assert(false);
         return;
     }
 
-    if (tileIDsCovered(beg, end, unwrap, tileClippingMaskIDs)) {
+    if (tileIDsCovered(renderTiles, tileClippingMaskIDs)) {
         // The current stencil mask is for this source already; no need to draw another one.
         return;
     }
 
-    const auto count = std::distance(beg, end);
+    const auto count = renderTiles->size();
     if (nextStencilID + count > maxStencilValue) {
         // we'll run out of fresh IDs so we need to clear and start from scratch
         clearStencil();
@@ -201,8 +184,8 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
 #if MLN_RENDER_BACKEND_METAL
     // Assign a stencil ID and build a UBO for each tile in the set
     std::vector<shaders::ClipUBO> tileUBOs;
-    for (auto i = beg; i != end; ++i) {
-        const auto& tileID = unwrap(*i);
+    for (const auto& tileRef : *renderTiles) {
+        const auto& tileID = tileRef.get().id;
 
         const int32_t stencilID = nextStencilID;
         const auto result = tileClippingMaskIDs.insert(std::make_pair(tileID, stencilID));
@@ -215,7 +198,7 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
         }
 
         if (tileUBOs.empty()) {
-            tileUBOs.reserve(std::distance(beg, end));
+            tileUBOs.reserve(count);
         }
 
         tileUBOs.emplace_back(shaders::ClipUBO{/*.matrix=*/util::cast<float>(matrixForTile(tileID)),
@@ -248,8 +231,8 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
     const style::Properties<>::PossiblyEvaluated properties{};
     const ClippingMaskProgram::Binders paintAttributeData(properties, 0);
 
-    for (auto i = beg; i != end; ++i) {
-        const auto& tileID = unwrap(*i);
+    for (const auto& tileRef : *renderTiles) {
+        const auto& tileID = tileRef.get().id;
 
         const int32_t stencilID = nextStencilID;
         const auto result = tileClippingMaskIDs.insert(std::make_pair(tileID, stencilID));
@@ -288,6 +271,12 @@ void PaintParameters::renderTileClippingMasks(TIter beg, TIter end, GetTileIDFun
                       "clipping/" + util::toString(stencilID));
     }
 #endif // MLN_RENDER_BACKEND_METAL
+}
+
+void PaintParameters::clearTileClippingMasks() {
+    if (!tileClippingMaskIDs.empty()) {
+        clearStencil();
+    }
 }
 
 gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& tileID) const {
