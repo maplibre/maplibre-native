@@ -6,9 +6,9 @@ An annotation as described in this proposal is a piece of UI that is drawn on th
 
 Most mobile map experiences display some sort of custom content on the map, often in the form of annotations. MapLibre’s current annotation system is difficult to use, performs poorly, and lacks many of the features developers expect from modern mapping libraries.
 
-This proposal introduces the concept annotations that are complex, animatable and interactive to maplibre’s core. The first phase allows bitmap backed annotations to be rendered. The second phase will enable native platform views (ios, android) to be rendered directly by maplibre-gl.
+This proposal introduces the concept of annotations that are complex, animatable and interactive to MapLibre’s core. The first phase allows bitmap backed annotations to be rendered. The second phase will enable native platform views (iOS, Android) to be rendered directly by MapLibre Native.
 
-These new annotations will provide a more flexible tool for drawing user content on the map that is more inline with what developers expect from the built-in mobile map toolkits. The focus on animations and interactivity allows developers to create differentiated map experiences that feel made for mobile.
+These new annotations will provide a more flexible tool for drawing user content on the map that is more in line with what developers expect from the built-in mobile map toolkits. The focus on animations and interactivity allows developers to create differentiated map experiences that feel made for mobile.
 
 By introducing a specialized rendering path for annotations, we bypass some of the limitations of the current layer-based system. This leads to better performance, especially in scenarios with many dynamic elements, where full layout re-calculations would otherwise cause noticeable lag and degrade the user experience.
 
@@ -17,18 +17,20 @@ The customization options that these annotations will provide, together with the
 ## Proposed Change
 
 ### Phase 1
+
 For this phase we would like to just build our support for bitmaps. The idea being that all native views eventually become bitmaps and supporting them robustly will eventually allow the renderer to draw native views correctly.
 
-* Introduce “Annotation” as a first class citizen of maplibre-gl core c++ layer. This feature would only be available to native clients and platforms and not maplibre-js.
+* Introduce “Annotation” as a first class citizen of the MapLibre Native C++ Core.
 * Annotations rely on their own bitmap handling and not on the symbol layer texture atlas. Bitmaps should be able to be transformed and quickly swappable to support animations.
-* Annotations can define a label (reuse symbol layer logic)
-* Annotations provide callbacks and handling / can trigger full map re-renders. These callbacks need to be in sync with the native render loop so that animations can be synchronized properly.
+* Annotations can define a label (reuse symbol layer logic).
+* Annotations provide callbacks and can trigger full map re-renders. These callbacks need to be in sync with the native render loop so that animations can be synchronized properly.
 * Annotations participate in label and symbol layer collisions.
-[Stretch] Annotations support clustering, like symbol layers do.
+* [Stretch] Annotations support clustering, like symbol layers do.
 * Platform layers allow annotations to participate in hit tests and “onTap” events.
 * Layout, styling and positioning of Annotations can happen outside of the style’s layout and paint loops. However they should still participate in the rendering process.
 
 ### Phase 2
+
 Once we have a system in place that can handle bitmaps we would like to take it one step further and support native platform views. The changes described here would likely be done inside the individual platforms. 
 
 For inspiration we can look at Flutter and their rendering engine (see https://github.com/flutter/flutter/wiki/Texture-Layer-Hybrid-Composition and https://github.com/flutter/flutter/wiki/Hybrid-Composition-iOS).
