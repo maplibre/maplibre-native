@@ -12,8 +12,8 @@
 /**
     Control how the fill outlines are being generated:
     MLN_TRIANGULATE_FILL_OUTLINES = 0 : Basic line primitives will be generated. Draw using gfx::Lines
-    MLN_TRIANGULATE_FILL_OUTLINES = 1 : Additionally generate triangulated lines. Draw using gfx::Triangles and a Line shader.
-                                        Pattern fill outlines are still drawn as basic lines.
+    MLN_TRIANGULATE_FILL_OUTLINES = 1 : Additionally generate triangulated lines. Draw using gfx::Triangles and a Line
+   shader. Pattern fill outlines are still drawn as basic lines.
  */
 #define MLN_TRIANGULATE_FILL_OUTLINES 1
 #else // MLN_DRAWABLE_RENDERER
@@ -65,7 +65,7 @@ public:
 
     /// Triangulated lines indexes
     using LineIndexVector = gfx::IndexVector<gfx::Triangles>;
-    const std::shared_ptr<LineIndexVector> sharedLineIndexes = std::make_shared<LineIndexVector>();    
+    const std::shared_ptr<LineIndexVector> sharedLineIndexes = std::make_shared<LineIndexVector>();
     LineIndexVector& lineIndexes = *sharedLineIndexes;
 
     /// Triangulated lines segments
