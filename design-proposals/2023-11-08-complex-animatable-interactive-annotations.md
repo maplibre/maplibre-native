@@ -40,6 +40,11 @@ The big challenges here would be:
 2. Correctly handling touch events
 3. Keeping the views in sync with map and the system
 
+#### Some potential challenges (ios centric):
+1. UIViews animate using a framework called CoreAnimation, much of which actually happens on a inaccessible rendering backend. However, with Metal it is now possible to synchronize with Core Animation via https://developer.apple.com/documentation/quartzcore/cametallayer/1478157-presentswithtransaction. Core Animation will animate your view either through transforms or any number of techniques. We need to capture each frame of the animation and the state of the bitmap so that maplibre-gl can render it.
+2. Touch events are notoriously tricky to get right (even the Flutter team points it out as a difficult problem). We need to come up with a way to correctly proxy the touch events from the MapView to the UIView backed annotations (which may have complex gesture recognizers attached to them). We may want to settle for limited touch support (select/deselect via single tap), but full touch will be complex.
+3. The view content itself may not represent what is actually being drawn, for example imagine an annotation backed by a UI view that has parts of the view hidden but can be shown through some touch event. Which parts of this view should participate? Should the whole view (based on the frame) or the visible elements. And lastly, back to (1) how do these get sync'd with the map in case of animations. We can start with the simpler case of just looking at bounding boxes as well as checking for visibility of the superview.
+
 
 ## API Modifications
 
