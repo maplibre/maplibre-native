@@ -57,7 +57,7 @@ public:
         newAttrs->copy(*this);
         return newAttrs;
     }
-    
+
     /// Indicates whether any values have changed
     bool isDirty() const override;
 
