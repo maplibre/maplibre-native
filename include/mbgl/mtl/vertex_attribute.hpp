@@ -57,6 +57,9 @@ public:
         newAttrs->copy(*this);
         return newAttrs;
     }
+    
+    /// Indicates whether any values have changed
+    bool isDirty() const override;
 
 private:
     gfx::UniqueVertexAttribute create(int index, gfx::AttributeDataType dataType, std::size_t count) const override {
