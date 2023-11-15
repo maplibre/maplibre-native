@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/immutable.hpp>
 
@@ -53,8 +54,10 @@ public:
     static shaders::ExpressionInputsUBO buildExpressionUBO(double zoom, uint64_t frameCount);
 
     /// @brief Check whether a property name exists within the previously set collection.
-    bool hasPropertyAsUniform(StringIdentity) const;
-    shaders::AttributeSource getAttributeSource(StringIdentity) const;
+    shaders::AttributeSource getAttributeSource(const StringIdentity id) {
+        return propertiesAsUniforms.count(id) ? shaders::AttributeSource::Constant
+                                              : shaders::AttributeSource::PerVertex;
+    }
 
     template <shaders::BuiltIn ShaderType>
     shaders::AttributeSource getAttributeSource(size_t index) {
