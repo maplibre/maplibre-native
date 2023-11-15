@@ -97,5 +97,18 @@ const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAtt
     return attrib_.getBuffer();
 }
 
+bool VertexAttributeArray::isDirty() const {
+    return std::any_of(attrs.begin(), attrs.end(), [](const auto& kv) {
+        if (kv.second) {
+            // If we have shared data, the dirty flag from that overrides ours
+            const auto& attrib = static_cast<const VertexAttribute&>(*kv.second);
+            if (const auto& shared = attrib.getSharedRawData()) {
+                return shared->getDirty();
+            }
+        }
+        return kv.second && kv.second->isDirty();
+    });
+}
+
 } // namespace mtl
 } // namespace mbgl

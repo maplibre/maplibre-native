@@ -78,11 +78,11 @@ public:
 
     /// Move constructor
     TinyUnorderedMap(TinyUnorderedMap&& rhs)
-        : Super(std::move(rhs)),
-          linearSize(rhs.linearSize),
+        : linearSize(rhs.linearSize),
           keys(std::move(rhs.keys)),
           values(std::move(rhs.values)) {
         rhs.linearSize = 0;
+        Super::operator=(std::move(rhs));
     }
 
     /// Copy constructor
@@ -157,6 +157,20 @@ public:
     void clear() {
         linearSize = 0;
         this->Super::clear();
+    }
+
+    bool operator==(const TinyUnorderedMap& other) const {
+        if (size() != other.size()) return false;
+        assert(linearSize == other.linearSize);
+        if (linearSize) {
+            return std::equal(
+                       keys.begin(), keys.begin() + linearSize, other.keys.begin(), other.keys.begin() + linearSize) &&
+                   std::equal(values.begin(),
+                              values.begin() + linearSize,
+                              other.values.begin(),
+                              other.values.begin() + linearSize);
+        }
+        return std::operator==(*this, other);
     }
 
 private:
