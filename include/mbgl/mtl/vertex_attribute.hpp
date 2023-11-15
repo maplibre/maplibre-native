@@ -17,7 +17,7 @@ class VertexAttribute final : public gfx::VertexAttribute {
 private:
     friend VertexAttributeArray;
     VertexAttribute(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
-        : gfx::VertexAttribute(index_, dataType_, count_, /*stride_=*/0) {}
+        : gfx::VertexAttribute(index_, dataType_, count_) {}
     VertexAttribute(const VertexAttribute& other)
         : gfx::VertexAttribute(other) {}
     VertexAttribute(VertexAttribute&& other)
@@ -32,8 +32,6 @@ public:
     static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
                                                             UploadPass&,
                                                             const gfx::BufferUsageType);
-
-    static std::size_t getStrideOf(gfx::AttributeDataType);
 };
 
 /// Stores a collection of vertex attributes by name
