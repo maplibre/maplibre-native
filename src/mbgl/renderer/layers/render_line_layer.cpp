@@ -461,6 +461,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         builder->setSegments(gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
     };
 
+    tileLayerGroup->setStencilTiles(renderTiles);
+
     std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
