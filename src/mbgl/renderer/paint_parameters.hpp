@@ -97,9 +97,6 @@ public:
 public:
     void renderTileClippingMasks(const RenderTiles&);
 
-    /// Clear any tile masks and the stencil buffer, if necessary
-    void clearTileClippingMasks();
-
     /// Clear the stencil buffer, even if there are no tile masks (for 3D)
     void clearStencil();
 

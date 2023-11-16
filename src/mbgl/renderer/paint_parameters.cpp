@@ -265,12 +265,6 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
 #endif // MLN_RENDER_BACKEND_METAL
 }
 
-void PaintParameters::clearTileClippingMasks() {
-    if (!tileClippingMaskIDs.empty()) {
-        clearStencil();
-    }
-}
-
 gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& tileID) const {
     auto it = tileClippingMaskIDs.find(tileID);
     assert(it != tileClippingMaskIDs.end());
