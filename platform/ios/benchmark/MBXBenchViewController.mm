@@ -176,15 +176,14 @@ NSDate* const currentDate = [NSDate date];
 }
 
 size_t idx = 0;
-enum class State { None, WaitingForAssets, WarmingUp, Benchmarking } state = State::None;
+enum class State { None, WaitingForAssets, Benchmarking } state = State::None;
 int frames = 0;
 double totalFrameEncodingTime = 0;
 double totalFrameRenderingTime = 0;
 std::chrono::steady_clock::time_point started;
 std::vector<std::pair<std::string, std::pair<double, double>> > result;
 
-static const int warmupDuration = 0; // frames
-static const int benchmarkDuration = 20; // frames
+static const int benchmarkDuration = 300; // frames
 
 namespace  mbgl {
     extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploadInvalidSegments;
@@ -225,7 +224,9 @@ namespace  mbgl {
         cameraOptions.center = mbgl::LatLng(location.latitude, location.longitude);
         cameraOptions.zoom = location.zoom;
         cameraOptions.bearing = location.bearing;
-        map->jumpTo(cameraOptions);
+        mbgl::AnimationOptions animationOptions;
+        animationOptions.duration.emplace(std::chrono::duration_cast<mbgl::Duration>(std::chrono::duration<NSTimeInterval>(5)));
+        map->easeTo(cameraOptions, animationOptions);
         
         state = State::WaitingForAssets;
         NSLog(@"Benchmarking \"%s\"", location.name.c_str());
@@ -307,30 +308,17 @@ namespace  mbgl {
         }
         return;
     }
-    else if (state == State::WarmingUp)
+    else if (state == State::WaitingForAssets)
     {
-        frames++;
-        if (frames >= warmupDuration)
+        if (map->isFullyLoaded())
         {
+            // Start the benchmarking timer.
             frames = 0;
             totalFrameEncodingTime = 0;
             totalFrameRenderingTime = 0;
             state = State::Benchmarking;
             started = std::chrono::steady_clock::now();
             NSLog(@"- Benchmarking for %d frames...", benchmarkDuration);
-        }
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self renderFrame];
-        });
-        return;
-    }
-    else if (state == State::WaitingForAssets)
-    {
-        if (map->isFullyLoaded())
-        {
-            // Start the benchmarking timer.
-            state = State::WarmingUp;
-            NSLog(@"- Warming up for %d frames...", warmupDuration);
         }
         dispatch_async(dispatch_get_main_queue(), ^{
             [self renderFrame];
