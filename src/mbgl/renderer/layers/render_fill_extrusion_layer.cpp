@@ -347,6 +347,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
+    tileLayerGroup->setStencilTiles(renderTiles);
+
     std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -448,7 +450,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             if (auto builder = context.createDrawableBuilder(layerPrefix + "depth")) {
                 builder->setShader(shader);
                 builder->setIs3D(true);
-                builder->setEnableStencil(false);
                 builder->setEnableColor(false);
                 builder->setRenderPass(drawPass);
                 builder->setCullFaceMode(gfx::CullFaceMode::backCCW());

@@ -204,10 +204,6 @@ void RenderBackgroundLayer::prepare(const LayerPrepareParameters& params) {
         addPatternIfNeeded(evaluated.get<BackgroundPattern>().from.id(), params);
         addPatternIfNeeded(evaluated.get<BackgroundPattern>().to.id(), params);
     }
-
-#if MLN_DRAWABLE_RENDERER
-    updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
 }
 
 #if MLN_DRAWABLE_RENDERER
@@ -290,9 +286,11 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
 
-    tileLayerGroup->visitDrawables([&](gfx::Drawable& drawable) -> bool {
-        // Has this tile dropped out of the cover set?
-        return (!drawable.getTileID() || hasRenderTile(*drawable.getTileID()));
+    // Remove drawables for tiles that are no longer in the cover set.
+    // (Note that `RenderTiles` is empty, and this layer does not use it)
+    tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) -> bool {
+        return drawable.getTileID() &&
+               (std::find(tileCover.begin(), tileCover.end(), *drawable.getTileID()) == tileCover.end());
     });
 
     // For each tile in the cover set, add a tile drawable if one doesn't already exist.
