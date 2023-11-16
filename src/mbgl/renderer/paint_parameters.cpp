@@ -162,16 +162,8 @@ void PaintParameters::clearStencil() {
 }
 
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
-    if (!renderTiles) {
-        return;
-    }
-    if (!renderPass) {
-        assert(false);
-        return;
-    }
-
-    if (tileIDsCovered(renderTiles, tileClippingMaskIDs)) {
-        // The current stencil mask is for this source already; no need to draw another one.
+    // If the current stencil mask covers this source already, there's no need to draw another one.
+    if (!renderTiles || !renderPass || tileIDsCovered(renderTiles, tileClippingMaskIDs)) {
         return;
     }
 
