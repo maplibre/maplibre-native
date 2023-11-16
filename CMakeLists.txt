@@ -175,6 +175,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_atlases_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_custom_layer_host_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/fill_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/hillshade_prepare_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp
@@ -1324,6 +1325,16 @@ include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 
+add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/unordered_dense)
+set_target_properties(
+    unordered_dense
+    PROPERTIES
+        INTERFACE_MAPBOX_NAME "unordered_dense"
+        INTERFACE_MAPBOX_URL "https://github.com/martinus/unordered_dense"
+        INTERFACE_MAPBOX_AUTHOR "Martin Leitner-Ankerl"
+        INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/unordered_dense/LICENSE
+)
+
 target_link_libraries(
     mbgl-core
     PRIVATE
@@ -1350,6 +1361,7 @@ target_link_libraries(
         Mapbox::Base::geojson.hpp
         Mapbox::Base::geometry.hpp
         Mapbox::Base::variant
+        unordered_dense
 )
 
 export(TARGETS
@@ -1380,6 +1392,7 @@ export(TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
+    unordered_dense
 
     FILE MapboxCoreTargets.cmake
 )
