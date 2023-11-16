@@ -183,8 +183,8 @@ double totalFrameRenderingTime = 0;
 std::chrono::steady_clock::time_point started;
 std::vector<std::pair<std::string, std::pair<double, double>> > result;
 
-static const int warmupDuration = 20; // frames
-static const int benchmarkDuration = 200; // frames
+static const int warmupDuration = 0; // frames
+static const int benchmarkDuration = 20; // frames
 
 namespace  mbgl {
     extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploadInvalidSegments;
