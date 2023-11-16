@@ -99,7 +99,7 @@ protected:
     
     //mbgl::Size viewSize = { static_cast<uint32_t>(self.view.bounds.size.width),
     //                        static_cast<uint32_t>(self.view.bounds.size.height) };
-    mbgl::Size viewSize = { 512, 128 };
+    mbgl::Size viewSize = { 512, 512 };
     auto pixelRatio = [[UIScreen mainScreen] scale];
     
     observer = std::make_unique<BenchMapObserver>(self);
@@ -161,6 +161,7 @@ protected:
                                                   encoding:NSUTF8StringEncoding];
     
     map->getStyle().loadJSON(jsonString.UTF8String);
+    //map->setDebug(mbgl::MapDebugOptions::Collision | mbgl::MapDebugOptions::TileBorders);
     
     //map->getStyle().loadURL("https://api.maptiler.com/maps/2f4c4899-e695-4c8b-a4ef-92fa9d2740ff/style.json?key=G4MQXsYbLiUxOu3SV4lh");
     
