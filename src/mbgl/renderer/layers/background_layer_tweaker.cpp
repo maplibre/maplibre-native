@@ -109,7 +109,10 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
                 /* .scale_b = */ crossfade.toScale,
                 /* .mix = */ crossfade.t,
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
-                /* .pad = */ 0,
+                /* .overdrawInspector = */ overdrawInspector,
+                /* .pad1/2/3 = */ 0,
+                0,
+                0,
             };
             uniforms.createOrUpdate(idBackgroundLayerUBOName, &layerUBO, context);
         } else {
@@ -117,8 +120,11 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
             if (!backgroundLayerBuffer) {
                 const BackgroundLayerUBO layerUBO = {/* .color = */ evaluated.get<BackgroundColor>(),
                                                      /* .opacity = */ evaluated.get<BackgroundOpacity>(),
-                                                     /* .pad = */ 0,
+                                                     /* .overdrawInspector = */ overdrawInspector,
+                                                     /* .pad1/2/3 = */ 0,
                                                      0,
+                                                     0,
+                                                     /* .pad4/5 = */ 0,
                                                      0};
                 backgroundLayerBuffer = context.createUniformBuffer(&layerUBO, sizeof(layerUBO));
             }

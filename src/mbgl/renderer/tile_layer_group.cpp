@@ -142,4 +142,8 @@ std::size_t TileLayerGroup::clearDrawables() {
     return count;
 }
 
+void TileLayerGroup::setStencilTiles(RenderTiles tiles) {
+    stencilTiles = std::move(tiles);
+}
+
 } // namespace mbgl
