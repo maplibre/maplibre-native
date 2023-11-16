@@ -395,7 +395,6 @@ std::unique_ptr<gfx::DrawableBuilder> CustomDrawableLayerHost::Interface::create
     builder_->setEnableDepth(false);
     builder_->setColorMode(gfx::ColorMode::alphaBlended());
     builder_->setCullFaceMode(gfx::CullFaceMode::disabled());
-    builder_->setEnableStencil(false);
     builder_->setRenderPass(RenderPass::Translucent);
 
     return builder_;

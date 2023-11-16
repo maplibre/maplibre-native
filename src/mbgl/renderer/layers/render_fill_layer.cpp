@@ -364,6 +364,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         return tileID && !hasRenderTile(*tileID);
     });
 
+    tileLayerGroup->setStencilTiles(renderTiles);
+
     std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -559,11 +561,13 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
+                    // Only write opaque fills to the depth buffer, matching `fillRenderPass` in legacy rendering
+                    const bool opaque = (evaluated.get<FillColor>().constantOr(Color()).a >= 1.0f &&
+                                         evaluated.get<FillOpacity>().constantOr(0) >= 1.0f);
+
                     commonInit(*builder);
-                    builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                             : gfx::DepthMaskType::ReadOnly);
-                    builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
-                                                                                : gfx::ColorMode::unblended());
+                    builder->setDepthType(opaque ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
+                    builder->setColorMode(opaque ? gfx::ColorMode::unblended() : gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
                     builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);

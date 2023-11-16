@@ -1055,7 +1055,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
     std::unique_ptr<gfx::DrawableBuilder> collisionBuilder = context.createDrawableBuilder(layerCollisionPrefix);
     collisionBuilder->setSubLayerIndex(0);
-    collisionBuilder->setEnableStencil(false);
     collisionBuilder->setEnableDepth(false);
     collisionBuilder->setRenderPass(passes);
     collisionBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
@@ -1316,7 +1315,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 if (!builder) {
                     builder = context.createDrawableBuilder(layerPrefix);
                     builder->setSubLayerIndex(0);
-                    builder->setEnableStencil(false);
                     builder->setRenderPass(passes);
                     builder->setCullFaceMode(gfx::CullFaceMode::disabled());
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
