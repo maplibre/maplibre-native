@@ -3,11 +3,11 @@
 #include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/immutable.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <array>
 #include <memory>
 #include <string>
-#include <unordered_set>
 
 namespace mbgl {
 
@@ -69,8 +69,8 @@ public:
     /// @brief Set the collection of attribute names which will be provided at uniform values rather than per-vertex
     /// attributes.
     /// @details These values should not have "a_" prefixes, as produced by `readDataDrivenPaintProperties`.
-    void setPropertiesAsUniforms(const std::unordered_set<StringIdentity>&);
-    const std::unordered_set<StringIdentity>& getPropertiesAsUniforms() const;
+    void setPropertiesAsUniforms(const mbgl::unordered_set<StringIdentity>&);
+    const mbgl::unordered_set<StringIdentity>& getPropertiesAsUniforms() const;
 
     void enableOverdrawInspector(bool);
 

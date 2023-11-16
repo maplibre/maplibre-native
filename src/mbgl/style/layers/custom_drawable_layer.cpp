@@ -19,6 +19,7 @@
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <mbgl/gfx/fill_generator.hpp>
 
@@ -364,7 +365,7 @@ void CustomDrawableLayerHost::Interface::finish() {
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
     gfx::ShaderGroupPtr lineShaderGroup = shaders.getShaderGroup("LineShader");
 
-    const std::unordered_set<StringIdentity> propertiesAsUniforms{
+    const mbgl::unordered_set<StringIdentity> propertiesAsUniforms{
         stringIndexer().get("a_color"),
         stringIndexer().get("a_blur"),
         stringIndexer().get("a_opacity"),
@@ -379,7 +380,7 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {
     gfx::ShaderGroupPtr fillShaderGroup = shaders.getShaderGroup("FillShader");
 
-    const std::unordered_set<StringIdentity> propertiesAsUniforms{
+    const mbgl::unordered_set<StringIdentity> propertiesAsUniforms{
         stringIndexer().get("a_color"),
         stringIndexer().get("a_opacity"),
     };
