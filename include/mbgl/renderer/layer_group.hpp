@@ -13,10 +13,12 @@ namespace mbgl {
 class LayerGroupBase;
 class PaintParameters;
 class RenderOrchestrator;
+class RenderTile;
 class RenderTree;
 class TileLayerGroup;
 
 using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
+using RenderTiles = std::shared_ptr<const std::vector<std::reference_wrapper<const RenderTile>>>;
 
 namespace gfx {
 class Context;
@@ -127,9 +129,15 @@ public:
 
     std::size_t clearDrawables() override;
 
+    void setStencilTiles(RenderTiles);
+
 protected:
     struct Impl;
     std::unique_ptr<Impl> impl;
+
+    // When stencil clipping is enabled for the layer, this is the set
+    // of tile IDs that need to be rendered to the stencil buffer.
+    RenderTiles stencilTiles;
 };
 
 /**
