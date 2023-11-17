@@ -20,7 +20,6 @@ enum class BuiltIn {
     LineGradientShader,
     LinePatternShader,
     LineSDFShader,
-    LineBasicShader,
     LineShader,
     FillPatternShader,
     FillOutlinePatternShader,

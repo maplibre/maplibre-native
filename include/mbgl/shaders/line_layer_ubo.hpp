@@ -84,16 +84,6 @@ struct alignas(16) LineSDFPropertiesUBO {
 };
 static_assert(sizeof(LineSDFPropertiesUBO) % 16 == 0);
 
-using LineBasicUBO = LineUBO;
-
-struct alignas(16) LineBasicPropertiesUBO {
-    Color color;
-    float opacity;
-    float width;
-    float pad1, pad2;
-};
-static_assert(sizeof(LineBasicPropertiesUBO) % 16 == 0);
-
 /// Property interpolation UBOs
 struct alignas(16) LineInterpolationUBO {
     float color_t;

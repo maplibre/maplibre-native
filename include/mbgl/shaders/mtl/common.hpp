@@ -123,13 +123,6 @@ struct alignas(16) LineUBO {
     float device_pixel_ratio;
 };
 
-struct alignas(16) LineBasicUBO {
-    float4x4 matrix;
-    float2 units_to_pixels;
-    float ratio;
-    float device_pixel_ratio;
-};
-
 struct alignas(16) LineGradientUBO {
     float4x4 matrix;
     float2 units_to_pixels;
@@ -145,13 +138,6 @@ struct alignas(16) LinePropertiesUBO {
     float offset;
     float width;
     float pad1, pad2, pad3;
-};
-
-struct alignas(16) LineBasicPropertiesUBO {
-    float4 color;
-    float opacity;
-    float width;
-    float pad1, pad2;
 };
 
 struct alignas(16) LineGradientPropertiesUBO {

@@ -4,7 +4,6 @@
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 #include <mbgl/layout/pattern_layout.hpp>
-#include <mbgl/renderer/buckets/fill_bucket.hpp>
 
 #include <memory>
 
@@ -35,15 +34,6 @@ public:
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
 #endif
-
-protected:
-#if MLN_TRIANGULATE_FILL_OUTLINES
-    void markLayerRenderable(bool willRender, UniqueChangeRequestVec&) override;
-    void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec&) override;
-    void layerRemoved(UniqueChangeRequestVec&) override;
-    std::size_t removeAllDrawables() override;
-    std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
-#endif // MLN_DRAWABLE_RENDERER
 
 private:
     void transition(const TransitionParameters&) override;
@@ -78,13 +68,7 @@ private:
     gfx::ShaderGroupPtr outlineShaderGroup;
     gfx::ShaderGroupPtr patternShaderGroup;
     gfx::ShaderGroupPtr outlinePatternShaderGroup;
-
-#if MLN_TRIANGULATE_FILL_OUTLINES
-    LayerGroupBasePtr outlineLayerGroup;
-    class OulineDrawableTweaker;
-#endif // MLN_TRIANGULATE_FILL_OUTLINES
-
-#endif // MLN_DRAWABLE_RENDERER
+#endif
 };
 
 } // namespace mbgl
