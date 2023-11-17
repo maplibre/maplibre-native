@@ -1148,35 +1148,34 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         };
 
         // If we already have drawables for this tile, update them.
-        if (tileLayerGroup->getDrawableCount(passes, tileID) > 0) {
-            gfx::UniformBufferPtr textInterpUBO, iconInterpUBO;
+        // Just update the drawables we already created
+        gfx::UniformBufferPtr textInterpUBO, iconInterpUBO;
+        auto updateExisting = [&](gfx::Drawable& drawable) {
+            if (drawable.getLayerTweaker() != layerTweaker) {
+                // This drawable was produced on a previous style/bucket, and should not be updated.
+                return false;
+            }
 
-            // Just update the drawables we already created
-            tileLayerGroup->visitDrawables(passes, tileID, [&](gfx::Drawable& drawable) {
-                if (drawable.getLayerTweaker() != layerTweaker) {
-                    // This drawable was produced on a previous style/bucket, and should not be updated.
-                    return;
-                }
+            propertiesAsUniforms.clear();
 
-                propertiesAsUniforms.clear();
+            const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
+            updateTileDrawable(drawable,
+                               context,
+                               bucket,
+                               bucketPaintProperties,
+                               evaluated,
+                               state,
+                               textInterpUBO,
+                               iconInterpUBO,
+                               propertiesAsUniforms);
 
-                const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-                updateTileDrawable(drawable,
-                                   context,
-                                   bucket,
-                                   bucketPaintProperties,
-                                   evaluated,
-                                   state,
-                                   textInterpUBO,
-                                   iconInterpUBO,
-                                   propertiesAsUniforms);
-
-                // We assume that the properties-as-uniforms doesn't change without the style changing.
-                // That would require updating the shader as well.
-                [[maybe_unused]] const auto& drawData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
-                assert(drawData.propertiesAsUniforms == toMap(propertiesAsUniforms));
-            });
-
+            // We assume that the properties-as-uniforms doesn't change without the style changing.
+            // That would require updating the shader as well.
+            [[maybe_unused]] const auto& drawData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
+            assert(drawData.propertiesAsUniforms == toMap(propertiesAsUniforms));
+            return true;
+        };
+        if (updateTile(passes, tileID, std::move(updateExisting))) {
             // re-create collision drawables
             if (collisionTileLayerGroup) {
                 collisionTileLayerGroup->removeDrawables(passes, tileID);
