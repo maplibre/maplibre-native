@@ -13,11 +13,11 @@ const style::LayerTypeInfo* LineLayerFactory::getTypeInfo() const noexcept {
 
 std::unique_ptr<style::Layer> LineLayerFactory::createLayer(const std::string& id,
                                                             const style::conversion::Convertible& value) noexcept {
-    auto const source = getSource(value);
+    const auto source = getSource(value);
     if (!source) {
         return nullptr;
     }
-    return std::unique_ptr<style::Layer>(new style::LineLayer(id, *source));
+    return std::unique_ptr<style::Layer>(new (std::nothrow) style::LineLayer(id, *source));
 }
 
 std::unique_ptr<Layout> LineLayerFactory::createLayout(

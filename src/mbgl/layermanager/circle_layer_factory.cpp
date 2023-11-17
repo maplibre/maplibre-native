@@ -14,12 +14,11 @@ const style::LayerTypeInfo* CircleLayerFactory::getTypeInfo() const noexcept {
 
 std::unique_ptr<style::Layer> CircleLayerFactory::createLayer(const std::string& id,
                                                               const style::conversion::Convertible& value) noexcept {
-    auto const source = getSource(value);
+    const auto source = getSource(value);
     if (!source) {
         return nullptr;
     }
-
-    return std::unique_ptr<style::Layer>(new style::CircleLayer(id, *source));
+    return std::unique_ptr<style::Layer>(new (std::nothrow) style::CircleLayer(id, *source));
 }
 
 std::unique_ptr<Layout> CircleLayerFactory::createLayout(

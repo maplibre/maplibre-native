@@ -13,12 +13,11 @@ const style::LayerTypeInfo* FillExtrusionLayerFactory::getTypeInfo() const noexc
 
 std::unique_ptr<style::Layer> FillExtrusionLayerFactory::createLayer(
     const std::string& id, const style::conversion::Convertible& value) noexcept {
-    auto const source = getSource(value);
+    const auto source = getSource(value);
     if (!source) {
         return nullptr;
     }
-
-    return std::unique_ptr<style::Layer>(new style::FillExtrusionLayer(id, *source));
+    return std::unique_ptr<style::Layer>(new (std::nothrow) style::FillExtrusionLayer(id, *source));
 }
 
 std::unique_ptr<Layout> FillExtrusionLayerFactory::createLayout(
