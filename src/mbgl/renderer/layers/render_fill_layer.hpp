@@ -82,7 +82,7 @@ private:
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
     LayerGroupBasePtr outlineLayerGroup;
-    class OulineDrawableTweaker;
+    LayerTweakerPtr outlineLayerTweaker;
 #endif // MLN_TRIANGULATE_FILL_OUTLINES
 
 #endif // MLN_DRAWABLE_RENDERER
