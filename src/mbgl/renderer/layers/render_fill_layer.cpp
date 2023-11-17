@@ -655,7 +655,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         auto updateExisting = [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
-                return;
+                return false;
             }
 
             auto& uniforms = drawable.mutableUniformBuffers();
@@ -676,8 +676,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             drawable.setVertexAttributes(vertexAttrs);
+            return true;
         };
-        if (0 < fillTileLayerGroup->visitDrawables(renderPass, tileID, std::move(updateExisting))) {
+        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
 

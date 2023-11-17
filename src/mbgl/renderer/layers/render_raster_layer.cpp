@@ -466,20 +466,26 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             if (!cleared) {
                 // Update existing drawables
                 bool geometryChanged = false;
-                const auto updated = tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+                auto updateExisting = [&](gfx::Drawable& drawable) {
+                    // Only current drawables are updated, ones produced for
+                    // a previous style retain the attribute values for that style.
+                    if (drawable.getLayerTweaker() != layerTweaker) {
+                        return false;
+                    }
+
                     gfx::UniqueDrawableBuilder none;
                     if (!geometryChanged && !buildVertexData(none, &drawable, bucket)) {
                         // Masking changed, need to rebuild this tile
                         geometryChanged = true;
                     }
-                });
-
-                if (geometryChanged) {
-                    removeTile(renderPass, tileID);
-                    // cleared = true;
-                } else if (0 < updated) {
+                    return true;
+                };
+                if (updateTile(renderPass, tileID, std::move(updateExisting))) {
                     // If we modified drawables without removing them, we're done with this tile.
                     continue;
+                } else if (geometryChanged) {
+                    // If the geometry has changed, the drawable needs to be re-built
+                    removeTile(renderPass, tileID);
                 }
             }
 
