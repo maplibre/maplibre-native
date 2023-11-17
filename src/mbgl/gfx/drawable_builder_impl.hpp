@@ -51,7 +51,7 @@ public:
 
     void addPolyline(gfx::DrawableBuilder& builder,
                      const GeometryCoordinates& coordinates,
-                     const gfx::PolylineGeneratorOptions& options);
+                     const gfx::PolylineGenerator::Options& options);
 
     void setupForPolylines(gfx::DrawableBuilder& builder);
 

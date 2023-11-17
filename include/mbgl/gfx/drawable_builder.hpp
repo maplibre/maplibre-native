@@ -199,7 +199,7 @@ public:
                       std::size_t baseIndex = 0);
 
     /// Add a polyline. If the last point equals the first it will be closed, otherwise open
-    void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions&);
+    void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGenerator::Options&);
 
     /// return the curent vertex count
     std::size_t curVertexCount() const;

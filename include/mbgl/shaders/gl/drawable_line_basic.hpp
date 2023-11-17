@@ -39,7 +39,27 @@ out float v_width;
 out float v_gamma_scale;
 out highp float v_linesofar;
 
+#ifndef HAS_UNIFORM_u_color
+layout (location = 2) in highp vec4 a_color;
+out highp vec4 color;
+#endif
+#ifndef HAS_UNIFORM_u_opacity
+layout (location = 3) in lowp vec2 a_opacity;
+out lowp float opacity;
+#endif
+
 void main() {
+    #ifndef HAS_UNIFORM_u_color
+color = unpack_mix_color(a_color, u_color_t);
+#else
+highp vec4 color = u_color;
+#endif
+    #ifndef HAS_UNIFORM_u_opacity
+opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
+#else
+lowp float opacity = u_opacity;
+#endif
+
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
     float ANTIALIASING = 1.0 / u_device_pixel_ratio / 2.0;
@@ -96,7 +116,21 @@ in float v_width;
 in vec2 v_normal;
 in float v_gamma_scale;
 
+#ifndef HAS_UNIFORM_u_color
+in highp vec4 color;
+#endif
+#ifndef HAS_UNIFORM_u_opacity
+in lowp float opacity;
+#endif
+
 void main() {
+    #ifdef HAS_UNIFORM_u_color
+highp vec4 color = u_color;
+#endif
+    #ifdef HAS_UNIFORM_u_opacity
+lowp float opacity = u_opacity;
+#endif
+
     // Calculate the distance of the pixel from the line in pixels.
     float dist = length(v_normal) * v_width;
 
@@ -106,7 +140,7 @@ void main() {
     float blur2 = (1.0 / u_device_pixel_ratio) * v_gamma_scale;
     float alpha = clamp(min(dist + blur2, v_width - dist) / blur2, 0.0, 1.0);
 
-    fragColor = u_color * (alpha * u_opacity);
+    fragColor = color * (alpha * opacity);
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

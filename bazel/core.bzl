@@ -613,7 +613,6 @@ MLN_CORE_SOURCE = [
     "src/mbgl/util/premultiply.cpp",
     "src/mbgl/util/quaternion.cpp",
     "src/mbgl/util/quaternion.hpp",
-    "src/mbgl/gfx/polyline_generator.cpp",
     "src/mbgl/gfx/fill_generator.cpp",
     "src/mbgl/util/rapidjson.cpp",
     "src/mbgl/util/rapidjson.hpp",

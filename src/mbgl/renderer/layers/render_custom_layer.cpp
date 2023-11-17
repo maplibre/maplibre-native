@@ -20,7 +20,7 @@
 #include <mbgl/gfx/drawable_custom_layer_host_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 
-#if !MLN_LEGACY_RENDERER
+#if MLN_METAL_RENDERER
 // TODO: platform agnostic error checks
 #define MBGL_CHECK_ERROR(cmd) (cmd)
 #endif
