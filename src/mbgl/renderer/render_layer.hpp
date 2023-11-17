@@ -8,6 +8,7 @@
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable.hpp>
+#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/util/tiny_unordered_map.hpp>
 #endif // MLN_DRAWABLE_RENDERER
@@ -19,7 +20,6 @@
 namespace mbgl {
 class Bucket;
 class DynamicFeatureIndex;
-class LayerGroupBase;
 class LineAtlas;
 class PropertyEvaluationParameters;
 class PaintParameters;
@@ -215,9 +215,30 @@ protected:
     /// @param updateFunction A function that updates a single drawable.  Should return true if the drawable
     ///                       was updated or false if it was skipped because it's for a previous style.
     /// @return true if drawables were updated
+    template <typename Func /* bool(gfx::Drawable&) */>
     bool updateTile(RenderPass renderPass,
                     const OverscaledTileID& tileID,
-                    std::function<bool(gfx::Drawable&)> updateFunction);
+                    Func update) {
+        bool anyUpdated = false;
+        if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
+            bool unUpdatedDrawables = false;
+            tileGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+                if (update(drawable)) {
+                    anyUpdated = true;
+                } else {
+                    unUpdatedDrawables = true;
+                }
+            });
+
+            // If any are updated, the caller shouldn't add new ones.
+            // If none are updated and some were skipped, remove those.
+            // This is to handle the case that the style layer changes but the bucket is not re-created.
+            if (!anyUpdated && unUpdatedDrawables) {
+                removeTile(renderPass, tileID);
+            }
+        }
+        return anyUpdated;
+    }
 
     /// Remove all drawables for the tile from the layer group
     /// @return The number of drawables actually removed.
@@ -285,7 +306,7 @@ protected:
     // Current renderable status as specified by the markLayerRenderable event
     bool isRenderable{false};
 
-    std::mutex mutex;
+    //std::mutex mutex;
 
     struct Stats {
         size_t propertyEvaluations = 0;

@@ -102,9 +102,16 @@ public:
     bool removeLayerGroup(const LayerGroupBasePtr&);
     size_t numLayerGroups() const noexcept;
     int32_t maxLayerIndex() const;
-    void visitLayerGroups(std::function<void(LayerGroupBase&)>);
-    void visitLayerGroups(std::function<void(const LayerGroupBase&)>) const;
     void updateLayerIndex(LayerGroupBasePtr, int32_t newIndex);
+
+    template <typename Func /* void(LayerGroupBase&) */>    
+    void visitLayerGroups(Func f) {
+        for (auto& pair : layerGroupsByLayerIndex) {
+            if (pair.second) {
+                f(*pair.second);
+            }
+        }
+    }
 
     void updateLayers(gfx::ShaderRegistry&,
                       gfx::Context&,
@@ -116,12 +123,24 @@ public:
 
     bool addRenderTarget(RenderTargetPtr);
     bool removeRenderTarget(const RenderTargetPtr&);
-    void visitRenderTargets(std::function<void(RenderTarget&)> f);
-    void visitRenderTargets(std::function<void(const RenderTarget&)> f) const;
+
+    template <typename Func /* void(RenderTarget&) */>
+    void visitRenderTargets(Func f) {
+        for (auto& renderTarget : renderTargets) {
+            f(*renderTarget);
+        }
+    }
 
     void updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters);
-    void visitDebugLayerGroups(std::function<void(LayerGroupBase&)>);
-    void visitDebugLayerGroups(std::function<void(const LayerGroupBase&)>) const;
+    
+    template <typename Func /* void(LayerGroupBase&) */>
+    void visitDebugLayerGroups(Func f) {
+        for (auto& pair : debugLayerGroups) {
+            if (pair.second) {
+                f(*pair.second);
+            }
+        }
+    }
 #endif
 
     const ZoomHistory& getZoomHistory() const { return zoomHistory; }
