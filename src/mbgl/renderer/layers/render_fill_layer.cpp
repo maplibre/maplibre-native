@@ -696,10 +696,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
-            const auto outlineShader = doOutline ? [&]() -> auto{
+            const auto outlineShader = doOutline ? [&]() -> auto {
                 std::unordered_set<StringIdentity> outlinePropertiesAsUniforms{
                     stringIndexer().get("a_width"),
-                };                
+                };
                 if (evaluated.get<FillOutlineColor>().isConstant()) {
                     outlinePropertiesAsUniforms.insert(stringIndexer().get("a_color"));
                 }
@@ -708,8 +708,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
                 return std::static_pointer_cast<gfx::ShaderProgramBase>(
                     outlineShaderGroup->getOrCreateShader(context, outlinePropertiesAsUniforms));
-            }
-            ()
+            }()
                 : nullptr;
 
             auto createOutline = [&](auto& builder) {
