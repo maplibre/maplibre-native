@@ -168,7 +168,7 @@ TEST(CustomDrawableLayer, Basic) {
         std::make_unique<CustomDrawableLayer>("custom-drawable", std::make_unique<TestDrawableLayer>()));
 
     // render and test
-    test::checkImage("test/fixtures/custom_drawable_layer/basic", frontend.render(map).image, 0.000657, 0.1);
+    test::checkImage("test/fixtures/custom_drawable_layer/basic", frontend.render(map).image, 0.0006, 0.1);
 }
 
 #endif // MLN_DRAWABLE_RENDERER
