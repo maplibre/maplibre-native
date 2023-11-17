@@ -90,49 +90,58 @@ BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
     return *this;
 }
 
-void BufferResource::update(const void* data, std::size_t updateSize, std::size_t offset) noexcept {
+void BufferResource::update(const void* newData, std::size_t updateSize, std::size_t offset) noexcept {
     assert(size >= 0 && updateSize + offset <= size);
     updateSize = std::min(updateSize, size - offset);
+    if (updateSize <= 0) {
+        return;
+    }
 
-    if (updateSize > 0) {
-        auto& stats = context.renderingStats();
-        if (buffer) {
-            if (auto* const content = static_cast<uint8_t*>(buffer->contents())) {
-                // Until we can be sure that the buffer is not still in use to render the
-                // previous frame, replace it with a new buffer instead of updating it.
-                auto& device = context.getBackend().getDevice();
+    auto& stats = context.renderingStats();
+    if (buffer) {
+        // Until we can be sure that the buffer is not still in use to render the
+        // previous frame, replace it with a new buffer instead of updating it.
 
-                const bool updateIsEntireBuffer = (offset == 0 && updateSize == size);
-                const auto copySource = updateIsEntireBuffer ? data : content;
-                auto newBuffer = NS::TransferPtr(device->newBuffer(copySource, size, usage));
+        auto& device = context.getBackend().getDevice();
+        const uint8_t* newBufferSource = nullptr;
+        std::unique_ptr<uint8_t[]> tempBuffer;
 
-                assert(newBuffer);
-                if (newBuffer) {
-                    buffer = std::move(newBuffer);
-
-                    stats.totalBuffers++;
-                    stats.totalBufferObjs++;
-                    stats.bufferObjUpdates++;
-                    stats.bufferUpdateBytes += updateSize;
-
-                    // Apply the update to the new buffer, if necessary
-                    if (!updateIsEntireBuffer) {
-                        auto* const newContent = static_cast<uint8_t*>(buffer->contents());
-
-                        assert(newContent);
-                        if (newContent) {
-                            std::memcpy(newContent + offset, data, updateSize);
-                        }
-                    }
+        // `[MTLBuffer contents]` may involve memory mapping and/or synchronization.  If the entire
+        // buffer is being replaced, avoid accessing the old one by creating the new buffer directly
+        // from the given data. If it's just being updated, apply the update to a local buffer to
+        // avoid needing to access the new buffer.
+        const bool updateIsEntireBuffer = (offset == 0 && updateSize == size);
+        if (updateIsEntireBuffer) {
+            newBufferSource = static_cast<const uint8_t*>(newData);
+        } else {
+            if (auto* const oldContent = static_cast<uint8_t*>(buffer->contents())) {
+                tempBuffer.reset(new (std::nothrow) uint8_t[size]);
+                assert(tempBuffer);
+                if (tempBuffer) {
+                    memcpy(tempBuffer.get(), oldContent, size);
+                    memcpy(tempBuffer.get() + offset, newData, updateSize);
+                    newBufferSource = tempBuffer.get();
                 }
             }
-        } else {
-            std::memcpy(raw.data() + offset, data, updateSize);
-            stats.bufferUpdateBytes += updateSize;
         }
-        stats.bufferUpdates++;
-        version++;
+
+        if (newBufferSource) {
+            auto newBuffer = NS::TransferPtr(device->newBuffer(newBufferSource, size, usage));
+            assert(newBuffer);
+            if (newBuffer) {
+                buffer = std::move(newBuffer);
+                stats.totalBuffers++;
+                stats.totalBufferObjs++;
+                stats.bufferObjUpdates++;
+                stats.bufferUpdateBytes += updateSize;
+            }
+        }
+    } else {
+        std::memcpy(raw.data() + offset, newData, updateSize);
+        stats.bufferUpdateBytes += updateSize;
     }
+    stats.bufferUpdates++;
+    version++;
 }
 
 bool BufferResource::needReBind(VersionType version_) const noexcept {
