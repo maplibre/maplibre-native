@@ -209,6 +209,16 @@ protected:
     /// Change the layer index on a layer group associated with this layer
     void changeLayerIndex(const LayerGroupBasePtr&, int32_t newLayerIndex, UniqueChangeRequestVec&);
 
+    /// Update the drawables for a tile.
+    /// @param renderPass The pass to consider
+    /// @param tileID The tile to consider
+    /// @param updateFunction A function that updates a single drawable.  Should return true if the drawable
+    ///                       was updated or false if it was skipped because it's for a previous style.
+    /// @return true if drawables were updated
+    bool updateTile(RenderPass renderPass,
+                    const OverscaledTileID& tileID,
+                    std::function<bool(gfx::Drawable&)> updateFunction);
+
     /// Remove all drawables for the tile from the layer group
     /// @return The number of drawables actually removed.
     virtual std::size_t removeTile(RenderPass, const OverscaledTileID&);
