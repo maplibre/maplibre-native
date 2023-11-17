@@ -14,10 +14,7 @@ const style::LayerTypeInfo* FillExtrusionLayerFactory::getTypeInfo() const noexc
 std::unique_ptr<style::Layer> FillExtrusionLayerFactory::createLayer(
     const std::string& id, const style::conversion::Convertible& value) noexcept {
     const auto source = getSource(value);
-    if (!source) {
-        return nullptr;
-    }
-    return std::unique_ptr<style::Layer>(new (std::nothrow) style::FillExtrusionLayer(id, *source));
+    return std::unique_ptr<style::Layer>(source ? new (std::nothrow) style::FillExtrusionLayer(id, *source) : nullptr);
 }
 
 std::unique_ptr<Layout> FillExtrusionLayerFactory::createLayout(
@@ -26,12 +23,14 @@ std::unique_ptr<Layout> FillExtrusionLayerFactory::createLayout(
     const std::vector<Immutable<style::LayerProperties>>& group) noexcept {
     using namespace style;
     using LayoutType = PatternLayout<FillExtrusionBucket, FillExtrusionLayerProperties, FillExtrusionPattern>;
-    return std::make_unique<LayoutType>(parameters.bucketParameters, group, std::move(layer), parameters);
+    return std::unique_ptr<Layout>(new (std::nothrow)
+                                       LayoutType(parameters.bucketParameters, group, std::move(layer), parameters));
 }
 
 std::unique_ptr<RenderLayer> FillExtrusionLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
     assert(impl->getTypeInfo() == getTypeInfo());
-    return std::make_unique<RenderFillExtrusionLayer>(staticImmutableCast<style::FillExtrusionLayer::Impl>(impl));
+    auto renderImpl = staticImmutableCast<style::FillExtrusionLayer::Impl>(impl);
+    return std::unique_ptr<RenderLayer>(new (std::nothrow) RenderFillExtrusionLayer(std::move(renderImpl)));
 }
 
 } // namespace mbgl

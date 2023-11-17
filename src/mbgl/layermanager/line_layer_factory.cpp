@@ -14,10 +14,7 @@ const style::LayerTypeInfo* LineLayerFactory::getTypeInfo() const noexcept {
 std::unique_ptr<style::Layer> LineLayerFactory::createLayer(const std::string& id,
                                                             const style::conversion::Convertible& value) noexcept {
     const auto source = getSource(value);
-    if (!source) {
-        return nullptr;
-    }
-    return std::unique_ptr<style::Layer>(new (std::nothrow) style::LineLayer(id, *source));
+    return std::unique_ptr<style::Layer>(source ? new (std::nothrow) style::LineLayer(id, *source) : nullptr);
 }
 
 std::unique_ptr<Layout> LineLayerFactory::createLayout(
@@ -30,14 +27,17 @@ std::unique_ptr<Layout> LineLayerFactory::createLayout(
         PatternLayout<LineBucket, LineLayerProperties, LinePattern, LineLayoutProperties, LineSortKey>;
     auto layerProperties = staticImmutableCast<LineLayerProperties>(group.front());
     if (layerProperties->layerImpl().layout.get<LineSortKey>().isUndefined()) {
-        return std::make_unique<LayoutTypeUnsorted>(parameters.bucketParameters, group, std::move(layer), parameters);
+        return std::unique_ptr<Layout>(
+            new (std::nothrow) LayoutTypeUnsorted(parameters.bucketParameters, group, std::move(layer), parameters));
     }
-    return std::make_unique<LayoutTypeSorted>(parameters.bucketParameters, group, std::move(layer), parameters);
+    return std::unique_ptr<Layout>(
+        new (std::nothrow) LayoutTypeSorted(parameters.bucketParameters, group, std::move(layer), parameters));
 }
 
 std::unique_ptr<RenderLayer> LineLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
     assert(impl->getTypeInfo() == getTypeInfo());
-    return std::make_unique<RenderLineLayer>(staticImmutableCast<style::LineLayer::Impl>(impl));
+    auto lineImpl = staticImmutableCast<style::LineLayer::Impl>(impl);
+    return std::unique_ptr<RenderLayer>(new (std::nothrow) RenderLineLayer(std::move(lineImpl)));
 }
 
 } // namespace mbgl
