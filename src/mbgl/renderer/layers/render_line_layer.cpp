@@ -537,11 +537,10 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             /*pattern_from =*/patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
             /*pattern_to =*/patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0}};
 
-        // update existing drawables
-        tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+        auto updateExisting = [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
-                return;
+                return false;
             }
 
             const auto& shader = drawable.getShader();
@@ -572,9 +571,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             // TODO: vertex attributes or `propertiesAsUniforms` updated, is that needed?
-        });
-
-        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+            return true;
+        };
+        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
 

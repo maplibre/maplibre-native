@@ -166,6 +166,30 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
 }
 
 #if MLN_DRAWABLE_RENDERER
+bool RenderLayer::updateTile(RenderPass renderPass,
+                             const OverscaledTileID& tileID,
+                             std::function<bool(gfx::Drawable&)> update) {
+    bool anyUpdated = false;
+    if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
+        bool unUpdatedDrawables = false;
+        tileGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+            if (update(drawable)) {
+                anyUpdated = true;
+            } else {
+                unUpdatedDrawables = true;
+            }
+        });
+
+        // If any are updated, the caller shouldn't add new ones.
+        // If none are updated and some were skipped, remove those.
+        // This is to handle the case that the style layer changes but the bucket is not re-created.
+        if (!anyUpdated && unUpdatedDrawables) {
+            removeTile(renderPass, tileID);
+        }
+    }
+    return anyUpdated;
+}
+
 std::size_t RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
     if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
         const auto n = tileGroup->removeDrawables(renderPass, tileID).size();
