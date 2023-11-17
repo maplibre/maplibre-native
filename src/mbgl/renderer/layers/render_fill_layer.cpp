@@ -699,10 +699,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 std::unordered_set<StringIdentity> outlinePropertiesAsUniforms{
                     stringIndexer().get("a_width"),
                 };                
-                if (unevaluated.get<FillOutlineColor>().isConstant()) {
+                if (evaluated.get<FillOutlineColor>().isConstant()) {
                     outlinePropertiesAsUniforms.insert(stringIndexer().get("a_color"));
                 }
-                if (unevaluated.get<FillOpacity>().isConstant())) {
+                if (evaluated.get<FillOpacity>().isConstant()) {
                     outlinePropertiesAsUniforms.insert(stringIndexer().get("a_opacity"));
                 }
                 return std::static_pointer_cast<gfx::ShaderProgramBase>(
