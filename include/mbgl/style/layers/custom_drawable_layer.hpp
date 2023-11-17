@@ -38,7 +38,7 @@ public:
         float gapWidth = 0.f;
         float offset = 0.f;
         float width = 1.f;
-        gfx::PolylineGeneratorOptions geometry;
+        gfx::PolylineGenerator::Options geometry;
     };
 
     struct FillOptions {

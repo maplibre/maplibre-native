@@ -45,9 +45,9 @@ DrawableBuilder::Impl::LineLayoutVertex DrawableBuilder::Impl::layoutVertex(
 
 void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
                                         const GeometryCoordinates& coordinates,
-                                        const gfx::PolylineGeneratorOptions& options) {
+                                        const gfx::PolylineGenerator::Options& options) {
     using namespace std::placeholders;
-    gfx::PolylineGenerator<DrawableBuilder::Impl::LineLayoutVertex, std::unique_ptr<Drawable::DrawSegment>> generator(
+    gfx::PolylineGenerator::generate(
         polylineVertices,
         std::bind(&DrawableBuilder::Impl::layoutVertex, this, _1, _2, _3, _4, _5, _6),
         segments,
@@ -55,8 +55,9 @@ void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
             return builder.createSegment(gfx::Triangles(), SegmentBase(vertexOffset, indexOffset));
         },
         [](auto& uniqueSegment) -> SegmentBase& { return uniqueSegment->getSegment(); },
-        polylineIndexes);
-    generator.generate(coordinates, options);
+        polylineIndexes,
+        coordinates,
+        options);
 }
 
 void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {

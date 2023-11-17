@@ -54,17 +54,7 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
 void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
                              const GeometryTileFeature& feature,
                              const CanonicalTileID& canonical) {
-    gfx::PolylineGenerator<LineLayoutVertex, Segment<LineAttributes>> generator(
-        vertices,
-        LineProgram::layoutVertex,
-        segments,
-        [](std::size_t vertexOffset, std::size_t indexOffset) -> Segment<LineAttributes> {
-            return Segment<LineAttributes>(vertexOffset, indexOffset);
-        },
-        [](auto& seg) -> Segment<LineAttributes>& { return seg; },
-        triangles);
-
-    gfx::PolylineGeneratorOptions options;
+    gfx::PolylineGenerator::Options options;
 
     options.type = feature.getType();
     const std::size_t len = [&coordinates] {
@@ -99,7 +89,7 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
             total_length += util::dist<double>(coordinates[i], coordinates[i + 1]);
         }
 
-        options.clipDistances = gfx::PolylineGeneratorDistances{
+        options.clipDistances = gfx::PolylineGenerator::Distances{
             *numericValue<double>(clip_start_it->second), *numericValue<double>(clip_end_it->second), total_length};
     }
 
@@ -111,7 +101,17 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
     options.roundLimit = layout.get<LineRoundLimit>();
     options.overscaling = overscaling;
 
-    generator.generate(coordinates, options);
+    gfx::PolylineGenerator::generate(
+        vertices,
+        LineProgram::layoutVertex,
+        segments,
+        [](std::size_t vertexOffset, std::size_t indexOffset) -> Segment<LineAttributes> {
+            return Segment<LineAttributes>(vertexOffset, indexOffset);
+        },
+        [](auto& seg) -> Segment<LineAttributes>& { return seg; },
+        triangles,
+        coordinates,
+        options);
 }
 
 void LineBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {

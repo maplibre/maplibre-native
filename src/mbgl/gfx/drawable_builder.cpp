@@ -274,7 +274,7 @@ std::size_t DrawableBuilder::curVertexCount() const {
 }
 
 void DrawableBuilder::addPolyline(const GeometryCoordinates& coordinates,
-                                  const gfx::PolylineGeneratorOptions& options) {
+                                  const gfx::PolylineGenerator::Options& options) {
     // mark the current mode
     if (!impl->checkAndSetMode(Impl::Mode::Polylines)) return;
 

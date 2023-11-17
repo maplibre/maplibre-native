@@ -29,7 +29,13 @@ out float v_width;
 out float v_gamma_scale;
 out highp float v_linesofar;
 
+#pragma mapbox: define highp vec4 color
+#pragma mapbox: define lowp float opacity
+
 void main() {
+    #pragma mapbox: initialize highp vec4 color
+    #pragma mapbox: initialize lowp float opacity
+
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
     float ANTIALIASING = 1.0 / u_device_pixel_ratio / 2.0;
