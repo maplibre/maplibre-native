@@ -13,9 +13,9 @@ to install the pre-commit hooks configured in `.pre-commit-config.yml`.
 
 ## Render Tests
 
-To check that the output of the rendering is correct, we compare actual rendered PNGs for simple styles with expected PNGs. The content of the tests is stored in the MapLibre GL JS submodule which means that GL JS and Native are in fact quasi pixel-identical in their rendering.
+To check that the output of the rendering is correct, we compare actual rendered PNGs for simple styles with expected PNGs. The content of the tests used to be stored in the MapLibre GL JS repository, which means that GL JS and Native are mostly pixel-identical in their rendering.
 
-The directory sturcture of the render tests looks like:
+The directory structure of the render tests looks like:
 
 ```
 metrics/
@@ -78,7 +78,7 @@ The render test results are summarized in a HTML website located next to the man
 
 # MapLibre & C++
 
-MapLibre makes use of a common set of C++ files for iOS, macOS, Android, Linux & Qt.  See [`platform/default/src/mbgl/`](`platform/default/src/mbgl/`), 
+MapLibre makes use of a common set of C++ files for iOS, macOS, Android, Linux & Qt.  See [`platform/default/src/mbgl/`](`platform/default/src/mbgl/`),
 or any of the platform make files:
 
 * [`platform/android/android.cmake`](platform/android/android.cmake)
@@ -147,7 +147,7 @@ Which will log the following samples.
 
 ### Autocomplete with `make`
 
-MapLibre makes use of several command line tools for local and cloud builds.  
+MapLibre makes use of several command line tools for local and cloud builds.
 To see what targets exist you have to review the `Makefile`, which can be tedious.
 
 There is a better way with the Zsh.  While in a folder with a `Makefile`, you can type `make` followed by hitting `<tab>` twice.
@@ -176,7 +176,7 @@ To add this feature add the following to your zsh.
 ```zsh
 # open ~/.zprofile
 
-# Autocomplete for `make` when in a directory 
+# Autocomplete for `make` when in a directory
 zstyle ':completion:*:*:make:*' tag-order 'targets'
 autoload -Uz compinit && compinit
 ```
