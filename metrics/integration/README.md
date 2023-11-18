@@ -1,9 +1,8 @@
-These integration tests verify the correctness and consistency of [mapbox-gl-js](https://github.com/mapbox/mapbox-gl-js) and
-[mapbox-gl-native](https://github.com/mapbox/mapbox-gl-native) rendering.
+These integration tests verify the correctness and consistency of [MapLibre Native](https://github.com/maplibre/maplibre-native) rendering.
 
 ## Organization
 
-Tests are contained in a directory tree, generally organized by [style specification](https://github.com/mapbox/mapbox-gl-style-spec)
+Tests are contained in a directory tree, generally organized by [style specification](https://maplibre.org/maplibre-style-spec/)
 property: `background-color`, `line-width`, etc., with a second level of directories below that for individual tests. For example, the test for specifying a literal `circle-radius` value lives in [`test/integration/render-tests/circle-radius/literal/`](https://github.com/mapbox/mapbox-gl-js/tree/master/test/integration/render-tests/circle-radius/literal).
 
 Within a leaf directory is a `style.json` file (e.g. [`circle-radius/literal/style.json`](https://github.com/mapbox/mapbox-gl-js/blob/master/test/integration/render-tests/circle-radius/literal/style.json)), which contains the minimal style needed for the given test case. The style can specify the map size, center, bearing, and pitch, and additional test metadata (e.g. output image dimensions).
@@ -17,26 +16,23 @@ The contents of vector tile fixtures can be read using the [`vt2geojson`](https:
 
 ## Running tests
 
-To run the entire integration test suite (both render or query tests), from within the `mapbox-gl-js` directory run the command:
+To run the entire integration test suite (both render or query tests), from within the maplibre-native directory on Linux run the command:
+
 ```
-yarn run test-suite
+./build/mbgl-render-test-runner --manifestPath metrics/linux-clang8-release-style.json
 ```
 
 To run only the render/query tests:
 
 ```
-yarn run test-render
-```
-or
-```
-yarn run test-query-node
+npm run test-render
 ```
 
 ### Running specific tests
 
 To run a subset of tests or an individual test, you can pass a specific subdirectory to the `test-render` script. For example, to run all the tests for a given property, e.g. `circle-radius`:
 ```
-$ yarn run test-render circle-radius
+$ npm run test-render circle-radius
 ...
 * passed circle-radius/antimeridian
 * passed circle-radius/default
@@ -50,7 +46,7 @@ Done in 2.71s.
 ```
 Or to run a single test:
 ```
-$ yarn run test-render circle-radius/literal
+$ npm run test-render circle-radius/literal
 ...
 * passed circle-radius/literal
 1 passed (100.0%)
@@ -76,16 +72,16 @@ open ./test/integration/query-tests/index.html
 
 Query tests can be run in the browser, the server for serving up the test page and test fixtures starts when you run
 ```
-yarn run start
+npm run start
 ```
 OR
 ```
-yarn run start-debug
+npm run start-debug
 ```
 
 If you want to run only the test server run:
 ```
-yarn run watch-query
+npm run watch-query
 ```
 
 Then open the following url in the browser of your choice to start running the tests.
@@ -112,9 +108,6 @@ DISABLE_BUILD_NOTIFICATIONS=true
 
 ## Writing new tests
 
-_Note: Expected results are always generated with the **js** implementation. This is merely for consistency and does not
-imply that in the event of a rendering discrepancy, the js implementation is always correct._
-
 To add a new render test:
 1. Create a new directory `test/integration/render-tests/<property-name>/<new-test-name>`
 
@@ -122,11 +115,11 @@ To add a new render test:
 
 3. Generate an `expected.png` image from the given style by running the new test with the `UPDATE` flag enabled:
    ```
-   $ UPDATE=1 yarn run test-render <property-name>/<new-test-name>
+   $ UPDATE=1 npm run test-render <property-name>/<new-test-name>
    ```
    The test will appear to fail, but you'll now see a new `expected.png` in the test directory.
 
-4. Manually inspect `expected.png` to verify it looks as expected, and optionally run the test again without the update flag (`yarn run test-render <property-name>/<new-test-name>`) to watch it pass (enjoy that dopamine kick!)
+4. Manually inspect `expected.png` to verify it looks as expected, and optionally run the test again without the update flag (`npm run test-render <property-name>/<new-test-name>`) to watch it pass (enjoy that dopamine kick!)
 
 5. Commit the new `style.json` and `expected.png` :rocket:
 
