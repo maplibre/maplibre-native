@@ -189,6 +189,9 @@ public:
     /// @param willRender Indicates if this layer should render or not
     /// @param changes The collection of current pending change requests
     virtual void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes);
+
+    /// Returns the current renderability mode if the layer
+    bool isLayerRenderable() const noexcept { return isRenderable; }
 #endif
 
 protected:
