@@ -27,14 +27,17 @@ std::unique_ptr<Layout> FillLayerFactory::createLayout(
         PatternLayout<FillBucket, FillLayerProperties, FillPattern, FillLayoutProperties, FillSortKey>;
     auto layerProperties = staticImmutableCast<FillLayerProperties>(group.front());
     if (layerProperties->layerImpl().layout.get<FillSortKey>().isUndefined()) {
-        return std::make_unique<LayoutTypeUnsorted>(parameters.bucketParameters, group, std::move(layer), parameters);
+        return std::unique_ptr<Layout>(
+            new (std::nothrow) LayoutTypeUnsorted(parameters.bucketParameters, group, std::move(layer), parameters));
     }
-    return std::make_unique<LayoutTypeSorted>(parameters.bucketParameters, group, std::move(layer), parameters);
+    return std::unique_ptr<Layout>(
+        new (std::nothrow) LayoutTypeSorted(parameters.bucketParameters, group, std::move(layer), parameters));
 }
 
 std::unique_ptr<RenderLayer> FillLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
     assert(impl->getTypeInfo() == getTypeInfo());
-    return std::make_unique<RenderFillLayer>(staticImmutableCast<style::FillLayer::Impl>(impl));
+    auto fillImpl = staticImmutableCast<style::FillLayer::Impl>(impl);
+    return std::unique_ptr<RenderLayer>(new (std::nothrow) RenderFillLayer(std::move(fillImpl)));
 }
 
 } // namespace mbgl
