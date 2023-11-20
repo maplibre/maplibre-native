@@ -111,7 +111,8 @@ void LineBucket::addGeometry(const GeometryCoordinates& coordinates,
         [](auto& seg) -> Segment<LineAttributes>& { return seg; },
         triangles,
         coordinates,
-        options);
+        options,
+        0);
 }
 
 void LineBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {

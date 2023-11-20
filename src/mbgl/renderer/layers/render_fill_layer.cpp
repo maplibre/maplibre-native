@@ -733,6 +733,34 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                sizeof(LineLayoutVertex),
                                                gfx::AttributeDataType::UByte4);
                     }
+                    if (!evaluated.get<FillOutlineColor>().isConstant()) {
+                        static const StringIdentity idColorAttribName = stringIndexer().get("a_color");
+                        if (auto& attr = attrs.getOrAdd(idColorAttribName)) {
+                            assert(bucket.lineVertices.elements() == bucket.lineToFillVertexIndex.size());
+                            for (std::size_t index{0}; index < bucket.lineVertices.elements(); ++index) {
+                                std::size_t sourceIndex = bucket.lineToFillVertexIndex[index];
+                                for (std::size_t attrIndex = 0; attrIndex < FillOutlineColor::AttributeNames.size();
+                                     ++attrIndex) {
+                                    attr->set(
+                                        index, binders.get<FillOutlineColor>()->getVertexValue(sourceIndex), attrIndex);
+                                }
+                            }
+                        }
+                    }
+                    if (!evaluated.get<FillOpacity>().isConstant()) {
+                        static const StringIdentity idOpacityAttribName = stringIndexer().get("a_opacity");
+                        if (auto& attr = attrs.getOrAdd(idOpacityAttribName)) {
+                            assert(bucket.lineVertices.elements() == bucket.lineToFillVertexIndex.size());
+                            for (std::size_t index{0}; index < bucket.lineVertices.elements(); ++index) {
+                                std::size_t sourceIndex = bucket.lineToFillVertexIndex[index];
+                                for (std::size_t attrIndex = 0; attrIndex < FillOpacity::AttributeNames.size();
+                                     ++attrIndex) {
+                                    attr->set(
+                                        index, binders.get<FillOpacity>()->getVertexValue(sourceIndex), attrIndex);
+                                }
+                            }
+                        }
+                    }
                     builder->setVertexAttributes(std::move(attrs));
                     builder->setSegments(gfx::Triangles(),
                                          bucket.sharedLineIndexes,

@@ -52,7 +52,7 @@ std::size_t totalVerticesCheck(const GeometryCollection& polygon) {
     return totalVertices;
 }
 
-void addFillIndices(SegmentVector<FillAttributes>& fillSegments,
+void addFillIndexes(SegmentVector<FillAttributes>& fillSegments,
                     gfx::IndexVector<gfx::Triangles>& fillIndexes,
                     std::vector<uint32_t>& indices,
                     std::size_t startVertices,
@@ -119,7 +119,7 @@ void generateFillBuffers(const GeometryCollection& geometry,
         }
 
         std::vector<uint32_t> indices = mapbox::earcut(polygon);
-        addFillIndices(fillSegments, fillIndexes, indices, startVertices, totalVertices);
+        addFillIndexes(fillSegments, fillIndexes, indices, startVertices, totalVertices);
     }
 }
 
@@ -143,7 +143,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
         }
 
         std::vector<uint32_t> indices = mapbox::earcut(polygon);
-        addFillIndices(fillSegments, fillIndexes, indices, startVertices, totalVertices);
+        addFillIndexes(fillSegments, fillIndexes, indices, startVertices, totalVertices);
     }
 }
 
@@ -176,11 +176,12 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                 [](auto& seg) -> Segment<LineAttributes>& { return seg; },
                 lineIndexes,
                 ring,
-                lineOptions);
+                lineOptions,
+                0);
         }
 
         std::vector<uint32_t> indices = mapbox::earcut(polygon);
-        addFillIndices(fillSegments, fillIndexes, indices, startVertices, totalVertices);
+        addFillIndexes(fillSegments, fillIndexes, indices, startVertices, totalVertices);
     }
 }
 
@@ -192,7 +193,8 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   gfx::IndexVector<gfx::Triangles>& lineIndexes,
                                   SegmentVector<LineAttributes>& lineSegments,
                                   gfx::IndexVector<gfx::Lines>& basicLineIndexes,
-                                  SegmentVector<FillAttributes>& basicLineSegments) {
+                                  SegmentVector<FillAttributes>& basicLineSegments,
+                                  std::vector<std::size_t>& lineToFillVertexIndex) {
     gfx::PolylineGenerator::Options lineOptions;
     lineOptions.type = FeatureType::Polygon;
 
@@ -205,8 +207,14 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
 
         for (const auto& ring : polygon) {
             std::size_t base = fillVertices.elements();
+
+            // add vertices to the fill buffer
             std::size_t nVertices = addRingVertices(fillVertices, ring);
+
+            // add basic outlines
             addOutlineIndices(base, nVertices, basicLineSegments, basicLineIndexes);
+
+            // add triangulated outlines
             gfx::PolylineGenerator::generate(
                 lineVertices,
                 LineProgram::layoutVertex,
@@ -217,11 +225,15 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                 [](auto& seg) -> Segment<LineAttributes>& { return seg; },
                 lineIndexes,
                 ring,
-                lineOptions);
+                lineOptions,
+                [&](std::size_t geometryIndex, std::size_t vertexIndex) {
+                    lineToFillVertexIndex.emplace_back(base + geometryIndex);
+                });
         }
 
+        // add fill indexes
         std::vector<uint32_t> indices = mapbox::earcut(polygon);
-        addFillIndices(fillSegments, fillIndexes, indices, startVertices, totalVertices);
+        addFillIndexes(fillSegments, fillIndexes, indices, startVertices, totalVertices);
     }
 }
 

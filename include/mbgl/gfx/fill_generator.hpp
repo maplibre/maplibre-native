@@ -42,7 +42,8 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                                   gfx::IndexVector<gfx::Triangles>& lineIndexes,
                                   SegmentVector<LineAttributes>& lineSegments,
                                   gfx::IndexVector<gfx::Lines>& basicLineIndexes,
-                                  SegmentVector<FillAttributes>& basicLineSegments);
+                                  SegmentVector<FillAttributes>& basicLineSegments,
+                                  std::vector<std::size_t>& lineToFillVertexIndex);
 
 } // namespace gfx
 } // namespace mbgl

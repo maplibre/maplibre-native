@@ -70,6 +70,9 @@ public:
 
     /// Triangulated lines segments
     SegmentVector<LineAttributes> lineSegments;
+
+    /// for each lineVertex index, store the correspondent fillVertex index
+    std::vector<std::size_t> lineToFillVertexIndex;
 #endif // MLN_TRIANGULATE_FILL_OUTLINES
 
     /// Basic lines indexes

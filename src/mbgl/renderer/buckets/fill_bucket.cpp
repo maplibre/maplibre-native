@@ -41,7 +41,8 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
                                       lineIndexes,
                                       lineSegments,
                                       basicLines,
-                                      basicLineSegments);
+                                      basicLineSegments,
+                                      lineToFillVertexIndex);
 
     for (auto& pair : paintPropertyBinders) {
         const auto it = patternDependencies.find(pair.first);

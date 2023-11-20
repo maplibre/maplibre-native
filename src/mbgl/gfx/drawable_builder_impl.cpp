@@ -57,7 +57,8 @@ void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
         [](auto& uniqueSegment) -> SegmentBase& { return uniqueSegment->getSegment(); },
         polylineIndexes,
         coordinates,
-        options);
+        options,
+        0);
 }
 
 void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {

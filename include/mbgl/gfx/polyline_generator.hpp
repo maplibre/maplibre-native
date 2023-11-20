@@ -16,6 +16,7 @@
 #include <vector>
 #include <functional>
 #include <optional>
+#include <type_traits>
 
 namespace mbgl {
 namespace gfx {
@@ -89,7 +90,8 @@ template <class Vertices,
           class Segments,
           class CreateSegmentFunc,
           class GetSegmentFunc,
-          class Indexes>
+          class Indexes,
+          typename VertexIndexCallback>
 static void generate(Vertices& vertices,
                      LayoutVertexFunc layoutVertex,
                      Segments& segments,
@@ -97,7 +99,8 @@ static void generate(Vertices& vertices,
                      GetSegmentFunc getSegment,
                      Indexes& indexes,
                      const GeometryCoordinates& coordinates,
-                     const Options& options);
+                     const Options& options,
+                     VertexIndexCallback&& vertexCallback);
 
 } // namespace PolylineGenerator
 
@@ -106,7 +109,8 @@ template <class Vertices,
           class Segments,
           class CreateSegmentFunc,
           class GetSegmentFunc,
-          class Indexes>
+          class Indexes,
+          typename VertexIndexCallback>
 void PolylineGenerator::generate(Vertices& vertices,
                                  LayoutVertexFunc layoutVertex,
                                  Segments& segments,
@@ -115,7 +119,8 @@ void PolylineGenerator::generate(Vertices& vertices,
                                  Indexes& indexes,
 
                                  const GeometryCoordinates& coordinates,
-                                 const PolylineGenerator::Options& options) {
+                                 const PolylineGenerator::Options& options,
+                                 VertexIndexCallback&& vertexCallback) {
     struct TriangleElement {
         TriangleElement(uint16_t a_, uint16_t b_, uint16_t c_)
             : a(a_),
@@ -166,6 +171,9 @@ void PolylineGenerator::generate(Vertices& vertices,
         }
         e1 = e2;
         e2 = e3;
+        if constexpr (std::is_invocable<VertexIndexCallback, std::size_t, std::size_t>::value) {
+            std::invoke(std::forward<VertexIndexCallback>(vertexCallback), /*geometryIndex*/ index, /*vertexIndex*/ e3);
+        }
 
         extrude = normal * -1.0;
         if (endRight) extrude = extrude - (util::perp(normal) * endRight);
@@ -181,6 +189,9 @@ void PolylineGenerator::generate(Vertices& vertices,
         }
         e1 = e2;
         e2 = e3;
+        if constexpr (std::is_invocable<VertexIndexCallback, std::size_t, std::size_t>::value) {
+            std::invoke(std::forward<VertexIndexCallback>(vertexCallback), /*geometryIndex*/ index, /*vertexIndex*/ e3);
+        }
 
         // There is a maximum "distance along the line" that we can store in the
         // buffers. When we get close to the distance, reset it to zero and add the
@@ -223,6 +234,9 @@ void PolylineGenerator::generate(Vertices& vertices,
         e3 = vertices.elements() - 1 - startVertex;
         if (e1 >= 0 && e2 >= 0) {
             triangleStore.emplace_back(static_cast<uint16_t>(e1), static_cast<uint16_t>(e2), static_cast<uint16_t>(e3));
+        }
+        if constexpr (std::is_invocable<VertexIndexCallback, std::size_t, std::size_t>::value) {
+            std::invoke(std::forward<VertexIndexCallback>(vertexCallback), /*geometryIndex*/ index, /*vertexIndex*/ e3);
         }
 
         if (lineTurnsLeft) {
