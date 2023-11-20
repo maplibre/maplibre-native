@@ -13,7 +13,7 @@ In terms of database structure, that means two new tables are created. They will
 
 ### When we need to store resource for ambient cache:
 
-We store it into the ambient_resources table.
+We store it into the `ambient_resources` table.
 
 ### When we need to store tile for ambient cache:
 
