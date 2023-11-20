@@ -17,7 +17,7 @@ We store it into the `ambient_resources` table.
 
 ### When we need to store tile for ambient cache:
 
-We store it into the ambient_tiles table.
+We store it into the `ambient_tiles` table.
 
 ### When we need to store resource for offline data:
 
