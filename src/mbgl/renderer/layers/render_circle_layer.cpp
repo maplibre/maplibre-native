@@ -87,6 +87,12 @@ void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters)
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
         auto newTweaker = std::make_shared<CircleLayerTweaker>(getID(), evaluatedProperties);
+
+        // propertiesAsUniforms isn't recalculated every update, so carry it over
+        if (layerTweaker) {
+            newTweaker->setPropertiesAsUniforms(layerTweaker->getPropertiesAsUniforms());
+        }
+
         replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
     }
 #endif // MLN_DRAWABLE_RENDERER
@@ -359,13 +365,14 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         auto updateExisting = [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
-                return;
+                return false;
             }
 
             auto& uniforms = drawable.mutableUniformBuffers();
             uniforms.createOrUpdate(idCircleInterpolateUBOName, &interpolateUBO, context);
+            return true;
         };
-        if (0 < tileLayerGroup->visitDrawables(renderPass, tileID, std::move(updateExisting))) {
+        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
 

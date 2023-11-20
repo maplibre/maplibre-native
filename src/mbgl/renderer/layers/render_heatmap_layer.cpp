@@ -71,6 +71,12 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
     if (renderTarget) {
         if (auto tileLayerGroup = renderTarget->getLayerGroup(0)) {
             auto newTweaker = std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties);
+
+            // propertiesAsUniforms isn't recalculated every update, so carry it over
+            if (layerTweaker) {
+                newTweaker->setPropertiesAsUniforms(layerTweaker->getPropertiesAsUniforms());
+            }
+
             replaceTweaker(layerTweaker, std::move(newTweaker), {std::move(tileLayerGroup)});
         }
     }
@@ -377,7 +383,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                     /* .weight_t = */ std::get<0>(paintPropertyBinders.get<HeatmapWeight>()->interpolationFactor(zoom)),
                     /* .radius_t = */ std::get<0>(paintPropertyBinders.get<HeatmapRadius>()->interpolationFactor(zoom)),
                     /* .padding = */ {0}};
-                interpolateBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
+                interpolateBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO), false);
             }
             return interpolateBuffer;
         };
@@ -429,7 +435,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         heatmapBuilder->setEnableDepth(false);
         heatmapBuilder->setColorMode(gfx::ColorMode::additive());
         heatmapBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        heatmapBuilder->setEnableStencil(false);
         heatmapBuilder->setRenderPass(renderPass);
         heatmapBuilder->setVertexAttributes(std::move(heatmapVertexAttrs));
         heatmapBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
@@ -503,7 +508,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     heatmapTextureBuilder->setEnableDepth(false);
     heatmapTextureBuilder->setColorMode(gfx::ColorMode::alphaBlended());
     heatmapTextureBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-    heatmapTextureBuilder->setEnableStencil(false);
     heatmapTextureBuilder->setRenderPass(renderPass);
     heatmapTextureBuilder->setVertexAttributes(std::move(textureVertexAttrs));
     heatmapTextureBuilder->setRawVertices({}, textureVertexCount, gfx::AttributeDataType::Short2);

@@ -29,7 +29,8 @@ UploadPass::UploadPass(gl::CommandEncoder& commandEncoder_, const char* name)
 
 std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResource(const void* data,
                                                                                   const std::size_t size,
-                                                                                  const gfx::BufferUsageType usage) {
+                                                                                  const gfx::BufferUsageType usage,
+                                                                                  bool /*persistent*/) {
     BufferID id = 0;
     MBGL_CHECK_ERROR(glGenBuffers(1, &id));
     commandEncoder.context.renderingStats().numBuffers++;
@@ -48,7 +49,8 @@ void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource,
 
 std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(const void* data,
                                                                                 std::size_t size,
-                                                                                const gfx::BufferUsageType usage) {
+                                                                                const gfx::BufferUsageType usage,
+                                                                                bool /*persistent*/) {
     BufferID id = 0;
     MBGL_CHECK_ERROR(glGenBuffers(1, &id));
     commandEncoder.context.renderingStats().numBuffers++;
@@ -161,7 +163,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         // Otherwise, create a new one
         if (rawBufSize > 0) {
             auto buffer = std::make_unique<VertexBufferGL>();
-            buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage);
+            buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
             vec->setBuffer(std::move(buffer));
             vec->setDirty(false);
             return static_cast<VertexBufferGL*>(vec->getBuffer())->resource;
@@ -283,7 +285,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     assert(vertexStride * vertexCount <= allData.size());
 
     if (!allData.empty()) {
-        if (auto vertBuf = createVertexBufferResource(allData.data(), allData.size(), usage)) {
+        if (auto vertBuf = createVertexBufferResource(allData.data(), allData.size(), usage, /*persistent=*/false)) {
             // Fill in the buffer in each binding that was generated without its own buffer
             std::for_each(bindings.begin(), bindings.end(), [&](auto& b) {
                 if (b && !b->vertexBufferResource) {

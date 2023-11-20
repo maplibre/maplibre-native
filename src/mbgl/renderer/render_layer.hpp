@@ -9,8 +9,7 @@
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/renderer/change_request.hpp>
-
-#include <unordered_map>
+#include <mbgl/util/tiny_unordered_map.hpp>
 #endif // MLN_DRAWABLE_RENDERER
 
 #include <list>
@@ -210,6 +209,16 @@ protected:
     /// Change the layer index on a layer group associated with this layer
     void changeLayerIndex(const LayerGroupBasePtr&, int32_t newLayerIndex, UniqueChangeRequestVec&);
 
+    /// Update the drawables for a tile.
+    /// @param renderPass The pass to consider
+    /// @param tileID The tile to consider
+    /// @param updateFunction A function that updates a single drawable.  Should return true if the drawable
+    ///                       was updated or false if it was skipped because it's for a previous style.
+    /// @return true if drawables were updated
+    bool updateTile(RenderPass renderPass,
+                    const OverscaledTileID& tileID,
+                    std::function<bool(gfx::Drawable&)> updateFunction);
+
     /// Remove all drawables for the tile from the layer group
     /// @return The number of drawables actually removed.
     virtual std::size_t removeTile(RenderPass, const OverscaledTileID&);
@@ -261,9 +270,13 @@ protected:
     // An optional tweaker that will update drawables
     LayerTweakerPtr layerTweaker;
 
-    // The set of Tile IDs in `renderTiles`, along with the
-    // identity of the bucket from which they were built.
-    std::unordered_map<OverscaledTileID, util::SimpleIdentity> renderTileIDs;
+    // A sorted set of tile IDs in `renderTiles`, along with
+    // the identity of the bucket from which they were built.
+    // We swap between two instances to minimize reallocations.
+    static constexpr auto LinearTileIDs = 12; // From benchmarking, see #1805
+    using RenderTileIDMap = util::TinyUnorderedMap<OverscaledTileID, util::SimpleIdentity, LinearTileIDs>;
+    RenderTileIDMap renderTileIDs;
+    RenderTileIDMap newRenderTileIDs;
 #endif
 
     // Current layer index as specified by the layerIndexChanged event

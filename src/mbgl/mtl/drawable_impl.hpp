@@ -6,11 +6,12 @@
 #include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/uniform.hpp>
 #include <mbgl/gfx/uniform_buffer.hpp>
-#include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
+#include <mbgl/mtl/vertex_attribute.hpp>
+#include <mbgl/mtl/vertex_buffer_resource.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
@@ -43,7 +44,7 @@ public:
     gfx::IndexVectorBasePtr indexes;
     std::size_t vertexCount = 0;
     gfx::AttributeDataType vertexType = gfx::AttributeDataType::Invalid;
-    gfx::VertexAttributeArray vertexAttributes;
+    VertexAttributeArray vertexAttributes;
 
     std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
 
@@ -55,7 +56,7 @@ public:
     // GLfloat pointSize = 0.0f;
     StringIdentity idVertexAttrName = stringIndexer().get("a_pos");
 
-    MTL::Buffer* noBindingBuffer = nullptr;
+    VertexBufferResource* noBindingBuffer = nullptr;
 
     gfx::AttributeBindingArray attributeBindings;
 

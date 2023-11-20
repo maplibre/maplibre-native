@@ -13,12 +13,11 @@ const style::LayerTypeInfo* HeatmapLayerFactory::getTypeInfo() const noexcept {
 
 std::unique_ptr<style::Layer> HeatmapLayerFactory::createLayer(const std::string& id,
                                                                const style::conversion::Convertible& value) noexcept {
-    auto const source = getSource(value);
+    const auto source = getSource(value);
     if (!source) {
         return nullptr;
     }
-
-    return std::unique_ptr<style::Layer>(new style::HeatmapLayer(id, *source));
+    return std::unique_ptr<style::Layer>(new (std::nothrow) style::HeatmapLayer(id, *source));
 }
 
 std::unique_ptr<Bucket> HeatmapLayerFactory::createBucket(

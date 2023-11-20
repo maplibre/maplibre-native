@@ -64,8 +64,9 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
     return std::make_unique<CommandEncoder>(*this);
 }
 
-BufferResource Context::createBuffer(const void* data, std::size_t size, gfx::BufferUsageType) const {
-    return {const_cast<Context&>(*this), data, size, MTL::ResourceStorageModeShared};
+BufferResource Context::createBuffer(
+    const void* data, std::size_t size, gfx::BufferUsageType, bool isIndexBuffer, bool persistent) const {
+    return {const_cast<Context&>(*this), data, size, MTL::ResourceStorageModeShared, isIndexBuffer, persistent};
 }
 
 UniqueShaderProgram Context::createProgram(std::string name,
@@ -170,8 +171,9 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size) {
-    return std::make_shared<UniformBuffer>(createBuffer(data, size, gfx::BufferUsageType::StaticDraw));
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent) {
+    return std::make_shared<UniformBuffer>(
+        createBuffer(data, size, gfx::BufferUsageType::StaticDraw, /*isIndexBuffer=*/false, persistent));
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -198,12 +200,15 @@ RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureC
 
 void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {}
 
-bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer, const void* data, std::size_t size) {
+bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
+                                           const void* data,
+                                           std::size_t size,
+                                           bool persistent) {
     if (buffer) {
         buffer->update(data, size);
         return false;
     } else {
-        buffer = createUniformBuffer(data, size);
+        buffer = createUniformBuffer(data, size, persistent);
         return true;
     }
 }
@@ -212,7 +217,11 @@ const BufferResource& Context::getTileVertexBuffer() {
     if (!tileVertexBuffer) {
         const auto vertices = RenderStaticData::tileVertices();
         constexpr auto vertexSize = sizeof(decltype(vertices)::Vertex::a1);
-        tileVertexBuffer.emplace(createBuffer(vertices.data(), vertices.bytes(), gfx::BufferUsageType::StaticDraw));
+        tileVertexBuffer.emplace(createBuffer(vertices.data(),
+                                              vertices.bytes(),
+                                              gfx::BufferUsageType::StaticDraw,
+                                              /*isIndexBuffer=*/true,
+                                              /*persistent=*/true));
     }
     return *tileVertexBuffer;
 }
@@ -220,12 +229,16 @@ const BufferResource& Context::getTileVertexBuffer() {
 const BufferResource& Context::getTileIndexBuffer() {
     if (!tileIndexBuffer) {
         const auto indexes = RenderStaticData::quadTriangleIndices();
-        tileIndexBuffer.emplace(createBuffer(indexes.data(), indexes.bytes(), gfx::BufferUsageType::StaticDraw));
+        tileIndexBuffer.emplace(createBuffer(indexes.data(),
+                                             indexes.bytes(),
+                                             gfx::BufferUsageType::StaticDraw,
+                                             /*isIndexBuffer=*/true,
+                                             /*persistent=*/true));
     }
     return *tileIndexBuffer;
 }
 
-const gfx::UniqueVertexBufferResource& Context::getEmptyVertexBuffer() {
+const UniqueVertexBufferResource& Context::getEmptyVertexBuffer() {
     if (!emptyVertexBuffer) {
         // This buffer is bound to vertex attribtue indexes when the uniforms are used instead and
         // shaders are expected not to access the attribute values, but Metal requires a binding.
@@ -234,7 +247,8 @@ const gfx::UniqueVertexBufferResource& Context::getEmptyVertexBuffer() {
         // descriptors, but that isn't currently being used.
         constexpr std::size_t size = 32;
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
-        emptyVertexBuffer = std::make_unique<VertexBufferResource>(createBuffer(nullptr, size, usage));
+        emptyVertexBuffer = std::make_unique<VertexBufferResource>(
+            createBuffer(nullptr, size, usage, /*isIndexBuffer=*/false, /*persistent=*/false));
     }
     return emptyVertexBuffer;
 }
@@ -272,7 +286,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     }
 
     const auto& mtlShader = static_cast<const mtl::ShaderProgram&>(*clipMaskShader);
-    const auto& mtlRenderPass = static_cast<mtl::RenderPass&>(renderPass);
+    auto& mtlRenderPass = static_cast<mtl::RenderPass&>(renderPass);
     const auto& encoder = mtlRenderPass.getMetalEncoder();
     const auto colorMode = gfx::ColorMode::disabled();
 
@@ -352,7 +366,11 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     auto& uboBuffer = clipMaskUniformsBufferUsed ? tempBuffer : clipMaskUniformsBuffer;
     clipMaskUniformsBufferUsed = true;
     if (!uboBuffer || !*uboBuffer || uboBuffer->getSizeInBytes() < bufferSize) {
-        uboBuffer = createBuffer(tileUBOs.data(), bufferSize, gfx::BufferUsageType::StaticDraw);
+        uboBuffer = createBuffer(tileUBOs.data(),
+                                 bufferSize,
+                                 gfx::BufferUsageType::StaticDraw,
+                                 /*isIndexBuffer=*/false,
+                                 /*persistent=*/!clipMaskUniformsBufferUsed);
         if (!uboBuffer) {
             return false;
         }
@@ -361,7 +379,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     }
 
     encoder->setCullMode(MTL::CullModeNone);
-    encoder->setVertexBuffer(vertexRes.getMetalBuffer().get(), /*offset=*/0, ShaderClass::attributes[0].index);
+
+    mtlRenderPass.bindVertex(vertexRes, /*offset=*/0, ShaderClass::attributes[0].index);
 
     // Instancing is disabled for now because the `[[stencil]]` attribute in the fragment shader output
     // that we need to apply a different stencil value for each tile causes a problem on some older (A8-A11)
@@ -379,10 +398,10 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                    /*baseVertex=*/0,
                                    /*baseInstance=*/0);
 #else
+    const auto uboIndex = ShaderClass::uniforms[0].index;
     for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
         encoder->setStencilReferenceValue(tileUBOs[ii].stencil_ref);
-        encoder->setVertexBuffer(
-            uboBuffer->getMetalBuffer().get(), /*offset=*/ii * uboSize, ShaderClass::uniforms[0].index);
+        mtlRenderPass.bindVertex(*uboBuffer, /*offset=*/ii * uboSize, uboIndex, /*size=*/uboSize);
         encoder->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle,
                                        indexCount,
                                        MTL::IndexType::IndexTypeUInt16,
