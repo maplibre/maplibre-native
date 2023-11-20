@@ -226,7 +226,7 @@ void generateFillAndOutineBuffers(const GeometryCollection& geometry,
                 lineIndexes,
                 ring,
                 lineOptions,
-                [&](std::size_t geometryIndex, std::size_t vertexIndex) {
+                [&](std::size_t geometryIndex, [[maybe_unused]] std::size_t vertexIndex) {
                     lineToFillVertexIndex.emplace_back(base + geometryIndex);
                 });
         }

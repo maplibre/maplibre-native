@@ -33,6 +33,7 @@ out highp float v_linesofar;
 #pragma mapbox: define lowp float opacity
 
 void main() {
+    float u_color_t = 0.0;
     #pragma mapbox: initialize highp vec4 color
     #pragma mapbox: initialize lowp float opacity
 

@@ -49,6 +49,7 @@ out lowp float opacity;
 #endif
 
 void main() {
+    float u_color_t = 0.0;
     #ifndef HAS_UNIFORM_u_color
 color = unpack_mix_color(a_color, u_color_t);
 #else
