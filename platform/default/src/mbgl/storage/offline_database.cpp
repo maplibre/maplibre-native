@@ -1407,10 +1407,7 @@ std::exception_ptr OfflineDatabase::initAmbientCacheSize() {
             "               + IFNULL(LENGTH(accessed), 0) "
             "               + IFNULL(LENGTH(must_revalidate), 0) "
             "               ) as data "
-            "    FROM tiles "
-            "    LEFT JOIN region_tiles "
-            "    ON tile_id = tiles.id "
-            "    WHERE tile_id IS NULL "
+            "    FROM ambient_tiles "
             "  UNION ALL "
             "    SELECT SUM(IFNULL(LENGTH(data), 0) "
             "               + IFNULL(LENGTH(id), 0) "
@@ -1423,14 +1420,13 @@ std::exception_ptr OfflineDatabase::initAmbientCacheSize() {
             "               + IFNULL(LENGTH(accessed), 0) "
             "               + IFNULL(LENGTH(must_revalidate), 0) "
             "               ) as data "
-            "    FROM resources "
-            "    LEFT JOIN region_resources "
-            "    ON resource_id = resources.id "
-            "    WHERE resource_id IS NULL "
+            "    FROM ambient_resources "
             ") ") };
             // clang-format on
+            std::cout << "######## BEFORE INITAMBIENT\n";
             query.run();
             currentAmbientCacheSize = query.get<int64_t>(0);
+            std::cout << "######## AFTER INITAMBIENT\n";
         } catch (const mapbox::sqlite::Exception& ex) {
             handleError(ex, "cannot get current ambient cache size");
             return std::current_exception();
