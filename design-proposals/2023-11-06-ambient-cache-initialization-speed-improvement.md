@@ -50,4 +50,4 @@ No public API modifications
 - Store the current ambient cache size inside the database, and update it each time his cache size is modified. This way, the initialization simply request the computed cache size from the last execution.
 - Store a flag inside the tiles and resources table that tells if the resource/tile is ambient or not. That way we simplify the request by deleting the need to make a left join. With the cost that for each download/cleaning, the flag must be re-set correctly.
 
-The main problem we have with these 2 solutions are in term of database corruption. If something wrong happens between the initial modification and the computation modification, you'll have a database with incoherent information stored. That could leads to issues difficult to overcome.
+The main problem we have with these 2 solutions are related to database corruption. If something wrong happens between the initial modification and the computation modification, you'll have a database with incoherent information stored. That could lead to issues difficult to overcome.
