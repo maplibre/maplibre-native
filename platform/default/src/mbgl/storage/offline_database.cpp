@@ -10,6 +10,8 @@
 
 #include <mbgl/storage/offline_schema.hpp>
 #include <mbgl/storage/merge_sideloaded.hpp>
+#include <iostream>
+#include <sstream>
 
 namespace mbgl {
 
@@ -67,6 +69,9 @@ void OfflineDatabase::initialize() {
             migrateToVersion6();
             // fall through
         case 6:
+            migrateToVersion7();
+            // fall through
+        case 7:
             // Happy path; we're done
             return;
         default:
@@ -173,7 +178,7 @@ void OfflineDatabase::createSchema() {
     db->exec("PRAGMA synchronous = FULL");
     mapbox::sqlite::Transaction transaction(*db);
     db->exec(offlineDatabaseSchema);
-    db->exec("PRAGMA user_version = 6");
+    db->exec("PRAGMA user_version = 7");
     transaction.commit();
 }
 
@@ -212,6 +217,46 @@ void OfflineDatabase::migrateToVersion6() {
         "ALTER TABLE tiles ADD COLUMN must_revalidate INTEGER NOT NULL DEFAULT "
         "0");
     db->exec("PRAGMA user_version = 6");
+    transaction.commit();
+}
+
+void OfflineDatabase::migrateToVersion7() {
+    assert(db);
+    checkFlags();
+
+    mapbox::sqlite::Transaction transaction(*db);
+    db->exec(
+        "CREATE TABLE ambient_resources (\n"
+        "  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n"
+        "  url TEXT NOT NULL,\n"
+        "  kind INTEGER NOT NULL,\n"
+        "  expires INTEGER,\n"
+        "  modified INTEGER,\n"
+        "  etag TEXT,\n"
+        "  data BLOB,\n"
+        "  compressed INTEGER NOT NULL DEFAULT 0,\n"
+        "  accessed INTEGER NOT NULL,\n"
+        "  must_revalidate INTEGER NOT NULL DEFAULT 0,\n"
+        "  UNIQUE (url)\n"
+        ");");
+    db->exec(
+        "CREATE TABLE ambient_tiles (\n"
+        "  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,\n"
+        "  url_template TEXT NOT NULL,\n"
+        "  pixel_ratio INTEGER NOT NULL,\n"
+        "  z INTEGER NOT NULL,\n"
+        "  x INTEGER NOT NULL,\n"
+        "  y INTEGER NOT NULL,\n"
+        "  expires INTEGER,\n"
+        "  modified INTEGER,\n"
+        "  etag TEXT,\n"
+        "  data BLOB,\n"
+        "  compressed INTEGER NOT NULL DEFAULT 0,\n"
+        "  accessed INTEGER NOT NULL,\n"
+        "  must_revalidate INTEGER NOT NULL DEFAULT 0,\n"
+        "  UNIQUE (url_template, pixel_ratio, z, x, y)\n"
+        ");");
+    db->exec("PRAGMA user_version = 7");
     transaction.commit();
 }
 
@@ -286,7 +331,7 @@ std::pair<bool, uint64_t> OfflineDatabase::put(const Resource& resource, const R
     }
 
     mapbox::sqlite::Transaction transaction(*db, mapbox::sqlite::Transaction::Immediate);
-    auto result = putInternal(resource, response, true);
+    auto result = putInternal(resource, response, true, true);
     transaction.commit();
     return result;
 } catch (...) {
@@ -296,7 +341,8 @@ std::pair<bool, uint64_t> OfflineDatabase::put(const Resource& resource, const R
 
 std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
                                                        const Response& response,
-                                                       bool evict_) {
+                                                       bool evict_,
+                                                       bool ambient) {
     checkFlags();
 
     if (response.error) {
@@ -331,14 +377,16 @@ std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
                            compressed      ? compressedData
                            : response.data ? *response.data
                                            : "",
-                           compressed);
+                           compressed,
+                           ambient);
     } else {
         inserted = putResource(resource,
                                response,
                                compressed      ? compressedData
                                : response.data ? *response.data
                                                : "",
-                               compressed);
+                               compressed,
+                               ambient);
     }
 
     if (stats) {
@@ -349,58 +397,72 @@ std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
 }
 
 std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const Resource& resource) {
-    // Update accessed timestamp used for LRU eviction.
-    if (!readOnly) {
-        try {
-            mapbox::sqlite::Query accessedQuery{getStatement("UPDATE resources SET accessed = ?1 WHERE url = ?2")};
-            accessedQuery.bind(1, util::now());
-            accessedQuery.bind(2, resource.url);
-            accessedQuery.run();
-        } catch (const mapbox::sqlite::Exception& ex) {
-            if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt) {
-                throw;
+    // Helper lambda to update accessed timestamp
+    auto updateAccessedTime = [this, &resource](const std::string& tableName) {
+        // Update accessed timestamp used for LRU eviction.
+        if (!readOnly) {
+            try {
+                std::string sql = "UPDATE " + tableName + " SET accessed = ?1 WHERE url = ?2";
+                mapbox::sqlite::Query accessedQuery{getStatement(sql.c_str())};
+                accessedQuery.bind(1, util::now());
+                accessedQuery.bind(2, resource.url);
+                accessedQuery.run();
+            } catch (const mapbox::sqlite::Exception& ex) {
+                if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt) {
+                    throw;
+                }
+                // If we don't have any indication that the database is corrupt, continue as usual.
+                Log::Warning(
+                    Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
             }
-
-            // If we don't have any indication that the database is corrupt, continue as usual.
-            Log::Warning(
-                Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
         }
+    };
+
+    // Helper lambda to execute the query and construct the response
+    auto queryResource = [this,
+                          &resource](const std::string& tableName) -> std::optional<std::pair<Response, uint64_t>> {
+        std::string sql = "SELECT etag, expires, must_revalidate, modified, data, compressed FROM " + tableName +
+                          " WHERE url = ?";
+        mapbox::sqlite::Query query{getStatement(sql.c_str())};
+        query.bind(1, resource.url);
+
+        if (!query.run()) {
+            return std::nullopt;
+        }
+
+        Response response;
+        uint64_t size = 0;
+
+        response.etag = query.get<std::optional<std::string>>(0);
+        response.expires = query.get<std::optional<Timestamp>>(1);
+        response.mustRevalidate = query.get<bool>(2);
+        response.modified = query.get<std::optional<Timestamp>>(3);
+
+        auto data = query.get<std::optional<std::string>>(4);
+        if (!data) {
+            response.noContent = true;
+        } else if (query.get<bool>(5)) {
+            response.data = std::make_shared<std::string>(util::decompress(*data));
+            size = data->length();
+        } else {
+            response.data = std::make_shared<std::string>(*data);
+            size = data->length();
+        }
+
+        return std::make_pair(response, size);
+    };
+
+    updateAccessedTime("ambient_resources");
+    updateAccessedTime("resources");
+
+    // Try to get the resource from ambient_resources first
+    auto ambientResult = queryResource("ambient_resources");
+    if (ambientResult) {
+        return ambientResult;
     }
 
-    // clang-format off
-    mapbox::sqlite::Query query{ getStatement(
-        //        0      1            2            3       4      5
-        "SELECT etag, expires, must_revalidate, modified, data, compressed "
-        "FROM resources "
-        "WHERE url = ?") };
-    // clang-format on
-
-    query.bind(1, resource.url);
-
-    if (!query.run()) {
-        return std::nullopt;
-    }
-
-    Response response;
-    uint64_t size = 0;
-
-    response.etag = query.get<std::optional<std::string>>(0);
-    response.expires = query.get<std::optional<Timestamp>>(1);
-    response.mustRevalidate = query.get<bool>(2);
-    response.modified = query.get<std::optional<Timestamp>>(3);
-
-    auto data = query.get<std::optional<std::string>>(4);
-    if (!data) {
-        response.noContent = true;
-    } else if (query.get<bool>(5)) {
-        response.data = std::make_shared<std::string>(util::decompress(*data));
-        size = data->length();
-    } else {
-        response.data = std::make_shared<std::string>(*data);
-        size = data->length();
-    }
-
-    return std::make_pair(response, size);
+    // If the resource is not in ambient_resources, try resources
+    return queryResource("resources");
 }
 
 std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
@@ -413,168 +475,204 @@ std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
     return query.get<std::optional<int64_t>>(0);
 }
 
-bool OfflineDatabase::putResource(const Resource& resource,
-                                  const Response& response,
-                                  const std::string& data,
-                                  bool compressed) {
+bool OfflineDatabase::putResource(
+    const Resource& resource, const Response& response, const std::string& data, bool compressed, bool ambient) {
     checkFlags();
 
     if (response.notModified) {
-        // clang-format off
-        mapbox::sqlite::Query notModifiedQuery{ getStatement(
-            "UPDATE resources "
-            "SET accessed         = ?1, "
-            "    expires          = ?2, "
-            "    must_revalidate  = ?3 "
-            "WHERE url    = ?4 ") };
-        // clang-format on
+        std::unique_ptr<mapbox::sqlite::Query> notModifiedQuery;
 
-        notModifiedQuery.bind(1, util::now());
-        notModifiedQuery.bind(2, response.expires);
-        notModifiedQuery.bind(3, response.mustRevalidate);
-        notModifiedQuery.bind(4, resource.url);
-        notModifiedQuery.run();
+        if (ambient) {
+            notModifiedQuery = std::make_unique<mapbox::sqlite::Query>(getStatement(
+                "UPDATE ambient_resources SET accessed = ?1, expires = ?2, must_revalidate = ?3 WHERE url = ?4"));
+        } else {
+            notModifiedQuery = std::make_unique<mapbox::sqlite::Query>(
+                getStatement("UPDATE resources SET accessed = ?1, expires = ?2, must_revalidate = ?3 WHERE url = ?4"));
+        }
+
+        notModifiedQuery->bind(1, util::now());
+        notModifiedQuery->bind(2, response.expires);
+        notModifiedQuery->bind(3, response.mustRevalidate);
+        notModifiedQuery->bind(4, resource.url);
+        notModifiedQuery->run();
         return false;
     }
 
     // We can't use REPLACE because it would change the id value.
-    // clang-format off
-    mapbox::sqlite::Query updateQuery{ getStatement(
-        "UPDATE resources "
-        "SET kind            = ?1, "
-        "    etag            = ?2, "
-        "    expires         = ?3, "
-        "    must_revalidate = ?4, "
-        "    modified        = ?5, "
-        "    accessed        = ?6, "
-        "    data            = ?7, "
-        "    compressed      = ?8 "
-        "WHERE url           = ?9 ") };
-    // clang-format on
 
-    updateQuery.bind(1, int(resource.kind));
-    updateQuery.bind(2, response.etag);
-    updateQuery.bind(3, response.expires);
-    updateQuery.bind(4, response.mustRevalidate);
-    updateQuery.bind(5, response.modified);
-    updateQuery.bind(6, util::now());
-    updateQuery.bind(9, resource.url);
+    std::unique_ptr<mapbox::sqlite::Query> updateQuery;
 
-    if (response.noContent) {
-        updateQuery.bind(7, nullptr);
-        updateQuery.bind(8, false);
+    if (ambient) {
+        updateQuery = std::make_unique<mapbox::sqlite::Query>(
+            getStatement("UPDATE ambient_resources SET kind = ?1, etag = ?2, expires = ?3, must_revalidate = ?4, "
+                         "modified = ?5, accessed = ?6, data = ?7, compressed = ?8 "
+                         "WHERE url = ?9"));
     } else {
-        updateQuery.bindBlob(7, data.data(), data.size(), false);
-        updateQuery.bind(8, compressed);
+        updateQuery = std::make_unique<mapbox::sqlite::Query>(
+            getStatement("UPDATE resources SET kind = ?1, etag = ?2, expires = ?3, must_revalidate = ?4, modified = "
+                         "?5, accessed = ?6, data = ?7, compressed = ?8 "
+                         "WHERE url = ?9"));
     }
 
-    updateQuery.run();
-    if (updateQuery.changes() != 0) {
+    updateQuery->bind(1, int(resource.kind));
+    updateQuery->bind(2, response.etag);
+    updateQuery->bind(3, response.expires);
+    updateQuery->bind(4, response.mustRevalidate);
+    updateQuery->bind(5, response.modified);
+    updateQuery->bind(6, util::now());
+    updateQuery->bind(9, resource.url);
+
+    if (response.noContent) {
+        updateQuery->bind(7, nullptr);
+        updateQuery->bind(8, false);
+    } else {
+        updateQuery->bindBlob(7, data.data(), data.size(), false);
+        updateQuery->bind(8, compressed);
+    }
+
+    updateQuery->run();
+    if (updateQuery->changes() != 0) {
         return false;
     }
 
-    // clang-format off
-    mapbox::sqlite::Query insertQuery{ getStatement(
-        "INSERT INTO resources (url, kind, etag, expires, must_revalidate, modified, accessed, data, compressed) "
-        "VALUES                (?1,  ?2,   ?3,   ?4,      ?5,              ?6,       ?7,       ?8,   ?9) ") };
-    // clang-format on
+    std::unique_ptr<mapbox::sqlite::Query> insertQuery;
 
-    insertQuery.bind(1, resource.url);
-    insertQuery.bind(2, int(resource.kind));
-    insertQuery.bind(3, response.etag);
-    insertQuery.bind(4, response.expires);
-    insertQuery.bind(5, response.mustRevalidate);
-    insertQuery.bind(6, response.modified);
-    insertQuery.bind(7, util::now());
-
-    if (response.noContent) {
-        insertQuery.bind(8, nullptr);
-        insertQuery.bind(9, false);
+    if (ambient) {
+        insertQuery = std::make_unique<mapbox::sqlite::Query>(
+            getStatement("INSERT INTO ambient_resources (url, kind, etag, expires, must_revalidate, modified, "
+                         "accessed, data, compressed) "
+                         "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)"));
     } else {
-        insertQuery.bindBlob(8, data.data(), data.size(), false);
-        insertQuery.bind(9, compressed);
+        insertQuery = std::make_unique<mapbox::sqlite::Query>(getStatement(
+            "INSERT INTO resources (url, kind, etag, expires, must_revalidate, modified, accessed, data, compressed) "
+            "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)"));
     }
 
-    insertQuery.run();
+    insertQuery->bind(1, resource.url);
+    insertQuery->bind(2, int(resource.kind));
+    insertQuery->bind(3, response.etag);
+    insertQuery->bind(4, response.expires);
+    insertQuery->bind(5, response.mustRevalidate);
+    insertQuery->bind(6, response.modified);
+    insertQuery->bind(7, util::now());
+
+    if (response.noContent) {
+        insertQuery->bind(8, nullptr);
+        insertQuery->bind(9, false);
+    } else {
+        insertQuery->bindBlob(8, data.data(), data.size(), false);
+        insertQuery->bind(9, compressed);
+    }
+
+    insertQuery->run();
 
     return true;
 }
 
 std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Resource::TileData& tile) {
-    // Update accessed timestamp used for LRU eviction.
-    if (!readOnly) {
-        try {
-            // clang-format off
-            mapbox::sqlite::Query accessedQuery{ getStatement(
-                "UPDATE tiles "
-                "SET accessed       = ?1 "
-                "WHERE url_template = ?2 "
-                "  AND pixel_ratio  = ?3 "
-                "  AND x            = ?4 "
-                "  AND y            = ?5 "
-                "  AND z            = ?6 ") };
-            // clang-format on
+    // Helper lambda to update the accessed timestamp for LRU eviction
+    auto updateAccessedTimestamp = [this](const std::string& table, const Resource::TileData& tileData) {
+        if (!readOnly) {
+            try {
+                // clang-format off
+                std::string sql =
+                    "UPDATE " + table + " "
+                    "SET accessed = ?1 "
+                    "WHERE url_template = ?2 "
+                    "AND pixel_ratio  = ?3 "
+                    "AND x            = ?4 "
+                    "AND y            = ?5 "
+                    "AND z            = ?6 ";
+                // clang-format on
+                mapbox::sqlite::Query query{getStatement(sql.c_str())};
 
-            accessedQuery.bind(1, util::now());
-            accessedQuery.bind(2, tile.urlTemplate);
-            accessedQuery.bind(3, tile.pixelRatio);
-            accessedQuery.bind(4, tile.x);
-            accessedQuery.bind(5, tile.y);
-            accessedQuery.bind(6, tile.z);
-            accessedQuery.run();
-        } catch (const mapbox::sqlite::Exception& ex) {
-            if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt) {
-                throw;
+                query.bind(1, util::now());
+                query.bind(2, tileData.urlTemplate);
+                query.bind(3, tileData.pixelRatio);
+                query.bind(4, tileData.x);
+                query.bind(5, tileData.y);
+                query.bind(6, tileData.z);
+                query.run();
+            } catch (const mapbox::sqlite::Exception& ex) {
+                if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt) {
+                    throw;
+                }
+                // If we don't have any indication that the database is corrupt, continue as usual.
+                Log::Warning(Event::Database,
+                             static_cast<int>(ex.code),
+                             "Can't update timestamp in " + table + ": " + std::string(ex.what()));
             }
-
-            // If we don't have any indication that the database is corrupt, continue as usual.
-            Log::Warning(
-                Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
         }
+    };
+
+    // Helper lambda to attempt to get tile data from a specific table
+    auto getTileData = [this, &tile](const std::string& table) -> std::optional<std::pair<Response, uint64_t>> {
+        // clang-format off
+        std::string sql =
+            "SELECT etag, expires, must_revalidate, modified, data, compressed "
+            "FROM " + table + " "
+            "WHERE url_template = ?1 "
+            "AND pixel_ratio  = ?2 "
+            "AND x            = ?3 "
+            "AND y            = ?4 "
+            "AND z            = ?5 ";
+        // clang-format on
+        mapbox::sqlite::Query query{getStatement(sql.c_str())};
+
+        query.bind(1, tile.urlTemplate);
+        query.bind(2, tile.pixelRatio);
+        query.bind(3, tile.x);
+        query.bind(4, tile.y);
+        query.bind(5, tile.z);
+
+        if (!query.run()) {
+            return std::nullopt; // If no data found, return nullopt
+        }
+
+        Response response;
+        uint64_t size = 0;
+
+        // Parse response fields from the query
+        response.etag = query.get<std::optional<std::string>>(0);
+        response.expires = query.get<std::optional<Timestamp>>(1);
+        response.mustRevalidate = query.get<bool>(2);
+        response.modified = query.get<std::optional<Timestamp>>(3);
+
+        auto data = query.get<std::optional<std::string>>(4);
+        if (!data) {
+            response.noContent = true; // Handle case with no content
+        } else if (query.get<bool>(5)) {
+            response.data = std::make_shared<std::string>(util::decompress(*data));
+            size = data->length();
+        } else {
+            response.data = std::make_shared<std::string>(*data);
+            size = data->length();
+        }
+
+        return std::make_pair(response, size); // Return the response and data size
+    };
+
+    // Update accessed timestamps
+    updateAccessedTimestamp("ambient_tiles", tile);
+    updateAccessedTimestamp("tiles", tile);
+
+    // Try to get tile from ambient resources first
+    auto ambientResult = getTileData("ambient_tiles");
+    std::cout << "######## GET AMBIENT\n";
+    if (ambientResult) {
+        std::cout << "######## OK FROM AMBIENT\n";
+        return ambientResult; // Return if found in ambient resources
     }
-
-    // clang-format off
-    mapbox::sqlite::Query query{ getStatement(
-        //        0      1           2,            3,      4,      5
-        "SELECT etag, expires, must_revalidate, modified, data, compressed "
-        "FROM tiles "
-        "WHERE url_template = ?1 "
-        "  AND pixel_ratio  = ?2 "
-        "  AND x            = ?3 "
-        "  AND y            = ?4 "
-        "  AND z            = ?5 ") };
-    // clang-format on
-
-    query.bind(1, tile.urlTemplate);
-    query.bind(2, tile.pixelRatio);
-    query.bind(3, tile.x);
-    query.bind(4, tile.y);
-    query.bind(5, tile.z);
-
-    if (!query.run()) {
-        return std::nullopt;
-    }
-
-    Response response;
-    uint64_t size = 0;
-
-    response.etag = query.get<std::optional<std::string>>(0);
-    response.expires = query.get<std::optional<Timestamp>>(1);
-    response.mustRevalidate = query.get<bool>(2);
-    response.modified = query.get<std::optional<Timestamp>>(3);
-
-    std::optional<std::string> data = query.get<std::optional<std::string>>(4);
-    if (!data) {
-        response.noContent = true;
-    } else if (query.get<bool>(5)) {
-        response.data = std::make_shared<std::string>(util::decompress(*data));
-        size = data->length();
+    std::cout << "######## GET OFFLINE\n";
+    // Finally, try to get tile from regular resources
+    auto offlineResult = getTileData("tiles");
+    if (offlineResult) {
+        std::cout << "######## OK FROM OFFLINE\n";
     } else {
-        response.data = std::make_shared<std::string>(*data);
-        size = data->length();
+        std::cout << "######## NOT FOUND : " + tile.urlTemplate + " - " + std::to_string(tile.z) + "/" +
+                         std::to_string(tile.x) + "/" + std::to_string(tile.y) + "\n";
     }
-
-    return std::make_pair(response, size);
+    return offlineResult;
 }
 
 std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) {
@@ -602,107 +700,109 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
     return size.get<std::optional<int64_t>>(0);
 }
 
-bool OfflineDatabase::putTile(const Resource::TileData& tile,
-                              const Response& response,
-                              const std::string& data,
-                              bool compressed) {
+bool OfflineDatabase::putTile(
+    const Resource::TileData& tile, const Response& response, const std::string& data, bool compressed, bool ambient) {
     checkFlags();
 
     if (response.notModified) {
-        // clang-format off
-        mapbox::sqlite::Query notModifiedQuery{ getStatement(
-            "UPDATE tiles "
-            "SET accessed        = ?1, "
-            "    expires         = ?2, "
-            "    must_revalidate = ?3 "
-            "WHERE url_template  = ?4 "
-            "  AND pixel_ratio   = ?5 "
-            "  AND x             = ?6 "
-            "  AND y             = ?7 "
-            "  AND z             = ?8 ") };
-        // clang-format on
+        std::unique_ptr<mapbox::sqlite::Query> notModifiedQuery;
 
-        notModifiedQuery.bind(1, util::now());
-        notModifiedQuery.bind(2, response.expires);
-        notModifiedQuery.bind(3, response.mustRevalidate);
-        notModifiedQuery.bind(4, tile.urlTemplate);
-        notModifiedQuery.bind(5, tile.pixelRatio);
-        notModifiedQuery.bind(6, tile.x);
-        notModifiedQuery.bind(7, tile.y);
-        notModifiedQuery.bind(8, tile.z);
-        notModifiedQuery.run();
+        if (ambient) {
+            notModifiedQuery = std::make_unique<mapbox::sqlite::Query>(
+                getStatement("UPDATE ambient_tiles SET accessed = ?1, expires = ?2, must_revalidate = ?3 "
+                             "WHERE url_template = ?4 AND pixel_ratio = ?5 AND x = ?6 AND y = ?7 AND z = ?8"));
+        } else {
+            notModifiedQuery = std::make_unique<mapbox::sqlite::Query>(
+                getStatement("UPDATE tiles SET accessed = ?1, expires = ?2, must_revalidate = ?3 "
+                             "WHERE url_template = ?4 AND pixel_ratio = ?5 AND x = ?6 AND y = ?7 AND z = ?8"));
+        }
+
+        notModifiedQuery->bind(1, util::now());
+        notModifiedQuery->bind(2, response.expires);
+        notModifiedQuery->bind(3, response.mustRevalidate);
+        notModifiedQuery->bind(4, tile.urlTemplate);
+        notModifiedQuery->bind(5, tile.pixelRatio);
+        notModifiedQuery->bind(6, tile.x);
+        notModifiedQuery->bind(7, tile.y);
+        notModifiedQuery->bind(8, tile.z);
+        notModifiedQuery->run();
         return false;
     }
 
     // We can't use REPLACE because it would change the id value.
 
-    // clang-format off
-    mapbox::sqlite::Query updateQuery{ getStatement(
-        "UPDATE tiles "
-        "SET modified        = ?1, "
-        "    etag            = ?2, "
-        "    expires         = ?3, "
-        "    must_revalidate = ?4, "
-        "    accessed        = ?5, "
-        "    data            = ?6, "
-        "    compressed      = ?7 "
-        "WHERE url_template  = ?8 "
-        "  AND pixel_ratio   = ?9 "
-        "  AND x             = ?10 "
-        "  AND y             = ?11 "
-        "  AND z             = ?12 ") };
-    // clang-format on
+    std::unique_ptr<mapbox::sqlite::Query> updateQuery;
 
-    updateQuery.bind(1, response.modified);
-    updateQuery.bind(2, response.etag);
-    updateQuery.bind(3, response.expires);
-    updateQuery.bind(4, response.mustRevalidate);
-    updateQuery.bind(5, util::now());
-    updateQuery.bind(8, tile.urlTemplate);
-    updateQuery.bind(9, tile.pixelRatio);
-    updateQuery.bind(10, tile.x);
-    updateQuery.bind(11, tile.y);
-    updateQuery.bind(12, tile.z);
-
-    if (response.noContent) {
-        updateQuery.bind(6, nullptr);
-        updateQuery.bind(7, false);
+    if (ambient) {
+        updateQuery = std::make_unique<mapbox::sqlite::Query>(
+            getStatement("UPDATE ambient_tiles SET modified = ?1, etag = ?2, expires = ?3, must_revalidate = ?4, "
+                         "accessed = ?5, data = ?6, compressed = ?7 "
+                         "WHERE url_template = ?8 AND pixel_ratio = ?9 AND x = ?10 AND y = ?11 AND z = ?12"));
     } else {
-        updateQuery.bindBlob(6, data.data(), data.size(), false);
-        updateQuery.bind(7, compressed);
+        updateQuery = std::make_unique<mapbox::sqlite::Query>(
+            getStatement("UPDATE tiles SET modified = ?1, etag = ?2, expires = ?3, must_revalidate = ?4, accessed = "
+                         "?5, data = ?6, compressed = ?7 "
+                         "WHERE url_template = ?8 AND pixel_ratio = ?9 AND x = ?10 AND y = ?11 AND z = ?12"));
     }
 
-    updateQuery.run();
-    if (updateQuery.changes() != 0) {
+    updateQuery->bind(1, response.modified);
+    updateQuery->bind(2, response.etag);
+    updateQuery->bind(3, response.expires);
+    updateQuery->bind(4, response.mustRevalidate);
+    updateQuery->bind(5, util::now());
+    updateQuery->bind(8, tile.urlTemplate);
+    updateQuery->bind(9, tile.pixelRatio);
+    updateQuery->bind(10, tile.x);
+    updateQuery->bind(11, tile.y);
+    updateQuery->bind(12, tile.z);
+
+    if (response.noContent) {
+        updateQuery->bind(6, nullptr);
+        updateQuery->bind(7, false);
+    } else {
+        updateQuery->bindBlob(6, data.data(), data.size(), false);
+        updateQuery->bind(7, compressed);
+    }
+
+    updateQuery->run();
+    if (updateQuery->changes() != 0) {
         return false;
     }
 
-    // clang-format off
-    mapbox::sqlite::Query insertQuery{ getStatement(
-        "INSERT INTO tiles (url_template, pixel_ratio, x,  y,  z,  modified, must_revalidate, etag, expires, accessed,  data, compressed) "
-        "VALUES            (?1,           ?2,          ?3, ?4, ?5, ?6,       ?7,              ?8,   ?9,      ?10,       ?11,  ?12)") };
-    // clang-format on
+    std::unique_ptr<mapbox::sqlite::Query> insertQuery;
 
-    insertQuery.bind(1, tile.urlTemplate);
-    insertQuery.bind(2, tile.pixelRatio);
-    insertQuery.bind(3, tile.x);
-    insertQuery.bind(4, tile.y);
-    insertQuery.bind(5, tile.z);
-    insertQuery.bind(6, response.modified);
-    insertQuery.bind(7, response.mustRevalidate);
-    insertQuery.bind(8, response.etag);
-    insertQuery.bind(9, response.expires);
-    insertQuery.bind(10, util::now());
-
-    if (response.noContent) {
-        insertQuery.bind(11, nullptr);
-        insertQuery.bind(12, false);
+    if (ambient) {
+        insertQuery = std::make_unique<mapbox::sqlite::Query>(
+            getStatement("INSERT INTO ambient_tiles (url_template, pixel_ratio, x, y, z, modified, must_revalidate, "
+                         "etag, expires, accessed, data, compressed) "
+                         "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)"));
     } else {
-        insertQuery.bindBlob(11, data.data(), data.size(), false);
-        insertQuery.bind(12, compressed);
+        insertQuery = std::make_unique<mapbox::sqlite::Query>(
+            getStatement("INSERT INTO tiles (url_template, pixel_ratio, x, y, z, modified, must_revalidate, etag, "
+                         "expires, accessed, data, compressed) "
+                         "VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)"));
     }
 
-    insertQuery.run();
+    insertQuery->bind(1, tile.urlTemplate);
+    insertQuery->bind(2, tile.pixelRatio);
+    insertQuery->bind(3, tile.x);
+    insertQuery->bind(4, tile.y);
+    insertQuery->bind(5, tile.z);
+    insertQuery->bind(6, response.modified);
+    insertQuery->bind(7, response.mustRevalidate);
+    insertQuery->bind(8, response.etag);
+    insertQuery->bind(9, response.expires);
+    insertQuery->bind(10, util::now());
+
+    if (response.noContent) {
+        insertQuery->bind(11, nullptr);
+        insertQuery->bind(12, false);
+    } else {
+        insertQuery->bindBlob(11, data.data(), data.size(), false);
+        insertQuery->bind(12, compressed);
+    }
+
+    insertQuery->run();
 
     return true;
 }
@@ -712,11 +812,8 @@ std::exception_ptr OfflineDatabase::invalidateAmbientCache() try {
 
     // clang-format off
     mapbox::sqlite::Query tileQuery{ getStatement(
-        "UPDATE tiles "
-        "SET expires = 0, must_revalidate = 1 "
-        "WHERE id NOT IN ("
-        "    SELECT tile_id FROM region_tiles"
-        ")"
+        "UPDATE ambient_tiles "
+        "SET expires = 0, must_revalidate = 1"
     ) };
     // clang-format on
 
@@ -724,11 +821,8 @@ std::exception_ptr OfflineDatabase::invalidateAmbientCache() try {
 
     // clang-format off
     mapbox::sqlite::Query resourceQuery{ getStatement(
-        "UPDATE resources "
-        "SET expires = 0, must_revalidate = 1 "
-        "WHERE id NOT IN ("
-        "    SELECT resource_id FROM region_resources"
-        ")"
+        "UPDATE ambient_resources "
+        "SET expires = 0, must_revalidate = 1"
     ) };
     // clang-format on
 
@@ -745,10 +839,7 @@ std::exception_ptr OfflineDatabase::clearAmbientCache() try {
 
     // clang-format off
     mapbox::sqlite::Query tileQuery{ getStatement(
-        "DELETE FROM tiles "
-        "WHERE id NOT IN ("
-        "    SELECT tile_id FROM region_tiles"
-        ")"
+        "DELETE FROM ambient_tiles"
     ) };
     // clang-format on
 
@@ -756,10 +847,7 @@ std::exception_ptr OfflineDatabase::clearAmbientCache() try {
 
     // clang-format off
     mapbox::sqlite::Query resourceQuery{ getStatement(
-        "DELETE FROM resources "
-        "WHERE id NOT IN ("
-        "    SELECT resource_id FROM region_resources"
-        ")"
+        "DELETE FROM ambient_resources"
     ) };
     // clang-format on
 
@@ -1059,7 +1147,7 @@ uint64_t OfflineDatabase::putRegionResourceInternal(int64_t regionID,
                                                     const Response& response) {
     checkFlags();
 
-    uint64_t size = putInternal(resource, response, false).second;
+    uint64_t size = putInternal(resource, response, false, false).second;
     bool previouslyUnused = markUsed(regionID, resource);
 
     if (previouslyUnused && exceedsOfflineMapboxTileCountLimit(resource)) {
@@ -1323,10 +1411,7 @@ std::exception_ptr OfflineDatabase::initAmbientCacheSize() {
             "               + IFNULL(LENGTH(accessed), 0) "
             "               + IFNULL(LENGTH(must_revalidate), 0) "
             "               ) as data "
-            "    FROM tiles "
-            "    LEFT JOIN region_tiles "
-            "    ON tile_id = tiles.id "
-            "    WHERE tile_id IS NULL "
+            "    FROM ambient_tiles "
             "  UNION ALL "
             "    SELECT SUM(IFNULL(LENGTH(data), 0) "
             "               + IFNULL(LENGTH(id), 0) "
@@ -1339,14 +1424,13 @@ std::exception_ptr OfflineDatabase::initAmbientCacheSize() {
             "               + IFNULL(LENGTH(accessed), 0) "
             "               + IFNULL(LENGTH(must_revalidate), 0) "
             "               ) as data "
-            "    FROM resources "
-            "    LEFT JOIN region_resources "
-            "    ON resource_id = resources.id "
-            "    WHERE resource_id IS NULL "
+            "    FROM ambient_resources "
             ") ") };
             // clang-format on
+            std::cout << "######## BEFORE INITAMBIENT\n";
             query.run();
             currentAmbientCacheSize = query.get<int64_t>(0);
+            std::cout << "######## AFTER INITAMBIENT\n";
         } catch (const mapbox::sqlite::Exception& ex) {
             handleError(ex, "cannot get current ambient cache size");
             return std::current_exception();
