@@ -4,7 +4,7 @@
 
 We would like to improve the speed of ambient cache initialization when a lot of offline regions are downloaded.
 
-The problem is described in this issue : https://github.com/maplibre/maplibre-native/issues/1815
+The problem is described in [this issue](https://github.com/maplibre/maplibre-native/issues/1815).
 
 ## Proposed Change
 
