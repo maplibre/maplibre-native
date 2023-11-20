@@ -372,6 +372,7 @@ void Style::Impl::onSpriteLoaded(std::vector<Immutable<style::Image::Impl>> imag
     std::sort(newImages->begin(), newImages->end());
     images = std::move(newImages);
     countOfSpritesLoaded += 1;
+    assert(countOfSpritesLoaded <= countOfSprites);
     observer->onUpdate(); // For *-pattern properties.
 }
 
@@ -381,6 +382,7 @@ void Style::Impl::onSpriteError(std::exception_ptr error) {
     observer->onResourceError(error);
     // Unblock rendering tiles (even though sprite request has failed).
     countOfSpritesLoaded += 1;
+    assert(countOfSpritesLoaded <= countOfSprites);
     observer->onUpdate();
 }
 

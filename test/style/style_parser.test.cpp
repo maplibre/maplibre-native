@@ -126,6 +126,53 @@ INSTANTIATE_TEST_SUITE_P(StyleParser, StyleParserTest, ::testing::ValuesIn([] {
                              return names;
                          }()));
 
+TEST(StyleParser, SpriteAsString) {
+    style::Parser parser;
+    parser.parse(R"({
+        "version": 8,
+        "sprite": "https://example.com/default/markers"
+    })");
+    auto result = &parser.sprites;
+    ASSERT_EQ(1, result->size());
+    ASSERT_EQ("https://example.com/default/markers", result->at(0)->spriteURL);
+    ASSERT_EQ("default", result->at(0)->id);
+}
+
+TEST(StyleParser, SpriteAsArraySingle) {
+    style::Parser parser;
+    parser.parse(R"({
+        "version": 8,
+        "sprite": [{
+            "id": "default",
+            "url": "https://example.com/default/markers"
+        }]
+    })");
+    auto result = &parser.sprites;
+    ASSERT_EQ(1, result->size());
+    ASSERT_EQ("https://example.com/default/markers", result->at(0)->spriteURL);
+    ASSERT_EQ("default", result->at(0)->id);
+}
+
+TEST(StyleParser, SpriteAsArrayMultiple) {
+    style::Parser parser;
+    parser.parse(R"({
+        "version": 8,
+        "sprite": [{
+            "id": "default",
+            "url": "https://example.com/default/markers"
+        },{
+            "id": "hiking",
+            "url": "https://example.com/hiking/markers"
+        }]
+    })");
+    auto result = &parser.sprites;
+    ASSERT_EQ(2, result->size());
+    ASSERT_EQ("https://example.com/default/markers", result->at(0)->spriteURL);
+    ASSERT_EQ("default", result->at(0)->id);
+    ASSERT_EQ("https://example.com/hiking/markers", result->at(1)->spriteURL);
+    ASSERT_EQ("hiking", result->at(1)->id);
+}
+
 TEST(StyleParser, FontStacks) {
     style::Parser parser;
     parser.parse(util::read_file("test/fixtures/style_parser/font_stacks.json"));
