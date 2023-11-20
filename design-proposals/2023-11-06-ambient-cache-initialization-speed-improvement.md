@@ -9,7 +9,7 @@ The problem is described in [this issue](https://github.com/maplibre/maplibre-na
 ## Proposed Change
 
 We propose to split the ambient cache from the offline database cache.
-In terms of database structure, that means create two new tables. Let's say ambient_tiles and ambient_resources.
+In terms of database structure, that means two new tables are created. They will be called `ambient_tiles` and `ambient_resources`.
 
 ### When we need to store resource for ambient cache:
 
