@@ -26,7 +26,7 @@ We delete the same resource from the ambient cache (*).
 
 ### When we need to store tile for offline data:
 
-We store it into the tile table with the associated region inside the region_tiles table.
+We store it into the tile table with the associated region inside the `region_tiles` table.
 We delete the same tile from the ambient cache (*).
 
 (*) Even if something wrong happens and the delete instruction cannot be done for a specified resource/tile, that only means the ambient cache will waste some size.
