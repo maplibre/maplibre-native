@@ -21,7 +21,7 @@ We store it into the `ambient_tiles` table.
 
 ### When we need to store resource for offline data:
 
-We store it into the resources table with the associated region inside the region_resources table.
+We store it into the resources table with the associated region inside the `region_resources` table.
 We delete the same resource from the ambient cache (*).
 
 ### When we need to store tile for offline data:
