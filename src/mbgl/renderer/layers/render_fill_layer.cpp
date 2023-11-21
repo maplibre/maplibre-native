@@ -487,7 +487,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     });
 #endif
 
-    tileLayerGroup->setStencilTiles(renderTiles);
+    fillTileLayerGroup->setStencilTiles(renderTiles);
 
     std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
