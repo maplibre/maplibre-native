@@ -17,9 +17,10 @@ enum class FillVariant : uint8_t {
 };
 
 struct FillDrawableData : public DrawableData {
-    FillDrawableData(FillVariant type_) : type(type_) {}
+    FillDrawableData(FillVariant type_)
+        : type(type_) {}
     ~FillDrawableData() override = default;
-    
+
     FillVariant type;
 };
 

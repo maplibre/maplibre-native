@@ -633,15 +633,20 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                          bucket.sharedTriangles,
                                          bucket.triangleSegments.data(),
                                          bucket.triangleSegments.size());
-                finish(*fillBuilder, FillLayerTweaker::idFillInterpolateUBOName, getFillInterpolateUBO(), gfx::FillVariant::Fill);
+                finish(*fillBuilder,
+                       FillLayerTweaker::idFillInterpolateUBOName,
+                       getFillInterpolateUBO(),
+                       gfx::FillVariant::Fill);
             }
             if (outlineBuilder && bucket.sharedLines->elements()) {
                 outlineBuilder->setShader(outlineShader);
                 outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlineBuilder->setSegments(
                     gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
-                finish(
-                    *outlineBuilder, FillLayerTweaker::idFillOutlineInterpolateUBOName, getFillOutlineInterpolateUBO(), gfx::FillVariant::FillOutline);
+                finish(*outlineBuilder,
+                       FillLayerTweaker::idFillOutlineInterpolateUBOName,
+                       getFillOutlineInterpolateUBO(),
+                       gfx::FillVariant::FillOutline);
             }
         } else { // FillPattern is defined
             if ((renderPass & RenderPass::Translucent) == 0) {
