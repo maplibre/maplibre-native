@@ -4,6 +4,7 @@
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/identity.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <functional>
 #include <memory>
@@ -124,7 +125,7 @@ public:
 
     template <typename Func /* void(gfx::Drawable&) */>
     std::size_t visitDrawables(Func f) {
-        assert(impl->drawablesByTile.size() == sortedDrawables.size());
+        assert(drawablesByTile.size() == sortedDrawables.size());
         for (auto* drawable : sortedDrawables) {
             f(*drawable);
         }
