@@ -284,7 +284,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters,
                                [[maybe_unused]] const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
-    //std::unique_lock<std::mutex> guard(mutex);
+    // std::unique_lock<std::mutex> guard(mutex);
 
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
