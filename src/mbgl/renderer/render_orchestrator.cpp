@@ -35,14 +35,22 @@ namespace mbgl {
 using namespace style;
 
 LayerRenderItem::LayerRenderItem(RenderLayer& layer_, RenderSource* source_, uint32_t index_)
-        : layer(layer_),
-          source(source_),
-          index(index_) {}
+    : layer(layer_),
+      source(source_),
+      index(index_) {}
 
-bool LayerRenderItem::hasRenderPass(RenderPass pass) const { return layer.get().hasRenderPass(pass); }
-void LayerRenderItem::upload(gfx::UploadPass& pass) const { layer.get().upload(pass); }
-void LayerRenderItem::render(PaintParameters& parameters) const { layer.get().render(parameters); }
-const std::string& LayerRenderItem::getName() const { return layer.get().getID(); }
+bool LayerRenderItem::hasRenderPass(RenderPass pass) const {
+    return layer.get().hasRenderPass(pass);
+}
+void LayerRenderItem::upload(gfx::UploadPass& pass) const {
+    layer.get().upload(pass);
+}
+void LayerRenderItem::render(PaintParameters& parameters) const {
+    layer.get().render(parameters);
+}
+const std::string& LayerRenderItem::getName() const {
+    return layer.get().getID();
+}
 
 #if MLN_DRAWABLE_RENDERER
 void LayerRenderItem::updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const {};
