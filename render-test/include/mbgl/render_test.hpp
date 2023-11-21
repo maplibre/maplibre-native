@@ -4,6 +4,6 @@
 
 namespace mbgl {
 
-int runRenderTests(int argc, char* argv[], void() >);
+int runRenderTests(int argc, char* argv[], std::function<void()>);
 
 } // namespace mbgl
