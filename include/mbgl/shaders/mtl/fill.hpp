@@ -22,7 +22,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 position [[attribute(0)]];
-    float2 color [[attribute(1)]];
+    float4 color [[attribute(1)]];
     float2 opacity [[attribute(2)]];
 };
 
@@ -59,7 +59,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillPermutationUBO& permutation [[buffer(6)]],
                                 device const ExpressionInputsUBO& expr [[buffer(7)]]) {
 
-    const auto color          = colorFor(permutation.color,          props.color,          vertx.color,                                   expr);
+    const auto color          = colorFor(permutation.color,          props.color,          vertx.color,          interp.color_t,          expr);
     const auto opacity        = valueFor(permutation.opacity,        props.opacity,        vertx.opacity,        interp.opacity_t,        expr);
 
     float4 position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);
@@ -97,7 +97,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 position [[attribute(0)]];
-    float2 outline_color [[attribute(1)]];
+    float4 outline_color [[attribute(1)]];
     float2 opacity [[attribute(2)]];
 };
 
@@ -137,7 +137,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillOutlinePermutationUBO& permutation [[buffer(6)]],
                                 device const ExpressionInputsUBO& expr [[buffer(7)]]) {
 
-    const auto outline_color  = colorFor(permutation.outline_color,  props.outline_color,  vertx.outline_color,                           expr);
+    const auto outline_color  = colorFor(permutation.outline_color,  props.outline_color,  vertx.outline_color,  interp.outline_color_t,  expr);
     const auto opacity        = valueFor(permutation.opacity,        props.opacity,        vertx.opacity,        interp.opacity_t,        expr);
 
     float4 position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);

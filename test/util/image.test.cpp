@@ -78,11 +78,13 @@ TEST(Image, JPEGTile) {
     EXPECT_EQ(256u, image.size.height);
 }
 
+#if !defined(__QT__) // WebP support is not enabled in Qt by default
 TEST(Image, WebPTile) {
     PremultipliedImage image = decodeImage(util::read_file("test/fixtures/image/tile.webp"));
     EXPECT_EQ(256u, image.size.width);
     EXPECT_EQ(256u, image.size.height);
 }
+#endif // !defined(__QT__)
 
 TEST(Image, Resize) {
     AlphaImage image({0, 0});

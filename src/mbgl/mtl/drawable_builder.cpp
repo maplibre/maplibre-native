@@ -27,7 +27,6 @@ void DrawableBuilder::init() {
     if (impl->rawVerticesCount) {
         auto raw = impl->rawVertices;
         drawable.setVertices(std::move(raw), impl->rawVerticesCount, impl->rawVerticesType);
-        impl->rawVerticesCount = 0;
     } else {
         const auto& verts = impl->vertices.vector();
         constexpr auto vertSize = sizeof(std::remove_reference<decltype(verts)>::type::value_type);

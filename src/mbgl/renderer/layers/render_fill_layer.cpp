@@ -487,6 +487,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     });
 #endif
 
+    tileLayerGroup->setStencilTiles(renderTiles);
+
     std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -639,7 +641,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         auto updateExisting = [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
-                return;
+                return false;
             }
 
             auto& uniforms = drawable.mutableUniformBuffers();
@@ -660,8 +662,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             drawable.setVertexAttributes(vertexAttrs);
+            return true;
         };
-        if (0 < fillTileLayerGroup->visitDrawables(renderPass, tileID, std::move(updateExisting))) {
+        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
 
@@ -738,11 +741,13 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 #endif
             if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
+                    // Only write opaque fills to the depth buffer, matching `fillRenderPass` in legacy rendering
+                    const bool opaque = (evaluated.get<FillColor>().constantOr(Color()).a >= 1.0f &&
+                                         evaluated.get<FillOpacity>().constantOr(0) >= 1.0f);
+
                     commonInit(*builder);
-                    builder->setDepthType((renderPass == RenderPass::Opaque) ? gfx::DepthMaskType::ReadWrite
-                                                                             : gfx::DepthMaskType::ReadOnly);
-                    builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
-                                                                                : gfx::ColorMode::unblended());
+                    builder->setDepthType(opaque ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
+                    builder->setColorMode(opaque ? gfx::ColorMode::unblended() : gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
                     builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);
