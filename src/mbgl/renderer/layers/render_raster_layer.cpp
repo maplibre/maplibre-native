@@ -425,7 +425,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     } else if (renderTiles) {
         // Remove existing drawables that are no longer in the cover set
         if (layerGroup) {
-            stats.drawablesRemoved += layerGroup->removeDrawablesIf(
+            stats.drawablesRemoved += removeLayerGroupDrawablesIf(*layerGroup,
                 [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
         } else {
             // Set up a tile layer group
