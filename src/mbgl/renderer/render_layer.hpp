@@ -216,9 +216,7 @@ protected:
     ///                       was updated or false if it was skipped because it's for a previous style.
     /// @return true if drawables were updated
     template <typename Func /* bool(gfx::Drawable&) */>
-    bool updateTile(RenderPass renderPass,
-                    const OverscaledTileID& tileID,
-                    Func update) {
+    bool updateTile(RenderPass renderPass, const OverscaledTileID& tileID, Func update) {
         bool anyUpdated = false;
         if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
             bool unUpdatedDrawables = false;
@@ -306,7 +304,7 @@ protected:
     // Current renderable status as specified by the markLayerRenderable event
     bool isRenderable{false};
 
-    //std::mutex mutex;
+    // std::mutex mutex;
 
     struct Stats {
         size_t propertyEvaluations = 0;

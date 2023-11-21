@@ -73,7 +73,7 @@ int VertexAttributeGL::getStride(GLenum glType) {
 }
 
 // Copy the transformed type into the buffer, returning true if it works.
-template <typename T, typename R, typename Func /* R(T) */ >
+template <typename T, typename R, typename Func /* R(T) */>
 static bool get(const gfx::VertexAttribute::ElementType& element, uint8_t* buffer, Func func) {
     if (auto* p = std::get_if<T>(&element)) {
         *reinterpret_cast<R*>(buffer) = func(*p);

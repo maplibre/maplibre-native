@@ -43,7 +43,7 @@ public:
     enum class Type : uint8_t {
         LayerGroup = 0,
         TileLayerGroup,
-        
+
         Invalid = 255
     };
 
@@ -151,9 +151,7 @@ public:
 
     /// Call the provided function for each drawable for the given tile
     template <typename Func /* void(gfx::Drawable&) */>
-    std::size_t visitDrawables(mbgl::RenderPass pass,
-                                            const OverscaledTileID& tileID,
-                                            Func f) {
+    std::size_t visitDrawables(mbgl::RenderPass pass, const OverscaledTileID& tileID, Func f) {
         assert(drawablesByTile.size() == sortedDrawables.size());
         const auto range = drawablesByTile.equal_range({pass, tileID});
         std::for_each(range.first, range.second, [&f](const auto& pair) { f(*pair.second); });
@@ -203,7 +201,7 @@ public:
 
     std::vector<gfx::UniqueDrawable> removeDrawables(mbgl::RenderPass);
     void addDrawable(gfx::UniqueDrawable&&);
-    
+
     template <typename Func /* void(gfx::Drawable&) */>
     std::size_t visitDrawables(Func f) {
         for (const auto& item : drawables) {
@@ -238,12 +236,11 @@ protected:
     DrawableCollection drawables;
 };
 
-
 template <typename Func /* void(gfx::Drawable&) */>
 void visitLayerGroupDrawables(mbgl::LayerGroupBase& layerGroup, Func dg) {
     switch (layerGroup.getType()) {
         case LayerGroupBase::Type::LayerGroup: {
-            static_cast<LayerGroup&>(layerGroup).visitDrawables(dg);    
+            static_cast<LayerGroup&>(layerGroup).visitDrawables(dg);
             break;
         }
         case LayerGroupBase::Type::TileLayerGroup: {
@@ -276,6 +273,5 @@ std::size_t removeLayerGroupDrawablesIf(mbgl::LayerGroupBase& layerGroup, Func d
         }
     }
 }
-
 
 } // namespace mbgl

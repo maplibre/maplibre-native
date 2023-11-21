@@ -104,7 +104,7 @@ public:
     int32_t maxLayerIndex() const;
     void updateLayerIndex(LayerGroupBasePtr, int32_t newIndex);
 
-    template <typename Func /* void(LayerGroupBase&) */>    
+    template <typename Func /* void(LayerGroupBase&) */>
     void visitLayerGroups(Func f) {
         for (auto& pair : layerGroupsByLayerIndex) {
             if (pair.second) {
@@ -132,7 +132,7 @@ public:
     }
 
     void updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters);
-    
+
     template <typename Func /* void(LayerGroupBase&) */>
     void visitDebugLayerGroups(Func f) {
         for (auto& pair : debugLayerGroups) {

@@ -15,7 +15,9 @@ LayerGroupBase::LayerGroupBase(int32_t layerIndex_, std::string name_, Type type
       name(std::move(name_)) {}
 
 TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
-    : LayerGroupBase(layerIndex_, std::move(name_), LayerGroupBase::Type::TileLayerGroup) { drawablesByTile.reserve(initialCapacity); }
+    : LayerGroupBase(layerIndex_, std::move(name_), LayerGroupBase::Type::TileLayerGroup) {
+    drawablesByTile.reserve(initialCapacity);
+}
 
 TileLayerGroup::~TileLayerGroup() = default;
 
