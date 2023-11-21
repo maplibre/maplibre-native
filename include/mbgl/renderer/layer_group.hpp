@@ -250,7 +250,8 @@ void visitLayerGroupDrawables(mbgl::LayerGroupBase& layerGroup, Func dg) {
         }
         default: {
 #ifndef NDEBUG
-            mbgl::Log::Error(mbgl::Event::Render, "Unknown layer group type: %d", static_cast<uint8_t>(layerGroup.getType()));
+            mbgl::Log::Error(
+                mbgl::Event::Render, "Unknown layer group type: %d", static_cast<uint8_t>(layerGroup.getType()));
 #endif
             break;
         }
@@ -268,7 +269,8 @@ std::size_t removeLayerGroupDrawablesIf(mbgl::LayerGroupBase& layerGroup, Func d
         }
         default: {
 #ifndef NDEBUG
-            mbgl::Log::Error(mbgl::Event::Render, "Unknown layer group type: %d", static_cast<uint8_t>(layerGroup.getType()));
+            mbgl::Log::Error(
+                mbgl::Event::Render, "Unknown layer group type: %d", static_cast<uint8_t>(layerGroup.getType()));
 #endif
             return 0;
         }
