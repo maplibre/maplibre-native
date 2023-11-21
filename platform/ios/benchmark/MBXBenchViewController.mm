@@ -261,6 +261,14 @@ namespace  mbgl {
         // NSLog(@"Total uploads with invalid segs: %zu", mbgl::uploadInvalidSegments);
         // NSLog(@"Total uploads with build: %zu", mbgl::uploadBuildCount);
 
+#if !defined(NDEBUG)
+        // Clean up and show rendering stats, as in `destroyCoreObjects` from tests.
+        // TODO: This doesn't clean up everything, what are we missing?
+        map.reset();
+        observer.reset();
+        frontend.reset();
+#endif // !defined(NDEBUG)
+
         // this does not shut the application down correctly,
         // and results in an assertion failure in thread-local code
         //exit(0);
