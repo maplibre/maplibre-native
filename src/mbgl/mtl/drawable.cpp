@@ -501,6 +501,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     if (impl->indexes->getDirty()) {
+        // Create or update a buffer for the index data.  We don't update any
+        // existing buffer because it may still be in use by the previous frame.
         auto indexBufferResource{uploadPass.createIndexBufferResource(
             impl->indexes->data(), impl->indexes->bytes(), usage, /*persistent=*/false)};
         auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(),
