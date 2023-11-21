@@ -158,12 +158,9 @@ MTLSamplerStatePtr Context::createMetalSamplerState(MTLSamplerDescriptorPtr samp
     return NS::TransferPtr(backend.getDevice()->newSamplerState(samplerDescriptor.get()));
 }
 
-void Context::clear() {
+void Context::performCleanup() {
     stats.numDrawCalls = 0;
     stats.numFrames++;
-}
-
-void Context::performCleanup() {
     clipMaskUniformsBufferUsed = false;
 }
 
