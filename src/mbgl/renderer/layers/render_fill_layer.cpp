@@ -639,26 +639,35 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         // If we already have drawables for this tile, update them.
         auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
-
             auto& uniforms = drawable.mutableUniformBuffers();
-            if (uniforms.get(FillLayerTweaker::idFillInterpolateUBOName)) {
-                uniforms.createOrUpdate(FillLayerTweaker::idFillInterpolateUBOName, &getFillInterpolateUBO(), context);
-            } else if (uniforms.get(idFillOutlineInterpolateUBOName)) {
-                uniforms.createOrUpdate(idFillOutlineInterpolateUBOName, &getFillOutlineInterpolateUBO(), context);
-            } else if (uniforms.get(idFillPatternInterpolateUBOName)) {
-                uniforms.createOrUpdate(idFillPatternInterpolateUBOName, &getFillPatternInterpolateUBO(), context);
-                uniforms.createOrUpdate(idFillPatternTilePropsUBOName, &getFillPatternTilePropsUBO(), context);
-            } else if (uniforms.get(idFillOutlinePatternInterpolateUBOName)) {
-                uniforms.createOrUpdate(
-                    idFillOutlinePatternInterpolateUBOName, &getFillOutlinePatternInterpolateUBO(), context);
-                uniforms.createOrUpdate(
-                    idFillOutlinePatternTilePropsUBOName, &getFillOutlinePatternTilePropsUBO(), context);
-            } else {
-                assert(false);
+            switch (static_cast<FillVariant>(drawable.getType())) {
+                case FillVariant::Fill: {
+                    uniforms.createOrUpdate(
+                        FillLayerTweaker::idFillInterpolateUBOName, &getFillInterpolateUBO(), context);
+                    break;
+                }
+                case FillVariant::FillOutline: {
+                    uniforms.createOrUpdate(idFillOutlineInterpolateUBOName, &getFillOutlineInterpolateUBO(), context);
+                    break;
+                }
+                case FillVariant::FillPattern: {
+                    uniforms.createOrUpdate(idFillPatternInterpolateUBOName, &getFillPatternInterpolateUBO(), context);
+                    uniforms.createOrUpdate(idFillPatternTilePropsUBOName, &getFillPatternTilePropsUBO(), context);
+                    break;
+                }
+                case FillVariant::FillOutlinePattern: {
+                    uniforms.createOrUpdate(
+                        idFillOutlinePatternInterpolateUBOName, &getFillOutlinePatternInterpolateUBO(), context);
+                    uniforms.createOrUpdate(
+                        idFillOutlinePatternTilePropsUBOName, &getFillOutlinePatternTilePropsUBO(), context);
+                    break;
+                }
+                default: {
+#ifndef NDEBUG
+                    mbgl::Log::Error(mbgl::Event::Render, "Invalid fill variant type supplied during drawable update!");
+#endif
+                    break;
+                }
             }
 
             drawable.setVertexAttributes(vertexAttrs);
@@ -769,12 +778,14 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             const auto finish = [&](gfx::DrawableBuilder& builder,
                                     const StringIdentity interpolateUBONameId,
-                                    const auto& interpolateUBO) {
+                                    const auto& interpolateUBO,
+                                    FillVariant type) {
                 builder.flush();
 
                 for (auto& drawable : builder.clearDrawables()) {
                     drawable->setTileID(tileID);
                     drawable->setLayerTweaker(layerTweaker);
+                    drawable->setType(static_cast<size_t>(type));
 
                     auto& uniforms = drawable->mutableUniformBuffers();
                     uniforms.createOrUpdate(interpolateUBONameId, &interpolateUBO, context);
@@ -800,7 +811,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                          bucket.sharedTriangles,
                                          bucket.triangleSegments.data(),
                                          bucket.triangleSegments.size());
-                finish(*fillBuilder, FillLayerTweaker::idFillInterpolateUBOName, getFillInterpolateUBO());
+                finish(*fillBuilder,
+                       FillLayerTweaker::idFillInterpolateUBOName,
+                       getFillInterpolateUBO(),
+                       FillVariant::Fill);
             }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
@@ -814,12 +828,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (doOutline && outlineBuilder && bucket.sharedBasicLineIndexes->elements()) {
                 outlineBuilder->setShader(outlineShader);
                 outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
-                outlineBuilder->setSegments(gfx::Lines(2),
-                                            bucket.sharedBasicLineIndexes,
-                                            bucket.basicLineSegments.data(),
-                                            bucket.basicLineSegments.size());
-                finish(
-                    *outlineBuilder, FillLayerTweaker::idFillOutlineInterpolateUBOName, getFillOutlineInterpolateUBO());
+                outlineBuilder->setSegments(
+                    gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
+                finish(*outlineBuilder,
+                       FillLayerTweaker::idFillOutlineInterpolateUBOName,
+                       getFillOutlineInterpolateUBO(),
+                       FillVariant::FillOutline);
             }
 #endif
         } else {
@@ -876,12 +890,14 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                     const StringIdentity interpolateNameId,
                                     const auto& interpolateUBO,
                                     const StringIdentity tileUBONameId,
-                                    const auto& tileUBO) {
+                                    const auto& tileUBO,
+                                    FillVariant type) {
                 builder.flush();
 
                 for (auto& drawable : builder.clearDrawables()) {
                     drawable->setTileID(tileID);
                     drawable->setLayerTweaker(layerTweaker);
+                    drawable->setType(static_cast<size_t>(type));
 
                     auto& uniforms = drawable->mutableUniformBuffers();
                     uniforms.createOrUpdate(interpolateNameId, &interpolateUBO, context);
@@ -910,7 +926,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                        idFillPatternInterpolateUBOName,
                        getFillPatternInterpolateUBO(),
                        idFillPatternTilePropsUBOName,
-                       getFillPatternTilePropsUBO());
+                       getFillPatternTilePropsUBO(),
+                       FillVariant::FillPattern);
             }
 
             if (doOutline && outlinePatternBuilder && bucket.sharedBasicLineIndexes->elements()) {
@@ -926,7 +943,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                        idFillOutlinePatternInterpolateUBOName,
                        getFillOutlinePatternInterpolateUBO(),
                        idFillOutlinePatternTilePropsUBOName,
-                       getFillOutlinePatternTilePropsUBO());
+                       getFillOutlinePatternTilePropsUBO(),
+                       FillVariant::FillOutlinePattern);
             }
         }
     }

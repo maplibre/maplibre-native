@@ -23,6 +23,15 @@ using FillLayerTweakerPtr = std::shared_ptr<FillLayerTweaker>;
 
 class RenderFillLayer final : public RenderLayer {
 public:
+    enum class FillVariant : uint8_t {
+        Fill,
+        FillPattern,
+        FillOutline,
+        FillOutlinePattern,
+        Undefined = 255
+    };
+
+public:
     explicit RenderFillLayer(Immutable<style::FillLayer::Impl>);
     ~RenderFillLayer() override;
 
