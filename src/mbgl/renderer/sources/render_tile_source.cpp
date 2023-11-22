@@ -87,9 +87,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     // build a set of tiles to cover
     std::unordered_set<OverscaledTileID> newTiles;
     for (auto& tile : *renderTiles) {
-        if (tile.getNeedsRendering()) {
-            newTiles.insert(tile.getOverscaledTileID());
-        }
+        newTiles.insert(tile.getOverscaledTileID());
     }
 
     // create texture. to be reused for all the tiles of the debug layers
@@ -164,42 +162,40 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
         // add new drawables and update existing ones
         for (auto& tile : *renderTiles) {
-            if (tile.getNeedsRendering()) {
-                const auto tileID = tile.getOverscaledTileID();
-                const auto& debugBucket = tile.debugBucket;
-                if (!debugBucket) continue;
+            const auto tileID = tile.getOverscaledTileID();
+            const auto& debugBucket = tile.debugBucket;
+            if (!debugBucket) continue;
 
-                const DebugUBO outlineUBO{/*matrix = */ util::cast<float>(tile.matrix),
-                                          /*color = */ Color::white(),
-                                          /*overlay_scale = */ 1.0f,
-                                          0,
-                                          0,
-                                          0};
-                if (0 == updateDrawables(outlineLayerGroup, tileID, outlineUBO)) {
-                    addDrawable(outlineLayerGroup,
-                                tileID,
-                                outlineUBO,
-                                gfx::Lines(4.0f * parameters.pixelRatio),
-                                debugBucket->vertices.vector(),
-                                debugBucket->indices.vector(),
-                                debugBucket->segments);
-                }
+            const DebugUBO outlineUBO{/*matrix = */ util::cast<float>(tile.matrix),
+                                      /*color = */ Color::white(),
+                                      /*overlay_scale = */ 1.0f,
+                                      0,
+                                      0,
+                                      0};
+            if (0 == updateDrawables(outlineLayerGroup, tileID, outlineUBO)) {
+                addDrawable(outlineLayerGroup,
+                            tileID,
+                            outlineUBO,
+                            gfx::Lines(4.0f * parameters.pixelRatio),
+                            debugBucket->vertices.vector(),
+                            debugBucket->indices.vector(),
+                            debugBucket->segments);
+            }
 
-                const DebugUBO textUBO{/*matrix = */ util::cast<float>(tile.matrix),
-                                       /*color = */ Color::black(),
-                                       /*overlay_scale = */ 1.0f,
-                                       0,
-                                       0,
-                                       0};
-                if (0 == updateDrawables(textLayerGroup, tileID, textUBO)) {
-                    addDrawable(textLayerGroup,
-                                tileID,
-                                textUBO,
-                                gfx::Lines(2.0f * parameters.pixelRatio),
-                                debugBucket->vertices.vector(),
-                                debugBucket->indices.vector(),
-                                debugBucket->segments);
-                }
+            const DebugUBO textUBO{/*matrix = */ util::cast<float>(tile.matrix),
+                                   /*color = */ Color::black(),
+                                   /*overlay_scale = */ 1.0f,
+                                   0,
+                                   0,
+                                   0};
+            if (0 == updateDrawables(textLayerGroup, tileID, textUBO)) {
+                addDrawable(textLayerGroup,
+                            tileID,
+                            textUBO,
+                            gfx::Lines(2.0f * parameters.pixelRatio),
+                            debugBucket->vertices.vector(),
+                            debugBucket->indices.vector(),
+                            debugBucket->segments);
             }
         }
     } else {
@@ -223,26 +219,24 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         auto indexes = RenderStaticData::tileLineStripIndices().vector();
         auto segments = RenderStaticData::tileBorderSegments();
         for (auto& tile : *renderTiles) {
-            if (tile.getNeedsRendering()) {
-                const auto tileID = tile.getOverscaledTileID();
-                const auto& debugBucket = tile.debugBucket;
-                if (!debugBucket) continue;
+            const auto tileID = tile.getOverscaledTileID();
+            const auto& debugBucket = tile.debugBucket;
+            if (!debugBucket) continue;
 
-                const DebugUBO debugUBO{/*matrix = */ util::cast<float>(tile.matrix),
-                                        /*color = */ Color::red(),
-                                        /*overlay_scale = */ 1.0f,
-                                        0,
-                                        0,
-                                        0};
-                if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO)) {
-                    addDrawable(tileLayerGroup,
-                                tileID,
-                                debugUBO,
-                                gfx::LineStrip(4.0f * parameters.pixelRatio),
-                                vertices,
-                                indexes,
-                                segments);
-                }
+            const DebugUBO debugUBO{/*matrix = */ util::cast<float>(tile.matrix),
+                                    /*color = */ Color::red(),
+                                    /*overlay_scale = */ 1.0f,
+                                    0,
+                                    0,
+                                    0};
+            if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO)) {
+                addDrawable(tileLayerGroup,
+                            tileID,
+                            debugUBO,
+                            gfx::LineStrip(4.0f * parameters.pixelRatio),
+                            vertices,
+                            indexes,
+                            segments);
             }
         }
     } else {
