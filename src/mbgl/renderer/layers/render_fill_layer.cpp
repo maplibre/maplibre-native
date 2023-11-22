@@ -543,7 +543,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 default: {
 #ifndef NDEBUG
                     mbgl::Log::Error(mbgl::Event::Render,
-                                     "Invalid fill variant type suppliied during drawable update!");
+                                     "Invalid fill variant type supplied during drawable update!");
 #endif
                     break;
                 }
