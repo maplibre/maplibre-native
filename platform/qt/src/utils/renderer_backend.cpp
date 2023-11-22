@@ -3,14 +3,15 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 
-#include <QtGlobal>
 #include <QOpenGLContext>
 
-namespace QMapLibreGL {
+#include <QtGlobal>
+
+namespace QMapLibre {
 
 class RenderableResource final : public mbgl::gl::RenderableResource {
 public:
-    RenderableResource(RendererBackend& backend_)
+    explicit RenderableResource(RendererBackend &backend_)
         : backend(backend_) {}
 
     void bind() override {
@@ -20,11 +21,11 @@ public:
     }
 
 private:
-    RendererBackend& backend;
+    RendererBackend &backend;
 };
 
-RendererBackend::RendererBackend(const mbgl::gfx::ContextMode contextMode_)
-    : mbgl::gl::RendererBackend(contextMode_),
+RendererBackend::RendererBackend(const mbgl::gfx::ContextMode mode)
+    : mbgl::gl::RendererBackend(mode),
       mbgl::gfx::Renderable({0, 0}, std::make_unique<RenderableResource>(*this)) {}
 
 RendererBackend::~RendererBackend() = default;
@@ -38,18 +39,18 @@ void RendererBackend::restoreFramebufferBinding() {
     setFramebufferBinding(m_fbo);
 }
 
-void RendererBackend::updateFramebuffer(quint32 fbo, const mbgl::Size& newSize) {
+void RendererBackend::updateFramebuffer(quint32 fbo, const mbgl::Size &newSize) {
     m_fbo = fbo;
     size = newSize;
 }
 
 /*!
-    Initializes an OpenGL extension function such as Vertex Array Objects
-   (VAOs), required by MapLibre Native engine.
+    Initializes an OpenGL extension function such as Vertex Array Objects (VAOs),
+    required by MapLibre Native engine.
 */
-mbgl::gl::ProcAddress RendererBackend::getExtensionFunctionPointer(const char* name) {
-    QOpenGLContext* thisContext = QOpenGLContext::currentContext();
+mbgl::gl::ProcAddress RendererBackend::getExtensionFunctionPointer(const char *name) {
+    QOpenGLContext *thisContext = QOpenGLContext::currentContext();
     return thisContext->getProcAddress(name);
 }
 
-} // namespace QMapLibreGL
+} // namespace QMapLibre
