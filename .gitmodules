@@ -51,4 +51,4 @@
 	url = https://github.com/maplibre/maplibre-gl-native-boost.git
 [submodule "vendor/unordered_dense"]
 	path = vendor/unordered_dense
-	url = https://github.com/mwilsnd/unordered_dense.git
+	url = https://github.com/martinus/unordered_dense.git
