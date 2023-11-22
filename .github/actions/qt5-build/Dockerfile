@@ -1,4 +1,4 @@
-FROM ghcr.io/maplibre/linux-builder:centos7-cmake3.19
+FROM ghcr.io/maplibre/linux-builder:centos8-latest
 
 # Copy and set the entry point
 COPY entrypoint.sh /entrypoint.sh
