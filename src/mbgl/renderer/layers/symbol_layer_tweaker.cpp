@@ -101,6 +101,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         propertiesUpdated = false;
     }
 
+    const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
+                                         /*.pad1=*/0,
+                                         /*.pad2=*/{0, 0}};
+
     layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
@@ -118,6 +122,12 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             const auto props = buildPaintUBO(false, evaluated);
             iconPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
             iconPropertiesUpdated = false;
+        }
+
+        if (!dynamicBuffer) {
+            dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
+        } else {
+            dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
         }
 
         // from RenderTile::translatedMatrix
@@ -171,13 +181,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.pad=*/{0},
         };
 
-        const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
-                                             /*.pad1=*/0,
-                                             /*.pad2=*/{0, 0}};
-
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(idSymbolDrawableUBOName, &drawableUBO, context);
-        uniforms.createOrUpdate(idSymbolDynamicUBOName, &dynamicUBO, context);
+
+        uniforms.addOrReplace(idSymbolDynamicUBOName, dynamicBuffer);
         uniforms.addOrReplace(idSymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
 
 #if MLN_RENDER_BACKEND_METAL

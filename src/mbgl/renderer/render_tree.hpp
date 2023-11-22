@@ -43,6 +43,26 @@ public:
 #endif
 };
 
+class RenderSource;
+class LayerRenderItem final : public RenderItem {
+public:
+    LayerRenderItem(RenderLayer& layer_, RenderSource* source_, uint32_t index_);
+    bool operator<(const LayerRenderItem& other) const { return index < other.index; }
+
+    std::reference_wrapper<RenderLayer> layer;
+    RenderSource* source;
+    const uint32_t index;
+
+private:
+    bool hasRenderPass(RenderPass pass) const override;
+    void upload(gfx::UploadPass& pass) const override;
+    void render(PaintParameters& parameters) const override;
+    const std::string& getName() const override;
+#if MLN_DRAWABLE_RENDERER
+    void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const override;
+#endif
+};
+
 using RenderItems = std::vector<std::reference_wrapper<const RenderItem>>;
 
 class RenderTreeParameters {
@@ -76,6 +96,7 @@ public:
     virtual ~RenderTree() = default;
     virtual void prepare() {}
     // Render items
+    virtual const std::set<LayerRenderItem>& getLayerRenderItemMap() const noexcept = 0;
     virtual RenderItems getLayerRenderItems() const = 0;
     virtual RenderItems getSourceRenderItems() const = 0;
     // Resources
