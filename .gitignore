@@ -21,6 +21,7 @@
 
 .DS_Store
 .cache
+compile_commands.json
 /build
 **/.idea
 /platform/android/MapboxGLAndroidSDKTestApp/local.properties
