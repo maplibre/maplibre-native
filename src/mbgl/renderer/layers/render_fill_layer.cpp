@@ -21,7 +21,6 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/std.hpp>
-#include <mbgl/util/logging.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_atlases_tweaker.hpp>
