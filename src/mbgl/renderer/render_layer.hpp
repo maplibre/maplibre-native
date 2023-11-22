@@ -190,7 +190,7 @@ public:
     /// @param changes The collection of current pending change requests
     virtual void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes);
 
-    /// Returns the current renderability mode if the layer
+    /// Returns the current renderability mode of the layer
     bool isLayerRenderable() const noexcept { return isRenderable; }
 #endif
 

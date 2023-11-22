@@ -334,9 +334,12 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         filteredLayersForSource.reserve(layerImpls->size());
     }
 
-    // Update all sources and initialize renderItems.
+#if MLN_DRAWABLE_RENDERER
+    // Track which layers are flagged for rendering
     std::vector<bool> updateList(orderedLayers.size());
+#endif
 
+    // Update all sources and initialize renderItems.
     for (const auto& sourceImpl : *sourceImpls) {
         RenderSource* source = renderSources.at(sourceImpl->id).get();
         bool sourceNeedsRendering = false;
@@ -390,6 +393,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         filteredLayersForSource.clear();
 
 #if MLN_DRAWABLE_RENDERER
+        // Update all layers with their new renderability status, if it changed.
         for (size_t i = 0; i < updateList.size(); i++) {
             if (orderedLayers[i].get().isLayerRenderable() != updateList[i]) {
                 orderedLayers[i].get().markLayerRenderable(updateList[i], changes);
