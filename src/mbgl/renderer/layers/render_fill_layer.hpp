@@ -29,7 +29,7 @@ public:
         FillOutlinePattern,
         Undefined = 255
     };
-    
+
 public:
     explicit RenderFillLayer(Immutable<style::FillLayer::Impl>);
     ~RenderFillLayer() override;
