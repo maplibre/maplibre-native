@@ -10,6 +10,7 @@
 #include <mbgl/mtl/buffer_resource.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/util/noncopyable.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <memory>
 #include <optional>
@@ -61,7 +62,7 @@ public:
                                       std::string_view vertexName,
                                       std::string_view fragmentName,
                                       const ProgramParameters& programParameters,
-                                      const std::unordered_map<std::string, std::string>& additionalDefines);
+                                      const mbgl::unordered_map<std::string, std::string>& additionalDefines);
 
     MTLTexturePtr createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const;
     MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;

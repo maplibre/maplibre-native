@@ -74,7 +74,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
                                            const std::string_view vertexName,
                                            const std::string_view fragmentName,
                                            const ProgramParameters& programParameters,
-                                           const std::unordered_map<std::string, std::string>& additionalDefines) {
+                                           const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
     const auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
     // No NSMutableDictionary?

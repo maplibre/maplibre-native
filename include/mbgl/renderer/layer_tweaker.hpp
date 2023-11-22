@@ -99,7 +99,7 @@ protected:
 #if MLN_RENDER_BACKEND_METAL
     // For Metal, whether a property is provided through attribtues or uniforms is specified in
     // a uniform buffer rather than by a shader compiled with different preprocessor definitions.
-    std::unordered_set<StringIdentity> propertiesAsUniforms;
+    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
 #endif // MLN_RENDER_BACKEND_METAL
 
     // Indicates that the evaluated properties have changed

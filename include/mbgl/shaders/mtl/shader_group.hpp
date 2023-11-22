@@ -5,6 +5,7 @@
 #include <mbgl/shaders/mtl/background.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/shader_source.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <numeric>
 #include <string>
@@ -22,7 +23,7 @@ public:
     ~ShaderGroup() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& gfxContext,
-                                     const std::unordered_set<StringIdentity>& propertiesAsUniforms,
+                                     const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms,
                                      std::string_view /*firstAttribName*/) override {
         constexpr auto& name = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::name;
         constexpr auto& source = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::source;
