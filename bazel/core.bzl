@@ -911,7 +911,6 @@ MLN_DRAWABLES_SOURCE = [
     "src/mbgl/gfx/hillshade_prepare_drawable_data.hpp",
     "src/mbgl/gfx/image_drawable_data.hpp",
     "src/mbgl/gfx/line_drawable_data.hpp",
-    "src/mbgl/gfx/fill_drawable_data.hpp",
     "src/mbgl/gfx/symbol_drawable_data.hpp",
     "src/mbgl/gfx/collision_drawable_data.hpp",
     "src/mbgl/gfx/uniform_block.cpp",
