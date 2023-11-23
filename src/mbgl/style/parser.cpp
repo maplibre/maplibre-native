@@ -177,12 +177,12 @@ void Parser::parseSprites(const JSValue& value) {
             }
 
             conversion::Error error;
-            std::optional<Sprite> sprite = conversion::convert<Sprite>(spriteValue,error);
+            std::optional<Sprite> sprite = conversion::convert<Sprite>(spriteValue, error);
             if (!sprite) {
                 Log::Warning(Event::ParseStyle, error.message);
                 continue;
             }
-            
+
             sprites.emplace_back(*sprite);
         }
     } else {

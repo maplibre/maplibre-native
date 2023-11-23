@@ -8,7 +8,7 @@ namespace mbgl {
 namespace style {
 namespace conversion {
 
-std::optional<Sprite> Converter<Sprite>::operator()(const Convertible& value,Error& error) const {
+std::optional<Sprite> Converter<Sprite>::operator()(const Convertible& value, Error& error) const {
     std::optional<std::string> id;
     auto idValue = objectMember(value, "id");
     if (!idValue) {
