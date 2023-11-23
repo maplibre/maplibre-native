@@ -108,7 +108,7 @@ private:
     Collection<Layer> layers;
     TransitionOptions transitionOptions;
     std::unique_ptr<Light> light;
-    std::unordered_map<std::string,bool> spritesLoadingStatus;
+    std::unordered_map<std::string, bool> spritesLoadingStatus;
 
     // Defaults
     std::string name;

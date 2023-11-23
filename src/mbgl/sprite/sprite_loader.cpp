@@ -62,22 +62,23 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
         }
     });
 
-    dataMap[id]->spriteRequest = fileSource.request(Resource::spriteImage(url, pixelRatio), [this, sprite](Response res) {
-        std::lock_guard<std::mutex> lock(dataMapMutex);
-        Data* data = dataMap[sprite->id].get();
-        if (res.error) {
-            observer->onSpriteError(*sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
-        } else if (res.notModified) {
-            return;
-        } else if (res.noContent) {
-            data->image = std::make_shared<std::string>();
-            emitSpriteLoadedIfComplete(*sprite);
-        } else {
-            assert(dataMap[sprite->id]->image != res.data);
-            data->image = std::move(res.data);
-            emitSpriteLoadedIfComplete(*sprite);
-        }
-    });
+    dataMap[id]->spriteRequest = fileSource.request(
+        Resource::spriteImage(url, pixelRatio), [this, sprite](Response res) {
+            std::lock_guard<std::mutex> lock(dataMapMutex);
+            Data* data = dataMap[sprite->id].get();
+            if (res.error) {
+                observer->onSpriteError(*sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
+            } else if (res.notModified) {
+                return;
+            } else if (res.noContent) {
+                data->image = std::make_shared<std::string>();
+                emitSpriteLoadedIfComplete(*sprite);
+            } else {
+                assert(dataMap[sprite->id]->image != res.data);
+                data->image = std::move(res.data);
+                emitSpriteLoadedIfComplete(*sprite);
+            }
+        });
 }
 
 void SpriteLoader::emitSpriteLoadedIfComplete(style::Sprite sprite) {

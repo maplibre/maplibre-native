@@ -117,14 +117,14 @@ void Style::Impl::parse(const std::string& json_) {
     defaultCamera.pitch = parser.pitch;
 
     setLight(std::make_unique<Light>(parser.light));
-    
+
     if (fileSource) {
         if (parser.sprites.empty()) {
             // We identify no sprite with a empty string in the sprite loading status.
             spritesLoadingStatus[""] = false;
             spriteLoader->load(std::nullopt, *fileSource);
         } else {
-            for (const auto &sprite : parser.sprites) {
+            for (const auto& sprite : parser.sprites) {
                 spritesLoadingStatus[sprite.getKey()] = false;
                 spriteLoader->load(std::optional(sprite), *fileSource);
             }
@@ -132,7 +132,8 @@ void Style::Impl::parse(const std::string& json_) {
     } else {
         // We identify no sprite with a empty string in the sprite loading status.
         spritesLoadingStatus[""] = false;
-        onSpriteError(std::nullopt, std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite url.")));
+        onSpriteError(std::nullopt,
+                      std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite url.")));
     }
     glyphURL = parser.glyphURL;
 
@@ -267,7 +268,7 @@ Source* Style::Impl::getSource(const std::string& id) const {
 
 bool Style::Impl::areSpritesLoaded() const {
     if (spritesLoadingStatus.empty()) {
-        return false;   // If nothing is stored inside, sprites are not yet loaded.
+        return false; // If nothing is stored inside, sprites are not yet loaded.
     }
     for (const auto& entry : spritesLoadingStatus) {
         if (!entry.second) {
@@ -360,7 +361,8 @@ void Style::Impl::onSourceDescriptionChanged(Source& source) {
     }
 }
 
-void Style::Impl::onSpriteLoaded(std::optional<style::Sprite> sprite, std::vector<Immutable<style::Image::Impl>> images_) {
+void Style::Impl::onSpriteLoaded(std::optional<style::Sprite> sprite,
+                                 std::vector<Immutable<style::Image::Impl>> images_) {
     auto newImages = makeMutable<ImageImpls>(*images);
     assert(std::is_sorted(newImages->begin(), newImages->end()));
 
