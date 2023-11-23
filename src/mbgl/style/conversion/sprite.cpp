@@ -8,8 +8,7 @@ namespace mbgl {
 namespace style {
 namespace conversion {
 
-std::optional<std::unique_ptr<Sprite>> Converter<std::unique_ptr<Sprite>>::operator()(const Convertible& value,
-                                                                                      Error& error) const {
+std::optional<Sprite> Converter<Sprite>::operator()(const Convertible& value,Error& error) const {
     std::optional<std::string> id;
     auto idValue = objectMember(value, "id");
     if (!idValue) {
@@ -26,7 +25,8 @@ std::optional<std::unique_ptr<Sprite>> Converter<std::unique_ptr<Sprite>>::opera
     }
     spriteURL = toString(*urlValue);
 
-    return std::make_unique<Sprite>(*id, *spriteURL);
+    const Sprite sprite(*id, *spriteURL);
+    return sprite;
 }
 
 } // namespace conversion

@@ -11,9 +11,9 @@ namespace style {
 namespace conversion {
 
 template <>
-struct Converter<std::unique_ptr<Sprite>> {
+struct Converter<Sprite> {
 public:
-    std::optional<std::unique_ptr<Sprite>> operator()(const Convertible& value, Error& error) const;
+    std::optional<Sprite> operator()(const Convertible& value, Error& error) const;
 };
 
 } // namespace conversion

@@ -27,7 +27,7 @@ public:
 
     StyleParseResult parse(const std::string&);
 
-    std::vector<std::unique_ptr<Sprite>> sprites;
+    std::vector<Sprite> sprites;
     std::string glyphURL;
 
     std::vector<std::unique_ptr<Source>> sources;

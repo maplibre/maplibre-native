@@ -33,8 +33,8 @@ SpriteLoader::SpriteLoader(float pixelRatio_)
 
 SpriteLoader::~SpriteLoader() = default;
 
-void SpriteLoader::load(const style::Sprite* sprite, FileSource& fileSource) {
-    if (sprite == nullptr) {
+void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& fileSource) {
+    if (sprite) {
         // Treat a non-existent sprite as a successfully loaded empty sprite.
         observer->onSpriteLoaded({});
         return;

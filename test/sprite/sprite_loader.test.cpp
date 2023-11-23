@@ -45,7 +45,7 @@ public:
         spriteLoader.setObserver(&observer);
 
         Sprite sprite = Sprite("default", "test/fixtures/resources/sprite");
-        spriteLoader.load(&sprite, fileSource);
+        spriteLoader.load(sprite, fileSource);
 
         loop.run();
     }

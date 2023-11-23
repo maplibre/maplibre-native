@@ -122,12 +122,11 @@ void Style::Impl::parse(const std::string& json_) {
     countOfSpritesLoaded = 0;
     if (fileSource) {
         if (parser.sprites.empty()) {
-            spriteLoader->load(nullptr, *fileSource);
+            std::optional<Sprite> nullSprite;
+            spriteLoader->load(nullSprite, *fileSource);
         } else {
-            for (const auto& sprite : parser.sprites) {
-                if (sprite) {
-                    spriteLoader->load(sprite.get(), *fileSource);
-                }
+            for (const auto &sprite : parser.sprites) {
+                spriteLoader->load(std::optional(sprite), *fileSource);
             }
         }
     } else {
@@ -372,7 +371,7 @@ void Style::Impl::onSpriteLoaded(std::vector<Immutable<style::Image::Impl>> imag
     std::sort(newImages->begin(), newImages->end());
     images = std::move(newImages);
     countOfSpritesLoaded += 1;
-    assert(countOfSpritesLoaded <= countOfSprites);
+    assert(countOfSpritesLoaded <= countOfSprites || countOfSprites == 0);
     observer->onUpdate(); // For *-pattern properties.
 }
 
@@ -380,9 +379,10 @@ void Style::Impl::onSpriteError(std::exception_ptr error) {
     lastError = error;
     Log::Error(Event::Style, "Failed to load sprite: " + util::toString(error));
     observer->onResourceError(error);
-    // Unblock rendering tiles (even though sprite request has failed).
     countOfSpritesLoaded += 1;
-    assert(countOfSpritesLoaded <= countOfSprites);
+    assert(countOfSpritesLoaded <= countOfSprites || countOfSprites == 0);
+    
+    // Unblock rendering tiles (even though sprite request has failed).
     observer->onUpdate();
 }
 

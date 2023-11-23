@@ -22,7 +22,7 @@ public:
     SpriteLoader(float pixelRatio);
     ~SpriteLoader();
 
-    void load(const style::Sprite* sprite, FileSource&);
+    void load(const std::optional<style::Sprite> sprite, FileSource&);
 
     void setObserver(SpriteLoaderObserver*);
 

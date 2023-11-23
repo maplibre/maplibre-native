@@ -134,8 +134,8 @@ TEST(StyleParser, SpriteAsString) {
     })");
     auto result = &parser.sprites;
     ASSERT_EQ(1, result->size());
-    ASSERT_EQ("https://example.com/default/markers", result->at(0)->spriteURL);
-    ASSERT_EQ("default", result->at(0)->id);
+    ASSERT_EQ("https://example.com/default/markers", result->at(0).spriteURL);
+    ASSERT_EQ("default", result->at(0).id);
 }
 
 TEST(StyleParser, SpriteAsArraySingle) {
@@ -149,8 +149,8 @@ TEST(StyleParser, SpriteAsArraySingle) {
     })");
     auto result = &parser.sprites;
     ASSERT_EQ(1, result->size());
-    ASSERT_EQ("https://example.com/default/markers", result->at(0)->spriteURL);
-    ASSERT_EQ("default", result->at(0)->id);
+    ASSERT_EQ("https://example.com/default/markers", result->at(0).spriteURL);
+    ASSERT_EQ("default", result->at(0).id);
 }
 
 TEST(StyleParser, SpriteAsArrayMultiple) {
@@ -167,10 +167,10 @@ TEST(StyleParser, SpriteAsArrayMultiple) {
     })");
     auto result = &parser.sprites;
     ASSERT_EQ(2, result->size());
-    ASSERT_EQ("https://example.com/default/markers", result->at(0)->spriteURL);
-    ASSERT_EQ("default", result->at(0)->id);
-    ASSERT_EQ("https://example.com/hiking/markers", result->at(1)->spriteURL);
-    ASSERT_EQ("hiking", result->at(1)->id);
+    ASSERT_EQ("https://example.com/default/markers", result->at(0).spriteURL);
+    ASSERT_EQ("default", result->at(0).id);
+    ASSERT_EQ("https://example.com/hiking/markers", result->at(1).spriteURL);
+    ASSERT_EQ("hiking", result->at(1).id);
 }
 
 TEST(StyleParser, FontStacks) {
