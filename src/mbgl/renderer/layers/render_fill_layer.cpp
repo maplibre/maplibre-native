@@ -43,11 +43,8 @@ namespace {
 
 #if MLN_DRAWABLE_RENDERER
 constexpr auto FillShaderName = "FillShader";
-#if MLN_TRIANGULATE_FILL_OUTLINES
-constexpr auto FillOutlineShaderName = "LineBasicShader";
-#else
+constexpr auto FillOutlineTriangulatedShaderName = "LineBasicShader";
 constexpr auto FillOutlineShaderName = "FillOutlineShader";
-#endif
 constexpr auto FillPatternShaderName = "FillPatternShader";
 constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 
@@ -433,6 +430,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         activateLayerGroup(outlineLayerGroup, isRenderable, changes);
     }
     auto* outlineTileLayerGroup = static_cast<TileLayerGroup*>(outlineLayerGroup.get());
+    if (!outlineTriangulatedShaderGroup) {
+        outlineTriangulatedShaderGroup = shaders.getShaderGroup(std::string(FillOutlineTriangulatedShaderName));
+    }
 #endif
 
     if (!layerTweaker) {
@@ -681,6 +681,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         // Outline does not default to fill in the pattern case
         const auto doOutline = evaluated.get<FillAntialias>() && (unevaluated.get<FillPattern>().isUndefined() ||
                                                                   unevaluated.get<FillOutlineColor>().isUndefined());
+        const bool dataDrivenOutline = !evaluated.get<FillOutlineColor>().isConstant() || !evaluated.get<FillOpacity>().isConstant();
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
             // Simple fill
@@ -691,14 +692,14 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
-            const auto outlineShader = doOutline ? [&]() -> auto {
+            const auto outlineTriangulatedShader = doOutline && !dataDrivenOutline ? [&]() -> auto {
                 static const std::unordered_set<StringIdentity> outlinePropertiesAsUniforms{
                     stringIndexer().get("a_color"),
                     stringIndexer().get("a_opacity"),
                     stringIndexer().get("a_width"),
                 };
                 return std::static_pointer_cast<gfx::ShaderProgramBase>(
-                    outlineShaderGroup->getOrCreateShader(context, outlinePropertiesAsUniforms));
+                    outlineTriangulatedShaderGroup->getOrCreateShader(context, outlinePropertiesAsUniforms));
             }()
                 : nullptr;
 
@@ -707,7 +708,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos_normal");
                     static const StringIdentity idDataAttribName = stringIndexer().get("a_data");
                     builder->setVertexAttrNameId(idVertexAttribName);
-                    builder->setShader(outlineShader);
+                    builder->setShader(outlineTriangulatedShader);
                     builder->setRawVertices({}, bucket.lineVertices.elements(), gfx::AttributeDataType::Short2);
                     gfx::VertexAttributeArray attrs;
                     if (const auto& attr = attrs.add(idVertexAttribName)) {
@@ -742,12 +743,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     }
                 }
             };
-#else // MLN_TRIANGULATE_FILL_OUTLINES
+#endif
             const auto outlineShader = doOutline
                                            ? std::static_pointer_cast<gfx::ShaderProgramBase>(
                                                  outlineShaderGroup->getOrCreateShader(context, propertiesAsUniforms))
                                            : nullptr;
-#endif
+
             if (!fillBuilder && fillShader) {
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill")) {
                     // Only write opaque fills to the depth buffer, matching `fillRenderPass` in legacy rendering
@@ -766,9 +767,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline")) {
                     commonInit(*builder);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-#if !MLN_TRIANGULATE_FILL_OUTLINES
                     builder->setLineWidth(2.0f);
-#endif
                     builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setRenderPass(RenderPass::Translucent);
@@ -780,6 +779,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                     const StringIdentity interpolateUBONameId,
                                     const auto& interpolateUBO,
                                     FillVariant type) {
+                builder.setVertexAttrNameId(idPosAttribName);
                 builder.flush();
 
                 for (auto& drawable : builder.clearDrawables()) {
@@ -797,7 +797,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (fillBuilder && bucket.sharedTriangles->elements()) {
                 fillBuilder->setShader(fillShader);
 #if MLN_TRIANGULATE_FILL_OUTLINES
-                fillBuilder->setVertexAttributes(std::move(vertexAttrs));
+                if (doOutline && dataDrivenOutline && outlineBuilder) {
+                    fillBuilder->setVertexAttributes(vertexAttrs);
+                    outlineBuilder->setVertexAttributes(std::move(vertexAttrs));
+                } else {
+                    fillBuilder->setVertexAttributes(std::move(vertexAttrs));
+                }
 #else
                 if (doOutline && outlineBuilder) {
                     fillBuilder->setVertexAttributes(vertexAttrs);
@@ -819,10 +824,25 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
             if (doOutline && outlineBuilder) {
-                outlineBuilder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
-                createOutline(outlineBuilder,
-                              evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
-                              evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()));
+                if(!dataDrivenOutline) {
+                    outlineBuilder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
+                    createOutline(outlineBuilder,
+                                  evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
+                                  evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()));
+                } else {
+                    if( bucket.sharedBasicLineIndexes->elements()) {
+                        outlineBuilder->setShader(outlineShader);
+                        outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
+                        outlineBuilder->setSegments(gfx::Lines(2),
+                                                    bucket.sharedBasicLineIndexes,
+                                                    bucket.basicLineSegments.data(),
+                                                    bucket.basicLineSegments.size());
+                        finish(*outlineBuilder,
+                               FillLayerTweaker::idFillOutlineInterpolateUBOName,
+                               getFillOutlineInterpolateUBO(),
+                               FillVariant::FillOutline);
+                    }
+                }
             }
 #else
             if (doOutline && outlineBuilder && bucket.sharedBasicLineIndexes->elements()) {
