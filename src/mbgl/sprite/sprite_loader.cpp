@@ -34,9 +34,9 @@ SpriteLoader::SpriteLoader(float pixelRatio_)
 SpriteLoader::~SpriteLoader() = default;
 
 void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& fileSource) {
-    if (sprite) {
+    if (!sprite) {
         // Treat a non-existent sprite as a successfully loaded empty sprite.
-        observer->onSpriteLoaded({});
+        observer->onSpriteLoaded(std::nullopt, {});
         return;
     }
 
@@ -44,44 +44,44 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
     std::string url = sprite->spriteURL;
 
     dataMap[id] = std::make_unique<Data>();
-    dataMap[id]->jsonRequest = fileSource.request(Resource::spriteJSON(url, pixelRatio), [this, id](Response res) {
+    dataMap[id]->jsonRequest = fileSource.request(Resource::spriteJSON(url, pixelRatio), [this, sprite](Response res) {
         std::lock_guard<std::mutex> lock(dataMapMutex);
-        Data* data = dataMap[id].get();
+        Data* data = dataMap[sprite->id].get();
         if (res.error) {
-            observer->onSpriteError(std::make_exception_ptr(std::runtime_error(res.error->message)));
+            observer->onSpriteError(*sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
             return;
         } else if (res.noContent) {
             data->json = std::make_shared<std::string>();
-            emitSpriteLoadedIfComplete(id);
+            emitSpriteLoadedIfComplete(*sprite);
         } else {
             // Only trigger a sprite loaded event we got new data.
             assert(data->json != res.data);
             data->json = std::move(res.data);
-            emitSpriteLoadedIfComplete(id);
+            emitSpriteLoadedIfComplete(*sprite);
         }
     });
 
-    dataMap[id]->spriteRequest = fileSource.request(Resource::spriteImage(url, pixelRatio), [this, id](Response res) {
+    dataMap[id]->spriteRequest = fileSource.request(Resource::spriteImage(url, pixelRatio), [this, sprite](Response res) {
         std::lock_guard<std::mutex> lock(dataMapMutex);
-        Data* data = dataMap[id].get();
+        Data* data = dataMap[sprite->id].get();
         if (res.error) {
-            observer->onSpriteError(std::make_exception_ptr(std::runtime_error(res.error->message)));
+            observer->onSpriteError(*sprite, std::make_exception_ptr(std::runtime_error(res.error->message)));
         } else if (res.notModified) {
             return;
         } else if (res.noContent) {
             data->image = std::make_shared<std::string>();
-            emitSpriteLoadedIfComplete(id);
+            emitSpriteLoadedIfComplete(*sprite);
         } else {
-            assert(dataMap[id]->image != res.data);
+            assert(dataMap[sprite->id]->image != res.data);
             data->image = std::move(res.data);
-            emitSpriteLoadedIfComplete(id);
+            emitSpriteLoadedIfComplete(*sprite);
         }
     });
 }
 
-void SpriteLoader::emitSpriteLoadedIfComplete(std::string id) {
-    Data* data = dataMap[id].get();
+void SpriteLoader::emitSpriteLoadedIfComplete(style::Sprite sprite) {
+    Data* data = dataMap[sprite.id].get();
     assert(data);
     if (!data->image || !data->json) {
         return;
@@ -92,22 +92,22 @@ void SpriteLoader::emitSpriteLoadedIfComplete(std::string id) {
         std::exception_ptr error;
     };
 
-    auto parseClosure = [id = id, image = data->image, json = data->json]() -> ParseResult {
+    auto parseClosure = [sprite = sprite, image = data->image, json = data->json]() -> ParseResult {
         try {
-            return {parseSprite(id, *image, *json), nullptr};
+            return {parseSprite(sprite.id, *image, *json), nullptr};
         } catch (...) {
             return {{}, std::current_exception()};
         }
     };
 
-    auto resultClosure = [this, weak = weakFactory.makeWeakPtr()](ParseResult result) {
+    auto resultClosure = [this, sprite = sprite, weak = weakFactory.makeWeakPtr()](ParseResult result) {
         if (!weak) return; // This instance has been deleted.
 
         if (result.error) {
-            observer->onSpriteError(result.error);
+            observer->onSpriteError(std::optional(sprite), result.error);
             return;
         }
-        observer->onSpriteLoaded(std::move(result.images));
+        observer->onSpriteLoaded(std::optional(sprite), std::move(result.images));
     };
 
     threadPool->scheduleAndReplyValue(parseClosure, resultClosure);

@@ -27,7 +27,7 @@ public:
     void setObserver(SpriteLoaderObserver*);
 
 private:
-    void emitSpriteLoadedIfComplete(std::string id);
+    void emitSpriteLoadedIfComplete(style::Sprite sprite);
 
     // Invoked by SpriteAtlasWorker
     friend class SpriteLoaderWorker;
