@@ -5,11 +5,18 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.*
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.testapp.R
+import java.io.IOException
 import java.util.*
 
 class FpsStore {
@@ -88,6 +95,17 @@ class BenchmarkActivity : AppCompatActivity() {
         if (styleNames.isNotEmpty() && styleNames.size == styleURLs.size) {
             styles = styleNames.zip(styleURLs)
         }
+
+        val client = OkHttpClient()
+        val request = Request.Builder()
+            .url("https://5km2laofzfdyfbglohgpajn43m0yafuf.lambda-url.us-east-1.on.aws")
+            .post("{ \"hello\": 12345 }".toRequestBody("application/json".toMediaType()))
+            .build()
+
+        println("Request")
+        val response = client.newCall(request).execute()
+        println("Request ${response.code}")
+        println("Request ${response.body!!.string()}")
     }
 
     private fun setupToolbar() {
