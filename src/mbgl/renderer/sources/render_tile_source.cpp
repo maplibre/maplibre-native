@@ -25,7 +25,6 @@
 #include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/renderer/layer_tweaker.hpp>
-#include <mbgl/util/convert.hpp>
 
 #include <unordered_set>
 #endif
