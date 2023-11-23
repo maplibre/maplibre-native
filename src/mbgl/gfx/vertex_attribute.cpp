@@ -13,6 +13,71 @@ namespace {
 const UniqueVertexAttribute nullref;
 } // namespace
 
+std::size_t VertexAttribute::getStrideOf(gfx::AttributeDataType type) {
+    switch (type) {
+        case gfx::AttributeDataType::Byte:
+            return 1;
+        case gfx::AttributeDataType::Byte2:
+            return 2;
+        case gfx::AttributeDataType::Byte3:
+            return 3;
+        case gfx::AttributeDataType::Byte4:
+            return 4;
+        case gfx::AttributeDataType::UByte:
+            return 1;
+        case gfx::AttributeDataType::UByte2:
+            return 2;
+        case gfx::AttributeDataType::UByte3:
+            return 3;
+        case gfx::AttributeDataType::UByte4:
+            return 4;
+        case gfx::AttributeDataType::Short:
+            return 2;
+        case gfx::AttributeDataType::Short2:
+            return 4;
+        case gfx::AttributeDataType::Short3:
+            return 6;
+        case gfx::AttributeDataType::Short4:
+            return 8;
+        case gfx::AttributeDataType::UShort:
+            return 2;
+        case gfx::AttributeDataType::UShort2:
+            return 4;
+        case gfx::AttributeDataType::UShort3:
+            return 6;
+        case gfx::AttributeDataType::UShort4:
+            return 8;
+        case gfx::AttributeDataType::UShort8:
+            return 16;
+        case gfx::AttributeDataType::Int:
+            return 4;
+        case gfx::AttributeDataType::Int2:
+            return 8;
+        case gfx::AttributeDataType::Int3:
+            return 12;
+        case gfx::AttributeDataType::Int4:
+            return 16;
+        case gfx::AttributeDataType::UInt:
+            return 4;
+        case gfx::AttributeDataType::UInt2:
+            return 8;
+        case gfx::AttributeDataType::UInt3:
+            return 12;
+        case gfx::AttributeDataType::UInt4:
+            return 16;
+        case gfx::AttributeDataType::Float:
+            return 4;
+        case gfx::AttributeDataType::Float2:
+            return 8;
+        case gfx::AttributeDataType::Float3:
+            return 12;
+        case gfx::AttributeDataType::Float4:
+            return 16;
+        default:
+            return 0;
+    }
+}
+
 std::size_t VertexAttribute::getCount() const {
     return sharedRawData ? sharedRawData->getRawCount() : items.size();
 }

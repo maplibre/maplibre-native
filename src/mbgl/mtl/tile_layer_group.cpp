@@ -55,37 +55,25 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     bool stencil3d = false;
     gfx::StencilMode stencilMode3d;
 
-    // Collect the tile IDs relevant to stenciling and update the stencil buffer, if necessary.
-    std::set<UnwrappedTileID> tileIDs;
-    std::size_t numEnabled = 0;
-    visitDrawables([&](const gfx::Drawable& drawable) {
-        if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
-            return;
-        }
-        numEnabled += 1;
-        if (drawable.getIs3D()) {
-            features3d = true;
-            if (drawable.getEnableStencil()) {
-                stencil3d = true;
+    // If we're using stencil clipping, we need to handle 3D features separately
+    if (stencilTiles && !stencilTiles->empty()) {
+        visitDrawables([&](const gfx::Drawable& drawable) {
+            if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
+                features3d = true;
+                if (drawable.getEnableStencil()) {
+                    stencil3d = true;
+                }
             }
-        }
-        if (!features3d && drawable.getEnableStencil() && drawable.getTileID()) {
-            tileIDs.emplace(drawable.getTileID()->toUnwrapped());
-        }
-    });
-
-    if (!numEnabled) {
-        return;
+        });
     }
 
 #if !defined(NDEBUG)
     const auto debugGroupRender = parameters.encoder->createDebugGroup(getName() + "-render");
 #endif
 
-    // If we're doing 3D stenciling and have any features
-    // to draw, set up the single-value stencil mask.
-    // If we're doing 2D stenciling and have any drawables with tile IDs,
-    // render each tile into the stencil buffer with a different value.
+    // If we're doing 3D stenciling and have any features to draw, set up the single-value stencil mask.
+    // If we're doing 2D stenciling and have any drawables with tile IDs, render each tile into the stencil buffer with
+    // a different value.
     MTLDepthStencilStatePtr stateWithStencil, stateWithoutStencil;
     if (features3d) {
         const auto depthMode = parameters.depthModeFor3D();
@@ -95,8 +83,8 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             encoder->setStencilReferenceValue(stencilMode3d.ref);
         }
         stateWithoutStencil = context.makeDepthStencilState(depthMode, gfx::StencilMode::disabled(), renderable);
-    } else if (!tileIDs.empty()) {
-        parameters.renderTileClippingMasks(tileIDs);
+    } else if (stencilTiles && !stencilTiles->empty()) {
+        parameters.renderTileClippingMasks(stencilTiles);
     }
 
     visitDrawables([&](gfx::Drawable& drawable) {

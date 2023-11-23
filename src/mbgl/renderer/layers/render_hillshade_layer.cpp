@@ -491,7 +491,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             // Only current drawables are updated, ones produced for
             // a previous style retain the attribute values for that style.
             if (drawable.getLayerTweaker() != layerTweaker) {
-                return;
+                return false;
             }
 
             drawable.setVertexAttributes(std::move(hillshadeVertexAttrs));
@@ -516,8 +516,9 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             if (hillshadeImageLocation) {
                 drawable.setTexture(bucket.renderTarget->getTexture(), *hillshadeImageLocation);
             }
+            return true;
         };
-        if (0 < tileLayerGroup->visitDrawables(renderPass, tileID, std::move(updateExisting))) {
+        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
 
