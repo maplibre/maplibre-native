@@ -43,7 +43,9 @@ namespace {
 
 #if MLN_DRAWABLE_RENDERER
 constexpr auto FillShaderName = "FillShader";
+#if MLN_TRIANGULATE_FILL_OUTLINES
 constexpr auto FillOutlineTriangulatedShaderName = "LineBasicShader";
+#endif
 constexpr auto FillOutlineShaderName = "FillOutlineShader";
 constexpr auto FillPatternShaderName = "FillPatternShader";
 constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
