@@ -256,6 +256,10 @@ void OfflineDatabase::migrateToVersion7() {
         "  must_revalidate INTEGER NOT NULL DEFAULT 0,\n"
         "  UNIQUE (url_template, pixel_ratio, z, x, y)\n"
         ");");
+    db->exec("CREATE INDEX ambient_resources_accessed\n"
+             "ON ambient_resources (accessed)\n");
+    db->exec("CREATE INDEX ambient_tiles_accessed\n"
+             "ON ambient_tiles (accessed)\n");
     db->exec("PRAGMA user_version = 7");
     transaction.commit();
 }
@@ -1429,16 +1433,10 @@ bool OfflineDatabase::evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& st
             "SELECT max(accessed) "
             "FROM ( "
             "    SELECT accessed "
-            "    FROM resources "
-            "    LEFT JOIN region_resources "
-            "    ON resource_id = resources.id "
-            "    WHERE resource_id IS NULL "
+            "    FROM ambient_resources "
             "  UNION ALL "
             "    SELECT accessed "
-            "    FROM tiles "
-            "    LEFT JOIN region_tiles "
-            "    ON tile_id = tiles.id "
-            "    WHERE tile_id IS NULL "
+            "    FROM ambient_tiles "
             "  ORDER BY accessed ASC LIMIT ?1 "
             ") "
         ) };
@@ -1451,13 +1449,10 @@ bool OfflineDatabase::evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& st
 
         // clang-format off
         mapbox::sqlite::Query resourceQuery{ getStatement(
-            "DELETE FROM resources "
+            "DELETE FROM ambient_resources "
             "WHERE id IN ( "
-            "  SELECT id FROM resources "
-            "  LEFT JOIN region_resources "
-            "  ON resource_id = resources.id "
-            "  WHERE resource_id IS NULL "
-            "  AND accessed <= ?1 "
+            "  SELECT id FROM ambient_resources "
+            "  WHERE accessed <= ?1 "
             ") ") };
         // clang-format on
         resourceQuery.bind(1, accessed);
@@ -1466,13 +1461,10 @@ bool OfflineDatabase::evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& st
 
         // clang-format off
         mapbox::sqlite::Query tileQuery{ getStatement(
-            "DELETE FROM tiles "
+            "DELETE FROM ambient_tiles "
             "WHERE id IN ( "
-            "  SELECT id FROM tiles "
-            "  LEFT JOIN region_tiles "
-            "  ON tile_id = tiles.id "
-            "  WHERE tile_id IS NULL "
-            "  AND accessed <= ?1 "
+            "  SELECT id FROM ambient_tiles "
+            "  WHERE accessed <= ?1 "
             ") ") };
         // clang-format on
         tileQuery.bind(1, accessed);
