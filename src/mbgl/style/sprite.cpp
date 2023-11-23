@@ -10,9 +10,5 @@ Sprite::Sprite(std::string id_, std::string spriteURL_) {
     this->spriteURL = spriteURL_;
 }
 
-std::string Sprite::getKey() const {
-    return this->id + "::" + this->spriteURL;
-}
-
 } // namespace style
 } // namespace mbgl

@@ -120,18 +120,18 @@ void Style::Impl::parse(const std::string& json_) {
 
     if (fileSource) {
         if (parser.sprites.empty()) {
-            // We identify no sprite with a empty string in the sprite loading status.
-            spritesLoadingStatus[""] = false;
+            // We identify no sprite with 'default' as string in the sprite loading status.
+            spritesLoadingStatus["default"] = false;
             spriteLoader->load(std::nullopt, *fileSource);
         } else {
             for (const auto& sprite : parser.sprites) {
-                spritesLoadingStatus[sprite.getKey()] = false;
+                spritesLoadingStatus[sprite.id] = false;
                 spriteLoader->load(std::optional(sprite), *fileSource);
             }
         }
     } else {
-        // We identify no sprite with a empty string in the sprite loading status.
-        spritesLoadingStatus[""] = false;
+        // We identify no sprite with 'default' as string in the sprite loading status.
+        spritesLoadingStatus["default"] = false;
         onSpriteError(std::nullopt,
                       std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite url.")));
     }
@@ -383,9 +383,9 @@ void Style::Impl::onSpriteLoaded(std::optional<style::Sprite> sprite,
     std::sort(newImages->begin(), newImages->end());
     images = std::move(newImages);
     if (sprite) {
-        spritesLoadingStatus[sprite->getKey()] = true;
+        spritesLoadingStatus[sprite->id] = true;
     } else {
-        spritesLoadingStatus[""] = true;
+        spritesLoadingStatus["default"] = true;
     }
     observer->onUpdate(); // For *-pattern properties.
 }
@@ -395,9 +395,9 @@ void Style::Impl::onSpriteError(std::optional<style::Sprite> sprite, std::except
     Log::Error(Event::Style, "Failed to load sprite: " + util::toString(error));
     observer->onResourceError(error);
     if (sprite) {
-        spritesLoadingStatus[sprite->getKey()] = true;
+        spritesLoadingStatus[sprite->id] = true;
     } else {
-        spritesLoadingStatus[""] = false;
+        spritesLoadingStatus["default"] = false;
     }
     // Unblock rendering tiles (even though sprite request has failed).
     observer->onUpdate();

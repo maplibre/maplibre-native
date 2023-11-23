@@ -12,8 +12,6 @@ public:
 
     std::string id;
     std::string spriteURL;
-
-    std::string getKey() const;
 };
 
 } // namespace style
