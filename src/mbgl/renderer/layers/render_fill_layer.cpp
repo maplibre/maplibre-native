@@ -681,7 +681,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         // Outline does not default to fill in the pattern case
         const auto doOutline = evaluated.get<FillAntialias>() && (unevaluated.get<FillPattern>().isUndefined() ||
                                                                   unevaluated.get<FillOutlineColor>().isUndefined());
-        const bool dataDrivenOutline = !evaluated.get<FillOutlineColor>().isConstant() || !evaluated.get<FillOpacity>().isConstant();
+        const bool dataDrivenOutline = !evaluated.get<FillOutlineColor>().isConstant() ||
+                                       !evaluated.get<FillOpacity>().isConstant();
 
         if (unevaluated.get<FillPattern>().isUndefined()) {
             // Simple fill
@@ -824,13 +825,13 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
             if (doOutline && outlineBuilder) {
-                if(!dataDrivenOutline) {
+                if (!dataDrivenOutline) {
                     outlineBuilder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
                     createOutline(outlineBuilder,
                                   evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
                                   evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()));
                 } else {
-                    if( bucket.sharedBasicLineIndexes->elements()) {
+                    if (bucket.sharedBasicLineIndexes->elements()) {
                         outlineBuilder->setShader(outlineShader);
                         outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                         outlineBuilder->setSegments(gfx::Lines(2),
