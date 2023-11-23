@@ -345,7 +345,7 @@ void OfflineDownload::activateDownload() {
 
         if (!parser.sprites.empty()) {
             // Always request 1x and @2x sprite images for portability.
-            for (const auto &sprite : parser.sprites) {
+            for (const auto& sprite : parser.sprites) {
                 std::string spriteURL = util::mapbox::canonicalizeSpriteURL(tileServerOptions, sprite.spriteURL);
                 queueResource(Resource::spriteImage(spriteURL, 1));
                 queueResource(Resource::spriteImage(spriteURL, 2));

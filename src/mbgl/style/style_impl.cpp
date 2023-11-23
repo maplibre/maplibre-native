@@ -125,7 +125,7 @@ void Style::Impl::parse(const std::string& json_) {
             std::optional<Sprite> nullSprite;
             spriteLoader->load(nullSprite, *fileSource);
         } else {
-            for (const auto &sprite : parser.sprites) {
+            for (const auto& sprite : parser.sprites) {
                 spriteLoader->load(std::optional(sprite), *fileSource);
             }
         }
@@ -381,7 +381,7 @@ void Style::Impl::onSpriteError(std::exception_ptr error) {
     observer->onResourceError(error);
     countOfSpritesLoaded += 1;
     assert(countOfSpritesLoaded <= countOfSprites || countOfSprites == 0);
-    
+
     // Unblock rendering tiles (even though sprite request has failed).
     observer->onUpdate();
 }
