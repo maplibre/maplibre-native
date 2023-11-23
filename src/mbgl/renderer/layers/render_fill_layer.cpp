@@ -829,7 +829,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlineBuilder->setShader(outlineShader);
                 outlineBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlineBuilder->setSegments(
-                    gfx::Lines(2), bucket.sharedLines, bucket.lineSegments.data(), bucket.lineSegments.size());
+                    gfx::Lines(2), bucket.sharedBasicLineIndexes, bucket.basicLineSegments.data(), bucket.basicLineSegments.size());
                 finish(*outlineBuilder,
                        FillLayerTweaker::idFillOutlineInterpolateUBOName,
                        getFillOutlineInterpolateUBO(),
