@@ -4,6 +4,7 @@
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 #include <mbgl/layout/pattern_layout.hpp>
+#include <mbgl/renderer/buckets/fill_bucket.hpp>
 
 #include <memory>
 
@@ -44,6 +45,15 @@ public:
                 UniqueChangeRequestVec&) override;
 #endif
 
+protected:
+#if MLN_TRIANGULATE_FILL_OUTLINES
+    void markLayerRenderable(bool willRender, UniqueChangeRequestVec&) override;
+    void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec&) override;
+    void layerRemoved(UniqueChangeRequestVec&) override;
+    std::size_t removeAllDrawables() override;
+    std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
+#endif // MLN_DRAWABLE_RENDERER
+
 private:
     void transition(const TransitionParameters&) override;
     void evaluate(const PropertyEvaluationParameters&) override;
@@ -72,12 +82,19 @@ private:
     std::shared_ptr<FillOutlineProgram> fillOutlineProgram;
     std::shared_ptr<FillOutlinePatternProgram> fillOutlinePatternProgram;
 #endif
+
 #if MLN_DRAWABLE_RENDERER
     gfx::ShaderGroupPtr fillShaderGroup;
     gfx::ShaderGroupPtr outlineShaderGroup;
     gfx::ShaderGroupPtr patternShaderGroup;
     gfx::ShaderGroupPtr outlinePatternShaderGroup;
-#endif
+
+#if MLN_TRIANGULATE_FILL_OUTLINES
+    LayerGroupBasePtr outlineLayerGroup;
+    gfx::ShaderGroupPtr outlineTriangulatedShaderGroup;
+#endif // MLN_TRIANGULATE_FILL_OUTLINES
+
+#endif // MLN_DRAWABLE_RENDERER
 };
 
 } // namespace mbgl
