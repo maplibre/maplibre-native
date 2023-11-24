@@ -15,6 +15,7 @@
 #include <mbgl/shaders/gl/drawable_line_pattern.hpp>
 #include <mbgl/shaders/gl/drawable_line_sdf.hpp>
 #include <mbgl/shaders/gl/drawable_line.hpp>
+#include <mbgl/shaders/gl/drawable_line_basic.hpp>
 #include <mbgl/shaders/gl/drawable_fill_pattern.hpp>
 #include <mbgl/shaders/gl/drawable_fill_outline_pattern.hpp>
 #include <mbgl/shaders/gl/drawable_fill_extrusion.hpp>
