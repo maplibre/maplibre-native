@@ -258,7 +258,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             shaders::LinePropertiesUBO linePropertiesUBO;
         };
 
-        GeometryCoordinates coords{{0, 0}, {util::EXTENT, 0}, {util::EXTENT, util::EXTENT}, {0, util::EXTENT}};
+        GeometryCoordinates coords{{0, 0}, {util::EXTENT, 0}, {util::EXTENT, util::EXTENT}, {0, util::EXTENT}, {0, 0}};
         gfx::PolylineGeneratorOptions options;
         options.type = FeatureType::Polygon;
 
@@ -331,7 +331,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                    0,
                                    0,
                                    0};
-            if (0 == updateDrawables(textLayerGroup, tileID, textUBO)) {
+            if (0 == updateDrawables(textLayerGroup, tileID, textUBO) && tile.getNeedsRendering()) {
                 addDrawable(textLayerGroup,
                             tileID,
                             textUBO,
@@ -372,14 +372,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                     0,
                                     0,
                                     0};
-            if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO)) {
-                /*addDrawable(tileLayerGroup,
-                            tileID,
-                            debugUBO,
-                            gfx::LineStrip(4.0f * parameters.pixelRatio),
-                            vertices,
-                            indexes,
-                            segments);*/
+            if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO) && tile.getNeedsRendering()) {
                 addPolylineDrawable(tileLayerGroup, tile);
             }
         }
