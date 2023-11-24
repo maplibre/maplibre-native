@@ -21,6 +21,7 @@ enum class BuiltIn {
     LinePatternShader,
     LineSDFShader,
     LineShader,
+    LineBasicShader,
     FillPatternShader,
     FillOutlinePatternShader,
     FillExtrusionShader,
