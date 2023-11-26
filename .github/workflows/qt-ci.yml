@@ -65,6 +65,12 @@ jobs:
             qt_version: 5.15.2
             qt_target: desktop
             compiler: ""
+          - name: Linux
+            os: ubuntu-22.04
+            build_type: RelWithDebInfo
+            qt_version: 6.5.3
+            qt_target: desktop
+            compiler: ""
           - name: Linux_GCC13
             os: ubuntu-22.04
             build_type: RelWithDebInfo
