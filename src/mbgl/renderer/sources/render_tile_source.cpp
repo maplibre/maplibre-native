@@ -378,13 +378,13 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 #if MLN_RENDER_BACKEND_METAL
                 addPolylineDrawable(tileLayerGroup, tile);
 #else
-                    addDrawable(tileLayerGroup,
-                                tileID,
-                                debugUBO,
-                                gfx::LineStrip(4.0f * parameters.pixelRatio),
-                                vertices,
-                                indexes,
-                                segments);
+                addDrawable(tileLayerGroup,
+                            tileID,
+                            debugUBO,
+                            gfx::LineStrip(4.0f * parameters.pixelRatio),
+                            vertices,
+                            indexes,
+                            segments);
 #endif
             }
         }
