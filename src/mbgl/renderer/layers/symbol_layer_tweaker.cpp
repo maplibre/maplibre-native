@@ -100,7 +100,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         iconPropertiesUpdated = true;
         propertiesUpdated = false;
     }
-    
+
     const auto camDist = state.getCameraToCenterDistance();
 
     const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
