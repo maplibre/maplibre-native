@@ -698,7 +698,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
             const auto outlineTriangulatedShader = doOutline && !dataDrivenOutline ? [&]() -> auto {
-                static const std::unordered_set<StringIdentity> outlinePropertiesAsUniforms{
+                static const mbgl::unordered_set<StringIdentity> outlinePropertiesAsUniforms{
                     stringIndexer().get("a_color"),
                     stringIndexer().get("a_opacity"),
                     stringIndexer().get("a_width"),
