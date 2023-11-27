@@ -100,7 +100,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
         builder->setRenderPass(renderPass);
         builder->setEnableDepth(false);
-        builder->setColorMode(gfx::ColorMode::unblended());
+        builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrNameId(idVertexAttribName);
 
