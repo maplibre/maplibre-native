@@ -189,7 +189,7 @@ void Parser::parseSprites(const JSValue& value) {
                 Log::Warning(Event::ParseStyle, "sprite ids must be unique");
                 continue;
             }
-            
+
             spriteIds.insert(sprite->id);
             sprites.emplace_back(*sprite);
         }
