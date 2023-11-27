@@ -532,6 +532,11 @@ Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
     checkFramebuffer();
     return {color.getSize(), std::move(fbo)};
 }
+
+gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
+    return std::make_shared<VertexAttributeArray>();
+}
+
 #endif
 
 void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {

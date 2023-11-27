@@ -33,10 +33,6 @@ void DrawableBuilder::setCullFaceMode(const gfx::CullFaceMode& value) {
     impl->cullFaceMode = value;
 }
 
-const gfx::VertexAttributeArray& DrawableBuilder::getVertexAttributes() const {
-    return impl->vertexAttrs;
-}
-
 UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
     if (!currentDrawable && createIfNone) {
         currentDrawable = createDrawable();
@@ -44,11 +40,11 @@ UniqueDrawable& DrawableBuilder::getCurrentDrawable(bool createIfNone) {
     return currentDrawable;
 }
 
-void DrawableBuilder::flush() {
+void DrawableBuilder::flush(gfx::Context& context) {
     if (curVertexCount()) {
         if (Impl::Mode::Polylines == impl->getMode()) {
             // setup for polylines
-            impl->setupForPolylines(*this);
+            impl->setupForPolylines(context, *this);
         }
 
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
@@ -68,9 +64,8 @@ void DrawableBuilder::flush() {
         draw->setTextures(textures);
         draw->setTweakers(tweakers);
 
-        const auto& builderAttrs = getVertexAttributes();
-        if (auto drawAttrs = builderAttrs.clone()) {
-            draw->setVertexAttributes(std::move(*drawAttrs));
+        if (vertexAttrs) {
+            draw->setVertexAttributes(vertexAttrs);
         }
 
         init();
@@ -149,14 +144,6 @@ void DrawableBuilder::addQuad(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
 
     addTriangle(x0, y0, x1, y0, x0, y1);
     appendTriangle(x1, y1);
-}
-
-void DrawableBuilder::setVertexAttributes(const VertexAttributeArray& attrs) {
-    impl->vertexAttrs = attrs;
-}
-
-void DrawableBuilder::setVertexAttributes(VertexAttributeArray&& attrs) {
-    impl->vertexAttrs = std::move(attrs);
 }
 
 std::size_t DrawableBuilder::addVertices(const std::vector<std::array<int16_t, 2>>& vertices,

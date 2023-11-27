@@ -388,11 +388,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             return interpolateBuffer;
         };
 
-        gfx::VertexAttributeArray heatmapVertexAttrs;
-        propertiesAsUniforms.clear();
-        heatmapVertexAttrs.readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(
-            paintPropertyBinders, evaluated, propertiesAsUniforms);
-
         if (layerTweaker) {
             layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
@@ -422,7 +417,11 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        if (const auto& attr = heatmapVertexAttrs.add(idVertexAttribName)) {
+        auto heatmapVertexAttrs = context.createVertexAttributeArray();
+        heatmapVertexAttrs->readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(
+            paintPropertyBinders, evaluated, propertiesAsUniforms);
+
+        if (const auto& attr = heatmapVertexAttrs->add(idVertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(HeatmapLayoutVertex, a1),
                                    /*vertexOffset=*/0,
@@ -441,7 +440,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         heatmapBuilder->setSegments(
             gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
 
-        heatmapBuilder->flush();
+        heatmapBuilder->flush(context);
 
         for (auto& drawable : heatmapBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
@@ -494,8 +493,8 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     }
     const auto textureVertexCount = sharedTextureVertices->elements();
 
-    gfx::VertexAttributeArray textureVertexAttrs;
-    if (const auto& attr = textureVertexAttrs.add(idVertexAttribName)) {
+    auto textureVertexAttrs = context.createVertexAttributeArray();
+    if (const auto& attr = textureVertexAttrs->add(idVertexAttribName)) {
         attr->setSharedRawData(sharedTextureVertices,
                                offsetof(HeatmapLayoutVertex, a1),
                                /*vertexOffset=*/0,
@@ -530,7 +529,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         heatmapTextureBuilder->setTexture(std::move(texture), colorRampLocation.value());
     }
 
-    heatmapTextureBuilder->flush();
+    heatmapTextureBuilder->flush(context);
 
     for (auto& drawable : heatmapTextureBuilder->clearDrawables()) {
         drawable->setLayerTweaker(textureTweaker);

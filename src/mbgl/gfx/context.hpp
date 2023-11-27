@@ -40,12 +40,14 @@ class Drawable;
 class DrawableBuilder;
 class ShaderProgramBase;
 class Texture2D;
+class VertexAttributeArray;
 
 using DrawablePtr = std::shared_ptr<Drawable>;
-using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
-using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
+using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
+using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
+using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
 #endif
 
 class Context {
@@ -57,24 +59,20 @@ public:
     static constexpr const uint32_t minimumRequiredVertexBindingCount = 8;
     const uint32_t maximumVertexBindingCount;
 
-public:
     Context(Context&&) = delete;
     Context(const Context&) = delete;
     Context& operator=(Context&& other) = delete;
     Context& operator=(const Context& other) = delete;
     virtual ~Context() = default;
 
-public:
     /// Called at the end of a frame.
     virtual void performCleanup() = 0;
 
     /// Called when the app receives a memory warning and before it goes to the background.
     virtual void reduceMemoryUsage() = 0;
 
-public:
     virtual std::unique_ptr<OffscreenTexture> createOffscreenTexture(Size, TextureChannelDataType) = 0;
 
-public:
     /// Creates an empty texture with the specified dimensions.
     Texture createTexture(const Size size,
                           TexturePixelType format = TexturePixelType::RGBA,
@@ -82,32 +80,21 @@ public:
         return {size, createTextureResource(size, format, type)};
     }
 
-protected:
-    virtual std::unique_ptr<TextureResource> createTextureResource(Size, TexturePixelType, TextureChannelDataType) = 0;
-
-public:
     template <RenderbufferPixelType pixelType>
     Renderbuffer<pixelType> createRenderbuffer(const Size size) {
         return {size, createRenderbufferResource(pixelType, size)};
     }
 
-protected:
-    virtual std::unique_ptr<RenderbufferResource> createRenderbufferResource(RenderbufferPixelType, Size) = 0;
-
-public:
     DrawScope createDrawScope() { return DrawScope{createDrawScopeResource()}; }
 
-protected:
-    virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;
-
-public:
     virtual std::unique_ptr<CommandEncoder> createCommandEncoder() = 0;
+
+    virtual gfx::VertexAttributeArrayPtr createVertexAttributeArray() const = 0;
 
     gfx::RenderingStats& renderingStats() { return stats; }
     const gfx::RenderingStats& renderingStats() const { return stats; }
 
 #if !defined(NDEBUG)
-public:
     virtual void visualizeStencilBuffer() = 0;
     virtual void visualizeDepthBuffer(float depthRangeSize) = 0;
 #endif
@@ -118,7 +105,6 @@ public:
     virtual void setDirtyState() = 0;
 
 #if MLN_DRAWABLE_RENDERER
-public:
     /// Create a new drawable builder
     virtual UniqueDrawableBuilder createDrawableBuilder(std::string name) = 0;
 
@@ -166,6 +152,10 @@ public:
 #endif
 
 protected:
+    virtual std::unique_ptr<TextureResource> createTextureResource(Size, TexturePixelType, TextureChannelDataType) = 0;
+    virtual std::unique_ptr<RenderbufferResource> createRenderbufferResource(RenderbufferPixelType, Size) = 0;
+    virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;
+
     gfx::RenderingStats stats;
 };
 
