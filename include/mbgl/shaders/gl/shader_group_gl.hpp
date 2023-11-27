@@ -5,9 +5,9 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/util/hash.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <sstream>
-#include <unordered_set>
 
 namespace mbgl {
 namespace gl {
@@ -21,7 +21,7 @@ public:
     ~ShaderGroupGL() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
-                                     const std::unordered_set<StringIdentity>& propertiesAsUniforms,
+                                     const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms,
                                      std::string_view firstAttribName) override {
         constexpr auto& vert = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::vertex;
         constexpr auto& frag = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::fragment;
