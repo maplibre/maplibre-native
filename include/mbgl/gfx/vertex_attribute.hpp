@@ -3,6 +3,7 @@
 #include <mbgl/gfx/gfx_types.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/util/string_indexer.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <algorithm>
 #include <array>
@@ -10,8 +11,6 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 #include <variant>
 #include <vector>
 
@@ -281,7 +280,7 @@ protected:
 /// Stores a collection of vertex attributes by name
 class VertexAttributeArray {
 public:
-    using AttributeMap = std::unordered_map<StringIdentity, std::unique_ptr<VertexAttribute>>;
+    using AttributeMap = mbgl::unordered_map<StringIdentity, std::unique_ptr<VertexAttribute>>;
 
     VertexAttributeArray() = default;
     VertexAttributeArray(VertexAttributeArray&&);
@@ -394,7 +393,7 @@ public:
     template <typename... DataDrivenPaintProperty, typename Binders, typename Evaluated>
     void readDataDrivenPaintProperties(const Binders& binders,
                                        const Evaluated& evaluated,
-                                       std::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                                       mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
         // Read each property in the type pack
         propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
         (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
@@ -413,7 +412,7 @@ protected:
     template <typename DataDrivenPaintProperty, typename Binder>
     void readDataDrivenPaintProperty(const Binder& binder,
                                      const bool isConstant,
-                                     std::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                                     mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
         if (!binder) {
             return;
         }

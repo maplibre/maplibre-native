@@ -110,10 +110,12 @@ MAPLIBRE_FLAGS = select({
         "/DMBGL_USE_GLES2=1",
         "/DMBGL_RENDER_BACKEND_OPENGL=1",
         "/D_USE_MATH_DEFINES",
+        "/DMLN_USE_UNORDERED_DENSE",
     ],
     "//conditions:default": [
         "-DMBGL_USE_GLES2=1",
         "-DMBGL_RENDER_BACKEND_OPENGL=1",
         "-DGLES_SILENCE_DEPRECATION",
+        "-DMLN_USE_UNORDERED_DENSE",
     ]
 })

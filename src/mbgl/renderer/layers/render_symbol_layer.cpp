@@ -749,7 +749,7 @@ SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
 }
 
 // Convert a properties-as-uniforms set to the type expected by `SymbolDrawableData`
-gfx::SymbolDrawableData::PropertyMapType toMap(const std::unordered_set<StringIdentity>& set) {
+gfx::SymbolDrawableData::PropertyMapType toMap(const mbgl::unordered_set<StringIdentity>& set) {
     // can we do this without allocating?
     auto values = std::vector<bool>(set.size());
     return gfx::SymbolDrawableData::PropertyMapType(set.begin(), set.end(), values.begin(), values.end());
@@ -769,7 +769,7 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const SymbolBucket::PaintProperties& paintProps,
                           const SymbolPaintProperties::PossiblyEvaluated& evaluated,
                           gfx::VertexAttributeArray& attribs,
-                          std::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                          mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
     if (const auto& attr = attribs.getOrAdd(idPosOffsetAttribName)) {
         attr->setSharedRawData(buffer.sharedVertices,
                                offsetof(SymbolLayoutVertex, a1),
@@ -826,7 +826,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
                         const TransformState& state,
                         gfx::UniformBufferPtr& textInterpUBO,
                         gfx::UniformBufferPtr& iconInterpUBO,
-                        std::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                        mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
     if (!drawable.getData()) {
         return;
     }
@@ -1061,7 +1061,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     collisionBuilder->setColorMode(gfx::ColorMode::alphaBlended());
     collisionBuilder->setVertexAttrNameId(idCollisionPosAttribName);
 
-    std::unordered_set<StringIdentity> propertiesAsUniforms;
+    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
