@@ -1,13 +1,12 @@
 #pragma once
 
 #include <mbgl/gfx/shader.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 
 namespace mbgl {
 
@@ -147,13 +146,13 @@ public:
     /// @return A `gfx::ShaderPtr`
     virtual gfx::ShaderPtr getOrCreateShader(
         gfx::Context&,
-        [[maybe_unused]] const std::unordered_set<StringIdentity>& propertiesAsUniforms,
+        [[maybe_unused]] const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms,
         [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
         return {};
     }
 
 private:
-    std::unordered_map<std::string, std::shared_ptr<gfx::Shader>> programs;
+    mbgl::unordered_map<std::string, std::shared_ptr<gfx::Shader>> programs;
     mutable std::shared_mutex programLock;
 };
 

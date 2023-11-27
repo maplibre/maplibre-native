@@ -7,6 +7,7 @@
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/text/bidi.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <memory>
 #include <map>
@@ -38,7 +39,7 @@ public:
 
     void createBucket(const ImagePositions&,
                       std::unique_ptr<FeatureIndex>&,
-                      std::unordered_map<std::string, LayerRenderData>&,
+                      mbgl::unordered_map<std::string, LayerRenderData>&,
                       bool firstLoad,
                       bool showCollisionBoxes,
                       const CanonicalTileID& canonical) override;
