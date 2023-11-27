@@ -534,7 +534,7 @@ Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
 }
 
 gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
-    return std::make_shared<VertexAttributeArray>();
+    return std::make_shared<VertexAttributeArrayGL>();
 }
 
 #endif

@@ -88,21 +88,6 @@ void DrawableGL::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx
     impl->vertexType = type_;
 }
 
-const gfx::VertexAttributeArray& DrawableGL::getVertexAttributes() const {
-    return impl->vertexAttributes;
-}
-
-gfx::VertexAttributeArray& DrawableGL::mutableVertexAttributes() {
-    return impl->vertexAttributes;
-}
-
-void DrawableGL::setVertexAttributes(const gfx::VertexAttributeArray& value) {
-    impl->vertexAttributes = static_cast<const VertexAttributeArrayGL&>(value);
-}
-void DrawableGL::setVertexAttributes(gfx::VertexAttributeArray&& value) {
-    impl->vertexAttributes = std::move(static_cast<VertexAttributeArrayGL&&>(value));
-}
-
 const gfx::UniformBufferArray& DrawableGL::getUniformBuffers() const {
     return impl->uniformBuffers;
 }
