@@ -341,7 +341,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         }
     };
 
-    gfx::VertexAttributeArrayPtr sharedAttrs;
+    gfx::VertexAttributeArrayPtr staticAttrs;
 
     // Build vertex attributes and apply them to a drawable or a builder.
     // Populates a drawable xor a drawable builder for creates and updates, respectively.
@@ -363,7 +363,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             const auto* segments = shared ? &bucket.segments : staticDataSegments.get();
 
             gfx::VertexAttributeArrayPtr bucketAttrs;
-            auto& vertexAttrs = shared ? sharedAttrs : bucketAttrs;
+            auto& vertexAttrs = shared ? bucketAttrs : staticAttrs;
             if (!vertexAttrs) {
                 vertexAttrs = context.createVertexAttributeArray();
 
@@ -488,11 +488,11 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                     }
                     return true;
                 };
-                if (updateTile(renderPass, tileID, std::move(updateExisting))) {
-                    // If we modified drawables without removing them, we're done with this tile.
+                // If we update existing drawables, don't build new ones.
+                // But if the geometry has changed, we need to drop and re-build them anyway.
+                if (updateTile(renderPass, tileID, std::move(updateExisting)) && !geometryChanged) {
                     continue;
                 } else if (geometryChanged) {
-                    // If the geometry has changed, the drawable needs to be re-built
                     removeTile(renderPass, tileID);
                 }
             }

@@ -72,7 +72,6 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
         if (auto tileLayerGroup = renderTarget->getLayerGroup(0)) {
             auto newTweaker = std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties);
 
-            // propertiesAsUniforms isn't recalculated every update, so carry it over
             if (layerTweaker) {
                 newTweaker->setPropertiesAsUniforms(layerTweaker->getPropertiesAsUniforms());
             }
@@ -352,7 +351,12 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
-    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
+    std::optional<mbgl::unordered_set<StringIdentity>> propertiesAsUniforms;
+#if !defined(NDEBUG)
+    std::optional<mbgl::unordered_set<StringIdentity>> previousPropertiesAsUniforms;
+#endif
+
+    gfx::ShaderPtr heatmapShader;
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -388,10 +392,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             return interpolateBuffer;
         };
 
-        if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-        }
-
         const auto updatedCount = tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
@@ -412,14 +412,34 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        const auto heatmapShader = heatmapShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
-        if (!heatmapShader) {
-            continue;
+        if (!propertiesAsUniforms) {
+            propertiesAsUniforms.emplace();
         }
+#if !defined(NDEBUG)
+        else {
+            propertiesAsUniforms->clear();
+        }
+#endif
 
         auto heatmapVertexAttrs = context.createVertexAttributeArray();
         heatmapVertexAttrs->readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(
-            paintPropertyBinders, evaluated, propertiesAsUniforms);
+            paintPropertyBinders, evaluated, *propertiesAsUniforms);
+
+#if !defined(NDEBUG)
+        // We assume the properties are the same across tiles.
+        if (previousPropertiesAsUniforms) {
+            assert(*propertiesAsUniforms == previousPropertiesAsUniforms);
+        } else {
+            previousPropertiesAsUniforms = propertiesAsUniforms;
+        }
+#endif
+
+        if (!heatmapShader) {
+            heatmapShader = heatmapShaderGroup->getOrCreateShader(context, *propertiesAsUniforms);
+            if (!heatmapShader) {
+                continue;
+            }
+        }
 
         if (const auto& attr = heatmapVertexAttrs->add(idVertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
@@ -455,6 +475,10 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         }
+    }
+
+    if (layerTweaker && propertiesAsUniforms) {
+        layerTweaker->setPropertiesAsUniforms(*propertiesAsUniforms);
     }
 
     // Set up texture layer group

@@ -71,6 +71,7 @@ public:
     void clear() {
         dirty = true;
         v.clear();
+        buffer.reset();
     }
 
     /// Indicate that this shared index vector will no longer be updated.
