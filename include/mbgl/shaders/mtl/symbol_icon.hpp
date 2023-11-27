@@ -71,8 +71,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     const float distance_ratio = props.pitch_with_map ?
-        camera_to_anchor_distance / drawable.camera_to_center_distance :
-        drawable.camera_to_center_distance / camera_to_anchor_distance;
+        camera_to_anchor_distance / dynamic.camera_to_center_distance :
+        dynamic.camera_to_center_distance / camera_to_anchor_distance;
     const float perspective_ratio = clamp(
             0.5 + 0.5 * distance_ratio,
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
@@ -89,7 +89,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
-        symbol_rotation = atan2((b.y - a.y) / drawable.aspect_ratio, b.x - a.x);
+        symbol_rotation = atan2((b.y - a.y) / dynamic.aspect_ratio, b.x - a.x);
     }
 
     const float angle_sin = sin(segment_angle + symbol_rotation);

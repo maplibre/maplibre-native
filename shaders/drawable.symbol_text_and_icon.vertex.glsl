@@ -20,19 +20,15 @@ layout (std140) uniform SymbolDrawableUBO {
     highp vec2 u_texsize_icon;
 
     highp float u_gamma_scale;
-    highp float u_device_pixel_ratio;
-
-    highp float u_camera_to_center_distance;
-    highp float u_pitch;
     bool u_rotate_symbol;
-    highp float u_aspect_ratio;
     highp vec2 u_pad1;
 };
 
 layout (std140) uniform SymbolDynamicUBO {
     highp float u_fade_change;
-    highp float u_pad7;
-    highp vec2  u_pad8;
+    highp float u_camera_to_center_distance;
+    highp float u_device_pixel_ratio;
+    highp float u_aspect_ratio;
 };
 
 layout (std140) uniform SymbolDrawablePaintUBO {
