@@ -100,7 +100,8 @@ public:
     UniformBlockArray& operator=(const UniformBlockArray&);
 
     /// Do something with each block
-    void visit(const std::function<void(const StringIdentity, const UniformBlock&)>& f) {
+    template <typename Func /* void(const StringIdentity, const UniformBlock&) */>
+    void visit(Func f) {
         std::for_each(uniformBlockMap.begin(), uniformBlockMap.end(), [&](const auto& kv) {
             if (kv.second) {
                 f(kv.first, *kv.second);

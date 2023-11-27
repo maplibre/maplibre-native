@@ -151,21 +151,6 @@ void VertexAttributeArray::clear() {
     attrs.clear();
 }
 
-void VertexAttributeArray::resolve(const VertexAttributeArray& overrides, ResolveDelegate delegate) const {
-    for (auto& kv : attrs) {
-        delegate(kv.first, *kv.second, overrides.get(kv.first));
-    }
-    // For OpenGL, the shader attributes are established with reflection, and we have extra
-    // entries when we share attributes between, e.g., fill and fill-outline drawables.
-#if !defined(NDEBUG) && MLN_RENDERER_BACKEND_METAL
-    // Every override should match a defined attribute.
-    for (const auto& kv : overrides.attrs) {
-        const auto hit = attrs.find(kv.first);
-        assert(hit != attrs.end());
-    }
-#endif
-}
-
 const UniqueVertexAttribute& VertexAttributeArray::add(const StringIdentity id,
                                                        std::unique_ptr<VertexAttribute>&& attr) {
     const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
