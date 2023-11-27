@@ -79,7 +79,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         return builder;
     }();
 
-    // initialize polyline
+#if MLN_RENDER_BACKEND_METAL
+    // initialize polyline builder
     gfx::ShaderPtr polylineShader;
     const auto createPolylineShader = [&]() -> gfx::ShaderPtr {
         gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("LineShader");
@@ -106,6 +107,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
         return builder;
     };
+#endif
 
     // add or get the layer group for a debug type
     const auto addOrGetLayerGroupForType = [&debugLayerGroups, &context](
@@ -183,6 +185,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         }
     };
 
+#if MLN_RENDER_BACKEND_METAL
     // function to add polylines drawable
     const auto addPolylineDrawable = [&](TileLayerGroup* tileLayerGroup, const RenderTile& tile) {
         class PolylineDrawableTweaker : public gfx::DrawableTweaker {
@@ -229,7 +232,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 uniforms.createOrUpdate(idLinePropertiesUBOName, &linePropertiesUBO, parameters.context);
                 uniforms.createOrUpdate(idLineInterpolationUBOName, &lineInterpolationUBO, parameters.context);
 
-#if MLN_RENDER_BACKEND_METAL
                 static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
                 const auto expressionUBO = LayerTweaker::buildExpressionUBO(zoom, parameters.frameCount);
                 uniforms.createOrUpdate(idExpressionInputsUBOName, &expressionUBO, parameters.context);
@@ -251,7 +253,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                     0,
                     0};
                 uniforms.createOrUpdate(idLinePermutationUBOName, &permutationUBO, parameters.context);
-#endif // MLN_RENDER_BACKEND_METAL
             };
 
         private:
@@ -288,6 +289,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             tileLayerGroup->addDrawable(renderPass, tile.getOverscaledTileID(), std::move(drawable));
         }
     };
+#endif
 
     // Timestamps or Parse Status
     if (parameters.debugOptions & (MapDebugOptions::Timestamps | MapDebugOptions::ParseStatus)) {
@@ -373,7 +375,17 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                     0,
                                     0};
             if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO) && tile.getNeedsRendering()) {
+#if MLN_RENDER_BACKEND_METAL
                 addPolylineDrawable(tileLayerGroup, tile);
+#else
+                    addDrawable(tileLayerGroup,
+                                tileID,
+                                debugUBO,
+                                gfx::LineStrip(4.0f * parameters.pixelRatio),
+                                vertices,
+                                indexes,
+                                segments);
+#endif
             }
         }
     } else {
