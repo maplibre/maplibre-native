@@ -3,6 +3,7 @@
 #include <mbgl/renderer/layer_tweaker.hpp>
 
 #include <string_view>
+#include <unordered_map>
 
 namespace mbgl {
 
@@ -29,6 +30,9 @@ public:
     ~LineLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
+    
+    static std::unordered_map<UnwrappedTileID, mat4> matrixCache;
+    static int matrixCacheHits;
 
 protected:
     gfx::UniformBufferPtr linePropertiesBuffer;

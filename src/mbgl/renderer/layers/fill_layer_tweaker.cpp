@@ -24,6 +24,9 @@ namespace mbgl {
 
 using namespace style;
 
+std::unordered_map<UnwrappedTileID, mat4> FillLayerTweaker::matrixCache;
+int FillLayerTweaker::matrixCacheHits;
+
 static const StringIdentity idFillDrawableUBOName = stringIndexer().get("FillDrawableUBO");
 static const StringIdentity idFillDrawablePropsUBOName = stringIndexer().get("FillDrawablePropsUBO");
 static const StringIdentity idFillEvaluatedPropsUBOName = stringIndexer().get("FillEvaluatedPropsUBO");
@@ -240,7 +243,20 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
-        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+        
+        mat4 matrix;
+        if (translation == FillTranslate::defaultValue() && anchor == FillTranslateAnchor::defaultValue()) {
+            const auto it = matrixCache.find(tileID);
+            if (it == matrixCache.end()) {
+                matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+                matrixCache[tileID] = matrix;
+            } else {
+                matrix = it->second;
+                matrixCacheHits ++;
+            }
+        } else {
+            matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+        }
 
         // from FillPatternProgram::layoutUniformValues
         const auto tileRatio = 1.0f / tileID.pixelsToTileUnits(1.0f, intZoom);

@@ -4,6 +4,7 @@
 #include <mbgl/util/string_indexer.hpp>
 
 #include <string>
+#include <unordered_map>
 
 namespace mbgl {
 
@@ -25,6 +26,9 @@ public:
     static const StringIdentity idSymbolDrawablePaintUBOName;
     static const StringIdentity idSymbolDrawableTilePropsUBOName;
     static const StringIdentity idSymbolDrawableInterpolateUBOName;
+    
+    static std::unordered_map<UnwrappedTileID, mat4> matrixCache;
+    static int matrixCacheHits;
 
 private:
     gfx::UniformBufferPtr textPaintBuffer;

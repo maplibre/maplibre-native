@@ -25,6 +25,9 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
+std::unordered_map<UnwrappedTileID, mat4> LineLayerTweaker::matrixCache;
+int LineLayerTweaker::matrixCacheHits;
+
 static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
 static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
 static const StringIdentity idLineGradientUBOName = stringIndexer().get("LineGradientUBO");
@@ -129,8 +132,20 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         auto& uniforms = drawable.mutableUniformBuffers();
-
-        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+        
+        mat4 matrix;
+        if (translation == LineTranslate::defaultValue() && anchor == LineTranslateAnchor::defaultValue()) {
+            const auto it = matrixCache.find(tileID);
+            if (it == matrixCache.end()) {
+                matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+                matrixCache[tileID] = matrix;
+            } else {
+                matrix = it->second;
+                matrixCacheHits ++;
+            }
+        } else {
+            matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+        }
 
         const LineType type = static_cast<LineType>(drawable.getType());
 

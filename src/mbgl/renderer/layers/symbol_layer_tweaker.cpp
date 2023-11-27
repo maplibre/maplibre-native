@@ -64,6 +64,9 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 
 } // namespace
 
+std::unordered_map<UnwrappedTileID, mat4> SymbolLayerTweaker::matrixCache;
+int SymbolLayerTweaker::matrixCacheHits;
+
 const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");
 const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = stringIndexer().get("SymbolDynamicUBO");
 const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = stringIndexer().get("SymbolDrawablePaintUBO");
@@ -136,7 +139,20 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                    : evaluated.get<style::IconTranslateAnchor>();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
+        
+        mat4 matrix;
+        if (translate == TextTranslate::defaultValue() && anchor == TextTranslateAnchor::defaultValue()) {
+            const auto it = matrixCache.find(tileID);
+            if (it == matrixCache.end()) {
+                matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
+                matrixCache[tileID] = matrix;
+            } else {
+                matrix = it->second;
+                matrixCacheHits ++;
+            }
+        } else {
+            matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
+        }
 
         // from symbol_program, makeValues
         const auto currentZoom = static_cast<float>(zoom);
