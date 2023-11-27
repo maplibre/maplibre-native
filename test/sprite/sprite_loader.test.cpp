@@ -17,11 +17,11 @@ using namespace mbgl::style;
 
 class StubSpriteLoaderObserver : public SpriteLoaderObserver {
 public:
-    void onSpriteLoaded(std::optional<Sprite> sprite, std::vector<Immutable<style::Image::Impl>> images) override {
+    void onSpriteLoaded(std::optional<Sprite>, std::vector<Immutable<style::Image::Impl>> images) override {
         if (spriteLoaded) spriteLoaded(std::move(images));
     }
 
-    void onSpriteError(std::optional<Sprite> sprite, std::exception_ptr error) override {
+    void onSpriteError(std::optional<Sprite>, std::exception_ptr error) override {
         if (spriteError) spriteError(error);
     }
 

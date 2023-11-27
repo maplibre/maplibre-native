@@ -138,6 +138,16 @@ TEST(StyleParser, SpriteAsString) {
     ASSERT_EQ("default", result->at(0).id);
 }
 
+TEST(StyleParser, SpriteAsArrayEmpty) {
+    style::Parser parser;
+    parser.parse(R"({
+        "version": 8,
+        "sprite": []
+    })");
+    auto result = &parser.sprites;
+    ASSERT_EQ(0, result->size());
+}
+
 TEST(StyleParser, SpriteAsArraySingle) {
     style::Parser parser;
     parser.parse(R"({
