@@ -70,17 +70,17 @@ void Renderer::Impl::setObserver(RendererObserver* observer_) {
 void Renderer::Impl::render(const RenderTree& renderTree,
                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
     auto& context = backend.getContext();
-    
+
     std::stringstream ss;
     ss << "\nFill layer matrix cache hits: " << FillLayerTweaker::matrixCacheHits
        << "\nLine layer matrix cache hits: " << LineLayerTweaker::matrixCacheHits
        << "\nSymbol layer matrix cache hits: " << SymbolLayerTweaker::matrixCacheHits;
     Log::Debug(Event::General, ss.str());
-    
+
     FillLayerTweaker::matrixCacheHits = 0;
     LineLayerTweaker::matrixCacheHits = 0;
     SymbolLayerTweaker::matrixCacheHits = 0;
-    
+
     FillLayerTweaker::matrixCache.clear();
     LineLayerTweaker::matrixCache.clear();
     SymbolLayerTweaker::matrixCache.clear();

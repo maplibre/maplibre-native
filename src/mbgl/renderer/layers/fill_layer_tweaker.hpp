@@ -24,7 +24,7 @@ public:
     static const StringIdentity idFillTilePropsUBOName;
     static const StringIdentity idFillInterpolateUBOName;
     static const StringIdentity idFillOutlineInterpolateUBOName;
-    
+
     static std::unordered_map<UnwrappedTileID, mat4> matrixCache;
     static int matrixCacheHits;
 

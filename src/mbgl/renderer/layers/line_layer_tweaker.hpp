@@ -30,7 +30,7 @@ public:
     ~LineLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
-    
+
     static std::unordered_map<UnwrappedTileID, mat4> matrixCache;
     static int matrixCacheHits;
 

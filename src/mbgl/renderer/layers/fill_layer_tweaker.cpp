@@ -243,7 +243,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
-        
+
         mat4 matrix;
         if (translation == FillTranslate::defaultValue() && anchor == FillTranslateAnchor::defaultValue()) {
             const auto it = matrixCache.find(tileID);
@@ -252,7 +252,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 matrixCache[tileID] = matrix;
             } else {
                 matrix = it->second;
-                matrixCacheHits ++;
+                matrixCacheHits++;
             }
         } else {
             matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);

@@ -26,7 +26,7 @@ public:
     static const StringIdentity idSymbolDrawablePaintUBOName;
     static const StringIdentity idSymbolDrawableTilePropsUBOName;
     static const StringIdentity idSymbolDrawableInterpolateUBOName;
-    
+
     static std::unordered_map<UnwrappedTileID, mat4> matrixCache;
     static int matrixCacheHits;
 

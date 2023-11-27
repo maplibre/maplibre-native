@@ -139,7 +139,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                    : evaluated.get<style::IconTranslateAnchor>();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        
+
         mat4 matrix;
         if (translate == TextTranslate::defaultValue() && anchor == TextTranslateAnchor::defaultValue()) {
             const auto it = matrixCache.find(tileID);
@@ -148,7 +148,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                 matrixCache[tileID] = matrix;
             } else {
                 matrix = it->second;
-                matrixCacheHits ++;
+                matrixCacheHits++;
             }
         } else {
             matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);

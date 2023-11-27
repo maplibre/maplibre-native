@@ -132,7 +132,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         auto& uniforms = drawable.mutableUniformBuffers();
-        
+
         mat4 matrix;
         if (translation == LineTranslate::defaultValue() && anchor == LineTranslateAnchor::defaultValue()) {
             const auto it = matrixCache.find(tileID);
@@ -141,7 +141,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 matrixCache[tileID] = matrix;
             } else {
                 matrix = it->second;
-                matrixCacheHits ++;
+                matrixCacheHits++;
             }
         } else {
             matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
