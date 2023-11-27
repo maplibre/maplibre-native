@@ -24,6 +24,8 @@ FillBucket::~FillBucket() {
     sharedVertices->release();
 }
 
+// MLN_TRIANGULATE_FILL_OUTLINES is defined in fill_bucket.hpp
+#if MLN_TRIANGULATE_FILL_OUTLINES
 void FillBucket::addFeature(const GeometryTileFeature& feature,
                             const GeometryCollection& geometry,
                             const ImagePositions& patternPositions,
@@ -31,7 +33,15 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
                             std::size_t index,
                             const CanonicalTileID& canonical) {
     // generate buffers
-    gfx::generateFillAndOutineBuffers(geometry, vertices, lineSegments, lines, triangleSegments, triangles);
+    gfx::generateFillAndOutineBuffers(geometry,
+                                      vertices,
+                                      triangles,
+                                      triangleSegments,
+                                      lineVertices,
+                                      lineIndexes,
+                                      lineSegments,
+                                      basicLines,
+                                      basicLineSegments);
 
     for (auto& pair : paintPropertyBinders) {
         const auto it = patternDependencies.find(pair.first);
@@ -43,12 +53,33 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
         }
     }
 }
+#else  // MLN_TRIANGULATE_FILL_OUTLINES
+void FillBucket::addFeature(const GeometryTileFeature& feature,
+                            const GeometryCollection& geometry,
+                            const ImagePositions& patternPositions,
+                            const PatternLayerMap& patternDependencies,
+                            std::size_t index,
+                            const CanonicalTileID& canonical) {
+    // generate buffers
+    gfx::generateFillAndOutineBuffers(geometry, vertices, triangles, triangleSegments, basicLines, basicLineSegments);
+
+    for (auto& pair : paintPropertyBinders) {
+        const auto it = patternDependencies.find(pair.first);
+        if (it != patternDependencies.end()) {
+            pair.second.populateVertexVectors(
+                feature, vertices.elements(), index, patternPositions, it->second, canonical);
+        } else {
+            pair.second.populateVertexVectors(feature, vertices.elements(), index, patternPositions, {}, canonical);
+        }
+    }
+}
+#endif // MLN_TRIANGULATE_FILL_OUTLINES
 
 void FillBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
 #if MLN_LEGACY_RENDERER
     if (!uploaded) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
-        lineIndexBuffer = uploadPass.createIndexBuffer(std::move(lines));
+        lineIndexBuffer = uploadPass.createIndexBuffer(std::move(basicLines));
         triangleIndexBuffer = triangles.empty() ? std::optional<gfx::IndexBuffer>{}
                                                 : uploadPass.createIndexBuffer(std::move(triangles));
     }
@@ -62,7 +93,7 @@ void FillBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
 }
 
 bool FillBucket::hasData() const {
-    return !triangleSegments.empty() || !lineSegments.empty();
+    return !triangleSegments.empty() || !basicLineSegments.empty();
 }
 
 float FillBucket::getQueryRadius(const RenderLayer& layer) const {
