@@ -6,6 +6,7 @@
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/util/mat4.hpp>
+#include <mbgl/util/containers.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/layer_ubo.hpp>
@@ -66,7 +67,7 @@ shaders::ExpressionInputsUBO LayerTweaker::buildExpressionUBO(double zoom, uint6
 }
 #endif // MLN_RENDER_BACKEND_METAL
 
-void LayerTweaker::setPropertiesAsUniforms([[maybe_unused]] const std::unordered_set<StringIdentity>& props) {
+void LayerTweaker::setPropertiesAsUniforms([[maybe_unused]] const mbgl::unordered_set<StringIdentity>& props) {
 #if MLN_RENDER_BACKEND_METAL
     if (props != propertiesAsUniforms) {
         propertiesAsUniforms = props;
@@ -77,11 +78,11 @@ void LayerTweaker::setPropertiesAsUniforms([[maybe_unused]] const std::unordered
 
 #if !MLN_RENDER_BACKEND_METAL
 namespace {
-const std::unordered_set<StringIdentity> emptyIDSet;
+const mbgl::unordered_set<StringIdentity> emptyIDSet;
 }
 #endif
 
-const std::unordered_set<StringIdentity>& LayerTweaker::getPropertiesAsUniforms() const {
+const mbgl::unordered_set<StringIdentity>& LayerTweaker::getPropertiesAsUniforms() const {
 #if MLN_RENDER_BACKEND_METAL
     return propertiesAsUniforms;
 #else

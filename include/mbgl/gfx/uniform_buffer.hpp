@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/util/string_indexer.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <memory>
 #include <string>
@@ -48,7 +49,7 @@ protected:
 /// Stores a collection of uniform buffers by name
 class UniformBufferArray {
 public:
-    using UniformBufferMap = std::unordered_map<StringIdentity, std::shared_ptr<UniformBuffer>>;
+    using UniformBufferMap = mbgl::unordered_map<StringIdentity, std::shared_ptr<UniformBuffer>>;
 
     UniformBufferArray() = default;
     UniformBufferArray(UniformBufferArray&&);
