@@ -108,6 +108,12 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                          /*.device_pixel_ratio=*/parameters.pixelRatio,
                                          /*.aspect_ratio=*/state.getSize().aspectRatio()};
 
+    if (!dynamicBuffer) {
+        dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
+    } else {
+        dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
+    }
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
@@ -125,12 +131,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             const auto props = buildPaintUBO(false, evaluated);
             iconPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
             iconPropertiesUpdated = false;
-        }
-
-        if (!dynamicBuffer) {
-            dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
-        } else {
-            dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
         }
 
         // from RenderTile::translatedMatrix
