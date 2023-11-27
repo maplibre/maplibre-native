@@ -117,7 +117,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     }
 #endif
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         const auto shader = drawable.getShader();
         if (!drawable.getTileID() || !shader || !checkTweakDrawable(drawable)) {
             return;

@@ -326,7 +326,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
             orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
-                layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+                visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
                     for (const auto& tweaker : drawable.getTweakers()) {
                         tweaker->execute(drawable, parameters);
                     }
