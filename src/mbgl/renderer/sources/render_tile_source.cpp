@@ -84,7 +84,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     gfx::ShaderPtr polylineShader;
     const auto createPolylineShader = [&]() -> gfx::ShaderPtr {
         gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("LineShader");
-        const std::unordered_set<StringIdentity> propertiesAsUniforms{
+        const mbgl::unordered_set<StringIdentity> propertiesAsUniforms{
             stringIndexer().get("a_color"),
             stringIndexer().get("a_blur"),
             stringIndexer().get("a_opacity"),
