@@ -13,7 +13,7 @@ const style::LayerTypeInfo* BackgroundLayerFactory::getTypeInfo() const noexcept
 std::unique_ptr<style::Layer> BackgroundLayerFactory::createLayer(
     const std::string& id, const style::conversion::Convertible& value) noexcept {
     (void)value;
-    return std::unique_ptr<style::Layer>(new style::BackgroundLayer(id));
+    return std::unique_ptr<style::Layer>(new (std::nothrow) style::BackgroundLayer(id));
 }
 
 std::unique_ptr<RenderLayer> BackgroundLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {

@@ -78,6 +78,9 @@ Context::Context(RendererBackend& backend_)
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
         reset();
+#if !defined(NDEBUG)
+        Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
+#endif
         assert(stats.isZero());
     }
 }

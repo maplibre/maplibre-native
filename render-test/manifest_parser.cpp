@@ -74,7 +74,7 @@ std::vector<std::pair<std::string, std::string>> parseIgnores(const std::vector<
 
 // defaultExpectationPath: absolute path that constains the style.json file for testing
 // testId: Test case id that used for composing expectation path
-// expectatedPaths: absolute paths that constain possible expected.png/metrics.json files for result checking
+// expectatedPaths: absolute paths that contain possible expected.png/metrics.json files for result checking
 std::vector<mbgl::filesystem::path> getTestExpectations(const mbgl::filesystem::path& defaultExpectationPath,
                                                         const std::string& testId,
                                                         std::vector<mbgl::filesystem::path> expectatedPaths) {

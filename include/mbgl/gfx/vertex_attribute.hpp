@@ -81,6 +81,11 @@ public:
           stride(stride_),
           dataType(dataType_),
           items(count_) {}
+    VertexAttribute(int index_, AttributeDataType dataType_, std::size_t count_)
+        : index(index_),
+          stride(getStrideOf(dataType_)),
+          dataType(dataType_),
+          items(count_) {}
     VertexAttribute(const VertexAttribute& other)
         : index(other.index),
           stride(other.stride),
@@ -104,6 +109,8 @@ public:
 
 public:
     virtual ~VertexAttribute() = default;
+
+    static std::size_t getStrideOf(gfx::AttributeDataType);
 
     /// @brief Get the index of the vertex attribute
     int getIndex() const { return index; }
@@ -455,7 +462,7 @@ protected:
     const UniqueVertexAttribute& add(const StringIdentity id, std::unique_ptr<VertexAttribute>&&);
 
     virtual UniqueVertexAttribute create(int index, AttributeDataType dataType, std::size_t count) const {
-        return std::make_unique<VertexAttribute>(index, dataType, count, count);
+        return std::make_unique<VertexAttribute>(index, dataType, count);
     }
 
     virtual UniqueVertexAttribute copy(const gfx::VertexAttribute& attr) const {

@@ -5,7 +5,7 @@ namespace shaders {
 
 const std::array<AttributeInfo, 4> ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-    AttributeInfo{1, gfx::AttributeDataType::Float2, 1, "a_color"},
+    AttributeInfo{1, gfx::AttributeDataType::Float4, 1, "a_color"},
     AttributeInfo{2, gfx::AttributeDataType::Float2, 1, "a_opacity"},
 
     // This shader doesn't use it, but we need this so that the layer can assign the same
@@ -24,7 +24,7 @@ const std::array<TextureInfo, 0> ShaderSource<BuiltIn::FillShader, gfx::Backend:
 
 const std::array<AttributeInfo, 4> ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-    AttributeInfo{1, gfx::AttributeDataType::Float2, 1, "a_outline_color"},
+    AttributeInfo{1, gfx::AttributeDataType::Float4, 1, "a_outline_color"},
     AttributeInfo{2, gfx::AttributeDataType::Float2, 1, "a_opacity"},
 
     // See `a_outline_color` in FillShader

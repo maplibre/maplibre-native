@@ -15,6 +15,7 @@
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
+#include <mbgl/shaders/debug_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/string_indexer.hpp>
@@ -25,6 +26,7 @@
 namespace mbgl {
 
 using namespace style;
+using namespace shaders;
 
 void TileSourceRenderItem::upload(gfx::UploadPass& parameters) const {
     for (auto& tile : *renderTiles) {
@@ -47,15 +49,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         return;
     }
 
-    // Debug UBO definition
-    struct alignas(16) DebugUBO {
-        std::array<float, 4 * 4> matrix;
-        Color color;
-        float overlay_scale;
-        float pad1, pad2, pad3;
-    };
-    static_assert(sizeof(DebugUBO) % 16 == 0);
-
     // initialize
     auto& context = parameters.context;
     const auto renderPass = RenderPass::None;
@@ -75,7 +68,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     builder->setEnableDepth(false);
     builder->setColorMode(gfx::ColorMode::unblended());
     builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-    builder->setEnableStencil(false);
     builder->setVertexAttrNameId(idVertexAttribName);
 
     // add or get the layer group for a debug type

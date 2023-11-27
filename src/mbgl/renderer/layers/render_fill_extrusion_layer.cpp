@@ -347,6 +347,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
+    tileLayerGroup->setStencilTiles(renderTiles);
+
     std::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -402,24 +404,18 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         };
 
         // If we already have drawables for this tile, update them.
-        if (tileLayerGroup->getDrawableCount(drawPass, tileID) > 0) {
-            // Just update the drawables we already created
-            tileLayerGroup->visitDrawables(drawPass, tileID, [&](gfx::Drawable& drawable) {
-                if (drawable.getLayerTweaker() != layerTweaker) {
-                    // This drawable was produced on a previous style/bucket, and should not be updated.
-                    return;
-                }
+        auto updateExisting = [&](gfx::Drawable& drawable) {
+            if (drawable.getLayerTweaker() != layerTweaker) {
+                // This drawable was produced on a previous style/bucket, and should not be updated.
+                return false;
+            }
 
-                auto& uniforms = drawable.mutableUniformBuffers();
-                uniforms.createOrUpdate(
-                    FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName, &tilePropsUBO, context);
-                uniforms.createOrUpdate(
-                    FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName, &interpUBO, context);
-            });
-            continue;
-        }
-
-        if (!shaderGroup) {
+            auto& uniforms = drawable.mutableUniformBuffers();
+            uniforms.createOrUpdate(FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName, &tilePropsUBO, context);
+            uniforms.createOrUpdate(FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName, &interpUBO, context);
+            return true;
+        };
+        if (updateTile(drawPass, tileID, std::move(updateExisting))) {
             continue;
         }
 
@@ -448,7 +444,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             if (auto builder = context.createDrawableBuilder(layerPrefix + "depth")) {
                 builder->setShader(shader);
                 builder->setIs3D(true);
-                builder->setEnableStencil(false);
                 builder->setEnableColor(false);
                 builder->setRenderPass(drawPass);
                 builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
