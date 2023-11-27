@@ -878,22 +878,6 @@ int32_t RenderOrchestrator::maxLayerIndex() const {
     return -1;
 }
 
-void RenderOrchestrator::visitLayerGroups(std::function<void(LayerGroupBase&)> f) {
-    for (auto& pair : layerGroupsByLayerIndex) {
-        if (pair.second) {
-            f(*pair.second);
-        }
-    }
-}
-
-void RenderOrchestrator::visitLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
-    for (const auto& pair : layerGroupsByLayerIndex) {
-        if (pair.second) {
-            f(*pair.second);
-        }
-    }
-}
-
 void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
@@ -944,37 +928,9 @@ bool RenderOrchestrator::removeRenderTarget(const RenderTargetPtr& renderTarget)
     }
 }
 
-void RenderOrchestrator::visitRenderTargets(std::function<void(RenderTarget&)> f) {
-    for (auto& renderTarget : renderTargets) {
-        f(*renderTarget);
-    }
-}
-
-void RenderOrchestrator::visitRenderTargets(std::function<void(const RenderTarget&)> f) const {
-    for (const auto& renderTarget : renderTargets) {
-        f(*renderTarget);
-    }
-}
-
 void RenderOrchestrator::updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters) {
     for (const RenderItem& item : renderTree.getSourceRenderItems()) {
         item.updateDebugDrawables(debugLayerGroups, parameters);
-    }
-}
-
-void RenderOrchestrator::visitDebugLayerGroups(std::function<void(LayerGroupBase&)> f) {
-    for (auto& pair : debugLayerGroups) {
-        if (pair.second) {
-            f(*pair.second);
-        }
-    }
-}
-
-void RenderOrchestrator::visitDebugLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
-    for (const auto& pair : debugLayerGroups) {
-        if (pair.second) {
-            f(*pair.second);
-        }
     }
 }
 

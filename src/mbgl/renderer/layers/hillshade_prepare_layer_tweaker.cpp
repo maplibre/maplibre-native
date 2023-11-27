@@ -39,7 +39,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const Pai
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData() || !checkTweakDrawable(drawable)) {
             return;
         }
