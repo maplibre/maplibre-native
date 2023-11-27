@@ -77,7 +77,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
                                                                              sizeof(evaluatedPropsUBO));
     }
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
         }

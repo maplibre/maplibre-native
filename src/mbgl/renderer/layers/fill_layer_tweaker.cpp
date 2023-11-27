@@ -234,7 +234,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     const auto intZoom = parameters.state.getIntegerZoom();
     const auto pixelRatio = parameters.pixelRatio;
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
         }

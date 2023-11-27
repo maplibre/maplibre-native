@@ -106,7 +106,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         evaluatedPropsUniformBuffer = context.createUniformBuffer(&evaluatedPropsUBO, sizeof(evaluatedPropsUBO));
     }
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID() || !"Circles only render with tiles");
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;

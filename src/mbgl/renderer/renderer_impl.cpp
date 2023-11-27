@@ -344,7 +344,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
             orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
-                layerGroup.visitDrawables([&](gfx::Drawable& drawable) { drawable.draw(parameters); });
+                visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) { drawable.draw(parameters); });
             });
         }
     };

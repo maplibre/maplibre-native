@@ -53,8 +53,14 @@ public:
     const LayerGroupBasePtr& getLayerGroup(const int32_t layerIndex) const;
 
     /// Execute the given function for each contained layer group
-    void visitLayerGroups(std::function<void(LayerGroupBase&)>);
-    void visitLayerGroups(std::function<void(const LayerGroupBase&)>) const;
+    template <typename Func /* void(LayerGroupBase&) */>
+    void visitLayerGroups(Func f) {
+        for (auto& pair : layerGroupsByLayerIndex) {
+            if (pair.second) {
+                f(*pair.second);
+            }
+        }
+    }
 
     /// Upload the layer groups
     void upload(gfx::UploadPass& uploadPass);

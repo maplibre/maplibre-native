@@ -60,22 +60,6 @@ const LayerGroupBasePtr& RenderTarget::getLayerGroup(const int32_t layerIndex) c
     return (hit == layerGroupsByLayerIndex.end()) ? no_group : hit->second;
 }
 
-void RenderTarget::visitLayerGroups(std::function<void(LayerGroupBase&)> f) {
-    for (auto& pair : layerGroupsByLayerIndex) {
-        if (pair.second) {
-            f(*pair.second);
-        }
-    }
-}
-
-void RenderTarget::visitLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
-    for (const auto& pair : layerGroupsByLayerIndex) {
-        if (pair.second) {
-            f(*pair.second);
-        }
-    }
-}
-
 void RenderTarget::upload(gfx::UploadPass& uploadPass) {
     visitLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.upload(uploadPass); }));
 }
