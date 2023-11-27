@@ -111,7 +111,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
     }
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
         }
