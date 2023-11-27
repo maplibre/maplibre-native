@@ -147,6 +147,7 @@ cc_library(
         "//vendor:polylabel",
         "//vendor:protozero",
         "//vendor:unique_resource",
+        "//vendor:unordered_dense",
         "//vendor:vector-tile",
         "//vendor:wagyu",
     ] + select({
