@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <memory>
 #include <set>
+#include <unordered_set>
 
 namespace mbgl {
 namespace style {
@@ -170,6 +171,7 @@ void Parser::parseSprites(const JSValue& value) {
         auto sprite = Sprite("default", url);
         sprites.emplace_back(sprite);
     } else if (value.IsArray()) {
+        std::unordered_set<std::string> spriteIds;
         for (auto& spriteValue : value.GetArray()) {
             if (!spriteValue.IsObject()) {
                 Log::Warning(Event::ParseStyle, "sprite child must be an object");
@@ -183,6 +185,12 @@ void Parser::parseSprites(const JSValue& value) {
                 continue;
             }
 
+            if (spriteIds.find(sprite->id) != spriteIds.end()) {
+                Log::Warning(Event::ParseStyle, "sprite ids must be unique");
+                continue;
+            }
+            
+            spriteIds.insert(sprite->id);
             sprites.emplace_back(*sprite);
         }
     } else {

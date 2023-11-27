@@ -172,7 +172,11 @@ std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& id,
     images.reserve(properties.MemberCount());
     for (const auto& property : properties) {
         const std::string name = {property.name.GetString(), property.name.GetStringLength()};
-        const std::string completeName = (id != "default") ? id + ":" + name : name;
+        std::string completeName = name;
+        if (id != "default") {
+            completeName = id + ":";
+            completeName += name;
+        }
         const JSValue& value = property.value;
 
         if (value.IsObject()) {
