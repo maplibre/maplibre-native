@@ -7,6 +7,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/identity.hpp>
 #include <mbgl/util/traits.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -43,7 +44,7 @@ using Texture2DPtr = std::shared_ptr<Texture2D>;
 class Drawable {
 public:
     /// @brief Map from sampler location to texture info
-    using Textures = std::unordered_map<int32_t, gfx::Texture2DPtr>;
+    using Textures = mbgl::unordered_map<int32_t, gfx::Texture2DPtr>;
 
 protected:
     Drawable(std::string name);
