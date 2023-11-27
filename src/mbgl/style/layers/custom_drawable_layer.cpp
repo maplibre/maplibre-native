@@ -297,7 +297,7 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     SegmentVector<FillAttributes> triangleSegments;
 
     // generate fill geometry into buffers
-    gfx::generateFillBuffers(geometry, vertices, triangleSegments, triangles);
+    gfx::generateFillBuffers(geometry, vertices, triangles, triangleSegments);
 
     // add to builder
     static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");

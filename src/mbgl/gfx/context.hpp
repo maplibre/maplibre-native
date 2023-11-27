@@ -65,17 +65,17 @@ public:
     virtual ~Context() = default;
 
 public:
-    // Called at the end of a frame.
+    /// Called at the end of a frame.
     virtual void performCleanup() = 0;
 
-    // Called when the app receives a memory warning and before it goes to the background.
+    /// Called when the app receives a memory warning and before it goes to the background.
     virtual void reduceMemoryUsage() = 0;
 
 public:
     virtual std::unique_ptr<OffscreenTexture> createOffscreenTexture(Size, TextureChannelDataType) = 0;
 
 public:
-    // Creates an empty texture with the specified dimensions.
+    /// Creates an empty texture with the specified dimensions.
     Texture createTexture(const Size size,
                           TexturePixelType format = TexturePixelType::RGBA,
                           TextureChannelDataType type = TextureChannelDataType::UnsignedByte) {
