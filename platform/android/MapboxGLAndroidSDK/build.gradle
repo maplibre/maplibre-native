@@ -127,6 +127,11 @@ android {
         disable 'MissingTranslation', 'TypographyQuotes', 'ObsoleteLintCustomCheck', 'MissingPermission', 'WrongThreadInterprocedural'
         warningsAsErrors false
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
 }
 
 licenseReport {

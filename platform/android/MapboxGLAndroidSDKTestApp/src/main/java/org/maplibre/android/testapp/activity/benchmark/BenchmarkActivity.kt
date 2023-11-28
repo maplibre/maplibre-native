@@ -41,6 +41,7 @@ class FpsStore {
     }
 }
 
+@Serializable
 data class Result(val average: Double, val low1p: Double)
 
 @Serializable
