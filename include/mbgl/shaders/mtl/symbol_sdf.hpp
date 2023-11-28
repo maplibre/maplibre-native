@@ -88,8 +88,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // which makes labels in the distance larger relative to the features around
     // them. We counteract part of that effect by dividing by the perspective ratio.
     const float distance_ratio = props.pitch_with_map ?
-        camera_to_anchor_distance / drawable.camera_to_center_distance :
-        drawable.camera_to_center_distance / camera_to_anchor_distance;
+        camera_to_anchor_distance / dynamic.camera_to_center_distance :
+        dynamic.camera_to_center_distance / camera_to_anchor_distance;
     const float perspective_ratio = clamp(
         0.5 + 0.5 * distance_ratio,
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
@@ -109,7 +109,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
 
-        symbol_rotation = atan2((b.y - a.y) / drawable.aspect_ratio, b.x - a.x);
+        symbol_rotation = atan2((b.y - a.y) / dynamic.aspect_ratio, b.x - a.x);
     }
 
     const float angle_sin = sin(segment_angle + symbol_rotation);
@@ -140,6 +140,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const SymbolDrawableUBO& drawable [[buffer(10)]],
+                            device const SymbolDynamicUBO& dynamic [[buffer(11)]],
                             device const SymbolDrawableTilePropsUBO& props [[buffer(13)]],
                             device const SymbolPermutationUBO& permutation [[buffer(15)]],
                             texture2d<float, access::sample> image [[texture(0)]],
@@ -148,7 +149,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(1.0);
     }
 
-    const float EDGE_GAMMA = 0.105 / drawable.device_pixel_ratio;
+    const float EDGE_GAMMA = 0.105 / dynamic.device_pixel_ratio;
 
     const float2 tex = in.data0.xy;
     const float gamma_scale = in.data1.x;

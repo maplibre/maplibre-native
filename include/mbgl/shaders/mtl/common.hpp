@@ -228,20 +228,16 @@ struct alignas(16) SymbolDrawableUBO {
     float2 texsize_icon;
 
     float gamma_scale;
-    float device_pixel_ratio;
-
-    float camera_to_center_distance;
-    float pitch;
     /*bool*/ int rotate_symbol;
-    float aspect_ratio;
     float2 pad;
 };
-static_assert(sizeof(SymbolDrawableUBO) == 15 * 16, "unexpected padding");
+static_assert(sizeof(SymbolDrawableUBO) == 14 * 16, "unexpected padding");
 
 struct alignas(16) SymbolDynamicUBO {
     float fade_change;
-    float pad1;
-    float2 pad2;
+    float camera_to_center_distance;
+    float device_pixel_ratio;
+    float aspect_ratio;
 };
 static_assert(sizeof(SymbolDynamicUBO) == 16, "unexpected padding");
 
