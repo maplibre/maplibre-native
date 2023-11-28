@@ -66,6 +66,8 @@ void DrawableBuilder::flush(gfx::Context& context) {
 
         if (vertexAttrs) {
             draw->setVertexAttributes(vertexAttrs);
+        } else {
+            draw->setVertexAttributes(context.createVertexAttributeArray());
         }
 
         init();
