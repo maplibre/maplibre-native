@@ -805,6 +805,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/util/color.hpp",
     "include/mbgl/util/compression.hpp",
     "include/mbgl/util/constants.hpp",
+    "include/mbgl/util/containers.hpp",
     "include/mbgl/util/convert.hpp",
     "include/mbgl/util/default_style.hpp",
     "include/mbgl/util/enum.hpp",

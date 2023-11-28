@@ -3,6 +3,7 @@
 #include <mbgl/gfx/gfx_types.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/util/string_indexer.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <algorithm>
 #include <array>
@@ -10,8 +11,6 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 #include <variant>
 #include <vector>
 
@@ -281,7 +280,7 @@ protected:
 /// Stores a collection of vertex attributes by name
 class VertexAttributeArray {
 public:
-    using AttributeMap = std::unordered_map<StringIdentity, std::unique_ptr<VertexAttribute>>;
+    using AttributeMap = mbgl::unordered_map<StringIdentity, std::unique_ptr<VertexAttribute>>;
 
     VertexAttributeArray() = default;
     VertexAttributeArray(VertexAttributeArray&&);
@@ -340,7 +339,8 @@ public:
     void clear();
 
     /// Do something with each attribute
-    void visitAttributes(const std::function<void(const StringIdentity, VertexAttribute&)>& f) {
+    template <typename Func /* void(StringIdentity, VertexAttribute&) */>
+    void visitAttributes(Func f) {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
             if (kv.second) {
                 f(kv.first, *kv.second);
@@ -348,19 +348,22 @@ public:
         });
     }
 
-    /// Do something with each attribute
-    void visitAttributes(const std::function<void(const StringIdentity, const VertexAttribute&)>& f) const {
-        std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
-            if (kv.second) {
-                f(kv.first, *kv.second);
-            }
-        });
-    }
-
-    using ResolveDelegate =
-        std::function<void(const StringIdentity, VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
     /// Call the provided delegate with each value, providing the override if one exists.
-    void resolve(const VertexAttributeArray& overrides, ResolveDelegate) const;
+    template <typename Func /* void(const StringIdentity, VertexAttribute&, const std::unique_ptr<VertexAttribute>&) */>
+    void resolve(const VertexAttributeArray& overrides, Func delegate) const {
+        for (auto& kv : attrs) {
+            delegate(kv.first, *kv.second, overrides.get(kv.first));
+        }
+        // For OpenGL, the shader attributes are established with reflection, and we have extra
+        // entries when we share attributes between, e.g., fill and fill-outline drawables.
+#if !defined(NDEBUG) && MLN_RENDERER_BACKEND_METAL
+        // Every override should match a defined attribute.
+        for (const auto& kv : overrides.attrs) {
+            const auto hit = attrs.find(kv.first);
+            assert(hit != attrs.end());
+        }
+#endif
+    }
 
     VertexAttributeArray& operator=(VertexAttributeArray&&);
     VertexAttributeArray& operator=(const VertexAttributeArray&);
@@ -390,7 +393,7 @@ public:
     template <typename... DataDrivenPaintProperty, typename Binders, typename Evaluated>
     void readDataDrivenPaintProperties(const Binders& binders,
                                        const Evaluated& evaluated,
-                                       std::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                                       mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
         // Read each property in the type pack
         propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
         (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
@@ -409,7 +412,7 @@ protected:
     template <typename DataDrivenPaintProperty, typename Binder>
     void readDataDrivenPaintProperty(const Binder& binder,
                                      const bool isConstant,
-                                     std::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                                     mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
         if (!binder) {
             return;
         }

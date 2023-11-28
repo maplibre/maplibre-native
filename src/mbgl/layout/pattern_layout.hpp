@@ -7,6 +7,7 @@
 #include <mbgl/style/expression/image.hpp>
 #include <mbgl/style/properties.hpp>
 #include <mbgl/style/layer_properties.hpp>
+#include <mbgl/util/containers.hpp>
 
 namespace mbgl {
 
@@ -171,7 +172,7 @@ public:
 
     void createBucket(const ImagePositions& patternPositions,
                       std::unique_ptr<FeatureIndex>& featureIndex,
-                      std::unordered_map<std::string, LayerRenderData>& renderData,
+                      mbgl::unordered_map<std::string, LayerRenderData>& renderData,
                       const bool /*firstLoad*/,
                       const bool /*showCollisionBoxes*/,
                       const CanonicalTileID& canonical) override {

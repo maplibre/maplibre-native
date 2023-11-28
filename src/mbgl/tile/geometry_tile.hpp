@@ -8,6 +8,7 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/tile/geometry_tile_worker.hpp>
 #include <mbgl/util/feature.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <atomic>
 #include <memory>
@@ -65,14 +66,14 @@ public:
 
     class LayoutResult {
     public:
-        std::unordered_map<std::string, LayerRenderData> layerRenderData;
+        mbgl::unordered_map<std::string, LayerRenderData> layerRenderData;
         std::shared_ptr<FeatureIndex> featureIndex;
         std::optional<AlphaImage> glyphAtlasImage;
         ImageAtlas iconAtlas;
 
         LayerRenderData* getLayerRenderData(const style::Layer::Impl&);
 
-        LayoutResult(std::unordered_map<std::string, LayerRenderData> renderData_,
+        LayoutResult(mbgl::unordered_map<std::string, LayerRenderData> renderData_,
                      std::unique_ptr<FeatureIndex> featureIndex_,
                      std::optional<AlphaImage> glyphAtlasImage_,
                      ImageAtlas iconAtlas_)

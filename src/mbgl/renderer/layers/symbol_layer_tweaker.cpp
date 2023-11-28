@@ -101,11 +101,20 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         propertiesUpdated = false;
     }
 
-    const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
-                                         /*.pad1=*/0,
-                                         /*.pad2=*/{0, 0}};
+    const auto camDist = state.getCameraToCenterDistance();
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
+                                         /*.camera_to_center_distance=*/camDist,
+                                         /*.device_pixel_ratio=*/parameters.pixelRatio,
+                                         /*.aspect_ratio=*/state.getSize().aspectRatio()};
+
+    if (!dynamicBuffer) {
+        dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
+    } else {
+        dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
+    }
+
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
         }
@@ -122,12 +131,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             const auto props = buildPaintUBO(false, evaluated);
             iconPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
             iconPropertiesUpdated = false;
-        }
-
-        if (!dynamicBuffer) {
-            dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
-        } else {
-            dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
         }
 
         // from RenderTile::translatedMatrix
@@ -153,7 +156,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                 matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
         const mat4 glCoordMatrix = getGlCoordMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
 
-        const auto camDist = state.getCameraToCenterDistance();
         const float gammaScale = (symbolData.pitchAlignment == AlignmentType::Map
                                       ? static_cast<float>(std::cos(state.getPitch())) * camDist
                                       : 1.0f);
@@ -172,12 +174,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.texsize_icon=*/toArray(getTexSize(drawable, idTexIconUniformName)),
 
             /*.gamma_scale=*/gammaScale,
-            /*.device_pixel_ratio=*/parameters.pixelRatio,
-
-            /*.camera_to_center_distance=*/camDist,
-            /*.pitch=*/static_cast<float>(state.getPitch()),
             /*.rotate_symbol=*/rotateInShader,
-            /*.aspect_ratio=*/state.getSize().aspectRatio(),
             /*.pad=*/{0},
         };
 
