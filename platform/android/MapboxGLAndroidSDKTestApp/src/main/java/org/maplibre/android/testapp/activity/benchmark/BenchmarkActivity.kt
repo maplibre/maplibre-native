@@ -5,18 +5,19 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import okhttp3.MediaType
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.log.Logger
 import org.maplibre.android.maps.*
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.testapp.R
-import java.io.IOException
 import java.util.*
 
 class FpsStore {
@@ -42,6 +43,7 @@ class FpsStore {
 
 data class Result(val average: Double, val low1p: Double)
 
+@Serializable
 data class Results(
     var map: MutableMap<String, List<Result>> = mutableMapOf<String, List<Result>>().withDefault { emptyList() })
     {
@@ -74,16 +76,9 @@ class BenchmarkActivity : AppCompatActivity() {
     //    <item>https://zelonewolf.github.io/openstreetmap-americana/style.json</item>
     // </array>
     // ```
-    private var styles = listOf(Pair("Demotiles", "https://demotiles.maplibre.org/style.json"))
-
     @SuppressLint("DiscouragedApi")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_benchmark)
-        handler = Handler(mainLooper)
-        setupToolbar()
-        setupMapView(savedInstanceState)
-
+    private var styles: List<Pair<String, String>> = run {
+        val default = listOf(Pair("Demotiles", "https://demotiles.maplibre.org/style.json"))
         val styleNames = resources.getStringArray(applicationContext.resources.getIdentifier(
             "benchmark_style_names",
             "array",
@@ -92,20 +87,21 @@ class BenchmarkActivity : AppCompatActivity() {
             "benchmark_style_urls",
             "array",
             applicationContext.packageName))
-        if (styleNames.isNotEmpty() && styleNames.size == styleURLs.size) {
-            styles = styleNames.zip(styleURLs)
-        }
 
-        val client = OkHttpClient()
-        val request = Request.Builder()
-            .url("https://5km2laofzfdyfbglohgpajn43m0yafuf.lambda-url.us-east-1.on.aws")
-            .post("{ \"hello\": 12345 }".toRequestBody("application/json".toMediaType()))
-            .build()
+        if (styleNames.isNotEmpty() && styleNames.size == styleURLs.size)
+            styleNames.zip(styleURLs)
+        else
+            default
+    }
 
-        println("Request")
-        val response = client.newCall(request).execute()
-        println("Request ${response.code}")
-        println("Request ${response.body!!.string()}")
+    @SuppressLint("DiscouragedApi")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_benchmark)
+        handler = Handler(mainLooper)
+        setupToolbar()
+        sendResults()
+        setupMapView(savedInstanceState)
     }
 
     private fun setupToolbar() {
@@ -158,7 +154,7 @@ class BenchmarkActivity : AppCompatActivity() {
                             maplibreMap.setStyle(styles[0].second)
                             flyTo(maplibreMap, 0, 0, zoom)
                         } else {
-                            finish()
+                            benchmarkDone()
                         }
                         return
                     }
@@ -212,6 +208,32 @@ class BenchmarkActivity : AppCompatActivity() {
     override fun onLowMemory() {
         super.onLowMemory()
         mapView.onLowMemory()
+    }
+
+    @SuppressLint("DiscouragedApi")
+    fun sendResults() {
+        val client = OkHttpClient()
+
+        val api = resources.getString(applicationContext.resources.getIdentifier(
+            "benchmark_results_api",
+            "string",
+            applicationContext.packageName))
+        if (api.isEmpty()) {
+            Logger.i("BenchMarkActivity", "No benchmark_results_api set in developer-config.xml")
+            return
+        }
+        val request = Request.Builder()
+            .url(api)
+            .post(
+                Json.encodeToString(results).toRequestBody("application/json".toMediaType()))
+            .build()
+        client.newCall(request).execute()
+    }
+
+    fun benchmarkDone() {
+        sendResults()
+        finish()
+
     }
 
     companion object {
