@@ -196,9 +196,9 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
                                        std::string(filePath));
                 return std::nullopt;
             }
-            const auto expectationPath = getValidPath(manifest.manifestPath, value.GetString());
-            if (!expectationPath.empty()) {
-                expectationPaths.emplace_back(expectationPath);
+            expectationPaths.emplace_back(getValidPath(manifest.manifestPath, value.GetString()));
+            if (expectationPaths.back().empty()) {
+                return std::nullopt;
             }
         }
     }
