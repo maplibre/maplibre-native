@@ -5,7 +5,6 @@ filegroup(
             "integration/**",
             "tests/**",
             "linux-gcc8-release/**",
-            "expectations/platform-all/**",
             "ignores/**",
             "ios-render-test-runner/**",  # iOS only
             "expectations/platform-ios/**",  # iOS only
