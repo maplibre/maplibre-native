@@ -1,6 +1,7 @@
 plugins {
     id 'org.jmailen.kotlinter'
     id 'com.android.application'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.9.21'
 }
 
 apply from: "${rootDir}/gradle/native-build.gradle"
@@ -19,8 +20,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     nativeBuild(["example-custom-layer"])
@@ -74,8 +75,6 @@ android {
 }
 
 dependencies {
-    implementation dependenciesList.kotlinLib
-
     implementation project(':MapboxGLAndroidSDK')
     implementation dependenciesList.mapboxJavaTurf
 
@@ -83,6 +82,7 @@ dependencies {
     implementation dependenciesList.supportRecyclerView
     implementation dependenciesList.supportDesign
     implementation dependenciesList.supportConstraintLayout
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0'
 
     implementation dependenciesList.multidex
 
@@ -101,6 +101,7 @@ dependencies {
     androidTestImplementation dependenciesList.testUiAutomator
     androidTestImplementation dependenciesList.appCenter
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+
 }
 
 apply from: "${rootDir}/gradle/gradle-make.gradle"

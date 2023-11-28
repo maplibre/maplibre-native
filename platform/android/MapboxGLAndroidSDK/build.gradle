@@ -26,7 +26,6 @@ dependencies {
     testImplementation dependenciesList.mockito
     testImplementation dependenciesList.mockk
     testImplementation dependenciesList.robolectric
-    testImplementation dependenciesList.kotlinLib
     testImplementation dependenciesList.commonsIO
     testImplementation dependenciesList.assertjcore
 
