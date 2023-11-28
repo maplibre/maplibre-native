@@ -260,7 +260,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         };
 
         GeometryCoordinates coords{{0, 0}, {util::EXTENT, 0}, {util::EXTENT, util::EXTENT}, {0, util::EXTENT}, {0, 0}};
-        gfx::PolylineGeneratorOptions options;
+        gfx::PolylineGenerator::Options options;
         options.type = FeatureType::Polygon;
 
         if (!polylineShader) polylineShader = createPolylineShader();
