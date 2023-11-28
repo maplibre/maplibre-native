@@ -71,7 +71,9 @@ public:
     void clear() {
         dirty = true;
         v.clear();
+#if MLN_DRAWABLE_RENDERER
         buffer.reset();
+#endif // MLN_DRAWABLE_RENDERER
     }
 
     /// Indicate that this shared index vector will no longer be updated.

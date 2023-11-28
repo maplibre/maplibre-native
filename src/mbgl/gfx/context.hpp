@@ -89,8 +89,6 @@ public:
 
     virtual std::unique_ptr<CommandEncoder> createCommandEncoder() = 0;
 
-    virtual gfx::VertexAttributeArrayPtr createVertexAttributeArray() const = 0;
-
     gfx::RenderingStats& renderingStats() { return stats; }
     const gfx::RenderingStats& renderingStats() const { return stats; }
 
@@ -105,6 +103,9 @@ public:
     virtual void setDirtyState() = 0;
 
 #if MLN_DRAWABLE_RENDERER
+    /// Create a new vertex attribute array
+    virtual gfx::VertexAttributeArrayPtr createVertexAttributeArray() const = 0;
+
     /// Create a new drawable builder
     virtual UniqueDrawableBuilder createDrawableBuilder(std::string name) = 0;
 

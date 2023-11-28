@@ -282,7 +282,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         auto tweaker = std::make_shared<PolylineDrawableTweaker>(linePropertiesUBO);
 
         // finish
-        polylineBuilder->flush();
+        polylineBuilder->flush(context);
         for (auto& drawable : polylineBuilder->clearDrawables()) {
             drawable->setTileID(tile.getOverscaledTileID());
             drawable->addTweaker(tweaker);
