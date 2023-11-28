@@ -179,6 +179,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Tweakers are run in the upload pass so they can set up uniforms.
         orchestrator.visitLayerGroups(
             [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
+        orchestrator.visitDebugLayerGroups(
+            [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
 
         // Update the debug layer groups
         orchestrator.updateDebugLayerGroups(renderTree, parameters);
@@ -344,7 +346,12 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
             orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
-                visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) { drawable.draw(parameters); });
+                visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
+                    for (const auto& tweaker : drawable.getTweakers()) {
+                        tweaker->execute(drawable, parameters);
+                    }
+                    drawable.draw(parameters);
+                });
             });
         }
     };
