@@ -25,7 +25,7 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-std::unordered_map<UnwrappedTileID, mat4> LineLayerTweaker::matrixCache;
+mbgl::unordered_map<UnwrappedTileID, mat4> LineLayerTweaker::matrixCache;
 int LineLayerTweaker::matrixCacheHits;
 
 static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");

@@ -64,7 +64,7 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 
 } // namespace
 
-std::unordered_map<UnwrappedTileID, mat4> SymbolLayerTweaker::matrixCache;
+mbgl::unordered_map<UnwrappedTileID, mat4> SymbolLayerTweaker::matrixCache;
 int SymbolLayerTweaker::matrixCacheHits;
 
 const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");

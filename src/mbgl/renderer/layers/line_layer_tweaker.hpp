@@ -31,7 +31,7 @@ public:
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
-    static std::unordered_map<UnwrappedTileID, mat4> matrixCache;
+    static mbgl::unordered_map<UnwrappedTileID, mat4> matrixCache;
     static int matrixCacheHits;
 
 protected:

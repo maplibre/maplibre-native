@@ -24,7 +24,7 @@ namespace mbgl {
 
 using namespace style;
 
-std::unordered_map<UnwrappedTileID, mat4> FillLayerTweaker::matrixCache;
+mbgl::unordered_map<UnwrappedTileID, mat4> FillLayerTweaker::matrixCache;
 int FillLayerTweaker::matrixCacheHits;
 
 static const StringIdentity idFillDrawableUBOName = stringIndexer().get("FillDrawableUBO");

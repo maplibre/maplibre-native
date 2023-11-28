@@ -27,7 +27,7 @@ public:
     static const StringIdentity idSymbolDrawableTilePropsUBOName;
     static const StringIdentity idSymbolDrawableInterpolateUBOName;
 
-    static std::unordered_map<UnwrappedTileID, mat4> matrixCache;
+    static mbgl::unordered_map<UnwrappedTileID, mat4> matrixCache;
     static int matrixCacheHits;
 
 private:
