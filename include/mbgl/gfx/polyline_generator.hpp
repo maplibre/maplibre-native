@@ -14,7 +14,6 @@
 #include <cstddef>
 #include <memory>
 #include <vector>
-#include <functional>
 #include <optional>
 
 namespace mbgl {
@@ -718,9 +717,6 @@ void PolylineGenerator::generate(Vertices& vertices,
     segment.indexLength += triangleStore.size() * 3;
 }
 
-namespace PolylineGenerator {
-namespace detail {
-
 template <class Vertices, class LayoutVertexFunc, class TriangleElement, class Distances>
 void PolylineGenerator::detail::addCurrentVertex(const std::size_t index,
                                                  Vertices& vertices,
@@ -829,9 +825,6 @@ void PolylineGenerator::detail::addPieSliceVertex([[maybe_unused]] const std::si
         e1 = e3;
     }
 };
-
-} // namespace detail
-} // namespace PolylineGenerator
 
 } // namespace gfx
 } // namespace mbgl
