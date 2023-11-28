@@ -8,11 +8,11 @@
     "ignore_paths": [
         "ignores/platform-all.json",
         "ignores/platform-macos.json",
-        "ignores/platform-ios.json"
+        "ignores/platform-ios.json",
+        "ignores/platform-ios-metal.json"
     ],
     "metric_path": "ios-render-test-runner",
     "probes": [
-        "probeGFX",
         "probeNetwork"
     ]
 }
