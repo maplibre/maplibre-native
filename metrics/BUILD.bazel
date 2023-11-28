@@ -11,7 +11,10 @@ filegroup(
             "expectations/platform-ios/**",  # iOS only
         ],
         allow_empty = False,
-    ) + [
+    )  + select({
+        "//:metal_renderer": glob(["expectations/platform-ios-metal/**"]), # iOS Metal only
+        "//conditions:default": [],
+    }) + [
         "cache-metrics.db",
         "cache-style.db",
         "ios-render-test-runner-metrics.json",  # iOS only
