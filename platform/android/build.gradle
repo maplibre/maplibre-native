@@ -7,7 +7,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.0.2'
+        classpath 'com.android.tools.build:gradle:8.1.4'
         classpath dependenciesList.licensesPlugin
         classpath dependenciesList.kotlinPlugin
         // classpath dependenciesList.jacocoPlugin
