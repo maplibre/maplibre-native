@@ -47,13 +47,11 @@ public:
     gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
 
-    VertexAttributeArray vertexAttrs;
-
     void addPolyline(gfx::DrawableBuilder& builder,
                      const GeometryCoordinates& coordinates,
                      const gfx::PolylineGeneratorOptions& options);
 
-    void setupForPolylines(gfx::DrawableBuilder& builder);
+    void setupForPolylines(gfx::Context&, gfx::DrawableBuilder&);
 
     bool checkAndSetMode(Mode);
 

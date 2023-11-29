@@ -1,0 +1,14 @@
+{
+    "base_test_path": "tests",
+    "cache_path": "cache-metrics.db",
+    "expectation_paths": [
+        "expectations/platform-ios",
+        "expectations/platform-ios-metal"
+    ],
+    "ignore_paths": [
+        "ignores/platform-all.json",
+        "ignores/platform-macos.json",
+        "ignores/platform-ios.json"
+    ],
+    "metric_path": "ios-render-test-runner"
+}

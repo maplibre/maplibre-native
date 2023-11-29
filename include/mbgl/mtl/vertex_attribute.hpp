@@ -18,16 +18,12 @@ private:
     friend VertexAttributeArray;
     VertexAttribute(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
         : gfx::VertexAttribute(index_, dataType_, count_) {}
-    VertexAttribute(const VertexAttribute& other)
-        : gfx::VertexAttribute(other) {}
+    VertexAttribute(const VertexAttribute& other) = delete;
     VertexAttribute(VertexAttribute&& other)
         : gfx::VertexAttribute(std::move(other)) {}
 
 public:
     ~VertexAttribute() override = default;
-
-    /// Get the Metal buffer, creating it if necessary
-    // const gfx::UniqueVertexBufferResource& getBuffer(UploadPass&, const gfx::BufferUsageType);
 
     static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
                                                             UploadPass&,
@@ -45,16 +41,7 @@ public:
         gfx::VertexAttributeArray::operator=(std::move(other));
         return *this;
     }
-    VertexAttributeArray& operator=(const VertexAttributeArray& other) {
-        gfx::VertexAttributeArray::operator=(other);
-        return *this;
-    }
-
-    gfx::UniqueVertexAttributeArray clone() const override {
-        auto newAttrs = std::make_unique<VertexAttributeArray>();
-        newAttrs->copy(*this);
-        return newAttrs;
-    }
+    VertexAttributeArray& operator=(const VertexAttributeArray& other) = delete;
 
     /// Indicates whether any values have changed
     bool isDirty() const override;
@@ -62,12 +49,6 @@ public:
 private:
     gfx::UniqueVertexAttribute create(int index, gfx::AttributeDataType dataType, std::size_t count) const override {
         return gfx::UniqueVertexAttribute(new VertexAttribute(index, dataType, count));
-    }
-
-    using gfx::VertexAttributeArray::copy;
-
-    gfx::UniqueVertexAttribute copy(const gfx::VertexAttribute& attr) const override {
-        return gfx::UniqueVertexAttribute(new VertexAttribute(static_cast<const VertexAttribute&>(attr)));
     }
 };
 

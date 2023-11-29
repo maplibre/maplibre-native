@@ -366,23 +366,11 @@ public:
     }
 
     VertexAttributeArray& operator=(VertexAttributeArray&&);
-    VertexAttributeArray& operator=(const VertexAttributeArray&);
+    VertexAttributeArray& operator=(const VertexAttributeArray&) = delete;
 
     /// Clone the collection
-    virtual UniqueVertexAttributeArray clone() const {
-        auto newAttrs = std::make_unique<VertexAttributeArray>();
-        newAttrs->copy(*this);
-        return newAttrs;
-    }
 
     /// Copy another collection into this one
-    virtual void copy(const VertexAttributeArray& other) {
-        for (const auto& kv : other.attrs) {
-            if (kv.second) {
-                attrs.insert(std::make_pair(kv.first, copy(*kv.second)));
-            }
-        }
-    }
 
     /// Specialized DataDrivenPaintProperty reader
     /// @param binders Property binders for the target shader
