@@ -1,57 +1,54 @@
 package org.maplibre.android.testapp.activity.benchmark
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.putJsonObject
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.maplibre.android.BuildConfig.GIT_REVISION
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.log.Logger
 import org.maplibre.android.maps.*
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
+import org.maplibre.android.testapp.BuildConfig
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.utils.FpsStore
+import org.maplibre.android.testapp.utils.BenchmarkResults
+
 import java.util.*
 
-class FpsStore {
-    private val fpsValues = ArrayList<Double>(100000)
-
-    fun add(fps: Double) {
-        fpsValues.add(fps)
-    }
-
-    fun reset() {
-        fpsValues.clear()
-    }
-
-    fun low1p(): Double {
-        fpsValues.sort()
-        return fpsValues.slice(0..(fpsValues.size / 100)).average()
-    }
-
-    fun average(): Double {
-        return fpsValues.average()
-    }
-}
-
-@Serializable
-data class Result(val average: Double, val low1p: Double)
-
-@Serializable
-data class Results(
-    var map: MutableMap<String, List<Result>> = mutableMapOf<String, List<Result>>().withDefault { emptyList() })
-    {
-
-    fun addResult(styleName: String, fpsStore: FpsStore) {
-        val newResults = map.getValue(styleName).plus(Result(fpsStore.average(), fpsStore.low1p()))
-        map[styleName] = newResults
+/**
+ * Prepares JSON payload that is sent to the API that collects benchmark results.
+ * See https://github.com/maplibre/ci-runners
+ */
+fun jsonPayload(results: BenchmarkResults): JsonObject {
+    return buildJsonObject {
+        putJsonObject("resultsPerStyle") {
+            for ((styleName, result) in results.resultsPerStyle) {
+                putJsonObject(styleName) {
+                    put("avgFps", JsonPrimitive(result.map { it.average }.average()))
+                    put("low1p", JsonPrimitive(result.map { it.low1p }.average()))
+                }
+            }
+        }
+        put("deviceManufacturer", JsonPrimitive(Build.MANUFACTURER))
+        put("model", JsonPrimitive(Build.MODEL))
+        put("renderer", JsonPrimitive(BuildConfig.FLAVOR))
+        put("debugBuild", JsonPrimitive(BuildConfig.DEBUG))
+        put("gitRevision", JsonPrimitive(GIT_REVISION))
     }
 }
 
@@ -59,12 +56,14 @@ data class Results(
  * Benchmark using a [android.view.TextureView]
  */
 class BenchmarkActivity : AppCompatActivity() {
+    private val TAG = "BenchmarkActivity"
+
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private var handler: Handler? = null
     private var delayed: Runnable? = null
     private var fpsStore = FpsStore()
-    private var results = Results()
+    private var results = BenchmarkResults()
     private var runsLeft = 5
 
     // the styles used for the benchmark
@@ -77,31 +76,48 @@ class BenchmarkActivity : AppCompatActivity() {
     //    <item>https://zelonewolf.github.io/openstreetmap-americana/style.json</item>
     // </array>
     // ```
-    @SuppressLint("DiscouragedApi")
-    private var styles: List<Pair<String, String>> = run {
-        val default = listOf(Pair("Demotiles", "https://demotiles.maplibre.org/style.json"))
-        val styleNames = resources.getStringArray(applicationContext.resources.getIdentifier(
-            "benchmark_style_names",
-            "array",
-            applicationContext.packageName))
-        val styleURLs = resources.getStringArray(applicationContext.resources.getIdentifier(
-            "benchmark_style_urls",
-            "array",
-            applicationContext.packageName))
+    private var styles: List<Pair<String, String>> = listOf(Pair("Demotiles", "https://demotiles.maplibre.org/style.json"))
 
-        if (styleNames.isNotEmpty() && styleNames.size == styleURLs.size)
-            styleNames.zip(styleURLs)
-        else
-            default
+    @SuppressLint("DiscouragedApi")
+    private fun getStringFromResources(name: String): String {
+        return try {
+            resources.getString(applicationContext.resources.getIdentifier(
+                name,
+                "string",
+                applicationContext.packageName))
+        } catch (e: Throwable) {
+            ""
+        }
     }
 
     @SuppressLint("DiscouragedApi")
+    private fun getArrayFromResources(name: String): Array<String> {
+        return try {
+            resources.getStringArray(applicationContext.resources.getIdentifier(
+                name,
+                "array",
+                applicationContext.packageName))
+        } catch (e: Throwable) {
+            emptyArray()
+        }
+    }
+
+    private fun readStyles() {
+        val styleNames = getArrayFromResources("benchmark_style_names")
+        val styleURLs = getArrayFromResources("benchmark_style_urls")
+
+        if (styleNames.isNotEmpty() && styleNames.size == styleURLs.size)
+            styles = styleNames.zip(styleURLs)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_benchmark)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         handler = Handler(mainLooper)
         setupToolbar()
-        sendResults()
+        readStyles()
         setupMapView(savedInstanceState)
     }
 
@@ -211,30 +227,29 @@ class BenchmarkActivity : AppCompatActivity() {
         mapView.onLowMemory()
     }
 
-    @SuppressLint("DiscouragedApi")
-    fun sendResults() {
-        val client = OkHttpClient()
-
-        val api = resources.getString(applicationContext.resources.getIdentifier(
-            "benchmark_results_api",
-            "string",
-            applicationContext.packageName))
+    private fun sendResults() {
+        val api = getStringFromResources("benchmark_results_api")
         if (api.isEmpty()) {
-            Logger.i("BenchMarkActivity", "No benchmark_results_api set in developer-config.xml")
+            Logger.i(TAG, "No benchmark_results_api set in developer-config.xml")
             return
         }
+
+        val client = OkHttpClient()
+
+        val payload = jsonPayload(results)
+        Logger.i(TAG, "Sending JSON payload to API: $payload")
+
         val request = Request.Builder()
             .url(api)
             .post(
-                Json.encodeToString(results).toRequestBody("application/json".toMediaType()))
+                Json.encodeToString(payload).toRequestBody("application/json".toMediaType()))
             .build()
         client.newCall(request).execute()
     }
 
-    fun benchmarkDone() {
+    private fun benchmarkDone() {
         sendResults()
         finish()
-
     }
 
     companion object {
