@@ -867,9 +867,9 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // TODO: detect whether anything has actually changed
     // See `Placement::updateBucketDynamicVertices`
 
-    gfx::VertexAttributeArray attribs;
-    updateTileAttributes(buffer, isText, paintProps, evaluated, attribs, propertiesAsUniforms);
-    drawable.setVertexAttributes(std::move(attribs));
+    if (auto& attribs = drawable.getVertexAttributes()) {
+        updateTileAttributes(buffer, isText, paintProps, evaluated, *attribs, propertiesAsUniforms);
+    }
 }
 
 const StringIdentity idCollisionPosAttribName = stringIndexer().get("a_pos");
@@ -878,25 +878,26 @@ const StringIdentity idCollisionExtrudeAttribName = stringIndexer().get("a_extru
 const StringIdentity idCollisionPlacedAttribName = stringIndexer().get("a_placed");
 const StringIdentity idCollisionShiftAttribName = stringIndexer().get("a_shift");
 
-gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::CollisionBuffer& buffer) {
-    gfx::VertexAttributeArray vertexAttrs;
+gfx::VertexAttributeArrayPtr getCollisionVertexAttributes(gfx::Context& context,
+                                                          const SymbolBucket::CollisionBuffer& buffer) {
+    auto vertexAttrs = context.createVertexAttributeArray();
     using LayoutVertex = gfx::Vertex<CollisionBoxLayoutAttributes>;
 
-    if (const auto& attr = vertexAttrs.getOrAdd(idCollisionPosAttribName)) {
+    if (const auto& attr = vertexAttrs->add(idCollisionPosAttribName)) {
         attr->setSharedRawData(buffer.sharedVertices,
                                offsetof(LayoutVertex, a1),
                                /*vertexOffset=*/0,
                                sizeof(LayoutVertex),
                                gfx::AttributeDataType::Short2);
     }
-    if (const auto& attr = vertexAttrs.getOrAdd(idCollisionAnchorPosAttribName)) {
+    if (const auto& attr = vertexAttrs->add(idCollisionAnchorPosAttribName)) {
         attr->setSharedRawData(buffer.sharedVertices,
                                offsetof(LayoutVertex, a2),
                                /*vertexOffset=*/0,
                                sizeof(LayoutVertex),
                                gfx::AttributeDataType::Short2);
     }
-    if (const auto& attr = vertexAttrs.getOrAdd(idCollisionExtrudeAttribName)) {
+    if (const auto& attr = vertexAttrs->add(idCollisionExtrudeAttribName)) {
         attr->setSharedRawData(buffer.sharedVertices,
                                offsetof(LayoutVertex, a3),
                                /*vertexOffset=*/0,
@@ -906,14 +907,14 @@ gfx::VertexAttributeArray getCollisionVertexAttributes(const SymbolBucket::Colli
 
     using DynamicVertex = gfx::Vertex<CollisionBoxDynamicAttributes>;
 
-    if (const auto& attr = vertexAttrs.getOrAdd(idCollisionPlacedAttribName)) {
+    if (const auto& attr = vertexAttrs->add(idCollisionPlacedAttribName)) {
         attr->setSharedRawData(buffer.sharedDynamicVertices,
                                offsetof(DynamicVertex, a1),
                                /*vertexOffset=*/0,
                                sizeof(DynamicVertex),
                                gfx::AttributeDataType::UShort2);
     }
-    if (const auto& attr = vertexAttrs.getOrAdd(idCollisionShiftAttribName)) {
+    if (const auto& attr = vertexAttrs->add(idCollisionShiftAttribName)) {
         attr->setSharedRawData(buffer.sharedDynamicVertices,
                                offsetof(DynamicVertex, a2),
                                /*vertexOffset=*/0,
@@ -1109,12 +1110,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "box");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionBox->vertices().vector());
-                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(*collisionBox));
+                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(context, *collisionBox));
                     collisionBuilder->setSegments(gfx::Lines(1.0f),
                                                   collisionBox->sharedLines,
                                                   collisionBox->segments.data(),
                                                   collisionBox->segments.size());
-                    collisionBuilder->flush();
+                    collisionBuilder->flush(context);
                 }
             }
 
@@ -1126,12 +1127,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "circle");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionCircle->vertices().vector());
-                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(*collisionCircle));
+                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(context, *collisionCircle));
                     collisionBuilder->setSegments(gfx::Triangles(),
                                                   collisionCircle->sharedTriangles,
                                                   collisionCircle->segments.data(),
                                                   collisionCircle->segments.size());
-                    collisionBuilder->flush();
+                    collisionBuilder->flush(context);
                 }
             }
 
@@ -1258,8 +1259,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto vertexCount = buffer.vertices().elements();
 
         propertiesAsUniforms.clear();
-        gfx::VertexAttributeArray attribs;
-        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, attribs, propertiesAsUniforms);
+        auto attribs = context.createVertexAttributeArray();
+        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *attribs, propertiesAsUniforms);
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
@@ -1342,7 +1343,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                 builder->setSegments(gfx::Triangles(), buffer.sharedTriangles, &renderable.segment.get(), 1);
 
-                builder->flush();
+                builder->flush(context);
 
                 for (auto& drawable : builder->clearDrawables()) {
                     drawable->setTileID(tileID);

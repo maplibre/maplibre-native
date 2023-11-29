@@ -117,6 +117,8 @@ public:
 
     Framebuffer createFramebuffer(const gfx::Texture2D& color);
 
+    gfx::VertexAttributeArrayPtr createVertexAttributeArray() const override;
+
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
 
     bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,

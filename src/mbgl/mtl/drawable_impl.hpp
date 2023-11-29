@@ -44,7 +44,6 @@ public:
     gfx::IndexVectorBasePtr indexes;
     std::size_t vertexCount = 0;
     gfx::AttributeDataType vertexType = gfx::AttributeDataType::Invalid;
-    VertexAttributeArray vertexAttributes;
 
     std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
 

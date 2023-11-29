@@ -61,16 +61,7 @@ public:
         VertexAttributeArray::operator=(std::move(other));
         return *this;
     }
-    VertexAttributeArrayGL& operator=(const VertexAttributeArrayGL& other) {
-        VertexAttributeArray::operator=(other);
-        return *this;
-    }
-
-    std::unique_ptr<VertexAttributeArray> clone() const override {
-        auto newAttrs = std::make_unique<VertexAttributeArrayGL>();
-        newAttrs->copy(*this);
-        return newAttrs;
-    }
+    VertexAttributeArrayGL& operator=(const VertexAttributeArrayGL&) = delete;
 
     /// Indicates whether any values have changed
     bool isDirty() const override;

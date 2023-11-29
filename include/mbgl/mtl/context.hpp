@@ -22,6 +22,11 @@ namespace mbgl {
 class ProgramParameters;
 class RenderStaticData;
 
+namespace gfx {
+class VertexAttributeArray;
+using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
+} // namespace gfx
+
 namespace shaders {
 struct ClipUBO;
 } // namespace shaders
@@ -85,8 +90,6 @@ public:
 
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
-    // UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
-
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
 
     void setDirtyState() override;
@@ -103,6 +106,8 @@ public:
                                                                           Size size) override;
 
     std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override;
+
+    gfx::VertexAttributeArrayPtr createVertexAttributeArray() const override;
 
 #if !defined(NDEBUG)
     void visualizeStencilBuffer() override;
