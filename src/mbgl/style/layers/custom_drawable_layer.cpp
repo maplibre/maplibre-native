@@ -302,8 +302,9 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     // add to builder
     static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
     builder->setVertexAttrNameId(idVertexAttribName);
-    gfx::VertexAttributeArray attrs;
-    if (const auto& attr = attrs.add(idVertexAttribName)) {
+
+    auto attrs = context.createVertexAttributeArray();
+    if (const auto& attr = attrs->add(idVertexAttribName)) {
         attr->setSharedRawData(sharedVertices,
                                offsetof(FillLayoutVertex, a1),
                                /*vertexOffset=*/0,
@@ -315,14 +316,14 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     builder->setSegments(gfx::Triangles(), sharedTriangles, triangleSegments.data(), triangleSegments.size());
 
     // flush current builder drawable
-    builder->flush();
+    builder->flush(context);
 }
 
 void CustomDrawableLayerHost::Interface::finish() {
     if (builder && !builder->empty()) {
         // finish
         const auto finish_ = [this](auto& tweaker) {
-            builder->flush();
+            builder->flush(context);
             for (auto& drawable : builder->clearDrawables()) {
                 assert(tileID.has_value());
                 drawable->setTileID(tileID.value());

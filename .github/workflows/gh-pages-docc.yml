@@ -17,7 +17,7 @@ jobs:
         run: make ios-docs
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.4.3
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
         with:
           branch: gh-pages
           folder: platform/ios/build/ios/static-docs

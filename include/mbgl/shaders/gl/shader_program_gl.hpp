@@ -48,8 +48,6 @@ public:
 protected:
     gfx::UniformBlockArray& mutableUniformBlocks() override { return uniformBlocks; }
 
-    gfx::VertexAttributeArray& mutableVertexAttributes() override { return vertexAttributes; }
-
 protected:
     UniqueProgram glProgram;
 

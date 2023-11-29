@@ -88,21 +88,6 @@ void DrawableGL::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx
     impl->vertexType = type_;
 }
 
-const gfx::VertexAttributeArray& DrawableGL::getVertexAttributes() const {
-    return impl->vertexAttributes;
-}
-
-gfx::VertexAttributeArray& DrawableGL::mutableVertexAttributes() {
-    return impl->vertexAttributes;
-}
-
-void DrawableGL::setVertexAttributes(const gfx::VertexAttributeArray& value) {
-    impl->vertexAttributes = static_cast<const VertexAttributeArrayGL&>(value);
-}
-void DrawableGL::setVertexAttributes(gfx::VertexAttributeArray&& value) {
-    impl->vertexAttributes = std::move(static_cast<VertexAttributeArrayGL&&>(value));
-}
-
 const gfx::UniformBufferArray& DrawableGL::getUniformBuffers() const {
     return impl->uniformBuffers;
 }
@@ -157,10 +142,11 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
-    const bool build = impl->vertexAttributes.isDirty() ||
-                       std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
-                           return !static_cast<const DrawSegmentGL&>(*seg).getVertexArray().isValid();
-                       });
+    const bool build = vertexAttributes &&
+                       (vertexAttributes->isDirty() ||
+                        std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
+                            return !static_cast<const DrawSegmentGL&>(*seg).getVertexArray().isValid();
+                        }));
 
     if (build) {
         auto& context = uploadPass.getContext();
@@ -169,7 +155,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 
         // Apply drawable values to shader defaults
         const auto& defaults = shader->getVertexAttributes();
-        const auto& overrides = impl->vertexAttributes;
+        const auto& overrides = *vertexAttributes;
 
         const auto& indexAttribute = defaults.get(impl->idVertexAttrName);
         const auto vertexAttributeIndex = static_cast<std::size_t>(indexAttribute ? indexAttribute->getIndex() : -1);

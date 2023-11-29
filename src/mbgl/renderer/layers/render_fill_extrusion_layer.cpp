@@ -419,12 +419,13 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        gfx::VertexAttributeArray vertexAttrs;
         propertiesAsUniforms.clear();
-        vertexAttrs.readDataDrivenPaintProperties<FillExtrusionBase,
-                                                  FillExtrusionColor,
-                                                  FillExtrusionHeight,
-                                                  FillExtrusionPattern>(binders, evaluated, propertiesAsUniforms);
+
+        auto vertexAttrs = context.createVertexAttributeArray();
+        vertexAttrs->readDataDrivenPaintProperties<FillExtrusionBase,
+                                                   FillExtrusionColor,
+                                                   FillExtrusionHeight,
+                                                   FillExtrusionPattern>(binders, evaluated, propertiesAsUniforms);
 
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
             shaderGroup->getOrCreateShader(context, propertiesAsUniforms));
@@ -487,14 +488,14 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        if (const auto& attr = vertexAttrs.getOrAdd(idPosAttribName)) {
+        if (const auto& attr = vertexAttrs->add(idPosAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a1),
                                    /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        if (const auto& attr = vertexAttrs.getOrAdd(idNormAttribName)) {
+        if (const auto& attr = vertexAttrs->add(idNormAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a2),
                                    /*vertexOffset=*/0,
@@ -502,16 +503,13 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::AttributeDataType::Short4);
         }
 
-        colorBuilder->setEnableStencil(doDepthPass);
         if (doDepthPass) {
             depthBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
+            depthBuilder->setVertexAttributes(vertexAttrs);
         }
-        colorBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
 
-        if (doDepthPass) {
-            auto copy = vertexAttrs.clone();
-            depthBuilder->setVertexAttributes(std::move(*copy));
-        }
+        colorBuilder->setEnableStencil(doDepthPass);
+        colorBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
         colorBuilder->setVertexAttributes(std::move(vertexAttrs));
 
         const auto finish = [&](gfx::DrawableBuilder& builder) {
@@ -523,7 +521,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                 bucket.triangleSegments.data(),
                                 bucket.triangleSegments.size());
 
-            builder.flush();
+            builder.flush(context);
 
             for (auto& drawable : builder.clearDrawables()) {
                 drawable->setTileID(tileID);
