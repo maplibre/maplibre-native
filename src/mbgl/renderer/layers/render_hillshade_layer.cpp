@@ -365,6 +365,29 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> hillshadeBuilder;
     std::unique_ptr<gfx::DrawableBuilder> hillshadePrepareBuilder;
 
+    gfx::VertexAttributeArrayPtr hillshadePrepareVertexAttrs;
+    const auto getPrepareVertexAttributes = [&] {
+        if (!hillshadePrepareVertexAttrs) {
+            hillshadePrepareVertexAttrs = context.createVertexAttributeArray();
+
+            if (const auto& attr = hillshadePrepareVertexAttrs->add(idPosAttribName)) {
+                attr->setSharedRawData(staticDataSharedVertices,
+                                       offsetof(HillshadeLayoutVertex, a1),
+                                       0,
+                                       sizeof(HillshadeLayoutVertex),
+                                       gfx::AttributeDataType::Short2);
+            }
+            if (const auto& attr = hillshadePrepareVertexAttrs->add(idTexturePosAttribName)) {
+                attr->setSharedRawData(staticDataSharedVertices,
+                                       offsetof(HillshadeLayoutVertex, a2),
+                                       0,
+                                       sizeof(HillshadeLayoutVertex),
+                                       gfx::AttributeDataType::Short2);
+            }
+        }
+        return hillshadePrepareVertexAttrs;
+    };
+
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -406,31 +429,13 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             }
             singleTileLayerGroup->addLayerTweaker(prepareLayerTweaker);
 
-            gfx::VertexAttributeArray hillshadePrepareVertexAttrs;
-
-            if (const auto& attr = hillshadePrepareVertexAttrs.add(idPosAttribName)) {
-                attr->setSharedRawData(staticDataSharedVertices,
-                                       offsetof(HillshadeLayoutVertex, a1),
-                                       0,
-                                       sizeof(HillshadeLayoutVertex),
-                                       gfx::AttributeDataType::Short2);
-            }
-            if (const auto& attr = hillshadePrepareVertexAttrs.getOrAdd(idTexturePosAttribName)) {
-                attr->setSharedRawData(staticDataSharedVertices,
-                                       offsetof(HillshadeLayoutVertex, a2),
-                                       0,
-                                       sizeof(HillshadeLayoutVertex),
-                                       gfx::AttributeDataType::Short2);
-            }
-
             hillshadePrepareBuilder = context.createDrawableBuilder("hillshadePrepare");
             hillshadePrepareBuilder->setShader(hillshadePrepareShader);
             hillshadePrepareBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
             hillshadePrepareBuilder->setColorMode(gfx::ColorMode::unblended());
             hillshadePrepareBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-
             hillshadePrepareBuilder->setRenderPass(renderPass);
-            hillshadePrepareBuilder->setVertexAttributes(std::move(hillshadePrepareVertexAttrs));
+            hillshadePrepareBuilder->setVertexAttributes(getPrepareVertexAttributes());
             hillshadePrepareBuilder->setRawVertices(
                 {}, staticDataSharedVertices->elements(), gfx::AttributeDataType::Short2);
             hillshadePrepareBuilder->setSegments(
@@ -445,7 +450,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                 hillshadePrepareBuilder->setTexture(texture, imageLocation.value());
             }
 
-            hillshadePrepareBuilder->flush();
+            hillshadePrepareBuilder->flush(context);
 
             for (auto& drawable : hillshadePrepareBuilder->clearDrawables()) {
                 drawable->setTileID(tileID);
@@ -468,33 +473,39 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             segments = &bucket.segments;
         }
 
-        gfx::VertexAttributeArray hillshadeVertexAttrs;
-
-        if (const auto& attr = hillshadeVertexAttrs.add(idPosAttribName)) {
-            attr->setSharedRawData(vertices,
-                                   offsetof(HillshadeLayoutVertex, a1),
-                                   0,
-                                   sizeof(HillshadeLayoutVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
-        if (const auto& attr = hillshadeVertexAttrs.getOrAdd(idTexturePosAttribName)) {
-            attr->setSharedRawData(vertices,
-                                   offsetof(HillshadeLayoutVertex, a2),
-                                   0,
-                                   sizeof(HillshadeLayoutVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
-
         hillshadeBuilder = context.createDrawableBuilder("hillshade");
 
-        auto updateExisting = [&](gfx::Drawable& drawable) {
+        gfx::VertexAttributeArrayPtr hillshadeVertexAttrs;
+        auto buildVertexAttributes = [&] {
+            if (!hillshadeVertexAttrs) {
+                hillshadeVertexAttrs = context.createVertexAttributeArray();
+
+                if (const auto& attr = hillshadeVertexAttrs->add(idPosAttribName)) {
+                    attr->setSharedRawData(vertices,
+                                           offsetof(HillshadeLayoutVertex, a1),
+                                           0,
+                                           sizeof(HillshadeLayoutVertex),
+                                           gfx::AttributeDataType::Short2);
+                }
+                if (const auto& attr = hillshadeVertexAttrs->getOrAdd(idTexturePosAttribName)) {
+                    attr->setSharedRawData(vertices,
+                                           offsetof(HillshadeLayoutVertex, a2),
+                                           0,
+                                           sizeof(HillshadeLayoutVertex),
+                                           gfx::AttributeDataType::Short2);
+                }
+            }
+            return hillshadeVertexAttrs;
+        };
+
+        const auto updateExisting = [&](gfx::Drawable& drawable) {
             // Only current drawables are updated, ones produced for
             // a previous style retain the attribute values for that style.
             if (drawable.getLayerTweaker() != layerTweaker) {
                 return false;
             }
 
-            drawable.setVertexAttributes(std::move(hillshadeVertexAttrs));
+            drawable.setVertexAttributes(buildVertexAttributes());
             drawable.setVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
 
             // Rebuild segments, since they're not shared.
@@ -526,9 +537,8 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         hillshadeBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
         hillshadeBuilder->setColorMode(gfx::ColorMode::alphaBlended());
         hillshadeBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-
         hillshadeBuilder->setRenderPass(renderPass);
-        hillshadeBuilder->setVertexAttributes(std::move(hillshadeVertexAttrs));
+        hillshadeBuilder->setVertexAttributes(buildVertexAttributes());
         hillshadeBuilder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
         hillshadeBuilder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
 
@@ -536,7 +546,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             hillshadeBuilder->setTexture(bucket.renderTarget->getTexture(), *hillshadeImageLocation);
         }
 
-        hillshadeBuilder->flush();
+        hillshadeBuilder->flush(context);
 
         for (auto& drawable : hillshadeBuilder->clearDrawables()) {
             drawable->setTileID(tileID);

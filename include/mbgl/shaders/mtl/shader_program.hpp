@@ -62,7 +62,6 @@ public:
     std::optional<uint32_t> getSamplerLocation(const StringIdentity id) const override;
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
-    gfx::VertexAttributeArray& mutableVertexAttributes() override { return vertexAttributes; }
 
     const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
     gfx::UniformBlockArray& mutableUniformBlocks() override { return uniformBlocks; }
