@@ -380,14 +380,14 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
 
         propertiesAsUniforms.clear();
-        gfx::VertexAttributeArray circleVertexAttrs;
-        circleVertexAttrs.readDataDrivenPaintProperties<CircleColor,
-                                                        CircleRadius,
-                                                        CircleBlur,
-                                                        CircleOpacity,
-                                                        CircleStrokeColor,
-                                                        CircleStrokeWidth,
-                                                        CircleStrokeOpacity>(
+        auto circleVertexAttrs = context.createVertexAttributeArray();
+        circleVertexAttrs->readDataDrivenPaintProperties<CircleColor,
+                                                         CircleRadius,
+                                                         CircleBlur,
+                                                         CircleOpacity,
+                                                         CircleStrokeColor,
+                                                         CircleStrokeWidth,
+                                                         CircleStrokeOpacity>(
             paintPropertyBinders, evaluated, propertiesAsUniforms);
 
         if (!circleShaderGroup) {
@@ -402,7 +402,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
 
-        if (const auto& attr = circleVertexAttrs.add(idVertexAttribName)) {
+        if (const auto& attr = circleVertexAttrs->add(idVertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(CircleLayoutVertex, a1),
                                    0,
@@ -423,7 +423,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         circleBuilder->setSegments(
             gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
 
-        circleBuilder->flush();
+        circleBuilder->flush(context);
 
         for (auto& drawable : circleBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
