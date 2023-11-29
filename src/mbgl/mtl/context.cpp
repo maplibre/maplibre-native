@@ -444,6 +444,10 @@ std::unique_ptr<gfx::DrawScopeResource> Context::createDrawScopeResource() {
     return nullptr;
 }
 
+gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
+    return std::make_shared<VertexAttributeArray>();
+}
+
 #if !defined(NDEBUG)
 void Context::visualizeStencilBuffer() {}
 

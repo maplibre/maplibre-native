@@ -314,7 +314,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         auto verticesCopy = rawVertices;
         builder->setRawVertices(std::move(verticesCopy), vertexCount, gfx::AttributeDataType::Short2);
         builder->setSegments(gfx::Triangles(), indexes.vector(), segs.data(), segs.size());
-        builder->flush();
+        builder->flush(context);
 
         for (auto& drawable : builder->clearDrawables()) {
             drawable->setTileID(tileID);

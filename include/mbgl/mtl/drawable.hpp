@@ -40,12 +40,6 @@ public:
 
     void setVertices(std::vector<uint8_t>&&, std::size_t, gfx::AttributeDataType) override;
 
-    const gfx::VertexAttributeArray& getVertexAttributes() const override;
-    void setVertexAttributes(const gfx::VertexAttributeArray& value) override;
-    void setVertexAttributes(gfx::VertexAttributeArray&& value) override;
-
-    gfx::VertexAttributeArray& mutableVertexAttributes() override;
-
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
 

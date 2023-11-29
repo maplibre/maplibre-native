@@ -93,16 +93,6 @@ VertexAttributeArray& VertexAttributeArray::operator=(VertexAttributeArray&& oth
     return *this;
 }
 
-VertexAttributeArray& VertexAttributeArray::operator=(const VertexAttributeArray& other) {
-    attrs.clear();
-    for (const auto& kv : other.attrs) {
-        if (kv.second) {
-            add(kv.first, copy(*kv.second));
-        }
-    }
-    return *this;
-}
-
 const std::unique_ptr<VertexAttribute>& VertexAttributeArray::get(const StringIdentity id) const {
     const auto result = attrs.find(id);
     return (result != attrs.end()) ? result->second : nullref;
