@@ -13,6 +13,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "FillShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 4> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;
@@ -28,8 +29,12 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
-    float4 color;
+#if !defined(HAS_UNIFORM_u_color)
+    half4 color;
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
+#endif
 };
 
 struct alignas(16) FillDrawableUBO {
@@ -58,16 +63,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillInterpolateUBO& interp [[buffer(5)]],
                                 device const FillPermutationUBO& permutation [[buffer(6)]],
                                 device const ExpressionInputsUBO& expr [[buffer(7)]]) {
-
-    const auto color          = colorFor(permutation.color,          props.color,          vertx.color,          interp.color_t,          expr);
-    const auto opacity        = valueFor(permutation.opacity,        props.opacity,        vertx.opacity,        interp.opacity_t,        expr);
-
-    float4 position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);
-
     return {
-        .position       = position,
-        .color          = color,
-        .opacity        = half(opacity),
+        .position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f),
+#if !defined(HAS_UNIFORM_u_color)
+        .color    = half4(colorFor(permutation.color, props.color, vertx.color, interp.color_t, expr)),
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+        .opacity  = half(valueFor(permutation.opacity, props.opacity, vertx.opacity, interp.opacity_t, expr)),
+#endif
     };
 }
 
@@ -78,7 +81,19 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(1.0);
     }
 
-    return half4(in.color * in.opacity);
+#if defined(HAS_UNIFORM_u_color)
+    const half4 color = half4(props.color);
+#else
+    const half4 color = in.color;
+#endif
+
+#if defined(HAS_UNIFORM_u_opacity)
+    const half opacity = props.opacity;
+#else
+    const half opacity = in.opacity;
+#endif
+
+    return half4(color * opacity);
 }
 )";
 };
@@ -88,6 +103,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "FillOutlineShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 4> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;
@@ -174,6 +190,7 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "FillPatternShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 4> attributes;
     static const std::array<UniformBlockInfo, 6> uniforms;
@@ -297,6 +314,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto name = "FillOutlinePatternShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 4> attributes;
     static const std::array<UniformBlockInfo, 6> uniforms;

@@ -13,6 +13,7 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LineShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 8> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;
@@ -127,6 +128,7 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LinePatternShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 9> attributes;
     static const std::array<UniformBlockInfo, 6> uniforms;
@@ -321,6 +323,7 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LineSDFShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 9> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;
@@ -485,6 +488,7 @@ struct ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LineBasicShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 2> attributes;
     static const std::array<UniformBlockInfo, 2> uniforms;

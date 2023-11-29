@@ -13,6 +13,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "CircleShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 8> attributes;
     static const std::array<UniformBlockInfo, 6> uniforms;

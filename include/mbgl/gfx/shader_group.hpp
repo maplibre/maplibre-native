@@ -3,9 +3,11 @@
 #include <mbgl/gfx/shader.hpp>
 #include <mbgl/util/containers.hpp>
 
+#include <iomanip>
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
+#include <sstream>
 #include <string>
 
 namespace mbgl {
@@ -149,6 +151,11 @@ public:
         [[maybe_unused]] const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms,
         [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
         return {};
+    }
+
+protected:
+    std::string getShaderName(const std::string_view& name, const std::size_t key) {
+        return (std::ostringstream() << name << '#' << std::hex << key).str();
     }
 
 private:

@@ -13,6 +13,7 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LineGradientShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 7> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;

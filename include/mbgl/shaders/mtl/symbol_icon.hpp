@@ -13,6 +13,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "SymbolIconShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 6> attributes;
     static const std::array<UniformBlockInfo, 7> uniforms;
