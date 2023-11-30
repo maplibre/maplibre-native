@@ -6,7 +6,6 @@
 #include <mbgl/mtl/vertex_attribute.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
-#include <Metal/MTLLibrary.hpp>
 
 #include <optional>
 #include <string>
@@ -50,7 +49,7 @@ public:
                   RendererBackend& backend,
                   MTLFunctionPtr vertexFunction,
                   MTLFunctionPtr fragmentFunction);
-    ~ShaderProgram() noexcept override = default;
+    ~ShaderProgram() noexcept override;
 
     static constexpr std::string_view Name{"GenericMTLShader"};
     const std::string_view typeName() const noexcept override { return Name; }
