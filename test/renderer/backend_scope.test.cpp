@@ -1,3 +1,4 @@
+#if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/test/util.hpp>
 
 #include <mbgl/gl/renderer_backend.hpp>
@@ -126,3 +127,4 @@ TEST(BackendScope, ChainedScopes) {
     ASSERT_FALSE(activatedA);
     ASSERT_FALSE(activatedB);
 }
+#endif
