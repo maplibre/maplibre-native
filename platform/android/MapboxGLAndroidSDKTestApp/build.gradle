@@ -1,6 +1,7 @@
 plugins {
     id 'org.jmailen.kotlinter'
     id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.9.21'
 }
 
@@ -20,8 +21,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 
     nativeBuild(["example-custom-layer"])
@@ -100,7 +105,8 @@ dependencies {
     androidTestImplementation dependenciesList.testEspressoContrib
     androidTestImplementation dependenciesList.testUiAutomator
     androidTestImplementation dependenciesList.appCenter
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test:core-ktx:1.5.0'
 
 }
 
@@ -108,7 +114,3 @@ apply from: "${rootDir}/gradle/gradle-make.gradle"
 apply from: "${rootDir}/gradle/gradle-config.gradle"
 apply from: "${rootDir}/gradle/gradle-checkstyle.gradle"
 apply from: "${rootDir}/gradle/gradle-lint.gradle"
-
-
-
-apply plugin: 'kotlin-android'
