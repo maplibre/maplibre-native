@@ -46,6 +46,11 @@ public:
         float opacity = 1.f;
     };
 
+    struct SymbolOptions {
+        Color color;
+        Size size;
+    };
+
 public:
     /// @brief Construct a new Interface object (internal core use only)
     Interface(RenderLayer& layer,
@@ -85,6 +90,13 @@ public:
     void setFillOptions(const FillOptions& options);
 
     /**
+     * @brief Set the Symbol options
+     * 
+     * @param options 
+     */
+    void setSymbolOptions(const SymbolOptions& options);
+
+    /**
      * @brief Add a polyline
      *
      * @param coordinates
@@ -92,7 +104,19 @@ public:
      */
     void addPolyline(const GeometryCoordinates& coordinates);
 
+    /**
+     * @brief Add a multipolygon area fill
+     * 
+     * @param geometry a collection of rings with optional holes
+     */
     void addFill(const GeometryCollection& geometry);
+
+    /**
+     * @brief Add a symbol
+     * 
+     * @param point 
+     */
+    void addSymbol(const GeometryCoordinate& point);
 
     /**
      * @brief Finish the current drawable building session

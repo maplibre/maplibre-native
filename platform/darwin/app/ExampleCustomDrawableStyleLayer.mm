@@ -85,7 +85,7 @@ public:
                 interface.addPolyline(polyline);
             }
         }
-        
+
         // add fill polygon
         {
             using namespace mbgl;
@@ -114,6 +114,17 @@ public:
 
             // add fill
             interface.addFill(geometry);
+        }
+        
+        // add symbol
+        {
+            using namespace mbgl;
+            GeometryCoordinate position {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)};
+            
+            // TODO: set options ...
+            
+            // add symbol
+            interface.addSymbol(position);
         }
                 
         // finish

@@ -319,6 +319,11 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     builder->flush(context);
 }
 
+void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& point) {
+    // TODO: implement
+}
+
+
 void CustomDrawableLayerHost::Interface::finish() {
     if (builder && !builder->empty()) {
         // finish
