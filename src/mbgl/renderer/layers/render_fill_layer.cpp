@@ -620,10 +620,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return atlasTweaker;
         };
 
-        // `Fill*Program` all use `style::FillPaintProperties`
-        gfx::VertexAttributeArray vertexAttrs;
         propertiesAsUniforms.clear();
-        vertexAttrs.readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
+
+        // `Fill*Program` all use `style::FillPaintProperties`
+        auto vertexAttrs = context.createVertexAttributeArray();
+        vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
             binders, evaluated, propertiesAsUniforms);
 
         if (layerTweaker) {
@@ -631,7 +632,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         const auto vertexCount = bucket.vertices.elements();
-        if (const auto& attr = vertexAttrs.add(idPosAttribName)) {
+        if (const auto& attr = vertexAttrs->add(idPosAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillLayoutVertex, a1),
                                    /*vertexOffset=*/0,
@@ -715,15 +716,16 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setVertexAttrNameId(idVertexAttribName);
                     builder->setShader(outlineTriangulatedShader);
                     builder->setRawVertices({}, bucket.lineVertices.elements(), gfx::AttributeDataType::Short2);
-                    gfx::VertexAttributeArray attrs;
-                    if (const auto& attr = attrs.add(idVertexAttribName)) {
+
+                    auto attrs = context.createVertexAttributeArray();
+                    if (const auto& attr = attrs->add(idVertexAttribName)) {
                         attr->setSharedRawData(bucket.sharedLineVertices,
                                                offsetof(LineLayoutVertex, a1),
                                                /*vertexOffset=*/0,
                                                sizeof(LineLayoutVertex),
                                                gfx::AttributeDataType::Short2);
                     }
-                    if (const auto& attr = attrs.add(idDataAttribName)) {
+                    if (const auto& attr = attrs->add(idDataAttribName)) {
                         attr->setSharedRawData(bucket.sharedLineVertices,
                                                offsetof(LineLayoutVertex, a2),
                                                /*vertexOffset=*/0,
@@ -731,6 +733,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                gfx::AttributeDataType::UByte4);
                     }
                     builder->setVertexAttributes(std::move(attrs));
+
                     builder->setSegments(gfx::Triangles(),
                                          bucket.sharedLineIndexes,
                                          bucket.lineSegments.data(),
@@ -739,7 +742,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     auto tweaker = std::make_shared<OutlineDrawableTweaker>(color, opacity);
 
                     // finish
-                    builder->flush();
+                    builder->flush(context);
                     for (auto& drawable : builder->clearDrawables()) {
                         drawable->setTileID(tileID);
                         drawable->addTweaker(tweaker);
@@ -785,7 +788,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                     const auto& interpolateUBO,
                                     FillVariant type) {
                 builder.setVertexAttrNameId(idPosAttribName);
-                builder.flush();
+                builder.flush(context);
 
                 for (auto& drawable : builder.clearDrawables()) {
                     drawable->setTileID(tileID);
@@ -919,7 +922,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                     const StringIdentity tileUBONameId,
                                     const auto& tileUBO,
                                     FillVariant type) {
-                builder.flush();
+                builder.flush(context);
 
                 for (auto& drawable : builder.clearDrawables()) {
                     drawable->setTileID(tileID);

@@ -40,6 +40,7 @@ using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 using IndexVectorBasePtr = std::shared_ptr<IndexVectorBase>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
+using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
 
 class Drawable {
 public:
@@ -188,16 +189,10 @@ public:
     virtual void setColorMode(const gfx::ColorMode&);
 
     /// Get the vertex attributes that override default values in the shader program
-    virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
-
-    /// Get the mutable vertex attribute array
-    virtual gfx::VertexAttributeArray& mutableVertexAttributes() = 0;
+    const gfx::VertexAttributeArrayPtr& getVertexAttributes() const noexcept { return vertexAttributes; }
 
     /// Set vertex attribute array
-    virtual void setVertexAttributes(const gfx::VertexAttributeArray&) = 0;
-
-    /// Set vertex attribute array
-    virtual void setVertexAttributes(gfx::VertexAttributeArray&&) = 0;
+    void setVertexAttributes(gfx::VertexAttributeArrayPtr value) noexcept { vertexAttributes = std::move(value); }
 
     /// Provide raw data for vertices. Incompatible with adding primitives
     virtual void setVertices(std::vector<uint8_t>&&, std::size_t, AttributeDataType) = 0;
@@ -259,6 +254,7 @@ protected:
     int32_t subLayerIndex = 0;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
     UniqueDrawableData drawableData{};
+    gfx::VertexAttributeArrayPtr vertexAttributes;
 
     struct Impl;
     std::unique_ptr<Impl> impl;
