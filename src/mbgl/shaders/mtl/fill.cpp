@@ -47,7 +47,7 @@ const std::array<AttributeInfo, 4> ShaderSource<BuiltIn::FillPatternShader, gfx:
 };
 const std::array<UniformBlockInfo, 6> ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{4, true, true, sizeof(FillPatternDrawableUBO), "FillPatternDrawableUBO"},
-    UniformBlockInfo{5, true, false, sizeof(FillPatternTilePropsUBO), "FillPatternTilePropsUBO"},
+    UniformBlockInfo{5, true, true, sizeof(FillPatternTilePropsUBO), "FillPatternTilePropsUBO"},
     UniformBlockInfo{6, true, true, sizeof(FillPatternEvaluatedPropsUBO), "FillPatternEvaluatedPropsUBO"},
     UniformBlockInfo{7, true, false, sizeof(FillPatternInterpolateUBO), "FillPatternInterpolateUBO"},
     UniformBlockInfo{8, true, true, sizeof(FillPatternPermutationUBO), "FillPatternPermutationUBO"},
@@ -67,7 +67,7 @@ const std::array<AttributeInfo, 4>
 const std::array<UniformBlockInfo, 6> ShaderSource<BuiltIn::FillOutlinePatternShader,
                                                    gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{4, true, true, sizeof(FillOutlinePatternDrawableUBO), "FillOutlinePatternDrawableUBO"},
-    UniformBlockInfo{5, true, false, sizeof(FillOutlinePatternTilePropsUBO), "FillOutlinePatternTilePropsUBO"},
+    UniformBlockInfo{5, true, true, sizeof(FillOutlinePatternTilePropsUBO), "FillOutlinePatternTilePropsUBO"},
     UniformBlockInfo{6, true, true, sizeof(FillOutlinePatternEvaluatedPropsUBO), "FillOutlinePatternEvaluatedPropsUBO"},
     UniformBlockInfo{7, true, false, sizeof(FillOutlinePatternInterpolateUBO), "FillOutlinePatternInterpolateUBO"},
     UniformBlockInfo{8, true, true, sizeof(FillOutlinePatternPermutationUBO), "FillOutlinePatternPermutationUBO"},

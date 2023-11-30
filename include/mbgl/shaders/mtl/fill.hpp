@@ -103,14 +103,13 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "FillOutlineShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
+    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 4> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
-
 struct VertexStage {
     short2 position [[attribute(0)]];
     float4 outline_color [[attribute(1)]];
@@ -119,9 +118,13 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
-    float4 outline_color;
     float2 pos;
+#if !defined(HAS_UNIFORM_u_outline_color)
+    half4 outline_color;
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
+#endif
 };
 
 struct alignas(16) FillOutlineDrawableUBO {
@@ -152,18 +155,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillOutlineInterpolateUBO& interp [[buffer(5)]],
                                 device const FillOutlinePermutationUBO& permutation [[buffer(6)]],
                                 device const ExpressionInputsUBO& expr [[buffer(7)]]) {
-
-    const auto outline_color  = colorFor(permutation.outline_color,  props.outline_color,  vertx.outline_color,  interp.outline_color_t,  expr);
-    const auto opacity        = valueFor(permutation.opacity,        props.opacity,        vertx.opacity,        interp.opacity_t,        expr);
-
-    float4 position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);
-    float2 v_pos = (position.xy / position.w + 1.0) / 2.0 * drawable.world;
-
+    const float4 position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);
     return {
         .position       = position,
-        .outline_color  = outline_color,
-        .pos            = v_pos,
-        .opacity        = half(opacity),
+        .pos            = (position.xy / position.w + 1.0) / 2.0 * drawable.world,
+#if !defined(HAS_UNIFORM_u_outline_color)
+        .outline_color  = half4(colorFor(permutation.outline_color, props.outline_color, vertx.outline_color, interp.outline_color_t, expr)),
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+        .opacity        = half( valueFor(permutation.opacity,       props.opacity,       vertx.opacity,       interp.opacity_t,       expr)),
+#endif
     };
 }
 
@@ -180,7 +181,19 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 //    float dist = length(in.pos - in.position.xy);
 //    float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
 
-    return half4(in.outline_color * in.opacity);
+#if defined(HAS_UNIFORM_u_outline_color)
+    const half4 color = half4(props.outline_color);
+#else
+    const half4 color = in.outline_color;
+#endif
+
+#if defined(HAS_UNIFORM_u_opacity)
+    const half opacity = props.opacity;
+#else
+    const half opacity = in.opacity;
+#endif
+
+    return half4(color * opacity);
 }
 )";
 };
@@ -190,14 +203,13 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "FillPatternShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
+    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 4> attributes;
     static const std::array<UniformBlockInfo, 6> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
-
 struct VertexStage {
     short2 position [[attribute(0)]];
     ushort4 pattern_from [[attribute(1)]];
@@ -207,11 +219,18 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
-    float4 pattern_from;
-    float4 pattern_to;
     float2 v_pos_a;
     float2 v_pos_b;
+
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    float4 pattern_from;
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+    float4 pattern_to;
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
+#endif
 };
 
 struct alignas(16) FillPatternDrawableUBO {
@@ -252,37 +271,57 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillPatternInterpolateUBO& interp [[buffer(7)]],
                                 device const FillPatternPermutationUBO& permutation [[buffer(8)]],
                                 device const ExpressionInputsUBO& expr [[buffer(9)]]) {
+#if defined(HAS_UNIFORM_u_pattern_from)
+    const auto pattern_from = tileProps.pattern_from;
+#else
+    const auto pattern_from = patternFor(permutation.pattern_from, tileProps.pattern_from, vertx.pattern_from, interp.pattern_from_t, expr);
+#endif
 
-    const auto pattern_from   = patternFor(permutation.pattern_from, tileProps.pattern_from,  vertx.pattern_from,   interp.pattern_from_t,     expr);
-    const auto pattern_to     = patternFor(permutation.pattern_to,   tileProps.pattern_to,    vertx.pattern_to,     interp.pattern_to_t,       expr);
-    const auto opacity        = valueFor(permutation.opacity,        props.opacity,           vertx.opacity,        interp.opacity_t,        expr);
+#if defined(HAS_UNIFORM_u_pattern_to)
+    const auto pattern_to   = tileProps.pattern_to;
+#else
+    const auto pattern_to   = patternFor(permutation.pattern_to,   tileProps.pattern_to,   vertx.pattern_to,   interp.pattern_to_t,   expr);
+#endif
 
-    float2 pattern_tl_a = pattern_from.xy;
-    float2 pattern_br_a = pattern_from.zw;
-    float2 pattern_tl_b = pattern_to.xy;
-    float2 pattern_br_b = pattern_to.zw;
+#if defined(HAS_UNIFORM_u_opacity)
+    const auto opacity      = props.opacity;
+#else
+    const auto opacity      = valueFor(permutation.opacity,        props.opacity,          vertx.opacity,      interp.opacity_t,     expr);
+#endif
 
-    float pixelRatio = drawable.scale.x;
-    float tileZoomRatio = drawable.scale.y;
-    float fromScale = drawable.scale.z;
-    float toScale = drawable.scale.w;
+    const float2 pattern_tl_a = pattern_from.xy;
+    const float2 pattern_br_a = pattern_from.zw;
+    const float2 pattern_tl_b = pattern_to.xy;
+    const float2 pattern_br_b = pattern_to.zw;
 
-    float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
-    float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
-    float2 postion = float2(vertx.position);
+    const float pixelRatio = drawable.scale.x;
+    const float tileZoomRatio = drawable.scale.y;
+    const float fromScale = drawable.scale.z;
+    const float toScale = drawable.scale.w;
+
+    const float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
+    const float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
+    const float2 postion = float2(vertx.position);
 
     return {
         .position       = drawable.matrix * float4(postion, 0, 1),
-        .pattern_from   = pattern_from,
-        .pattern_to     = pattern_to,
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, postion),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
+#if !defined(HAS_UNIFORM_u_pattern_from)
+        .pattern_from   = pattern_from,
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+        .pattern_to     = pattern_to,
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
         .opacity        = half(opacity),
+#endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const FillPatternDrawableUBO& drawable [[buffer(4)]],
+                            device const FillPatternTilePropsUBO& tileProps [[buffer(5)]],
                             device const FillPatternEvaluatedPropsUBO& props [[buffer(6)]],
                             device const FillPatternPermutationUBO& permutation [[buffer(8)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
@@ -291,10 +330,28 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(1.0);
     }
 
-    const float2 pattern_tl_a = in.pattern_from.xy;
-    const float2 pattern_br_a = in.pattern_from.zw;
-    const float2 pattern_tl_b = in.pattern_to.xy;
-    const float2 pattern_br_b = in.pattern_to.zw;
+#if defined(HAS_UNIFORM_u_pattern_from)
+    const auto pattern_from   = tileProps.pattern_from;
+#else
+    const auto pattern_from   = in.pattern_from;
+#endif
+
+#if defined(HAS_UNIFORM_u_pattern_to)
+    const auto pattern_to     = tileProps.pattern_to;
+#else
+    const auto pattern_to     = in.pattern_to;
+#endif
+
+#if defined(HAS_UNIFORM_u_opacity)
+    const auto opacity        = props.opacity;
+#else
+    const auto opacity        = in.opacity;
+#endif
+
+    const float2 pattern_tl_a = pattern_from.xy;
+    const float2 pattern_br_a = pattern_from.zw;
+    const float2 pattern_tl_b = pattern_to.xy;
+    const float2 pattern_br_b = pattern_to.zw;
 
     const float2 imagecoord = glMod(in.v_pos_a, 1.0);
     const float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
@@ -304,7 +361,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
     const float4 color2 = image0.sample(image0_sampler, pos2);
 
-    return half4(mix(color1, color2, props.fade) * in.opacity);
+    return half4(mix(color1, color2, props.fade) * opacity);
 }
 )";
 };
@@ -314,7 +371,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto name = "FillOutlinePatternShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
+    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 4> attributes;
     static const std::array<UniformBlockInfo, 6> uniforms;
@@ -333,10 +390,17 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float2 v_pos_a;
     float2 v_pos_b;
-    float4 pattern_from;
-    float4 pattern_to;
     float2 v_pos;
+
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    float4 pattern_from;
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+    float4 pattern_to;
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
+#endif
 };
 
 struct alignas(16) FillOutlinePatternDrawableUBO {
@@ -378,39 +442,58 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillOutlinePatternInterpolateUBO& interp [[buffer(7)]],
                                 device const FillOutlinePatternPermutationUBO& permutation [[buffer(8)]],
                                 device const ExpressionInputsUBO& expr [[buffer(9)]]) {
+#if defined(HAS_UNIFORM_u_pattern_from)
+    const auto pattern_from = tileProps.pattern_from;
+#else
+    const auto pattern_from = patternFor(permutation.pattern_from, tileProps.pattern_from, vertx.pattern_from, interp.pattern_from_t, expr);
+#endif
 
-    const auto pattern_from   = patternFor(permutation.pattern_from, tileProps.pattern_from,  vertx.pattern_from,   interp.pattern_from_t,     expr);
-    const auto pattern_to     = patternFor(permutation.pattern_to,   tileProps.pattern_to,    vertx.pattern_to,     interp.pattern_to_t,       expr);
-    const auto opacity        = valueFor(permutation.opacity,        props.opacity,           vertx.opacity,        interp.opacity_t,        expr);
+#if defined(HAS_UNIFORM_u_pattern_to)
+    const auto pattern_to   = tileProps.pattern_to;
+#else
+    const auto pattern_to   = patternFor(permutation.pattern_to,   tileProps.pattern_to,   vertx.pattern_to,   interp.pattern_to_t,   expr);
+#endif
 
-    float2 pattern_tl_a = pattern_from.xy;
-    float2 pattern_br_a = pattern_from.zw;
-    float2 pattern_tl_b = pattern_to.xy;
-    float2 pattern_br_b = pattern_to.zw;
+#if !defined(HAS_UNIFORM_u_opacity)
+    const auto opacity      = valueFor(permutation.opacity,        props.opacity,          vertx.opacity,      interp.opacity_t,     expr);
+#endif
 
-    float pixelRatio = drawable.scale.x;
-    float tileZoomRatio = drawable.scale.y;
-    float fromScale = drawable.scale.z;
-    float toScale = drawable.scale.w;
+    const float2 pattern_tl_a = pattern_from.xy;
+    const float2 pattern_br_a = pattern_from.zw;
+    const float2 pattern_tl_b = pattern_to.xy;
+    const float2 pattern_br_b = pattern_to.zw;
 
-    float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
-    float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
-    float2 pos2 = float2(vertx.position);
-    float4 position = drawable.matrix * float4(pos2, 0, 1);
+    const float pixelRatio = drawable.scale.x;
+    const float tileZoomRatio = drawable.scale.y;
+    const float fromScale = drawable.scale.z;
+    const float toScale = drawable.scale.w;
+
+    const float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
+    const float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
+    const float2 pos2 = float2(vertx.position);
+    const float4 position = drawable.matrix * float4(pos2, 0, 1);
 
     return {
         .position       = position,
-        .pattern_from   = pattern_from,
-        .pattern_to     = pattern_to,
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, pos2),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, pos2),
-        .v_pos          =  (position.xy / position.w + 1.0) / 2.0 * drawable.world,
+        .v_pos          = (position.xy / position.w + 1.0) / 2.0 * drawable.world,
+
+#if !defined(HAS_UNIFORM_u_pattern_from)
+        .pattern_from   = pattern_from,
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+        .pattern_to     = pattern_to,
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
         .opacity        = half(opacity),
+#endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const FillOutlinePatternDrawableUBO& drawable [[buffer(4)]],
+                            device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(5)]],
                             device const FillOutlinePatternEvaluatedPropsUBO& props [[buffer(6)]],
                             device const FillOutlinePatternPermutationUBO& permutation [[buffer(8)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
@@ -419,10 +502,28 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(1.0);
     }
 
-    const float2 pattern_tl_a = in.pattern_from.xy;
-    const float2 pattern_br_a = in.pattern_from.zw;
-    const float2 pattern_tl_b = in.pattern_to.xy;
-    const float2 pattern_br_b = in.pattern_to.zw;
+#if defined(HAS_UNIFORM_u_pattern_from)
+    const auto pattern_from   = tileProps.pattern_from;
+#else
+    const auto pattern_from   = in.pattern_from;
+#endif
+
+#if defined(HAS_UNIFORM_u_pattern_to)
+    const auto pattern_to     = tileProps.pattern_to;
+#else
+    const auto pattern_to     = in.pattern_to;
+#endif
+
+#if defined(HAS_UNIFORM_u_opacity)
+    const auto opacity        = props.opacity;
+#else
+    const auto opacity        = in.opacity;
+#endif
+
+    const float2 pattern_tl_a = pattern_from.xy;
+    const float2 pattern_br_a = pattern_from.zw;
+    const float2 pattern_tl_b = pattern_to.xy;
+    const float2 pattern_br_b = pattern_to.zw;
 
     const float2 imagecoord = glMod(in.v_pos_a, 1.0);
     const float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
@@ -436,7 +537,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     //float dist = length(in.v_pos - in.position.xy);
     //float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
 
-    return half4(mix(color1, color2, props.fade) * in.opacity);
+    return half4(mix(color1, color2, props.fade) * opacity);
 }
 )";
 };
