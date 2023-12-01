@@ -94,8 +94,8 @@ public:
 
     /**
      * @brief Set the Symbol options
-     * 
-     * @param options 
+     *
+     * @param options
      */
     void setSymbolOptions(const SymbolOptions& options);
 
@@ -109,15 +109,15 @@ public:
 
     /**
      * @brief Add a multipolygon area fill
-     * 
+     *
      * @param geometry a collection of rings with optional holes
      */
     void addFill(const GeometryCollection& geometry);
 
     /**
      * @brief Add a symbol
-     * 
-     * @param point 
+     *
+     * @param point
      */
     void addSymbol(const GeometryCoordinate& point);
 

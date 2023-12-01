@@ -328,7 +328,6 @@ void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
     // TODO: implement
 }
 
-
 void CustomDrawableLayerHost::Interface::finish() {
     if (builder && !builder->empty()) {
         // finish
