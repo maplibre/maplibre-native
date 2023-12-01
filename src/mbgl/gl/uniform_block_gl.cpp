@@ -15,7 +15,8 @@ void UniformBlockGL::bindBuffer(const gfx::UniformBuffer& uniformBuffer) {
     assert(size == uniformBuffer.getSize());
     GLint binding = index;
     const auto& uniformBufferGL = static_cast<const UniformBufferGL&>(uniformBuffer);
-    MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, binding, uniformBufferGL.getID()));
+    MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER, binding, uniformBufferGL.getID(),
+        uniformBufferGL.getBaseOffset(), uniformBufferGL.getSize()));
 }
 
 void UniformBlockGL::unbindBuffer() {

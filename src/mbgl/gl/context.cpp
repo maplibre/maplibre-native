@@ -85,6 +85,26 @@ Context::~Context() noexcept {
     }
 }
 
+void Context::beginFrame() {
+    frameInFlightFence.reset();
+    frameInFlightFence = std::make_shared<gl::Fence>();
+
+    if (frameNum == 300) {
+        UniformBufferGL::defragment(*this);
+        frameNum = 0;
+    } else {
+        frameNum++;
+    }
+}
+
+void Context::endFrame() {
+    if (!frameInFlightFence) {
+        return;
+    }
+
+    frameInFlightFence->insert();
+}
+
 void Context::initializeExtensions(const std::function<gl::ProcAddress(const char*)>& getProcAddress) {
     if (const auto* extensions = reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetString(GL_EXTENSIONS)))) {
         auto fn = [&](std::initializer_list<std::pair<const char*, const char*>> probes) -> ProcAddress {
@@ -632,6 +652,10 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
 
 void Context::finish() {
     MBGL_CHECK_ERROR(glFinish());
+}
+
+std::shared_ptr<gl::Fence> Context::getCurrentFrameFence() const {
+    return frameInFlightFence;
 }
 
 void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::size_t indexLength) {

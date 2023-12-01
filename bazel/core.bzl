@@ -854,6 +854,8 @@ MLN_OPENGL_SOURCE = [
     "src/mbgl/gl/command_encoder.hpp",
     "src/mbgl/gl/context.cpp",
     "src/mbgl/gl/context.hpp",
+    "src/mbgl/gl/fence.cpp",
+    "src/mbgl/gl/fence.hpp",
     "src/mbgl/gl/debugging_extension.cpp",
     "src/mbgl/gl/debugging_extension.hpp",
     "src/mbgl/gl/defines.hpp",

@@ -1067,6 +1067,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/fence.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/fence.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_layer_factory.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.cpp

@@ -12,6 +12,7 @@
 #include <mbgl/gl/framebuffer.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/types.hpp>
+#include <mbgl/gl/fence.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
@@ -43,6 +44,9 @@ public:
     Context& operator=(const Context& other) = delete;
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
+
+    void beginFrame() override;
+    void endFrame() override;
 
     void initializeExtensions(const std::function<gl::ProcAddress(const char*)>&);
 
@@ -80,6 +84,8 @@ public:
     void draw(const gfx::DrawMode&, std::size_t indexOffset, std::size_t indexLength);
 
     void finish();
+
+    std::shared_ptr<gl::Fence> getCurrentFrameFence() const;
 
     // Actually remove the objects we marked as abandoned with the above methods.
     // Only call this while the OpenGL context is exclusive to this thread.
@@ -134,6 +140,8 @@ private:
     bool cleanupOnDestruction = true;
 
     std::unique_ptr<extension::Debugging> debugging;
+    std::shared_ptr<gl::Fence> frameInFlightFence;
+    size_t frameNum = 0;
 
 public:
     State<value::ActiveTextureUnit> activeTextureUnit;
