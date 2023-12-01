@@ -7,6 +7,8 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/gfx/texture2d.hpp>
+#include <mbgl/gfx/context.hpp>
 
 #include <array>
 #include <memory>
@@ -49,6 +51,7 @@ public:
     struct SymbolOptions {
         Color color;
         Size size;
+        gfx::Texture2DPtr texture;
     };
 
 public:
@@ -146,6 +149,7 @@ private:
     std::optional<OverscaledTileID> tileID;
     LineOptions lineOptions;
     FillOptions fillOptions;
+    SymbolOptions symbolOptions;
 };
 
 class CustomDrawableLayer final : public Layer {

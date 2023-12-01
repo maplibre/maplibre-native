@@ -265,6 +265,11 @@ void CustomDrawableLayerHost::Interface::setFillOptions(const FillOptions& optio
     fillOptions = options;
 }
 
+void CustomDrawableLayerHost::Interface::setSymbolOptions(const SymbolOptions& options) {
+    finish();
+    symbolOptions = options;
+}
+
 void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates) {
     if (!lineShader) lineShader = lineShaderDefault();
     assert(lineShader);
