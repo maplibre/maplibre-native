@@ -136,6 +136,7 @@ void checkShaderHashes() {
             } while (std::next_permutation(subset.begin(), subset.end()));
         }
     });
+    EXPECT_EQ((size_t)std::pow(2, attributes.size()), 1 + subsetHashes.size());
 }
 
 template <BuiltIn... type>

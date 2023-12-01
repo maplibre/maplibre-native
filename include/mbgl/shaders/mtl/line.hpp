@@ -13,14 +13,13 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LineShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
+    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 8> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
-
 struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
@@ -36,10 +35,17 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float2 width2;
     float2 normal;
-    float gamma_scale;
+    half gamma_scale;
+
+#if !defined(HAS_UNIFORM_u_color)
     float4 color;
+#endif
+#if !defined(HAS_UNIFORM_u_blur)
     float blur;
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
     float opacity;
+#endif
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -49,9 +55,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const LinePermutationUBO& permutation [[buffer(11)]],
                                 device const ExpressionInputsUBO& expr [[buffer(12)]]) {
 
-    const auto color    = colorFor(permutation.color,    props.color,    vertx.color,    interp.color_t,    expr);
-    const auto blur     = valueFor(permutation.blur,     props.blur,     vertx.blur,     interp.blur_t,     expr);
-    const auto opacity  = valueFor(permutation.opacity,  props.opacity,  vertx.opacity,  interp.opacity_t,  expr);
     const auto gapwidth = valueFor(permutation.gapwidth, props.gapwidth, vertx.gapwidth, interp.gapwidth_t, expr) / 2;
     const auto offset   = valueFor(permutation.offset,   props.offset,   vertx.offset,   interp.offset_t,   expr) * -1;
     const auto width    = valueFor(permutation.width,    props.width,    vertx.width,    interp.width_t,    expr);
@@ -96,29 +99,53 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position    = position,
         .width2      = float2(outset, inset),
         .normal      = v_normal,
-        .gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective,
-        .color       = color,
-        .blur        = blur,
-        .opacity     = opacity,
+        .gamma_scale = half(extrude_length_without_perspective / extrude_length_with_perspective),
+
+#if !defined(HAS_UNIFORM_u_color)
+        .color       = colorFor(permutation.color,   props.color,   vertx.color,   interp.color_t,   expr),
+#endif
+#if !defined(HAS_UNIFORM_u_blur)
+        .blur        = valueFor(permutation.blur,    props.blur,    vertx.blur,    interp.blur_t,    expr),
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+        .opacity     = valueFor(permutation.opacity, props.opacity, vertx.opacity, interp.opacity_t, expr),
+#endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LineUBO& line [[buffer(8)]],
+                            device const LinePropertiesUBO& props [[buffer(9)]],
                             device const LinePermutationUBO& permutation [[buffer(11)]]) {
     if (permutation.overdrawInspector) {
         return half4(1.0);
     }
+
+#if defined(HAS_UNIFORM_u_color)
+    const float4 color = props.color;
+#else
+    const float4 color = in.color;
+#endif
+#if defined(HAS_UNIFORM_u_blur)
+    const float blur = props.blur;
+#else
+    const float blur = in.blur;
+#endif
+#if defined(HAS_UNIFORM_u_opacity)
+    const float opacity = props.opacity;
+#else
+    const float opacity = in.opacity;
+#endif
 
     // Calculate the distance of the pixel from the line in pixels.
     const float dist = length(in.normal) * in.width2.x;
 
     // Calculate the antialiasing fade factor. This is either when fading in the
     // line in case of an offset line (v_width2.y) or when fading out (v_width2.x)
-    const float blur2 = (in.blur + 1.0 / line.device_pixel_ratio) * in.gamma_scale;
+    const float blur2 = (blur + 1.0 / line.device_pixel_ratio) * in.gamma_scale;
     const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0);
 
-    return half4(in.color * (alpha * in.opacity));
+    return half4(color * (alpha * opacity));
 }
 )";
 };
@@ -135,7 +162,6 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
-
 struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
@@ -152,12 +178,21 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float2 width2;
     float2 normal;
-    float gamma_scale;
-    float blur;
-    float opacity;
-    float4 pattern_from;
-    float4 pattern_to;
+    half gamma_scale;
     float linesofar;
+
+#if !defined(HAS_UNIFORM_u_blur)
+    float blur;
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    float opacity;
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    float4 pattern_from;
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+    float4 pattern_to;
+#endif
 };
 
 struct alignas(16) LinePatternUBO {
@@ -204,14 +239,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const LinePermutationUBO& permutation [[buffer(13)]],
                                 device const ExpressionInputsUBO& expr [[buffer(14)]]) {
 
-    const auto blur     = valueFor(permutation.blur,     props.blur,     vertx.blur,     interp.blur_t,     expr);
-    const auto opacity  = valueFor(permutation.opacity,  props.opacity,  vertx.opacity,  interp.opacity_t,  expr);
     const auto gapwidth = valueFor(permutation.gapwidth, props.gapwidth, vertx.gapwidth, interp.gapwidth_t, expr) / 2;
     const auto offset   = valueFor(permutation.offset,   props.offset,   vertx.offset,   interp.offset_t,   expr) * -1;
     const auto width    = valueFor(permutation.width,    props.width,    vertx.width,    interp.width_t,    expr);
-
-    const auto pattern_from   = patternFor(permutation.pattern_from,    tileProps.pattern_from,  vertx.pattern_from,   interp.pattern_from_t,     expr);
-    const auto pattern_to     = patternFor(permutation.pattern_to,      tileProps.pattern_to,    vertx.pattern_to,     interp.pattern_to_t,       expr);
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
@@ -220,7 +250,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float2 a_extrude = float2(vertx.data.xy) - 128.0;
     const float a_direction = fmod(float(vertx.data.z), 4.0) - 1.0;
-    float linesofar = (floor(vertx.data.z / 4.0) + vertx.data.w * 64.0) * LINE_DISTANCE_SCALE;
+    const float linesofar = (floor(vertx.data.z / 4.0) + vertx.data.w * 64.0) * LINE_DISTANCE_SCALE;
     const float2 pos = floor(float2(vertx.pos_normal) * 0.5);
 
     // x is 1 if it's a round cap, 0 otherwise
@@ -255,17 +285,28 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position     = position,
         .width2       = float2(outset, inset),
         .normal       = v_normal,
-        .gamma_scale  = extrude_length_without_perspective / extrude_length_with_perspective,
-        .blur         = blur,
-        .opacity      = opacity,
-        .pattern_from = pattern_from,
-        .pattern_to   = pattern_to,
+        .gamma_scale  = half(extrude_length_without_perspective / extrude_length_with_perspective),
         .linesofar    = linesofar,
+
+#if !defined(HAS_UNIFORM_u_blur)
+        .blur         = valueFor(permutation.blur,     props.blur,     vertx.blur,     interp.blur_t,     expr),
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+        .opacity      = valueFor(permutation.opacity,  props.opacity,  vertx.opacity,  interp.opacity_t,  expr),
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+        .pattern_from = patternFor(permutation.pattern_from, tileProps.pattern_from, vertx.pattern_from, interp.pattern_from_t, expr),
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+        .pattern_to   = patternFor(permutation.pattern_to,   tileProps.pattern_to,   vertx.pattern_to,   interp.pattern_to_t,   expr),
+#endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LinePatternUBO& line [[buffer(9)]],
+                            device const LinePatternPropertiesUBO& props [[buffer(10)]],
+                            device const LinePatternTilePropertiesUBO& tileProps [[buffer(12)]],
                             device const LinePermutationUBO& permutation [[buffer(13)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
@@ -273,47 +314,68 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(1.0);
     }
 
-    float2 pattern_tl_a = in.pattern_from.xy;
-    float2 pattern_br_a = in.pattern_from.zw;
-    float2 pattern_tl_b = in.pattern_to.xy;
-    float2 pattern_br_b = in.pattern_to.zw;
-    
-    float pixelRatio = line.scale.x;
-    float tileZoomRatio = line.scale.y;
-    float fromScale = line.scale.z;
-    float toScale = line.scale.w;
-    
-    float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
-    float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
-    
-    float2 pattern_size_a = float2(display_size_a.x * fromScale / tileZoomRatio, display_size_a.y);
-    float2 pattern_size_b = float2(display_size_b.x * toScale / tileZoomRatio, display_size_b.y);
-    
+#if defined(HAS_UNIFORM_u_blur)
+    const auto blur         = props.blur;
+#else
+    const auto blur         = in.blur;
+#endif
+#if defined(HAS_UNIFORM_u_opacity)
+    const auto opacity      = props.opacity;
+#else
+    const auto opacity      = in.opacity;
+#endif
+#if defined(HAS_UNIFORM_u_pattern_from)
+    const auto pattern_from = tileProps.pattern_from;
+#else
+    const auto pattern_from = in.pattern_from;
+#endif
+#if defined(HAS_UNIFORM_u_pattern_to)
+    const auto pattern_to   = tileProps.pattern_to;
+#else
+    const auto pattern_to   = in.pattern_to;
+#endif
+
+    const float2 pattern_tl_a = pattern_from.xy;
+    const float2 pattern_br_a = pattern_from.zw;
+    const float2 pattern_tl_b = pattern_to.xy;
+    const float2 pattern_br_b = pattern_to.zw;
+
+    const float pixelRatio = line.scale.x;
+    const float tileZoomRatio = line.scale.y;
+    const float fromScale = line.scale.z;
+    const float toScale = line.scale.w;
+
+    const float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
+    const float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
+
+    const float2 pattern_size_a = float2(display_size_a.x * fromScale / tileZoomRatio, display_size_a.y);
+    const float2 pattern_size_b = float2(display_size_b.x * toScale / tileZoomRatio, display_size_b.y);
+
     // Calculate the distance of the pixel from the line in pixels.
-    float dist = length(in.normal) * in.width2.x;
-    
+    const float dist = length(in.normal) * in.width2.x;
+
     // Calculate the antialiasing fade factor. This is either when fading in
     // the line in case of an offset line (in.width2.y) or when fading out
     // (in.width2.x)
-    float blur2 = (in.blur + 1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
-    float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0);
-    
-    float x_a = glMod(in.linesofar / pattern_size_a.x, 1.0);
-    float x_b = glMod(in.linesofar / pattern_size_b.x, 1.0);
-    
+    const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
+    const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0);
+
+    const float x_a = glMod(in.linesofar / pattern_size_a.x, 1.0);
+    const float x_b = glMod(in.linesofar / pattern_size_b.x, 1.0);
+
     // in.normal.y is 0 at the midpoint of the line, -1 at the lower edge, 1 at the upper edge
     // we clamp the line width outset to be between 0 and half the pattern height plus padding (2.0)
     // to ensure we don't sample outside the designated symbol on the sprite sheet.
     // 0.5 is added to shift the component to be bounded between 0 and 1 for interpolation of
     // the texture coordinate
-    float y_a = 0.5 + (in.normal.y * clamp(in.width2.x, 0.0, (pattern_size_a.y + 2.0) / 2.0) / pattern_size_a.y);
-    float y_b = 0.5 + (in.normal.y * clamp(in.width2.x, 0.0, (pattern_size_b.y + 2.0) / 2.0) / pattern_size_b.y);
-    float2 pos_a = mix(pattern_tl_a / line.texsize, pattern_br_a / line.texsize, float2(x_a, y_a));
-    float2 pos_b = mix(pattern_tl_b / line.texsize, pattern_br_b / line.texsize, float2(x_b, y_b));
+    const float y_a = 0.5 + (in.normal.y * clamp(in.width2.x, 0.0, (pattern_size_a.y + 2.0) / 2.0) / pattern_size_a.y);
+    const float y_b = 0.5 + (in.normal.y * clamp(in.width2.x, 0.0, (pattern_size_b.y + 2.0) / 2.0) / pattern_size_b.y);
+    const float2 pos_a = mix(pattern_tl_a / line.texsize, pattern_br_a / line.texsize, float2(x_a, y_a));
+    const float2 pos_b = mix(pattern_tl_b / line.texsize, pattern_br_b / line.texsize, float2(x_b, y_b));
 
-    float4 color = mix(image0.sample(image0_sampler, pos_a), image0.sample(image0_sampler, pos_b), line.fade);
-    
-    return half4(color * alpha * in.opacity);
+    const float4 color = mix(image0.sample(image0_sampler, pos_a), image0.sample(image0_sampler, pos_b), line.fade);
+
+    return half4(color * alpha * opacity);
 }
 )";
 };
@@ -323,14 +385,13 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LineSDFShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
+    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 9> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
-
 struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
@@ -345,15 +406,24 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
-    float4 color;
     float2 width2;
     float2 normal;
-    float gamma_scale;
-    float blur;
-    float opacity;
     float2 tex_a;
     float2 tex_b;
+    half gamma_scale;
+
+#if !defined(HAS_UNIFORM_u_color)
+    float4 color;
+#endif
+#if !defined(HAS_UNIFORM_u_blur)
+    float blur;
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    float opacity;
+#endif
+#if !defined(HAS_UNIFORM_u_floorwidth)
     float floorwidth;
+#endif
 };
 
 struct alignas(16) LineSDFUBO {
@@ -398,9 +468,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const LinePermutationUBO& permutation [[buffer(12)]],
                                 device const ExpressionInputsUBO& expr [[buffer(13)]]) {
 
-    const auto color      = colorFor(permutation.color,         props.color,        vertx.color,        interp.color_t,         expr);
-    const auto blur       = valueFor(permutation.blur,          props.blur,         vertx.blur,         interp.blur_t,        expr);
-    const auto opacity    = valueFor(permutation.opacity,       props.opacity,      vertx.opacity,      interp.opacity_t,       expr);
     const auto gapwidth   = valueFor(permutation.gapwidth,      props.gapwidth,     vertx.gapwidth,     interp.gapwidth_t,      expr) / 2;
     const auto offset     = valueFor(permutation.offset,        props.offset,       vertx.offset,       interp.offset_t,        expr) * -1;
     const auto width      = valueFor(permutation.width,         props.width,        vertx.width,        interp.width_t,         expr);
@@ -446,20 +513,30 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     return {
         .position     = position,
-        .color        = color,
         .width2       = float2(outset, inset),
         .normal       = v_normal,
-        .gamma_scale  = extrude_length_without_perspective / extrude_length_with_perspective,
-        .blur         = blur,
-        .opacity      = opacity,
+        .gamma_scale  = half(extrude_length_without_perspective / extrude_length_with_perspective),
         .tex_a        = float2(linesofar * line.patternscale_a.x / floorwidth, (normal.y * line.patternscale_a.y + line.tex_y_a) * 2.0),
         .tex_b        = float2(linesofar * line.patternscale_b.x / floorwidth, (normal.y * line.patternscale_b.y + line.tex_y_b) * 2.0),
+
+#if !defined(HAS_UNIFORM_u_color)
+        .color        = colorFor(permutation.color,      props.color,      vertx.color,      interp.color_t,      expr),
+#endif
+#if !defined(HAS_UNIFORM_u_blur)
+        .blur         = valueFor(permutation.blur,       props.blur,       vertx.blur,       interp.blur_t,       expr),
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+        .opacity      = valueFor(permutation.opacity,    props.opacity,    vertx.opacity,    interp.opacity_t,    expr),
+#endif
+#if !defined(HAS_UNIFORM_u_floorwidth)
         .floorwidth   = floorwidth,
+#endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LineSDFUBO& line [[buffer(9)]],
+                            device const LineSDFPropertiesUBO& props [[buffer(10)]],
                             device const LinePermutationUBO& permutation [[buffer(12)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
@@ -467,18 +544,39 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(1.0);
     }
 
+#if defined(HAS_UNIFORM_u_color)
+    const float4 color = props.color;
+#else
+    const float4 color = in.color;
+#endif
+#if defined(HAS_UNIFORM_u_blur)
+    const float blur = props.blur;
+#else
+    const float blur = in.blur;
+#endif
+#if defined(HAS_UNIFORM_u_opacity)
+    const float opacity = props.opacity;
+#else
+    const float opacity = in.opacity;
+#endif
+#if defined(HAS_UNIFORM_u_floorwidth)
+    const float floorwidth = props.floorwidth;
+#else
+    const float floorwidth = in.floorwidth;
+#endif
+
     const float dist = length(in.normal) * in.width2.x;
     // Calculate the antialiasing fade factor. This is either when fading in the
     // line in case of an offset line (v_width2.y) or when fading out (v_width2.x)
-    const float blur2 = (in.blur + 1.0 / line.device_pixel_ratio) * in.gamma_scale;
+    const float blur2 = (blur + 1.0 / line.device_pixel_ratio) * in.gamma_scale;
     float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0);
 
     float sdfdist_a = image0.sample(image0_sampler, in.tex_a).a;
     float sdfdist_b = image0.sample(image0_sampler, in.tex_b).a;
     float sdfdist = mix(sdfdist_a, sdfdist_b, line.mix);
-    alpha *= smoothstep(0.5 - line.sdfgamma / in.floorwidth, 0.5 + line.sdfgamma / in.floorwidth, sdfdist);
+    alpha *= smoothstep(0.5 - line.sdfgamma / floorwidth, 0.5 + line.sdfgamma / floorwidth, sdfdist);
 
-    return half4(in.color * (alpha * in.opacity));
+    return half4(color * (alpha * opacity));
 }
 )";
 };
@@ -488,14 +586,13 @@ struct ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LineBasicShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
+    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 2> attributes;
     static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
-
 struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
@@ -505,9 +602,7 @@ struct FragmentStage {
     float4 position [[position, invariant]];
     float width2;
     float2 normal;
-    float gamma_scale;
-    float4 color;
-    float opacity;
+    half gamma_scale;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -544,14 +639,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .position    = position,
         .width2      = outset,
         .normal      = v_normal,
-        .gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective,
-        .color       = props.color,
-        .opacity     = props.opacity,
+        .gamma_scale = half(extrude_length_without_perspective / extrude_length_with_perspective),
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineBasicUBO& line [[buffer(2)]]) {
+                            device const LineBasicUBO& line [[buffer(2)]],
+                            device const LineBasicPropertiesUBO& props [[buffer(3)]]) {
 
     // Calculate the distance of the pixel from the line in pixels.
     const float dist = length(in.normal) * in.width2;
@@ -561,7 +655,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float blur2 = (1.0 / line.device_pixel_ratio) * in.gamma_scale;
     const float alpha = clamp(min(dist + blur2, in.width2 - dist) / blur2, 0.0, 1.0);
 
-    return half4(in.color * (alpha * in.opacity));
+    return half4(props.color * (alpha * props.opacity));
 }
 )";
 };
