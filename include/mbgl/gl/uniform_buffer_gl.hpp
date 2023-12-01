@@ -1,56 +1,36 @@
 #pragma once
 
-#include <mbgl/gl/context.hpp>
 #include <mbgl/gfx/uniform_buffer.hpp>
+#include <mbgl/gl/types.hpp>
+#include <mbgl/gl/buffer_allocator.hpp>
 
 namespace mbgl {
 namespace gl {
 
-class UniformBufferGL final : public gfx::UniformBuffer {
+class UniformBufferGL final : public gfx::UniformBuffer, public gl::RelocatableBuffer<UniformBufferGL> {
     UniformBufferGL(const UniformBufferGL&);
 
 public:
-    struct Ref {
-        UniformBufferGL* refPtr;
-        ptrdiff_t bufPtr = 0;
-        size_t size = 0;
-
-        Ref(UniformBufferGL* buffer, ptrdiff_t pointer, size_t size_)
-            : refPtr(buffer), bufPtr(pointer), size(size_) {}
-        Ref(UniformBufferGL* buffer) : refPtr(buffer) {}
-
-        bool operator==(const Ref& rhs) const noexcept {
-            return refPtr == rhs.refPtr;
-        }
-    };
-
-public:
-    UniformBufferGL(const void* data, std::size_t size_);
-    UniformBufferGL(UniformBufferGL&& other) noexcept
-        : UniformBuffer(std::move(other)), contents(std::move(other.contents)) {
-        activeBuffer = std::move(other.activeBuffer);
-        alignedIndex = std::move(other.alignedIndex);
-    }
+    UniformBufferGL(const void* data, std::size_t size_, IBufferAllocator& allocator);
     ~UniformBufferGL() override;
 
-    BufferID getID() const;
-    ptrdiff_t getBaseOffset() const noexcept { return alignedIndex; }
-    const std::vector<std::byte>& getContents() const noexcept { return contents; }
-    void relocBuffer(size_t bufferID, ptrdiff_t index) noexcept;
-    void relocRef(Ref* ref) noexcept;
-    void update(const void* data, std::size_t size_) override;
+    UniformBufferGL(UniformBufferGL&& rhs) noexcept = default;
+    UniformBufferGL& operator=(const UniformBufferGL& rhs) = delete;
+//    UniformBufferGL& operator=(UniformBufferGL&& rhs) noexcept = default;
 
-    static void defragment(const gl::Context& context);
+    BufferID getID() const;
 
     UniformBufferGL clone() const { return {*this}; }
 
-protected:
-    Ref* ref = nullptr;
-    std::vector<std::byte> contents;
-    //uint32_t hash;
-    size_t activeBuffer = 0;
+    // gfx::UniformBuffer
+    void update(const void* data, std::size_t size_) override;
 
-    ptrdiff_t alignedIndex = 0;
+private:
+    // If the requested UBO size is too large for the allocator, the UBO will manage its own allocation
+    bool isManagedAllocation = false;
+    BufferID localID;
+
+    friend class UniformBufferArrayGL;
 };
 
 /// Stores a collection of uniform buffers by name

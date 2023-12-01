@@ -22,9 +22,9 @@ void Fence::insert() noexcept {
 
 bool Fence::isSignaled() const noexcept {
     if (!fence) {
-        return true;
+        return false;
     }
-    
+
     return glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, 0);
 }
 

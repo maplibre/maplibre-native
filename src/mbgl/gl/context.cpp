@@ -73,7 +73,11 @@ GLint getMaxVertexAttribs() {
 
 Context::Context(RendererBackend& backend_)
     : gfx::Context(/*maximumVertexBindingCount=*/getMaxVertexAttribs()),
-      backend(backend_) {}
+      backend(backend_) {
+#if MLN_DRAWABLE_RENDERER
+    uboAllocator = std::make_unique<gl::UniformBufferAllocator>();
+#endif
+}
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
@@ -86,11 +90,13 @@ Context::~Context() noexcept {
 }
 
 void Context::beginFrame() {
-    frameInFlightFence.reset();
     frameInFlightFence = std::make_shared<gl::Fence>();
 
-    if (frameNum == 300) {
-        UniformBufferGL::defragment(*this);
+    // Run allocator defragmentation on this frame interval.
+    constexpr auto defragFreq = 1;
+
+    if (frameNum == defragFreq) {
+        uboAllocator->defragment(frameInFlightFence);
         frameNum = 0;
     } else {
         frameNum++;
@@ -514,7 +520,7 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
 }
 
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool /*persistent*/) {
-    return std::make_shared<gl::UniformBufferGL>(data, size);
+    return std::make_shared<gl::UniformBufferGL>(data, size, *uboAllocator);
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {

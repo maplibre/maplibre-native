@@ -17,6 +17,7 @@
 #include <mbgl/util/noncopyable.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gl/buffer_allocator.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 #endif
 
@@ -141,6 +142,9 @@ private:
 
     std::unique_ptr<extension::Debugging> debugging;
     std::shared_ptr<gl::Fence> frameInFlightFence;
+#if MLN_DRAWABLE_RENDERER
+    std::unique_ptr<gl::UniformBufferAllocator> uboAllocator;
+#endif
     size_t frameNum = 0;
 
 public:

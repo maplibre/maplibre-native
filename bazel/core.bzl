@@ -997,6 +997,7 @@ MLN_DRAWABLES_HEADERS = [
 ]
 
 MLN_DRAWABLES_GL_SOURCE = [
+    "src/mbgl/gl/buffer_allocator.cpp",
     "src/mbgl/gl/drawable_gl.cpp",
     "src/mbgl/gl/drawable_gl_builder.cpp",
     "src/mbgl/gl/drawable_gl_impl.hpp",
@@ -1009,6 +1010,7 @@ MLN_DRAWABLES_GL_SOURCE = [
 ]
 
 MLN_DRAWABLES_GL_HEADERS = [
+    "include/mbgl/gl/buffer_allocator.hpp",
     "include/mbgl/gl/drawable_gl.hpp",
     "include/mbgl/gl/drawable_gl_builder.hpp",
     "include/mbgl/gl/layer_group_gl.hpp",
