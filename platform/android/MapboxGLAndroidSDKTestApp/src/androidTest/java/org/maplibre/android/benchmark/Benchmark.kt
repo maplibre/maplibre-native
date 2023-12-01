@@ -1,7 +1,8 @@
 package org.maplibre.android.benchmark
 
 import android.app.Activity
-import androidx.test.core.app.launchActivityForResult
+import androidx.lifecycle.Lifecycle
+import androidx.test.core.app.ActivityScenario
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -12,7 +13,10 @@ import org.maplibre.android.testapp.activity.benchmark.BenchmarkActivity
 class Benchmark {
     @Test
     fun worldTourBenchmark() {
-        val scenario = launchActivityForResult<BenchmarkActivity>()
+        val scenario = ActivityScenario.launch(BenchmarkActivity::class.java)
+        while (scenario.state !== Lifecycle.State.DESTROYED) {
+            Thread.sleep(1000)
+        }
         assertEquals(scenario.result.resultCode, Activity.RESULT_OK)
     }
 }
