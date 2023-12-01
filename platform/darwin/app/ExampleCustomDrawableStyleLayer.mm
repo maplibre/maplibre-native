@@ -122,6 +122,14 @@ public:
             GeometryCoordinate position {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)};
             
             // TODO: set options ...
+            Interface::SymbolOptions options;
+            options.size = mbgl::Size(32, 32);
+            options.color = Color::blue();
+            options.texture = interface.context.createTexture2D();
+            std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(options.size);
+            // TODO: load image
+            options.texture->setImage(image);
+            interface.setSymbolOptions(options);
             
             // add symbol
             interface.addSymbol(position);
