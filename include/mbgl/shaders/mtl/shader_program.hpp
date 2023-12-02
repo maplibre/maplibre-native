@@ -69,6 +69,9 @@ public:
     void initUniformBlock(const shaders::UniformBlockInfo&);
     void initTexture(const shaders::TextureInfo&);
 
+    bool getBindMissingAttributes() const { return bindMissingAttributes; }
+    void setBindMissingAttributes(bool value) { bindMissingAttributes = value; }
+
 protected:
     std::string shaderName;
     RendererBackend& backend;
@@ -77,6 +80,7 @@ protected:
     UniformBlockArray uniformBlocks;
     VertexAttributeArray vertexAttributes;
     std::unordered_map<StringIdentity, std::size_t> textureBindings;
+    bool bindMissingAttributes = true;
 };
 
 } // namespace mtl

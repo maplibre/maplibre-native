@@ -15,7 +15,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
     static constexpr auto hasPermutations = true;
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
@@ -23,12 +23,18 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
 
 struct VertexStage {
     short2 position [[attribute(0)]];
+
+#if !defined(HAS_UNIFORM_u_color)
     float4 color [[attribute(1)]];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
     float2 opacity [[attribute(2)]];
+#endif
 };
 
 struct FragmentStage {
     float4 position [[position, invariant]];
+
 #if !defined(HAS_UNIFORM_u_color)
     half4 color;
 #endif
@@ -105,7 +111,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
     static constexpr auto hasPermutations = true;
 
-    static const std::array<AttributeInfo, 4> attributes;
+    static const std::array<AttributeInfo, 3> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
@@ -212,9 +218,16 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 struct VertexStage {
     short2 position [[attribute(0)]];
+
+#if !defined(HAS_UNIFORM_u_pattern_from)
     ushort4 pattern_from [[attribute(1)]];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
     ushort4 pattern_to [[attribute(2)]];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
     float2 opacity [[attribute(3)]];
+#endif
 };
 
 struct FragmentStage {
@@ -381,9 +394,16 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
 
 struct VertexStage {
     short2 position [[attribute(0)]];
+
+#if !defined(HAS_UNIFORM_u_pattern_from)
     ushort4 pattern_from [[attribute(1)]];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
     ushort4 pattern_to [[attribute(2)]];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
     float2 opacity [[attribute(3)]];
+#endif
 };
 
 struct FragmentStage {

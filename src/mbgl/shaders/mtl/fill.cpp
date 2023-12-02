@@ -3,15 +3,10 @@
 namespace mbgl {
 namespace shaders {
 
-const std::array<AttributeInfo, 4> ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>::attributes = {
+const std::array<AttributeInfo, 3> ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, 1, "a_pos"},
     AttributeInfo{1, gfx::AttributeDataType::Float4, 1, "a_color"},
     AttributeInfo{2, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-
-    // This shader doesn't use it, but we need this so that the layer can assign the same
-    // attributes to all the drawables.  If/When `VertexAttributeArray::resolve` allows it,
-    // this can be removed.
-    AttributeInfo{8, gfx::AttributeDataType::Float2, 1, "a_outline_color"},
 };
 const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{3, true, false, sizeof(FillDrawableUBO), "FillDrawableUBO"},
@@ -22,13 +17,10 @@ const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::FillShader, gfx::Bac
 };
 const std::array<TextureInfo, 0> ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>::textures = {};
 
-const std::array<AttributeInfo, 4> ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>::attributes = {
+const std::array<AttributeInfo, 3> ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, 1, "a_pos"},
     AttributeInfo{1, gfx::AttributeDataType::Float4, 1, "a_outline_color"},
     AttributeInfo{2, gfx::AttributeDataType::Float2, 1, "a_opacity"},
-
-    // See `a_outline_color` in FillShader
-    AttributeInfo{8, gfx::AttributeDataType::Float2, 1, "a_color"},
 };
 const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{3, true, false, sizeof(FillOutlineDrawableUBO), "FillOutlineDrawableUBO"},

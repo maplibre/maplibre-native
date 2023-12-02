@@ -50,16 +50,17 @@ public:
         constexpr auto& source = ShaderSource::source;
         constexpr auto& vertMain = ShaderSource::vertexMainFunction;
         constexpr auto& fragMain = ShaderSource::fragmentMainFunction;
+        constexpr auto permutations = usePermutations();
 
-        const size_t key = usePermutations()
+        const size_t key = permutations
                                ? util::order_independent_hash(propertiesAsUniforms.begin(), propertiesAsUniforms.end())
                                : 0;
-        const std::string shaderName = usePermutations() ? getShaderName(name, key) : name;
+        const std::string shaderName = permutations ? getShaderName(name, key) : name;
 
         auto shader = get<mtl::ShaderProgram>(shaderName);
         if (!shader) {
             DefinesMap additionalDefines;
-            if (usePermutations()) {
+            if (permutations) {
                 addAdditionalDefines(propertiesAsUniforms, additionalDefines);
             }
 
@@ -73,9 +74,13 @@ public:
                 throw std::runtime_error("Failed to register " + shaderName + " with shader group!");
             }
 
+            shader->setBindMissingAttributes(!permutations);
+
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
             for (const auto& attrib : ShaderClass::attributes) {
-                shader->initAttribute(attrib);
+                if (!permutations || !propertiesAsUniforms.count(attrib.nameID)) {
+                    shader->initAttribute(attrib);
+                }
             }
             for (const auto& uniform : ShaderClass::uniforms) {
                 shader->initUniformBlock(uniform);

@@ -23,12 +23,25 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
 struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
+
+#if !defined(HAS_UNIFORM_u_color)
     float4 color [[attribute(2)]];
+#endif
+#if !defined(HAS_UNIFORM_u_blur)
     float2 blur [[attribute(3)]];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
     float2 opacity [[attribute(4)]];
+#endif
+#if !defined(HAS_UNIFORM_u_gapwidth)
     float2 gapwidth [[attribute(5)]];
+#endif
+#if !defined(HAS_UNIFORM_u_offset)
     float2 offset [[attribute(6)]];
+#endif
+#if !defined(HAS_UNIFORM_u_width)
     float2 width [[attribute(7)]];
+#endif
 };
 
 struct FragmentStage {
@@ -55,9 +68,21 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const LinePermutationUBO& permutation [[buffer(11)]],
                                 device const ExpressionInputsUBO& expr [[buffer(12)]]) {
 
+#if defined(HAS_UNIFORM_u_gapwidth)
+    const auto gapwidth = props.gapwidth / 2;
+#else
     const auto gapwidth = valueFor(permutation.gapwidth, props.gapwidth, vertx.gapwidth, interp.gapwidth_t, expr) / 2;
+#endif
+#if defined(HAS_UNIFORM_u_offset)
+    const auto offset   = props.offset * -1;
+#else
     const auto offset   = valueFor(permutation.offset,   props.offset,   vertx.offset,   interp.offset_t,   expr) * -1;
+#endif
+#if defined(HAS_UNIFORM_u_width)
+    const auto width    = props.width;
+#else
     const auto width    = valueFor(permutation.width,    props.width,    vertx.width,    interp.width_t,    expr);
+#endif
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
@@ -165,13 +190,28 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
 struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
+
+#if !defined(HAS_UNIFORM_u_blur)
     float2 blur [[attribute(2)]];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
     float2 opacity [[attribute(3)]];
+#endif
+#if !defined(HAS_UNIFORM_u_gapwidth)
     float2 gapwidth [[attribute(4)]];
+#endif
+#if !defined(HAS_UNIFORM_u_offset)
     float2 offset [[attribute(5)]];
+#endif
+#if !defined(HAS_UNIFORM_u_width)
     float2 width [[attribute(6)]];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
     ushort4 pattern_from [[attribute(7)]];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
     ushort4 pattern_to [[attribute(8)]];
+#endif
 };
 
 struct FragmentStage {
@@ -239,9 +279,21 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const LinePermutationUBO& permutation [[buffer(13)]],
                                 device const ExpressionInputsUBO& expr [[buffer(14)]]) {
 
+#if defined(HAS_UNIFORM_u_gapwidth)
+    const auto gapwidth = props.gapwidth / 2;
+#else
     const auto gapwidth = valueFor(permutation.gapwidth, props.gapwidth, vertx.gapwidth, interp.gapwidth_t, expr) / 2;
+#endif
+#if defined(HAS_UNIFORM_u_offset)
+    const auto offset   = props.offset * -1;
+#else
     const auto offset   = valueFor(permutation.offset,   props.offset,   vertx.offset,   interp.offset_t,   expr) * -1;
+#endif
+#if defined(HAS_UNIFORM_u_width)
+    const auto width    = props.width;
+#else
     const auto width    = valueFor(permutation.width,    props.width,    vertx.width,    interp.width_t,    expr);
+#endif
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
@@ -395,13 +447,28 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
 struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
+
+#if !defined(HAS_UNIFORM_u_color)
     float4 color [[attribute(2)]];
+#endif
+#if !defined(HAS_UNIFORM_u_blur)
     float2 blur [[attribute(3)]];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
     float2 opacity [[attribute(4)]];
+#endif
+#if !defined(HAS_UNIFORM_u_gapwidth)
     float2 gapwidth [[attribute(5)]];
+#endif
+#if !defined(HAS_UNIFORM_u_offset)
     float2 offset [[attribute(6)]];
+#endif
+#if !defined(HAS_UNIFORM_u_width)
     float2 width [[attribute(7)]];
+#endif
+#if !defined(HAS_UNIFORM_u_floorwidth)
     float2 floorwidth [[attribute(8)]];
+#endif
 };
 
 struct FragmentStage {
@@ -468,10 +535,26 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const LinePermutationUBO& permutation [[buffer(12)]],
                                 device const ExpressionInputsUBO& expr [[buffer(13)]]) {
 
-    const auto gapwidth   = valueFor(permutation.gapwidth,      props.gapwidth,     vertx.gapwidth,     interp.gapwidth_t,      expr) / 2;
-    const auto offset     = valueFor(permutation.offset,        props.offset,       vertx.offset,       interp.offset_t,        expr) * -1;
-    const auto width      = valueFor(permutation.width,         props.width,        vertx.width,        interp.width_t,         expr);
-    const auto floorwidth = valueFor(permutation.floorwidth,    props.floorwidth,   vertx.floorwidth,   interp.floorwidth_t,    expr);
+#if defined(HAS_UNIFORM_u_gapwidth)
+    const auto gapwidth   = props.gapwidth / 2;
+#else
+    const auto gapwidth   = valueFor(permutation.gapwidth,   props.gapwidth,   vertx.gapwidth,   interp.gapwidth_t,   expr) / 2;
+#endif
+#if defined(HAS_UNIFORM_u_offset)
+    const auto offset     = props.offset * -1;
+#else
+    const auto offset     = valueFor(permutation.offset,     props.offset,     vertx.offset,     interp.offset_t,     expr) * -1;
+#endif
+#if defined(HAS_UNIFORM_u_width)
+    const auto width      = props.width;
+#else
+    const auto width      = valueFor(permutation.width,      props.width,      vertx.width,      interp.width_t,      expr);
+#endif
+#if defined(HAS_UNIFORM_u_floorwidth)
+    const auto floorwidth = props.floorwidth;
+#else
+    const auto floorwidth = valueFor(permutation.floorwidth, props.floorwidth, vertx.floorwidth, interp.floorwidth_t, expr);
+#endif
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
@@ -565,16 +648,16 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float floorwidth = in.floorwidth;
 #endif
 
-    const float dist = length(in.normal) * in.width2.x;
     // Calculate the antialiasing fade factor. This is either when fading in the
-    // line in case of an offset line (v_width2.y) or when fading out (v_width2.x)
+    // line in case of an offset line (`v_width2.y`) or when fading out (`v_width2.x`)
     const float blur2 = (blur + 1.0 / line.device_pixel_ratio) * in.gamma_scale;
-    float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0);
 
-    float sdfdist_a = image0.sample(image0_sampler, in.tex_a).a;
-    float sdfdist_b = image0.sample(image0_sampler, in.tex_b).a;
-    float sdfdist = mix(sdfdist_a, sdfdist_b, line.mix);
-    alpha *= smoothstep(0.5 - line.sdfgamma / floorwidth, 0.5 + line.sdfgamma / floorwidth, sdfdist);
+    const float sdfdist_a = image0.sample(image0_sampler, in.tex_a).a;
+    const float sdfdist_b = image0.sample(image0_sampler, in.tex_b).a;
+    const float sdfdist = mix(sdfdist_a, sdfdist_b, line.mix);
+    const float dist = length(in.normal) * in.width2.x;
+    const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0) *
+                        smoothstep(0.5 - line.sdfgamma / floorwidth, 0.5 + line.sdfgamma / floorwidth, sdfdist);
 
     return half4(color * (alpha * opacity));
 }
@@ -651,7 +734,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float dist = length(in.normal) * in.width2;
 
     // Calculate the antialiasing fade factor. This is either when fading in the
-    // line in case of an offset line (v_width2.y) or when fading out (v_width2.x)
+    // line in case of an offset line (`v_width2.y`) or when fading out (`v_width2.x`)
     const float blur2 = (1.0 / line.device_pixel_ratio) * in.gamma_scale;
     const float alpha = clamp(min(dist + blur2, in.width2 - dist) / blur2, 0.0, 1.0);
 
