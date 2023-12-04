@@ -16,7 +16,7 @@ public:
 
     UniformBufferGL(UniformBufferGL&& rhs) noexcept = default;
     UniformBufferGL& operator=(const UniformBufferGL& rhs) = delete;
-//    UniformBufferGL& operator=(UniformBufferGL&& rhs) noexcept = default;
+    //    UniformBufferGL& operator=(UniformBufferGL&& rhs) noexcept = default;
 
     BufferID getID() const;
 

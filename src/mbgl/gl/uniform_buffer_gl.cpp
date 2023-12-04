@@ -13,7 +13,8 @@ namespace gl {
 using namespace platform;
 
 UniformBufferGL::UniformBufferGL(const void* data_, std::size_t size_, IBufferAllocator& allocator_)
-    : UniformBuffer(size_), RelocatableBuffer(allocator_) {
+    : UniformBuffer(size_),
+      RelocatableBuffer(allocator_) {
     if (size_ > allocator.pageSize()) {
         // Buffer is very large, won't fit in the provided allocator
         MBGL_CHECK_ERROR(glGenBuffers(1, &localID));
