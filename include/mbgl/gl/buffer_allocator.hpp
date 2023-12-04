@@ -3,6 +3,7 @@
 #include <mbgl/gl/types.hpp>
 #include <type_traits>
 #include <cassert>
+#include <cstring>
 #include <cstdint>
 #include <list>
 #include <vector>

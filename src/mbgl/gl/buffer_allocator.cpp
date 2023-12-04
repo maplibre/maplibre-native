@@ -3,8 +3,6 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
 
-#include <cstring>
-
 namespace mbgl {
 
 using namespace platform;
