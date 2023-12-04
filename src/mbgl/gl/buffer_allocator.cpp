@@ -36,7 +36,7 @@ public:
     using BufferTy = BufferAllocator<OwnerClass, type, PageSizeKB, FragmentationThreshPerc, InitialBufferSize>;
     using RefTy = TypedBufferRef<OwnerClass>;
 
-    ~BufferAllocator() = default;
+    ~BufferAllocator() override = default;
 
 private:
     /// @brief A buffer in-flight is one that is being used by the GPU. Such buffers become free
