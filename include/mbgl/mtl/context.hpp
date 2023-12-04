@@ -50,6 +50,9 @@ public:
 
     const RendererBackend& getBackend() const { return backend; }
 
+    void beginFrame() override;
+    void endFrame() override;
+
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
     /// Create a new buffer object

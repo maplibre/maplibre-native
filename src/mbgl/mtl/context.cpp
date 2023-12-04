@@ -60,6 +60,9 @@ Context::~Context() noexcept {
     }
 }
 
+void Context::beginFrame() {}
+void Context::endFrame() {}
+
 std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
     return std::make_unique<CommandEncoder>(*this);
 }

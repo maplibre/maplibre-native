@@ -12,11 +12,11 @@
 #include <mbgl/gl/framebuffer.hpp>
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/types.hpp>
-#include <mbgl/gl/fence.hpp>
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/util/noncopyable.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gl/fence.hpp>
 #include <mbgl/gl/buffer_allocator.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 #endif
@@ -86,7 +86,9 @@ public:
 
     void finish();
 
+#if MLN_DRAWABLE_RENDERER
     std::shared_ptr<gl::Fence> getCurrentFrameFence() const;
+#endif
 
     // Actually remove the objects we marked as abandoned with the above methods.
     // Only call this while the OpenGL context is exclusive to this thread.
@@ -141,11 +143,11 @@ private:
     bool cleanupOnDestruction = true;
 
     std::unique_ptr<extension::Debugging> debugging;
-    std::shared_ptr<gl::Fence> frameInFlightFence;
 #if MLN_DRAWABLE_RENDERER
+    std::shared_ptr<gl::Fence> frameInFlightFence;
     std::unique_ptr<gl::UniformBufferAllocator> uboAllocator;
-#endif
     size_t frameNum = 0;
+#endif
 
 public:
     State<value::ActiveTextureUnit> activeTextureUnit;

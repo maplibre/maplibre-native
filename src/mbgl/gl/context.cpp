@@ -90,6 +90,7 @@ Context::~Context() noexcept {
 }
 
 void Context::beginFrame() {
+#if MLN_DRAWABLE_RENDERER
     frameInFlightFence = std::make_shared<gl::Fence>();
 
     // Run allocator defragmentation on this frame interval.
@@ -101,14 +102,17 @@ void Context::beginFrame() {
     } else {
         frameNum++;
     }
+#endif
 }
 
 void Context::endFrame() {
+#if MLN_DRAWABLE_RENDERER
     if (!frameInFlightFence) {
         return;
     }
 
     frameInFlightFence->insert();
+#endif
 }
 
 void Context::initializeExtensions(const std::function<gl::ProcAddress(const char*)>& getProcAddress) {
@@ -660,9 +664,11 @@ void Context::finish() {
     MBGL_CHECK_ERROR(glFinish());
 }
 
+#if MLN_DRAWABLE_RENDERER
 std::shared_ptr<gl::Fence> Context::getCurrentFrameFence() const {
     return frameInFlightFence;
 }
+#endif
 
 void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::size_t indexLength) {
     switch (drawMode.type) {
