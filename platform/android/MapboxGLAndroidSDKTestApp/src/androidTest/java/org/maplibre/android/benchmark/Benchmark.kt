@@ -13,7 +13,7 @@ import org.maplibre.android.testapp.activity.benchmark.BenchmarkActivity
 class Benchmark {
     @Test
     fun worldTourBenchmark() {
-        val scenario = ActivityScenario.launch(BenchmarkActivity::class.java)
+        val scenario = ActivityScenario.launchActivityForResult(BenchmarkActivity::class.java)
         while (scenario.state !== Lifecycle.State.DESTROYED) {
             Thread.sleep(1000)
         }
