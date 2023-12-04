@@ -152,7 +152,7 @@ private:
 class UniformBufferAllocator : public IBufferAllocator {
 public:
     UniformBufferAllocator();
-    ~UniformBufferAllocator();
+    ~UniformBufferAllocator() override;
 
     bool write(const void* data, size_t size, BufferRef*& ref) noexcept override;
     void release(BufferRef* ref) noexcept override;
