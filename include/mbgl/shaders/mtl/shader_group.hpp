@@ -50,7 +50,7 @@ public:
         constexpr auto& source = ShaderSource::source;
         constexpr auto& vertMain = ShaderSource::vertexMainFunction;
         constexpr auto& fragMain = ShaderSource::fragmentMainFunction;
-        constexpr auto permutations = usePermutations();
+        constexpr auto permutations = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::hasPermutations;
 
         const size_t key = permutations
                                ? util::order_independent_hash(propertiesAsUniforms.begin(), propertiesAsUniforms.end())
@@ -90,15 +90,6 @@ public:
             }
         }
         return shader;
-    }
-
-protected:
-    static constexpr bool usePermutations() noexcept {
-#if NO_METAL_PERMUTATIONS
-        return false;
-#else
-        return shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::hasPermutations;
-#endif
     }
 
 private:

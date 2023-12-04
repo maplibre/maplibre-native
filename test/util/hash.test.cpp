@@ -35,9 +35,6 @@
 
 using namespace mbgl;
 
-// Enable for troubleshooting
-#define LOG_STEPS 0
-
 TEST(OrderIndependentHash, Permutations) {
     // Try collections of up to this many elements
     constexpr int maxSize = 6;
@@ -66,14 +63,6 @@ TEST(OrderIndependentHash, Permutations) {
                 size_t initialValue = 0;
                 do {
                     const auto curValue = util::order_independent_hash(values.begin(), values.end());
-#if LOG_STEPS
-                    if (isFirst || curValue != initialValue) {
-                        for (auto v : values) {
-                            std::cout << v << ",";
-                        }
-                        std::cout << " - " << std::hex << curValue << std::endl;
-                    }
-#endif
                     if (isFirst) {
                         initialValue = curValue;
                         isFirst = false;
@@ -122,13 +111,6 @@ void checkShaderHashes() {
                     // All permutations of the subset must yield the same hash key as the first
                     EXPECT_EQ(*firstHash, hash);
                 } else {
-#if LOG_STEPS
-                    for (const auto& strid : subset) {
-                        std::cout << strid << ",";
-                    }
-                    std::cout << ": " << std::hex << phash << "\n";
-#endif
-
                     firstHash.emplace(hash);
                     // All subset hashes must be unique
                     EXPECT_TRUE(subsetHashes.insert(hash).second);
@@ -136,7 +118,7 @@ void checkShaderHashes() {
             } while (std::next_permutation(subset.begin(), subset.end()));
         }
     });
-    EXPECT_EQ((size_t)std::pow(2, attributes.size()), 1 + subsetHashes.size());
+    EXPECT_EQ(static_cast<size_t>(std::pow(2, attributes.size())), 1 + subsetHashes.size());
 }
 
 template <BuiltIn... type>
