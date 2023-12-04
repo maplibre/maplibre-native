@@ -13,7 +13,7 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
     static constexpr auto name = "SymbolTextAndIconShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
+    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 9> attributes;
     static const std::array<UniformBlockInfo, 7> uniforms;
@@ -29,22 +29,43 @@ struct VertexStage {
     float3 projected_pos [[attribute(2)]];
     float fade_opacity [[attribute(3)]];
 
+#if !defined(HAS_UNIFORM_u_fill_color)
     float4 fill_color [[attribute(4)]];
+#endif
+#if !defined(HAS_UNIFORM_u_halo_color)
     float4 halo_color [[attribute(5)]];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
     float opacity [[attribute(6)]];
+#endif
+#if !defined(HAS_UNIFORM_u_halo_width)
     float halo_width [[attribute(7)]];
+#endif
+#if !defined(HAS_UNIFORM_u_halo_blur)
     float halo_blur [[attribute(8)]];
+#endif
 };
 
 struct FragmentStage {
     float4 position [[position, invariant]];
-    float4 fill_color;
-    float4 halo_color;
-    float halo_width;
-    float halo_blur;
-    float opacity;
     float4 data0;
     float4 data1;
+
+#if !defined(HAS_UNIFORM_u_fill_color)
+    half4 fill_color;
+#endif
+#if !defined(HAS_UNIFORM_u_halo_color)
+    half4 halo_color;
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    half opacity;
+#endif
+#if !defined(HAS_UNIFORM_u_halo_width)
+    half halo_width;
+#endif
+#if !defined(HAS_UNIFORM_u_halo_blur)
+    half halo_blur;
+#endif
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -55,12 +76,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolDrawableInterpolateUBO& interp [[buffer(13)]],
                                 device const SymbolPermutationUBO& permutation [[buffer(14)]],
                                 device const ExpressionInputsUBO& expr [[buffer(15)]]) {
-
-    const auto fill_color = colorFor(permutation.fill_color, paint.fill_color, vertx.fill_color, interp.fill_color_t, expr);
-    const auto halo_color = colorFor(permutation.halo_color, paint.halo_color, vertx.halo_color, interp.halo_color_t, expr);
-    const auto opacity = valueFor(permutation.opacity, paint.opacity, vertx.opacity, interp.opacity_t, expr);
-    const auto halo_width = valueFor(permutation.halo_width, paint.halo_width, vertx.halo_width, interp.halo_width_t, expr);
-    const auto halo_blur = valueFor(permutation.halo_blur, paint.halo_blur, vertx.halo_blur, interp.halo_blur_t, expr);
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -131,19 +146,31 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     return {
         .position   = position,
-        .fill_color = fill_color,
-        .halo_color = halo_color,
-        .halo_width = halo_width,
-        .halo_blur  = halo_blur,
-        .opacity    = opacity,
         .data0      = float4(a_tex / drawable.texsize, a_tex / drawable.texsize_icon),
         .data1      = float4(gamma_scale, size, interpolated_fade_opacity, is_sdf),
+
+#if !defined(HAS_UNIFORM_u_fill_color)
+        .fill_color = half(colorFor(permutation.fill_color, paint.fill_color, vertx.fill_color, interp.fill_color_t, expr));
+#endif
+#if !defined(HAS_UNIFORM_u_halo_color)
+        .halo_color = half(colorFor(permutation.halo_color, paint.halo_color, vertx.halo_color, interp.halo_color_t, expr));
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+        .opacity    = half(valueFor(permutation.opacity, paint.opacity, vertx.opacity, interp.opacity_t, expr));
+#endif
+#if !defined(HAS_UNIFORM_u_halo_width)
+        .halo_width = half(valueFor(permutation.halo_width, paint.halo_width, vertx.halo_width, interp.halo_width_t, expr));
+#endif
+#if !defined(HAS_UNIFORM_u_halo_blur)
+        .halo_blur  = half(valueFor(permutation.halo_blur, paint.halo_blur, vertx.halo_blur, interp.halo_blur_t, expr));
+#endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const SymbolDrawableUBO& drawable [[buffer(9)]],
                             device const SymbolDynamicUBO& dynamic [[buffer(10)]],
+                            device const SymbolDrawablePaintUBO& paint [[buffer(11)]],
                             device const SymbolDrawableTilePropsUBO& props [[buffer(12)]],
                             device const SymbolPermutationUBO& permutation [[buffer(14)]],
                             texture2d<float, access::sample> glyph_image [[texture(0)]],
@@ -154,36 +181,54 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
         return half4(1.0);
     }
 
+#if defined(HAS_UNIFORM_u_fill_color)
+    const half4 fill_color = half4(paint.fill_color);
+#else
+    const half4 fill_color = in.fill_color;
+#endif
+#if defined(HAS_UNIFORM_u_halo_color)
+    const half4 halo_color = half4(paint.halo_color);
+#else
+    const half4 halo_color = in.halo_color;
+#endif
+#if defined(HAS_UNIFORM_u_opacity)
+    const half opacity = half(paint.opacity);
+#else
+    const half opacity = in.opacity;
+#endif
+#if defined(HAS_UNIFORM_u_halo_width)
+    const half halo_width = half(paint.halo_width);
+#else
+    const half halo_width = in.halo_width;
+#endif
+#if defined(HAS_UNIFORM_u_halo_blur)
+    const half halo_blur = half(paint.halo_blur);
+#else
+    const half halo_blur = in.halo_blur;
+#endif
+
     const float fade_opacity = in.data1[2];
 
     if (in.data1.w == ICON) {
         const float2 tex_icon = in.data0.zw;
-        const float alpha = in.opacity * fade_opacity;
+        const float alpha = opacity * fade_opacity;
         return half4(icon_image.sample(icon_sampler, tex_icon) * alpha);
     }
 
     const float2 tex = in.data0.xy;
     const float EDGE_GAMMA = 0.105 / dynamic.device_pixel_ratio;
-
     const float gamma_scale = in.data1.x;
     const float size = in.data1.y;
-
     const float fontScale = size / 24.0;
-
-    float4 color = in.fill_color;
-    float gamma = EDGE_GAMMA / (fontScale * drawable.gamma_scale);
-    float buff = (256.0 - 64.0) / 256.0;
-    if (props.is_halo) {
-        color = in.halo_color;
-        gamma = (in.halo_blur * 1.19 / SDF_PX + EDGE_GAMMA) / (fontScale * drawable.gamma_scale);
-        buff = (6.0 - in.halo_width / fontScale) / SDF_PX;
-    }
-
+    const half4 color = props.is_halo ? halo_color : fill_color;
+    const float fontGamma = fontScale * drawable.gamma_scale;
+    const float gamma = ((props.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
+    const float buff = props.is_halo ? (6.0 - halo_width / fontScale) / SDF_PX : (256.0 - 64.0) / 256.0;
     const float dist = glyph_image.sample(glyph_sampler, tex).a;
     const float gamma_scaled = gamma * gamma_scale;
     const float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
 
-    return half4(color * (alpha * in.opacity * fade_opacity));
+    return half4(color * (alpha * opacity * fade_opacity));
 }
 )";
 };

@@ -296,12 +296,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto pattern_to   = patternFor(permutation.pattern_to,   tileProps.pattern_to,   vertx.pattern_to,   interp.pattern_to_t,   expr);
 #endif
 
-#if defined(HAS_UNIFORM_u_opacity)
-    const auto opacity      = props.opacity;
-#else
-    const auto opacity      = valueFor(permutation.opacity,        props.opacity,          vertx.opacity,      interp.opacity_t,     expr);
-#endif
-
     const float2 pattern_tl_a = pattern_from.xy;
     const float2 pattern_br_a = pattern_from.zw;
     const float2 pattern_tl_b = pattern_to.xy;
@@ -327,7 +321,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .pattern_to     = pattern_to,
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(opacity),
+        .opacity        = half(valueFor(permutation.opacity,        props.opacity,          vertx.opacity,      interp.opacity_t,     expr)),
 #endif
     };
 }
