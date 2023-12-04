@@ -2,6 +2,7 @@
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
+#include <utility>
 
 namespace mbgl {
 
@@ -147,7 +148,7 @@ public:
             // Important: Check if our list needs to reallocate, if so we need to handle it manually
             // so we can update the references with their new memory locations
             if (refs.size() == refs.capacity()) {
-                auto oldList = std::move(refs);
+                auto oldList = std::exchange(refs, {});
                 refs.reserve(oldList.size() * 2);
 
                 for (size_t i = 0; i < oldList.size(); ++i) {
