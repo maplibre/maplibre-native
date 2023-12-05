@@ -12,6 +12,7 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/string_indexer.hpp>
 
+#include <Metal/MTLLibrary.hpp>
 #include <Metal/MTLRenderPass.hpp>
 #include <Metal/MTLRenderPipeline.hpp>
 
@@ -102,6 +103,8 @@ ShaderProgram::ShaderProgram(std::string name, RendererBackend& backend_, MTLFun
       backend(backend_),
       vertexFunction(std::move(vert)),
       fragmentFunction(std::move(frag)) {}
+
+ShaderProgram::~ShaderProgram() noexcept = default;
 
 MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Renderable& renderable,
                                                                 const MTLVertexDescriptorPtr& vertexDescriptor,

@@ -1,3 +1,5 @@
+#if MLN_RENDER_BACKEND_OPENGL
+
 #include <mbgl/gfx/gfx_types.hpp>
 #include <mbgl/gfx/types.hpp>
 #include <mbgl/gl/defines.hpp>
@@ -176,3 +178,5 @@ TEST(GL, sizedFor) {
     ASSERT_EQ(GL_INVALID_ENUM,
               Enum<gfx::TexturePixelType>::sizedFor(TexturePixelType::RGBA, static_cast<TextureChannelDataType>(-1)));
 }
+
+#endif
