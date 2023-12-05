@@ -78,8 +78,6 @@ public:
 
     bool operator==(const TypedBufferRef& rhs) const noexcept { return ownerPtr == rhs.ownerPtr; }
 
-    void clearOwner() noexcept { ownerPtr = nullptr; }
-
     // The owner of this allocation
     OwnerClass* getOwner() const noexcept { return ownerPtr; }
     void setOwner(OwnerClass* owner) { ownerPtr = owner; }
@@ -94,15 +92,19 @@ private:
 template <typename OwnerClass>
 class RelocatableBuffer {
 public:
-    RelocatableBuffer(IBufferAllocator& allocator_)
-        : allocator(allocator_) {}
+    RelocatableBuffer(IBufferAllocator& allocator_, OwnerClass* owner_)
+        : allocator(allocator_), owner(owner_) {
+        assert(owner);
+    }
     RelocatableBuffer(const RelocatableBuffer<OwnerClass>& rhs)
         : allocator(rhs.allocator),
+          owner(rhs.owner),
           contents(rhs.contents) {
         allocate(contents.data(), contents.size());
     }
-    RelocatableBuffer(RelocatableBuffer<OwnerClass>&& rhs)
+    RelocatableBuffer(RelocatableBuffer<OwnerClass>&& rhs) noexcept
         : allocator(rhs.allocator),
+          owner(rhs.owner),
           ref(std::move(rhs.ref)),
           contents(std::move(rhs.contents)) {}
     ~RelocatableBuffer() {
@@ -118,15 +120,18 @@ public:
     void relocRef(TypedBufferRef<OwnerClass>* newRef) noexcept { ref = newRef; }
 
     // Get the current OpenGL buffer ID. Do not store this, bind it and discard after the active frame.
-    int32_t getBufferID() const noexcept { return allocator.getBufferID(ref->getBufferIndex()); }
+    int32_t getBufferID() const noexcept { return ref ? allocator.getBufferID(ref->getBufferIndex()) : 0; }
 
     intptr_t getBindingOffset() const noexcept { return ref ? ref->getBufferOffset() : 0; }
 
     const std::vector<std::byte>& getContents() const noexcept { return contents; }
 
-protected:
+    void setOwner(OwnerClass* owner_) noexcept { owner = owner_; }
+
     /// Allocate buffer memory and copy `size` bytes into the allocation from `data`
     void allocate(const void* data, size_t size) noexcept {
+        assert(owner);
+
         if (ref && ref->getOwner()) {
             // If we're writing new data, we need to remove our ref from our old buffer.
             allocator.release(ref);
@@ -137,7 +142,7 @@ protected:
         allocator.write(data, size, reference);
 
         ref = std::move(static_cast<decltype(ref)>(reference));
-        ref->setOwner(static_cast<OwnerClass*>(this));
+        ref->setOwner(owner);
 
         contents.resize(size);
         std::memcpy(contents.data(), data, size);
@@ -146,6 +151,7 @@ protected:
     IBufferAllocator& allocator;
 
 private:
+    OwnerClass* owner = nullptr;
     TypedBufferRef<OwnerClass>* ref = nullptr; // A strong reference to the active allocation backing this buffer
     std::vector<std::byte> contents;           // CPU-side buffer contents
 };

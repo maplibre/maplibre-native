@@ -27,8 +27,7 @@ template <typename OwnerClass, // UniformBufferGL
           size_t FragmentationThreshPerc = 10,
           size_t InitialBufferSize = 256>
 class BufferAllocator : public IBufferAllocator {
-    static_assert(std::is_base_of_v<RelocatableBuffer<OwnerClass>, OwnerClass>);
-    static_assert(type == 0x8A11);
+    static_assert(type == GL_UNIFORM_BUFFER);
 
 public:
     static constexpr const size_t PageSize = 1024 * PageSizeKB;
@@ -159,7 +158,7 @@ public:
 
                     // Relocate the reference
                     refs.push_back(std::move(oldList[i]));
-                    refs.back().getOwner()->relocRef(&refs.back());
+                    refs.back().getOwner()->getManagedBuffer().relocRef(&refs.back());
                 }
 
                 // Since we dropped released refs, we can clear the tombstone count
@@ -188,7 +187,7 @@ public:
 #else
             tombstones++;
 #endif
-            bufObj->clearOwner();
+            bufObj->setOwner(nullptr);
 
             assert(occupancyBytes >= bufObj->getSize());
             occupancyBytes -= bufObj->getSize();
@@ -411,7 +410,7 @@ private:
                              GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_WRITE_BIT));
 
         if (buf) {
-            std::memcpy(buf, ref.getOwner()->getContents().data(), ref.getOwner()->getSize());
+            std::memcpy(buf, ref.getOwner()->getManagedBuffer().getContents().data(), ref.getOwner()->getSize());
             MBGL_CHECK_ERROR(glUnmapBuffer(type));
             destBuffer.pointer += alignedSize;
         } else {
@@ -429,7 +428,7 @@ private:
 
         const auto newRef = destBuffer.addRef(owner, recycledWriteIndex, refSize);
         buffers[oldIndex].decRef(&ref);
-        owner->relocRef(newRef);
+        owner->getManagedBuffer().relocRef(newRef);
         return true;
     }
 

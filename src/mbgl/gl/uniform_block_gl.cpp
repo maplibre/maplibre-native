@@ -18,7 +18,7 @@ void UniformBlockGL::bindBuffer(const gfx::UniformBuffer& uniformBuffer) {
     MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
                                        binding,
                                        uniformBufferGL.getID(),
-                                       uniformBufferGL.getBindingOffset(),
+                                       uniformBufferGL.getManagedBuffer().getBindingOffset(),
                                        uniformBufferGL.getSize()));
 }
 

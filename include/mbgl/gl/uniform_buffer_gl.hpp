@@ -7,18 +7,19 @@
 namespace mbgl {
 namespace gl {
 
-class UniformBufferGL final : public gfx::UniformBuffer, public gl::RelocatableBuffer<UniformBufferGL> {
+class UniformBufferGL final : public gfx::UniformBuffer {
     UniformBufferGL(const UniformBufferGL&);
 
 public:
     UniformBufferGL(const void* data, std::size_t size_, IBufferAllocator& allocator);
     ~UniformBufferGL() override;
 
-    UniformBufferGL(UniformBufferGL&& rhs) noexcept = default;
+    UniformBufferGL(UniformBufferGL&& rhs) noexcept;
     UniformBufferGL& operator=(const UniformBufferGL& rhs) = delete;
-    //    UniformBufferGL& operator=(UniformBufferGL&& rhs) noexcept = default;
 
     BufferID getID() const;
+    gl::RelocatableBuffer<UniformBufferGL>& getManagedBuffer() noexcept { return managedBuffer; }
+    const gl::RelocatableBuffer<UniformBufferGL>& getManagedBuffer() const noexcept { return managedBuffer; }
 
     UniformBufferGL clone() const { return {*this}; }
 
@@ -29,6 +30,7 @@ private:
     // If the requested UBO size is too large for the allocator, the UBO will manage its own allocation
     bool isManagedAllocation = false;
     BufferID localID;
+    gl::RelocatableBuffer<UniformBufferGL> managedBuffer;
 
     friend class UniformBufferArrayGL;
 };

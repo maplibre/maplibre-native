@@ -14,8 +14,8 @@ using namespace platform;
 
 UniformBufferGL::UniformBufferGL(const void* data_, std::size_t size_, IBufferAllocator& allocator_)
     : UniformBuffer(size_),
-      RelocatableBuffer(allocator_) {
-    if (size_ > allocator.pageSize()) {
+      managedBuffer(allocator_, this) {
+    if (size_ > managedBuffer.allocator.pageSize()) {
         // Buffer is very large, won't fit in the provided allocator
         MBGL_CHECK_ERROR(glGenBuffers(1, &localID));
         MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, localID));
@@ -25,14 +25,23 @@ UniformBufferGL::UniformBufferGL(const void* data_, std::size_t size_, IBufferAl
     }
 
     isManagedAllocation = true;
-    allocate(data_, size_);
+    managedBuffer.allocate(data_, size_);
+}
+
+UniformBufferGL::UniformBufferGL(UniformBufferGL&& rhs) noexcept
+    : UniformBuffer(rhs.size),
+      isManagedAllocation(rhs.isManagedAllocation),
+      localID(rhs.localID),
+      managedBuffer(std::move(rhs.managedBuffer)) {
+    managedBuffer.setOwner(this);
 }
 
 UniformBufferGL::UniformBufferGL(const UniformBufferGL& other)
     : UniformBuffer(other),
-      RelocatableBuffer(other.allocator) {
+      managedBuffer(other.managedBuffer.allocator, this) {
+    managedBuffer.setOwner(this);
     if (other.isManagedAllocation) {
-        allocate(other.getContents().data(), other.size);
+        managedBuffer.allocate(other.managedBuffer.getContents().data(), other.size);
     } else {
         MBGL_CHECK_ERROR(glGenBuffers(1, &localID));
         MBGL_CHECK_ERROR(glCopyBufferSubData(other.localID, localID, 0, 0, size));
@@ -55,7 +64,7 @@ UniformBufferGL::~UniformBufferGL() {
 
 BufferID UniformBufferGL::getID() const {
     if (isManagedAllocation) {
-        return getBufferID();
+        return managedBuffer.getBufferID();
     } else {
         return localID;
     }
@@ -63,7 +72,7 @@ BufferID UniformBufferGL::getID() const {
 
 void UniformBufferGL::update(const void* data_, std::size_t size_) {
     assert(size == size_);
-    assert(getContents().size() == size_);
+    assert(managedBuffer.getContents().size() == size_);
 
     if (size != size_) {
         Log::Error(
@@ -73,7 +82,7 @@ void UniformBufferGL::update(const void* data_, std::size_t size_) {
     }
 
     if (isManagedAllocation) {
-        allocate(data_, size);
+        managedBuffer.allocate(data_, size);
     } else {
         MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, localID));
         MBGL_CHECK_ERROR(glBufferSubData(GL_UNIFORM_BUFFER, 0, size_, data_));
