@@ -4,7 +4,6 @@
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/programs/program_parameters.hpp>
-#include <mbgl/util/hash.hpp>
 #include <mbgl/util/containers.hpp>
 
 namespace mbgl {
@@ -25,12 +24,9 @@ public:
         constexpr auto& vert = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::vertex;
         constexpr auto& frag = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::fragment;
 
-        // Generate a map key for the specified combination of properties
-        const size_t key = util::order_independent_hash(propertiesAsUniforms.begin(), propertiesAsUniforms.end());
-
         // We could cache these by key here to avoid creating a string key each time, but we
         // would need another mutex.  We could also push string IDs down into `ShaderGroup`.
-        const std::string shaderName = getShaderName(name, key);
+        const std::string shaderName = getShaderName(name, propertyHash(propertiesAsUniforms));
         auto shader = get<gl::ShaderProgramGL>(shaderName);
         if (shader) {
             return shader;
