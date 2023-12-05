@@ -13,9 +13,10 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "SymbolIconShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 6> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<UniformBlockInfo, 7> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -25,25 +26,30 @@ struct VertexStage {
     float4 pixeloffset [[attribute(2)]];
     float3 projected_pos [[attribute(3)]];
     float fade_opacity [[attribute(4)]];
+
+#if !defined(HAS_UNIFORM_u_opacity)
     float opacity [[attribute(5)]];
+#endif
 };
 
 struct FragmentStage {
     float4 position [[position, invariant]];
     float2 tex;
-    float fade_opacity;
-    float opacity;
+    half fade_opacity;
+
+#if !defined(HAS_UNIFORM_u_opacity)
+    half opacity;
+#endif
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolDrawableUBO& drawable [[buffer(8)]],
-                                device const SymbolDrawablePaintUBO& paint [[buffer(9)]],
-                                device const SymbolDrawableTilePropsUBO& props [[buffer(10)]],
-                                device const SymbolDrawableInterpolateUBO& interp [[buffer(11)]],
-                                device const SymbolPermutationUBO& permutation [[buffer(12)]],
-                                device const ExpressionInputsUBO& expr [[buffer(13)]]) {
-
-    const auto opacity  = valueFor(permutation.opacity, paint.opacity, vertx.opacity, interp.opacity_t, expr);
+                                device const SymbolDynamicUBO& dynamic [[buffer(9)]],
+                                device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
+                                device const SymbolDrawableTilePropsUBO& props [[buffer(11)]],
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(12)]],
+                                device const SymbolPermutationUBO& permutation [[buffer(13)]],
+                                device const ExpressionInputsUBO& expr [[buffer(14)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -70,8 +76,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     const float distance_ratio = props.pitch_with_map ?
-        camera_to_anchor_distance / drawable.camera_to_center_distance :
-        drawable.camera_to_center_distance / camera_to_anchor_distance;
+        camera_to_anchor_distance / dynamic.camera_to_center_distance :
+        dynamic.camera_to_center_distance / camera_to_anchor_distance;
     const float perspective_ratio = clamp(
             0.5 + 0.5 * distance_ratio,
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
@@ -88,7 +94,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
-        symbol_rotation = atan2((b.y - a.y) / drawable.aspect_ratio, b.x - a.x);
+        symbol_rotation = atan2((b.y - a.y) / dynamic.aspect_ratio, b.x - a.x);
     }
 
     const float angle_sin = sin(segment_angle + symbol_rotation);
@@ -101,26 +107,35 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
 
     const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = fade_opacity[1] > 0.5 ? drawable.fade_change : -drawable.fade_change;
+    const float fade_change = fade_opacity[1] > 0.5 ? dynamic.fade_change : -dynamic.fade_change;
 
     return {
         .position     = position,
         .tex          = a_tex / drawable.texsize,
-        .fade_opacity = max(0.0, min(1.0, fade_opacity[0] + fade_change)),
-        .opacity      = opacity,
+        .fade_opacity = half(max(0.0, min(1.0, fade_opacity[0] + fade_change))),
+#if !defined(HAS_UNIFORM_u_opacity)
+        .opacity      = half(valueFor(permutation.opacity, paint.opacity, vertx.opacity, interp.opacity_t, expr)),
+#endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const SymbolDrawableUBO& drawable [[buffer(8)]],
-                            device const SymbolPermutationUBO& permutation [[buffer(12)]],
+                            device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
+                            device const SymbolPermutationUBO& permutation [[buffer(13)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
     if (permutation.overdrawInspector) {
         return half4(1.0);
     }
 
-    return half4(image.sample(image_sampler, in.tex) * (in.opacity * in.fade_opacity));
+#if defined(HAS_UNIFORM_u_opacity)
+    const half opacity = half(paint.opacity);
+#else
+    const half opacity = in.opacity;
+#endif
+
+    return half4(image.sample(image_sampler, in.tex) * (opacity * in.fade_opacity));
 }
 )";
 };

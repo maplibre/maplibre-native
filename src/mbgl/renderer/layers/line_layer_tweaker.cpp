@@ -17,6 +17,7 @@
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/line.hpp>
+#include <mbgl/shaders/mtl/line_gradient.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 namespace mbgl {
@@ -110,37 +111,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     };
 
 #if MLN_RENDER_BACKEND_METAL
-    if (permutationUpdated) {
-        const LinePermutationUBO permutationUBO = {
-            /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(2), /*.expression=*/{}},
-            /* .blur = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(3), /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(4), /*.expression=*/{}},
-            /* .gapwidth = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(5), /*.expression=*/{}},
-            /* .offset = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(6), /*.expression=*/{}},
-            /* .width = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(7), /*.expression=*/{}},
-            /* .floorwidth = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
-            /* .pattern_from = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
-            /* .pattern_to = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
-            /* .overdrawInspector = */ overdrawInspector,
-            /* .pad = */ 0,
-            0,
-            0,
-            0};
-
-        if (permutationUniformBuffer) {
-            permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
-        } else {
-            permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
-        }
-        permutationUpdated = false;
-    }
     if (!expressionUniformBuffer) {
         const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
         expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
     }
 #endif
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         const auto shader = drawable.getShader();
         if (!drawable.getTileID() || !shader || !checkTweakDrawable(drawable)) {
             return;
@@ -168,6 +145,29 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                 // properties UBO
                 uniforms.addOrReplace(idLinePropertiesUBOName, getLinePropsBuffer());
+
+#if MLN_RENDER_BACKEND_METAL
+                if (permutationUpdated) {
+                    const LinePermutationUBO permutationUBO = {
+                        /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(2), /*.expression=*/{}},
+                        /* .blur = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(3), /*.expression=*/{}},
+                        /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(4), /*.expression=*/{}},
+                        /* .gapwidth = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(5), /*.expression=*/{}},
+                        /* .offset = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(6), /*.expression=*/{}},
+                        /* .width = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(7), /*.expression=*/{}},
+                        /* .floorwidth = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
+                        /* .pattern_from = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
+                        /* .pattern_to = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
+                        /* .overdrawInspector = */ overdrawInspector,
+                        /* .pad = */ 0,
+                        0,
+                        0,
+                        0};
+
+                    context.emplaceOrUpdateUniformBuffer(permutationUniformBuffer, &permutationUBO);
+                    permutationUpdated = false;
+                }
+#endif
             } break;
 
             case LineType::Gradient: {
@@ -180,6 +180,34 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                 // properties UBO
                 uniforms.addOrReplace(idLineGradientPropertiesUBOName, getLineGradientPropsBuffer());
+
+#if MLN_RENDER_BACKEND_METAL
+                if (permutationUpdated) {
+                    const LinePermutationUBO permutationUBO = {
+                        /* .color = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
+                        /* .blur = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LineGradientShader>(2), /*.expression=*/{}},
+                        /* .opacity = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LineGradientShader>(3), /*.expression=*/{}},
+                        /* .gapwidth = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LineGradientShader>(4), /*.expression=*/{}},
+                        /* .offset = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LineGradientShader>(5), /*.expression=*/{}},
+                        /* .width = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LineGradientShader>(6), /*.expression=*/{}},
+                        /* .floorwidth = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
+                        /* .pattern_from = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
+                        /* .pattern_to = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
+                        /* .overdrawInspector = */ overdrawInspector,
+                        /* .pad = */ 0,
+                        0,
+                        0,
+                        0};
+
+                    context.emplaceOrUpdateUniformBuffer(permutationUniformBuffer, &permutationUBO);
+                    permutationUpdated = false;
+                }
+#endif
             } break;
 
             case LineType::Pattern: {
@@ -205,6 +233,36 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                 // properties UBO
                 uniforms.addOrReplace(idLinePatternPropertiesUBOName, getLinePatternPropsBuffer());
+
+#if MLN_RENDER_BACKEND_METAL
+                if (permutationUpdated) {
+                    const LinePermutationUBO permutationUBO = {
+                        /* .color = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
+                        /* .blur = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LinePatternShader>(2), /*.expression=*/{}},
+                        /* .opacity = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LinePatternShader>(3), /*.expression=*/{}},
+                        /* .gapwidth = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LinePatternShader>(4), /*.expression=*/{}},
+                        /* .offset = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LinePatternShader>(5), /*.expression=*/{}},
+                        /* .width = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LinePatternShader>(6), /*.expression=*/{}},
+                        /* .floorwidth = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
+                        /* .pattern_from = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LinePatternShader>(7), /*.expression=*/{}},
+                        /* .pattern_to = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LinePatternShader>(8), /*.expression=*/{}},
+                        /* .overdrawInspector = */ overdrawInspector,
+                        /* .pad = */ 0,
+                        0,
+                        0,
+                        0};
+
+                    context.emplaceOrUpdateUniformBuffer(permutationUniformBuffer, &permutationUBO);
+                    permutationUpdated = false;
+                }
+#endif
             } break;
 
             case LineType::SDF: {
@@ -251,6 +309,32 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     // properties UBO
                     uniforms.addOrReplace(idLineSDFPropertiesUBOName, getLineSDFPropsBuffer());
                 }
+
+#if MLN_RENDER_BACKEND_METAL
+                if (permutationUpdated) {
+                    const LinePermutationUBO permutationUBO = {
+                        /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::LineSDFShader>(2), /*.expression=*/{}},
+                        /* .blur = */ {/*.source=*/getAttributeSource<BuiltIn::LineSDFShader>(3), /*.expression=*/{}},
+                        /* .opacity = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LineSDFShader>(4), /*.expression=*/{}},
+                        /* .gapwidth = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LineSDFShader>(5), /*.expression=*/{}},
+                        /* .offset = */ {/*.source=*/getAttributeSource<BuiltIn::LineSDFShader>(6), /*.expression=*/{}},
+                        /* .width = */ {/*.source=*/getAttributeSource<BuiltIn::LineSDFShader>(7), /*.expression=*/{}},
+                        /* .floorwidth = */
+                        {/*.source=*/getAttributeSource<BuiltIn::LineSDFShader>(8), /*.expression=*/{}},
+                        /* .pattern_from = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
+                        /* .pattern_to = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
+                        /* .overdrawInspector = */ overdrawInspector,
+                        /* .pad = */ 0,
+                        0,
+                        0,
+                        0};
+
+                    context.emplaceOrUpdateUniformBuffer(permutationUniformBuffer, &permutationUBO);
+                    permutationUpdated = false;
+                }
+#endif
             } break;
 
             default: {

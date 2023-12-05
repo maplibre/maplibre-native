@@ -42,7 +42,7 @@ public:
     UniqueDrawable& getCurrentDrawable(bool createIfNone);
 
     /// Close the current drawable, using a new one for any further work
-    void flush();
+    void flush(gfx::Context& context);
 
     /// Get all the completed drawables
     const std::vector<UniqueDrawable>& getDrawables() const { return drawables; }
@@ -134,9 +134,6 @@ public:
     /// Set the shader to be used
     void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
 
-    /// Get the vertex attributes that override default values in the shader program
-    const gfx::VertexAttributeArray& getVertexAttributes() const;
-
     /// Set the name given to new drawables
     void setDrawableName(std::string value) { drawableName = std::move(value); }
 
@@ -157,9 +154,12 @@ public:
     /// Clear the tweaker collection
     void clearTweakers() { tweakers.clear(); }
 
+    /// Get the vertex attributes that override default values in the shader program
+    VertexAttributeArrayPtr& getVertexAttributes() { return vertexAttrs; }
+    const VertexAttributeArrayPtr& getVertexAttributes() const { return vertexAttrs; }
+
     /// A set of attribute values to be added for each vertex
-    void setVertexAttributes(const VertexAttributeArray& value);
-    void setVertexAttributes(VertexAttributeArray&&);
+    void setVertexAttributes(VertexAttributeArrayPtr attrs) { vertexAttrs = std::move(attrs); }
 
     /// Add some vertex elements, returns the index of the first one added
     std::size_t addVertices(const std::vector<std::array<int16_t, 2>>& vertices,
@@ -204,6 +204,8 @@ public:
     /// return the curent vertex count
     std::size_t curVertexCount() const;
 
+    bool empty() const { return !(drawables.size() || curVertexCount()); }
+
 protected:
     /// Create an instance of the appropriate drawable type
     virtual UniqueDrawable createDrawable() const = 0;
@@ -230,6 +232,7 @@ protected:
     std::vector<UniqueDrawable> drawables;
     gfx::Drawable::Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
+    gfx::VertexAttributeArrayPtr vertexAttrs;
 
     class Impl;
     std::unique_ptr<Impl> impl;

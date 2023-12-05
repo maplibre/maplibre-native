@@ -89,26 +89,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     const auto zoom = parameters.state.getZoom();
 
 #if MLN_RENDER_BACKEND_METAL
-    if (permutationUpdated) {
-        const SymbolPermutationUBO permutationUBO = {
-            /* .fill_color = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(5), /*.expression=*/{}},
-            /* .halo_color = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(6), /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(7), /*.expression=*/{}},
-            /* .halo_width = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(8), /*.expression=*/{}},
-            /* .halo_blur = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(9), /*.expression=*/{}},
-            /* .overdrawInspector = */ overdrawInspector,
-            /* .pad = */ 0,
-            0,
-            0};
-
-        if (permutationUniformBuffer) {
-            permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
-        } else {
-            permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
-        }
-
-        permutationUpdated = false;
-    }
     if (!expressionUniformBuffer) {
         const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
         expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
@@ -121,7 +101,20 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         propertiesUpdated = false;
     }
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    const auto camDist = state.getCameraToCenterDistance();
+
+    const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
+                                         /*.camera_to_center_distance=*/camDist,
+                                         /*.device_pixel_ratio=*/parameters.pixelRatio,
+                                         /*.aspect_ratio=*/state.getSize().aspectRatio()};
+
+    if (!dynamicBuffer) {
+        dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
+    } else {
+        dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
+    }
+
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
         }
@@ -163,7 +156,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                 matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
         const mat4 glCoordMatrix = getGlCoordMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
 
-        const auto camDist = state.getCameraToCenterDistance();
         const float gammaScale = (symbolData.pitchAlignment == AlignmentType::Map
                                       ? static_cast<float>(std::cos(state.getPitch())) * camDist
                                       : 1.0f);
@@ -182,27 +174,39 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.texsize_icon=*/toArray(getTexSize(drawable, idTexIconUniformName)),
 
             /*.gamma_scale=*/gammaScale,
-            /*.device_pixel_ratio=*/parameters.pixelRatio,
-
-            /*.camera_to_center_distance=*/camDist,
-            /*.pitch=*/static_cast<float>(state.getPitch()),
             /*.rotate_symbol=*/rotateInShader,
-            /*.aspect_ratio=*/state.getSize().aspectRatio(),
             /*.pad=*/{0},
         };
 
-        const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
-                                             /*.pad1=*/0,
-                                             /*.pad2=*/{0, 0}};
-
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(idSymbolDrawableUBOName, &drawableUBO, context);
-        uniforms.createOrUpdate(idSymbolDynamicUBOName, &dynamicUBO, context);
+
+        uniforms.addOrReplace(idSymbolDynamicUBOName, dynamicBuffer);
         uniforms.addOrReplace(idSymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
 
 #if MLN_RENDER_BACKEND_METAL
+        assert(propertiesAsUniforms.empty());
+
+        using namespace shaders;
+        using ShaderClass = ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal>;
+        const auto source = [&](int index) {
+            const auto nameID = ShaderClass::attributes[index].nameID;
+            const bool uniform = symbolData.propertiesAsUniforms.count(nameID);
+            return uniform ? AttributeSource::Constant : AttributeSource::PerVertex;
+        };
+
+        const SymbolPermutationUBO permutationUBO = {/* .fill_color = */ {/*.source=*/source(5), /*.expression=*/{}},
+                                                     /* .halo_color = */ {/*.source=*/source(6), /*.expression=*/{}},
+                                                     /* .opacity = */ {/*.source=*/source(7), /*.expression=*/{}},
+                                                     /* .halo_width = */ {/*.source=*/source(8), /*.expression=*/{}},
+                                                     /* .halo_blur = */ {/*.source=*/source(9), /*.expression=*/{}},
+                                                     /* .overdrawInspector = */ overdrawInspector,
+                                                     /* .pad = */ 0,
+                                                     0,
+                                                     0};
+        uniforms.createOrUpdate(idSymbolPermutationUBOName, &permutationUBO, context);
+
         uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
-        uniforms.addOrReplace(idSymbolPermutationUBOName, permutationUniformBuffer);
 #endif // MLN_RENDER_BACKEND_METAL
     });
 }

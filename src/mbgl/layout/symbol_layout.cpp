@@ -15,6 +15,7 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/i18n.hpp>
 #include <mbgl/util/platform.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <mapbox/polylabel.hpp>
 
@@ -933,7 +934,7 @@ std::vector<float> SymbolLayout::calculateTileDistances(const GeometryCoordinate
 
 void SymbolLayout::createBucket(const ImagePositions&,
                                 std::unique_ptr<FeatureIndex>&,
-                                std::unordered_map<std::string, LayerRenderData>& renderData,
+                                mbgl::unordered_map<std::string, LayerRenderData>& renderData,
                                 const bool firstLoad,
                                 const bool showCollisionBoxes,
                                 const CanonicalTileID& canonical) {

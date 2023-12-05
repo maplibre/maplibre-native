@@ -39,8 +39,6 @@ public:
     std::size_t vertexCount = 0;
     gfx::AttributeDataType vertexType = static_cast<gfx::AttributeDataType>(-1);
 
-    VertexAttributeArrayGL vertexAttributes;
-
     gfx::IndexBuffer indexBuffer = {0, nullptr};
     std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
 

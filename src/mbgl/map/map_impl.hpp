@@ -45,7 +45,7 @@ public:
     void onInvalidate() final;
     void onResourceError(std::exception_ptr) final;
     void onWillStartRenderingFrame() final;
-    void onDidFinishRenderingFrame(RenderMode, bool, bool, double) final;
+    void onDidFinishRenderingFrame(RenderMode, bool, bool, double, double) final;
     void onWillStartRenderingMap() final;
     void onDidFinishRenderingMap() final;
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;

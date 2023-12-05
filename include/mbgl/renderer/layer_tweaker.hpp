@@ -1,12 +1,13 @@
 #pragma once
 
+#include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/immutable.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <array>
 #include <memory>
 #include <string>
-#include <unordered_set>
 
 namespace mbgl {
 
@@ -53,8 +54,10 @@ public:
     static shaders::ExpressionInputsUBO buildExpressionUBO(double zoom, uint64_t frameCount);
 
     /// @brief Check whether a property name exists within the previously set collection.
-    bool hasPropertyAsUniform(StringIdentity) const;
-    shaders::AttributeSource getAttributeSource(StringIdentity) const;
+    shaders::AttributeSource getAttributeSource(const StringIdentity id) {
+        return propertiesAsUniforms.count(id) ? shaders::AttributeSource::Constant
+                                              : shaders::AttributeSource::PerVertex;
+    }
 
     template <shaders::BuiltIn ShaderType>
     shaders::AttributeSource getAttributeSource(size_t index) {
@@ -66,8 +69,8 @@ public:
     /// @brief Set the collection of attribute names which will be provided at uniform values rather than per-vertex
     /// attributes.
     /// @details These values should not have "a_" prefixes, as produced by `readDataDrivenPaintProperties`.
-    void setPropertiesAsUniforms(const std::unordered_set<StringIdentity>&);
-    const std::unordered_set<StringIdentity>& getPropertiesAsUniforms() const;
+    void setPropertiesAsUniforms(const mbgl::unordered_set<StringIdentity>&);
+    const mbgl::unordered_set<StringIdentity>& getPropertiesAsUniforms() const;
 
     void enableOverdrawInspector(bool);
 
@@ -96,7 +99,7 @@ protected:
 #if MLN_RENDER_BACKEND_METAL
     // For Metal, whether a property is provided through attribtues or uniforms is specified in
     // a uniform buffer rather than by a shader compiled with different preprocessor definitions.
-    std::unordered_set<StringIdentity> propertiesAsUniforms;
+    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
 #endif // MLN_RENDER_BACKEND_METAL
 
     // Indicates that the evaluated properties have changed

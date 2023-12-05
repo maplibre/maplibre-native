@@ -256,6 +256,7 @@ cc_library(
     ],
 )
 
+
 filegroup(
     name = "srcs",
     srcs = glob(["**"]),
@@ -319,3 +320,13 @@ cmake(
         "harfbuzz",
     ],
 )
+
+cc_library(
+    name = "unordered_dense",
+    srcs = [],
+    hdrs = ["unordered_dense/include/ankerl/unordered_dense.h"],
+    include_prefix = "ankerl",
+    strip_include_prefix = "unordered_dense/include/ankerl",
+    visibility = ["//visibility:public"],
+)
+

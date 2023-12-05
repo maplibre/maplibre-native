@@ -54,8 +54,9 @@ public:
 public:
     template <class Vertex>
     VertexBuffer<Vertex> createVertexBuffer(const VertexVector<Vertex>& v,
-                                            const BufferUsageType usage = BufferUsageType::StaticDraw) {
-        return {v.elements(), createVertexBufferResource(v.data(), v.bytes(), usage)};
+                                            const BufferUsageType usage = BufferUsageType::StaticDraw,
+                                            bool persistent = false) {
+        return {v.elements(), createVertexBufferResource(v.data(), v.bytes(), usage, persistent)};
     }
 
     template <class Vertex>
@@ -66,8 +67,9 @@ public:
 
     template <class DrawMode>
     IndexBuffer createIndexBuffer(IndexVector<DrawMode>&& v,
-                                  const BufferUsageType usage = BufferUsageType::StaticDraw) {
-        return {v.elements(), createIndexBufferResource(v.data(), v.bytes(), usage)};
+                                  const BufferUsageType usage = BufferUsageType::StaticDraw,
+                                  bool persistent = false) {
+        return {v.elements(), createIndexBufferResource(v.data(), v.bytes(), usage, persistent)};
     }
 
     template <class DrawMode>
@@ -91,13 +93,15 @@ public:
 protected:
     virtual std::unique_ptr<VertexBufferResource> createVertexBufferResource(const void* data,
                                                                              std::size_t size,
-                                                                             BufferUsageType) = 0;
+                                                                             BufferUsageType,
+                                                                             bool persistent = false) = 0;
     virtual void updateVertexBufferResource(VertexBufferResource&, const void* data, std::size_t size) = 0;
 
 public:
     virtual std::unique_ptr<IndexBufferResource> createIndexBufferResource(const void* data,
                                                                            std::size_t size,
-                                                                           BufferUsageType) = 0;
+                                                                           BufferUsageType,
+                                                                           bool persistent = false) = 0;
     virtual void updateIndexBufferResource(IndexBufferResource&, const void* data, std::size_t size) = 0;
 
 public:

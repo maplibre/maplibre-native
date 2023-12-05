@@ -110,7 +110,12 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     parameters.symbolFadeChange = renderTreeParameters.symbolFadeChange;
     parameters.opaquePassCutoff = renderTreeParameters.opaquePassCutOff;
     const auto& sourceRenderItems = renderTree.getSourceRenderItems();
+
+#if MLN_DRAWABLE_RENDERER
+    const auto& layerRenderItems = renderTree.getLayerRenderItemMap();
+#else
     const auto& layerRenderItems = renderTree.getLayerRenderItems();
+#endif
 
     // - UPLOAD PASS -------------------------------------------------------------------------------
     // Uploads all required buffers and images before we do any actual rendering.
@@ -153,6 +158,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
         // Tweakers are run in the upload pass so they can set up uniforms.
         orchestrator.visitLayerGroups(
+            [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
+        orchestrator.visitDebugLayerGroups(
             [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
 
         // Update the debug layer groups
@@ -319,7 +326,12 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
             orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
-                layerGroup.visitDrawables([&](gfx::Drawable& drawable) { drawable.draw(parameters); });
+                visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
+                    for (const auto& tweaker : drawable.getTweakers()) {
+                        tweaker->execute(drawable, parameters);
+                    }
+                    drawable.draw(parameters);
+                });
             });
         }
     };
@@ -382,16 +394,22 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     // Ends the RenderPass
     parameters.renderPass.reset();
+
+    const auto startRendering = util::MonotonicTimer::now().count();
     parameters.encoder->present(parameters.backend.getDefaultRenderable());
+    const auto renderingTime = util::MonotonicTimer::now().count() - startRendering;
 
     // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
+
+    const auto encodingTime = renderTree.getElapsedTime() - renderingTime;
 
     observer->onDidFinishRenderingFrame(
         renderTreeParameters.loaded ? RendererObserver::RenderMode::Full : RendererObserver::RenderMode::Partial,
         renderTreeParameters.needsRepaint,
         renderTreeParameters.placementChanged,
-        renderTree.getElapsedTime());
+        encodingTime,
+        renderingTime);
 
     if (!renderTreeParameters.loaded) {
         renderState = RenderState::Partial;

@@ -103,7 +103,7 @@ public:
 
 #if MLN_DRAWABLE_RENDERER
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
-    gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
+    gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size, bool persistent) override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
@@ -117,9 +117,14 @@ public:
 
     Framebuffer createFramebuffer(const gfx::Texture2D& color);
 
+    gfx::VertexAttributeArrayPtr createVertexAttributeArray() const override;
+
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
 
-    bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size) override;
+    bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
+                                      const void* data,
+                                      std::size_t size,
+                                      bool persistent) override;
 #endif
 
     void setDirtyState() override;

@@ -13,6 +13,7 @@ struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "CollisionCircleShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 4> attributes;
     static const std::array<UniformBlockInfo, 1> uniforms;
@@ -24,7 +25,7 @@ struct VertexStage {
     short2 pos [[attribute(0)]];
     short2 anchor_pos [[attribute(1)]];
     short2 extrude [[attribute(2)]];
-    uchar2 placed [[attribute(3)]];
+    ushort2 placed [[attribute(3)]];
 };
 
 struct FragmentStage {

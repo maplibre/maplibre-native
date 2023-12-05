@@ -60,7 +60,7 @@ float2 unpack_float(const float packedValue) {
     return float2(v0, packedIntValue - v0 * 256);
 }
 float2 unpack_opacity(const float packedOpacity) {
-    return float2(float(int(packedOpacity) / 2) / 127.0, fmod(packedOpacity, 2.0));
+    return float2(float(int(packedOpacity) / 2) / 127.0, glMod(packedOpacity, 2.0));
 }
 // To minimize the number of attributes needed, we encode a 4-component
 // color into a pair of floats (i.e. a vec2) as follows:
@@ -123,6 +123,13 @@ struct alignas(16) LineUBO {
     float device_pixel_ratio;
 };
 
+struct alignas(16) LineBasicUBO {
+    float4x4 matrix;
+    float2 units_to_pixels;
+    float ratio;
+    float device_pixel_ratio;
+};
+
 struct alignas(16) LineGradientUBO {
     float4x4 matrix;
     float2 units_to_pixels;
@@ -138,6 +145,13 @@ struct alignas(16) LinePropertiesUBO {
     float offset;
     float width;
     float pad1, pad2, pad3;
+};
+
+struct alignas(16) LineBasicPropertiesUBO {
+    float4 color;
+    float opacity;
+    float width;
+    float pad1, pad2;
 };
 
 struct alignas(16) LineGradientPropertiesUBO {
@@ -214,16 +228,18 @@ struct alignas(16) SymbolDrawableUBO {
     float2 texsize_icon;
 
     float gamma_scale;
-    float device_pixel_ratio;
-
-    float camera_to_center_distance;
-    float pitch;
     /*bool*/ int rotate_symbol;
-    float aspect_ratio;
-    float fade_change;
-    float pad;
+    float2 pad;
 };
-static_assert(sizeof(SymbolDrawableUBO) == 15 * 16, "unexpected padding");
+static_assert(sizeof(SymbolDrawableUBO) == 14 * 16, "unexpected padding");
+
+struct alignas(16) SymbolDynamicUBO {
+    float fade_change;
+    float camera_to_center_distance;
+    float device_pixel_ratio;
+    float aspect_ratio;
+};
+static_assert(sizeof(SymbolDynamicUBO) == 16, "unexpected padding");
 
 struct alignas(16) SymbolDrawablePaintUBO {
     float4 fill_color;

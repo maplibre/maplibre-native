@@ -35,11 +35,14 @@ public:
 
     std::unique_ptr<gfx::VertexBufferResource> createVertexBufferResource(const void* data,
                                                                           std::size_t size,
-                                                                          gfx::BufferUsageType) override;
+                                                                          gfx::BufferUsageType,
+                                                                          bool persistent) override;
     void updateVertexBufferResource(gfx::VertexBufferResource&, const void* data, std::size_t size) override;
+
     std::unique_ptr<gfx::IndexBufferResource> createIndexBufferResource(const void* data,
                                                                         std::size_t size,
-                                                                        gfx::BufferUsageType) override;
+                                                                        gfx::BufferUsageType,
+                                                                        bool persistent) override;
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
 
 #if MLN_DRAWABLE_RENDERER

@@ -13,6 +13,7 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "BackgroundShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<UniformBlockInfo, 2> uniforms;
@@ -35,24 +36,26 @@ struct alignas(16) BackgroundDrawableUBO {
 };
 struct alignas(16) BackgroundLayerUBO {
     float4 color;
-    float opacity, pad1, pad2, pad3;
+    float opacity;
+    bool overdrawInspector;
+    uint8_t pad1, pad2, pad3;
+    float pad4, pad5;
 };
 
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
-                                device const BackgroundLayerUBO& layerUBO [[buffer(1)]],
-                                device const BackgroundDrawableUBO& drawableUBO [[buffer(2)]]) {
+                                device const BackgroundDrawableUBO& drawableUBO [[buffer(1)]]) {
     return {
         .position = drawableUBO.matrix * float4(float2(in.position.xy), 0, 1)
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const BackgroundLayerUBO& layerUBO [[buffer(1)]]) {
-#ifdef OVERDRAW_INSPECTOR
-    return half4(1.0);
-#else
-    return half4(float4(layerUBO.color.rgb, layerUBO.color.a * layerUBO.opacity));
-#endif
+                            device const BackgroundLayerUBO& layerUBO [[buffer(2)]]) {
+    if (layerUBO.overdrawInspector) {
+        return half4(0.0);
+    }
+    
+    return half4(layerUBO.color * layerUBO.opacity);
 }
 )";
 };

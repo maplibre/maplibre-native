@@ -10,6 +10,7 @@
 #include <mbgl/mtl/buffer_resource.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/util/noncopyable.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <memory>
 #include <optional>
@@ -21,6 +22,11 @@ namespace mbgl {
 class ProgramParameters;
 class RenderStaticData;
 
+namespace gfx {
+class VertexAttributeArray;
+using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
+} // namespace gfx
+
 namespace shaders {
 struct ClipUBO;
 } // namespace shaders
@@ -30,8 +36,10 @@ namespace mtl {
 class RenderPass;
 class RendererBackend;
 class ShaderProgram;
+class VertexBufferResource;
 
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
+using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
 
 class Context final : public gfx::Context {
 public:
@@ -44,27 +52,33 @@ public:
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
-    BufferResource createBuffer(const void* data, std::size_t size, gfx::BufferUsageType) const;
+    /// Create a new buffer object
+    /// @param data The raw data to copy, may be `nullptr`
+    /// @param size The size of the buffer
+    /// @param usage Not currently used
+    /// @param isIndexBuffer True if the buffer will be used for indexes.  The Metal API only accepts `MTLBuffer`
+    /// objects for drawing indexed primitives, so this constrains how the buffer can be managed.
+    /// @param persistent Performance hint, assume this buffer will be reused many times.
+    BufferResource createBuffer(
+        const void* data, std::size_t size, gfx::BufferUsageType usage, bool isIndexBuffer, bool persistent) const;
 
     UniqueShaderProgram createProgram(std::string name,
                                       std::string_view source,
                                       std::string_view vertexName,
                                       std::string_view fragmentName,
                                       const ProgramParameters& programParameters,
-                                      const std::unordered_map<std::string, std::string>& additionalDefines);
+                                      const mbgl::unordered_map<std::string, std::string>& additionalDefines);
 
     MTLTexturePtr createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const;
     MTLSamplerStatePtr createMetalSamplerState(MTLSamplerDescriptorPtr samplerDescriptor) const;
 
-    void clear();
-
-    // Actually remove the objects we marked as abandoned with the above methods.
+    /// Called at the end of a frame.
     void performCleanup() override;
 
     void reduceMemoryUsage() override {}
 
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
-    gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
+    gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size, bool persistent) override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
@@ -75,8 +89,6 @@ public:
     gfx::Texture2DPtr createTexture2D() override;
 
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
-
-    // UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
 
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
 
@@ -94,10 +106,8 @@ public:
                                                                           Size size) override;
 
     std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override;
-    /*
-         UniqueFramebuffer createFramebuffer();
-         std::unique_ptr<uint8_t[]> readFramebuffer(Size, gfx::TexturePixelType, bool flip);
-    */
+
+    gfx::VertexAttributeArrayPtr createVertexAttributeArray() const override;
 
 #if !defined(NDEBUG)
     void visualizeStencilBuffer() override;
@@ -110,7 +120,13 @@ public:
                                                   const gfx::StencilMode&,
                                                   const gfx::Renderable&) const;
 
-    virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size);
+    virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
+                                              const void* data,
+                                              std::size_t size,
+                                              bool persistent);
+
+    /// Get an empty buffer to act as a placeholder
+    const BufferResource& getEmptyBuffer();
 
     /// Get a reusable buffer containing the standard fixed tile vertices (+/- `util::EXTENT`)
     const BufferResource& getTileVertexBuffer();
@@ -119,7 +135,7 @@ public:
     const BufferResource& getTileIndexBuffer();
 
     /// Get a buffer to be bound to unused vertex buffers
-    const gfx::UniqueVertexBufferResource& getEmptyVertexBuffer();
+    const UniqueVertexBufferResource& getEmptyVertexBuffer();
 
     bool renderTileClippingMasks(gfx::RenderPass& renderPass,
                                  RenderStaticData& staticData,
@@ -129,10 +145,11 @@ private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
 
+    std::optional<BufferResource> emptyBuffer;
     std::optional<BufferResource> tileVertexBuffer;
     std::optional<BufferResource> tileIndexBuffer;
 
-    gfx::UniqueVertexBufferResource emptyVertexBuffer;
+    UniqueVertexBufferResource emptyVertexBuffer;
 
     gfx::ShaderProgramBasePtr clipMaskShader;
     MTLDepthStencilStatePtr clipMaskDepthStencilState;
