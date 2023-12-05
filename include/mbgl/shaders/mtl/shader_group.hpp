@@ -52,9 +52,7 @@ public:
         constexpr auto& fragMain = ShaderSource::fragmentMainFunction;
         constexpr auto permutations = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>::hasPermutations;
 
-        const size_t key = permutations
-                               ? util::order_independent_hash(propertiesAsUniforms.begin(), propertiesAsUniforms.end())
-                               : 0;
+        const PropertyHashType key = permutations ? propertyHash(propertiesAsUniforms) : 0;
         const std::string shaderName = permutations ? getShaderName(name, key) : name;
 
         auto shader = get<mtl::ShaderProgram>(shaderName);
