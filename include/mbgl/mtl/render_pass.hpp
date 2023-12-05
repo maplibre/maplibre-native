@@ -21,6 +21,9 @@ public:
     RenderPass(CommandEncoder&, const char* name, const gfx::RenderPassDescriptor&);
     ~RenderPass() override;
 
+    mtl::CommandEncoder& getCommandEncoder() { return commandEncoder; }
+    const mtl::CommandEncoder& getCommandEncoder() const { return commandEncoder; }
+
     const MTLRenderCommandEncoderPtr& getMetalEncoder() const { return encoder; }
     const gfx::RenderPassDescriptor& getDescriptor() const { return descriptor; }
 

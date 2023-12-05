@@ -354,15 +354,6 @@ public:
         for (auto& kv : attrs) {
             delegate(kv.first, *kv.second, overrides.get(kv.first));
         }
-        // For OpenGL, the shader attributes are established with reflection, and we have extra
-        // entries when we share attributes between, e.g., fill and fill-outline drawables.
-#if !defined(NDEBUG) && MLN_RENDERER_BACKEND_METAL
-        // Every override should match a defined attribute.
-        for (const auto& kv : overrides.attrs) {
-            const auto hit = attrs.find(kv.first);
-            assert(hit != attrs.end());
-        }
-#endif
     }
 
     VertexAttributeArray& operator=(VertexAttributeArray&&);

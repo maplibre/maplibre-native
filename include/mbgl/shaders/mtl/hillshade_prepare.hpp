@@ -13,6 +13,7 @@ struct ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Metal> 
     static constexpr auto name = "HillshadePrepareShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 2> attributes;
     static const std::array<UniformBlockInfo, 1> uniforms;
