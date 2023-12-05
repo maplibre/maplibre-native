@@ -3,6 +3,7 @@ package org.maplibre.android.testapp.activity.benchmark
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.view.View
 import android.view.WindowManager
@@ -12,6 +13,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.putJsonObject
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -27,8 +31,20 @@ import org.maplibre.android.testapp.BuildConfig
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.utils.FpsStore
 import org.maplibre.android.testapp.utils.BenchmarkResults
+import java.io.File
 
 import java.util.*
+
+data class BenchmarkInputData(
+    val styleNames: List<String>,
+    val styleURLs: List<String>,
+    val resultsAPI: String = ""
+) {
+    init {
+        if (styleNames.size != styleURLs.size)
+            throw Error("Different size: styleNames=$styleNames, styleURLs=$styleURLs")
+    }
+}
 
 /**
  * Prepares JSON payload that is sent to the API that collects benchmark results.
@@ -76,7 +92,7 @@ class BenchmarkActivity : AppCompatActivity() {
     //    <item>https://zelonewolf.github.io/openstreetmap-americana/style.json</item>
     // </array>
     // ```
-    private var styles: List<Pair<String, String>> = listOf(Pair("Demotiles", "https://demotiles.maplibre.org/style.json"))
+    private lateinit var inputData: BenchmarkInputData
 
     @SuppressLint("DiscouragedApi")
     private fun getStringFromResources(name: String): String {
@@ -102,12 +118,42 @@ class BenchmarkActivity : AppCompatActivity() {
         }
     }
 
-    private fun readStyles() {
+    private fun getBenchmarkInputData(): BenchmarkInputData {
+        // read input for benchmark from JSON file (on CI)
+        val jsonFile = File("${Environment.getExternalStorageDirectory()}/benchmark-input.json")
+        if (jsonFile.isFile) {
+            val jsonFileContents = jsonFile.readText()
+            val jsonElement = Json.parseToJsonElement(jsonFileContents)
+            val styleNames = jsonElement.jsonObject["styleNames"]?.jsonArray?.map { it.jsonPrimitive.content }
+            val styleURLs = jsonElement.jsonObject["styleURLs"]?.jsonArray?.map { it.jsonPrimitive.content }
+            val resultsAPI = jsonElement.jsonObject["resultsAPI"]?.jsonPrimitive?.content
+            if (styleNames == null || styleURLs == null || resultsAPI == null) {
+                throw Error("${jsonFile.name} is missing elements")
+            }
+            return BenchmarkInputData(
+                styleNames = styleNames.toList(),
+                styleURLs = styleURLs.toList(),
+                resultsAPI = resultsAPI
+            )
+        } else {
+            Logger.i(TAG, "${jsonFile.name} not found, reading from developer-config.xml")
+        }
+
+        // try to read from developer-config.xml instead (for development)
         val styleNames = getArrayFromResources("benchmark_style_names")
         val styleURLs = getArrayFromResources("benchmark_style_urls")
+        if (styleNames.isNotEmpty() && styleURLs.isNotEmpty()) {
+            return BenchmarkInputData(
+                styleNames = styleNames.toList(),
+                styleURLs = styleURLs.toList()
+            )
+        }
 
-        if (styleNames.isNotEmpty() && styleNames.size == styleURLs.size)
-            styles = styleNames.zip(styleURLs)
+        // return default
+        return BenchmarkInputData(
+            styleNames = listOf("MapLibre Demotiles"),
+            styleURLs = listOf("https://demotiles.maplibre.org/style.json")
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,7 +163,7 @@ class BenchmarkActivity : AppCompatActivity() {
 
         handler = Handler(mainLooper)
         setupToolbar()
-        readStyles()
+        inputData = getBenchmarkInputData()
         setupMapView(savedInstanceState)
     }
 
@@ -133,7 +179,7 @@ class BenchmarkActivity : AppCompatActivity() {
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@BenchmarkActivity.maplibreMap = maplibreMap
-            maplibreMap.setStyle(styles[0].second)
+            maplibreMap.setStyle(inputData.styleURLs[0])
             setFpsView(maplibreMap)
 
             // Start an animation on the map as well
@@ -158,17 +204,17 @@ class BenchmarkActivity : AppCompatActivity() {
 
                 override fun onFinish() {
                     if (place == PLACES.size - 1) {  // done with tour
-                        results.addResult(styles[style].first, fpsStore)
+                        results.addResult(inputData.styleNames[style], fpsStore)
                         fpsStore.reset()
 
                         println("FPS results $results")
 
-                        if (style < styles.size - 1) {  // continue with next style
-                            maplibreMap.setStyle(styles[style + 1].second)
+                        if (style < inputData.styleURLs.size - 1) {  // continue with next style
+                            maplibreMap.setStyle(inputData.styleURLs[style + 1])
                             flyTo(maplibreMap, 0, style + 1, zoom)
                         } else if (runsLeft > 0) {  // start over
                             --runsLeft
-                            maplibreMap.setStyle(styles[0].second)
+                            maplibreMap.setStyle(inputData.styleURLs[0])
                             flyTo(maplibreMap, 0, 0, zoom)
                         } else {
                             benchmarkDone()
@@ -228,9 +274,9 @@ class BenchmarkActivity : AppCompatActivity() {
     }
 
     private fun sendResults() {
-        val api = getStringFromResources("benchmark_results_api")
+        val api = inputData.resultsAPI
         if (api.isEmpty()) {
-            Logger.i(TAG, "No benchmark_results_api set in developer-config.xml")
+            Logger.i(TAG, "Not sending results to API")
             return
         }
 
