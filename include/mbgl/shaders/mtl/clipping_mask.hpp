@@ -21,6 +21,7 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal> {
     static constexpr auto name = "ClippingMaskProgram";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
+    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<UniformBlockInfo, 1> uniforms;
