@@ -306,7 +306,10 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
     impl->vertexType = type;
 
     if (count && type != gfx::AttributeDataType::Invalid && !data.empty()) {
-        if (auto& attrib = impl->vertexAttributes.getOrAdd(impl->idVertexAttrName, /*index=*/-1, type)) {
+        if (!vertexAttributes) {
+            vertexAttributes = std::make_shared<VertexAttributeArray>();
+        }
+        if (auto& attrib = vertexAttributes->getOrAdd(impl->idVertexAttrName, /*index=*/-1, type)) {
             attrib->setRawData(std::move(data));
             attrib->setStride(VertexAttribute::getStrideOf(type));
         } else {
@@ -317,21 +320,6 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
             assert(false);
         }
     }
-}
-
-const gfx::VertexAttributeArray& Drawable::getVertexAttributes() const {
-    return impl->vertexAttributes;
-}
-
-gfx::VertexAttributeArray& Drawable::mutableVertexAttributes() {
-    return impl->vertexAttributes;
-}
-
-void Drawable::setVertexAttributes(const gfx::VertexAttributeArray& value) {
-    impl->vertexAttributes = static_cast<const VertexAttributeArray&>(value);
-}
-void Drawable::setVertexAttributes(gfx::VertexAttributeArray&& value) {
-    impl->vertexAttributes = std::move(static_cast<VertexAttributeArray&&>(value));
 }
 
 const gfx::UniformBufferArray& Drawable::getUniformBuffers() const {
@@ -356,8 +344,14 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
         if (buffer && buffer->get()) {
             assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
             renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
-        } else if (impl->noBindingBuffer) {
-            renderPass.bindVertex(impl->noBindingBuffer->get(), /*offset=*/0, attributeIndex);
+        } else {
+            const auto* shaderMTL = static_cast<const ShaderProgram*>(shader.get());
+            if (impl->noBindingBuffer && shaderMTL && shaderMTL->getBindMissingAttributes()) {
+                renderPass.bindVertex(impl->noBindingBuffer->get(), /*offset=*/0, attributeIndex);
+            } else {
+                auto& context = renderPass.getCommandEncoder().getContext();
+                renderPass.bindVertex(context.getEmptyBuffer(), /*offset=*/0, attributeIndex);
+            }
         }
         attributeIndex += 1;
     }
@@ -513,12 +507,16 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         impl->indexes->setDirty(false);
     }
 
-    const bool buildAttribs = impl->vertexAttributes.isDirty() || !impl->vertexDesc;
+    const bool buildAttribs = !vertexAttributes || vertexAttributes->isDirty() || !impl->vertexDesc;
 
     if (buildAttribs) {
 #if !defined(NDEBUG)
         const auto debugGroup = uploadPass.createDebugGroup(debugLabel(*this));
 #endif
+
+        if (!vertexAttributes) {
+            vertexAttributes = std::make_shared<VertexAttributeArray>();
+        }
 
         // Apply drawable values to shader defaults
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
@@ -527,13 +525,12 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                     /*vertexAttributeIndex=*/-1,
                                                                     /*vertexData=*/{},
                                                                     shader->getVertexAttributes(),
-                                                                    impl->vertexAttributes,
+                                                                    *vertexAttributes,
                                                                     usage,
                                                                     vertexBuffers);
         impl->attributeBuffers = std::move(vertexBuffers);
 
-        impl->vertexAttributes.visitAttributes(
-            [](const auto&, gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
+        vertexAttributes->visitAttributes([](const auto&, gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
         if (impl->attributeBindings != attributeBindings_) {
             impl->attributeBindings = std::move(attributeBindings_);
@@ -545,6 +542,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
             for (auto& binding : impl->attributeBindings) {
                 if (!binding) {
                     assert("Missing attribute binding");
+                    index += 1;
                     continue;
                 }
 

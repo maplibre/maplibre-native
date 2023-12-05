@@ -22,6 +22,11 @@ namespace mbgl {
 class ProgramParameters;
 class RenderStaticData;
 
+namespace gfx {
+class VertexAttributeArray;
+using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
+} // namespace gfx
+
 namespace shaders {
 struct ClipUBO;
 } // namespace shaders
@@ -85,8 +90,6 @@ public:
 
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
-    // UniqueFramebuffer createFramebuffer(const gfx::Texture2D& color);
-
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
 
     void setDirtyState() override;
@@ -104,6 +107,8 @@ public:
 
     std::unique_ptr<gfx::DrawScopeResource> createDrawScopeResource() override;
 
+    gfx::VertexAttributeArrayPtr createVertexAttributeArray() const override;
+
 #if !defined(NDEBUG)
     void visualizeStencilBuffer() override;
     void visualizeDepthBuffer(float depthRangeSize) override;
@@ -119,6 +124,9 @@ public:
                                               const void* data,
                                               std::size_t size,
                                               bool persistent);
+
+    /// Get an empty buffer to act as a placeholder
+    const BufferResource& getEmptyBuffer();
 
     /// Get a reusable buffer containing the standard fixed tile vertices (+/- `util::EXTENT`)
     const BufferResource& getTileVertexBuffer();
@@ -137,6 +145,7 @@ private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
 
+    std::optional<BufferResource> emptyBuffer;
     std::optional<BufferResource> tileVertexBuffer;
     std::optional<BufferResource> tileIndexBuffer;
 

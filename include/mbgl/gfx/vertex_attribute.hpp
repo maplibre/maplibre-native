@@ -354,35 +354,14 @@ public:
         for (auto& kv : attrs) {
             delegate(kv.first, *kv.second, overrides.get(kv.first));
         }
-        // For OpenGL, the shader attributes are established with reflection, and we have extra
-        // entries when we share attributes between, e.g., fill and fill-outline drawables.
-#if !defined(NDEBUG) && MLN_RENDERER_BACKEND_METAL
-        // Every override should match a defined attribute.
-        for (const auto& kv : overrides.attrs) {
-            const auto hit = attrs.find(kv.first);
-            assert(hit != attrs.end());
-        }
-#endif
     }
 
     VertexAttributeArray& operator=(VertexAttributeArray&&);
-    VertexAttributeArray& operator=(const VertexAttributeArray&);
+    VertexAttributeArray& operator=(const VertexAttributeArray&) = delete;
 
     /// Clone the collection
-    virtual UniqueVertexAttributeArray clone() const {
-        auto newAttrs = std::make_unique<VertexAttributeArray>();
-        newAttrs->copy(*this);
-        return newAttrs;
-    }
 
     /// Copy another collection into this one
-    virtual void copy(const VertexAttributeArray& other) {
-        for (const auto& kv : other.attrs) {
-            if (kv.second) {
-                attrs.insert(std::make_pair(kv.first, copy(*kv.second)));
-            }
-        }
-    }
 
     /// Specialized DataDrivenPaintProperty reader
     /// @param binders Property binders for the target shader

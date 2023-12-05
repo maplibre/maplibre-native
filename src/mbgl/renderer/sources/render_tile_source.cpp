@@ -124,7 +124,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     };
 
     // build a set of tiles to cover
-    std::unordered_set<OverscaledTileID> newTiles;
+    mbgl::unordered_set<OverscaledTileID> newTiles;
+    newTiles.reserve(renderTiles->size());
     for (auto& tile : *renderTiles) {
         newTiles.insert(tile.getOverscaledTileID());
     }
@@ -175,7 +176,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         debugBuilder->setTexture(texture, samplerLocation.value());
 
         // finish
-        debugBuilder->flush();
+        debugBuilder->flush(context);
         for (auto& drawable : debugBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
             auto& uniforms = drawable->mutableUniformBuffers();
@@ -282,7 +283,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         auto tweaker = std::make_shared<PolylineDrawableTweaker>(linePropertiesUBO);
 
         // finish
-        polylineBuilder->flush();
+        polylineBuilder->flush(context);
         for (auto& drawable : polylineBuilder->clearDrawables()) {
             drawable->setTileID(tile.getOverscaledTileID());
             drawable->addTweaker(tweaker);
