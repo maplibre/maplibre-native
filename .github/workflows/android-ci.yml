@@ -118,7 +118,22 @@ jobs:
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, not copying..."
           fi
 
+      - name: Build Benchmark
+        if: github.ref != 'refs/heads/main'
+        run: |
+          ./gradlew assembleDrawableRelease assembleDrawableReleaseAndroidTest
+
+      - uses: actions/upload-artifact@v3
+        if: github.ref != 'refs/heads/main'
+        with:
+          if-no-files-found: error
+          name: benchmarkAPKs
+          path: |
+            MapboxGLAndroidSDKTestApp/build/outputs/apk/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release.apk
+            MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk
+
       - name: Build UI tests
+        if: github.ref == 'refs/heads/main'
         run: make android-ui-test-arm-v8
 
       - name: Configure AWS Credentials
@@ -230,6 +245,7 @@ jobs:
           project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
           device_pool_arn: ${{ vars.AWS_DEVICE_FARM_DEVICE_POOL_ARN }}
           app_arn: ${{ env.ANDROID_APP_ARN }}
+          test_spec_arn: ${{ vars.AWS_DEVICE_FARM_TEST_SPEC_ARN_ANDROID_UI_TESTS }}
           app_type: ANDROID_APP
           test_type: INSTRUMENTATION
           test_package_arn: ${{ env.ANDROID_TEST_ARN }}

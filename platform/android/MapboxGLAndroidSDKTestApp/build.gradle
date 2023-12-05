@@ -55,6 +55,8 @@ android {
         }
     }
 
+    testBuildType "release" // for benchmark
+
     flavorDimensions += "renderer"
     productFlavors {
         create("legacy") {
