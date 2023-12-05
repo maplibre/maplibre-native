@@ -93,7 +93,8 @@ template <typename OwnerClass>
 class RelocatableBuffer {
 public:
     RelocatableBuffer(IBufferAllocator& allocator_, OwnerClass* owner_)
-        : allocator(allocator_), owner(owner_) {
+        : allocator(allocator_),
+          owner(owner_) {
         assert(owner);
     }
     RelocatableBuffer(const RelocatableBuffer<OwnerClass>& rhs)
