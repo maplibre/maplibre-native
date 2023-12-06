@@ -25,8 +25,8 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
-    half2 pos_a;
-    half2 pos_b;
+    float2 pos_a;
+    float2 pos_b;
 };
 
 struct alignas(16) BackgroundDrawableUBO {
@@ -67,8 +67,8 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
                                          pos);
     return {
         .position = drawableUBO.matrix * float4(float2(in.position.xy), 0, 1),
-        .pos_a = half2(glMod(pos_a, 1.0)),
-        .pos_b = half2(glMod(pos_b, 1.0)),
+        .pos_a = pos_a,
+        .pos_b = pos_b,
     };
 }
 
@@ -80,10 +80,11 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(1.0);
 #endif
 
-    const float2 pos = mix(layerUBO.pattern_tl_a / layerUBO.texsize, layerUBO.pattern_br_a / layerUBO.texsize, float2(in.pos_a));
+    const float2 imagecoord = glMod(float2(in.pos_a), 1.0);
+    const float2 pos = mix(layerUBO.pattern_tl_a / layerUBO.texsize, layerUBO.pattern_br_a / layerUBO.texsize, imagecoord);
     const float4 color1 = image.sample(image_sampler, pos);
-
-    const float2 pos2 = mix(layerUBO.pattern_tl_b / layerUBO.texsize, layerUBO.pattern_br_b / layerUBO.texsize, float2(in.pos_b));
+    const float2 imagecoord_b = glMod(float2(in.pos_b), 1.0);
+    const float2 pos2 = mix(layerUBO.pattern_tl_b / layerUBO.texsize, layerUBO.pattern_br_b / layerUBO.texsize, imagecoord_b);
     const float4 color2 = image.sample(image_sampler, pos2);
 
     return half4(mix(color1, color2, layerUBO.mix) * layerUBO.opacity);

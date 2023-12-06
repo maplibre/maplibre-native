@@ -19,7 +19,6 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
-
 struct VertexStage {
     short2 position [[attribute(0)]];
 
@@ -49,7 +48,7 @@ struct VertexStage {
 struct FragmentStage {
     float4 position [[position, invariant]];
     float2 extrude;
-    half antialiasblur;
+    float antialiasblur;
 
 #if !defined(HAS_UNIFORM_u_color)
     half4 color;
@@ -169,22 +168,22 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .color          = half4(unpack_mix_color(vertx.color, interp.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_radius)
-        .radius         = half(radius),
+        .radius         = radius,
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur           = half(unpack_mix_float(props.blur, interp.blur_t)),
+        .blur           = half(unpack_mix_float(vertx.blur, interp.blur_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(unpack_mix_float(props.opacity, interp.opacity_t)),
+        .opacity        = half(unpack_mix_float(vertx.opacity, interp.opacity_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_color)
-        .stroke_color   = half4(unpack_mix_color(props.stroke_color, interp.stroke_color_t)),
+        .stroke_color   = half4(unpack_mix_color(vertx.stroke_color, interp.stroke_color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_width)
         .stroke_width   = half(stroke_width),
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_opacity)
-        .stroke_opacity = half(unpack_mix_float(props.stroke_opacity, interp.stroke_opacity_t)),
+        .stroke_opacity = half(unpack_mix_float(vertx.stroke_opacity, interp.stroke_opacity_t)),
 #endif
     };
 }
@@ -207,14 +206,14 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float radius = in.radius;
 #endif
 #if defined(HAS_UNIFORM_u_blur)
-    const half blur = props.blur;
+    const float blur = props.blur;
 #else
-    const half blur = in.blur;
+    const float blur = in.blur;
 #endif
 #if defined(HAS_UNIFORM_u_opacity)
-    const half opacity = props.opacity;
+    const float opacity = props.opacity;
 #else
-    const half opacity = in.opacity;
+    const float opacity = in.opacity;
 #endif
 #if defined(HAS_UNIFORM_u_stroke_color)
     const half4 stroke_color = half4(props.stroke_color);
@@ -222,14 +221,14 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const half4 stroke_color = in.stroke_color;
 #endif
 #if defined(HAS_UNIFORM_u_stroke_width)
-    const half stroke_width = props.stroke_width;
+    const float stroke_width = props.stroke_width;
 #else
-    const half stroke_width = in.stroke_width;
+    const float stroke_width = in.stroke_width;
 #endif
 #if defined(HAS_UNIFORM_u_stroke_opacity)
-    const half stroke_opacity = props.stroke_opacity;
+    const float stroke_opacity = props.stroke_opacity;
 #else
-    const half stroke_opacity = in.stroke_opacity;
+    const float stroke_opacity = in.stroke_opacity;
 #endif
 
     const float extrude_length = length(in.extrude);
