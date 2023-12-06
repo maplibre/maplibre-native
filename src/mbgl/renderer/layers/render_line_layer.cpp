@@ -360,7 +360,7 @@ static const StringIdentity idLineImageUniformName = stringIndexer().get("u_imag
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
-                             const std::shared_ptr<UpdateParameters>& updateParameters,
+                             const std::shared_ptr<UpdateParameters>&,
                              [[maybe_unused]] const RenderTree& renderTree,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);

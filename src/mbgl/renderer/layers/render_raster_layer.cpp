@@ -254,7 +254,7 @@ static const StringIdentity idTexImage1Name = stringIndexer().get("u_image1");
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
-                               const std::shared_ptr<UpdateParameters>& updateParameters,
+                               const std::shared_ptr<UpdateParameters>&,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);

@@ -277,7 +277,7 @@ bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates&
 void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
-                                      const std::shared_ptr<UpdateParameters>& updateParameters,
+                                      const std::shared_ptr<UpdateParameters>&,
                                       const RenderTree& /*renderTree*/,
                                       UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {

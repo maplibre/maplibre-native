@@ -285,7 +285,7 @@ using namespace shaders;
 void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 gfx::Context& context,
                                 const TransformState& state,
-                                const std::shared_ptr<UpdateParameters>& updateParameters,
+                                const std::shared_ptr<UpdateParameters>&,
                                 [[maybe_unused]] const RenderTree& renderTree,
                                 UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
