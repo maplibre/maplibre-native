@@ -47,8 +47,6 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
-    float4 data0;
-    float4 data1;
 
 #if !defined(HAS_UNIFORM_u_fill_color)
     half4 fill_color;
@@ -56,6 +54,9 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_halo_color)
     half4 halo_color;
 #endif
+
+    half2 tex;
+
 #if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
 #endif
@@ -65,6 +66,11 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_halo_blur)
     half halo_blur;
 #endif
+
+    half gamma_scale;
+    half fontScale;
+    half fade_opacity;
+    bool is_icon;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -139,12 +145,15 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
     const float fade_change = (fade_opacity[1] > 0.5) ? dynamic.fade_change : -dynamic.fade_change;
-    const float interpolated_fade_opacity = max(0.0, min(1.0, fade_opacity[0] + fade_change));
+    const bool is_icon = (is_sdf == ICON);
 
     return {
-        .position   = position,
-        .data0      = float4(a_tex / drawable.texsize, a_tex / drawable.texsize_icon),
-        .data1      = float4(gamma_scale, size, interpolated_fade_opacity, is_sdf),
+        .position     = position,
+        .tex          = half2(a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize)),
+        .gamma_scale  = half(gamma_scale),
+        .fontScale    = half(fontScale),
+        .fade_opacity = half(max(0.0, min(1.0, fade_opacity[0] + fade_change))),
+        .is_icon      = is_icon,
 
 #if !defined(HAS_UNIFORM_u_fill_color)
         .fill_color = half(unpack_mix_color(vertx.fill_color, interp.fill_color_t));
@@ -203,28 +212,21 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const half halo_blur = in.halo_blur;
 #endif
 
-    const float fade_opacity = in.data1[2];
-
-    if (in.data1.w == ICON) {
-        const float2 tex_icon = in.data0.zw;
-        const float alpha = opacity * fade_opacity;
-        return half4(icon_image.sample(icon_sampler, tex_icon) * alpha);
+    if (in.is_icon) {
+        const float alpha = opacity * in.fade_opacity;
+        return half4(icon_image.sample(icon_sampler, float2(in.tex)) * alpha);
     }
 
-    const float2 tex = in.data0.xy;
     const float EDGE_GAMMA = 0.105 / dynamic.device_pixel_ratio;
-    const float gamma_scale = in.data1.x;
-    const float size = in.data1.y;
-    const float fontScale = size / 24.0;
     const half4 color = props.is_halo ? halo_color : fill_color;
-    const float fontGamma = fontScale * drawable.gamma_scale;
+    const float fontGamma = in.fontScale * drawable.gamma_scale;
     const float gamma = ((props.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
-    const float buff = props.is_halo ? (6.0 - halo_width / fontScale) / SDF_PX : (256.0 - 64.0) / 256.0;
-    const float dist = glyph_image.sample(glyph_sampler, tex).a;
-    const float gamma_scaled = gamma * gamma_scale;
+    const float buff = props.is_halo ? (6.0 - halo_width / in.fontScale) / SDF_PX : (256.0 - 64.0) / 256.0;
+    const float dist = glyph_image.sample(glyph_sampler, float2(in.tex)).a;
+    const float gamma_scaled = gamma * in.gamma_scale;
     const float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
 
-    return half4(color * (alpha * opacity * fade_opacity));
+    return half4(color * (alpha * opacity * in.fade_opacity));
 }
 )";
 };

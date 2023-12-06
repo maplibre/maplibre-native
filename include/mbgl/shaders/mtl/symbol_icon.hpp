@@ -33,10 +33,13 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
-    float2 tex;
-    half fade_opacity;
+    half2 tex;
 
-#if !defined(HAS_UNIFORM_u_opacity)
+#if defined(HAS_UNIFORM_u_opacity)
+    // We only need to pass `fade_opacity` separately if opacity is a
+    // uniform, otherwise it's multiplied into fragment opacity, below.
+    half fade_opacity;
+#else
     half opacity;
 #endif
 };
@@ -103,15 +106,17 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
     const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
 
-    const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = fade_opacity[1] > 0.5 ? dynamic.fade_change : -dynamic.fade_change;
+    const float2 raw_fade_opacity = unpack_opacity(vertx.fade_opacity);
+    const float fade_change = raw_fade_opacity[1] > 0.5 ? dynamic.fade_change : -dynamic.fade_change;
+    const float fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
 
     return {
         .position     = position,
-        .tex          = a_tex / drawable.texsize,
-        .fade_opacity = half(max(0.0, min(1.0, fade_opacity[0] + fade_change))),
-#if !defined(HAS_UNIFORM_u_opacity)
-        .opacity      = half(unpack_mix_float(vertx.opacity, interp.opacity_t)),
+        .tex          = half2(a_tex / drawable.texsize),
+#if defined(HAS_UNIFORM_u_opacity)
+        .fade_opacity = half(fade_opacity),
+#else
+        .opacity      = half(unpack_mix_float(vertx.opacity, interp.opacity_t) * fade_opacity),
 #endif
     };
 }
@@ -126,12 +131,12 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #endif
 
 #if defined(HAS_UNIFORM_u_opacity)
-    const half opacity = half(paint.opacity);
+    const float opacity = paint.opacity * in.fade_opacity;
 #else
-    const half opacity = in.opacity;
+    const float opacity = in.opacity; // fade_opacity is baked in for this case
 #endif
 
-    return half4(image.sample(image_sampler, in.tex) * (opacity * in.fade_opacity));
+    return half4(image.sample(image_sampler, float2(in.tex)) * opacity);
 }
 )";
 };

@@ -32,8 +32,8 @@ struct VertexStage {
 struct FragmentStage {
     float4 position [[position, invariant]];
     float2 width2;
-    float2 normal;
-    float gamma_scale;
+    half2 normal;
+    half gamma_scale;
     float lineprogress;
 
 #if !defined(HAS_UNIFORM_u_blur)
@@ -111,8 +111,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position     = position,
         .width2       = float2(outset, inset),
-        .normal       = v_normal,
-        .gamma_scale  = extrude_length_without_perspective / extrude_length_with_perspective,
+        .normal       = half2(v_normal),
+        .gamma_scale  = half(extrude_length_without_perspective / extrude_length_with_perspective),
         .lineprogress = v_lineprogress,
 
 #if !defined(HAS_UNIFORM_u_blur)
