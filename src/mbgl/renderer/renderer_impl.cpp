@@ -71,6 +71,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
     auto& context = backend.getContext();
 
+#if !MLN_LEGACY_RENDERER
     std::stringstream ss;
     ss << "\nFill layer matrix cache hits: " << FillLayerTweaker::matrixCacheHits
        << "\nLine layer matrix cache hits: " << LineLayerTweaker::matrixCacheHits
@@ -84,6 +85,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     FillLayerTweaker::matrixCache.clear();
     LineLayerTweaker::matrixCache.clear();
     SymbolLayerTweaker::matrixCache.clear();
+#endif
 
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
