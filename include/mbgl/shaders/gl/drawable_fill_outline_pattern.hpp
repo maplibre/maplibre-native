@@ -8,8 +8,10 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillOutlinePatternShader";
-    static constexpr const char* vertex = R"(layout (std140) uniform FillOutlinePatternDrawableUBO {
+    static constexpr const char* vertex = R"(layout (std140) uniform FillMatrixUBO {
     highp mat4 u_matrix;
+};
+layout (std140) uniform FillOutlinePatternDrawableUBO {
     highp vec4 u_scale;
     highp vec2 u_world;
     highp vec2 u_pixel_coord_upper;
@@ -90,7 +92,10 @@ mediump vec4 pattern_to = u_pattern_to;
     v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world;
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform FillOutlinePatternDrawableUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform FillMatrixUBO {
+    highp mat4 u_matrix;
+};
+layout (std140) uniform FillOutlinePatternDrawableUBO {
     highp mat4 u_matrix;
     highp vec4 u_scale;
     highp vec2 u_world;

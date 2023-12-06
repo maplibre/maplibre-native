@@ -1,4 +1,4 @@
-layout (std140) uniform FillDrawableUBO {
+layout (std140) uniform FillMatrixUBO {
     highp mat4 u_matrix;
 };
 layout (std140) uniform FillEvaluatedPropsUBO {

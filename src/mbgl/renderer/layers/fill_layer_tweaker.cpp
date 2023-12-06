@@ -24,10 +24,10 @@ namespace mbgl {
 
 using namespace style;
 
-mbgl::unordered_map<UnwrappedTileID, mat4> FillLayerTweaker::matrixCache;
+mbgl::unordered_map<UnwrappedTileID, gfx::UniformBufferPtr> FillLayerTweaker::matrixCache;
 int FillLayerTweaker::matrixCacheHits;
 
-static const StringIdentity idFillDrawableUBOName = stringIndexer().get("FillDrawableUBO");
+static const StringIdentity idFillMatrixUBOName = stringIndexer().get("FillMatrixUBO");
 static const StringIdentity idFillDrawablePropsUBOName = stringIndexer().get("FillDrawablePropsUBO");
 static const StringIdentity idFillEvaluatedPropsUBOName = stringIndexer().get("FillEvaluatedPropsUBO");
 static const StringIdentity idFillPermutationUBOName = stringIndexer().get("FillPermutationUBO");
@@ -240,22 +240,28 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+        auto& uniforms = drawable.mutableUniformBuffers();
 
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
 
-        mat4 matrix;
         if (translation == FillTranslate::defaultValue() && anchor == FillTranslateAnchor::defaultValue()) {
+            gfx::UniformBufferPtr matrixBuffer;
             const auto it = matrixCache.find(tileID);
             if (it == matrixCache.end()) {
-                matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
-                matrixCache[tileID] = matrix;
+                const mat4 matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+                const MatrixUBO matrixUBO = {/*.matrix=*/util::cast<float>(matrix)};
+                matrixBuffer = parameters.context.createUniformBuffer(&matrixUBO, sizeof(matrixUBO));
+                matrixCache[tileID] = matrixBuffer;
             } else {
-                matrix = it->second;
+                matrixBuffer = it->second;
                 matrixCacheHits++;
             }
+            uniforms.addOrReplace(idFillMatrixUBOName, matrixBuffer);
         } else {
-            matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+            const mat4 matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+            const MatrixUBO matrixUBO = {/*.matrix=*/util::cast<float>(matrix)};
+            uniforms.createOrUpdate(idFillMatrixUBOName, &matrixUBO, context);
         }
 
         // from FillPatternProgram::layoutUniformValues
@@ -276,14 +282,10 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             }
         }
 
-        auto& uniforms = drawable.mutableUniformBuffers();
         if (uniforms.get(idFillInterpolateUBOName)) {
             UpdateFillUniformBuffers();
 
             uniforms.addOrReplace(idFillEvaluatedPropsUBOName, fillPropsUniformBuffer);
-
-            const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
-            uniforms.createOrUpdate(idFillDrawableUBOName, &drawableUBO, context);
 
 #if MLN_RENDER_BACKEND_METAL
             uniforms.addOrReplace(idFillPermutationUBOName, fillPermutationUniformBuffer);
@@ -294,7 +296,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             uniforms.addOrReplace(idFillOutlineEvaluatedPropsUBOName, fillOutlinePropsUniformBuffer);
 
             const FillOutlineDrawableUBO drawableUBO = {
-                /*.matrix=*/util::cast<float>(matrix),
                 /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
                 /* pad1 */ 0,
                 /* pad2 */ 0};
@@ -309,7 +310,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             uniforms.addOrReplace(idFillPatternEvaluatedPropsUBOName, fillPatternPropsUniformBuffer);
 
             const FillPatternDrawableUBO drawableUBO = {
-                /*.matrix=*/util::cast<float>(matrix),
                 /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
                 /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
                 /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
@@ -328,7 +328,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             uniforms.addOrReplace(idFillOutlinePatternEvaluatedPropsUBOName, fillOutlinePatternPropsUniformBuffer);
 
             const FillOutlinePatternDrawableUBO drawableUBO = {
-                /*.matrix=*/util::cast<float>(matrix),
                 /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
                 /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
                 /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},

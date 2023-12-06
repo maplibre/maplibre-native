@@ -123,6 +123,10 @@ struct alignas(16) LineUBO {
     float device_pixel_ratio;
 };
 
+struct alignas(16) MatrixUBO {
+    float4x4 matrix;
+};
+
 struct alignas(16) LineBasicUBO {
     float4x4 matrix;
     float2 units_to_pixels;

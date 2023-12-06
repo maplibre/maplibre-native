@@ -46,5 +46,11 @@ struct alignas(16) ExpressionInputsUBO {
 };
 static_assert(sizeof(ExpressionInputsUBO) == 2 * 16);
 
+struct alignas(16) MatrixUBO {
+    /*  0 */ std::array<float, 4 * 4> matrix; // composite model-view-projection matrix
+    /* 64 */
+};
+static_assert(sizeof(MatrixUBO) == 4 * 16);
+
 } // namespace shaders
 } // namespace mbgl

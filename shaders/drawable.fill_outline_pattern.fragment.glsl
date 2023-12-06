@@ -1,3 +1,6 @@
+layout (std140) uniform FillMatrixUBO {
+    highp mat4 u_matrix;
+};
 layout (std140) uniform FillOutlinePatternDrawableUBO {
     highp mat4 u_matrix;
     highp vec4 u_scale;

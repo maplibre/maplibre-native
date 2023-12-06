@@ -1,5 +1,7 @@
-layout (std140) uniform FillOutlineDrawableUBO {
+layout (std140) uniform FillMatrixUBO {
     highp mat4 u_matrix;
+};
+layout (std140) uniform FillOutlineDrawableUBO {
     highp vec2 u_world;
 };
 layout (std140) uniform FillOutlineEvaluatedPropsUBO {

@@ -170,8 +170,8 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
 
-        static const StringIdentity idFillDrawableUBOName = stringIndexer().get("FillDrawableUBO");
-        const shaders::FillDrawableUBO fillUBO{/*matrix = */ util::cast<float>(matrix)};
+        static const StringIdentity idFillMatrixeUBOName = stringIndexer().get("FillMatrixUBO");
+        const shaders::MatrixUBO matrixUBO{/*matrix = */ util::cast<float>(matrix)};
 
         static const StringIdentity idFillEvaluatedPropsUBOName = stringIndexer().get("FillEvaluatedPropsUBO");
         const shaders::FillEvaluatedPropsUBO fillPropertiesUBO{
@@ -190,7 +190,7 @@ public:
             0,
         };
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idFillDrawableUBOName, &fillUBO, parameters.context);
+        uniforms.createOrUpdate(idFillMatrixeUBOName, &matrixUBO, parameters.context);
         uniforms.createOrUpdate(idFillEvaluatedPropsUBOName, &fillPropertiesUBO, parameters.context);
         uniforms.createOrUpdate(idFillInterpolateUBOName, &fillInterpolateUBO, parameters.context);
 

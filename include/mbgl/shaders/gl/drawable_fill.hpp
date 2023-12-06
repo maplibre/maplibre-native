@@ -8,7 +8,7 @@ namespace shaders {
 template <>
 struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "FillShader";
-    static constexpr const char* vertex = R"(layout (std140) uniform FillDrawableUBO {
+    static constexpr const char* vertex = R"(layout (std140) uniform FillMatrixUBO {
     highp mat4 u_matrix;
 };
 layout (std140) uniform FillEvaluatedPropsUBO {

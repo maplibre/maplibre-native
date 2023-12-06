@@ -25,7 +25,7 @@ public:
     static const StringIdentity idFillInterpolateUBOName;
     static const StringIdentity idFillOutlineInterpolateUBOName;
 
-    static mbgl::unordered_map<UnwrappedTileID, mat4> matrixCache;
+    static mbgl::unordered_map<UnwrappedTileID, gfx::UniformBufferPtr> matrixCache;
     static int matrixCacheHits;
 
 private:

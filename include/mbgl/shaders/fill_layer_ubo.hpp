@@ -8,11 +8,6 @@ namespace shaders {
 //
 // Fill
 
-struct alignas(16) FillDrawableUBO {
-    /*  0 */ std::array<float, 4 * 4> matrix; // composite model-view-projection matrix
-};
-static_assert(sizeof(FillDrawableUBO) == 4 * 16);
-
 struct alignas(16) FillEvaluatedPropsUBO {
     Color color;
     float opacity;
@@ -41,12 +36,11 @@ static_assert(sizeof(FillPermutationUBO) == 2 * 16);
 // Fill outline
 
 struct alignas(16) FillOutlineDrawableUBO {
-    /*  0 */ std::array<float, 4 * 4> matrix; // composite model-view-projection matrix
-    /* 64 */ std::array<float, 2> world;
-    /* 72 */ float pad1, pad2;
-    /* 80 */
+    /* 0 */ std::array<float, 2> world;
+    /* 8 */ float pad1, pad2;
+    /* 16 */
 };
-static_assert(sizeof(FillOutlineDrawableUBO) == 5 * 16);
+static_assert(sizeof(FillOutlineDrawableUBO) == 16);
 
 struct alignas(16) FillOutlineEvaluatedPropsUBO {
     Color outline_color;
@@ -76,15 +70,14 @@ static_assert(sizeof(FillOutlinePermutationUBO) == 2 * 16);
 // Fill Pattern
 
 struct alignas(16) FillPatternDrawableUBO {
-    /*  0  */ std::array<float, 4 * 4> matrix; // composite model-view-projection matrix
-    /*  64 */ std::array<float, 4> scale;
-    /*  80 */ std::array<float, 2> pixel_coord_upper;
-    /*  88 */ std::array<float, 2> pixel_coord_lower;
-    /*  96 */ std::array<float, 2> texsize;
-    /* 104 */ float pad1, pad2;
-    /* 112 */
+    /*  0 */ std::array<float, 4> scale;
+    /* 16 */ std::array<float, 2> pixel_coord_upper;
+    /* 24 */ std::array<float, 2> pixel_coord_lower;
+    /* 32 */ std::array<float, 2> texsize;
+    /* 40 */ float pad1, pad2;
+    /* 48 */
 };
-static_assert(sizeof(FillPatternDrawableUBO) == 7 * 16);
+static_assert(sizeof(FillPatternDrawableUBO) == 3 * 16);
 
 struct alignas(16) FillPatternEvaluatedPropsUBO {
     float opacity;
@@ -122,14 +115,14 @@ static_assert(sizeof(FillPatternPermutationUBO) == 2 * 16);
 // Fill pattern outline
 
 struct alignas(16) FillOutlinePatternDrawableUBO {
-    /*  0  */ std::array<float, 4 * 4> matrix; // composite model-view-projection matrix
-    /*  64 */ std::array<float, 4> scale;
-    /*  80 */ std::array<float, 2> world;
-    /*  88 */ std::array<float, 2> pixel_coord_upper;
-    /*  96 */ std::array<float, 2> pixel_coord_lower;
-    /* 104 */ std::array<float, 2> texsize;
+    /*  0 */ std::array<float, 4> scale;
+    /* 16 */ std::array<float, 2> world;
+    /* 24 */ std::array<float, 2> pixel_coord_upper;
+    /* 32 */ std::array<float, 2> pixel_coord_lower;
+    /* 40 */ std::array<float, 2> texsize;
+    /* 48 */
 };
-static_assert(sizeof(FillOutlinePatternDrawableUBO) == 7 * 16);
+static_assert(sizeof(FillOutlinePatternDrawableUBO) == 3 * 16);
 
 struct alignas(16) FillOutlinePatternEvaluatedPropsUBO {
     float opacity;
