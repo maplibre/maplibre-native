@@ -36,7 +36,7 @@ constexpr T factor() {
 /// Generate a hash key from a collection of integer values which doesn't depend on their order.
 /// Adapted from https://stackoverflow.com/a/76993810/135138
 template <typename TIter, typename TKey = detail::TIterVal<TIter>, TKey factor = factor<TKey>()>
-TKey order_independent_hash(TIter cur, const TIter end) {
+TKey order_independent_hash(std::remove_const_t<TIter> cur, const TIter end) {
     detail::TIterVal<TIter> sum = 0, product = 1;
     for (; cur != end; ++cur) {
         const auto& value = *cur;
