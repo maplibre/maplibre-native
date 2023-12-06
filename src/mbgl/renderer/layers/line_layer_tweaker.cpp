@@ -26,7 +26,9 @@ using namespace style;
 using namespace shaders;
 
 mbgl::unordered_map<UnwrappedTileID, gfx::UniformBufferPtr> LineLayerTweaker::matrixCache;
+#if !defined(NDEBUG)
 int LineLayerTweaker::matrixCacheHits;
+#endif
 
 static const StringIdentity idLineMatrixUBOName = stringIndexer().get("LineMatrixUBO");
 static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
@@ -145,7 +147,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 matrixCache[tileID] = matrixBuffer;
             } else {
                 matrixBuffer = it->second;
+#if !defined(NDEBUG)
                 matrixCacheHits++;
+#endif
             }
             uniforms.addOrReplace(idLineMatrixUBOName, matrixBuffer);
         } else {

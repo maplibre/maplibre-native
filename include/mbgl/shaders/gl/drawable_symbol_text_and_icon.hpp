@@ -21,8 +21,11 @@ layout (location = 3) in float a_fade_opacity;
 // [ text-size(lowerZoomStop, feature),
 //   text-size(upperZoomStop, feature) ]
 
-layout (std140) uniform SymbolDrawableUBO {
+layout (std140) uniform SymbolMatrixUBO {
     highp mat4 u_matrix;
+};
+
+layout (std140) uniform SymbolDrawableUBO {
     highp mat4 u_label_plane_matrix;
     highp mat4 u_coord_matrix;
 
@@ -197,7 +200,6 @@ lowp float halo_blur = u_halo_blur;
 #define ICON 0.0
 
 layout (std140) uniform SymbolDrawableUBO {
-    highp mat4 u_matrix;
     highp mat4 u_label_plane_matrix;
     highp mat4 u_coord_matrix;
 

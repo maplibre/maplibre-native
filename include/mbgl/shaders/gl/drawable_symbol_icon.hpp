@@ -14,8 +14,11 @@ layout (location = 2) in vec4 a_pixeloffset;
 layout (location = 3) in vec3 a_projected_pos;
 layout (location = 4) in float a_fade_opacity;
 
-layout (std140) uniform SymbolDrawableUBO {
+layout (std140) uniform SymbolMatrixUBO {
     highp mat4 u_matrix;
+};
+
+layout (std140) uniform SymbolDrawableUBO {
     highp mat4 u_label_plane_matrix;
     highp mat4 u_coord_matrix;
 

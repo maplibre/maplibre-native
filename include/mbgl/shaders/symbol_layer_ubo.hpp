@@ -32,20 +32,19 @@ struct alignas(16) SymbolDrawableInterpolateUBO {
 static_assert(sizeof(SymbolDrawableInterpolateUBO) == 32);
 
 struct alignas(16) SymbolDrawableUBO {
-    /*   0 */ std::array<float, 4 * 4> matrix;
-    /*  64 */ std::array<float, 4 * 4> label_plane_matrix;
-    /* 128 */ std::array<float, 4 * 4> coord_matrix;
+    /*   0 */ std::array<float, 4 * 4> label_plane_matrix;
+    /*  64 */ std::array<float, 4 * 4> coord_matrix;
 
-    /* 192 */ std::array<float, 2> texsize;
-    /* 200 */ std::array<float, 2> texsize_icon;
+    /* 128 */ std::array<float, 2> texsize;
+    /* 136 */ std::array<float, 2> texsize_icon;
 
-    /* 208 */ float gamma_scale;
-    /* 212 */ /*bool*/ int rotate_symbol;
+    /* 144 */ float gamma_scale;
+    /* 148 */ /*bool*/ int rotate_symbol;
 
-    /* 216 */ std::array<float, 2> pad;
-    /* 224 */
+    /* 152 */ std::array<float, 2> pad;
+    /* 160 */
 };
-static_assert(sizeof(SymbolDrawableUBO) == 14 * 16);
+static_assert(sizeof(SymbolDrawableUBO) == 10 * 16);
 
 /// Dynamic UBO
 struct alignas(16) SymbolDynamicUBO {

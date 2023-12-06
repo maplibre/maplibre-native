@@ -65,8 +65,12 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 } // namespace
 
 mbgl::unordered_map<UnwrappedTileID, mat4> SymbolLayerTweaker::matrixCache;
+mbgl::unordered_map<UnwrappedTileID, gfx::UniformBufferPtr> SymbolLayerTweaker::matrixUBOCache;
+#if !defined(NDEBUG)
 int SymbolLayerTweaker::matrixCacheHits;
+#endif
 
+static const StringIdentity idSymbolMatrixUBOName = stringIndexer().get("SymbolMatrixUBO");
 const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");
 const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = stringIndexer().get("SymbolDynamicUBO");
 const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = stringIndexer().get("SymbolDrawablePaintUBO");
@@ -122,6 +126,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             return;
         }
 
+        auto& uniforms = drawable.mutableUniformBuffers();
         const auto tileID = drawable.getTileID()->toUnwrapped();
         const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
         const auto isText = (symbolData.symbolType == SymbolType::Text);
@@ -151,10 +156,24 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                 matrixCache[tileID] = matrix;
             } else {
                 matrix = it->second;
+#if !defined(NDEBUG)
                 matrixCacheHits++;
+#endif
             }
+            gfx::UniformBufferPtr matrixBuffer;
+            const auto itUBO = matrixUBOCache.find(tileID);
+            if (itUBO == matrixUBOCache.end()) {
+                const MatrixUBO matrixUBO = {/*.matrix=*/util::cast<float>(matrix)};
+                matrixBuffer = parameters.context.createUniformBuffer(&matrixUBO, sizeof(matrixUBO));
+                matrixUBOCache[tileID] = matrixBuffer;
+            } else {
+                matrixBuffer = itUBO->second;
+            }
+            uniforms.addOrReplace(idSymbolMatrixUBOName, matrixBuffer);
         } else {
             matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
+            const MatrixUBO matrixUBO = {/*.matrix=*/util::cast<float>(matrix)};
+            uniforms.createOrUpdate(idSymbolMatrixUBOName, &matrixUBO, context);
         }
 
         // from symbol_program, makeValues
@@ -182,7 +201,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
         const SymbolDrawableUBO drawableUBO = {
-            /*.matrix=*/util::cast<float>(matrix),
             /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
             /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
 
@@ -194,7 +212,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.pad=*/{0},
         };
 
-        auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(idSymbolDrawableUBOName, &drawableUBO, context);
 
         uniforms.addOrReplace(idSymbolDynamicUBOName, dynamicBuffer);

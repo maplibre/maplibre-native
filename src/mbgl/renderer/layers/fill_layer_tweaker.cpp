@@ -25,7 +25,9 @@ namespace mbgl {
 using namespace style;
 
 mbgl::unordered_map<UnwrappedTileID, gfx::UniformBufferPtr> FillLayerTweaker::matrixCache;
+#if !defined(NDEBUG)
 int FillLayerTweaker::matrixCacheHits;
+#endif
 
 static const StringIdentity idFillMatrixUBOName = stringIndexer().get("FillMatrixUBO");
 static const StringIdentity idFillDrawablePropsUBOName = stringIndexer().get("FillDrawablePropsUBO");
@@ -256,7 +258,9 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 matrixCache[tileID] = matrixBuffer;
             } else {
                 matrixBuffer = it->second;
+#if !defined(NDEBUG)
                 matrixCacheHits++;
+#endif
             }
             uniforms.addOrReplace(idFillMatrixUBOName, matrixBuffer);
         } else {

@@ -32,7 +32,9 @@ public:
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
     static mbgl::unordered_map<UnwrappedTileID, gfx::UniformBufferPtr> matrixCache;
+#if !defined(NDEBUG)
     static int matrixCacheHits;
+#endif
 
 protected:
     gfx::UniformBufferPtr linePropertiesBuffer;

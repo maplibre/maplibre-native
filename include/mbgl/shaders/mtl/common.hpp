@@ -222,7 +222,6 @@ struct alignas(16) SymbolDrawableInterpolateUBO {
 static_assert(sizeof(SymbolDrawableInterpolateUBO) == 32, "unexpected padding");
 
 struct alignas(16) SymbolDrawableUBO {
-    float4x4 matrix;
     float4x4 label_plane_matrix;
     float4x4 coord_matrix;
 
@@ -233,7 +232,7 @@ struct alignas(16) SymbolDrawableUBO {
     /*bool*/ int rotate_symbol;
     float2 pad;
 };
-static_assert(sizeof(SymbolDrawableUBO) == 14 * 16, "unexpected padding");
+static_assert(sizeof(SymbolDrawableUBO) == 10 * 16, "unexpected padding");
 
 struct alignas(16) SymbolDynamicUBO {
     float fade_change;

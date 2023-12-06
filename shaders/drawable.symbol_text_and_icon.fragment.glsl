@@ -4,7 +4,6 @@
 #define ICON 0.0
 
 layout (std140) uniform SymbolDrawableUBO {
-    highp mat4 u_matrix;
     highp mat4 u_label_plane_matrix;
     highp mat4 u_coord_matrix;
 

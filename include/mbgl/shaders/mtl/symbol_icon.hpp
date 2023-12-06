@@ -16,7 +16,7 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 6> attributes;
-    static const std::array<UniformBlockInfo, 7> uniforms;
+    static const std::array<UniformBlockInfo, 8> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -43,13 +43,14 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const SymbolDrawableUBO& drawable [[buffer(8)]],
-                                device const SymbolDynamicUBO& dynamic [[buffer(9)]],
-                                device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
-                                device const SymbolDrawableTilePropsUBO& props [[buffer(11)]],
-                                device const SymbolDrawableInterpolateUBO& interp [[buffer(12)]],
-                                device const SymbolPermutationUBO& permutation [[buffer(13)]],
-                                device const ExpressionInputsUBO& expr [[buffer(14)]]) {
+                                device const MatrixUBO& matrix [[buffer(8)]],
+                                device const SymbolDrawableUBO& drawable [[buffer(9)]],
+                                device const SymbolDynamicUBO& dynamic [[buffer(10)]],
+                                device const SymbolDrawablePaintUBO& paint [[buffer(11)]],
+                                device const SymbolDrawableTilePropsUBO& props [[buffer(12)]],
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(13)]],
+                                device const SymbolPermutationUBO& permutation [[buffer(14)]],
+                                device const ExpressionInputsUBO& expr [[buffer(15)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -72,7 +73,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         size = props.size;
     }
 
-    const float4 projectedPoint = drawable.matrix * float4(a_pos, 0, 1);
+    const float4 projectedPoint = matrix.matrix * float4(a_pos, 0, 1);
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     const float distance_ratio = props.pitch_with_map ?
@@ -90,7 +91,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float symbol_rotation = 0.0;
     if (drawable.rotate_symbol) {
         // See comments in symbol_sdf.vertex
-        const float4 offsetProjectedPoint = drawable.matrix * float4(a_pos + float2(1, 0), 0, 1);
+        const float4 offsetProjectedPoint = matrix.matrix * float4(a_pos + float2(1, 0), 0, 1);
 
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
@@ -120,9 +121,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolDrawableUBO& drawable [[buffer(8)]],
-                            device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
-                            device const SymbolPermutationUBO& permutation [[buffer(13)]],
+                            device const SymbolDrawableUBO& drawable [[buffer(9)]],
+                            device const SymbolDrawablePaintUBO& paint [[buffer(11)]],
+                            device const SymbolPermutationUBO& permutation [[buffer(14)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
     if (permutation.overdrawInspector) {

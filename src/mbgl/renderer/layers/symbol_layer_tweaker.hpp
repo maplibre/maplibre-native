@@ -28,7 +28,10 @@ public:
     static const StringIdentity idSymbolDrawableInterpolateUBOName;
 
     static mbgl::unordered_map<UnwrappedTileID, mat4> matrixCache;
+    static mbgl::unordered_map<UnwrappedTileID, gfx::UniformBufferPtr> matrixUBOCache;
+#if !defined(NDEBUG)
     static int matrixCacheHits;
+#endif
 
 private:
     gfx::UniformBufferPtr textPaintBuffer;
