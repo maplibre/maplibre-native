@@ -212,7 +212,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
                 static const StringIdentity idLineMatrixUBOName = stringIndexer().get("LineMatrixUBO");
                 const shaders::MatrixUBO matrixUBO{/*matrix = */ util::cast<float>(matrix)};
-                
+
                 static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
                 const shaders::LineUBO lineUBO{
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
