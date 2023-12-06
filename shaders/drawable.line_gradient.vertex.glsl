@@ -13,6 +13,9 @@
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
+layout (std140) uniform LineMatrixUBO {
+    highp mat4 u_matrix;
+};
 layout (std140) uniform LineGradientUBO {
     highp mat4 u_matrix;
     highp vec2 u_units_to_pixels;

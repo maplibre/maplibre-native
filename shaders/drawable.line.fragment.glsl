@@ -1,5 +1,4 @@
 layout (std140) uniform LineUBO {
-    highp mat4 u_matrix;
     highp vec2 u_units_to_pixels;
     mediump float u_ratio;
     lowp float u_device_pixel_ratio;

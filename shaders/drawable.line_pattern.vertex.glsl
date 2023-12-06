@@ -13,8 +13,10 @@
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-layout (std140) uniform LinePatternUBO {
+layout (std140) uniform LineMatrixUBO {
     highp mat4 u_matrix;
+};
+layout (std140) uniform LinePatternUBO {
     mediump vec4 u_scale;
     highp vec2 u_texsize;
     highp vec2 u_units_to_pixels;

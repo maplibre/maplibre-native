@@ -116,15 +116,14 @@ float4 colorFor(device const Attribute& attrib,
     }
 }
 
-struct alignas(16) LineUBO {
+struct alignas(16) MatrixUBO {
     float4x4 matrix;
+};
+
+struct alignas(16) LineUBO {
     float2 units_to_pixels;
     float ratio;
     float device_pixel_ratio;
-};
-
-struct alignas(16) MatrixUBO {
-    float4x4 matrix;
 };
 
 struct alignas(16) LineBasicUBO {
@@ -135,7 +134,6 @@ struct alignas(16) LineBasicUBO {
 };
 
 struct alignas(16) LineGradientUBO {
-    float4x4 matrix;
     float2 units_to_pixels;
     float ratio;
     float device_pixel_ratio;

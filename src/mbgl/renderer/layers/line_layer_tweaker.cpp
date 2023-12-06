@@ -25,9 +25,10 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-mbgl::unordered_map<UnwrappedTileID, mat4> LineLayerTweaker::matrixCache;
+mbgl::unordered_map<UnwrappedTileID, gfx::UniformBufferPtr> LineLayerTweaker::matrixCache;
 int LineLayerTweaker::matrixCacheHits;
 
+static const StringIdentity idLineMatrixUBOName = stringIndexer().get("LineMatrixUBO");
 static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
 static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
 static const StringIdentity idLineGradientUBOName = stringIndexer().get("LineGradientUBO");
@@ -133,18 +134,25 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         auto& uniforms = drawable.mutableUniformBuffers();
 
-        mat4 matrix;
         if (translation == LineTranslate::defaultValue() && anchor == LineTranslateAnchor::defaultValue()) {
+            gfx::UniformBufferPtr matrixBuffer;
             const auto it = matrixCache.find(tileID);
             if (it == matrixCache.end()) {
-                matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
-                matrixCache[tileID] = matrix;
+                const mat4 matrix = getTileMatrix(
+                    tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+                const MatrixUBO matrixUBO = {/*.matrix=*/util::cast<float>(matrix)};
+                matrixBuffer = parameters.context.createUniformBuffer(&matrixUBO, sizeof(matrixUBO));
+                matrixCache[tileID] = matrixBuffer;
             } else {
-                matrix = it->second;
+                matrixBuffer = it->second;
                 matrixCacheHits++;
             }
+            uniforms.addOrReplace(idLineMatrixUBOName, matrixBuffer);
         } else {
-            matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+            const mat4 matrix = getTileMatrix(
+                tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+            const MatrixUBO matrixUBO = {/*.matrix=*/util::cast<float>(matrix)};
+            uniforms.createOrUpdate(idLineMatrixUBOName, &matrixUBO, context);
         }
 
         const LineType type = static_cast<LineType>(drawable.getType());
@@ -152,7 +160,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         switch (type) {
             case LineType::Simple: {
                 const LineUBO lineUBO{
-                    /*matrix = */ util::cast<float>(matrix),
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                     /*device_pixel_ratio = */ parameters.pixelRatio};
@@ -187,7 +194,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
             case LineType::Gradient: {
                 const LineGradientUBO lineGradientUBO{
-                    /*matrix = */ util::cast<float>(matrix),
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                     /*device_pixel_ratio = */ parameters.pixelRatio};
@@ -233,7 +239,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     }
                 }
                 const LinePatternUBO linePatternUBO{
-                    /*matrix =*/util::cast<float>(matrix),
                     {parameters.pixelRatio,
                      1 / tileID.pixelsToTileUnits(1, parameters.state.getIntegerZoom()),
                      crossfade.fromScale,
@@ -304,7 +309,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     const float widthA = posA.width * crossfade.fromScale;
                     const float widthB = posB.width * crossfade.toScale;
                     const LineSDFUBO lineSDFUBO{
-                        /* matrix = */ util::cast<float>(matrix),
                         {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                         {1.0f / tileID.pixelsToTileUnits(widthA, parameters.state.getIntegerZoom()),
                          -posA.height / 2.0f},

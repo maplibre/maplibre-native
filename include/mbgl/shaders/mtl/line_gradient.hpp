@@ -16,7 +16,7 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
     static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 7> attributes;
-    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<UniformBlockInfo, 6> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -42,11 +42,12 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineGradientUBO& line [[buffer(7)]],
-                                device const LineGradientPropertiesUBO& props [[buffer(8)]],
-                                device const LineGradientInterpolationUBO& interp [[buffer(9)]],
-                                device const LinePermutationUBO& permutation [[buffer(10)]],
-                                device const ExpressionInputsUBO& expr [[buffer(11)]]) {
+                                device const MatrixUBO& matrix [[buffer(7)]],
+                                device const LineGradientUBO& line [[buffer(8)]],
+                                device const LineGradientPropertiesUBO& props [[buffer(9)]],
+                                device const LineGradientInterpolationUBO& interp [[buffer(10)]],
+                                device const LinePermutationUBO& permutation [[buffer(11)]],
+                                device const ExpressionInputsUBO& expr [[buffer(12)]]) {
 
     const auto blur     = valueFor(permutation.blur,     props.blur,     vertx.blur,     interp.blur_t,     expr);
     const auto opacity  = valueFor(permutation.opacity,  props.opacity,  vertx.opacity,  interp.opacity_t,  expr);
@@ -84,8 +85,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float t = 1.0 - abs(u);
     const float2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * float2x2(t, -u, u, t);
 
-    const float4 projected_extrude = line.matrix * float4(dist / line.ratio, 0.0, 0.0);
-    const float4 position = line.matrix * float4(pos + offset2 / line.ratio, 0.0, 1.0) + projected_extrude;
+    const float4 projected_extrude = matrix.matrix * float4(dist / line.ratio, 0.0, 0.0);
+    const float4 position = matrix.matrix * float4(pos + offset2 / line.ratio, 0.0, 1.0) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
@@ -104,8 +105,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineGradientUBO& line [[buffer(7)]],
-                            device const LinePermutationUBO& permutation [[buffer(10)]],
+                            device const LineGradientUBO& line [[buffer(8)]],
+                            device const LinePermutationUBO& permutation [[buffer(11)]],
                             texture2d<float, access::sample> gradientTexture [[texture(0)]]) {
     if (permutation.overdrawInspector) {
         return half4(1.0);

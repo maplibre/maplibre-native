@@ -1,6 +1,3 @@
-layout (std140) uniform FillMatrixUBO {
-    highp mat4 u_matrix;
-};
 layout (std140) uniform FillPatternDrawableUBO {
     highp vec4 u_scale;
     highp vec2 u_pixel_coord_upper;

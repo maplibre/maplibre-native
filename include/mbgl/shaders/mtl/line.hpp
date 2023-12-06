@@ -16,7 +16,7 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 8> attributes;
-    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<UniformBlockInfo, 6> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
@@ -62,11 +62,12 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineUBO& line [[buffer(8)]],
-                                device const LinePropertiesUBO& props [[buffer(9)]],
-                                device const LineInterpolationUBO& interp [[buffer(10)]],
-                                device const LinePermutationUBO& permutation [[buffer(11)]],
-                                device const ExpressionInputsUBO& expr [[buffer(12)]]) {
+                                device const MatrixUBO& matrix [[buffer(8)]],
+                                device const LineUBO& line [[buffer(9)]],
+                                device const LinePropertiesUBO& props [[buffer(10)]],
+                                device const LineInterpolationUBO& interp [[buffer(11)]],
+                                device const LinePermutationUBO& permutation [[buffer(12)]],
+                                device const ExpressionInputsUBO& expr [[buffer(13)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth = props.gapwidth / 2;
@@ -113,8 +114,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float t = 1.0 - abs(u);
     const float2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * float2x2(t, -u, u, t);
 
-    const float4 projected_extrude = line.matrix * float4(dist / line.ratio, 0.0, 0.0);
-    const float4 position = line.matrix * float4(pos + offset2 / line.ratio, 0.0, 1.0) + projected_extrude;
+    const float4 projected_extrude = matrix.matrix * float4(dist / line.ratio, 0.0, 0.0);
+    const float4 position = matrix.matrix * float4(pos + offset2 / line.ratio, 0.0, 1.0) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
@@ -139,9 +140,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineUBO& line [[buffer(8)]],
-                            device const LinePropertiesUBO& props [[buffer(9)]],
-                            device const LinePermutationUBO& permutation [[buffer(11)]]) {
+                            device const LineUBO& line [[buffer(9)]],
+                            device const LinePropertiesUBO& props [[buffer(10)]],
+                            device const LinePermutationUBO& permutation [[buffer(12)]]) {
     if (permutation.overdrawInspector) {
         return half4(1.0);
     }
@@ -183,7 +184,7 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 9> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<UniformBlockInfo, 7> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -236,7 +237,6 @@ struct FragmentStage {
 };
 
 struct alignas(16) LinePatternUBO {
-    float4x4 matrix;
     float4 scale;
     float2 texsize;
     float2 units_to_pixels;
@@ -272,12 +272,13 @@ struct alignas(16) LinePatternTilePropertiesUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LinePatternUBO& line [[buffer(9)]],
-                                device const LinePatternPropertiesUBO& props [[buffer(10)]],
-                                device const LinePatternInterpolationUBO& interp [[buffer(11)]],
-                                device const LinePatternTilePropertiesUBO& tileProps [[buffer(12)]],
-                                device const LinePermutationUBO& permutation [[buffer(13)]],
-                                device const ExpressionInputsUBO& expr [[buffer(14)]]) {
+                                device const MatrixUBO& matrix [[buffer(9)]],
+                                device const LinePatternUBO& line [[buffer(10)]],
+                                device const LinePatternPropertiesUBO& props [[buffer(11)]],
+                                device const LinePatternInterpolationUBO& interp [[buffer(12)]],
+                                device const LinePatternTilePropertiesUBO& tileProps [[buffer(13)]],
+                                device const LinePermutationUBO& permutation [[buffer(14)]],
+                                device const ExpressionInputsUBO& expr [[buffer(15)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth = props.gapwidth / 2;
@@ -326,8 +327,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float t = 1.0 - abs(u);
     const float2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * float2x2(t, -u, u, t);
 
-    const float4 projected_extrude = line.matrix * float4(dist / line.ratio, 0.0, 0.0);
-    const float4 position = line.matrix * float4(pos + offset2 / line.ratio, 0.0, 1.0) + projected_extrude;
+    const float4 projected_extrude = matrix.matrix * float4(dist / line.ratio, 0.0, 0.0);
+    const float4 position = matrix.matrix * float4(pos + offset2 / line.ratio, 0.0, 1.0) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
@@ -356,10 +357,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LinePatternUBO& line [[buffer(9)]],
-                            device const LinePatternPropertiesUBO& props [[buffer(10)]],
-                            device const LinePatternTilePropertiesUBO& tileProps [[buffer(12)]],
-                            device const LinePermutationUBO& permutation [[buffer(13)]],
+                            device const LinePatternUBO& line [[buffer(10)]],
+                            device const LinePatternPropertiesUBO& props [[buffer(11)]],
+                            device const LinePatternTilePropertiesUBO& tileProps [[buffer(13)]],
+                            device const LinePermutationUBO& permutation [[buffer(14)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
     if (permutation.overdrawInspector) {
@@ -440,7 +441,7 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 9> attributes;
-    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<UniformBlockInfo, 6> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -494,7 +495,6 @@ struct FragmentStage {
 };
 
 struct alignas(16) LineSDFUBO {
-    float4x4 matrix;
     float2 units_to_pixels;
     float2 patternscale_a;
     float2 patternscale_b;
@@ -529,11 +529,12 @@ struct alignas(16) LineSDFInterpolationUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineSDFUBO& line [[buffer(9)]],
-                                device const LineSDFPropertiesUBO& props [[buffer(10)]],
-                                device const LineSDFInterpolationUBO& interp [[buffer(11)]],
-                                device const LinePermutationUBO& permutation [[buffer(12)]],
-                                device const ExpressionInputsUBO& expr [[buffer(13)]]) {
+                                device const MatrixUBO& matrix [[buffer(9)]],
+                                device const LineSDFUBO& line [[buffer(10)]],
+                                device const LineSDFPropertiesUBO& props [[buffer(11)]],
+                                device const LineSDFInterpolationUBO& interp [[buffer(12)]],
+                                device const LinePermutationUBO& permutation [[buffer(13)]],
+                                device const ExpressionInputsUBO& expr [[buffer(14)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth   = props.gapwidth / 2;
@@ -587,8 +588,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float t = 1.0 - abs(u);
     const float2 offset2 = offset * a_extrude * LINE_NORMAL_SCALE * v_normal.y * float2x2(t, -u, u, t);
 
-    const float4 projected_extrude = line.matrix * float4(dist / line.ratio, 0.0, 0.0);
-    const float4 position = line.matrix * float4(pos + offset2 / line.ratio, 0.0, 1.0) + projected_extrude;
+    const float4 projected_extrude = matrix.matrix * float4(dist / line.ratio, 0.0, 0.0);
+    const float4 position = matrix.matrix * float4(pos + offset2 / line.ratio, 0.0, 1.0) + projected_extrude;
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
@@ -618,9 +619,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineSDFUBO& line [[buffer(9)]],
-                            device const LineSDFPropertiesUBO& props [[buffer(10)]],
-                            device const LinePermutationUBO& permutation [[buffer(12)]],
+                            device const LineSDFUBO& line [[buffer(10)]],
+                            device const LineSDFPropertiesUBO& props [[buffer(11)]],
+                            device const LinePermutationUBO& permutation [[buffer(13)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
     if (permutation.overdrawInspector) {

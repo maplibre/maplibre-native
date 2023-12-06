@@ -19,8 +19,10 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::OpenGL> {
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-layout (std140) uniform LineUBO {
+layout (std140) uniform LineMatrixUBO {
     highp mat4 u_matrix;
+};
+layout (std140) uniform LineUBO {
     highp vec2 u_units_to_pixels;
     mediump float u_ratio;
     lowp float u_device_pixel_ratio;
@@ -159,7 +161,6 @@ mediump float width = u_width;
 }
 )";
     static constexpr const char* fragment = R"(layout (std140) uniform LineUBO {
-    highp mat4 u_matrix;
     highp vec2 u_units_to_pixels;
     mediump float u_ratio;
     lowp float u_device_pixel_ratio;

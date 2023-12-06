@@ -1,6 +1,5 @@
 
 layout (std140) uniform LineSDFUBO {
-    highp mat4 u_matrix;
     highp vec2 u_units_to_pixels;
     highp vec2 u_patternscale_a;
     highp vec2 u_patternscale_b;
