@@ -1,5 +1,4 @@
 layout (std140) uniform LinePatternUBO {
-    highp mat4 u_matrix;
     mediump vec4 u_scale;
     highp vec2 u_texsize;
     highp vec2 u_units_to_pixels;
