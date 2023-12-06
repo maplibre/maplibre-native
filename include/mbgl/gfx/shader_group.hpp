@@ -2,10 +2,13 @@
 
 #include <mbgl/gfx/shader.hpp>
 #include <mbgl/util/containers.hpp>
+#include <mbgl/util/hash.hpp>
 
+#include <iomanip>
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
+#include <sstream>
 #include <string>
 
 namespace mbgl {
@@ -149,6 +152,20 @@ public:
         [[maybe_unused]] const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms,
         [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
         return {};
+    }
+
+protected:
+    using PropertyHashType = std::uint64_t;
+
+    std::string getShaderName(const std::string_view& name, const PropertyHashType key) {
+        return (std::ostringstream() << name << '#' << std::hex << key).str();
+    }
+
+    /// Generate a map key for the specified combination of properties
+    PropertyHashType propertyHash(const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
+        const auto beg = propertiesAsUniforms.cbegin();
+        const auto end = propertiesAsUniforms.cend();
+        return util::order_independent_hash<decltype(beg), PropertyHashType>(beg, end);
     }
 
 private:

@@ -23,7 +23,7 @@ const std::array<UniformBlockInfo, 7> ShaderSource<BuiltIn::SymbolSDFIconShader,
     {
         UniformBlockInfo{10, true, true, sizeof(SymbolDrawableUBO), "SymbolDrawableUBO"},
         UniformBlockInfo{11, true, true, sizeof(SymbolDynamicUBO), "SymbolDynamicUBO"},
-        UniformBlockInfo{12, true, false, sizeof(SymbolDrawablePaintUBO), "SymbolDrawablePaintUBO"},
+        UniformBlockInfo{12, true, true, sizeof(SymbolDrawablePaintUBO), "SymbolDrawablePaintUBO"},
         UniformBlockInfo{13, true, true, sizeof(SymbolDrawableTilePropsUBO), "SymbolDrawableTilePropsUBO"},
         UniformBlockInfo{14, true, false, sizeof(SymbolDrawableInterpolateUBO), "SymbolDrawableInterpolateUBO"},
         UniformBlockInfo{15, true, true, sizeof(SymbolPermutationUBO), "SymbolPermutationUBO"},

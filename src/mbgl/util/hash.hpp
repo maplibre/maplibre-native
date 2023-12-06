@@ -25,15 +25,18 @@ template <typename TIter>
 using TIterVal = std::enable_if_t<std::is_integral<typename TIter::value_type>::value, typename TIter::value_type>;
 } // namespace detail
 
-/// Generate a hash key from a collection of integer values which doesn't depend on their order.
-/// Adapted from https://stackoverflow.com/a/76993810/135138
-/// Default factor prime values from 32-bit FNV hash and 64-bit FNV hash.
-constexpr size_t factor() {
-    if constexpr (std::is_same_v<long long, size_t>) return 1099511628211LL;
+template <typename T>
+constexpr T factor() {
+    // Default factor prime value from 64-bit FNV hash.
+    if constexpr (sizeof(T) == 8) return 1099511628211;
+    // for 32-bit hash
     return 16777619;
 }
-template <typename TIter, typename TKey = detail::TIterVal<TIter>, TKey factor = factor()>
-TKey order_independent_hash(TIter cur, const TIter end) {
+
+/// Generate a hash key from a collection of integer values which doesn't depend on their order.
+/// Adapted from https://stackoverflow.com/a/76993810/135138
+template <typename TIter, typename TKey = detail::TIterVal<TIter>, TKey factor = factor<TKey>()>
+TKey order_independent_hash(std::remove_const_t<TIter> cur, const TIter end) {
     detail::TIterVal<TIter> sum = 0, product = 1;
     for (; cur != end; ++cur) {
         const auto& value = *cur;

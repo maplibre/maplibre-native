@@ -124,7 +124,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     };
 
     // build a set of tiles to cover
-    std::unordered_set<OverscaledTileID> newTiles;
+    mbgl::unordered_set<OverscaledTileID> newTiles;
+    newTiles.reserve(renderTiles->size());
     for (auto& tile : *renderTiles) {
         newTiles.insert(tile.getOverscaledTileID());
     }
