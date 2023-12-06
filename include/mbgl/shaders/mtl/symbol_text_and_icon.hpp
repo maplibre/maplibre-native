@@ -13,10 +13,9 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
     static constexpr auto name = "SymbolTextAndIconShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 9> attributes;
-    static const std::array<UniformBlockInfo, 7> uniforms;
+    static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto source = R"(
@@ -73,9 +72,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolDynamicUBO& dynamic [[buffer(10)]],
                                 device const SymbolDrawablePaintUBO& paint [[buffer(11)]],
                                 device const SymbolDrawableTilePropsUBO& props [[buffer(12)]],
-                                device const SymbolDrawableInterpolateUBO& interp [[buffer(13)]],
-                                device const SymbolPermutationUBO& permutation [[buffer(14)]],
-                                device const ExpressionInputsUBO& expr [[buffer(15)]]) {
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(13)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -150,19 +147,19 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .data1      = float4(gamma_scale, size, interpolated_fade_opacity, is_sdf),
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-        .fill_color = half(colorFor(permutation.fill_color, paint.fill_color, vertx.fill_color, interp.fill_color_t, expr));
+        .fill_color = half(unpack_mix_color(vertx.fill_color, interp.fill_color_t));
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-        .halo_color = half(colorFor(permutation.halo_color, paint.halo_color, vertx.halo_color, interp.halo_color_t, expr));
+        .halo_color = half(unpack_mix_color(vertx.halo_color, interp.halo_color_t));
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity    = half(valueFor(permutation.opacity, paint.opacity, vertx.opacity, interp.opacity_t, expr));
+        .opacity    = half(unpack_mix_float(vertx.opacity, interp.opacity_t));
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-        .halo_width = half(valueFor(permutation.halo_width, paint.halo_width, vertx.halo_width, interp.halo_width_t, expr));
+        .halo_width = half(unpack_mix_float(vertx.halo_width, interp.halo_width_t));
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-        .halo_blur  = half(valueFor(permutation.halo_blur, paint.halo_blur, vertx.halo_blur, interp.halo_blur_t, expr));
+        .halo_blur  = half(unpack_mix_float(vertx.halo_blur, interp.halo_blur_t));
 #endif
     };
 }
@@ -172,14 +169,13 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const SymbolDynamicUBO& dynamic [[buffer(10)]],
                             device const SymbolDrawablePaintUBO& paint [[buffer(11)]],
                             device const SymbolDrawableTilePropsUBO& props [[buffer(12)]],
-                            device const SymbolPermutationUBO& permutation [[buffer(14)]],
                             texture2d<float, access::sample> glyph_image [[texture(0)]],
                             texture2d<float, access::sample> icon_image [[texture(1)]],
                             sampler glyph_sampler [[sampler(0)]],
                             sampler icon_sampler [[sampler(1)]]) {
-    if (permutation.overdrawInspector) {
-        return half4(1.0);
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
 #if defined(HAS_UNIFORM_u_fill_color)
     const half4 fill_color = half4(paint.fill_color);

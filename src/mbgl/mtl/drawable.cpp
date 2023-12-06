@@ -346,12 +346,8 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
             renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
         } else {
             const auto* shaderMTL = static_cast<const ShaderProgram*>(shader.get());
-            if (impl->noBindingBuffer && shaderMTL && shaderMTL->getBindMissingAttributes()) {
-                renderPass.bindVertex(impl->noBindingBuffer->get(), /*offset=*/0, attributeIndex);
-            } else {
-                auto& context = renderPass.getCommandEncoder().getContext();
-                renderPass.bindVertex(context.getEmptyBuffer(), /*offset=*/0, attributeIndex);
-            }
+            auto& context = renderPass.getCommandEncoder().getContext();
+            renderPass.bindVertex(context.getEmptyBuffer(), /*offset=*/0, attributeIndex);
         }
         attributeIndex += 1;
     }

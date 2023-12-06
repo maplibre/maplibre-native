@@ -71,11 +71,6 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
     if (renderTarget) {
         if (auto tileLayerGroup = renderTarget->getLayerGroup(0)) {
             auto newTweaker = std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties);
-
-            if (layerTweaker) {
-                newTweaker->setPropertiesAsUniforms(layerTweaker->getPropertiesAsUniforms());
-            }
-
             replaceTweaker(layerTweaker, std::move(newTweaker), {std::move(tileLayerGroup)});
         }
     }
@@ -338,7 +333,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties);
         tileLayerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     std::unique_ptr<gfx::DrawableBuilder> heatmapBuilder;
     constexpr auto renderPass = RenderPass::Translucent;
@@ -477,10 +471,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 
-    if (layerTweaker && propertiesAsUniforms) {
-        layerTweaker->setPropertiesAsUniforms(*propertiesAsUniforms);
-    }
-
     // Set up texture layer group
     if (!layerGroup) {
         if (auto layerGroup_ = context.createLayerGroup(layerIndex, /*initialCapacity=*/1, getID())) {
@@ -496,7 +486,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         textureTweaker = std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(textureTweaker);
     }
-    textureTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!heatmapTextureShader) {
         heatmapTextureShader = context.getGenericShader(shaders, HeatmapTextureShaderGroupName);

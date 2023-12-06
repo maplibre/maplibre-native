@@ -13,10 +13,9 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LineGradientShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 7> attributes;
-    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -33,26 +32,44 @@ struct VertexStage {
 struct FragmentStage {
     float4 position [[position, invariant]];
     float2 width2;
-    float2 gapwidth;
     float2 normal;
     float gamma_scale;
-    float blur;
-    float opacity;
     float lineprogress;
+
+#if !defined(HAS_UNIFORM_u_blur)
+    half blur;
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    half opacity;
+#endif
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const LineGradientUBO& line [[buffer(7)]],
                                 device const LineGradientPropertiesUBO& props [[buffer(8)]],
-                                device const LineGradientInterpolationUBO& interp [[buffer(9)]],
-                                device const LinePermutationUBO& permutation [[buffer(10)]],
-                                device const ExpressionInputsUBO& expr [[buffer(11)]]) {
+                                device const LineGradientInterpolationUBO& interp [[buffer(9)]]) {
 
-    const auto blur     = valueFor(permutation.blur,     props.blur,     vertx.blur,     interp.blur_t,     expr);
-    const auto opacity  = valueFor(permutation.opacity,  props.opacity,  vertx.opacity,  interp.opacity_t,  expr);
-    const auto gapwidth = valueFor(permutation.gapwidth, props.gapwidth, vertx.gapwidth, interp.gapwidth_t, expr) / 2;
-    const auto offset   = valueFor(permutation.offset,   props.offset,   vertx.offset,   interp.offset_t,   expr) * -1;
-    const auto width    = valueFor(permutation.width,    props.width,    vertx.width,    interp.width_t,    expr);
+#if !defined(HAS_UNIFORM_u_blur)
+    const auto blur     = unpack_mix_float(vertx.blur,     interp.blur_t);
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    const auto opacity  = unpack_mix_float(vertx.opacity,  interp.opacity_t);
+#endif
+#if defined(HAS_UNIFORM_u_gapwidth)
+    const auto gapwidth = props.gapwidth;
+#else
+    const auto gapwidth = unpack_mix_float(vertx.gapwidth, interp.gapwidth_t) / 2;
+#endif
+#if defined(HAS_UNIFORM_u_offset)
+    const auto offset   = props.offset;
+#else
+    const auto offset   = unpack_mix_float(vertx.offset,   interp.offset_t) * -1;
+#endif
+#if defined(HAS_UNIFORM_u_width)
+    const auto width    = props.width;
+#else
+    const auto width    = unpack_mix_float(vertx.width,    interp.width_t);
+#endif
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
@@ -94,29 +111,44 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position     = position,
         .width2       = float2(outset, inset),
-        .gapwidth     = gapwidth,
         .normal       = v_normal,
         .gamma_scale  = extrude_length_without_perspective / extrude_length_with_perspective,
-        .blur         = blur,
-        .opacity      = opacity,
         .lineprogress = v_lineprogress,
+
+#if !defined(HAS_UNIFORM_u_blur)
+        .blur         = half(blur),
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+        .opacity      = half(opacity),
+#endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LineGradientUBO& line [[buffer(7)]],
-                            device const LinePermutationUBO& permutation [[buffer(10)]],
+                            device const LineGradientPropertiesUBO& props [[buffer(8)]],
                             texture2d<float, access::sample> gradientTexture [[texture(0)]]) {
-    if (permutation.overdrawInspector) {
-        return half4(1.0);
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
+
+#if defined(HAS_UNIFORM_u_blur)
+    const float blur = props.blur;
+#else
+    const float blur = float(in.blur);
+#endif
+#if defined(HAS_UNIFORM_u_opacity)
+    const float opacity = props.opacity;
+#else
+    const float opacity = float(in.opacity);
+#endif
 
     // Calculate the distance of the pixel from the line in pixels.
     const float dist = length(in.normal) * in.width2.x;
 
     // Calculate the antialiasing fade factor. This is either when fading in the
     // line in case of an offset line (v_width2.y) or when fading out (v_width2.x)
-    const float blur2 = (in.blur + 1.0 / line.device_pixel_ratio) * in.gamma_scale;
+    const float blur2 = (blur + 1.0 / line.device_pixel_ratio) * in.gamma_scale;
     const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0);
 
     // For gradient lines, v_lineprogress is the ratio along the entire line,
@@ -124,7 +156,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     constexpr sampler sampler2d(coord::normalized, filter::linear);
     const float4 color = gradientTexture.sample(sampler2d, float2(in.lineprogress, 0.5));
 
-    return half4(color * (alpha * in.opacity));
+    return half4(color * (alpha * opacity));
 }
 )";
 };

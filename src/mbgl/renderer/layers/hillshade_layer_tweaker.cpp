@@ -65,14 +65,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, true);
         HillshadeDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
                                             /* .latrange = */ getLatRange(tileID),
-                                            /* .light = */ getLight(parameters, evaluated),
-                                            /* .overdrawInspector = */ overdrawInspector,
-                                            /* .pad1/2/3 = */ 0,
-                                            0,
-                                            0,
-                                            /* .pad4/5/6 = */ 0,
-                                            0,
-                                            0};
+                                            /* .light = */ getLight(parameters, evaluated)};
 
         drawable.mutableUniformBuffers().createOrUpdate(idHillshadeDrawableUBOName, &drawableUBO, parameters.context);
     });

@@ -331,7 +331,6 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!hillshadePrepareShader) {
         hillshadePrepareShader = context.getGenericShader(shaders, HillshadePrepareShaderGroupName);

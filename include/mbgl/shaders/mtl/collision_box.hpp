@@ -13,7 +13,6 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "CollisionBoxShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 5> attributes;
     static const std::array<UniformBlockInfo, 1> uniforms;

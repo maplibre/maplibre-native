@@ -77,12 +77,6 @@ void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& para
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
         auto newTweaker = std::make_shared<FillExtrusionLayerTweaker>(getID(), evaluatedProperties);
-
-        // propertiesAsUniforms isn't recalculated every update, so carry it over
-        if (layerTweaker) {
-            newTweaker->setPropertiesAsUniforms(layerTweaker->getPropertiesAsUniforms());
-        }
-
         replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
     }
 #endif // MLN_DRAWABLE_RENDERER
@@ -305,8 +299,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         layerGroup->addLayerTweaker(layerTweaker);
     }
 
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
-
     if (!fillExtrusionGroup) {
         fillExtrusionGroup = shaders.getShaderGroup("FillExtrusionShader");
     }
@@ -431,10 +423,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             shaderGroup->getOrCreateShader(context, propertiesAsUniforms));
         if (!shader) {
             continue;
-        }
-
-        if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
 
         // The non-pattern path in `render()` only uses two-pass rendering if there's translucency.

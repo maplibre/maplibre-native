@@ -258,7 +258,6 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!hasPattern && !plainShader) {
         plainShader = context.getGenericShader(shaders, std::string(BackgroundPlainShaderName));

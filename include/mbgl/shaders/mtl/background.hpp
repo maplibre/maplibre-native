@@ -13,7 +13,6 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "BackgroundShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<UniformBlockInfo, 2> uniforms;
@@ -51,10 +50,10 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const BackgroundLayerUBO& layerUBO [[buffer(2)]]) {
-    if (layerUBO.overdrawInspector) {
-        return half4(0.0);
-    }
-    
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
+
     return half4(layerUBO.color * layerUBO.opacity);
 }
 )";

@@ -290,7 +290,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             imageLayerGroup->addLayerTweaker(layerTweaker);
         }
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!staticDataVertices) {
         staticDataVertices = std::make_shared<RasterVertexVector>(RenderStaticData::rasterVertices());

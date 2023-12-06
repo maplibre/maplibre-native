@@ -27,15 +27,5 @@ struct alignas(16) HeatmapInterpolateUBO {
 };
 static_assert(sizeof(HeatmapInterpolateUBO) % 16 == 0);
 
-struct alignas(16) HeatmapPermutationUBO {
-    /*  0 */ Attribute weight;
-    /*  8 */ Attribute radius;
-    /* 16 */ bool overdrawInspector;
-    /* 17 */ uint8_t pad1, pad2, pad3;
-    /* 20 */ float pad4, pad5, pad6;
-    /* 32 */
-};
-static_assert(sizeof(HeatmapPermutationUBO) == 2 * 16);
-
 } // namespace shaders
 } // namespace mbgl

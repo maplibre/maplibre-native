@@ -441,7 +441,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!fillShaderGroup) {
         fillShaderGroup = shaders.getShaderGroup(std::string(FillShaderName));
@@ -626,10 +625,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         auto vertexAttrs = context.createVertexAttributeArray();
         vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
             binders, evaluated, propertiesAsUniforms);
-
-        if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-        }
 
         const auto vertexCount = bucket.vertices.elements();
         if (const auto& attr = vertexAttrs->add(idPosAttribName)) {

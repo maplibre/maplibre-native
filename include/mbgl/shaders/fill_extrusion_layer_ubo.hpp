@@ -56,18 +56,5 @@ struct alignas(16) FillExtrusionDrawablePropsUBO {
 };
 static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16);
 
-struct alignas(16) FillExtrusionPermutationUBO {
-    /*  0 */ Attribute color;
-    /*  8 */ Attribute base;
-    /* 16 */ Attribute height;
-    /* 24 */ Attribute pattern_from;
-    /* 32 */ Attribute pattern_to;
-    /* 40 */ bool overdrawInspector;
-    /* 41 */ uint8_t pad1, pad2, pad3;
-    /* 44 */ float pad4;
-    /* 48 */
-};
-static_assert(sizeof(FillExtrusionPermutationUBO) == 3 * 16, "unexpected padding");
-
 } // namespace shaders
 } // namespace mbgl

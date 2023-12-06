@@ -13,10 +13,9 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "SymbolIconShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 6> attributes;
-    static const std::array<UniformBlockInfo, 7> uniforms;
+    static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -47,9 +46,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolDynamicUBO& dynamic [[buffer(9)]],
                                 device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
                                 device const SymbolDrawableTilePropsUBO& props [[buffer(11)]],
-                                device const SymbolDrawableInterpolateUBO& interp [[buffer(12)]],
-                                device const SymbolPermutationUBO& permutation [[buffer(13)]],
-                                device const ExpressionInputsUBO& expr [[buffer(14)]]) {
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(12)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -114,7 +111,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .tex          = a_tex / drawable.texsize,
         .fade_opacity = half(max(0.0, min(1.0, fade_opacity[0] + fade_change))),
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity      = half(valueFor(permutation.opacity, paint.opacity, vertx.opacity, interp.opacity_t, expr)),
+        .opacity      = half(unpack_mix_float(vertx.opacity, interp.opacity_t)),
 #endif
     };
 }
@@ -122,12 +119,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const SymbolDrawableUBO& drawable [[buffer(8)]],
                             device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
-                            device const SymbolPermutationUBO& permutation [[buffer(13)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
-    if (permutation.overdrawInspector) {
-        return half4(1.0);
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
 #if defined(HAS_UNIFORM_u_opacity)
     const half opacity = half(paint.opacity);

@@ -8,7 +8,8 @@
 namespace mbgl {
 
 ProgramParameters::ProgramParameters(const float pixelRatio, const bool overdraw)
-    : defines(2) {
+    : defines(2),
+      overdrawInspector(overdraw) {
     defines["DEVICE_PIXEL_RATIO"] = util::toString(pixelRatio, true);
     if (overdraw) {
         defines["OVERDRAW_INSPECTOR"] = std::string();
