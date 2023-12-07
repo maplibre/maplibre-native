@@ -13,10 +13,9 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LineShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 8> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
@@ -65,24 +64,22 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const MatrixUBO& matrix [[buffer(8)]],
                                 device const LineUBO& line [[buffer(9)]],
                                 device const LinePropertiesUBO& props [[buffer(10)]],
-                                device const LineInterpolationUBO& interp [[buffer(11)]],
-                                device const LinePermutationUBO& permutation [[buffer(12)]],
-                                device const ExpressionInputsUBO& expr [[buffer(13)]]) {
+                                device const LineInterpolationUBO& interp [[buffer(11)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth = props.gapwidth / 2;
 #else
-    const auto gapwidth = valueFor(permutation.gapwidth, props.gapwidth, vertx.gapwidth, interp.gapwidth_t, expr) / 2;
+    const auto gapwidth = unpack_mix_float(vertx.gapwidth, interp.gapwidth_t) / 2;
 #endif
 #if defined(HAS_UNIFORM_u_offset)
     const auto offset   = props.offset * -1;
 #else
-    const auto offset   = valueFor(permutation.offset,   props.offset,   vertx.offset,   interp.offset_t,   expr) * -1;
+    const auto offset   = unpack_mix_float(vertx.offset, interp.offset_t) * -1;
 #endif
 #if defined(HAS_UNIFORM_u_width)
     const auto width    = props.width;
 #else
-    const auto width    = valueFor(permutation.width,    props.width,    vertx.width,    interp.width_t,    expr);
+    const auto width    = unpack_mix_float(vertx.width, interp.width_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -128,24 +125,23 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .gamma_scale = half(extrude_length_without_perspective / extrude_length_with_perspective),
 
 #if !defined(HAS_UNIFORM_u_color)
-        .color       = colorFor(permutation.color,   props.color,   vertx.color,   interp.color_t,   expr),
+        .color       = unpack_mix_color(vertx.color,   interp.color_t),
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur        = valueFor(permutation.blur,    props.blur,    vertx.blur,    interp.blur_t,    expr),
+        .blur        = unpack_mix_float(vertx.blur,    interp.blur_t),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity     = valueFor(permutation.opacity, props.opacity, vertx.opacity, interp.opacity_t, expr),
+        .opacity     = unpack_mix_float(vertx.opacity, interp.opacity_t),
 #endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LineUBO& line [[buffer(9)]],
-                            device const LinePropertiesUBO& props [[buffer(10)]],
-                            device const LinePermutationUBO& permutation [[buffer(12)]]) {
-    if (permutation.overdrawInspector) {
-        return half4(1.0);
-    }
+                            device const LinePropertiesUBO& props [[buffer(10)]]) {
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
 #if defined(HAS_UNIFORM_u_color)
     const float4 color = props.color;
@@ -181,10 +177,9 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LinePatternShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 9> attributes;
-    static const std::array<UniformBlockInfo, 7> uniforms;
+    static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -218,21 +213,21 @@ struct VertexStage {
 struct FragmentStage {
     float4 position [[position, invariant]];
     float2 width2;
-    float2 normal;
-    half gamma_scale;
     float linesofar;
+    half2 normal;
+    half gamma_scale;
 
 #if !defined(HAS_UNIFORM_u_blur)
-    float blur;
+    half blur;
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity;
+    half opacity;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    float4 pattern_from;
+    half4 pattern_from;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    float4 pattern_to;
+    half4 pattern_to;
 #endif
 };
 
@@ -276,24 +271,22 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const LinePatternUBO& line [[buffer(10)]],
                                 device const LinePatternPropertiesUBO& props [[buffer(11)]],
                                 device const LinePatternInterpolationUBO& interp [[buffer(12)]],
-                                device const LinePatternTilePropertiesUBO& tileProps [[buffer(13)]],
-                                device const LinePermutationUBO& permutation [[buffer(14)]],
-                                device const ExpressionInputsUBO& expr [[buffer(15)]]) {
+                                device const LinePatternTilePropertiesUBO& tileProps [[buffer(13)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth = props.gapwidth / 2;
 #else
-    const auto gapwidth = valueFor(permutation.gapwidth, props.gapwidth, vertx.gapwidth, interp.gapwidth_t, expr) / 2;
+    const auto gapwidth = unpack_mix_float(vertx.gapwidth, interp.gapwidth_t) / 2;
 #endif
 #if defined(HAS_UNIFORM_u_offset)
     const auto offset   = props.offset * -1;
 #else
-    const auto offset   = valueFor(permutation.offset,   props.offset,   vertx.offset,   interp.offset_t,   expr) * -1;
+    const auto offset   = unpack_mix_float(vertx.offset,   interp.offset_t) * -1;
 #endif
 #if defined(HAS_UNIFORM_u_width)
     const auto width    = props.width;
 #else
-    const auto width    = valueFor(permutation.width,    props.width,    vertx.width,    interp.width_t,    expr);
+    const auto width    = unpack_mix_float(vertx.width,    interp.width_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -337,21 +330,21 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position     = position,
         .width2       = float2(outset, inset),
-        .normal       = v_normal,
+        .normal       = half2(v_normal),
         .gamma_scale  = half(extrude_length_without_perspective / extrude_length_with_perspective),
         .linesofar    = linesofar,
 
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur         = valueFor(permutation.blur,     props.blur,     vertx.blur,     interp.blur_t,     expr),
+        .blur         = half(unpack_mix_float(vertx.blur, interp.blur_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity      = valueFor(permutation.opacity,  props.opacity,  vertx.opacity,  interp.opacity_t,  expr),
+        .opacity      = half(unpack_mix_float(vertx.opacity, interp.opacity_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-        .pattern_from = patternFor(permutation.pattern_from, tileProps.pattern_from, vertx.pattern_from, interp.pattern_from_t, expr),
+        .pattern_from = half4(vertx.pattern_from),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-        .pattern_to   = patternFor(permutation.pattern_to,   tileProps.pattern_to,   vertx.pattern_to,   interp.pattern_to_t,   expr),
+        .pattern_to   = half4(vertx.pattern_to),
 #endif
     };
 }
@@ -360,32 +353,31 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LinePatternUBO& line [[buffer(10)]],
                             device const LinePatternPropertiesUBO& props [[buffer(11)]],
                             device const LinePatternTilePropertiesUBO& tileProps [[buffer(13)]],
-                            device const LinePermutationUBO& permutation [[buffer(14)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
-    if (permutation.overdrawInspector) {
-        return half4(1.0);
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
 #if defined(HAS_UNIFORM_u_blur)
-    const auto blur         = props.blur;
+    const half blur         = props.blur;
 #else
-    const auto blur         = in.blur;
+    const half blur         = in.blur;
 #endif
 #if defined(HAS_UNIFORM_u_opacity)
-    const auto opacity      = props.opacity;
+    const half opacity      = props.opacity;
 #else
-    const auto opacity      = in.opacity;
+    const half opacity      = in.opacity;
 #endif
 #if defined(HAS_UNIFORM_u_pattern_from)
-    const auto pattern_from = tileProps.pattern_from;
+    const auto pattern_from = float4(tileProps.pattern_from);
 #else
-    const auto pattern_from = in.pattern_from;
+    const auto pattern_from = float4(in.pattern_from);
 #endif
 #if defined(HAS_UNIFORM_u_pattern_to)
-    const auto pattern_to   = tileProps.pattern_to;
+    const auto pattern_to   = float4(tileProps.pattern_to);
 #else
-    const auto pattern_to   = in.pattern_to;
+    const auto pattern_to   = float4(in.pattern_to);
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
@@ -438,10 +430,9 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LineSDFShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 9> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -532,29 +523,27 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const MatrixUBO& matrix [[buffer(9)]],
                                 device const LineSDFUBO& line [[buffer(10)]],
                                 device const LineSDFPropertiesUBO& props [[buffer(11)]],
-                                device const LineSDFInterpolationUBO& interp [[buffer(12)]],
-                                device const LinePermutationUBO& permutation [[buffer(13)]],
-                                device const ExpressionInputsUBO& expr [[buffer(14)]]) {
+                                device const LineSDFInterpolationUBO& interp [[buffer(12)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth   = props.gapwidth / 2;
 #else
-    const auto gapwidth   = valueFor(permutation.gapwidth,   props.gapwidth,   vertx.gapwidth,   interp.gapwidth_t,   expr) / 2;
+    const auto gapwidth   = unpack_mix_float(vertx.gapwidth,   interp.gapwidth_t) / 2;
 #endif
 #if defined(HAS_UNIFORM_u_offset)
     const auto offset     = props.offset * -1;
 #else
-    const auto offset     = valueFor(permutation.offset,     props.offset,     vertx.offset,     interp.offset_t,     expr) * -1;
+    const auto offset     = unpack_mix_float(vertx.offset,     interp.offset_t) * -1;
 #endif
 #if defined(HAS_UNIFORM_u_width)
     const auto width      = props.width;
 #else
-    const auto width      = valueFor(permutation.width,      props.width,      vertx.width,      interp.width_t,      expr);
+    const auto width      = unpack_mix_float(vertx.width,      interp.width_t);
 #endif
 #if defined(HAS_UNIFORM_u_floorwidth)
     const auto floorwidth = props.floorwidth;
 #else
-    const auto floorwidth = valueFor(permutation.floorwidth, props.floorwidth, vertx.floorwidth, interp.floorwidth_t, expr);
+    const auto floorwidth = unpack_mix_float(vertx.floorwidth, interp.floorwidth_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -604,13 +593,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .tex_b        = float2(linesofar * line.patternscale_b.x / floorwidth, (normal.y * line.patternscale_b.y + line.tex_y_b) * 2.0),
 
 #if !defined(HAS_UNIFORM_u_color)
-        .color        = colorFor(permutation.color,      props.color,      vertx.color,      interp.color_t,      expr),
+        .color        = unpack_mix_color(vertx.color, interp.color_t),
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-        .blur         = valueFor(permutation.blur,       props.blur,       vertx.blur,       interp.blur_t,       expr),
+        .blur         = unpack_mix_float(vertx.blur, interp.blur_t),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity      = valueFor(permutation.opacity,    props.opacity,    vertx.opacity,    interp.opacity_t,    expr),
+        .opacity      = unpack_mix_float(vertx.opacity, interp.opacity_t),
 #endif
 #if !defined(HAS_UNIFORM_u_floorwidth)
         .floorwidth   = floorwidth,
@@ -621,12 +610,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const LineSDFUBO& line [[buffer(10)]],
                             device const LineSDFPropertiesUBO& props [[buffer(11)]],
-                            device const LinePermutationUBO& permutation [[buffer(13)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
-    if (permutation.overdrawInspector) {
-        return half4(1.0);
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
 #if defined(HAS_UNIFORM_u_color)
     const float4 color = props.color;
@@ -670,7 +658,6 @@ struct ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "LineBasicShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 2> attributes;
     static const std::array<UniformBlockInfo, 2> uniforms;

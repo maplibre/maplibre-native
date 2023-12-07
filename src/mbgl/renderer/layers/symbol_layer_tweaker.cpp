@@ -46,8 +46,6 @@ std::array<float, 2> toArray(const Size& s) {
 
 const StringIdentity idTexUniformName = stringIndexer().get("u_texture");
 const StringIdentity idTexIconUniformName = stringIndexer().get("u_texture_icon");
-const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
-const StringIdentity idSymbolPermutationUBOName = stringIndexer().get("SymbolPermutationUBO");
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
@@ -91,15 +89,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #if !defined(NDEBUG)
     const auto label = layerGroup.getName() + "-update-uniforms";
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
-#endif
-
-    const auto zoom = parameters.state.getZoom();
-
-#if MLN_RENDER_BACKEND_METAL
-    if (!expressionUniformBuffer) {
-        const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
-        expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
-    }
 #endif
 
     if (propertiesUpdated) {
@@ -177,7 +166,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         }
 
         // from symbol_program, makeValues
-        const auto currentZoom = static_cast<float>(zoom);
+        const auto currentZoom = static_cast<float>(parameters.state.getZoom());
         const float pixelsToTileUnits = tileID.pixelsToTileUnits(1.f, currentZoom);
         const bool pitchWithMap = symbolData.pitchAlignment == style::AlignmentType::Map;
         const bool rotateWithMap = symbolData.rotationAlignment == style::AlignmentType::Map;
@@ -216,31 +205,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         uniforms.addOrReplace(idSymbolDynamicUBOName, dynamicBuffer);
         uniforms.addOrReplace(idSymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
-
-#if MLN_RENDER_BACKEND_METAL
-        assert(propertiesAsUniforms.empty());
-
-        using namespace shaders;
-        using ShaderClass = ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal>;
-        const auto source = [&](int index) {
-            const auto nameID = ShaderClass::attributes[index].nameID;
-            const bool uniform = symbolData.propertiesAsUniforms.count(nameID);
-            return uniform ? AttributeSource::Constant : AttributeSource::PerVertex;
-        };
-
-        const SymbolPermutationUBO permutationUBO = {/* .fill_color = */ {/*.source=*/source(5), /*.expression=*/{}},
-                                                     /* .halo_color = */ {/*.source=*/source(6), /*.expression=*/{}},
-                                                     /* .opacity = */ {/*.source=*/source(7), /*.expression=*/{}},
-                                                     /* .halo_width = */ {/*.source=*/source(8), /*.expression=*/{}},
-                                                     /* .halo_blur = */ {/*.source=*/source(9), /*.expression=*/{}},
-                                                     /* .overdrawInspector = */ overdrawInspector,
-                                                     /* .pad = */ 0,
-                                                     0,
-                                                     0};
-        uniforms.createOrUpdate(idSymbolPermutationUBOName, &permutationUBO, context);
-
-        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
-#endif // MLN_RENDER_BACKEND_METAL
     });
 }
 

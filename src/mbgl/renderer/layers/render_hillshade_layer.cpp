@@ -306,7 +306,7 @@ static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
                                   [[maybe_unused]] const TransformState& state,
-                                  const std::shared_ptr<UpdateParameters>& updateParameters,
+                                  const std::shared_ptr<UpdateParameters>&,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -331,7 +331,6 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!hillshadePrepareShader) {
         hillshadePrepareShader = context.getGenericShader(shaders, HillshadePrepareShaderGroupName);

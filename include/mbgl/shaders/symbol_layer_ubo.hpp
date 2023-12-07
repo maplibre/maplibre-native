@@ -68,17 +68,5 @@ struct alignas(16) SymbolDrawablePaintUBO {
 };
 static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
 
-struct alignas(16) SymbolPermutationUBO {
-    /*  0 */ Attribute fill_color;
-    /*  8 */ Attribute halo_color;
-    /* 16 */ Attribute opacity;
-    /* 24 */ Attribute halo_width;
-    /* 40 */ Attribute halo_blur;
-    /* 48 */ int32_t /*bool*/ overdrawInspector;
-    /* 52 */ float pad1, pad2, pad3;
-    /* 64 */
-};
-static_assert(sizeof(SymbolPermutationUBO) == 4 * 16);
-
 } // namespace shaders
 } // namespace mbgl
