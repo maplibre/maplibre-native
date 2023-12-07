@@ -22,6 +22,9 @@ inputs:
   testFilter:
     description: 'Filter tests'
     required: false
+  externalData:
+    description: 'ARN of external data package'
+    required: false
   AWS_ACCESS_KEY_ID:
     description: "AWS_ACCESS_KEY_ID"
     required: true
@@ -110,6 +113,7 @@ runs:
             --device-pool-arn ${{ inputs.AWS_DEVICE_FARM_DEVICE_POOL_ARN }} \
             --test type=${{ inputs.testType }},testPackageArn=${{ env.test_package_arn }}${{ inputs.testFilter && ",filter=" }}${{ inputs.testFilter }} \
             --execution-configuration jobTimeoutMinutes=28800,videoCapture=false \
+            ${{ inputs.externalData && "--configuration extraDataPackageArn=" }}${{ inputs.externalData }} \
             --output text --query "run.arn")"
           
           # wait until result is not PENDING
