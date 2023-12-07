@@ -7,6 +7,7 @@
 #include <mbgl/tile/vector_tile.hpp>
 #include <mbgl/tile/vector_tile_data.hpp>
 
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/annotation/annotation_manager.hpp>
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/map/transform.hpp>
@@ -58,7 +59,7 @@ public:
 
 TEST(TileCache, Smoke) {
     VectorTileTest test;
-    TileCache cache(1);
+    TileCache cache(Scheduler::GetBackground(), 1);
     OverscaledTileID id(0, 0, 0);
     std::unique_ptr<Tile> tile = std::make_unique<VectorTileMock>(id, "source", test.tileParameters, test.tileset);
 
@@ -70,7 +71,7 @@ TEST(TileCache, Smoke) {
 
 TEST(TileCache, Issue15926) {
     VectorTileTest test;
-    TileCache cache(2);
+    TileCache cache(Scheduler::GetBackground(), 2);
     OverscaledTileID id0(0, 0, 0);
     OverscaledTileID id1(1, 0, 0);
     std::unique_ptr<Tile> tile1 = std::make_unique<VectorTileMock>(id0, "source", test.tileParameters, test.tileset);
