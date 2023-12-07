@@ -111,9 +111,9 @@ runs:
             --name "MapLibre Native ${{ matrix.test.name }}" \
             --app-arn ${{ env.app_arn }} \
             --device-pool-arn ${{ inputs.AWS_DEVICE_FARM_DEVICE_POOL_ARN }} \
-            --test type=${{ inputs.testType }},testPackageArn=${{ env.test_package_arn }}${{ inputs.testFilter && ",filter=" }}${{ inputs.testFilter }} \
+            --test type=${{ inputs.testType }},testPackageArn=${{ env.test_package_arn }}${{ inputs.testFilter && ',filter=' }}${{ inputs.testFilter }} \
             --execution-configuration jobTimeoutMinutes=28800,videoCapture=false \
-            ${{ inputs.externalData && "--configuration extraDataPackageArn=" }}${{ inputs.externalData }} \
+            ${{ inputs.externalData && '--configuration extraDataPackageArn=' }}${{ inputs.externalData }} \
             --output text --query "run.arn")"
           
           # wait until result is not PENDING
