@@ -1,6 +1,7 @@
 package org.maplibre.android.testapp.activity.benchmark
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -295,6 +296,7 @@ class BenchmarkActivity : AppCompatActivity() {
 
     private fun benchmarkDone() {
         sendResults()
+        setResult(Activity.RESULT_OK)
         finish()
     }
 
