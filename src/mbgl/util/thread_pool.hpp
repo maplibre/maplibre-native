@@ -14,7 +14,7 @@ namespace mbgl {
 class ThreadedSchedulerBase : public Scheduler {
 public:
     void schedule(std::function<void()>) override;
-    
+
 protected:
     ThreadedSchedulerBase() = default;
     ~ThreadedSchedulerBase() override;
@@ -67,7 +67,7 @@ public:
                 fn();
             }
         }
-    }    
+    }
 
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 

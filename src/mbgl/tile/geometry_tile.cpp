@@ -177,15 +177,14 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, c
 
 GeometryTile::~GeometryTile() {
     markObsolete();
-    
+
     glyphManager.removeRequestor(*this);
     imageManager.removeRequestor(*this);
 
     if (layoutResult) {
         Scheduler::GetBackground()->runOnRenderThread(
-            [layoutResult_{ std::move(layoutResult) }, atlasTextures_{ std::move(atlasTextures) }]() {});
+            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {});
     }
-    
 }
 
 void GeometryTile::cancel() {

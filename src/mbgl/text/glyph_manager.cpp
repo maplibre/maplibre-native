@@ -93,7 +93,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
 
     {
         std::unique_lock<std::shared_mutex> readWriteLock(rwLock);
-        
+
         Entry& entry = entries[fontStack];
         GlyphRequest& request = entry.ranges[range];
 
@@ -142,7 +142,7 @@ void GlyphManager::notify(GlyphRequestor& requestor, const GlyphDependencies& gl
     {
         // This could already be locked, we only care that we're locked for reading here.
         std::shared_lock<std::shared_mutex> readLock(rwLock, std::try_to_lock);
-        
+
         for (const auto& dependency : glyphDependencies) {
             const FontStack& fontStack = dependency.first;
             const GlyphIDs& glyphIDs = dependency.second;

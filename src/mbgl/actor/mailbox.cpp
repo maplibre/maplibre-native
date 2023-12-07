@@ -34,7 +34,7 @@ void Mailbox::open(Scheduler& scheduler_) {
 
 void Mailbox::close() {
     abandon();
-    
+
     // Block until neither receive() nor push() are in progress. Two mutexes are
     // used because receive() must not block send(). Of the two, the receiving
     // mutex must be acquired first, because that is the order that an actor
@@ -68,11 +68,11 @@ void Mailbox::push(std::unique_ptr<Message> message) {
         }
     }
 
-    Scoped activityFlag{ [this]() {
+    Scoped activityFlag{[this]() {
         if (state == State::Processing) {
             state = State::Idle;
         }
-    } };
+    }};
 
     std::lock_guard<std::mutex> pushingLock(pushingMutex);
 
@@ -98,11 +98,11 @@ void Mailbox::receive() {
         }
     }
 
-    Scoped activityFlag{ [this]() {
+    Scoped activityFlag{[this]() {
         if (state == State::Processing) {
             state = State::Idle;
         }
-    } };
+    }};
     std::lock_guard<std::recursive_mutex> receivingLock(receivingMutex);
 
     auto guard = weakScheduler.lock();

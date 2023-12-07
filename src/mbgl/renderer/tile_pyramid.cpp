@@ -25,7 +25,8 @@ using namespace style;
 static TileObserver nullObserver;
 
 TilePyramid::TilePyramid()
-    : cache(Scheduler::GetBackground()), observer(&nullObserver) {}
+    : cache(Scheduler::GetBackground()),
+      observer(&nullObserver) {}
 
 TilePyramid::~TilePyramid() = default;
 
@@ -235,7 +236,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
                 if (tilesIt->second) {
                     tilesIt->second->cancel();
-                    Scheduler::GetBackground()->schedule([tile_{ std::shared_ptr<Tile>(std::move(tiles.extract((tilesIt++)->first).mapped())) }]() {});
+                    Scheduler::GetBackground()->schedule(
+                        [tile_{std::shared_ptr<Tile>(std::move(tiles.extract((tilesIt++)->first).mapped()))}]() {});
                 } else {
                     tiles.erase(tilesIt++);
                 }

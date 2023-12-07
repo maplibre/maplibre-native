@@ -27,7 +27,7 @@ void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile> tile) {
         // remove existing tile key
         orderedKeys.remove(key);
         tile->cancel();
-        threadPool->schedule([tile_{ std::shared_ptr<Tile>(std::move(tile)) }]() mutable { tile_ = nullptr; });
+        threadPool->schedule([tile_{std::shared_ptr<Tile>(std::move(tile))}]() mutable { tile_ = nullptr; });
     } else {
         tiles.emplace(key, std::move(tile));
     }
@@ -40,9 +40,7 @@ void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile> tile) {
         auto removedTile = pop(orderedKeys.front());
         removedTile->cancel();
 
-        threadPool->schedule(
-            [tile_{std::shared_ptr<Tile>(std::move(removedTile))}]() {}
-        );
+        threadPool->schedule([tile_{std::shared_ptr<Tile>(std::move(removedTile))}]() {});
     }
 
     assert(orderedKeys.size() <= size);

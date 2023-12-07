@@ -14,7 +14,8 @@ class Scheduler;
 class TileCache {
 public:
     TileCache(std::shared_ptr<Scheduler> threadPool_, size_t size_ = 0)
-        : threadPool(std::move(threadPool_)), size(size_) {}
+        : threadPool(std::move(threadPool_)),
+          size(size_) {}
 
     void setSize(size_t);
     size_t getSize() const { return size; };

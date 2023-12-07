@@ -52,7 +52,7 @@ private:
     std::shared_ptr<FileSource> fileSource;
     std::unique_ptr<AsyncRequest> request;
     TileUpdateParameters updateParameters{Duration::zero(), false};
-    
+
     /// @brief It's possible for async requests in flight to mess with the request
     /// object at the same time as the loader's destructor. This construct is shared
     /// with the request lambdas to ensure more tightly controlled synchronization
@@ -61,7 +61,7 @@ private:
         std::shared_mutex requestLock;
         std::atomic_bool aborted{false};
     };
-    
+
     // Allocated as a share_ptr so either the loader or request can outlive the
     // other and still see this.
     std::shared_ptr<Shared> shared;
