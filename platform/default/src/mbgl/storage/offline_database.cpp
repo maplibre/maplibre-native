@@ -401,72 +401,66 @@ std::pair<bool, uint64_t> OfflineDatabase::putInternal(const Resource& resource,
 }
 
 std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getResource(const Resource& resource) {
-    // Helper lambda to update accessed timestamp
-    auto updateAccessedTime = [this, &resource](const std::string& tableName) {
-        // Update accessed timestamp used for LRU eviction.
-        if (!readOnly) {
-            try {
-                std::string sql = "UPDATE " + tableName + " SET accessed = ?1 WHERE url = ?2";
-                mapbox::sqlite::Query accessedQuery{getStatement(sql.c_str())};
-                accessedQuery.bind(1, util::now());
-                accessedQuery.bind(2, resource.url);
-                accessedQuery.run();
-            } catch (const mapbox::sqlite::Exception& ex) {
-                if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt) {
-                    throw;
-                }
-                // If we don't have any indication that the database is corrupt, continue as usual.
-                Log::Warning(
-                    Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
-            }
-        }
-    };
+    // Update accessed timestamp used for LRU eviction.
+    updateResourceTimestamp(resource, "UPDATE resources SET accessed = ?1 WHERE url = ?2");
+    updateResourceTimestamp(resource, "UPDATE ambient_resources SET accessed = ?1 WHERE url = ?2");
 
-    // Helper lambda to execute the query and construct the response
-    auto queryResource = [this,
-                          &resource](const std::string& tableName) -> std::optional<std::pair<Response, uint64_t>> {
-        std::string sql = "SELECT etag, expires, must_revalidate, modified, data, compressed FROM " + tableName +
-                          " WHERE url = ?";
-        mapbox::sqlite::Query query{getStatement(sql.c_str())};
-        query.bind(1, resource.url);
-
-        if (!query.run()) {
-            return std::nullopt;
-        }
-
-        Response response;
-        uint64_t size = 0;
-
-        response.etag = query.get<std::optional<std::string>>(0);
-        response.expires = query.get<std::optional<Timestamp>>(1);
-        response.mustRevalidate = query.get<bool>(2);
-        response.modified = query.get<std::optional<Timestamp>>(3);
-
-        auto data = query.get<std::optional<std::string>>(4);
-        if (!data) {
-            response.noContent = true;
-        } else if (query.get<bool>(5)) {
-            response.data = std::make_shared<std::string>(util::decompress(*data));
-            size = data->length();
-        } else {
-            response.data = std::make_shared<std::string>(*data);
-            size = data->length();
-        }
-
-        return std::make_pair(response, size);
-    };
-
-    updateAccessedTime("ambient_resources");
-    updateAccessedTime("resources");
-
-    // Try to get the resource from ambient_resources first
-    auto ambientResult = queryResource("ambient_resources");
+    // Try to get the resource from ambient_resources table first
+    std::optional<std::pair<Response, uint64_t>> ambientResult = extractResourceData(resource, "SELECT etag, expires, must_revalidate, modified, data, compressed FROM ambient_resources WHERE url = ?");
     if (ambientResult) {
         return ambientResult;
     }
 
-    // If the resource is not in ambient_resources, try resources
-    return queryResource("resources");
+    // If the resource is not in ambient_resources, try to get the resource from offline regions (resources table)
+    return extractResourceData(resource, "SELECT etag, expires, must_revalidate, modified, data, compressed FROM resources WHERE url = ?");
+}
+
+void OfflineDatabase::updateResourceTimestamp(const Resource& resource, const char *sql) {
+    if (!readOnly) {
+        try {
+            mapbox::sqlite::Query accessedQuery{getStatement(sql)};
+            accessedQuery.bind(1, util::now());
+            accessedQuery.bind(2, resource.url);
+            accessedQuery.run();
+        } catch (const mapbox::sqlite::Exception& ex) {
+            if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt) {
+                throw;
+            }
+            // If we don't have any indication that the database is corrupt, continue as usual.
+            Log::Warning(
+                Event::Database, static_cast<int>(ex.code), std::string("Can't update timestamp: ") + ex.what());
+        }
+    }
+}
+
+std::optional<std::pair<Response, uint64_t>> OfflineDatabase::extractResourceData(const Resource& resource, const char *sql) {
+    mapbox::sqlite::Query query{getStatement(sql)};
+    query.bind(1, resource.url);
+
+    if (!query.run()) {
+        return std::nullopt;
+    }
+
+    Response response;
+    uint64_t size = 0;
+
+    response.etag = query.get<std::optional<std::string>>(0);
+    response.expires = query.get<std::optional<Timestamp>>(1);
+    response.mustRevalidate = query.get<bool>(2);
+    response.modified = query.get<std::optional<Timestamp>>(3);
+
+    auto data = query.get<std::optional<std::string>>(4);
+    if (!data) {
+        response.noContent = true;
+    } else if (query.get<bool>(5)) {
+        response.data = std::make_shared<std::string>(util::decompress(*data));
+        size = data->length();
+    } else {
+        response.data = std::make_shared<std::string>(*data);
+        size = data->length();
+    }
+
+    return std::make_pair(response, size);
 }
 
 std::optional<int64_t> OfflineDatabase::extractResourceDataSize(const Resource& resource, const char *sql) {
@@ -624,112 +618,121 @@ bool OfflineDatabase::putResource(
 }
 
 std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Resource::TileData& tile) {
-    // Helper lambda to update the accessed timestamp for LRU eviction
-    auto updateAccessedTimestamp = [this](const std::string& table, const Resource::TileData& tileData) {
-        if (!readOnly) {
-            try {
-                // clang-format off
-                std::string sql =
-                    "UPDATE " + table + " "
-                    "SET accessed = ?1 "
-                    "WHERE url_template = ?2 "
-                    "AND pixel_ratio  = ?3 "
-                    "AND x            = ?4 "
-                    "AND y            = ?5 "
-                    "AND z            = ?6 ";
-                // clang-format on
-                mapbox::sqlite::Query query{getStatement(sql.c_str())};
+    
+    // Update the accessed timestamps for LRU eviction
 
-                query.bind(1, util::now());
-                query.bind(2, tileData.urlTemplate);
-                query.bind(3, tileData.pixelRatio);
-                query.bind(4, tileData.x);
-                query.bind(5, tileData.y);
-                query.bind(6, tileData.z);
-                query.run();
-            } catch (const mapbox::sqlite::Exception& ex) {
-                if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt) {
-                    throw;
-                }
-                // If we don't have any indication that the database is corrupt, continue as usual.
-                Log::Warning(Event::Database,
-                             static_cast<int>(ex.code),
-                             "Can't update timestamp in " + table + ": " + std::string(ex.what()));
-            }
-        }
-    };
+    updateTileTimestamp(tile, "UPDATE tiles "
+                              "SET accessed       = ?1 "
+                              "WHERE url_template = ?2 "
+                              "  AND pixel_ratio  = ?3 "
+                              "  AND x            = ?4 "
+                              "  AND y            = ?5 "
+                              "  AND z            = ?6 ");
+    
+    updateTileTimestamp(tile, "UPDATE ambient_tiles "
+                              "SET accessed       = ?1 "
+                              "WHERE url_template = ?2 "
+                              "  AND pixel_ratio  = ?3 "
+                              "  AND x            = ?4 "
+                              "  AND y            = ?5 "
+                              "  AND z            = ?6 ");
 
-    // Helper lambda to attempt to get tile data from a specific table
-    auto getTileData = [this, &tile](const std::string& table) -> std::optional<std::pair<Response, uint64_t>> {
-        // clang-format off
-        std::string sql =
-            "SELECT etag, expires, must_revalidate, modified, data, compressed "
-            "FROM " + table + " "
-            "WHERE url_template = ?1 "
-            "AND pixel_ratio  = ?2 "
-            "AND x            = ?3 "
-            "AND y            = ?4 "
-            "AND z            = ?5 ";
-        // clang-format on
-        mapbox::sqlite::Query query{getStatement(sql.c_str())};
 
-        query.bind(1, tile.urlTemplate);
-        query.bind(2, tile.pixelRatio);
-        query.bind(3, tile.x);
-        query.bind(4, tile.y);
-        query.bind(5, tile.z);
-
-        if (!query.run()) {
-            return std::nullopt; // If no data found, return nullopt
-        }
-
-        Response response;
-        uint64_t size = 0;
-
-        // Parse response fields from the query
-        response.etag = query.get<std::optional<std::string>>(0);
-        response.expires = query.get<std::optional<Timestamp>>(1);
-        response.mustRevalidate = query.get<bool>(2);
-        response.modified = query.get<std::optional<Timestamp>>(3);
-
-        auto data = query.get<std::optional<std::string>>(4);
-        if (!data) {
-            response.noContent = true; // Handle case with no content
-        } else if (query.get<bool>(5)) {
-            response.data = std::make_shared<std::string>(util::decompress(*data));
-            size = data->length();
-        } else {
-            response.data = std::make_shared<std::string>(*data);
-            size = data->length();
-        }
-
-        return std::make_pair(response, size); // Return the response and data size
-    };
-
-    // Update accessed timestamps
-    updateAccessedTimestamp("ambient_tiles", tile);
-    updateAccessedTimestamp("tiles", tile);
-
-    // Try to get tile from ambient resources first
-    auto ambientResult = getTileData("ambient_tiles");
+    // Try to get tile from ambient_tiles table first
+    
+    std::optional<std::pair<Response, uint64_t>> ambientResult = extractTileData(tile, "SELECT etag, expires, must_revalidate, modified, data, compressed "
+                                                                                        "FROM ambient_tiles "
+                                                                                        "WHERE url_template = ?1 "
+                                                                                        "AND pixel_ratio  = ?2 "
+                                                                                        "AND x            = ?3 "
+                                                                                        "AND y            = ?4 "
+                                                                                        "AND z            = ?5 ");
     //std::cout << "######## GET AMBIENT\n";
     if (ambientResult) {
         //std::cout << "######## OK FROM AMBIENT\n";
         return ambientResult; // Return if found in ambient resources
     }
     //std::cout << "######## GET OFFLINE\n";
-    // Finally, try to get tile from regular resources
-    auto offlineResult = getTileData("tiles");
-    if (offlineResult) {
-        //std::cout << "######## OK FROM OFFLINE\n";
+    
+    // If not found, try to get tile from offline regions (tiles table)
+    std::optional<std::pair<Response, uint64_t>> offlineResult = extractTileData(tile, "SELECT etag, expires, must_revalidate, modified, data, compressed "
+                                                                                        "FROM tiles "
+                                                                                        "WHERE url_template = ?1 "
+                                                                                        "AND pixel_ratio  = ?2 "
+                                                                                        "AND x            = ?3 "
+                                                                                        "AND y            = ?4 "
+                                                                                        "AND z            = ?5 ");
+    /*if (offlineResult) {
+        std::cout << "######## OK FROM OFFLINE\n";
     } else {
-        //std::cout << "######## NOT FOUND : " + tile.urlTemplate + " - " + std::to_string(tile.z) + "/" +
+        std::cout << "######## NOT FOUND : " + tile.urlTemplate + " - " + std::to_string(tile.z) + "/" +
                          std::to_string(tile.x) + "/" + std::to_string(tile.y) + "\n";
-    }
+    }*/
     return offlineResult;
 }
 
+void OfflineDatabase::updateTileTimestamp(const Resource::TileData& tile, const char *sql) {
+    if (!readOnly) {
+        try {
+            // clang-format off
+            mapbox::sqlite::Query query{getStatement(sql)};
 
+            query.bind(1, util::now());
+            query.bind(2, tile.urlTemplate);
+            query.bind(3, tile.pixelRatio);
+            query.bind(4, tile.x);
+            query.bind(5, tile.y);
+            query.bind(6, tile.z);
+            query.run();
+        } catch (const mapbox::sqlite::Exception& ex) {
+            if (ex.code == mapbox::sqlite::ResultCode::NotADB || ex.code == mapbox::sqlite::ResultCode::Corrupt) {
+                throw;
+            }
+            // If we don't have any indication that the database is corrupt, continue as usual.
+            Log::Warning(Event::Database,
+                         static_cast<int>(ex.code),
+                         "Can't update timestamp: " + std::string(ex.what()));
+        }
+    }
+}
+
+
+std::optional<std::pair<Response, uint64_t>> OfflineDatabase::extractTileData(const Resource::TileData& tile, const char *sql) {
+    // clang-format on
+    mapbox::sqlite::Query query{getStatement(sql)};
+
+    query.bind(1, tile.urlTemplate);
+    query.bind(2, tile.pixelRatio);
+    query.bind(3, tile.x);
+    query.bind(4, tile.y);
+    query.bind(5, tile.z);
+
+    if (!query.run()) {
+        return std::nullopt; // If no data found, return nullopt
+    }
+
+    Response response;
+    uint64_t size = 0;
+
+    // Parse response fields from the query
+    response.etag = query.get<std::optional<std::string>>(0);
+    response.expires = query.get<std::optional<Timestamp>>(1);
+    response.mustRevalidate = query.get<bool>(2);
+    response.modified = query.get<std::optional<Timestamp>>(3);
+
+    auto data = query.get<std::optional<std::string>>(4);
+    if (!data) {
+        response.noContent = true; // Handle case with no content
+    } else if (query.get<bool>(5)) {
+        response.data = std::make_shared<std::string>(util::decompress(*data));
+        size = data->length();
+    } else {
+        response.data = std::make_shared<std::string>(*data);
+        size = data->length();
+    }
+
+    return std::make_pair(response, size); // Return the response and data size
+}
 
 std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) {
 
