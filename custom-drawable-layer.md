@@ -4,7 +4,7 @@
 
 #### Interface
 
-The current Annotations interface is exposed by the `Map` object;
+The current Annotations interface is exposed by the _core_ through `Map`:
 ```C++
     // Annotations
     void addAnnotationImage(std::unique_ptr<style::Image>);
@@ -15,6 +15,90 @@ The current Annotations interface is exposed by the `Map` object;
     void updateAnnotation(AnnotationID, const Annotation&);
     void removeAnnotation(AnnotationID);
 ```
+
+#### Implementation
+
+[Source folder](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/annotation/)
+
+`AnnotationManager` [annotation_manager.hpp](https://github.com/maplibre/maplibre-native/blob/main/src/mbgl/annotation/annotation_manager.hpp)
+```C++
+class AnnotationManager ... {
+public:
+...
+    AnnotationID addAnnotation(const Annotation&);
+    bool updateAnnotation(const AnnotationID&, const Annotation&);
+    void removeAnnotation(const AnnotationID&);
+
+    void addImage(std::unique_ptr<style::Image>);
+    void removeImage(const std::string&);
+    double getTopOffsetPixelsForImage(const std::string&);
+
+    void setStyle(style::Style&);
+    void onStyleLoaded();
+
+    void updateData();
+
+    void addTile(AnnotationTile&);
+    void removeTile(AnnotationTile&);
+
+    static const std::string SourceID;
+    static const std::string PointLayerID;
+    static const std::string ShapeLayerID;
+
+...
+private:
+    void add(const AnnotationID&, const SymbolAnnotation&);
+    void add(const AnnotationID&, const LineAnnotation&);
+    void add(const AnnotationID&, const FillAnnotation&);
+
+    void update(const AnnotationID&, const SymbolAnnotation&);
+    void update(const AnnotationID&, const LineAnnotation&);
+    void update(const AnnotationID&, const FillAnnotation&);
+
+    void remove(const AnnotationID&);
+
+    void updateStyle();
+
+    std::unique_ptr<AnnotationTileData> getTileData(const CanonicalTileID&);
+
+    std::reference_wrapper<style::Style> style;
+
+    std::mutex mutex;
+
+    bool dirty = false;
+
+    AnnotationID nextID = 0;
+
+    using SymbolAnnotationTree = boost::geometry::index::rtree<std::shared_ptr<const SymbolAnnotationImpl>,
+                                                               boost::geometry::index::rstar<16, 4>>;
+    // Unlike std::unordered_map, std::map is guaranteed to sort by
+    // AnnotationID, ensuring that older annotations are below newer
+    // annotations. <https://github.com/mapbox/mapbox-gl-native/issues/5691>
+    using SymbolAnnotationMap = std::map<AnnotationID, std::shared_ptr<SymbolAnnotationImpl>>;
+    using ShapeAnnotationMap = std::map<AnnotationID, std::unique_ptr<ShapeAnnotationImpl>>;
+    using ImageMap = std::unordered_map<std::string, style::Image>;
+
+    SymbolAnnotationTree symbolTree;
+    SymbolAnnotationMap symbolAnnotations;
+    ShapeAnnotationMap shapeAnnotations;
+    ImageMap images;
+
+    std::unordered_set<AnnotationTile*> tiles;
+    mapbox::base::WeakPtrFactory<AnnotationManager> weakFactory{this};
+};
+```
+
+`LineAnnotation` `FillAnnotation` `SymbolAnnotation` [annotation.hpp](https://github.com/maplibre/maplibre-native/blob/main/include/mbgl/annotation/annotation.hpp)
+
+`RenderOrchestrator::createRenderTree` calls `AnnotationManager::updateData()`
+
+`AnnotationSource`
+
+`AnnotationTile`
+
+
+
+RenderLayer
 
 #### Usage
 
@@ -62,7 +146,184 @@ Point Annotation with image in Swift
     }
 ```
 
+Add Annotation Shapes
 
+```ObjectiveC
+- (void)addTestShapes:(NSUInteger)featuresCount
+{
+    for (int featureIndex = 0; featureIndex < featuresCount; ++featureIndex) {
+        double deltaLongitude = featureIndex * 0.01;
+        double deltaLatitude = -featureIndex * 0.01;
+        
+        // Pacific Northwest triangle
+        //
+        CLLocationCoordinate2D triangleCoordinates[3] =
+        {
+            CLLocationCoordinate2DMake(44 + deltaLatitude, -122 + deltaLongitude),
+            CLLocationCoordinate2DMake(46 + deltaLatitude, -122 + deltaLongitude),
+            CLLocationCoordinate2DMake(46 + deltaLatitude, -121 + deltaLongitude)
+        };
+        
+        MLNPolygon *triangle = [MLNPolygon polygonWithCoordinates:triangleCoordinates count:3];
+        
+        [self.mapView addAnnotation:triangle];
+        
+        // West coast polyline
+        //
+        CLLocationCoordinate2D lineCoordinates[4] = {
+            CLLocationCoordinate2DMake(47.6025 + deltaLatitude, -122.3327 + deltaLongitude),
+            CLLocationCoordinate2DMake(45.5189 + deltaLatitude, -122.6726 + deltaLongitude),
+            CLLocationCoordinate2DMake(37.7790 + deltaLatitude, -122.4177 + deltaLongitude),
+            CLLocationCoordinate2DMake(34.0532 + deltaLatitude, -118.2349 + deltaLongitude)
+        };
+        MLNPolyline *line = [MLNPolyline polylineWithCoordinates:lineCoordinates count:4];
+        [self.mapView addAnnotation:line];
+        
+        // Orcas Island, WA hike polyline
+        //
+        NSDictionary *hike = [NSJSONSerialization JSONObjectWithData:
+                              [NSData dataWithContentsOfFile:
+                               [[NSBundle mainBundle] pathForResource:@"polyline" ofType:@"geojson"]]
+                                                             options:0
+                                                               error:nil];
+        
+        NSArray *hikeCoordinatePairs = hike[@"features"][0][@"geometry"][@"coordinates"];
+        
+        CLLocationCoordinate2D *polylineCoordinates = (CLLocationCoordinate2D *)malloc([hikeCoordinatePairs count] * sizeof(CLLocationCoordinate2D));
+        
+        for (NSUInteger i = 0; i < [hikeCoordinatePairs count]; i++)
+        {
+            polylineCoordinates[i] = CLLocationCoordinate2DMake([hikeCoordinatePairs[i][1] doubleValue] + deltaLatitude, [hikeCoordinatePairs[i][0] doubleValue] + deltaLongitude);
+        }
+        
+        MLNPolyline *polyline = [MLNPolyline polylineWithCoordinates:polylineCoordinates
+                                                               count:[hikeCoordinatePairs count]];
+        
+        [self.mapView addAnnotation:polyline];
+        
+        free(polylineCoordinates);
+        
+        // PA/NJ/DE polygons
+        //
+        NSDictionary *threestates = [NSJSONSerialization JSONObjectWithData:
+                                     [NSData dataWithContentsOfFile:
+                                      [[NSBundle mainBundle] pathForResource:@"threestates" ofType:@"geojson"]]
+                                                                    options:0
+                                                                      error:nil];
+        
+        for (NSDictionary *feature in threestates[@"features"])
+        {
+            NSArray *stateCoordinatePairs = feature[@"geometry"][@"coordinates"];
+            
+            while ([stateCoordinatePairs count] == 1) stateCoordinatePairs = stateCoordinatePairs[0];
+            
+            CLLocationCoordinate2D *polygonCoordinates = (CLLocationCoordinate2D *)malloc([stateCoordinatePairs count] * sizeof(CLLocationCoordinate2D));
+            
+            for (NSUInteger i = 0; i < [stateCoordinatePairs count]; i++)
+            {
+                polygonCoordinates[i] = CLLocationCoordinate2DMake([stateCoordinatePairs[i][1] doubleValue] + deltaLatitude, [stateCoordinatePairs[i][0] doubleValue] + deltaLongitude);
+            }
+            
+            MLNPolygon *polygon = [MLNPolygon polygonWithCoordinates:polygonCoordinates count:[stateCoordinatePairs count]];
+            polygon.title = feature[@"properties"][@"NAME"];
+            
+            [self.mapView addAnnotation:polygon];
+            
+            free(polygonCoordinates);
+        }
+        
+        // Null Island polygon with an interior hole
+        //
+        CLLocationCoordinate2D innerCoordinates[] = {
+            CLLocationCoordinate2DMake(-5 + deltaLatitude, -5 + deltaLongitude),
+            CLLocationCoordinate2DMake(-5 + deltaLatitude, 5 + deltaLongitude),
+            CLLocationCoordinate2DMake(5 + deltaLatitude, 5 + deltaLongitude),
+            CLLocationCoordinate2DMake(5 + deltaLatitude, -5 + deltaLongitude),
+        };
+        MLNPolygon *innerPolygon = [MLNPolygon polygonWithCoordinates:innerCoordinates count:sizeof(innerCoordinates) / sizeof(innerCoordinates[0])];
+        CLLocationCoordinate2D outerCoordinates[] = {
+            CLLocationCoordinate2DMake(-10 + deltaLatitude, -10 + deltaLongitude),
+            CLLocationCoordinate2DMake(-10 + deltaLatitude, 10 + deltaLongitude),
+            CLLocationCoordinate2DMake(10 + deltaLatitude, 10 + deltaLongitude),
+            CLLocationCoordinate2DMake(10 + deltaLatitude, -10 + deltaLongitude),
+        };
+        MLNPolygon *outerPolygon = [MLNPolygon polygonWithCoordinates:outerCoordinates count:sizeof(outerCoordinates) / sizeof(outerCoordinates[0]) interiorPolygons:@[innerPolygon]];
+        [self.mapView addAnnotation:outerPolygon];
+    }
+}
+```
+
+Add Annotation with custom callout
+
+```ObjectiveC
+- (void)addAnnotationWithCustomCallout
+{
+    [self.mapView removeAnnotations:self.mapView.annotations];
+
+    MBXCustomCalloutAnnotation *firstAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
+    firstAnnotation.coordinate = CLLocationCoordinate2DMake(48.8533940, 2.3775439);
+    firstAnnotation.title = @"Open anchored to annotation";
+    firstAnnotation.anchoredToAnnotation = YES;
+    firstAnnotation.dismissesAutomatically = NO;
+
+    MBXCustomCalloutAnnotation *secondAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
+    secondAnnotation.coordinate = CLLocationCoordinate2DMake(48.8543940, 2.3775439);
+    secondAnnotation.title = @"Open not anchored to annotation";
+    secondAnnotation.anchoredToAnnotation = NO;
+    secondAnnotation.dismissesAutomatically = NO;
+
+    MBXCustomCalloutAnnotation *thirdAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
+    thirdAnnotation.coordinate = CLLocationCoordinate2DMake(48.8553940, 2.3775439);
+    thirdAnnotation.title = @"Dismisses automatically";
+    thirdAnnotation.anchoredToAnnotation = YES;
+    thirdAnnotation.dismissesAutomatically = YES;
+
+    NSArray *annotations = @[firstAnnotation, secondAnnotation, thirdAnnotation];
+    [self.mapView addAnnotations:annotations];
+
+    [self.mapView showAnnotations:annotations animated:YES];
+}
+```
+
+Annotation image callback ObjectiveC
+
+```ObjectiveC
+- (MLNAnnotationImage *)mapView:(MLNMapView * __nonnull)mapView imageForAnnotation:(id <MLNAnnotation> __nonnull)annotation
+{
+    if ([annotation isKindOfClass:[MBXDroppedPinAnnotation class]] || [annotation isKindOfClass:[MBXCustomCalloutAnnotation class]])
+    {
+        return nil; // use default marker
+    }
+
+    NSAssert([annotation isKindOfClass:[MBXSpriteBackedAnnotation class]], @"Annotations should be sprite-backed.");
+
+    NSString *title = [(MLNPointAnnotation *)annotation title];
+    if (!title.length) return nil;
+    NSString *lastTwoCharacters = [title substringFromIndex:title.length - 2];
+
+    MLNAnnotationImage *annotationImage = [mapView dequeueReusableAnnotationImageWithIdentifier:lastTwoCharacters];
+
+    if ( ! annotationImage)
+    {
+        UIColor *color;
+
+        // make every tenth annotation blue
+        if ([lastTwoCharacters hasSuffix:@"0"]) {
+            color = [UIColor blueColor];
+        } else {
+            color = [UIColor redColor];
+        }
+
+        UIImage *image = [self imageWithText:lastTwoCharacters backgroundColor:color];
+        annotationImage = [MLNAnnotationImage annotationImageWithImage:image reuseIdentifier:lastTwoCharacters];
+
+        // don't allow touches on blue annotations
+        if ([color isEqual:[UIColor blueColor]]) annotationImage.enabled = NO;
+    }
+
+    return annotationImage;
+}
+```
 
 
 ### Custom Drawable Layer 
