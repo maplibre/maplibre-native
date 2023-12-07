@@ -21,10 +21,10 @@ namespace gl {
 /// @tparam MaxFragmentationOccupancy Buffers under this percentage of occupancy are considered fragmented
 /// and the defragmentation routine will attempt to relocate living references to them to other buffers.
 /// @tparam MaxFreeBuffers When buffers are made free for recycling, buffers in excess of this amount are
-/// released to reduce memory consumption. 
+/// released to reduce memory consumption.
 /// @tparam InitialBufferSize Initial size of the reference list. 128 has been observed to work well.
 template <typename OwnerClass, // UniformBufferGL
-          GLenum type,       // GL_UNIFORM_BUFFER
+          GLenum type,         // GL_UNIFORM_BUFFER
           size_t PageSizeKB = 8,
           size_t MaxFragmentationOccupancy = 10,
           size_t MaxFreeBuffers = 48,
@@ -36,7 +36,8 @@ public:
     static constexpr const size_t PageSize = 1024 * PageSizeKB;
     static constexpr const size_t FragmentedOccupancyLevel = static_cast<size_t>(
         PageSize * (static_cast<double>(MaxFragmentationOccupancy) / 100.0));
-    using BufferTy = BufferAllocator<OwnerClass, type, PageSizeKB, MaxFragmentationOccupancy, MaxFreeBuffers, InitialBufferSize>;
+    using BufferTy =
+        BufferAllocator<OwnerClass, type, PageSizeKB, MaxFragmentationOccupancy, MaxFreeBuffers, InitialBufferSize>;
     using RefTy = TypedBufferRef<OwnerClass>;
 
     ~BufferAllocator() override = default;
