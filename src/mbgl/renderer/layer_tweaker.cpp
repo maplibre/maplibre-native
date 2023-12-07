@@ -52,49 +52,4 @@ void LayerTweaker::updateProperties(Immutable<style::LayerProperties> newProps) 
     propertiesUpdated = true;
 }
 
-#if MLN_RENDER_BACKEND_METAL
-shaders::ExpressionInputsUBO LayerTweaker::buildExpressionUBO(double zoom, uint64_t frameCount) {
-    const auto time = util::MonotonicTimer::now();
-    const auto time_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(time).count();
-    return {/* .time_lo = */ static_cast<uint32_t>(time_ns),
-            /* .time_hi = */ static_cast<uint32_t>(time_ns >> 32),
-            /* .frame_lo = */ static_cast<uint32_t>(frameCount),
-            /* .frame_hi = */ static_cast<uint32_t>(frameCount >> 32),
-            /* .zoom = */ static_cast<float>(zoom),
-            /* .zoom_frac = */ static_cast<float>(zoom - static_cast<float>(zoom)),
-            /* .pad = */ 0,
-            0};
-}
-#endif // MLN_RENDER_BACKEND_METAL
-
-void LayerTweaker::setPropertiesAsUniforms([[maybe_unused]] const mbgl::unordered_set<StringIdentity>& props) {
-#if MLN_RENDER_BACKEND_METAL
-    if (props != propertiesAsUniforms) {
-        propertiesAsUniforms = props;
-        permutationUpdated = true;
-    }
-#endif
-}
-
-#if !MLN_RENDER_BACKEND_METAL
-namespace {
-const mbgl::unordered_set<StringIdentity> emptyIDSet;
-}
-#endif
-
-const mbgl::unordered_set<StringIdentity>& LayerTweaker::getPropertiesAsUniforms() const {
-#if MLN_RENDER_BACKEND_METAL
-    return propertiesAsUniforms;
-#else
-    return emptyIDSet;
-#endif
-}
-
-void LayerTweaker::enableOverdrawInspector(bool value) {
-    if (overdrawInspector != value) {
-        overdrawInspector = value;
-        permutationUpdated = true;
-    }
-}
-
 } // namespace mbgl

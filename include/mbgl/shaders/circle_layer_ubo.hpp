@@ -47,20 +47,5 @@ struct alignas(16) CircleInterpolateUBO {
 };
 static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
 
-struct alignas(16) CirclePermutationUBO {
-    /*  0 */ Attribute color;
-    /*  8 */ Attribute radius;
-    /* 16 */ Attribute blur;
-    /* 24 */ Attribute opacity;
-    /* 32 */ Attribute stroke_color;
-    /* 40 */ Attribute stroke_width;
-    /* 48 */ Attribute stroke_opacity;
-    /* 56 */ bool overdrawInspector;
-    /* 57 */ uint8_t pad1, pad2, pad3;
-    /* 60 */ float pad4;
-    /* 64 */
-};
-static_assert(sizeof(CirclePermutationUBO) == 4 * 16);
-
 } // namespace shaders
 } // namespace mbgl

@@ -83,12 +83,6 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
         auto newTweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
-
-        // propertiesAsUniforms isn't recalculated every update, so carry it over
-        if (layerTweaker) {
-            newTweaker->setPropertiesAsUniforms(layerTweaker->getPropertiesAsUniforms());
-        }
-
         replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
     }
 #endif
@@ -366,7 +360,7 @@ static const StringIdentity idLineImageUniformName = stringIndexer().get("u_imag
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
-                             const std::shared_ptr<UpdateParameters>& updateParameters,
+                             const std::shared_ptr<UpdateParameters>&,
                              [[maybe_unused]] const RenderTree& renderTree,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -390,7 +384,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!lineShaderGroup) {
         lineShaderGroup = shaders.getShaderGroup("LineShader");
@@ -599,10 +592,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 continue;
             }
 
-            if (layerTweaker) {
-                layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-            }
-
             auto builder = createLineBuilder("lineSDF", std::move(shader));
 
             // vertices, attributes and segments
@@ -645,10 +634,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             auto shader = linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {
                 continue;
-            }
-
-            if (layerTweaker) {
-                layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
             }
 
             auto builder = createLineBuilder("linePattern", std::move(shader));
@@ -704,10 +689,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 continue;
             }
 
-            if (layerTweaker) {
-                layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-            }
-
             auto builder = createLineBuilder("lineGradient", std::move(shader));
 
             // vertices and attributes
@@ -758,10 +739,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {
                 continue;
-            }
-
-            if (layerTweaker) {
-                layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
             }
 
             auto builder = createLineBuilder("line", std::move(shader));

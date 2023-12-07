@@ -13,13 +13,11 @@ const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::CircleShader, gfx::Back
     AttributeInfo{6, gfx::AttributeDataType::Float2, 1, "a_stroke_width"},
     AttributeInfo{7, gfx::AttributeDataType::Float2, 1, "a_stroke_opacity"},
 };
-const std::array<UniformBlockInfo, 6> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>::uniforms = {
+const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{8, true, false, sizeof(CircleDrawableUBO), "CircleDrawableUBO"},
     UniformBlockInfo{9, true, true, sizeof(CirclePaintParamsUBO), "CirclePaintParamsUBO"},
     UniformBlockInfo{10, true, true, sizeof(CircleEvaluatedPropsUBO), "CircleEvaluatedPropsUBO"},
     UniformBlockInfo{11, true, false, sizeof(CircleInterpolateUBO), "CircleInterpolateUBO"},
-    UniformBlockInfo{12, true, true, sizeof(CirclePermutationUBO), "CirclePermutationUBO"},
-    UniformBlockInfo{13, true, false, sizeof(ExpressionInputsUBO), "ExpressionInputsUBO"},
 };
 const std::array<TextureInfo, 0> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>::textures = {};
 
