@@ -14,7 +14,7 @@ namespace mbgl {
 class ThreadedSchedulerBase : public Scheduler {
 public:
     void schedule(std::function<void()>) override;
-
+    
 protected:
     ThreadedSchedulerBase() = default;
     ~ThreadedSchedulerBase() override;
@@ -53,12 +53,31 @@ public:
         }
     }
 
+    void runOnRenderThread(std::function<void()>&& fn) override {
+        std::lock_guard<std::mutex> lock(renderMutex);
+        renderThreadQueue.push(std::move(fn));
+    }
+
+    void runRenderJobs() override {
+        std::lock_guard<std::mutex> lock(renderMutex);
+        while (renderThreadQueue.size()) {
+            auto fn = std::move(renderThreadQueue.front());
+            renderThreadQueue.pop();
+            if (fn) {
+                fn();
+            }
+        }
+    }    
+
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
 private:
     std::array<std::thread, N> threads;
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
     static_assert(N > 0, "Thread count must be more than zero.");
+
+    std::queue<std::function<void()>> renderThreadQueue;
+    std::mutex renderMutex;
 };
 
 class SequencedScheduler : public ThreadedScheduler<1> {};

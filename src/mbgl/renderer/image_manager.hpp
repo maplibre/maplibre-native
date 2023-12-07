@@ -4,6 +4,8 @@
 #include <mbgl/util/immutable.hpp>
 
 #include <map>
+#include <mutex>
+#include <shared_mutex>
 #include <string>
 
 namespace mbgl {
@@ -70,6 +72,8 @@ private:
     std::set<std::string> availableImages;
 
     ImageManagerObserver* observer = nullptr;
+
+    std::shared_mutex rwLock;
 };
 
 class ImageRequestor {

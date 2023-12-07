@@ -5,6 +5,7 @@
 #include <mbgl/renderer/query.hpp>
 #include <mbgl/map/transform.hpp>
 #include <mbgl/math/clamp.hpp>
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/util/tile_cover.hpp>
 #include <mbgl/util/tile_range.hpp>
 #include <mbgl/util/enum.hpp>
@@ -24,7 +25,7 @@ using namespace style;
 static TileObserver nullObserver;
 
 TilePyramid::TilePyramid()
-    : observer(&nullObserver) {}
+    : cache(Scheduler::GetBackground()), observer(&nullObserver) {}
 
 TilePyramid::~TilePyramid() = default;
 
@@ -231,7 +232,13 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                     tilesIt->second->setNecessity(TileNecessity::Optional);
                     cache.add(tilesIt->first, std::move(tilesIt->second));
                 }
-                tiles.erase(tilesIt++);
+
+                if (tilesIt->second) {
+                    tilesIt->second->cancel();
+                    Scheduler::GetBackground()->schedule([tile_{ std::shared_ptr<Tile>(std::move(tiles.extract((tilesIt++)->first).mapped())) }]() {});
+                } else {
+                    tiles.erase(tilesIt++);
+                }
             } else {
                 if (!(*retainIt < tilesIt->first)) {
                     ++tilesIt;

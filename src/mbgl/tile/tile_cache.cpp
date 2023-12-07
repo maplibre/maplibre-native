@@ -1,4 +1,5 @@
 #include <mbgl/tile/tile_cache.hpp>
+#include <mbgl/actor/scheduler.hpp>
 #include <cassert>
 
 namespace mbgl {
@@ -17,13 +18,18 @@ void TileCache::setSize(size_t size_) {
 
 void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile> tile) {
     if (!tile->isRenderable() || !size) {
+        tile->cancel();
+        threadPool->schedule([tile_{std::shared_ptr<Tile>(std::move(tile))}]() {});
         return;
     }
 
-    // insert new or query existing tile
-    if (!tiles.emplace(key, std::move(tile)).second) {
+    if (tiles.find(key) != tiles.end()) {
         // remove existing tile key
         orderedKeys.remove(key);
+        tile->cancel();
+        threadPool->schedule([tile_{ std::shared_ptr<Tile>(std::move(tile)) }]() mutable { tile_ = nullptr; });
+    } else {
+        tiles.emplace(key, std::move(tile));
     }
 
     // (re-)insert tile key as newest
@@ -31,7 +37,12 @@ void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile> tile) {
 
     // purge oldest key/tile if necessary
     if (orderedKeys.size() > size) {
-        pop(orderedKeys.front());
+        auto removedTile = pop(orderedKeys.front());
+        removedTile->cancel();
+
+        threadPool->schedule(
+            [tile_{std::shared_ptr<Tile>(std::move(removedTile))}]() {}
+        );
     }
 
     assert(orderedKeys.size() <= size);

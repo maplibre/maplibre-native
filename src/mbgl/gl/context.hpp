@@ -44,6 +44,9 @@ public:
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
+    void beginFrame() override;
+    void endFrame() override;
+
     void initializeExtensions(const std::function<gl::ProcAddress(const char*)>&);
 
     void enableDebugging();

@@ -20,6 +20,7 @@
 #include <mbgl/tile/geometry_tile_worker.hpp>
 #include <mbgl/tile/tile_observer.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/thread_pool.hpp>
 
 #include <mbgl/gfx/upload_pass.hpp>
 #include <utility>
@@ -175,8 +176,16 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, c
       showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
 
 GeometryTile::~GeometryTile() {
-    glyphManager.removeRequestor(*this);
     markObsolete();
+    
+    glyphManager.removeRequestor(*this);
+    imageManager.removeRequestor(*this);
+
+    if (layoutResult) {
+        Scheduler::GetBackground()->runOnRenderThread(
+            [layoutResult_{ std::move(layoutResult) }, atlasTextures_{ std::move(atlasTextures) }]() {});
+    }
+    
 }
 
 void GeometryTile::cancel() {
@@ -185,6 +194,7 @@ void GeometryTile::cancel() {
 
 void GeometryTile::markObsolete() {
     obsolete = true;
+    mailbox->abandon();
 }
 
 void GeometryTile::setError(std::exception_ptr err) {
@@ -193,6 +203,10 @@ void GeometryTile::setError(std::exception_ptr err) {
 }
 
 void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
+    if (obsolete) {
+        return;
+    }
+
     // Mark the tile as pending again if it was complete before to prevent
     // signaling a complete state despite pending parse operations.
     pending = true;

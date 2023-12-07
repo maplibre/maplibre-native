@@ -39,6 +39,9 @@ public:
     virtual void schedule(std::function<void()>) = 0;
     /// Makes a weak pointer to this Scheduler.
     virtual mapbox::base::WeakPtr<Scheduler> makeWeakPtr() = 0;
+    /// Enqueues a function for execution on the render thread.
+    virtual void runOnRenderThread(std::function<void()>&&) {};
+    virtual void runRenderJobs() {}
 
     /// Returns a closure wrapping the given one.
     ///

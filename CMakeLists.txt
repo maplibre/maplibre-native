@@ -412,6 +412,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/range.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/run_loop.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/scoped.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/size.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/string.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/string_indexer.hpp

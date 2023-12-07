@@ -31,6 +31,8 @@ void ImageManager::setLoaded(bool loaded_) {
         for (const auto& entry : requestors) {
             checkMissingAndNotify(*entry.first, entry.second);
         }
+
+        std::unique_lock<std::shared_mutex> readWriteLock(rwLock);
         requestors.clear();
     }
 }
@@ -41,9 +43,13 @@ bool ImageManager::isLoaded() const {
 
 void ImageManager::addImage(Immutable<style::Image::Impl> image_) {
     assert(images.find(image_->id) == images.end());
-    // Increase cache size if requested image was provided.
-    if (requestedImages.find(image_->id) != requestedImages.end()) {
-        requestedImagesCacheSize += image_->image.bytes();
+
+    {
+        std::shared_lock<std::shared_mutex> readLock(rwLock);
+        // Increase cache size if requested image was provided.
+        if (requestedImages.find(image_->id) != requestedImages.end()) {
+            requestedImagesCacheSize += image_->image.bytes();
+        }
     }
     availableImages.emplace(image_->id);
     images.emplace(image_->id, std::move(image_));
@@ -57,6 +63,8 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
     auto sizeChanged = oldImage->second->image.size != image_->image.size;
 
     if (sizeChanged) {
+        std::unique_lock<std::shared_mutex> readWriteLock(rwLock);
+
         // Update cache size if requested image size has changed.
         if (requestedImages.find(image_->id) != requestedImages.end()) {
             int64_t diff = image_->image.bytes() - oldImage->second->image.bytes();
@@ -76,13 +84,18 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
 void ImageManager::removeImage(const std::string& id) {
     auto it = images.find(id);
     assert(it != images.end());
-    // Reduce cache size for requested images.
-    auto requestedIt = requestedImages.find(it->second->id);
-    if (requestedIt != requestedImages.end()) {
-        assert(requestedImagesCacheSize >= it->second->image.bytes());
-        requestedImagesCacheSize -= it->second->image.bytes();
-        requestedImages.erase(requestedIt);
+
+    {
+        std::unique_lock<std::shared_mutex> readWriteLock(rwLock);
+        // Reduce cache size for requested images.
+        auto requestedIt = requestedImages.find(it->second->id);
+        if (requestedIt != requestedImages.end()) {
+            assert(requestedImagesCacheSize >= it->second->image.bytes());
+            requestedImagesCacheSize -= it->second->image.bytes();
+            requestedImages.erase(requestedIt);
+        }
     }
+
     images.erase(it);
     availableImages.erase(id);
     updatedImageVersions.erase(id);
@@ -125,6 +138,7 @@ void ImageManager::getImages(ImageRequestor& requestor, ImageRequestPair&& pair)
         if (hasAllDependencies) {
             notify(requestor, pair);
         } else {
+            std::unique_lock<std::shared_mutex> readWriteLock(rwLock);
             requestors.emplace(&requestor, std::move(pair));
         }
     } else {
@@ -133,6 +147,8 @@ void ImageManager::getImages(ImageRequestor& requestor, ImageRequestPair&& pair)
 }
 
 void ImageManager::removeRequestor(ImageRequestor& requestor) {
+    std::unique_lock<std::shared_mutex> readWriteLock(rwLock);
+
     requestors.erase(&requestor);
     missingImageRequestors.erase(&requestor);
     for (auto& requestedImage : requestedImages) {
@@ -141,6 +157,8 @@ void ImageManager::removeRequestor(ImageRequestor& requestor) {
 }
 
 void ImageManager::notifyIfMissingImageAdded() {
+    std::unique_lock<std::shared_mutex> readWriteLock(rwLock);
+
     for (auto it = missingImageRequestors.begin(); it != missingImageRequestors.end();) {
         ImageRequestor& requestor = *it->first;
         if (!requestor.hasPendingRequests()) {
@@ -153,6 +171,8 @@ void ImageManager::notifyIfMissingImageAdded() {
 }
 
 void ImageManager::reduceMemoryUse() {
+    std::shared_lock<std::shared_mutex> readLock(rwLock);
+
     std::vector<std::string> unusedIDs;
     unusedIDs.reserve(requestedImages.size());
 
@@ -178,6 +198,8 @@ const std::set<std::string>& ImageManager::getAvailableImages() const {
 }
 
 void ImageManager::clear() {
+    std::unique_lock<std::shared_mutex> readWriteLock(rwLock);
+
     assert(requestors.empty());
     assert(missingImageRequestors.empty());
 
@@ -189,6 +211,8 @@ void ImageManager::clear() {
 }
 
 void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageRequestPair& pair) {
+    std::unique_lock<std::shared_mutex> readWriteLock(rwLock);
+
     ImageDependencies missingDependencies;
 
     for (const auto& dependency : pair.first) {

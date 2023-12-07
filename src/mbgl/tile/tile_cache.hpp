@@ -9,10 +9,12 @@
 
 namespace mbgl {
 
+class Scheduler;
+
 class TileCache {
 public:
-    TileCache(size_t size_ = 0)
-        : size(size_) {}
+    TileCache(std::shared_ptr<Scheduler> threadPool_, size_t size_ = 0)
+        : threadPool(std::move(threadPool_)), size(size_) {}
 
     void setSize(size_t);
     size_t getSize() const { return size; };
@@ -25,6 +27,7 @@ public:
 private:
     std::map<OverscaledTileID, std::unique_ptr<Tile>> tiles;
     std::list<OverscaledTileID> orderedKeys;
+    std::shared_ptr<Scheduler> threadPool;
 
     size_t size;
 };

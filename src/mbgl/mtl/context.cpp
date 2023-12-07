@@ -22,6 +22,7 @@
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/thread_pool.hpp>
 
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
@@ -42,6 +43,7 @@ Context::Context(RendererBackend& backend_)
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
+        Scheduler::GetBackground()->runRenderJobs();
         performCleanup();
 
         emptyVertexBuffer.reset();
@@ -59,6 +61,12 @@ Context::~Context() noexcept {
         assert(stats.isZero());
     }
 }
+
+void Context::beginFrame() {
+    Scheduler::GetBackground()->runRenderJobs();
+}
+
+void Context::endFrame() {}
 
 std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
     return std::make_unique<CommandEncoder>(*this);
