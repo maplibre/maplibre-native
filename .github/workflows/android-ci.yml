@@ -172,8 +172,8 @@ jobs:
       - name: Upload Android UI test
         if: github.ref == 'refs/heads/main'
         run: |
-          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/legacy/debug/MapboxGLAndroidSDKTestApp-legacy-debug.apk '${{ steps.upload-android-app.outputs.url }}'
-          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/legacy/debug/MapboxGLAndroidSDKTestApp-legacy-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/legacy/release/MapboxGLAndroidSDKTestApp-legacy-debug.apk '${{ steps.upload-android-app.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/legacy/release/MapboxGLAndroidSDKTestApp-legacy-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
 
       - name: Write uploads.env
         if: github.ref == 'refs/heads/main'
