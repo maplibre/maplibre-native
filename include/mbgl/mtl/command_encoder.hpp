@@ -25,6 +25,9 @@ public:
     explicit CommandEncoder(Context& context_);
     ~CommandEncoder() override;
 
+    mtl::Context& getContext() { return context; }
+    const mtl::Context& getContext() const { return context; }
+
     std::unique_ptr<gfx::UploadPass> createUploadPass(const char* name, gfx::Renderable&) override;
     std::unique_ptr<gfx::RenderPass> createRenderPass(const char* name, const gfx::RenderPassDescriptor&) override;
 

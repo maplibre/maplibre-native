@@ -128,6 +128,9 @@ public:
                                               std::size_t size,
                                               bool persistent);
 
+    /// Get an empty buffer to act as a placeholder
+    const BufferResource& getEmptyBuffer();
+
     /// Get a reusable buffer containing the standard fixed tile vertices (+/- `util::EXTENT`)
     const BufferResource& getTileVertexBuffer();
 
@@ -145,6 +148,7 @@ private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
 
+    std::optional<BufferResource> emptyBuffer;
     std::optional<BufferResource> tileVertexBuffer;
     std::optional<BufferResource> tileIndexBuffer;
 

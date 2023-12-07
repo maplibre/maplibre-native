@@ -213,6 +213,13 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
     }
 }
 
+const BufferResource& Context::getEmptyBuffer() {
+    if (!emptyBuffer) {
+        emptyBuffer.emplace(const_cast<Context&>(*this), nullptr, 0, MTL::ResourceStorageModeShared, false, false);
+    }
+    return *emptyBuffer;
+}
+
 const BufferResource& Context::getTileVertexBuffer() {
     if (!tileVertexBuffer) {
         const auto vertices = RenderStaticData::tileVertices();
