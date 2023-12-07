@@ -96,11 +96,10 @@ private:
 
 `AnnotationTile`
 
-
-
-RenderLayer
-
 #### Usage
+
+Annotation tests
+[annotations.test.cpp](https://github.com/maplibre/maplibre-native/blob/main/test/api/annotations.test.cpp)
 
 Point Annotation with image in Swift
 
