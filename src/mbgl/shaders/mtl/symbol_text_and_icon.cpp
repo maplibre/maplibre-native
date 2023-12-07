@@ -18,15 +18,13 @@ const std::array<AttributeInfo, 9>
         AttributeInfo{7, gfx::AttributeDataType::Float, 1, "a_halo_width"},
         AttributeInfo{8, gfx::AttributeDataType::Float, 1, "a_halo_blur"},
 };
-const std::array<UniformBlockInfo, 7>
+const std::array<UniformBlockInfo, 5>
     ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>::uniforms = {
         UniformBlockInfo{9, true, true, sizeof(SymbolDrawableUBO), "SymbolDrawableUBO"},
         UniformBlockInfo{10, true, true, sizeof(SymbolDynamicUBO), "SymbolDynamicUBO"},
         UniformBlockInfo{11, true, true, sizeof(SymbolDrawablePaintUBO), "SymbolDrawablePaintUBO"},
         UniformBlockInfo{12, true, true, sizeof(SymbolDrawableTilePropsUBO), "SymbolDrawableTilePropsUBO"},
         UniformBlockInfo{13, true, false, sizeof(SymbolDrawableInterpolateUBO), "SymbolDrawableInterpolateUBO"},
-        UniformBlockInfo{14, true, true, sizeof(SymbolPermutationUBO), "SymbolPermutationUBO"},
-        UniformBlockInfo{15, true, false, sizeof(ExpressionInputsUBO), "ExpressionInputsUBO"},
 };
 const std::array<TextureInfo, 2> ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, "u_texture"},

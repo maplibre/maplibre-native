@@ -13,7 +13,6 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "HeatmapTextureShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<UniformBlockInfo, 1> uniforms;
@@ -57,9 +56,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             sampler image_sampler [[sampler(0)]],
                             sampler color_ramp_sampler [[sampler(1)]]) {
 
-    if (drawable.overdrawInspector) {
-        return half4(0.0);
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
     float t = image.sample(image_sampler, in.pos).r;
     float4 color = color_ramp.sample(color_ramp_sampler, float2(t, 0.5));

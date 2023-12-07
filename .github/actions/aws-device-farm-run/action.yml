@@ -19,6 +19,12 @@ inputs:
   testType:
     description: 'e.g. INSTRUMENTATION, XCTEST'
     required: true
+  testFilter:
+    description: 'Filter tests'
+    required: false
+  externalData:
+    description: 'ARN of external data package'
+    required: false
   AWS_ACCESS_KEY_ID:
     description: "AWS_ACCESS_KEY_ID"
     required: true
@@ -98,13 +104,28 @@ runs:
           done
 
       - name: Schedule test run
-        uses: realm/aws-devicefarm/test-application@master
-        with:
-          name: MapLibre Native ${{ matrix.test.name }}
-          project_arn: ${{ inputs.AWS_DEVICE_FARM_PROJECT_ARN }}
-          device_pool_arn: ${{ inputs.AWS_DEVICE_FARM_DEVICE_POOL_ARN }}
-          app_arn: ${{ env.app_arn }}
-          app_type: ${{ inputs.appType }}
-          test_type: ${{ inputs.testType }}
-          test_package_arn: ${{ env.test_package_arn }}
-          timeout: 28800
+        shell: bash
+        run: |
+          arn="$(aws devicefarm schedule-run \
+            --project-arn ${{ inputs.AWS_DEVICE_FARM_PROJECT_ARN }} \
+            --name "MapLibre Native ${{ matrix.test.name }}" \
+            --app-arn ${{ env.app_arn }} \
+            --device-pool-arn ${{ inputs.AWS_DEVICE_FARM_DEVICE_POOL_ARN }} \
+            --test type=${{ inputs.testType }},testPackageArn=${{ env.test_package_arn }}${{ inputs.testFilter && ',filter=' }}${{ inputs.testFilter }} \
+            --execution-configuration jobTimeoutMinutes=28800,videoCapture=false \
+            ${{ inputs.externalData && '--configuration extraDataPackageArn=' }}${{ inputs.externalData }} \
+            --output text --query "run.arn")"
+          
+          # wait until result is not PENDING
+          # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/devicefarm/get-run.html#output
+          while true; do
+            sleep 30
+            result="$(aws get-run --arn "$arn" --output text --query "run.result")"
+            case $result in
+              FAILED|ERRORED|STOPPED) echo "Run $result" && exit 1 ;;
+              SKIPPED|PASSED) echo "Run $result" && exit 0 ;;
+              PENDING) continue ;;
+              *) echo "Unexpected run result $result" && exit 1 ;;
+            esac
+          done
+

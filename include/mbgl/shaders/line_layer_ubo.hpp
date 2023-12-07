@@ -147,22 +147,5 @@ struct alignas(16) LinePatternTilePropertiesUBO {
 };
 static_assert(sizeof(LinePatternTilePropertiesUBO) % 16 == 0);
 
-struct alignas(16) LinePermutationUBO {
-    /*  0 */ Attribute color;
-    /*  8 */ Attribute blur;
-    /* 16 */ Attribute opacity;
-    /* 24 */ Attribute gapwidth;
-    /* 32 */ Attribute offset;
-    /* 40 */ Attribute width;
-    /* 48 */ Attribute floorwidth;
-    /* 56 */ Attribute pattern_from;
-    /* 64 */ Attribute pattern_to;
-    /* 72 */ bool overdrawInspector;
-    /* 73 */ uint8_t pad1, pad2, pad3;
-    /* 76 */ float pad4;
-    /* 80 */
-};
-static_assert(sizeof(LinePermutationUBO) == 5 * 16);
-
 } // namespace shaders
 } // namespace mbgl
