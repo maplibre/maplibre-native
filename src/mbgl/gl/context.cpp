@@ -94,7 +94,7 @@ void Context::beginFrame() {
     frameInFlightFence = std::make_shared<gl::Fence>();
 
     // Run allocator defragmentation on this frame interval.
-    constexpr auto defragFreq = 1;
+    constexpr auto defragFreq = 4;
 
     if (frameNum == defragFreq) {
         uboAllocator->defragment(frameInFlightFence);

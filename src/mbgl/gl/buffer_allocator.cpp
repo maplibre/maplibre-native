@@ -18,13 +18,16 @@ namespace gl {
 /// @tparam OwnerClass The class type having allocations managed by this allocator.
 /// @tparam type GL_UNIFORM_BUFFER, no other type is currently valid.
 /// @tparam PageSizeKB Size of underlying UBO allocations, in KB. 8KB has been observed to work well.
-/// @tparam FragmentationThreshPerc Buffers under this percentage of occupancy are considered fragmented
+/// @tparam MaxFragmentationOccupancy Buffers under this percentage of occupancy are considered fragmented
 /// and the defragmentation routine will attempt to relocate living references to them to other buffers.
+/// @tparam MaxFreeBuffers When buffers are made free for recycling, buffers in excess of this amount are
+/// released to reduce memory consumption. 
 /// @tparam InitialBufferSize Initial size of the reference list. 128 has been observed to work well.
 template <typename OwnerClass, // UniformBufferGL
-          uint32_t type,       // GL_UNIFORM_BUFFER
+          GLenum type,       // GL_UNIFORM_BUFFER
           size_t PageSizeKB = 8,
-          size_t FragmentationThreshPerc = 10,
+          size_t MaxFragmentationOccupancy = 10,
+          size_t MaxFreeBuffers = 48,
           size_t InitialBufferSize = 256>
 class BufferAllocator : public IBufferAllocator {
     static_assert(type == GL_UNIFORM_BUFFER);
@@ -32,8 +35,8 @@ class BufferAllocator : public IBufferAllocator {
 public:
     static constexpr const size_t PageSize = 1024 * PageSizeKB;
     static constexpr const size_t FragmentedOccupancyLevel = static_cast<size_t>(
-        PageSize * (static_cast<double>(FragmentationThreshPerc) / 100.0));
-    using BufferTy = BufferAllocator<OwnerClass, type, PageSizeKB, FragmentationThreshPerc, InitialBufferSize>;
+        PageSize * (static_cast<double>(MaxFragmentationOccupancy) / 100.0));
+    using BufferTy = BufferAllocator<OwnerClass, type, PageSizeKB, MaxFragmentationOccupancy, MaxFreeBuffers, InitialBufferSize>;
     using RefTy = TypedBufferRef<OwnerClass>;
 
     ~BufferAllocator() override = default;
@@ -80,6 +83,9 @@ public:
         // We need to know the index to ourselves in the main buffer list
         size_t bufferIndex = 0;
 
+        // If true, the buffer's memory has been released to compact memory
+        bool reclaimed = false;
+
         Buffer(BufferAllocator& allocator_)
             : allocator(allocator_) {
             refs.reserve(InitialBufferSize);
@@ -89,6 +95,16 @@ public:
         }
 
         ~Buffer() {
+            if (id != 0) {
+                glDeleteBuffers(1, &id);
+                id = 0;
+            }
+        }
+
+        void reclaim() {
+            refs.clear();
+            refs = decltype(refs)();
+
             if (id != 0) {
                 glDeleteBuffers(1, &id);
                 id = 0;
@@ -382,6 +398,12 @@ private:
             const auto index = freeList.back();
             freeList.pop_back();
             return index;
+        } else if (reclaimedList.size() > 0) {
+            const auto index = reclaimedList.back();
+            reclaimedList.pop_back();
+            new (&buffers[index]) Buffer(*this);
+            buffers[index].setBufferIndex(index);
+            return index;
         }
         return -1;
     }
@@ -395,6 +417,13 @@ private:
             } else {
                 ++it;
             }
+        }
+
+        // And check the free list for an excess of buffers, reclaim if we need to
+        while (freeList.size() > MaxFreeBuffers) {
+            reclaimedList.push_back(freeList.back());
+            freeList.pop_back();
+            buffers[reclaimedList.back()].reclaim();
         }
     }
 
@@ -440,6 +469,8 @@ private:
 
     // Buffers free for re-use
     std::vector<size_t> freeList;
+    // Buffers reclaimed that can be recreated if needed
+    std::vector<size_t> reclaimedList;
     // Buffers recorded and currently in-use
     std::list<size_t> inFlightBuffers;
     // When we recycle a buffer, we copy from an in-flight buffer to a fresh one.
