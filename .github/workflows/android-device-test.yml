@@ -12,6 +12,13 @@ jobs:
       matrix:
         test: [
           {artifactName: android-render-tests, testFile: RenderTests.apk, appFile: RenderTestsApp.apk, name: "Android Render Tests"},
+          {
+            artifactName: benchmarkAPKs,
+            testFile: "androidTest/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk",
+            appFile: "drawable/release/MapboxGLAndroidSDKTestApp-drawable-release.apk",
+            name: "Android Benchmark",
+            testFilter: "org.maplibre.android.benchmark.Benchmark"
+          }
         ]
     runs-on: ubuntu-latest
     steps:
