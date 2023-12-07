@@ -14,8 +14,8 @@ jobs:
           {artifactName: android-render-tests, testFile: RenderTests.apk, appFile: RenderTestsApp.apk, name: "Android Render Tests"},
           {
             artifactName: benchmarkAPKs,
-            testFile: "androidTest/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk",
-            appFile: "drawable/release/MapboxGLAndroidSDKTestApp-drawable-release.apk",
+            testFile: "MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk",
+            appFile: "MapboxGLAndroidSDKTestApp-drawable-release.apk",
             name: "Android Benchmark",
             testFilter: "org.maplibre.android.benchmark.Benchmark",
             # echo '{"styleNames": [...], "styleURLs": [...], "resultsAPI: "..." }' > benchmark-input.json 
