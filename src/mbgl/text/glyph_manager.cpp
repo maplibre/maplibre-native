@@ -8,6 +8,7 @@
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/tiny_sdf.hpp>
 #include <mbgl/util/image.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <fstream>
 
@@ -86,14 +87,19 @@ void GlyphManager::requestRange(GlyphRequest& request,
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
     Resource res(Resource::Kind::Unknown, "");
     switch (range.type) {
-        case GlyphIDType::Khmer:
-        case GlyphIDType::Myanmar:
-        case GlyphIDType::Devanagari:
-            res = Resource::fontGlyphs(fontURL, fontStack, getGlyphRangeName(range.type));
-            break;
         case GlyphIDType::FontPBF:
-        default:
             res = Resource::glyphs(glyphURL, fontStack, std::pair<uint16_t, uint16_t>{range.first, range.second});
+            break;
+        default:
+        {
+            std::string url = getFontFaceURL(range.type);
+            if (url.size()) {
+                res = Resource::fontFace(url);
+            } else {
+                Log::Error(Event::Style, "Try download a glyph doesn't in current faces");
+            }
+            
+        }
             break;
     }
 
@@ -260,6 +266,21 @@ void GlyphManager::hbShaping(const std::u16string& text,
     if (shaper) {
         shaper->CreateComplexGlyphIDs(text, glyphIDs, adjusts);
     }
+}
+
+std::string GlyphManager::getFontFaceURL(GlyphIDType type) {
+    std::string url;
+
+    if (fontFaces) {
+        for (auto& face : *fontFaces) {
+            if (face.type == type) {
+                url = face.url;
+                break;
+            }
+        }
+    }
+
+    return url;
 }
 
 #endif

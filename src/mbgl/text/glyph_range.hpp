@@ -4,21 +4,19 @@
 #include <cstdint>
 #include <unordered_set>
 #include <mbgl/util/hash.hpp>
+#include <mbgl/util/font_stack.hpp>
 
 namespace mbgl {
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
 
-enum GlyphIDType : short {
+
+enum GlyphIDType : uint16_t {
     FontPBF = 0x00,
-    Khmer = 0x01,
-    Myanmar = 0x02,
-    Devanagari = 0x03,
 };
 
-#endif
+GlyphIDType genNewGlyphIDType(const std::string &url, const FontStack &fontStack, const std::vector<std::pair<uint32_t, uint32_t>> &pairs);
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 class GlyphRange {
 public:
     uint16_t first = 0;

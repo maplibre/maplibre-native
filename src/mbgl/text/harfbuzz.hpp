@@ -9,10 +9,7 @@ class HBShaper {
 public:
     explicit HBShaper(GlyphIDType type_, const std::string &fontFileData, const FreeTypeLibrary &lib);
     ~HBShaper();
-
-    void CreateComplexGlyphIDs(const std::string &text,
-                               std::vector<GlyphID> &glyphIDs,
-                               std::vector<HBShapeAdjust> &adjusts);
+    
     void CreateComplexGlyphIDs(const std::u16string &text,
                                std::vector<GlyphID> &glyphIDs,
                                std::vector<HBShapeAdjust> &adjusts);

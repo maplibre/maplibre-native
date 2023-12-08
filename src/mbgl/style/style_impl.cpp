@@ -126,7 +126,7 @@ void Style::Impl::parse(const std::string& json_) {
     }
     glyphURL = parser.glyphURL;
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
-    fontURL = parser.fontURL;
+    fontFaces = parser.fontFaces;
 #endif
 
     loaded = true;
@@ -394,9 +394,11 @@ const std::string& Style::Impl::getGlyphURL() const {
     return glyphURL;
 }
 
-const std::string& Style::Impl::getFontsURL() const {
-    return fontURL;
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+std::shared_ptr<FontFaces> Style::Impl::getFontFaces() const {
+    return fontFaces;
 }
+#endif
 
 Immutable<std::vector<Immutable<Image::Impl>>> Style::Impl::getImageImpls() const {
     return images;

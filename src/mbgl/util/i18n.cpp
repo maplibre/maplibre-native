@@ -42,9 +42,7 @@ DEFINE_IS_IN_UNICODE_BLOCK(ArabicSupplement, 0x0750, 0x077F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Mandaic, 0x0840, 0x085F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Syriac Supplement, 0x0860, 0x086F)
 DEFINE_IS_IN_UNICODE_BLOCK(ArabicExtendedA, 0x08A0, 0x08FF)
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
-DEFINE_IS_IN_UNICODE_BLOCK(Devanagari, 0x0900, 0x097F)
-#endif
+//DEFINE_IS_IN_UNICODE_BLOCK(Devanagari, 0x0900, 0x097F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Bengali, 0x0980, 0x09FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(Gurmukhi, 0x0A00, 0x0A7F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Gujarati, 0x0A80, 0x0AFF)
@@ -57,9 +55,7 @@ DEFINE_IS_IN_UNICODE_BLOCK(Devanagari, 0x0900, 0x097F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Thai, 0x0E00, 0x0E7F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Lao, 0x0E80, 0x0EFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(Tibetan, 0x0F00, 0x0FFF)
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
-DEFINE_IS_IN_UNICODE_BLOCK(Myanmar, 0x1000, 0x109F)
-#endif
+//DEFINE_IS_IN_UNICODE_BLOCK(Myanmar, 0x1000, 0x109F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Georgian, 0x10A0, 0x10FF)
 DEFINE_IS_IN_UNICODE_BLOCK(HangulJamo, 0x1100, 0x11FF)
 
@@ -158,20 +154,14 @@ DEFINE_IS_IN_UNICODE_BLOCK(YiRadicals, 0xA490, 0xA4CF)
 // DEFINE_IS_IN_UNICODE_BLOCK(CommonIndicNumberForms, 0xA830, 0xA83F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Phagspa, 0xA840, 0xA87F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Saurashtra, 0xA880, 0xA8DF)
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
-DEFINE_IS_IN_UNICODE_BLOCK(DevanagariExtended, 0xA8E0, 0xA8FF)
-#endif
+//DEFINE_IS_IN_UNICODE_BLOCK(DevanagariExtended, 0xA8E0, 0xA8FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(KayahLi, 0xA900, 0xA92F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Rejang, 0xA930, 0xA95F)
 DEFINE_IS_IN_UNICODE_BLOCK(HangulJamoExtendedA, 0xA960, 0xA97F)
 // DEFINE_IS_IN_UNICODE_BLOCK(Javanese, 0xA980, 0xA9DF)
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
-DEFINE_IS_IN_UNICODE_BLOCK(MyanmarExtendedB, 0xA9E0, 0xA9FF)
-#endif
+//DEFINE_IS_IN_UNICODE_BLOCK(MyanmarExtendedB, 0xA9E0, 0xA9FF)
 // DEFINE_IS_IN_UNICODE_BLOCK(Cham, 0xAA00, 0xAA5F)
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
-DEFINE_IS_IN_UNICODE_BLOCK(MyanmarExtendedA, 0xAA60, 0xAA7F)
-#endif
+//DEFINE_IS_IN_UNICODE_BLOCK(MyanmarExtendedA, 0xAA60, 0xAA7F)
 // DEFINE_IS_IN_UNICODE_BLOCK(TaiViet, 0xAA80, 0xAADF)
 // DEFINE_IS_IN_UNICODE_BLOCK(MeeteiMayekExtensions, 0xAAE0, 0xAAFF)
 // DEFINE_IS_IN_UNICODE_BLOCK(EthiopicExtendedA, 0xAB00, 0xAB2F)
@@ -637,23 +627,11 @@ bool isWhitespace(char16_t chr) {
     return chr == u' ' || chr == u'\t' || chr == u'\n' || chr == u'\v' || chr == u'\f' || chr == u'\r';
 }
 
-} // namespace i18n
-} // namespace util
-
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
-
-GlyphIDType charGlyphIDType(char16_t ch, GlyphIDType lastChType) {
-    if (u'\uFE00' == ch) {
-        return lastChType;
-    }
-
-    if (isInKhmer(ch)) return GlyphIDType::Khmer;
-    if (isInMyanmar(ch) || isInMyanmarExtendedA(ch) || isInMyanmarExtendedB(ch)) return GlyphIDType::Myanmar;
-    if (isInDevanagari(ch) || isInDevanagariExtended(ch)) return GlyphIDType::Devanagari;
-
-    return GlyphIDType::FontPBF;
+bool isVariationSelector1(char16_t chr) {
+    return chr == 0xFE00;
 }
 
-#endif
+} // namespace i18n
+} // namespace util
 
 } // namespace mbgl

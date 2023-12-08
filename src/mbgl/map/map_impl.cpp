@@ -55,7 +55,9 @@ void Map::Impl::onUpdate() {
                                timePoint,
                                transform.getState(),
                                style->impl->getGlyphURL(),
-                               style->impl->getFontsURL(),
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+                               style->impl->getFontFaces(),
+#endif
                                style->impl->spriteLoaded,
                                style->impl->getTransitionOptions(),
                                style->impl->getLight()->impl,

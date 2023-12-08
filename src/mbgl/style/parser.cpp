@@ -117,10 +117,77 @@ StyleParseResult Parser::parse(const std::string& json) {
     }
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
-    if (document.HasMember("fonts")) {
-        const JSValue& fonts = document["fonts"];
-        if (fonts.IsString()) {
-            fontURL = {fonts.GetString(), fonts.GetStringLength()};
+    if (document.HasMember("font-faces")) {
+        const JSValue& faces = document["font-faces"];
+        if (faces.IsArray()) {
+            fontFaces = std::make_shared<FontFaces>();
+            for (auto& face : faces.GetArray()) {
+                if (face.IsObject()) {
+                    if (face.HasMember("text-font")) {
+                        
+                        const JSValue &family = face["text-font"];
+                        FontStack familyString;
+                        if (family.IsArray()) {
+                            for (auto& font : family.GetArray()) {
+                                if (font.IsString()) {
+                                    familyString.emplace_back(font.GetString());
+                                }
+                            }   
+                        }
+                        if (familyString.empty())
+                            continue;
+                        
+                        if (face.HasMember("font-files")) {
+                            const JSValue &fontFiles = face["font-files"];
+                            
+                            if (fontFiles.IsArray()) {
+                                for (auto& fontfile : fontFiles.GetArray()) {
+                                    std::string urlString;
+                                    if (fontfile.HasMember("url")) {
+                                        const JSValue &url = fontfile["url"];
+                                        if (url.IsString())
+                                            urlString = url.GetString();
+                                    }
+                                    
+                                    if (fontfile.HasMember("unicode-range")) {
+                                        const JSValue &unicodeRange = fontfile["unicode-range"];
+                                        if (unicodeRange.IsArray()) {
+                                            fontFaces->emplace_back();
+                                            auto &fontFace = fontFaces->back();
+                                            fontFace.fontStack = familyString;
+                                            fontFace.url = urlString;
+                                            
+                                            for (auto& range : unicodeRange.GetArray()) {
+                                                if (range.IsString()) {
+                                                    std::string rangeString = range.GetString();
+                                                    if (rangeString.length() > 2) {
+                                                        rangeString = rangeString.substr(2);
+                                                        std::string::size_type pos = rangeString.find('-');
+                                                        if (pos != std::string::npos) {
+                                                            std::string start = rangeString.substr(0, pos);
+                                                            std::string end = rangeString.substr(pos + 1);
+                                                            if (!start.empty() && !end.empty()) {
+                                                                int startInt = std::stoi(start, nullptr, 16);
+                                                                int endInt = std::stoi(end, nullptr, 16);
+                                                                fontFace.ranges.emplace_back(startInt, endInt);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            
+                                            fontFace.type = genNewGlyphIDType(urlString, familyString, fontFace.ranges);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        
+                    }
+                }
+                
+            };
         }
     }
 #endif

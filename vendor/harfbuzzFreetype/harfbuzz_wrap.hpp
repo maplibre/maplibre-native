@@ -34,9 +34,6 @@ public:
     explicit HBShaperWrap(GlyphTypeWrap glyphType, const std::string& fontFileData, const FreeTypeLibrary& lib);
     ~HBShaperWrap();
 
-    void CreateComplexGlyphIDs(const std::string& text,
-                               std::vector<uint32_t>& glyphIndexs,
-                               std::vector<HBShapeAdjust>& adjusts);
     void CreateComplexGlyphIDs(const std::u16string& text,
                                std::vector<uint32_t>& glyphIndexs,
                                std::vector<HBShapeAdjust>& adjusts);
@@ -51,10 +48,7 @@ private:
     hb_font_t *font;
     hb_buffer_t *buffer;
     
-    InternalHBLangInfo *hbInfo;
     GlyphTypeWrap type;
-    
-    static std::map<GlyphTypeWrap, InternalHBLangInfo> internalInfos;
 };
 
 } // namespace mbgl

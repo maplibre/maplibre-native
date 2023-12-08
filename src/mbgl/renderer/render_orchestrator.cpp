@@ -185,7 +185,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                         updateParameters->prefetchZoomDelta};
 
     glyphManager->setURL(updateParameters->glyphURL);
-    glyphManager->setFontURL(updateParameters->fontURL);
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+    glyphManager->setFontFaces(updateParameters->fontFaces);
+#endif
 
     // Update light.
     const bool lightChanged = renderLight.impl != updateParameters->light;

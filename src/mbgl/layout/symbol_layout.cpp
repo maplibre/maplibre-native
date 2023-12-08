@@ -79,6 +79,29 @@ inline Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> createLayout(
     return layout;
 }
 
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+GlyphIDType getCharGlyphIDType(char16_t ch, const FontStack &stack, std::shared_ptr<FontFaces> faces, GlyphIDType lastCharType) {
+    if (!faces) {
+        return GlyphIDType::FontPBF;
+    }
+
+    if (util::i18n::isVariationSelector1(ch)) {
+        return lastCharType;
+    }
+    
+    for (auto &face : *faces) {
+        if (face.fontStack == stack) {
+            for (auto &range : face.ranges) {
+                if (ch >= range.first && ch <= range.second)
+                    return face.type;
+            }
+        }
+    }
+    
+    return GlyphIDType::FontPBF;
+}
+#endif
+
 } // namespace
 
 SymbolLayout::SymbolLayout(const BucketParameters& parameters,
@@ -168,15 +191,18 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                     auto u16String = applyArabicShaping(util::convertUTF8ToUTF16(u8string));
                     const char16_t* u16Char = u16String.data();
                     std::u16string subString;
-                    GlyphIDType subStringtype = charGlyphIDType(*u16Char, GlyphIDType::FontPBF);
+                    auto sectionScale = section.fontScale ? *section.fontScale : 1.0;
+                    auto sectionFontStack = section.fontStack ? *section.fontStack : baseFontStack;
+              
+                    GlyphIDType subStringtype = getCharGlyphIDType(*u16Char, sectionFontStack, layoutParameters.fontFaces, GlyphIDType::FontPBF);
 
                     while (*u16Char) {
-                        const auto chType = charGlyphIDType(*u16Char, subStringtype);
+                        const auto chType = getCharGlyphIDType(*u16Char, sectionFontStack, layoutParameters.fontFaces, subStringtype);
                         if (chType != subStringtype) {
                             if (subString.length()) {
                                 ft.formattedText->addTextSection(subString,
-                                                                 section.fontScale ? *section.fontScale : 1.0,
-                                                                 section.fontStack ? *section.fontStack : baseFontStack,
+                                                                 sectionScale,
+                                                                 sectionFontStack,
                                                                  subStringtype,
                                                                  false,
                                                                  section.textColor);

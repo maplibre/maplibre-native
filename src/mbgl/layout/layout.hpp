@@ -43,6 +43,9 @@ public:
 class LayoutParameters {
 public:
     const BucketParameters& bucketParameters;
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+    std::shared_ptr<FontFaces> fontFaces;
+#endif
     GlyphDependencies& glyphDependencies;
     ImageDependencies& imageDependencies;
     std::set<std::string>& availableImages;

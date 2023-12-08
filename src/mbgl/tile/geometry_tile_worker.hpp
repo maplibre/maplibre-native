@@ -36,7 +36,11 @@ public:
                        const std::atomic<bool>&,
                        MapMode,
                        float pixelRatio,
-                       bool showCollisionBoxes_);
+                       bool showCollisionBoxes_
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+                       ,std::shared_ptr<FontFaces> fontFaces
+#endif
+                       );
     ~GeometryTileWorker();
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,
@@ -86,6 +90,9 @@ private:
 
     std::unique_ptr<FeatureIndex> featureIndex;
     mbgl::unordered_map<std::string, LayerRenderData> renderData;
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+    std::shared_ptr<FontFaces> fontFaces;
+#endif
 
     enum State {
         Idle,

@@ -167,7 +167,11 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, c
              obsolete,
              parameters.mode,
              parameters.pixelRatio,
-             parameters.debugOptions & MapDebugOptions::Collision),
+             parameters.debugOptions & MapDebugOptions::Collision
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+             ,parameters.glyphManager.getFontFaces()
+#endif
+             ),
       fileSource(parameters.fileSource),
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),

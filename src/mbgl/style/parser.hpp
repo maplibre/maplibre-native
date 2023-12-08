@@ -4,6 +4,8 @@
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/light.hpp>
 
+#include <mbgl/text/glyph.hpp>
+
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/rapidjson.hpp>
 #include <mbgl/util/font_stack.hpp>
@@ -30,7 +32,7 @@ public:
     std::string spriteURL;
     std::string glyphURL;
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
-    std::string fontURL;
+    std::shared_ptr<FontFaces> fontFaces;
 #endif
 
     std::vector<std::unique_ptr<Source>> sources;

@@ -52,8 +52,6 @@ union GlyphID {
     bool operator>(const uint16_t &other) const { return hash > other; }
 };
 
-GlyphIDType charGlyphIDType(char16_t ch, GlyphIDType lastChType);
-
 #else
 using GlyphID = char16_t;
 #endif
@@ -62,10 +60,6 @@ using GlyphIDs = std::set<GlyphID>;
 
 // Note: this only works for the BMP
 GlyphRange getGlyphRange(GlyphID glyph);
-
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
-const std::string getGlyphRangeName(GlyphIDType type);
-#endif
 
 struct GlyphMetrics {
     uint32_t width = 0;
@@ -174,6 +168,17 @@ enum class WritingModeType : uint8_t {
 };
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
+// style defined faces
+struct FontFace {
+    GlyphIDType type;                                   // a unique glyph id
+    
+    FontStack fontStack;                                // font stack
+    std::string url;                                    // font file url
+    std::vector<std::pair<uint32_t, uint32_t>> ranges;  // unicode ranges
+};
+
+using FontFaces = std::vector<FontFace>;
+
 struct HBShapeRequest {
     std::u16string str;
     FontStack fontStack;

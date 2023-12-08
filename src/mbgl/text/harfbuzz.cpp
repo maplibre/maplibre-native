@@ -15,15 +15,6 @@ HBShaper::~HBShaper() {
     shaper.reset();
 }
 
-void HBShaper::CreateComplexGlyphIDs(const std::string &text,
-                                     std::vector<GlyphID> &glyphIDs,
-                                     std::vector<HBShapeAdjust> &adjusts) {
-    std::vector<uint32_t> indexs;
-    shaper->CreateComplexGlyphIDs(text, indexs, adjusts);
-    for (auto index : indexs) {
-        glyphIDs.emplace_back((char16_t)index, type);
-    }
-}
 
 void HBShaper::CreateComplexGlyphIDs(const std::u16string &text,
                                      std::vector<GlyphID> &glyphIDs,

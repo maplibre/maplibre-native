@@ -63,7 +63,6 @@ public:
     void removeRequestor(GlyphRequestor &);
 
     void setURL(const std::string &url) { glyphURL = url; }
-    void setFontURL(const std::string &url) { fontURL = url; }
 
     void setObserver(GlyphManagerObserver *);
 
@@ -73,19 +72,24 @@ public:
     Immutable<Glyph> getGlyph(const FontStack &, GlyphID);
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
+    void setFontFaces(std::shared_ptr<FontFaces> faces) { fontFaces = faces; }
+    
     std::shared_ptr<HBShaper> getHBShaper(FontStack, GlyphIDType);
-
+    
     void hbShaping(const std::u16string &text,
                    const FontStack &font,
                    GlyphIDType type,
                    std::vector<GlyphID> &glyphIDs,
                    std::vector<HBShapeAdjust> &adjusts);
+    
+    std::shared_ptr<FontFaces> getFontFaces() { return fontFaces; }
+    
+    std::string getFontFaceURL(GlyphIDType type);
 #endif
 
 private:
     Glyph generateLocalSDF(const FontStack &fontStack, GlyphID glyphID);
     std::string glyphURL;
-    std::string fontURL;
 
     struct GlyphRequest {
         bool parsed = false;
@@ -109,6 +113,7 @@ private:
     std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer;
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
+    std::shared_ptr<FontFaces> fontFaces;
     FreeTypeLibrary ftLibrary;
     std::map<FontStack, std::map<GlyphIDType, std::shared_ptr<HBShaper>>> hbShapers;
 

@@ -80,19 +80,8 @@ Resource Resource::glyphs(const std::string& urlTemplate,
                     })};
 }
 
-Resource Resource::fontGlyphs(const std::string& urlTemplate,
-                              const FontStack& fontStack,
-                              const std::string& glyphlanguage) {
-    return Resource{Resource::Kind::Glyphs,
-                    util::replaceTokens(urlTemplate, [&](const std::string& token) -> std::optional<std::string> {
-                        if (token == "fontstack") {
-                            return util::percentEncode(fontStackToString(fontStack));
-                        } else if (token == "language") {
-                            return glyphlanguage;
-                        } else {
-                            return {};
-                        }
-                    })};
+Resource Resource::fontFace(const std::string &url){
+    return Resource{Resource::Kind::Glyphs, url};
 }
 
 Resource Resource::tile(const std::string& urlTemplate,
