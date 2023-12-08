@@ -8,7 +8,6 @@
 #include <mbgl/util/immutable.hpp>
 
 #include <mutex>
-#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 
@@ -74,7 +73,7 @@ private:
 
     std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer;
 
-    std::shared_mutex rwLock;
+    std::recursive_mutex rwLock;
 };
 
 } // namespace mbgl
