@@ -73,7 +73,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
-    const float ANTIALIASING = 1.0 / line.device_pixel_ratio / 2.0;
+    const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
     const float2 a_extrude = float2(vertx.data.xy) - 128.0;
     const float a_direction = fmod(float(vertx.data.z), 4.0) - 1.0;
@@ -148,7 +148,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     // Calculate the antialiasing fade factor. This is either when fading in the
     // line in case of an offset line (v_width2.y) or when fading out (v_width2.x)
-    const float blur2 = (blur + 1.0 / line.device_pixel_ratio) * in.gamma_scale;
+    const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
     const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0);
 
     // For gradient lines, v_lineprogress is the ratio along the entire line,

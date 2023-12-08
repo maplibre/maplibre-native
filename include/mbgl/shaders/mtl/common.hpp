@@ -58,21 +58,21 @@ struct alignas(16) LineUBO {
     float4x4 matrix;
     float2 units_to_pixels;
     float ratio;
-    float device_pixel_ratio;
+    float pad;
 };
 
 struct alignas(16) LineBasicUBO {
     float4x4 matrix;
     float2 units_to_pixels;
     float ratio;
-    float device_pixel_ratio;
+    float pad;
 };
 
 struct alignas(16) LineGradientUBO {
     float4x4 matrix;
     float2 units_to_pixels;
     float ratio;
-    float device_pixel_ratio;
+    float pad;
 };
 
 struct alignas(16) LinePropertiesUBO {
@@ -159,8 +159,8 @@ static_assert(sizeof(SymbolDrawableUBO) == 14 * 16, "unexpected padding");
 struct alignas(16) SymbolDynamicUBO {
     float fade_change;
     float camera_to_center_distance;
-    float device_pixel_ratio;
     float aspect_ratio;
+    float pad;
 };
 static_assert(sizeof(SymbolDynamicUBO) == 16, "unexpected padding");
 

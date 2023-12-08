@@ -9,7 +9,7 @@ struct alignas(16) LineUBO {
     std::array<float, 4 * 4> matrix;
     std::array<float, 2> units_to_pixels;
     float ratio;
-    float device_pixel_ratio;
+    float pad;
 };
 static_assert(sizeof(LineUBO) % 16 == 0);
 
@@ -42,9 +42,8 @@ struct alignas(16) LinePatternUBO {
     std::array<float, 2> texsize;
     std::array<float, 2> units_to_pixels;
     float ratio;
-    float device_pixel_ratio;
     float fade;
-    float pad1;
+    float pad1, pad2;
 };
 static_assert(sizeof(LinePatternUBO) % 16 == 0);
 
@@ -64,11 +63,11 @@ struct alignas(16) LineSDFUBO {
     std::array<float, 2> patternscale_a;
     std::array<float, 2> patternscale_b;
     float ratio;
-    float device_pixel_ratio;
     float tex_y_a;
     float tex_y_b;
     float sdfgamma;
     float mix;
+    float pad;
 };
 static_assert(sizeof(LineSDFUBO) % 16 == 0);
 

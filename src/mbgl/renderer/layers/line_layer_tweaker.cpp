@@ -130,7 +130,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /*matrix = */ util::cast<float>(matrix),
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                    /*device_pixel_ratio = */ parameters.pixelRatio};
+                    0};
                 uniforms.createOrUpdate(idLineUBOName, &lineUBO, context);
 
                 // properties UBO
@@ -142,7 +142,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /*matrix = */ util::cast<float>(matrix),
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                    /*device_pixel_ratio = */ parameters.pixelRatio};
+                    0};
                 uniforms.createOrUpdate(idLineGradientUBOName, &lineGradientUBO, context);
 
                 // properties UBO
@@ -159,14 +159,14 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 const LinePatternUBO linePatternUBO{
                     /*matrix =*/util::cast<float>(matrix),
                     {parameters.pixelRatio,
-                     1 / tileID.pixelsToTileUnits(1, parameters.state.getIntegerZoom()),
-                     crossfade.fromScale,
-                     crossfade.toScale},
+                        1 / tileID.pixelsToTileUnits(1, parameters.state.getIntegerZoom()),
+                        crossfade.fromScale,
+                        crossfade.toScale},
                     /*texsize =*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
                     /*units_to_pixels =*/{1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio =*/1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                    /*device_pixel_ratio =*/parameters.pixelRatio,
                     /*fade =*/crossfade.t,
+                    0,
                     0};
                 uniforms.createOrUpdate(idLinePatternUBOName, &linePatternUBO, context);
 
@@ -202,18 +202,18 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         /* matrix = */ util::cast<float>(matrix),
                         {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                         {1.0f / tileID.pixelsToTileUnits(widthA, parameters.state.getIntegerZoom()),
-                         -posA.height / 2.0f},
+                            -posA.height / 2.0f},
                         /* patternscale_b = */
                         {1.0f / tileID.pixelsToTileUnits(widthB, parameters.state.getIntegerZoom()),
-                         -posB.height / 2.0f},
+                            -posB.height / 2.0f},
                         /* ratio = */ 1.0f /
-                            tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
-                        /* device_pixel_ratio = */ parameters.pixelRatio,
+                        tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
                         /* tex_y_a = */ posA.y,
                         /* tex_y_b = */ posB.y,
                         /* sdfgamma = */ static_cast<float>(dashPatternTexture.getSize().width) /
-                            (std::min(widthA, widthB) * 256.0f * parameters.pixelRatio) / 2.0f,
-                        /* mix = */ crossfade.t};
+                        (std::min(widthA, widthB) * 256.0f * parameters.pixelRatio) / 2.0f,
+                        /* mix = */ crossfade.t,
+                        0};
                     uniforms.createOrUpdate(idLineSDFUBOName, &lineSDFUBO, context);
 
                     // properties UBO
