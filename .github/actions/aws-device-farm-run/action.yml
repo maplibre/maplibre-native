@@ -119,7 +119,7 @@ runs:
           # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/devicefarm/get-run.html#output
           while true; do
             sleep 30
-            result="$(aws get-run --arn "$arn" --output text --query "run.result")"
+            result="$(aws devicefarm get-run --arn "$arn" --output text --query "run.result")"
             case $result in
               FAILED|ERRORED|STOPPED) echo "Run $result" && exit 1 ;;
               SKIPPED|PASSED) echo "Run $result" && exit 0 ;;
