@@ -125,7 +125,6 @@ jobs:
           cp MapboxGLAndroidSDKTestApp/build/outputs/apk/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release.apk .
           cp MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk .
 
-
       - name: Create artifact for benchmark APKs 
         uses: actions/upload-artifact@v3
         if: github.ref != 'refs/heads/main'
@@ -135,6 +134,9 @@ jobs:
           path: |
             platform/android/MapboxGLAndroidSDKTestApp-drawable-release.apk
             platform/android/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk
+
+      - if: github.event_name == 'pull_request'
+        uses: ./.github/actions/save-pr-number
 
       - name: Build UI tests
         if: github.ref == 'refs/heads/main'
