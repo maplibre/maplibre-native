@@ -73,17 +73,17 @@ public:
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
     void setFontFaces(std::shared_ptr<FontFaces> faces) { fontFaces = faces; }
-    
+
     std::shared_ptr<HBShaper> getHBShaper(FontStack, GlyphIDType);
-    
+
     void hbShaping(const std::u16string &text,
                    const FontStack &font,
                    GlyphIDType type,
                    std::vector<GlyphID> &glyphIDs,
                    std::vector<HBShapeAdjust> &adjusts);
-    
+
     std::shared_ptr<FontFaces> getFontFaces() { return fontFaces; }
-    
+
     std::string getFontFaceURL(GlyphIDType type);
 #endif
 

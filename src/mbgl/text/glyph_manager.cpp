@@ -90,17 +90,15 @@ void GlyphManager::requestRange(GlyphRequest& request,
         case GlyphIDType::FontPBF:
             res = Resource::glyphs(glyphURL, fontStack, std::pair<uint16_t, uint16_t>{range.first, range.second});
             break;
-        default:
-        {
+        default: {
             std::string url = getFontFaceURL(range.type);
             if (url.size()) {
                 res = Resource::fontFace(url);
             } else {
                 Log::Error(Event::Style, "Try download a glyph doesn't in current faces");
             }
-            
-        }
-            break;
+
+        } break;
     }
 
     request.req = fileSource.request(

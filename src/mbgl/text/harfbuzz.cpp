@@ -15,7 +15,6 @@ HBShaper::~HBShaper() {
     shaper.reset();
 }
 
-
 void HBShaper::CreateComplexGlyphIDs(const std::u16string &text,
                                      std::vector<GlyphID> &glyphIDs,
                                      std::vector<HBShapeAdjust> &adjusts) {

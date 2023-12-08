@@ -169,14 +169,16 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, c
              parameters.pixelRatio,
              parameters.debugOptions & MapDebugOptions::Collision
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
-             ,parameters.glyphManager.getFontFaces()
+             ,
+             parameters.glyphManager.getFontFaces()
 #endif
-             ),
+                 ),
       fileSource(parameters.fileSource),
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
       mode(parameters.mode),
-      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
+      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {
+}
 
 GeometryTile::~GeometryTile() {
     glyphManager.removeRequestor(*this);

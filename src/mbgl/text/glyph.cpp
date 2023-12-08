@@ -27,28 +27,29 @@ bool GlyphRange::operator<(const GlyphRange &other) const {
 GlyphIDType genNewGlyphIDType() {
     static short glyphType = GlyphIDType::FontPBF;
     ++glyphType;
-    if (glyphType == GlyphIDType::FontPBF)
-        ++glyphType;
+    if (glyphType == GlyphIDType::FontPBF) ++glyphType;
     return static_cast<GlyphIDType>(glyphType);
 }
 
-GlyphIDType genNewGlyphIDType(const std::string &url, const FontStack &fontStack, const std::vector<std::pair<uint32_t, uint32_t>> &pairs) {
+GlyphIDType genNewGlyphIDType(const std::string &url,
+                              const FontStack &fontStack,
+                              const std::vector<std::pair<uint32_t, uint32_t>> &pairs) {
     static std::map<std::string, std::map<std::string, std::map<std::size_t, GlyphIDType>>> glyphTypes;
-    
+
     std::size_t hash = 0;
     for (auto &pair : pairs) {
         mbgl::util::hash_combine(hash, pair.first);
         mbgl::util::hash_combine(hash, pair.second);
     }
-    
+
     auto family = fontStackToString(fontStack);
-    
+
     auto type = glyphTypes[url][family][hash];
     if (type == GlyphIDType::FontPBF) {
         type = genNewGlyphIDType();
         glyphTypes[url][family][hash] = type;
     }
-    
+
     return type;
 }
 

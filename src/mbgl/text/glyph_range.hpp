@@ -10,12 +10,13 @@ namespace mbgl {
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
 
-
 enum GlyphIDType : uint16_t {
     FontPBF = 0x00,
 };
 
-GlyphIDType genNewGlyphIDType(const std::string &url, const FontStack &fontStack, const std::vector<std::pair<uint32_t, uint32_t>> &pairs);
+GlyphIDType genNewGlyphIDType(const std::string &url,
+                              const FontStack &fontStack,
+                              const std::vector<std::pair<uint32_t, uint32_t>> &pairs);
 
 class GlyphRange {
 public:

@@ -346,8 +346,8 @@ void OfflineDownload::activateDownload() {
                     }
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
                     if (!parser.fontFaces) {
-                        FontFaces &faces = *parser.fontFaces;
-                        for (const auto &face : faces) {
+                        FontFaces& faces = *parser.fontFaces;
+                        for (const auto& face : faces) {
                             queueResource(Resource::fontFace(face.url));
                         }
                     }

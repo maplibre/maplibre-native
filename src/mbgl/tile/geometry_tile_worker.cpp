@@ -36,7 +36,8 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        const float pixelRatio_,
                                        const bool showCollisionBoxes_
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
-                                       ,std::shared_ptr<FontFaces> fontFaces_
+                                       ,
+                                       std::shared_ptr<FontFaces> fontFaces_
 #endif
                                        )
     : self(std::move(self_)),
@@ -49,7 +50,8 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
       fontFaces(fontFaces_),
 #endif
-      showCollisionBoxes(showCollisionBoxes_) {}
+      showCollisionBoxes(showCollisionBoxes_) {
+}
 
 GeometryTileWorker::~GeometryTileWorker() = default;
 
@@ -473,12 +475,15 @@ void GeometryTileWorker::parse() {
         // images/glyphs are used, or the Layout is stored until the
         // images/glyphs are available to add the features to the buckets.
         if (leaderImpl.getTypeInfo()->layout == LayerTypeInfo::Layout::Required) {
-            std::unique_ptr<Layout> layout = LayerManager::get()->createLayout(
-                {parameters,
+            std::unique_ptr<Layout> layout = LayerManager::get()->createLayout({parameters,
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
-                    fontFaces,
+                                                                                fontFaces,
 #endif
-                    glyphDependencies, imageDependencies, availableImages}, std::move(geometryLayer), group);
+                                                                                glyphDependencies,
+                                                                                imageDependencies,
+                                                                                availableImages},
+                                                                               std::move(geometryLayer),
+                                                                               group);
             if (layout->hasDependencies()) {
                 layouts.push_back(std::move(layout));
             } else {

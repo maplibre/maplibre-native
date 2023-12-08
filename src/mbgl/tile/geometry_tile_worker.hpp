@@ -38,9 +38,10 @@ public:
                        float pixelRatio,
                        bool showCollisionBoxes_
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
-                       ,std::shared_ptr<FontFaces> fontFaces
+                       ,
+                       std::shared_ptr<FontFaces> fontFaces
 #endif
-                       );
+    );
     ~GeometryTileWorker();
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,

@@ -170,11 +170,11 @@ enum class WritingModeType : uint8_t {
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
 // style defined faces
 struct FontFace {
-    GlyphIDType type;                                   // a unique glyph id
-    
-    FontStack fontStack;                                // font stack
-    std::string url;                                    // font file url
-    std::vector<std::pair<uint32_t, uint32_t>> ranges;  // unicode ranges
+    GlyphIDType type; // a unique glyph id
+
+    FontStack fontStack;                               // font stack
+    std::string url;                                   // font file url
+    std::vector<std::pair<uint32_t, uint32_t>> ranges; // unicode ranges
 };
 
 using FontFaces = std::vector<FontFace>;

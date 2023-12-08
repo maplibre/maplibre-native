@@ -124,39 +124,36 @@ StyleParseResult Parser::parse(const std::string& json) {
             for (auto& face : faces.GetArray()) {
                 if (face.IsObject()) {
                     if (face.HasMember("text-font")) {
-                        
-                        const JSValue &family = face["text-font"];
+                        const JSValue& family = face["text-font"];
                         FontStack familyString;
                         if (family.IsArray()) {
                             for (auto& font : family.GetArray()) {
                                 if (font.IsString()) {
                                     familyString.emplace_back(font.GetString());
                                 }
-                            }   
+                            }
                         }
-                        if (familyString.empty())
-                            continue;
-                        
+                        if (familyString.empty()) continue;
+
                         if (face.HasMember("font-files")) {
-                            const JSValue &fontFiles = face["font-files"];
-                            
+                            const JSValue& fontFiles = face["font-files"];
+
                             if (fontFiles.IsArray()) {
                                 for (auto& fontfile : fontFiles.GetArray()) {
                                     std::string urlString;
                                     if (fontfile.HasMember("url")) {
-                                        const JSValue &url = fontfile["url"];
-                                        if (url.IsString())
-                                            urlString = url.GetString();
+                                        const JSValue& url = fontfile["url"];
+                                        if (url.IsString()) urlString = url.GetString();
                                     }
-                                    
+
                                     if (fontfile.HasMember("unicode-range")) {
-                                        const JSValue &unicodeRange = fontfile["unicode-range"];
+                                        const JSValue& unicodeRange = fontfile["unicode-range"];
                                         if (unicodeRange.IsArray()) {
                                             fontFaces->emplace_back();
-                                            auto &fontFace = fontFaces->back();
+                                            auto& fontFace = fontFaces->back();
                                             fontFace.fontStack = familyString;
                                             fontFace.url = urlString;
-                                            
+
                                             for (auto& range : unicodeRange.GetArray()) {
                                                 if (range.IsString()) {
                                                     std::string rangeString = range.GetString();
@@ -175,18 +172,15 @@ StyleParseResult Parser::parse(const std::string& json) {
                                                     }
                                                 }
                                             }
-                                            
+
                                             fontFace.type = genNewGlyphIDType(urlString, familyString, fontFace.ranges);
                                         }
                                     }
                                 }
                             }
                         }
-                        
-                        
                     }
                 }
-                
             };
         }
     }

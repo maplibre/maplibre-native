@@ -80,7 +80,10 @@ inline Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> createLayout(
 }
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
-GlyphIDType getCharGlyphIDType(char16_t ch, const FontStack &stack, std::shared_ptr<FontFaces> faces, GlyphIDType lastCharType) {
+GlyphIDType getCharGlyphIDType(char16_t ch,
+                               const FontStack& stack,
+                               std::shared_ptr<FontFaces> faces,
+                               GlyphIDType lastCharType) {
     if (!faces) {
         return GlyphIDType::FontPBF;
     }
@@ -88,16 +91,15 @@ GlyphIDType getCharGlyphIDType(char16_t ch, const FontStack &stack, std::shared_
     if (util::i18n::isVariationSelector1(ch)) {
         return lastCharType;
     }
-    
-    for (auto &face : *faces) {
+
+    for (auto& face : *faces) {
         if (face.fontStack == stack) {
-            for (auto &range : face.ranges) {
-                if (ch >= range.first && ch <= range.second)
-                    return face.type;
+            for (auto& range : face.ranges) {
+                if (ch >= range.first && ch <= range.second) return face.type;
             }
         }
     }
-    
+
     return GlyphIDType::FontPBF;
 }
 #endif
@@ -193,19 +195,17 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                     std::u16string subString;
                     auto sectionScale = section.fontScale ? *section.fontScale : 1.0;
                     auto sectionFontStack = section.fontStack ? *section.fontStack : baseFontStack;
-              
-                    GlyphIDType subStringtype = getCharGlyphIDType(*u16Char, sectionFontStack, layoutParameters.fontFaces, GlyphIDType::FontPBF);
+
+                    GlyphIDType subStringtype = getCharGlyphIDType(
+                        *u16Char, sectionFontStack, layoutParameters.fontFaces, GlyphIDType::FontPBF);
 
                     while (*u16Char) {
-                        const auto chType = getCharGlyphIDType(*u16Char, sectionFontStack, layoutParameters.fontFaces, subStringtype);
+                        const auto chType = getCharGlyphIDType(
+                            *u16Char, sectionFontStack, layoutParameters.fontFaces, subStringtype);
                         if (chType != subStringtype) {
                             if (subString.length()) {
-                                ft.formattedText->addTextSection(subString,
-                                                                 sectionScale,
-                                                                 sectionFontStack,
-                                                                 subStringtype,
-                                                                 false,
-                                                                 section.textColor);
+                                ft.formattedText->addTextSection(
+                                    subString, sectionScale, sectionFontStack, subStringtype, false, section.textColor);
                                 sectionTable[ft.formattedText->getSections().size() - 1] = sectionIndex;
                                 if (subStringtype != GlyphIDType::FontPBF) {
                                     layoutParameters.glyphDependencies
