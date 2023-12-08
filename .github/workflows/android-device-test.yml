@@ -9,9 +9,17 @@ on:
 jobs:
   create-check:
     strategy:
+      max-parallel: 2
       matrix:
         test: [
-          {artifactName: android-render-tests, testFile: RenderTests.apk, appFile: RenderTestsApp.apk, name: "Android Render Tests"},
+          {
+            artifactName: android-render-tests,
+            testFile: RenderTests.apk,
+            appFile: RenderTestsApp.apk,
+            name: "Android Render Tests",
+            # Google Pixel 7 Pro
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564"
+          },
           {
             artifactName: benchmarkAPKs,
             testFile: "MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk",
@@ -23,7 +31,9 @@ jobs:
             # aws devicefarm create-upload --project-arn <project_arn> --type EXTERNAL_DATA --name benchmark-input.zip
             # curl -T benchmark-input.zip <upload_url>
             # aws devicefarm get-upload <arn>
-            externalData: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/c27174c2-63f4-4cdb-9af9-68957d75ebed"
+            externalData: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/c27174c2-63f4-4cdb-9af9-68957d75ebed",
+            # top devices, query with `aws list-device-pools --arn <project_arn>`
+            devicePool: "arn:aws:devicefarm:us-west-2::devicepool:082d10e5-d7d7-48a5-ba5c-b33d66efa1f5"
           }
         ]
     runs-on: ubuntu-latest
@@ -69,7 +79,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME }}
           AWS_DEVICE_FARM_PROJECT_ARN: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
-          AWS_DEVICE_FARM_DEVICE_POOL_ARN: ${{ vars.AWS_DEVICE_FARM_DEVICE_POOL_ARN }}
+          AWS_DEVICE_FARM_DEVICE_POOL_ARN: ${{ matrix.test.devicePool }}
           externalData: ${{ matrix.test.externalData }}
 
       - uses: LouisBrunner/checks-action@v1.6.2
