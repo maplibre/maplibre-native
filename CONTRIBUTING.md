@@ -20,9 +20,7 @@ If you want to contribute code:
 
 1. Ensure that existing [pull requests](https://github.com/maplibre/maplibre-native/pulls) and [issues](https://github.com/maplibre/maplibre-native/issues) don’t already cover your contribution or question.
 
-1. Pull requests are gladly accepted. If there are any changes that developers using one of the platform should be aware of, please update the **main** section of the relevant `CHANGELOG.md`.
-
-4. Prefix your commit messages with the platform(s) your changes affect, e.g. `[ios]`.
+1. Pull requests are gladly accepted. If there are any changes that developers using one of the platforms should be aware of, please update the **main** section of the relevant `CHANGELOG.md`.
 
 Please note the special instructions for contributing new source code files, asset files, or user-facing strings to MapLibre Native for [iOS](platform/ios/CONTRIBUTING.md), [Android](platform/android/DEVELOPING.md) or [macOS](platform/macos/DEVELOPING.md).
 
