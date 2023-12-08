@@ -11,19 +11,6 @@
 git clone --recurse-submodules https://github.com/maplibre/maplibre-native.git
 ```
 
-## Building
-
-MapLibre Native shares a single C++ core library with all platforms. To build it, we utilize CMake.
-
-To build, run the following from the root directory
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_CORE_ONLY=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DMLN_WITH_COVERAGE=ON
-```
-
-`CMAKE_BUILD_TYPE=Debug` will build debug artifacts. You can opt to omit it if that is not necessary.
-`MLN_WITH_CORE_ONLY=ON` will build only the core libraries.
-Built artifacts should be available on `build` folder.
-
 
 ## Guidelines
 
@@ -33,11 +20,17 @@ If you want to contribute code:
 
 1. Ensure that existing [pull requests](https://github.com/maplibre/maplibre-native/pulls) and [issues](https://github.com/maplibre/maplibre-native/issues) don’t already cover your contribution or question.
 
-1. Pull requests are gladly accepted. If there are any changes that developers using one of the GL SDKs should be aware of, please update the **main** section of the relevant `CHANGELOG.md`.
-
-4. Prefix your commit messages with the platform(s) your changes affect, e.g. `[ios]`.
+1. Pull requests are gladly accepted. If there are any changes that developers using one of the platforms should be aware of, please update the **main** section of the relevant `CHANGELOG.md`.
 
 Please note the special instructions for contributing new source code files, asset files, or user-facing strings to MapLibre Native for [iOS](platform/ios/CONTRIBUTING.md), [Android](platform/android/DEVELOPING.md) or [macOS](platform/macos/DEVELOPING.md).
+
+## Pull Requests
+
+To run the benchmarks (for Android) include the following line on a PR comment:
+
+```
+!benchmark android
+```
 
 ## Design Proposals
 
