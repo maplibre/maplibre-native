@@ -23,6 +23,8 @@
 
 #include <mbgl/gfx/fill_generator.hpp>
 
+
+
 namespace mbgl {
 
 namespace style {
@@ -221,6 +223,37 @@ private:
     float opacity;
 };
 
+class SymbolDrawableTweaker : public gfx::DrawableTweaker {
+public:
+    SymbolDrawableTweaker()
+    {}
+    ~SymbolDrawableTweaker() override = default;
+
+    void init(gfx::Drawable&) override{};
+
+    void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
+        if (!drawable.getTileID().has_value()) {
+            return;
+        }
+
+        const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+        mat4 tileMatrix;
+        parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
+
+        const auto matrix = LayerTweaker::getTileMatrix(
+            tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
+
+        static const StringIdentity idDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");
+        struct alignas(16) DrawableUBO {
+            std::array<float, 4 * 4> matrix;
+        };
+        const DrawableUBO drawableUBO{/*matrix = */ util::cast<float>(matrix)};
+
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.createOrUpdate(idDrawableUBOName, &drawableUBO, parameters.context);
+    };
+};
+
 CustomDrawableLayerHost::Interface::Interface(RenderLayer& layer_,
                                               LayerGroupBasePtr& layerGroup_,
                                               gfx::ShaderRegistry& shaders_,
@@ -274,6 +307,7 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
     if (!lineShader) lineShader = lineShaderDefault();
     assert(lineShader);
     if (!builder || builder->getShader() != lineShader) {
+        finish();
         builder = createBuilder("lines", lineShader);
     }
     assert(builder);
@@ -285,6 +319,7 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     if (!fillShader) fillShader = fillShaderDefault();
     assert(fillShader);
     if (!builder || builder->getShader() != fillShader) {
+        finish();
         builder = createBuilder("fill", fillShader);
     }
     assert(builder);
@@ -324,8 +359,66 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     builder->flush(context);
 }
 
-void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& point) {
-    // TODO: implement
+void CustomDrawableLayerHost::Interface::addSymbol([[maybe_unused]] const GeometryCoordinate& point) {
+    if (!symbolShader) symbolShader = symbolShaderDefault();
+    assert(symbolShader);
+    if(!builder || builder->getShader() != symbolShader) {
+        finish();
+        builder = createBuilder("symbol", symbolShader);
+    }
+    assert(builder);
+    assert(builder->getShader() == symbolShader);
+    
+    // temporary: buffers
+    struct CustomSymbolIcon {
+        std::array<float, 2> a_pos;
+        std::array<float, 2> a_tex;
+    };
+    
+    using VertexVector = gfx::VertexVector<CustomSymbolIcon>;
+    const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+    VertexVector& vertices = *sharedVertices;
+    
+    vertices.emplace_back(CustomSymbolIcon{{0, 0}, {0, 0}},
+                          CustomSymbolIcon{{1000, 0}, {1, 0}},
+                          CustomSymbolIcon{{0, 1000}, {0, 1}},
+                          CustomSymbolIcon{{1000, 1000}, {1, 1}});
+    
+    using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
+    const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
+    TriangleIndexVector& triangles = *sharedTriangles;
+    
+    triangles.emplace_back(0, 1, 2, 1, 2, 3);
+    
+    SegmentVector<CustomSymbolIcon> triangleSegments;
+    triangleSegments.emplace_back(Segment<CustomSymbolIcon>{0, 0, 4, 6});
+    
+    // add to builder
+    static const StringIdentity idPositionAttribName = stringIndexer().get("a_pos");
+    static const StringIdentity idTextureAttribName = stringIndexer().get("a_tex");
+    builder->setVertexAttrNameId(idPositionAttribName);
+    
+    auto attrs = context.createVertexAttributeArray();
+    if (const auto& attr = attrs->add(idPositionAttribName)) {
+        attr->setSharedRawData(sharedVertices,
+                               offsetof(CustomSymbolIcon, a_pos),
+                               /*vertexOffset=*/0,
+                               sizeof(CustomSymbolIcon),
+                               gfx::AttributeDataType::Float2);
+    }
+    if (const auto& attr = attrs->add(idTextureAttribName)) {
+        attr->setSharedRawData(sharedVertices,
+                               offsetof(CustomSymbolIcon, a_tex),
+                               /*vertexOffset=*/0,
+                               sizeof(CustomSymbolIcon),
+                               gfx::AttributeDataType::Float2);
+    }
+    builder->setVertexAttributes(std::move(attrs));
+    builder->setRawVertices({}, vertices.elements(), gfx::AttributeDataType::Float2);
+    builder->setSegments(gfx::Triangles(), sharedTriangles, triangleSegments.data(), triangleSegments.size());
+    
+    // flush current builder drawable
+    builder->flush(context);
 }
 
 void CustomDrawableLayerHost::Interface::finish() {
@@ -368,12 +461,20 @@ void CustomDrawableLayerHost::Interface::finish() {
 
             // finish drawables
             finish_(tweaker);
+        } else if (builder->getShader() == symbolShader) {
+            // finish building symbols
+            
+            // create symbol tweaker
+            auto tweaker = std::make_shared<SymbolDrawableTweaker>();
+
+            // finish drawables
+            finish_(tweaker);
         }
     }
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
-    gfx::ShaderGroupPtr lineShaderGroup = shaders.getShaderGroup("LineShader");
+    gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("LineShader");
 
     const mbgl::unordered_set<StringIdentity> propertiesAsUniforms{
         stringIndexer().get("a_color"),
@@ -384,18 +485,22 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
         stringIndexer().get("a_width"),
     };
 
-    return lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {
-    gfx::ShaderGroupPtr fillShaderGroup = shaders.getShaderGroup("FillShader");
+    gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("FillShader");
 
     const mbgl::unordered_set<StringIdentity> propertiesAsUniforms{
         stringIndexer().get("a_color"),
         stringIndexer().get("a_opacity"),
     };
 
-    return fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+    return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+}
+
+gfx::ShaderPtr CustomDrawableLayerHost::Interface::symbolShaderDefault() const {
+    return context.getGenericShader(shaders, "CustomSymbolIconShader");
 }
 
 std::unique_ptr<gfx::DrawableBuilder> CustomDrawableLayerHost::Interface::createBuilder(const std::string& name,

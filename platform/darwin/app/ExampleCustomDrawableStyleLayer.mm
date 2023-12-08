@@ -6,6 +6,9 @@
 #import "MLNStyleLayer_Private.h"
 #import "MLNGeometry_Private.h"
 
+#import <UIKit/UIKit.h>
+
+#include <mbgl/util/image+MLNAdditions.hpp>
 #include <mbgl/layermanager/layer_factory.hpp>
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/layers/custom_drawable_layer.hpp>
@@ -126,8 +129,12 @@ public:
             options.size = mbgl::Size(32, 32);
             options.color = Color::blue();
             options.texture = interface.context.createTexture2D();
-            std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(options.size);
-            // TODO: load image
+            
+            // load image
+            UIImage *assetImage = [UIImage imageNamed:@"MissingImage"];
+            assert(assetImage.CGImage != NULL);
+            std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(MLNPremultipliedImageFromCGImage(assetImage.CGImage));
+            
             options.texture->setImage(image);
             interface.setSymbolOptions(options);
             

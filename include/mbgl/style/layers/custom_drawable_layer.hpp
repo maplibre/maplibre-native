@@ -140,13 +140,17 @@ public:
 private:
     gfx::ShaderPtr lineShaderDefault() const;
     gfx::ShaderPtr fillShaderDefault() const;
+    gfx::ShaderPtr symbolShaderDefault() const;
 
     std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
 
-    gfx::ShaderPtr lineShader;
-    gfx::ShaderPtr fillShader;
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
+
+    gfx::ShaderPtr lineShader;
+    gfx::ShaderPtr fillShader;
+    gfx::ShaderPtr symbolShader;
+
     LineOptions lineOptions;
     FillOptions fillOptions;
     SymbolOptions symbolOptions;
