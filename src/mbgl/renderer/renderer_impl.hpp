@@ -2,6 +2,12 @@
 
 #include <mbgl/renderer/render_orchestrator.hpp>
 
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/mtl/mtl_fwd.hpp>
+#include <Foundation/Foundation.hpp>
+#define ENABLE_METAL_CAPTURE 0
+#endif // MLN_RENDER_BACKEND_METAL
+
 #include <memory>
 #include <string>
 
@@ -49,6 +55,10 @@ private:
     RenderState renderState = RenderState::Never;
 
     uint64_t frameCount = 0;
+
+#if MLN_RENDER_BACKEND_METAL && ENABLE_METAL_CAPTURE
+    mtl::MTLCaptureScopePtr commandCaptureScope;
+#endif // MLN_RENDER_BACKEND_METAL
 };
 
 } // namespace mbgl
