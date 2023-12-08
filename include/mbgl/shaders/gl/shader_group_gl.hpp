@@ -30,7 +30,7 @@ public:
         mbgl::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
         mbgl::util::hash_combine(seed, programParameters.getDefinesHash());
         const std::string shaderName = getShaderName(name, seed);
-        
+
         auto shader = get<gl::ShaderProgramGL>(shaderName);
         if (shader) {
             return shader;
