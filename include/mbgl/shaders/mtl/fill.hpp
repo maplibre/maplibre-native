@@ -13,10 +13,9 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "FillShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 3> attributes;
-    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
@@ -57,35 +56,26 @@ struct alignas(16) FillInterpolateUBO {
     float opacity_t;
 };
 
-struct alignas(16) FillPermutationUBO {
-    Attribute color;
-    Attribute opacity;
-    bool overdrawInspector;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillDrawableUBO& drawable [[buffer(3)]],
                                 device const FillEvaluatedPropsUBO& props [[buffer(4)]],
-                                device const FillInterpolateUBO& interp [[buffer(5)]],
-                                device const FillPermutationUBO& permutation [[buffer(6)]],
-                                device const ExpressionInputsUBO& expr [[buffer(7)]]) {
+                                device const FillInterpolateUBO& interp [[buffer(5)]]) {
     return {
         .position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f),
 #if !defined(HAS_UNIFORM_u_color)
-        .color    = half4(colorFor(permutation.color, props.color, vertx.color, interp.color_t, expr)),
+        .color    = half4(unpack_mix_color(vertx.color, interp.color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity  = half(valueFor(permutation.opacity, props.opacity, vertx.opacity, interp.opacity_t, expr)),
+        .opacity  = half(unpack_mix_float(vertx.opacity, interp.opacity_t)),
 #endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillEvaluatedPropsUBO& props [[buffer(4)]],
-                            device const FillPermutationUBO& permutation [[buffer(6)]]) {
-    if (permutation.overdrawInspector) {
-        return half4(1.0);
-    }
+                            device const FillEvaluatedPropsUBO& props [[buffer(4)]]) {
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
 #if defined(HAS_UNIFORM_u_color)
     const half4 color = half4(props.color);
@@ -109,10 +99,9 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "FillOutlineShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 3> attributes;
-    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
@@ -149,37 +138,28 @@ struct alignas(16) FillOutlineInterpolateUBO {
     float opacity_t;
 };
 
-struct alignas(16) FillOutlinePermutationUBO {
-    Attribute outline_color;
-    Attribute opacity;
-    bool overdrawInspector;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillOutlineDrawableUBO& drawable [[buffer(3)]],
                                 device const FillOutlineEvaluatedPropsUBO& props [[buffer(4)]],
-                                device const FillOutlineInterpolateUBO& interp [[buffer(5)]],
-                                device const FillOutlinePermutationUBO& permutation [[buffer(6)]],
-                                device const ExpressionInputsUBO& expr [[buffer(7)]]) {
+                                device const FillOutlineInterpolateUBO& interp [[buffer(5)]]) {
     const float4 position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);
     return {
         .position       = position,
         .pos            = (position.xy / position.w + 1.0) / 2.0 * drawable.world,
 #if !defined(HAS_UNIFORM_u_outline_color)
-        .outline_color  = half4(colorFor(permutation.outline_color, props.outline_color, vertx.outline_color, interp.outline_color_t, expr)),
+        .outline_color  = half4(unpack_mix_color(vertx.outline_color, interp.outline_color_t)),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half( valueFor(permutation.opacity,       props.opacity,       vertx.opacity,       interp.opacity_t,       expr)),
+        .opacity        = half(unpack_mix_float(vertx.opacity, interp.opacity_t)),
 #endif
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillOutlineEvaluatedPropsUBO& props [[buffer(4)]],
-                            device const FillOutlinePermutationUBO& permutation [[buffer(6)]]) {
-    if (permutation.overdrawInspector) {
-        return half4(1.0);
-    }
+                            device const FillOutlineEvaluatedPropsUBO& props [[buffer(4)]]) {
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
 //   TODO: Cause metal line primitive only support draw 1 pixel width line
 //   use alpha to provide edge antialiased is no point
@@ -209,10 +189,9 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "FillPatternShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 4> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -236,10 +215,10 @@ struct FragmentStage {
     float2 v_pos_b;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    float4 pattern_from;
+    half4 pattern_from;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    float4 pattern_to;
+    half4 pattern_to;
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
@@ -270,30 +249,21 @@ struct alignas(16) FillPatternInterpolateUBO {
     float opacity_t;
 };
 
-struct alignas(16) FillPatternPermutationUBO {
-    Attribute pattern_from;
-    Attribute pattern_to;
-    Attribute opacity;
-    bool overdrawInspector;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillPatternDrawableUBO& drawable [[buffer(4)]],
                                 device const FillPatternTilePropsUBO& tileProps [[buffer(5)]],
                                 device const FillPatternEvaluatedPropsUBO& props [[buffer(6)]],
-                                device const FillPatternInterpolateUBO& interp [[buffer(7)]],
-                                device const FillPatternPermutationUBO& permutation [[buffer(8)]],
-                                device const ExpressionInputsUBO& expr [[buffer(9)]]) {
+                                device const FillPatternInterpolateUBO& interp [[buffer(7)]]) {
 #if defined(HAS_UNIFORM_u_pattern_from)
-    const auto pattern_from = tileProps.pattern_from;
+    const auto pattern_from = float4(tileProps.pattern_from);
 #else
-    const auto pattern_from = patternFor(permutation.pattern_from, tileProps.pattern_from, vertx.pattern_from, interp.pattern_from_t, expr);
+    const auto pattern_from = float4(vertx.pattern_from);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
-    const auto pattern_to   = tileProps.pattern_to;
+    const auto pattern_to   = float4(tileProps.pattern_to);
 #else
-    const auto pattern_to   = patternFor(permutation.pattern_to,   tileProps.pattern_to,   vertx.pattern_to,   interp.pattern_to_t,   expr);
+    const auto pattern_to   = float4(vertx.pattern_to);
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
@@ -315,13 +285,13 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .v_pos_a        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, postion),
         .v_pos_b        = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, postion),
 #if !defined(HAS_UNIFORM_u_pattern_from)
-        .pattern_from   = pattern_from,
+        .pattern_from   = half4(pattern_from),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-        .pattern_to     = pattern_to,
+        .pattern_to     = half4(pattern_to),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-        .opacity        = half(valueFor(permutation.opacity,        props.opacity,          vertx.opacity,      interp.opacity_t,     expr)),
+        .opacity        = half(unpack_mix_float(vertx.opacity, interp.opacity_t)),
 #endif
     };
 }
@@ -330,23 +300,22 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const FillPatternDrawableUBO& drawable [[buffer(4)]],
                             device const FillPatternTilePropsUBO& tileProps [[buffer(5)]],
                             device const FillPatternEvaluatedPropsUBO& props [[buffer(6)]],
-                            device const FillPatternPermutationUBO& permutation [[buffer(8)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
-    if (permutation.overdrawInspector) {
-        return half4(1.0);
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
-    const auto pattern_from   = tileProps.pattern_from;
+    const auto pattern_from   = float4(tileProps.pattern_from);
 #else
-    const auto pattern_from   = in.pattern_from;
+    const auto pattern_from   = float4(in.pattern_from);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
-    const auto pattern_to     = tileProps.pattern_to;
+    const auto pattern_to     = float4(tileProps.pattern_to);
 #else
-    const auto pattern_to     = in.pattern_to;
+    const auto pattern_to     = float4(in.pattern_to);
 #endif
 
 #if defined(HAS_UNIFORM_u_opacity)
@@ -378,10 +347,9 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto name = "FillOutlinePatternShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 4> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -407,10 +375,10 @@ struct FragmentStage {
     float2 v_pos;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    float4 pattern_from;
+    half4 pattern_from;
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    float4 pattern_to;
+    half4 pattern_to;
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
     half opacity;
@@ -442,34 +410,25 @@ struct alignas(16) FillOutlinePatternInterpolateUBO {
     float opacity_t;
 };
 
-struct alignas(16) FillOutlinePatternPermutationUBO {
-    Attribute pattern_from;
-    Attribute pattern_to;
-    Attribute opacity;
-    bool overdrawInspector;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillOutlinePatternDrawableUBO& drawable [[buffer(4)]],
                                 device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(5)]],
                                 device const FillOutlinePatternEvaluatedPropsUBO& props [[buffer(6)]],
-                                device const FillOutlinePatternInterpolateUBO& interp [[buffer(7)]],
-                                device const FillOutlinePatternPermutationUBO& permutation [[buffer(8)]],
-                                device const ExpressionInputsUBO& expr [[buffer(9)]]) {
+                                device const FillOutlinePatternInterpolateUBO& interp [[buffer(7)]]) {
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = tileProps.pattern_from;
 #else
-    const auto pattern_from = patternFor(permutation.pattern_from, tileProps.pattern_from, vertx.pattern_from, interp.pattern_from_t, expr);
+    const auto pattern_from = float4(vertx.pattern_from);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
     const auto pattern_to   = tileProps.pattern_to;
 #else
-    const auto pattern_to   = patternFor(permutation.pattern_to,   tileProps.pattern_to,   vertx.pattern_to,   interp.pattern_to_t,   expr);
+    const auto pattern_to   = float4(vertx.pattern_to);
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    const auto opacity      = valueFor(permutation.opacity,        props.opacity,          vertx.opacity,      interp.opacity_t,     expr);
+    const auto opacity      = unpack_mix_float(vertx.opacity, interp.opacity_t);
 #endif
 
     const float2 pattern_tl_a = pattern_from.xy;
@@ -494,10 +453,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         .v_pos          = (position.xy / position.w + 1.0) / 2.0 * drawable.world,
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-        .pattern_from   = pattern_from,
+        .pattern_from   = half4(pattern_from),
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-        .pattern_to     = pattern_to,
+        .pattern_to     = half4(pattern_to),
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity        = half(opacity),
@@ -509,23 +468,22 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const FillOutlinePatternDrawableUBO& drawable [[buffer(4)]],
                             device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(5)]],
                             device const FillOutlinePatternEvaluatedPropsUBO& props [[buffer(6)]],
-                            device const FillOutlinePatternPermutationUBO& permutation [[buffer(8)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
-    if (permutation.overdrawInspector) {
-        return half4(1.0);
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
-    const auto pattern_from   = tileProps.pattern_from;
+    const auto pattern_from   = float4(tileProps.pattern_from);
 #else
-    const auto pattern_from   = in.pattern_from;
+    const auto pattern_from   = float4(in.pattern_from);
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
-    const auto pattern_to     = tileProps.pattern_to;
+    const auto pattern_to     = float4(tileProps.pattern_to);
 #else
-    const auto pattern_to     = in.pattern_to;
+    const auto pattern_to     = float4(in.pattern_to);
 #endif
 
 #if defined(HAS_UNIFORM_u_opacity)

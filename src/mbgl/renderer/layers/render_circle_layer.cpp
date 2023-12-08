@@ -88,12 +88,6 @@ void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters)
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
         auto newTweaker = std::make_shared<CircleLayerTweaker>(getID(), evaluatedProperties);
-
-        // propertiesAsUniforms isn't recalculated every update, so carry it over
-        if (layerTweaker) {
-            newTweaker->setPropertiesAsUniforms(layerTweaker->getPropertiesAsUniforms());
-        }
-
         replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
     }
 #endif // MLN_DRAWABLE_RENDERER
@@ -281,7 +275,7 @@ using namespace shaders;
 void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
-                               [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters,
+                               [[maybe_unused]] const std::shared_ptr<UpdateParameters>&,
                                [[maybe_unused]] const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -300,12 +294,10 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-
     if (!layerTweaker) {
         layerTweaker = std::make_shared<CircleLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!circleShaderGroup) {
         circleShaderGroup = shaders.getShaderGroup(CircleShaderGroupName);
@@ -396,10 +388,6 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         const auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         if (!circleShader) {
             continue;
-        }
-
-        if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
         }
 
         if (const auto& attr = circleVertexAttrs->add(idVertexAttribName)) {

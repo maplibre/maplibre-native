@@ -61,6 +61,8 @@ public:
     /// @return Shader source string
     const std::string& fragmentSource(gfx::Backend::Type backend) const;
 
+    bool getOverdrawInspectorEnabled() const { return overdrawInspector; }
+
 private:
     std::unordered_map<std::string, std::string> defines;
 
@@ -69,6 +71,8 @@ private:
 
     std::array<ProgramSource, static_cast<size_t>(gfx::Backend::Type::TYPE_MAX)> defaultSources;
     std::array<ProgramSource, static_cast<size_t>(gfx::Backend::Type::TYPE_MAX)> userSources;
+
+    bool overdrawInspector;
 };
 
 } // namespace mbgl

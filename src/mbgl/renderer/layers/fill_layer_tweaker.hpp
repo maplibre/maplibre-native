@@ -29,14 +29,6 @@ private:
     gfx::UniformBufferPtr fillOutlinePropsUniformBuffer;
     gfx::UniformBufferPtr fillPatternPropsUniformBuffer;
     gfx::UniformBufferPtr fillOutlinePatternPropsUniformBuffer;
-
-    gfx::UniformBufferPtr fillPermutationUniformBuffer;
-    gfx::UniformBufferPtr fillOutlinePermutationUniformBuffer;
-    gfx::UniformBufferPtr fillPatternPermutationUniformBuffer;
-    gfx::UniformBufferPtr fillOutlinePatternPermutationUniformBuffer;
-#if MLN_RENDER_BACKEND_METAL
-    gfx::UniformBufferPtr expressionUniformBuffer;
-#endif // MLN_RENDER_BACKEND_METAL
 };
 
 } // namespace mbgl
