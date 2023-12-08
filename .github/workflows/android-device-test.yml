@@ -47,7 +47,7 @@ jobs:
           app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
-      - run: echo ${{ toJSON(github.event.workflow_run) }}
+      - run: echo "${{ toJSON(github.event.workflow_run) }}"
 
       - uses: ./.github/actions/get-pr-number
         id: get-pr-number
