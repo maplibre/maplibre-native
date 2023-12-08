@@ -118,19 +118,23 @@ jobs:
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, not copying..."
           fi
 
-      - name: Build Benchmark
+      - name: Build Benchmark, copy to platform/android
         if: github.ref != 'refs/heads/main'
         run: |
           ./gradlew assembleDrawableRelease assembleDrawableReleaseAndroidTest
+          cp MapboxGLAndroidSDKTestApp/build/outputs/apk/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release.apk .
+          cp MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk .
 
-      - uses: actions/upload-artifact@v3
+
+      - name: Create artifact for benchmark APKs 
+        uses: actions/upload-artifact@v3
         if: github.ref != 'refs/heads/main'
         with:
           if-no-files-found: error
           name: benchmarkAPKs
           path: |
-            platform/android/MapboxGLAndroidSDKTestApp/build/outputs/apk/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release.apk
-            platform/android/MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk
+            platform/android/MapboxGLAndroidSDKTestApp-drawable-release.apk
+            platform/android/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk
 
       - name: Build UI tests
         if: github.ref == 'refs/heads/main'
