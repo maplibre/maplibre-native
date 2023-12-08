@@ -27,7 +27,7 @@ public:
     void loadDescription(FileSource&) final;
 
     const std::vector<std::string> getTiles();
-    void setTiles(const std::vector<std::string> &);
+    void setTiles(const std::vector<std::string>&);
 
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
