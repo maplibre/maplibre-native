@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - opengl-2
     tags:
       - "node-*"
     paths:
@@ -32,7 +32,7 @@ on:
 
   pull_request:
     branches:
-      - main
+      - opengl-2
     paths:
       - CMakeLists.txt
       - "platform/linux/**"
@@ -68,9 +68,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runs-on: ubuntu-20.04
+          - runs-on: ubuntu-22.04
             arch: x86_64
           - runs-on: [self-hosted, linux, ARM64]
+            arch: arm64
+          - runs-on: macos-12
+            arch: x86_64
+          - runs-on: [self-hosted, macOS, ARM64]
             arch: arm64
           - runs-on: windows-2022
             arch: x86_64
@@ -127,9 +131,7 @@ jobs:
             libcurl4-openssl-dev \
             libglfw3-dev \
             libuv1-dev \
-            g++-10 \
-            libc++-9-dev \
-            libc++abi-9-dev \
+            g++-12 \
             libjpeg-dev \
             libpng-dev
           /usr/sbin/update-ccache-symlinks
@@ -137,7 +139,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
 
       - name: npm ci
         run: npm ci --ignore-scripts
@@ -146,8 +148,16 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
 
+      # Fixes an issue with the image causing builds to fail - https://github.com/actions/runner-images/issues/8598
+      - name: Remove Strawberry Perl from PATH (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
+          "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Setup cmake (Linux)
-        if: runner.os == 'Linux' && runner.arch != 'arm64'
+        if: runner.os == 'Linux' && matrix.arch != 'arm64'
         uses: jwlawson/actions-setup-cmake@v1.13
         with:
           cmake-version: "3.19.x"
@@ -173,6 +183,13 @@ jobs:
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
 
+      - name: Cache cmake-node-module deps
+        uses: actions/cache@v3
+        with:
+          # downloaded with platform/node/cmake/module.cmake
+          path: build/headers
+          key: ${{ runner.os }}-${{ runner.arch }}-cmake-node-module-deps
+
       - name: Configure maplibre-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
@@ -190,8 +207,8 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_C_COMPILER=gcc-10 \
-            -DCMAKE_CXX_COMPILER=g++-10 \
+            -DCMAKE_C_COMPILER=gcc-12 \
+            -DCMAKE_CXX_COMPILER=g++-12 \
             -DMLN_WITH_NODE=ON
 
       - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
@@ -258,7 +275,7 @@ jobs:
           GALLIUM_DRIVER: softpipe
         run: |
           Invoke-WebRequest https://github.com/pal1000/mesa-dist-win/releases/download/22.3.5/mesa3d-22.3.5-release-msvc.7z -OutFile mesa3d.7z
-          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v108 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll x64\libglapi.dll
+          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v115 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll x64\libglapi.dll
           npm test
 
       # On PRs make sure that the npm package can be packaged.
