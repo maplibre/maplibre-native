@@ -4,10 +4,10 @@ import android.content.Intent
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
+import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
 import java.util.Collections
 
@@ -16,22 +16,22 @@ class LocationEngineResultTest {
     @Test
     fun checkNullIntent() {
         val result = LocationEngineResult.extractResult(null)
-        Assertions.assertThat(result).isNull()
+        assertThat(result).isNull()
     }
 
     @Test
     fun passInvalidIntent() {
-        val intent = Mockito.mock(Intent::class.java)
+        val intent = mock(Intent::class.java)
         val result = LocationEngineResult.extractResult(intent)
-        Assertions.assertThat(result).isNull()
+        assertThat(result).isNull()
     }
 
     @Test
     fun passValidIntent() {
-        val location = Mockito.mock(Location::class.java)
+        val location = mock(Location::class.java)
         val result = LocationEngineResult.extractResult(getValidIntent(location))
-        Assertions.assertThat(result).isNotNull()
-        Assertions.assertThat(result!!.lastLocation).isSameAs(location)
+        assertThat(result).isNotNull()
+        assertThat(result!!.lastLocation).isSameAs(location)
     }
 
     @Test
@@ -80,8 +80,8 @@ class LocationEngineResultTest {
     fun passImmutableListWithNullLocation() {
         val locations = listOf<Location?>(null)
         val result = LocationEngineResult.create(locations)
-        Assertions.assertThat(result != null)
-        Assertions.assertThat(result.locations.size == 0)
+        assertThat(result != null)
+        assertThat(result.locations.size == 0)
     }
 
     companion object {
@@ -97,30 +97,30 @@ class LocationEngineResultTest {
             }
         private val validLocation: Location
             private get() {
-                val location = Mockito.mock(Location::class.java)
-                Mockito.`when`(location.latitude).thenReturn(TEST_LAT_LNG)
-                Mockito.`when`(location.longitude).thenReturn(TEST_LAT_LNG)
+                val location = mock(Location::class.java)
+                `when`(location.latitude).thenReturn(TEST_LAT_LNG)
+                `when`(location.longitude).thenReturn(TEST_LAT_LNG)
                 return location
             }
 
         private fun assertForNullInput(result: LocationEngineResult) {
-            Assertions.assertThat(result).isNotNull()
-            Assertions.assertThat(result.locations).isEmpty()
+            assertThat(result).isNotNull()
+            assertThat(result.locations).isEmpty()
         }
 
         private fun assertForValidInput(result: LocationEngineResult) {
-            Assertions.assertThat(result.locations).isNotNull()
-            Assertions.assertThat(result.locations.size).isEqualTo(1)
-            Assertions.assertThat(result.locations[0].latitude).isEqualTo(TEST_LAT_LNG)
-            Assertions.assertThat(result.locations[0].longitude).isEqualTo(TEST_LAT_LNG)
+            assertThat(result.locations).isNotNull()
+            assertThat(result.locations.size).isEqualTo(1)
+            assertThat(result.locations[0].latitude).isEqualTo(TEST_LAT_LNG)
+            assertThat(result.locations[0].longitude).isEqualTo(TEST_LAT_LNG)
         }
 
         private fun getValidIntent(location: Location): Intent {
-            val intent = Mockito.mock(Intent::class.java)
-            Mockito.`when`(intent.hasExtra(LocationManager.KEY_LOCATION_CHANGED)).thenReturn(true)
-            val bundle = Mockito.mock(Bundle::class.java)
-            Mockito.`when`<Any?>(bundle.getParcelable(LocationManager.KEY_LOCATION_CHANGED)).thenReturn(location)
-            Mockito.`when`(intent.extras).thenReturn(bundle)
+            val intent = mock(Intent::class.java)
+            `when`(intent.hasExtra(LocationManager.KEY_LOCATION_CHANGED)).thenReturn(true)
+            val bundle = mock(Bundle::class.java)
+            `when`<Any?>(bundle.getParcelable(LocationManager.KEY_LOCATION_CHANGED)).thenReturn(location)
+            `when`(intent.extras).thenReturn(bundle)
             return intent
         }
     }
