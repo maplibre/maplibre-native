@@ -74,6 +74,8 @@ target_compile_definitions(
     PRIVATE
         CURL_STATICLIB
         USE_STD_FILESYSTEM
+    PUBLIC
+        MBGL_USE_GLES2
 )
 
 if(MLN_WITH_EGL)
