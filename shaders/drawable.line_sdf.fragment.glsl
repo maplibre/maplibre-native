@@ -4,11 +4,12 @@ layout (std140) uniform LineSDFUBO {
     highp vec2 u_patternscale_a;
     highp vec2 u_patternscale_b;
     mediump float u_ratio;
-    lowp float u_device_pixel_ratio;
     highp float u_tex_y_a;
     highp float u_tex_y_b;
     highp float u_sdfgamma;
     highp float u_mix;
+    
+    lowp float pad0;
 };
 
 layout (std140) uniform LineSDFPropertiesUBO {
@@ -62,7 +63,7 @@ void main() {
     // Calculate the antialiasing fade factor. This is either when fading in
     // the line in case of an offset line (v_width2.t) or when fading out
     // (v_width2.s)
-    float blur2 = (blur + 1.0 / u_device_pixel_ratio) * v_gamma_scale;
+    float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * v_gamma_scale;
     float alpha = clamp(min(dist - (v_width2.t - blur2), v_width2.s - dist) / blur2, 0.0, 1.0);
 
     float sdfdist_a = texture(u_image, v_tex_a).a;

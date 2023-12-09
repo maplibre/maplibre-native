@@ -50,8 +50,8 @@ static_assert(sizeof(SymbolDrawableUBO) == 10 * 16);
 struct alignas(16) SymbolDynamicUBO {
     /* 0 */ float fade_change;
     /* 4 */ float camera_to_center_distance;
-    /* 8 */ float device_pixel_ratio;
-    /* 12 */ float aspect_ratio;
+    /* 8 */ float aspect_ratio;
+    /* 12 */ float pad;
     /* 16 */
 };
 static_assert(sizeof(SymbolDynamicUBO) == 16);

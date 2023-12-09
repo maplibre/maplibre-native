@@ -80,8 +80,7 @@ struct alignas(16) CircleDrawableUBO {
 };
 struct alignas(16) CirclePaintParamsUBO {
     float camera_to_center_distance;
-    float device_pixel_ratio;
-    float pad1,pad2;
+    float pad1,pad2,pad3;
 };
 struct alignas(16) CircleEvaluatedPropsUBO {
     float4 color;
@@ -157,7 +156,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // This is a minimum blur distance that serves as a faux-antialiasing for
     // the circle. since blur is a ratio of the circle's size and the intent is
     // to keep the blur at roughly 1px, the two are inversely related.
-    const half antialiasblur = 1.0 / params.device_pixel_ratio / (radius + stroke_width);
+    const half antialiasblur = 1.0 / DEVICE_PIXEL_RATIO / (radius + stroke_width);
 
     return {
         .position       = position,
