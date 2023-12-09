@@ -137,7 +137,7 @@ jobs:
           "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Setup cmake (Linux)
-        if: runner.os == 'Linux' && runner.arch != 'arm64'
+        if: runner.os == 'Linux' && matrix.arch != 'arm64'
         uses: jwlawson/actions-setup-cmake@v1.14
         with:
           cmake-version: "3.19.x"
@@ -229,7 +229,7 @@ jobs:
           cmake --build build
 
       - name: Publish X64 Release to Github
-        if: github.ref == 'refs/heads/main' && matrix.arch == 'x86_64'
+        if: matrix.arch == 'x86_64'
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
@@ -238,7 +238,7 @@ jobs:
           ./platform/node/scripts/publish.sh
 
       - name: Publish ARM Release to Github
-        if: github.ref == 'refs/heads/main' && matrix.arch == 'arm64'
+        if: matrix.arch == 'arm64'
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo

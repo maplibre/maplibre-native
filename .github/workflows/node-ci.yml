@@ -73,6 +73,13 @@ jobs:
             arch: x86_64
           - runs-on: [self-hosted, linux, ARM64]
             arch: arm64
+          # Disabled until Metal backend is complete
+          # A release for macOS can be made from the opengl-2 branch
+
+          # - runs-on: macos-12
+          #   arch: x86_64
+          # - runs-on: macos-12-arm
+          #   arch: arm64
           - runs-on: windows-2022
             arch: x86_64
     continue-on-error: true
@@ -155,7 +162,7 @@ jobs:
           "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Setup cmake (Linux)
-        if: runner.os == 'Linux' && runner.arch != 'arm64'
+        if: runner.os == 'Linux' && matrix.arch != 'arm64'
         uses: jwlawson/actions-setup-cmake@v1.14
         with:
           cmake-version: "3.19.x"
@@ -278,6 +285,5 @@ jobs:
 
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
-        if: github.ref != 'refs/heads/main'
         run: |
           npm pack --dry-run
