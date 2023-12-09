@@ -73,7 +73,7 @@ jobs:
         include:
           - runs-on: macos-12
             arch: x86_64
-          - runs-on: macos-12-arm
+          - runs-on: [self-hosted, macOS, ARM64]
             arch: arm64
     continue-on-error: true
     env:
