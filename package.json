@@ -67,7 +67,7 @@
   },
   "gypfile": true,
   "binary": {
-    "module_name": "mbgl",
+    "module_name": "mln",
     "module_path": "./lib/{node_abi}",
     "host": "https://github.com/maplibre/maplibre-native/releases/download/",
     "remote_path": "node-v{version}",
