@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - opengl-2
     tags:
       - "node-*"
     paths:
@@ -32,7 +32,7 @@ on:
 
   pull_request:
     branches:
-      - main
+      - opengl-2
     paths:
       - CMakeLists.txt
       - "platform/linux/**"
