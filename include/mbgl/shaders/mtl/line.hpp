@@ -83,7 +83,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
-    const float ANTIALIASING = 1.0 / line.device_pixel_ratio / 2.0;
+    const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
     const float2 a_extrude = float2(vertx.data.xy) - 128.0;
     const float a_direction = fmod(float(vertx.data.z), 4.0) - 1.0;
@@ -163,7 +163,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     // Calculate the antialiasing fade factor. This is either when fading in the
     // line in case of an offset line (v_width2.y) or when fading out (v_width2.x)
-    const float blur2 = (blur + 1.0 / line.device_pixel_ratio) * in.gamma_scale;
+    const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
     const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0);
 
     return half4(color * (alpha * opacity));
@@ -236,9 +236,8 @@ struct alignas(16) LinePatternUBO {
     float2 texsize;
     float2 units_to_pixels;
     float ratio;
-    float device_pixel_ratio;
     float fade;
-    float pad1;
+    float pad1, pad2;
 };
 
 struct alignas(16) LinePatternPropertiesUBO {
@@ -290,7 +289,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
-    const float ANTIALIASING = 1.0 / line.device_pixel_ratio / 2.0;
+    const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
     const float LINE_DISTANCE_SCALE = 2.0;
 
     const float2 a_extrude = float2(vertx.data.xy) - 128.0;
@@ -490,11 +489,11 @@ struct alignas(16) LineSDFUBO {
     float2 patternscale_a;
     float2 patternscale_b;
     float ratio;
-    float device_pixel_ratio;
     float tex_y_a;
     float tex_y_b;
     float sdfgamma;
     float mix;
+    float pad;
 };
 
 struct alignas(16) LineSDFPropertiesUBO {
@@ -547,7 +546,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
-    const float ANTIALIASING = 1.0 / line.device_pixel_ratio / 2.0;
+    const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
     const float LINE_DISTANCE_SCALE = 2.0;
 
     const float2 a_extrude = float2(vertx.data.xy) - 128.0;
@@ -638,7 +637,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     // Calculate the antialiasing fade factor. This is either when fading in the
     // line in case of an offset line (`v_width2.y`) or when fading out (`v_width2.x`)
-    const float blur2 = (blur + 1.0 / line.device_pixel_ratio) * in.gamma_scale;
+    const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
 
     const float sdfdist_a = image0.sample(image0_sampler, in.tex_a).a;
     const float sdfdist_b = image0.sample(image0_sampler, in.tex_b).a;
@@ -681,7 +680,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
-    const float ANTIALIASING = 1.0 / line.device_pixel_ratio / 2.0;
+    const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
     const float2 a_extrude = float2(vertx.data.xy) - 128.0;
     const float2 pos = floor(float2(vertx.pos_normal) * 0.5);
@@ -722,7 +721,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     // Calculate the antialiasing fade factor. This is either when fading in the
     // line in case of an offset line (`v_width2.y`) or when fading out (`v_width2.x`)
-    const float blur2 = (1.0 / line.device_pixel_ratio) * in.gamma_scale;
+    const float blur2 = (1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
     const float alpha = clamp(min(dist + blur2, in.width2 - dist) / blur2, 0.0, 1.0);
 
     return half4(props.color * (alpha * props.opacity));
