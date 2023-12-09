@@ -94,7 +94,7 @@ With the first gradle invocation, gradle will take the value of the `MLN_API_KEY
 
 ## Running project
 
-Run the configuration for the `MapboxGLAndroidSDKTestApp` module and select a device or emulator to deploy on. Based on the selected device, the c++ code will be compiled for the related processor architecture. You can see the project compiling in the `View > Tool Windows > Gradle Console`.
+Run the configuration for the `MapboxGLAndroidSDKTestApp` module and select a device or emulator (random example: "Medium Phone API 29") to deploy on. Based on the selected device, the c++ code will be compiled for the related processor architecture. You can see the project compiling in the `View > Tool Windows > Gradle Console`.
 
 More information about building and distributing this project in [DISTRIBUTE.md](DISTRIBUTE.md).
 
