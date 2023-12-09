@@ -25,10 +25,7 @@ protected:
 
     using DefinesMap = mbgl::unordered_map<std::string, std::string>;
     void addAdditionalDefines(const StringIDSet& propertiesAsUniforms, DefinesMap& additionalDefines) {
-        additionalDefines.reserve(propertiesAsUniforms.size() + 1);
-        if (programParameters.getOverdrawInspectorEnabled()) {
-            additionalDefines.insert(std::make_pair(overdrawName, std::string()));
-        }
+        additionalDefines.reserve(propertiesAsUniforms.size());
         for (const auto nameID : propertiesAsUniforms) {
             // We expect the names to be prefixed by "a_", but we need just the base here.
             const auto name = stringIndexer().get(nameID);
@@ -41,7 +38,6 @@ protected:
 
 private:
     static constexpr auto uniformPrefix = "HAS_UNIFORM_u_";
-    static constexpr auto overdrawName = "OVERDRAW_INSPECTOR";
 };
 
 template <shaders::BuiltIn ShaderID>
@@ -60,7 +56,10 @@ public:
         constexpr auto& vertMain = ShaderSource::vertexMainFunction;
         constexpr auto& fragMain = ShaderSource::fragmentMainFunction;
 
-        const std::string shaderName = getShaderName(name, propertyHash(propertiesAsUniforms));
+        std::size_t seed = 0;
+        mbgl::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
+        mbgl::util::hash_combine(seed, programParameters.getDefinesHash());
+        const std::string shaderName = getShaderName(name, seed);
 
         auto shader = get<mtl::ShaderProgram>(shaderName);
         if (!shader) {

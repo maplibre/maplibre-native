@@ -62,9 +62,11 @@ public:
     const std::string& fragmentSource(gfx::Backend::Type backend) const;
 
     bool getOverdrawInspectorEnabled() const { return overdrawInspector; }
+    std::uint64_t getDefinesHash() const { return definesHash; }
 
 private:
     std::unordered_map<std::string, std::string> defines;
+    std::uint64_t definesHash;
 
     // cached value of `defines` converted to string format
     mutable std::string definesStr;

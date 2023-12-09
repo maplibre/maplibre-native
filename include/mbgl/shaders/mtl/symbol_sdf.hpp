@@ -200,7 +200,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float halo_blur = in.halo_blur;
 #endif
 
-    const float EDGE_GAMMA = 0.105 / dynamic.device_pixel_ratio;
+    const float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
     const float fontGamma = in.fontScale * drawable.gamma_scale;
     const half4 color = props.is_halo ? halo_color : fill_color;
     const float gamma = ((props.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;

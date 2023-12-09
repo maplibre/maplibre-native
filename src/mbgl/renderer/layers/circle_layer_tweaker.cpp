@@ -42,8 +42,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     // Updated every frame, but shared across drawables
     const CirclePaintParamsUBO paintParamsUBO = {
         /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
-        /* .device_pixel_ratio = */ parameters.pixelRatio,
         /* .padding = */ 0,
+        0,
         0};
 
     if (!paintParamsUniformBuffer) {

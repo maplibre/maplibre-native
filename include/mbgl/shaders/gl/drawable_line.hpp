@@ -23,7 +23,7 @@ layout (std140) uniform LineUBO {
     highp mat4 u_matrix;
     highp vec2 u_units_to_pixels;
     mediump float u_ratio;
-    lowp float u_device_pixel_ratio;
+    lowp float pad0;
 };
 
 layout (std140) uniform LinePropertiesUBO {
@@ -110,7 +110,7 @@ mediump float width = u_width;
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
-    float ANTIALIASING = 1.0 / u_device_pixel_ratio / 2.0;
+    float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
     vec2 a_extrude = a_data.xy - 128.0;
     float a_direction = mod(a_data.z, 4.0) - 1.0;
@@ -162,7 +162,7 @@ mediump float width = u_width;
     highp mat4 u_matrix;
     highp vec2 u_units_to_pixels;
     mediump float u_ratio;
-    lowp float u_device_pixel_ratio;
+    lowp float pad0;
 };
 
 layout (std140) uniform LinePropertiesUBO {
@@ -219,7 +219,7 @@ lowp float opacity = u_opacity;
     // Calculate the antialiasing fade factor. This is either when fading in
     // the line in case of an offset line (v_width2.t) or when fading out
     // (v_width2.s)
-    float blur2 = (blur + 1.0 / u_device_pixel_ratio) * v_gamma_scale;
+    float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * v_gamma_scale;
     float alpha = clamp(min(dist - (v_width2.t - blur2), v_width2.s - dist) / blur2, 0.0, 1.0);
 
     fragColor = color * (alpha * opacity);
