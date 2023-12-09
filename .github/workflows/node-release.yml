@@ -241,7 +241,7 @@ jobs:
           cmake --build build
 
       - name: Publish X64 Release to Github
-        if: github.ref == 'refs/heads/main' && matrix.arch == 'x86_64'
+        if: matrix.arch == 'x86_64'
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
@@ -250,7 +250,7 @@ jobs:
           ./platform/node/scripts/publish.sh
 
       - name: Publish ARM Release to Github
-        if: github.ref == 'refs/heads/main' && matrix.arch == 'arm64'
+        if: matrix.arch == 'arm64'
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
@@ -281,7 +281,7 @@ jobs:
           node-version: 20
 
       - name: Publish to NPM (release)
-        if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'patch' || github.event.inputs.version == 'minor' || github.event.inputs.version == 'major')
+        if: github.event.inputs.version == 'patch' || github.event.inputs.version == 'minor' || github.event.inputs.version == 'major'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
@@ -289,7 +289,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
 
       - name: Publish to NPM (prerelease)
-        if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'prerelease' || github.event.inputs.version == 'prepatch' || github.event.inputs.version == 'preminor' || github.event.inputs.version == 'premajor')
+        if: github.event.inputs.version == 'prerelease' || github.event.inputs.version == 'prepatch' || github.event.inputs.version == 'preminor' || github.event.inputs.version == 'premajor'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag next --access public
