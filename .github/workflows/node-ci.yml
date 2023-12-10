@@ -250,7 +250,7 @@ jobs:
 
       - name: Run render tests on Linux
         if: runner.os == 'Linux'
-        run: set -o pipefail && xvfb-run --auto-servernum ./build/mbgl-render-test-runner --manifestPath metrics/linux-gcc8-release-style.json
+        run: set -o pipefail && xvfb-run --auto-servernum ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Run render tests on macOS
         if: runner.os == 'macOS'
@@ -281,16 +281,9 @@ jobs:
         run: |
           npm pack --dry-run
 
-      - name: Upload render test artifacts (MacOS)
+      - name: Upload render test artifacts
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
           path: metrics/macos-xcode11-release-style.html
-
-      - name: Upload render test artifacts (Linux)
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
-          path: metrics/linux-gcc8-release-style.html
