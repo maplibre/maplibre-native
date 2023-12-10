@@ -249,15 +249,26 @@ jobs:
           cmake --build build
 
       - name: Run render tests on macOS
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && runner.arch != 'arm64'
         run: set -o pipefail && ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Upload render test artifacts (MacOS)
-        if: runner.os == 'MacOS'
+        if: runner.os == 'MacOS' && runner.arch != 'arm64'
         uses: actions/upload-artifact@v3
         with:
           name: render-query-test-results
           path: metrics/macos-xcode11-release-style.html
+
+      - name: Run render tests on macOS Arm64
+        if: runner.os == 'macOS' && runner.arch == 'arm64'
+        run: set -o pipefail && ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style-arm64.json
+
+      - name: Upload render test artifacts (MacOS Arm64)
+        if: runner.os == 'MacOS' && runner.arch == 'arm64'
+        uses: actions/upload-artifact@v3
+        with:
+          name: render-query-test-results
+          path: metrics/macos-xcode11-release-style-arm64.html
 
       - name: Test (Linux)
         if: runner.os == 'Linux'
