@@ -71,8 +71,7 @@ BufferID UniformBufferGL::getID() const {
 }
 
 void UniformBufferGL::update(const void* data_, std::size_t size_) {
-    assert(size == size_);
-    assert(managedBuffer.getContents().size() == size_);
+    assert(isManagedAllocation ? managedBuffer.getContents().size() == size_ : size == size_);
 
     if (size != size_ || (isManagedAllocation && managedBuffer.getContents().size() != size_)) {
         Log::Error(
