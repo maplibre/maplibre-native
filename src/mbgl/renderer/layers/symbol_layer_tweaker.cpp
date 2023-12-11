@@ -94,8 +94,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
                                          /*.camera_to_center_distance=*/camDist,
-                                         /*.device_pixel_ratio=*/parameters.pixelRatio,
-                                         /*.aspect_ratio=*/state.getSize().aspectRatio()};
+                                         /*.aspect_ratio=*/state.getSize().aspectRatio(),
+                                         0};
 
     if (!dynamicBuffer) {
         dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
