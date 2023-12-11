@@ -74,10 +74,14 @@ void UniformBufferGL::update(const void* data_, std::size_t size_) {
     assert(size == size_);
     assert(managedBuffer.getContents().size() == size_);
 
-    if (size != size_) {
+    if (size != size_ || managedBuffer.getContents().size() != size_) {
         Log::Error(
             Event::General,
             "Mismatched size given to UBO update, expected " + std::to_string(size) + ", got " + std::to_string(size_));
+        return;
+    }
+
+    if (std::memcmp(data_, managedBuffer.getContents().data(), managedBuffer.getContents().size()) == 0) {
         return;
     }
 
