@@ -108,16 +108,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         return lineSDFPropertiesBuffer;
     };
 
-    const LineDynamicUBO dynamicUBO = {/*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
-                                       0,
-                                       0};
+    const LineDynamicUBO dynamicUBO = {
+        /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, 0, 0};
 
     if (!dynamicBuffer) {
         dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
     } else {
         dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
     }
-    
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         const auto shader = drawable.getShader();
         if (!drawable.getTileID() || !shader || !checkTweakDrawable(drawable)) {
@@ -134,16 +133,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
 
         uniforms.addOrReplace(idLineDynamicUBOName, dynamicBuffer);
-        
+
         const LineType type = static_cast<LineType>(drawable.getType());
         switch (type) {
             case LineType::Simple: {
-                const LineUBO lineUBO{
-                    /*matrix = */ util::cast<float>(matrix),
-                    /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                    0,
-                    0,
-                    0};
+                const LineUBO lineUBO{/*matrix = */ util::cast<float>(matrix),
+                                      /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
+                                      0,
+                                      0,
+                                      0};
                 uniforms.createOrUpdate(idLineUBOName, &lineUBO, context);
 
                 // properties UBO
@@ -154,7 +152,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 const LineGradientUBO lineGradientUBO{
                     /*matrix = */ util::cast<float>(matrix),
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                    0, 
+                    0,
                     0,
                     0};
                 uniforms.createOrUpdate(idLineGradientUBOName, &lineGradientUBO, context);
@@ -172,7 +170,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 }
                 const LinePatternUBO linePatternUBO{
                     /*matrix =*/util::cast<float>(matrix),
-                    /*scale =*/{parameters.pixelRatio, 1 / tileID.pixelsToTileUnits(1, parameters.state.getIntegerZoom()), crossfade.fromScale, crossfade.toScale},
+                    /*scale =*/
+                    {parameters.pixelRatio,
+                     1 / tileID.pixelsToTileUnits(1, parameters.state.getIntegerZoom()),
+                     crossfade.fromScale,
+                     crossfade.toScale},
                     /*texsize =*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
                     /*ratio =*/1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                     /*fade =*/crossfade.t};
@@ -208,12 +210,17 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     const float widthB = posB.width * crossfade.toScale;
                     const LineSDFUBO lineSDFUBO{
                         /* matrix = */ util::cast<float>(matrix),
-                        /* patternscale_a = */ {1.0f / tileID.pixelsToTileUnits(widthA, parameters.state.getIntegerZoom()),  -posA.height / 2.0f},
-                        /* patternscale_b = */ {1.0f / tileID.pixelsToTileUnits(widthB, parameters.state.getIntegerZoom()), -posB.height / 2.0f},
+                        /* patternscale_a = */
+                        {1.0f / tileID.pixelsToTileUnits(widthA, parameters.state.getIntegerZoom()),
+                         -posA.height / 2.0f},
+                        /* patternscale_b = */
+                        {1.0f / tileID.pixelsToTileUnits(widthB, parameters.state.getIntegerZoom()),
+                         -posB.height / 2.0f},
                         /* ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                         /* tex_y_a = */ posA.y,
                         /* tex_y_b = */ posB.y,
-                        /* sdfgamma = */ static_cast<float>(dashPatternTexture.getSize().width) / (std::min(widthA, widthB) * 256.0f * parameters.pixelRatio) / 2.0f,
+                        /* sdfgamma = */ static_cast<float>(dashPatternTexture.getSize().width) /
+                            (std::min(widthA, widthB) * 256.0f * parameters.pixelRatio) / 2.0f,
                         /* mix = */ crossfade.t,
                         0,
                         0,
