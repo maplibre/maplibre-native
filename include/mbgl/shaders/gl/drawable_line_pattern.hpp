@@ -23,16 +23,17 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::OpenGL> {
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
+layout (std140) uniform LineDynamicUBO {
+    highp vec2 u_units_to_pixels;
+    lowp float pad0, pad1;
+};
+
 layout (std140) uniform LinePatternUBO {
     highp mat4 u_matrix;
     mediump vec4 u_scale;
     highp vec2 u_texsize;
-    highp vec2 u_units_to_pixels;
     mediump float u_ratio;
     highp float u_fade;
-
-    lowp float pad0;
-    highp float pad1;
 };
 
 layout (std140) uniform LinePatternPropertiesUBO {
@@ -185,12 +186,8 @@ mediump vec4 pattern_to = u_pattern_to;
     highp mat4 u_matrix;
     mediump vec4 u_scale;
     highp vec2 u_texsize;
-    highp vec2 u_units_to_pixels;
     mediump float u_ratio;
     highp float u_fade;
-
-    lowp float pad0;
-    highp float pad1;
 };
 
 layout (std140) uniform LinePatternPropertiesUBO {

@@ -97,11 +97,17 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
 
+        static const StringIdentity idLineDynamicUBOName = stringIndexer().get("LineDynamicUBO");
+        const shaders::LineDynamicUBO dynamicUBO = {/*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
+                                                    0,
+                                                    0};
+        
         static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
         const shaders::LineUBO lineUBO{
             /*matrix = */ util::cast<float>(matrix),
-            /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
             /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+            0,
+            0,
             0};
 
         static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
@@ -116,6 +122,7 @@ public:
                                                                  0,
                                                                  0};
         auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.createOrUpdate(idLineDynamicUBOName, &dynamicUBO, parameters.context);
         uniforms.createOrUpdate(idLineUBOName, &lineUBO, parameters.context);
         uniforms.createOrUpdate(idLinePropertiesUBOName, &linePropertiesUBO, parameters.context);
         uniforms.createOrUpdate(idLineInterpolationUBOName, &lineInterpolationUBO, parameters.context);

@@ -54,11 +54,15 @@ float4 unpack_mix_color(const float4 packedColors, const float t) {
                decode_color(float2(packedColors[2], packedColors[3])), t);
 }
 
+struct alignas(16) LineDynamicUBO {
+    float2 units_to_pixels;
+    float pad1, pad2;
+};
+
 struct alignas(16) LineUBO {
     float4x4 matrix;
-    float2 units_to_pixels;
     float ratio;
-    float pad;
+    float pad1, pad2, pad3;
 };
 
 struct alignas(16) LineBasicUBO {
@@ -70,9 +74,8 @@ struct alignas(16) LineBasicUBO {
 
 struct alignas(16) LineGradientUBO {
     float4x4 matrix;
-    float2 units_to_pixels;
     float ratio;
-    float pad;
+    float pad1, pad2, pad3;
 };
 
 struct alignas(16) LinePropertiesUBO {

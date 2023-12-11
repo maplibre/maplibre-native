@@ -23,11 +23,15 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::OpenGL> {
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
+layout (std140) uniform LineDynamicUBO {
+    highp vec2 u_units_to_pixels;
+    lowp float pad0, pad1;
+};
+
 layout (std140) uniform LineGradientUBO {
     highp mat4 u_matrix;
-    highp vec2 u_units_to_pixels;
     mediump float u_ratio;
-    lowp float pad0;
+    lowp float pad2, pad3, pad4;
 };
 
 layout (std140) uniform LineGradientPropertiesUBO {
@@ -37,8 +41,8 @@ layout (std140) uniform LineGradientPropertiesUBO {
     lowp float u_offset;
     mediump float u_width;
 
-    highp float pad1;
-    highp vec2 pad2;
+    highp float pad5;
+    highp vec2 pad6;
 };
 
 layout (std140) uniform LineGradientInterpolationUBO {
@@ -48,8 +52,8 @@ layout (std140) uniform LineGradientInterpolationUBO {
     lowp float u_offset_t;
     lowp float u_width_t;
 
-    highp float pad3;
-    highp vec2 pad4;
+    highp float pad7;
+    highp vec2 pad8;
 };
 
 out vec2 v_normal;
@@ -154,9 +158,8 @@ mediump float width = u_width;
 )";
     static constexpr const char* fragment = R"(layout (std140) uniform LineGradientUBO {
     highp mat4 u_matrix;
-    highp vec2 u_units_to_pixels;
     mediump float u_ratio;
-    lowp float pad0;
+    lowp float pad2, pad3, pad4;
 };
 
 layout (std140) uniform LineGradientPropertiesUBO {
@@ -166,8 +169,8 @@ layout (std140) uniform LineGradientPropertiesUBO {
     lowp float u_offset;
     mediump float u_width;
 
-    highp float pad1;
-    highp vec2 pad2;
+    highp float pad5;
+    highp vec2 pad6;
 };
 
 layout (std140) uniform LineGradientInterpolationUBO {
@@ -177,8 +180,8 @@ layout (std140) uniform LineGradientInterpolationUBO {
     lowp float u_offset_t;
     lowp float u_width_t;
 
-    highp float pad3;
-    highp vec2 pad4;
+    highp float pad7;
+    highp vec2 pad8;
 };
 
 uniform sampler2D u_image;
