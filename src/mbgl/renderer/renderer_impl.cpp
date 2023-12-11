@@ -29,7 +29,16 @@
 #include <limits>
 #endif // MLN_DRAWABLE_RENDERER
 
-#if !MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/mtl/renderer_backend.hpp>
+#include <Metal/MTLCaptureManager.hpp>
+#include <Metal/MTLCaptureScope.hpp>
+/// Enable programmatic Metal frame captures for specific frame numbers.
+/// Requries iOS 13
+constexpr auto EnableMetalCapture = 0;
+constexpr auto CaptureFrameStart = 0; // frames are 0-based
+constexpr auto CaptureFrameCount = 1;
+#else // !MLN_RENDER_BACKEND_METAL
 #include <mbgl/gl/defines.hpp>
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/drawable_gl.hpp>
@@ -70,6 +79,67 @@ void Renderer::Impl::setObserver(RendererObserver* observer_) {
 void Renderer::Impl::render(const RenderTree& renderTree,
                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
     auto& context = backend.getContext();
+#if MLN_RENDER_BACKEND_METAL
+    if constexpr (EnableMetalCapture) {
+        const auto& mtlBackend = static_cast<mtl::RendererBackend&>(backend);
+        const auto& mtlDevice = mtlBackend.getDevice();
+
+        if (!commandCaptureScope) {
+            if (const auto& cmdQueue = mtlBackend.getCommandQueue()) {
+                if (const auto captureManager = NS::RetainPtr(MTL::CaptureManager::sharedCaptureManager())) {
+                    if ((commandCaptureScope = NS::TransferPtr(captureManager->newCaptureScope(cmdQueue.get())))) {
+                        const auto label = "Renderer::Impl frame=" + util::toString(frameCount);
+                        commandCaptureScope->setLabel(NS::String::string(label.c_str(), NS::UTF8StringEncoding));
+                        captureManager->setDefaultCaptureScope(commandCaptureScope.get());
+                    }
+                }
+            }
+        }
+
+        // "When you capture a frame programmatically, you can capture Metal commands that span multiple
+        //  frames by using a custom capture scope. For example, by calling begin() at the start of frame
+        //  1 and end() after frame 3, the trace will contain command data from all the buffers that were
+        //  committed in the three frames."
+        // https://developer.apple.com/documentation/metal/debugging_tools/capturing_gpu_command_data_programmatically
+        if constexpr (0 < CaptureFrameStart && 0 < CaptureFrameCount) {
+            if (commandCaptureScope) {
+                const auto captureManager = NS::RetainPtr(MTL::CaptureManager::sharedCaptureManager());
+                if (frameCount == CaptureFrameStart) {
+                    constexpr auto captureDest = MTL::CaptureDestination::CaptureDestinationDeveloperTools;
+                    if (captureManager && !captureManager->isCapturing() &&
+                        captureManager->supportsDestination(captureDest)) {
+                        if (auto captureDesc = NS::TransferPtr(MTL::CaptureDescriptor::alloc()->init())) {
+                            captureDesc->setCaptureObject(mtlDevice.get());
+                            captureDesc->setDestination(captureDest);
+                            NS::Error* errorPtr = nullptr;
+                            if (captureManager->startCapture(captureDesc.get(), &errorPtr)) {
+                                Log::Warning(Event::Render, "Capture Started");
+                            } else {
+                                std::string errStr = "<none>";
+                                if (auto error = NS::TransferPtr(errorPtr)) {
+                                    if (auto str = error->localizedDescription()) {
+                                        if (auto cstr = str->utf8String()) {
+                                            errStr = cstr;
+                                        }
+                                    }
+                                }
+                                Log::Warning(Event::Render, "Capture Failed: " + errStr);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (commandCaptureScope) {
+            commandCaptureScope->beginScope();
+
+            const auto captureManager = NS::RetainPtr(MTL::CaptureManager::sharedCaptureManager());
+            if (captureManager->isCapturing()) {
+                Log::Info(Event::Render, "Capturing frame " + util::toString(frameCount));
+            }
+        }
+    }
+#endif // MLN_RENDER_BACKEND_METAL
 
 #if !MLN_LEGACY_RENDERER
 
@@ -427,6 +497,19 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
+
+#if MLN_RENDER_BACKEND_METAL
+    if constexpr (EnableMetalCapture) {
+        if (commandCaptureScope) {
+            commandCaptureScope->endScope();
+
+            const auto captureManager = NS::RetainPtr(MTL::CaptureManager::sharedCaptureManager());
+            if (frameCount == CaptureFrameStart + CaptureFrameCount - 1 && captureManager->isCapturing()) {
+                captureManager->stopCapture();
+            }
+        }
+    }
+#endif // MLN_RENDER_BACKEND_METAL
 
     const auto encodingTime = renderTree.getElapsedTime() - renderingTime;
 
