@@ -26,9 +26,6 @@ static const StringIdentity idCircleDrawableUBOName = stringIndexer().get("Circl
 static const StringIdentity idCirclePaintParamsUBOName = stringIndexer().get("CirclePaintParamsUBO");
 static const StringIdentity idCircleEvaluatedPropsUBOName = stringIndexer().get("CircleEvaluatedPropsUBO");
 
-static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
-static const StringIdentity idCirclePermutationUBOName = stringIndexer().get("CirclePermutationUBO");
-
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
@@ -45,8 +42,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     // Updated every frame, but shared across drawables
     const CirclePaintParamsUBO paintParamsUBO = {
         /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
-        /* .device_pixel_ratio = */ parameters.pixelRatio,
         /* .padding = */ 0,
+        0,
         0};
 
     if (!paintParamsUniformBuffer) {
@@ -56,37 +53,6 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     }
 
     const auto zoom = parameters.state.getZoom();
-
-#if MLN_RENDER_BACKEND_METAL
-    if (permutationUpdated) {
-        const CirclePermutationUBO permutationUBO = {
-            /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(1), /*.expression=*/{}},
-            /* .radius = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(2), /*.expression=*/{}},
-            /* .blur = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(3), /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(4), /*.expression=*/{}},
-            /* .stroke_color = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(5), /*.expression=*/{}},
-            /* .stroke_width = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(6), /*.expression=*/{}},
-            /* .stroke_opacity = */ {/*.source=*/getAttributeSource<BuiltIn::CircleShader>(7), /*.expression=*/{}},
-            /* .overdrawInspector = */ overdrawInspector,
-            /* .pad = */ 0,
-            0,
-            0,
-            0};
-
-        if (permutationUniformBuffer) {
-            permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
-        } else {
-            permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
-        }
-
-        permutationUpdated = false;
-    }
-    if (!expressionUniformBuffer) {
-        const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
-        expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
-    }
-#endif
-
     const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
     const bool scaleWithMap = evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map;
 
@@ -133,10 +99,6 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                /* .padding = */ 0};
 
         uniforms.createOrUpdate(idCircleDrawableUBOName, &drawableUBO, context);
-#if MLN_RENDER_BACKEND_METAL
-        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
-        uniforms.addOrReplace(idCirclePermutationUBOName, permutationUniformBuffer);
-#endif // MLN_RENDER_BACKEND_METAL
     });
 }
 

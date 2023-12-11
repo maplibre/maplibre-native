@@ -10,7 +10,6 @@ struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>
     static constexpr auto name = "BackgroundPatternShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = false;
 
     static const std::array<AttributeInfo, 1> attributes;
     static const std::array<UniformBlockInfo, 2> uniforms;
@@ -56,13 +55,20 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
                                 device const BackgroundDrawableUBO& drawableUBO [[buffer(1)]],
                                 device const BackgroundLayerUBO& layerUBO [[buffer(2)]]) {
     const float2 pos = float2(in.position);
-    float2 pos_a = get_pattern_pos(layerUBO.pixel_coord_upper, layerUBO.pixel_coord_lower, layerUBO.scale_a * layerUBO.pattern_size_a, layerUBO.tile_units_to_pixels, pos);
-    float2 pos_b = get_pattern_pos(layerUBO.pixel_coord_upper, layerUBO.pixel_coord_lower, layerUBO.scale_b * layerUBO.pattern_size_b, layerUBO.tile_units_to_pixels, pos);
-
+    const float2 pos_a = get_pattern_pos(layerUBO.pixel_coord_upper,
+                                         layerUBO.pixel_coord_lower,
+                                         layerUBO.scale_a * layerUBO.pattern_size_a,
+                                         layerUBO.tile_units_to_pixels,
+                                         pos);
+    const float2 pos_b = get_pattern_pos(layerUBO.pixel_coord_upper,
+                                         layerUBO.pixel_coord_lower,
+                                         layerUBO.scale_b * layerUBO.pattern_size_b,
+                                         layerUBO.tile_units_to_pixels,
+                                         pos);
     return {
         .position = drawableUBO.matrix * float4(float2(in.position.xy), 0, 1),
         .pos_a = pos_a,
-        .pos_b = pos_b
+        .pos_b = pos_b,
     };
 }
 
@@ -70,17 +76,16 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const BackgroundLayerUBO& layerUBO [[buffer(2)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
-    if (layerUBO.overdrawInspector) {
-        return half4(0.0);
-    }
-    
-    float2 imagecoord = glMod(in.pos_a, 1.0);
-    float2 pos = mix(layerUBO.pattern_tl_a / layerUBO.texsize, layerUBO.pattern_br_a / layerUBO.texsize, imagecoord);
-    float4 color1 = image.sample(image_sampler, pos);
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
-    float2 imagecoord_b = glMod(in.pos_b, 1.0);
-    float2 pos2 = mix(layerUBO.pattern_tl_b / layerUBO.texsize, layerUBO.pattern_br_b / layerUBO.texsize, imagecoord_b);
-    float4 color2 = image.sample(image_sampler, pos2);
+    const float2 imagecoord = glMod(float2(in.pos_a), 1.0);
+    const float2 pos = mix(layerUBO.pattern_tl_a / layerUBO.texsize, layerUBO.pattern_br_a / layerUBO.texsize, imagecoord);
+    const float4 color1 = image.sample(image_sampler, pos);
+    const float2 imagecoord_b = glMod(float2(in.pos_b), 1.0);
+    const float2 pos2 = mix(layerUBO.pattern_tl_b / layerUBO.texsize, layerUBO.pattern_br_b / layerUBO.texsize, imagecoord_b);
+    const float4 color2 = image.sample(image_sampler, pos2);
 
     return half4(mix(color1, color2, layerUBO.mix) * layerUBO.opacity);
 }

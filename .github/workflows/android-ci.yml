@@ -118,7 +118,28 @@ jobs:
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, not copying..."
           fi
 
+      - name: Build Benchmark, copy to platform/android
+        if: github.ref != 'refs/heads/main'
+        run: |
+          ./gradlew assembleDrawableRelease assembleDrawableReleaseAndroidTest
+          cp MapboxGLAndroidSDKTestApp/build/outputs/apk/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release.apk .
+          cp MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk .
+
+      - name: Create artifact for benchmark APKs 
+        uses: actions/upload-artifact@v3
+        if: github.ref != 'refs/heads/main'
+        with:
+          if-no-files-found: error
+          name: benchmarkAPKs
+          path: |
+            platform/android/MapboxGLAndroidSDKTestApp-drawable-release.apk
+            platform/android/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk
+
+      - if: github.event_name == 'pull_request'
+        uses: ./.github/actions/save-pr-number
+
       - name: Build UI tests
+        if: github.ref == 'refs/heads/main'
         run: make android-ui-test-arm-v8
 
       - name: Configure AWS Credentials
@@ -153,8 +174,8 @@ jobs:
       - name: Upload Android UI test
         if: github.ref == 'refs/heads/main'
         run: |
-          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/legacy/debug/MapboxGLAndroidSDKTestApp-legacy-debug.apk '${{ steps.upload-android-app.outputs.url }}'
-          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/legacy/debug/MapboxGLAndroidSDKTestApp-legacy-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/legacy/release/MapboxGLAndroidSDKTestApp-legacy-debug.apk '${{ steps.upload-android-app.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/legacy/release/MapboxGLAndroidSDKTestApp-legacy-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
 
       - name: Write uploads.env
         if: github.ref == 'refs/heads/main'
@@ -230,6 +251,7 @@ jobs:
           project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
           device_pool_arn: ${{ vars.AWS_DEVICE_FARM_DEVICE_POOL_ARN }}
           app_arn: ${{ env.ANDROID_APP_ARN }}
+          test_spec_arn: ${{ vars.AWS_DEVICE_FARM_TEST_SPEC_ARN_ANDROID_UI_TESTS }}
           app_type: ANDROID_APP
           test_type: INSTRUMENTATION
           test_package_arn: ${{ env.ANDROID_TEST_ARN }}

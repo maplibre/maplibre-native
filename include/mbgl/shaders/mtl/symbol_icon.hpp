@@ -13,10 +13,9 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "SymbolIconShader";
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
-    static constexpr auto hasPermutations = true;
 
     static const std::array<AttributeInfo, 6> attributes;
-    static const std::array<UniformBlockInfo, 7> uniforms;
+    static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -34,10 +33,13 @@ struct VertexStage {
 
 struct FragmentStage {
     float4 position [[position, invariant]];
-    float2 tex;
-    half fade_opacity;
+    half2 tex;
 
-#if !defined(HAS_UNIFORM_u_opacity)
+#if defined(HAS_UNIFORM_u_opacity)
+    // We only need to pass `fade_opacity` separately if opacity is a
+    // uniform, otherwise it's multiplied into fragment opacity, below.
+    half fade_opacity;
+#else
     half opacity;
 #endif
 };
@@ -47,9 +49,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const SymbolDynamicUBO& dynamic [[buffer(9)]],
                                 device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
                                 device const SymbolDrawableTilePropsUBO& props [[buffer(11)]],
-                                device const SymbolDrawableInterpolateUBO& interp [[buffer(12)]],
-                                device const SymbolPermutationUBO& permutation [[buffer(13)]],
-                                device const ExpressionInputsUBO& expr [[buffer(14)]]) {
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(12)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -106,15 +106,17 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
     const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
 
-    const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = fade_opacity[1] > 0.5 ? dynamic.fade_change : -dynamic.fade_change;
+    const float2 raw_fade_opacity = unpack_opacity(vertx.fade_opacity);
+    const float fade_change = raw_fade_opacity[1] > 0.5 ? dynamic.fade_change : -dynamic.fade_change;
+    const float fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
 
     return {
         .position     = position,
-        .tex          = a_tex / drawable.texsize,
-        .fade_opacity = half(max(0.0, min(1.0, fade_opacity[0] + fade_change))),
-#if !defined(HAS_UNIFORM_u_opacity)
-        .opacity      = half(valueFor(permutation.opacity, paint.opacity, vertx.opacity, interp.opacity_t, expr)),
+        .tex          = half2(a_tex / drawable.texsize),
+#if defined(HAS_UNIFORM_u_opacity)
+        .fade_opacity = half(fade_opacity),
+#else
+        .opacity      = half(unpack_mix_float(vertx.opacity, interp.opacity_t) * fade_opacity),
 #endif
     };
 }
@@ -122,20 +124,19 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const SymbolDrawableUBO& drawable [[buffer(8)]],
                             device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
-                            device const SymbolPermutationUBO& permutation [[buffer(13)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
-    if (permutation.overdrawInspector) {
-        return half4(1.0);
-    }
-
-#if defined(HAS_UNIFORM_u_opacity)
-    const half opacity = half(paint.opacity);
-#else
-    const half opacity = in.opacity;
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
 #endif
 
-    return half4(image.sample(image_sampler, in.tex) * (opacity * in.fade_opacity));
+#if defined(HAS_UNIFORM_u_opacity)
+    const float opacity = paint.opacity * in.fade_opacity;
+#else
+    const float opacity = in.opacity; // fade_opacity is baked in for this case
+#endif
+
+    return half4(image.sample(image_sampler, float2(in.tex)) * opacity);
 }
 )";
 };
