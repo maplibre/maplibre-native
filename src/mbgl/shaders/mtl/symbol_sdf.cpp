@@ -19,15 +19,13 @@ const std::array<AttributeInfo, 10> ShaderSource<BuiltIn::SymbolSDFIconShader, g
         AttributeInfo{8, gfx::AttributeDataType::Float, 1, "a_halo_width"},
         AttributeInfo{9, gfx::AttributeDataType::Float, 1, "a_halo_blur"},
 };
-const std::array<UniformBlockInfo, 7> ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal>::uniforms =
+const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal>::uniforms =
     {
         UniformBlockInfo{10, true, true, sizeof(SymbolDrawableUBO), "SymbolDrawableUBO"},
         UniformBlockInfo{11, true, true, sizeof(SymbolDynamicUBO), "SymbolDynamicUBO"},
         UniformBlockInfo{12, true, true, sizeof(SymbolDrawablePaintUBO), "SymbolDrawablePaintUBO"},
         UniformBlockInfo{13, true, true, sizeof(SymbolDrawableTilePropsUBO), "SymbolDrawableTilePropsUBO"},
         UniformBlockInfo{14, true, false, sizeof(SymbolDrawableInterpolateUBO), "SymbolDrawableInterpolateUBO"},
-        UniformBlockInfo{15, true, true, sizeof(SymbolPermutationUBO), "SymbolPermutationUBO"},
-        UniformBlockInfo{16, true, false, sizeof(ExpressionInputsUBO), "ExpressionInputsUBO"},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, "u_texture"},

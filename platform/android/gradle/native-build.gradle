@@ -3,8 +3,6 @@ ext.nativeBuild = { nativeTargets ->
         ndkVersion androidSdkVersions.ndkVersion
         buildToolsVersion androidSdkVersions.buildToolsVersion
 
-        defaultPublishConfig project.hasProperty("mapbox.buildtype") ? project.getProperty("mapbox.buildtype") : "debug"
-
         // We sometimes want to invoke Gradle without building a native dependency, e.g. when we just want
         // to invoke the Java tests. When we explicitly specify an ABI of 'none', no native dependencies are
         // added. When another ABI is specified explicitly, we're just going to build that ABI. In all other

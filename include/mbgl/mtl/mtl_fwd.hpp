@@ -19,6 +19,7 @@ namespace MTL {
 class BlitCommandEncoder;
 class BlitPassDescriptor;
 class Buffer;
+class CaptureScope;
 class CommandBuffer;
 class CommandQueue;
 class Device;
@@ -43,6 +44,7 @@ using CAMetalDrawablePtr = NS::SharedPtr<CA::MetalDrawable>;
 using MTLBlitCommandEncoderPtr = NS::SharedPtr<MTL::BlitCommandEncoder>;
 using MTLBlitPassDescriptorPtr = NS::SharedPtr<MTL::BlitPassDescriptor>;
 using MTLBufferPtr = NS::SharedPtr<MTL::Buffer>;
+using MTLCaptureScopePtr = NS::SharedPtr<MTL::CaptureScope>;
 using MTLCommandBufferPtr = NS::SharedPtr<MTL::CommandBuffer>;
 using MTLCommandQueuePtr = NS::SharedPtr<MTL::CommandQueue>;
 using MTLDevicePtr = NS::SharedPtr<MTL::Device>;
