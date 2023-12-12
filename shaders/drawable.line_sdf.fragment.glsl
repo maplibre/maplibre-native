@@ -1,7 +1,6 @@
 
 layout (std140) uniform LineSDFUBO {
     highp mat4 u_matrix;
-    highp vec2 u_units_to_pixels;
     highp vec2 u_patternscale_a;
     highp vec2 u_patternscale_b;
     mediump float u_ratio;
@@ -10,7 +9,7 @@ layout (std140) uniform LineSDFUBO {
     highp float u_sdfgamma;
     highp float u_mix;
     
-    lowp float pad0;
+    lowp float pad2, pad3, pad4;
 };
 
 layout (std140) uniform LineSDFPropertiesUBO {
@@ -22,7 +21,7 @@ layout (std140) uniform LineSDFPropertiesUBO {
     mediump float u_width;
     lowp float u_floorwidth;
 
-    highp vec2 pad1;
+    highp vec2 pad5;
 };
 
 layout (std140) uniform LineSDFInterpolationUBO {
@@ -34,7 +33,7 @@ layout (std140) uniform LineSDFInterpolationUBO {
     lowp float u_width_t;
     lowp float u_floorwidth_t;
 
-    highp float pad2;
+    highp float pad6;
 };
 
 uniform sampler2D u_image;
