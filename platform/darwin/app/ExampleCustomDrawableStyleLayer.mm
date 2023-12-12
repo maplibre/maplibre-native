@@ -131,11 +131,13 @@ public:
             options.texture = interface.context.createTexture2D();
             
             // load image
-            UIImage *assetImage = [UIImage imageNamed:@"MissingImage"];
+            UIImage *assetImage = [UIImage imageNamed:@"AppIcon"];
             assert(assetImage.CGImage != NULL);
             std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(MLNPremultipliedImageFromCGImage(assetImage.CGImage));
             
             options.texture->setImage(image);
+            options.texture->setSamplerConfiguration(
+                                                     {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
             interface.setSymbolOptions(options);
             
             // add symbol

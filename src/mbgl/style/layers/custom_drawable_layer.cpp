@@ -372,6 +372,14 @@ void CustomDrawableLayerHost::Interface::addSymbol([[maybe_unused]] const Geomet
     builder->setRawVertices({}, vertices.elements(), gfx::AttributeDataType::Float2);
     builder->setSegments(gfx::Triangles(), sharedTriangles, triangleSegments.data(), triangleSegments.size());
     
+    // texture
+    if(symbolOptions.texture) {
+        static const StringIdentity idTextureUniformName = stringIndexer().get("u_texture");
+        if(auto textureLocation = builder->getShader()->getSamplerLocation(idTextureUniformName); textureLocation.has_value()) {
+            builder->setTexture(symbolOptions.texture, *textureLocation);
+        }
+    }
+    
     // flush current builder drawable
     builder->flush(context);
 }
