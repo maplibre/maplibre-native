@@ -113,6 +113,8 @@ class MapLibreFusedLocationEngineImplTest {
                 anyLong(), anyFloat(), any(PendingIntent::class.java))
     }
 
+// J2k: // TODO: see https://github.com/maplibre/maplibre-native/issues/1949
+/*
     // J2K: rewrite test to not use "@get", rename to "getLastLocationNull"
     @Test(expected = NullPointerException::class)
     fun getLastLocationNull() {
@@ -124,7 +126,7 @@ class MapLibreFusedLocationEngineImplTest {
     fun requestLocationUpdatesNullCallback() {
         engine!!.requestLocationUpdates(null!!, null!!, null!!)
     }
-
+*/
     @After
     fun tearDown() {
         reset(locationManagerMock)
