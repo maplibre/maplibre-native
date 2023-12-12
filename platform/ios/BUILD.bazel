@@ -1,3 +1,4 @@
+load("@aspect_rules_js//js:defs.bzl", "js_library")
 load("@build_bazel_rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
@@ -96,11 +97,11 @@ info_plist(
 )
 
 public_hdrs = [
-    ":umbrella_header",
+    # ":umbrella_header",
     ":ios_public_hdrs",
     ":ios_sdk_hdrs",
     "//platform/darwin:darwin_objc_hdrs",
-    "//platform/darwin:darwin_objcpp_hdrs",
+    # "//platform/darwin:darwin_objcpp_hdrs",
     "//platform/darwin:generated_style_public_hdrs",
 ]
 
@@ -116,7 +117,7 @@ apple_static_xcframework(
     },
     minimum_os_versions = {"ios": "12.0"},
     public_hdrs = public_hdrs,
-    umbrella_header = "umbrella_header",
+    # umbrella_header = "umbrella_header",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
 )
@@ -150,7 +151,6 @@ apple_xcframework(
     },
     minimum_os_versions = {"ios": "12.0"},
     public_hdrs = public_hdrs,
-    umbrella_header = "umbrella_header",
     version = ":maplibre_ios_version",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk-dynamic"],
@@ -158,11 +158,13 @@ apple_xcframework(
 
 ios_framework(
     name = "MapLibre.link",
+    testonly = True,
     bundle_id = "com.maplibre.link",
     families = ["iphone"],
     infoplists = ["info_plist"],
     linkopts = [""],
     minimum_os_version = "12.0",
+    visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk"],
 )
 
@@ -332,4 +334,16 @@ exports_files(
     MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE +
     MLN_IOS_PUBLIC_OBJC_SOURCE +
     MLN_PUBLIC_IOS_APP_SOPURCE,
+)
+
+js_library(
+    name = "symbols-to-check",
+    srcs = [
+        ":ios_objc_srcs",
+        ":ios_objcpp_srcs",
+        ":ios_private_hdrs",
+        ":ios_public_hdrs",
+        ":ios_sdk_hdrs",
+    ],
+    visibility = ["//platform:__pkg__"],
 )
