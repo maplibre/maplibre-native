@@ -65,6 +65,9 @@ public:
     Context& operator=(const Context& other) = delete;
     virtual ~Context() = default;
 
+    virtual void beginFrame() = 0;
+    virtual void endFrame() = 0;
+
     /// Called at the end of a frame.
     virtual void performCleanup() = 0;
 

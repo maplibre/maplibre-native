@@ -8,6 +8,7 @@ import android.os.Environment
 import android.os.Handler
 import android.view.View
 import android.view.WindowManager
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -122,7 +123,7 @@ class BenchmarkActivity : AppCompatActivity() {
     private fun getBenchmarkInputData(): BenchmarkInputData {
         // read input for benchmark from JSON file (on CI)
         val jsonFile = File("${Environment.getExternalStorageDirectory()}/benchmark-input.json")
-        if (jsonFile.isFile) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager() && jsonFile.isFile) {
             val jsonFileContents = jsonFile.readText()
             val jsonElement = Json.parseToJsonElement(jsonFileContents)
             val styleNames = jsonElement.jsonObject["styleNames"]?.jsonArray?.map { it.jsonPrimitive.content }

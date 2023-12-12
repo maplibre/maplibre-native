@@ -16,6 +16,8 @@
 #include <mbgl/util/noncopyable.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gl/fence.hpp>
+#include <mbgl/gl/buffer_allocator.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 #endif
 
@@ -43,6 +45,9 @@ public:
     Context& operator=(const Context& other) = delete;
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
+
+    void beginFrame() override;
+    void endFrame() override;
 
     void initializeExtensions(const std::function<gl::ProcAddress(const char*)>&);
 
@@ -80,6 +85,10 @@ public:
     void draw(const gfx::DrawMode&, std::size_t indexOffset, std::size_t indexLength);
 
     void finish();
+
+#if MLN_DRAWABLE_RENDERER
+    std::shared_ptr<gl::Fence> getCurrentFrameFence() const;
+#endif
 
     // Actually remove the objects we marked as abandoned with the above methods.
     // Only call this while the OpenGL context is exclusive to this thread.
@@ -134,6 +143,11 @@ private:
     bool cleanupOnDestruction = true;
 
     std::unique_ptr<extension::Debugging> debugging;
+#if MLN_DRAWABLE_RENDERER
+    std::shared_ptr<gl::Fence> frameInFlightFence;
+    std::unique_ptr<gl::UniformBufferAllocator> uboAllocator;
+    size_t frameNum = 0;
+#endif
 
 public:
     State<value::ActiveTextureUnit> activeTextureUnit;
