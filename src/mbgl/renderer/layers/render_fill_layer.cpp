@@ -374,7 +374,7 @@ public:
                 /*matrix = */ util::cast<float>(matrix),
                 /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                 /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
-                /*device_pixel_ratio = */ parameters.pixelRatio};
+                0};
             parameters.context.emplaceOrUpdateUniformBuffer(lineUniformBuffer, &lineUBO);
         }
         uniforms.addOrReplace(idLineUBOName, lineUniformBuffer);

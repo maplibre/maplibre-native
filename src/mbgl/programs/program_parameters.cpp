@@ -1,5 +1,6 @@
 #include <mbgl/programs/program_parameters.hpp>
 
+#include <mbgl/util/hash.hpp>
 #include <mbgl/util/string.hpp>
 
 #include <string_view>
@@ -14,6 +15,7 @@ ProgramParameters::ProgramParameters(const float pixelRatio, const bool overdraw
     if (overdraw) {
         defines["OVERDRAW_INSPECTOR"] = std::string();
     }
+    definesHash = util::hash(getDefinesString());
 }
 
 ProgramParameters ProgramParameters::withShaderSource(const ProgramSource& source) const noexcept {

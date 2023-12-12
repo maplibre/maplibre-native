@@ -15,7 +15,7 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 7> attributes;
-    static const std::array<UniformBlockInfo, 3> uniforms;
+    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -45,9 +45,10 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineGradientUBO& line [[buffer(7)]],
-                                device const LineGradientPropertiesUBO& props [[buffer(8)]],
-                                device const LineGradientInterpolationUBO& interp [[buffer(9)]]) {
+                                device const LineDynamicUBO& dynamic [[buffer(7)]],
+                                device const LineGradientUBO& line [[buffer(8)]],
+                                device const LineGradientPropertiesUBO& props [[buffer(9)]],
+                                device const LineGradientInterpolationUBO& interp [[buffer(10)]]) {
 
 #if !defined(HAS_UNIFORM_u_blur)
     const auto blur     = unpack_mix_float(vertx.blur,     interp.blur_t);
@@ -73,7 +74,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
-    const float ANTIALIASING = 1.0 / line.device_pixel_ratio / 2.0;
+    const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
     const float2 a_extrude = float2(vertx.data.xy) - 128.0;
     const float a_direction = fmod(float(vertx.data.z), 4.0) - 1.0;
@@ -106,7 +107,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
-    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * line.units_to_pixels);
+    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * dynamic.units_to_pixels);
 
     return {
         .position     = position,
@@ -125,8 +126,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineGradientUBO& line [[buffer(7)]],
-                            device const LineGradientPropertiesUBO& props [[buffer(8)]],
+                            device const LineGradientUBO& line [[buffer(8)]],
+                            device const LineGradientPropertiesUBO& props [[buffer(9)]],
                             texture2d<float, access::sample> gradientTexture [[texture(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
@@ -148,7 +149,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     // Calculate the antialiasing fade factor. This is either when fading in the
     // line in case of an offset line (v_width2.y) or when fading out (v_width2.x)
-    const float blur2 = (blur + 1.0 / line.device_pixel_ratio) * in.gamma_scale;
+    const float blur2 = (blur + 1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
     const float alpha = clamp(min(dist - (in.width2.y - blur2), in.width2.x - dist) / blur2, 0.0, 1.0);
 
     // For gradient lines, v_lineprogress is the ratio along the entire line,
