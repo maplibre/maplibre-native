@@ -919,6 +919,21 @@ TEST(Source, RenderTileSetSourceUpdate) {
     renderSource->update(uninitialized.baseImpl, layers, true, true, test.tileParameters());
 }
 
+TEST(Source, VectorSourceSetTiles) {
+    SourceTest test;
+    test.styleObserver.sourceChanged = [&](Source& source) {
+        EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string> {"new"});
+        test.end();
+    };
+
+    VectorSource source("source", Tileset{{"url"}});
+    source.setObserver(&test.styleObserver);
+    source.loadDescription(*test.fileSource);
+    EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string> {"url"});
+    source.setTiles({"new"});
+    test.run();
+}
+
 TEST(Source, GeoJSONSourceTilesAfterDataReset) {
     SourceTest test;
     GeoJSONSource source("source");
