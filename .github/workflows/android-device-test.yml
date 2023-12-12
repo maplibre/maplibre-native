@@ -33,7 +33,10 @@ jobs:
             # aws devicefarm get-upload <arn>
             externalData: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/c27174c2-63f4-4cdb-9af9-68957d75ebed",
             # top devices, query with `aws list-device-pools --arn <project_arn>`
-            devicePool: "arn:aws:devicefarm:us-west-2::devicepool:082d10e5-d7d7-48a5-ba5c-b33d66efa1f5"
+            devicePool: "arn:aws:devicefarm:us-west-2::devicepool:082d10e5-d7d7-48a5-ba5c-b33d66efa1f5",
+            # benchmark-android.yaml
+            # see https://github.com/maplibre/ci-runners/tree/main/aws-device-farm/custom-test-envs
+            "testSpecArn": "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/14862afb-cf88-44aa-9f1e-5131cbb22f01"
           }
         ]
     runs-on: ubuntu-latest
