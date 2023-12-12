@@ -922,7 +922,7 @@ TEST(Source, RenderTileSetSourceUpdate) {
 TEST(Source, VectorSourceSetTiles) {
     SourceTest test;
     test.styleObserver.sourceChanged = [&](Source& source) {
-        EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string> {"new"});
+        EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string>{"new"});
         test.end();
     };
 
@@ -930,7 +930,7 @@ TEST(Source, VectorSourceSetTiles) {
     source.setObserver(&test.styleObserver);
     source.setTiles({"unused"}); // make sure early setTiles does not segfault
     source.loadDescription(*test.fileSource);
-    EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string> {"url"});
+    EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string>{"url"});
     source.setTiles({"new"});
     test.run();
 }
@@ -938,13 +938,13 @@ TEST(Source, VectorSourceSetTiles) {
 TEST(Source, VectorSourceUrlSetTiles) {
     SourceTest test;
     test.styleObserver.sourceLoaded = [&](Source& source) {
-        EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string> {"tiles"});
+        EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string>{"tiles"});
         source.as<VectorSource>()->setTiles({"new"});
     };
     int count = 0;
     test.styleObserver.sourceChanged = [&](Source& source) {
         if (count++) {
-            EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string> {"new"});
+            EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string>{"new"});
             test.end();
         }
     };
