@@ -374,7 +374,7 @@ public:
                 /*matrix = */ util::cast<float>(matrix),
                 /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                 /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
-                /*device_pixel_ratio = */ parameters.pixelRatio};
+                0};
             parameters.context.emplaceOrUpdateUniformBuffer(lineUniformBuffer, &lineUBO);
         }
         uniforms.addOrReplace(idLineUBOName, lineUniformBuffer);
@@ -405,7 +405,7 @@ private:
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
-                             const std::shared_ptr<UpdateParameters>& updateParameters,
+                             const std::shared_ptr<UpdateParameters>&,
                              [[maybe_unused]] const RenderTree& renderTree,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -441,7 +441,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<FillLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!fillShaderGroup) {
         fillShaderGroup = shaders.getShaderGroup(std::string(FillShaderName));
@@ -626,10 +625,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         auto vertexAttrs = context.createVertexAttributeArray();
         vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
             binders, evaluated, propertiesAsUniforms);
-
-        if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-        }
 
         const auto vertexCount = bucket.vertices.elements();
         if (const auto& attr = vertexAttrs->add(idPosAttribName)) {

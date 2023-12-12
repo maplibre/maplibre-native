@@ -14,14 +14,12 @@ const std::array<AttributeInfo, 6> ShaderSource<BuiltIn::SymbolIconShader, gfx::
     // sometimes uniforms
     AttributeInfo{5, gfx::AttributeDataType::Float, 1, "a_opacity"},
 };
-const std::array<UniformBlockInfo, 7> ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal>::uniforms = {
+const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{8, true, true, sizeof(SymbolDrawableUBO), "SymbolDrawableUBO"},
     UniformBlockInfo{9, true, false, sizeof(SymbolDynamicUBO), "SymbolDynamicUBO"},
     UniformBlockInfo{10, true, true, sizeof(SymbolDrawablePaintUBO), "SymbolDrawablePaintUBO"},
     UniformBlockInfo{11, true, false, sizeof(SymbolDrawableTilePropsUBO), "SymbolDrawableTilePropsUBO"},
     UniformBlockInfo{12, true, false, sizeof(SymbolDrawableInterpolateUBO), "SymbolDrawableInterpolateUBO"},
-    UniformBlockInfo{13, true, true, sizeof(SymbolPermutationUBO), "SymbolPermutationUBO"},
-    UniformBlockInfo{14, true, false, sizeof(ExpressionInputsUBO), "ExpressionInputsUBO"},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, "u_texture"},

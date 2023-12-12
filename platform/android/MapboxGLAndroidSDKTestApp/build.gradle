@@ -1,6 +1,8 @@
 plugins {
     id 'org.jmailen.kotlinter'
     id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.9.21'
 }
 
 apply from: "${rootDir}/gradle/native-build.gradle"
@@ -21,6 +23,10 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 
     nativeBuild(["example-custom-layer"])
@@ -44,9 +50,12 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            testProguardFiles 'test-proguard-rules.pro'
             signingConfig signingConfigs.debug
         }
     }
+
+    testBuildType "release" // for benchmark
 
     flavorDimensions += "renderer"
     productFlavors {
@@ -74,8 +83,6 @@ android {
 }
 
 dependencies {
-    implementation dependenciesList.kotlinLib
-
     implementation project(':MapboxGLAndroidSDK')
     implementation dependenciesList.mapboxJavaTurf
 
@@ -83,6 +90,7 @@ dependencies {
     implementation dependenciesList.supportRecyclerView
     implementation dependenciesList.supportDesign
     implementation dependenciesList.supportConstraintLayout
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0'
 
     implementation dependenciesList.multidex
 
@@ -100,14 +108,12 @@ dependencies {
     androidTestImplementation dependenciesList.testEspressoContrib
     androidTestImplementation dependenciesList.testUiAutomator
     androidTestImplementation dependenciesList.appCenter
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test:core-ktx:1.5.0'
+
 }
 
 apply from: "${rootDir}/gradle/gradle-make.gradle"
 apply from: "${rootDir}/gradle/gradle-config.gradle"
 apply from: "${rootDir}/gradle/gradle-checkstyle.gradle"
 apply from: "${rootDir}/gradle/gradle-lint.gradle"
-
-
-
-apply plugin: 'kotlin-android'

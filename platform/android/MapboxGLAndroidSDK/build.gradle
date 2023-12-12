@@ -26,7 +26,6 @@ dependencies {
     testImplementation dependenciesList.mockito
     testImplementation dependenciesList.mockk
     testImplementation dependenciesList.robolectric
-    testImplementation dependenciesList.kotlinLib
     testImplementation dependenciesList.commonsIO
     testImplementation dependenciesList.assertjcore
 
@@ -53,6 +52,7 @@ android {
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         buildConfigField "String", "GIT_REVISION_SHORT", String.format("\"%s\"", getGitRevision())
+        buildConfigField "String", "GIT_REVISION", String.format("\"%s\"", getGitRevision(false))
         buildConfigField "String", "MAPBOX_SDK_IDENTIFIER", String.format("\"%s\"", "mapbox-maps-android")
         buildConfigField "String", "MAPBOX_SDK_VERSION", String.format("\"%s\"", project.VERSION_NAME)
         buildConfigField "String", "MAPBOX_VERSION_STRING", String.format("\"Mapbox/%s\"", project.VERSION_NAME)
@@ -128,6 +128,15 @@ android {
         disable 'MissingTranslation', 'TypographyQuotes', 'ObsoleteLintCustomCheck', 'MissingPermission', 'WrongThreadInterprocedural'
         warningsAsErrors false
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 licenseReport {
@@ -137,8 +146,8 @@ licenseReport {
     copyJsonReportToAssets = false
 }
 
-def static getGitRevision() {
-    def cmd = "git rev-parse --short HEAD"
+def static getGitRevision(shortRev = true) {
+    def cmd = shortRev ? "git rev-parse --short HEAD" : "git rev-parse HEAD"
     def proc = cmd.execute()
     def ref = proc.text.trim()
     return ref
