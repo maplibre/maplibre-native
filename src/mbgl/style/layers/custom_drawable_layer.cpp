@@ -23,8 +23,6 @@
 
 #include <mbgl/gfx/fill_generator.hpp>
 
-
-
 namespace mbgl {
 
 namespace style {
@@ -180,8 +178,7 @@ private:
 
 class SymbolDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    SymbolDrawableTweaker()
-    {}
+    SymbolDrawableTweaker() {}
     ~SymbolDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override{};
@@ -317,42 +314,42 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
 void CustomDrawableLayerHost::Interface::addSymbol([[maybe_unused]] const GeometryCoordinate& point) {
     if (!symbolShader) symbolShader = symbolShaderDefault();
     assert(symbolShader);
-    if(!builder || builder->getShader() != symbolShader) {
+    if (!builder || builder->getShader() != symbolShader) {
         finish();
         builder = createBuilder("symbol", symbolShader);
     }
     assert(builder);
     assert(builder->getShader() == symbolShader);
-    
+
     // temporary: buffers
     struct CustomSymbolIcon {
         std::array<float, 2> a_pos;
         std::array<float, 2> a_tex;
     };
-    
+
     using VertexVector = gfx::VertexVector<CustomSymbolIcon>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
-    
+
     vertices.emplace_back(CustomSymbolIcon{{0, 0}, {0, 0}},
                           CustomSymbolIcon{{1000, 0}, {1, 0}},
                           CustomSymbolIcon{{0, 1000}, {0, 1}},
                           CustomSymbolIcon{{1000, 1000}, {1, 1}});
-    
+
     using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& triangles = *sharedTriangles;
-    
+
     triangles.emplace_back(0, 1, 2, 1, 2, 3);
-    
+
     SegmentVector<CustomSymbolIcon> triangleSegments;
     triangleSegments.emplace_back(Segment<CustomSymbolIcon>{0, 0, 4, 6});
-    
+
     // add to builder
     static const StringIdentity idPositionAttribName = stringIndexer().get("a_pos");
     static const StringIdentity idTextureAttribName = stringIndexer().get("a_tex");
     builder->setVertexAttrNameId(idPositionAttribName);
-    
+
     auto attrs = context.createVertexAttributeArray();
     if (const auto& attr = attrs->add(idPositionAttribName)) {
         attr->setSharedRawData(sharedVertices,
@@ -371,15 +368,16 @@ void CustomDrawableLayerHost::Interface::addSymbol([[maybe_unused]] const Geomet
     builder->setVertexAttributes(std::move(attrs));
     builder->setRawVertices({}, vertices.elements(), gfx::AttributeDataType::Float2);
     builder->setSegments(gfx::Triangles(), sharedTriangles, triangleSegments.data(), triangleSegments.size());
-    
+
     // texture
-    if(symbolOptions.texture) {
+    if (symbolOptions.texture) {
         static const StringIdentity idTextureUniformName = stringIndexer().get("u_texture");
-        if(auto textureLocation = builder->getShader()->getSamplerLocation(idTextureUniformName); textureLocation.has_value()) {
+        if (auto textureLocation = builder->getShader()->getSamplerLocation(idTextureUniformName);
+            textureLocation.has_value()) {
             builder->setTexture(symbolOptions.texture, *textureLocation);
         }
     }
-    
+
     // flush current builder drawable
     builder->flush(context);
 }
@@ -426,7 +424,7 @@ void CustomDrawableLayerHost::Interface::finish() {
             finish_(tweaker);
         } else if (builder->getShader() == symbolShader) {
             // finish building symbols
-            
+
             // create symbol tweaker
             auto tweaker = std::make_shared<SymbolDrawableTweaker>();
 
