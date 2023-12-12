@@ -928,6 +928,7 @@ TEST(Source, VectorSourceSetTiles) {
 
     VectorSource source("source", Tileset{{"url"}});
     source.setObserver(&test.styleObserver);
+    source.setTiles({"unused"}); // make sure early setTiles does not segfault
     source.loadDescription(*test.fileSource);
     EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string> {"url"});
     source.setTiles({"new"});
