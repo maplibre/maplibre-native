@@ -220,10 +220,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                     0};
 
                 static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
-                const shaders::LineUBO lineUBO{/*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
-                                               0,
-                                               0,
-                                               0};
+                const shaders::LineUBO lineUBO{/*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom), 0, 0, 0};
 
                 static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
 

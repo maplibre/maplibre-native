@@ -164,10 +164,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         const LineType type = static_cast<LineType>(drawable.getType());
         switch (type) {
             case LineType::Simple: {
-                const LineUBO lineUBO{/*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                                      0,
-                                      0,
-                                      0};
+                const LineUBO lineUBO{
+                    /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)), 0, 0, 0};
                 uniforms.createOrUpdate(idLineUBOName, &lineUBO, context);
 
                 // properties UBO
@@ -176,10 +174,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
             case LineType::Gradient: {
                 const LineGradientUBO lineGradientUBO{
-                    /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                    0,
-                    0,
-                    0};
+                    /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)), 0, 0, 0};
                 uniforms.createOrUpdate(idLineGradientUBOName, &lineGradientUBO, context);
 
                 // properties UBO
@@ -195,9 +190,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 }
                 const LinePatternUBO linePatternUBO{
                     /*scale =*/{parameters.pixelRatio,
-                     1 / tileID.pixelsToTileUnits(1, parameters.state.getIntegerZoom()),
-                     crossfade.fromScale,
-                     crossfade.toScale},
+                                1 / tileID.pixelsToTileUnits(1, parameters.state.getIntegerZoom()),
+                                crossfade.fromScale,
+                                crossfade.toScale},
                     /*texsize =*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
                     /*ratio =*/1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                     /*fade =*/crossfade.t};
@@ -232,8 +227,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     const float widthA = posA.width * crossfade.fromScale;
                     const float widthB = posB.width * crossfade.toScale;
                     const LineSDFUBO lineSDFUBO{
-                        /* patternscale_a = */{1.0f / tileID.pixelsToTileUnits(widthA, parameters.state.getIntegerZoom()),
-                         -posA.height / 2.0f},
+                        /* patternscale_a = */ {
+                            1.0f / tileID.pixelsToTileUnits(widthA, parameters.state.getIntegerZoom()),
+                            -posA.height / 2.0f},
                         /* patternscale_b = */
                         {1.0f / tileID.pixelsToTileUnits(widthB, parameters.state.getIntegerZoom()),
                          -posB.height / 2.0f},
