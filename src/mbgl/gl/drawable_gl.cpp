@@ -71,10 +71,12 @@ void DrawableGL::draw(PaintParameters& parameters) const {
         }
     }
 
+#ifndef NDEBUG
     context.bindVertexArray = value::BindVertexArray::Default;
 
     unbindTextures();
     unbindUniformBuffers();
+#endif
 }
 
 void DrawableGL::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
