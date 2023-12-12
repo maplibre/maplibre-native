@@ -1,1 +1,4 @@
+# TODO: remove with bazel 7.x
+common --enable_bzlmod
+
 coverage --experimental_ui_max_stdouterr_bytes=10485760
