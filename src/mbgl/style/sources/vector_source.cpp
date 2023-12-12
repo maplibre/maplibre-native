@@ -108,7 +108,6 @@ void VectorSource::setTiles(const std::vector<std::string>& newtiles) {
     newtileset.tiles = newtiles;
     bool changed = tileset->tiles != newtiles;
     baseImpl = makeMutable<Impl>(impl(), newtileset);
-    observer->onSourceLoaded(*this);
     if (changed) {
         observer->onSourceChanged(*this);
     }
