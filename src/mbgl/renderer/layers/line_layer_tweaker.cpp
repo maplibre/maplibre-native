@@ -39,6 +39,7 @@ static const StringIdentity idLinePatternUBOName = stringIndexer().get("LinePatt
 static const StringIdentity idLinePatternPropertiesUBOName = stringIndexer().get("LinePatternPropertiesUBO");
 static const StringIdentity idLineSDFUBOName = stringIndexer().get("LineSDFUBO");
 static const StringIdentity idLineSDFPropertiesUBOName = stringIndexer().get("LineSDFPropertiesUBO");
+static const StringIdentity idLineDynamicUBOName = stringIndexer().get("LineDynamicUBO");
 static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
@@ -113,6 +114,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         return lineSDFPropertiesBuffer;
     };
 
+    const LineDynamicUBO dynamicUBO = {
+        /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, 0, 0};
+
+    if (!dynamicBuffer) {
+        dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
+    } else {
+        dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
+    }
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         const auto shader = drawable.getShader();
         if (!drawable.getTileID() || !shader || !checkTweakDrawable(drawable)) {
@@ -149,14 +159,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             uniforms.createOrUpdate(idLineMatrixUBOName, &matrixUBO, context);
         }
 
-        const LineType type = static_cast<LineType>(drawable.getType());
+        uniforms.addOrReplace(idLineDynamicUBOName, dynamicBuffer);
 
+        const LineType type = static_cast<LineType>(drawable.getType());
         switch (type) {
             case LineType::Simple: {
-                const LineUBO lineUBO{
-                    /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
-                    /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                    0};
+                const LineUBO lineUBO{/*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
+                                      0,
+                                      0,
+                                      0};
                 uniforms.createOrUpdate(idLineUBOName, &lineUBO, context);
 
                 // properties UBO
@@ -165,8 +176,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
             case LineType::Gradient: {
                 const LineGradientUBO lineGradientUBO{
-                    /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
+                    0,
+                    0,
                     0};
                 uniforms.createOrUpdate(idLineGradientUBOName, &lineGradientUBO, context);
 
@@ -182,16 +194,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     }
                 }
                 const LinePatternUBO linePatternUBO{
-                    {parameters.pixelRatio,
+                    /*scale =*/{parameters.pixelRatio,
                      1 / tileID.pixelsToTileUnits(1, parameters.state.getIntegerZoom()),
                      crossfade.fromScale,
                      crossfade.toScale},
                     /*texsize =*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                    /*units_to_pixels =*/{1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio =*/1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                    /*fade =*/crossfade.t,
-                    0,
-                    0};
+                    /*fade =*/crossfade.t};
                 uniforms.createOrUpdate(idLinePatternUBOName, &linePatternUBO, context);
 
                 // properties UBO
@@ -223,19 +232,19 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     const float widthA = posA.width * crossfade.fromScale;
                     const float widthB = posB.width * crossfade.toScale;
                     const LineSDFUBO lineSDFUBO{
-                        {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
-                        {1.0f / tileID.pixelsToTileUnits(widthA, parameters.state.getIntegerZoom()),
+                        /* patternscale_a = */{1.0f / tileID.pixelsToTileUnits(widthA, parameters.state.getIntegerZoom()),
                          -posA.height / 2.0f},
                         /* patternscale_b = */
                         {1.0f / tileID.pixelsToTileUnits(widthB, parameters.state.getIntegerZoom()),
                          -posB.height / 2.0f},
-                        /* ratio = */ 1.0f /
-                            tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
+                        /* ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                         /* tex_y_a = */ posA.y,
                         /* tex_y_b = */ posB.y,
                         /* sdfgamma = */ static_cast<float>(dashPatternTexture.getSize().width) /
                             (std::min(widthA, widthB) * 256.0f * parameters.pixelRatio) / 2.0f,
                         /* mix = */ crossfade.t,
+                        0,
+                        0,
                         0};
                     uniforms.createOrUpdate(idLineSDFUBOName, &lineSDFUBO, context);
 

@@ -13,11 +13,12 @@ const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::LineShader, gfx::Backen
     AttributeInfo{6, gfx::AttributeDataType::Float2, 1, "a_offset"},
     AttributeInfo{7, gfx::AttributeDataType::Float2, 1, "a_width"},
 };
-const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal>::uniforms = {
+const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{8, true, false, sizeof(MatrixUBO), "LineMatrixUBO"},
-    UniformBlockInfo{9, true, true, sizeof(LineUBO), "LineUBO"},
-    UniformBlockInfo{10, true, true, sizeof(LinePropertiesUBO), "LinePropertiesUBO"},
-    UniformBlockInfo{11, true, false, sizeof(LineInterpolationUBO), "LineInterpolationUBO"},
+    UniformBlockInfo{9, true, false, sizeof(LineGradientUBO), "LineDynamicUBO"},
+    UniformBlockInfo{10, true, true, sizeof(LineUBO), "LineUBO"},
+    UniformBlockInfo{11, true, true, sizeof(LinePropertiesUBO), "LinePropertiesUBO"},
+    UniformBlockInfo{12, true, false, sizeof(LineInterpolationUBO), "LineInterpolationUBO"},
 };
 const std::array<TextureInfo, 0> ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal>::textures = {};
 
@@ -32,12 +33,13 @@ const std::array<AttributeInfo, 9> ShaderSource<BuiltIn::LinePatternShader, gfx:
     AttributeInfo{7, gfx::AttributeDataType::UShort4, 1, "a_pattern_from"},
     AttributeInfo{8, gfx::AttributeDataType::UShort4, 1, "a_pattern_to"},
 };
-const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal>::uniforms = {
+const std::array<UniformBlockInfo, 6> ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{9, true, false, sizeof(MatrixUBO), "LineMatrixUBO"},
-    UniformBlockInfo{10, true, true, sizeof(LinePatternUBO), "LinePatternUBO"},
-    UniformBlockInfo{11, true, true, sizeof(LinePatternPropertiesUBO), "LinePatternPropertiesUBO"},
-    UniformBlockInfo{12, true, false, sizeof(LinePatternInterpolationUBO), "LinePatternInterpolationUBO"},
-    UniformBlockInfo{13, true, true, sizeof(LinePatternTilePropertiesUBO), "LinePatternTilePropertiesUBO"},
+    UniformBlockInfo{10, true, false, sizeof(LineGradientUBO), "LineDynamicUBO"},
+    UniformBlockInfo{11, true, true, sizeof(LinePatternUBO), "LinePatternUBO"},
+    UniformBlockInfo{12, true, true, sizeof(LinePatternPropertiesUBO), "LinePatternPropertiesUBO"},
+    UniformBlockInfo{13, true, false, sizeof(LinePatternInterpolationUBO), "LinePatternInterpolationUBO"},
+    UniformBlockInfo{14, true, true, sizeof(LinePatternTilePropertiesUBO), "LinePatternTilePropertiesUBO"},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, "u_image"},
@@ -54,11 +56,12 @@ const std::array<AttributeInfo, 9> ShaderSource<BuiltIn::LineSDFShader, gfx::Bac
     AttributeInfo{7, gfx::AttributeDataType::Float2, 1, "a_width"},
     AttributeInfo{8, gfx::AttributeDataType::Float2, 1, "a_floorwidth"},
 };
-const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal>::uniforms = {
+const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{9, true, false, sizeof(MatrixUBO), "LineMatrixUBO"},
-    UniformBlockInfo{10, true, true, sizeof(LineSDFUBO), "LineSDFUBO"},
-    UniformBlockInfo{11, true, true, sizeof(LineSDFPropertiesUBO), "LineSDFPropertiesUBO"},
-    UniformBlockInfo{12, true, false, sizeof(LineSDFInterpolationUBO), "LineSDFInterpolationUBO"},
+    UniformBlockInfo{10, true, false, sizeof(LineGradientUBO), "LineDynamicUBO"},
+    UniformBlockInfo{11, true, true, sizeof(LineSDFUBO), "LineSDFUBO"},
+    UniformBlockInfo{12, true, true, sizeof(LineSDFPropertiesUBO), "LineSDFPropertiesUBO"},
+    UniformBlockInfo{13, true, false, sizeof(LineSDFInterpolationUBO), "LineSDFInterpolationUBO"},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, "u_image"},

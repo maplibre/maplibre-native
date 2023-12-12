@@ -5,10 +5,16 @@
 namespace mbgl {
 namespace shaders {
 
+struct alignas(16) LineDynamicUBO {
+    /* 0 */ std::array<float, 2> units_to_pixels;
+    /* 8 */ float pad1, pad2;
+    /* 16 */
+};
+static_assert(sizeof(LineDynamicUBO) == 16);
+
 struct alignas(16) LineUBO {
-    std::array<float, 2> units_to_pixels;
     float ratio;
-    float pad;
+    float pad1, pad2, pad3;
 };
 static_assert(sizeof(LineUBO) % 16 == 0);
 
@@ -38,10 +44,8 @@ static_assert(sizeof(LineGradientPropertiesUBO) % 16 == 0);
 struct alignas(16) LinePatternUBO {
     std::array<float, 4> scale;
     std::array<float, 2> texsize;
-    std::array<float, 2> units_to_pixels;
     float ratio;
     float fade;
-    float pad1, pad2;
 };
 static_assert(sizeof(LinePatternUBO) % 16 == 0);
 
@@ -56,7 +60,6 @@ struct alignas(16) LinePatternPropertiesUBO {
 static_assert(sizeof(LinePatternPropertiesUBO) % 16 == 0);
 
 struct alignas(16) LineSDFUBO {
-    std::array<float, 2> units_to_pixels;
     std::array<float, 2> patternscale_a;
     std::array<float, 2> patternscale_b;
     float ratio;
@@ -64,7 +67,7 @@ struct alignas(16) LineSDFUBO {
     float tex_y_b;
     float sdfgamma;
     float mix;
-    float pad;
+    float pad1, pad2, pad3;
 };
 static_assert(sizeof(LineSDFUBO) % 16 == 0);
 
@@ -84,9 +87,9 @@ struct alignas(16) LineBasicUBO {
     std::array<float, 4 * 4> matrix;
     std::array<float, 2> units_to_pixels;
     float ratio;
-    float device_pixel_ratio;
+    float pad;
 };
-static_assert(sizeof(LineUBO) % 16 == 0);
+static_assert(sizeof(LineBasicUBO) % 16 == 0);
 
 struct alignas(16) LineBasicPropertiesUBO {
     Color color;

@@ -12,10 +12,15 @@ layout (location = 1) in vec4 a_data;
 layout (std140) uniform LineMatrixUBO {
     highp mat4 u_matrix;
 };
-layout (std140) uniform LineUBO {
+
+layout (std140) uniform LineDynamicUBO {
     highp vec2 u_units_to_pixels;
+    lowp float pad0, pad1;
+};
+
+layout (std140) uniform LineUBO {
     mediump float u_ratio;
-    lowp float pad0;
+    lowp float pad2, pad3, pad4;
 };
 
 layout (std140) uniform LinePropertiesUBO {
@@ -26,8 +31,8 @@ layout (std140) uniform LinePropertiesUBO {
     lowp float u_offset;
     mediump float u_width;
 
-    highp float pad1;
-    highp vec2 pad2;
+    highp float pad5;
+    highp vec2 pad6;
 };
 
 layout (std140) uniform LineInterpolationUBO {
@@ -38,7 +43,7 @@ layout (std140) uniform LineInterpolationUBO {
     lowp float u_offset_t;
     lowp float u_width_t;
 
-    highp vec2 pad3;
+    highp vec2 pad7;
 };
 
 out vec2 v_normal;

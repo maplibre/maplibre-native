@@ -58,10 +58,14 @@ struct alignas(16) MatrixUBO {
     float4x4 matrix;
 };
 
-struct alignas(16) LineUBO {
+struct alignas(16) LineDynamicUBO {
     float2 units_to_pixels;
+    float pad1, pad2;
+};
+
+struct alignas(16) LineUBO {
     float ratio;
-    float pad;
+    float pad1, pad2, pad3;
 };
 
 struct alignas(16) LineBasicUBO {
@@ -72,9 +76,8 @@ struct alignas(16) LineBasicUBO {
 };
 
 struct alignas(16) LineGradientUBO {
-    float2 units_to_pixels;
     float ratio;
-    float pad;
+    float pad1, pad2, pad3;
 };
 
 struct alignas(16) LinePropertiesUBO {

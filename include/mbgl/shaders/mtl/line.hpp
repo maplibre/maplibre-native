@@ -15,7 +15,7 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 8> attributes;
-    static const std::array<UniformBlockInfo, 4> uniforms;
+    static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
@@ -62,9 +62,10 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const MatrixUBO& matrix [[buffer(8)]],
-                                device const LineUBO& line [[buffer(9)]],
-                                device const LinePropertiesUBO& props [[buffer(10)]],
-                                device const LineInterpolationUBO& interp [[buffer(11)]]) {
+                                device const LineDynamicUBO& dynamic [[buffer(9)]],
+                                device const LineUBO& line [[buffer(10)]],
+                                device const LinePropertiesUBO& props [[buffer(11)]],
+                                device const LineInterpolationUBO& interp [[buffer(12)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth = props.gapwidth / 2;
@@ -116,7 +117,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
-    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * line.units_to_pixels);
+    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * dynamic.units_to_pixels);
 
     return {
         .position    = position,
@@ -137,8 +138,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineUBO& line [[buffer(9)]],
-                            device const LinePropertiesUBO& props [[buffer(10)]]) {
+                            device const LineUBO& line [[buffer(10)]],
+                            device const LinePropertiesUBO& props [[buffer(11)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
@@ -179,7 +180,7 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 9> attributes;
-    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<UniformBlockInfo, 6> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -234,10 +235,8 @@ struct FragmentStage {
 struct alignas(16) LinePatternUBO {
     float4 scale;
     float2 texsize;
-    float2 units_to_pixels;
     float ratio;
     float fade;
-    float pad1, pad2;
 };
 
 struct alignas(16) LinePatternPropertiesUBO {
@@ -267,10 +266,11 @@ struct alignas(16) LinePatternTilePropertiesUBO {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const MatrixUBO& matrix [[buffer(9)]],
-                                device const LinePatternUBO& line [[buffer(10)]],
-                                device const LinePatternPropertiesUBO& props [[buffer(11)]],
-                                device const LinePatternInterpolationUBO& interp [[buffer(12)]],
-                                device const LinePatternTilePropertiesUBO& tileProps [[buffer(13)]]) {
+                                device const LineDynamicUBO& dynamic [[buffer(10)]],
+                                device const LinePatternUBO& line [[buffer(11)]],
+                                device const LinePatternPropertiesUBO& props [[buffer(12)]],
+                                device const LinePatternInterpolationUBO& interp [[buffer(13)]],
+                                device const LinePatternTilePropertiesUBO& tileProps [[buffer(14)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth = props.gapwidth / 2;
@@ -324,7 +324,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
-    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * line.units_to_pixels);
+    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * dynamic.units_to_pixels);
 
     return {
         .position     = position,
@@ -349,9 +349,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LinePatternUBO& line [[buffer(10)]],
-                            device const LinePatternPropertiesUBO& props [[buffer(11)]],
-                            device const LinePatternTilePropertiesUBO& tileProps [[buffer(13)]],
+                            device const LinePatternUBO& line [[buffer(11)]],
+                            device const LinePatternPropertiesUBO& props [[buffer(12)]],
+                            device const LinePatternTilePropertiesUBO& tileProps [[buffer(14)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
@@ -431,7 +431,7 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 9> attributes;
-    static const std::array<UniformBlockInfo, 4> uniforms;
+    static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -485,7 +485,6 @@ struct FragmentStage {
 };
 
 struct alignas(16) LineSDFUBO {
-    float2 units_to_pixels;
     float2 patternscale_a;
     float2 patternscale_b;
     float ratio;
@@ -493,7 +492,7 @@ struct alignas(16) LineSDFUBO {
     float tex_y_b;
     float sdfgamma;
     float mix;
-    float pad;
+    float pad1, pad2, pad3;
 };
 
 struct alignas(16) LineSDFPropertiesUBO {
@@ -520,9 +519,10 @@ struct alignas(16) LineSDFInterpolationUBO {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const MatrixUBO& matrix [[buffer(9)]],
-                                device const LineSDFUBO& line [[buffer(10)]],
-                                device const LineSDFPropertiesUBO& props [[buffer(11)]],
-                                device const LineSDFInterpolationUBO& interp [[buffer(12)]]) {
+                                device const LineDynamicUBO& dynamic [[buffer(10)]],
+                                device const LineSDFUBO& line [[buffer(11)]],
+                                device const LineSDFPropertiesUBO& props [[buffer(12)]],
+                                device const LineSDFInterpolationUBO& interp [[buffer(13)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth   = props.gapwidth / 2;
@@ -581,7 +581,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
-    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * line.units_to_pixels);
+    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * dynamic.units_to_pixels);
 
     return {
         .position     = position,
@@ -607,8 +607,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineSDFUBO& line [[buffer(10)]],
-                            device const LineSDFPropertiesUBO& props [[buffer(11)]],
+                            device const LineSDFUBO& line [[buffer(11)]],
+                            device const LineSDFPropertiesUBO& props [[buffer(12)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)

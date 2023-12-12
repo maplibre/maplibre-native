@@ -15,7 +15,7 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 7> attributes;
-    static const std::array<UniformBlockInfo, 4> uniforms;
+    static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -46,9 +46,10 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const MatrixUBO& matrix [[buffer(7)]],
-                                device const LineGradientUBO& line [[buffer(8)]],
-                                device const LineGradientPropertiesUBO& props [[buffer(9)]],
-                                device const LineGradientInterpolationUBO& interp [[buffer(10)]]) {
+                                device const LineDynamicUBO& dynamic [[buffer(8)]],
+                                device const LineGradientUBO& line [[buffer(9)]],
+                                device const LineGradientPropertiesUBO& props [[buffer(10)]],
+                                device const LineGradientInterpolationUBO& interp [[buffer(11)]]) {
 
 #if !defined(HAS_UNIFORM_u_blur)
     const auto blur     = unpack_mix_float(vertx.blur,     interp.blur_t);
@@ -107,7 +108,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
-    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * line.units_to_pixels);
+    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * dynamic.units_to_pixels);
 
     return {
         .position     = position,
@@ -126,8 +127,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineGradientUBO& line [[buffer(8)]],
-                            device const LineGradientPropertiesUBO& props [[buffer(9)]],
+                            device const LineGradientUBO& line [[buffer(9)]],
+                            device const LineGradientPropertiesUBO& props [[buffer(10)]],
                             texture2d<float, access::sample> gradientTexture [[texture(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
