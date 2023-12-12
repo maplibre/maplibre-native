@@ -35,6 +35,7 @@ protected:
     gfx::UniformBufferPtr lineGradientPropertiesBuffer;
     gfx::UniformBufferPtr linePatternPropertiesBuffer;
     gfx::UniformBufferPtr lineSDFPropertiesBuffer;
+    gfx::UniformBufferPtr dynamicBuffer;
 
 #if MLN_RENDER_BACKEND_METAL
     gfx::UniformBufferPtr permutationUniformBuffer;
