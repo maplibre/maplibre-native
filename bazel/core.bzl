@@ -854,6 +854,8 @@ MLN_OPENGL_SOURCE = [
     "src/mbgl/gl/command_encoder.hpp",
     "src/mbgl/gl/context.cpp",
     "src/mbgl/gl/context.hpp",
+    "src/mbgl/gl/fence.cpp",
+    "src/mbgl/gl/fence.hpp",
     "src/mbgl/gl/debugging_extension.cpp",
     "src/mbgl/gl/debugging_extension.hpp",
     "src/mbgl/gl/defines.hpp",
@@ -995,6 +997,7 @@ MLN_DRAWABLES_HEADERS = [
 ]
 
 MLN_DRAWABLES_GL_SOURCE = [
+    "src/mbgl/gl/buffer_allocator.cpp",
     "src/mbgl/gl/drawable_gl.cpp",
     "src/mbgl/gl/drawable_gl_builder.cpp",
     "src/mbgl/gl/drawable_gl_impl.hpp",
@@ -1007,6 +1010,7 @@ MLN_DRAWABLES_GL_SOURCE = [
 ]
 
 MLN_DRAWABLES_GL_HEADERS = [
+    "include/mbgl/gl/buffer_allocator.hpp",
     "include/mbgl/gl/drawable_gl.hpp",
     "include/mbgl/gl/drawable_gl_builder.hpp",
     "include/mbgl/gl/layer_group_gl.hpp",

@@ -2,12 +2,8 @@ layout (std140) uniform LinePatternUBO {
     highp mat4 u_matrix;
     mediump vec4 u_scale;
     highp vec2 u_texsize;
-    highp vec2 u_units_to_pixels;
     mediump float u_ratio;
     highp float u_fade;
-
-    lowp float pad0;
-    highp float pad1;
 };
 
 layout (std140) uniform LinePatternPropertiesUBO {

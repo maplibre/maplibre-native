@@ -137,6 +137,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
+    context.beginFrame();
 
     if (!staticData) {
         staticData = std::make_unique<RenderStaticData>(pixelRatio, std::make_unique<gfx::ShaderRegistry>());
@@ -471,6 +472,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
+    context.endFrame();
 
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {
