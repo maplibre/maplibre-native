@@ -330,11 +330,12 @@ void CustomDrawableLayerHost::Interface::addSymbol([[maybe_unused]] const Geomet
     using VertexVector = gfx::VertexVector<CustomSymbolIcon>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
-
-    vertices.emplace_back(CustomSymbolIcon{{0, 0}, {0, 0}},
-                          CustomSymbolIcon{{1000, 0}, {1, 0}},
-                          CustomSymbolIcon{{0, 1000}, {0, 1}},
-                          CustomSymbolIcon{{1000, 1000}, {1, 1}});
+    
+    for(int y = 0; y <= 1; ++y) {
+        for(int x = 0; x <= 1; ++x) {
+            vertices.emplace_back(CustomSymbolIcon{{point.x * 2 + x, point.y * 2 + y}, {x, y}});
+        }
+    }
 
     using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();

@@ -124,17 +124,16 @@ public:
             using namespace mbgl;
             GeometryCoordinate position {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)};
             
-            // TODO: set options ...
-            Interface::SymbolOptions options;
-            options.size = mbgl::Size(32, 32);
-            options.color = Color::blue();
-            options.texture = interface.context.createTexture2D();
-            
             // load image
-            UIImage *assetImage = [UIImage imageNamed:@"AppIcon"];
+            UIImage *assetImage = [UIImage imageNamed:@"MissingImage"];
             assert(assetImage.CGImage != NULL);
             std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(MLNPremultipliedImageFromCGImage(assetImage.CGImage));
-            
+
+            // TODO: set options ...
+            Interface::SymbolOptions options;
+            options.size = image->size;
+            options.color = Color::blue();
+            options.texture = interface.context.createTexture2D();
             options.texture->setImage(image);
             options.texture->setSamplerConfiguration(
                                                      {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
