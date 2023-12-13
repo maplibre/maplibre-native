@@ -12,12 +12,11 @@ const std::array<AttributeInfo, 7> ShaderSource<BuiltIn::LineGradientShader, gfx
     AttributeInfo{5, gfx::AttributeDataType::Float2, 1, "a_offset"},
     AttributeInfo{6, gfx::AttributeDataType::Float2, 1, "a_width"},
 };
-const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{7, true, true, sizeof(LineGradientUBO), "LineGradientUBO"},
-    UniformBlockInfo{8, true, false, sizeof(LineGradientPropertiesUBO), "LineGradientPropertiesUBO"},
-    UniformBlockInfo{9, true, false, sizeof(LineGradientInterpolationUBO), "LineGradientInterpolationUBO"},
-    UniformBlockInfo{10, true, true, sizeof(LinePermutationUBO), "LinePermutationUBO"},
-    UniformBlockInfo{11, true, false, sizeof(ExpressionInputsUBO), "ExpressionInputsUBO"},
+const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal>::uniforms = {
+    UniformBlockInfo{7, true, false, sizeof(LineGradientUBO), "LineDynamicUBO"},
+    UniformBlockInfo{8, true, true, sizeof(LineGradientUBO), "LineGradientUBO"},
+    UniformBlockInfo{9, true, true, sizeof(LineGradientPropertiesUBO), "LineGradientPropertiesUBO"},
+    UniformBlockInfo{10, true, false, sizeof(LineGradientInterpolationUBO), "LineGradientInterpolationUBO"},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, "u_image"},

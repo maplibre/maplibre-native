@@ -16,6 +16,8 @@
 #include <mbgl/util/noncopyable.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gl/fence.hpp>
+#include <mbgl/gl/buffer_allocator.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 #endif
 
@@ -43,6 +45,9 @@ public:
     Context& operator=(const Context& other) = delete;
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
+
+    void beginFrame() override;
+    void endFrame() override;
 
     void initializeExtensions(const std::function<gl::ProcAddress(const char*)>&);
 
@@ -81,6 +86,10 @@ public:
 
     void finish();
 
+#if MLN_DRAWABLE_RENDERER
+    std::shared_ptr<gl::Fence> getCurrentFrameFence() const;
+#endif
+
     // Actually remove the objects we marked as abandoned with the above methods.
     // Only call this while the OpenGL context is exclusive to this thread.
     void performCleanup() override;
@@ -103,7 +112,7 @@ public:
 
 #if MLN_DRAWABLE_RENDERER
     gfx::UniqueDrawableBuilder createDrawableBuilder(std::string name) override;
-    gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size) override;
+    gfx::UniformBufferPtr createUniformBuffer(const void* data, std::size_t size, bool persistent) override;
 
     gfx::ShaderProgramBasePtr getGenericShader(gfx::ShaderRegistry&, const std::string& name) override;
 
@@ -117,9 +126,14 @@ public:
 
     Framebuffer createFramebuffer(const gfx::Texture2D& color);
 
+    gfx::VertexAttributeArrayPtr createVertexAttributeArray() const override;
+
     void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
 
-    bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&, const void* data, std::size_t size) override;
+    bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
+                                      const void* data,
+                                      std::size_t size,
+                                      bool persistent) override;
 #endif
 
     void setDirtyState() override;
@@ -129,6 +143,11 @@ private:
     bool cleanupOnDestruction = true;
 
     std::unique_ptr<extension::Debugging> debugging;
+#if MLN_DRAWABLE_RENDERER
+    std::shared_ptr<gl::Fence> frameInFlightFence;
+    std::unique_ptr<gl::UniformBufferAllocator> uboAllocator;
+    size_t frameNum = 0;
+#endif
 
 public:
     State<value::ActiveTextureUnit> activeTextureUnit;

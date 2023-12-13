@@ -52,7 +52,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
     layerGroup.setEnabled(true);
 
     std::optional<uint32_t> samplerLocation{};
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
@@ -109,7 +109,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
                 /* .scale_b = */ crossfade.toScale,
                 /* .mix = */ crossfade.t,
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
-                /* .pad = */ 0,
+                /* .pad1 = */ 0,
             };
             uniforms.createOrUpdate(idBackgroundLayerUBOName, &layerUBO, context);
         } else {
@@ -117,7 +117,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
             if (!backgroundLayerBuffer) {
                 const BackgroundLayerUBO layerUBO = {/* .color = */ evaluated.get<BackgroundColor>(),
                                                      /* .opacity = */ evaluated.get<BackgroundOpacity>(),
-                                                     /* .pad = */ 0,
+                                                     /* .pad1/2/3 = */ 0,
                                                      0,
                                                      0};
                 backgroundLayerBuffer = context.createUniformBuffer(&layerUBO, sizeof(layerUBO));

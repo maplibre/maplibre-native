@@ -39,7 +39,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const Pai
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData() || !checkTweakDrawable(drawable)) {
             return;
         }
@@ -55,14 +55,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const Pai
             /* .unpack = */ getUnpackVector(drawableData.encoding),
             /* .dimension = */ {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},
             /* .zoom = */ static_cast<float>(tileID.canonical.z),
-            /* .maxzoom = */ static_cast<float>(drawableData.maxzoom),
-            /* .overdrawInspector = */ overdrawInspector,
-            /* .pad1/2/3 = */ 0,
-            0,
-            0,
-            /* .pad4/5/6 = */ 0,
-            0,
-            0};
+            /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
 
         drawable.mutableUniformBuffers().createOrUpdate(
             idHillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);

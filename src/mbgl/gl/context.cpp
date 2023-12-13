@@ -73,13 +73,46 @@ GLint getMaxVertexAttribs() {
 
 Context::Context(RendererBackend& backend_)
     : gfx::Context(/*maximumVertexBindingCount=*/getMaxVertexAttribs()),
-      backend(backend_) {}
+      backend(backend_) {
+#if MLN_DRAWABLE_RENDERER
+    uboAllocator = std::make_unique<gl::UniformBufferAllocator>();
+#endif
+}
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
         reset();
+#if !defined(NDEBUG)
+        Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
+#endif
         assert(stats.isZero());
     }
+}
+
+void Context::beginFrame() {
+#if MLN_DRAWABLE_RENDERER
+    frameInFlightFence = std::make_shared<gl::Fence>();
+
+    // Run allocator defragmentation on this frame interval.
+    constexpr auto defragFreq = 4;
+
+    if (frameNum == defragFreq) {
+        uboAllocator->defragment(frameInFlightFence);
+        frameNum = 0;
+    } else {
+        frameNum++;
+    }
+#endif
+}
+
+void Context::endFrame() {
+#if MLN_DRAWABLE_RENDERER
+    if (!frameInFlightFence) {
+        return;
+    }
+
+    frameInFlightFence->insert();
+#endif
 }
 
 void Context::initializeExtensions(const std::function<gl::ProcAddress(const char*)>& getProcAddress) {
@@ -436,12 +469,15 @@ void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
     setCullFaceMode(gfx::CullFaceMode::disabled());
 }
 
-bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer, const void* data, std::size_t size) {
+bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
+                                           const void* data,
+                                           std::size_t size,
+                                           bool persistent) {
     if (buffer) {
         buffer->update(data, size);
         return false;
     } else {
-        buffer = createUniformBuffer(data, size);
+        buffer = createUniformBuffer(data, size, persistent);
         return true;
     }
 }
@@ -487,8 +523,8 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size) {
-    return std::make_shared<gl::UniformBufferGL>(data, size);
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool /*persistent*/) {
+    return std::make_shared<gl::UniformBufferGL>(data, size, *uboAllocator);
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -526,6 +562,11 @@ Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
     checkFramebuffer();
     return {color.getSize(), std::move(fbo)};
 }
+
+gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
+    return std::make_shared<VertexAttributeArrayGL>();
+}
+
 #endif
 
 void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {
@@ -622,6 +663,12 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
 void Context::finish() {
     MBGL_CHECK_ERROR(glFinish());
 }
+
+#if MLN_DRAWABLE_RENDERER
+std::shared_ptr<gl::Fence> Context::getCurrentFrameFence() const {
+    return frameInFlightFence;
+}
+#endif
 
 void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::size_t indexLength) {
     switch (drawMode.type) {

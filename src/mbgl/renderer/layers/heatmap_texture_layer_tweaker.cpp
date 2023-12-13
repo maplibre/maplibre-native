@@ -30,7 +30,7 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const Paint
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!checkTweakDrawable(drawable)) {
             return;
         }
@@ -42,10 +42,8 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const Paint
             /* .matrix = */ util::cast<float>(viewportMat),
             /* .world = */ {static_cast<float>(size.width), static_cast<float>(size.height)},
             /* .opacity = */ evaluated.get<HeatmapOpacity>(),
-            /* .overdrawInspector = */ overdrawInspector,
             /* .pad1 = */ 0,
-            /* .pad2 = */ 0,
-            /* .pad3 = */ 0};
+        };
 
         drawable.mutableUniformBuffers().createOrUpdate(
             idHeatmapTextureDrawableUBOName, &drawableUBO, parameters.context);

@@ -9,8 +9,8 @@ layout (std140) uniform CircleDrawableUBO {
 
 layout (std140) uniform CirclePaintParamsUBO {
     highp float u_camera_to_center_distance;
-    lowp float u_device_pixel_ratio;
-    lowp vec2 pad3_;
+    lowp float pad3_;
+    lowp vec2 pad4_;
 };
 
 layout (std140) uniform CircleEvaluatedPropsUBO {
@@ -86,7 +86,7 @@ void main(void) {
     // This is a minimum blur distance that serves as a faux-antialiasing for
     // the circle. since blur is a ratio of the circle's size and the intent is
     // to keep the blur at roughly 1px, the two are inversely related.
-    lowp float antialiasblur = 1.0 / u_device_pixel_ratio / (radius + stroke_width);
+    lowp float antialiasblur = 1.0 / DEVICE_PIXEL_RATIO / (radius + stroke_width);
 
     v_data = vec3(extrude.x, extrude.y, antialiasblur);
 }

@@ -74,10 +74,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             texture2d<float, access::sample> image1 [[texture(1)]],
                             sampler image0_sampler [[sampler(0)]],
                             sampler image1_sampler [[sampler(1)]]) {
-
-    if (drawable.overdrawInspector) {
-        return half4(1.0);
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
     // read and cross-fade colors from the main and parent tiles
     float4 color0 = image0.sample(image0_sampler, in.pos0);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/util/string_indexer.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <memory>
 #include <string>
@@ -48,7 +49,7 @@ protected:
 /// Stores a collection of uniform buffers by name
 class UniformBufferArray {
 public:
-    using UniformBufferMap = std::unordered_map<StringIdentity, std::shared_ptr<UniformBuffer>>;
+    using UniformBufferMap = mbgl::unordered_map<StringIdentity, std::shared_ptr<UniformBuffer>>;
 
     UniformBufferArray() = default;
     UniformBufferArray(UniformBufferArray&&);
@@ -68,13 +69,18 @@ public:
                                                        std::shared_ptr<UniformBuffer> uniformBuffer);
 
     /// Create and add a new buffer or update an existing one
-    void createOrUpdate(const StringIdentity id, const std::vector<uint8_t>& data, gfx::Context&);
-    void createOrUpdate(const StringIdentity id, const void* data, std::size_t size, gfx::Context&);
+    void createOrUpdate(const StringIdentity id,
+                        const std::vector<uint8_t>& data,
+                        gfx::Context&,
+                        bool persistent = false);
+    void createOrUpdate(
+        const StringIdentity id, const void* data, std::size_t size, gfx::Context&, bool persistent = false);
     template <typename T>
     std::enable_if_t<!std::is_pointer_v<T>> createOrUpdate(const StringIdentity id,
                                                            const T* data,
-                                                           gfx::Context& context) {
-        createOrUpdate(id, data, sizeof(T), context);
+                                                           gfx::Context& context,
+                                                           bool persistent = false) {
+        createOrUpdate(id, data, sizeof(T), context, persistent);
     }
 
     UniformBufferArray& operator=(UniformBufferArray&&);

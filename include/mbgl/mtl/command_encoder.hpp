@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/command_encoder.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <functional>
 #include <memory>
@@ -23,6 +24,9 @@ class CommandEncoder final : public gfx::CommandEncoder {
 public:
     explicit CommandEncoder(Context& context_);
     ~CommandEncoder() override;
+
+    mtl::Context& getContext() { return context; }
+    const mtl::Context& getContext() const { return context; }
 
     std::unique_ptr<gfx::UploadPass> createUploadPass(const char* name, gfx::Renderable&) override;
     std::unique_ptr<gfx::RenderPass> createRenderPass(const char* name, const gfx::RenderPassDescriptor&) override;
@@ -65,8 +69,8 @@ protected:
     std::vector<GroupEntry> debugGroupNames;
     std::vector<gfx::DebugGroup<gfx::RenderPass>> renderDebugGroups;
     std::vector<gfx::DebugGroup<gfx::UploadPass>> uploadDebugGroups;
-    std::unordered_set<RenderPass*> renderPasses;
-    std::unordered_set<UploadPass*> uploadPasses;
+    mbgl::unordered_set<RenderPass*> renderPasses;
+    mbgl::unordered_set<UploadPass*> uploadPasses;
 };
 
 } // namespace mtl

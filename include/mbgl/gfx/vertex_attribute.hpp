@@ -3,6 +3,7 @@
 #include <mbgl/gfx/gfx_types.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/util/string_indexer.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <algorithm>
 #include <array>
@@ -10,8 +11,6 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 #include <variant>
 #include <vector>
 
@@ -81,6 +80,11 @@ public:
           stride(stride_),
           dataType(dataType_),
           items(count_) {}
+    VertexAttribute(int index_, AttributeDataType dataType_, std::size_t count_)
+        : index(index_),
+          stride(getStrideOf(dataType_)),
+          dataType(dataType_),
+          items(count_) {}
     VertexAttribute(const VertexAttribute& other)
         : index(other.index),
           stride(other.stride),
@@ -104,6 +108,8 @@ public:
 
 public:
     virtual ~VertexAttribute() = default;
+
+    static std::size_t getStrideOf(gfx::AttributeDataType);
 
     /// @brief Get the index of the vertex attribute
     int getIndex() const { return index; }
@@ -274,7 +280,7 @@ protected:
 /// Stores a collection of vertex attributes by name
 class VertexAttributeArray {
 public:
-    using AttributeMap = std::unordered_map<StringIdentity, std::unique_ptr<VertexAttribute>>;
+    using AttributeMap = mbgl::unordered_map<StringIdentity, std::unique_ptr<VertexAttribute>>;
 
     VertexAttributeArray() = default;
     VertexAttributeArray(VertexAttributeArray&&);
@@ -333,7 +339,8 @@ public:
     void clear();
 
     /// Do something with each attribute
-    void visitAttributes(const std::function<void(const StringIdentity, VertexAttribute&)>& f) {
+    template <typename Func /* void(StringIdentity, VertexAttribute&) */>
+    void visitAttributes(Func f) {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
             if (kv.second) {
                 f(kv.first, *kv.second);
@@ -341,38 +348,20 @@ public:
         });
     }
 
-    /// Do something with each attribute
-    void visitAttributes(const std::function<void(const StringIdentity, const VertexAttribute&)>& f) const {
-        std::for_each(attrs.begin(), attrs.end(), [&](const auto& kv) {
-            if (kv.second) {
-                f(kv.first, *kv.second);
-            }
-        });
-    }
-
-    using ResolveDelegate =
-        std::function<void(const StringIdentity, VertexAttribute&, const std::unique_ptr<VertexAttribute>&)>;
     /// Call the provided delegate with each value, providing the override if one exists.
-    void resolve(const VertexAttributeArray& overrides, ResolveDelegate) const;
-
-    VertexAttributeArray& operator=(VertexAttributeArray&&);
-    VertexAttributeArray& operator=(const VertexAttributeArray&);
-
-    /// Clone the collection
-    virtual UniqueVertexAttributeArray clone() const {
-        auto newAttrs = std::make_unique<VertexAttributeArray>();
-        newAttrs->copy(*this);
-        return newAttrs;
-    }
-
-    /// Copy another collection into this one
-    virtual void copy(const VertexAttributeArray& other) {
-        for (const auto& kv : other.attrs) {
-            if (kv.second) {
-                attrs.insert(std::make_pair(kv.first, copy(*kv.second)));
-            }
+    template <typename Func /* void(const StringIdentity, VertexAttribute&, const std::unique_ptr<VertexAttribute>&) */>
+    void resolve(const VertexAttributeArray& overrides, Func delegate) const {
+        for (auto& kv : attrs) {
+            delegate(kv.first, *kv.second, overrides.get(kv.first));
         }
     }
+
+    VertexAttributeArray& operator=(VertexAttributeArray&&);
+    VertexAttributeArray& operator=(const VertexAttributeArray&) = delete;
+
+    /// Clone the collection
+
+    /// Copy another collection into this one
 
     /// Specialized DataDrivenPaintProperty reader
     /// @param binders Property binders for the target shader
@@ -383,7 +372,7 @@ public:
     template <typename... DataDrivenPaintProperty, typename Binders, typename Evaluated>
     void readDataDrivenPaintProperties(const Binders& binders,
                                        const Evaluated& evaluated,
-                                       std::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                                       mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
         // Read each property in the type pack
         propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
         (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
@@ -402,7 +391,7 @@ protected:
     template <typename DataDrivenPaintProperty, typename Binder>
     void readDataDrivenPaintProperty(const Binder& binder,
                                      const bool isConstant,
-                                     std::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                                     mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
         if (!binder) {
             return;
         }
@@ -455,7 +444,7 @@ protected:
     const UniqueVertexAttribute& add(const StringIdentity id, std::unique_ptr<VertexAttribute>&&);
 
     virtual UniqueVertexAttribute create(int index, AttributeDataType dataType, std::size_t count) const {
-        return std::make_unique<VertexAttribute>(index, dataType, count, count);
+        return std::make_unique<VertexAttribute>(index, dataType, count);
     }
 
     virtual UniqueVertexAttribute copy(const gfx::VertexAttribute& attr) const {

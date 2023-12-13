@@ -13,6 +13,7 @@ option(MLN_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" ON)
 option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" OFF)
+option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -158,8 +159,8 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_program_base.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
-        
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/buffer_allocator.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
@@ -215,6 +216,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/util/identity.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/buffer_allocator.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_impl.hpp
@@ -238,6 +240,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend_scope.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/gfx_types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/polyline_generator.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/fill_generator.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderable.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderer_backend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/rendering_stats.hpp
@@ -386,6 +389,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/color.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/compression.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/constants.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/containers.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/convert.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/default_style.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/enum.hpp
@@ -416,6 +420,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/thread.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/tileset.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/timer.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/tiny_unordered_map.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/traits.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/type_list.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/unitbezier.hpp
@@ -469,6 +474,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/index_vector.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/offscreen_texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/polyline_generator.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/fill_generator.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/program.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/render_pass.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderbuffer.hpp
@@ -987,6 +993,7 @@ if(MLN_WITH_OPENGL)
         PUBLIC
             "MLN_LEGACY_RENDERER=$<BOOL:${MLN_LEGACY_RENDERER}>"
             "MLN_DRAWABLE_RENDERER=$<BOOL:${MLN_DRAWABLE_RENDERER}>"
+            "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
     list(APPEND 
         INCLUDE_FILES
@@ -1061,6 +1068,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/fence.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/fence.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_layer_factory.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.cpp
@@ -1120,6 +1129,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/collision_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_drawable_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_drawable_layer_factory.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/debug_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_extrusion_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/heatmap_layer_ubo.hpp
@@ -1162,7 +1172,9 @@ if(MBGL_WITH_METAL)
     message(STATUS "Configuring Metal renderer backend")
     target_compile_definitions(
         mbgl-core
-        PRIVATE MBGL_RENDER_BACKEND_METAL=1
+        PRIVATE
+            MBGL_RENDER_BACKEND_METAL=1
+            "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
     list(APPEND 
         INCLUDE_FILES
@@ -1192,6 +1204,7 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision_box.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/debug.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion_pattern.hpp
@@ -1236,6 +1249,7 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/collision_box.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/collision_circle.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/debug.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill_extrusion.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill_extrusion_pattern.cpp
@@ -1250,14 +1264,6 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_sdf.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_text_and_icon.cpp
     ]
-    )
-endif()
-
-if(MBGL_WITH_METAL)
-    message(STATUS "Configuring Metal renderer backend")
-    target_compile_definitions(
-        mbgl-core
-        PRIVATE MBGL_RENDER_BACKEND_METAL=1
     )
 endif()
 
@@ -1318,6 +1324,16 @@ include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 
+add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/unordered_dense)
+set_target_properties(
+    unordered_dense
+    PROPERTIES
+        INTERFACE_MAPBOX_NAME "unordered_dense"
+        INTERFACE_MAPBOX_URL "https://github.com/martinus/unordered_dense"
+        INTERFACE_MAPBOX_AUTHOR "Martin Leitner-Ankerl"
+        INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/unordered_dense/LICENSE
+)
+
 target_link_libraries(
     mbgl-core
     PRIVATE
@@ -1344,6 +1360,7 @@ target_link_libraries(
         Mapbox::Base::geojson.hpp
         Mapbox::Base::geometry.hpp
         Mapbox::Base::variant
+        unordered_dense
 )
 
 export(TARGETS
@@ -1374,6 +1391,7 @@ export(TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
+    unordered_dense
 
     FILE MapboxCoreTargets.cmake
 )

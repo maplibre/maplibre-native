@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/util/string_indexer.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -62,7 +63,7 @@ protected:
 /// Stores a collection of uniform blocks by name
 class UniformBlockArray {
 public:
-    using UniformBlockMap = std::unordered_map<StringIdentity, std::unique_ptr<UniformBlock>>;
+    using UniformBlockMap = mbgl::unordered_map<StringIdentity, std::unique_ptr<UniformBlock>>;
 
     /// @brief Constructor
     UniformBlockArray() = default;
@@ -100,7 +101,8 @@ public:
     UniformBlockArray& operator=(const UniformBlockArray&);
 
     /// Do something with each block
-    void visit(const std::function<void(const StringIdentity, const UniformBlock&)>& f) {
+    template <typename Func /* void(const StringIdentity, const UniformBlock&) */>
+    void visit(Func f) {
         std::for_each(uniformBlockMap.begin(), uniformBlockMap.end(), [&](const auto& kv) {
             if (kv.second) {
                 f(kv.first, *kv.second);

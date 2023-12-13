@@ -83,12 +83,6 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
 #if MLN_DRAWABLE_RENDERER
     if (layerGroup) {
         auto newTweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
-
-        // propertiesAsUniforms isn't recalculated every update, so carry it over
-        if (layerTweaker) {
-            newTweaker->setPropertiesAsUniforms(layerTweaker->getPropertiesAsUniforms());
-        }
-
         replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
     }
 #endif
@@ -366,7 +360,7 @@ static const StringIdentity idLineImageUniformName = stringIndexer().get("u_imag
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
-                             const std::shared_ptr<UpdateParameters>& updateParameters,
+                             const std::shared_ptr<UpdateParameters>&,
                              [[maybe_unused]] const RenderTree& renderTree,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -390,7 +384,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!lineShaderGroup) {
         lineShaderGroup = shaders.getShaderGroup("LineShader");
@@ -434,11 +427,11 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     };
 
     auto addAttributes =
-        [&](gfx::DrawableBuilder& builder, const LineBucket& bucket, gfx::VertexAttributeArray&& vertexAttrs) {
+        [&](gfx::DrawableBuilder& builder, const LineBucket& bucket, gfx::VertexAttributeArrayPtr&& vertexAttrs) {
             const auto vertexCount = bucket.vertices.elements();
             builder.setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
 
-            if (const auto& attr = vertexAttrs.add(idVertexAttribName)) {
+            if (const auto& attr = vertexAttrs->add(idVertexAttribName)) {
                 attr->setSharedRawData(bucket.sharedVertices,
                                        offsetof(LineLayoutVertex, a1),
                                        /*vertexOffset=*/0,
@@ -446,7 +439,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                        gfx::AttributeDataType::Short2);
             }
 
-            if (const auto& attr = vertexAttrs.add(idDataAttribName)) {
+            if (const auto& attr = vertexAttrs->add(idDataAttribName)) {
                 attr->setSharedRawData(bucket.sharedVertices,
                                        offsetof(LineLayoutVertex, a2),
                                        /*vertexOffset=*/0,
@@ -461,7 +454,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         builder->setSegments(gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
     };
 
-    std::unordered_set<StringIdentity> propertiesAsUniforms;
+    tileLayerGroup->setStencilTiles(renderTiles);
+
+    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -535,11 +530,10 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             /*pattern_from =*/patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
             /*pattern_to =*/patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0}};
 
-        // update existing drawables
-        tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+        auto updateExisting = [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
-                return;
+                return false;
             }
 
             const auto& shader = drawable.getShader();
@@ -570,9 +564,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             // TODO: vertex attributes or `propertiesAsUniforms` updated, is that needed?
-        });
-
-        if (tileLayerGroup->getDrawableCount(renderPass, tileID) > 0) {
+            return true;
+        };
+        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
 
@@ -583,23 +577,19 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             // dash array line (SDF)
             propertiesAsUniforms.clear();
-            gfx::VertexAttributeArray vertexAttrs;
-            vertexAttrs.readDataDrivenPaintProperties<LineColor,
-                                                      LineBlur,
-                                                      LineOpacity,
-                                                      LineGapWidth,
-                                                      LineOffset,
-                                                      LineWidth,
-                                                      LineFloorWidth>(
+            auto vertexAttrs = context.createVertexAttributeArray();
+            vertexAttrs->readDataDrivenPaintProperties<LineColor,
+                                                       LineBlur,
+                                                       LineOpacity,
+                                                       LineGapWidth,
+                                                       LineOffset,
+                                                       LineWidth,
+                                                       LineFloorWidth>(
                 paintPropertyBinders, evaluated, propertiesAsUniforms);
 
             auto shader = lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {
                 continue;
-            }
-
-            if (layerTweaker) {
-                layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
             }
 
             auto builder = createLineBuilder("lineSDF", std::move(shader));
@@ -609,7 +599,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             setSegments(builder, bucket);
 
             // finish
-            builder->flush();
+            builder->flush(context);
             const LinePatternCap cap = bucket.layout.get<LineCap>() == LineCapType::Round ? LinePatternCap::Round
                                                                                           : LinePatternCap::Square;
             for (auto& drawable : builder->clearDrawables()) {
@@ -632,18 +622,18 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
 
             propertiesAsUniforms.clear();
-            gfx::VertexAttributeArray vertexAttrs;
-            vertexAttrs
-                .readDataDrivenPaintProperties<LineBlur, LineOpacity, LineOffset, LineGapWidth, LineWidth, LinePattern>(
-                    paintPropertyBinders, evaluated, propertiesAsUniforms);
+            auto vertexAttrs = context.createVertexAttributeArray();
+            vertexAttrs->readDataDrivenPaintProperties<LineBlur,
+                                                       LineOpacity,
+                                                       LineOffset,
+                                                       LineGapWidth,
+                                                       LineWidth,
+                                                       LinePattern>(
+                paintPropertyBinders, evaluated, propertiesAsUniforms);
 
             auto shader = linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {
                 continue;
-            }
-
-            if (layerTweaker) {
-                layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
             }
 
             auto builder = createLineBuilder("linePattern", std::move(shader));
@@ -669,7 +659,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
                 setSegments(builder, bucket);
 
-                builder->flush();
+                builder->flush(context);
                 for (auto& drawable : builder->clearDrawables()) {
                     drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Pattern));
                     drawable->setTileID(tileID);
@@ -690,17 +680,13 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             // gradient line
             propertiesAsUniforms.clear();
-            gfx::VertexAttributeArray vertexAttrs;
-            vertexAttrs.readDataDrivenPaintProperties<LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(
+            auto vertexAttrs = context.createVertexAttributeArray();
+            vertexAttrs->readDataDrivenPaintProperties<LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(
                 paintPropertyBinders, evaluated, propertiesAsUniforms);
 
             auto shader = lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {
                 continue;
-            }
-
-            if (layerTweaker) {
-                layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
             }
 
             auto builder = createLineBuilder("lineGradient", std::move(shader));
@@ -725,7 +711,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                     setSegments(builder, bucket);
 
                     // finish
-                    builder->flush();
+                    builder->flush(context);
                     for (auto& drawable : builder->clearDrawables()) {
                         drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Gradient));
                         drawable->setTileID(tileID);
@@ -745,18 +731,14 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             // simple line
             propertiesAsUniforms.clear();
-            gfx::VertexAttributeArray vertexAttrs;
+            auto vertexAttrs = context.createVertexAttributeArray();
             vertexAttrs
-                .readDataDrivenPaintProperties<LineColor, LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(
+                ->readDataDrivenPaintProperties<LineColor, LineBlur, LineOpacity, LineGapWidth, LineOffset, LineWidth>(
                     paintPropertyBinders, evaluated, propertiesAsUniforms);
 
             auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
             if (!shader) {
                 continue;
-            }
-
-            if (layerTweaker) {
-                layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
             }
 
             auto builder = createLineBuilder("line", std::move(shader));
@@ -766,7 +748,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             setSegments(builder, bucket);
 
             // finish
-            builder->flush();
+            builder->flush(context);
             for (auto& drawable : builder->clearDrawables()) {
                 drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Simple));
                 drawable->setTileID(tileID);

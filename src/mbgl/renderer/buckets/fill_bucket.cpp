@@ -4,44 +4,15 @@
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/renderer/layers/render_fill_layer.hpp>
 #include <mbgl/util/math.hpp>
-
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4244)
-#endif
-
-#include <mapbox/earcut.hpp>
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
-#include <cassert>
-
-namespace mapbox {
-namespace util {
-template <>
-struct nth<0, mbgl::GeometryCoordinate> {
-    static int64_t get(const mbgl::GeometryCoordinate& t) { return t.x; };
-};
-
-template <>
-struct nth<1, mbgl::GeometryCoordinate> {
-    static int64_t get(const mbgl::GeometryCoordinate& t) { return t.y; };
-};
-} // namespace util
-} // namespace mapbox
+#include <mbgl/gfx/fill_generator.hpp>
 
 namespace mbgl {
-
-using namespace style;
-
-struct GeometryTooLongException : std::exception {};
 
 FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
                        const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
                        const float zoom,
                        const uint32_t) {
+    using namespace style;
     for (const auto& pair : layerPaintProperties) {
         paintPropertyBinders.emplace(std::piecewise_construct,
                                      std::forward_as_tuple(pair.first),
@@ -53,73 +24,24 @@ FillBucket::~FillBucket() {
     sharedVertices->release();
 }
 
+// MLN_TRIANGULATE_FILL_OUTLINES is defined in fill_bucket.hpp
+#if MLN_TRIANGULATE_FILL_OUTLINES
 void FillBucket::addFeature(const GeometryTileFeature& feature,
                             const GeometryCollection& geometry,
                             const ImagePositions& patternPositions,
                             const PatternLayerMap& patternDependencies,
                             std::size_t index,
                             const CanonicalTileID& canonical) {
-    for (auto& polygon : classifyRings(geometry)) {
-        // Optimize polygons with many interior rings for earcut tesselation.
-        limitHoles(polygon, 500);
-
-        std::size_t totalVertices = 0;
-
-        for (const auto& ring : polygon) {
-            totalVertices += ring.size();
-            if (totalVertices > std::numeric_limits<uint16_t>::max()) throw GeometryTooLongException();
-        }
-
-        std::size_t startVertices = vertices.elements();
-
-        for (const auto& ring : polygon) {
-            std::size_t nVertices = ring.size();
-
-            if (nVertices == 0) continue;
-
-            if (lineSegments.empty() ||
-                lineSegments.back().vertexLength + nVertices > std::numeric_limits<uint16_t>::max()) {
-                lineSegments.emplace_back(vertices.elements(), lines.elements());
-            }
-
-            auto& lineSegment = lineSegments.back();
-            assert(lineSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
-            const auto lineIndex = static_cast<uint16_t>(lineSegment.vertexLength);
-
-            vertices.emplace_back(FillProgram::layoutVertex(ring[0]));
-            lines.emplace_back(static_cast<uint16_t>(lineIndex + nVertices - 1), lineIndex);
-
-            for (std::size_t i = 1; i < nVertices; i++) {
-                vertices.emplace_back(FillProgram::layoutVertex(ring[i]));
-                lines.emplace_back(static_cast<uint16_t>(lineIndex + i - 1), static_cast<uint16_t>(lineIndex + i));
-            }
-
-            lineSegment.vertexLength += nVertices;
-            lineSegment.indexLength += nVertices * 2;
-        }
-
-        std::vector<uint32_t> indices = mapbox::earcut(polygon);
-
-        std::size_t nIndicies = indices.size();
-        assert(nIndicies % 3 == 0);
-
-        if (triangleSegments.empty() ||
-            triangleSegments.back().vertexLength + totalVertices > std::numeric_limits<uint16_t>::max()) {
-            triangleSegments.emplace_back(startVertices, triangles.elements());
-        }
-
-        auto& triangleSegment = triangleSegments.back();
-        assert(triangleSegment.vertexLength <= std::numeric_limits<uint16_t>::max());
-        const auto triangleIndex = static_cast<uint16_t>(triangleSegment.vertexLength);
-
-        for (std::size_t i = 0; i < nIndicies; i += 3) {
-            triangles.emplace_back(
-                triangleIndex + indices[i], triangleIndex + indices[i + 1], triangleIndex + indices[i + 2]);
-        }
-
-        triangleSegment.vertexLength += totalVertices;
-        triangleSegment.indexLength += nIndicies;
-    }
+    // generate buffers
+    gfx::generateFillAndOutineBuffers(geometry,
+                                      vertices,
+                                      triangles,
+                                      triangleSegments,
+                                      lineVertices,
+                                      lineIndexes,
+                                      lineSegments,
+                                      basicLines,
+                                      basicLineSegments);
 
     for (auto& pair : paintPropertyBinders) {
         const auto it = patternDependencies.find(pair.first);
@@ -131,12 +53,33 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
         }
     }
 }
+#else  // MLN_TRIANGULATE_FILL_OUTLINES
+void FillBucket::addFeature(const GeometryTileFeature& feature,
+                            const GeometryCollection& geometry,
+                            const ImagePositions& patternPositions,
+                            const PatternLayerMap& patternDependencies,
+                            std::size_t index,
+                            const CanonicalTileID& canonical) {
+    // generate buffers
+    gfx::generateFillAndOutineBuffers(geometry, vertices, triangles, triangleSegments, basicLines, basicLineSegments);
+
+    for (auto& pair : paintPropertyBinders) {
+        const auto it = patternDependencies.find(pair.first);
+        if (it != patternDependencies.end()) {
+            pair.second.populateVertexVectors(
+                feature, vertices.elements(), index, patternPositions, it->second, canonical);
+        } else {
+            pair.second.populateVertexVectors(feature, vertices.elements(), index, patternPositions, {}, canonical);
+        }
+    }
+}
+#endif // MLN_TRIANGULATE_FILL_OUTLINES
 
 void FillBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
 #if MLN_LEGACY_RENDERER
     if (!uploaded) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
-        lineIndexBuffer = uploadPass.createIndexBuffer(std::move(lines));
+        lineIndexBuffer = uploadPass.createIndexBuffer(std::move(basicLines));
         triangleIndexBuffer = triangles.empty() ? std::optional<gfx::IndexBuffer>{}
                                                 : uploadPass.createIndexBuffer(std::move(triangles));
     }
@@ -150,10 +93,11 @@ void FillBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
 }
 
 bool FillBucket::hasData() const {
-    return !triangleSegments.empty() || !lineSegments.empty();
+    return !triangleSegments.empty() || !basicLineSegments.empty();
 }
 
 float FillBucket::getQueryRadius(const RenderLayer& layer) const {
+    using namespace style;
     const auto& evaluated = getEvaluated<FillLayerProperties>(layer.evaluatedProperties);
     const std::array<float, 2>& translate = evaluated.get<FillTranslate>();
     return util::length(translate[0], translate[1]);

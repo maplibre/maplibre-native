@@ -32,6 +32,11 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
     numTextureBindings += r.numTextureBindings;
     numTextureUpdates += r.numTextureUpdates;
     textureUpdateBytes += r.textureUpdateBytes;
+    totalBuffers += r.totalBuffers;
+    totalBufferObjs += r.totalBufferObjs;
+    bufferUpdates += r.bufferUpdates;
+    bufferObjUpdates += r.bufferObjUpdates;
+    bufferUpdateBytes += r.bufferUpdateBytes;
     numBuffers += r.numBuffers;
     numFrameBuffers += r.numFrameBuffers;
     numIndexBuffers += r.numIndexBuffers;
@@ -58,14 +63,17 @@ std::string RenderingStats::toString(std::string_view sep) const {
        << "totalDrawCalls = " << totalDrawCalls << sep << "numCreatedTextures = " << numCreatedTextures << sep
        << "numActiveTextures = " << numActiveTextures << sep << "numTextureBindings = " << numTextureBindings << sep
        << "numTextureUpdates = " << numTextureUpdates << sep << "textureUpdateBytes = " << textureUpdateBytes << sep
-       << "numBuffers = " << numBuffers << sep << "numFrameBuffers = " << numFrameBuffers << sep
-       << "numIndexBuffers = " << numIndexBuffers << sep << "indexUpdateBytes = " << indexUpdateBytes << sep
-       << "numVertexBuffers = " << numVertexBuffers << sep << "vertexUpdateBytes = " << vertexUpdateBytes << sep
-       << "numUniformBuffers = " << numUniformBuffers << sep << "numUniformUpdates = " << numUniformUpdates << sep
-       << "uniformUpdateBytes = " << uniformUpdateBytes << sep << "memTextures = " << memTextures << sep
-       << "memBuffers = " << memBuffers << sep << "memIndexBuffers = " << memIndexBuffers << sep
-       << "memVertexBuffers = " << memVertexBuffers << sep << "memUniformBuffers = " << memUniformBuffers << sep
-       << "stencilClears = " << stencilClears << sep << "stencilUpdates = " << stencilUpdates << sep;
+       << "totalBuffers = " << totalBuffers << sep << "totalBufferObjs = " << totalBufferObjs << sep
+       << "bufferUpdates = " << bufferUpdates << sep << "bufferObjUpdates = " << bufferObjUpdates << sep
+       << "bufferUpdateBytes = " << bufferUpdateBytes << sep << "numBuffers = " << numBuffers << sep
+       << "numFrameBuffers = " << numFrameBuffers << sep << "numIndexBuffers = " << numIndexBuffers << sep
+       << "indexUpdateBytes = " << indexUpdateBytes << sep << "numVertexBuffers = " << numVertexBuffers << sep
+       << "vertexUpdateBytes = " << vertexUpdateBytes << sep << "numUniformBuffers = " << numUniformBuffers << sep
+       << "numUniformUpdates = " << numUniformUpdates << sep << "uniformUpdateBytes = " << uniformUpdateBytes << sep
+       << "memTextures = " << memTextures << sep << "memBuffers = " << memBuffers << sep
+       << "memIndexBuffers = " << memIndexBuffers << sep << "memVertexBuffers = " << memVertexBuffers << sep
+       << "memUniformBuffers = " << memUniformBuffers << sep << "stencilClears = " << stencilClears << sep
+       << "stencilUpdates = " << stencilUpdates << sep;
     return ss.str();
 }
 #endif

@@ -19,7 +19,7 @@ class VertexAttributeGL final : public gfx::VertexAttribute {
 private:
     friend VertexAttributeArrayGL;
     VertexAttributeGL(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
-        : VertexAttribute(index_, dataType_, count_, /*stride_=*/0) {}
+        : VertexAttribute(index_, dataType_, count_) {}
     VertexAttributeGL(const VertexAttributeGL& other)
         : VertexAttribute(other),
           glType(other.glType) {}
@@ -61,16 +61,7 @@ public:
         VertexAttributeArray::operator=(std::move(other));
         return *this;
     }
-    VertexAttributeArrayGL& operator=(const VertexAttributeArrayGL& other) {
-        VertexAttributeArray::operator=(other);
-        return *this;
-    }
-
-    std::unique_ptr<VertexAttributeArray> clone() const override {
-        auto newAttrs = std::make_unique<VertexAttributeArrayGL>();
-        newAttrs->copy(*this);
-        return newAttrs;
-    }
+    VertexAttributeArrayGL& operator=(const VertexAttributeArrayGL&) = delete;
 
     /// Indicates whether any values have changed
     bool isDirty() const override;

@@ -21,11 +21,6 @@ public:
 protected:
     gfx::UniformBufferPtr paintParamsUniformBuffer;
     gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
-
-#if MLN_RENDER_BACKEND_METAL
-    gfx::UniformBufferPtr permutationUniformBuffer;
-    gfx::UniformBufferPtr expressionUniformBuffer;
-#endif // MLN_RENDER_BACKEND_METAL
 };
 
 } // namespace mbgl

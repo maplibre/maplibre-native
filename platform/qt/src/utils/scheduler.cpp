@@ -4,16 +4,16 @@
 
 #include <cassert>
 
-namespace QMapLibreGL {
+namespace QMapLibre {
 
-Scheduler::Scheduler() {}
+Scheduler::Scheduler() = default;
 
 Scheduler::~Scheduler() {
     MBGL_VERIFY_THREAD(tid);
 }
 
 void Scheduler::schedule(std::function<void()> function) {
-    std::lock_guard<std::mutex> lock(m_taskQueueMutex);
+    const std::lock_guard<std::mutex> lock(m_taskQueueMutex);
     m_taskQueue.push(std::move(function));
 
     // Need to force the main thread to wake
@@ -24,15 +24,17 @@ void Scheduler::schedule(std::function<void()> function) {
 void Scheduler::processEvents() {
     std::queue<std::function<void()>> taskQueue;
     {
-        std::unique_lock<std::mutex> lock(m_taskQueueMutex);
+        const std::unique_lock<std::mutex> lock(m_taskQueueMutex);
         std::swap(taskQueue, m_taskQueue);
     }
 
     while (!taskQueue.empty()) {
         auto& function = taskQueue.front();
-        if (function) function();
+        if (function) {
+            function();
+        }
         taskQueue.pop();
     }
 }
 
-} // namespace QMapLibreGL
+} // namespace QMapLibre

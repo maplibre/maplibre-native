@@ -21,7 +21,8 @@ HeadlessFrontend::HeadlessFrontend(Size size_,
                                    float pixelRatio_,
                                    gfx::HeadlessBackend::SwapBehaviour swapBehavior,
                                    const gfx::ContextMode contextMode,
-                                   const std::optional<std::string>& localFontFamily)
+                                   const std::optional<std::string>& localFontFamily,
+                                   bool invalidateOnUpdate_)
     : size(size_),
       pixelRatio(pixelRatio_),
       frameTime(0),
@@ -29,23 +30,8 @@ HeadlessFrontend::HeadlessFrontend(Size size_,
           {static_cast<uint32_t>(size.width * pixelRatio), static_cast<uint32_t>(size.height * pixelRatio)},
           swapBehavior,
           contextMode)),
-      asyncInvalidate([this] {
-          if (renderer && updateParameters) {
-              auto startTime = mbgl::util::MonotonicTimer::now();
-              gfx::BackendScope guard{*getBackend()};
-
-              // onStyleImageMissing might be called during a render. The user
-              // implemented method could trigger a call to
-              // MLNRenderFrontend#update which overwrites `updateParameters`.
-              // Copy the shared pointer here so that the parameters aren't
-              // destroyed while `render(...)` is still using them.
-              auto updateParameters_ = updateParameters;
-              renderer->render(updateParameters_);
-
-              auto endTime = mbgl::util::MonotonicTimer::now();
-              frameTime = (endTime - startTime).count();
-          }
-      }),
+      asyncInvalidate([this] { renderFrame(); }),
+      invalidateOnUpdate(invalidateOnUpdate_),
       renderer(std::make_unique<Renderer>(*getBackend(), pixelRatio, localFontFamily)) {}
 
 HeadlessFrontend::~HeadlessFrontend() = default;
@@ -57,7 +43,9 @@ void HeadlessFrontend::reset() {
 
 void HeadlessFrontend::update(std::shared_ptr<UpdateParameters> updateParameters_) {
     updateParameters = updateParameters_;
-    asyncInvalidate.send();
+    if (invalidateOnUpdate) {
+        asyncInvalidate.send();
+    }
 }
 
 void HeadlessFrontend::setObserver(RendererObserver& observer_) {
@@ -167,6 +155,24 @@ HeadlessFrontend::RenderResult HeadlessFrontend::render(Map& map) {
 
 void HeadlessFrontend::renderOnce(Map&) {
     util::RunLoop::Get()->runOnce();
+}
+
+void HeadlessFrontend::renderFrame() {
+    if (renderer && updateParameters) {
+        auto startTime = mbgl::util::MonotonicTimer::now();
+        gfx::BackendScope guard{*getBackend()};
+
+        // onStyleImageMissing might be called during a render. The user
+        // implemented method could trigger a call to
+        // MLNRenderFrontend#update which overwrites `updateParameters`.
+        // Copy the shared pointer here so that the parameters aren't
+        // destroyed while `render(...)` is still using them.
+        auto updateParameters_ = updateParameters;
+        renderer->render(updateParameters_);
+
+        auto endTime = mbgl::util::MonotonicTimer::now();
+        frameTime = (endTime - startTime).count();
+    }
 }
 
 std::optional<TransformState> HeadlessFrontend::getTransformState() const {

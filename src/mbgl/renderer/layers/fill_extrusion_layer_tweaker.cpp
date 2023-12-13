@@ -29,8 +29,6 @@ using namespace style;
 namespace {
 const StringIdentity idFillExtrusionDrawableUBOName = stringIndexer().get("FillExtrusionDrawableUBO");
 const StringIdentity idFillExtrusionDrawablePropsUBOName = stringIndexer().get("FillExtrusionDrawablePropsUBO");
-const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
-const StringIdentity idFillExtrusionPermutationUBOName = stringIndexer().get("FillExtrusionPermutationUBO");
 const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 } // namespace
@@ -78,37 +76,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         propsBuffer->update(&paramsUBO, sizeof(paramsUBO));
     }
 
-#if MLN_RENDER_BACKEND_METAL
-    const auto zoom = parameters.state.getZoom();
-    if (permutationUpdated) {
-        const FillExtrusionPermutationUBO permutationUBO = {
-            /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(2), /*.expression=*/{}},
-            /* .base = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(3), /*.expression=*/{}},
-            /* .height = */ {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionShader>(4), /*.expression=*/{}},
-            /* .pattern_from = */
-            {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionPatternShader>(4), /*.expression=*/{}},
-            /* .pattern_to = */
-            {/*.source=*/getAttributeSource<BuiltIn::FillExtrusionPatternShader>(5), /*.expression=*/{}},
-            /* .overdrawInspector = */ overdrawInspector,
-            /* .pad = */ 0,
-            0,
-            0,
-            0};
-
-        if (permutationUniformBuffer) {
-            permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
-        } else {
-            permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
-        }
-        permutationUpdated = false;
-    }
-    if (!expressionUniformBuffer) {
-        const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
-        expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
-    }
-#endif
-
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
         }
@@ -154,11 +122,6 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             /* .pad = */ 0};
 
         uniforms.createOrUpdate(idFillExtrusionDrawableUBOName, &drawableUBO, context);
-
-#if MLN_RENDER_BACKEND_METAL
-        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
-        uniforms.addOrReplace(idFillExtrusionPermutationUBOName, permutationUniformBuffer);
-#endif // MLN_RENDER_BACKEND_METAL
     });
 }
 

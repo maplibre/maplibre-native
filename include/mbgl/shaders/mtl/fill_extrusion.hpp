@@ -15,7 +15,7 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 5> attributes;
-    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
@@ -56,25 +56,19 @@ struct alignas(16) FillExtrusionDrawablePropsUBO {
 };
 static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16, "unexpected padding");
 
-struct alignas(16) FillExtrusionPermutationUBO {
-    /*  0 */ Attribute color;
-    /*  8 */ Attribute base;
-    /* 16 */ Attribute height;
-    /* 24 */ Attribute pattern_from;
-    /* 32 */ Attribute pattern_to;
-    /* 40 */ bool overdrawInspector;
-    /* 41 */ uint8_t pad1, pad2, pad3;
-    /* 44 */ float pad4;
-    /* 48 */
-};
-static_assert(sizeof(FillExtrusionPermutationUBO) == 3 * 16, "unexpected padding");
-
 struct VertexStage {
     short2 pos [[attribute(0)]];
     short4 normal_ed [[attribute(1)]];
+
+#if !defined(HAS_UNIFORM_u_color)
     float4 color [[attribute(2)]];
+#endif
+#if !defined(HAS_UNIFORM_u_base)
     float base [[attribute(3)]];
+#endif
+#if !defined(HAS_UNIFORM_u_height)
     float height [[attribute(4)]];
+#endif
 };
 
 struct FragmentStage {
@@ -90,27 +84,36 @@ struct FragmentOutput {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillExtrusionDrawableUBO& fill [[buffer(5)]],
                                 device const FillExtrusionDrawablePropsUBO& props [[buffer(6)]],
-                                device const FillExtrusionInterpolateUBO& interp [[buffer(7)]],
-                                device const FillExtrusionPermutationUBO& permutation [[buffer(8)]],
-                                device const ExpressionInputsUBO& expr [[buffer(9)]]) {
+                                device const FillExtrusionInterpolateUBO& interp [[buffer(7)]]) {
 
-    const float u_base = props.light_position_base.w;
-    const auto base   = max(valueFor(permutation.base,   u_base,       vertx.base,   interp.base_t,   expr), 0.0);
-    const auto height = max(valueFor(permutation.height, props.height, vertx.height, interp.height_t, expr), 0.0);
+#if defined(HAS_UNIFORM_u_base)
+    const auto base   = props.light_position_base.w;
+#else
+    const auto base   = max(unpack_mix_float(vertx.base, interp.base_t), 0.0);
+#endif
+#if defined(HAS_UNIFORM_u_height)
+    const auto height = props.height;
+#else
+    const auto height = max(unpack_mix_float(vertx.height, interp.height_t), 0.0);
+#endif
 
     const float3 normal = float3(vertx.normal_ed.xyz);
     const float t = glMod(normal.x, 2.0);
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
     const float4 position = fill.matrix * float4(float2(vertx.pos), z, 1);
 
-    if (permutation.overdrawInspector) {
-        return {
-            .position = position,
-            .color    = half4(1.0),
-        };
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return {
+        .position = position,
+        .color    = half4(1.0),
+    };
+#endif
 
-    auto color = colorFor(permutation.color, props.color, vertx.color, interp.color_t, expr);
+#if defined(HAS_UNIFORM_u_color)
+    auto color = props.color;
+#else
+    auto color = unpack_mix_color(vertx.color, interp.color_t);
+#endif
 
     // Relative luminance (how dark/bright is the surface color?)
     const float luminance = color.r * 0.2126 + color.g * 0.7152 + color.b * 0.0722;

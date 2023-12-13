@@ -20,5 +20,7 @@ cp -r metrics/tests $BASE_DIR/test-data/
 cp -r metrics/ios-render-test-runner $BASE_DIR/test-data/
 cp -r metrics/ios-render-test-runner-style.json $BASE_DIR/test-data/
 cp -r metrics/ios-render-test-runner-metrics.json $BASE_DIR/test-data/
+cp -r metrics/ios-metal-render-test-runner-style.json $BASE_DIR/test-data/
+cp -r metrics/ios-metal-render-test-runner-metrics.json $BASE_DIR/test-data/
 cp -r metrics/cache-metrics.db $BASE_DIR/test-data/
 cp -r metrics/cache-style.db $BASE_DIR/test-data/

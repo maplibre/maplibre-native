@@ -151,7 +151,9 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         for (std::size_t i = 0; i < nIndices; i += 3) {
             // Counter-Clockwise winding order.
-            triangles.emplace_back(flatIndices[indices[i]], flatIndices[indices[i + 2]], flatIndices[indices[i + 1]]);
+            triangles.emplace_back(static_cast<uint16_t>(flatIndices[indices[i]]),
+                                   static_cast<uint16_t>(flatIndices[indices[i + 2]]),
+                                   static_cast<uint16_t>(flatIndices[indices[i + 1]]));
         }
 
         triangleSegment.vertexLength += totalVertices;

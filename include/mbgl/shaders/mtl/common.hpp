@@ -27,30 +27,6 @@ float radians(float degrees) {
     return M_PI_F * degrees / 180.0;
 }
 
-enum class AttributeSource : int32_t {
-    Constant,
-    PerVertex,
-    Computed,
-};
-
-struct Expression {};
-
-struct Attribute {
-    AttributeSource source;
-    Expression expression;
-};
-
-struct alignas(16) ExpressionInputsUBO {
-    // These can use uint64_t in later versions of Metal
-    /*  0 */ uint32_t time_lo;  // Current scene time (nanoseconds)
-    /*  4 */ uint32_t time_hi;
-    /*  8 */ uint32_t frame_lo; // Current frame count
-    /* 12 */ uint32_t frame_hi;
-    /* 16 */ float zoom;     // Current zoom level
-    /* 20 */ float pad1, pad2, pad3;
-    /* 32 */
-};
-
 // Unpack a pair of values that have been packed into a single float.
 // The packed values are assumed to be 8-bit unsigned integers, and are
 // packed like so: packedValue = floor(input[0]) * 256 + input[1],
@@ -60,7 +36,7 @@ float2 unpack_float(const float packedValue) {
     return float2(v0, packedIntValue - v0 * 256);
 }
 float2 unpack_opacity(const float packedOpacity) {
-    return float2(float(int(packedOpacity) / 2) / 127.0, fmod(packedOpacity, 2.0));
+    return float2(float(int(packedOpacity) / 2) / 127.0, glMod(packedOpacity, 2.0));
 }
 // To minimize the number of attributes needed, we encode a 4-component
 // color into a pair of floats (i.e. a vec2) as follows:
@@ -78,56 +54,28 @@ float4 unpack_mix_color(const float4 packedColors, const float t) {
                decode_color(float2(packedColors[2], packedColors[3])), t);
 }
 
-float valueFor(device const Attribute& attrib,
-               const float constValue,
-               thread const float2& vertexValue,
-               const float t,
-               device const ExpressionInputsUBO&) {
-    switch (attrib.source) {
-        case AttributeSource::PerVertex: return unpack_mix_float(vertexValue, t);
-        case AttributeSource::Computed:  // TODO
-        default:
-        case AttributeSource::Constant: return constValue;
-    }
-}
-// single packed color
-float4 colorFor(device const Attribute& attrib,
-                device const float4& constValue,
-                thread const float2& vertexValue,
-                device const ExpressionInputsUBO&) {
-    switch (attrib.source) {
-        case AttributeSource::PerVertex: return decode_color(float2(vertexValue[0], vertexValue[1]));
-        case AttributeSource::Computed:  // TODO
-        default:
-        case AttributeSource::Constant: return constValue;
-    }
-}
-// interpolated packed colors
-float4 colorFor(device const Attribute& attrib,
-                device const float4& constValue,
-                const float4 vertexValue,
-                const float t,
-                device const ExpressionInputsUBO&) {
-    switch (attrib.source) {
-        case AttributeSource::PerVertex: return unpack_mix_color(vertexValue, t);
-        case AttributeSource::Computed:  // TODO
-        default:
-        case AttributeSource::Constant: return constValue;
-    }
-}
+struct alignas(16) LineDynamicUBO {
+    float2 units_to_pixels;
+    float pad1, pad2;
+};
 
 struct alignas(16) LineUBO {
     float4x4 matrix;
+    float ratio;
+    float pad1, pad2, pad3;
+};
+
+struct alignas(16) LineBasicUBO {
+    float4x4 matrix;
     float2 units_to_pixels;
     float ratio;
-    float device_pixel_ratio;
+    float pad;
 };
 
 struct alignas(16) LineGradientUBO {
     float4x4 matrix;
-    float2 units_to_pixels;
     float ratio;
-    float device_pixel_ratio;
+    float pad1, pad2, pad3;
 };
 
 struct alignas(16) LinePropertiesUBO {
@@ -140,6 +88,13 @@ struct alignas(16) LinePropertiesUBO {
     float pad1, pad2, pad3;
 };
 
+struct alignas(16) LineBasicPropertiesUBO {
+    float4 color;
+    float opacity;
+    float width;
+    float pad1, pad2;
+};
+
 struct alignas(16) LineGradientPropertiesUBO {
     float blur;
     float opacity;
@@ -147,21 +102,6 @@ struct alignas(16) LineGradientPropertiesUBO {
     float offset;
     float width;
     float pad1, pad2, pad3;
-};
-
-struct alignas(16) LinePermutationUBO {
-    Attribute color;
-    Attribute blur;
-    Attribute opacity;
-    Attribute gapwidth;
-    Attribute offset;
-    Attribute width;
-    Attribute floorwidth;
-    Attribute pattern_from;
-    Attribute pattern_to;
-    bool overdrawInspector;
-    uint8_t pad1, pad2, pad3;
-    float pad4;
 };
 
 struct alignas(16) LineInterpolationUBO {
@@ -214,16 +154,18 @@ struct alignas(16) SymbolDrawableUBO {
     float2 texsize_icon;
 
     float gamma_scale;
-    float device_pixel_ratio;
-
-    float camera_to_center_distance;
-    float pitch;
     /*bool*/ int rotate_symbol;
-    float aspect_ratio;
+    float2 pad;
+};
+static_assert(sizeof(SymbolDrawableUBO) == 14 * 16, "unexpected padding");
+
+struct alignas(16) SymbolDynamicUBO {
     float fade_change;
+    float camera_to_center_distance;
+    float aspect_ratio;
     float pad;
 };
-static_assert(sizeof(SymbolDrawableUBO) == 15 * 16, "unexpected padding");
+static_assert(sizeof(SymbolDynamicUBO) == 16, "unexpected padding");
 
 struct alignas(16) SymbolDrawablePaintUBO {
     float4 fill_color;
@@ -234,31 +176,6 @@ struct alignas(16) SymbolDrawablePaintUBO {
     float padding;
 };
 static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16, "unexpected padding");
-
-struct alignas(16) SymbolPermutationUBO {
-    Attribute fill_color;
-    Attribute halo_color;
-    Attribute opacity;
-    Attribute halo_width;
-    Attribute halo_blur;
-    int32_t /*bool*/ overdrawInspector;
-    float pad1, pad2, pad3;
-};
-static_assert(sizeof(SymbolPermutationUBO) == 4 * 16, "unexpected padding");
-
-
-float4 patternFor(device const Attribute& attrib,
-                device const float4& constValue,
-                thread const ushort4& vertexValue,
-                device const float& ,
-                device const ExpressionInputsUBO&) {
-    switch (attrib.source) {
-        case AttributeSource::PerVertex: return float4(vertexValue);
-        case AttributeSource::Computed:  // TODO
-        default:
-        case AttributeSource::Constant: return constValue;
-    }
-}
 
 // unpack pattern position
 inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel_coord_lower,

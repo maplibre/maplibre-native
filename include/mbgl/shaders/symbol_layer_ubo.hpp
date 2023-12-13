@@ -40,22 +40,19 @@ struct alignas(16) SymbolDrawableUBO {
     /* 200 */ std::array<float, 2> texsize_icon;
 
     /* 208 */ float gamma_scale;
-    /* 212 */ float device_pixel_ratio;
+    /* 212 */ /*bool*/ int rotate_symbol;
 
-    /* 216 */ float camera_to_center_distance;
-    /* 220 */ float pitch;
-    /* 224 */ /*bool*/ int rotate_symbol;
-    /* 228 */ float aspect_ratio;
-    /* 232 */ std::array<float, 2> pad;
-    /* 240 */
+    /* 216 */ std::array<float, 2> pad;
+    /* 224 */
 };
-static_assert(sizeof(SymbolDrawableUBO) == 15 * 16);
+static_assert(sizeof(SymbolDrawableUBO) == 14 * 16);
 
 /// Dynamic UBO
 struct alignas(16) SymbolDynamicUBO {
     /* 0 */ float fade_change;
-    /* 4 */ float pad1;
-    /* 8 */ std::array<float, 2> pad2;
+    /* 4 */ float camera_to_center_distance;
+    /* 8 */ float aspect_ratio;
+    /* 12 */ float pad;
     /* 16 */
 };
 static_assert(sizeof(SymbolDynamicUBO) == 16);
@@ -71,18 +68,6 @@ struct alignas(16) SymbolDrawablePaintUBO {
     /* 48 */
 };
 static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
-
-struct alignas(16) SymbolPermutationUBO {
-    /*  0 */ Attribute fill_color;
-    /*  8 */ Attribute halo_color;
-    /* 16 */ Attribute opacity;
-    /* 24 */ Attribute halo_width;
-    /* 40 */ Attribute halo_blur;
-    /* 48 */ int32_t /*bool*/ overdrawInspector;
-    /* 52 */ float pad1, pad2, pad3;
-    /* 64 */
-};
-static_assert(sizeof(SymbolPermutationUBO) == 4 * 16);
 
 } // namespace shaders
 } // namespace mbgl

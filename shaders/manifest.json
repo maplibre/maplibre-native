@@ -84,6 +84,13 @@
         "uses_ubos": true
     },
     {
+        "name": "LineBasicShader",
+        "header": "drawable_line_basic",
+        "glsl_vert": "drawable.line_basic.vertex.glsl",
+        "glsl_frag": "drawable.line_basic.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "FillPatternShader",
         "header": "drawable_fill_pattern",
         "glsl_vert": "drawable.fill_pattern.vertex.glsl",

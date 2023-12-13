@@ -13,6 +13,7 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/intersection_tests.hpp>
+#include <mbgl/util/containers.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_builder.hpp>
@@ -274,7 +275,7 @@ using namespace shaders;
 void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
-                               [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters,
+                               [[maybe_unused]] const std::shared_ptr<UpdateParameters>&,
                                [[maybe_unused]] const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
@@ -293,12 +294,10 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
-
     if (!layerTweaker) {
         layerTweaker = std::make_shared<CircleLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!circleShaderGroup) {
         circleShaderGroup = shaders.getShaderGroup(CircleShaderGroupName);
@@ -319,7 +318,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
-    std::unordered_set<StringIdentity> propertiesAsUniforms;
+    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -359,27 +358,28 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         auto updateExisting = [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
-                return;
+                return false;
             }
 
             auto& uniforms = drawable.mutableUniformBuffers();
             uniforms.createOrUpdate(idCircleInterpolateUBOName, &interpolateUBO, context);
+            return true;
         };
-        if (0 < tileLayerGroup->visitDrawables(renderPass, tileID, std::move(updateExisting))) {
+        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
             continue;
         }
 
         const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
 
         propertiesAsUniforms.clear();
-        gfx::VertexAttributeArray circleVertexAttrs;
-        circleVertexAttrs.readDataDrivenPaintProperties<CircleColor,
-                                                        CircleRadius,
-                                                        CircleBlur,
-                                                        CircleOpacity,
-                                                        CircleStrokeColor,
-                                                        CircleStrokeWidth,
-                                                        CircleStrokeOpacity>(
+        auto circleVertexAttrs = context.createVertexAttributeArray();
+        circleVertexAttrs->readDataDrivenPaintProperties<CircleColor,
+                                                         CircleRadius,
+                                                         CircleBlur,
+                                                         CircleOpacity,
+                                                         CircleStrokeColor,
+                                                         CircleStrokeWidth,
+                                                         CircleStrokeOpacity>(
             paintPropertyBinders, evaluated, propertiesAsUniforms);
 
         if (!circleShaderGroup) {
@@ -390,11 +390,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        if (layerTweaker) {
-            layerTweaker->setPropertiesAsUniforms(propertiesAsUniforms);
-        }
-
-        if (const auto& attr = circleVertexAttrs.add(idVertexAttribName)) {
+        if (const auto& attr = circleVertexAttrs->add(idVertexAttribName)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(CircleLayoutVertex, a1),
                                    0,
@@ -415,7 +411,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         circleBuilder->setSegments(
             gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
 
-        circleBuilder->flush();
+        circleBuilder->flush(context);
 
         for (auto& drawable : circleBuilder->clearDrawables()) {
             drawable->setTileID(tileID);

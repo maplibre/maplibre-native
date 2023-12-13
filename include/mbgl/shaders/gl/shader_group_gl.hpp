@@ -4,10 +4,7 @@
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/programs/program_parameters.hpp>
-#include <mbgl/util/hash.hpp>
-
-#include <sstream>
-#include <unordered_set>
+#include <mbgl/util/containers.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -16,22 +13,24 @@ template <shaders::BuiltIn ShaderID>
 class ShaderGroupGL final : public gfx::ShaderGroup {
 public:
     ShaderGroupGL(const ProgramParameters& programParameters_)
-        : ShaderGroup(),
+        : gfx::ShaderGroup(),
           programParameters(programParameters_) {}
     ~ShaderGroupGL() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
-                                     const std::unordered_set<StringIdentity>& propertiesAsUniforms,
+                                     const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms,
                                      std::string_view firstAttribName) override {
+        constexpr auto& name = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::name;
         constexpr auto& vert = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::vertex;
         constexpr auto& frag = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::fragment;
 
-        // Generate a map key for the specified combination of properties
-        const size_t key = util::order_independent_hash(propertiesAsUniforms.begin(), propertiesAsUniforms.end());
-
         // We could cache these by key here to avoid creating a string key each time, but we
         // would need another mutex.  We could also push string IDs down into `ShaderGroup`.
-        const std::string shaderName = getShaderName(key);
+        std::size_t seed = 0;
+        mbgl::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
+        mbgl::util::hash_combine(seed, programParameters.getDefinesHash());
+        const std::string shaderName = getShaderName(name, seed);
+
         auto shader = get<gl::ShaderProgramGL>(shaderName);
         if (shader) {
             return shader;
@@ -60,16 +59,6 @@ public:
             throw std::runtime_error("Failed to register " + shaderName + " with shader group!");
         }
         return shader;
-    }
-
-protected:
-    std::string getShaderName(std::size_t key) {
-        constexpr auto& name = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::name;
-
-        // This could be more efficient.
-        std::ostringstream stream;
-        stream << name << '#' << key;
-        return stream.str();
     }
 
 private:
