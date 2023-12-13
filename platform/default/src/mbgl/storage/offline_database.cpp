@@ -934,6 +934,39 @@ std::exception_ptr OfflineDatabase::invalidateAmbientCache() try {
     return std::current_exception();
 }
 
+std::exception_ptr OfflineDatabase::clearUnusedResourcesAndTiles() try {
+    checkFlags();
+
+    // clang-format off
+    mapbox::sqlite::Query tileQuery{ getStatement(
+        "DELETE FROM tiles "
+        "WHERE id NOT IN ("
+        "    SELECT tile_id FROM region_tiles"
+        ")"
+    ) };
+    // clang-format on
+
+    tileQuery.run();
+
+    // clang-format off
+    mapbox::sqlite::Query resourceQuery{ getStatement(
+        "DELETE FROM resources "
+        "WHERE id NOT IN ("
+        "    SELECT resource_id FROM region_resources"
+        ")"
+    ) };
+    // clang-format on
+
+    resourceQuery.run();
+
+    if (autopack) vacuum();
+
+    return nullptr;
+} catch (...) {
+    handleError("clear unused resources and tiles");
+    return std::current_exception();
+}
+
 std::exception_ptr OfflineDatabase::clearAmbientCache() try {
     checkFlags();
 
@@ -1150,6 +1183,8 @@ std::exception_ptr OfflineDatabase::deleteRegion(OfflineRegion&& region) try {
         query.bind(1, region.getID());
         query.run();
     }
+    
+    clearUnusedResourcesAndTiles();
 
     DatabaseSizeChangeStats stats(this);
     evict(0, stats);

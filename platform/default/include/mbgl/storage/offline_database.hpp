@@ -157,6 +157,8 @@ private:
     std::optional<uint64_t> offlineMapboxTileCount;
 
     bool evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& stats);
+    
+    std::exception_ptr clearUnusedResourcesAndTiles();
 
     TileServerOptions tileServerOptions;
 
