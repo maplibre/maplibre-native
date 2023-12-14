@@ -189,11 +189,15 @@ void NativeMapView::onDidFinishRenderingFrame(MapObserver::RenderFrameStatus sta
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onDidFinishRenderingFrame = javaClass.GetMethod<void(jboolean, jdouble, jdouble)>(*_env, "onDidFinishRenderingFrame");
+    static auto onDidFinishRenderingFrame = javaClass.GetMethod<void(jboolean, jdouble, jdouble)>(
+        *_env, "onDidFinishRenderingFrame");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(
-            *_env, onDidFinishRenderingFrame, (jboolean)(status.mode != MapObserver::RenderMode::Partial), (jdouble)status.frameEncodingTime, (jdouble)status.frameRenderingTime);
+        weakReference.Call(*_env,
+                           onDidFinishRenderingFrame,
+                           (jboolean)(status.mode != MapObserver::RenderMode::Partial),
+                           (jdouble)status.frameEncodingTime,
+                           (jdouble)status.frameRenderingTime);
     }
 }
 
