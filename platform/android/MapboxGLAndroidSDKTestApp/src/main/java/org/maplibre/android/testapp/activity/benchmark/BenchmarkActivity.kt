@@ -33,6 +33,7 @@ import org.maplibre.android.testapp.BuildConfig
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.utils.FpsStore
 import org.maplibre.android.testapp.utils.BenchmarkResults
+import timber.log.Timber
 import java.io.File
 
 import java.util.*
@@ -179,10 +180,19 @@ class BenchmarkActivity : AppCompatActivity() {
 
     private fun setupMapView(savedInstanceState: Bundle?) {
         mapView = findViewById<View>(R.id.mapView) as MapView
+        mapView.addOnDidFinishRenderingFrameListener(
+            MapView.OnDidFinishRenderingFrameListener { fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double ->
+                /*Timber.v(
+                    "OnDidFinishRenderingFrame: fully: %s, encoding time: %.2f ms, rendering time: %.2f ms",
+                    fully, frameEncodingTime * 1e3, frameRenderingTime * 1e3
+                )*/
+                fpsStore.add(frameEncodingTime * 1e3)
+            }
+        )
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@BenchmarkActivity.maplibreMap = maplibreMap
             maplibreMap.setStyle(inputData.styleURLs[0])
-            setFpsView(maplibreMap)
+            //setFpsView(maplibreMap)
 
             // Start an animation on the map as well
             flyTo(maplibreMap, 0, 0,14.0)

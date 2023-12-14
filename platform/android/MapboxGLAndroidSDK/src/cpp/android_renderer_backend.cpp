@@ -22,6 +22,10 @@ public:
         backend.setViewport(0, 0, backend.getSize());
     }
 
+    void swap() override {
+        backend.swap();
+    }
+
 private:
     AndroidRendererBackend& backend;
 };
@@ -49,6 +53,10 @@ void AndroidRendererBackend::resizeFramebuffer(int width, int height) {
 PremultipliedImage AndroidRendererBackend::readFramebuffer() {
     assert(gfx::BackendScope::exists());
     return gl::RendererBackend::readFramebuffer(size);
+}
+
+void AndroidRendererBackend::swap() {
+    static_cast<gl::Context&>(getContext()).finish();
 }
 
 void AndroidRendererBackend::updateAssumedState() {
