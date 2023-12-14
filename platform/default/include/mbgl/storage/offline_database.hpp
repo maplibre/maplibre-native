@@ -119,17 +119,17 @@ private:
     mapbox::sqlite::Statement& getStatement(const char*);
 
     std::optional<std::pair<Response, uint64_t>> getTile(const Resource::TileData&);
-    void updateTileTimestamp(const Resource::TileData&, const char *);
-    std::optional<std::pair<Response, uint64_t>> extractTileData(const Resource::TileData&, const char *);
+    void updateTileTimestamp(const Resource::TileData&, const char*);
+    std::optional<std::pair<Response, uint64_t>> extractTileData(const Resource::TileData&, const char*);
     std::optional<int64_t> hasTile(const Resource::TileData&);
-    std::optional<int64_t> extractTileDataSize(const Resource::TileData&, const char *);
+    std::optional<int64_t> extractTileDataSize(const Resource::TileData&, const char*);
     bool putTile(const Resource::TileData&, const Response&, const std::string&, bool compressed, bool ambient);
 
     std::optional<std::pair<Response, uint64_t>> getResource(const Resource&);
-    void updateResourceTimestamp(const Resource&, const char *);
-    std::optional<std::pair<Response, uint64_t>> extractResourceData(const Resource&, const char *);
+    void updateResourceTimestamp(const Resource&, const char*);
+    std::optional<std::pair<Response, uint64_t>> extractResourceData(const Resource&, const char*);
     std::optional<int64_t> hasResource(const Resource&);
-    std::optional<int64_t> extractResourceDataSize(const Resource&, const char *);
+    std::optional<int64_t> extractResourceDataSize(const Resource&, const char*);
     bool putResource(const Resource&, const Response&, const std::string&, bool compressed, bool ambient);
 
     uint64_t putRegionResourceInternal(int64_t regionID, const Resource&, const Response&);
@@ -157,7 +157,7 @@ private:
     std::optional<uint64_t> offlineMapboxTileCount;
 
     bool evict(uint64_t neededFreeSize, DatabaseSizeChangeStats& stats);
-    
+
     std::exception_ptr clearUnusedResourcesAndTiles();
 
     TileServerOptions tileServerOptions;
