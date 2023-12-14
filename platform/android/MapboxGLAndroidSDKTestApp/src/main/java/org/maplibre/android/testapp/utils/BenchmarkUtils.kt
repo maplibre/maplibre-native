@@ -23,6 +23,27 @@ class FpsStore {
     }
 }
 
+class FrameTimeStore {
+    private val timeValues = ArrayList<Double>(100000)
+
+    fun add(time: Double) {
+        timeValues.add(time)
+    }
+
+    fun reset() {
+        timeValues.clear()
+    }
+
+    fun low1p(): Double {
+        timeValues.sort()
+        return timeValues.slice((99 * timeValues.size / 100)..timeValues.size - 1).average()
+    }
+
+    fun average(): Double {
+        return timeValues.average()
+    }
+}
+
 /**
  * Result of single benchmark run
  */
@@ -37,6 +58,16 @@ data class BenchmarkResults(
             BenchmarkResult(
                 fpsStore.average(),
                 fpsStore.low1p()
+            )
+        )
+        resultsPerStyle[styleName] = newResults
+    }
+
+    fun addResult(styleName: String, frameTimeStore: FrameTimeStore) {
+        val newResults = resultsPerStyle.getValue(styleName).plus(
+            BenchmarkResult(
+                frameTimeStore.average(),
+                frameTimeStore.low1p()
             )
         )
         resultsPerStyle[styleName] = newResults

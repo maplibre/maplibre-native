@@ -33,6 +33,7 @@ import org.maplibre.android.testapp.BuildConfig
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.utils.FpsStore
 import org.maplibre.android.testapp.utils.BenchmarkResults
+import org.maplibre.android.testapp.utils.FrameTimeStore
 import timber.log.Timber
 import java.io.File
 
@@ -82,7 +83,11 @@ class BenchmarkActivity : AppCompatActivity() {
     private var handler: Handler? = null
     private var delayed: Runnable? = null
     private var fpsStore = FpsStore()
-    private var results = BenchmarkResults()
+    private var encodingTimeStore = FrameTimeStore()
+    private var renderingTimeStore = FrameTimeStore()
+    private var fpsResults = BenchmarkResults()
+    private var encodingTimeResults = BenchmarkResults()
+    private var renderingTimeResults = BenchmarkResults()
     private var runsLeft = 5
 
     // the styles used for the benchmark
@@ -186,13 +191,14 @@ class BenchmarkActivity : AppCompatActivity() {
                     "OnDidFinishRenderingFrame: fully: %s, encoding time: %.2f ms, rendering time: %.2f ms",
                     fully, frameEncodingTime * 1e3, frameRenderingTime * 1e3
                 )*/
-                fpsStore.add(frameEncodingTime * 1e3)
+                encodingTimeStore.add(frameEncodingTime * 1e3)
+                renderingTimeStore.add(frameRenderingTime * 1e3)
             }
         )
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@BenchmarkActivity.maplibreMap = maplibreMap
             maplibreMap.setStyle(inputData.styleURLs[0])
-            //setFpsView(maplibreMap)
+            setFpsView(maplibreMap)
 
             // Start an animation on the map as well
             flyTo(maplibreMap, 0, 0,14.0)
@@ -216,10 +222,20 @@ class BenchmarkActivity : AppCompatActivity() {
 
                 override fun onFinish() {
                     if (place == PLACES.size - 1) {  // done with tour
-                        results.addResult(inputData.styleNames[style], fpsStore)
+                        fpsResults.addResult(inputData.styleNames[style], fpsStore)
                         fpsStore.reset()
 
-                        println("FPS results $results")
+                        println("FPS results $fpsResults")
+
+                        encodingTimeResults.addResult(inputData.styleNames[style], encodingTimeStore)
+                        encodingTimeStore.reset()
+
+                        println("Encoding time results $encodingTimeResults")
+
+                        renderingTimeResults.addResult(inputData.styleNames[style], renderingTimeStore)
+                        renderingTimeStore.reset()
+
+                        println("Rendering time  results $renderingTimeResults")
 
                         if (style < inputData.styleURLs.size - 1) {  // continue with next style
                             maplibreMap.setStyle(inputData.styleURLs[style + 1])
@@ -294,7 +310,7 @@ class BenchmarkActivity : AppCompatActivity() {
 
         val client = OkHttpClient()
 
-        val payload = jsonPayload(results)
+        val payload = jsonPayload(fpsResults)
         Logger.i(TAG, "Sending JSON payload to API: $payload")
 
         val request = Request.Builder()
