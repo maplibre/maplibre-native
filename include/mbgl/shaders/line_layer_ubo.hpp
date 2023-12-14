@@ -10,7 +10,7 @@ struct alignas(16) LineDynamicUBO {
     /* 8 */ float pad1, pad2;
     /* 16 */
 };
-static_assert(sizeof(LineDynamicUBO) == 16);
+static_assert(sizeof(LineDynamicUBO) % 16 == 0);
 
 struct alignas(16) LineUBO {
     float ratio;

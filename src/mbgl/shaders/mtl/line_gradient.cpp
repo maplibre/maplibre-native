@@ -14,7 +14,7 @@ const std::array<AttributeInfo, 7> ShaderSource<BuiltIn::LineGradientShader, gfx
 };
 const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{7, true, false, sizeof(MatrixUBO), "LineMatrixUBO"},
-    UniformBlockInfo{8, true, false, sizeof(LineGradientUBO), "LineDynamicUBO"},
+    UniformBlockInfo{8, true, false, sizeof(LineDynamicUBO), "LineDynamicUBO"},
     UniformBlockInfo{9, true, true, sizeof(LineGradientUBO), "LineGradientUBO"},
     UniformBlockInfo{10, true, false, sizeof(LineGradientPropertiesUBO), "LineGradientPropertiesUBO"},
     UniformBlockInfo{11, true, false, sizeof(LineGradientInterpolationUBO), "LineGradientInterpolationUBO"},
