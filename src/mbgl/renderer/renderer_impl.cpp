@@ -141,26 +141,6 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 #endif // MLN_RENDER_BACKEND_METAL
 
-#if !MLN_LEGACY_RENDERER
-
-#if !defined(NDEBUG)
-    std::stringstream ss;
-    ss << "\nFill layer matrix cache hits: " << FillLayerTweaker::matrixCacheHits
-       << "\nLine layer matrix cache hits: " << LineLayerTweaker::matrixCacheHits
-       << "\nSymbol layer matrix cache hits: " << SymbolLayerTweaker::matrixCacheHits;
-    Log::Debug(Event::General, ss.str());
-
-    FillLayerTweaker::matrixCacheHits = 0;
-    LineLayerTweaker::matrixCacheHits = 0;
-    SymbolLayerTweaker::matrixCacheHits = 0;
-#endif
-
-    FillLayerTweaker::matrixCache.clear();
-    LineLayerTweaker::matrixCache.clear();
-    SymbolLayerTweaker::matrixCache.clear();
-    SymbolLayerTweaker::matrixUBOCache.clear();
-#endif
-
     // Blocks execution until the renderable is available.
     backend.getDefaultRenderable().wait();
     context.beginFrame();
@@ -530,6 +510,26 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 
     frameCount += 1;
+    
+#if !MLN_LEGACY_RENDERER
+
+#if !defined(NDEBUG)
+    std::stringstream ss;
+    ss << "\nFill layer matrix cache hits: " << FillLayerTweaker::matrixCacheHits
+       << "\nLine layer matrix cache hits: " << LineLayerTweaker::matrixCacheHits
+       << "\nSymbol layer matrix cache hits: " << SymbolLayerTweaker::matrixCacheHits;
+    Log::Debug(Event::General, ss.str());
+
+    FillLayerTweaker::matrixCacheHits = 0;
+    LineLayerTweaker::matrixCacheHits = 0;
+    SymbolLayerTweaker::matrixCacheHits = 0;
+#endif
+
+    FillLayerTweaker::matrixCache.clear();
+    LineLayerTweaker::matrixCache.clear();
+    SymbolLayerTweaker::matrixCache.clear();
+    SymbolLayerTweaker::matrixUBOCache.clear();
+#endif
 }
 
 void Renderer::Impl::reduceMemoryUse() {
