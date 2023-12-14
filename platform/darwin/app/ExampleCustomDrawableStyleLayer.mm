@@ -125,18 +125,19 @@ public:
             GeometryCoordinate position {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)};
             
             // load image
-            UIImage *assetImage = [UIImage imageNamed:@"MissingImage"];
+            UIImage *assetImage = [UIImage imageNamed:@"pin"];
             assert(assetImage.CGImage != NULL);
             std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(MLNPremultipliedImageFromCGImage(assetImage.CGImage));
 
-            // TODO: set options ...
+            // set symbol options
             Interface::SymbolOptions options;
             options.size = image->size;
             options.color = Color::blue();
             options.texture = interface.context.createTexture2D();
             options.texture->setImage(image);
-            options.texture->setSamplerConfiguration(
-                                                     {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            options.texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+//            options.textureCoordinates = {{{0.2f, 0.2f}, {0.8f, 0.8f}}};
+            options.anchor = {0.5f, 1.0f};
             interface.setSymbolOptions(options);
             
             // add symbol

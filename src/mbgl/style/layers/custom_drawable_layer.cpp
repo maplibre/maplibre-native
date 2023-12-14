@@ -178,7 +178,9 @@ private:
 
 class SymbolDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    SymbolDrawableTweaker() {}
+    SymbolDrawableTweaker(const CustomDrawableLayerHost::Interface::SymbolOptions& options_)
+    : options(options_)
+    {}
     ~SymbolDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override{};
@@ -200,10 +202,26 @@ public:
             std::array<float, 4 * 4> matrix;
         };
         const DrawableUBO drawableUBO{/*matrix = */ util::cast<float>(matrix)};
+        
+        static const StringIdentity idParametersUBOName = stringIndexer().get("SymbolParametersUBO");
+        struct alignas(16) ParametersUBO {
+            std::array<float, 2> extrude_scale;
+            std::array<float, 2> pad0;
+        };
+        const float yFactor = (parameters.state.getViewportMode() == ViewportMode::FlippedY) ? 1.0f : -1.0f;
+        const float ratio = static_cast<double>(parameters.state.getSize().width) / parameters.state.getSize().height;
+        const ParametersUBO parametersUBO{
+            /*extrude_scale*/ {options.size.width, yFactor * ratio * options.size.height},
+            options.anchor
+        };
 
+        // set UBOs
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(idDrawableUBOName, &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(idParametersUBOName, &parametersUBO, parameters.context);
     };
+private:
+    CustomDrawableLayerHost::Interface::SymbolOptions options;
 };
 
 CustomDrawableLayerHost::Interface::Interface(RenderLayer& layer_,
@@ -306,12 +324,12 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     builder->setVertexAttributes(std::move(attrs));
     builder->setRawVertices({}, vertices.elements(), gfx::AttributeDataType::Short2);
     builder->setSegments(gfx::Triangles(), sharedTriangles, triangleSegments.data(), triangleSegments.size());
-
+    
     // flush current builder drawable
     builder->flush(context);
 }
 
-void CustomDrawableLayerHost::Interface::addSymbol([[maybe_unused]] const GeometryCoordinate& point) {
+void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& point) {
     if (!symbolShader) symbolShader = symbolShaderDefault();
     assert(symbolShader);
     if (!builder || builder->getShader() != symbolShader) {
@@ -327,16 +345,19 @@ void CustomDrawableLayerHost::Interface::addSymbol([[maybe_unused]] const Geomet
         std::array<float, 2> a_tex;
     };
 
+    // vertices
     using VertexVector = gfx::VertexVector<CustomSymbolIcon>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
     
+    // encode center and extrude direction into vertices
     for(int y = 0; y <= 1; ++y) {
         for(int x = 0; x <= 1; ++x) {
-            vertices.emplace_back(CustomSymbolIcon{{point.x * 2 + x, point.y * 2 + y}, {x, y}});
+            vertices.emplace_back(CustomSymbolIcon{{point.x * 2 + x, point.y * 2 + y}, {symbolOptions.textureCoordinates[x][0], symbolOptions.textureCoordinates[y][1]}});
         }
     }
 
+    // indexes
     using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& triangles = *sharedTriangles;
@@ -379,6 +400,10 @@ void CustomDrawableLayerHost::Interface::addSymbol([[maybe_unused]] const Geomet
         }
     }
 
+    // create fill tweaker
+    auto tweaker = std::make_shared<SymbolDrawableTweaker>(symbolOptions);
+    builder->addTweaker(tweaker);
+
     // flush current builder drawable
     builder->flush(context);
 }
@@ -386,12 +411,14 @@ void CustomDrawableLayerHost::Interface::addSymbol([[maybe_unused]] const Geomet
 void CustomDrawableLayerHost::Interface::finish() {
     if (builder && !builder->empty()) {
         // finish
-        const auto finish_ = [this](auto& tweaker) {
+        const auto finish_ = [this](gfx::DrawableTweakerPtr tweaker) {
             builder->flush(context);
             for (auto& drawable : builder->clearDrawables()) {
                 assert(tileID.has_value());
                 drawable->setTileID(tileID.value());
-                drawable->addTweaker(tweaker);
+                if(tweaker) {
+                    drawable->addTweaker(tweaker);
+                }
 
                 TileLayerGroup* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
                 tileLayerGroup->addDrawable(RenderPass::Translucent, tileID.value(), std::move(drawable));
@@ -426,11 +453,8 @@ void CustomDrawableLayerHost::Interface::finish() {
         } else if (builder->getShader() == symbolShader) {
             // finish building symbols
 
-            // create symbol tweaker
-            auto tweaker = std::make_shared<SymbolDrawableTweaker>();
-
             // finish drawables
-            finish_(tweaker);
+            finish_(nullptr);
         }
     }
 }
