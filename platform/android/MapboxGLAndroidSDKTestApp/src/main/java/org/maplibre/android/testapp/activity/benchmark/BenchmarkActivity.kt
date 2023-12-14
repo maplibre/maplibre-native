@@ -222,10 +222,10 @@ class BenchmarkActivity : AppCompatActivity() {
 
                 override fun onFinish() {
                     if (place == PLACES.size - 1) {  // done with tour
-                        fpsResults.addResult(inputData.styleNames[style], fpsStore)
+                        /*fpsResults.addResult(inputData.styleNames[style], fpsStore)
                         fpsStore.reset()
 
-                        println("FPS results $fpsResults")
+                        println("FPS results $fpsResults")*/
 
                         encodingTimeResults.addResult(inputData.styleNames[style], encodingTimeStore)
                         encodingTimeStore.reset()
