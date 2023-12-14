@@ -1799,7 +1799,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(MergeDatabaseWithSingleRegion_Update))
     }
 }
 
-TEST(OfflineDatabase, DISABLED_MergeDatabaseWithSingleRegion_NoUpdate) {
+TEST(OfflineDatabase, MergeDatabaseWithSingleRegion_NoUpdate) {
     deleteDatabaseFiles();
     util::deleteFile(filename_sideload);
 
@@ -1841,7 +1841,7 @@ TEST(OfflineDatabase, MergeDatabaseWithSingleRegion_AmbientTiles) {
         Resource::tile("maptiler://tiles/tiles/satellite/{z}/{x}/{y}{ratio}.jpg", 1, 1, 1, 2, Tileset::Scheme::XYZ))));
 }
 
-TEST(OfflineDatabase, DISABLED_MergeDatabaseWithMultipleRegions_New) {
+TEST(OfflineDatabase, MergeDatabaseWithMultipleRegions_New) {
     util::deleteFile(filename_sideload);
     util::copyFile(filename_sideload, "test/fixtures/offline_database/sideload_sat_multiple.db");
 
@@ -1863,7 +1863,7 @@ TEST(OfflineDatabase, DISABLED_MergeDatabaseWithMultipleRegions_New) {
     EXPECT_EQ(200u, status->completedResourceCount);
 }
 
-TEST(OfflineDatabase, DISABLED_MergeDatabaseWithMultipleRegionsWithOverlap) {
+TEST(OfflineDatabase, MergeDatabaseWithMultipleRegionsWithOverlap) {
     deleteDatabaseFiles();
     util::deleteFile(filename_sideload);
     util::copyFile(filename, "test/fixtures/offline_database/sideload_sat.db");
