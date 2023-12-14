@@ -1104,7 +1104,6 @@ expected<OfflineRegions, std::exception_ptr> OfflineDatabase::mergeDatabase(cons
         // For version 7, the merging process is identical as for version 6
 
         auto sideUserVersion = static_cast<int>(getPragma<int64_t>("PRAGMA side.user_version"));
-        const auto mainUserVersion = getPragma<int64_t>("PRAGMA user_version");
         if (sideUserVersion < 6 || sideUserVersion > 7) {
             throw std::runtime_error("Merge database has incorrect user_version");
         }
