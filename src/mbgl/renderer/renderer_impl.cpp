@@ -510,7 +510,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 
     frameCount += 1;
-    
+
 #if !MLN_LEGACY_RENDERER
 
 #if !defined(NDEBUG)
