@@ -27,6 +27,7 @@ import org.maplibre.android.BuildConfig.GIT_REVISION
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.log.Logger
+import org.maplibre.android.log.Logger.INFO
 import org.maplibre.android.maps.*
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.testapp.BuildConfig
@@ -54,13 +55,32 @@ data class BenchmarkInputData(
  * Prepares JSON payload that is sent to the API that collects benchmark results.
  * See https://github.com/maplibre/ci-runners
  */
-fun jsonPayload(results: BenchmarkResults): JsonObject {
+@SuppressLint("NewApi")
+fun jsonPayload(styleNames: List<String>, fpsResults: BenchmarkResults, encodingTimeResults: BenchmarkResults, renderingTimeResults: BenchmarkResults): JsonObject {
     return buildJsonObject {
         putJsonObject("resultsPerStyle") {
-            for ((styleName, result) in results.resultsPerStyle) {
-                putJsonObject(styleName) {
-                    put("avgFps", JsonPrimitive(result.map { it.average }.average()))
-                    put("low1p", JsonPrimitive(result.map { it.low1p }.average()))
+            for (style in styleNames) {
+                putJsonObject(style) {
+                    fpsResults.resultsPerStyle[style].let { results ->
+                        if (results !== null) {
+                            put("avgFps", JsonPrimitive(results.map { it.average }.average()))
+                            put("low1pFps", JsonPrimitive(results.map { it.low1p }.average()))
+                        }
+                    }
+
+                    encodingTimeResults.resultsPerStyle[style].let { results ->
+                        if (results !== null) {
+                            put("avgEncodingTime", JsonPrimitive(results.map { it.average }.average()))
+                            put("low1pEncodingTime", JsonPrimitive(results.map { it.low1p }.average()))
+                        }
+                    }
+
+                    renderingTimeResults.resultsPerStyle[style].let { results ->
+                        if (results !== null) {
+                            put("avgRenderingTime", JsonPrimitive(results.map { it.average }.average()))
+                            put("low1pRenderingTime", JsonPrimitive(results.map { it.low1p }.average()))
+                        }
+                    }
                 }
             }
         }
@@ -166,6 +186,8 @@ class BenchmarkActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Logger.setVerbosity(INFO)
+
         setContentView(R.layout.activity_benchmark)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -231,6 +253,7 @@ class BenchmarkActivity : AppCompatActivity() {
                         encodingTimeStore.reset()
 
                         println("Encoding time results $encodingTimeResults")
+                        println("Benchmark ${jsonPayload(inputData.styleNames, fpsResults, encodingTimeResults, renderingTimeResults)}")
 
                         renderingTimeResults.addResult(inputData.styleNames[style], renderingTimeStore)
                         renderingTimeStore.reset()
@@ -310,7 +333,7 @@ class BenchmarkActivity : AppCompatActivity() {
 
         val client = OkHttpClient()
 
-        val payload = jsonPayload(fpsResults)
+        val payload = jsonPayload(inputData.styleNames, fpsResults, encodingTimeResults, renderingTimeResults)
         Logger.i(TAG, "Sending JSON payload to API: $payload")
 
         val request = Request.Builder()
