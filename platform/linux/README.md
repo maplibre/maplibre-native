@@ -1,23 +1,37 @@
 # Linux
 
-This guide explains how to get started building and running MapLibre Native on Linux. The guide focusses on **Debian 11**, but should be adaptible to other distributions. The build process should give you a set of `.a` files that you can use to include MapLibre Native in other C++ projects, as well as a set of executables that you can run to render map tile images and test the project.
+This guide explains how to get started building and running MapLibre Native on Linux. The guide focusses on a Ubuntu 22.04 clean docker image, but should be adaptible to other distributions. The build process should give you a set of `.a` files that you can use to include MapLibre Native in other C++ projects, as well as a set of executables that you can run to render map tile images and test the project.
 
-## Prerequisites
+## Requirements
 
 The following system libraries need to be installed.
 
 ```bash
-apt install libcurl4-openssl-dev libglfw3-dev libuv1-dev libpng-dev libicu-dev libjpeg62-turbo libwebp-dev
+apt install libcurl4-openssl-dev libglfw3-dev libuv1-dev libpng-dev libicu-dev libjpeg8-dev libwebp-dev xvfb
 ```
 
 Optional: `libsqlite3-dev` (also available as vendored dependency).
 
-### Build tools
-
 The following tools need to be available.
 
 ```bash
-apt install g++ git cmake ccache ninja-build pkg-config
+apt install clang git cmake ccache ninja-build pkg-config
+```
+
+## Docker
+
+Alternatively to the above requirements, you can use a docker container to build MapLibre Native:
+
+Create image with:
+```bash
+# in platform/linux
+docker build -t maplibre-native-image .
+```
+
+Run image with:
+```bash
+# in repo root directory
+docker run --rm -it -v "$(pwd)":/root/ maplibre-native-image
 ```
 
 ## Build
@@ -29,11 +43,14 @@ git clone --recurse-submodules -j8 https://github.com/maplibre/maplibre-native.g
 cd maplibre-native
 ```
 
-To create the build, run the following commands from the root of the project.
+To create the build, run the following commands from the root of the project:
 
 ```bash
-cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
-cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=OFF -DMLN_WITH_COVERAGE=OFF -DMLN_DRAWABLE_RENDERER=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON
+```
+
+```bash
+cmake --build build --target mbgl-render -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 ```
 
 ## `mbgl-render`
