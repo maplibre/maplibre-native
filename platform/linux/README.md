@@ -20,7 +20,7 @@ apt install clang git cmake ccache ninja-build pkg-config
 
 ## Docker
 
-Alternatively to the above requirements, you can use a docker container to build MapLibre Native:
+You can use a Docker container to build MapLibre Native. A `Dockerfile` that installes the required dependencies when the image is built is provided in this directory.
 
 Build image with:
 ```bash
