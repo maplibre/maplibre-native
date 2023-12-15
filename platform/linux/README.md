@@ -1,6 +1,6 @@
 # Linux
 
-This guide explains how to get started building and running MapLibre Native on Linux. The guide focusses on a Ubuntu 22.04 clean docker image, but should be adaptible to other distributions. The build process should give you a set of `.a` files that you can use to include MapLibre Native in other C++ projects, as well as a set of executables that you can run to render map tile images and test the project.
+This guide explains how to get started building and running MapLibre Native on Linux. The guide focusses on a Ubuntu 22.04. The build process should give you a set of `.a` files that you can use to include MapLibre Native in other C++ projects, as well as a set of executables that you can run to render map tile images and test the project.
 
 ## Requirements
 
