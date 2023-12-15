@@ -138,6 +138,7 @@ public:
             options.texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
 //            options.textureCoordinates = {{{0.2f, 0.2f}, {0.8f, 0.8f}}};
             options.anchor = {0.5f, 1.0f};
+            options.angleDegrees = 0.0f;
             interface.setSymbolOptions(options);
             
             // add symbol

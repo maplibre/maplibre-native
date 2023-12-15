@@ -206,13 +206,17 @@ public:
         static const StringIdentity idParametersUBOName = stringIndexer().get("SymbolParametersUBO");
         struct alignas(16) ParametersUBO {
             std::array<float, 2> extrude_scale;
-            std::array<float, 2> pad0;
+            std::array<float, 2> anchor;
+            float angle_degrees;
+            float pad0, pad1, pad2;
         };
         const float yFactor = (parameters.state.getViewportMode() == ViewportMode::FlippedY) ? 1.0f : -1.0f;
         const float ratio = static_cast<double>(parameters.state.getSize().width) / parameters.state.getSize().height;
         const ParametersUBO parametersUBO{
             /*extrude_scale*/ {options.size.width, yFactor * ratio * options.size.height},
-            options.anchor
+            options.anchor,
+            options.angleDegrees,
+            0, 0, 0
         };
 
         // set UBOs

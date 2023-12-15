@@ -18,10 +18,17 @@ layout (std140) uniform SymbolDrawableUBO {
 layout (std140) uniform SymbolParametersUBO {
     highp vec2 u_extrude_scale;
     highp vec2 u_anchor;
+    highp float u_angle_degrees;
+    highp float pad0, pad1, pad2;
 };
 
-
 out vec2 v_tex;
+
+vec2 rotateVec2(vec2 v, float angle) {
+    float cosA = cos(angle);
+    float sinA = sin(angle);
+    return vec2(v.x * cosA - v.y * sinA, v.x * sinA + v.y * cosA);
+}
 
 void main() {
     // unencode the extrusion vector (-1, -1) to (1, 1)
@@ -34,7 +41,8 @@ void main() {
     vec2 center = floor(a_pos * 0.5);
 
     gl_Position = u_matrix * vec4(center, 0, 1);
-    gl_Position.xy += (extrude - anchor) * u_extrude_scale * DEVICE_PIXEL_RATIO;
+    float angle = radians(u_angle_degrees);
+    gl_Position.xy += rotateVec2((extrude - anchor) * u_extrude_scale * DEVICE_PIXEL_RATIO, angle);
 
     v_tex = a_tex;
 }
