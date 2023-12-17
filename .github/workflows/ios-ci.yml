@@ -17,6 +17,9 @@ on:
     branches:
       - '*'
 
+permissions:
+  id-token: write         # needed for AWS
+
 jobs:
   pre_job:
     runs-on: ubuntu-latest
