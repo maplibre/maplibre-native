@@ -7,7 +7,7 @@ This guide explains how to get started building and running MapLibre Native on L
 The following system libraries need to be installed.
 
 ```bash
-apt install libcurl4-openssl-dev libglfw3-dev libuv1-dev libpng-dev libicu-dev libjpeg8-dev libwebp-dev xvfb
+apt install libcurl4-openssl-dev libglfw3-dev libuv1-dev libpng-dev libicu-dev libjpeg-turbo8-dev libwebp-dev xvfb
 ```
 
 Optional: `libsqlite3-dev` (also available as vendored dependency).
