@@ -125,7 +125,7 @@ jobs:
           zip -r "$render_test_app_dir"/RenderTest.xctest.zip RenderTest.xctest
           echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: matrix.renderer == 'legacy'
         with:
           name: ios-render-test
@@ -154,7 +154,7 @@ jobs:
           zip -r "$ios_cpp_test_app_dir"/CppUnitTests.xctest.zip CppUnitTests.xctest
           echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: matrix.renderer == 'legacy'
         with:
           name: ios-cpp-unit-tests
@@ -176,7 +176,7 @@ jobs:
           cp MapLibre.xcframework/ios-arm64/MapLibre.framework/MapLibre MapLibre_dynamic
 
       - name: Upload size test as artifact (Bloaty)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: matrix.renderer == 'drawable' && github.event_name == 'pull_request'
         with:
           name: ios-size-test-files
