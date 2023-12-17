@@ -169,7 +169,7 @@ jobs:
       - name: Build dynamic library for size test (Bloaty)
         if: matrix.renderer == 'drawable'
         run: |
-          bazel build //platform/ios:MapLibre.dynamic --//:renderer=metal --//:maplibre_platform=ios --compilation_mode="opt" --copt -g --strip never --output_groups=+dsyms --apple_generate_dsym
+          bazel build //platform/ios:MapLibre.dynamic --//:renderer=metal --//:maplibre_platform=ios --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --output_groups=+dsyms --apple_generate_dsym
           bazel_bin="$(bazel info --compilation_mode="opt" bazel-bin)"
           unzip "$bazel_bin"/platform/ios/MapLibre.dynamic.xcframework.zip
           cp "$bazel_bin"/platform/ios/MapLibre.dynamic_dsyms/MapLibre_ios_device.framework.dSYM/Contents/Resources/DWARF/MapLibre_ios_device MapLibre_DWARF
