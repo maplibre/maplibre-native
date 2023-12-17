@@ -458,7 +458,7 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
         //#-end-example-code
     }
     
-    func testMLNMapSnapshotter() {
+    func testMLNMapSnapshotter() throws {
         throw XCTSkip("Snapshotter not implemented yet for Metal")
 
         let expectation = self.expectation(description: "MLNMapSnapshotter should produce a snapshot")
