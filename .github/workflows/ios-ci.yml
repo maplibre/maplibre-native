@@ -41,14 +41,10 @@ jobs:
   ios-build:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
-    strategy:
-      fail-fast: false
-      matrix:
-        renderer: [legacy, drawable, metal]
     runs-on: [self-hosted, macOS, ARM64]
     concurrency:
       # cancel jobs on PRs only
-      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.renderer }}
+      group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
     env:
       BUILDTYPE: Debug
@@ -94,25 +90,23 @@ jobs:
       - run: cp bazel/example_config.bzl bazel/config.bzl
 
       - name: Check debug symbols
-        run: bazel run //platform:check-public-symbols --//:renderer=${{ matrix.renderer }}
+        run: bazel run //platform:check-public-symbols --//:renderer=metal
 
       - name: Lint plist files
-        run: bazel run //platform/ios:lint-plists --//:renderer=${{ matrix.renderer }}
+        run: bazel run //platform/ios:lint-plists --//:renderer=metal
 
       - name: Running iOS tests
-        if: matrix.renderer != 'metal'
-        run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=${{ matrix.renderer }}
+        run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=metal
 
       - name: Running iOS UI tests
-        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=${{ matrix.renderer }}
+        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal
 
       # render test
 
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
-        if: matrix.renderer == 'legacy'
         run: |
           set -e
-          bazel run //platform/ios:xcodeproj
+          bazel run --//:renderer=metal //platform/ios:xcodeproj
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
           render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
@@ -126,7 +120,6 @@ jobs:
           echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v3
-        if: matrix.renderer == 'legacy'
         with:
           name: ios-render-test
           retention-days: 3
@@ -138,10 +131,9 @@ jobs:
       # C++ unit tests
       
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
-        if: matrix.renderer == 'legacy'
         run: |
           set -e
-          bazel run //platform/ios:xcodeproj
+          bazel run --//:renderer=metal //platform/ios:xcodeproj
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
           ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
@@ -155,7 +147,6 @@ jobs:
           echo ios_cpp_test_artifacts_dir="$ios_cpp_test_app_dir" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v3
-        if: matrix.renderer == 'legacy'
         with:
           name: ios-cpp-unit-tests
           retention-days: 3
@@ -167,7 +158,6 @@ jobs:
       # Size test (Bloaty)
 
       - name: Build dynamic library for size test (Bloaty)
-        if: matrix.renderer == 'drawable'
         run: |
           bazel build //platform/ios:MapLibre.dynamic --//:renderer=metal --//:maplibre_platform=ios --compilation_mode="opt" --copt -g --copt="-Oz" --strip never --output_groups=+dsyms --apple_generate_dsym
           bazel_bin="$(bazel info --compilation_mode="opt" bazel-bin)"
@@ -177,7 +167,7 @@ jobs:
 
       - name: Upload size test as artifact (Bloaty)
         uses: actions/upload-artifact@v3
-        if: matrix.renderer == 'drawable' && github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request'
         with:
           name: ios-size-test-files
           retention-days: 3
@@ -187,7 +177,7 @@ jobs:
             platform/ios/MapLibre_dynamic
 
       - name: Configure AWS Credentials
-        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
@@ -195,7 +185,7 @@ jobs:
           role-session-name: ${{ github.run_id }}
       
       - name: Upload MapLibre_DWARF & MapLibre_dynamic to S3
-        if: matrix.renderer == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+        if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
         run: | 
           aws s3 cp MapLibre_DWARF s3://maplibre-native/size-test-ios/MapLibre_DWARF-main
           aws s3 cp MapLibre_dynamic s3://maplibre-native/size-test-ios/MapLibre_dynamic-main
@@ -205,13 +195,13 @@ jobs:
 
       # Make Metal XCFramework release
       - name: Should make release?
-        if: ${{ github.ref == 'refs/heads/main' && matrix.renderer == 'metal' }}
+        if: ${{ github.ref == 'refs/heads/main' }}
         run: echo make_release=true >> "$GITHUB_ENV"
 
       - name: Build XCFramework
         run: |
-          bazel build --compilation_mode=opt --//:renderer=${{ matrix.renderer }} --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic
-          echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=${{ matrix.renderer }} --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
+          bazel build --compilation_mode=opt --//:renderer=metal --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic
+          echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
 
       - name: Get version (release)
         if: env.make_release && github.event.inputs.release
