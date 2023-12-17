@@ -126,7 +126,7 @@ jobs:
           cp MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk .
 
       - name: Create artifact for benchmark APKs 
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: github.ref != 'refs/heads/main'
         with:
           if-no-files-found: error
@@ -184,7 +184,7 @@ jobs:
           echo "ANDROID_APP_ARN=${{ steps.upload-android-app.outputs.arn }}" >> uploads.env
           echo "ANDROID_TEST_ARN=${{ steps.upload-android-test.outputs.arn }}" >> uploads.env
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: github.ref == 'refs/heads/main'
         with:
           if-no-files-found: error
@@ -200,7 +200,7 @@ jobs:
         working-directory: ./render-test/android
 
       - name: Store Render Test .apk files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-render-tests
           if-no-files-found: error
@@ -209,7 +209,7 @@ jobs:
             ./render-test/android/RenderTests.apk
 
       - name: Store debug artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: debug-artifacts
           path: |

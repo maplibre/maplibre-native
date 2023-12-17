@@ -100,7 +100,7 @@ jobs:
 
       - name: Upload mbgl-render as artifact
         if: matrix.renderer == 'drawable' && github.event_name == 'pull_request' 
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mbgl-render
           path: |
@@ -108,7 +108,7 @@ jobs:
   
       - name: Upload mbgl-benchmark-runner as artifact
         if: matrix.renderer == 'drawable' && github.event_name == 'pull_request' 
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mbgl-benchmark-runner
           path: |
@@ -152,7 +152,7 @@ jobs:
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure' && matrix.renderer == 'drawable'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: render-test-result
           path: |
@@ -213,7 +213,7 @@ jobs:
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: ${{ env.coverage_report }}
