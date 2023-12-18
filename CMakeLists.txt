@@ -1135,6 +1135,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/hillshade_prepare_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/line_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/custom_drawable_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/raster_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
@@ -1201,6 +1202,7 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision_box.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision_circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/custom_symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/debug.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/fill_extrusion.hpp
@@ -1246,6 +1248,7 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/collision_box.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/collision_circle.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/custom_symbol_icon.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/debug.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill_extrusion.cpp

@@ -20,8 +20,8 @@
 #include <mbgl/util/math.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/util/containers.hpp>
-
 #include <mbgl/gfx/fill_generator.hpp>
+#include <mbgl/shaders/custom_drawable_layer_ubo.hpp>
 
 namespace mbgl {
 
@@ -197,25 +197,16 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
 
-        static const StringIdentity idDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");
-        struct alignas(16) DrawableUBO {
-            std::array<float, 4 * 4> matrix;
-        };
-        const DrawableUBO drawableUBO{/*matrix = */ util::cast<float>(matrix)};
+        static const StringIdentity idDrawableUBOName = stringIndexer().get("CustomSymbolIconDrawableUBO");
+        const shaders::CustomSymbolIconDrawableUBO drawableUBO{/*matrix = */ util::cast<float>(matrix)};
         
-        static const StringIdentity idParametersUBOName = stringIndexer().get("SymbolParametersUBO");
-        struct alignas(16) ParametersUBO {
-            std::array<float, 2> extrude_scale;
-            std::array<float, 2> anchor;
-            float angle_degrees;
-            float pad0, pad1, pad2;
-        };
+        static const StringIdentity idParametersUBOName = stringIndexer().get("CustomSymbolIconParametersUBO");
         const float yFactor = (parameters.state.getViewportMode() == ViewportMode::FlippedY) ? 1.0f : -1.0f;
         const float ratio = static_cast<double>(parameters.state.getSize().width) / parameters.state.getSize().height;
-        const ParametersUBO parametersUBO{
+        const shaders::CustomSymbolIconParametersUBO parametersUBO{
             /*extrude_scale*/ {options.size.width, yFactor * ratio * options.size.height},
-            options.anchor,
-            options.angleDegrees,
+            /*anchor*/ options.anchor,
+            /*angle_degrees*/ options.angleDegrees,
             0, 0, 0
         };
 

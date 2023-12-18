@@ -11,11 +11,11 @@ struct ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_tex;
 
-layout (std140) uniform SymbolDrawableUBO {
+layout (std140) uniform CustomSymbolIconDrawableUBO {
     highp mat4 u_matrix;
 };
 
-layout (std140) uniform SymbolParametersUBO {
+layout (std140) uniform CustomSymbolIconParametersUBO {
     highp vec2 u_extrude_scale;
     highp vec2 u_anchor;
     highp float u_angle_degrees;
