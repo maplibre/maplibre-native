@@ -19,6 +19,7 @@ on:
 
 permissions:
   id-token: write         # needed for AWS
+  contents: write         # allow making a release
 
 jobs:
   pre_job:
