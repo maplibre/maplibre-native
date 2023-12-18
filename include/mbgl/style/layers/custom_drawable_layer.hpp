@@ -52,9 +52,9 @@ public:
         Color color;
         Size size;
         gfx::Texture2DPtr texture;
-        std::array<float, 2> anchor {0.5f, 0.5f};
-        std::array<std::array<float, 2>, 2> textureCoordinates {{{0, 0}, {1, 1}}};
-        float angleDegrees {.0f};
+        std::array<float, 2> anchor{0.5f, 0.5f};
+        std::array<std::array<float, 2>, 2> textureCoordinates{{{0, 0}, {1, 1}}};
+        float angleDegrees{.0f};
     };
 
 public:

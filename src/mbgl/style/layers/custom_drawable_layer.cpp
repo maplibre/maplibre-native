@@ -184,8 +184,7 @@ private:
 class SymbolDrawableTweaker : public gfx::DrawableTweaker {
 public:
     SymbolDrawableTweaker(const CustomDrawableLayerHost::Interface::SymbolOptions& options_)
-    : options(options_)
-    {}
+        : options(options_) {}
     ~SymbolDrawableTweaker() override = default;
 
     void init(gfx::Drawable&) override{};
@@ -204,7 +203,7 @@ public:
 
         static const StringIdentity idDrawableUBOName = stringIndexer().get("CustomSymbolIconDrawableUBO");
         const shaders::CustomSymbolIconDrawableUBO drawableUBO{/*matrix = */ util::cast<float>(matrix)};
-        
+
         static const StringIdentity idParametersUBOName = stringIndexer().get("CustomSymbolIconParametersUBO");
         const float yFactor = (parameters.state.getViewportMode() == ViewportMode::FlippedY) ? 1.0f : -1.0f;
         const float ratio = static_cast<double>(parameters.state.getSize().width) / parameters.state.getSize().height;
@@ -212,14 +211,16 @@ public:
             /*extrude_scale*/ {options.size.width, yFactor * ratio * options.size.height},
             /*anchor*/ options.anchor,
             /*angle_degrees*/ options.angleDegrees,
-            0, 0, 0
-        };
+            0,
+            0,
+            0};
 
         // set UBOs
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(idDrawableUBOName, &drawableUBO, parameters.context);
         uniforms.createOrUpdate(idParametersUBOName, &parametersUBO, parameters.context);
     };
+
 private:
     CustomDrawableLayerHost::Interface::SymbolOptions options;
 };
@@ -324,7 +325,7 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     builder->setVertexAttributes(std::move(attrs));
     builder->setRawVertices({}, vertices.elements(), gfx::AttributeDataType::Short2);
     builder->setSegments(gfx::Triangles(), sharedTriangles, triangleSegments.data(), triangleSegments.size());
-    
+
     // flush current builder drawable
     builder->flush(context);
 }
@@ -349,11 +350,13 @@ void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
     using VertexVector = gfx::VertexVector<CustomSymbolIcon>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
-    
+
     // encode center and extrude direction into vertices
-    for(int y = 0; y <= 1; ++y) {
-        for(int x = 0; x <= 1; ++x) {
-            vertices.emplace_back(CustomSymbolIcon{{point.x * 2 + x, point.y * 2 + y}, {symbolOptions.textureCoordinates[x][0], symbolOptions.textureCoordinates[y][1]}});
+    for (int y = 0; y <= 1; ++y) {
+        for (int x = 0; x <= 1; ++x) {
+            vertices.emplace_back(
+                CustomSymbolIcon{{point.x * 2 + x, point.y * 2 + y},
+                                 {symbolOptions.textureCoordinates[x][0], symbolOptions.textureCoordinates[y][1]}});
         }
     }
 
@@ -416,7 +419,7 @@ void CustomDrawableLayerHost::Interface::finish() {
             for (auto& drawable : builder->clearDrawables()) {
                 assert(tileID.has_value());
                 drawable->setTileID(tileID.value());
-                if(tweaker) {
+                if (tweaker) {
                     drawable->addTweaker(tweaker);
                 }
 
