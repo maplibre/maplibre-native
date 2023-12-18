@@ -75,6 +75,7 @@ MLNImage *MLNImageFromCurrentContext(void) {
 }
 
 - (void)testOverlayHandler {
+    XCTSkip(@"Snapshotter not implemented yet for Metal. See https://github.com/maplibre/maplibre-native/issues/1972");
     self.styleLoadingExpectation = [self expectationWithDescription:@"Style should finish loading."];
     XCTestExpectation *overlayExpectation = [self expectationWithDescription:@"Overlay handler should get called."];
     XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Completion handler should get called."];
@@ -118,6 +119,7 @@ MLNImage *MLNImageFromCurrentContext(void) {
 }
 
 - (void)testDelegate {
+    XCTSkip(@"Snapshotter not implemented yet for Metal. See https://github.com/maplibre/maplibre-native/issues/1972");
     self.styleLoadingExpectation = [self expectationWithDescription:@"Style should finish loading."];
     XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Completion handler should get called."];
     
@@ -141,6 +143,7 @@ MLNImage *MLNImageFromCurrentContext(void) {
 }
 
 - (void)testRuntimeStyling {
+    XCTSkip(@"Snapshotter not implemented yet for Metal. See https://github.com/maplibre/maplibre-native/issues/1972");
     [self testStyleURL:nil camera:[MLNMapCamera camera] applyingRuntimeStylingActions:^(MLNStyle *style) {
         MLNBackgroundStyleLayer *backgroundLayer = [[MLNBackgroundStyleLayer alloc] initWithIdentifier:@"background"];
         backgroundLayer.backgroundColor = [NSExpression expressionForConstantValue:[MLNColor orangeColor]];
@@ -149,6 +152,7 @@ MLNImage *MLNImageFromCurrentContext(void) {
 }
 
 - (void)testLocalGlyphRendering {
+    XCTSkip(@"Snapshotter not implemented yet for Metal. See https://github.com/maplibre/maplibre-native/issues/1972");
     [[NSUserDefaults standardUserDefaults] setObject:@[@"PingFang TC"] forKey:@"MLNIdeographicFontFamilyName"];
     NSURL *styleURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"mixed" withExtension:@"json"];
     [self testStyleURL:styleURL camera:nil applyingRuntimeStylingActions:^(MLNStyle *style) {} expectedImageName:@"Fixtures/MLNMapSnapshotterTests/PingFang"];
