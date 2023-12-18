@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 'use strict';
 
+// Regenerates the Shaders (which should be usually followed by a full clean rebuild).
+// USAGE: Within root (platform/android/) either use `make android-style-code` or `node scripts/generate-style-code.js`.
+
 const fs = require('fs');
 const ejs = require('ejs');
 const spec = require('../../../scripts/style-spec');
