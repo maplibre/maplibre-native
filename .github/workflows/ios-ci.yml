@@ -123,7 +123,6 @@ jobs:
           echo render_test_artifacts_dir="$render_test_app_dir" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v4
-        if: matrix.renderer == 'legacy'
         with:
           name: ios-render-test
           retention-days: 3
