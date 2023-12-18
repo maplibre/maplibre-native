@@ -208,7 +208,7 @@ public:
         const float yFactor = (parameters.state.getViewportMode() == ViewportMode::FlippedY) ? 1.0f : -1.0f;
         const float ratio = static_cast<double>(parameters.state.getSize().width) / parameters.state.getSize().height;
         const shaders::CustomSymbolIconParametersUBO parametersUBO{
-            /*extrude_scale*/ {options.size.width, yFactor * ratio * options.size.height},
+            /*extrude_scale*/ {static_cast<float>(options.size.width), yFactor * ratio * options.size.height},
             /*anchor*/ options.anchor,
             /*angle_degrees*/ options.angleDegrees,
             0,
@@ -355,7 +355,7 @@ void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
     for (int y = 0; y <= 1; ++y) {
         for (int x = 0; x <= 1; ++x) {
             vertices.emplace_back(
-                CustomSymbolIcon{{point.x * 2 + x, point.y * 2 + y},
+                CustomSymbolIcon{{static_cast<float>(point.x * 2 + x), static_cast<float>(point.y * 2 + y)},
                                  {symbolOptions.textureCoordinates[x][0], symbolOptions.textureCoordinates[y][1]}});
         }
     }
