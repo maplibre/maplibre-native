@@ -93,7 +93,7 @@ void FileSource::setAPIBaseUrl(jni::JNIEnv& env, const jni::String& url) {
 
 jni::Local<jni::String> FileSource::getAPIBaseUrl(jni::JNIEnv& env) {
     if (auto* url = onlineSource->getProperty(mbgl::API_BASE_URL_KEY).getString()) {
-        return jni::Make<jni::String>(env, *url);
+        return jni::Make<jni::String>(env, std::string(*url));
     }
 
     ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Online functionality is disabled.");
