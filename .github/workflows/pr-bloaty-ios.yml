@@ -58,6 +58,14 @@ jobs:
       - name: Run Bloaty
         run: bloaty/build/bloaty --debug-file MapLibre_DWARF --debug-file MapLibre_DWARF-main MapLibre_dynamic -n 0 -s vm -d compileunits -- MapLibre_dynamic-main > bloaty_diff.txt
 
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
       - name: Prepare Bloaty message
         run: |
           report_path=bloaty-results-ios/pr-${{ steps.get-pr-number.outputs.pr-number }}-compared-to-main.txt
