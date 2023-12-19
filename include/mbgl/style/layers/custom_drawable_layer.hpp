@@ -49,7 +49,6 @@ public:
     };
 
     struct SymbolOptions {
-        Color color;
         Size size;
         gfx::Texture2DPtr texture;
         std::array<float, 2> anchor{0.5f, 0.5f};

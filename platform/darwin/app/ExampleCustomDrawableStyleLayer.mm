@@ -132,11 +132,10 @@ public:
             // set symbol options
             Interface::SymbolOptions options;
             options.size = image->size;
-            options.color = Color::blue();
             options.texture = interface.context.createTexture2D();
             options.texture->setImage(image);
             options.texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-//            options.textureCoordinates = {{{0.2f, 0.2f}, {0.8f, 0.8f}}};
+            options.textureCoordinates = {{{0.0f, 0.1f}, {1.0f, 0.9f}}};
             options.anchor = {0.5f, 1.0f};
             options.angleDegrees = 30.0f;
             interface.setSymbolOptions(options);
