@@ -647,6 +647,7 @@ MLN_CORE_SOURCE = [
 ]
 
 MLN_CORE_HEADERS = [
+    "include/mbgl/gfx/context.hpp",
     "include/mbgl/actor/actor.hpp",
     "include/mbgl/actor/actor_ref.hpp",
     "include/mbgl/actor/aspiring_actor.hpp",
@@ -960,7 +961,6 @@ MLN_DRAWABLES_SOURCE = [
 ]
 
 MLN_DRAWABLES_HEADERS = [
-    "include/mbgl/gfx/context.hpp",
     "include/mbgl/gfx/drawable.hpp",
     "include/mbgl/gfx/drawable_data.hpp",
     "include/mbgl/gfx/drawable_impl.hpp",
