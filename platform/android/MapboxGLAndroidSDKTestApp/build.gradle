@@ -7,6 +7,16 @@ plugins {
 
 apply from: "${rootDir}/gradle/native-build.gradle"
 
+def obtainTestBuildType() {
+    def result = "debug";
+
+    if (project.hasProperty("testBuildType")) {
+        result = project.getProperties().get("testBuildType")
+    }
+
+    result
+}
+
 android {
     compileSdkVersion androidVersions.compileSdkVersion
 
@@ -55,7 +65,7 @@ android {
         }
     }
 
-    testBuildType "release" // for benchmark
+    testBuildType obtainTestBuildType()
 
     flavorDimensions += "renderer"
     productFlavors {
