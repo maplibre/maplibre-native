@@ -14,9 +14,7 @@
     NSArray *paths = NSSearchPathForDirectoriesInDomains(
                                                          NSApplicationSupportDirectory,
                                                          NSUserDomainMask, YES);
-    NSLog(@"%@/com.geolives.maplibre.app/.mapbox/cache.db",[paths objectAtIndex:0]);
-    
-    
+        
 #ifndef MLN_DISABLE_LOGGING
     [MLNLoggingConfiguration sharedConfiguration].loggingLevel = MLNLoggingLevelFault;
 #endif
