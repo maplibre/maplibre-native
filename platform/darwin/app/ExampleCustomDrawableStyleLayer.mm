@@ -131,15 +131,20 @@ public:
 
             // set symbol options
             Interface::SymbolOptions options;
-            options.size = image->size;
             options.texture = interface.context.createTexture2D();
             options.texture->setImage(image);
             options.texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-            options.textureCoordinates = {{{0.0f, 0.1f}, {1.0f, 0.9f}}};
-            options.anchor = {0.5f, 1.0f};
-            options.angleDegrees = 30.0f;
+            options.textureCoordinates = {{{0.0f, 0.08f}, {1.0f, 0.9f}}};
+            const float xspan = options.textureCoordinates[1][0] - options.textureCoordinates[0][0];
+            const float yspan = options.textureCoordinates[1][1] - options.textureCoordinates[0][1];
+            assert(xspan > 0.0f && yspan > 0.0f);
+            options.size = {static_cast<uint32_t>(image->size.width * xspan), static_cast<uint32_t>(image->size.height * yspan)};
+            options.anchor = {0.5f, 0.95f};
+            options.angleDegrees = 45.0f;
+            options.scaleWithMap = true;
+            options.pitchWithMap = true;
             interface.setSymbolOptions(options);
-            
+
             // add symbol
             interface.addSymbol(position);
         }

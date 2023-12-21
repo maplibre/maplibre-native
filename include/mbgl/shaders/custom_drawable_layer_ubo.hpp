@@ -17,7 +17,9 @@ struct alignas(16) CustomSymbolIconParametersUBO {
     /*  0 */ std::array<float, 2> extrude_scale;
     /*  8 */ std::array<float, 2> anchor;
     /* 16 */ float angle_degrees;
-    /* 20 */ float pad0, pad1, pad2;
+    /* 20 */ uint32_t scale_with_map;
+    /* 24 */ uint32_t pitch_with_map;
+    /* 28 */ float camera_to_center_distance;
     /* 32 */
 };
 static_assert(sizeof(CustomSymbolIconParametersUBO) == 2 * 16);

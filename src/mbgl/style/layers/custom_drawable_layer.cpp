@@ -204,16 +204,19 @@ public:
         static const StringIdentity idDrawableUBOName = stringIndexer().get("CustomSymbolIconDrawableUBO");
         const shaders::CustomSymbolIconDrawableUBO drawableUBO{/*matrix = */ util::cast<float>(matrix)};
 
+        const auto pixelsToTileUnits = tileID.pixelsToTileUnits(1.0f, options.scaleWithMap ? tileID.canonical.z : parameters.state.getZoom());
+        const auto f = options.scaleWithMap ? std::pow(2.f, parameters.state.getZoom() - tileID.canonical.z) : 1.0f;
+        const auto extrudeScale = options.pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits}
+            : std::array<float, 2>{parameters.pixelsToGLUnits[0] * f, parameters.pixelsToGLUnits[1] * f};
+        
         static const StringIdentity idParametersUBOName = stringIndexer().get("CustomSymbolIconParametersUBO");
-        const float yFactor = (parameters.state.getViewportMode() == ViewportMode::FlippedY) ? 1.0f : -1.0f;
-        const float ratio = static_cast<double>(parameters.state.getSize().width) / parameters.state.getSize().height;
         const shaders::CustomSymbolIconParametersUBO parametersUBO{
-            /*extrude_scale*/ {static_cast<float>(options.size.width), yFactor * ratio * options.size.height},
-            /*anchor*/ options.anchor,
-            /*angle_degrees*/ options.angleDegrees,
-            0,
-            0,
-            0};
+            /*extrude_scale*/               {extrudeScale[0] * options.size.width, extrudeScale[1] * options.size.height},
+            /*anchor*/                      options.anchor,
+            /*angle_degrees*/               options.angleDegrees,
+            /*scale_with_map*/              options.scaleWithMap,
+            /*pitch_with_map*/              options.pitchWithMap,
+            /*camera_to_center_distance*/   parameters.state.getCameraToCenterDistance()};
 
         // set UBOs
         auto& uniforms = drawable.mutableUniformBuffers();
