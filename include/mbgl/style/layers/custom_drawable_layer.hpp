@@ -54,8 +54,8 @@ public:
         std::array<float, 2> anchor{0.5f, 0.5f};
         std::array<std::array<float, 2>, 2> textureCoordinates{{{0, 0}, {1, 1}}};
         float angleDegrees{.0f};
-        bool scaleWithMap {false};
-        bool pitchWithMap {false};
+        bool scaleWithMap{false};
+        bool pitchWithMap{false};
     };
 
 public:
