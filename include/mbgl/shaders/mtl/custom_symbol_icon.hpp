@@ -27,7 +27,9 @@ struct alignas(16) CustomSymbolIconParametersUBO {
     float2 extrude_scale;
     float2 anchor;
     float angle_degrees;
-    float pad0, pad1, pad2;    
+    int scale_with_map;
+    int pitch_with_map;
+    float camera_to_center_distance;
 };
 
 struct VertexStage {
@@ -53,9 +55,25 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 extrude = glMod(float2(vertx.a_pos), 2.0) * 2.0 - 1.0;
     const float2 anchor = (parameters.anchor - float2(0.5, 0.5)) * 2.0;
     const float2 center = floor(float2(vertx.a_pos) * 0.5);
+    const float angle = radians(-parameters.angle_degrees);
+    float2 rotated_unit = rotateVec2((extrude - anchor), angle);
 
-    float4 position = drawable.matrix * float4(center, 0, 1);
-    position.xy += rotateVec2((extrude - anchor) * parameters.extrude_scale * DEVICE_PIXEL_RATIO, radians(parameters.angle_degrees));
+    float4 position;
+    if (parameters.pitch_with_map) {
+        float2 corner = center;
+        if (parameters.scale_with_map) {
+            corner += rotated_unit * parameters.extrude_scale;
+        } else {
+            float4 projected_center = drawable.matrix * float4(center, 0, 1);
+            corner += rotated_unit * parameters.extrude_scale * (projected_center.w / parameters.camera_to_center_distance);
+        }
+
+        position = drawable.matrix * float4(corner, 0, 1);
+    } else {
+        position = drawable.matrix * float4(center, 0, 1);
+        const float factor = parameters.scale_with_map ? parameters.camera_to_center_distance : position.w;
+        position.xy += rotated_unit * parameters.extrude_scale * factor;
+    }
 
     return {
         .position   = position,

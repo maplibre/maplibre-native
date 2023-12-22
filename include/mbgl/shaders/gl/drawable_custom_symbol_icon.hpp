@@ -33,14 +33,16 @@ vec2 rotateVec2(vec2 v, float angle) {
 }
 
 void main() {
-    // unencode the extrusion vector (-1, -1) to (1, 1)
+    // decode the extrusion vector (-1, -1) to (1, 1)
     vec2 extrude = vec2(mod(a_pos, 2.0) * 2.0 - 1.0);
 
-    // anchor in the range (-1, -1) to (1, 1)
+    // make anchor relative to (0.5, 0.5) and corners in range (-1, -1) to (1, 1)
     vec2 anchor = (u_anchor - vec2(0.5, 0.5)) * 2.0;
 
-    // get center
+    // decode center 
     vec2 center = floor(a_pos * 0.5);
+
+    // rotate extrusion around anchor
     float angle = radians(-u_angle_degrees);
     vec2 rotated_unit = rotateVec2((extrude - anchor), angle);
 
