@@ -151,7 +151,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                 // properties UBO
                 uniforms.addOrReplace(idLinePropertiesUBOName, getLinePropsBuffer());
-                
+
                 // dynamic UBO
                 uniforms.addOrReplace(idLineDynamicUBOName, dynamicBuffer);
             } break;
@@ -167,7 +167,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                 // properties UBO
                 uniforms.addOrReplace(idLineGradientPropertiesUBOName, getLineGradientPropsBuffer());
-                
+
                 // dynamic UBO
                 uniforms.addOrReplace(idLineGradientDynamicUBOName, dynamicBuffer);
             } break;
@@ -193,7 +193,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                 // properties UBO
                 uniforms.addOrReplace(idLinePatternPropertiesUBOName, getLinePatternPropsBuffer());
-                
+
                 // dynamic UBO
                 uniforms.addOrReplace(idLinePatternDynamicUBOName, dynamicBuffer);
 
@@ -243,7 +243,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                     // properties UBO
                     uniforms.addOrReplace(idLineSDFPropertiesUBOName, getLineSDFPropsBuffer());
-                    
+
                     // dynamic UBO
                     uniforms.addOrReplace(idLineSDFDynamicUBOName, dynamicBuffer);
                 }

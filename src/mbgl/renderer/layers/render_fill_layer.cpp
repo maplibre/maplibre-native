@@ -641,8 +641,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             auto& uniforms = drawable.mutableUniformBuffers();
             switch (static_cast<FillVariant>(drawable.getType())) {
                 case FillVariant::Fill: {
-                    uniforms.createOrUpdate(
-                        idFillInterpolateUBOName, &getFillInterpolateUBO(), context);
+                    uniforms.createOrUpdate(idFillInterpolateUBOName, &getFillInterpolateUBO(), context);
                     break;
                 }
                 case FillVariant::FillOutline: {
@@ -820,10 +819,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                          bucket.sharedTriangles,
                                          bucket.triangleSegments.data(),
                                          bucket.triangleSegments.size());
-                finish(*fillBuilder,
-                       idFillInterpolateUBOName,
-                       getFillInterpolateUBO(),
-                       FillVariant::Fill);
+                finish(*fillBuilder, idFillInterpolateUBOName, getFillInterpolateUBO(), FillVariant::Fill);
             }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES

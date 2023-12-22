@@ -165,7 +165,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             }
         }
 
-
         auto& uniforms = drawable.mutableUniformBuffers();
         switch (static_cast<RenderFillLayer::FillVariant>(drawable.getType())) {
             case RenderFillLayer::FillVariant::Fill: {

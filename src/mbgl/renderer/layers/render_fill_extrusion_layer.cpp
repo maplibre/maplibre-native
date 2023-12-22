@@ -281,7 +281,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       const RenderTree& /*renderTree*/,
                                       UniqueChangeRequestVec& changes) {
     return;
-    
+
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
         removeAllDrawables();
         return;

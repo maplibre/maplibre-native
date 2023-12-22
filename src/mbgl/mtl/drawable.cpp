@@ -357,8 +357,7 @@ void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
     if (shader) {
         const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
         for (const auto& block : shaderMTL.getUniformBlocks().getVector()) {
-            if (!block)
-                continue;
+            if (!block) continue;
             const auto index = block->getIndex();
             const auto& uniformBuffer = getUniformBuffers().get(index);
             assert(uniformBuffer && "UBO missing, drawable skipped");

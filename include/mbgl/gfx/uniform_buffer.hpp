@@ -68,12 +68,8 @@ public:
                                                        std::shared_ptr<UniformBuffer> uniformBuffer);
 
     /// Create and add a new buffer or update an existing one
-    void createOrUpdate(const size_t index,
-                        const std::vector<uint8_t>& data,
-                        gfx::Context&,
-                        bool persistent = false);
-    void createOrUpdate(
-        const size_t index, const void* data, std::size_t size, gfx::Context&, bool persistent = false);
+    void createOrUpdate(const size_t index, const std::vector<uint8_t>& data, gfx::Context&, bool persistent = false);
+    void createOrUpdate(const size_t index, const void* data, std::size_t size, gfx::Context&, bool persistent = false);
     template <typename T>
     std::enable_if_t<!std::is_pointer_v<T>> createOrUpdate(const size_t index,
                                                            const T* data,
