@@ -23,6 +23,8 @@
 #include <mbgl/gfx/fill_generator.hpp>
 #include <mbgl/shaders/custom_drawable_layer_ubo.hpp>
 
+#include <cmath>
+
 namespace mbgl {
 
 namespace style {
@@ -206,7 +208,7 @@ public:
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(
             1.0f, options.scaleWithMap ? tileID.canonical.z : parameters.state.getZoom());
-        const float f = options.scaleWithMap ? std::powf(2.f, parameters.state.getZoom() - tileID.canonical.z) : 1.0f;
+        const float f = options.scaleWithMap ? static_cast<float>(std::pow(2.f, parameters.state.getZoom() - tileID.canonical.z)) : 1.0f;
         const auto extrudeScale = options.pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits}
                                                        : std::array<float, 2>{parameters.pixelsToGLUnits[0] * f,
                                                                               parameters.pixelsToGLUnits[1] * f};
