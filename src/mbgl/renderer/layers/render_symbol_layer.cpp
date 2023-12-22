@@ -977,6 +977,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                const std::shared_ptr<UpdateParameters>&,
                                const RenderTree& /*renderTree*/,
                                UniqueChangeRequestVec& changes) {
+    return;
+    
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
         removeAllDrawables();
         return;

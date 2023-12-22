@@ -8,57 +8,44 @@ namespace gfx {
 std::shared_ptr<UniformBuffer> UniformBufferArray::nullref = nullptr;
 
 UniformBufferArray::UniformBufferArray(UniformBufferArray&& other)
-    : uniformBufferMap(std::move(other.uniformBufferMap)) {}
+    : uniformBufferVector(std::move(other.uniformBufferVector)) {}
 
 UniformBufferArray& UniformBufferArray::operator=(UniformBufferArray&& other) {
-    uniformBufferMap = std::move(other.uniformBufferMap);
+    uniformBufferVector = std::move(other.uniformBufferVector);
     return *this;
 }
 
 UniformBufferArray& UniformBufferArray::operator=(const UniformBufferArray& other) {
-    uniformBufferMap.clear();
-    for (const auto& kv : other.uniformBufferMap) {
-        add(kv.first, copy(*kv.second));
+    for (size_t index = 0; index < other.uniformBufferVector.size(); index++) {
+        uniformBufferVector[index] = other.uniformBufferVector[index];
     }
     return *this;
 }
 
-const std::shared_ptr<UniformBuffer>& UniformBufferArray::get(const StringIdentity id) const {
-    const auto result = uniformBufferMap.find(id);
-    return (result != uniformBufferMap.end()) ? result->second : nullref;
+const std::shared_ptr<UniformBuffer>& UniformBufferArray::get(const size_t index) const {
+    const auto& result = (index < uniformBufferVector.size()) ? uniformBufferVector[index] : nullref;
+    return (result != nullptr) ? result : nullref;
 }
 
-const std::shared_ptr<UniformBuffer>& UniformBufferArray::addOrReplace(const StringIdentity id,
+const std::shared_ptr<UniformBuffer>& UniformBufferArray::addOrReplace(const size_t index,
                                                                        std::shared_ptr<UniformBuffer> uniformBuffer) {
-    const auto result = uniformBufferMap.insert(std::make_pair(id, std::shared_ptr<UniformBuffer>()));
-    result.first->second = std::move(uniformBuffer);
-    return result.first->second;
+    uniformBufferVector[index] = std::move(uniformBuffer);
+    return uniformBufferVector[index];
 }
 
-void UniformBufferArray::createOrUpdate(const StringIdentity id,
+void UniformBufferArray::createOrUpdate(const size_t index,
                                         const std::vector<uint8_t>& data,
                                         gfx::Context& context,
                                         bool persistent) {
-    createOrUpdate(id, data.data(), data.size(), context, persistent);
+    createOrUpdate(index, data.data(), data.size(), context, persistent);
 }
 
 void UniformBufferArray::createOrUpdate(
-    const StringIdentity id, const void* data, const std::size_t size, gfx::Context& context, bool persistent) {
-    if (auto& ubo = get(id); ubo && ubo->getSize() == size) {
+    const size_t index, const void* data, const std::size_t size, gfx::Context& context, bool persistent) {
+    if (auto& ubo = get(index); ubo && ubo->getSize() == size) {
         ubo->update(data, size);
     } else {
-        add(id, context.createUniformBuffer(data, size, persistent));
-    }
-}
-
-const std::shared_ptr<UniformBuffer>& UniformBufferArray::add(const StringIdentity id,
-                                                              std::shared_ptr<UniformBuffer>&& uniformBuffer) {
-    const auto result = uniformBufferMap.insert(std::make_pair(id, std::shared_ptr<UniformBuffer>()));
-    if (result.second) {
-        result.first->second = std::move(uniformBuffer);
-        return result.first->second;
-    } else {
-        return nullref;
+        uniformBufferVector[index] = context.createUniformBuffer(data, size, persistent);
     }
 }
 

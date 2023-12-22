@@ -258,6 +258,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
+    return;
 
     if ((!renderTiles || renderTiles->empty()) && !imageData) {
         if (layerGroup) {

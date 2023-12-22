@@ -50,11 +50,12 @@ constexpr auto FillOutlineShaderName = "FillOutlineShader";
 constexpr auto FillPatternShaderName = "FillPatternShader";
 constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 
-const StringIdentity idFillOutlineInterpolateUBOName = stringIndexer().get("FillOutlineInterpolateUBO");
-const StringIdentity idFillPatternInterpolateUBOName = stringIndexer().get("FillPatternInterpolateUBO");
-const StringIdentity idFillPatternTilePropsUBOName = stringIndexer().get("FillPatternTilePropsUBO");
-const StringIdentity idFillOutlinePatternInterpolateUBOName = stringIndexer().get("FillOutlinePatternInterpolateUBO");
-const StringIdentity idFillOutlinePatternTilePropsUBOName = stringIndexer().get("FillOutlinePatternTilePropsUBO");
+const size_t idFillInterpolateUBOName = 5;
+const size_t idFillOutlineInterpolateUBOName = 5;
+const size_t idFillPatternTilePropsUBOName = 5;
+const size_t idFillPatternInterpolateUBOName = 7;
+const size_t idFillOutlinePatternTilePropsUBOName = 5;
+const size_t idFillOutlinePatternInterpolateUBOName = 7;
 
 const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
 const StringIdentity idIconTextureName = stringIndexer().get("u_image");
@@ -365,7 +366,7 @@ public:
         const auto zoom = parameters.state.getZoom();
         auto& uniforms = drawable.mutableUniformBuffers();
 
-        static const StringIdentity idLineUBOName = stringIndexer().get("LineBasicUBO");
+        static const size_t idLineUBOName = 2;
         {
             const auto matrix = LayerTweaker::getTileMatrix(
                 tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
@@ -379,7 +380,7 @@ public:
         }
         uniforms.addOrReplace(idLineUBOName, lineUniformBuffer);
 
-        static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LineBasicPropertiesUBO");
+        static const size_t idLinePropertiesUBOName = 3;
         if (!linePropertiesUniformBuffer) {
             const shaders::LineBasicPropertiesUBO linePropertiesUBO{/*color =*/color,
                                                                     /*opacity =*/opacity,
@@ -641,7 +642,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             switch (static_cast<FillVariant>(drawable.getType())) {
                 case FillVariant::Fill: {
                     uniforms.createOrUpdate(
-                        FillLayerTweaker::idFillInterpolateUBOName, &getFillInterpolateUBO(), context);
+                        idFillInterpolateUBOName, &getFillInterpolateUBO(), context);
                     break;
                 }
                 case FillVariant::FillOutline: {
@@ -820,7 +821,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                          bucket.triangleSegments.data(),
                                          bucket.triangleSegments.size());
                 finish(*fillBuilder,
-                       FillLayerTweaker::idFillInterpolateUBOName,
+                       idFillInterpolateUBOName,
                        getFillInterpolateUBO(),
                        FillVariant::Fill);
             }
@@ -841,7 +842,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                     bucket.basicLineSegments.data(),
                                                     bucket.basicLineSegments.size());
                         finish(*outlineBuilder,
-                               FillLayerTweaker::idFillOutlineInterpolateUBOName,
+                               idFillOutlineInterpolateUBOName,
                                getFillOutlineInterpolateUBO(),
                                FillVariant::FillOutline);
                     }
@@ -856,7 +857,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                             bucket.basicLineSegments.data(),
                                             bucket.basicLineSegments.size());
                 finish(*outlineBuilder,
-                       FillLayerTweaker::idFillOutlineInterpolateUBOName,
+                       idFillOutlineInterpolateUBOName,
                        getFillOutlineInterpolateUBO(),
                        FillVariant::FillOutline);
             }

@@ -5,6 +5,7 @@
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/render_fill_layer.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
@@ -24,32 +25,23 @@ namespace mbgl {
 
 using namespace style;
 
-static const StringIdentity idFillDrawableUBOName = stringIndexer().get("FillDrawableUBO");
-static const StringIdentity idFillDrawablePropsUBOName = stringIndexer().get("FillDrawablePropsUBO");
-static const StringIdentity idFillEvaluatedPropsUBOName = stringIndexer().get("FillEvaluatedPropsUBO");
+static const size_t idFillDrawableUBOName = 3;
+static const size_t idFillEvaluatedPropsUBOName = 4;
+static const size_t idFillInterpolateUBOName = 5;
 
-const StringIdentity FillLayerTweaker::idFillTilePropsUBOName = stringIndexer().get("FillDrawableTilePropsUBO");
-const StringIdentity FillLayerTweaker::idFillInterpolateUBOName = stringIndexer().get("FillInterpolateUBO");
-const StringIdentity FillLayerTweaker::idFillOutlineInterpolateUBOName = stringIndexer().get(
-    "FillOutlineInterpolateUBO");
+static const size_t idFillOutlineDrawableUBOName = 3;
+static const size_t idFillOutlineEvaluatedPropsUBOName = 4;
+static const size_t idFillOutlineInterpolateUBOName = 5;
 
-static const StringIdentity idFillOutlineDrawableUBOName = stringIndexer().get("FillOutlineDrawableUBO");
-static const StringIdentity idFillOutlineEvaluatedPropsUBOName = stringIndexer().get("FillOutlineEvaluatedPropsUBO");
+static const size_t idFillPatternDrawableUBOName = 4;
+static const size_t idFillPatternTilePropsUBOName = 5;
+static const size_t idFillPatternEvaluatedPropsUBOName = 6;
+static const size_t idFillPatternInterpolateUBOName = 7;
 
-static const StringIdentity idFillOutlineInterpolateUBOName = stringIndexer().get("FillOutlineInterpolateUBO");
-
-static const StringIdentity idFillPatternDrawableUBOName = stringIndexer().get("FillPatternDrawableUBO");
-static const StringIdentity idFillPatternInterpolateUBOName = stringIndexer().get("FillPatternInterpolateUBO");
-static const StringIdentity idFillPatternEvaluatedPropsUBOName = stringIndexer().get("FillPatternEvaluatedPropsUBO");
-static const StringIdentity idFillPatternTilePropsUBOName = stringIndexer().get("FillPatternTilePropsUBO");
-
-static const StringIdentity idFillOutlinePatternDrawableUBOName = stringIndexer().get("FillOutlinePatternDrawableUBO");
-static const StringIdentity idFillOutlinePatternInterpolateUBOName = stringIndexer().get(
-    "FillOutlinePatternInterpolateUBO");
-static const StringIdentity idFillOutlinePatternEvaluatedPropsUBOName = stringIndexer().get(
-    "FillOutlinePatternEvaluatedPropsUBO");
-static const StringIdentity idFillOutlinePatternTilePropsUBOName = stringIndexer().get(
-    "FillOutlinePatternTilePropsUBO");
+static const size_t idFillOutlinePatternDrawableUBOName = 4;
+static const size_t idFillOutlinePatternTilePropsUBOName = 5;
+static const size_t idFillOutlinePatternEvaluatedPropsUBOName = 6;
+static const size_t idFillOutlinePatternInterpolateUBOName = 7;
 
 static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 using namespace shaders;
@@ -173,54 +165,70 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             }
         }
 
+
         auto& uniforms = drawable.mutableUniformBuffers();
-        if (uniforms.get(idFillInterpolateUBOName)) {
-            UpdateFillUniformBuffers();
+        switch (static_cast<RenderFillLayer::FillVariant>(drawable.getType())) {
+            case RenderFillLayer::FillVariant::Fill: {
+                UpdateFillUniformBuffers();
 
-            uniforms.addOrReplace(idFillEvaluatedPropsUBOName, fillPropsUniformBuffer);
+                uniforms.addOrReplace(idFillEvaluatedPropsUBOName, fillPropsUniformBuffer);
 
-            const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
-            uniforms.createOrUpdate(idFillDrawableUBOName, &drawableUBO, context);
-        } else if (uniforms.get(idFillOutlineInterpolateUBOName)) {
-            UpdateFillOutlineUniformBuffers();
+                const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
+                uniforms.createOrUpdate(idFillDrawableUBOName, &drawableUBO, context);
+                break;
+            }
+            case RenderFillLayer::FillVariant::FillOutline: {
+                UpdateFillOutlineUniformBuffers();
 
-            uniforms.addOrReplace(idFillOutlineEvaluatedPropsUBOName, fillOutlinePropsUniformBuffer);
+                uniforms.addOrReplace(idFillOutlineEvaluatedPropsUBOName, fillOutlinePropsUniformBuffer);
 
-            const FillOutlineDrawableUBO drawableUBO = {
-                /*.matrix=*/util::cast<float>(matrix),
-                /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
-                /* pad1 */ 0,
-                /* pad2 */ 0};
-            uniforms.createOrUpdate(idFillOutlineDrawableUBOName, &drawableUBO, context);
-        } else if (uniforms.get(idFillPatternInterpolateUBOName)) {
-            UpdateFillPatternUniformBuffers();
+                const FillOutlineDrawableUBO drawableUBO = {
+                    /*.matrix=*/util::cast<float>(matrix),
+                    /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
+                    /* pad1 */ 0,
+                    /* pad2 */ 0};
+                uniforms.createOrUpdate(idFillOutlineDrawableUBOName, &drawableUBO, context);
+                break;
+            }
+            case RenderFillLayer::FillVariant::FillPattern: {
+                UpdateFillPatternUniformBuffers();
 
-            uniforms.addOrReplace(idFillPatternEvaluatedPropsUBOName, fillPatternPropsUniformBuffer);
+                uniforms.addOrReplace(idFillPatternEvaluatedPropsUBOName, fillPatternPropsUniformBuffer);
 
-            const FillPatternDrawableUBO drawableUBO = {
-                /*.matrix=*/util::cast<float>(matrix),
-                /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
-                /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
-                /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
-                /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                0,
-                0,
-            };
-            uniforms.createOrUpdate(idFillPatternDrawableUBOName, &drawableUBO, context);
-        } else if (uniforms.get(idFillOutlinePatternInterpolateUBOName)) {
-            UpdateFillOutlinePatternUniformBuffers();
+                const FillPatternDrawableUBO drawableUBO = {
+                    /*.matrix=*/util::cast<float>(matrix),
+                    /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
+                    /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
+                    /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+                    /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+                    0,
+                    0,
+                };
+                uniforms.createOrUpdate(idFillPatternDrawableUBOName, &drawableUBO, context);
+                break;
+            }
+            case RenderFillLayer::FillVariant::FillOutlinePattern: {
+                UpdateFillOutlinePatternUniformBuffers();
 
-            uniforms.addOrReplace(idFillOutlinePatternEvaluatedPropsUBOName, fillOutlinePatternPropsUniformBuffer);
+                uniforms.addOrReplace(idFillOutlinePatternEvaluatedPropsUBOName, fillOutlinePatternPropsUniformBuffer);
 
-            const FillOutlinePatternDrawableUBO drawableUBO = {
-                /*.matrix=*/util::cast<float>(matrix),
-                /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
-                /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
-                /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
-                /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
-                /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-            };
-            uniforms.createOrUpdate(idFillOutlinePatternDrawableUBOName, &drawableUBO, context);
+                const FillOutlinePatternDrawableUBO drawableUBO = {
+                    /*.matrix=*/util::cast<float>(matrix),
+                    /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
+                    /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
+                    /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
+                    /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
+                    /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+                };
+                uniforms.createOrUpdate(idFillOutlinePatternDrawableUBOName, &drawableUBO, context);
+                break;
+            }
+            default: {
+#ifndef NDEBUG
+                mbgl::Log::Error(mbgl::Event::Render, "Invalid fill variant type supplied during drawable update!");
+#endif
+                break;
+            }
         }
     });
 

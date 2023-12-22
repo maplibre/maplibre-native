@@ -25,15 +25,22 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
-static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
-static const StringIdentity idLineGradientUBOName = stringIndexer().get("LineGradientUBO");
-static const StringIdentity idLineGradientPropertiesUBOName = stringIndexer().get("LineGradientPropertiesUBO");
-static const StringIdentity idLinePatternUBOName = stringIndexer().get("LinePatternUBO");
-static const StringIdentity idLinePatternPropertiesUBOName = stringIndexer().get("LinePatternPropertiesUBO");
-static const StringIdentity idLineSDFUBOName = stringIndexer().get("LineSDFUBO");
-static const StringIdentity idLineSDFPropertiesUBOName = stringIndexer().get("LineSDFPropertiesUBO");
-static const StringIdentity idLineDynamicUBOName = stringIndexer().get("LineDynamicUBO");
+static const StringIdentity idLineDynamicUBOName = 8;
+static const StringIdentity idLineUBOName = 9;
+static const StringIdentity idLinePropertiesUBOName = 10;
+
+static const StringIdentity idLineGradientDynamicUBOName = 7;
+static const StringIdentity idLineGradientUBOName = 8;
+static const StringIdentity idLineGradientPropertiesUBOName = 9;
+
+static const StringIdentity idLinePatternDynamicUBOName = 9;
+static const StringIdentity idLinePatternUBOName = 10;
+static const StringIdentity idLinePatternPropertiesUBOName = 11;
+
+static const StringIdentity idLineSDFDynamicUBOName = 9;
+static const StringIdentity idLineSDFUBOName = 10;
+static const StringIdentity idLineSDFPropertiesUBOName = 11;
+
 static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
@@ -132,8 +139,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
         const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
 
-        uniforms.addOrReplace(idLineDynamicUBOName, dynamicBuffer);
-
         const LineType type = static_cast<LineType>(drawable.getType());
         switch (type) {
             case LineType::Simple: {
@@ -146,6 +151,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                 // properties UBO
                 uniforms.addOrReplace(idLinePropertiesUBOName, getLinePropsBuffer());
+                
+                // dynamic UBO
+                uniforms.addOrReplace(idLineDynamicUBOName, dynamicBuffer);
             } break;
 
             case LineType::Gradient: {
@@ -159,6 +167,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                 // properties UBO
                 uniforms.addOrReplace(idLineGradientPropertiesUBOName, getLineGradientPropsBuffer());
+                
+                // dynamic UBO
+                uniforms.addOrReplace(idLineGradientDynamicUBOName, dynamicBuffer);
             } break;
 
             case LineType::Pattern: {
@@ -182,6 +193,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                 // properties UBO
                 uniforms.addOrReplace(idLinePatternPropertiesUBOName, getLinePatternPropsBuffer());
+                
+                // dynamic UBO
+                uniforms.addOrReplace(idLinePatternDynamicUBOName, dynamicBuffer);
 
             } break;
 
@@ -229,6 +243,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                     // properties UBO
                     uniforms.addOrReplace(idLineSDFPropertiesUBOName, getLineSDFPropsBuffer());
+                    
+                    // dynamic UBO
+                    uniforms.addOrReplace(idLineSDFDynamicUBOName, dynamicBuffer);
                 }
             } break;
 

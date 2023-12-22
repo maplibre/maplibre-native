@@ -347,13 +347,13 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
 
 #if MLN_DRAWABLE_RENDERER
 /// Property interpolation UBOs
-static const StringIdentity idLineInterpolationUBOName = stringIndexer().get("LineInterpolationUBO");
-static const StringIdentity idLineGradientInterpolationUBOName = stringIndexer().get("LineGradientInterpolationUBO");
-static const StringIdentity idLinePatternInterpolationUBOName = stringIndexer().get("LinePatternInterpolationUBO");
-static const StringIdentity idLineSDFInterpolationUBOName = stringIndexer().get("LineSDFInterpolationUBO");
+static const size_t idLineInterpolationUBOName = 11;
+static const size_t idLineGradientInterpolationUBOName = 10;
+static const size_t idLinePatternInterpolationUBOName = 12;
+static const size_t idLineSDFInterpolationUBOName = 12;
 
 /// Evaluated properties that depend on the tile
-static const StringIdentity idLinePatternTilePropertiesUBOName = stringIndexer().get("LinePatternTilePropertiesUBO");
+static const StringIdentity idLinePatternTilePropertiesUBOName = 13;
 
 static const StringIdentity idLineImageUniformName = stringIndexer().get("u_image");
 
