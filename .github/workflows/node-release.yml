@@ -1,53 +1,45 @@
 name: node-release
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
-    inputs:
-      version:
-        description: Choose a release type
-        required: true
-        type: choice
-        options:
-          - prerelease
-          - prepatch
-          - preminor
-          - premajor
-          - patch
-          - minor
-          - major
 
 jobs:
-  bump_version:
-    runs-on: ubuntu-20.04
-
+  release-check:
+    name: Check if version changed
+    runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./
         shell: bash
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+          ref: main
 
-      - name: Setup node
+      - name: Use Node.js from nvmrc
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version-file: '.nvmrc'
 
-      - name: npm version
+      - name: Check if version changed
+        id: check
         run: |
-          echo "NPM_VERSION=$(npm version ${{ github.event.inputs.version }} --preid pre --no-git-tag-version)" >> "$GITHUB_ENV"
-
-      - name: Push version to git
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git commit -a -m "Update node version to ${{ env.NPM_VERSION }} (${{ github.event.inputs.version }})"
-          git push
+          latestNpmPackageVersion=$( npm view @maplibre/maplibre-gl-native versions --json | jq '.[-1]' -r )
+          currentVersion=$( node -e "console.log(require('./package.json').version)" )
+          if [ "$latestNpmPackageVersion" == "$currentVersion" ]; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+          
+    outputs:
+      publish: ${{ steps.check.outputs.changed }}
 
   publish_binaries:
+    needs: release-check
+    if: ${{ needs.release-check.outputs.publish == 'true' }}
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
@@ -81,9 +73,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Get Latest Version
-        run: git pull
 
       - name: Setup submodules
         shell: bash
@@ -129,10 +118,10 @@ jobs:
             libwebp-dev
           /usr/sbin/update-ccache-symlinks
 
-      - name: Setup node
+      - name: Use Node.js from nvmrc
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
 
       - name: npm ci
         run: npm ci --ignore-scripts
@@ -273,16 +262,23 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get Latest Version
-        run: git pull
-
-      - name: Setup node
+      - name: Use Node.js from nvmrc
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
+
+      - name: Get version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+
+      - name: Prepare release
+        id: prepare_release
+        run: |
+          RELEASE_TYPE=$(node -e "console.log(require('semver').prerelease('${{ steps.package-version.outputs.current-version }}') ? 'prerelease' : 'regular')")
+          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
 
       - name: Publish to NPM (release)
-        if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'patch' || github.event.inputs.version == 'minor' || github.event.inputs.version == 'major')
+        if: ${{ steps.prepare_release.outputs.release_type == 'regular' }}
         run: |
           npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --access public
@@ -290,7 +286,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
 
       - name: Publish to NPM (prerelease)
-        if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'prerelease' || github.event.inputs.version == 'prepatch' || github.event.inputs.version == 'preminor' || github.event.inputs.version == 'premajor')
+        if: ${{ steps.prepare_release.outputs.release_type == 'prerelease' }}
         run: |
           npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --tag next --access public

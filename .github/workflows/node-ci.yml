@@ -134,10 +134,10 @@ jobs:
             libwebp-dev
           /usr/sbin/update-ccache-symlinks
 
-      - name: Setup node
+      - name: Use Node.js from nvmrc
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
 
       - name: npm ci
         run: npm ci --ignore-scripts
