@@ -268,6 +268,9 @@ jobs:
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
 
+      - name: npm ci
+        run: npm ci --ignore-scripts
+
       - name: Prepare release
         id: prepare_release
         run: |
