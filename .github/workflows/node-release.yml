@@ -25,8 +25,8 @@ jobs:
       - name: Check if version changed
         id: check
         run: |
-          latestNpmPackageVersion=$( npm view @maplibre/maplibre-gl-native versions --json | jq '.[-1]' -r )
-          currentVersion=$( node -e "console.log(require('./package.json').version)" )
+          latestNpmPackageVersion="$( npm view @maplibre/maplibre-gl-native versions --json | jq '.[-1]' -r )"
+          currentVersion="$( node -e "console.log(require('./package.json').version)" )"
           if [ "$latestNpmPackageVersion" == "$currentVersion" ]; then
             echo "changed=false" >> $GITHUB_OUTPUT
           else
@@ -274,7 +274,7 @@ jobs:
       - name: Prepare release
         id: prepare_release
         run: |
-          RELEASE_TYPE=$(node -e "console.log(require('semver').prerelease('${{ steps.package-version.outputs.current-version }}') ? 'prerelease' : 'regular')")
+          RELEASE_TYPE="$(node -e "console.log(require('semver').prerelease('${{ steps.package-version.outputs.current-version }}') ? 'prerelease' : 'regular')")"
           echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
 
       - name: Publish to NPM (release)
