@@ -1219,6 +1219,9 @@ brevity, this document does not speak of these classes.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="maplibre-native-for-android"><a class="header" href="#maplibre-native-for-android">MapLibre Native for Android</a></h1>
 <p>MapLibre Native for Android is a library for embedding interactive map views with scalable, customizable vector maps onto Android devices.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="quickstart"><a class="header" href="#quickstart">Quickstart</a></h1>
+<div class="warning">
+<p>In versions prior to the (upcoming) MapLibre Native for Android 11.0 release, you need to use <code>com.mapbox.mapboxsdk.*</code> for imports instead of <code>org.maplibre.android.*</code>. Classes with <code>Mapbox</code> in the name are replaced with <code>MapLibre</code>. Details can be found in the <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/CHANGELOG.md">changelog</a>.</p>
+</div>
 <ol>
 <li>
 <p>Add bintray Maven repositories to your project-level Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>).</p>
