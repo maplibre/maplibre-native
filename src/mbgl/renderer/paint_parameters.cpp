@@ -188,11 +188,17 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             // already present
             continue;
         }
+    }
 
-        if (tileUBOs.empty()) {
-            tileUBOs.reserve(count);
-        }
+    if (tileUBOs.empty()) {
+        tileUBOs.reserve(count);
+    }
 
+    // Render tile clipping masks in order of tile ID, by increasing
+    // z-value, so that more detailed tiles cover less detailed ones.
+    for (const auto& pair : tileClippingMaskIDs) {
+        const auto& tileID = pair.first;
+        const auto stencilID = pair.second;
         tileUBOs.emplace_back(shaders::ClipUBO{/*.matrix=*/util::cast<float>(matrixForTile(tileID)),
                                                /*.stencil_ref=*/stencilID,
                                                /*.pad=*/0,
@@ -235,6 +241,11 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
             // already present
             continue;
         }
+    }
+
+    for (const auto& pair : tileClippingMaskIDs) {
+        const auto& tileID = pair.first;
+        const auto stencilID = pair.second;
 
         program->draw(context,
                       *renderPass,
