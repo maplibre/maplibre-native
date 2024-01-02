@@ -7,7 +7,7 @@ on:
 
 jobs:
   release-check:
-    name: Check if version changed
+    name: Check if version is published
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -22,26 +22,20 @@ jobs:
         with:
           node-version-file: '.nvmrc'
 
-      - name: Check if version changed
+      - name: Check if version is published
         id: check
         run: |
           currentVersion="$( node -e "console.log(require('./package.json').version)" )"
-          echo "currentVersion: $currentVersion"
           isPublished="$( npm view @maplibre/maplibre-gl-native versions --json | jq -c --arg cv $currentVersion 'any(. == $cv)' )"
+          echo "published=$isPublished" >> "$GITHUB_OUTPUT"
+          echo "currentVersion: $currentVersion"
           echo "isPublished: $isPublished"
-          if [ "$isPublished" == "true" ]; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "changed=false"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "changed=true"
-          fi
     outputs:
-      publish: ${{ steps.check.outputs.changed }}
+      published: ${{ steps.check.outputs.published }}
 
   publish_binaries:
     needs: release-check
-    if: ${{ needs.release-check.outputs.publish == 'true' }}
+    if: ${{ needs.release-check.outputs.published == 'false' }}
     runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
