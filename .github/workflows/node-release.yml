@@ -28,9 +28,9 @@ jobs:
           latestNpmPackageVersion="$( npm view @maplibre/maplibre-gl-native versions --json | jq '.[-1]' -r )"
           currentVersion="$( node -e "console.log(require('./package.json').version)" )"
           if [ "$latestNpmPackageVersion" == "$currentVersion" ]; then
-            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "changed=false" >> "$GITHUB_OUTPUT"
           else
-            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
           
     outputs:
