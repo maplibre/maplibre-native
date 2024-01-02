@@ -243,7 +243,7 @@ jobs:
           ./platform/node/scripts/publish.sh --target_arch=arm64
 
   publish_npm:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: publish_binaries
 
     defaults:
