@@ -272,7 +272,7 @@ jobs:
         id: prepare_release
         run: |
           RELEASE_TYPE="$(node -e "console.log(require('semver').prerelease('${{ steps.package-version.outputs.current-version }}') ? 'prerelease' : 'regular')")"
-          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          echo "release_type=$RELEASE_TYPE" >> "$GITHUB_OUTPUT"
 
       - name: Publish to NPM (release)
         if: ${{ steps.prepare_release.outputs.release_type == 'regular' }}
