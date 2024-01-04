@@ -227,16 +227,16 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: ios-v${{ env.version }}
-          files: |
-            ${{ env.xcframework }}
-            LICENSE.md
+          files: ${{ env.xcframework }}
           tag_name: ios-v${{ env.version }}
           prerelease: ${{ !github.event.inputs.release }}
           fail_on_unmatched_files: true
 
       - name: Release (CocoaPods)
+        shell: bash -leo pipefail {0}  # so pod is found
         if: env.make_release
         run: |
+          zip ${{ env.xcframework }} ../../LICENSE.md  # add license to zip
           VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
 
   ios-ci-result:
