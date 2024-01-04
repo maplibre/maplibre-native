@@ -241,6 +241,7 @@ jobs:
 
       # needed to trigger workflow for Swift Package Index release
       - name: Generate token
+        if: env.make_release
         id: generate_token
         uses: tibdex/github-app-token@v2
         with:
@@ -248,6 +249,7 @@ jobs:
           private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
       - name: Release (Swift Package Index)
+        if: env.make_release
         run: |
           echo "::add-mask::${{ steps.generate_token.outputs.token }}"
           release_workflow_id=81221759  # id of release.yml
