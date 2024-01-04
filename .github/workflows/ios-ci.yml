@@ -221,14 +221,23 @@ jobs:
           git tag -a ios-v${{ env.version }} -m "Publish ios-v${{ env.version }}" ${{ github.sha }}
           git push origin ios-v${{ env.version }}
 
-      - name: Release
+      - name: Release (GitHub)
         if: env.make_release
+        id: release
         uses: softprops/action-gh-release@v1
         with:
           name: ios-v${{ env.version }}
-          files: ${{ env.xcframework }}
+          files: |
+            ${{ env.xcframework }}
+            LICENSE.md
           tag_name: ios-v${{ env.version }}
           prerelease: ${{ !github.event.inputs.release }}
+          fail_on_unmatched_files: true
+
+      - name: Release (CocoaPods)
+        if: env.make_release
+        run: |
+          VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
 
   ios-ci-result:
     runs-on: ubuntu-latest
