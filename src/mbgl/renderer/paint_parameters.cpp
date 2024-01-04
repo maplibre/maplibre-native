@@ -124,14 +124,12 @@ const UnwrappedTileID& unwrap(const RenderTiles::element_type::value_type& iter)
     return iter.get().id;
 }
 
-// Check whether the given set of tile IDs is a subset of the ones already rendered
+// Check whether we can reuse a clip mask for a new set of tiles
 bool tileIDsCovered(const RenderTiles& tiles, const TileMaskIDMap& idMap) {
-    if (idMap.size() < tiles->size()) {
-        return false;
-    }
-    assert(std::is_sorted(
-        tiles->begin(), tiles->end(), [=](const auto& a, const auto& b) { return unwrap(a) < unwrap(b); }));
-    return includes(idMap.cbegin(), idMap.cend(), tiles->cbegin(), tiles->cend(), &unwrap);
+    return idMap.size() == tiles->size() &&
+           std::equal(idMap.cbegin(), idMap.cend(), tiles->cbegin(), tiles->cend(), [=](const auto& a, const auto& b) {
+               return a.first == unwrap(b);
+           });
 }
 
 } // namespace
@@ -162,14 +160,17 @@ void PaintParameters::clearStencil() {
 }
 
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
-    // If the current stencil mask covers this source already, there's no need to draw another one.
+    // We can avoid updating the mask if it already contains the same set of tiles.
     if (!renderTiles || !renderPass || tileIDsCovered(renderTiles, tileClippingMaskIDs)) {
         return;
     }
 
+    tileClippingMaskIDs.clear();
+
+    // If the stencil value will overflow, clear the target to ensure ensure that none of the new
+    // values remain set somewhere in it. Otherwise we can continue to overwrite it incrementally.
     const auto count = renderTiles->size();
     if (nextStencilID + count > maxStencilValue) {
-        // we'll run out of fresh IDs so we need to clear and start from scratch
         clearStencil();
     }
 
