@@ -216,6 +216,7 @@ jobs:
         run: echo version="$(cat VERSION)"-pre${{ github.sha }} >> "$GITHUB_ENV"
 
       - name: Extract changelog for version
+        if: env.make_release
         run: |
           awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "## {{ env.version }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
           cat changelog_for_version.md
@@ -275,7 +276,6 @@ jobs:
         shell: bash -leo pipefail {0}  # so pod is found
         if: env.make_release
         run: |
-          zip ${{ env.xcframework }} ../../LICENSE.md  # add license to zip
           VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
 
   ios-ci-result:
