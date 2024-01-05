@@ -274,7 +274,42 @@ jobs:
         id: prepare_release
         run: |
           RELEASE_TYPE="$(node -e "console.log(require('semver').prerelease('${{ steps.package-version.outputs.current-version }}') ? 'prerelease' : 'regular')")"
-          echo "release_type=$RELEASE_TYPE" >> "$GITHUB_OUTPUT"
+          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+
+      - name: Build Release Notes
+        id: release_notes
+        run: |
+          RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
+          node ./platform/node/scripts/release-notes-node.js > ${RELEASE_NOTES_PATH}
+          echo "release_notes=${RELEASE_NOTES_PATH}" >> $GITHUB_OUTPUT
+
+      - name: Update Release Notes (release)
+        id: create_regular_release
+        if: ${{ steps.prepare_release.outputs.release_type == 'regular' }}
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag: node-v${{ steps.package-version.outputs.current-version }}
+          name: node-v${{ steps.package-version.outputs.current-version }}
+          bodyFile: ${{ steps.release_notes.outputs.release_notes }}
+          allowUpdates: true
+          draft: false
+          prerelease: false
+
+      - name: Update Release Notes (prerelease)
+        id: create_prerelease
+        if: ${{ steps.prepare_release.outputs.release_type == 'prerelease' }}
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag: node-v${{ steps.package-version.outputs.current-version }}
+          name: node-v${{ steps.package-version.outputs.current-version }}
+          bodyFile: ${{ steps.release_notes.outputs.release_notes }}
+          allowUpdates: true
+          draft: false
+          prerelease: true
 
       - name: Publish to NPM (release)
         if: ${{ steps.prepare_release.outputs.release_type == 'regular' }}
