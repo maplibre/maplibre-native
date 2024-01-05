@@ -28,7 +28,7 @@ public:
 
     /// @brief Gets the tile urls for this vector source.
     /// @return List of tile urls.
-    const std::vector<std::string> getTiles();
+    const std::vector<std::string> getTiles() const;
 
     /// @brief Sets the tile urls for this vector source.
     /// @param tiles List of tile urls.

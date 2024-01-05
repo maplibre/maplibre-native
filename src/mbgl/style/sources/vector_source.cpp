@@ -92,7 +92,7 @@ void VectorSource::loadDescription(FileSource& fileSource) {
     });
 }
 
-const std::vector<std::string> VectorSource::getTiles() {
+const std::vector<std::string> VectorSource::getTiles() const {
     auto tileset = impl().tileset;
     if (tileset.has_value()) {
         return tileset->tiles;
