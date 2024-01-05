@@ -919,6 +919,50 @@ TEST(Source, RenderTileSetSourceUpdate) {
     renderSource->update(uninitialized.baseImpl, layers, true, true, test.tileParameters());
 }
 
+TEST(Source, VectorSourceSetTiles) {
+    SourceTest test;
+    test.styleObserver.sourceChanged = [&](Source& source) {
+        EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string>{"new"});
+        test.end();
+    };
+
+    VectorSource source("source", Tileset{{"url"}});
+    source.setObserver(&test.styleObserver);
+    source.setTiles({"unused"}); // make sure early setTiles does not segfault
+    source.loadDescription(*test.fileSource);
+    EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string>{"url"});
+    source.setTiles({"new"});
+    test.run();
+}
+
+TEST(Source, VectorSourceUrlSetTiles) {
+    SourceTest test;
+    test.styleObserver.sourceLoaded = [&](Source& source) {
+        EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string>{"tiles"});
+        source.as<VectorSource>()->setTiles({"new"});
+    };
+    int count = 0;
+    test.styleObserver.sourceChanged = [&](Source& source) {
+        if (count++) {
+            EXPECT_EQ(source.as<VectorSource>()->getTiles(), std::vector<std::string>{"new"});
+            test.end();
+        }
+    };
+
+    test.fileSource->sourceResponse = [&](const Resource& resource) {
+        EXPECT_EQ("url", resource.url);
+        Response response;
+        response.data = std::make_unique<std::string>(R"({"tiles": ["tiles"]})");
+        return response;
+    };
+
+    VectorSource source("source", "url");
+    source.setObserver(&test.styleObserver);
+    source.setTiles({"unused"});
+    source.loadDescription(*test.fileSource);
+    test.run();
+}
+
 TEST(Source, GeoJSONSourceTilesAfterDataReset) {
     SourceTest test;
     GeoJSONSource source("source");
