@@ -37,6 +37,8 @@ jobs:
     needs: release-check
     if: ${{ needs.release-check.outputs.published == 'false' }}
     runs-on: ${{ matrix.runs-on }}
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -229,7 +231,7 @@ jobs:
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./platform/node/scripts/publish.sh
 
@@ -238,17 +240,17 @@ jobs:
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./platform/node/scripts/publish.sh --target_arch=arm64
 
   publish_npm:
     runs-on: ubuntu-latest
     needs: publish_binaries
-
+    permissions:
+      contents: write
     defaults:
       run:
-        working-directory: ./
         shell: bash
 
     steps:
