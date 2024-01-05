@@ -101,37 +101,12 @@ using GetTileIDFunc = const UnwrappedTileID& (*)(const typename TIter::value_typ
 
 using TileMaskIDMap = std::map<UnwrappedTileID, int32_t>;
 
-// `std::includes` adapted to extract tile IDs from arbitrary collection iterators.
-// This is needed because, although it accepts iterators of different types, they must be:
-// "...such that an object of type InputIt can be dereferenced and then implicitly converted to both of them.​"
-template <class I1, class I2>
-bool includes(I1 beg1, const I1 end1, I2 beg2, const I2 end2, const GetTileIDFunc<I2>& unwrap) {
-    for (; beg2 != end2; ++beg1) {
-        if (beg1 == end1) {
-            return false;
-        }
-        const auto id2 = unwrap(*beg2);
-        if (id2 < beg1->first) {
-            return false;
-        } else if (!(beg1->first < id2)) {
-            ++beg2;
-        }
-    }
-    return true;
-}
-
-const UnwrappedTileID& unwrap(const RenderTiles::element_type::value_type& iter) {
-    return iter.get().id;
-}
-
-// Check whether the given set of tile IDs is a subset of the ones already rendered
+// Check whether we can reuse a clip mask for a new set of tiles
 bool tileIDsCovered(const RenderTiles& tiles, const TileMaskIDMap& idMap) {
-    if (idMap.size() < tiles->size()) {
-        return false;
-    }
-    assert(std::is_sorted(
-        tiles->begin(), tiles->end(), [=](const auto& a, const auto& b) { return unwrap(a) < unwrap(b); }));
-    return includes(idMap.cbegin(), idMap.cend(), tiles->cbegin(), tiles->cend(), &unwrap);
+    return idMap.size() == tiles->size() &&
+           std::equal(idMap.cbegin(), idMap.cend(), tiles->cbegin(), tiles->cend(), [=](const auto& a, const auto& b) {
+               return a.first == b.get().id;
+           });
 }
 
 } // namespace
@@ -162,14 +137,17 @@ void PaintParameters::clearStencil() {
 }
 
 void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
-    // If the current stencil mask covers this source already, there's no need to draw another one.
+    // We can avoid updating the mask if it already contains the same set of tiles.
     if (!renderTiles || !renderPass || tileIDsCovered(renderTiles, tileClippingMaskIDs)) {
         return;
     }
 
+    tileClippingMaskIDs.clear();
+
+    // If the stencil value will overflow, clear the target to ensure ensure that none of the new
+    // values remain set somewhere in it. Otherwise we can continue to overwrite it incrementally.
     const auto count = renderTiles->size();
     if (nextStencilID + count > maxStencilValue) {
-        // we'll run out of fresh IDs so we need to clear and start from scratch
         clearStencil();
     }
 
