@@ -274,45 +274,32 @@ jobs:
         id: prepare_release
         run: |
           RELEASE_TYPE="$(node -e "console.log(require('semver').prerelease('${{ steps.package-version.outputs.current-version }}') ? 'prerelease' : 'regular')")"
-          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          if [[ $RELEASE_TYPE == 'regular' ]]; then
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Build Release Notes
-        id: release_notes
+      - name: Extract changelog for version
         run: |
-          RELEASE_NOTES_PATH="${PWD}/release_notes.txt"
-          node ./platform/node/scripts/release-notes-node.js > ${RELEASE_NOTES_PATH}
-          echo "release_notes=${RELEASE_NOTES_PATH}" >> $GITHUB_OUTPUT
+          awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "## ${{ steps.package-version.outputs.current-version }}" { p = 1 };' platform/node/CHANGELOG.md > changelog_for_version.md
+          cat changelog_for_version.md
 
-      - name: Update Release Notes (release)
-        id: create_regular_release
-        if: ${{ steps.prepare_release.outputs.release_type == 'regular' }}
+      - name: Update Release Notes
+        id: update_release_notes
         uses: ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag: node-v${{ steps.package-version.outputs.current-version }}
           name: node-v${{ steps.package-version.outputs.current-version }}
-          bodyFile: ${{ steps.release_notes.outputs.release_notes }}
+          bodyFile: changelog_for_version.md
           allowUpdates: true
           draft: false
-          prerelease: false
-
-      - name: Update Release Notes (prerelease)
-        id: create_prerelease
-        if: ${{ steps.prepare_release.outputs.release_type == 'prerelease' }}
-        uses: ncipollo/release-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag: node-v${{ steps.package-version.outputs.current-version }}
-          name: node-v${{ steps.package-version.outputs.current-version }}
-          bodyFile: ${{ steps.release_notes.outputs.release_notes }}
-          allowUpdates: true
-          draft: false
-          prerelease: true
+          prerelease: ${{ steps.prepare_release.outputs.prerelease }}
 
       - name: Publish to NPM (release)
-        if: ${{ steps.prepare_release.outputs.release_type == 'regular' }}
+        if: ${{ steps.prepare_release.outputs.prerelease == 'false' }}
         run: |
           npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --access public
@@ -320,7 +307,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
 
       - name: Publish to NPM (prerelease)
-        if: ${{ steps.prepare_release.outputs.release_type == 'prerelease' }}
+        if: ${{ steps.prepare_release.outputs.prerelease == 'true' }}
         run: |
           npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --tag next --access public
