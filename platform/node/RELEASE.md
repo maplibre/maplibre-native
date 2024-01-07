@@ -1,4 +1,4 @@
-# Instructions for making an Node release
+# Instructions for making a Node release
 
 1. Change the version number in package.json. on the command line, in the package root directory, run the following command, replacing <update_type> with one of the semantic versioning release types (prerelease, prepatch, preminor, premajor, patch, minor, major):
 
