@@ -274,7 +274,7 @@ jobs:
 
       - name: Release (CocoaPods)
         shell: bash -leo pipefail {0}  # so pod is found
-        if: env.make_release
+        if: env.make_release && github.event.inputs.release
         run: |
           VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
 
