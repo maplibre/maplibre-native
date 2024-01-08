@@ -203,7 +203,7 @@ jobs:
 
       # Make Metal XCFramework release
       - name: Should make release?
-        if: github.event.inputs.release != 'no'
+        if: github.event.inputs.release == 'full' || github.event.inputs.release == 'pre'
         run: echo make_release=true >> "$GITHUB_ENV"
 
       - name: Build XCFramework
@@ -214,13 +214,13 @@ jobs:
       - name: Get version (release)
         if: github.event.inputs.release == 'full'
         run: |
-          echo version="$(cat VERSION)" >> "$GITHUB_ENV"
+          echo version="$(head VERSION)" >> "$GITHUB_ENV"
           echo changelog_version_heading="## {{ env.version }}" >> "$GITHUB_ENV"
 
       - name: Get version (pre-release)
         if: github.event.inputs.release == 'pre'
         run: |
-          echo version="$(cat VERSION)"-pre${{ github.sha }} >> "$GITHUB_ENV"
+          echo version="$(head VERSION)"-pre${{ github.sha }} >> "$GITHUB_ENV"
           echo changelog_version_heading="## main" >> "$GITHUB_ENV"
 
       - name: Extract changelog for version
