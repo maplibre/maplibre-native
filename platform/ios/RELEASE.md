@@ -32,4 +32,4 @@ gh workflow run ios-ci.yml -f release=full --ref main
 
 Or run the workflow from the Actions tab on GitHub:
 
-<img width="367" alt="Screenshot 2024-01-08 at 11 00 30" src="https://github.com/louwers/workflow-playground/assets/649392/2066da56-0bb2-44ea-a9fc-4a2b160961c8">
+<img width="367" alt="Screenshot 2024-01-08 at 11 00 30" src="https://github.com/maplibre/maplibre-native/assets/649392/ae791f04-f805-4544-b33a-44d8b04e0836">
