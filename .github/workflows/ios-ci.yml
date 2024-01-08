@@ -268,13 +268,13 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/maplibre/maplibre-gl-native-distribution/actions/workflows/$release_workflow_id/dispatches \
             -d '{"ref":"main","inputs":{ \
-              "changelog": '"$(cat changelog_for_version.md)"' \
+              "changelog": '"$(cat changelog_for_version.md)"', \
               "version":"${{ env.version }}", \
               "download_url":"${{ fromJSON(steps.github_release.outputs.assets)[0].browser_download_url }}"}}'
 
       - name: Release (CocoaPods)
         shell: bash -leo pipefail {0}  # so pod is found
-        if: env.make_release
+        if: env.make_release && github.event.inputs.release
         run: |
           VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
 
