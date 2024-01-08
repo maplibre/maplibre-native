@@ -26,6 +26,14 @@ public:
 
     void loadDescription(FileSource&) final;
 
+    /// @brief Gets the tile urls for this vector source.
+    /// @return List of tile urls.
+    const std::vector<std::string> getTiles() const;
+
+    /// @brief Sets the tile urls for this vector source.
+    /// @param tiles List of tile urls.
+    void setTiles(const std::vector<std::string>& tiles);
+
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
 
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }

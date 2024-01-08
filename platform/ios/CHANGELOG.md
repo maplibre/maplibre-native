@@ -4,8 +4,11 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-## 6.0.0-pre0
+## 6.0.0
 
+* This is the first release that uses **Metal** for rendering. This is a graphics API from Apple that replaces OpenGL ES on Apple platforms.
+  * Note that the [snapshotter](https://github.com/maplibre/maplibre-native/issues/1862) has not been implemented yet for the Metal renderer. Hold off updating if your application requires this functionality.
+  * While we had a long period of pre-releases and testing leading up to this release, and no crashes have been reported, it is possible that you come across inconsistencies or problems in production apps. Please report them on [GitHub](https://github.com/maplibre/maplibre-native/issues/1609).
 * 💥 Breaking: Changed the prefix of files, classes, methods, variables and everything from `MGL` to `MLN`. ([#919](https://github.com/maplibre/maplibre-native/pull/919)).
 
   > To migrate:  
