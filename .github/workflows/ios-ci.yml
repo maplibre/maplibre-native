@@ -4,9 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        required: false
-        type: boolean
-        description: Makes a release with version platform/ios/VERSION
+        type: choice
+        default: no
+        options:
+          - full
+          - pre
+          - no
+        description: Whether to make a release, choose full release (uses platform/ios/VERSION) or pre-release
   push:
     branches:
       - main
@@ -199,7 +203,7 @@ jobs:
 
       # Make Metal XCFramework release
       - name: Should make release?
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: github.event.inputs.release != 'no'
         run: echo make_release=true >> "$GITHUB_ENV"
 
       - name: Build XCFramework
@@ -208,17 +212,21 @@ jobs:
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
 
       - name: Get version (release)
-        if: env.make_release && github.event.inputs.release
-        run: echo version="$(cat VERSION)" >> "$GITHUB_ENV"
+        if: github.event.inputs.release == 'full'
+        run: |
+          echo version="$(cat VERSION)" >> "$GITHUB_ENV"
+          echo changelog_version_heading="## {{ env.version }}" >> "$GITHUB_ENV"
 
       - name: Get version (pre-release)
-        if: env.make_release && !github.event.inputs.release
-        run: echo version="$(cat VERSION)"-pre${{ github.sha }} >> "$GITHUB_ENV"
+        if: github.event.inputs.release == 'pre'
+        run: |
+          echo version="$(cat VERSION)"-pre${{ github.sha }} >> "$GITHUB_ENV"
+          echo changelog_version_heading="## main" >> "$GITHUB_ENV"
 
       - name: Extract changelog for version
         if: env.make_release
         run: |
-          awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "## {{ env.version }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
+          awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "{{ env.changelog_version_heading }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
           cat changelog_for_version.md
 
       - name: Create tag
@@ -268,13 +276,13 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/maplibre/maplibre-gl-native-distribution/actions/workflows/$release_workflow_id/dispatches \
             -d '{"ref":"main","inputs":{ \
-              "changelog": '"$(cat changelog_for_version.md)"', \
+              "changelog": "'"$(cat changelog_for_version.md)"'", \
               "version":"${{ env.version }}", \
               "download_url":"${{ fromJSON(steps.github_release.outputs.assets)[0].browser_download_url }}"}}'
 
       - name: Release (CocoaPods)
         shell: bash -leo pipefail {0}  # so pod is found
-        if: env.make_release && github.event.inputs.release
+        if: env.make_release
         run: |
           VERSION=${{ env.version }} COCOAPODS_TRUNK_TOKEN=${{ secrets.COCOAPODS_PASSWORD }} pod trunk push MapLibre.podspec
 
