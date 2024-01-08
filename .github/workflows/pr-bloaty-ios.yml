@@ -14,6 +14,7 @@ permissions:
 
 jobs:
   pr-bloaty-ios:
+    if: github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
