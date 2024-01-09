@@ -142,7 +142,7 @@ public:
             options.anchor = {0.5f, 0.95f};
             options.angleDegrees = 45.0f;
             options.scaleWithMap = true;
-            options.pitchWithMap = true;
+            options.pitchWithMap = false;
             interface.setSymbolOptions(options);
 
             // add symbol

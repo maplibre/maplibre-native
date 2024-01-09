@@ -12,6 +12,8 @@ layout(std140) uniform CustomSymbolIconParametersUBO {
     bool u_scale_with_map;
     bool u_pitch_with_map;
     highp float u_camera_to_center_distance;
+    highp float u_aspect_ratio;
+    highp float pad0, pad1, pad3;
 };
 
 out vec2 v_tex;
@@ -20,6 +22,13 @@ vec2 rotateVec2(vec2 v, float angle) {
     float cosA = cos(angle);
     float sinA = sin(angle);
     return vec2(v.x * cosA - v.y * sinA, v.x * sinA + v.y * cosA);
+}
+
+vec2 ellipseRotateVec2(vec2 v, float angle, float radiusRatio /* A/B */) {
+    float cosA = cos(angle);
+    float sinA = sin(angle);
+    float invRatio = 1.0 / radiusRatio;
+    return vec2(v.x * cosA - radiusRatio * v.y * sinA, invRatio * v.x * sinA + v.y * cosA);
 }
 
 void main() {
@@ -34,26 +43,24 @@ void main() {
 
     // rotate extrusion around anchor
     float angle = radians(-u_angle_degrees);
-    vec2 rotated_unit = rotateVec2((extrude - anchor), angle);
+    vec2 corner = extrude - anchor;
 
     // compute
     if (u_pitch_with_map) {
-        vec2 corner = center;
         if (u_scale_with_map) {
-            corner += rotated_unit * u_extrude_scale;
+            corner *= u_extrude_scale;
         } else {
             vec4 projected_center = u_matrix * vec4(center, 0, 1);
-            corner += rotated_unit * u_extrude_scale * (projected_center.w / u_camera_to_center_distance);
+            corner *= u_extrude_scale * (projected_center.w / u_camera_to_center_distance);
         }
-
+        corner = center + rotateVec2(corner, angle);
         gl_Position = u_matrix * vec4(corner, 0, 1);
     } else {
         gl_Position = u_matrix * vec4(center, 0, 1);
-
         if (u_scale_with_map) {
-            gl_Position.xy += rotated_unit * u_extrude_scale * u_camera_to_center_distance;
+            gl_Position.xy += ellipseRotateVec2(corner * u_extrude_scale * u_camera_to_center_distance, angle, u_aspect_ratio);
         } else {
-            gl_Position.xy += rotated_unit * u_extrude_scale * gl_Position.w;
+            gl_Position.xy += ellipseRotateVec2(corner * u_extrude_scale * gl_Position.w, angle, u_aspect_ratio);
         }
     }
 
