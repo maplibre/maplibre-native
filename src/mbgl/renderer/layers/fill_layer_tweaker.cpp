@@ -27,21 +27,21 @@ using namespace style;
 
 static const size_t idFillDrawableUBOName = 3;
 static const size_t idFillEvaluatedPropsUBOName = 4;
-//static const size_t idFillInterpolateUBOName = 5;
+// static const size_t idFillInterpolateUBOName = 5;
 
 static const size_t idFillOutlineDrawableUBOName = 3;
 static const size_t idFillOutlineEvaluatedPropsUBOName = 4;
-//static const size_t idFillOutlineInterpolateUBOName = 5;
+// static const size_t idFillOutlineInterpolateUBOName = 5;
 
 static const size_t idFillPatternDrawableUBOName = 4;
-//static const size_t idFillPatternTilePropsUBOName = 5;
+// static const size_t idFillPatternTilePropsUBOName = 5;
 static const size_t idFillPatternEvaluatedPropsUBOName = 6;
-//static const size_t idFillPatternInterpolateUBOName = 7;
+// static const size_t idFillPatternInterpolateUBOName = 7;
 
 static const size_t idFillOutlinePatternDrawableUBOName = 4;
-//static const size_t idFillOutlinePatternTilePropsUBOName = 5;
+// static const size_t idFillOutlinePatternTilePropsUBOName = 5;
 static const size_t idFillOutlinePatternEvaluatedPropsUBOName = 6;
-//static const size_t idFillOutlinePatternInterpolateUBOName = 7;
+// static const size_t idFillOutlinePatternInterpolateUBOName = 7;
 
 static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 using namespace shaders;
