@@ -209,8 +209,8 @@ public:
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(
             1.0f, options.scaleWithMap ? tileID.canonical.z : parameters.state.getZoom());
         const float factor = options.scaleWithMap
-                            ? static_cast<float>(std::pow(2.f, parameters.state.getZoom() - tileID.canonical.z))
-                            : 1.0f;
+                                 ? static_cast<float>(std::pow(2.f, parameters.state.getZoom() - tileID.canonical.z))
+                                 : 1.0f;
         const auto extrudeScale = options.pitchWithMap ? std::array<float, 2>{pixelsToTileUnits, pixelsToTileUnits}
                                                        : std::array<float, 2>{parameters.pixelsToGLUnits[0] * factor,
                                                                               parameters.pixelsToGLUnits[1] * factor};
@@ -224,8 +224,9 @@ public:
             /*pitch_with_map*/ options.pitchWithMap,
             /*camera_to_center_distance*/ parameters.state.getCameraToCenterDistance(),
             /*aspect_ratio*/ parameters.pixelsToGLUnits[0] / parameters.pixelsToGLUnits[1],
-            0, 0, 0
-        };
+            0,
+            0,
+            0};
 
         // set UBOs
         auto& uniforms = drawable.mutableUniformBuffers();
