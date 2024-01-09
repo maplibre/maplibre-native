@@ -25,21 +25,21 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idLineDynamicUBOName = 8;
-static const StringIdentity idLineUBOName = 9;
-static const StringIdentity idLinePropertiesUBOName = 10;
+static const size_t idLineDynamicUBOName = 8;
+static const size_t idLineUBOName = 9;
+static const size_t idLinePropertiesUBOName = 10;
 
-static const StringIdentity idLineGradientDynamicUBOName = 7;
-static const StringIdentity idLineGradientUBOName = 8;
-static const StringIdentity idLineGradientPropertiesUBOName = 9;
+static const size_t idLineGradientDynamicUBOName = 7;
+static const size_t idLineGradientUBOName = 8;
+static const size_t idLineGradientPropertiesUBOName = 9;
 
-static const StringIdentity idLinePatternDynamicUBOName = 9;
-static const StringIdentity idLinePatternUBOName = 10;
-static const StringIdentity idLinePatternPropertiesUBOName = 11;
+static const size_t idLinePatternDynamicUBOName = 9;
+static const size_t idLinePatternUBOName = 10;
+static const size_t idLinePatternPropertiesUBOName = 11;
 
-static const StringIdentity idLineSDFDynamicUBOName = 9;
-static const StringIdentity idLineSDFUBOName = 10;
-static const StringIdentity idLineSDFPropertiesUBOName = 11;
+static const size_t idLineSDFDynamicUBOName = 9;
+static const size_t idLineSDFUBOName = 10;
+static const size_t idLineSDFPropertiesUBOName = 11;
 
 static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
