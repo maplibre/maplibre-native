@@ -131,9 +131,12 @@ jobs:
             libcurl4-openssl-dev \
             libglfw3-dev \
             libuv1-dev \
-            g++-12 \
+            g++-10 \
+            libc++-9-dev \
+            libc++abi-9-dev \
             libjpeg-dev \
-            libpng-dev
+            libpng-dev \
+            libwebp-dev
           /usr/sbin/update-ccache-symlinks
 
       - name: Setup node
@@ -155,12 +158,6 @@ jobs:
         run: |
           $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
           "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Setup cmake (Linux)
-        if: runner.os == 'Linux' && matrix.arch != 'arm64'
-        uses: jwlawson/actions-setup-cmake@v1.13
-        with:
-          cmake-version: "3.19.x"
 
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
