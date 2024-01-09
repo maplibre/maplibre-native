@@ -53,8 +53,14 @@ public:
         }
 
         auto& glContext = static_cast<gl::Context&>(context);
-        shader = ShaderProgramGL::create(
-            glContext, programParameters, shaderName, firstAttribName, shaders::ShaderInfo<ShaderID, gfx::Backend::Type::OpenGL>::uniformBlocks, vert, frag, additionalDefines);
+        shader = ShaderProgramGL::create(glContext,
+                                         programParameters,
+                                         shaderName,
+                                         firstAttribName,
+                                         shaders::ShaderInfo<ShaderID, gfx::Backend::Type::OpenGL>::uniformBlocks,
+                                         vert,
+                                         frag,
+                                         additionalDefines);
         if (!shader || !registerShader(shader, shaderName)) {
             throw std::runtime_error("Failed to register " + shaderName + " with shader group!");
         }
