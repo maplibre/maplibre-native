@@ -273,7 +273,7 @@ namespace {
 
 constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
-const StringIdentity idHeatmapInterpolateUBOName = stringIndexer().get("HeatmapInterpolateUBO");
+const size_t idHeatmapInterpolateUBOName = 5;
 const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
 const StringIdentity idTexImageName = stringIndexer().get("u_image");
 const StringIdentity idTexColorRampName = stringIndexer().get("u_color_ramp");
@@ -289,7 +289,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 [[maybe_unused]] const RenderTree& renderTree,
                                 UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
-    return;
 
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();

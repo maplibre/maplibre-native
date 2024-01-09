@@ -21,9 +21,9 @@ public:
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
     static constexpr auto CollisionCircleUBOName = "CollisionCircleUBO";
-    static const StringIdentity idCollisionCircleUBOName;
+    static const size_t idCollisionCircleUBOName;
     static constexpr auto CollisionBoxUBOName = "CollisionBoxUBO";
-    static const StringIdentity idCollisionBoxUBOName;
+    static const size_t idCollisionBoxUBOName;
 };
 
 } // namespace mbgl

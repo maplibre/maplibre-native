@@ -217,7 +217,6 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    [[maybe_unused]] const RenderTree& renderTree,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
-    return;
 
     const auto zoom = state.getIntegerZoom();
     const auto tileCover = util::tileCover(state, zoom);

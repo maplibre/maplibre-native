@@ -20,8 +20,8 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idHeatmapDrawableUBOName = stringIndexer().get("HeatmapDrawableUBO");
-static const StringIdentity idHeatmapEvaluatedPropsUBOName = stringIndexer().get("HeatmapEvaluatedPropsUBO");
+static const size_t idHeatmapDrawableUBOName = 3;
+static const size_t idHeatmapEvaluatedPropsUBOName = 4;
 
 void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;

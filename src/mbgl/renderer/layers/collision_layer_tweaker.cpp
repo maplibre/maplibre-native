@@ -21,8 +21,8 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-const StringIdentity CollisionLayerTweaker::idCollisionCircleUBOName = stringIndexer().get(CollisionCircleUBOName);
-const StringIdentity CollisionLayerTweaker::idCollisionBoxUBOName = stringIndexer().get(CollisionBoxUBOName);
+const size_t CollisionLayerTweaker::idCollisionCircleUBOName = 4;
+const size_t CollisionLayerTweaker::idCollisionBoxUBOName = 5;
 
 void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     if (layerGroup.empty()) {

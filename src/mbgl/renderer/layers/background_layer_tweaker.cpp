@@ -19,8 +19,9 @@ using namespace shaders;
 #if !defined(NDEBUG)
 constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
 #endif
-static const StringIdentity idBackgroundDrawableUBOName = stringIndexer().get("BackgroundDrawableUBO");
-static const StringIdentity idBackgroundLayerUBOName = stringIndexer().get("BackgroundLayerUBO");
+static const size_t idBackgroundDrawableUBOName = 1;
+static const size_t idBackgroundLayerUBOName = 2;
+
 static const StringIdentity idTexUniformName = stringIndexer().get("u_image");
 
 void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {

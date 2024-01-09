@@ -265,7 +265,7 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 namespace {
 
 constexpr auto CircleShaderGroupName = "CircleShader";
-const StringIdentity idCircleInterpolateUBOName = stringIndexer().get("CircleInterpolateUBO");
+const size_t idCircleInterpolateUBOName = 11;
 const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
 
 } // namespace
@@ -279,7 +279,6 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                [[maybe_unused]] const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
     std::unique_lock<std::mutex> guard(mutex);
-    return;
 
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();

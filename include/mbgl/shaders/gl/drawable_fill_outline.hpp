@@ -11,7 +11,6 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* vertex = R"(layout (std140) uniform FillOutlineDrawableUBO {
     highp mat4 u_matrix;
     highp vec2 u_world;
-    highp vec2 pad;
 };
 layout (std140) uniform FillOutlineEvaluatedPropsUBO {
     highp vec4 u_outline_color;

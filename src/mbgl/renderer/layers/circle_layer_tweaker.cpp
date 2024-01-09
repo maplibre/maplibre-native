@@ -22,9 +22,9 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idCircleDrawableUBOName = stringIndexer().get("CircleDrawableUBO");
-static const StringIdentity idCirclePaintParamsUBOName = stringIndexer().get("CirclePaintParamsUBO");
-static const StringIdentity idCircleEvaluatedPropsUBOName = stringIndexer().get("CircleEvaluatedPropsUBO");
+static const size_t idCircleDrawableUBOName = 8;
+static const size_t idCirclePaintParamsUBOName = 9;
+static const size_t idCircleEvaluatedPropsUBOName = 10;
 
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;

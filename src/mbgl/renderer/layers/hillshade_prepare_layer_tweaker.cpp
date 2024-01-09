@@ -16,7 +16,7 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idHillshadePrepareDrawableUBOName = stringIndexer().get("HillshadePrepareDrawableUBO");
+static const size_t idHillshadePrepareDrawableUBOName = 2;
 
 const std::array<float, 4>& getUnpackVector(Tileset::DEMEncoding encoding) {
     // https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb

@@ -66,7 +66,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         return;
     }
     static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
-    static const StringIdentity idDebugUBOName = stringIndexer().get("DebugUBO");
+    static const size_t idDebugUBOName = 1;
     std::unique_ptr<gfx::DrawableBuilder> debugBuilder = [&]() -> std::unique_ptr<gfx::DrawableBuilder> {
         auto builder = context.createDrawableBuilder("debug-builder");
         builder->setShader(debugShader);

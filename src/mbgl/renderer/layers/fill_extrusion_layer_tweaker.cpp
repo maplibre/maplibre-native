@@ -27,16 +27,14 @@ using namespace shaders;
 using namespace style;
 
 namespace {
-const StringIdentity idFillExtrusionDrawableUBOName = stringIndexer().get("FillExtrusionDrawableUBO");
-const StringIdentity idFillExtrusionDrawablePropsUBOName = stringIndexer().get("FillExtrusionDrawablePropsUBO");
+const size_t idFillExtrusionDrawableUBOName = 6;
+const size_t idFillExtrusionDrawablePropsUBOName = 7;
 const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 } // namespace
 
-const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName = stringIndexer().get(
-    "FillExtrusionDrawableTilePropsUBO");
-const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = stringIndexer().get(
-    "FillExtrusionInterpolateUBO");
+const size_t FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName = 8;
+const size_t FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = 9;
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
