@@ -132,6 +132,8 @@ jobs:
             libglfw3-dev \
             libuv1-dev \
             g++-10 \
+            libc++-9-dev \
+            libc++abi-9-dev \
             libjpeg-dev \
             libpng-dev \
             libwebp-dev
