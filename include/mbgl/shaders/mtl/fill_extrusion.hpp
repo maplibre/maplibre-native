@@ -82,9 +82,9 @@ struct FragmentOutput {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const FillExtrusionDrawableUBO& fill [[buffer(5)]],
-                                device const FillExtrusionDrawablePropsUBO& props [[buffer(6)]],
-                                device const FillExtrusionInterpolateUBO& interp [[buffer(7)]]) {
+                                device const FillExtrusionDrawableUBO& fill [[buffer(6)]],
+                                device const FillExtrusionDrawablePropsUBO& props [[buffer(7)]],
+                                device const FillExtrusionInterpolateUBO& interp [[buffer(9)]]) {
 
 #if defined(HAS_UNIFORM_u_base)
     const auto base   = props.light_position_base.w;

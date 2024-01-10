@@ -45,11 +45,11 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const SymbolDrawableUBO& drawable [[buffer(8)]],
-                                device const SymbolDynamicUBO& dynamic [[buffer(9)]],
-                                device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
-                                device const SymbolDrawableTilePropsUBO& props [[buffer(11)]],
-                                device const SymbolDrawableInterpolateUBO& interp [[buffer(12)]]) {
+                                device const SymbolDrawableUBO& drawable [[buffer(10)]],
+                                device const SymbolDynamicUBO& dynamic [[buffer(11)]],
+                                device const SymbolDrawablePaintUBO& paint [[buffer(12)]],
+                                device const SymbolDrawableTilePropsUBO& props [[buffer(13)]],
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(14)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -122,8 +122,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolDrawableUBO& drawable [[buffer(8)]],
-                            device const SymbolDrawablePaintUBO& paint [[buffer(10)]],
+                            device const SymbolDrawableUBO& drawable [[buffer(10)]],
+                            device const SymbolDrawablePaintUBO& paint [[buffer(12)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)

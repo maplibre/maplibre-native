@@ -210,22 +210,22 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 const auto matrix = LayerTweaker::getTileMatrix(
                     tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
 
-                static const StringIdentity idLineDynamicUBOName = stringIndexer().get("LineDynamicUBO");
+                static const size_t idLineDynamicUBOName = 8;
                 const shaders::LineDynamicUBO dynamicUBO = {
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     0,
                     0};
 
-                static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
+                static const size_t idLineUBOName = 9;
                 const shaders::LineUBO lineUBO{/*matrix = */ util::cast<float>(matrix),
                                                /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
                                                0,
                                                0,
                                                0};
 
-                static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
+                static const size_t idLinePropertiesUBOName = 10;
 
-                static const StringIdentity idLineInterpolationUBOName = stringIndexer().get("LineInterpolationUBO");
+                static const size_t idLineInterpolationUBOName = 11;
                 const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
                                                                          /*blur_t =*/0.f,
                                                                          /*opacity_t =*/0.f,
