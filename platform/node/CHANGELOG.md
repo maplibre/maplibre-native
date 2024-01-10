@@ -2,15 +2,18 @@
 ## main
 
 * ...Add new stuff here...
-* [Breaking] Remove node 14 support and add node 20 support. We are now building binaries for node 16,18,20
-* [Breaking] Linux binary is now built on Ubuntu 22.04 instead of Ubuntu 20.04. it could require a OS update to use this update on linux.
+* [Note] This is a OpenGL-2 release. It does not include metal support.
+* [Breaking] Removes node 14 binary build and adds node 20 binary build. We are now building binaries for node 16,18,20 @acalcutt https://github.com/maplibre/maplibre-native/pull/1941
+* [Breaking] Linux binary is now built on Ubuntu 22.04 instead of Ubuntu 20.04. it could require a OS update to use this update on linux. @acalcutt https://github.com/maplibre/maplibre-native/pull/1941
 * Make Node Map object options "request" property optional by @tdcosta100 in https://github.com/maplibre/maplibre-native/pull/904
 * Compile Node targets without -std=c++11 option by @tdcosta100 in https://github.com/maplibre/maplibre-native/pull/926
 
+
 ## 5.3.0-pre.0
 
-* [Breaking] Remove node 14 support and add node 20 support. We are now building binaries for node 16,18,20
-* [Breaking] Linux binary is now built on Ubuntu 22.04 instead of Ubuntu 20.04. it could require a OS update to use this update on linux.
+* [Note] This is a OpenGL-2 release. It does not include metal support.
+* [Breaking] Removes node 14 binary build and adds node 20 binary build. We are now building binaries for node 16,18,20 @acalcutt https://github.com/maplibre/maplibre-native/pull/1941
+* [Breaking] Linux binary is now built on Ubuntu 22.04 instead of Ubuntu 20.04. it could require a OS update to use this update on linux. @acalcutt https://github.com/maplibre/maplibre-native/pull/1941
 * Make Node Map object options "request" property optional by @tdcosta100 in https://github.com/maplibre/maplibre-native/pull/904
 * Compile Node targets without -std=c++11 option by @tdcosta100 in https://github.com/maplibre/maplibre-native/pull/926
 
