@@ -136,10 +136,10 @@ jobs:
             libpng-dev
           /usr/sbin/update-ccache-symlinks
 
-      - name: Setup node
-        uses: actions/setup-node@v3
+      - name: Use Node.js from nvmrc
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
 
       - name: npm ci
         run: npm ci --ignore-scripts
@@ -158,7 +158,7 @@ jobs:
 
       - name: Setup cmake (Linux)
         if: runner.os == 'Linux' && matrix.arch != 'arm64'
-        uses: jwlawson/actions-setup-cmake@v1.13
+        uses: jwlawson/actions-setup-cmake@v1.14
         with:
           cmake-version: "3.19.x"
 
@@ -280,6 +280,5 @@ jobs:
 
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
-        if: github.ref != 'refs/heads/main'
         run: |
           npm pack --dry-run
