@@ -485,12 +485,12 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
         // interpolation UBOs
         const float zoom = static_cast<float>(state.getZoom());
-        
+
         std::optional<LineInterpolationUBO> lineInterpolationUBO = std::nullopt;
         std::optional<LineGradientInterpolationUBO> lineGradientInterpolationUBO = std::nullopt;
         std::optional<LinePatternInterpolationUBO> linePatternInterpolationUBO = std::nullopt;
         std::optional<LineSDFInterpolationUBO> lineSDFInterpolationUBO = std::nullopt;
-        
+
         auto getLineInterpolationUBO = [&]() -> const LineInterpolationUBO& {
             if (!lineInterpolationUBO) {
                 lineInterpolationUBO = {
@@ -506,7 +506,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             return *lineInterpolationUBO;
         };
-        
+
         auto getLineGradientInterpolationUBO = [&]() -> const LineGradientInterpolationUBO& {
             if (!lineGradientInterpolationUBO) {
                 lineGradientInterpolationUBO = {
@@ -522,7 +522,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             return *lineGradientInterpolationUBO;
         };
-        
+
         auto getLinePatternInterpolationUBO = [&]() -> const LinePatternInterpolationUBO& {
             if (!linePatternInterpolationUBO) {
                 linePatternInterpolationUBO = {
@@ -538,7 +538,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             return *linePatternInterpolationUBO;
         };
-        
+
         auto getLineSDFInterpolationUBO = [&]() -> const LineSDFInterpolationUBO& {
             if (!lineSDFInterpolationUBO) {
                 lineSDFInterpolationUBO = {
@@ -548,7 +548,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                     /*gapwidth_t =*/std::get<0>(paintPropertyBinders.get<LineGapWidth>()->interpolationFactor(zoom)),
                     /*offset_t =*/std::get<0>(paintPropertyBinders.get<LineOffset>()->interpolationFactor(zoom)),
                     /*width_t =*/std::get<0>(paintPropertyBinders.get<LineWidth>()->interpolationFactor(zoom)),
-                    /*floorwidth_t =*/std::get<0>(paintPropertyBinders.get<LineFloorWidth>()->interpolationFactor(zoom)),
+                    /*floorwidth_t =*/
+                    std::get<0>(paintPropertyBinders.get<LineFloorWidth>()->interpolationFactor(zoom)),
                     0};
             }
 
@@ -560,13 +561,12 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
         const std::optional<ImagePosition> patternPosA = tile.getPattern(linePatternValue.from.id());
         const std::optional<ImagePosition> patternPosB = tile.getPattern(linePatternValue.to.id());
-        
+
         auto getLinePatternTilePropertiesUBO = [&]() -> const LinePatternTilePropertiesUBO& {
             if (!linePatternTilePropertiesUBO) {
                 linePatternTilePropertiesUBO = {
                     /*pattern_from =*/patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-                    /*pattern_to =*/patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0}
-                };
+                    /*pattern_to =*/patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0}};
             }
 
             return *linePatternTilePropertiesUBO;
