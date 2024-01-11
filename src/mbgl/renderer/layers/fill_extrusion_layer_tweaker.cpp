@@ -90,7 +90,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = true;
-        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, state.getIntegerZoom());
         const auto zoomScale = state.zoomScale(tileID.canonical.z);

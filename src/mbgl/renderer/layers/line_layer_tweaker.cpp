@@ -130,7 +130,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         auto& uniforms = drawable.mutableUniformBuffers();
 
-        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         uniforms.addOrReplace(idLineDynamicUBOName, dynamicBuffer);
 

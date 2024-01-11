@@ -57,6 +57,7 @@ public:
                               style::TranslateAnchorType,
                               bool nearClipped,
                               bool inViewportPixelUnits,
+                              const gfx::Drawable& drawable,
                               bool aligned = false);
 
 protected:

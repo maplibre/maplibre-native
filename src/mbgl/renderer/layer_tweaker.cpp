@@ -32,15 +32,23 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  style::TranslateAnchorType anchor,
                                  bool nearClipped,
                                  bool inViewportPixelUnits,
+                                 const gfx::Drawable& drawable,
                                  bool aligned) {
     // from RenderTile::prepare
     mat4 tileMatrix;
     parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
     // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
-    const auto& projMatrix = aligned ? parameters.transformParams.alignedProjMatrix
+    auto projMatrix = aligned ? parameters.transformParams.alignedProjMatrix
                                      : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
                                                     : parameters.transformParams.projMatrix);
+    if (!drawable.getIs3D()) {
+        const auto depthEpsilon = 1.0f / (1 << 12);
+        const auto numSublayers  = 3;
+        const auto slice = ((1 + drawable.getLayerIndex()) * numSublayers + drawable.getSubLayerIndex()) * depthEpsilon;
+        projMatrix[14] -= slice;
+    }
+
     matrix::multiply(tileMatrix, projMatrix, tileMatrix);
 
     return RenderTile::translateVtxMatrix(
