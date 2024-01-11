@@ -3,6 +3,7 @@ layout (std140) uniform FillMatrixUBO {
 };
 layout (std140) uniform FillOutlineDrawableUBO {
     highp vec2 u_world;
+    highp vec2 pad;
 };
 layout (std140) uniform FillOutlineEvaluatedPropsUBO {
     highp vec4 u_outline_color;
