@@ -14,7 +14,7 @@ const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::LineShader, gfx::Backen
     AttributeInfo{7, gfx::AttributeDataType::Float2, 1, "a_width"},
 };
 const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{8, true, false, sizeof(LineGradientUBO), "LineDynamicUBO"},
+    UniformBlockInfo{8, true, false, sizeof(LineDynamicUBO), "LineDynamicUBO"},
     UniformBlockInfo{9, true, true, sizeof(LineUBO), "LineUBO"},
     UniformBlockInfo{10, true, true, sizeof(LinePropertiesUBO), "LinePropertiesUBO"},
     UniformBlockInfo{11, true, false, sizeof(LineInterpolationUBO), "LineInterpolationUBO"},
@@ -33,7 +33,7 @@ const std::array<AttributeInfo, 9> ShaderSource<BuiltIn::LinePatternShader, gfx:
     AttributeInfo{8, gfx::AttributeDataType::UShort4, 1, "a_pattern_to"},
 };
 const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{9, true, false, sizeof(LineGradientUBO), "LineDynamicUBO"},
+    UniformBlockInfo{9, true, false, sizeof(LineDynamicUBO), "LineDynamicUBO"},
     UniformBlockInfo{10, true, true, sizeof(LinePatternUBO), "LinePatternUBO"},
     UniformBlockInfo{11, true, true, sizeof(LinePatternPropertiesUBO), "LinePatternPropertiesUBO"},
     UniformBlockInfo{12, true, false, sizeof(LinePatternInterpolationUBO), "LinePatternInterpolationUBO"},
@@ -55,7 +55,7 @@ const std::array<AttributeInfo, 9> ShaderSource<BuiltIn::LineSDFShader, gfx::Bac
     AttributeInfo{8, gfx::AttributeDataType::Float2, 1, "a_floorwidth"},
 };
 const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{9, true, false, sizeof(LineGradientUBO), "LineDynamicUBO"},
+    UniformBlockInfo{9, true, false, sizeof(LineDynamicUBO), "LineDynamicUBO"},
     UniformBlockInfo{10, true, true, sizeof(LineSDFUBO), "LineSDFUBO"},
     UniformBlockInfo{11, true, true, sizeof(LineSDFPropertiesUBO), "LineSDFPropertiesUBO"},
     UniformBlockInfo{12, true, false, sizeof(LineSDFInterpolationUBO), "LineSDFInterpolationUBO"},
