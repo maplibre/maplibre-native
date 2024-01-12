@@ -176,7 +176,8 @@ public:
         // add symbol icon
         {
             using namespace mbgl;
-            GeometryCoordinate position{static_cast<int16_t>(util::EXTENT  * 0.5f), static_cast<int16_t>(util::EXTENT  * 0.5f)};
+            GeometryCoordinate position{static_cast<int16_t>(util::EXTENT * 0.5f),
+                                        static_cast<int16_t>(util::EXTENT * 0.5f)};
 
             // load image
             std::string imageData; // doh!
