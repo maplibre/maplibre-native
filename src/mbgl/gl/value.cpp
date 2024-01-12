@@ -133,7 +133,7 @@ StencilOp::Type StencilOp::Get() {
             Enum<gfx::StencilOpType>::from(dppass)};
 }
 
-#if MLN_LEGACY_RENDERER
+#if MLN_RENDER_BACKEND_OPENGL
 const constexpr DepthRange::Type DepthRange::Default;
 
 void DepthRange::Set(const Type& value) {

@@ -169,7 +169,7 @@ private:
     State<value::StencilMask> stencilMask;
     State<value::StencilTest> stencilTest;
     State<value::StencilOp> stencilOp;
-#if MLN_LEGACY_RENDERER
+#if MLN_RENDER_BACKEND_OPENGL
     State<value::DepthRange> depthRange;
 #endif
     State<value::DepthMask> depthMask;

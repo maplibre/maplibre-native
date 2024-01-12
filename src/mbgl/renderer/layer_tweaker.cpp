@@ -32,7 +32,7 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  style::TranslateAnchorType anchor,
                                  bool nearClipped,
                                  bool inViewportPixelUnits,
-                                 const gfx::Drawable& drawable,
+                                 [[maybe_unused]] const gfx::Drawable& drawable,
                                  bool aligned) {
     // from RenderTile::prepare
     mat4 tileMatrix;
@@ -43,12 +43,14 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                               : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
                                              : parameters.transformParams.projMatrix);
 
+#if !MLN_RENDER_BACKEND_OPENGL
     // Offset the projection matrix NDC depth range for the drawable's layer and sublayer.
     if (!drawable.getIs3D()) {
         projMatrix[14] -= ((1 + drawable.getLayerIndex()) * PaintParameters::numSublayers +
                            drawable.getSubLayerIndex()) *
                           PaintParameters::depthEpsilon;
     }
+#endif
 
     matrix::multiply(tileMatrix, projMatrix, tileMatrix);
 
