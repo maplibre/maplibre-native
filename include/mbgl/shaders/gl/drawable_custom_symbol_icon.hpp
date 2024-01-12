@@ -54,7 +54,6 @@ void main() {
     // rotate extrusion around anchor
     float angle = radians(-u_angle_degrees);
     vec2 corner = extrude - anchor;
-    // vec2 rotated_unit = rotateVec2(corner, angle);
 
     // compute
     if (u_pitch_with_map) {
@@ -65,13 +64,10 @@ void main() {
             corner *= u_extrude_scale * (projected_center.w / u_camera_to_center_distance);
         }
         corner = center + rotateVec2(corner, angle);
-
         gl_Position = u_matrix * vec4(corner, 0, 1);
     } else {
         gl_Position = u_matrix * vec4(center, 0, 1);
-
         if (u_scale_with_map) {
-
             gl_Position.xy += ellipseRotateVec2(corner * u_extrude_scale * u_camera_to_center_distance, angle, u_aspect_ratio);
         } else {
             gl_Position.xy += ellipseRotateVec2(corner * u_extrude_scale * gl_Position.w, angle, u_aspect_ratio);
