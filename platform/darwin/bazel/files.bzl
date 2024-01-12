@@ -99,6 +99,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/NSExpression+MLNAdditions.h",
     "src/NSPredicate+MLNAdditions.h",
     "src/NSValue+MLNAdditions.h",
+    "src/MLNCustomDrawableStyleLayer.h",
 ]
 
 MLN_DARWIN_OBJCPP_HEADERS = [
@@ -210,7 +211,6 @@ MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE = [
 ]
 MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE = [
     "src/MLNCustomDrawableStyleLayer_Private.h",
-    "src/MLNCustomDrawableStyleLayer.h",
     "src/MLNCustomDrawableStyleLayer.mm",
 ]
 MLN_DARWIN_PUBLIC_OBJC_SOURCE = [
