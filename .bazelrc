@@ -1,4 +1,5 @@
 # TODO: remove with bazel 7.x
-common --enable_bzlmod
+common --enable_bzlmod \
+    --incompatible_disallow_empty_glob
 
 coverage --experimental_ui_max_stdouterr_bytes=10485760

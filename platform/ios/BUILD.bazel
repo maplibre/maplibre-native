@@ -229,7 +229,6 @@ ios_application(
     infoplists = ["//platform/ios/benchmark:info_benchmark_plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
-    resources = ["//platform/ios/benchmark:bundle_resources"],
     visibility = ["//visibility:public"],
     deps = [
         "//platform:ios-benchapp",
