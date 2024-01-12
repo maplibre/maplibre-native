@@ -40,12 +40,14 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
 
     // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
     auto projMatrix = aligned ? parameters.transformParams.alignedProjMatrix
-                                     : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
-                                                    : parameters.transformParams.projMatrix);
+                              : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
+                                             : parameters.transformParams.projMatrix);
 
     // Offset the projection matrix NDC depth range for the drawable's layer and sublayer.
     if (!drawable.getIs3D()) {
-        projMatrix[14] -= ((1 + drawable.getLayerIndex()) * PaintParameters::numSublayers + drawable.getSubLayerIndex()) * PaintParameters::depthEpsilon;
+        projMatrix[14] -= ((1 + drawable.getLayerIndex()) * PaintParameters::numSublayers +
+                           drawable.getSubLayerIndex()) *
+                          PaintParameters::depthEpsilon;
     }
 
     matrix::multiply(tileMatrix, projMatrix, tileMatrix);

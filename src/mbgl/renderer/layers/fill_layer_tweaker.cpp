@@ -155,7 +155,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         constexpr bool nearClipped = false;
 
         const auto depthMode = parameters.depthModeForSublayer(drawable.getSubLayerIndex(), drawable.getDepthType());
-        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         // from FillPatternProgram::layoutUniformValues
         const auto tileRatio = 1.0f / tileID.pixelsToTileUnits(1.0f, intZoom);

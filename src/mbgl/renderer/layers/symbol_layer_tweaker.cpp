@@ -128,7 +128,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                    : evaluated.get<style::IconTranslateAnchor>();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         // from symbol_program, makeValues
         const auto currentZoom = static_cast<float>(parameters.state.getZoom());

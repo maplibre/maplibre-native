@@ -17,7 +17,7 @@ public:
 #if MLN_LEGACY_RENDERER
     static DepthMode disabled() { return DepthMode{DepthFunctionType::Always, DepthMaskType::ReadOnly, {0.0, 1.0}}; }
 #else
-    static DepthMode disabled() { return DepthMode{ DepthFunctionType::Always, DepthMaskType::ReadOnly }; }
+    static DepthMode disabled() { return DepthMode{DepthFunctionType::Always, DepthMaskType::ReadOnly}; }
 #endif
 };
 
