@@ -271,8 +271,7 @@ const auto clipMaskStencilMode = gfx::StencilMode{
 };
 const auto clipMaskDepthMode = gfx::DepthMode{
     /*.func=*/gfx::DepthFunctionType::Always,
-    /*.mask=*/gfx::DepthMaskType::ReadOnly,
-    /*.range=*/{0, 1},
+    /*.mask=*/gfx::DepthMaskType::ReadOnly
 };
 } // namespace
 
