@@ -98,12 +98,14 @@ constexpr bool operator!=(const StencilOp::Type& a, const StencilOp::Type& b) {
     return a.sfail != b.sfail || a.dpfail != b.dpfail || a.dppass != b.dppass;
 }
 
+#if MLN_LEGACY_RENDERER
 struct DepthRange {
     using Type = Range<float>;
     static const constexpr Type Default = {0, 1};
     static void Set(const Type&);
     static Type Get();
 };
+#endif
 
 struct DepthTest {
     using Type = bool;

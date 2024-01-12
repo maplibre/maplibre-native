@@ -86,12 +86,21 @@ gfx::DepthMode PaintParameters::depthModeForSublayer(uint8_t n, gfx::DepthMaskTy
     if (currentLayer < opaquePassCutoff) {
         return gfx::DepthMode::disabled();
     }
+
+#if MLN_LEGACY_RENDERER
     float depth = depthRangeSize + ((1 + currentLayer) * numSublayers + n) * depthEpsilon;
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, mask, {depth, depth}};
+#else
+    return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, mask};
+#endif
 }
 
 gfx::DepthMode PaintParameters::depthModeFor3D() const {
+#if MLN_LEGACY_RENDERER
     return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, gfx::DepthMaskType::ReadWrite, {0.0, depthRangeSize}};
+#else
+    return gfx::DepthMode{gfx::DepthFunctionType::LessEqual, gfx::DepthMaskType::ReadWrite};
+#endif
 }
 
 namespace {

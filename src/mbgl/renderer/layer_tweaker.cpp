@@ -42,11 +42,10 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
     auto projMatrix = aligned ? parameters.transformParams.alignedProjMatrix
                                      : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
                                                     : parameters.transformParams.projMatrix);
+
+    // Offset the projection matrix NDC depth range for the drawable's layer and sublayer.
     if (!drawable.getIs3D()) {
-        const auto depthEpsilon = 1.0f / (1 << 12);
-        const auto numSublayers  = 3;
-        const auto slice = ((1 + drawable.getLayerIndex()) * numSublayers + drawable.getSubLayerIndex()) * depthEpsilon;
-        projMatrix[14] -= slice;
+        projMatrix[14] -= ((1 + drawable.getLayerIndex()) * PaintParameters::numSublayers + drawable.getSubLayerIndex()) * PaintParameters::depthEpsilon;
     }
 
     matrix::multiply(tileMatrix, projMatrix, tileMatrix);
