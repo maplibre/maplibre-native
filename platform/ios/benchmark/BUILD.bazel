@@ -24,11 +24,10 @@ filegroup(
 filegroup(
     name = "bundle_resources",
     srcs = glob([
-        "benchmark/*.lproj/**",
-        "benchmark/Assets.xcassets/**",
-        "benchmark/assets/**/*.pbf",
-        "benchmark/assets/**/*.json",
-        "benchmark/assets/**/*.png",
+        "*.lproj/**",
+        "Assets.xcassets/**",
+        "assets/**/*.json",
+        "assets/**/*.png",
     ]),
     visibility = ["//platform/ios:__pkg__"],
 )
