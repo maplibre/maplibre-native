@@ -75,6 +75,7 @@ bazel build //platform/ios:"$target" --apple_platform_type=ios \
    --objc_enable_binary_stripping \
    --copt=-Wall --copt=-Wextra --copt=-Wpedantic \
    --copt=-Werror \
+   --incompatible_disallow_empty_glob \
    --jobs "$ncpu" \
    --//:renderer=$flavor \
    --//:maplibre_platform=ios
