@@ -1,7 +1,7 @@
 
 ## main
 
-## 5.3.0-pre.0
+## 5.3.0
 
 * [Note] This is a OpenGL-2 release. It does not include metal support.
 * [Breaking] Removes node 14 binary build and adds node 20 binary build. We are now building binaries for node 16,18,20 @acalcutt https://github.com/maplibre/maplibre-native/pull/1941
