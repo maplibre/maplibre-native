@@ -47,7 +47,8 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
     // Offset the projection matrix NDC depth range for the drawable's layer and sublayer.
     if (!drawable.getIs3D()) {
         projMatrix[14] -= ((1 + drawable.getLayerIndex()) * PaintParameters::numSublayers -
-                            drawable.getSubLayerIndex()) * PaintParameters::depthEpsilon;
+                           drawable.getSubLayerIndex()) *
+                          PaintParameters::depthEpsilon;
     }
 #endif
 
