@@ -65,7 +65,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
         } else {
             // this is a tile drawable
             const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-            matrix = parameters.matrixForTile(tileID, !parameters.state.isChanging());
+            matrix = getTileMatrix(tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable, !parameters.state.isChanging());
         }
 
         const RasterDrawableUBO drawableUBO{
