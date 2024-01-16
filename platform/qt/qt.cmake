@@ -31,7 +31,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     endif()
 	
 	find_package(PNG REQUIRED)
-	pkg_search_module(WEBP libwebp REQUIRED)
+	find_package(WEBP REQUIRED)
 endif()
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
