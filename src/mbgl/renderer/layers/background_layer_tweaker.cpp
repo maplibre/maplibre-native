@@ -64,7 +64,8 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
                (shader == context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        const auto matrix = parameters.matrixForTile(tileID);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable);
 
         const BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
 
