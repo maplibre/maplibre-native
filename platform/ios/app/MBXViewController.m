@@ -38,11 +38,6 @@ static const MLNCoordinateBounds colorado = {
     .ne = { .latitude = 40.989329, .longitude = -102.062592},
 };
 
-static const MLNCoordinateBounds areaAroundBelgium = {
-    .sw = { .latitude = 52.2782, .longitude = 8.289179999999988},
-    .ne = { .latitude = 48.5584, .longitude = 1.0162300000000073},
-};
-
 static NSString * const MBXViewControllerAnnotationViewReuseIdentifer = @"MBXViewControllerAnnotationViewReuseIdentifer";
 
 typedef NS_ENUM(NSInteger, MBXSettingsSections) {
@@ -118,7 +113,6 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
-    MBXSettingsMiscellaneousLatLngBoundsConstraints,
     MBXSettingsMiscellaneousWorldTour,
     MBXSettingsMiscellaneousRandomTour,
     MBXSettingsMiscellaneousScrollView,
@@ -248,7 +242,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     BOOL _isTouringWorld;
     BOOL _contentInsetsEnabled;
     UIEdgeInsets _originalContentInsets;
-    BOOL _hasLatLngBoundConstraints;
 }
 
 // MARK: - Setup & Teardown
@@ -455,7 +448,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             break;
         case MBXSettingsMiscellaneous:
             [settingsTitles addObjectsFromArray:@[
-                _hasLatLngBoundConstraints ? @"Remove LatLng bound constraints" : @"Set LatLng bound box constraint",
                 @"Start World Tour",
                 @"Random Tour",
                 @"Embedded Map View",
@@ -689,9 +681,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         case MBXSettingsMiscellaneous:
             switch (indexPath.row)
             {
-                case MBXSettingsMiscellaneousLatLngBoundsConstraints:
-                    [self setLatLngBoundsConstraints];
-                    break;
                 case MBXSettingsMiscellaneousLocalizeLabels:
                     [self toggleStyleLabelsLanguage];
                     break;
@@ -1504,20 +1493,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     if (radarSuffix > 3) {
         radarSuffix = 0;
     }
-}
-
--(void)setLatLngBoundsConstraints
-{
-    if(_hasLatLngBoundConstraints) {
-        [self.mapView clearLatLnBounds];
-        [self.mapView resetPosition];
-    } else {
-        MLNMapCamera *newCamera = [self.mapView cameraThatFitsCoordinateBounds: areaAroundBelgium];
-        [self.mapView setCamera: newCamera];
-        [self.mapView setLatLngBounds: areaAroundBelgium];
-    }
-    
-    _hasLatLngBoundConstraints = !_hasLatLngBoundConstraints;
 }
 
 -(void)toggleStyleLabelsLanguage

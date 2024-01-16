@@ -2695,7 +2695,6 @@ public:
     currentCameraOptions.anchor = anchor;
     MLNCoordinateBounds bounds = MLNCoordinateBoundsFromLatLngBounds(self.mbglMap.latLngBoundsForCamera(currentCameraOptions));
     
-    
     return [self cameraThatFitsCoordinateBounds:bounds];
 }
 
@@ -3832,23 +3831,6 @@ static void *windowScreenContext = &windowScreenContext;
 {
     MLNLogDebug(@"Setting minimumZoomLevel: %f", minimumZoomLevel);
     self.mbglMap.setBounds(mbgl::BoundOptions().withMinZoom(minimumZoomLevel));
-}
-
-
-
-- (void)clearLatLnBounds
-{
-    mbgl::BoundOptions newBounds = mbgl::BoundOptions().withLatLngBounds(mbgl::LatLngBounds());
-    self.mbglMap.setBounds(newBounds);
-}
-
-- (void)setLatLngBounds:(MLNCoordinateBounds)latLngBounds
-{
-    mbgl::LatLng sw = {latLngBounds.sw.latitude, latLngBounds.sw.longitude};
-    mbgl::LatLng ne = {latLngBounds.ne.latitude, latLngBounds.ne.longitude};
-    mbgl::BoundOptions newBounds = mbgl::BoundOptions().withLatLngBounds(mbgl::LatLngBounds::hull(sw, ne));
-    
-    self.mbglMap.setBounds(newBounds);
 }
 
 - (double)minimumZoomLevel
