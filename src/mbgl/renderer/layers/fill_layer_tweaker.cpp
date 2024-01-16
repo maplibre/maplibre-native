@@ -145,7 +145,9 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = false;
-        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+
+        const auto matrix = getTileMatrix(
+            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         // from FillPatternProgram::layoutUniformValues
         const auto tileRatio = 1.0f / tileID.pixelsToTileUnits(1.0f, intZoom);
