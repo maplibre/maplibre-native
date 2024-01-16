@@ -113,6 +113,10 @@ public final class MapLibreMap {
     setPrefetchesTiles(options);
   }
 
+  public boolean isFullyLoaded() {
+    return nativeMapView.isFullyLoaded();
+  }
+
   /**
    * Get the Style of the map asynchronously.
    */

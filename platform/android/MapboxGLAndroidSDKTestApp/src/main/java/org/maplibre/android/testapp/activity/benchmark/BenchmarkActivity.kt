@@ -213,8 +213,10 @@ class BenchmarkActivity : AppCompatActivity() {
                     "OnDidFinishRenderingFrame: fully: %s, encoding time: %.2f ms, rendering time: %.2f ms",
                     fully, frameEncodingTime * 1e3, frameRenderingTime * 1e3
                 )*/
-                encodingTimeStore.add(frameEncodingTime * 1e3)
-                renderingTimeStore.add(frameRenderingTime * 1e3)
+                if (maplibreMap.isFullyLoaded()) {
+                    encodingTimeStore.add(frameEncodingTime * 1e3)
+                    renderingTimeStore.add(frameRenderingTime * 1e3)
+                }
             }
         )
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
