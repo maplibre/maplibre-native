@@ -133,6 +133,7 @@ StencilOp::Type StencilOp::Get() {
             Enum<gfx::StencilOpType>::from(dppass)};
 }
 
+#if MLN_RENDER_BACKEND_OPENGL
 const constexpr DepthRange::Type DepthRange::Default;
 
 void DepthRange::Set(const Type& value) {
@@ -144,6 +145,7 @@ DepthRange::Type DepthRange::Get() {
     MBGL_CHECK_ERROR(glGetFloatv(GL_DEPTH_RANGE, floats));
     return {floats[0], floats[1]};
 }
+#endif
 
 const constexpr DepthTest::Type DepthTest::Default;
 

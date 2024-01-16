@@ -368,7 +368,7 @@ public:
         static const StringIdentity idLineUBOName = stringIndexer().get("LineBasicUBO");
         {
             const auto matrix = LayerTweaker::getTileMatrix(
-                tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
+                tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
             const shaders::LineBasicUBO lineUBO{
                 /*matrix = */ util::cast<float>(matrix),

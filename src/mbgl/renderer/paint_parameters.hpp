@@ -121,14 +121,18 @@ private:
     int32_t nextStencilID = 1;
 
 public:
-    const int numSublayers = 3;
     uint32_t currentLayer;
     float depthRangeSize;
     uint32_t opaquePassCutoff = 0;
     float symbolFadeChange;
     const uint64_t frameCount;
 
+    static constexpr int numSublayers = 3;
+#if MLN_RENDER_BACKEND_OPENGL
     static constexpr float depthEpsilon = 1.0f / (1 << 16);
+#else
+    static constexpr float depthEpsilon = 1.0f / (1 << 12);
+#endif
     static constexpr int maxStencilValue = 255;
 };
 

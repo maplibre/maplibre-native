@@ -95,7 +95,7 @@ public:
         parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
         const auto matrix = LayerTweaker::getTileMatrix(
-            tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
+            tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
         static const StringIdentity idLineDynamicUBOName = stringIndexer().get("LineDynamicUBO");
         const shaders::LineDynamicUBO dynamicUBO = {
@@ -149,7 +149,7 @@ public:
         parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
         const auto matrix = LayerTweaker::getTileMatrix(
-            tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
+            tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
         static const StringIdentity idFillDrawableUBOName = stringIndexer().get("FillDrawableUBO");
         const shaders::FillDrawableUBO fillUBO{/*matrix = */ util::cast<float>(matrix)};
