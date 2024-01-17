@@ -22,9 +22,19 @@ protected:
     void terminate();
     std::thread makeSchedulerThread(size_t index);
 
+    std::size_t waitForEmpty(std::chrono::milliseconds) override;
+
+    // Assume we're created on the main thread
+    const std::thread::id mainThreadID = std::this_thread::get_id();
+
     std::queue<std::function<void()>> queue;
     std::mutex mutex;
-    std::condition_variable cv;
+    // Signal when an item is added to the queue
+    std::condition_variable cvAvailable;
+    // Signal when the queue becomes empty
+    std::condition_variable cvEmpty;
+    // Count of functions removed from the queue but still executing
+    std::atomic<std::size_t> execPending{0};
     bool terminated{false};
 };
 

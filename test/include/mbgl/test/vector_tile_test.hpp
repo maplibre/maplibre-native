@@ -38,6 +38,12 @@ public:
                                   imageManager,
                                   glyphManager,
                                   0};
+
+    ~VectorTileTest() {
+        // Ensure that deferred releases are complete before cleaning up
+        EXPECT_EQ(0, loop.waitForEmpty(std::chrono::milliseconds{100}));
+        EXPECT_EQ(0, threadPool->waitForEmpty(std::chrono::milliseconds{100}));
+    }
 };
 
 } // namespace mbgl

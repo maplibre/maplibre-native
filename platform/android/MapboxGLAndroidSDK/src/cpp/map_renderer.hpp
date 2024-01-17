@@ -68,6 +68,7 @@ public:
     // JVM to process the mailbox on the right thread.
     void schedule(std::function<void()>&& scheduled) override;
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+    std::size_t waitForEmpty(std::chrono::milliseconds timeout) override;
 
     void requestRender();
 

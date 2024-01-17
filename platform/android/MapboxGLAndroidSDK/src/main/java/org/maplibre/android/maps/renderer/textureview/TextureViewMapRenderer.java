@@ -91,6 +91,14 @@ public class TextureViewMapRenderer extends MapRenderer {
    * {@inheritDoc}
    */
   @Override
+  public long waitForEmpty(long timeoutMillis) {
+    return renderThread.waitForEmpty(timeoutMillis);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
   public void onStop() {
     renderThread.onPause();
   }

@@ -65,6 +65,9 @@ public:
         scheduleAndReplyValue(task, reply, GetCurrent()->makeWeakPtr());
     }
 
+    /// Wait until there's nothing pending or in process
+    virtual std::size_t waitForEmpty(std::chrono::milliseconds timeout) = 0;
+
     /// Set/Get the current Scheduler for this thread
     static Scheduler* GetCurrent();
     static void SetCurrent(Scheduler*);
@@ -100,7 +103,6 @@ protected:
             };
             replyScheduler->schedule(std::move(scheduledReply));
         };
-
         schedule(std::move(scheduled));
     }
 };

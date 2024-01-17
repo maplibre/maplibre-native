@@ -84,6 +84,20 @@ void MapRenderer::schedule(std::function<void()>&& scheduled) {
     }
 }
 
+std::size_t MapRenderer::waitForEmpty(std::chrono::milliseconds timeout) {
+    try {
+        android::UniqueEnv _env = android::AttachEnv();
+        static auto& javaClass = jni::Class<MapRenderer>::Singleton(*_env);
+        static auto waitForEmpty = javaClass.GetMethod<jni::jint(jni::jlong)>(*_env, "waitForEmpty");
+        if (auto weakReference = javaPeer.get(*_env)) {
+            return weakReference.Call(*_env, waitForEmpty, static_cast<int64_t>(timeout.count()));
+        }
+    } catch (const std::exception& exception) {
+        Log::Error(Event::Android, std::string("MapRenderer::waitForEmpty failed: ") + exception.what());
+    }
+    return -1;
+}
+
 void MapRenderer::requestRender() {
     try {
         android::UniqueEnv _env = android::AttachEnv();

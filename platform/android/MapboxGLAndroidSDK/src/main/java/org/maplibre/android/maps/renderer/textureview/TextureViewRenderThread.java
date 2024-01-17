@@ -135,6 +135,31 @@ class TextureViewRenderThread extends Thread implements TextureView.SurfaceTextu
     }
   }
 
+  /**
+   * Wait for the queue to be empty.
+   * @param timeoutMillis Maximum time to wait, in milliseconds
+   * @return The number of items remaining in the queue
+   */
+  @UiThread
+  int waitForEmpty(long timeoutMillis) {
+    final long startTime = System.nanoTime();
+    synchronized (lock) {
+      // Wait for the queue to be empty
+      while (!this.eventQueue.isEmpty()) {
+        final long elapsedMillis = (System.nanoTime() - startTime) / 1000 / 1000;
+        if (elapsedMillis < timeoutMillis) {
+          try {
+            lock.wait(timeoutMillis - elapsedMillis);
+          } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+          }
+        } else {
+          break;
+        }
+      }
+      return this.eventQueue.size();
+    }
+  }
 
   @UiThread
   void onPause() {
