@@ -66,7 +66,7 @@ public:
 
     // From Scheduler. Schedules by using callbacks to the
     // JVM to process the mailbox on the right thread.
-    void schedule(std::function<void()> scheduled) override;
+    void schedule(std::function<void()>&& scheduled) override;
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
     void requestRender();

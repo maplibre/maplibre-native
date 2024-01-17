@@ -78,7 +78,7 @@ public:
         return std::make_unique<WorkRequest>(task);
     }
 
-    void schedule(std::function<void()> fn) override { invoke(std::move(fn)); }
+    void schedule(std::function<void()>&& fn) override { invoke(std::move(fn)); }
     ::mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
     class Impl;

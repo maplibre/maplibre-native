@@ -60,7 +60,7 @@ ActorRef<Renderer> MapRenderer::actor() const {
     return *rendererRef;
 }
 
-void MapRenderer::schedule(std::function<void()> scheduled) {
+void MapRenderer::schedule(std::function<void()>&& scheduled) {
     try {
         // Create a runnable
         android::UniqueEnv _env = android::AttachEnv();

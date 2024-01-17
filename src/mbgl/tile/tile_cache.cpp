@@ -8,26 +8,46 @@ void TileCache::setSize(size_t size_) {
     size = size_;
 
     while (orderedKeys.size() > size) {
-        auto key = orderedKeys.front();
+        const auto key = orderedKeys.front();
         orderedKeys.remove(key);
-        tiles.erase(key);
+
+        auto hit = tiles.find(key);
+        if (hit != tiles.end()) {
+            auto tile = std::move(hit->second);
+            tiles.erase(hit);
+            deferredRelease(std::move(tile));
+        }
     }
 
     assert(orderedKeys.size() <= size);
 }
 
-void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile> tile) {
+void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
+    tile->cancel();
+
+    // The `std::function` must be created in a separate statement from the `schedule` call.
+    // Creating a `std::function` from a lambda involves a copy, which is why we must use
+    // `shared_ptr` rather than `unique_ptr` for the capture.  As a result, a temporary holds
+    // a reference until the construction is complete and the lambda is destroyed.
+    // If this temporary outlives the `schedule` call, and the function is executed immediately
+    // by a waiting thread and is already complete, that temporary reference ends up being the
+    // last one and the destruction actually occurs here on this thread.
+    std::function<void()> f{[tile_{std::shared_ptr<Tile>(std::move(tile))}]() {
+    }};
+    threadPool->schedule(std::move(f));
+}
+
+void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {
     if (!tile->isRenderable() || !size) {
-        tile->cancel();
-        threadPool->schedule([tile_{std::shared_ptr<Tile>(std::move(tile))}]() {});
+        deferredRelease(std::move(tile));
         return;
     }
 
     if (tiles.find(key) != tiles.end()) {
         // remove existing tile key
         orderedKeys.remove(key);
-        tile->cancel();
-        threadPool->schedule([tile_{std::shared_ptr<Tile>(std::move(tile))}]() {});
+
+        deferredRelease(std::move(tile));
     } else {
         tiles.emplace(key, std::move(tile));
     }
@@ -37,10 +57,7 @@ void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile> tile) {
 
     // purge oldest key/tile if necessary
     if (orderedKeys.size() > size) {
-        auto removedTile = pop(orderedKeys.front());
-        removedTile->cancel();
-
-        threadPool->schedule([tile_{std::shared_ptr<Tile>(std::move(removedTile))}]() {});
+        deferredRelease(pop(orderedKeys.front()));
     }
 
     assert(orderedKeys.size() <= size);

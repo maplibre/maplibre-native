@@ -25,7 +25,7 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
             platform::setCurrentThreadPriority(*priority);
         }
 
-        platform::setCurrentThreadName(std::string{"Worker "} + util::toString(index + 1));
+        platform::setCurrentThreadName("Worker " + util::toString(index + 1));
         platform::attachThread();
 
         while (true) {
@@ -46,7 +46,7 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
     });
 }
 
-void ThreadedSchedulerBase::schedule(std::function<void()> fn) {
+void ThreadedSchedulerBase::schedule(std::function<void()>&& fn) {
     assert(fn);
     {
         std::lock_guard<std::mutex> lock(mutex);

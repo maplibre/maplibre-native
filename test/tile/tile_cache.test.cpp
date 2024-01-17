@@ -17,34 +17,13 @@
 #include <mbgl/renderer/tile_parameters.hpp>
 #include <mbgl/style/layers/symbol_layer.hpp>
 #include <mbgl/style/style.hpp>
+#include <mbgl/test/vector_tile_test.hpp>
 #include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/util/run_loop.hpp>
 
 #include <memory>
 
 using namespace mbgl;
-
-class VectorTileTest {
-public:
-    std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>();
-    TransformState transformState;
-    util::RunLoop loop;
-    style::Style style{fileSource, 1};
-    AnnotationManager annotationManager{style};
-    ImageManager imageManager;
-    GlyphManager glyphManager;
-    Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
-
-    TileParameters tileParameters{1.0,
-                                  MapDebugOptions(),
-                                  transformState,
-                                  fileSource,
-                                  MapMode::Continuous,
-                                  annotationManager.makeWeakPtr(),
-                                  imageManager,
-                                  glyphManager,
-                                  0};
-};
 
 class VectorTileMock : public VectorTile {
 public:
@@ -60,8 +39,8 @@ public:
 TEST(TileCache, Smoke) {
     VectorTileTest test;
     TileCache cache(Scheduler::GetBackground(), 1);
-    OverscaledTileID id(0, 0, 0);
-    std::unique_ptr<Tile> tile = std::make_unique<VectorTileMock>(id, "source", test.tileParameters, test.tileset);
+    const OverscaledTileID id(0, 0, 0);
+    auto tile = std::make_unique<VectorTileMock>(id, "source", test.tileParameters, test.tileset);
 
     cache.add(id, std::move(tile));
     EXPECT_TRUE(cache.has(id));
@@ -72,11 +51,11 @@ TEST(TileCache, Smoke) {
 TEST(TileCache, Issue15926) {
     VectorTileTest test;
     TileCache cache(Scheduler::GetBackground(), 2);
-    OverscaledTileID id0(0, 0, 0);
-    OverscaledTileID id1(1, 0, 0);
-    std::unique_ptr<Tile> tile1 = std::make_unique<VectorTileMock>(id0, "source", test.tileParameters, test.tileset);
-    std::unique_ptr<Tile> tile2 = std::make_unique<VectorTileMock>(id0, "source", test.tileParameters, test.tileset);
-    std::unique_ptr<Tile> tile3 = std::make_unique<VectorTileMock>(id1, "source", test.tileParameters, test.tileset);
+    const OverscaledTileID id0(0, 0, 0);
+    const OverscaledTileID id1(1, 0, 0);
+    auto tile1 = std::make_unique<VectorTileMock>(id0, "source", test.tileParameters, test.tileset);
+    auto tile2 = std::make_unique<VectorTileMock>(id0, "source", test.tileParameters, test.tileset);
+    auto tile3 = std::make_unique<VectorTileMock>(id1, "source", test.tileParameters, test.tileset);
 
     cache.add(id0, std::move(tile1));
     EXPECT_TRUE(cache.has(id0));
