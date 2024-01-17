@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:
       - main
+      - opengl-2
     paths:
       - "src/**"
       - "include/**"
