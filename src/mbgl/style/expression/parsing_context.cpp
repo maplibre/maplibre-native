@@ -25,6 +25,8 @@
 #include <mbgl/style/expression/number_format.hpp>
 #include <mbgl/style/expression/step.hpp>
 #include <mbgl/style/expression/within.hpp>
+#include <mbgl/style/expression/index_of.hpp>
+#include <mbgl/style/expression/slice.hpp>
 
 #include <mbgl/style/expression/find_zoom_curve.hpp>
 #include <mbgl/style/expression/dsl.hpp>
@@ -104,42 +106,42 @@ ParseResult ParsingContext::parse(const Convertible& value,
 
 using ParseFunction = ParseResult (*)(const conversion::Convertible&, ParsingContext&);
 MAPBOX_ETERNAL_CONSTEXPR const auto expressionRegistry =
-    mapbox::eternal::hash_map<mapbox::eternal::string, ParseFunction>({
-        {"==", parseComparison},
-        {"!=", parseComparison},
-        {">", parseComparison},
-        {"<", parseComparison},
-        {">=", parseComparison},
-        {"<=", parseComparison},
-        {"all", All::parse},
-        {"any", Any::parse},
-        {"array", Assertion::parse},
-        {"at", At::parse},
-        {"in", In::parse},
-        {"boolean", Assertion::parse},
-        {"case", Case::parse},
-        {"coalesce", Coalesce::parse},
-        {"collator", CollatorExpression::parse},
-        {"distance", Distance::parse},
-        {"format", FormatExpression::parse},
-        {"image", ImageExpression::parse},
-        {"interpolate", parseInterpolate},
-        {"length", Length::parse},
-        {"let", Let::parse},
-        {"literal", Literal::parse},
-        {"match", parseMatch},
-        {"number", Assertion::parse},
-        {"number-format", NumberFormat::parse},
-        {"object", Assertion::parse},
-        {"step", Step::parse},
-        {"string", Assertion::parse},
-        {"to-boolean", Coercion::parse},
-        {"to-color", Coercion::parse},
-        {"to-number", Coercion::parse},
-        {"to-string", Coercion::parse},
-        {"var", Var::parse},
-        {"within", Within::parse},
-    });
+    mapbox::eternal::hash_map<mapbox::eternal::string, ParseFunction>({{"==", parseComparison},
+                                                                       {"!=", parseComparison},
+                                                                       {">", parseComparison},
+                                                                       {"<", parseComparison},
+                                                                       {">=", parseComparison},
+                                                                       {"<=", parseComparison},
+                                                                       {"all", All::parse},
+                                                                       {"any", Any::parse},
+                                                                       {"array", Assertion::parse},
+                                                                       {"at", At::parse},
+                                                                       {"in", In::parse},
+                                                                       {"boolean", Assertion::parse},
+                                                                       {"case", Case::parse},
+                                                                       {"coalesce", Coalesce::parse},
+                                                                       {"collator", CollatorExpression::parse},
+                                                                       {"distance", Distance::parse},
+                                                                       {"format", FormatExpression::parse},
+                                                                       {"image", ImageExpression::parse},
+                                                                       {"interpolate", parseInterpolate},
+                                                                       {"length", Length::parse},
+                                                                       {"let", Let::parse},
+                                                                       {"literal", Literal::parse},
+                                                                       {"match", parseMatch},
+                                                                       {"number", Assertion::parse},
+                                                                       {"number-format", NumberFormat::parse},
+                                                                       {"object", Assertion::parse},
+                                                                       {"step", Step::parse},
+                                                                       {"string", Assertion::parse},
+                                                                       {"to-boolean", Coercion::parse},
+                                                                       {"to-color", Coercion::parse},
+                                                                       {"to-number", Coercion::parse},
+                                                                       {"to-string", Coercion::parse},
+                                                                       {"var", Var::parse},
+                                                                       {"within", Within::parse},
+                                                                       {"index-of", IndexOf::parse},
+                                                                       {"slice", Slice::parse}});
 
 bool isExpression(const std::string& name) {
     return expressionRegistry.contains(name.c_str());
