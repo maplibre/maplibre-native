@@ -216,7 +216,7 @@ jobs:
           target: ${{ matrix.qt_target }}
           arch: ${{ matrix.qt_arch }}
           tools: ${{ matrix.qt_tools }}
-          archives: 'qtbase qtimageformats'
+          archives: 'icu qtbase qtdeclarative qtsvg qttools qttranslations qtwayland qtimageformats'
 
       - name: Update ccache
         if: runner.os == 'Windows'
