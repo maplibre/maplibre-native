@@ -201,7 +201,7 @@ public:
         parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
         const auto matrix = LayerTweaker::getTileMatrix(
-            tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
+            tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
         static const StringIdentity idDrawableUBOName = stringIndexer().get("CustomSymbolIconDrawableUBO");
         const shaders::CustomSymbolIconDrawableUBO drawableUBO{/*matrix = */ util::cast<float>(matrix)};
