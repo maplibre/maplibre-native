@@ -29,9 +29,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         message(STATUS "Using internal ICU")
         include(${PROJECT_SOURCE_DIR}/vendor/icu.cmake)
     endif()
-	
-	find_package(PNG REQUIRED)
-	pkg_search_module(WEBP libwebp REQUIRED)
 endif()
 
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
@@ -86,8 +83,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/$<IF:$<BOOL:${MLN_QT_WITH_INTERNAL_SQLITE}>,default/src/mbgl/storage/sqlite3.cpp,qt/src/mbgl/sqlite3.cpp>
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/compression.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/monotonic_timer.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/png_reader.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/webp_reader.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task.cpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/async_task_impl.hpp
         ${PROJECT_SOURCE_DIR}/platform/qt/src/mbgl/gl_functions.cpp
@@ -123,9 +118,7 @@ target_compile_definitions(
 
 target_include_directories(
     mbgl-core
-    PRIVATE
-        ${PROJECT_SOURCE_DIR}/platform/default/include
-        ${WEBP_INCLUDE_DIRS}
+    PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/include
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/nunicode.cmake)
