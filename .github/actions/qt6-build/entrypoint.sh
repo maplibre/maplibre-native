@@ -1,7 +1,5 @@
 #!/bin/bash -l
 
-source /opt/rh/gcc-toolset-11/enable
-
 set -e
 set -x
 

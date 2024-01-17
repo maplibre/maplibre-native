@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-source scl_source enable devtoolset-11 rh-git218
+source scl_source enable devtoolset-8 rh-git218
 
 set -e
 set -x
