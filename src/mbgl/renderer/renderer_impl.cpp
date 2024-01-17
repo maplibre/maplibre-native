@@ -336,7 +336,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Opaque;
         parameters.currentLayer = 0;
-        parameters.depthRangeSize = 1 - (maxLayerIndex + 3) * parameters.numSublayers * PaintParameters::depthEpsilon;
+        parameters.depthRangeSize = 1 -
+                                    (maxLayerIndex + 3) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
@@ -349,7 +350,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-translucent"));
         const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Translucent;
-        parameters.depthRangeSize = 1 - (maxLayerIndex + 3) * parameters.numSublayers * PaintParameters::depthEpsilon;
+        parameters.depthRangeSize = 1 -
+                                    (maxLayerIndex + 3) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
@@ -364,7 +366,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     const auto renderLayerOpaquePass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("opaque"));
         parameters.pass = RenderPass::Opaque;
-        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * parameters.numSublayers *
+        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
 
         uint32_t i = 0;
@@ -382,7 +384,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     const auto renderLayerTranslucentPass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("translucent"));
         parameters.pass = RenderPass::Translucent;
-        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * parameters.numSublayers *
+        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
 
         int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;

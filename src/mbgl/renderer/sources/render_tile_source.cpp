@@ -208,7 +208,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
                 const auto matrix = LayerTweaker::getTileMatrix(
-                    tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
+                    tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
                 static const StringIdentity idLineMatrixUBOName = stringIndexer().get("LineMatrixUBO");
                 const shaders::MatrixUBO matrixUBO{/*matrix = */ util::cast<float>(matrix)};

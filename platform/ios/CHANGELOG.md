@@ -8,14 +8,13 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 * This is the first release that uses **Metal** for rendering. This is a graphics API from Apple that replaces OpenGL ES on Apple platforms.
   * Note that the [snapshotter](https://github.com/maplibre/maplibre-native/issues/1862) has not been implemented yet for the Metal renderer. Hold off updating if your application requires this functionality.
-  * While we had a long period of pre-releases and testing leading up to this release, and no crashes have been reported, it is possible that you come across inconsistencies or problems in production apps. Please report them on [GitHub](https://github.com/maplibre/maplibre-native/issues/1609).
+  * While we had a long period of pre-releases and testing leading up to this release, and no crashes have been reported, it is possible that you come across inconsistencies or problems in production apps. Please report them on GitHub.
 * 💥 Breaking: Changed the prefix of files, classes, methods, variables and everything from `MGL` to `MLN`. ([#919](https://github.com/maplibre/maplibre-native/pull/919)).
 
   > To migrate:  
   > Change all your `MGL` prefixes to `MLN`. If you are using `NSKeyedArchiver` or similar mechanishm to save the state, the app may crash after this change when trying to unarchive the state using old names of the classes. You need to clean the saved state of the app and save it using new classes.
 * 💥 Breaking: The OpenGL ES renderer now uses OpenGL ES 3.0. This means that only iOS Devices with an Apple A7 GPU or later are supported. https://developer.apple.com/library/archive/documentation/3DDrawing/Conceptual/OpenGLES_ProgrammingGuide/BestPracticesforAppleA7GPUsandLater/BestPracticesforAppleA7GPUsandLater.html
-* Add `MLNMapView.setLatLngBounds` and `MLNMapView.clearLatLnBounds`
-* Add `flyToCamera` with `edgePadding` for `MLNMapView`
+* The Swift package needs to be imported with `import MapLibre` instead of `import Mapbox`.
 
 ## 5.13.0 - January 05, 2023
 

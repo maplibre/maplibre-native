@@ -165,7 +165,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             const auto it = matrixCache.find(tileID);
             if (it == matrixCache.end()) {
                 const mat4 matrix = getTileMatrix(
-                    tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+                    tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
                 const MatrixUBO matrixUBO = {/*.matrix=*/util::cast<float>(matrix)};
                 matrixBuffer = parameters.context.createUniformBuffer(&matrixUBO, sizeof(matrixUBO));
                 matrixCache[tileID] = matrixBuffer;
