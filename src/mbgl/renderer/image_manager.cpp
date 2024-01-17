@@ -306,11 +306,11 @@ void ImageManager::dumpDebugLogs() const {
     Log::Info(Event::General, ss.str());
 }
 
-ImageRequestor::ImageRequestor(ImageManager& imageManager_)
-    : imageManager(imageManager_) {}
+ImageRequestor::ImageRequestor(std::shared_ptr<ImageManager> imageManager_)
+    : imageManager(std::move(imageManager_)) {}
 
 ImageRequestor::~ImageRequestor() {
-    imageManager.removeRequestor(*this);
+    imageManager->removeRequestor(*this);
 }
 
 } // namespace mbgl

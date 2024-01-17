@@ -62,8 +62,8 @@ public:
     TransformState transformState;
     Style style{fileSource, 1};
     AnnotationManager annotationManager{style};
-    ImageManager imageManager;
-    GlyphManager glyphManager;
+    std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
+    std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
 
     TileParameters tileParameters(MapMode mapMode = MapMode::Continuous) {
         return {1.0,

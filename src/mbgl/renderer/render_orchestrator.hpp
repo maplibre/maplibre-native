@@ -184,8 +184,8 @@ private:
     ZoomHistory zoomHistory;
     TransformState transformState;
 
-    std::unique_ptr<GlyphManager> glyphManager;
-    std::unique_ptr<ImageManager> imageManager;
+    std::shared_ptr<GlyphManager> glyphManager;
+    std::shared_ptr<ImageManager> imageManager;
     std::unique_ptr<LineAtlas> lineAtlas;
     std::unique_ptr<PatternAtlas> patternAtlas;
 
