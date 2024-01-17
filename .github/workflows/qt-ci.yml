@@ -210,7 +210,6 @@ jobs:
           target: ${{ matrix.qt_target }}
           arch: ${{ matrix.qt_arch }}
           tools: ${{ matrix.qt_tools }}
-          modules: 'qtimageformats'
 
       - name: Update ccache
         if: runner.os == 'Windows'
