@@ -141,7 +141,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         if (translate == TextTranslate::defaultValue() && anchor == TextTranslateAnchor::defaultValue()) {
             const auto it = matrixCache.find(tileID);
             if (it == matrixCache.end()) {
-                matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+                matrix = getTileMatrix(
+                    tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
                 matrixCache[tileID] = matrix;
             } else {
                 matrix = it->second;
