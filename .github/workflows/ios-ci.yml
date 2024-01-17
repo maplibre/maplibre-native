@@ -208,7 +208,7 @@ jobs:
 
       - name: Build XCFramework
         run: |
-          bazel build --compilation_mode=opt --//:renderer=metal --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic
+          bazel build --compilation_mode=opt --//:renderer=metal --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal --//:maplibre_platform=ios //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
 
       - name: Get version (release)

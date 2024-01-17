@@ -1,6 +1,7 @@
 load("@build_bazel_rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
+load("@build_bazel_rules_apple//apple:versioning.bzl", "apple_bundle_version")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
@@ -120,6 +121,17 @@ apple_static_xcframework(
     deps = ["//platform:ios-sdk"],
 )
 
+apple_bundle_version(
+    name = "maplibre_ios_version",
+    build_label_pattern = "maplibre_ios_{version}",
+    build_version = "{version}",
+    capture_groups = {
+        "version": "[0-9]+.[0-9]+.[0-9]+",
+    },
+    fallback_build_label = "maplibre_ios_1.2.3456789",
+    short_version_string = "{version}",
+)
+
 apple_xcframework(
     name = "MapLibre.dynamic",
     bundle_id = "com.maplibre.mapbox",
@@ -139,6 +151,7 @@ apple_xcframework(
     minimum_os_versions = {"ios": "12.0"},
     public_hdrs = public_hdrs,
     umbrella_header = "umbrella_header",
+    version = ":maplibre_ios_version",
     visibility = ["//visibility:public"],
     deps = ["//platform:ios-sdk-dynamic"],
 )
