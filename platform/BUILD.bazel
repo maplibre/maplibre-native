@@ -100,10 +100,6 @@ objc_library(
 # Common headers between objc and objcpp libraries.
 objc_library(
     name = "objc-headers",
-    srcs = glob([
-        "darwin/src/*.h",
-        "ios/src/*.h",
-    ]),
     includes = [
         "darwin/src",
         "ios/src",
@@ -204,9 +200,6 @@ objc_library(
             "//platform/darwin:app/LimeGreenStyleLayer.m",
         ],
     }),
-    data = glob([
-        "app/Assets.xcassets/**",
-    ]),
     defines = ["GLES_SILENCE_DEPRECATION"],
     includes = [
         "darwin/app",
