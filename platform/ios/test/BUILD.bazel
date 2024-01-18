@@ -12,7 +12,6 @@ objc_library(
             "*.h",
             "*.m",
         ],
-        allow_empty = False,
         exclude = [
             "MLNMapViewContentInsetTests.m",
         ],
@@ -30,7 +29,6 @@ objc_library(
             "*.mm",
             "*.h",
         ],
-        allow_empty = False,
     ),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],
     deps = [
@@ -41,10 +39,7 @@ objc_library(
 swift_library(
     name = "ios_tests_swift_srcs",
     testonly = True,
-    srcs = glob(
-        ["*.swift"],
-        allow_empty = False,
-    ) + [
+    srcs = glob(["*.swift"]) + [
         "//platform/darwin:test/MLNSDKTestHelpers.swift",
     ],
     deps = [
