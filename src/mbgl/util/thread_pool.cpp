@@ -45,7 +45,7 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                 auto function = std::move(queue.front());
                 queue.pop();
 
-                execPending++;
+                pendingItems++;
                 try {
                     lock.unlock();
 
@@ -55,9 +55,9 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
 
                     // destroy the function and release its captures before unblocking `waitForEmpty`
                     function = {};
-                    execPending--;
+                    pendingItems--;
                 } catch (...) {
-                    execPending--;
+                    pendingItems--;
                     throw;
                 }
             }
@@ -88,18 +88,18 @@ std::size_t ThreadedSchedulerBase::waitForEmpty(std::chrono::milliseconds timeou
 
     const auto startTime = mbgl::util::MonotonicTimer::now();
     std::unique_lock<std::mutex> lock(mutex);
-    while (!queue.empty() || execPending.load() > 0) {
+    const auto isDone = [&] {
+        return queue.empty() && pendingItems == 0;
+    };
+    while (!isDone()) {
         const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
-        auto isDone = [&] {
-            return queue.empty() && execPending.load() == 0;
-        };
-        if (timeout <= elapsed || !cvEmpty.wait_for(lock, timeout - elapsed, std::move(isDone))) {
-            assert(queue.empty());
+        if (timeout <= elapsed || !cvEmpty.wait_for(lock, timeout - elapsed, isDone)) {
+            assert(isDone());
             break;
         }
     }
 
-    return queue.size();
+    return queue.size() + pendingItems;
 }
 
 } // namespace mbgl

@@ -91,7 +91,7 @@ TEST(Actor, DestructionBlocksOnSend) {
 
         ~TestScheduler() override { EXPECT_TRUE(waited.load()); }
 
-        std::size_t waitForEmpty(std::chrono::milliseconds timeout) override {
+        std::size_t waitForEmpty(std::chrono::milliseconds) override {
             assert(false);
             return 0;
         }

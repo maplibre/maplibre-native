@@ -34,7 +34,7 @@ protected:
     // Signal when the queue becomes empty
     std::condition_variable cvEmpty;
     // Count of functions removed from the queue but still executing
-    std::atomic<std::size_t> execPending{0};
+    std::atomic<std::size_t> pendingItems{0};
     bool terminated{false};
 };
 
