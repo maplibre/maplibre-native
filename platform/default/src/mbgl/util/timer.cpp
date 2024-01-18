@@ -1,5 +1,7 @@
 #include <mbgl/util/timer.hpp>
 
+#include <stdexcept>
+
 #include <mbgl/util/run_loop.hpp>
 
 #include <uv.h>
