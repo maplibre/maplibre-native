@@ -191,7 +191,7 @@ jobs:
             x11-xserver-utils
 
       - name: Cache Bazel
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
