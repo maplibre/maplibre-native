@@ -410,7 +410,9 @@ void shapeLines(Shaping& shaping,
             const HBShapeAdjust* adjust = nullptr;
             if (section.adjusts) {
                 assert(section.startIndex >= 0);
-                adjust = &((*section.adjusts)[i - section.startIndex]);
+                if (i - section.startIndex >= 0 && i - section.startIndex < section.adjusts->size() {
+                    adjust = &((*section.adjusts)[i - section.startIndex]);
+                }
             }
             GlyphID codePoint(line.getCharCodeAt(i), section.type);
 #else

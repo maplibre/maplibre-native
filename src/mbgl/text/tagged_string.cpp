@@ -89,6 +89,12 @@ void TaggedString::trim() {
 #endif
 
     if (beginningWhitespace == std::u16string::npos) {
+        
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
+        for (auto &section : sections) {
+            section.startIndex = 0;
+        }
+#endif
         // Entirely whitespace
         styledText.first.clear();
         styledText.second.clear();
@@ -96,6 +102,12 @@ void TaggedString::trim() {
         std::size_t trailingWhitespace = styledText.first.find_last_not_of(u" \t\n\v\f\r") + 1;
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
+        if (beginningWhitespace) {
+            for (auto &section : sections) {
+                section.startIndex -= beginningWhitespace;
+            }
+        }
+        
         for (size_t i = styledText.first.length() - 1; i >= trailingWhitespace; --i) {
             auto &sec = getSection(i);
             if (sec.type != FontPBF) {
