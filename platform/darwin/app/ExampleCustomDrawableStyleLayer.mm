@@ -1,10 +1,7 @@
 #import "ExampleCustomDrawableStyleLayer.h"
 #import "MLNStyleLayer.h"
 
-#import "MLNCustomDrawableStyleLayer_Private.h"
-#import "MLNStyle_Private.h"
 #import "MLNStyleLayer_Private.h"
-#import "MLNGeometry_Private.h"
 
 #include <mbgl/layermanager/layer_factory.hpp>
 #include <mbgl/style/layer.hpp>
