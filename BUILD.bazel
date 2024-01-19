@@ -22,10 +22,7 @@ load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 # Generate code required by the core
 filegroup(
     name = "style_data",
-    srcs = glob(
-        ["**/*.ejs"],
-        allow_empty = False,
-    ),
+    srcs = glob(["**/*.ejs"]),
 )
 
 genrule(
@@ -40,10 +37,7 @@ genrule(
 
 filegroup(
     name = "shader_data",
-    srcs = ["shaders/manifest.json"] + glob(
-        ["shaders/*.glsl"],
-        allow_empty = False,
-    ),
+    srcs = ["shaders/manifest.json"] + glob(["shaders/*.glsl"]),
 )
 
 genrule(
