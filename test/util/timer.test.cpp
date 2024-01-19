@@ -17,7 +17,7 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(Basic)) {
     const auto expectedTotalTime = interval;
 
     const auto first = MonotonicTimer::now();
-    const auto elapsed = [=]{
+    const auto elapsed = [=] {
         return std::chrono::duration_cast<mbgl::Milliseconds>(MonotonicTimer::now() - first);
     };
     std::optional<mbgl::Milliseconds> callbackTime;
