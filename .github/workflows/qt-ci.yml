@@ -175,7 +175,7 @@ jobs:
         env:
           MLN_COMPILER: ${{ matrix.compiler }}
         run: |
-          brew install --overwrite python@3.11
+          # brew install --overwrite python@3.11
           brew install "$MLN_COMPILER"
           echo "/usr/local/opt/${MLN_COMPILER}/bin" >> "$GITHUB_PATH"
           {
