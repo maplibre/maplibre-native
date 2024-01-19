@@ -40,7 +40,7 @@
 #import "NSDate+MLNAdditions.h"
 
 #if !MLN_RENDER_BACKEND_METAL
-    #import "MLNOpenGLStyleLayer.h"
+    #import "MLNCustomStyleLayer.h"
 #endif
 
 #if TARGET_OS_IPHONE
@@ -82,7 +82,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
 @property (nonatomic, readonly, weak) id <MLNStylable> stylable;
 @property (nonatomic, readonly) mbgl::style::Style *rawStyle;
 @property (readonly, copy, nullable) NSURL *URL;
-@property (nonatomic, readwrite, strong) NSMutableDictionary<NSString *, MLNOpenGLStyleLayer *> *openGLLayers;
+@property (nonatomic, readwrite, strong) NSMutableDictionary<NSString *, MLNCustomStyleLayer *> *openGLLayers;
 @property (nonatomic) NSMutableDictionary<NSString *, NSDictionary<NSObject *, MLNTextLanguage *> *> *localizedLayersByIdentifier;
 
 @end

@@ -204,9 +204,9 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/NSValue+MLNStyleAttributeAdditions.mm",
 ]
 MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE = [
-    "src/MLNOpenGLStyleLayer_Private.h",
-    "src/MLNOpenGLStyleLayer.h",
-    "src/MLNOpenGLStyleLayer.mm",
+    "src/MLNCustomStyleLayer_Private.h",
+    "src/MLNCustomStyleLayer.h",
+    "src/MLNCustomStyleLayer.mm",
 ]
 MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE = [
     "src/MLNCustomDrawableStyleLayer_Private.h",

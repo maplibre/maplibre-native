@@ -1,5 +1,5 @@
-#import "MLNOpenGLStyleLayer.h"
-#import "MLNOpenGLStyleLayer_Private.h"
+#import "MLNCustomStyleLayer.h"
+#import "MLNCustomStyleLayer_Private.h"
 
 #import "MLNMapView_Private.h"
 #import "MLNStyle_Private.h"
@@ -12,7 +12,7 @@
 class MLNOpenGLLayerHost;
 
 /**
- An `MLNOpenGLStyleLayer` is a style layer that is rendered by OpenGL code that
+ An `MLNCustomStyleLayer` is a style layer that is rendered by OpenGL code that
  you provide.
 
  By default, this class does nothing. You can subclass this class to provide
@@ -29,7 +29,7 @@ class MLNOpenGLLayerHost;
  @warning This API is undocumented and therefore unsupported. It may change at
     any time without notice.
  */
-@interface MLNOpenGLStyleLayer ()
+@interface MLNCustomStyleLayer ()
 
 @property (nonatomic, readonly) mbgl::style::CustomLayer *rawLayer;
 
@@ -45,7 +45,7 @@ class MLNOpenGLLayerHost;
 
 @end
 
-@implementation MLNOpenGLStyleLayer
+@implementation MLNCustomStyleLayer
 
 /**
  Returns an OpenGL style layer object initialized with the given identifier.
@@ -166,7 +166,7 @@ class MLNOpenGLLayerHost;
 
 class MLNOpenGLLayerHost : public mbgl::style::CustomLayerHost {
 public:
-    MLNOpenGLLayerHost(MLNOpenGLStyleLayer *styleLayer) {
+    MLNOpenGLLayerHost(MLNCustomStyleLayer *styleLayer) {
         layerRef = styleLayer;
         layer = nil;
     }
@@ -209,14 +209,14 @@ public:
         layer = nil;
     }
 private:
-    __weak MLNOpenGLStyleLayer * layerRef;
-    MLNOpenGLStyleLayer * layer = nil;
+    __weak MLNCustomStyleLayer * layerRef;
+    MLNCustomStyleLayer * layer = nil;
 };
 
 namespace mbgl {
 
 MLNStyleLayer* OpenGLStyleLayerPeerFactory::createPeer(style::Layer* rawLayer) {
-    return [[MLNOpenGLStyleLayer alloc] initWithRawLayer:rawLayer];
+    return [[MLNCustomStyleLayer alloc] initWithRawLayer:rawLayer];
 }
 
 }  // namespace mbgl

@@ -1,5 +1,5 @@
 #import "Mapbox.h"
 
-@interface LimeGreenStyleLayer : MLNOpenGLStyleLayer
+@interface LimeGreenStyleLayer : MLNCustomStyleLayer
 
 @end

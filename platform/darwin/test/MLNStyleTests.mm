@@ -233,7 +233,7 @@
     XCTAssertThrowsSpecificNamed([self.style insertLayer:[[MLNFillStyleLayer alloc] initWithIdentifier:@"my-layer" source:source] aboveLayer:initial], NSException, @"MLNRedundantLayerIdentifierException");
     XCTAssertThrowsSpecificNamed([self.style insertLayer:[[MLNFillStyleLayer alloc] initWithIdentifier:@"my-layer" source:source] atIndex:0], NSException, @"MLNRedundantLayerIdentifierException");
 #if !MLN_RENDER_BACKEND_METAL
-    XCTAssertThrowsSpecificNamed([self.style insertLayer:[[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"my-layer"] atIndex:0], NSException, @"MLNRedundantLayerIdentifierException");
+    XCTAssertThrowsSpecificNamed([self.style insertLayer:[[MLNCustomStyleLayer alloc] initWithIdentifier:@"my-layer"] atIndex:0], NSException, @"MLNRedundantLayerIdentifierException");
 #endif
 }
 

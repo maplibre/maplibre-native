@@ -23,7 +23,7 @@ typedef struct MLNStyleLayerDrawingContext {
 } MLNStyleLayerDrawingContext;
 
 MLN_EXPORT
-@interface MLNOpenGLStyleLayer : MLNStyleLayer
+@interface MLNCustomStyleLayer : MLNStyleLayer
 
 @property (nonatomic, weak, readonly) MLNStyle *style;
 

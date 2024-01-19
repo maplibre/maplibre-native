@@ -11,7 +11,7 @@
 #import "MLNSymbolStyleLayer_Private.h"
 
 #if !MLN_RENDER_BACKEND_METAL
-#import "MLNOpenGLStyleLayer_Private.h"
+#import "MLNCustomStyleLayer_Private.h"
 #endif
 
 #if MLN_DRAWABLE_RENDERER
