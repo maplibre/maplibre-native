@@ -7,6 +7,7 @@
 #include <mbgl/util/timer.hpp>
 
 #include <memory>
+#include <optional>
 
 using namespace mbgl::util;
 
