@@ -11,11 +11,6 @@ objc_library(
         "//platform/ios:ios_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
     ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objcpp_opengl_srcs",
-        ],
-    }) + select({
         "//:legacy_renderer": [],
         "//conditions:default": [
             "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
@@ -262,11 +257,6 @@ sh_binary(
         "//platform/macos:macos_private_hdrs",
         "//platform/macos:macos_public_hdrs",
     ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objcpp_opengl_srcs",
-        ],
-    }) + select({
         "//:legacy_renderer": [],
         "//conditions:default": [
             "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
