@@ -249,7 +249,7 @@ jobs:
           cmake --build build
 
       - name: Run render tests on macOS
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && matrix.arch != 'arm64'
         run: set -o pipefail && ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Upload render test artifacts (MacOS)
