@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:
       - main
+      - opengl-2
     paths:
       - "src/**"
       - "include/**"
@@ -121,23 +122,12 @@ jobs:
         id: render_test
         run: xvfb-run -a ./mbgl-render-test-runner --manifestPath=metrics/linux-gcc8-release-style.json
 
-      - name: Configure AWS Credentials
+      - name: Upload render test artifacts
         if: ${{ steps.render_test.outcome == 'failure' }}
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: actions/upload-artifact@v3
         with:
-          aws-region: us-west-2
-          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
-          role-session-name: ${{ github.run_id	}}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      
-      - name: Upload render test results to S3
-        if: ${{ steps.render_test.outcome == 'failure' }}
-        id: upload_render_test_results
-        run: |
-          aws s3 cp metrics/linux-gcc8-release-style.html \
-            s3://maplibre-native-test-artifacts/${{ github.run_id	}}-linux-gcc8-release-style.html \
-            --expires "$(date -d '+30 days' --utc +'%Y-%m-%dT%H:%M:%SZ')
+          name: render-query-test-results_${{ github.run_id }}
+          path: metrics/linux-gcc8-release-style.html
 
       - name: Make comment with test results
         if: ${{ steps.upload_render_test_results.outcome == 'success' }}
