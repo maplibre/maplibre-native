@@ -328,3 +328,42 @@ TEST(Thread, DeleteBeforeChildStarts) {
     // Should process the queue before destruction.
     ASSERT_TRUE(flag);
 }
+
+TEST(Thread, PoolWait) {
+    auto pool = Scheduler::GetBackground();
+
+    constexpr int threadCount = 10;
+    for (int i = 0; i < threadCount; ++i) {
+        pool->schedule([&] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+    }
+
+    EXPECT_EQ(0, pool->waitForEmpty(std::chrono::milliseconds(500)));
+}
+
+TEST(Thread, PoolWaitTimeout) {
+    auto pool = Scheduler::GetBackground();
+
+    pool->schedule([&] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+
+    EXPECT_EQ(1, pool->waitForEmpty(std::chrono::milliseconds(10)));
+    EXPECT_EQ(0, pool->waitForEmpty(std::chrono::milliseconds(200)));
+}
+
+TEST(Thread, PoolWaitException) {
+    auto pool = Scheduler::GetBackground();
+
+    std::atomic<int> caught{0};
+    pool->setExceptionHandler([&](const auto* ex) { caught++; });
+
+    constexpr int threadCount = 3;
+    for (int i = 0; i < threadCount; ++i) {
+        pool->schedule([=] {
+            std::this_thread::sleep_for(std::chrono::milliseconds(i));
+            throw std::runtime_error("test");
+        });
+    }
+
+    // Exceptions shouldn't cause deadlocks by, e.g., abandoning locks.
+    EXPECT_EQ(0, pool->waitForEmpty(std::chrono::milliseconds(100)));
+    EXPECT_EQ(threadCount, caught);
+}

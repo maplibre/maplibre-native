@@ -33,37 +33,54 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
         platform::attachThread();
 
         while (true) {
-            {
-                std::unique_lock<std::mutex> lock(mutex);
-                cvAvailable.wait(lock, [this] { return !queue.empty() || terminated; });
+            std::unique_lock<std::mutex> lock(mutex);
+            if (queue.empty() && !pendingItems) {
+                cvEmpty.notify_all();
+            }
 
-                if (terminated) {
-                    platform::detachThread();
-                    return;
-                }
+            cvAvailable.wait(lock, [this] { return !queue.empty() || terminated; });
 
-                auto function = std::move(queue.front());
-                queue.pop();
+            if (terminated) {
+                platform::detachThread();
+                return;
+            }
 
+            auto function = std::move(queue.front());
+            queue.pop();
+
+            if (function) {
                 pendingItems++;
-                try {
-                    lock.unlock();
+            }
 
-                    if (function) {
-                        function();
-                    }
+            lock.unlock();
 
+            if (function) {
+                const auto cleanup = [&] {
                     // destroy the function and release its captures before unblocking `waitForEmpty`
                     function = {};
                     pendingItems--;
+                    if (queue.empty() && !pendingItems) {
+                        cvEmpty.notify_all();
+                    }
+                };
+                try {
+                    function();
+                    cleanup();
+                } catch (const std::exception& ex) {
+                    cleanup();
+                    if (const auto& handler = this->handler) {
+                        handler(&ex);
+                    } else {
+                        throw;
+                    }
                 } catch (...) {
-                    pendingItems--;
-                    throw;
+                    cleanup();
+                    if (const auto& handler = this->handler) {
+                        handler(nullptr);
+                    } else {
+                        throw;
+                    }
                 }
-            }
-
-            if (queue.empty()) {
-                cvEmpty.notify_all();
             }
         }
     });
@@ -81,25 +98,22 @@ void ThreadedSchedulerBase::schedule(std::function<void()>&& fn) {
 }
 
 std::size_t ThreadedSchedulerBase::waitForEmpty(std::chrono::milliseconds timeout) {
-    if (mainThreadID != std::this_thread::get_id()) {
-        assert(false);
-        return false;
-    }
-
-    const auto startTime = mbgl::util::MonotonicTimer::now();
-    std::unique_lock<std::mutex> lock(mutex);
-    const auto isDone = [&] {
-        return queue.empty() && pendingItems == 0;
-    };
-    while (!isDone()) {
-        const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
-        if (timeout <= elapsed || !cvEmpty.wait_for(lock, timeout - elapsed, isDone)) {
-            assert(isDone());
-            break;
+    assert(mainThreadID == std::this_thread::get_id());
+    if (mainThreadID == std::this_thread::get_id()) {
+        const auto startTime = mbgl::util::MonotonicTimer::now();
+        const auto isDone = [&] {
+            return queue.empty() && pendingItems == 0;
+        };
+        std::unique_lock<std::mutex> lock(mutex);
+        while (!isDone()) {
+            const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
+            if (timeout <= elapsed || !cvEmpty.wait_for(lock, timeout - elapsed, isDone)) {
+                break;
+            }
         }
+        return queue.size() + pendingItems;
     }
-
-    return queue.size() + pendingItems;
+    return 0;
 }
 
 } // namespace mbgl
