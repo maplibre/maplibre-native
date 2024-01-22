@@ -67,17 +67,21 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                     function();
                     cleanup();
                 } catch (const std::exception& ex) {
-                    cleanup();
-                    if (const auto& handler = this->handler) {
+                    lock.lock();
+                    if (handler) {
                         handler(&ex);
+                        cleanup();
                     } else {
+                        cleanup();
                         throw;
                     }
                 } catch (...) {
-                    cleanup();
-                    if (const auto& handler = this->handler) {
+                    lock.lock();
+                    if (handler) {
                         handler(nullptr);
+                        cleanup();
                     } else {
+                        cleanup();
                         throw;
                     }
                 }
