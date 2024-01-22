@@ -1,3 +1,6 @@
+#if !MLN_RENDER_BACKEND_METAL
+
+/* OPENGL Custom Layer example implementation */
 #import "LimeGreenStyleLayer.h"
 #import <GLKit/GLKit.h>
 
@@ -56,3 +59,24 @@
 }
 
 @end
+
+#else // MLN_RENDER_BACKEND_METAL:
+
+/* Metal Custom Layer example implementation */
+#import "LimeGreenStyleLayer.h"
+
+@implementation LimeGreenStyleLayer {
+}
+
+- (void)didMoveToMapView:(MLNMapView *)mapView {
+}
+
+- (void)drawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context {
+}
+
+- (void)willMoveFromMapView:(MLNMapView *)mapView {
+}
+
+@end
+
+#endif

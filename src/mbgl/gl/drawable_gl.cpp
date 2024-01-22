@@ -140,7 +140,12 @@ struct IndexBufferGL : public gfx::IndexBufferBase {
 };
 
 void DrawableGL::upload(gfx::UploadPass& uploadPass) {
+    if (isCustom) {
+        return;
+    }
     if (!shader) {
+        Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
+        assert(false);
         return;
     }
 

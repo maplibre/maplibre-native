@@ -13,9 +13,7 @@
 #import "MBXState.h"
 #import "MLNSettings.h"
 
-#if !MLN_RENDER_BACKEND_METAL
 #import "LimeGreenStyleLayer.h"
-#endif
 
 #if MLN_DRAWABLE_RENDERER
 #import "ExampleCustomDrawableStyleLayer.h"
@@ -101,9 +99,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingRasterTileSource,
     MBXSettingsRuntimeStylingImageSource,
     MBXSettingsRuntimeStylingRouteLine,
-#if !MLN_RENDER_BACKEND_METAL
     MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer,
-#endif
     MBXSettingsRuntimeStylingDDSPolygon,
     MBXSettingsRuntimeStylingCustomLatLonGrid,
     MBXSettingsRuntimeStylingLineGradient,
@@ -435,9 +431,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 @"Style Raster Tile Source",
                 @"Style Image Source",
                 @"Add Route Line",
-#if !MLN_RENDER_BACKEND_METAL
                 @"Add Lime Green Triangle Layer",
-#endif
                 @"Dynamically Style Polygon",
                 @"Add Custom Lat/Lon Grid",
                 @"Style Route line with gradient",
@@ -654,11 +648,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsRuntimeStylingRouteLine:
                     [self styleRouteLine];
                     break;
-#if !MLN_RENDER_BACKEND_METAL
                 case MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer:
                     [self styleAddLimeGreenTriangleLayer];
                     break;
-#endif
                 case MBXSettingsRuntimeStylingDDSPolygon:
                     [self stylePolygonWithDDS];
                     break;
@@ -1604,13 +1596,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:routeLayer];
 }
 
-#if !MLN_RENDER_BACKEND_METAL
 - (void)styleAddLimeGreenTriangleLayer
 {
     LimeGreenStyleLayer *layer = [[LimeGreenStyleLayer alloc] initWithIdentifier:@"mbx-custom"];
     [self.mapView.style addLayer:layer];
 }
-#endif
 
 - (void)stylePolygonWithDDS {
     CLLocationCoordinate2D leftCoords[] = {

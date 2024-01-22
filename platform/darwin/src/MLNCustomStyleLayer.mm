@@ -88,13 +88,13 @@ class MLNCustomLayerHost;
 // MARK: - Adding to and removing from a map view
 - (void)addToStyle:(MLNStyle *)style belowLayer:(MLNStyleLayer *)otherLayer {
     self.style = style;
-    self.style.openGLLayers[self.identifier] = self;
+    self.style.customLayers[self.identifier] = self;
     [super addToStyle:style belowLayer:otherLayer];
 }
 
 - (void)removeFromStyle:(MLNStyle *)style {
     [super removeFromStyle:style];
-    self.style.openGLLayers[self.identifier] = nil;
+    self.style.customLayers[self.identifier] = nil;
     self.style = nil;
 }
 
@@ -215,7 +215,7 @@ private:
 
 namespace mbgl {
 
-MLNStyleLayer* OpenGLStyleLayerPeerFactory::createPeer(style::Layer* rawLayer) {
+MLNStyleLayer* CustomStyleLayerPeerFactory::createPeer(style::Layer* rawLayer) {
     return [[MLNCustomStyleLayer alloc] initWithRawLayer:rawLayer];
 }
 
