@@ -17,5 +17,8 @@ npm.npm_translate_lock(
 )
 use_repo(npm, "npm")
 
+pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
+use_repo(pnpm, "pnpm")
+
 provisioning_profile_repository = use_extension("@build_bazel_rules_apple//apple:apple.bzl", "provisioning_profile_repository_extension")
 provisioning_profile_repository.setup()
