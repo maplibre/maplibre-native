@@ -9,7 +9,7 @@
 #include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/math/wrap.hpp>
 
-class MLNOpenGLLayerHost;
+class MLNCustomLayerHost;
 
 /**
  An `MLNCustomStyleLayer` is a style layer that is rendered by OpenGL / Metal code that
@@ -60,7 +60,7 @@ class MLNOpenGLLayerHost;
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier {
     auto layer = std::make_unique<mbgl::style::CustomLayer>(identifier.UTF8String,
-                                                            std::make_unique<MLNOpenGLLayerHost>(self));
+                                                            std::make_unique<MLNCustomLayerHost>(self));
     return self = [super initWithPendingLayer:std::move(layer)];
 }
 
@@ -164,9 +164,9 @@ class MLNOpenGLLayerHost;
 
 @end
 
-class MLNOpenGLLayerHost : public mbgl::style::CustomLayerHost {
+class MLNCustomLayerHost : public mbgl::style::CustomLayerHost {
 public:
-    MLNOpenGLLayerHost(MLNCustomStyleLayer *styleLayer) {
+    MLNCustomLayerHost(MLNCustomStyleLayer *styleLayer) {
         layerRef = styleLayer;
         layer = nil;
     }
