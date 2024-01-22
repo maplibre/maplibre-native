@@ -186,22 +186,21 @@ void Texture2D::updateSamplerConfiguration() noexcept {
     metalSamplerState = context.createMetalSamplerState(samplerDescriptor);
 }
 
-void Texture2D::bind(const RenderPass& renderPass, int32_t location) noexcept {
+void Texture2D::bind(RenderPass& renderPass, int32_t location) noexcept {
     assert(!textureDirty);
-    const auto& encoder = renderPass.getMetalEncoder();
 
     // Update the sampler state if it was changed after resource creation
     if (samplerStateDirty) {
         updateSamplerConfiguration();
     }
 
-    encoder->setFragmentTexture(metalTexture.get(), location);
-    encoder->setFragmentSamplerState(metalSamplerState.get(), location);
+    renderPass.setFragmentTexture(metalTexture, location);
+    renderPass.setFragmentSamplerState(metalSamplerState, location);
 
     context.renderingStats().numTextureBindings++;
 }
 
-void Texture2D::unbind(const RenderPass&, int32_t /*location*/) noexcept {
+void Texture2D::unbind(RenderPass&, int32_t /*location*/) noexcept {
     context.renderingStats().numTextureBindings--;
 }
 
