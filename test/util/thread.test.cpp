@@ -359,7 +359,11 @@ TEST(Thread, PoolWaitException) {
     for (int i = 0; i < threadCount; ++i) {
         pool->schedule([=] {
             std::this_thread::sleep_for(std::chrono::milliseconds(i));
-            throw std::runtime_error("test");
+            if (i & 1) {
+                throw std::runtime_error("test");
+            } else {
+                throw 1;
+            }
         });
     }
 

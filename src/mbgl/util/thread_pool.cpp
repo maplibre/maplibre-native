@@ -70,20 +70,22 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                     lock.lock();
                     if (handler) {
                         handler(&ex);
-                        cleanup();
-                    } else {
-                        cleanup();
-                        throw;
                     }
+                    cleanup();
+                    if (handler) {
+                        continue;
+                    }
+                    throw;
                 } catch (...) {
                     lock.lock();
                     if (handler) {
                         handler(nullptr);
-                        cleanup();
-                    } else {
-                        cleanup();
-                        throw;
                     }
+                    cleanup();
+                    if (handler) {
+                        continue;
+                    }
+                    throw;
                 }
             }
         }
