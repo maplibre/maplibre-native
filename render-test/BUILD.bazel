@@ -49,6 +49,7 @@ cc_test(
     data = [
         "//metrics:render-test-files",
     ],
+    tags = ["no-sandbox"],
     deps = [
         "render-test-srcs",
         "//platform/default:render-test-bin",
