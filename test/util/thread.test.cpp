@@ -353,7 +353,7 @@ TEST(Thread, PoolWaitException) {
     auto pool = Scheduler::GetBackground();
 
     std::atomic<int> caught{0};
-    pool->setExceptionHandler([&](const auto* ex) { caught++; });
+    pool->setExceptionHandler([&](const auto*) { caught++; });
 
     constexpr int threadCount = 3;
     for (int i = 0; i < threadCount; ++i) {
