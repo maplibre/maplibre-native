@@ -49,7 +49,8 @@ jobs:
             libuv1-dev \
             libjpeg-dev \
             libpng-dev \
-            libglfw3-dev
+            libglfw3-dev \
+            libwebp-dev
 
       - name: Build Maplibre GL Core
         run: |
