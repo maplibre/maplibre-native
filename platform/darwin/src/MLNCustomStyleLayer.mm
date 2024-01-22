@@ -12,18 +12,18 @@
 class MLNOpenGLLayerHost;
 
 /**
- An `MLNCustomStyleLayer` is a style layer that is rendered by OpenGL code that
+ An `MLNCustomStyleLayer` is a style layer that is rendered by OpenGL / Metal code that
  you provide.
 
  By default, this class does nothing. You can subclass this class to provide
- custom OpenGL drawing code that is run on each frame of the map. Your subclass
+ custom OpenGL or Metal drawing code that is run on each frame of the map. Your subclass
  should override the `-didMoveToMapView:`, `-willMoveFromMapView:`, and
  `-drawInMapView:withContext:` methods.
 
- You can access an existing OpenGL style layer using the
+ You can access an existing MLNCustomStyleLayer using the
  `-[MLNStyle layerWithIdentifier:]` method if you know its identifier;
  otherwise, find it using the `MLNStyle.layers` property. You can also create a
- new OpenGL style layer and add it to the style using a method such as
+ new MLNCustomStyleLayer and add it to the style using a method such as
  `-[MLNStyle addLayer:]`.
 
  @warning This API is undocumented and therefore unsupported. It may change at
@@ -48,7 +48,7 @@ class MLNOpenGLLayerHost;
 @implementation MLNCustomStyleLayer
 
 /**
- Returns an OpenGL style layer object initialized with the given identifier.
+ Returns an MLNCustomStyleLayer style layer object initialized with the given identifier.
 
  After initializing and configuring the style layer, add it to a map view’s
  style using the `-[MLNStyle addLayer:]` or
