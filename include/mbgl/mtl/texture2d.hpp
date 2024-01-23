@@ -54,12 +54,12 @@ public:
     /// @brief Bind this texture to the specified location
     /// @param renderPass Render pass on which the texture will be assign
     /// @param location Location index of texture sampler in a shader
-    void bind(const RenderPass& renderPass, int32_t location) noexcept;
+    void bind(RenderPass& renderPass, int32_t location) noexcept;
 
     /// @brief Unbind the texture, if it was bound
     /// @param renderPass Render pass from which the texture will be removed
     /// @param location Location index of texture sampler in a shader
-    void unbind(const RenderPass& renderPass, int32_t location) noexcept;
+    void unbind(RenderPass& renderPass, int32_t location) noexcept;
 
 private:
     MTL::PixelFormat getMetalPixelFormat() const noexcept;

@@ -233,10 +233,8 @@ void Drawable::draw(PaintParameters& parameters) const {
             impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderable);
             impl->previousStencilMode = *newStencilMode;
         }
-        if (impl->depthStencilState) {
-            encoder->setDepthStencilState(impl->depthStencilState.get());
-            encoder->setStencilReferenceValue(impl->previousStencilMode.ref);
-        }
+        renderPass.setDepthStencilState(impl->depthStencilState);
+        renderPass.setStencilReference(impl->previousStencilMode.ref);
     }
 
     for (const auto& seg_ : impl->segments) {
