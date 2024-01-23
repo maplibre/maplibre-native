@@ -3,7 +3,9 @@ load("//bazel:flags.bzl", "CPP_FLAGS")
 # vendor/mapbox-base-files.json
 cc_library(
     name = "mapbox-base",
-    hdrs = glob(
+    hdrs = [
+        "mapbox-base/extras/args/args.hxx",
+    ] + glob(
         [
             "mapbox-base/deps/cheap-ruler-cpp/include/mapbox/*.hpp",
             "mapbox-base/deps/geojson-vt-cpp/include/**/*.hpp",
@@ -18,10 +20,8 @@ cc_library(
             "mapbox-base/extras/filesystem/include/ghc/*.hpp",
             "mapbox-base/extras/kdbush.hpp/include/*.hpp",
             "mapbox-base/extras/rapidjson/include/**/*.h",
-            "mapbox-base/extras/args/args.hxx",
             "mapbox-base/include/mapbox/**/*.hpp",
         ],
-        allow_empty = False,
         exclude = ["mapbox-base/deps/jni.hpp/include/jni/string_conversion.hpp"],
     ),
     copts = CPP_FLAGS,
@@ -51,12 +51,7 @@ cc_library(
 cc_library(
     name = "parsedate",
     srcs = ["parsedate/parsedate.cpp"],
-    hdrs = glob(
-        [
-            "parsedate/**/*.hpp",
-        ],
-        allow_empty = False,
-    ),
+    hdrs = glob(["parsedate/**/*.hpp"]),
     copts = CPP_FLAGS,
     includes = ["parsedate"],
     visibility = ["//visibility:public"],
@@ -65,12 +60,7 @@ cc_library(
 # vendor/optional
 cc_library(
     name = "optional",
-    hdrs = glob(
-        [
-            "mapbox-base/deps/optional/*.hpp",
-        ],
-        allow_empty = False,
-    ),
+    hdrs = glob(["mapbox-base/deps/optional/*.hpp"]),
     copts = CPP_FLAGS,
     includes = ["mapbox-base/deps/optional"],
     visibility = ["//visibility:public"],
@@ -84,7 +74,6 @@ cc_library(
             "csscolorparser/**/*.hpp",
             "csscolorparser/**/*.cpp",
         ],
-        allow_empty = False,
     ),
     copts = CPP_FLAGS,
     includes = ["csscolorparser"],
@@ -95,10 +84,7 @@ cc_library(
 # vendor/wagyu-files.json
 cc_library(
     name = "wagyu",
-    hdrs = glob(
-        ["wagyu/include/mapbox/geometry/wagyu/*.hpp"],
-        allow_empty = False,
-    ),
+    hdrs = glob(["wagyu/include/mapbox/geometry/wagyu/*.hpp"]),
     copts = CPP_FLAGS,
     includes = ["wagyu/include"],
     visibility = ["//visibility:public"],
@@ -115,7 +101,6 @@ objc_library(
             "zip-archive/SSZipArchive/minizip/*.c",
             "zip-archive/SSZipArchive/minizip/*.h",
         ],
-        allow_empty = False,
     ),
     defines = ["ZLIB_COMPAT"],
     includes = ["zip-archive/SSZipArchive"],
@@ -130,7 +115,6 @@ cc_library(
             "boost/include/boost/**/*.hpp",
             "boost/include/boost/**/*.h",
         ],
-        allow_empty = False,
     ),
     copts = CPP_FLAGS,
     includes = ["boost/include"],
@@ -148,10 +132,7 @@ cc_library(
 # vendor/protozero-files.json
 cc_library(
     name = "protozero",
-    hdrs = glob(
-        ["protozero/include/protozero/*.hpp"],
-        allow_empty = False,
-    ),
+    hdrs = glob(["protozero/include/protozero/*.hpp"]),
     copts = CPP_FLAGS,
     includes = ["protozero/include"],
     visibility = ["//visibility:public"],
@@ -178,10 +159,7 @@ cc_library(
 # vendor/metal-cpp.json
 cc_library(
     name = "metal-cpp",
-    hdrs = glob(
-        ["metal-cpp/**/*.hpp"],
-        allow_empty = False,
-    ),
+    hdrs = glob(["metal-cpp/**/*.hpp"]),
     copts = CPP_FLAGS,
     includes = ["metal-cpp"],
     visibility = ["//visibility:public"],
@@ -208,10 +186,7 @@ cc_library(
 # vendor/vector-tile-files.json
 cc_library(
     name = "vector-tile",
-    hdrs = glob(
-        ["vector-tile/include/mapbox/**/*.hpp"],
-        allow_empty = False,
-    ),
+    hdrs = glob(["vector-tile/include/mapbox/**/*.hpp"]),
     copts = CPP_FLAGS,
     includes = ["vector-tile/include"],
     visibility = ["//visibility:public"],
@@ -225,7 +200,6 @@ cc_library(
             "icu/src/*.cpp",
             "icu/src/*.h",
         ],
-        allow_empty = False,
     ),
     hdrs = glob(["icu/include/unicode/*.h"]),
     copts = CPP_FLAGS + [

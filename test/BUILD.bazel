@@ -14,13 +14,9 @@ cc_library(
 cc_library(
     name = "testlib",
     srcs = select({
-        "//:ios": glob(
-            ["src/mbgl/test/*.cpp"],
-            allow_empty = False,
-        ),
+        "//:ios": glob(["src/mbgl/test/*.cpp"]),
         "//conditions:default": glob(
             ["src/mbgl/test/*.cpp"],
-            allow_empty = False,
             exclude = ["src/mbgl/test/http_server.cpp"],
         ),
     }) + [
@@ -74,7 +70,6 @@ filegroup(
     name = "fixtures",
     srcs = glob(
         ["fixtures/**/*"],
-        allow_empty = False,
     ),
     visibility = [
         "//platform/ios/test/core:__pkg__",
