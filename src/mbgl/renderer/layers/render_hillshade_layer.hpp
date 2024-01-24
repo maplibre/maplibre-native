@@ -45,6 +45,11 @@ private:
 
 #if MLN_DRAWABLE_RENDERER
     void updateLayerTweaker();
+
+    void layerChanged(const TransitionParameters& parameters,
+                      const Immutable<style::Layer::Impl>& impl,
+                      UniqueChangeRequestVec& changes);
+
 #endif // MLN_DRAWABLE_RENDERER
 
     void prepare(const LayerPrepareParameters&) override;
