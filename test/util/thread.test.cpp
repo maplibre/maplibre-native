@@ -383,7 +383,7 @@ TEST(Thread, WrongThread) {
     auto pool = Scheduler::GetBackground();
 
     // Asserts in debug builds, silently ignored in release.
-    pool->schedule([&] { EXPECT_EQ(0, pool->waitForEmpty(0)); });
+    pool->schedule([&] { EXPECT_EQ(0, pool->waitForEmpty()); });
 
     EXPECT_EQ(0, pool->waitForEmpty());
 }

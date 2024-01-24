@@ -160,7 +160,7 @@ std::size_t RunLoop::waitForEmpty(Milliseconds timeout) {
 
         const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
         const auto elapsedMillis = std::chrono::duration_cast<Milliseconds>(elapsed);
-        if (remaining == 0 || (Milliseconds::zero() < timeout && timeout <= elapsedMillis) {
+        if (remaining == 0 || (Milliseconds::zero() < timeout && timeout <= elapsedMillis)) {
             return remaining;
         }
 
