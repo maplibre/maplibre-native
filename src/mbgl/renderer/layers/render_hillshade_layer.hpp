@@ -48,7 +48,7 @@ private:
 
     void layerChanged(const TransitionParameters& parameters,
                       const Immutable<style::Layer::Impl>& impl,
-                      UniqueChangeRequestVec& changes);
+                      UniqueChangeRequestVec& changes) override;
 
 #endif // MLN_DRAWABLE_RENDERER
 
