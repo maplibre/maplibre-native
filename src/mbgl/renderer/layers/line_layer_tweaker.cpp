@@ -38,13 +38,16 @@ static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
+    const auto zoom = parameters.state.getZoom();
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const LineLayerProperties&>(*evaluatedProperties).crossfade;
 
-    const auto zoom = parameters.state.getZoom();
+    // Each property UBO is updated at most once if new evaluated properties were set
+    bool propUpdateFlags[4] = {propertiesUpdated, propertiesUpdated, propertiesUpdated, propertiesUpdated};
+    propertiesUpdated = false;
 
     const auto getLinePropsBuffer = [&]() {
-        if (!linePropertiesBuffer || propertiesUpdated) {
+        if (!linePropertiesBuffer || propUpdateFlags[0]) {
             const LinePropertiesUBO linePropertiesUBO{
                 /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
@@ -56,12 +59,12 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
                 0};
             context.emplaceOrUpdateUniformBuffer(linePropertiesBuffer, &linePropertiesUBO);
-            propertiesUpdated = false;
+            propUpdateFlags[0] = false;
         }
         return linePropertiesBuffer;
     };
     const auto getLineGradientPropsBuffer = [&]() {
-        if (!lineGradientPropertiesBuffer || propertiesUpdated) {
+        if (!lineGradientPropertiesBuffer || propUpdateFlags[1]) {
             const LineGradientPropertiesUBO lineGradientPropertiesUBO{
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
                 /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
@@ -72,12 +75,12 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
                 0};
             context.emplaceOrUpdateUniformBuffer(lineGradientPropertiesBuffer, &lineGradientPropertiesUBO);
-            propertiesUpdated = false;
+            propUpdateFlags[1] = false;
         }
         return lineGradientPropertiesBuffer;
     };
     const auto getLinePatternPropsBuffer = [&]() {
-        if (!linePatternPropertiesBuffer || propertiesUpdated) {
+        if (!linePatternPropertiesBuffer || propUpdateFlags[2]) {
             const LinePatternPropertiesUBO linePatternPropertiesUBO{
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
                 /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
@@ -88,12 +91,12 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
                 0};
             context.emplaceOrUpdateUniformBuffer(linePatternPropertiesBuffer, &linePatternPropertiesUBO);
-            propertiesUpdated = false;
+            propUpdateFlags[2] = false;
         }
         return linePatternPropertiesBuffer;
     };
     const auto getLineSDFPropsBuffer = [&]() {
-        if (!lineSDFPropertiesBuffer || propertiesUpdated) {
+        if (!lineSDFPropertiesBuffer || propUpdateFlags[3]) {
             const LineSDFPropertiesUBO lineSDFPropertiesUBO{
                 /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
@@ -105,7 +108,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
                 0};
             context.emplaceOrUpdateUniformBuffer(lineSDFPropertiesBuffer, &lineSDFPropertiesUBO);
-            propertiesUpdated = false;
+            propUpdateFlags[3] = false;
         }
         return lineSDFPropertiesBuffer;
     };
@@ -237,11 +240,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             } break;
         }
     });
-
-    // We assume each layer produces only one kind of line.
-    assert(!propertiesUpdated || (linePropertiesBuffer ? 1 : 0) + (lineGradientPropertiesBuffer ? 1 : 0) +
-                                         (linePatternPropertiesBuffer ? 1 : 0) + (lineSDFPropertiesBuffer ? 1 : 0) <
-                                     2);
 }
 
 } // namespace mbgl
