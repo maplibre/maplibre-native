@@ -6,6 +6,7 @@
 #import "MLNMapCamera.h"
 #import "MLNTypes.h"
 #import "MLNStyle.h"
+#import "MLNBackendResource.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -2055,6 +2056,8 @@ MLN_EXPORT
  */
 @property (nonatomic) MLNMapDebugMaskOptions debugMask;
 
+
+- (MLNBackendResource)backendResource;
 @end
 
 NS_ASSUME_NONNULL_END

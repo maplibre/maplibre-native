@@ -219,3 +219,14 @@ void MLNMapViewMetalImpl::layoutChanged() {
     size = { static_cast<uint32_t>(mapView.bounds.size.width * scaleFactor),
              static_cast<uint32_t>(mapView.bounds.size.height * scaleFactor) };
 }
+
+MLNBackendResource MLNMapViewMetalImpl::getObject() {
+    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+    auto renderPassDescriptor = resource.getRenderPassDescriptor().get();
+    return {
+        resource.mtlView,
+        resource.mtlView.device,
+        [MTLRenderPassDescriptor renderPassDescriptor],
+        resource.commandBuffer
+    };
+}
