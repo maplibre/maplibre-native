@@ -81,7 +81,7 @@ public:
     void schedule(std::function<void()>&& fn) override { invoke(std::move(fn)); }
     ::mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
-    std::size_t waitForEmpty(std::chrono::milliseconds timeout) override;
+    std::size_t waitForEmpty(Milliseconds timeout) override;
 
     class Impl;
 

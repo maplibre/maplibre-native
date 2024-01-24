@@ -66,20 +66,10 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                 try {
                     function();
                     cleanup();
-                } catch (const std::exception& ex) {
-                    lock.lock();
-                    if (handler) {
-                        handler(&ex);
-                    }
-                    cleanup();
-                    if (handler) {
-                        continue;
-                    }
-                    throw;
                 } catch (...) {
                     lock.lock();
                     if (handler) {
-                        handler(nullptr);
+                        handler(std::current_exception());
                     }
                     cleanup();
                     if (handler) {
@@ -103,22 +93,27 @@ void ThreadedSchedulerBase::schedule(std::function<void()>&& fn) {
     }
 }
 
-std::size_t ThreadedSchedulerBase::waitForEmpty(std::chrono::milliseconds timeout) {
-    assert(mainThreadID == std::this_thread::get_id());
-    if (mainThreadID == std::this_thread::get_id()) {
+std::size_t ThreadedSchedulerBase::waitForEmpty(Milliseconds timeout) {
+    // Must not be called from a thread in our pool, or we would deadlock
+    if (!isThreadOwned(std::this_thread::get_id())) {
         const auto startTime = mbgl::util::MonotonicTimer::now();
         const auto isDone = [&] {
             return queue.empty() && pendingItems == 0;
         };
         std::unique_lock<std::mutex> lock(mutex);
         while (!isDone()) {
-            const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
-            if (timeout <= elapsed || !cvEmpty.wait_for(lock, timeout - elapsed, isDone)) {
-                break;
+            if (timeout > Milliseconds::zero()) {
+                const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
+                if (timeout <= elapsed || !cvEmpty.wait_for(lock, timeout - elapsed, isDone)) {
+                    break;
+                }
+            } else {
+                cvEmpty.wait(lock, isDone);
             }
         }
         return queue.size() + pendingItems;
     }
+    assert(false);
     return 0;
 }
 

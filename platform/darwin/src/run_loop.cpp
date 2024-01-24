@@ -47,7 +47,7 @@ void RunLoop::stop() {
     invoke([&] { CFRunLoopStop(CFRunLoopGetCurrent()); });
 }
 
-std::size_t RunLoop::waitForEmpty(std::chrono::milliseconds timeout) {
+std::size_t RunLoop::waitForEmpty(Milliseconds timeout) {
     const auto startTime = mbgl::util::MonotonicTimer::now();
     while (true) {
         std::size_t remaining;
@@ -58,7 +58,7 @@ std::size_t RunLoop::waitForEmpty(std::chrono::milliseconds timeout) {
 
         const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
         const auto elapsedMillis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-        if (remaining == 0 || timeout <= elapsedMillis) {
+        if (remaining == 0 || (Milliseconds::zero() < timeout && timeout <= elapsedMillis)) {
             return remaining;
         }
 

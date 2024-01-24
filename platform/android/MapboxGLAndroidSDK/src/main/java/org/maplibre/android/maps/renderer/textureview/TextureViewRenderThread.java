@@ -146,15 +146,23 @@ class TextureViewRenderThread extends Thread implements TextureView.SurfaceTextu
     synchronized (lock) {
       // Wait for the queue to be empty
       while (!this.eventQueue.isEmpty()) {
-        final long elapsedMillis = (System.nanoTime() - startTime) / 1000 / 1000;
-        if (elapsedMillis < timeoutMillis) {
+        if (timeoutMillis > 0) {
+          final long elapsedMillis = (System.nanoTime() - startTime) / 1000 / 1000;
+          if (elapsedMillis < timeoutMillis) {
+            try {
+              lock.wait(timeoutMillis - elapsedMillis);
+            } catch (InterruptedException ex) {
+              Thread.currentThread().interrupt();
+            }
+          } else {
+            break;
+          }
+        } else {
           try {
-            lock.wait(timeoutMillis - elapsedMillis);
+            lock.wait(0);
           } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
           }
-        } else {
-          break;
         }
       }
       return this.eventQueue.size();

@@ -3,6 +3,7 @@
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/actor/scheduler.hpp>
 
+#include <algorithm>
 #include <condition_variable>
 #include <mutex>
 #include <queue>
@@ -22,10 +23,13 @@ protected:
     void terminate();
     std::thread makeSchedulerThread(size_t index);
 
-    std::size_t waitForEmpty(std::chrono::milliseconds) override;
+    /// Wait until there's nothing pending or in process
+    /// Must not be called from a task provided to this scheduler.
+    /// @param timeout Time to wait, or zero to wait forever.
+    std::size_t waitForEmpty(Milliseconds timeout) override;
 
-    // Assume we're created on the main thread
-    const std::thread::id mainThreadID = std::this_thread::get_id();
+    /// Returns true if called from a thread managed by the scheduler
+    virtual bool isThreadOwned(const std::thread::id tid) const = 0;
 
     std::queue<std::function<void()>> queue;
     std::mutex mutex;
@@ -80,6 +84,11 @@ public:
     }
 
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
+
+protected:
+    bool isThreadOwned(const std::thread::id tid) const override {
+        return std::any_of(threads.begin(), threads.end(), [=](const auto& thread) { return thread.get_id() == tid; });
+    }
 
 private:
     std::vector<std::thread> threads;

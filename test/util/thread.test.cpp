@@ -334,31 +334,37 @@ TEST(Thread, PoolWait) {
 
     constexpr int threadCount = 10;
     for (int i = 0; i < threadCount; ++i) {
-        pool->schedule([&] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+        pool->schedule([&] { std::this_thread::sleep_for(Milliseconds(100)); });
     }
 
-    EXPECT_EQ(0, pool->waitForEmpty(std::chrono::milliseconds(500)));
+    EXPECT_EQ(0, pool->waitForEmpty());
 }
 
 TEST(Thread, PoolWaitTimeout) {
     auto pool = Scheduler::GetBackground();
 
-    pool->schedule([&] { std::this_thread::sleep_for(std::chrono::milliseconds(100)); });
+    std::mutex mutex;
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        pool->schedule([&] { std::lock_guard<std::mutex> lock(mutex); });
 
-    EXPECT_EQ(1, pool->waitForEmpty(std::chrono::milliseconds(10)));
-    EXPECT_EQ(0, pool->waitForEmpty(std::chrono::milliseconds(200)));
+        // should always time out
+        EXPECT_EQ(1, pool->waitForEmpty(Milliseconds(100)));
+    }
+
+    EXPECT_EQ(0, pool->waitForEmpty());
 }
 
 TEST(Thread, PoolWaitException) {
     auto pool = Scheduler::GetBackground();
 
     std::atomic<int> caught{0};
-    pool->setExceptionHandler([&](const auto*) { caught++; });
+    pool->setExceptionHandler([&](const auto) { caught++; });
 
     constexpr int threadCount = 3;
     for (int i = 0; i < threadCount; ++i) {
         pool->schedule([=] {
-            std::this_thread::sleep_for(std::chrono::milliseconds(i));
+            std::this_thread::sleep_for(Milliseconds(i));
             if (i & 1) {
                 throw std::runtime_error("test");
             } else {
@@ -368,6 +374,17 @@ TEST(Thread, PoolWaitException) {
     }
 
     // Exceptions shouldn't cause deadlocks by, e.g., abandoning locks.
-    EXPECT_EQ(0, pool->waitForEmpty(std::chrono::milliseconds(100)));
+    EXPECT_EQ(0, pool->waitForEmpty());
     EXPECT_EQ(threadCount, caught);
 }
+
+#if defined(NDEBUG)
+TEST(Thread, WrongThread) {
+    auto pool = Scheduler::GetBackground();
+
+    // Asserts in debug builds, silently ignored in release.
+    pool->schedule([&] { EXPECT_EQ(0, pool->waitForEmpty(0)); });
+
+    EXPECT_EQ(0, pool->waitForEmpty());
+}
+#endif

@@ -1035,7 +1035,7 @@ public class MapLibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
 
     /**
      * Wait for the queue to become empty
-     * @param timeoutMillis Timeout in milliseconds
+     * @param timeoutMillis Timeout in milliseconds, zero for indefinite wait
      * @return Number of queue items remaining
     */
     public int waitForEmpty(long timeoutMillis) {
@@ -1043,15 +1043,23 @@ public class MapLibreGLSurfaceView extends SurfaceView implements SurfaceHolder.
       synchronized (glThreadManager) {
         // Wait for the queue to be empty
         while (!this.eventQueue.isEmpty()) {
-          final long elapsedMillis = (System.nanoTime() - startTime) / 1000 / 1000;
-          if (elapsedMillis < timeoutMillis) {
+          if (timeoutMillis > 0) {
+            final long elapsedMillis = (System.nanoTime() - startTime) / 1000 / 1000;
+            if (elapsedMillis < timeoutMillis) {
+              try {
+                glThreadManager.wait(timeoutMillis - elapsedMillis);
+              } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+              }
+            } else {
+              break;
+            }
+          } else {
             try {
-              glThreadManager.wait(timeoutMillis - elapsedMillis);
+              glThreadManager.wait();
             } catch (InterruptedException ex) {
               Thread.currentThread().interrupt();
             }
-          } else {
-            break;
           }
         }
         return this.eventQueue.size();

@@ -84,7 +84,7 @@ void MapRenderer::schedule(std::function<void()>&& scheduled) {
     }
 }
 
-std::size_t MapRenderer::waitForEmpty(std::chrono::milliseconds timeout) {
+std::size_t MapRenderer::waitForEmpty(Milliseconds timeout) {
     try {
         android::UniqueEnv _env = android::AttachEnv();
         static auto& javaClass = jni::Class<MapRenderer>::Singleton(*_env);

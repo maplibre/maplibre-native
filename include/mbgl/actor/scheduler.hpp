@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mbgl/util/chrono.hpp>
+
 #include <mapbox/std/weak.hpp>
 
 #include <functional>
@@ -66,7 +68,9 @@ public:
     }
 
     /// Wait until there's nothing pending or in process
-    virtual std::size_t waitForEmpty(std::chrono::milliseconds timeout) = 0;
+    /// Must not be called from a task provided to this scheduler.
+    /// @param timeout Time to wait, or zero to wait forever.
+    virtual std::size_t waitForEmpty(Milliseconds timeout = Milliseconds{0}) = 0;
 
     /// Set/Get the current Scheduler for this thread
     static Scheduler* GetCurrent();
@@ -91,7 +95,7 @@ public:
     [[nodiscard]] static std::shared_ptr<Scheduler> GetSequenced();
 
     /// Set a function to be called when an exception occurs on a thread controlled by the scheduler
-    void setExceptionHandler(std::function<void(const std::exception*)> handler_) { handler = std::move(handler_); }
+    void setExceptionHandler(std::function<void(const std::exception_ptr)> handler_) { handler = std::move(handler_); }
 
 protected:
     template <typename TaskFn, typename ReplyFn>
@@ -109,7 +113,7 @@ protected:
         schedule(std::move(scheduled));
     }
 
-    std::function<void(const std::exception*)> handler;
+    std::function<void(const std::exception_ptr)> handler;
 };
 
 } // namespace mbgl
