@@ -15,6 +15,7 @@ MLN_IOS_SDK_HEADERS = [
 
 MLN_IOS_PUBLIC_HEADERS = [
     "src/MLNAnnotationContainerView.h",
+    "src/MLNBackendResource.h",
     "src/MLNCompactCalloutView.h",
     "src/MLNFaux3DUserLocationAnnotationView.h",
     "src/MLNMapAccessibilityElement.h",
