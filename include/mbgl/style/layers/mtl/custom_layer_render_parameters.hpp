@@ -19,7 +19,7 @@ namespace mtl {
 /**
  * Metal subclass of CustomLayerRenderParameters
  */
-struct CustomLayerRenderParameters:  mbgl::style::CustomLayerRenderParameters{
+struct CustomLayerRenderParameters : mbgl::style::CustomLayerRenderParameters {
     mbgl::mtl::MTLRenderCommandEncoderPtr encoder;
 
     CustomLayerRenderParameters(const PaintParameters&);

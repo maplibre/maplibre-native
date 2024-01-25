@@ -18,12 +18,12 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
     context.resetState(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
                        paintParameters.colorModeForRenderPass());
 
-    std::unique_ptr<style::CustomLayerRenderParameters> parameters = std::make_unique<style::CustomLayerRenderParameters>(paintParameters);
+    std::unique_ptr<style::CustomLayerRenderParameters> parameters =
+        std::make_unique<style::CustomLayerRenderParameters>(paintParameters);
 
+    //    auto& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
+    //    const auto& encoder = renderPass.getMetalEncoder();
 
-//    auto& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
-//    const auto& encoder = renderPass.getMetalEncoder();
-    
     host->render(std::move(parameters));
 
     // Reset the view back to our original one, just in case the CustomLayer
