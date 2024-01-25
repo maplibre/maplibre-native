@@ -256,5 +256,4 @@ std::string GlyphManager::getFontFaceURL(GlyphIDType type) {
     return url;
 }
 
-
 } // namespace mbgl

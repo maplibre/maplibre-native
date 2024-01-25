@@ -37,8 +37,7 @@ public:
                        MapMode,
                        float pixelRatio,
                        bool showCollisionBoxes_,
-                       std::shared_ptr<FontFaces> fontFaces
-    );
+                       std::shared_ptr<FontFaces> fontFaces);
     ~GeometryTileWorker();
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,

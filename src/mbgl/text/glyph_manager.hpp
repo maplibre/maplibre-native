@@ -34,6 +34,7 @@ using HBShapeResults = std::map<FontStack, std::map<GlyphIDType, std::map<std::u
 class GlyphRequestor {
 public:
     virtual void onGlyphsAvailable(GlyphMap, HBShapeRequests) = 0;
+
 protected:
     virtual ~GlyphRequestor() = default;
 };

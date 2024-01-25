@@ -20,8 +20,7 @@ struct SectionOptions {
           fontStackHash(FontStackHasher()(std::move(fontStack_))),
           type(type_),
           startIndex(startIndex_),
-          textColor(std::move(textColor_)) {
-    }
+          textColor(std::move(textColor_)) {}
 
     SectionOptions(double scale_,
                    FontStackHash fontStackHash_,
@@ -32,14 +31,12 @@ struct SectionOptions {
           fontStackHash(fontStackHash_),
           type(type_),
           startIndex(startIndex_),
-          textColor(std::move(textColor_)) {
-    }
+          textColor(std::move(textColor_)) {}
 
     explicit SectionOptions(std::string imageID_)
         : scale(1.0),
           type(GlyphIDType::FontPBF),
-          imageID(std::move(imageID_)) {
-    }
+          imageID(std::move(imageID_)) {}
 
     double scale;
     FontStack fontStack;

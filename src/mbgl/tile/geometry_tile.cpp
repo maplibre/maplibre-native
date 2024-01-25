@@ -168,14 +168,12 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, c
              parameters.mode,
              parameters.pixelRatio,
              parameters.debugOptions & MapDebugOptions::Collision,
-             parameters.glyphManager.getFontFaces()
-                 ),
+             parameters.glyphManager.getFontFaces()),
       fileSource(parameters.fileSource),
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
       mode(parameters.mode),
-      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {
-}
+      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
 
 GeometryTile::~GeometryTile() {
     glyphManager.removeRequestor(*this);

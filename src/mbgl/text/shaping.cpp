@@ -412,7 +412,7 @@ void shapeLines(Shaping& shaping,
                 }
             }
             GlyphID codePoint(line.getCharCodeAt(i), section.type);
-            
+
             double baselineOffset = 0.0;
             Rect<uint16_t> rect;
             GlyphMetrics metrics;
@@ -506,7 +506,8 @@ void shapeLines(Shaping& shaping,
             }
 
             if (!vertical) {
-                positionedGlyphs.emplace_back(codePoint,                                              x + xHBOffset,
+                positionedGlyphs.emplace_back(codePoint,
+                                              x + xHBOffset,
                                               y + static_cast<float>(baselineOffset) + yHBOffset,
                                               vertical,
                                               section.fontStackHash,

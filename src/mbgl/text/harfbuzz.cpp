@@ -1,6 +1,5 @@
 #include "harfbuzz.hpp"
 
-
 // TODO: return empty harfbuzz
 namespace mbgl {
 
@@ -60,16 +59,11 @@ Glyph HBShaper::rasterizeGlyph(GlyphID glyphID) {
 
 #else
 
+HBShaper::HBShaper(GlyphIDType, const std::string &, const FreeTypeLibrary &) {}
 
-HBShaper::HBShaper(GlyphIDType, const std::string &, const FreeTypeLibrary &) {
-}
+HBShaper::~HBShaper() {}
 
-HBShaper::~HBShaper() {
-}
-
-void HBShaper::CreateComplexGlyphIDs(const std::u16string &,
-                                     std::vector<GlyphID> &,
-                                     std::vector<HBShapeAdjust> &) {
+void HBShaper::CreateComplexGlyphIDs(const std::u16string &, std::vector<GlyphID> &, std::vector<HBShapeAdjust> &) {
     assert(false && "can't shaping text without harfbuzz.");
 }
 
@@ -77,7 +71,6 @@ Glyph HBShaper::rasterizeGlyph(GlyphID) {
     assert(false && "can't rasterize glyph without harfbuzz + freetype.");
     return {};
 }
-
 
 #endif
 
