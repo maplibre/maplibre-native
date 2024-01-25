@@ -53,6 +53,15 @@ void RenderHeatmapLayer::transition(const TransitionParameters& parameters) {
     updateColorRamp();
 }
 
+#if MLN_DRAWABLE_RENDERER
+void RenderHeatmapLayer::layerChanged(const TransitionParameters& parameters,
+                                      const Immutable<style::Layer::Impl>& impl,
+                                      UniqueChangeRequestVec& changes) {
+    RenderLayer::layerChanged(parameters, impl, changes);
+    textureTweaker.reset();
+}
+#endif
+
 void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     auto properties = makeMutable<HeatmapLayerProperties>(staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
                                                           unevaluated.evaluate(parameters));
@@ -63,16 +72,11 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup) {
-        auto newTextureTweaker = std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties);
-        replaceTweaker(textureTweaker, std::move(newTextureTweaker), {layerGroup});
+    if (layerTweaker) {
+        layerTweaker->updateProperties(evaluatedProperties);
     }
-
-    if (renderTarget) {
-        if (auto tileLayerGroup = renderTarget->getLayerGroup(0)) {
-            auto newTweaker = std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties);
-            replaceTweaker(layerTweaker, std::move(newTweaker), {std::move(tileLayerGroup)});
-        }
+    if (textureTweaker) {
+        textureTweaker->updateProperties(evaluatedProperties);
     }
 #endif
 }
@@ -499,8 +503,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     // TODO: Don't rebuild drawables every time
     textureLayerGroup->clearDrawables();
 
-    std::unique_ptr<gfx::DrawableBuilder> heatmapTextureBuilder;
-
     if (!sharedTextureVertices) {
         sharedTextureVertices = std::make_shared<TextureVertexVector>(RenderStaticData::heatmapTextureVertices());
     }
@@ -515,7 +517,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::AttributeDataType::Short2);
     }
 
-    heatmapTextureBuilder = context.createDrawableBuilder("heatmapTexture");
+    auto heatmapTextureBuilder = context.createDrawableBuilder("heatmapTexture");
     heatmapTextureBuilder->setShader(heatmapTextureShader);
     heatmapTextureBuilder->setEnableDepth(false);
     heatmapTextureBuilder->setColorMode(gfx::ColorMode::alphaBlended());

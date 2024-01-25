@@ -266,11 +266,6 @@ protected:
     /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
 
-    /// Update the layer tweaker and drawables which reference it
-    static void replaceTweaker(LayerTweakerPtr& toReplace,
-                               LayerTweakerPtr newTweaker,
-                               const std::vector<LayerGroupBasePtr>&);
-
 #endif // MLN_DRAWABLE_RENDERER
 
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
