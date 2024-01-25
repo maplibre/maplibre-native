@@ -17,7 +17,6 @@
 
 namespace mbgl {
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 union GlyphID {
     char32_t hash;
     struct {
@@ -51,10 +50,6 @@ union GlyphID {
     bool operator<(const uint16_t &other) const { return hash < other; }
     bool operator>(const uint16_t &other) const { return hash > other; }
 };
-
-#else
-using GlyphID = char16_t;
-#endif
 
 using GlyphIDs = std::set<GlyphID>;
 
@@ -167,7 +162,6 @@ enum class WritingModeType : uint8_t {
     Vertical = 1 << 1,
 };
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 // style defined faces
 struct FontFace {
     GlyphIDType type; // a unique glyph id
@@ -196,9 +190,7 @@ struct GlyphDependencies {
     std::map<FontStack, GlyphIDs> glyphs;
     HBShapeRequests shapes;
 };
-#else
-using GlyphDependencies = std::map<FontStack, GlyphIDs>;
-#endif
+
 using GlyphRangeDependencies = std::map<FontStack, std::unordered_set<GlyphRange>>;
 
 } // end namespace mbgl

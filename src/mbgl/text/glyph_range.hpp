@@ -8,8 +8,6 @@
 
 namespace mbgl {
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
-
 enum GlyphIDType : uint16_t {
     FontPBF = 0x00,
 };
@@ -30,9 +28,6 @@ public:
     bool operator==(const GlyphRange &other) const;
     bool operator<(const GlyphRange &other) const;
 };
-#else
-using GlyphRange = std::pair<uint16_t, uint16_t>;
-#endif
 
 constexpr uint32_t GLYPHS_PER_GLYPH_RANGE = 256;
 constexpr uint32_t GLYPH_RANGES_PER_FONT_STACK = 256;

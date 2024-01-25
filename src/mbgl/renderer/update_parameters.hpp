@@ -29,9 +29,7 @@ public:
     const TransformState transformState;
 
     const std::string glyphURL;
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     std::shared_ptr<FontFaces> fontFaces;
-#endif
     const bool spriteLoaded;
     const style::TransitionOptions transitionOptions;
     const Immutable<style::Light::Impl> light;

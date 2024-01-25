@@ -3,8 +3,6 @@
 
 namespace mbgl {
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
-
 GlyphRange::GlyphRange(uint32_t first_, uint32_t second_, GlyphIDType type_)
     : first((uint16_t)first_),
       second((uint16_t)second_),
@@ -53,10 +51,7 @@ GlyphIDType genNewGlyphIDType(const std::string &url,
     return type;
 }
 
-#endif
-
 // Note: this only works for the BMP
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 GlyphRange getGlyphRange(GlyphID glyph) {
     unsigned start = (glyph.complex.code / 256) * 256;
     unsigned end = (start + 255);
@@ -64,14 +59,5 @@ GlyphRange getGlyphRange(GlyphID glyph) {
     if (end > 65535) end = 65535;
     return {start, end, glyph.complex.type};
 }
-#else
-GlyphRange getGlyphRange(GlyphID glyph) {
-    unsigned start = (glyph / 256) * 256;
-    unsigned end = (start + 255);
-    if (start > 65280) start = 65280;
-    if (end > 65535) end = 65535;
-    return {start, end};
-}
-#endif
 
 } // namespace mbgl

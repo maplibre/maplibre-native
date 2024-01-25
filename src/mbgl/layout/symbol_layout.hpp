@@ -32,11 +32,9 @@ public:
 
     ~SymbolLayout() final = default;
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     bool needfinalizeSymbols() override { return needfinalizeSymbolsVal; }
 
     void finalizeSymbols(HBShapeResults&) override;
-#endif
 
     void prepareSymbols(const GlyphMap& glyphMap,
                         const GlyphPositions&,
@@ -147,9 +145,7 @@ private:
                // reinstantiation costs; use of BiDi/ubiditransform object must
                // be constrained to one thread
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     bool needfinalizeSymbolsVal = false;
-#endif
 };
 
 } // namespace mbgl

@@ -36,11 +36,8 @@ public:
                        const std::atomic<bool>&,
                        MapMode,
                        float pixelRatio,
-                       bool showCollisionBoxes_
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
-                       ,
+                       bool showCollisionBoxes_,
                        std::shared_ptr<FontFaces> fontFaces
-#endif
     );
     ~GeometryTileWorker();
 
@@ -53,11 +50,7 @@ public:
     void reset(uint64_t correlationID_);
     void setShowCollisionBoxes(bool showCollisionBoxes_, uint64_t correlationID_);
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     void onGlyphsAvailable(GlyphMap glyphs, HBShapeResults requests);
-#else
-    void onGlyphsAvailable(GlyphMap glyphs);
-#endif
 
     void onImagesAvailable(ImageMap newIconMap,
                            ImageMap newPatternMap,
@@ -91,9 +84,7 @@ private:
 
     std::unique_ptr<FeatureIndex> featureIndex;
     mbgl::unordered_map<std::string, LayerRenderData> renderData;
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     std::shared_ptr<FontFaces> fontFaces;
-#endif
 
     enum State {
         Idle,

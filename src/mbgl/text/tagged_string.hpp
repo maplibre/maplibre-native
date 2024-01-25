@@ -1,9 +1,7 @@
 #pragma once
 
 #include <mbgl/text/bidi.hpp>
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 #include <mbgl/text/harfbuzz.hpp>
-#endif
 #include <mbgl/style/expression/formatted.hpp>
 #include <mbgl/util/font_stack.hpp>
 
@@ -14,42 +12,32 @@ namespace mbgl {
 struct SectionOptions {
     SectionOptions(double scale_,
                    FontStack fontStack_,
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                    GlyphIDType type_,
                    uint32_t startIndex_,
-#endif
                    std::optional<Color> textColor_ = std::nullopt)
         : scale(scale_),
           fontStack(fontStack_),
           fontStackHash(FontStackHasher()(std::move(fontStack_))),
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
           type(type_),
           startIndex(startIndex_),
-#endif
           textColor(std::move(textColor_)) {
     }
 
     SectionOptions(double scale_,
                    FontStackHash fontStackHash_,
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                    GlyphIDType type_,
                    uint32_t startIndex_,
-#endif
                    std::optional<Color> textColor_ = std::nullopt)
         : scale(scale_),
           fontStackHash(fontStackHash_),
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
           type(type_),
           startIndex(startIndex_),
-#endif
           textColor(std::move(textColor_)) {
     }
 
     explicit SectionOptions(std::string imageID_)
         : scale(1.0),
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
           type(GlyphIDType::FontPBF),
-#endif
           imageID(std::move(imageID_)) {
     }
 
@@ -57,14 +45,12 @@ struct SectionOptions {
     FontStack fontStack;
     FontStackHash fontStackHash;
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     GlyphIDType type;
 
     std::shared_ptr<std::vector<HBShapeAdjust>> adjusts;
 
     int32_t startIndex;
     bool keySection = true;
-#endif
 
     std::optional<std::string> imageID;
 
@@ -115,13 +101,10 @@ struct TaggedString {
     void addTextSection(const std::u16string& text,
                         double scale,
                         const FontStack& fontStack,
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                         GlyphIDType type,
                         bool keySection = true,
-#endif
                         std::optional<Color> textColor_ = std::nullopt);
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     void addTextSection(const std::u16string& text,
                         double scale,
                         const FontStack& fontStack,
@@ -129,7 +112,6 @@ struct TaggedString {
                         std::shared_ptr<std::vector<HBShapeAdjust>>& adjusts,
                         bool keySection = true,
                         std::optional<Color> textColor_ = std::nullopt);
-#endif
 
     void addImageSection(const std::string& imageID);
 

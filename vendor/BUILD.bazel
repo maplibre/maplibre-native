@@ -264,7 +264,7 @@ filegroup(
 )
 
 cmake(
-    name = "freetype",
+    name = "freetypeCMake",
     lib_source = ":srcs",
     generate_args = ["-DFT_DISABLE_BROTLI=ON -DFT_REQUIRE_BROTLI=OFF -DFT_DISABLE_PNG=ON -DHB_HAVE_FREETYPE=ON -DBAZEL_BUILD=ON -DFT_DISABLE_BZIP2=ON"],
     cache_entries = select({
@@ -279,7 +279,7 @@ cmake(
 )
 
 cmake(
-    name = "harfbuzz",
+    name = "harfbuzzCMake",
     lib_source = ":srcs",
     generate_args = ["-DFT_DISABLE_BROTLI=ON -DFT_REQUIRE_BROTLI=OFF -DFT_DISABLE_PNG=ON -DHB_HAVE_FREETYPE=ON -DBAZEL_BUILD=ON -DFT_DISABLE_BZIP2=ON"],
     cache_entries = select({
@@ -293,12 +293,12 @@ cmake(
     visibility = ["//visibility:public"],
 
     deps = [
-        "freetype"
+        "freetypeCmake"
     ],
 )
 
 cmake(
-    name = "harfbuzzFreetype",
+    name = "harfbuzzFreetypeCmake",
     lib_source = ":srcs",
     generate_args = ["-DFT_DISABLE_BROTLI=ON -DFT_REQUIRE_BROTLI=OFF -DFT_DISABLE_PNG=ON -DHB_HAVE_FREETYPE=ON -DBAZEL_BUILD=ON -DFT_DISABLE_BZIP2=ON"],
     cache_entries = select({
@@ -316,8 +316,8 @@ cmake(
     visibility = ["//visibility:public"],
 
     deps = [
-        "freetype",
-        "harfbuzz",
+        "freetypeCMake",
+        "harfbuzCMake",
     ],
 )
 

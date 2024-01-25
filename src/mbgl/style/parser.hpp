@@ -31,9 +31,7 @@ public:
 
     std::string spriteURL;
     std::string glyphURL;
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     std::shared_ptr<FontFaces> fontFaces;
-#endif
 
     std::vector<std::unique_ptr<Source>> sources;
     std::vector<std::unique_ptr<Layer>> layers;

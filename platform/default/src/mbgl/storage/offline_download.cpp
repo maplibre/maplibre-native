@@ -218,9 +218,7 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
 
     if (!parser.glyphURL.empty()) {
         uint32_t ttfCount = 0;
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
         if (!parser.fontFaces) ttfCount = static_cast<uint32_t>(parser.fontFaces->size()); // custom faces
-#endif
         result->requiredResourceCount += parser.fontStacks().size() *
                                          (definition.match([](auto& reg) { return reg.includeIdeographs; })
                                               ? GLYPH_RANGES_PER_FONT_STACK + ttfCount
@@ -344,14 +342,12 @@ void OfflineDownload::activateDownload() {
                         queueResource(Resource::glyphs(
                             parser.glyphURL, fontStack, std::pair<uint16_t, uint16_t>{range.first, range.second}));
                     }
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
                     if (!parser.fontFaces) {
                         FontFaces& faces = *parser.fontFaces;
                         for (const auto& face : faces) {
                             queueResource(Resource::fontFace(face.url));
                         }
                     }
-#endif
                 }
             }
         }

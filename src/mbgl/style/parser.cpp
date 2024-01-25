@@ -117,6 +117,7 @@ StyleParseResult Parser::parse(const std::string& json) {
     }
 
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
+    // Ignore font-faces if no harfbuzz
     if (document.HasMember("font-faces")) {
         const JSValue& faces = document["font-faces"];
         if (faces.IsArray()) {

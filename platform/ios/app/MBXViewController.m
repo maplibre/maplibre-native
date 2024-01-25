@@ -2066,6 +2066,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     self.styleIndex = (self.styleIndex + 1) % self.styleNames.count;
 
     self.mapView.styleURL = self.styleURLs[self.styleIndex];
+//    self.mapView.styleURL = [NSURL URLWithString:@"https://alanchenboy.github.io/harfbuzzResource/hindi.json"];
+    self.mapView.styleURL = [NSURL URLWithString:@"http://127.0.0.1:8080/hindi.json"];
 
     UIButton *titleButton = (UIButton *)self.navigationItem.titleView;
     [titleButton setTitle:self.styleNames[self.styleIndex] forState:UIControlStateNormal];

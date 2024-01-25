@@ -1,8 +1,12 @@
 #include "harfbuzz.hpp"
 
+
+// TODO: return empty harfbuzz
 namespace mbgl {
 
 #define SDF_FONT_SIZE 24
+
+#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 
 HBShaper::HBShaper(GlyphIDType type_, const std::string &fontFileData, const FreeTypeLibrary &lib)
     : type(type_) {
@@ -53,5 +57,28 @@ Glyph HBShaper::rasterizeGlyph(GlyphID glyphID) {
 
     return fixedMetrics;
 }
+
+#else
+
+
+HBShaper::HBShaper(GlyphIDType, const std::string &, const FreeTypeLibrary &) {
+}
+
+HBShaper::~HBShaper() {
+}
+
+void HBShaper::CreateComplexGlyphIDs(const std::u16string &,
+                                     std::vector<GlyphID> &,
+                                     std::vector<HBShapeAdjust> &) {
+    assert(false && "can't shaping text without harfbuzz.");
+}
+
+Glyph HBShaper::rasterizeGlyph(GlyphID) {
+    assert(false && "can't rasterize glyph without harfbuzz + freetype.");
+    return {};
+}
+
+
+#endif
 
 } // namespace mbgl

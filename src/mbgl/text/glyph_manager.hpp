@@ -10,9 +10,7 @@
 #include <string>
 #include <unordered_map>
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 #include "harfbuzz.hpp"
-#endif
 
 namespace mbgl {
 
@@ -20,7 +18,6 @@ class FileSource;
 class AsyncRequest;
 class Response;
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 struct HBShapeResult {
     std::u16string str;
 
@@ -33,15 +30,10 @@ struct HBShapeResult {
           adjusts(adjusts_) {}
 };
 using HBShapeResults = std::map<FontStack, std::map<GlyphIDType, std::map<std::u16string, HBShapeResult>>>;
-#endif
+
 class GlyphRequestor {
 public:
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     virtual void onGlyphsAvailable(GlyphMap, HBShapeRequests) = 0;
-#else
-    virtual void onGlyphsAvailable(GlyphMap) = 0;
-#endif
-
 protected:
     virtual ~GlyphRequestor() = default;
 };
@@ -71,7 +63,6 @@ public:
 
     Immutable<Glyph> getGlyph(const FontStack &, GlyphID);
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     void setFontFaces(std::shared_ptr<FontFaces> faces) { fontFaces = faces; }
 
     std::shared_ptr<HBShaper> getHBShaper(FontStack, GlyphIDType);
@@ -85,7 +76,6 @@ public:
     std::shared_ptr<FontFaces> getFontFaces() { return fontFaces; }
 
     std::string getFontFaceURL(GlyphIDType type);
-#endif
 
 private:
     Glyph generateLocalSDF(const FontStack &fontStack, GlyphID glyphID);
@@ -112,13 +102,11 @@ private:
 
     std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer;
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     std::shared_ptr<FontFaces> fontFaces;
     FreeTypeLibrary ftLibrary;
     std::map<FontStack, std::map<GlyphIDType, std::shared_ptr<HBShaper>>> hbShapers;
 
     bool loadHBShaper(const FontStack &fontStack, GlyphIDType type, const std::string &data);
-#endif
 };
 
 } // namespace mbgl

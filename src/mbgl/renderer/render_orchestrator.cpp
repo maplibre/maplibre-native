@@ -185,9 +185,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                         updateParameters->prefetchZoomDelta};
 
     glyphManager->setURL(updateParameters->glyphURL);
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     glyphManager->setFontFaces(updateParameters->fontFaces);
-#endif
 
     // Update light.
     const bool lightChanged = renderLight.impl != updateParameters->light;
@@ -944,15 +942,11 @@ void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
                                        std::exception_ptr error) {
     std::stringstream ss;
     ss << "Failed to load glyph range ";
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     if (glyphRange.type == FontPBF) {
         ss << glyphRange.first << "-" << glyphRange.second;
     } else {
         ss << (int)glyphRange.type << "(font file)";
     }
-#else
-    ss << glyphRange.first << "-" << glyphRange.second;
-#endif
     ss << " for font stack " << fontStackToString(fontStack) << ":( " << util::toString(error) << ")";
     auto errorDetail = ss.str();
     Log::Error(Event::Style, errorDetail);

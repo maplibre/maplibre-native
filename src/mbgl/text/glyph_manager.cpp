@@ -21,9 +21,7 @@ GlyphManager::GlyphManager(std::unique_ptr<LocalGlyphRasterizer> localGlyphRaste
       localGlyphRasterizer(std::move(localGlyphRasterizer_)) {}
 
 GlyphManager::~GlyphManager() {
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     hbShapers.clear(); // clear harfbuzz + freetype face before library;
-#endif
 }
 
 void GlyphManager::getGlyphs(GlyphRequestor& requestor, GlyphDependencies glyphDependencies, FileSource& fileSource) {
@@ -34,11 +32,7 @@ void GlyphManager::getGlyphs(GlyphRequestor& requestor, GlyphDependencies glyphD
     // shared pointer containing the dependencies. When the shared pointer
     // becomes unique, we know that all the dependencies for that requestor have
     // been fetched, and can notify it of completion.
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     for (const auto& dependency : dependencies->glyphs) {
-#else
-    for (const auto& dependency : *dependencies) {
-#endif
         const FontStack& fontStack = dependency.first;
         Entry& entry = entries[fontStack];
 
@@ -84,7 +78,6 @@ void GlyphManager::requestRange(GlyphRequest& request,
     if (request.req) {
         return;
     }
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     Resource res(Resource::Kind::Unknown, "");
     switch (range.type) {
         case GlyphIDType::FontPBF:
@@ -103,11 +96,6 @@ void GlyphManager::requestRange(GlyphRequest& request,
 
     request.req = fileSource.request(
         res, [this, fontStack, range](const Response& response) { processResponse(response, fontStack, range); });
-#else
-    request.req = fileSource.request(
-        Resource::glyphs(glyphURL, fontStack, range),
-        [this, fontStack, range](const Response& res) { processResponse(res, fontStack, range); });
-#endif
 }
 
 void GlyphManager::processResponse(const Response& res, const FontStack& fontStack, const GlyphRange& range) {
@@ -127,7 +115,6 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
         std::vector<Glyph> glyphs;
 
         try {
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
             if (range.type == GlyphIDType::FontPBF) {
                 glyphs = parseGlyphPBF(range, *res.data);
             } else {
@@ -137,9 +124,6 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
                     glyphs.emplace_back(std::move(temp));
                 }
             }
-#else
-            glyphs = parseGlyphPBF(range, *res.data);
-#endif
         } catch (...) {
             observer->onGlyphsError(fontStack, range, std::current_exception());
             return;
@@ -176,11 +160,7 @@ void GlyphManager::setObserver(GlyphManagerObserver* observer_) {
 void GlyphManager::notify(GlyphRequestor& requestor, const GlyphDependencies& glyphDependencies) {
     GlyphMap response;
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     for (const auto& dependency : glyphDependencies.glyphs) {
-#else
-    for (const auto& dependency : glyphDependencies) {
-#endif
         const FontStack& fontStack = dependency.first;
         const GlyphIDs& glyphIDs = dependency.second;
 
@@ -197,11 +177,7 @@ void GlyphManager::notify(GlyphRequestor& requestor, const GlyphDependencies& gl
         }
     }
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     requestor.onGlyphsAvailable(response, glyphDependencies.shapes);
-#else
-    requestor.onGlyphsAvailable(response);
-#endif
 }
 
 void GlyphManager::removeRequestor(GlyphRequestor& requestor) {
@@ -216,7 +192,6 @@ void GlyphManager::evict(const std::set<FontStack>& keep) {
     util::erase_if(entries, [&](const auto& entry) { return keep.count(entry.first) == 0; });
 }
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
 std::shared_ptr<HBShaper> GlyphManager::getHBShaper(FontStack fontStack, GlyphIDType type) {
     if (hbShapers.find(fontStack) != hbShapers.end()) {
         auto& glyphs = hbShapers[fontStack];
@@ -281,6 +256,5 @@ std::string GlyphManager::getFontFaceURL(GlyphIDType type) {
     return url;
 }
 
-#endif
 
 } // namespace mbgl

@@ -81,9 +81,7 @@ public:
     void removeImage(const std::string&);
 
     const std::string& getGlyphURL() const;
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     std::shared_ptr<FontFaces> getFontFaces() const;
-#endif
 
     using ImageImpls = std::vector<Immutable<Image::Impl>>;
     Immutable<ImageImpls> getImageImpls() const;
@@ -108,9 +106,7 @@ private:
     std::unique_ptr<SpriteLoader> spriteLoader;
 
     std::string glyphURL;
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
     std::shared_ptr<FontFaces> fontFaces;
-#endif
     Immutable<ImageImpls> images = makeMutable<ImageImpls>();
     CollectionWithPersistentOrder<Source> sources;
     Collection<Layer> layers;
