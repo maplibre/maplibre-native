@@ -24,11 +24,13 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
 
 // TODO: change
 #if MLN_RENDER_BACKEND_METAL
-    std::unique_ptr<style::CustomLayerRenderParameters> parameters = std::make_unique<style::mtl::CustomLayerRenderParameters>(paintParameters);
+    std::unique_ptr<style::CustomLayerRenderParameters> parameters =
+        std::make_unique<style::mtl::CustomLayerRenderParameters>(paintParameters);
 #else
-    std::unique_ptr<style::CustomLayerRenderParameters> parameters = std::make_unique<style::CustomLayerRenderParameters>(paintParameters);
+    std::unique_ptr<style::CustomLayerRenderParameters> parameters =
+        std::make_unique<style::CustomLayerRenderParameters>(paintParameters);
 #endif
-    
+
     host->render(std::move(parameters));
 
     // Reset the view back to our original one, just in case the CustomLayer
