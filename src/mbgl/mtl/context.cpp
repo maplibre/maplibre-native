@@ -324,12 +324,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
             clipMaskDepthStencilState = std::move(depthStencilState);
         }
     }
-    if (clipMaskDepthStencilState) {
-        encoder->setDepthStencilState(clipMaskDepthStencilState.get());
-    } else {
-        assert(!"Failed to create depth-stencil state for clip masking");
-        return false;
-    }
+    assert(clipMaskDepthStencilState || !"Failed to create depth-stencil state for clip masking");
+    mtlRenderPass.setDepthStencilState(clipMaskDepthStencilState);
 
     if (!clipMaskPipelineState) {
         // A vertex descriptor tells Metal what's in the vertex buffer

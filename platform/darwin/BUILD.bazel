@@ -4,9 +4,9 @@ load(
     "MLN_DARWIN_OBJCPP_HEADERS",
     "MLN_DARWIN_OBJC_HEADERS",
     "MLN_DARWIN_PRIVATE_HEADERS",
-    "MLN_DARWIN_PUBLIC_OBJCPP_SOURCE",
-    "MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE",
+    "MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE",
+    "MLN_DARWIN_PUBLIC_OBJCPP_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJC_SOURCE",
     "MLN_GENERATED_DARWIN_STYLE_HEADERS",
     "MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS",
@@ -147,14 +147,10 @@ objc_library(
             "test/*.m",
             "test/*.h",
         ],
-        allow_empty = False,
     ),
     copts = MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],
     data = glob(
-        [
-            "test/Media.xcassets/**",
-        ],
-        allow_empty = False,
+        ["test/Media.xcassets/**"],
     ),
     sdk_frameworks = [
         "MapKit",
@@ -175,7 +171,6 @@ objc_library(
             "test/*.h",
             "test/*.mm",
         ],
-        allow_empty = False,
         exclude = [
             "test/MLNOfflineStorageTests.mm",
         ],
@@ -192,12 +187,7 @@ objc_library(
 swift_library(
     name = "shared_tests_swift_srcs",
     testonly = True,
-    srcs = glob(
-        [
-            "test/*.swift",
-        ],
-        allow_empty = False,
-    ),
+    srcs = glob(["test/*.swift"]),
     data = [
         "test/amsterdam.geojson",
         "test/one-liner.json",
