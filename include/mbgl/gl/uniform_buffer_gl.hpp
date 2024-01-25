@@ -24,7 +24,7 @@ public:
     const gl::RelocatableBuffer<UniformBufferGL>& getManagedBuffer() const noexcept { return managedBuffer; }
 
     UniformBufferGL clone() const { return {*this}; }
-    
+
     const uint8_t* getCurrent() override { return current.get(); };
 
     // gfx::UniformBuffer

@@ -54,9 +54,10 @@ void UniformBufferArray::createOrUpdate(
         // measure
         std::vector<std::string> fields;
         std::size_t updatedSize{0};
-        uniform_metadata::getChangedUBOFields(stringIndexer().get(id), size, ubo->getCurrent(), static_cast<const uint8_t*>(data), fields, updatedSize);
-        for(auto& field: fields) {
-            gUBOUpdates[std::string(stringIndexer().get(id))+"."+field]++;
+        uniform_metadata::getChangedUBOFields(
+            stringIndexer().get(id), size, ubo->getCurrent(), static_cast<const uint8_t*>(data), fields, updatedSize);
+        for (auto& field : fields) {
+            gUBOUpdates[std::string(stringIndexer().get(id)) + "." + field]++;
         }
         gFieldLevelUpdatedSize += updatedSize;
 
@@ -67,15 +68,15 @@ void UniformBufferArray::createOrUpdate(
         std::vector<std::string> fields;
         std::size_t dataSize{0};
         uniform_metadata::getUBOFields(stringIndexer().get(id), size, fields, dataSize);
-        for(auto& field: fields) {
-            gUBOUpdates[std::string(stringIndexer().get(id))+"."+field]++;
+        for (auto& field : fields) {
+            gUBOUpdates[std::string(stringIndexer().get(id)) + "." + field]++;
         }
         gFieldLevelUpdatedSize += dataSize;
 
         // add
         add(id, context.createUniformBuffer(data, size, persistent));
     }
-    
+
     // print
     {
         static size_t idx = 0;
@@ -85,9 +86,9 @@ void UniformBufferArray::createOrUpdate(
         std::copy(gUBOUpdates.begin(), gUBOUpdates.end(), std::back_insert_iterator<decltype(vec)>(vec));
         std::sort(vec.begin(), vec.end(), [](auto a, auto b) { return a.second > b.second; });
 
-        if(idx++ % 10 == 0) {
+        if (idx++ % 10 == 0) {
             printf("--- %zu fields:\n", vec.size());
-            for(auto& v: vec) {
+            for (auto& v : vec) {
                 printf("%zu %s\n", v.second, v.first.c_str());
             }
             printf("---\n");

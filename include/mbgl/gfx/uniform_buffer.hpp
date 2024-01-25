@@ -35,7 +35,7 @@ public:
     std::size_t getSize() const { return size; }
 
     UniformBuffer& operator=(const UniformBuffer&) = delete;
-    
+
     virtual const uint8_t* getCurrent() { return nullptr; };
 
 protected:
