@@ -27,6 +27,5 @@ struct CustomLayerRenderParameters {
     CustomLayerRenderParameters(const PaintParameters&);
 };
 
-
 } // namespace style
 } // namespace mbgl
