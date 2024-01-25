@@ -162,6 +162,8 @@ MLN_CORE_SOURCE = [
     "src/mbgl/gfx/stencil_mode.hpp",
     "src/mbgl/gfx/texture.hpp",
     "src/mbgl/gfx/uniform.hpp",
+    "src/mbgl/gfx/uniform_metadata.hpp",
+    "src/mbgl/gfx/uniform_metadata.cpp",
     "src/mbgl/gfx/upload_pass.hpp",
     "src/mbgl/gfx/vertex_buffer.hpp",
     "src/mbgl/gfx/vertex_vector.hpp",

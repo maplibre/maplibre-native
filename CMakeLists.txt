@@ -485,6 +485,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/stencil_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_metadata.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform_metadata.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/upload_pass.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_buffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_vector.hpp

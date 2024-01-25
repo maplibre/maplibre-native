@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <cassert>
+#include <cstring>
 
 namespace mbgl {
 namespace gl {
@@ -14,13 +15,15 @@ using namespace platform;
 
 UniformBufferGL::UniformBufferGL(const void* data_, std::size_t size_, IBufferAllocator& allocator_)
     : UniformBuffer(size_),
-      managedBuffer(allocator_, this) {
+      managedBuffer(allocator_, this),
+      current(new uint8_t[size]) {
     if (size_ > managedBuffer.allocator.pageSize()) {
         // Buffer is very large, won't fit in the provided allocator
         MBGL_CHECK_ERROR(glGenBuffers(1, &localID));
         MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, localID));
         MBGL_CHECK_ERROR(glBufferData(GL_UNIFORM_BUFFER, size, data_, GL_DYNAMIC_DRAW));
         MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, 0));
+        std::memset(current.get(), 0, size);
         return;
     }
 
@@ -32,13 +35,15 @@ UniformBufferGL::UniformBufferGL(UniformBufferGL&& rhs) noexcept
     : UniformBuffer(rhs.size),
       isManagedAllocation(rhs.isManagedAllocation),
       localID(rhs.localID),
-      managedBuffer(std::move(rhs.managedBuffer)) {
+      managedBuffer(std::move(rhs.managedBuffer)),
+      current(std::move(rhs.current)) {
     managedBuffer.setOwner(this);
 }
 
 UniformBufferGL::UniformBufferGL(const UniformBufferGL& other)
     : UniformBuffer(other),
-      managedBuffer(other.managedBuffer.allocator, this) {
+      managedBuffer(other.managedBuffer.allocator, this),
+      current(new uint8_t[other.size]) {
     managedBuffer.setOwner(this);
     if (other.isManagedAllocation) {
         managedBuffer.allocate(other.managedBuffer.getContents().data(), other.size);
@@ -48,6 +53,7 @@ UniformBufferGL::UniformBufferGL(const UniformBufferGL& other)
         MBGL_CHECK_ERROR(glBindBuffer(GL_COPY_READ_BUFFER, other.localID));
         MBGL_CHECK_ERROR(glBindBuffer(GL_COPY_WRITE_BUFFER, localID));
         MBGL_CHECK_ERROR(glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size));
+        std::memcpy(current.get(), other.current.get(), size);
     }
 }
 
@@ -90,6 +96,7 @@ void UniformBufferGL::update(const void* data_, std::size_t size_) {
         MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, localID));
         MBGL_CHECK_ERROR(glBufferSubData(GL_UNIFORM_BUFFER, 0, size_, data_));
         MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, 0));
+        std::memcpy(current.get(), data_, size);
     }
 }
 

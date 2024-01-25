@@ -4,6 +4,8 @@
 #include <mbgl/gl/types.hpp>
 #include <mbgl/gl/buffer_allocator.hpp>
 
+#include <memory>
+
 namespace mbgl {
 namespace gl {
 
@@ -22,6 +24,8 @@ public:
     const gl::RelocatableBuffer<UniformBufferGL>& getManagedBuffer() const noexcept { return managedBuffer; }
 
     UniformBufferGL clone() const { return {*this}; }
+    
+    const uint8_t* getCurrent() override { return current.get(); };
 
     // gfx::UniformBuffer
     void update(const void* data, std::size_t size_) override;
@@ -31,6 +35,7 @@ private:
     bool isManagedAllocation = false;
     BufferID localID;
     gl::RelocatableBuffer<UniformBufferGL> managedBuffer;
+    std::unique_ptr<uint8_t[]> current;
 
     friend class UniformBufferArrayGL;
 };
