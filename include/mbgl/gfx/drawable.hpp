@@ -18,9 +18,9 @@
 namespace mbgl {
 
 class Color;
-class PaintParameters;
 class LayerTweaker;
 enum class RenderPass : uint8_t;
+class PaintParameters;
 
 using LayerTweakerPtr = std::shared_ptr<LayerTweaker>;
 

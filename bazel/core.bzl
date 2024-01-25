@@ -449,6 +449,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/style/layers/circle_layer_impl.cpp",
     "src/mbgl/style/layers/circle_layer_impl.hpp",
     "src/mbgl/style/layers/custom_layer.cpp",
+    "src/mbgl/style/layers/custom_layer_render_parameters.cpp",
     "src/mbgl/style/layers/custom_layer_impl.cpp",
     "src/mbgl/style/layers/custom_layer_impl.hpp",
     "src/mbgl/style/layers/fill_extrusion_layer_impl.cpp",
@@ -774,6 +775,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/style/layer.hpp",
     "include/mbgl/style/layer_properties.hpp",
     "include/mbgl/style/layers/custom_layer.hpp",
+    "include/mbgl/style/layers/custom_layer_render_parameters.hpp",
     "include/mbgl/style/position.hpp",
     "include/mbgl/style/property_expression.hpp",
     "include/mbgl/style/property_value.hpp",
@@ -1063,6 +1065,7 @@ MLN_DRAWABLES_MTL_SOURCE = [
     "src/mbgl/shaders/mtl/symbol_icon.cpp",
     "src/mbgl/shaders/mtl/symbol_sdf.cpp",
     "src/mbgl/shaders/mtl/symbol_text_and_icon.cpp",
+    "src/mbgl/style/layers/mtl/custom_layer_render_parameters.cpp",
 ]
 
 MLN_DRAWABLES_MTL_HEADERS = [
@@ -1108,4 +1111,5 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/shaders/mtl/symbol_icon.hpp",
     "include/mbgl/shaders/mtl/symbol_sdf.hpp",
     "include/mbgl/shaders/mtl/symbol_text_and_icon.hpp",
+    "include/mbgl/style/layers/mtl/custom_layer_render_parameters.hpp",
 ]

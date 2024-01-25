@@ -173,22 +173,25 @@
     };
     
     // Create a new command buffer for each render pass to the current drawable.
-    id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
-    commandBuffer.label = @"MyCommand";
+//    id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
+//    commandBuffer.label = @"MyCommand";
     
     // Obtain a renderPassDescriptor generated from the view's drawable textures.
-    MTLRenderPassDescriptor *renderPassDescriptor = res.mtkView.currentRenderPassDescriptor;
+//    MTLRenderPassDescriptor *renderPassDescriptor = res.mtkView.currentRenderPassDescriptor;
     
-    if(renderPassDescriptor != nil)
+    if(context.renderEncoder != nil)
     {
         // load framebuffer
-        MTLLoadAction previousLoadAction = renderPassDescriptor.colorAttachments[0].loadAction;
-        renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadActionLoad;
+//        MTLLoadAction previousLoadAction = renderPassDescriptor.colorAttachments[0].loadAction;
+//        renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadActionLoad;
+
+        // Use the supplied render command encoder
+        id<MTLRenderCommandEncoder> renderEncoder = context.renderEncoder;
 
         // Create a render command encoder.
-        id<MTLRenderCommandEncoder> renderEncoder =
-        [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
-        renderEncoder.label = @"MyRenderEncoder";
+//        id<MTLRenderCommandEncoder> renderEncoder =
+//        [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
+//        renderEncoder.label = @"MyRenderEncoder";
         
 //        // Set the region of the drawable to draw into.
 //        [renderEncoder setViewport:(MTLViewport){0.0, 0.0, _viewportSize.x, _viewportSize.y, 0.0, 1.0 }];
@@ -209,15 +212,14 @@
                           vertexStart:0
                           vertexCount:3];
         
-        [renderEncoder endEncoding];
+//        [renderEncoder endEncoding];
         
         // Schedule a present once the framebuffer is complete using the current drawable.
-        [commandBuffer presentDrawable:res.mtkView.currentDrawable];
-        renderPassDescriptor.colorAttachments[0].loadAction = previousLoadAction;
+//        [commandBuffer presentDrawable:res.mtkView.currentDrawable];
     }
     
     // Finalize rendering here & push the command buffer to the GPU.
-    [commandBuffer commit];
+//    [commandBuffer commit];
 }
 
 - (void)willMoveFromMapView:(MLNMapView *)mapView {

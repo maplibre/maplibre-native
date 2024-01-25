@@ -142,6 +142,7 @@ add_library(mapbox-gl SHARED
             ${PROJECT_SOURCE_DIR}/style/layers/circle_layer.cpp
             ${PROJECT_SOURCE_DIR}/style/layers/circle_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/custom_layer.cpp
+            ${PROJECT_SOURCE_DIR}/style/layers/custom_layer_render_parameters.cpp
             ${PROJECT_SOURCE_DIR}/style/layers/custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/fill_extrusion_layer.cpp
             ${PROJECT_SOURCE_DIR}/style/layers/fill_extrusion_layer.hpp

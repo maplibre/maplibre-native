@@ -22,7 +22,6 @@ class Bucket;
 class DynamicFeatureIndex;
 class LineAtlas;
 class PropertyEvaluationParameters;
-class PaintParameters;
 class PatternAtlas;
 class RenderTile;
 class RenderTree;
@@ -31,6 +30,7 @@ class TransformState;
 class TransitionParameters;
 class UpdateParameters;
 class UploadParameters;
+class PaintParameters;
 
 #if MLN_DRAWABLE_RENDERER
 class ChangeRequest;

@@ -14,11 +14,11 @@
 
 namespace mbgl {
 class LayerGroupBase;
-class PaintParameters;
 class RenderOrchestrator;
 class RenderTile;
 class RenderTree;
 class TileLayerGroup;
+class PaintParameters;
 
 using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 using RenderTiles = std::shared_ptr<const std::vector<std::reference_wrapper<const RenderTile>>>;

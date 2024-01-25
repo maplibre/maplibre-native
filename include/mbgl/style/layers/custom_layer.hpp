@@ -1,27 +1,14 @@
 #pragma once
 
 #include <mbgl/style/layer.hpp>
+#include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 
 #include <array>
+#include <memory>
 
 namespace mbgl {
-namespace style {
 
-/**
- * Parameters that define the current camera position for a
- * `CustomLayerHost::render()` function.
- */
-struct CustomLayerRenderParameters {
-    double width;
-    double height;
-    double latitude;
-    double longitude;
-    double zoom;
-    double bearing;
-    double pitch;
-    double fieldOfView;
-    std::array<double, 16> projectionMatrix;
-};
+namespace style {
 
 class CustomLayerHost {
 public:
@@ -46,7 +33,7 @@ public:
      * advantage of the opaque fragment culling in case there are opaque layers
      * above your custom layer.
      */
-    virtual void render(const CustomLayerRenderParameters&) = 0;
+    virtual void render(const std::unique_ptr<CustomLayerRenderParameters>) = 0;
 
     /**
      * Called when the system has destroyed the underlying GL context. The

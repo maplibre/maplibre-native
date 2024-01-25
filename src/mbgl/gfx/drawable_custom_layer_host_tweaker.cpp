@@ -6,32 +6,25 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/context.hpp>
 
+#include <memory>
+
 namespace mbgl {
 namespace gfx {
 
 void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& drawable,
-                                             const PaintParameters& paintParameters) {
+                                             const mbgl::PaintParameters& paintParameters) {
     // custom drawing
     auto& context = paintParameters.context;
-    const TransformState& state = paintParameters.state;
     context.resetState(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
                        paintParameters.colorModeForRenderPass());
 
-    style::CustomLayerRenderParameters parameters;
+    std::unique_ptr<style::CustomLayerRenderParameters> parameters = std::make_unique<style::CustomLayerRenderParameters>(paintParameters);
 
-    parameters.width = state.getSize().width;
-    parameters.height = state.getSize().height;
-    parameters.latitude = state.getLatLng().latitude();
-    parameters.longitude = state.getLatLng().longitude();
-    parameters.zoom = state.getZoom();
-    parameters.bearing = util::rad2deg(-state.getBearing());
-    parameters.pitch = state.getPitch();
-    parameters.fieldOfView = state.getFieldOfView();
-    mat4 projMatrix;
-    state.getProjMatrix(projMatrix);
-    parameters.projectionMatrix = projMatrix;
 
-    host->render(parameters);
+//    auto& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
+//    const auto& encoder = renderPass.getMetalEncoder();
+    
+    host->render(std::move(parameters));
 
     // Reset the view back to our original one, just in case the CustomLayer
     // changed the viewport or Framebuffer.

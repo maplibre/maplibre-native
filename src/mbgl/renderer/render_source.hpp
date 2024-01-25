@@ -17,7 +17,6 @@
 
 namespace mbgl {
 
-class PaintParameters;
 class TransformState;
 class RenderTile;
 class RenderLayer;
@@ -31,6 +30,7 @@ class TransformParameters;
 class ImageManager;
 class ImageSourceRenderData;
 class RenderItem;
+class PaintParameters;
 
 namespace gfx {
 class UploadPass;

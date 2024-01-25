@@ -11,6 +11,8 @@
 
 namespace mbgl {
 
+class PaintParameters;
+
 namespace gfx {
 class Drawable;
 class UniformBuffer;
@@ -24,7 +26,6 @@ enum class TranslateAnchorType : bool;
 
 class TransformState;
 class LayerGroupBase;
-class PaintParameters;
 class RenderTree;
 class UnwrappedTileID;
 

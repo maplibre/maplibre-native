@@ -6,8 +6,16 @@
 #import "MLNStyleLayer_Private.h"
 #import "MLNGeometry_Private.h"
 
+#if MLN_RENDER_BACKEND_METAL
+#import <MetalKit/MetalKit.h>
+#endif
+
 #include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/math/wrap.hpp>
+
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/style/layers/mtl/custom_layer_render_parameters.hpp>
+#endif
 
 class MLNCustomLayerHost;
 
@@ -180,17 +188,26 @@ public:
         }
     }
 
-    void render(const mbgl::style::CustomLayerRenderParameters &params) {
+    void render(const std::unique_ptr<mbgl::style::CustomLayerRenderParameters> parameters) {
         if(!layer) return;
 
+#if MLN_RENDER_BACKEND_METAL
+        MTL::RenderCommandEncoder* ptr = static_cast<mbgl::style::mtl::CustomLayerRenderParameters&>(*parameters).encoder.get();
+        id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
+#endif
+
         MLNStyleLayerDrawingContext drawingContext = {
-            .size = CGSizeMake(params.width, params.height),
-            .centerCoordinate = CLLocationCoordinate2DMake(params.latitude, params.longitude),
-            .zoomLevel = params.zoom,
-            .direction = mbgl::util::wrap(params.bearing, 0., 360.),
-            .pitch = static_cast<CGFloat>(params.pitch),
-            .fieldOfView = static_cast<CGFloat>(params.fieldOfView),
-            .projectionMatrix = MLNMatrix4Make(params.projectionMatrix)
+            .size = CGSizeMake(parameters->width, parameters->height),
+            .centerCoordinate = CLLocationCoordinate2DMake(parameters->latitude, parameters->longitude),
+            .zoomLevel = parameters->zoom,
+            .direction = mbgl::util::wrap(parameters->bearing, 0., 360.),
+            .pitch = static_cast<CGFloat>(parameters->pitch),
+            .fieldOfView = static_cast<CGFloat>(parameters->fieldOfView),
+            .projectionMatrix = MLNMatrix4Make(parameters->projectionMatrix)
+#if MLN_RENDER_BACKEND_METAL
+            ,
+            .renderEncoder = encoder
+#endif
         };
         if (layer.mapView) {
             [layer drawInMapView:layer.mapView withContext:drawingContext];

@@ -7,6 +7,10 @@
 #import "MLNStyleLayer.h"
 #import "MLNGeometry.h"
 
+#if MLN_RENDER_BACKEND_METAL
+#import <MetalKit/MetalKit.h>
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class MLNMapView;
@@ -20,6 +24,9 @@ typedef struct MLNStyleLayerDrawingContext {
     CGFloat pitch;
     CGFloat fieldOfView;
     MLNMatrix4 projectionMatrix;
+#if MLN_RENDER_BACKEND_METAL
+    id<MTLRenderCommandEncoder> renderEncoder;
+#endif
 } MLNStyleLayerDrawingContext;
 
 MLN_EXPORT
