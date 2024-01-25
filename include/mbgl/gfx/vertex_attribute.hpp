@@ -359,9 +359,25 @@ public:
     VertexAttributeArray& operator=(VertexAttributeArray&&);
     VertexAttributeArray& operator=(const VertexAttributeArray&) = delete;
 
-    /// Clone the collection
-
-    /// Copy another collection into this one
+    /// Specialized DataDrivenPaintProperty reader
+    /// @param binders Property binders for the target shader
+    /// @param evaluated Evaluated properties
+    /// @param propertiesAsUniforms [out] A set of string identities for the properties which will be constant, not
+    /// attributes.
+    /// @details The property name IDs refer to the "a\_" prefixed values to match the shader definitions.
+    template <typename... DataDrivenPaintProperty, typename Binders, typename Evaluated>
+    void readDataDrivenPaintProperties(const Binders& binders,
+                                       const Evaluated& evaluated,
+                                       mbgl::unordered_set<StringIdentity>* propertiesAsUniforms) {
+        // Read each property in the type pack
+        if (propertiesAsUniforms) {
+            propertiesAsUniforms->reserve(sizeof...(DataDrivenPaintProperty));
+        }
+        (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
+                                                              isConstant<DataDrivenPaintProperty>(evaluated),
+                                                              propertiesAsUniforms),
+         ...);
+    }
 
     /// Specialized DataDrivenPaintProperty reader
     /// @param binders Property binders for the target shader
@@ -377,7 +393,7 @@ public:
         propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
         (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
                                                               isConstant<DataDrivenPaintProperty>(evaluated),
-                                                              propertiesAsUniforms),
+                                                              &propertiesAsUniforms),
          ...);
     }
 
@@ -391,7 +407,7 @@ protected:
     template <typename DataDrivenPaintProperty, typename Binder>
     void readDataDrivenPaintProperty(const Binder& binder,
                                      const bool isConstant,
-                                     mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                                     mbgl::unordered_set<StringIdentity>* propertiesAsUniforms) {
         if (!binder) {
             return;
         }
@@ -410,8 +426,8 @@ protected:
                 const auto& attr = getOrAdd(
                     *attributeNameID, /*index=*/-1, /*type=*/gfx::AttributeDataType::Invalid, /*count=*/0);
                 applyPaintProperty<Attribute>(attrIndex, attr, binder);
-            } else {
-                propertiesAsUniforms.emplace(*attributeNameID);
+            } else if (propertiesAsUniforms) {
+                propertiesAsUniforms->emplace(*attributeNameID);
             }
         }
     }
