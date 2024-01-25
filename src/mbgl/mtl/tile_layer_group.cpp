@@ -43,7 +43,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     }
 
     auto& context = static_cast<Context&>(parameters.context);
-    const auto& renderPass = static_cast<const mtl::RenderPass&>(*parameters.renderPass);
+    auto& renderPass = static_cast<mtl::RenderPass&>(*parameters.renderPass);
     const auto& encoder = renderPass.getMetalEncoder();
     const auto& renderable = renderPass.getDescriptor().renderable;
 
@@ -101,9 +101,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         // 2D drawables will set their own stencil mode within `draw`.
         if (features3d) {
             const auto& state = drawable.getEnableStencil() ? stateWithStencil : stateWithoutStencil;
-            if (state) {
-                encoder->setDepthStencilState(state.get());
-            }
+            renderPass.setDepthStencilState(state);
         }
 
         drawable.draw(parameters);
