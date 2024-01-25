@@ -162,7 +162,7 @@ jobs:
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
 
       - name: Cache cmake-node-module deps
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           # downloaded with platform/node/cmake/module.cmake
           path: build/headers
@@ -196,7 +196,7 @@ jobs:
 
       - name: Restore vcpkg cache (Windows)
         if: runner.os == 'Windows'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/platform/windows/vendor/vcpkg

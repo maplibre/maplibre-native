@@ -147,7 +147,7 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
 bool BufferResource::needReBind(VersionType version_) const noexcept {
     // If we're using a raw buffer, an update means we have to re-bind.
     // For a MTLBuffer, the binding can be left alone.
-    return (!buffer || version != version_);
+    return (version != version_);
 }
 
 void BufferResource::bindVertex(const MTLRenderCommandEncoderPtr& encoder,

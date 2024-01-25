@@ -9,17 +9,16 @@ filegroup(
             "ios-render-test-runner/**",  # iOS only
             "expectations/platform-ios/**",  # iOS only
         ],
-        allow_empty = False,
-    )  + select({
-        "//:metal_renderer": glob(["expectations/platform-ios-metal/**"]), # iOS Metal only
+    ) + select({
+        "//:metal_renderer": glob(["expectations/platform-ios-metal/**"]),  # iOS Metal only
         "//conditions:default": [],
     }) + [
         "cache-metrics.db",
         "cache-style.db",
-        "ios-render-test-runner-metrics.json",  # iOS only
-        "ios-render-test-runner-style.json",  # iOS only
         "ios-metal-render-test-runner-metrics.json",  # iOS Metal only
         "ios-metal-render-test-runner-style.json",  # iOS Metal only
+        "ios-render-test-runner-metrics.json",  # iOS only
+        "ios-render-test-runner-style.json",  # iOS only
         "linux-gcc8-release-metrics.json",
         "linux-gcc8-release-style.json",
     ],
@@ -31,12 +30,7 @@ filegroup(
 
 filegroup(
     name = "expression-test-files",
-    srcs = glob(
-        [
-            "integration/expression-tests/**",
-        ],
-        allow_empty = False,
-    ) + [
+    srcs = glob(["integration/expression-tests/**"]) + [
         "ignores/platform-all.json",
     ],
     visibility = [
