@@ -43,11 +43,14 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     const auto& crossfade = static_cast<const LineLayerProperties&>(*evaluatedProperties).crossfade;
 
     // Each property UBO is updated at most once if new evaluated properties were set
-    bool propUpdateFlags[4] = {propertiesUpdated, propertiesUpdated, propertiesUpdated, propertiesUpdated};
+    bool simplePropertiesUpdated = propertiesUpdated;
+    bool gradientPropertiesUpdated = propertiesUpdated;
+    bool patternPropertiesUpdated = propertiesUpdated;
+    bool sdfPropertiesUpdated = propertiesUpdated;
     propertiesUpdated = false;
 
     const auto getLinePropsBuffer = [&]() {
-        if (!linePropertiesBuffer || propUpdateFlags[0]) {
+        if (!linePropertiesBuffer || simplePropertiesUpdated) {
             const LinePropertiesUBO linePropertiesUBO{
                 /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
@@ -59,12 +62,12 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
                 0};
             context.emplaceOrUpdateUniformBuffer(linePropertiesBuffer, &linePropertiesUBO);
-            propUpdateFlags[0] = false;
+            simplePropertiesUpdated = false;
         }
         return linePropertiesBuffer;
     };
     const auto getLineGradientPropsBuffer = [&]() {
-        if (!lineGradientPropertiesBuffer || propUpdateFlags[1]) {
+        if (!lineGradientPropertiesBuffer || gradientPropertiesUpdated) {
             const LineGradientPropertiesUBO lineGradientPropertiesUBO{
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
                 /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
@@ -75,12 +78,12 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
                 0};
             context.emplaceOrUpdateUniformBuffer(lineGradientPropertiesBuffer, &lineGradientPropertiesUBO);
-            propUpdateFlags[1] = false;
+            gradientPropertiesUpdated = false;
         }
         return lineGradientPropertiesBuffer;
     };
     const auto getLinePatternPropsBuffer = [&]() {
-        if (!linePatternPropertiesBuffer || propUpdateFlags[2]) {
+        if (!linePatternPropertiesBuffer || patternPropertiesUpdated) {
             const LinePatternPropertiesUBO linePatternPropertiesUBO{
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
                 /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
@@ -91,12 +94,12 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
                 0};
             context.emplaceOrUpdateUniformBuffer(linePatternPropertiesBuffer, &linePatternPropertiesUBO);
-            propUpdateFlags[2] = false;
+            patternPropertiesUpdated = false;
         }
         return linePatternPropertiesBuffer;
     };
     const auto getLineSDFPropsBuffer = [&]() {
-        if (!lineSDFPropertiesBuffer || propUpdateFlags[3]) {
+        if (!lineSDFPropertiesBuffer || sdfPropertiesUpdated) {
             const LineSDFPropertiesUBO lineSDFPropertiesUBO{
                 /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
@@ -108,7 +111,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
                 0};
             context.emplaceOrUpdateUniformBuffer(lineSDFPropertiesBuffer, &lineSDFPropertiesUBO);
-            propUpdateFlags[3] = false;
+            sdfPropertiesUpdated = false;
         }
         return lineSDFPropertiesBuffer;
     };
