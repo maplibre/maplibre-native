@@ -6,6 +6,10 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/context.hpp>
 
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/style/layers/mtl/custom_layer_render_parameters.hpp>
+#endif
+
 #include <memory>
 
 namespace mbgl {
@@ -18,11 +22,12 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
     context.resetState(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
                        paintParameters.colorModeForRenderPass());
 
+// TODO: change
+#if MLN_RENDER_BACKEND_METAL
+    std::unique_ptr<style::CustomLayerRenderParameters> parameters = std::make_unique<style::mtl::CustomLayerRenderParameters>(paintParameters);
+#else
     std::unique_ptr<style::CustomLayerRenderParameters> parameters = std::make_unique<style::CustomLayerRenderParameters>(paintParameters);
-
-
-//    auto& renderPass = static_cast<mbgl::mtl::RenderPass&>(*paintParameters.renderPass);
-//    const auto& encoder = renderPass.getMetalEncoder();
+#endif
     
     host->render(std::move(parameters));
 

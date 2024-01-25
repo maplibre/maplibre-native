@@ -2,6 +2,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/mtl/render_pass.hpp>
 
+#include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
 
 namespace mbgl {
