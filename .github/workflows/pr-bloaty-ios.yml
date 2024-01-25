@@ -27,7 +27,7 @@ jobs:
 
       - name: Cache Bloaty
         id: cache-bloaty
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: bloaty/build/bloaty
           key: bloaty-${{ env.bloaty_sha }}
