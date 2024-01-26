@@ -76,8 +76,7 @@ bazel build //platform/ios:"$target" --apple_platform_type=ios \
    --copt=-Wall --copt=-Wextra --copt=-Wpedantic \
    --copt=-Werror \
    --jobs "$ncpu" \
-   --//:renderer=$flavor \
-   --//:maplibre_platform=ios
+   --//:renderer=$flavor
 
 echo "Done."
 echo "Package will be available in \"/bazel-bin/platform/ios/$target.xcframework.zip\""

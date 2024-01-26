@@ -206,7 +206,7 @@ jobs:
       - name: Generate coverage report
         run: |
           xvfb-run -a \
-            bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" --//:maplibre_platform=linux \
+            bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" \
             --test_output=errors --local_test_jobs=1 \
             --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
             //test:core //render-test:render-test //expression-test:test
