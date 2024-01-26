@@ -1,7 +1,7 @@
 
 ## main
 
-## 5.3.1-pre.0
+## 5.3.1
 
 * [Note] This is a OpenGL-2 release. It does not include metal support.
 * Add WebP decoding support to Linux and Windows. @mwilsnd @acalcutt https://github.com/maplibre/maplibre-native/pull/2044
