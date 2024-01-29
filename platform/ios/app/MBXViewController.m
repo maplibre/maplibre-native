@@ -431,7 +431,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 @"Style Raster Tile Source",
                 @"Style Image Source",
                 @"Add Route Line",
-                @"Add Lime Green Triangle Layer",
+#if MLN_RENDER_BACKEND_METAL
+                @"Add Custom Triangle Layer (Metal)",
+#else
+                @"Add Custom Triangle Layer (OpenGL)",
+#endif
                 @"Dynamically Style Polygon",
                 @"Add Custom Lat/Lon Grid",
                 @"Style Route line with gradient",

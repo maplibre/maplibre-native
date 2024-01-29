@@ -66,36 +66,21 @@
 #import "LimeGreenStyleLayer.h"
 
 @implementation LimeGreenStyleLayer {
-    id<MTLDevice> _device;
-
-    // The render pipeline generated from the vertex and fragment shaders in the .metal shader file.
+    // The render pipeline state
     id<MTLRenderPipelineState> _pipelineState;
-    
-    // The command queue used to pass commands to the device.
-    id<MTLCommandQueue> _commandQueue;
-
-    // The current size of the view, used as an input to the vertex shader.
-    vector_uint2 _viewportSize;
 }
 
 - (void)didMoveToMapView:(MLNMapView *)mapView {
-    // TODO: get device
-    // TODO: custom setup
-    MLNBackendResource res = [mapView backendResource];
+    MLNBackendResource resource = [mapView backendResource];
     
     NSString *shaderSource = @
 "    #include <metal_stdlib>\n"
 "    using namespace metal;\n"
-"    typedef enum AAPLVertexInputIndex\n"
-"    {\n"
-"        AAPLVertexInputIndexVertices     = 0,\n"
-"        AAPLVertexInputIndexViewportSize = 1,\n"
-"    } AAPLVertexInputIndex;\n"
 "    typedef struct\n"
 "    {\n"
 "        vector_float2 position;\n"
 "        vector_float4 color;\n"
-"    } AAPLVertex;\n"
+"    } Vertex;\n"
 "    struct RasterizerData\n"
 "    {\n"
 "        float4 position [[position]];\n"
@@ -103,8 +88,8 @@
 "    };\n"
 "    vertex RasterizerData\n"
 "    vertexShader(uint vertexID [[vertex_id]],\n"
-"                 constant AAPLVertex *vertices [[buffer(AAPLVertexInputIndexVertices)]],\n"
-"                 constant vector_uint2 *viewportSizePointer [[buffer(AAPLVertexInputIndexViewportSize)]])\n"
+"                 constant Vertex *vertices [[buffer(0)]],\n"
+"                 constant vector_uint2 *viewportSizePointer [[buffer(1)]])\n"
 "    {\n"
 "        RasterizerData out;\n"
 "        float2 pixelSpacePosition = vertices[vertexID].position.xy;\n"
@@ -121,7 +106,7 @@
 
     
     NSError *error = nil;
-    _device = res.device;
+    id<MTLDevice> _device = resource.device;
     id<MTLLibrary> library = [_device newLibraryWithSource:shaderSource options:nil error:&error];
     NSAssert(library, @"Error compiling shaders: %@", error);
     id<MTLFunction> vertexFunction = [library newFunctionWithName:@"vertexShader"];
@@ -132,98 +117,62 @@
     pipelineStateDescriptor.label = @"Simple Pipeline";
     pipelineStateDescriptor.vertexFunction = vertexFunction;
     pipelineStateDescriptor.fragmentFunction = fragmentFunction;
-    pipelineStateDescriptor.colorAttachments[0].pixelFormat = res.mtkView.colorPixelFormat;
+    pipelineStateDescriptor.colorAttachments[0].pixelFormat = resource.mtkView.colorPixelFormat;
     pipelineStateDescriptor.depthAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     pipelineStateDescriptor.stencilAttachmentPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
     
     _pipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
                                                              error:&error];
     NSAssert(_pipelineState, @"Failed to create pipeline state: %@", error);
-    
-    // Create the command queue
-    _commandQueue = [_device newCommandQueue];
 }
 
 - (void)drawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context {
-    // TODO: encode commands
-    MLNBackendResource res = [mapView backendResource];
-    
-    typedef enum AAPLVertexInputIndex
-    {
-        AAPLVertexInputIndexVertices     = 0,
-        AAPLVertexInputIndexViewportSize = 1,
-    } AAPLVertexInputIndex;
-
-    CGSize size = res.mtkView.drawableSize;
-    _viewportSize.x = size.width;
-    _viewportSize.y = size.height;
-    
-    typedef struct
-    {
-        vector_float2 position;
-        vector_float4 color;
-    } AAPLVertex;
-
-    static const AAPLVertex triangleVertices[] =
-    {
-        // 2D positions,    RGBA colors
-        { {  250,  -250 }, { 1, 0, 0, 1 } },
-        { { -250,  -250 }, { 0, 1, 0, 1 } },
-        { {    0,   250 }, { 0, 0, 1, 1 } },
-    };
-    
-    // Create a new command buffer for each render pass to the current drawable.
-//    id<MTLCommandBuffer> commandBuffer = [_commandQueue commandBuffer];
-//    commandBuffer.label = @"MyCommand";
-    
-    // Obtain a renderPassDescriptor generated from the view's drawable textures.
-//    MTLRenderPassDescriptor *renderPassDescriptor = res.mtkView.currentRenderPassDescriptor;
-    
+    // Use the supplied render command encoder to encode commands
     if(context.renderEncoder != nil)
     {
-        // load framebuffer
-//        MTLLoadAction previousLoadAction = renderPassDescriptor.colorAttachments[0].loadAction;
-//        renderPassDescriptor.colorAttachments[0].loadAction = MTLLoadActionLoad;
+        MLNBackendResource resource = [mapView backendResource];
+        
+        vector_uint2 _viewportSize;
+        _viewportSize.x = resource.mtkView.drawableSize.width;
+        _viewportSize.y = resource.mtkView.drawableSize.height;
+        
+        typedef struct
+        {
+            vector_float2 position;
+            vector_float4 color;
+        } Vertex;
+
+        static const Vertex triangleVertices[] =
+        {
+            // 2D positions,    RGBA colors
+            { {  250,  -250 }, { 1, 0, 0, 1 } },
+            { { -250,  -250 }, { 0, 1, 0, 1 } },
+            { {    0,   250 }, { 0, 0, 1, 1 } },
+        };
 
         // Use the supplied render command encoder
         id<MTLRenderCommandEncoder> renderEncoder = context.renderEncoder;
 
-        // Create a render command encoder.
-//        id<MTLRenderCommandEncoder> renderEncoder =
-//        [commandBuffer renderCommandEncoderWithDescriptor:renderPassDescriptor];
-//        renderEncoder.label = @"MyRenderEncoder";
-        
-//        // Set the region of the drawable to draw into.
-//        [renderEncoder setViewport:(MTLViewport){0.0, 0.0, _viewportSize.x, _viewportSize.y, 0.0, 1.0 }];
-        
         [renderEncoder setRenderPipelineState:_pipelineState];
         
         // Pass in the parameter data.
         [renderEncoder setVertexBytes:triangleVertices
                                length:sizeof(triangleVertices)
-                              atIndex:AAPLVertexInputIndexVertices];
+                               atIndex:0];
         
         [renderEncoder setVertexBytes:&_viewportSize
                                length:sizeof(_viewportSize)
-                              atIndex:AAPLVertexInputIndexViewportSize];
+                               atIndex:1];
         
         // Draw the triangle.
         [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangle
                           vertexStart:0
                           vertexCount:3];
-        
-//        [renderEncoder endEncoding];
-        
-        // Schedule a present once the framebuffer is complete using the current drawable.
-//        [commandBuffer presentDrawable:res.mtkView.currentDrawable];
     }
-    
-    // Finalize rendering here & push the command buffer to the GPU.
-//    [commandBuffer commit];
 }
 
 - (void)willMoveFromMapView:(MLNMapView *)mapView {
-    // TODO: clean up
+    // Clean up
 }
 
 @end
