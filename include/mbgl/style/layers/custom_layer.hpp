@@ -14,7 +14,7 @@ class CustomLayerHost {
 public:
     virtual ~CustomLayerHost() = default;
     /**
-     * Initialize any GL state needed by the custom layer. This method is called
+     * Initialize any GL/Metal state needed by the custom layer. This method is called
      * once, from the main thread, at a point when the GL context is active but
      * before rendering for the first time.
      *
@@ -25,7 +25,7 @@ public:
 
     /**
      * Render the layer. This method is called once per frame. The
-     * implementation should not make any assumptions about the GL state (other
+     * implementation should not make any assumptions about the GL/Metal state (other
      * than that the correct context is active). It may make changes to the
      * state, and is not required to reset values such as the depth mask,
      * stencil mask, and corresponding test flags to their original values. Make
@@ -36,7 +36,7 @@ public:
     virtual void render(const std::unique_ptr<CustomLayerRenderParameters>) = 0;
 
     /**
-     * Called when the system has destroyed the underlying GL context. The
+     * Called when the system has destroyed the underlying GL/Metal context. The
      * `deinitialize` function will not be called in this case, however
      * `initialize` will be called instead to prepare for a new render.
      *
@@ -44,9 +44,9 @@ public:
     virtual void contextLost() = 0;
 
     /**
-     * Destroy any GL state needed by the custom layer, and deallocate context,
+     * Destroy any GL/Metal state needed by the custom layer, and deallocate context,
      * if necessary. This method is called once, from the main thread, at a
-     * point when the GL context is active.
+     * point when the GL/Metal context is active.
      *
      * Note that it may be called even when the `initialize` function has not
      * been called.

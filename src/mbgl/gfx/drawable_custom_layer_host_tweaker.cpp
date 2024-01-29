@@ -22,7 +22,6 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
     context.resetState(paintParameters.depthModeForSublayer(0, gfx::DepthMaskType::ReadOnly),
                        paintParameters.colorModeForRenderPass());
 
-// TODO: change
 #if MLN_RENDER_BACKEND_METAL
     std::unique_ptr<style::CustomLayerRenderParameters> parameters =
         std::make_unique<style::mtl::CustomLayerRenderParameters>(paintParameters);
