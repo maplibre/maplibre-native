@@ -60,13 +60,6 @@ Context::~Context() noexcept {
 #endif
         assert(stats.isZero());
     }
-
-    // Wait for any deferred cleanup tasks to complete before releasing and potentially destroying the
-    // scheduler.  Those cleanup tasks must not hold the final reference to the scheduler, e.g., via
-    // `GeometryTile.worker.retainer` because it cannot be destroyed from one of its own pool threads.
-    constexpr auto deferredCleanupTimeoutMs = std::chrono::milliseconds{100};
-    [[maybe_unused]] const auto remaining = backgroundScheduler->waitForEmpty(deferredCleanupTimeoutMs);
-    assert(remaining == 0);
 }
 
 void Context::beginFrame() {
