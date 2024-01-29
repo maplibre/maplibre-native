@@ -15,6 +15,8 @@
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/util/run_loop.hpp>
 
+#include <memory>
+
 using namespace mbgl;
 using namespace mbgl::style;
 using namespace mbgl::platform;
@@ -60,7 +62,7 @@ public:
         MBGL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(GLfloat), triangle, GL_STATIC_DRAW));
     }
 
-    void render(const mbgl::style::CustomLayerRenderParameters&) override {
+    void render(const std::unique_ptr<mbgl::style::CustomLayerRenderParameters>) override {
         MBGL_CHECK_ERROR(glUseProgram(program));
         MBGL_CHECK_ERROR(glBindBuffer(GL_ARRAY_BUFFER, buffer));
         MBGL_CHECK_ERROR(glEnableVertexAttribArray(a_pos));
