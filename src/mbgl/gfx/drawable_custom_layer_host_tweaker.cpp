@@ -34,9 +34,7 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
 
     // Reset the view back to our original one, just in case the CustomLayer
     // changed the viewport or Framebuffer.
-#if !MLN_RENDER_BACKEND_METAL
     paintParameters.backend.getDefaultRenderable().getResource<gfx::RenderableResource>().bind();
-#endif
 
     context.setDirtyState();
 }

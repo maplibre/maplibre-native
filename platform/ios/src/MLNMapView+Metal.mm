@@ -52,8 +52,10 @@ public:
             commandQueue = [mtlView.device newCommandQueue];
         }
 
-        commandBuffer = [commandQueue commandBuffer];
-        commandBufferPtr = NS::RetainPtr((__bridge MTL::CommandBuffer*)commandBuffer);
+        if (!commandBuffer) {
+            commandBuffer = [commandQueue commandBuffer];
+            commandBufferPtr = NS::RetainPtr((__bridge MTL::CommandBuffer*)commandBuffer);
+        }
     }
 
     const mbgl::mtl::RendererBackend& getBackend() const override { return backend; }
