@@ -38,7 +38,7 @@ void DrawableCustomLayerHostTweaker::execute([[maybe_unused]] gfx::Drawable& dra
 #if !MLN_RENDER_BACKEND_METAL
     paintParameters.backend.getDefaultRenderable().getResource<gfx::RenderableResource>().bind();
 #endif
-    
+
     context.setDirtyState();
 }
 
