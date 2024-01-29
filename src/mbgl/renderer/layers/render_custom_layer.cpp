@@ -87,7 +87,6 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
 
     // TODO: remove cast
     auto& glContext = static_cast<gl::Context&>(paintParameters.context);
-    const TransformState& state = paintParameters.state;
 
     // Reset GL state to a known state so the CustomLayer always has a clean slate.
     glContext.bindVertexArray = 0;
