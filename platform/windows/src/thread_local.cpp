@@ -10,6 +10,7 @@
 #include "thread.h"
 
 #define StorageToThreadInfo reinterpret_cast<THREAD_INFO*&>(storage)
+#define StorageToConstThreadInfo reinterpret_cast<const THREAD_INFO*&>(storage)
 
 namespace mbgl {
 namespace util {
@@ -48,7 +49,7 @@ ThreadLocalBase::~ThreadLocalBase() {
 }
 
 void* ThreadLocalBase::get() const {
-    return TlsGetValue(StorageToThreadInfo->key);
+    return TlsGetValue(StorageToConstThreadInfo->key);
 }
 
 void ThreadLocalBase::set(void* ptr) {
