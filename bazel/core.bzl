@@ -1007,6 +1007,7 @@ MLN_DRAWABLES_GL_SOURCE = [
     "src/mbgl/gl/uniform_block_gl.cpp",
     "src/mbgl/gl/uniform_buffer_gl.cpp",
     "src/mbgl/gl/vertex_attribute_gl.cpp",
+    "src/mbgl/shaders/gl/shader_info.cpp",
     "src/mbgl/shaders/gl/shader_program_gl.cpp",
 ]
 
@@ -1019,6 +1020,7 @@ MLN_DRAWABLES_GL_HEADERS = [
     "include/mbgl/gl/uniform_buffer_gl.hpp",
     "include/mbgl/gl/vertex_attribute_gl.hpp",
     "include/mbgl/gl/texture2d.hpp",
+    "include/mbgl/shaders/gl/shader_info.hpp",
     "include/mbgl/shaders/gl/shader_program_gl.hpp",
     "include/mbgl/shaders/gl/shader_group_gl.hpp",
 ]
