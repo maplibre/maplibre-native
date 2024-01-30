@@ -10,7 +10,7 @@
 #include "thread.h"
 
 #define StorageToThreadInfo reinterpret_cast<THREAD_INFO*&>(storage)
-#define StorageToConstThreadInfo reinterpret_cast<const THREAD_INFO*&>(storage)
+#define StorageToConstThreadInfo reinterpret_cast<THREAD_INFO* const&>(storage)
 
 namespace mbgl {
 namespace util {
