@@ -34,6 +34,8 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
         platform::setCurrentThreadName("Worker " + util::toString(index + 1));
         platform::attachThread();
 
+        owningThreadPool.set(this);
+
         while (true) {
             std::unique_lock<std::mutex> lock(mutex);
             if (queue.empty() && !pendingItems) {
@@ -92,7 +94,7 @@ void ThreadedSchedulerBase::schedule(std::function<void()>&& fn) {
             // pool.  Tasks are added by other tasks, so we must not block a thread we do control
             // or `waitForEmpty` will deadlock.
             std::unique_lock<std::mutex> addLock(addMutex, std::defer_lock);
-            if (!isThreadOwned(std::this_thread::get_id())) {
+            if (!thisThreadIsOwned()) {
                 addLock.lock();
             }
             std::lock_guard<std::mutex> lock(mutex);
@@ -104,7 +106,7 @@ void ThreadedSchedulerBase::schedule(std::function<void()>&& fn) {
 
 std::size_t ThreadedSchedulerBase::waitForEmpty(Milliseconds timeout) {
     // Must not be called from a thread in our pool, or we would deadlock
-    if (!isThreadOwned(std::this_thread::get_id())) {
+    if (!thisThreadIsOwned()) {
         const auto startTime = util::MonotonicTimer::now();
         const auto isDone = [&] {
             return queue.empty() && pendingItems == 0;

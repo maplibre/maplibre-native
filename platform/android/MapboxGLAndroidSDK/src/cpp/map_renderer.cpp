@@ -92,10 +92,13 @@ std::size_t MapRenderer::waitForEmpty(Milliseconds timeout) {
         if (auto weakReference = javaPeer.get(*_env)) {
             return weakReference.Call(*_env, waitForEmpty, static_cast<int64_t>(timeout.count()));
         }
-    } catch (const std::exception& exception) {
-        Log::Error(Event::Android, std::string("MapRenderer::waitForEmpty failed: ") + exception.what());
+        // If the peer is already cleaned up, there's nothing to wait for
+        return 0;
+    } catch (...) {
+        Log::Error(Event::Android, "MapRenderer::waitForEmpty failed");
+        jni::ThrowJavaError(*android::AttachEnv(), std::current_exception());
+        return 0;
     }
-    return -1;
 }
 
 void MapRenderer::requestRender() {

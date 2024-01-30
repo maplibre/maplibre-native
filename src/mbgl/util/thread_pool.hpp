@@ -2,6 +2,7 @@
 
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/thread_local.hpp>
 
 #include <algorithm>
 #include <condition_variable>
@@ -29,7 +30,7 @@ protected:
     std::size_t waitForEmpty(Milliseconds timeout) override;
 
     /// Returns true if called from a thread managed by the scheduler
-    virtual bool isThreadOwned(const std::thread::id tid) const = 0;
+    bool thisThreadIsOwned() const { return owningThreadPool.get() == this; }
 
     std::queue<std::function<void()>> queue;
     // protects `queue`
@@ -42,6 +43,8 @@ protected:
     std::condition_variable cvEmpty;
     // Count of functions removed from the queue but still executing
     std::atomic<std::size_t> pendingItems{0};
+    // Points to the owning pool in owned threads
+    util::ThreadLocal<ThreadedSchedulerBase> owningThreadPool;
     bool terminated{false};
 };
 
@@ -63,7 +66,7 @@ public:
     }
 
     ~ThreadedScheduler() override {
-        assert(!this->ThreadedScheduler::isThreadOwned(std::this_thread::get_id()));
+        assert(!thisThreadIsOwned());
         terminate();
         for (auto& thread : threads) {
             assert(std::this_thread::get_id() != thread.get_id());
@@ -88,11 +91,6 @@ public:
     }
 
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
-
-protected:
-    bool isThreadOwned(const std::thread::id tid) const override {
-        return std::any_of(threads.begin(), threads.end(), [=](const auto& thread) { return thread.get_id() == tid; });
-    }
 
 private:
     std::vector<std::thread> threads;
