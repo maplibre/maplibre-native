@@ -568,10 +568,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 return false;
             }
 
-            const auto& shader = drawable.getShader();
-            const auto& shaderUniforms = shader->getUniformBlocks();
             auto& drawableUniforms = drawable.mutableUniformBuffers();
-
             const LineLayerTweaker::LineType type = static_cast<LineLayerTweaker::LineType>(drawable.getType());
             switch (type) {
                 case LineLayerTweaker::LineType::Simple: {
