@@ -104,17 +104,17 @@ void DrawableGL::setVertexAttrNameId(const StringIdentity id) {
 
 void DrawableGL::bindUniformBuffers() const {
     if (shader) {
-        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
-        for (const auto& block : shaderGL.getUniformBlocks().getVector()) {
+        const auto& uniformBlocks = shader->getUniformBlocks();
+        for (size_t id = 0; id < uniformBlocks.size(); id++) {
+            const auto& block = uniformBlocks.get(id);
             if (!block) continue;
-            const auto index = block->getIndex();
-            const auto& uniformBuffer = getUniformBuffers().get(index);
+            const auto& uniformBuffer = getUniformBuffers().get(id);
             assert(uniformBuffer && "UBO missing, drawable skipped");
             if (!uniformBuffer) {
                 using namespace std::string_literals;
                 const auto tileIDStr = getTileID() ? util::toString(*getTileID()) : "<no tile>";
                 Log::Error(Event::General,
-                           "bindUniformBuffers: UBO "s + util::toString(index) + " not found for " +
+                           "bindUniformBuffers: UBO "s + util::toString(block->getIndex()) + " not found for " +
                                util::toString(getID()) + " / " + getName() + " / " + tileIDStr + ". skipping.");
                 assert(false);
                 continue;
@@ -126,8 +126,9 @@ void DrawableGL::bindUniformBuffers() const {
 
 void DrawableGL::unbindUniformBuffers() const {
     if (shader) {
-        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
-        for (const auto& block : shaderGL.getUniformBlocks().getVector()) {
+        const auto& uniformBlocks = shader->getUniformBlocks();
+        for (size_t id = 0; id < uniformBlocks.size(); id++) {
+            const auto& block = uniformBlocks.get(id);
             if (block) {
                 block->unbindBuffer();
             }

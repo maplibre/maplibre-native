@@ -7,178 +7,193 @@
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 
+#include <mbgl/shaders/background_layer_ubo.hpp>
+#include <mbgl/shaders/circle_layer_ubo.hpp>
+#include <mbgl/shaders/collision_layer_ubo.hpp>
+#include <mbgl/shaders/debug_layer_ubo.hpp>
+#include <mbgl/shaders/fill_layer_ubo.hpp>
+#include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
+#include <mbgl/shaders/heatmap_layer_ubo.hpp>
+#include <mbgl/shaders/heatmap_texture_layer_ubo.hpp>
+#include <mbgl/shaders/hillshade_layer_ubo.hpp>
+#include <mbgl/shaders/hillshade_prepare_layer_ubo.hpp>
+#include <mbgl/shaders/line_layer_ubo.hpp>
+#include <mbgl/shaders/raster_layer_ubo.hpp>
+#include <mbgl/shaders/symbol_layer_ubo.hpp>
+
 #include <cstring>
 #include <utility>
 
 namespace mbgl {
 namespace shaders {
 
-UniformBlockInfo::UniformBlockInfo(std::string_view name_, std::size_t binding_)
+UniformBlockInfo::UniformBlockInfo(std::string_view name_, std::size_t id_)
     : name(name_),
-      binding(binding_) {}
+      id(id_),
+      binding(id_) {}
 
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::BackgroundShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"BackgroundDrawableUBO", 1},
-    UniformBlockInfo{"BackgroundLayerUBO", 2},
+    UniformBlockInfo{"BackgroundDrawableUBO", idBackgroundDrawableUBO},
+    UniformBlockInfo{"BackgroundLayerUBO", idBackgroundLayerUBO},
 };
 
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"BackgroundDrawableUBO", 1},
-        UniformBlockInfo{"BackgroundLayerUBO", 2},
+        UniformBlockInfo{"BackgroundDrawableUBO", idBackgroundDrawableUBO},
+        UniformBlockInfo{"BackgroundLayerUBO", idBackgroundLayerUBO},
 };
 
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::CircleShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"CircleDrawableUBO", 8},
-    UniformBlockInfo{"CirclePaintParamsUBO", 9},
-    UniformBlockInfo{"CircleEvaluatedPropsUBO", 10},
-    UniformBlockInfo{"CircleInterpolateUBO", 11},
+    UniformBlockInfo{"CircleDrawableUBO", idCircleDrawableUBO},
+    UniformBlockInfo{"CirclePaintParamsUBO", idCirclePaintParamsUBO},
+    UniformBlockInfo{"CircleEvaluatedPropsUBO", idCircleEvaluatedPropsUBO},
+    UniformBlockInfo{"CircleInterpolateUBO", idCircleInterpolateUBO},
 };
 
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::CollisionBoxShader, gfx::Backend::Type::OpenGL>::uniformBlocks =
     {
-        UniformBlockInfo{"CollisionBoxUBO", 5},
+        UniformBlockInfo{"CollisionBoxUBO", idCollisionUBO},
 };
 
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::CollisionCircleShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"CollisionCircleUBO", 4},
+        UniformBlockInfo{"CollisionCircleUBO", idCollisionUBO},
 };
 
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::DebugShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"DebugUBO", 1},
+    UniformBlockInfo{"DebugUBO", idDebugUBO},
 };
 
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::FillShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"FillDrawableUBO", 3},
-    UniformBlockInfo{"FillEvaluatedPropsUBO", 4},
-    UniformBlockInfo{"FillInterpolateUBO", 5},
+    UniformBlockInfo{"FillDrawableUBO", idFillDrawableUBO},
+    UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
+    UniformBlockInfo{"FillInterpolateUBO", idFillInterpolateUBO},
 };
 
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL>::uniformBlocks =
     {
-        UniformBlockInfo{"FillOutlineDrawableUBO", 3},
-        UniformBlockInfo{"FillOutlineEvaluatedPropsUBO", 4},
-        UniformBlockInfo{"FillOutlineInterpolateUBO", 5},
+        UniformBlockInfo{"FillOutlineDrawableUBO", idFillOutlineDrawableUBO},
+        UniformBlockInfo{"FillOutlineEvaluatedPropsUBO", idFillOutlineEvaluatedPropsUBO},
+        UniformBlockInfo{"FillOutlineInterpolateUBO", idFillOutlineInterpolateUBO},
 };
 
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::FillPatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks =
     {
-        UniformBlockInfo{"FillPatternDrawableUBO", 4},
-        UniformBlockInfo{"FillPatternTilePropsUBO", 5},
-        UniformBlockInfo{"FillPatternEvaluatedPropsUBO", 6},
-        UniformBlockInfo{"FillPatternInterpolateUBO", 7},
+        UniformBlockInfo{"FillPatternDrawableUBO", idFillPatternDrawableUBO},
+        UniformBlockInfo{"FillPatternTilePropsUBO", idFillPatternTilePropsUBO},
+        UniformBlockInfo{"FillPatternEvaluatedPropsUBO", idFillPatternEvaluatedPropsUBO},
+        UniformBlockInfo{"FillPatternInterpolateUBO", idFillPatternInterpolateUBO},
 };
 
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"FillOutlinePatternDrawableUBO", 4},
-        UniformBlockInfo{"FillOutlinePatternTilePropsUBO", 5},
-        UniformBlockInfo{"FillOutlinePatternEvaluatedPropsUBO", 6},
-        UniformBlockInfo{"FillOutlinePatternInterpolateUBO", 7},
+        UniformBlockInfo{"FillOutlinePatternDrawableUBO", idFillOutlinePatternDrawableUBO},
+        UniformBlockInfo{"FillOutlinePatternTilePropsUBO", idFillOutlinePatternTilePropsUBO},
+        UniformBlockInfo{"FillOutlinePatternEvaluatedPropsUBO", idFillOutlinePatternEvaluatedPropsUBO},
+        UniformBlockInfo{"FillOutlinePatternInterpolateUBO", idFillOutlinePatternInterpolateUBO},
 };
 
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"FillExtrusionDrawableUBO", 6},
-        UniformBlockInfo{"FillExtrusionDrawablePropsUBO", 7},
-        UniformBlockInfo{"FillExtrusionDrawableTilePropsUBO", 8},
-        UniformBlockInfo{"FillExtrusionInterpolateUBO", 9},
+        UniformBlockInfo{"FillExtrusionDrawableUBO", idFillExtrusionDrawableUBO},
+        UniformBlockInfo{"FillExtrusionDrawablePropsUBO", idFillExtrusionDrawablePropsUBO},
+        UniformBlockInfo{"FillExtrusionDrawableTilePropsUBO", idFillExtrusionDrawableTilePropsUBO},
+        UniformBlockInfo{"FillExtrusionInterpolateUBO", idFillExtrusionInterpolateUBO},
 };
 
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"FillExtrusionDrawableUBO", 6},
-        UniformBlockInfo{"FillExtrusionDrawablePropsUBO", 7},
-        UniformBlockInfo{"FillExtrusionDrawableTilePropsUBO", 8},
-        UniformBlockInfo{"FillExtrusionInterpolateUBO", 9},
-};
-
-const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LineGradientShader, gfx::Backend::Type::OpenGL>::uniformBlocks =
-    {
-        UniformBlockInfo{"LineDynamicUBO", 7},
-        UniformBlockInfo{"LineGradientUBO", 8},
-        UniformBlockInfo{"LineGradientPropertiesUBO", 9},
-        UniformBlockInfo{"LineGradientInterpolationUBO", 10},
-};
-
-const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LinePatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks =
-    {
-        UniformBlockInfo{"LineDynamicUBO", 9},
-        UniformBlockInfo{"LinePatternUBO", 10},
-        UniformBlockInfo{"LinePatternPropertiesUBO", 11},
-        UniformBlockInfo{"LinePatternInterpolationUBO", 12},
-        UniformBlockInfo{"LinePatternTilePropertiesUBO", 13},
-};
-
-const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LineSDFShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"LineDynamicUBO", 9},
-    UniformBlockInfo{"LineSDFUBO", 10},
-    UniformBlockInfo{"LineSDFPropertiesUBO", 11},
-    UniformBlockInfo{"LineSDFInterpolationUBO", 12},
-};
-
-const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LineShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"LineDynamicUBO", 8},
-    UniformBlockInfo{"LineUBO", 9},
-    UniformBlockInfo{"LinePropertiesUBO", 10},
-    UniformBlockInfo{"LineInterpolationUBO", 11},
-};
-
-const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LineBasicShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"LineBasicUBO", 2},
-    UniformBlockInfo{"LineBasicPropertiesUBO", 3},
+        UniformBlockInfo{"FillExtrusionDrawableUBO", idFillExtrusionDrawableUBO},
+        UniformBlockInfo{"FillExtrusionDrawablePropsUBO", idFillExtrusionDrawablePropsUBO},
+        UniformBlockInfo{"FillExtrusionDrawableTilePropsUBO", idFillExtrusionDrawableTilePropsUBO},
+        UniformBlockInfo{"FillExtrusionInterpolateUBO", idFillExtrusionInterpolateUBO},
 };
 
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::HeatmapShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"HeatmapDrawableUBO", 3},
-    UniformBlockInfo{"HeatmapEvaluatedPropsUBO", 4},
-    UniformBlockInfo{"HeatmapInterpolateUBO", 5},
+    UniformBlockInfo{"HeatmapDrawableUBO", idHeatmapDrawableUBO},
+    UniformBlockInfo{"HeatmapEvaluatedPropsUBO", idHeatmapEvaluatedPropsUBO},
+    UniformBlockInfo{"HeatmapInterpolateUBO", idHeatmapInterpolateUBO},
 };
 
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"HeatmapTextureDrawableUBO", 1},
+        UniformBlockInfo{"HeatmapTextureDrawableUBO", idHeatmapTextureDrawableUBO},
 };
 
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"HillshadePrepareDrawableUBO", 2},
+        UniformBlockInfo{"HillshadePrepareDrawableUBO", idHillshadePrepareDrawableUBO},
 };
 
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::HillshadeShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"HillshadeDrawableUBO", 2},
-    UniformBlockInfo{"HillshadeEvaluatedPropsUBO", 3},
+    UniformBlockInfo{"HillshadeDrawableUBO", idHillshadeDrawableUBO},
+    UniformBlockInfo{"HillshadeEvaluatedPropsUBO", idHillshadeEvaluatedPropsUBO},
+};
+
+const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LineGradientShader, gfx::Backend::Type::OpenGL>::uniformBlocks =
+    {
+        UniformBlockInfo{"LineDynamicUBO", idLineDynamicUBO},
+        UniformBlockInfo{"LineGradientUBO", idLineGradientUBO},
+        UniformBlockInfo{"LineGradientPropertiesUBO", idLineGradientPropertiesUBO},
+        UniformBlockInfo{"LineGradientInterpolationUBO", idLineGradientInterpolationUBO},
+};
+
+const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LinePatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks =
+    {
+        UniformBlockInfo{"LineDynamicUBO", idLineDynamicUBO},
+        UniformBlockInfo{"LinePatternUBO", idLinePatternUBO},
+        UniformBlockInfo{"LinePatternPropertiesUBO", idLinePatternPropertiesUBO},
+        UniformBlockInfo{"LinePatternInterpolationUBO", idLinePatternInterpolationUBO},
+        UniformBlockInfo{"LinePatternTilePropertiesUBO", idLinePatternTilePropertiesUBO},
+};
+
+const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LineSDFShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
+    UniformBlockInfo{"LineDynamicUBO", idLineDynamicUBO},
+    UniformBlockInfo{"LineSDFUBO", idLineSDFUBO},
+    UniformBlockInfo{"LineSDFPropertiesUBO", idLineSDFPropertiesUBO},
+    UniformBlockInfo{"LineSDFInterpolationUBO", idLineSDFInterpolationUBO},
+};
+
+const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LineShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
+    UniformBlockInfo{"LineDynamicUBO", idLineDynamicUBO},
+    UniformBlockInfo{"LineUBO", idLineUBO},
+    UniformBlockInfo{"LinePropertiesUBO", idLinePropertiesUBO},
+    UniformBlockInfo{"LineInterpolationUBO", idLineInterpolationUBO},
+};
+
+const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LineBasicShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
+    UniformBlockInfo{"LineBasicUBO", idLineBasicUBO},
+    UniformBlockInfo{"LineBasicPropertiesUBO", idLineBasicPropertiesUBO},
 };
 
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::RasterShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"RasterDrawableUBO", 2},
+    UniformBlockInfo{"RasterDrawableUBO", idRasterDrawableUBO},
 };
 
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::SymbolIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"SymbolDrawableUBO", 10},
-    UniformBlockInfo{"SymbolDynamicUBO", 11},
-    UniformBlockInfo{"SymbolDrawablePaintUBO", 12},
-    UniformBlockInfo{"SymbolDrawableTilePropsUBO", 13},
-    UniformBlockInfo{"SymbolDrawableInterpolateUBO", 14},
+    UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
+    UniformBlockInfo{"SymbolDynamicUBO", idSymbolDynamicUBO},
+    UniformBlockInfo{"SymbolDrawablePaintUBO", idSymbolDrawablePaintUBO},
+    UniformBlockInfo{"SymbolDrawableTilePropsUBO", idSymbolDrawableTilePropsUBO},
+    UniformBlockInfo{"SymbolDrawableInterpolateUBO", idSymbolDrawableInterpolateUBO},
 };
 
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"SymbolDrawableUBO", 10},
-        UniformBlockInfo{"SymbolDynamicUBO", 11},
-        UniformBlockInfo{"SymbolDrawablePaintUBO", 12},
-        UniformBlockInfo{"SymbolDrawableTilePropsUBO", 13},
-        UniformBlockInfo{"SymbolDrawableInterpolateUBO", 14},
+        UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
+        UniformBlockInfo{"SymbolDynamicUBO", idSymbolDynamicUBO},
+        UniformBlockInfo{"SymbolDrawablePaintUBO", idSymbolDrawablePaintUBO},
+        UniformBlockInfo{"SymbolDrawableTilePropsUBO", idSymbolDrawableTilePropsUBO},
+        UniformBlockInfo{"SymbolDrawableInterpolateUBO", idSymbolDrawableInterpolateUBO},
 };
 
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"SymbolDrawableUBO", 10},
-        UniformBlockInfo{"SymbolDynamicUBO", 11},
-        UniformBlockInfo{"SymbolDrawablePaintUBO", 12},
-        UniformBlockInfo{"SymbolDrawableTilePropsUBO", 13},
-        UniformBlockInfo{"SymbolDrawableInterpolateUBO", 14},
+        UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
+        UniformBlockInfo{"SymbolDynamicUBO", idSymbolDynamicUBO},
+        UniformBlockInfo{"SymbolDrawablePaintUBO", idSymbolDrawablePaintUBO},
+        UniformBlockInfo{"SymbolDrawableTilePropsUBO", idSymbolDrawableTilePropsUBO},
+        UniformBlockInfo{"SymbolDrawableInterpolateUBO", idSymbolDrawableInterpolateUBO},
 };
 
 } // namespace shaders
@@ -330,7 +345,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         assert(size > 0);
         GLint binding = GLint(blockInfo.binding);
         MBGL_CHECK_ERROR(glUniformBlockBinding(program, index, binding));
-        uniformBlocks.add(binding, size);
+        uniformBlocks.add(blockInfo.id, binding, size);
     }
 
     SamplerLocationMap samplerLocations;
