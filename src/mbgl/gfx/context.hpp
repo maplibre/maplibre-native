@@ -18,6 +18,7 @@
 
 namespace mbgl {
 
+class PaintParameters;
 class ProgramParameters;
 
 #if MLN_DRAWABLE_RENDERER
@@ -28,8 +29,6 @@ using TileLayerGroupPtr = std::shared_ptr<TileLayerGroup>;
 using LayerGroupPtr = std::shared_ptr<LayerGroup>;
 using RenderTargetPtr = std::shared_ptr<RenderTarget>;
 #endif
-
-class PaintParameters;
 
 namespace gfx {
 

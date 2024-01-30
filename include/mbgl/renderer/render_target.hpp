@@ -10,8 +10,6 @@
 
 namespace mbgl {
 
-class PaintParameters;
-
 namespace gfx {
 class Context;
 class Texture2D;
@@ -21,6 +19,7 @@ using Texture2DPtr = std::shared_ptr<Texture2D>;
 } // namespace gfx
 
 class LayerGroupBase;
+class PaintParameters;
 class RenderOrchestrator;
 class RenderTree;
 

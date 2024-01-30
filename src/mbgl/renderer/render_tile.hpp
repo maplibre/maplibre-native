@@ -13,8 +13,6 @@
 
 namespace mbgl {
 
-class PaintParameters;
-
 namespace gfx {
 #if MLN_DRAWABLE_RENDERER
 class Texture2D;
@@ -28,6 +26,7 @@ class Bucket;
 class LayerRenderData;
 class Tile;
 class TransformState;
+class PaintParameters;
 class DebugBucket;
 class SourcePrepareParameters;
 class FeatureIndex;
