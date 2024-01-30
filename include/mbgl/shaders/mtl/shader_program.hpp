@@ -14,10 +14,9 @@
 namespace mbgl {
 namespace shaders {
 struct AttributeInfo {
-    AttributeInfo(std::size_t index, gfx::AttributeDataType dataType, std::size_t count, std::string_view name);
+    AttributeInfo(std::size_t index, gfx::AttributeDataType dataType, std::string_view name);
     std::size_t index;
     gfx::AttributeDataType dataType;
-    std::size_t count;
     std::string_view name;
     StringIdentity nameID;
 };
