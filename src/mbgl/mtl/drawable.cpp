@@ -24,6 +24,9 @@
 #include <simd/simd.h>
 
 #include <cassert>
+#if !defined(NDEBUG)
+#include <sstream>
+#endif
 
 namespace mbgl {
 namespace mtl {
@@ -72,11 +75,16 @@ MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) noexcept {
 
 #if !defined(NDEBUG)
 std::string debugLabel(const gfx::Drawable& drawable) {
-    std::string result = drawable.getName();
+    std::ostringstream oss;
+    oss << drawable.getID().id() << "/" << drawable.getName() << "/tile=";
+
     if (const auto& tileID = drawable.getTileID()) {
-        result.append("/tile=").append(util::toString(*tileID));
+        oss << util::toString(*tileID);
+    } else {
+        oss << "(none)";
     }
-    return result;
+
+    return oss.str();
 }
 #endif // !defined(NDEBUG)
 
