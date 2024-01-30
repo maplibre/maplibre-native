@@ -64,8 +64,7 @@ public:
     const std::shared_ptr<UniformBuffer>& get(const size_t id) const;
 
     /// Add a new uniform buffer element or replace the existing one.
-    const std::shared_ptr<UniformBuffer>& addOrReplace(const size_t id,
-                                                       std::shared_ptr<UniformBuffer> uniformBuffer);
+    const std::shared_ptr<UniformBuffer>& addOrReplace(const size_t id, std::shared_ptr<UniformBuffer> uniformBuffer);
 
     /// Create and add a new buffer or update an existing one
     void createOrUpdate(const size_t id, const std::vector<uint8_t>& data, gfx::Context&, bool persistent = false);

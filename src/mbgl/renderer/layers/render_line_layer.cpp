@@ -586,7 +586,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 case LineLayerTweaker::LineType::Pattern: {
                     drawableUniforms.createOrUpdate(
                         idLinePatternInterpolationUBO, &getLinePatternInterpolationUBO(), context);
-                    
+
                     drawableUniforms.createOrUpdate(
                         idLinePatternTilePropertiesUBO, &getLinePatternTilePropertiesUBO(), context);
                 } break;

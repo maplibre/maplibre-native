@@ -27,7 +27,6 @@ struct alignas(16) FillInterpolateUBO {
 };
 static_assert(sizeof(FillInterpolateUBO) % 16 == 0);
 
-
 enum {
     idFillDrawableUBO,
     idFillEvaluatedPropsUBO,
