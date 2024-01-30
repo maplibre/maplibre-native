@@ -748,13 +748,6 @@ SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
     };
 }
 
-// Convert a properties-as-uniforms set to the type expected by `SymbolDrawableData`
-gfx::SymbolDrawableData::PropertyMapType toMap(const mbgl::unordered_set<StringIdentity>& set) {
-    // can we do this without allocating?
-    auto values = std::vector<bool>(set.size());
-    return gfx::SymbolDrawableData::PropertyMapType(set.begin(), set.end(), values.begin(), values.end());
-}
-
 const auto idDataAttibName = stringIndexer().get("a_data");
 const auto posOffsetAttribName = "a_pos_offset";
 const auto idPosOffsetAttribName = stringIndexer().get(posOffsetAttribName);
@@ -769,7 +762,7 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const SymbolBucket::PaintProperties& paintProps,
                           const SymbolPaintProperties::PossiblyEvaluated& evaluated,
                           gfx::VertexAttributeArray& attribs,
-                          mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                          mbgl::unordered_set<StringIdentity>* propertiesAsUniforms) {
     if (const auto& attr = attribs.getOrAdd(idPosOffsetAttribName)) {
         attr->setSharedRawData(buffer.sharedVertices,
                                offsetof(SymbolLayoutVertex, a1),
@@ -825,8 +818,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
                         const SymbolPaintProperties::PossiblyEvaluated& evaluated,
                         const TransformState& state,
                         gfx::UniformBufferPtr& textInterpUBO,
-                        gfx::UniformBufferPtr& iconInterpUBO,
-                        mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                        gfx::UniformBufferPtr& iconInterpUBO) {
     if (!drawable.getData()) {
         return;
     }
@@ -868,7 +860,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // See `Placement::updateBucketDynamicVertices`
 
     if (auto& attribs = drawable.getVertexAttributes()) {
-        updateTileAttributes(buffer, isText, paintProps, evaluated, *attribs, propertiesAsUniforms);
+        updateTileAttributes(buffer, isText, paintProps, evaluated, *attribs, nullptr);
     }
 }
 
@@ -1159,20 +1151,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             propertiesAsUniforms.clear();
 
             const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-            updateTileDrawable(drawable,
-                               context,
-                               bucket,
-                               bucketPaintProperties,
-                               evaluated,
-                               state,
-                               textInterpUBO,
-                               iconInterpUBO,
-                               propertiesAsUniforms);
-
-            // We assume that the properties-as-uniforms doesn't change without the style changing.
-            // That would require updating the shader as well.
-            [[maybe_unused]] const auto& drawData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
-            assert(drawData.propertiesAsUniforms == toMap(propertiesAsUniforms));
+            updateTileDrawable(
+                drawable, context, bucket, bucketPaintProperties, evaluated, state, textInterpUBO, iconInterpUBO);
             return true;
         };
         if (updateTile(passes, tileID, std::move(updateExisting))) {
@@ -1259,7 +1239,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         propertiesAsUniforms.clear();
         auto attribs = context.createVertexAttributeArray();
-        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *attribs, propertiesAsUniforms);
+        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *attribs, &propertiesAsUniforms);
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
@@ -1355,8 +1335,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                         /*.pitchAlignment=*/values.pitchAlignment,
                         /*.rotationAlignment=*/values.rotationAlignment,
                         /*.placement=*/layout.get<SymbolPlacement>(),
-                        /*.textFit=*/layout.get<IconTextFit>(),
-                        /*propertiesAsUniforms=*/toMap(propertiesAsUniforms));
+                        /*.textFit=*/layout.get<IconTextFit>());
 
                     const auto tileUBO = buildTileUBO(bucket, *drawData, currentZoom);
                     drawable->setData(std::move(drawData));

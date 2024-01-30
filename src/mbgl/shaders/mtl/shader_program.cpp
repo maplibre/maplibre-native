@@ -24,13 +24,9 @@ using namespace std::string_literals;
 
 namespace mbgl {
 
-shaders::AttributeInfo::AttributeInfo(std::size_t index_,
-                                      gfx::AttributeDataType dataType_,
-                                      std::size_t count_,
-                                      std::string_view name_)
+shaders::AttributeInfo::AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::string_view name_)
     : index(index_),
       dataType(dataType_),
-      count(count_),
       name(name_),
       nameID(stringIndexer().get(name_)) {}
 
@@ -208,7 +204,7 @@ void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
         [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
     uniformBlocks.visit([&](auto, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
-    vertexAttributes.add(stringIndexer().get(info.name), index, info.dataType, info.count);
+    vertexAttributes.add(stringIndexer().get(info.name), index, info.dataType, 1);
 }
 
 void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
