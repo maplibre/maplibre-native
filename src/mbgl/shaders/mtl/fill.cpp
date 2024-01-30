@@ -4,9 +4,9 @@ namespace mbgl {
 namespace shaders {
 
 const std::array<AttributeInfo, 3> ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-    AttributeInfo{1, gfx::AttributeDataType::Float4, 1, "a_color"},
-    AttributeInfo{2, gfx::AttributeDataType::Float2, 1, "a_opacity"},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos"},
+    AttributeInfo{1, gfx::AttributeDataType::Float4, "a_color"},
+    AttributeInfo{2, gfx::AttributeDataType::Float2, "a_opacity"},
 };
 const std::array<UniformBlockInfo, 3> ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{3, true, false, sizeof(MatrixUBO), "FillMatrixUBO"},
@@ -16,9 +16,9 @@ const std::array<UniformBlockInfo, 3> ShaderSource<BuiltIn::FillShader, gfx::Bac
 const std::array<TextureInfo, 0> ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>::textures = {};
 
 const std::array<AttributeInfo, 3> ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-    AttributeInfo{1, gfx::AttributeDataType::Float4, 1, "a_outline_color"},
-    AttributeInfo{2, gfx::AttributeDataType::Float2, 1, "a_opacity"},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos"},
+    AttributeInfo{1, gfx::AttributeDataType::Float4, "a_outline_color"},
+    AttributeInfo{2, gfx::AttributeDataType::Float2, "a_opacity"},
 };
 const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{3, true, false, sizeof(MatrixUBO), "FillMatrixUBO"},
@@ -29,10 +29,10 @@ const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::FillOutlineShader, g
 const std::array<TextureInfo, 0> ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>::textures = {};
 
 const std::array<AttributeInfo, 4> ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-    AttributeInfo{1, gfx::AttributeDataType::UShort4, 1, "a_pattern_from"},
-    AttributeInfo{2, gfx::AttributeDataType::UShort4, 1, "a_pattern_to"},
-    AttributeInfo{3, gfx::AttributeDataType::Float2, 1, "a_opacity"},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos"},
+    AttributeInfo{1, gfx::AttributeDataType::UShort4, "a_pattern_from"},
+    AttributeInfo{2, gfx::AttributeDataType::UShort4, "a_pattern_to"},
+    AttributeInfo{3, gfx::AttributeDataType::Float2, "a_opacity"},
 };
 const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{4, true, false, sizeof(MatrixUBO), "FillMatrixUBO"},
@@ -47,10 +47,10 @@ const std::array<TextureInfo, 1> ShaderSource<BuiltIn::FillPatternShader, gfx::B
 
 const std::array<AttributeInfo, 4>
     ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>::attributes = {
-        AttributeInfo{0, gfx::AttributeDataType::Short2, 1, "a_pos"},
-        AttributeInfo{1, gfx::AttributeDataType::UShort4, 1, "a_pattern_from"},
-        AttributeInfo{2, gfx::AttributeDataType::UShort4, 1, "a_pattern_to"},
-        AttributeInfo{3, gfx::AttributeDataType::Float2, 1, "a_opacity"},
+        AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos"},
+        AttributeInfo{1, gfx::AttributeDataType::UShort4, "a_pattern_from"},
+        AttributeInfo{2, gfx::AttributeDataType::UShort4, "a_pattern_to"},
+        AttributeInfo{3, gfx::AttributeDataType::Float2, "a_opacity"},
 };
 const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::FillOutlinePatternShader,
                                                    gfx::Backend::Type::Metal>::uniforms = {
