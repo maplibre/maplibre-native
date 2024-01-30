@@ -1,13 +1,6 @@
 #pragma once
 
-#include <mbgl/util/string_indexer.hpp>
-#include <mbgl/util/containers.hpp>
-
-#include <algorithm>
-#include <functional>
-#include <string>
-#include <memory>
-#include <unordered_map>
+#include <mbgl/shaders/ubo_max_count.hpp>
 
 namespace mbgl {
 namespace gfx {
@@ -113,7 +106,7 @@ protected:
     virtual std::unique_ptr<UniformBlock> copy(const UniformBlock& uniformBlock) = 0;
 
 protected:
-    std::array<UniqueUniformBlock, 8> uniformBlockVector;
+    std::array<UniqueUniformBlock, shaders::maxUBOCountPerShader> uniformBlockVector;
     static std::unique_ptr<UniformBlock> nullref;
 };
 

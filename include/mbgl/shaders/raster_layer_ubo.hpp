@@ -24,7 +24,7 @@ static_assert(sizeof(RasterDrawableUBO) % 16 == 0);
 
 enum {
     idRasterDrawableUBO,
-    idRasterUBOCount
+    rasterUBOCount
 };
 
 } // namespace shaders

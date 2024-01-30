@@ -51,7 +51,7 @@ enum {
     idCirclePaintParamsUBO,
     idCircleEvaluatedPropsUBO,
     idCircleInterpolateUBO,
-    idCircleUBOCount
+    circleUBOCount
 };
 
 } // namespace shaders

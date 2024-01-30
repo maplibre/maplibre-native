@@ -43,7 +43,7 @@ static_assert(sizeof(BackgroundPatternLayerUBO) == 96);
 enum {
     idBackgroundDrawableUBO,
     idBackgroundLayerUBO,
-    idBackgroundUBOCount
+    backgroundUBOCount
 };
 
 } // namespace shaders

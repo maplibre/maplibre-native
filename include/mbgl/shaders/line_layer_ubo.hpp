@@ -49,7 +49,7 @@ enum {
     idLineUBO,
     idLinePropertiesUBO,
     idLineInterpolationUBO,
-    idLineUBOCount
+    lineUBOCount
 };
 
 //
@@ -82,7 +82,7 @@ enum {
     idLineGradientUBO,
     idLineGradientPropertiesUBO,
     idLineGradientInterpolationUBO,
-    idLineGradientUBOCount
+    lineGradientUBOCount
 };
 
 //
@@ -131,7 +131,7 @@ enum {
     idLinePatternPropertiesUBO,
     idLinePatternInterpolationUBO,
     idLinePatternTilePropertiesUBO,
-    idLinePatternUBOCount
+    linePatternUBOCount
 };
 
 //
@@ -179,7 +179,7 @@ enum {
     idLineSDFUBO,
     idLineSDFPropertiesUBO,
     idLineSDFInterpolationUBO,
-    idLineSDFUBOCount
+    lineSDFUBOCount
 };
 
 //
@@ -204,7 +204,7 @@ static_assert(sizeof(LineBasicPropertiesUBO) % 16 == 0);
 enum {
     idLineBasicUBO,
     idLineBasicPropertiesUBO,
-    idLineBasicUBOCount
+    lineBasicUBOCount
 };
 
 } // namespace shaders

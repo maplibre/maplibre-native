@@ -31,7 +31,7 @@ enum {
     idFillDrawableUBO,
     idFillEvaluatedPropsUBO,
     idFillInterpolateUBO,
-    idFillUBOCount
+    fillUBOCount
 };
 
 //
@@ -63,7 +63,7 @@ enum {
     idFillOutlineDrawableUBO,
     idFillOutlineEvaluatedPropsUBO,
     idFillOutlineInterpolateUBO,
-    idFillOutlineUBOCount
+    fillOutlineUBOCount
 };
 
 //
@@ -106,7 +106,7 @@ enum {
     idFillPatternTilePropsUBO,
     idFillPatternEvaluatedPropsUBO,
     idFillPatternInterpolateUBO,
-    idFillPatternUBOCount
+    fillPatternUBOCount
 };
 
 //
@@ -148,7 +148,7 @@ enum {
     idFillOutlinePatternTilePropsUBO,
     idFillOutlinePatternEvaluatedPropsUBO,
     idFillOutlinePatternInterpolateUBO,
-    idFillOutlinePatternUBOCount
+    fillOutlinePatternUBOCount
 };
 
 } // namespace shaders

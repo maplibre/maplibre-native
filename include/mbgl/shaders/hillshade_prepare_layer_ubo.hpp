@@ -16,7 +16,7 @@ static_assert(sizeof(HillshadePrepareDrawableUBO) % 16 == 0);
 
 enum {
     idHillshadePrepareDrawableUBO,
-    idHillshadePrepareUBOCount
+    hillshadePrepareUBOCount
 };
 
 } // namespace shaders

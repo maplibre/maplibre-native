@@ -15,7 +15,7 @@ static_assert(sizeof(DebugUBO) % 16 == 0);
 
 enum {
     idDebugUBO,
-    idDebugUBOCount
+    debugUBOCount
 };
 
 } // namespace shaders

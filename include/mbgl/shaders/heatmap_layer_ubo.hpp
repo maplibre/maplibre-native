@@ -31,7 +31,7 @@ enum {
     idHeatmapDrawableUBO,
     idHeatmapEvaluatedPropsUBO,
     idHeatmapInterpolateUBO,
-    idHeatmapUBOCount
+    heatmapUBOCount
 };
 
 } // namespace shaders

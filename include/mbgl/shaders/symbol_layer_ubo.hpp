@@ -75,7 +75,7 @@ enum {
     idSymbolDrawablePaintUBO,
     idSymbolDrawableTilePropsUBO,
     idSymbolDrawableInterpolateUBO,
-    idSymbolUBOCount
+    symbolUBOCount
 };
 
 } // namespace shaders

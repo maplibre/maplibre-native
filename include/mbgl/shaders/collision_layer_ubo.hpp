@@ -16,7 +16,7 @@ static_assert(sizeof(CollisionUBO) == 80);
 
 enum {
     idCollisionUBO,
-    idCollisionUBOCount
+    collisionUBOCount
 };
 
 } // namespace shaders

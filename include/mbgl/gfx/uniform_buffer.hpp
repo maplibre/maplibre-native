@@ -1,12 +1,7 @@
 #pragma once
 
+#include <mbgl/shaders/ubo_max_count.hpp>
 #include <mbgl/util/string_indexer.hpp>
-#include <mbgl/util/containers.hpp>
-
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 namespace mbgl {
 namespace gfx {
@@ -84,7 +79,7 @@ protected:
     virtual std::unique_ptr<UniformBuffer> copy(const UniformBuffer&) = 0;
 
 protected:
-    std::array<UniformBufferPtr, 8> uniformBufferVector;
+    std::array<UniformBufferPtr, shaders::maxUBOCountPerShader> uniformBufferVector;
     static std::shared_ptr<UniformBuffer> nullref;
 };
 

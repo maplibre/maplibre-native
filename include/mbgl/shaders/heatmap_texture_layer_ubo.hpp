@@ -15,7 +15,7 @@ static_assert(sizeof(HeatmapTextureDrawableUBO) % 16 == 0);
 
 enum {
     idHeatmapTextureDrawableUBO,
-    idHeatmapTextureUBOCount
+    heatmapTextureUBOCount
 };
 
 } // namespace shaders

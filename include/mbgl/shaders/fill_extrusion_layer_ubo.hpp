@@ -61,7 +61,7 @@ enum {
     idFillExtrusionDrawablePropsUBO,
     idFillExtrusionDrawableTilePropsUBO,
     idFillExtrusionInterpolateUBO,
-    idFillExtrusionUBOCount
+    fillExtrusionUBOCount
 };
 
 } // namespace shaders
