@@ -24,8 +24,8 @@ using namespace style;
 
 static TileObserver nullObserver;
 
-TilePyramid::TilePyramid()
-    : cache(Scheduler::GetBackground()),
+TilePyramid::TilePyramid(std::shared_ptr<Scheduler> threadPool_)
+    : cache(std::move(threadPool_)),
       observer(&nullObserver) {}
 
 TilePyramid::~TilePyramid() = default;
