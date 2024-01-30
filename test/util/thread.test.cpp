@@ -390,8 +390,8 @@ TEST(Thread, PoolWaitTimeout) {
 
     std::mutex mutex;
     {
-        std::lock_guard<std::mutex> lock(mutex);
-        pool->schedule([&] { std::lock_guard<std::mutex> lock(mutex); });
+        std::lock_guard<std::mutex> outerLock(mutex);
+        pool->schedule([&] { std::lock_guard<std::mutex> innerLock(mutex); });
 
         // should always time out
         EXPECT_EQ(1, pool->waitForEmpty(Milliseconds(100)));
