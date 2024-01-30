@@ -2,6 +2,7 @@
 
 #include <mbgl/shaders/shader_source.hpp>
 
+#include <vector>
 #include <string>
 
 namespace mbgl {
