@@ -17,8 +17,6 @@ using namespace style;
 using namespace shaders;
 
 namespace {
-static const size_t idHillshadePrepareDrawableUBOName = 2;
-
 // https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb
 constexpr std::array<float, 4> unpackMapbox = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
 
@@ -59,7 +57,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const Pai
             /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
 
         drawable.mutableUniformBuffers().createOrUpdate(
-            idHillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);
+            idHillshadePrepareDrawableUBO, &drawableUBO, parameters.context);
     });
 }
 

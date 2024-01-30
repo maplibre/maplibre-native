@@ -25,22 +25,6 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const size_t idLineDynamicUBOName = 8;
-static const size_t idLineUBOName = 9;
-static const size_t idLinePropertiesUBOName = 10;
-
-static const size_t idLineGradientDynamicUBOName = 7;
-static const size_t idLineGradientUBOName = 8;
-static const size_t idLineGradientPropertiesUBOName = 9;
-
-static const size_t idLinePatternDynamicUBOName = 9;
-static const size_t idLinePatternUBOName = 10;
-static const size_t idLinePatternPropertiesUBOName = 11;
-
-static const size_t idLineSDFDynamicUBOName = 9;
-static const size_t idLineSDFUBOName = 10;
-static const size_t idLineSDFPropertiesUBOName = 11;
-
 static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
@@ -151,13 +135,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                                       0,
                                       0,
                                       0};
-                uniforms.createOrUpdate(idLineUBOName, &lineUBO, context);
+                uniforms.createOrUpdate(idLineUBO, &lineUBO, context);
 
                 // properties UBO
-                uniforms.addOrReplace(idLinePropertiesUBOName, getLinePropsBuffer());
+                uniforms.addOrReplace(idLinePropertiesUBO, getLinePropsBuffer());
 
                 // dynamic UBO
-                uniforms.addOrReplace(idLineDynamicUBOName, dynamicBuffer);
+                uniforms.addOrReplace(idLineDynamicUBO, dynamicBuffer);
             } break;
 
             case LineType::Gradient: {
@@ -167,13 +151,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     0,
                     0,
                     0};
-                uniforms.createOrUpdate(idLineGradientUBOName, &lineGradientUBO, context);
+                uniforms.createOrUpdate(idLineGradientUBO, &lineGradientUBO, context);
 
                 // properties UBO
-                uniforms.addOrReplace(idLineGradientPropertiesUBOName, getLineGradientPropsBuffer());
+                uniforms.addOrReplace(idLineGradientPropertiesUBO, getLineGradientPropsBuffer());
 
                 // dynamic UBO
-                uniforms.addOrReplace(idLineGradientDynamicUBOName, dynamicBuffer);
+                uniforms.addOrReplace(idLineGradientDynamicUBO, dynamicBuffer);
             } break;
 
             case LineType::Pattern: {
@@ -193,13 +177,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /*texsize =*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
                     /*ratio =*/1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                     /*fade =*/crossfade.t};
-                uniforms.createOrUpdate(idLinePatternUBOName, &linePatternUBO, context);
+                uniforms.createOrUpdate(idLinePatternUBO, &linePatternUBO, context);
 
                 // properties UBO
-                uniforms.addOrReplace(idLinePatternPropertiesUBOName, getLinePatternPropsBuffer());
+                uniforms.addOrReplace(idLinePatternPropertiesUBO, getLinePatternPropsBuffer());
 
                 // dynamic UBO
-                uniforms.addOrReplace(idLinePatternDynamicUBOName, dynamicBuffer);
+                uniforms.addOrReplace(idLinePatternDynamicUBO, dynamicBuffer);
 
             } break;
 
@@ -243,13 +227,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         0,
                         0,
                         0};
-                    uniforms.createOrUpdate(idLineSDFUBOName, &lineSDFUBO, context);
+                    uniforms.createOrUpdate(idLineSDFUBO, &lineSDFUBO, context);
 
                     // properties UBO
-                    uniforms.addOrReplace(idLineSDFPropertiesUBOName, getLineSDFPropsBuffer());
+                    uniforms.addOrReplace(idLineSDFPropertiesUBO, getLineSDFPropsBuffer());
 
                     // dynamic UBO
-                    uniforms.addOrReplace(idLineSDFDynamicUBOName, dynamicBuffer);
+                    uniforms.addOrReplace(idLineSDFDynamicUBO, dynamicBuffer);
                 }
             } break;
 

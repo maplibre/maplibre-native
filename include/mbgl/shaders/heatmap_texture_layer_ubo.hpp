@@ -13,5 +13,10 @@ struct alignas(16) HeatmapTextureDrawableUBO {
 };
 static_assert(sizeof(HeatmapTextureDrawableUBO) % 16 == 0);
 
+enum {
+    idHeatmapTextureDrawableUBO,
+    idHeatmapTextureUBOCount
+};
+
 } // namespace shaders
 } // namespace mbgl

@@ -25,24 +25,6 @@ namespace mbgl {
 
 using namespace style;
 
-static const size_t idFillDrawableUBOName = 3;
-static const size_t idFillEvaluatedPropsUBOName = 4;
-// static const size_t idFillInterpolateUBOName = 5;
-
-static const size_t idFillOutlineDrawableUBOName = 3;
-static const size_t idFillOutlineEvaluatedPropsUBOName = 4;
-// static const size_t idFillOutlineInterpolateUBOName = 5;
-
-static const size_t idFillPatternDrawableUBOName = 4;
-// static const size_t idFillPatternTilePropsUBOName = 5;
-static const size_t idFillPatternEvaluatedPropsUBOName = 6;
-// static const size_t idFillPatternInterpolateUBOName = 7;
-
-static const size_t idFillOutlinePatternDrawableUBOName = 4;
-// static const size_t idFillOutlinePatternTilePropsUBOName = 5;
-static const size_t idFillOutlinePatternEvaluatedPropsUBOName = 6;
-// static const size_t idFillOutlinePatternInterpolateUBOName = 7;
-
 static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 using namespace shaders;
 
@@ -172,29 +154,29 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             case RenderFillLayer::FillVariant::Fill: {
                 UpdateFillUniformBuffers();
 
-                uniforms.addOrReplace(idFillEvaluatedPropsUBOName, fillPropsUniformBuffer);
+                uniforms.addOrReplace(idFillEvaluatedPropsUBO, fillPropsUniformBuffer);
 
                 const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
-                uniforms.createOrUpdate(idFillDrawableUBOName, &drawableUBO, context);
+                uniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
             case RenderFillLayer::FillVariant::FillOutline: {
                 UpdateFillOutlineUniformBuffers();
 
-                uniforms.addOrReplace(idFillOutlineEvaluatedPropsUBOName, fillOutlinePropsUniformBuffer);
+                uniforms.addOrReplace(idFillOutlineEvaluatedPropsUBO, fillOutlinePropsUniformBuffer);
 
                 const FillOutlineDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
                     /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
                     /* pad1 */ 0,
                     /* pad2 */ 0};
-                uniforms.createOrUpdate(idFillOutlineDrawableUBOName, &drawableUBO, context);
+                uniforms.createOrUpdate(idFillOutlineDrawableUBO, &drawableUBO, context);
                 break;
             }
             case RenderFillLayer::FillVariant::FillPattern: {
                 UpdateFillPatternUniformBuffers();
 
-                uniforms.addOrReplace(idFillPatternEvaluatedPropsUBOName, fillPatternPropsUniformBuffer);
+                uniforms.addOrReplace(idFillPatternEvaluatedPropsUBO, fillPatternPropsUniformBuffer);
 
                 const FillPatternDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
@@ -205,13 +187,13 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     0,
                     0,
                 };
-                uniforms.createOrUpdate(idFillPatternDrawableUBOName, &drawableUBO, context);
+                uniforms.createOrUpdate(idFillPatternDrawableUBO, &drawableUBO, context);
                 break;
             }
             case RenderFillLayer::FillVariant::FillOutlinePattern: {
                 UpdateFillOutlinePatternUniformBuffers();
 
-                uniforms.addOrReplace(idFillOutlinePatternEvaluatedPropsUBOName, fillOutlinePatternPropsUniformBuffer);
+                uniforms.addOrReplace(idFillOutlinePatternEvaluatedPropsUBO, fillOutlinePatternPropsUniformBuffer);
 
                 const FillOutlinePatternDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
@@ -221,7 +203,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
                     /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
                 };
-                uniforms.createOrUpdate(idFillOutlinePatternDrawableUBOName, &drawableUBO, context);
+                uniforms.createOrUpdate(idFillOutlinePatternDrawableUBO, &drawableUBO, context);
                 break;
             }
             default: {

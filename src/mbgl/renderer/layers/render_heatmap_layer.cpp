@@ -277,7 +277,7 @@ namespace {
 
 constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
-const size_t idHeatmapInterpolateUBOName = 5;
+
 const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
 const StringIdentity idTexImageName = stringIndexer().get("u_image");
 const StringIdentity idTexColorRampName = stringIndexer().get("u_color_ramp");
@@ -402,7 +402,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             auto& uniforms = drawable.mutableUniformBuffers();
 
             if (auto buffer = getInterpolateBuffer()) {
-                uniforms.addOrReplace(idHeatmapInterpolateUBOName, std::move(buffer));
+                uniforms.addOrReplace(idHeatmapInterpolateUBO, std::move(buffer));
             }
         });
 
@@ -467,7 +467,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             auto& uniforms = drawable->mutableUniformBuffers();
 
             if (auto buffer = getInterpolateBuffer()) {
-                uniforms.addOrReplace(idHeatmapInterpolateUBOName, std::move(buffer));
+                uniforms.addOrReplace(idHeatmapInterpolateUBO, std::move(buffer));
             }
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));

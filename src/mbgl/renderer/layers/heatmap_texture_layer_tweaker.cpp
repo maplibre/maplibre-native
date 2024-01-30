@@ -16,8 +16,6 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const size_t idHeatmapTextureDrawableUBOName = 1;
-
 void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
 
@@ -50,7 +48,7 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const Paint
         if (!checkTweakDrawable(drawable)) {
             return;
         }
-        drawable.mutableUniformBuffers().addOrReplace(idHeatmapTextureDrawableUBOName, getDrawableUBO());
+        drawable.mutableUniformBuffers().addOrReplace(idHeatmapTextureDrawableUBO, getDrawableUBO());
     });
 }
 

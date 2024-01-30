@@ -27,14 +27,9 @@ using namespace shaders;
 using namespace style;
 
 namespace {
-const size_t idFillExtrusionDrawableUBOName = 6;
-const size_t idFillExtrusionDrawablePropsUBOName = 7;
 const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 } // namespace
-
-const size_t FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName = 8;
-const size_t FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = 9;
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
@@ -79,7 +74,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idFillExtrusionDrawablePropsUBOName, propsBuffer);
+        uniforms.addOrReplace(idFillExtrusionDrawablePropsUBO, propsBuffer);
 
         const auto& translation = evaluated.get<FillExtrusionTranslate>();
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
@@ -117,7 +112,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             /* .height_factor = */ heightFactor,
             /* .pad = */ 0};
 
-        uniforms.createOrUpdate(idFillExtrusionDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idFillExtrusionDrawableUBO, &drawableUBO, context);
     });
 }
 

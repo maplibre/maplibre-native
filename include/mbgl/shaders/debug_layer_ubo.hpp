@@ -13,5 +13,10 @@ struct alignas(16) DebugUBO {
 };
 static_assert(sizeof(DebugUBO) % 16 == 0);
 
+enum {
+    idDebugUBO,
+    idDebugUBOCount
+};
+
 } // namespace shaders
 } // namespace mbgl

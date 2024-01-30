@@ -836,20 +836,20 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // Create or update the shared interpolation UBO
     gfx::UniformBufferPtr& interpUBO = isText ? textInterpUBO : iconInterpUBO;
     if (interpUBO) {
-        uniforms.addOrReplace(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, interpUBO);
+        uniforms.addOrReplace(idSymbolDrawableInterpolateUBO, interpUBO);
     } else {
         const auto ubo = buildInterpUBO(paintProps, isText, currentZoom);
-        interpUBO = uniforms.get(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName);
+        interpUBO = uniforms.get(idSymbolDrawableInterpolateUBO);
         if (interpUBO) {
             interpUBO->update(&ubo, sizeof(ubo));
         } else {
             interpUBO = context.createUniformBuffer(&ubo, sizeof(ubo));
-            uniforms.addOrReplace(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, interpUBO);
+            uniforms.addOrReplace(idSymbolDrawableInterpolateUBO, interpUBO);
         }
     }
 
     const auto tileUBO = buildTileUBO(bucket, drawData, currentZoom);
-    uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName, &tileUBO, context);
+    uniforms.createOrUpdate(idSymbolDrawableTilePropsUBO, &tileUBO, context);
 
     const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
     const auto vertexCount = buffer.vertices().elements();
@@ -1341,8 +1341,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     drawable->setData(std::move(drawData));
 
                     auto& uniforms = drawable->mutableUniformBuffers();
-                    uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName, &tileUBO, context);
-                    uniforms.addOrReplace(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, interpUBO);
+                    uniforms.createOrUpdate(idSymbolDrawableTilePropsUBO, &tileUBO, context);
+                    uniforms.addOrReplace(idSymbolDrawableInterpolateUBO, interpUBO);
 
                     tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                     ++stats.drawablesAdded;

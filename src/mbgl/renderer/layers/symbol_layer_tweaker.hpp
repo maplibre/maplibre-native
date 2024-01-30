@@ -20,12 +20,6 @@ public:
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
-    static const size_t idSymbolDrawableUBOName;
-    static const size_t idSymbolDynamicUBOName;
-    static const size_t idSymbolDrawablePaintUBOName;
-    static const size_t idSymbolDrawableTilePropsUBOName;
-    static const size_t idSymbolDrawableInterpolateUBOName;
-
 private:
     gfx::UniformBufferPtr textPaintBuffer;
     gfx::UniformBufferPtr iconPaintBuffer;

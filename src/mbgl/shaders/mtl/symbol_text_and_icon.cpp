@@ -20,11 +20,11 @@ const std::array<AttributeInfo, 9>
 };
 const std::array<UniformBlockInfo, 5>
     ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>::uniforms = {
-        UniformBlockInfo{10, true, true, sizeof(SymbolDrawableUBO), "SymbolDrawableUBO"},
-        UniformBlockInfo{11, true, true, sizeof(SymbolDynamicUBO), "SymbolDynamicUBO"},
-        UniformBlockInfo{12, true, true, sizeof(SymbolDrawablePaintUBO), "SymbolDrawablePaintUBO"},
-        UniformBlockInfo{13, true, true, sizeof(SymbolDrawableTilePropsUBO), "SymbolDrawableTilePropsUBO"},
-        UniformBlockInfo{14, true, false, sizeof(SymbolDrawableInterpolateUBO), "SymbolDrawableInterpolateUBO"},
+        UniformBlockInfo{10, true, true, sizeof(SymbolDrawableUBO), idSymbolDrawableUBO},
+        UniformBlockInfo{11, true, true, sizeof(SymbolDynamicUBO), idSymbolDynamicUBO},
+        UniformBlockInfo{12, true, true, sizeof(SymbolDrawablePaintUBO), idSymbolDrawablePaintUBO},
+        UniformBlockInfo{13, true, true, sizeof(SymbolDrawableTilePropsUBO), idSymbolDrawableTilePropsUBO},
+        UniformBlockInfo{14, true, false, sizeof(SymbolDrawableInterpolateUBO), idSymbolDrawableInterpolateUBO},
 };
 const std::array<TextureInfo, 2> ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, "u_texture"},

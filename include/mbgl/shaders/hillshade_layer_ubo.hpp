@@ -19,5 +19,11 @@ struct alignas(16) HillshadeEvaluatedPropsUBO {
 };
 static_assert(sizeof(HillshadeEvaluatedPropsUBO) % 16 == 0);
 
+enum {
+    idHillshadeDrawableUBO,
+    idHillshadeEvaluatedPropsUBO,
+    idHillshadeUBOCount
+};
+
 } // namespace shaders
 } // namespace mbgl

@@ -62,12 +62,6 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 
 } // namespace
 
-const size_t SymbolLayerTweaker::idSymbolDrawableUBOName = 10;
-const size_t SymbolLayerTweaker::idSymbolDynamicUBOName = 11;
-const size_t SymbolLayerTweaker::idSymbolDrawablePaintUBOName = 12;
-const size_t SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = 13;
-const size_t SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = 14;
-
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& state = parameters.state;
@@ -167,10 +161,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         };
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idSymbolDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
 
-        uniforms.addOrReplace(idSymbolDynamicUBOName, dynamicBuffer);
-        uniforms.addOrReplace(idSymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
+        uniforms.addOrReplace(idSymbolDynamicUBO, dynamicBuffer);
+        uniforms.addOrReplace(idSymbolDrawablePaintUBO, isText ? textPaintBuffer : iconPaintBuffer);
     });
 }
 

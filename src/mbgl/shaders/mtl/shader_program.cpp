@@ -31,13 +31,12 @@ shaders::AttributeInfo::AttributeInfo(std::size_t index_, gfx::AttributeDataType
       nameID(stringIndexer().get(name_)) {}
 
 shaders::UniformBlockInfo::UniformBlockInfo(
-    std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::string_view name_)
+    std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
     : index(index_),
       vertex(vertex_),
       fragment(fragment_),
       size(size_),
-      name(name_),
-      nameID(stringIndexer().get(name_)) {}
+      id(id_) {}
 
 shaders::TextureInfo::TextureInfo(std::size_t index_, std::string_view name_)
     : index(index_),
@@ -215,7 +214,7 @@ void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
         [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
     uniformBlocks.visit([&](auto, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
-    if (const auto& block_ = uniformBlocks.add(index, info.size)) {
+    if (const auto& block_ = uniformBlocks.add(info.id, index, info.size)) {
         auto& block = static_cast<UniformBlock&>(*block_);
         block.setBindVertex(info.vertex);
         block.setBindFragment(info.fragment);

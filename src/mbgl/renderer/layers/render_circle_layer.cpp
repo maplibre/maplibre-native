@@ -264,7 +264,6 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 namespace {
 
 constexpr auto CircleShaderGroupName = "CircleShader";
-const size_t idCircleInterpolateUBOName = 11;
 const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
 
 } // namespace
@@ -361,7 +360,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(idCircleInterpolateUBOName, &interpolateUBO, context);
+            uniforms.createOrUpdate(idCircleInterpolateUBO, &interpolateUBO, context);
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
@@ -417,7 +416,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setLayerTweaker(layerTweaker);
 
             auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.addOrReplace(idCircleInterpolateUBOName, interpBuffer);
+            uniforms.addOrReplace(idCircleInterpolateUBO, interpBuffer);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

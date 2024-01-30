@@ -63,7 +63,7 @@ protected:
     std::size_t size;
 };
 
-/// Stores a collection of uniform blocks by name
+/// Stores a collection of uniform blocks by id
 class UniformBlockArray {
 public:
     /// @brief Constructor
@@ -78,22 +78,19 @@ public:
     /// @brief  Destructor
     virtual ~UniformBlockArray() = default;
 
-    /// @brief Get map of elements.
-    const std::array<UniqueUniformBlock, 32>& getVector() const { return uniformBlockVector; }
-
     /// @brief Number of elements
     std::size_t size() const { return uniformBlockVector.size(); }
 
     /// @brief Get an uniform block element.
     /// @return Pointer to the element on success, or null if the uniform block doesn't exists.
-    const std::unique_ptr<UniformBlock>& get(const size_t index) const;
+    const std::unique_ptr<UniformBlock>& get(const size_t id) const;
 
     /// @brief Add a new uniform block element.
-    /// @param name
+    /// @param id
     /// @param index
     /// @param size
     /// @return Pointer to the new element on success, or null if the uniform block already exists.
-    const std::unique_ptr<UniformBlock>& add(const size_t index, std::size_t size);
+    const std::unique_ptr<UniformBlock>& add(const size_t id, const size_t index, std::size_t size);
 
     /// @brief  Move assignment operator
     UniformBlockArray& operator=(UniformBlockArray&&);
@@ -116,7 +113,7 @@ protected:
     virtual std::unique_ptr<UniformBlock> copy(const UniformBlock& uniformBlock) = 0;
 
 protected:
-    std::array<UniqueUniformBlock, 32> uniformBlockVector;
+    std::array<UniqueUniformBlock, 8> uniformBlockVector;
     static std::unique_ptr<UniformBlock> nullref;
 };
 

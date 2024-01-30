@@ -47,7 +47,7 @@ protected:
     std::size_t size;
 };
 
-/// Stores a collection of uniform buffers by name
+/// Stores a collection of uniform buffers by id
 class UniformBufferArray {
 public:
     UniformBufferArray() = default;
@@ -61,21 +61,21 @@ public:
 
     /// Get an uniform buffer element.
     /// Returns a pointer to the element on success, or null if the uniform buffer doesn't exists.
-    const std::shared_ptr<UniformBuffer>& get(const size_t index) const;
+    const std::shared_ptr<UniformBuffer>& get(const size_t id) const;
 
     /// Add a new uniform buffer element or replace the existing one.
-    const std::shared_ptr<UniformBuffer>& addOrReplace(const size_t index,
+    const std::shared_ptr<UniformBuffer>& addOrReplace(const size_t id,
                                                        std::shared_ptr<UniformBuffer> uniformBuffer);
 
     /// Create and add a new buffer or update an existing one
-    void createOrUpdate(const size_t index, const std::vector<uint8_t>& data, gfx::Context&, bool persistent = false);
-    void createOrUpdate(const size_t index, const void* data, std::size_t size, gfx::Context&, bool persistent = false);
+    void createOrUpdate(const size_t id, const std::vector<uint8_t>& data, gfx::Context&, bool persistent = false);
+    void createOrUpdate(const size_t id, const void* data, std::size_t size, gfx::Context&, bool persistent = false);
     template <typename T>
-    std::enable_if_t<!std::is_pointer_v<T>> createOrUpdate(const size_t index,
+    std::enable_if_t<!std::is_pointer_v<T>> createOrUpdate(const size_t id,
                                                            const T* data,
                                                            gfx::Context& context,
                                                            bool persistent = false) {
-        createOrUpdate(index, data, sizeof(T), context, persistent);
+        createOrUpdate(id, data, sizeof(T), context, persistent);
     }
 
     UniformBufferArray& operator=(UniformBufferArray&&);
@@ -85,7 +85,7 @@ protected:
     virtual std::unique_ptr<UniformBuffer> copy(const UniformBuffer&) = 0;
 
 protected:
-    std::array<UniformBufferPtr, 32> uniformBufferVector;
+    std::array<UniformBufferPtr, 8> uniformBufferVector;
     static std::shared_ptr<UniformBuffer> nullref;
 };
 

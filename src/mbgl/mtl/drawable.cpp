@@ -354,10 +354,11 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
 void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
     if (shader) {
         const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
-        for (const auto& block : shaderMTL.getUniformBlocks().getVector()) {
+        const auto& uniformBlocks = shaderMTL.getUniformBlocks();
+        for (size_t id = 0; id < uniformBlocks.size(); id++) {
+            const auto& block = uniformBlocks.get(id);
             if (!block) continue;
-            const auto index = block->getIndex();
-            const auto& uniformBuffer = getUniformBuffers().get(index);
+            const auto& uniformBuffer = getUniformBuffers().get(id);
             assert(uniformBuffer && "UBO missing, drawable skipped");
             if (uniformBuffer) {
                 const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
@@ -365,10 +366,10 @@ void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
                 const auto& mtlBlock = static_cast<const UniformBlock&>(*block);
 
                 if (mtlBlock.getBindVertex()) {
-                    renderPass.bindVertex(resource, /*offset=*/0, index);
+                    renderPass.bindVertex(resource, /*offset=*/0, block->getIndex());
                 }
                 if (mtlBlock.getBindFragment()) {
-                    renderPass.bindFragment(resource, /*offset=*/0, index);
+                    renderPass.bindFragment(resource, /*offset=*/0, block->getIndex());
                 }
             }
         }

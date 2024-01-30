@@ -22,5 +22,10 @@ struct alignas(16) RasterDrawableUBO {
 static_assert(sizeof(RasterDrawableUBO) == 128);
 static_assert(sizeof(RasterDrawableUBO) % 16 == 0);
 
+enum {
+    idRasterDrawableUBO,
+    idRasterUBOCount
+};
+
 } // namespace shaders
 } // namespace mbgl

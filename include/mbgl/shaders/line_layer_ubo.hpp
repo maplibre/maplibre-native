@@ -5,6 +5,9 @@
 namespace mbgl {
 namespace shaders {
 
+//
+// Line
+
 struct alignas(16) LineDynamicUBO {
     /* 0 */ std::array<float, 2> units_to_pixels;
     /* 8 */ float pad1, pad2;
@@ -19,8 +22,6 @@ struct alignas(16) LineUBO {
 };
 static_assert(sizeof(LineUBO) % 16 == 0);
 
-using LineGradientUBO = LineUBO;
-
 struct alignas(16) LinePropertiesUBO {
     Color color;
     float blur;
@@ -32,6 +33,30 @@ struct alignas(16) LinePropertiesUBO {
 };
 static_assert(sizeof(LinePropertiesUBO) % 16 == 0);
 
+struct alignas(16) LineInterpolationUBO {
+    float color_t;
+    float blur_t;
+    float opacity_t;
+    float gapwidth_t;
+    float offset_t;
+    float width_t;
+    float pad1, pad2;
+};
+static_assert(sizeof(LineInterpolationUBO) % 16 == 0);
+
+enum {
+    idLineDynamicUBO,
+    idLineUBO,
+    idLinePropertiesUBO,
+    idLineInterpolationUBO,
+    idLineUBOCount
+};
+
+//
+// Line gradient
+
+using LineGradientUBO = LineUBO;
+
 struct alignas(16) LineGradientPropertiesUBO {
     float blur;
     float opacity;
@@ -41,6 +66,27 @@ struct alignas(16) LineGradientPropertiesUBO {
     float pad1, pad2, pad3;
 };
 static_assert(sizeof(LineGradientPropertiesUBO) % 16 == 0);
+
+struct alignas(16) LineGradientInterpolationUBO {
+    float blur_t;
+    float opacity_t;
+    float gapwidth_t;
+    float offset_t;
+    float width_t;
+    float pad1, pad2, pad3;
+};
+static_assert(sizeof(LineGradientInterpolationUBO) % 16 == 0);
+
+enum {
+    idLineGradientDynamicUBO,
+    idLineGradientUBO,
+    idLineGradientPropertiesUBO,
+    idLineGradientInterpolationUBO,
+    idLineGradientUBOCount
+};
+
+//
+// Line pattern
 
 struct alignas(16) LinePatternUBO {
     std::array<float, 4 * 4> matrix;
@@ -60,6 +106,36 @@ struct alignas(16) LinePatternPropertiesUBO {
     float pad1, pad2, pad3;
 };
 static_assert(sizeof(LinePatternPropertiesUBO) % 16 == 0);
+
+struct alignas(16) LinePatternInterpolationUBO {
+    float blur_t;
+    float opacity_t;
+    float offset_t;
+    float gapwidth_t;
+    float width_t;
+    float pattern_from_t;
+    float pattern_to_t;
+    float pad1;
+};
+static_assert(sizeof(LinePatternInterpolationUBO) % 16 == 0);
+
+struct alignas(16) LinePatternTilePropertiesUBO {
+    std::array<float, 4> pattern_from;
+    std::array<float, 4> pattern_to;
+};
+static_assert(sizeof(LinePatternTilePropertiesUBO) % 16 == 0);
+
+enum {
+    idLinePatternDynamicUBO,
+    idLinePatternUBO,
+    idLinePatternPropertiesUBO,
+    idLinePatternInterpolationUBO,
+    idLinePatternTilePropertiesUBO,
+    idLinePatternUBOCount
+};
+
+//
+// Line SDF
 
 struct alignas(16) LineSDFUBO {
     std::array<float, 4 * 4> matrix;
@@ -86,6 +162,29 @@ struct alignas(16) LineSDFPropertiesUBO {
 };
 static_assert(sizeof(LineSDFPropertiesUBO) % 16 == 0);
 
+struct alignas(16) LineSDFInterpolationUBO {
+    float color_t;
+    float blur_t;
+    float opacity_t;
+    float gapwidth_t;
+    float offset_t;
+    float width_t;
+    float floorwidth_t;
+    float pad1;
+};
+static_assert(sizeof(LineSDFInterpolationUBO) % 16 == 0);
+
+enum {
+    idLineSDFDynamicUBO,
+    idLineSDFUBO,
+    idLineSDFPropertiesUBO,
+    idLineSDFInterpolationUBO,
+    idLineSDFUBOCount
+};
+
+//
+// Line basic
+
 struct alignas(16) LineBasicUBO {
     std::array<float, 4 * 4> matrix;
     std::array<float, 2> units_to_pixels;
@@ -102,58 +201,11 @@ struct alignas(16) LineBasicPropertiesUBO {
 };
 static_assert(sizeof(LineBasicPropertiesUBO) % 16 == 0);
 
-/// Property interpolation UBOs
-struct alignas(16) LineInterpolationUBO {
-    float color_t;
-    float blur_t;
-    float opacity_t;
-    float gapwidth_t;
-    float offset_t;
-    float width_t;
-    float pad1, pad2;
+enum {
+    idLineBasicUBO,
+    idLineBasicPropertiesUBO,
+    idLineBasicUBOCount
 };
-static_assert(sizeof(LineInterpolationUBO) % 16 == 0);
-
-struct alignas(16) LineGradientInterpolationUBO {
-    float blur_t;
-    float opacity_t;
-    float gapwidth_t;
-    float offset_t;
-    float width_t;
-    float pad1, pad2, pad3;
-};
-static_assert(sizeof(LineGradientInterpolationUBO) % 16 == 0);
-
-struct alignas(16) LinePatternInterpolationUBO {
-    float blur_t;
-    float opacity_t;
-    float offset_t;
-    float gapwidth_t;
-    float width_t;
-    float pattern_from_t;
-    float pattern_to_t;
-    float pad1;
-};
-static_assert(sizeof(LinePatternInterpolationUBO) % 16 == 0);
-
-struct alignas(16) LineSDFInterpolationUBO {
-    float color_t;
-    float blur_t;
-    float opacity_t;
-    float gapwidth_t;
-    float offset_t;
-    float width_t;
-    float floorwidth_t;
-    float pad1;
-};
-static_assert(sizeof(LineSDFInterpolationUBO) % 16 == 0);
-
-/// Evaluated properties that depend on the tile
-struct alignas(16) LinePatternTilePropertiesUBO {
-    std::array<float, 4> pattern_from;
-    std::array<float, 4> pattern_to;
-};
-static_assert(sizeof(LinePatternTilePropertiesUBO) % 16 == 0);
 
 } // namespace shaders
 } // namespace mbgl

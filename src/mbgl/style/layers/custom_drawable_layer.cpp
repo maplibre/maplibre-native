@@ -27,6 +27,8 @@ namespace mbgl {
 
 namespace style {
 
+using namespace shaders;
+
 namespace {
 const LayerTypeInfo typeInfoCustomDrawable{"custom-drawable",
                                            LayerTypeInfo::Source::NotRequired,
@@ -97,20 +99,15 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-        static const size_t idLineDynamicUBOName = 8;
         const shaders::LineDynamicUBO dynamicUBO = {
             /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, 0, 0};
 
-        static const size_t idLineUBOName = 9;
         const shaders::LineUBO lineUBO{/*matrix = */ util::cast<float>(matrix),
                                        /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
                                        0,
                                        0,
                                        0};
 
-        static const size_t idLinePropertiesUBOName = 10;
-
-        static const size_t idLineInterpolationUBOName = 11;
         const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
                                                                  /*blur_t =*/0.f,
                                                                  /*opacity_t =*/0.f,
@@ -120,10 +117,10 @@ public:
                                                                  0,
                                                                  0};
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idLineDynamicUBOName, &dynamicUBO, parameters.context);
-        uniforms.createOrUpdate(idLineUBOName, &lineUBO, parameters.context);
-        uniforms.createOrUpdate(idLinePropertiesUBOName, &linePropertiesUBO, parameters.context);
-        uniforms.createOrUpdate(idLineInterpolationUBOName, &lineInterpolationUBO, parameters.context);
+        uniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
+        uniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
+        uniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
+        uniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
     };
 
 private:
@@ -151,10 +148,8 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-        static const size_t idFillDrawableUBOName = 3;
         const shaders::FillDrawableUBO fillUBO{/*matrix = */ util::cast<float>(matrix)};
 
-        static const size_t idFillEvaluatedPropsUBOName = 4;
         const shaders::FillEvaluatedPropsUBO fillPropertiesUBO{
             /* .color = */ color,
             /* .opacity = */ opacity,
@@ -163,7 +158,6 @@ public:
             0,
         };
 
-        static const size_t idFillInterpolateUBOName = 5;
         const shaders::FillInterpolateUBO fillInterpolateUBO{
             /* .color_t = */ 0.f,
             /* .opacity_t = */ 0.f,
@@ -171,9 +165,9 @@ public:
             0,
         };
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idFillDrawableUBOName, &fillUBO, parameters.context);
-        uniforms.createOrUpdate(idFillEvaluatedPropsUBOName, &fillPropertiesUBO, parameters.context);
-        uniforms.createOrUpdate(idFillInterpolateUBOName, &fillInterpolateUBO, parameters.context);
+        uniforms.createOrUpdate(idFillDrawableUBO, &fillUBO, parameters.context);
+        uniforms.createOrUpdate(idFillEvaluatedPropsUBO, &fillPropertiesUBO, parameters.context);
+        uniforms.createOrUpdate(idFillInterpolateUBO, &fillInterpolateUBO, parameters.context);
     };
 
 private:

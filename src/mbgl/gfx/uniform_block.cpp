@@ -14,20 +14,20 @@ UniformBlockArray& UniformBlockArray::operator=(UniformBlockArray&& other) {
 }
 
 UniformBlockArray& UniformBlockArray::operator=(const UniformBlockArray& other) {
-    for (size_t index = 0; index < other.uniformBlockVector.size(); index++) {
-        uniformBlockVector[index] = copy(*other.uniformBlockVector[index]);
+    for (size_t id = 0; id < other.uniformBlockVector.size(); id++) {
+        uniformBlockVector[id] = copy(*other.uniformBlockVector[id]);
     }
     return *this;
 }
 
-const std::unique_ptr<UniformBlock>& UniformBlockArray::get(const size_t index) const {
-    const auto& result = (index < uniformBlockVector.size()) ? uniformBlockVector[index] : nullref;
+const std::unique_ptr<UniformBlock>& UniformBlockArray::get(const size_t id) const {
+    const auto& result = (id < uniformBlockVector.size()) ? uniformBlockVector[id] : nullref;
     return (result != nullptr) ? result : nullref;
 }
 
-const std::unique_ptr<UniformBlock>& UniformBlockArray::add(const size_t index, std::size_t size) {
-    uniformBlockVector[index] = create((int)index, size);
-    return uniformBlockVector[index];
+const std::unique_ptr<UniformBlock>& UniformBlockArray::add(const size_t id, const size_t index, std::size_t size) {
+    uniformBlockVector[id] = create((int)index, size);
+    return uniformBlockVector[id];
 }
 
 } // namespace gfx

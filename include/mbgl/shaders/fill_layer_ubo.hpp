@@ -27,6 +27,14 @@ struct alignas(16) FillInterpolateUBO {
 };
 static_assert(sizeof(FillInterpolateUBO) % 16 == 0);
 
+
+enum {
+    idFillDrawableUBO,
+    idFillEvaluatedPropsUBO,
+    idFillInterpolateUBO,
+    idFillUBOCount
+};
+
 //
 // Fill outline
 
@@ -51,6 +59,13 @@ struct alignas(16) FillOutlineInterpolateUBO {
     float pad1, pad2;
 };
 static_assert(sizeof(FillOutlineInterpolateUBO) == 1 * 16);
+
+enum {
+    idFillOutlineDrawableUBO,
+    idFillOutlineEvaluatedPropsUBO,
+    idFillOutlineInterpolateUBO,
+    idFillOutlineUBOCount
+};
 
 //
 // Fill Pattern
@@ -87,6 +102,14 @@ struct alignas(16) FillPatternInterpolateUBO {
 };
 static_assert(sizeof(FillPatternInterpolateUBO) == 1 * 16);
 
+enum {
+    idFillPatternDrawableUBO,
+    idFillPatternTilePropsUBO,
+    idFillPatternEvaluatedPropsUBO,
+    idFillPatternInterpolateUBO,
+    idFillPatternUBOCount
+};
+
 //
 // Fill pattern outline
 
@@ -120,6 +143,14 @@ struct alignas(16) FillOutlinePatternInterpolateUBO {
     float pad;
 };
 static_assert(sizeof(FillOutlinePatternInterpolateUBO) == 1 * 16);
+
+enum {
+    idFillOutlinePatternDrawableUBO,
+    idFillOutlinePatternTilePropsUBO,
+    idFillOutlinePatternEvaluatedPropsUBO,
+    idFillOutlinePatternInterpolateUBO,
+    idFillOutlinePatternUBOCount
+};
 
 } // namespace shaders
 } // namespace mbgl
