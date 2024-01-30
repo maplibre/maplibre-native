@@ -74,11 +74,11 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const SymbolDrawableUBO& drawable [[buffer(10)]],
-                                device const SymbolDynamicUBO& dynamic [[buffer(11)]],
-                                device const SymbolDrawablePaintUBO& paint [[buffer(12)]],
-                                device const SymbolDrawableTilePropsUBO& props [[buffer(13)]],
-                                device const SymbolDrawableInterpolateUBO& interp [[buffer(14)]]) {
+                                device const SymbolDrawableUBO& drawable [[buffer(9)]],
+                                device const SymbolDynamicUBO& dynamic [[buffer(10)]],
+                                device const SymbolDrawablePaintUBO& paint [[buffer(11)]],
+                                device const SymbolDrawableTilePropsUBO& props [[buffer(12)]],
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(13)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -174,10 +174,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolDrawableUBO& drawable [[buffer(10)]],
-                            device const SymbolDynamicUBO& dynamic [[buffer(11)]],
-                            device const SymbolDrawablePaintUBO& paint [[buffer(12)]],
-                            device const SymbolDrawableTilePropsUBO& props [[buffer(13)]],
+                            device const SymbolDrawableUBO& drawable [[buffer(9)]],
+                            device const SymbolDynamicUBO& dynamic [[buffer(10)]],
+                            device const SymbolDrawablePaintUBO& paint [[buffer(11)]],
+                            device const SymbolDrawableTilePropsUBO& props [[buffer(12)]],
                             texture2d<float, access::sample> glyph_image [[texture(0)]],
                             texture2d<float, access::sample> icon_image [[texture(1)]],
                             sampler glyph_sampler [[sampler(0)]],
