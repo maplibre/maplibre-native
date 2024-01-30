@@ -45,19 +45,14 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         /* .padding = */ 0,
         0,
         0};
-
-    if (!paintParamsUniformBuffer) {
-        paintParamsUniformBuffer = context.createUniformBuffer(&paintParamsUBO, sizeof(paintParamsUBO));
-    } else {
-        paintParamsUniformBuffer->update(&paintParamsUBO, sizeof(CirclePaintParamsUBO));
-    }
+    context.emplaceOrUpdateUniformBuffer(paintParamsUniformBuffer, &paintParamsUBO);
 
     const auto zoom = parameters.state.getZoom();
     const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
     const bool scaleWithMap = evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map;
 
     // Updated only with evaluated properties
-    if (!evaluatedPropsUniformBuffer) {
+    if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
         const CircleEvaluatedPropsUBO evaluatedPropsUBO = {
             /* .color = */ constOrDefault<CircleColor>(evaluated),
             /* .stroke_color = */ constOrDefault<CircleStrokeColor>(evaluated),
@@ -69,8 +64,9 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /* .scale_with_map = */ scaleWithMap,
             /* .pitch_with_map = */ pitchWithMap,
             /* .padding = */ 0};
-        evaluatedPropsUniformBuffer = context.createUniformBuffer(&evaluatedPropsUBO, sizeof(evaluatedPropsUBO));
+        context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
     }
+    propertiesUpdated = false;
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID() || !"Circles only render with tiles");

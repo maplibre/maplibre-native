@@ -56,6 +56,10 @@ private:
     void updateColorRamp();
 
 #if MLN_DRAWABLE_RENDERER
+    void layerChanged(const TransitionParameters& parameters,
+                      const Immutable<style::Layer::Impl>& impl,
+                      UniqueChangeRequestVec& changes) override;
+
     /// Remove all drawables for the tile from the layer group
     /// @return The number of drawables actually removed.
     std::size_t removeTile(RenderPass, const OverscaledTileID&) override;

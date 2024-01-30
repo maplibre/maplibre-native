@@ -68,11 +68,8 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         /* .pad = */ 0,
         0,
         0};
-    if (!propsBuffer) {
-        propsBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
-    } else {
-        propsBuffer->update(&paramsUBO, sizeof(paramsUBO));
-    }
+    context.emplaceOrUpdateUniformBuffer(propsBuffer, &paramsUBO);
+    propertiesUpdated = false;
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {

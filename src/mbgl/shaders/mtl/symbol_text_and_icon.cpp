@@ -6,17 +6,17 @@ namespace shaders {
 const std::array<AttributeInfo, 9>
     ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>::attributes = {
         // always attributes
-        AttributeInfo{0, gfx::AttributeDataType::Short4, 1, "a_pos_offset"},
-        AttributeInfo{1, gfx::AttributeDataType::UShort4, 1, "a_data"},
-        AttributeInfo{2, gfx::AttributeDataType::Float3, 1, "a_projected_pos"},
-        AttributeInfo{3, gfx::AttributeDataType::Float, 1, "a_fade_opacity"},
+        AttributeInfo{0, gfx::AttributeDataType::Short4, "a_pos_offset"},
+        AttributeInfo{1, gfx::AttributeDataType::UShort4, "a_data"},
+        AttributeInfo{2, gfx::AttributeDataType::Float3, "a_projected_pos"},
+        AttributeInfo{3, gfx::AttributeDataType::Float, "a_fade_opacity"},
 
         // sometimes uniforms
-        AttributeInfo{4, gfx::AttributeDataType::Float4, 1, "a_fill_color"},
-        AttributeInfo{5, gfx::AttributeDataType::Float4, 1, "a_halo_color"},
-        AttributeInfo{6, gfx::AttributeDataType::Float, 1, "a_opacity"},
-        AttributeInfo{7, gfx::AttributeDataType::Float, 1, "a_halo_width"},
-        AttributeInfo{8, gfx::AttributeDataType::Float, 1, "a_halo_blur"},
+        AttributeInfo{4, gfx::AttributeDataType::Float4, "a_fill_color"},
+        AttributeInfo{5, gfx::AttributeDataType::Float4, "a_halo_color"},
+        AttributeInfo{6, gfx::AttributeDataType::Float, "a_opacity"},
+        AttributeInfo{7, gfx::AttributeDataType::Float, "a_halo_width"},
+        AttributeInfo{8, gfx::AttributeDataType::Float, "a_halo_blur"},
 };
 const std::array<UniformBlockInfo, 5>
     ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>::uniforms = {

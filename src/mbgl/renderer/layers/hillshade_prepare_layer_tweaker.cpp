@@ -16,20 +16,21 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
+namespace {
 static const size_t idHillshadePrepareDrawableUBOName = 2;
 
-const std::array<float, 4>& getUnpackVector(Tileset::DEMEncoding encoding) {
-    // https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb
-    static const std::array<float, 4> unpackMapbox = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
-    // https://aws.amazon.com/public-datasets/terrain/
-    static const std::array<float, 4> unpackTerrarium = {{256.0f, 1.0f, 1.0f / 256.0f, 32768.0f}};
+// https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb
+constexpr std::array<float, 4> unpackMapbox = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
 
-    return encoding == Tileset::DEMEncoding::Terrarium ? unpackTerrarium : unpackMapbox;
+// https://aws.amazon.com/public-datasets/terrain/
+constexpr std::array<float, 4> unpackTerrarium = {{256.0f, 1.0f, 1.0f / 256.0f, 32768.0f}};
+
+constexpr const std::array<float, 4>& getUnpackVector(const Tileset::DEMEncoding encoding) {
+    return (encoding == Tileset::DEMEncoding::Terrarium) ? unpackTerrarium : unpackMapbox;
 }
+} // namespace
 
 void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
-    // const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
-
     if (layerGroup.empty()) {
         return;
     }

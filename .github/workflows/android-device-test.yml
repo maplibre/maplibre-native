@@ -55,13 +55,13 @@ jobs:
         id: get-pr-number
 
       - name: Check if comment on PR contains '!benchmark android'
-        uses: peter-evans/find-comment@v2
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
           issue-number: ${{ steps.get-pr-number.outputs.pr-number }}
           body-regex: '^!benchmark.*android.*$'
 
-      - uses: LouisBrunner/checks-action@v1.6.2
+      - uses: LouisBrunner/checks-action@v2.0.0
         if: matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id
         id: create_check
         with:
@@ -101,7 +101,7 @@ jobs:
           externalData: ${{ matrix.test.externalData }}
           testSpecArn: ${{ matrix.test.testSpecArn }}
 
-      - uses: LouisBrunner/checks-action@v1.6.2
+      - uses: LouisBrunner/checks-action@v2.0.0
         if: always() && (matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id)
         with:
           token: ${{ steps.generate_token.outputs.token }}

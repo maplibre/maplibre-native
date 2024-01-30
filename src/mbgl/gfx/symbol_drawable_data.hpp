@@ -22,16 +22,14 @@ struct SymbolDrawableData : public DrawableData {
                        const style::AlignmentType pitchAlignment_,
                        const style::AlignmentType rotationAlignment_,
                        const style::SymbolPlacementType placement_,
-                       const style::IconTextFitType textFit_,
-                       PropertyMapType&& propertiesAsUniforms_)
+                       const style::IconTextFitType textFit_)
         : isHalo(isHalo_),
           bucketVariablePlacement(bucketVariablePlacement_),
           symbolType(symbolType_),
           pitchAlignment(pitchAlignment_),
           rotationAlignment(rotationAlignment_),
           placement(placement_),
-          textFit(textFit_),
-          propertiesAsUniforms(std::move(propertiesAsUniforms_)) {}
+          textFit(textFit_) {}
     ~SymbolDrawableData() override = default;
 
     const bool isHalo;
@@ -41,7 +39,6 @@ struct SymbolDrawableData : public DrawableData {
     const style::AlignmentType rotationAlignment;
     const style::SymbolPlacementType placement;
     const style::IconTextFitType textFit;
-    const PropertyMapType propertiesAsUniforms;
 };
 
 using UniqueSymbolDrawableData = std::unique_ptr<SymbolDrawableData>;

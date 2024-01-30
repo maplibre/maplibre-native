@@ -52,6 +52,9 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
     }
     layerGroup.setEnabled(true);
 
+    // properties are re-evaluated every time
+    propertiesUpdated = false;
+
     std::optional<uint32_t> samplerLocation{};
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());

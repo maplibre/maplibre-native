@@ -64,6 +64,15 @@ void RenderHillshadeLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
 }
 
+#if MLN_DRAWABLE_RENDERER
+void RenderHillshadeLayer::layerChanged(const TransitionParameters& parameters,
+                                        const Immutable<style::Layer::Impl>& impl,
+                                        UniqueChangeRequestVec& changes) {
+    RenderLayer::layerChanged(parameters, impl, changes);
+    prepareLayerTweaker.reset();
+}
+#endif
+
 void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     auto properties = makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(baseImpl),
                                                             unevaluated.evaluate(parameters));
@@ -73,25 +82,11 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup) {
-        auto newTweaker = std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties);
-        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    if (layerTweaker) {
+        layerTweaker->updateProperties(evaluatedProperties);
     }
-
-    if (!activatedRenderTargets.empty()) {
-        auto newTweaker2 = std::make_shared<HillshadePrepareLayerTweaker>(getID(), evaluatedProperties);
-
-        std::vector<LayerGroupBasePtr> groups;
-        for (const auto& target : activatedRenderTargets) {
-            if (const auto& group = target->getLayerGroup(0)) {
-                groups.push_back(group);
-            }
-        }
-        if (groups.empty()) {
-            prepareLayerTweaker = newTweaker2;
-        } else {
-            replaceTweaker(prepareLayerTweaker, std::move(newTweaker2), groups);
-        }
+    if (prepareLayerTweaker) {
+        prepareLayerTweaker->updateProperties(evaluatedProperties);
     }
 #endif
 }
