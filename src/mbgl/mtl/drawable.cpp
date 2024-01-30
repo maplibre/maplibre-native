@@ -353,8 +353,7 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
 
 void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
     if (shader) {
-        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
-        const auto& uniformBlocks = shaderMTL.getUniformBlocks();
+        const auto& uniformBlocks = shader->getUniformBlocks();
         for (size_t id = 0; id < uniformBlocks.size(); id++) {
             const auto& block = uniformBlocks.get(id);
             if (!block) continue;
