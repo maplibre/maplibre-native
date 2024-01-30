@@ -340,6 +340,51 @@ TEST(Thread, PoolWait) {
     EXPECT_EQ(0, pool->waitForEmpty());
 }
 
+TEST(Thread, PoolWaitRecursiveAdd) {
+    auto pool = Scheduler::GetBackground();
+
+    pool->schedule([&] {
+        // Scheduled tasks can add more tasks
+        pool->schedule([&] {
+            std::this_thread::sleep_for(Milliseconds(10));
+            pool->schedule([&] { std::this_thread::sleep_for(Milliseconds(10)); });
+        });
+        std::this_thread::sleep_for(Milliseconds(10));
+    });
+
+    EXPECT_EQ(0, pool->waitForEmpty());
+}
+
+TEST(Thread, PoolWaitAdd) {
+    auto pool = Scheduler::GetBackground();
+    auto seq = Scheduler::GetSequenced();
+
+    // add new tasks every few milliseconds
+    std::atomic<bool> addActive{true};
+    std::atomic<int> added{0};
+    std::atomic<int> executed{0};
+    seq->schedule([&] {
+        while (addActive) {
+            pool->schedule([&] { executed++; });
+            added++;
+        }
+    });
+
+    // Wait be sure some are added
+    while (added < 1) {
+        std::this_thread::sleep_for(Milliseconds(10));
+    }
+
+    // Add an item that should take long enough to be confident that
+    // more items would be added by the sequential task if not blocked
+    pool->schedule([&] { std::this_thread::sleep_for(Milliseconds(100)); });
+
+    EXPECT_EQ(0, pool->waitForEmpty());
+
+    addActive = false;
+    EXPECT_EQ(0, pool->waitForEmpty());
+}
+
 TEST(Thread, PoolWaitTimeout) {
     auto pool = Scheduler::GetBackground();
 

@@ -18,6 +18,8 @@ void ThreadedSchedulerBase::terminate() {
         std::lock_guard<std::mutex> lock(mutex);
         terminated = true;
     }
+
+    // Wake up all threads so that they shut down
     cvAvailable.notify_all();
 }
 
@@ -86,6 +88,13 @@ void ThreadedSchedulerBase::schedule(std::function<void()>&& fn) {
     assert(fn);
     if (fn) {
         {
+            // We need to block if adding adding a new task from a thread not controlled by this
+            // pool.  Tasks are added by other tasks, so we must not block a thread we do control
+            // or `waitForEmpty` will deadlock.
+            std::unique_lock<std::mutex> addLock(addMutex, std::defer_lock);
+            if (!isThreadOwned(std::this_thread::get_id())) {
+                addLock.lock();
+            }
             std::lock_guard<std::mutex> lock(mutex);
             queue.push(std::move(fn));
         }
@@ -96,14 +105,16 @@ void ThreadedSchedulerBase::schedule(std::function<void()>&& fn) {
 std::size_t ThreadedSchedulerBase::waitForEmpty(Milliseconds timeout) {
     // Must not be called from a thread in our pool, or we would deadlock
     if (!isThreadOwned(std::this_thread::get_id())) {
-        const auto startTime = mbgl::util::MonotonicTimer::now();
+        const auto startTime = util::MonotonicTimer::now();
         const auto isDone = [&] {
             return queue.empty() && pendingItems == 0;
         };
+        // Block any other threads from adding new items
+        std::scoped_lock<std::mutex> addLock(addMutex);
         std::unique_lock<std::mutex> lock(mutex);
         while (!isDone()) {
             if (timeout > Milliseconds::zero()) {
-                const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
+                const auto elapsed = util::MonotonicTimer::now() - startTime;
                 if (timeout <= elapsed || !cvEmpty.wait_for(lock, timeout - elapsed, isDone)) {
                     break;
                 }

@@ -32,7 +32,10 @@ protected:
     virtual bool isThreadOwned(const std::thread::id tid) const = 0;
 
     std::queue<std::function<void()>> queue;
+    // protects `queue`
     std::mutex mutex;
+    // Used to block addition of new items while waiting
+    std::mutex addMutex;
     // Signal when an item is added to the queue
     std::condition_variable cvAvailable;
     // Signal when the queue becomes empty
@@ -60,6 +63,7 @@ public:
     }
 
     ~ThreadedScheduler() override {
+        assert(!this->ThreadedScheduler::isThreadOwned(std::this_thread::get_id()));
         terminate();
         for (auto& thread : threads) {
             assert(std::this_thread::get_id() != thread.get_id());
