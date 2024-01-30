@@ -116,13 +116,16 @@ const std::unique_ptr<VertexAttribute>& VertexAttributeArray::getOrAdd(const Str
                                                                        AttributeDataType dataType,
                                                                        std::size_t count) {
     const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
-    if (auto& attr = result.first->second; result.second) {
-        return attr = create(index, dataType, count);
-    } else if ((dataType == AttributeDataType::Invalid || attr->getDataType() == dataType) &&
-               (index < 0 || attr->getIndex() == index) && (count == 0 || attr->getCount() == count)) {
-        return attr;
+    auto& attr = result.first->second;
+    if (result.second) {
+        // inserted
+        attr = create(index, dataType, count);
+    } else {
+        // already present
+        assert(dataType == AttributeDataType::Invalid || attr->getDataType() == dataType);
+        assert((index < 0 || attr->getIndex() == index) && (count == 0 || attr->getCount() == count));
     }
-    return nullref;
+    return attr;
 }
 
 std::size_t VertexAttributeArray::getTotalSize() const {
