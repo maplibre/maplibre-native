@@ -22,7 +22,7 @@ DrawableGL::~DrawableGL() {
     impl->attributeBuffers.clear();
 }
 
-void DrawableGL::draw(PaintParameters& parameters) const {
+void DrawableGL::draw(PaintParameters& parameters, std::array<intptr_t, 32>& cachedBufferIDVector) const {
     if (isCustom) {
         return;
     }
@@ -59,7 +59,7 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     context.setColorMode(getColorMode());
     context.setCullFaceMode(getCullFaceMode());
 
-    bindUniformBuffers();
+    bindUniformBuffers(cachedBufferIDVector);
     bindTextures();
 
     for (const auto& seg : impl->segments) {
@@ -75,7 +75,7 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     context.bindVertexArray = value::BindVertexArray::Default;
 
     unbindTextures();
-    unbindUniformBuffers();
+    //unbindUniformBuffers();
 #endif
 }
 
@@ -102,7 +102,7 @@ void DrawableGL::setVertexAttrNameId(const StringIdentity id) {
     impl->idVertexAttrName = id;
 }
 
-void DrawableGL::bindUniformBuffers() const {
+void DrawableGL::bindUniformBuffers(std::array<intptr_t, 32>& cachedBufferIDVector) const {
     if (shader) {
         const auto& uniformBlocks = shader->getUniformBlocks();
         for (size_t id = 0; id < uniformBlocks.size(); id++) {
@@ -119,7 +119,17 @@ void DrawableGL::bindUniformBuffers() const {
                 assert(false);
                 continue;
             }
-            block->bindBuffer(*uniformBuffer);
+            const auto& uniformBufferGL = static_cast<const UniformBufferGL&>(*uniformBuffer);
+            const auto binding = block->getIndex();
+            const intptr_t bufferID = uniformBufferGL.getID() + uniformBufferGL.getManagedBuffer().getBindingOffset();
+            gfx::Drawable::bindUBOCount++;
+            if ( bufferID != cachedBufferIDVector[binding] ) {
+                gfx::Drawable::bindUBOExecutedCount++;
+                block->bindBuffer(*uniformBuffer);
+                cachedBufferIDVector[binding] = bufferID;
+            } else {
+                gfx::Drawable::bindUBOCacheHitCount++;
+            }
         }
     }
 }

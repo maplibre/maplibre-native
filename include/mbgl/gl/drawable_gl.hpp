@@ -34,7 +34,8 @@ public:
     DrawableGL(std::string name);
     ~DrawableGL() override;
 
-    void draw(PaintParameters&) const override;
+    void draw(PaintParameters&) const override {};
+    void draw(PaintParameters&, std::array<intptr_t, 32>& cachedBufferIDVector) const;
 
     struct DrawSegmentGL;
     void setIndexData(gfx::IndexVectorBasePtr, std::vector<UniqueDrawSegment> segments) override;
@@ -61,7 +62,7 @@ private:
 
     void uploadTextures() const;
 
-    void bindUniformBuffers() const;
+    void bindUniformBuffers(std::array<intptr_t, 32>& cachedBufferIDVector) const;
     void unbindUniformBuffers() const;
 
     void bindTextures() const;

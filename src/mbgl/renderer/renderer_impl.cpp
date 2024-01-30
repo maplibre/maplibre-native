@@ -506,6 +506,16 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 
     frameCount += 1;
+    
+    std::stringstream ss;
+    ss << "\nbindUBOCount: " << gfx::Drawable::bindUBOCount
+       << "\nbindUBOExecutedCount: " << gfx::Drawable::bindUBOExecutedCount
+       << "\nbindUBOCacheHitCount: " << gfx::Drawable::bindUBOCacheHitCount;
+    Log::Debug(Event::General, ss.str());
+
+    gfx::Drawable::bindUBOCount = 0;
+    gfx::Drawable::bindUBOExecutedCount = 0;
+    gfx::Drawable::bindUBOCacheHitCount = 0;
 }
 
 void Renderer::Impl::reduceMemoryUse() {

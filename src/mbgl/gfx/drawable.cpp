@@ -10,6 +10,10 @@
 namespace mbgl {
 namespace gfx {
 
+int Drawable::bindUBOCount = 0;
+int Drawable::bindUBOExecutedCount = 0;
+int Drawable::bindUBOCacheHitCount = 0;
+
 struct Drawable::Impl {
     gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();

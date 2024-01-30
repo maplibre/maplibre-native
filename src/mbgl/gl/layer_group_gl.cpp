@@ -90,6 +90,9 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
     const auto debugGroupRender = parameters.encoder->createDebugGroup(label_render.c_str());
 #endif
 
+    std::array<intptr_t, 32> cachedBufferIDVector;
+    cachedBufferIDVector.fill(0);
+    
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -116,7 +119,8 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
             context.setStencilMode(drawable.getEnableStencil() ? stencilMode3d : gfx::StencilMode::disabled());
         }
 
-        drawable.draw(parameters);
+        const auto& drawableGL = static_cast<const DrawableGL&>(drawable);
+        drawableGL.draw(parameters, cachedBufferIDVector);
     });
 }
 
@@ -148,6 +152,9 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
         return;
     }
 
+    std::array<intptr_t, 32> cachedBufferIDVector;
+    cachedBufferIDVector.fill(0);
+    
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -161,7 +168,8 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
             tweaker->execute(drawable, parameters);
         }
 
-        drawable.draw(parameters);
+        const auto& drawableGL = static_cast<const DrawableGL&>(drawable);
+        drawableGL.draw(parameters, cachedBufferIDVector);
     });
 }
 
