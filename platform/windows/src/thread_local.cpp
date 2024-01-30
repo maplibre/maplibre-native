@@ -47,7 +47,7 @@ ThreadLocalBase::~ThreadLocalBase() {
     }
 }
 
-void* ThreadLocalBase::get() {
+void* ThreadLocalBase::get() const {
     return TlsGetValue(StorageToThreadInfo->key);
 }
 
