@@ -34,7 +34,7 @@ public:
     DrawableGL(std::string name);
     ~DrawableGL() override;
 
-    void draw(PaintParameters&) const override {};
+    void draw(PaintParameters&) const override{};
     void draw(PaintParameters&, std::array<intptr_t, 32>& cachedBufferIDVector) const;
 
     struct DrawSegmentGL;

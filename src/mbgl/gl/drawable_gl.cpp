@@ -75,7 +75,7 @@ void DrawableGL::draw(PaintParameters& parameters, std::array<intptr_t, 32>& cac
     context.bindVertexArray = value::BindVertexArray::Default;
 
     unbindTextures();
-    //unbindUniformBuffers();
+    // unbindUniformBuffers();
 #endif
 }
 
@@ -123,7 +123,7 @@ void DrawableGL::bindUniformBuffers(std::array<intptr_t, 32>& cachedBufferIDVect
             const auto binding = block->getIndex();
             const intptr_t bufferID = uniformBufferGL.getID() + uniformBufferGL.getManagedBuffer().getBindingOffset();
             gfx::Drawable::bindUBOCount++;
-            if ( bufferID != cachedBufferIDVector[binding] ) {
+            if (bufferID != cachedBufferIDVector[binding]) {
                 gfx::Drawable::bindUBOExecutedCount++;
                 block->bindBuffer(*uniformBuffer);
                 cachedBufferIDVector[binding] = bufferID;

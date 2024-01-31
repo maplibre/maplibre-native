@@ -506,7 +506,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 
     frameCount += 1;
-    
+
     std::stringstream ss;
     ss << "\nbindUBOCount: " << gfx::Drawable::bindUBOCount
        << "\nbindUBOExecutedCount: " << gfx::Drawable::bindUBOExecutedCount

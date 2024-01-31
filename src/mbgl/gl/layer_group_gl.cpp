@@ -92,7 +92,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
 
     std::array<intptr_t, 32> cachedBufferIDVector;
     cachedBufferIDVector.fill(0);
-    
+
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -154,7 +154,7 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
 
     std::array<intptr_t, 32> cachedBufferIDVector;
     cachedBufferIDVector.fill(0);
-    
+
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
