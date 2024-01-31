@@ -20,10 +20,6 @@ public:
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
-    static const StringIdentity idFillTilePropsUBOName;
-    static const StringIdentity idFillInterpolateUBOName;
-    static const StringIdentity idFillOutlineInterpolateUBOName;
-
 private:
     gfx::UniformBufferPtr fillPropsUniformBuffer;
     gfx::UniformBufferPtr fillOutlinePropsUniformBuffer;

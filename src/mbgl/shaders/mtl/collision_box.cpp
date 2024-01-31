@@ -11,7 +11,7 @@ const std::array<AttributeInfo, 5> ShaderSource<BuiltIn::CollisionBoxShader, gfx
     AttributeInfo{4, gfx::AttributeDataType::Float2, "a_shift"},
 };
 const std::array<UniformBlockInfo, 1> ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{5, true, true, sizeof(CollisionUBO), "CollisionBoxUBO"},
+    UniformBlockInfo{5, true, true, sizeof(CollisionUBO), idCollisionUBO},
 };
 const std::array<TextureInfo, 0> ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal>::textures = {};
 

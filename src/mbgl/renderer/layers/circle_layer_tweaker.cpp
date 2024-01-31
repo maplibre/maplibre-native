@@ -22,10 +22,6 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idCircleDrawableUBOName = stringIndexer().get("CircleDrawableUBO");
-static const StringIdentity idCirclePaintParamsUBOName = stringIndexer().get("CirclePaintParamsUBO");
-static const StringIdentity idCircleEvaluatedPropsUBOName = stringIndexer().get("CircleEvaluatedPropsUBO");
-
 void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
@@ -76,8 +72,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idCirclePaintParamsUBOName, paintParamsUniformBuffer);
-        uniforms.addOrReplace(idCircleEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
+        uniforms.set(idCirclePaintParamsUBO, paintParamsUniformBuffer);
+        uniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
         const auto& translation = evaluated.get<CircleTranslate>();
         const auto anchor = evaluated.get<CircleTranslateAnchor>();
@@ -95,7 +91,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                /* .extrude_scale = */ extrudeScale,
                                                /* .padding = */ 0};
 
-        uniforms.createOrUpdate(idCircleDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idCircleDrawableUBO, &drawableUBO, context);
     });
 }
 
