@@ -93,6 +93,8 @@ Context::~Context() noexcept {
 }
 
 void Context::beginFrame() {
+    Scheduler::GetBackground()->runRenderJobs();
+
 #if MLN_DRAWABLE_RENDERER
     frameInFlightFence = std::make_shared<gl::Fence>();
 
@@ -117,12 +119,6 @@ void Context::endFrame() {
     frameInFlightFence->insert();
 #endif
 }
-
-void Context::beginFrame() {
-    Scheduler::GetBackground()->runRenderJobs();
-}
-
-void Context::endFrame() {}
 
 void Context::initializeExtensions(const std::function<gl::ProcAddress(const char*)>& getProcAddress) {
     if (const auto* extensions = reinterpret_cast<const char*>(MBGL_CHECK_ERROR(glGetString(GL_EXTENSIONS)))) {
