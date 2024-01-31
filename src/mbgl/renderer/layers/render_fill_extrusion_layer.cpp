@@ -402,8 +402,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName, &tilePropsUBO, context);
-            uniforms.createOrUpdate(FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName, &interpUBO, context);
+            uniforms.createOrUpdate(idFillExtrusionDrawableTilePropsUBO, &tilePropsUBO, context);
+            uniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
             return true;
         };
         if (updateTile(drawPass, tileID, std::move(updateExisting))) {
@@ -515,10 +515,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setLayerTweaker(layerTweaker);
 
                 auto& uniforms = drawable->mutableUniformBuffers();
-                uniforms.createOrUpdate(
-                    FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName, &tilePropsUBO, context);
-                uniforms.createOrUpdate(
-                    FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName, &interpUBO, context);
+                uniforms.createOrUpdate(idFillExtrusionDrawableTilePropsUBO, &tilePropsUBO, context);
+                uniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
 
                 tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;

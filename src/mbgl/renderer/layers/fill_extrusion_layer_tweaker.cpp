@@ -27,16 +27,9 @@ using namespace shaders;
 using namespace style;
 
 namespace {
-const StringIdentity idFillExtrusionDrawableUBOName = stringIndexer().get("FillExtrusionDrawableUBO");
-const StringIdentity idFillExtrusionDrawablePropsUBOName = stringIndexer().get("FillExtrusionDrawablePropsUBO");
 const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 } // namespace
-
-const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName = stringIndexer().get(
-    "FillExtrusionDrawableTilePropsUBO");
-const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = stringIndexer().get(
-    "FillExtrusionInterpolateUBO");
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
@@ -81,7 +74,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idFillExtrusionDrawablePropsUBOName, propsBuffer);
+        uniforms.set(idFillExtrusionDrawablePropsUBO, propsBuffer);
 
         const auto& translation = evaluated.get<FillExtrusionTranslate>();
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
@@ -119,7 +112,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             /* .height_factor = */ heightFactor,
             /* .pad = */ 0};
 
-        uniforms.createOrUpdate(idFillExtrusionDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idFillExtrusionDrawableUBO, &drawableUBO, context);
     });
 }
 

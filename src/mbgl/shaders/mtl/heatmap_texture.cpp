@@ -9,7 +9,7 @@ const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::HeatmapTextureShader, g
 };
 const std::array<UniformBlockInfo, 1> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal>::uniforms =
     {
-        UniformBlockInfo{1, true, true, sizeof(HeatmapTextureDrawableUBO), "HeatmapTextureDrawableUBO"},
+        UniformBlockInfo{1, true, true, sizeof(HeatmapTextureDrawableUBO), idHeatmapTextureDrawableUBO},
 };
 const std::array<TextureInfo, 2> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, "u_image"},
