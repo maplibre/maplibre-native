@@ -92,11 +92,11 @@ public:
     UniformBlockArray& operator=(const UniformBlockArray&);
 
     /// Do something with each block
-    template <typename Func /* void(const size_t, const UniformBlock&) */>
+    template <typename Func /* void(const UniformBlock&) */>
     void visit(Func f) {
         std::for_each(uniformBlockVector.begin(), uniformBlockVector.end(), [&](const auto& block) {
             if (block) {
-                f(0, *block);
+                f(*block);
             }
         });
     }
