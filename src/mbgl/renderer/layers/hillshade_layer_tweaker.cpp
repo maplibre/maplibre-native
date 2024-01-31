@@ -16,9 +16,6 @@ using namespace style;
 using namespace shaders;
 
 namespace {
-const StringIdentity idHillshadeDrawableUBOName = stringIndexer().get("HillshadeDrawableUBO");
-const StringIdentity idHillshadeEvaluatedPropsUBOName = stringIndexer().get("HillshadeEvaluatedPropsUBO");
-
 std::array<float, 2> getLatRange(const UnwrappedTileID& id) {
     const LatLng latlng0 = LatLng(id);
     const LatLng latlng1 = LatLng(UnwrappedTileID(id.canonical.z, id.canonical.x, id.canonical.y + 1));
@@ -66,14 +63,14 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idHillshadeEvaluatedPropsUBOName, getPropsBuffer());
+        uniforms.set(idHillshadeEvaluatedPropsUBO, getPropsBuffer());
 
         const auto matrix = getTileMatrix(
             tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable, true);
         HillshadeDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
                                             /* .latrange = */ getLatRange(tileID),
                                             /* .light = */ getLight(parameters, evaluated)};
-        uniforms.createOrUpdate(idHillshadeDrawableUBOName, &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(idHillshadeDrawableUBO, &drawableUBO, parameters.context);
     });
 
     propertiesUpdated = false;
