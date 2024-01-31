@@ -214,7 +214,7 @@ void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
         [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
     uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
-    if (const auto& block_ = uniformBlocks.add(info.id, index, info.size)) {
+    if (const auto& block_ = uniformBlocks.set(info.id, index, info.size)) {
         auto& block = static_cast<UniformBlock&>(*block_);
         block.setBindVertex(info.vertex);
         block.setBindFragment(info.fragment);
