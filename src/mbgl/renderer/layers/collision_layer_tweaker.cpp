@@ -21,9 +21,6 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-const StringIdentity CollisionLayerTweaker::idCollisionCircleUBOName = stringIndexer().get(CollisionCircleUBOName);
-const StringIdentity CollisionLayerTweaker::idCollisionBoxUBOName = stringIndexer().get(CollisionBoxUBOName);
-
 void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     if (layerGroup.empty()) {
         return;
@@ -49,7 +46,8 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
         const auto anchor = data.translateAnchor;
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         // extrude scale
         const auto pixelRatio = tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
@@ -64,19 +62,8 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
             /*.camera_to_center_distance*/ parameters.state.getCameraToCenterDistance(),
             /*.overscale_factor*/ static_cast<float>(drawable.getTileID()->overscaleFactor())};
 
-        const auto shader = drawable.getShader();
-        const auto& shaderUniforms = shader->getUniformBlocks();
         auto& uniforms = drawable.mutableUniformBuffers();
-
-        if (shaderUniforms.get(idCollisionBoxUBOName)) {
-            // collision box
-            uniforms.createOrUpdate(idCollisionBoxUBOName, &drawableUBO, context);
-        } else if (shaderUniforms.get(idCollisionCircleUBOName)) {
-            // collision circle
-            uniforms.createOrUpdate(idCollisionCircleUBOName, &drawableUBO, context);
-        } else {
-            Log::Error(Event::General, "Collision shader uniform name unknown.");
-        }
+        uniforms.createOrUpdate(idCollisionUBO, &drawableUBO, context);
     });
 }
 

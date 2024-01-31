@@ -24,6 +24,9 @@
 #include <simd/simd.h>
 
 #include <cassert>
+#if !defined(NDEBUG)
+#include <sstream>
+#endif
 
 namespace mbgl {
 namespace mtl {
@@ -72,11 +75,16 @@ MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) noexcept {
 
 #if !defined(NDEBUG)
 std::string debugLabel(const gfx::Drawable& drawable) {
-    std::string result = drawable.getName();
+    std::ostringstream oss;
+    oss << drawable.getID().id() << "/" << drawable.getName() << "/tile=";
+
     if (const auto& tileID = drawable.getTileID()) {
-        result.append("/tile=").append(util::toString(*tileID));
+        oss << util::toString(*tileID);
+    } else {
+        oss << "(none)";
     }
-    return result;
+
+    return oss.str();
 }
 #endif // !defined(NDEBUG)
 
@@ -233,10 +241,8 @@ void Drawable::draw(PaintParameters& parameters) const {
             impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderable);
             impl->previousStencilMode = *newStencilMode;
         }
-        if (impl->depthStencilState) {
-            encoder->setDepthStencilState(impl->depthStencilState.get());
-            encoder->setStencilReferenceValue(impl->previousStencilMode.ref);
-        }
+        renderPass.setDepthStencilState(impl->depthStencilState);
+        renderPass.setStencilReference(impl->previousStencilMode.ref);
     }
 
     for (const auto& seg_ : impl->segments) {
@@ -355,21 +361,22 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
 
 void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
     if (shader) {
-        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
-        for (const auto& element : shaderMTL.getUniformBlocks().getMap()) {
-            const auto& uniformBuffer = getUniformBuffers().get(element.first);
+        const auto& uniformBlocks = shader->getUniformBlocks();
+        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
+            const auto& block = uniformBlocks.get(id);
+            if (!block) continue;
+            const auto& uniformBuffer = getUniformBuffers().get(id);
             assert(uniformBuffer && "UBO missing, drawable skipped");
             if (uniformBuffer) {
                 const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
                 const auto& resource = buffer.getBufferResource();
-                const auto& block = static_cast<const UniformBlock&>(*element.second);
-                const auto index = block.getIndex();
+                const auto& mtlBlock = static_cast<const UniformBlock&>(*block);
 
-                if (block.getBindVertex()) {
-                    renderPass.bindVertex(resource, /*offset=*/0, index);
+                if (mtlBlock.getBindVertex()) {
+                    renderPass.bindVertex(resource, /*offset=*/0, block->getIndex());
                 }
-                if (block.getBindFragment()) {
-                    renderPass.bindFragment(resource, /*offset=*/0, index);
+                if (mtlBlock.getBindFragment()) {
+                    renderPass.bindFragment(resource, /*offset=*/0, block->getIndex());
                 }
             }
         }

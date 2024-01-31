@@ -26,7 +26,11 @@ public:
 
         // We could cache these by key here to avoid creating a string key each time, but we
         // would need another mutex.  We could also push string IDs down into `ShaderGroup`.
-        const std::string shaderName = getShaderName(name, propertyHash(propertiesAsUniforms));
+        std::size_t seed = 0;
+        mbgl::util::hash_combine(seed, propertyHash(propertiesAsUniforms));
+        mbgl::util::hash_combine(seed, programParameters.getDefinesHash());
+        const std::string shaderName = getShaderName(name, seed);
+
         auto shader = get<gl::ShaderProgramGL>(shaderName);
         if (shader) {
             return shader;
@@ -49,8 +53,14 @@ public:
         }
 
         auto& glContext = static_cast<gl::Context&>(context);
-        shader = ShaderProgramGL::create(
-            glContext, programParameters, shaderName, firstAttribName, vert, frag, additionalDefines);
+        shader = ShaderProgramGL::create(glContext,
+                                         programParameters,
+                                         shaderName,
+                                         firstAttribName,
+                                         shaders::ShaderInfo<ShaderID, gfx::Backend::Type::OpenGL>::uniformBlocks,
+                                         vert,
+                                         frag,
+                                         additionalDefines);
         if (!shader || !registerShader(shader, shaderName)) {
             throw std::runtime_error("Failed to register " + shaderName + " with shader group!");
         }

@@ -16,6 +16,8 @@
 #include <mbgl/util/noncopyable.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gl/fence.hpp>
+#include <mbgl/gl/buffer_allocator.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 #endif
 
@@ -84,6 +86,10 @@ public:
 
     void finish();
 
+#if MLN_DRAWABLE_RENDERER
+    std::shared_ptr<gl::Fence> getCurrentFrameFence() const;
+#endif
+
     // Actually remove the objects we marked as abandoned with the above methods.
     // Only call this while the OpenGL context is exclusive to this thread.
     void performCleanup() override;
@@ -137,6 +143,11 @@ private:
     bool cleanupOnDestruction = true;
 
     std::unique_ptr<extension::Debugging> debugging;
+#if MLN_DRAWABLE_RENDERER
+    std::shared_ptr<gl::Fence> frameInFlightFence;
+    std::unique_ptr<gl::UniformBufferAllocator> uboAllocator;
+    size_t frameNum = 0;
+#endif
 
 public:
     State<value::ActiveTextureUnit> activeTextureUnit;
@@ -158,7 +169,9 @@ private:
     State<value::StencilMask> stencilMask;
     State<value::StencilTest> stencilTest;
     State<value::StencilOp> stencilOp;
+#if MLN_RENDER_BACKEND_OPENGL
     State<value::DepthRange> depthRange;
+#endif
     State<value::DepthMask> depthMask;
     State<value::DepthTest> depthTest;
     State<value::DepthFunc> depthFunc;

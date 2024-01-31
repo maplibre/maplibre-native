@@ -13,16 +13,17 @@
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
+layout (std140) uniform LineDynamicUBO {
+    highp vec2 u_units_to_pixels;
+    lowp float pad0, pad1;
+};
+
 layout (std140) uniform LinePatternUBO {
     highp mat4 u_matrix;
     mediump vec4 u_scale;
     highp vec2 u_texsize;
-    highp vec2 u_units_to_pixels;
     mediump float u_ratio;
-    lowp float u_device_pixel_ratio;
     highp float u_fade;
-
-    highp float pad1;
 };
 
 layout (std140) uniform LinePatternPropertiesUBO {
@@ -77,7 +78,7 @@ void main() {
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
-    float ANTIALIASING = 1.0 / u_device_pixel_ratio / 2.0;
+    float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
     vec2 a_extrude = a_data.xy - 128.0;
     float a_direction = mod(a_data.z, 4.0) - 1.0;

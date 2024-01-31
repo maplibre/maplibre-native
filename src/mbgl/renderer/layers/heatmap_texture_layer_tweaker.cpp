@@ -16,8 +16,6 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idHeatmapTextureDrawableUBOName = stringIndexer().get("HeatmapTextureDrawableUBO");
-
 void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
 
@@ -30,23 +28,27 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const Paint
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
+    const auto getDrawableUBO = [&]() -> auto& {
+        if (!drawableBuffer) {
+            const auto& size = parameters.staticData.backendSize;
+            mat4 viewportMat;
+            matrix::ortho(viewportMat, 0, size.width, size.height, 0, -1, 1);
+            const HeatmapTextureDrawableUBO drawableUBO = {
+                /* .matrix = */ util::cast<float>(viewportMat),
+                /* .world = */ {static_cast<float>(size.width), static_cast<float>(size.height)},
+                /* .opacity = */ evaluated.get<HeatmapOpacity>(),
+                /* .pad1 = */ 0,
+            };
+            parameters.context.emplaceOrUpdateUniformBuffer(drawableBuffer, &drawableUBO);
+        }
+        return drawableBuffer;
+    };
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!checkTweakDrawable(drawable)) {
             return;
         }
-
-        const auto& size = parameters.staticData.backendSize;
-        mat4 viewportMat;
-        matrix::ortho(viewportMat, 0, size.width, size.height, 0, -1, 1);
-        const HeatmapTextureDrawableUBO drawableUBO = {
-            /* .matrix = */ util::cast<float>(viewportMat),
-            /* .world = */ {static_cast<float>(size.width), static_cast<float>(size.height)},
-            /* .opacity = */ evaluated.get<HeatmapOpacity>(),
-            /* .pad1 = */ 0,
-        };
-
-        drawable.mutableUniformBuffers().createOrUpdate(
-            idHeatmapTextureDrawableUBOName, &drawableUBO, parameters.context);
+        drawable.mutableUniformBuffers().set(idHeatmapTextureDrawableUBO, getDrawableUBO());
     });
 }
 

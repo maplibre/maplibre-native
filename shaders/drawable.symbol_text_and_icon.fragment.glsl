@@ -19,8 +19,8 @@ layout (std140) uniform SymbolDrawableUBO {
 layout (std140) uniform SymbolDynamicUBO {
     highp float u_fade_change;
     highp float u_camera_to_center_distance;
-    highp float u_device_pixel_ratio;
     highp float u_aspect_ratio;
+    highp float pad0;
 };
 
 layout (std140) uniform SymbolDrawablePaintUBO {
@@ -86,7 +86,7 @@ void main() {
 
     vec2 tex = v_data0.xy;
 
-    float EDGE_GAMMA = 0.105 / u_device_pixel_ratio;
+    float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
 
     float gamma_scale = v_data1.x;
     float size = v_data1.y;

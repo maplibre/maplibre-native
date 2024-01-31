@@ -27,16 +27,9 @@ using namespace shaders;
 using namespace style;
 
 namespace {
-const StringIdentity idFillExtrusionDrawableUBOName = stringIndexer().get("FillExtrusionDrawableUBO");
-const StringIdentity idFillExtrusionDrawablePropsUBOName = stringIndexer().get("FillExtrusionDrawablePropsUBO");
 const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 } // namespace
-
-const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionTilePropsUBOName = stringIndexer().get(
-    "FillExtrusionDrawableTilePropsUBO");
-const StringIdentity FillExtrusionLayerTweaker::idFillExtrusionInterpolateUBOName = stringIndexer().get(
-    "FillExtrusionInterpolateUBO");
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
@@ -70,11 +63,8 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         /* .pad = */ 0,
         0,
         0};
-    if (!propsBuffer) {
-        propsBuffer = context.createUniformBuffer(&paramsUBO, sizeof(paramsUBO));
-    } else {
-        propsBuffer->update(&paramsUBO, sizeof(paramsUBO));
-    }
+    context.emplaceOrUpdateUniformBuffer(propsBuffer, &paramsUBO);
+    propertiesUpdated = false;
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
@@ -84,13 +74,14 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idFillExtrusionDrawablePropsUBOName, propsBuffer);
+        uniforms.set(idFillExtrusionDrawablePropsUBO, propsBuffer);
 
         const auto& translation = evaluated.get<FillExtrusionTranslate>();
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         constexpr bool nearClipped = true;
-        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         const auto tileRatio = 1 / tileID.pixelsToTileUnits(1, state.getIntegerZoom());
         const auto zoomScale = state.zoomScale(tileID.canonical.z);
@@ -121,7 +112,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
             /* .height_factor = */ heightFactor,
             /* .pad = */ 0};
 
-        uniforms.createOrUpdate(idFillExtrusionDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idFillExtrusionDrawableUBO, &drawableUBO, context);
     });
 }
 

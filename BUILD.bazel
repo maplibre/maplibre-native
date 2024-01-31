@@ -22,10 +22,7 @@ load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 # Generate code required by the core
 filegroup(
     name = "style_data",
-    srcs = glob(
-        ["**/*.ejs"],
-        allow_empty = False,
-    ),
+    srcs = glob(["**/*.ejs"]),
 )
 
 genrule(
@@ -40,10 +37,7 @@ genrule(
 
 filegroup(
     name = "shader_data",
-    srcs = ["shaders/manifest.json"] + glob(
-        ["shaders/*.glsl"],
-        allow_empty = False,
-    ),
+    srcs = ["shaders/manifest.json"] + glob(["shaders/*.glsl"]),
 )
 
 genrule(
@@ -119,7 +113,7 @@ cc_library(
             "MLN_DRAWABLE_RENDERER=1",
         ],
     }) + select({
-        "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
+        "@platforms//os:ios": ["GLES_SILENCE_DEPRECATION=1"],
         "//conditions:default": [],
     }),
     includes = [
@@ -151,7 +145,7 @@ cc_library(
         "//vendor:vector-tile",
         "//vendor:wagyu",
     ] + select({
-        "//:ios": [
+        "@platforms//os:ios": [
             "//vendor:icu",
         ],
         "//conditions:default": [],
@@ -171,38 +165,6 @@ genrule(
     """,
     local = True,
     visibility = ["//visibility:public"],
-)
-
-# The next three rules are a bit of a hack
-# they are needed until rules_apple has platforms support
-# https://github.com/bazelbuild/rules_apple/issues/1658
-# Allows passing a command line flag to set the Platform
-# bazel build [target] --//:maplibre_platform=ios
-
-string_flag(
-    name = "maplibre_platform",
-    build_setting_default = "ios",
-)
-
-config_setting(
-    name = "linux",
-    flag_values = {
-        ":maplibre_platform": "linux",
-    },
-)
-
-config_setting(
-    name = "ios",
-    flag_values = {
-        ":maplibre_platform": "ios",
-    },
-)
-
-config_setting(
-    name = "windows",
-    flag_values = {
-        ":maplibre_platform": "windows",
-    },
 )
 
 # Selects the rendering implementation to utilize in the core

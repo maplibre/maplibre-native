@@ -24,24 +24,19 @@ using namespace std::string_literals;
 
 namespace mbgl {
 
-shaders::AttributeInfo::AttributeInfo(std::size_t index_,
-                                      gfx::AttributeDataType dataType_,
-                                      std::size_t count_,
-                                      std::string_view name_)
+shaders::AttributeInfo::AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::string_view name_)
     : index(index_),
       dataType(dataType_),
-      count(count_),
       name(name_),
       nameID(stringIndexer().get(name_)) {}
 
 shaders::UniformBlockInfo::UniformBlockInfo(
-    std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::string_view name_)
+    std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
     : index(index_),
       vertex(vertex_),
       fragment(fragment_),
       size(size_),
-      name(name_),
-      nameID(stringIndexer().get(name_)) {}
+      id(id_) {}
 
 shaders::TextureInfo::TextureInfo(std::size_t index_, std::string_view name_)
     : index(index_),
@@ -206,9 +201,9 @@ void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
     vertexAttributes.visitAttributes(
         [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
-    uniformBlocks.visit([&](auto, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
+    uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
-    vertexAttributes.add(stringIndexer().get(info.name), index, info.dataType, info.count);
+    vertexAttributes.add(stringIndexer().get(info.name), index, info.dataType, 1);
 }
 
 void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
@@ -217,9 +212,9 @@ void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
     vertexAttributes.visitAttributes(
         [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
-    uniformBlocks.visit([&](auto, const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
+    uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
-    if (const auto& block_ = uniformBlocks.add(stringIndexer().get(info.name), index, info.size)) {
+    if (const auto& block_ = uniformBlocks.set(info.id, index, info.size)) {
         auto& block = static_cast<UniformBlock&>(*block_);
         block.setBindVertex(info.vertex);
         block.setBindFragment(info.fragment);

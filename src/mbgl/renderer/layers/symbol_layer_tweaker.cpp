@@ -62,14 +62,6 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 
 } // namespace
 
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = stringIndexer().get("SymbolDynamicUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = stringIndexer().get("SymbolDrawablePaintUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = stringIndexer().get(
-    "SymbolDrawableTilePropsUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = stringIndexer().get(
-    "SymbolDrawableInterpolateUBO");
-
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& state = parameters.state;
@@ -94,8 +86,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
                                          /*.camera_to_center_distance=*/camDist,
-                                         /*.device_pixel_ratio=*/parameters.pixelRatio,
-                                         /*.aspect_ratio=*/state.getSize().aspectRatio()};
+                                         /*.aspect_ratio=*/state.getSize().aspectRatio(),
+                                         0};
 
     if (!dynamicBuffer) {
         dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
@@ -128,7 +120,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                    : evaluated.get<style::IconTranslateAnchor>();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         // from symbol_program, makeValues
         const auto currentZoom = static_cast<float>(parameters.state.getZoom());
@@ -168,10 +161,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         };
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idSymbolDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
 
-        uniforms.addOrReplace(idSymbolDynamicUBOName, dynamicBuffer);
-        uniforms.addOrReplace(idSymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
+        uniforms.set(idSymbolDynamicUBO, dynamicBuffer);
+        uniforms.set(idSymbolDrawablePaintUBO, isText ? textPaintBuffer : iconPaintBuffer);
     });
 }
 

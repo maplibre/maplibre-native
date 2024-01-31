@@ -19,8 +19,7 @@ using namespace shaders;
 #if !defined(NDEBUG)
 constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
 #endif
-static const StringIdentity idBackgroundDrawableUBOName = stringIndexer().get("BackgroundDrawableUBO");
-static const StringIdentity idBackgroundLayerUBOName = stringIndexer().get("BackgroundLayerUBO");
+
 static const StringIdentity idTexUniformName = stringIndexer().get("u_image");
 
 void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
@@ -51,6 +50,9 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
     }
     layerGroup.setEnabled(true);
 
+    // properties are re-evaluated every time
+    propertiesUpdated = false;
+
     std::optional<uint32_t> samplerLocation{};
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
@@ -64,12 +66,13 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
                (shader == context.getGenericShader(parameters.shaders, std::string(BackgroundPatternShaderName))));
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-        const auto matrix = parameters.matrixForTile(tileID);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable);
 
         const BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idBackgroundDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context);
 
         if (hasPattern) {
             if (!samplerLocation.has_value()) {
@@ -111,7 +114,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
                 /* .opacity = */ evaluated.get<BackgroundOpacity>(),
                 /* .pad1 = */ 0,
             };
-            uniforms.createOrUpdate(idBackgroundLayerUBOName, &layerUBO, context);
+            uniforms.createOrUpdate(idBackgroundLayerUBO, &layerUBO, context);
         } else {
             // UBOs can be shared
             if (!backgroundLayerBuffer) {
@@ -122,7 +125,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
                                                      0};
                 backgroundLayerBuffer = context.createUniformBuffer(&layerUBO, sizeof(layerUBO));
             }
-            uniforms.addOrReplace(idBackgroundLayerUBOName, backgroundLayerBuffer);
+            uniforms.set(idBackgroundLayerUBO, backgroundLayerBuffer);
         }
     });
 }

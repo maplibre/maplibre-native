@@ -40,6 +40,9 @@ inputs:
   AWS_DEVICE_FARM_DEVICE_POOL_ARN:
     description: "AWS_DEVICE_FARM_DEVICE_POOL_ARN"
     required: true
+  testSpecArn:
+    description: "ARN of test spec"
+    required: false
 runs:
   using: "composite"
   steps:
@@ -111,7 +114,7 @@ runs:
             --name "MapLibre Native ${{ matrix.test.name }}" \
             --app-arn ${{ env.app_arn }} \
             --device-pool-arn ${{ inputs.AWS_DEVICE_FARM_DEVICE_POOL_ARN }} \
-            --test type=${{ inputs.testType }},testPackageArn=${{ env.test_package_arn }}${{ inputs.testFilter && ',filter=' }}${{ inputs.testFilter }} \
+            --test type=${{ inputs.testType }},testPackageArn=${{ env.test_package_arn }}${{ inputs.testFilter && ',filter=' }}${{ inputs.testFilter }}${{ inputs.testSpecArn && ',testSpecArn=' }}${{ inputs.testSpecArn }} \
             ${{ inputs.externalData && '--configuration extraDataPackageArn=' }}${{ inputs.externalData }} \
             --output text --query "run.arn")"
           
@@ -119,7 +122,7 @@ runs:
           # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/devicefarm/get-run.html#output
           while true; do
             sleep 30
-            result="$(aws get-run --arn "$arn" --output text --query "run.result")"
+            result="$(aws devicefarm get-run --arn "$arn" --output text --query "run.result")"
             case $result in
               FAILED|ERRORED|STOPPED) echo "Run $result" && exit 1 ;;
               SKIPPED|PASSED) echo "Run $result" && exit 0 ;;

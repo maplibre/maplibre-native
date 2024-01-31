@@ -51,8 +51,8 @@ static_assert(sizeof(SymbolDrawableUBO) == 14 * 16);
 struct alignas(16) SymbolDynamicUBO {
     /* 0 */ float fade_change;
     /* 4 */ float camera_to_center_distance;
-    /* 8 */ float device_pixel_ratio;
-    /* 12 */ float aspect_ratio;
+    /* 8 */ float aspect_ratio;
+    /* 12 */ float pad;
     /* 16 */
 };
 static_assert(sizeof(SymbolDynamicUBO) == 16);
@@ -68,6 +68,15 @@ struct alignas(16) SymbolDrawablePaintUBO {
     /* 48 */
 };
 static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
+
+enum {
+    idSymbolDrawableUBO,
+    idSymbolDynamicUBO,
+    idSymbolDrawablePaintUBO,
+    idSymbolDrawableTilePropsUBO,
+    idSymbolDrawableInterpolateUBO,
+    symbolUBOCount
+};
 
 } // namespace shaders
 } // namespace mbgl
