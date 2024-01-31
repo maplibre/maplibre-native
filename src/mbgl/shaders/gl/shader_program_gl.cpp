@@ -156,9 +156,9 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         GLint size = 0;
         MBGL_CHECK_ERROR(glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_DATA_SIZE, &size));
         assert(size > 0);
-        GLint binding = GLint(blockInfo.binding);
+        GLint binding = static_cast<GLint>(blockInfo.binding);
         MBGL_CHECK_ERROR(glUniformBlockBinding(program, index, binding));
-        uniformBlocks.add(blockInfo.id, binding, size);
+        uniformBlocks.set(blockInfo.id, binding, size);
     }
 
     SamplerLocationMap samplerLocations;

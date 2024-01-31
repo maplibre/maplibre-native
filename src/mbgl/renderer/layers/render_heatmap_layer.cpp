@@ -402,7 +402,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             auto& uniforms = drawable.mutableUniformBuffers();
 
             if (auto buffer = getInterpolateBuffer()) {
-                uniforms.addOrReplace(idHeatmapInterpolateUBO, std::move(buffer));
+                uniforms.set(idHeatmapInterpolateUBO, std::move(buffer));
             }
         });
 
@@ -467,7 +467,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             auto& uniforms = drawable->mutableUniformBuffers();
 
             if (auto buffer = getInterpolateBuffer()) {
-                uniforms.addOrReplace(idHeatmapInterpolateUBO, std::move(buffer));
+                uniforms.set(idHeatmapInterpolateUBO, std::move(buffer));
             }
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));

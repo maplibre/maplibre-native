@@ -54,7 +54,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idHeatmapEvaluatedPropsUBO, getPropsBuffer());
+        uniforms.set(idHeatmapEvaluatedPropsUBO, getPropsBuffer());
 
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;

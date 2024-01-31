@@ -27,8 +27,11 @@ const std::shared_ptr<UniformBuffer>& UniformBufferArray::get(const size_t id) c
     return (result != nullptr) ? result : nullref;
 }
 
-const std::shared_ptr<UniformBuffer>& UniformBufferArray::addOrReplace(const size_t id,
-                                                                       std::shared_ptr<UniformBuffer> uniformBuffer) {
+const std::shared_ptr<UniformBuffer>& UniformBufferArray::set(const size_t id, std::shared_ptr<UniformBuffer> uniformBuffer) {
+    assert(id < uniformBufferVector.size());
+    if (id >= uniformBufferVector.size()) {
+        return nullref;
+    }
     uniformBufferVector[id] = std::move(uniformBuffer);
     return uniformBufferVector[id];
 }

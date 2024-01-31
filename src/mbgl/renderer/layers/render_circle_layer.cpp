@@ -416,7 +416,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setLayerTweaker(layerTweaker);
 
             auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.addOrReplace(idCircleInterpolateUBO, interpBuffer);
+            uniforms.set(idCircleInterpolateUBO, interpBuffer);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

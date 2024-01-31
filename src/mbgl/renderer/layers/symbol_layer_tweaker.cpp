@@ -163,8 +163,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
 
-        uniforms.addOrReplace(idSymbolDynamicUBO, dynamicBuffer);
-        uniforms.addOrReplace(idSymbolDrawablePaintUBO, isText ? textPaintBuffer : iconPaintBuffer);
+        uniforms.set(idSymbolDynamicUBO, dynamicBuffer);
+        uniforms.set(idSymbolDrawablePaintUBO, isText ? textPaintBuffer : iconPaintBuffer);
     });
 }
 

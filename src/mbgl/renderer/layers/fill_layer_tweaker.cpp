@@ -154,7 +154,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             case RenderFillLayer::FillVariant::Fill: {
                 UpdateFillUniformBuffers();
 
-                uniforms.addOrReplace(idFillEvaluatedPropsUBO, fillPropsUniformBuffer);
+                uniforms.set(idFillEvaluatedPropsUBO, fillPropsUniformBuffer);
 
                 const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
                 uniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
@@ -163,7 +163,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             case RenderFillLayer::FillVariant::FillOutline: {
                 UpdateFillOutlineUniformBuffers();
 
-                uniforms.addOrReplace(idFillOutlineEvaluatedPropsUBO, fillOutlinePropsUniformBuffer);
+                uniforms.set(idFillOutlineEvaluatedPropsUBO, fillOutlinePropsUniformBuffer);
 
                 const FillOutlineDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
@@ -176,7 +176,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             case RenderFillLayer::FillVariant::FillPattern: {
                 UpdateFillPatternUniformBuffers();
 
-                uniforms.addOrReplace(idFillPatternEvaluatedPropsUBO, fillPatternPropsUniformBuffer);
+                uniforms.set(idFillPatternEvaluatedPropsUBO, fillPatternPropsUniformBuffer);
 
                 const FillPatternDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
@@ -193,7 +193,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             case RenderFillLayer::FillVariant::FillOutlinePattern: {
                 UpdateFillOutlinePatternUniformBuffers();
 
-                uniforms.addOrReplace(idFillOutlinePatternEvaluatedPropsUBO, fillOutlinePatternPropsUniformBuffer);
+                uniforms.set(idFillOutlinePatternEvaluatedPropsUBO, fillOutlinePatternPropsUniformBuffer);
 
                 const FillOutlinePatternDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),

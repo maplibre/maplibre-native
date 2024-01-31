@@ -72,8 +72,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idCirclePaintParamsUBO, paintParamsUniformBuffer);
-        uniforms.addOrReplace(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+        uniforms.set(idCirclePaintParamsUBO, paintParamsUniformBuffer);
+        uniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
         const auto& translation = evaluated.get<CircleTranslate>();
         const auto anchor = evaluated.get<CircleTranslateAnchor>();
