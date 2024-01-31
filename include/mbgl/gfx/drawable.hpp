@@ -143,7 +143,7 @@ public:
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
 
     /// Whether to enable depth testing
-    bool getEnableDepth() { return enableDepth; }
+    bool getEnableDepth() const { return enableDepth; }
     virtual void setEnableDepth(bool value) { enableDepth = value; }
 
     /// Determines depth range within the layer for 2D drawables
