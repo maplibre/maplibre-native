@@ -370,7 +370,7 @@ public:
                 0};
             parameters.context.emplaceOrUpdateUniformBuffer(lineUniformBuffer, &lineBasicUBO);
         }
-        uniforms.addOrReplace(idLineBasicUBO, lineUniformBuffer);
+        uniforms.set(idLineBasicUBO, lineUniformBuffer);
 
         if (!linePropertiesUniformBuffer) {
             const shaders::LineBasicPropertiesUBO linePropertiesUBO{/*color =*/color,
@@ -381,7 +381,7 @@ public:
             parameters.context.emplaceOrUpdateUniformBuffer(linePropertiesUniformBuffer, &linePropertiesUBO);
         }
         if (!uniforms.get(idLineBasicPropertiesUBO)) {
-            uniforms.addOrReplace(idLineBasicPropertiesUBO, linePropertiesUniformBuffer);
+            uniforms.set(idLineBasicPropertiesUBO, linePropertiesUniformBuffer);
         }
     };
 

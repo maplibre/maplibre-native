@@ -51,15 +51,15 @@ public:
     UniformBufferArray(const UniformBufferArray&) = delete;
     virtual ~UniformBufferArray() = default;
 
-    /// Number of elements
-    std::size_t size() const { return uniformBufferVector.size(); }
+    /// Number of maximum allocated elements
+    std::size_t allocatedSize() const { return uniformBufferVector.size(); }
 
     /// Get an uniform buffer element.
     /// Returns a pointer to the element on success, or null if the uniform buffer doesn't exists.
     const std::shared_ptr<UniformBuffer>& get(const size_t id) const;
 
-    /// Add a new uniform buffer element or replace the existing one.
-    const std::shared_ptr<UniformBuffer>& addOrReplace(const size_t id, std::shared_ptr<UniformBuffer> uniformBuffer);
+    /// Set a new uniform buffer element or replace the existing one.
+    const std::shared_ptr<UniformBuffer>& set(const size_t id, std::shared_ptr<UniformBuffer> uniformBuffer);
 
     /// Create and add a new buffer or update an existing one
     void createOrUpdate(const size_t id, const std::vector<uint8_t>& data, gfx::Context&, bool persistent = false);

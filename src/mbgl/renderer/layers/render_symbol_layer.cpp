@@ -848,7 +848,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // Create or update the shared interpolation UBO
     gfx::UniformBufferPtr& interpUBO = isText ? textInterpUBO : iconInterpUBO;
     if (interpUBO) {
-        uniforms.addOrReplace(idSymbolDrawableInterpolateUBO, interpUBO);
+        uniforms.set(idSymbolDrawableInterpolateUBO, interpUBO);
     } else {
         const auto ubo = buildInterpUBO(paintProps, isText, currentZoom);
         interpUBO = uniforms.get(idSymbolDrawableInterpolateUBO);
@@ -856,7 +856,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
             interpUBO->update(&ubo, sizeof(ubo));
         } else {
             interpUBO = context.createUniformBuffer(&ubo, sizeof(ubo));
-            uniforms.addOrReplace(idSymbolDrawableInterpolateUBO, interpUBO);
+            uniforms.set(idSymbolDrawableInterpolateUBO, interpUBO);
         }
     }
 
@@ -1368,7 +1368,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                     auto& uniforms = drawable->mutableUniformBuffers();
                     uniforms.createOrUpdate(idSymbolDrawableTilePropsUBO, &tileUBO, context);
-                    uniforms.addOrReplace(idSymbolDrawableInterpolateUBO, interpUBO);
+                    uniforms.set(idSymbolDrawableInterpolateUBO, interpUBO);
 
                     tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                     ++stats.drawablesAdded;

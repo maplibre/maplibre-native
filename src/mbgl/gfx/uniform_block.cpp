@@ -25,8 +25,12 @@ const std::unique_ptr<UniformBlock>& UniformBlockArray::get(const size_t id) con
     return (result != nullptr) ? result : nullref;
 }
 
-const std::unique_ptr<UniformBlock>& UniformBlockArray::add(const size_t id, const size_t index, std::size_t size) {
-    uniformBlockVector[id] = create((int)index, size);
+const std::unique_ptr<UniformBlock>& UniformBlockArray::set(const size_t id, const size_t index, std::size_t size) {
+    assert(id < uniformBlockVector.size());
+    if (id >= uniformBlockVector.size()) {
+        return nullref;
+    }
+    uniformBlockVector[id] = create(static_cast<int>(index), size);
     return uniformBlockVector[id];
 }
 

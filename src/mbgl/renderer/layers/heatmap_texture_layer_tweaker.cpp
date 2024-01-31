@@ -48,7 +48,7 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const Paint
         if (!checkTweakDrawable(drawable)) {
             return;
         }
-        drawable.mutableUniformBuffers().addOrReplace(idHeatmapTextureDrawableUBO, getDrawableUBO());
+        drawable.mutableUniformBuffers().set(idHeatmapTextureDrawableUBO, getDrawableUBO());
     });
 }
 

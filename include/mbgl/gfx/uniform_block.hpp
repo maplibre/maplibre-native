@@ -71,19 +71,19 @@ public:
     /// @brief  Destructor
     virtual ~UniformBlockArray() = default;
 
-    /// @brief Number of elements
-    std::size_t size() const { return uniformBlockVector.size(); }
+    /// @brief Number of maximum allocated elements
+    std::size_t allocatedSize() const { return uniformBlockVector.size(); }
 
     /// @brief Get an uniform block element.
     /// @return Pointer to the element on success, or null if the uniform block doesn't exists.
     const std::unique_ptr<UniformBlock>& get(const size_t id) const;
 
-    /// @brief Add a new uniform block element.
+    /// @brief Set a new uniform block element.
     /// @param id
     /// @param index
     /// @param size
     /// @return Pointer to the new element on success, or null if the uniform block already exists.
-    const std::unique_ptr<UniformBlock>& add(const size_t id, const size_t index, std::size_t size);
+    const std::unique_ptr<UniformBlock>& set(const size_t id, const size_t index, std::size_t size);
 
     /// @brief  Move assignment operator
     UniformBlockArray& operator=(UniformBlockArray&&);
@@ -92,11 +92,11 @@ public:
     UniformBlockArray& operator=(const UniformBlockArray&);
 
     /// Do something with each block
-    template <typename Func /* void(const size_t, const UniformBlock&) */>
+    template <typename Func /* void(const UniformBlock&) */>
     void visit(Func f) {
         std::for_each(uniformBlockVector.begin(), uniformBlockVector.end(), [&](const auto& block) {
             if (block) {
-                f(0, *block);
+                f(*block);
             }
         });
     }

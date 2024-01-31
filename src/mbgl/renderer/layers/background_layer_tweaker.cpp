@@ -125,7 +125,7 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
                                                      0};
                 backgroundLayerBuffer = context.createUniformBuffer(&layerUBO, sizeof(layerUBO));
             }
-            uniforms.addOrReplace(idBackgroundLayerUBO, backgroundLayerBuffer);
+            uniforms.set(idBackgroundLayerUBO, backgroundLayerBuffer);
         }
     });
 }
