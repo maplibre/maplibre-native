@@ -9,7 +9,7 @@ namespace mbgl {
 namespace shaders {
 
 struct UniformBlockInfo {
-    UniformBlockInfo(std::string_view name, std::size_t id, std::size_t binding_);
+    UniformBlockInfo(std::string_view name, std::size_t id, std::size_t binding);
     std::string_view name;
     std::size_t id;
     std::size_t binding;
