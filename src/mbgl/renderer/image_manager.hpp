@@ -76,7 +76,7 @@ private:
 
 class ImageRequestor {
 public:
-    explicit ImageRequestor(ImageManager&);
+    explicit ImageRequestor(std::shared_ptr<ImageManager>);
     virtual ~ImageRequestor();
     virtual void onImagesAvailable(ImageMap icons,
                                    ImageMap patterns,
@@ -89,7 +89,7 @@ public:
     void removePendingRequest(const std::string& imageId) { pendingRequests.erase(imageId); }
 
 private:
-    ImageManager& imageManager;
+    std::shared_ptr<ImageManager> imageManager;
 
     // Pending requests are image requests that are waiting to be dispatched to the client.
     std::set<std::string> pendingRequests;

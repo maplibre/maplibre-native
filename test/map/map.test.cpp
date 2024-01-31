@@ -1452,11 +1452,14 @@ TEST(Map, KeepRenderData) {
     test.map.getStyle().loadURL("maptiler://maps/streets");
     const int iterations = 3;
     const int resourcesCount = 4 /*tiles*/;
+
+    requestsCount = 0;
     // Keep render data.
     for (int i = 1; i <= iterations; ++i) {
         test.frontend.render(test.map);
         EXPECT_EQ(resourcesCount, requestsCount);
     }
+
     requestsCount = 0;
     // Clear render data.
     for (int i = 1; i <= iterations; ++i) {
