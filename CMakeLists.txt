@@ -159,6 +159,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_program_base.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_info.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/buffer_allocator.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
@@ -1139,6 +1140,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/line_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/raster_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/symbol_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/ubo_max_count.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
@@ -1149,6 +1152,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/texture2d.hpp
         )
         list(APPEND SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_info.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp

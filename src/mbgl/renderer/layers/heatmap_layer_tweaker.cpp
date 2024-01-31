@@ -20,9 +20,6 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idHeatmapDrawableUBOName = stringIndexer().get("HeatmapDrawableUBO");
-static const StringIdentity idHeatmapEvaluatedPropsUBOName = stringIndexer().get("HeatmapEvaluatedPropsUBO");
-
 void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto zoom = parameters.state.getZoom();
@@ -57,7 +54,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idHeatmapEvaluatedPropsUBOName, getPropsBuffer());
+        uniforms.set(idHeatmapEvaluatedPropsUBO, getPropsBuffer());
 
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
@@ -68,7 +65,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
             /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
             /* .padding = */ {0}};
 
-        uniforms.createOrUpdate(idHeatmapDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idHeatmapDrawableUBO, &drawableUBO, context);
     });
 
     propertiesUpdated = false;
