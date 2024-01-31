@@ -55,9 +55,6 @@ public:
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
-    void beginFrame() override;
-    void endFrame() override;
-
     /// Create a new buffer object
     /// @param data The raw data to copy, may be `nullptr`
     /// @param size The size of the buffer
