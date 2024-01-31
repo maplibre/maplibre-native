@@ -69,6 +69,10 @@ public:
     void schedule(std::function<void()>&& scheduled) override;
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
+    // Wait for the queue to be empty
+    // A timeout of zero results in an unbounded wait
+    std::size_t waitForEmpty(Milliseconds timeout) override;
+
     void requestRender();
 
     // Snapshot - requires a RunLoop on the calling thread

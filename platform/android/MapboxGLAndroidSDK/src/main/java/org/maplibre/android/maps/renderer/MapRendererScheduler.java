@@ -14,4 +14,9 @@ public interface MapRendererScheduler {
   @Keep
   void queueEvent(Runnable runnable);
 
+  @Keep
+  void waitForEmpty();
+
+  @Keep
+  long waitForEmpty(long timeoutMillis);
 }

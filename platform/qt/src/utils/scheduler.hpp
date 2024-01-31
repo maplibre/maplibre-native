@@ -5,6 +5,7 @@
 
 #include <QObject>
 
+#include <condition_variable>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -20,6 +21,9 @@ public:
 
     // mbgl::Scheduler implementation.
     void schedule(std::function<void()>&& function) final;
+
+    std::size_t waitForEmpty(std::chrono::milliseconds timeout) override;
+
     mapbox::base::WeakPtr<mbgl::Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
     void processEvents();
@@ -31,6 +35,8 @@ private:
     MBGL_STORE_THREAD(tid);
 
     std::mutex m_taskQueueMutex;
+    std::condition_variable cvEmpty;
+    std::atomic<std::size_t> pendingItems;
     std::queue<std::function<void()>> m_taskQueue;
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
 };

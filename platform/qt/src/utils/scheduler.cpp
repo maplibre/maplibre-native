@@ -1,5 +1,6 @@
 #include "scheduler.hpp"
 
+#include <mbgl/util/monotonic_timer.hpp>
 #include <mbgl/util/util.hpp>
 
 #include <cassert>
@@ -26,6 +27,7 @@ void Scheduler::processEvents() {
     {
         const std::unique_lock<std::mutex> lock(m_taskQueueMutex);
         std::swap(taskQueue, m_taskQueue);
+        pendingItems += taskQueue.size();
     }
 
     while (!taskQueue.empty()) {
@@ -34,7 +36,29 @@ void Scheduler::processEvents() {
             function();
         }
         taskQueue.pop();
+        pendingItems--;
     }
+
+    cvEmpty.notify_all();
+}
+
+std::size_t Scheduler::waitForEmpty(std::chrono::milliseconds timeout) {
+    MBGL_VERIFY_THREAD(tid);
+
+    const auto startTime = mbgl::util::MonotonicTimer::now();
+    std::unique_lock<std::mutex> lock(m_taskQueueMutex);
+    const auto isDone = [&] {
+        return m_taskQueue.empty() && pendingItems == 0;
+    };
+    while (!isDone()) {
+        const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
+        if (timeout <= elapsed || !cvEmpty.wait_for(lock, timeout - elapsed, isDone)) {
+            assert(isDone());
+            break;
+        }
+    }
+
+    return m_taskQueue.size() + pendingItems;
 }
 
 } // namespace QMapLibre

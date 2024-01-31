@@ -21,9 +21,13 @@ public:
     util::RunLoop loop;
     style::Style style{fileSource, 1};
     AnnotationManager annotationManager{style};
-    ImageManager imageManager;
-    GlyphManager glyphManager;
+
+    const std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
+    const std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
+
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
+
+    const std::shared_ptr<Scheduler> threadPool = Scheduler::GetBackground();
 
     TileParameters tileParameters{1.0,
                                   MapDebugOptions(),
@@ -34,6 +38,12 @@ public:
                                   imageManager,
                                   glyphManager,
                                   0};
+
+    ~VectorTileTest() {
+        // Ensure that deferred releases are complete before cleaning up
+        EXPECT_EQ(0, loop.waitForEmpty(Milliseconds::zero()));
+        EXPECT_EQ(0, threadPool->waitForEmpty());
+    }
 };
 
 } // namespace mbgl
