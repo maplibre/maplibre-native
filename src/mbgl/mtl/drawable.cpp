@@ -235,7 +235,9 @@ void Drawable::draw(PaintParameters& parameters) const {
             if (enableStencil && !newStencilMode) {
                 newStencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
             }
-            const auto depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+            const auto depthMode = getEnableDepth()
+                                       ? parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType())
+                                       : gfx::DepthMode::disabled();
             const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
                                                    : gfx::StencilMode::disabled();
             impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderable);
@@ -361,21 +363,22 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
 
 void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
     if (shader) {
-        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
-        for (const auto& element : shaderMTL.getUniformBlocks().getMap()) {
-            const auto& uniformBuffer = getUniformBuffers().get(element.first);
+        const auto& uniformBlocks = shader->getUniformBlocks();
+        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
+            const auto& block = uniformBlocks.get(id);
+            if (!block) continue;
+            const auto& uniformBuffer = getUniformBuffers().get(id);
             assert(uniformBuffer && "UBO missing, drawable skipped");
             if (uniformBuffer) {
                 const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
                 const auto& resource = buffer.getBufferResource();
-                const auto& block = static_cast<const UniformBlock&>(*element.second);
-                const auto index = block.getIndex();
+                const auto& mtlBlock = static_cast<const UniformBlock&>(*block);
 
-                if (block.getBindVertex()) {
-                    renderPass.bindVertex(resource, /*offset=*/0, index);
+                if (mtlBlock.getBindVertex()) {
+                    renderPass.bindVertex(resource, /*offset=*/0, block->getIndex());
                 }
-                if (block.getBindFragment()) {
-                    renderPass.bindFragment(resource, /*offset=*/0, index);
+                if (mtlBlock.getBindFragment()) {
+                    renderPass.bindFragment(resource, /*offset=*/0, block->getIndex());
                 }
             }
         }

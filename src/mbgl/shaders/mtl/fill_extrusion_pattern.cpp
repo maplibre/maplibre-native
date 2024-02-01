@@ -15,10 +15,10 @@ const std::array<AttributeInfo, 6>
 };
 const std::array<UniformBlockInfo, 4>
     ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal>::uniforms = {
-        UniformBlockInfo{6, true, true, sizeof(FillExtrusionDrawableUBO), "FillExtrusionDrawableUBO"},
-        UniformBlockInfo{7, true, true, sizeof(FillExtrusionDrawablePropsUBO), "FillExtrusionDrawablePropsUBO"},
-        UniformBlockInfo{8, true, true, sizeof(FillExtrusionDrawableTilePropsUBO), "FillExtrusionDrawableTilePropsUBO"},
-        UniformBlockInfo{9, true, false, sizeof(FillExtrusionInterpolateUBO), "FillExtrusionInterpolateUBO"},
+        UniformBlockInfo{6, true, true, sizeof(FillExtrusionDrawableUBO), idFillExtrusionDrawableUBO},
+        UniformBlockInfo{7, true, true, sizeof(FillExtrusionDrawablePropsUBO), idFillExtrusionDrawablePropsUBO},
+        UniformBlockInfo{8, true, true, sizeof(FillExtrusionDrawableTilePropsUBO), idFillExtrusionDrawableTilePropsUBO},
+        UniformBlockInfo{9, true, false, sizeof(FillExtrusionInterpolateUBO), idFillExtrusionInterpolateUBO},
 };
 const std::array<TextureInfo, 1>
     ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal>::textures = {

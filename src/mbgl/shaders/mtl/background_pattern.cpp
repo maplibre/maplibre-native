@@ -10,8 +10,8 @@ const std::array<AttributeInfo, 1>
 };
 const std::array<UniformBlockInfo, 2>
     ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>::uniforms = {
-        UniformBlockInfo{1, true, false, sizeof(BackgroundDrawableUBO), "BackgroundDrawableUBO"},
-        UniformBlockInfo{2, true, true, sizeof(BackgroundPatternLayerUBO), "BackgroundLayerUBO"},
+        UniformBlockInfo{1, true, false, sizeof(BackgroundDrawableUBO), idBackgroundDrawableUBO},
+        UniformBlockInfo{2, true, true, sizeof(BackgroundPatternLayerUBO), idBackgroundLayerUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, "u_image"}};

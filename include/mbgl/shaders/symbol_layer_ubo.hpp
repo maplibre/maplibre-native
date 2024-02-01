@@ -69,5 +69,14 @@ struct alignas(16) SymbolDrawablePaintUBO {
 };
 static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
 
+enum {
+    idSymbolDrawableUBO,
+    idSymbolDynamicUBO,
+    idSymbolDrawablePaintUBO,
+    idSymbolDrawableTilePropsUBO,
+    idSymbolDrawableInterpolateUBO,
+    symbolUBOCount
+};
+
 } // namespace shaders
 } // namespace mbgl

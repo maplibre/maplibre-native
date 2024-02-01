@@ -9,9 +9,9 @@ const std::array<AttributeInfo, 3> ShaderSource<BuiltIn::HeatmapShader, gfx::Bac
     AttributeInfo{2, gfx::AttributeDataType::Float2, "a_radius"},
 };
 const std::array<UniformBlockInfo, 3> ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{3, true, false, sizeof(HeatmapDrawableUBO), "HeatmapDrawableUBO"},
-    UniformBlockInfo{4, true, true, sizeof(HeatmapEvaluatedPropsUBO), "HeatmapEvaluatedPropsUBO"},
-    UniformBlockInfo{5, true, false, sizeof(HeatmapInterpolateUBO), "HeatmapInterpolateUBO"},
+    UniformBlockInfo{3, true, false, sizeof(HeatmapDrawableUBO), idHeatmapDrawableUBO},
+    UniformBlockInfo{4, true, true, sizeof(HeatmapEvaluatedPropsUBO), idHeatmapEvaluatedPropsUBO},
+    UniformBlockInfo{5, true, false, sizeof(HeatmapInterpolateUBO), idHeatmapInterpolateUBO},
 };
 const std::array<TextureInfo, 0> ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal>::textures = {};
 
