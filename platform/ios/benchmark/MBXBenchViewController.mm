@@ -31,7 +31,7 @@ public:
         //NSLog(@"Frame rendering time: %4.1f ms", status.frameRenderingTime * 1e3);
         
         bool fullyRendered = status.mode == mbgl::MapObserver::RenderMode::Full;
-        [mapDelegate mapDidFinishRenderingFrameFullyRendered:fullyRendered 
+        [mapDelegate mapDidFinishRenderingFrameFullyRendered:fullyRendered
                                            frameEncodingTime:status.frameEncodingTime
                                           frameRenderingTime:status.frameRenderingTime];
     }
@@ -176,15 +176,14 @@ NSDate* const currentDate = [NSDate date];
 }
 
 size_t idx = 0;
-enum class State { None, WaitingForAssets, WarmingUp, Benchmarking } state = State::None;
+enum class State { None, WaitingForAssets, Benchmarking } state = State::None;
 int frames = 0;
 double totalFrameEncodingTime = 0;
 double totalFrameRenderingTime = 0;
 std::chrono::steady_clock::time_point started;
 std::vector<std::pair<std::string, std::pair<double, double>> > result;
 
-static const int warmupDuration = 20; // frames
-static const int benchmarkDuration = 200; // frames
+static const int benchmarkDuration = 5; // seconds
 
 namespace  mbgl {
     extern std::size_t uploadCount, uploadBuildCount, uploadVertextAttrsDirty, uploadInvalidSegments;
@@ -225,7 +224,9 @@ namespace  mbgl {
         cameraOptions.center = mbgl::LatLng(location.latitude, location.longitude);
         cameraOptions.zoom = location.zoom;
         cameraOptions.bearing = location.bearing;
-        map->jumpTo(cameraOptions);
+        mbgl::AnimationOptions animationOptions;
+        animationOptions.duration.emplace(std::chrono::duration_cast<mbgl::Duration>(std::chrono::duration<NSTimeInterval>(benchmarkDuration)));
+        map->easeTo(cameraOptions, animationOptions);
         
         state = State::WaitingForAssets;
         NSLog(@"Benchmarking \"%s\"", location.name.c_str());
@@ -293,17 +294,17 @@ namespace  mbgl {
         frames++;
         totalFrameEncodingTime += frameEncodingTime;
         totalFrameRenderingTime += frameRenderingTime;
-        if (frames >= benchmarkDuration)
+        
+        const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - started).count();
+        if (duration >= benchmarkDuration * 1e6)
         {
             state = State::None;
 
             // Report FPS
-            const auto duration = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - started).count();
-            const auto wallClockFPS = double(frames * 1e6) / duration;
             const auto frameEncodingTime = static_cast<double>(totalFrameEncodingTime) / frames;
             const auto frameRenderingTime = static_cast<double>(totalFrameRenderingTime) / frames;
             result.emplace_back(mbgl::bench::locations[idx].name, std::make_pair(frameEncodingTime, frameRenderingTime));
-            NSLog(@"- Frame encoding time: %.1f ms, Frame rendering time: %.1f ms (%.1f sync FPS)", frameEncodingTime * 1e3, frameRenderingTime * 1e3, wallClockFPS);
+            NSLog(@"- Frame encoding time: %.1f ms, Frame rendering time: %.1f ms (%d frames)", frameEncodingTime * 1e3, frameRenderingTime * 1e3, frames);
 
             // Start benchmarking the next location.
             idx++;
@@ -315,30 +316,17 @@ namespace  mbgl {
         }
         return;
     }
-    else if (state == State::WarmingUp)
-    {
-        frames++;
-        if (frames >= warmupDuration)
-        {
-            frames = 0;
-            totalFrameEncodingTime = 0;
-            totalFrameRenderingTime = 0;
-            state = State::Benchmarking;
-            started = std::chrono::steady_clock::now();
-            NSLog(@"- Benchmarking for %d frames...", benchmarkDuration);
-        }
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self renderFrame];
-        });
-        return;
-    }
     else if (state == State::WaitingForAssets)
     {
         if (map->isFullyLoaded())
         {
             // Start the benchmarking timer.
-            state = State::WarmingUp;
-            NSLog(@"- Warming up for %d frames...", warmupDuration);
+            frames = 0;
+            totalFrameEncodingTime = 0;
+            totalFrameRenderingTime = 0;
+            state = State::Benchmarking;
+            started = std::chrono::steady_clock::now();
+            NSLog(@"- Benchmarking for %d seconds...", benchmarkDuration);
         }
         dispatch_async(dispatch_get_main_queue(), ^{
             [self renderFrame];
