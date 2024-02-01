@@ -44,6 +44,11 @@ struct ShaderInfo<BuiltIn::CollisionCircleShader, gfx::Backend::Type::OpenGL> {
 };
 
 template <>
+struct ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL> {
+    static const std::vector<UniformBlockInfo> uniformBlocks;
+};
+
+template <>
 struct ShaderInfo<BuiltIn::DebugShader, gfx::Backend::Type::OpenGL> {
     static const std::vector<UniformBlockInfo> uniformBlocks;
 };

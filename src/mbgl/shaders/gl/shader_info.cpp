@@ -34,6 +34,12 @@ const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::CollisionBoxShader, gfx:
 };
 
 const std::vector<UniformBlockInfo>
+    ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
+        UniformBlockInfo{"CustomSymbolIconDrawableUBO", idCustomSymbolIconDrawableUBO},
+        UniformBlockInfo{"CustomSymbolIconParametersUBO", idCustomSymbolIconParametersUBO},
+};
+
+const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::CollisionCircleShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
         UniformBlockInfo{"CollisionCircleUBO", idCollisionUBO},
 };

@@ -197,7 +197,6 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-        static const StringIdentity idDrawableUBOName = stringIndexer().get("CustomSymbolIconDrawableUBO");
         const shaders::CustomSymbolIconDrawableUBO drawableUBO{/*matrix = */ util::cast<float>(matrix)};
 
         const auto pixelsToTileUnits = tileID.pixelsToTileUnits(
@@ -209,7 +208,6 @@ public:
                                                        : std::array<float, 2>{parameters.pixelsToGLUnits[0] * factor,
                                                                               parameters.pixelsToGLUnits[1] * factor};
 
-        static const StringIdentity idParametersUBOName = stringIndexer().get("CustomSymbolIconParametersUBO");
         const shaders::CustomSymbolIconParametersUBO parametersUBO{
             /*extrude_scale*/ {extrudeScale[0] * options.size.width, extrudeScale[1] * options.size.height},
             /*anchor*/ options.anchor,
@@ -224,8 +222,8 @@ public:
 
         // set UBOs
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idDrawableUBOName, &drawableUBO, parameters.context);
-        uniforms.createOrUpdate(idParametersUBOName, &parametersUBO, parameters.context);
+        uniforms.createOrUpdate(idCustomSymbolIconDrawableUBO, &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(idCustomSymbolIconParametersUBO, &parametersUBO, parameters.context);
     };
 
 private:

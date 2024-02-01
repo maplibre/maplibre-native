@@ -3,6 +3,7 @@
 #include <mbgl/shaders/background_layer_ubo.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/collision_layer_ubo.hpp>
+#include <mbgl/shaders/custom_drawable_layer_ubo.hpp>
 #include <mbgl/shaders/debug_layer_ubo.hpp>
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
@@ -22,6 +23,7 @@ namespace shaders {
 static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backgroundUBOCount),
                                                        static_cast<size_t>(circleUBOCount),
                                                        static_cast<size_t>(collisionUBOCount),
+                                                       static_cast<size_t>(customDrawableUBOCount),
                                                        static_cast<size_t>(debugUBOCount),
                                                        static_cast<size_t>(fillUBOCount),
                                                        static_cast<size_t>(fillOutlineUBOCount),
