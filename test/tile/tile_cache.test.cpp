@@ -20,10 +20,13 @@
 #include <mbgl/test/vector_tile_test.hpp>
 #include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/identity.hpp>
 
 #include <memory>
 
 using namespace mbgl;
+
+namespace {
 
 class VectorTileMock : public VectorTile {
 public:
@@ -31,12 +34,14 @@ public:
                    std::string sourceID_,
                    const TileParameters& parameters,
                    const Tileset& tileset)
-        : VectorTile(id_, sourceID_, parameters, tileset) {
+        : VectorTile(id_, std::move(sourceID_), parameters, tileset) {
         renderable = true;
     }
 
     util::SimpleIdentity uniqueId;
 };
+
+} // namespace
 
 TEST(TileCache, Smoke) {
     VectorTileTest test;
