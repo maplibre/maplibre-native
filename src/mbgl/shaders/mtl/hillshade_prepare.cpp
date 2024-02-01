@@ -10,7 +10,7 @@ const std::array<AttributeInfo, 2>
 };
 const std::array<UniformBlockInfo, 1>
     ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Metal>::uniforms = {
-        UniformBlockInfo{2, true, true, sizeof(HillshadePrepareDrawableUBO), "HillshadePrepareDrawableUBO"},
+        UniformBlockInfo{2, true, true, sizeof(HillshadePrepareDrawableUBO), idHillshadePrepareDrawableUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, "u_image"},

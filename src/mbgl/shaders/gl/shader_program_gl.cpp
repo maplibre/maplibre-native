@@ -113,13 +113,15 @@ std::optional<uint32_t> ShaderProgramGL::getSamplerLocation(const StringIdentity
     return result;
 }
 
-std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
-                                                         const ProgramParameters& programParameters,
-                                                         const std::string& /*name*/,
-                                                         const std::string_view firstAttribName,
-                                                         const std::string& vertexSource,
-                                                         const std::string& fragmentSource,
-                                                         const std::string& additionalDefines) noexcept(false) {
+std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
+    Context& context,
+    const ProgramParameters& programParameters,
+    const std::string& /*name*/,
+    const std::string_view firstAttribName,
+    const std::vector<shaders::UniformBlockInfo>& uniformBlocksInfo,
+    const std::string& vertexSource,
+    const std::string& fragmentSource,
+    const std::string& additionalDefines) noexcept(false) {
     // throws on compile error
     auto vertProg = context.createShader(
         ShaderType::Vertex,
@@ -149,23 +151,21 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(Context& context,
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_BLOCKS, &count));
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH, &maxLength));
 
-    auto name = std::vector<GLchar>(maxLength);
-    for (GLint index = 0; index < count; ++index) {
-        GLsizei length = 0;
+    for (const auto& blockInfo : uniformBlocksInfo) {
+        GLint index = MBGL_CHECK_ERROR(glGetUniformBlockIndex(program, blockInfo.name.data()));
         GLint size = 0;
-        GLint binding = index;
-        MBGL_CHECK_ERROR(glGetActiveUniformBlockName(program, index, maxLength, &length, name.data()));
         MBGL_CHECK_ERROR(glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_DATA_SIZE, &size));
-        assert(length > 0 && size > 0);
+        assert(size > 0);
+        GLint binding = static_cast<GLint>(blockInfo.binding);
         MBGL_CHECK_ERROR(glUniformBlockBinding(program, index, binding));
-        uniformBlocks.add(stringIndexer().get(name.data()), index, size);
+        uniformBlocks.set(blockInfo.id, binding, size);
     }
 
     SamplerLocationMap samplerLocations;
     GLint numActiveUniforms = 0;
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numActiveUniforms));
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength));
-    name.resize(maxLength);
+    auto name = std::vector<GLchar>(maxLength);
     for (GLint index = 0; index < numActiveUniforms; ++index) {
         GLsizei actualLength = 0;
         GLint size = 0;

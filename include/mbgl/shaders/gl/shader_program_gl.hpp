@@ -3,8 +3,9 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/uniform_block_gl.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
+#include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/util/string_indexer.hpp>
+#include <mbgl/shaders/gl/shader_info.hpp>
 
 #include <unordered_map>
 
@@ -33,6 +34,7 @@ public:
                                                    const ProgramParameters& programParameters,
                                                    const std::string& name,
                                                    const std::string_view firstAttribName,
+                                                   const std::vector<shaders::UniformBlockInfo>& uniformBlocksInfo,
                                                    const std::string& vertexSource,
                                                    const std::string& fragmentSource,
                                                    const std::string& additionalDefines = "") noexcept(false);

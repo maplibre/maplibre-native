@@ -20,9 +20,6 @@ public:
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
-    static const StringIdentity idFillExtrusionTilePropsUBOName;
-    static const StringIdentity idFillExtrusionInterpolateUBOName;
-
 private:
     gfx::UniformBufferPtr propsBuffer;
 
