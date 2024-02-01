@@ -401,22 +401,22 @@ class MapChangeReceiverTest {
         mapChangeEventManager!!.addOnDidFinishRenderingFrameListener(
             onDidFinishRenderingFrameListener
         )
-        mapChangeEventManager!!?.onDidFinishRenderingFrame(true)
-        Mockito.verify(onDidFinishRenderingFrameListener)?.onDidFinishRenderingFrame(true)
+        mapChangeEventManager!!?.onDidFinishRenderingFrame(true, .0, .0)
+        Mockito.verify(onDidFinishRenderingFrameListener)?.onDidFinishRenderingFrame(true, .0, .0)
         mapChangeEventManager!!.removeOnDidFinishRenderingFrameListener(
             onDidFinishRenderingFrameListener
         )
-        mapChangeEventManager!!?.onDidFinishRenderingFrame(true)
-        Mockito.verify(onDidFinishRenderingFrameListener)?.onDidFinishRenderingFrame(true)
+        mapChangeEventManager!!?.onDidFinishRenderingFrame(true, .0, .0)
+        Mockito.verify(onDidFinishRenderingFrameListener)?.onDidFinishRenderingFrame(true,.0, .0)
         mapChangeEventManager!!.addOnDidFinishRenderingFrameListener(
             onDidFinishRenderingFrameListener
         )
         Logger.setLoggerDefinition(loggerDefinition)
         val exc: Exception = RuntimeException()
         Mockito.doThrow(exc).`when`(onDidFinishRenderingFrameListener)
-            ?.onDidFinishRenderingFrame(true)
+            ?.onDidFinishRenderingFrame(true, .0, .0)
         try {
-            mapChangeEventManager!!?.onDidFinishRenderingFrame(true)
+            mapChangeEventManager!!?.onDidFinishRenderingFrame(true, .0, .0)
             Assert.fail("The exception should've been re-thrown.")
         } catch (throwable: RuntimeException) {
             Mockito.verify(loggerDefinition)?.e(
@@ -427,9 +427,9 @@ class MapChangeReceiverTest {
         }
         val err: Error = ExecutionError("", Error())
         Mockito.doThrow(err).`when`(onDidFinishRenderingFrameListener)
-            ?.onDidFinishRenderingFrame(true)
+            ?.onDidFinishRenderingFrame(true, .0, .0)
         try {
-            mapChangeEventManager!!?.onDidFinishRenderingFrame(true)
+            mapChangeEventManager!!?.onDidFinishRenderingFrame(true, .0, .0)
             Assert.fail("The exception should've been re-thrown.")
         } catch (throwable: ExecutionError) {
             Mockito.verify(loggerDefinition)?.e(
@@ -445,22 +445,22 @@ class MapChangeReceiverTest {
         mapChangeEventManager!!.addOnDidFinishRenderingFrameListener(
             onDidFinishRenderingFrameListener
         )
-        mapChangeEventManager!!?.onDidFinishRenderingFrame(false)
-        Mockito.verify(onDidFinishRenderingFrameListener)?.onDidFinishRenderingFrame(false)
+        mapChangeEventManager!!?.onDidFinishRenderingFrame(false, .0, .0)
+        Mockito.verify(onDidFinishRenderingFrameListener)?.onDidFinishRenderingFrame(false, .0, .0)
         mapChangeEventManager!!.removeOnDidFinishRenderingFrameListener(
             onDidFinishRenderingFrameListener
         )
-        mapChangeEventManager!!?.onDidFinishRenderingFrame(false)
-        Mockito.verify(onDidFinishRenderingFrameListener)?.onDidFinishRenderingFrame(false)
+        mapChangeEventManager!!?.onDidFinishRenderingFrame(false, .0, .0)
+        Mockito.verify(onDidFinishRenderingFrameListener)?.onDidFinishRenderingFrame(false, .0, .0)
         mapChangeEventManager!!.addOnDidFinishRenderingFrameListener(
             onDidFinishRenderingFrameListener
         )
         Logger.setLoggerDefinition(loggerDefinition)
         val exc: Exception = RuntimeException()
         Mockito.doThrow(exc).`when`(onDidFinishRenderingFrameListener)
-            ?.onDidFinishRenderingFrame(false)
+            ?.onDidFinishRenderingFrame(false, .0, .0)
         try {
-            mapChangeEventManager!!?.onDidFinishRenderingFrame(false)
+            mapChangeEventManager!!?.onDidFinishRenderingFrame(false, .0, .0)
             Assert.fail("The exception should've been re-thrown.")
         } catch (throwable: RuntimeException) {
             Mockito.verify(loggerDefinition)?.e(
@@ -471,9 +471,9 @@ class MapChangeReceiverTest {
         }
         val err: Error = ExecutionError("", Error())
         Mockito.doThrow(err).`when`(onDidFinishRenderingFrameListener)
-            ?.onDidFinishRenderingFrame(false)
+            ?.onDidFinishRenderingFrame(false, .0, .0)
         try {
-            mapChangeEventManager!!?.onDidFinishRenderingFrame(false)
+            mapChangeEventManager!!?.onDidFinishRenderingFrame(false, .0, .0)
             Assert.fail("The exception should've been re-thrown.")
         } catch (throwable: ExecutionError) {
             Mockito.verify(loggerDefinition)?.e(
