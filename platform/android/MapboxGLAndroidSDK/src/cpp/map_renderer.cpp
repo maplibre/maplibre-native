@@ -236,6 +236,10 @@ void MapRenderer::onSurfaceDestroyed(JNIEnv&) {
     resetRenderer();
 }
 
+void MapRenderer::setSwapBehaviorFlush(JNIEnv&, jboolean flush) {
+    backend->setSwapBehavior(flush ? gfx::Renderable::SwapBehaviour::Flush : gfx::Renderable::SwapBehaviour::NoFlush);
+}
+
 // Static methods //
 
 void MapRenderer::registerNative(jni::JNIEnv& env) {
@@ -256,7 +260,8 @@ void MapRenderer::registerNative(jni::JNIEnv& env) {
         METHOD(&MapRenderer::onRendererReset, "nativeReset"),
         METHOD(&MapRenderer::onSurfaceCreated, "nativeOnSurfaceCreated"),
         METHOD(&MapRenderer::onSurfaceChanged, "nativeOnSurfaceChanged"),
-        METHOD(&MapRenderer::onSurfaceDestroyed, "nativeOnSurfaceDestroyed"));
+        METHOD(&MapRenderer::onSurfaceDestroyed, "nativeOnSurfaceDestroyed"),
+        METHOD(&MapRenderer::setSwapBehaviorFlush, "nativeSetSwapBehaviorFlush"));
 }
 
 MapRenderer& MapRenderer::getNativePeer(JNIEnv& env, const jni::Object<MapRenderer>& jObject) {

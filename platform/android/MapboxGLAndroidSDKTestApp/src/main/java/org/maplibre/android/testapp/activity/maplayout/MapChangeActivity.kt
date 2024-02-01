@@ -58,7 +58,7 @@ class MapChangeActivity : AppCompatActivity() {
         mapView.addOnDidFinishLoadingMapListener(OnDidFinishLoadingMapListener { Timber.v("OnDidFinishLoadingMap") })
         mapView.addOnDidFinishLoadingStyleListener(OnDidFinishLoadingStyleListener { Timber.v("OnDidFinishLoadingStyle") })
         mapView.addOnDidFinishRenderingFrameListener(
-            OnDidFinishRenderingFrameListener { fully: Boolean ->
+            OnDidFinishRenderingFrameListener { fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double ->
                 Timber.v(
                     "OnDidFinishRenderingFrame: fully: %s",
                     fully
