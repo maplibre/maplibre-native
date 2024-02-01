@@ -8,7 +8,6 @@ import android.os.Environment
 import android.os.Handler
 import android.view.View
 import android.view.WindowManager
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -27,12 +26,14 @@ import org.maplibre.android.BuildConfig.GIT_REVISION
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.log.Logger
+import org.maplibre.android.log.Logger.INFO
 import org.maplibre.android.maps.*
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.testapp.BuildConfig
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.utils.FpsStore
 import org.maplibre.android.testapp.utils.BenchmarkResults
+import org.maplibre.android.testapp.utils.FrameTimeStore
 import java.io.File
 
 import java.util.*
@@ -52,13 +53,32 @@ data class BenchmarkInputData(
  * Prepares JSON payload that is sent to the API that collects benchmark results.
  * See https://github.com/maplibre/ci-runners
  */
-fun jsonPayload(results: BenchmarkResults): JsonObject {
+@SuppressLint("NewApi")
+fun jsonPayload(styleNames: List<String>, fpsResults: BenchmarkResults, encodingTimeResults: BenchmarkResults, renderingTimeResults: BenchmarkResults): JsonObject {
     return buildJsonObject {
         putJsonObject("resultsPerStyle") {
-            for ((styleName, result) in results.resultsPerStyle) {
-                putJsonObject(styleName) {
-                    put("avgFps", JsonPrimitive(result.map { it.average }.average()))
-                    put("low1p", JsonPrimitive(result.map { it.low1p }.average()))
+            for (style in styleNames) {
+                putJsonObject(style) {
+                    fpsResults.resultsPerStyle[style].let { results ->
+                        if (results !== null) {
+                            put("avgFps", JsonPrimitive(results.map { it.average }.average()))
+                            put("low1pFps", JsonPrimitive(results.map { it.low1p }.average()))
+                        }
+                    }
+
+                    encodingTimeResults.resultsPerStyle[style].let { results ->
+                        if (results !== null) {
+                            put("avgEncodingTime", JsonPrimitive(results.map { it.average }.average()))
+                            put("low1pEncodingTime", JsonPrimitive(results.map { it.low1p }.average()))
+                        }
+                    }
+
+                    renderingTimeResults.resultsPerStyle[style].let { results ->
+                        if (results !== null) {
+                            put("avgRenderingTime", JsonPrimitive(results.map { it.average }.average()))
+                            put("low1pRenderingTime", JsonPrimitive(results.map { it.low1p }.average()))
+                        }
+                    }
                 }
             }
         }
@@ -77,12 +97,16 @@ class BenchmarkActivity : AppCompatActivity() {
     private val TAG = "BenchmarkActivity"
 
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MapLibreMap
     private var handler: Handler? = null
     private var delayed: Runnable? = null
     private var fpsStore = FpsStore()
-    private var results = BenchmarkResults()
+    private var encodingTimeStore = FrameTimeStore()
+    private var renderingTimeStore = FrameTimeStore()
+    private var fpsResults = BenchmarkResults()
+    private var encodingTimeResults = BenchmarkResults()
+    private var renderingTimeResults = BenchmarkResults()
     private var runsLeft = 5
+    private var measureFrameTime = true
 
     // the styles used for the benchmark
     // can be overridden adding with developer-config.xml
@@ -160,6 +184,8 @@ class BenchmarkActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Logger.setVerbosity(INFO)
+
         setContentView(R.layout.activity_benchmark)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
@@ -179,10 +205,20 @@ class BenchmarkActivity : AppCompatActivity() {
 
     private fun setupMapView(savedInstanceState: Bundle?) {
         mapView = findViewById<View>(R.id.mapView) as MapView
+        if (measureFrameTime) {
+            mapView.addOnDidFinishRenderingFrameListener { fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double ->
+                encodingTimeStore.add(frameEncodingTime * 1e3)
+                renderingTimeStore.add(frameRenderingTime * 1e3)
+            }
+        }
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
-            this@BenchmarkActivity.maplibreMap = maplibreMap
             maplibreMap.setStyle(inputData.styleURLs[0])
-            setFpsView(maplibreMap)
+            maplibreMap.setSwapBehaviorFlush(measureFrameTime)
+            if (!measureFrameTime) {
+                maplibreMap.setOnFpsChangedListener { fps: Double ->
+                    fpsStore.add(fps)
+                }
+            }
 
             // Start an animation on the map as well
             flyTo(maplibreMap, 0, 0,14.0)
@@ -206,10 +242,29 @@ class BenchmarkActivity : AppCompatActivity() {
 
                 override fun onFinish() {
                     if (place == PLACES.size - 1) {  // done with tour
-                        results.addResult(inputData.styleNames[style], fpsStore)
-                        fpsStore.reset()
+                        if (measureFrameTime) {
+                            encodingTimeResults.addResult(
+                                inputData.styleNames[style],
+                                encodingTimeStore
+                            )
+                            encodingTimeStore.reset()
 
-                        println("FPS results $results")
+                            println("Encoding time results $encodingTimeResults")
+
+                            renderingTimeResults.addResult(
+                                inputData.styleNames[style],
+                                renderingTimeStore
+                            )
+                            renderingTimeStore.reset()
+
+                            println("Rendering time results $renderingTimeResults")
+                        } else {
+                            fpsResults.addResult(inputData.styleNames[style], fpsStore)
+                            fpsStore.reset()
+
+                            println("FPS results $fpsResults")
+                        }
+                        println("Benchmark ${jsonPayload(inputData.styleNames, fpsResults, encodingTimeResults, renderingTimeResults)}")
 
                         if (style < inputData.styleURLs.size - 1) {  // continue with next style
                             maplibreMap.setStyle(inputData.styleURLs[style + 1])
@@ -229,12 +284,6 @@ class BenchmarkActivity : AppCompatActivity() {
                 }
             }
         )
-    }
-
-    private fun setFpsView(maplibreMap: MapLibreMap) {
-        maplibreMap.setOnFpsChangedListener { fps: Double ->
-            fpsStore.add(fps)
-        }
     }
 
     override fun onStart() {
@@ -284,7 +333,7 @@ class BenchmarkActivity : AppCompatActivity() {
 
         val client = OkHttpClient()
 
-        val payload = jsonPayload(results)
+        val payload = jsonPayload(inputData.styleNames, fpsResults, encodingTimeResults, renderingTimeResults)
         Logger.i(TAG, "Sending JSON payload to API: $payload")
 
         val request = Request.Builder()
