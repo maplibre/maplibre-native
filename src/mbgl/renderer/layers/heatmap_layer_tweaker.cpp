@@ -42,6 +42,7 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
                 /* .intensity = */ evaluated.get<HeatmapIntensity>(),
                 /* .padding = */ 0};
             parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
+            propertiesUpdated = false;
         }
         return evaluatedPropsUniformBuffer;
     };
@@ -67,8 +68,6 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
 
         uniforms.createOrUpdate(idHeatmapDrawableUBO, &drawableUBO, context);
     });
-
-    propertiesUpdated = false;
 }
 
 } // namespace mbgl

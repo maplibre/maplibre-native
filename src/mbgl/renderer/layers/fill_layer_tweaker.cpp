@@ -43,17 +43,16 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    // Only run each update function once
-    bool fillUniformBufferUpdated = false;
-    bool fillOutlineUniformBufferUpdated = false;
-    bool fillPatternUniformBufferUpdated = false;
-    bool fillOutlinePatternUniformBufferUpdated = false;
+    if (propertiesUpdated) {
+        fillUniformBufferUpdated = true;
+        fillOutlineUniformBufferUpdated = true;
+        fillPatternUniformBufferUpdated = true;
+        fillOutlinePatternUniformBufferUpdated = true;
+        propertiesUpdated = false;
+    }
 
     const auto UpdateFillUniformBuffers = [&]() {
-        if (fillUniformBufferUpdated) return;
-        fillUniformBufferUpdated = true;
-
-        if (!fillPropsUniformBuffer || propertiesUpdated) {
+        if (!fillPropsUniformBuffer || fillUniformBufferUpdated) {
             const FillEvaluatedPropsUBO paramsUBO = {
                 /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
                 /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
@@ -62,14 +61,12 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
             };
             context.emplaceOrUpdateUniformBuffer(fillPropsUniformBuffer, &paramsUBO);
+            fillUniformBufferUpdated = false;
         }
     };
 
     const auto UpdateFillOutlineUniformBuffers = [&]() {
-        if (fillOutlineUniformBufferUpdated) return;
-        fillOutlineUniformBufferUpdated = true;
-
-        if (!fillOutlinePropsUniformBuffer || propertiesUpdated) {
+        if (!fillOutlinePropsUniformBuffer || fillOutlineUniformBufferUpdated) {
             const FillOutlineEvaluatedPropsUBO paramsUBO = {
                 /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
                 /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
@@ -78,14 +75,12 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
             };
             context.emplaceOrUpdateUniformBuffer(fillOutlinePropsUniformBuffer, &paramsUBO);
+            fillOutlineUniformBufferUpdated = false;
         }
     };
 
     const auto UpdateFillPatternUniformBuffers = [&]() {
-        if (fillPatternUniformBufferUpdated) return;
-        fillPatternUniformBufferUpdated = true;
-
-        if (!fillPatternPropsUniformBuffer || propertiesUpdated) {
+        if (!fillPatternPropsUniformBuffer || fillPatternUniformBufferUpdated) {
             const FillPatternEvaluatedPropsUBO paramsUBO = {
                 /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
                 /* .fade = */ crossfade.t,
@@ -93,14 +88,12 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
             };
             context.emplaceOrUpdateUniformBuffer(fillPatternPropsUniformBuffer, &paramsUBO);
+            fillPatternUniformBufferUpdated = false;
         }
     };
 
     const auto UpdateFillOutlinePatternUniformBuffers = [&]() {
-        if (fillOutlinePatternUniformBufferUpdated) return;
-        fillOutlinePatternUniformBufferUpdated = true;
-
-        if (!fillOutlinePatternPropsUniformBuffer || propertiesUpdated) {
+        if (!fillOutlinePatternPropsUniformBuffer || fillOutlinePatternUniformBufferUpdated) {
             const FillOutlinePatternEvaluatedPropsUBO paramsUBO = {
                 /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
                 /* .fade = */ crossfade.t,
@@ -108,6 +101,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
             };
             context.emplaceOrUpdateUniformBuffer(fillOutlinePatternPropsUniformBuffer, &paramsUBO);
+            fillOutlinePatternUniformBufferUpdated = false;
         }
     };
 
@@ -214,8 +208,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             }
         }
     });
-
-    propertiesUpdated = false;
 }
 
 } // namespace mbgl
