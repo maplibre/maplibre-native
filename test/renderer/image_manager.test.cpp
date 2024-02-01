@@ -32,6 +32,8 @@ TEST(ImageManager, Basic) {
         ASSERT_TRUE(stored);
         EXPECT_EQ(image->image.size, stored->image.size);
     }
+
+    imageManager.dumpDebugLogs();
 }
 
 TEST(ImageManager, AddRemove) {

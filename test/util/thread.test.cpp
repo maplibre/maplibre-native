@@ -2,6 +2,7 @@
 
 #include <mbgl/actor/actor_ref.hpp>
 #include <mbgl/actor/scheduler.hpp>
+#include <mbgl/platform/settings.hpp>
 #include <mbgl/test/util.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/timer.hpp>
@@ -133,6 +134,11 @@ TEST(Thread, Concurrency) {
 
     unsigned numMessages = 100000;
     std::atomic_uint completed(numMessages);
+
+    auto& settings = platform::Settings::getInstance();
+    if (!settings.get(platform::EXPERIMENTAL_THREAD_PRIORITY_WORKER).getDouble()) {
+        settings.set(platform::EXPERIMENTAL_THREAD_PRIORITY_WORKER, 0.5);
+    }
 
     Actor<TestWorker> poolWorker(Scheduler::GetBackground());
     auto poolWorkerRef = poolWorker.self();

@@ -23,7 +23,10 @@ public:
     /// Get the maximum size
     size_t getMaxSize() const { return size; }
 
+    /// Add a new tile with the given ID.
+    /// If a tile with the same ID is already present, it will be retained and the new one will be discarded.
     void add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile);
+
     std::unique_ptr<Tile> pop(const OverscaledTileID& key);
     Tile* get(const OverscaledTileID& key);
     bool has(const OverscaledTileID& key);

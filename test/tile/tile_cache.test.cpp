@@ -34,6 +34,8 @@ public:
         : VectorTile(id_, sourceID_, parameters, tileset) {
         renderable = true;
     }
+
+    util::SimpleIdentity uniqueId;
 };
 
 TEST(TileCache, Smoke) {
@@ -56,12 +58,30 @@ TEST(TileCache, Issue15926) {
     auto tile1 = std::make_unique<VectorTileMock>(id0, "source", test.tileParameters, test.tileset);
     auto tile2 = std::make_unique<VectorTileMock>(id0, "source", test.tileParameters, test.tileset);
     auto tile3 = std::make_unique<VectorTileMock>(id1, "source", test.tileParameters, test.tileset);
+    auto tile4 = std::make_unique<VectorTileMock>(id0, "source", test.tileParameters, test.tileset);
+    const auto tile1Id = tile1->uniqueId;
 
+    // add
     cache.add(id0, std::move(tile1));
     EXPECT_TRUE(cache.has(id0));
+
+    // adding a key already present doesn't replace the existing item
     cache.add(id0, std::move(tile2));
+    EXPECT_EQ(tile1Id, static_cast<VectorTileMock*>(cache.get(id0))->uniqueId);
+
+    // Evict on add
     cache.setSize(1);
     cache.add(id1, std::move(tile3));
     EXPECT_FALSE(cache.has(id0));
     EXPECT_TRUE(cache.has(id1));
+
+    // Evict due to size limit change
+    cache.setSize(2);
+    cache.add(id0, std::move(tile4));
+    EXPECT_TRUE(cache.has(id0));
+    EXPECT_TRUE(cache.has(id1));
+    cache.setSize(1);
+    // older item should be evicted
+    EXPECT_TRUE(cache.has(id0));
+    EXPECT_FALSE(cache.has(id1));
 }

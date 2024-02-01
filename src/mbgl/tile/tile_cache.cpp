@@ -43,13 +43,16 @@ void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {
         return;
     }
 
-    if (tiles.find(key) != tiles.end()) {
-        // remove existing tile key
-        orderedKeys.remove(key);
-
-        deferredRelease(std::move(tile));
+    const auto result = tiles.insert(std::make_pair(key, std::unique_ptr<Tile>{}));
+    if (result.second) {
+        // inserted
+        result.first->second = std::move(tile);
     } else {
-        tiles.emplace(key, std::move(tile));
+        // already present
+        // remove existing tile key to move it to the end
+        orderedKeys.remove(key);
+        // release the newly-provided item
+        deferredRelease(std::move(tile));
     }
 
     // (re-)insert tile key as newest

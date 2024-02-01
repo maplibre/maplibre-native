@@ -106,6 +106,7 @@ void ThreadedSchedulerBase::schedule(std::function<void()>&& fn) {
 
 std::size_t ThreadedSchedulerBase::waitForEmpty(Milliseconds timeout) {
     // Must not be called from a thread in our pool, or we would deadlock
+    assert(!thisThreadIsOwned());
     if (!thisThreadIsOwned()) {
         const auto startTime = util::MonotonicTimer::now();
         const auto isDone = [&] {
@@ -126,7 +127,6 @@ std::size_t ThreadedSchedulerBase::waitForEmpty(Milliseconds timeout) {
         }
         return queue.size() + pendingItems;
     }
-    assert(false);
     return 0;
 }
 
