@@ -69,8 +69,8 @@ void AndroidRendererBackend::setSwapBehavior(SwapBehaviour swapBehaviour_) {
 }
 
 void AndroidRendererBackend::swap() {
-    if( swapBehaviour == SwapBehaviour::Flush) {
-        static_cast<gl::Context &>(getContext()).finish();
+    if (swapBehaviour == SwapBehaviour::Flush) {
+        static_cast<gl::Context&>(getContext()).finish();
     }
 }
 
