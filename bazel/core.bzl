@@ -900,7 +900,6 @@ MLN_OPENGL_SOURCE = [
 ]
 
 MLN_OPENGL_HEADERS = [
-    "include/mbgl/gfx/backend.hpp",
     "include/mbgl/gl/renderable_resource.hpp",
     "include/mbgl/gl/renderer_backend.hpp",
     "include/mbgl/layermanager/location_indicator_layer_factory.hpp",
