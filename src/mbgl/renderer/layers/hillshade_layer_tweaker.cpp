@@ -51,6 +51,7 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
                 /* .shadow = */ evaluated.get<HillshadeShadowColor>(),
                 /* .accent = */ evaluated.get<HillshadeAccentColor>()};
             parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
+            propertiesUpdated = false;
         }
         return evaluatedPropsUniformBuffer;
     };
@@ -72,8 +73,6 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
                                             /* .light = */ getLight(parameters, evaluated)};
         uniforms.createOrUpdate(idHillshadeDrawableUBO, &drawableUBO, parameters.context);
     });
-
-    propertiesUpdated = false;
 }
 
 } // namespace mbgl
