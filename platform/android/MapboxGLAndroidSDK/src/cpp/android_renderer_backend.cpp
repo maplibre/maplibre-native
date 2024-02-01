@@ -53,10 +53,6 @@ PremultipliedImage AndroidRendererBackend::readFramebuffer() {
     return gl::RendererBackend::readFramebuffer(size);
 }
 
-void AndroidRendererBackend::swap() {
-    static_cast<gl::Context&>(getContext()).finish();
-}
-
 void AndroidRendererBackend::updateAssumedState() {
     assumeFramebufferBinding(0);
     assumeViewport(0, 0, size);
@@ -65,6 +61,16 @@ void AndroidRendererBackend::updateAssumedState() {
 void AndroidRendererBackend::markContextLost() {
     if (context) {
         getContext<gl::Context>().setCleanupOnDestruction(false);
+    }
+}
+
+void AndroidRendererBackend::setSwapBehavior(SwapBehaviour swapBehaviour_) {
+    swapBehaviour = swapBehaviour_;
+}
+
+void AndroidRendererBackend::swap() {
+    if( swapBehaviour == SwapBehaviour::Flush) {
+        static_cast<gl::Context &>(getContext()).finish();
     }
 }
 

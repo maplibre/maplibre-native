@@ -19,7 +19,11 @@ public:
     void resizeFramebuffer(int width, int height);
     PremultipliedImage readFramebuffer();
 
+    void setSwapBehavior(SwapBehaviour swapBehaviour);
     void swap();
+
+private:
+    SwapBehaviour swapBehaviour = SwapBehaviour::NoFlush;
 
     // mbgl::gfx::RendererBackend implementation
 public:

@@ -102,6 +102,10 @@ public abstract class MapRenderer implements MapRendererScheduler {
     }
   }
 
+  public void setSwapBehaviorFlush(boolean flush) {
+    nativeSetSwapBehaviorFlush(flush);
+  }
+
   /**
    * May be called from any thread.
    * <p>
@@ -133,6 +137,8 @@ public abstract class MapRenderer implements MapRendererScheduler {
   protected native void nativeReset();
 
   private native void nativeRender();
+
+  private native void nativeSetSwapBehaviorFlush(boolean flush);
 
   private long timeElapsed;
 

@@ -220,6 +220,7 @@ class BenchmarkActivity : AppCompatActivity() {
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@BenchmarkActivity.maplibreMap = maplibreMap
             maplibreMap.setStyle(inputData.styleURLs[0])
+            maplibreMap.setSwapBehaviorFlush(true)
             setFpsView(maplibreMap)
 
             // Start an animation on the map as well

@@ -1026,6 +1026,11 @@ final class NativeMapView implements NativeMap {
     nativeTriggerRepaint();
   }
 
+  @Override
+  public void setSwapBehaviorFlush(boolean flush) {
+    mapRenderer.setSwapBehaviorFlush(flush);
+  }
+
   @NonNull
   @Override
   public RectF getDensityDependantRectangle(final RectF rectangle) {
