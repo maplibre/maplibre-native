@@ -21,6 +21,12 @@ public:
 };
 
 class Renderable {
+public:
+    enum class SwapBehaviour {
+        NoFlush,
+        Flush
+    };
+
 protected:
     Renderable(const Size size_, std::unique_ptr<RenderableResource> resource_)
         : size(size_),

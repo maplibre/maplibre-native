@@ -107,6 +107,8 @@ private:
     // Called on either Main or GL thread //
     void onRendererReset(JNIEnv&);
 
+    void setSwapBehaviorFlush(JNIEnv&, jboolean flush);
+
 private:
     jni::WeakReference<jni::Object<MapRenderer>, jni::EnvAttachingDeleter> javaPeer;
 
