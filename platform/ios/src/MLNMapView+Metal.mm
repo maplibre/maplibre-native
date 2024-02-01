@@ -82,7 +82,8 @@ public:
 
         // Un-comment for synchronous, which can help troubleshoot rendering problems,
         // particularly those related to resource tracking and multiple queued buffers.
-        //[commandBuffer waitUntilCompleted];
+        // Also this synchronizes with externally replayed map transformations (Issue #2053 - MLNAnnotationView delay with map panning)
+        [commandBuffer waitUntilCompleted];
 
         commandBuffer = nil;
         commandBufferPtr.reset();
