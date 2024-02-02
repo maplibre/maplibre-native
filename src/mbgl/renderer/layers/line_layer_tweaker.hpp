@@ -41,6 +41,11 @@ protected:
     gfx::UniformBufferPtr permutationUniformBuffer;
     gfx::UniformBufferPtr expressionUniformBuffer;
 #endif // MLN_RENDER_BACKEND_METAL
+
+    bool simplePropertiesUpdated = true;
+    bool gradientPropertiesUpdated = true;
+    bool patternPropertiesUpdated = true;
+    bool sdfPropertiesUpdated = true;
 };
 
 } // namespace mbgl

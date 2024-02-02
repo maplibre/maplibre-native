@@ -34,11 +34,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     const auto& crossfade = static_cast<const LineLayerProperties&>(*evaluatedProperties).crossfade;
 
     // Each property UBO is updated at most once if new evaluated properties were set
-    bool simplePropertiesUpdated = propertiesUpdated;
-    bool gradientPropertiesUpdated = propertiesUpdated;
-    bool patternPropertiesUpdated = propertiesUpdated;
-    bool sdfPropertiesUpdated = propertiesUpdated;
-    propertiesUpdated = false;
+    if (propertiesUpdated) {
+        simplePropertiesUpdated = true;
+        gradientPropertiesUpdated = true;
+        patternPropertiesUpdated = true;
+        sdfPropertiesUpdated = true;
+        propertiesUpdated = false;
+    }
 
     const auto getLinePropsBuffer = [&]() {
         if (!linePropertiesBuffer || simplePropertiesUpdated) {
