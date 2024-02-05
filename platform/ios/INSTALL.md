@@ -34,9 +34,9 @@ Before building, follow these steps to install prerequisites:
    brew install node cmake ccache pkg-config glfw cmake-docs
    ```
 
-1. Install [xcpretty](https://github.com/supermarin/xcpretty) for prettifying command line builds. (optional):
+1. Install [xbeautify](https://github.com/tuist/xcbeautify) for prettifying command line builds. (optional):
    ```
-   sudo gem install xcpretty
+   brew install xbeautify
    ```
 1. Install [jazzy](https://github.com/realm/jazzy) for generating API documentation (optional):
    ```

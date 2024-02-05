@@ -94,7 +94,7 @@ xcodebuild \
     -scheme ${SCHEME} \
     -configuration ${BUILDTYPE} \
     -sdk iphonesimulator \
-    -jobs ${JOBS} | tee ${LOG_PATH} | xcpretty
+    -jobs ${JOBS} | tee ${LOG_PATH} | xcbeautify
 
 if [[ ${BUILD_FOR_DEVICE} == true ]]; then
     step "Building ${FORMAT} framework for iOS devices using ${SCHEME} scheme"
@@ -108,7 +108,7 @@ if [[ ${BUILD_FOR_DEVICE} == true ]]; then
         -scheme ${SCHEME} \
         -configuration ${BUILDTYPE} \
         -sdk iphoneos \
-        -jobs ${JOBS} | tee ${LOG_PATH} | xcpretty
+        -jobs ${JOBS} | tee ${LOG_PATH} | xcbeautify
 fi
 
 LIBS=(Mapbox.a)

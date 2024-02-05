@@ -43,7 +43,7 @@ xcodebuild \
     -scheme dynamic \
     -configuration ${BUILDTYPE} \
     -jobs ${JOBS} \
-    build | xcpretty
+    build | xcbeautify
 
 step "Copying dynamic framework into place"
 mkdir -p "${OUTPUT}/${NAME}.framework"
@@ -65,7 +65,7 @@ if [[ ${BUILDTYPE} == Release ]]; then
         -scheme macosapp \
         -configuration ${BUILDTYPE} \
         -jobs ${JOBS} \
-        archive | xcpretty
+        archive | xcbeautify
 fi
 
 if [[ ${SYMBOLS} = NO ]]; then
