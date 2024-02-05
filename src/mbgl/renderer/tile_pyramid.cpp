@@ -236,8 +236,11 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
                 if (tilesIt->second) {
                     tilesIt->second->cancel();
-                    Scheduler::GetBackground()->schedule(
-                        [tile_{std::shared_ptr<Tile>(std::move(tiles.extract((tilesIt++)->first).mapped()))}]() {});
+                    // See `TileCache::deferredRelease`
+                    std::unique_ptr<Tile> tile = std::move(tiles.extract(tilesIt++).mapped());
+                    std::function<void()> func{[tile_{std::shared_ptr<Tile>(std::move(tile))}] {
+                    }};
+                    Scheduler::GetBackground()->schedule(std::move(func));
                 } else {
                     tiles.erase(tilesIt++);
                 }
