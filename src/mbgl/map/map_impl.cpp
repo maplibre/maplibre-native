@@ -169,6 +169,13 @@ void Map::Impl::onDidFinishRenderingMap() {
     }
 };
 
+void Map::Impl::onFrameRenderComplete() {
+    // TODO: update currentTransform 
+    if (mode == MapMode::Continuous) {
+        observer.onFrameRenderComplete();
+    }
+}
+
 void Map::Impl::jumpTo(const CameraOptions& camera) {
     cameraMutated = true;
     transform.jumpTo(camera);

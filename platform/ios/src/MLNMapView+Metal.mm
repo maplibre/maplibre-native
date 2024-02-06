@@ -75,15 +75,23 @@ public:
         return cachedRenderPassDescriptor;
     }
 
-    void swap() override {
+    void swap(std::function<void()> completionCallback) override {
         id<CAMetalDrawable> currentDrawable = [mtlView currentDrawable];
         [commandBuffer presentDrawable:currentDrawable];
+
+        // add frame completion handler
+        [commandBuffer addCompletedHandler:^(id<MTLCommandBuffer> commandBuffer) {
+            if (completionCallback) {
+                completionCallback();
+            }
+        }];
+
         [commandBuffer commit];
 
         // Un-comment for synchronous, which can help troubleshoot rendering problems,
         // particularly those related to resource tracking and multiple queued buffers.
         // Also this synchronizes with externally replayed map transformations (Issue #2053 - MLNAnnotationView delay with map panning)
-        [commandBuffer waitUntilCompleted];
+//        [commandBuffer waitUntilCompleted];
 
         commandBuffer = nil;
         commandBufferPtr.reset();

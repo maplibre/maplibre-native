@@ -73,10 +73,11 @@ public:
         }
     }
 
-    void swap() override {
+    void swap(std::function<void()> completionCallback) override {
         assert(commandBuffer);
         commandBuffer->commit();
         commandBuffer->waitUntilCompleted();
+        completionCallback();
         commandBuffer.reset();
         renderPassDescriptor.reset();
     }

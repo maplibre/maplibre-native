@@ -96,7 +96,7 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
     });
 
     parameters.renderPass.reset();
-    parameters.encoder->present(*offscreenTexture);
+    parameters.encoder->present(*offscreenTexture, {});
 }
 
 } // namespace mbgl

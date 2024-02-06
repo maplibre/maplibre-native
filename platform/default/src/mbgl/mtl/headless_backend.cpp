@@ -24,7 +24,7 @@ public:
 
     void bind() override { offscreenTexture->getResource<RenderableResource>().bind(); }
 
-    void swap() override { offscreenTexture->getResource<RenderableResource>().swap(); }
+    void swap(std::function<void()> completionCallback) override { offscreenTexture->getResource<RenderableResource>().swap(completionCallback); }
 
     PremultipliedImage readStillImage() { return offscreenTexture->readStillImage(); }
 

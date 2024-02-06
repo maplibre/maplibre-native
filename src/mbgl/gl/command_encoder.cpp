@@ -25,8 +25,8 @@ std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(const char* na
     return std::make_unique<gl::RenderPass>(*this, name, descriptor);
 }
 
-void CommandEncoder::present(gfx::Renderable& renderable) {
-    renderable.getResource<gl::RenderableResource>().swap();
+void CommandEncoder::present(gfx::Renderable& renderable, std::function<void()> onCompletionCallback) {
+    renderable.getResource<gl::RenderableResource>().swap(onCompletionCallback);
 }
 
 void CommandEncoder::pushDebugGroup(const char* name) {

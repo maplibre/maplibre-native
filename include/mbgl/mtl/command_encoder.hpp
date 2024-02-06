@@ -31,7 +31,7 @@ public:
     std::unique_ptr<gfx::UploadPass> createUploadPass(const char* name, gfx::Renderable&) override;
     std::unique_ptr<gfx::RenderPass> createRenderPass(const char* name, const gfx::RenderPassDescriptor&) override;
 
-    void present(gfx::Renderable&) override;
+    void present(gfx::Renderable&, std::function<void()>) override;
 
     template <typename TFunc>
     void visitDebugGroups(TFunc f) {

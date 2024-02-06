@@ -52,6 +52,8 @@ public:
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
     void onRegisterShaders(gfx::ShaderRegistry&) final;
 
+    void onFrameRenderComplete() final;
+
     // Map
     void jumpTo(const CameraOptions&);
 

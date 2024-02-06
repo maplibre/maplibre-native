@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <string>
+#include <functional>
 
 namespace mbgl {
 namespace gfx {
@@ -31,7 +32,7 @@ public:
 
     virtual std::unique_ptr<UploadPass> createUploadPass(const char* name, Renderable&) = 0;
     virtual std::unique_ptr<RenderPass> createRenderPass(const char* name, const RenderPassDescriptor&) = 0;
-    virtual void present(Renderable&) = 0;
+    virtual void present(Renderable&, std::function<void()>) = 0;
 };
 
 } // namespace gfx

@@ -12,7 +12,7 @@ protected:
     explicit RenderableResource() = default;
 
 public:
-    virtual void swap() {
+    virtual void swap(std::function<void()>) {
         // Renderable resources that require a swap function to be called
         // explicitly can override this method.
     }
