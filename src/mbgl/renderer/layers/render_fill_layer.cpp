@@ -599,7 +599,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
                     atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
                         atlases,
-                        0,
+                        std::nullopt,
                         idIconTextureName,
                         /*isText*/ false,
                         /*sdfIcons*/ true, // to force linear filter

@@ -680,7 +680,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 if (!iconTweaker) {
                     iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
                         atlases,
-                        0,
+                        std::nullopt,
                         idLineImageUniformName,
                         /*isText*/ false,
                         /*sdfIcons*/ true, // to force linear filter

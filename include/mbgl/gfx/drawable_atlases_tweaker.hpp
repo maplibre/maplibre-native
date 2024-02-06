@@ -23,8 +23,8 @@ class Drawable;
 class DrawableAtlasesTweaker : public gfx::DrawableTweaker {
 public:
     DrawableAtlasesTweaker(TileAtlasTexturesPtr atlases_,
-                           const StringIdentity iconNameId_,
-                           const StringIdentity glyphNameId_,
+                           const std::optional<StringIdentity> iconNameId_,
+                           const std::optional<StringIdentity> glyphNameId_,
                            bool isText_,
                            const bool sdfIcons_,
                            const style::AlignmentType rotationAlignment_,
@@ -37,7 +37,9 @@ public:
           sdfIcons(sdfIcons_),
           rotationAlignment(rotationAlignment_),
           iconScaled(iconScaled_),
-          textSizeIsZoomConstant(textSizeIsZoomConstant_) {}
+          textSizeIsZoomConstant(textSizeIsZoomConstant_) {
+        assert(iconNameId_ != glyphNameId_);
+    }
     ~DrawableAtlasesTweaker() override = default;
 
     void init(Drawable&) override;
@@ -48,8 +50,8 @@ protected:
     void setupTextures(Drawable&, const bool);
 
     TileAtlasTexturesPtr atlases;
-    StringIdentity iconNameId;
-    StringIdentity glyphNameId;
+    std::optional<StringIdentity> iconNameId;
+    std::optional<StringIdentity> glyphNameId;
     bool isText;
 
     const bool sdfIcons;
