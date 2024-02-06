@@ -66,8 +66,8 @@ public:
     // Observe this event to easily mutate or observe shaders as soon
     // as the registry becomes available.
     virtual void onRegisterShaders(gfx::ShaderRegistry&){};
-    
-    virtual void onFrameRenderComplete() {};
+
+    virtual void onFrameRenderComplete(){};
 };
 
 } // namespace mbgl

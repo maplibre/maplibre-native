@@ -170,7 +170,7 @@ void Map::Impl::onDidFinishRenderingMap() {
 };
 
 void Map::Impl::onFrameRenderComplete() {
-    // TODO: update currentTransform 
+    // TODO: update currentTransform
     if (mode == MapMode::Continuous) {
         observer.onFrameRenderComplete();
     }

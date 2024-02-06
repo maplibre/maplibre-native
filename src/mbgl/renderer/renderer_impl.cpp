@@ -469,9 +469,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     parameters.renderPass.reset();
 
     const auto startRendering = util::MonotonicTimer::now().count();
-    parameters.encoder->present(parameters.backend.getDefaultRenderable(), [this](){
-        observer->onFrameRenderComplete();
-    });
+    parameters.encoder->present(parameters.backend.getDefaultRenderable(),
+                                [this]() { observer->onFrameRenderComplete(); });
     const auto renderingTime = util::MonotonicTimer::now().count() - startRendering;
 
     // CommandEncoder destructor submits render commands.
