@@ -204,7 +204,7 @@ const args = (() => {
     });
     parser.add_argument("--root", "--r", {
         help: "Directory root to place generated code",
-        required: true
+        required: false
     });
     parser.add_argument("--compress", "--c", {
         help: "Compress shader text with zlib and output byte arrays instead of strings",
@@ -220,8 +220,9 @@ const args = (() => {
 
 
 // Generate shader source headers
-const shaderRoot = "shaders/";
-const outputRoot = path.join((args.root ? args.root : ""), "include/mbgl/shaders");
+const root = args.root ? args.root : path.dirname(__dirname);
+const shaderRoot = path.join(root, "shaders");
+const outputRoot = path.join(root, "include/mbgl/shaders");
 let generatedHeaders = [];
 let shaderNames = [];
 

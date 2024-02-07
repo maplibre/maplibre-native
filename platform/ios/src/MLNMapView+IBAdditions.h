@@ -1,6 +1,5 @@
 #import <Foundation/Foundation.h>
-
-@class MLNMapView;
+#import "MLNMapView.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
