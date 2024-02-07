@@ -15,7 +15,7 @@ public:
         backend.setViewport(0, 0, backend.getSize());
     }
 
-    void swap() override { backend.swap(); }
+    void swap(std::function<void()>) override { backend.swap(); }
 
 private:
     GLFWGLBackend& backend;
