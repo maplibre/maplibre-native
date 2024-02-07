@@ -171,14 +171,13 @@ void Map::Impl::onDidFinishRenderingMap() {
 };
 
 void Map::Impl::onFrameRenderComplete(const TransformState& state) {
-    
     //
     // this is called on different thread. TODO: synchronize
     //
-    
+
     // if we didn't reach the desired transform state, repaint
     bool needRepaint = (state != transform.getState());
-    
+
     // update currentTransform
     currentTransform.setState(state);
 
