@@ -1,12 +1,16 @@
+#import <AppKit/AppKit.h>
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class MLNMapView;
 @class MLNAnnotationImage;
+@class MLNMapCamera;
+@class MLNMapView;
 @class MLNPolygon;
 @class MLNPolyline;
 @class MLNShape;
+@class MLNStyle;
+@protocol MLNAnnotation;
 
 /**
  The `MLNMapViewDelegate` protocol defines a set of optional methods that you

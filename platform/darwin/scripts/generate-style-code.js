@@ -3,7 +3,7 @@
 
 const { ArgumentParser } = require("argparse");
 const fs = require('fs');
-const ejs = require('ejs');
+const path = require('path');
 const _ = require('lodash');
 const colorParser = require('csscolorparser');
 const assert = require('assert');
@@ -21,7 +21,7 @@ const args = (() => {
     });
     return parser.parse_args();
 })();
-  
+
 const cocoaConventions = require('./style-spec-cocoa-conventions-v8.json');
 const prefix = 'MLN';
 const suffix = 'StyleLayer';
@@ -51,7 +51,7 @@ _.forOwn(cocoaConventions, function (properties, kind) {
     _.forOwn(properties, function (newConvention, oldName) {
         let conventionOverride = new ConventionOverride(newConvention);
         let property = spec[kind][oldName];
-        
+
         if (property) {
             if (conventionOverride.name.startsWith('is-')) {
                 property.getter = conventionOverride.name;
@@ -787,23 +787,25 @@ const lightProperties = Object.keys(spec['light']).reduce((memo, name) => {
 const lightDoc = spec['light-cocoa-doc'];
 const lightType = 'light';
 
-const layerH = ejs.compile(fs.readFileSync('platform/darwin/src/MLNStyleLayer.h.ejs', 'utf8'), { strict: true });
-const layerPrivateH = ejs.compile(fs.readFileSync('platform/darwin/src/MLNStyleLayer_Private.h.ejs', 'utf8'), { strict: true });
-const layerM = ejs.compile(fs.readFileSync('platform/darwin/src/MLNStyleLayer.mm.ejs', 'utf8'), { strict: true});
-const testLayers = ejs.compile(fs.readFileSync('platform/darwin/test/MLNStyleLayerTests.mm.ejs', 'utf8'), { strict: true});
-const forStyleAuthorsMD = ejs.compile(fs.readFileSync('platform/darwin/docs/guides/For_Style_Authors.md.ejs', 'utf8'), { strict: true });
-const ddsGuideMD = ejs.compile(fs.readFileSync('platform/darwin/docs/guides/Migrating_to_Expressions.md.ejs', 'utf8'), { strict: true });
-const templatesMD = ejs.compile(fs.readFileSync('platform/darwin/docs/guides/Tile_URL_Templates.md.ejs', 'utf8'), { strict: true });
+const root = args.root ? args.root : path.dirname(path.dirname(path.dirname(__dirname)));
 
-const lightH = ejs.compile(fs.readFileSync('platform/darwin/src/MLNLight.h.ejs', 'utf8'), {strict: true});
-const lightM = ejs.compile(fs.readFileSync('platform/darwin/src/MLNLight.mm.ejs', 'utf8'), {strict: true});
-const testLight = ejs.compile(fs.readFileSync('platform/darwin/test/MLNLightTest.mm.ejs', 'utf8'), { strict: true});
+const layerH = readAndCompile('platform/darwin/src/MLNStyleLayer.h.ejs', root);
+const layerPrivateH = readAndCompile('platform/darwin/src/MLNStyleLayer_Private.h.ejs', root);
+const layerM = readAndCompile('platform/darwin/src/MLNStyleLayer.mm.ejs', root);
+const testLayers = readAndCompile('platform/darwin/test/MLNStyleLayerTests.mm.ejs', root);
+const forStyleAuthorsMD = readAndCompile('platform/darwin/docs/guides/For_Style_Authors.md.ejs', root);
+const ddsGuideMD = readAndCompile('platform/darwin/docs/guides/Migrating_to_Expressions.md.ejs', root);
+const templatesMD = readAndCompile('platform/darwin/docs/guides/Tile_URL_Templates.md.ejs', root);
+
+const lightH = readAndCompile('platform/darwin/src/MLNLight.h.ejs', root);
+const lightM = readAndCompile('platform/darwin/src/MLNLight.mm.ejs', root);
+const testLight = readAndCompile('platform/darwin/test/MLNLightTest.mm.ejs', root);
 writeIfModified(`platform/darwin/src/MLNLight.h`, duplicatePlatformDecls(
-    lightH({ properties: lightProperties, doc: lightDoc, type: lightType })), args.root);
+    lightH({ properties: lightProperties, doc: lightDoc, type: lightType })), root);
 writeIfModified(`platform/darwin/src/MLNLight.mm`,
-    lightM({ properties: lightProperties, doc: lightDoc, type: lightType }), args.root);
+    lightM({ properties: lightProperties, doc: lightDoc, type: lightType }), root);
 writeIfModified(`platform/darwin/test/MLNLightTest.mm`,
-    testLight({ properties: lightProperties, doc: lightDoc, type: lightType }), args.root);
+    testLight({ properties: lightProperties, doc: lightDoc, type: lightType }), root);
 
 const layers = _(spec.layer.type.values).map((value, layerType) => {
     const layoutProperties = Object.keys(spec[`layout_${layerType}`]).reduce((memo, name) => {
@@ -877,13 +879,13 @@ for (var layer of layers) {
     }
 
     writeIfModified(`platform/darwin/src/${prefix}${camelize(layer.type)}${suffix}.h`,
-        duplicatePlatformDecls(layerH(layer)), args.root);
+        duplicatePlatformDecls(layerH(layer)), root);
     writeIfModified(`platform/darwin/src/${prefix}${camelize(layer.type)}${suffix}_Private.h`,
-        duplicatePlatformDecls(layerPrivateH(layer)),  args.root);
+        duplicatePlatformDecls(layerPrivateH(layer)),  root);
     writeIfModified(`platform/darwin/src/${prefix}${camelize(layer.type)}${suffix}.mm`,
-        layerM(layer),  args.root);
+        layerM(layer),  root);
     writeIfModified(`platform/darwin/test/${prefix}${camelize(layer.type)}${suffix}Tests.mm`,
-        testLayers(layer), args.root);
+        testLayers(layer), root);
 }
 
 // Extract examples for guides from unit tests.
@@ -925,21 +927,21 @@ writeIfModified(`platform/ios/docs/guides/For Style Authors.md`, forStyleAuthors
     os: 'iOS',
     renamedProperties: renamedPropertiesByLayerType,
     layers: layers,
-}), args.root);
+}), root);
 writeIfModified(`platform/macos/docs/guides/For Style Authors.md`, forStyleAuthorsMD({
     os: 'macOS',
     renamedProperties: renamedPropertiesByLayerType,
     layers: layers,
-}), args.root);
+}), root);
 writeIfModified(`platform/ios/docs/guides/Migrating to Expressions.md`, ddsGuideMD({
     os: 'iOS',
-}), args.root);
+}), root);
 writeIfModified(`platform/macos/docs/guides/Migrating to Expressions.md`, ddsGuideMD({
     os: 'macOS',
-}), args.root);
+}), root);
 writeIfModified(`platform/ios/docs/guides/Tile URL Templates.md`, templatesMD({
     os: 'iOS',
-}), args.root);
+}), root);
 writeIfModified(`platform/macos/docs/guides/Tile URL Templates.md`, templatesMD({
     os: 'macOS',
-}), args.root);*/
+}), root);*/
