@@ -16,6 +16,7 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_tweaker.hpp>
@@ -468,9 +469,11 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     // Ends the RenderPass
     parameters.renderPass.reset();
 
+    const TransformState currentTransformState = updateParameters->transformState;
     const auto startRendering = util::MonotonicTimer::now().count();
-    parameters.encoder->present(parameters.backend.getDefaultRenderable(),
-                                [this]() { observer->onFrameRenderComplete(); });
+    parameters.encoder->present(parameters.backend.getDefaultRenderable(), [this, currentTransformState]() {
+        observer->onFrameRenderComplete(currentTransformState);
+    });
     const auto renderingTime = util::MonotonicTimer::now().count() - startRendering;
 
     // CommandEncoder destructor submits render commands.

@@ -6810,11 +6810,14 @@ static void *windowScreenContext = &windowScreenContext;
     }
 }
 
-- (void)mapViewFrameRenderComplete {
-//    self.needsDisplayRefresh = YES;
+- (void)mapViewFrameRenderComplete:(BOOL)needRepaint {
+    if(needRepaint) {
+        self.needsDisplayRefresh = YES;
+    }
+    
     dispatch_async(dispatch_get_main_queue(), ^{
-//        [self renderSync];
         [self updateViewsWithCurrentUpdateParameters];
+        [self renderSync];
     });
 }
 

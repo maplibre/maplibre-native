@@ -117,6 +117,6 @@ bool MLNMapViewImpl::onCanRemoveUnusedStyleImage(const std::string &imageIdentif
     return [mapView shouldRemoveStyleImage:imageName];
 }
 
-void MLNMapViewImpl::onFrameRenderComplete() {
-    [mapView mapViewFrameRenderComplete];
+void MLNMapViewImpl::onFrameRenderComplete(bool needRepaint) {
+    [mapView mapViewFrameRenderComplete:needRepaint];
 }

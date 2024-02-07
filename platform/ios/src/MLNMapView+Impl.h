@@ -71,7 +71,7 @@ public:
     void onStyleImageMissing(const std::string& imageIdentifier) override;
     bool onCanRemoveUnusedStyleImage(const std::string& imageIdentifier) override;
 
-    void onFrameRenderComplete() override;
+    void onFrameRenderComplete(bool) override;
 
 protected:
     /// Cocoa map view that this adapter bridges to.

@@ -47,7 +47,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 - (void)sourceDidChange:(nonnull MLNSource *)source;
 - (void)didFailToLoadImage:(nonnull NSString *)imageName;
 - (BOOL)shouldRemoveStyleImage:(nonnull NSString *)imageName;
-- (void)mapViewFrameRenderComplete;
+- (void)mapViewFrameRenderComplete:(BOOL)needRepaint;
 
 - (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude zoomLevel:(double)zoomLevel;
 

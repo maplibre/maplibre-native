@@ -52,7 +52,7 @@ public:
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
     void onRegisterShaders(gfx::ShaderRegistry&) final;
 
-    void onFrameRenderComplete() final;
+    void onFrameRenderComplete(const TransformState& state) final;
 
     // Map
     void jumpTo(const CameraOptions&);
@@ -61,6 +61,7 @@ public:
     RendererFrontend& rendererFrontend;
 
     Transform transform;
+    Transform currentTransform;
 
     const MapMode mode;
     const float pixelRatio;

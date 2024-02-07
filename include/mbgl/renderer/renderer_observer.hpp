@@ -7,6 +7,8 @@
 
 namespace mbgl {
 
+class TransformState;
+
 namespace gfx {
 class ShaderRegistry;
 }
@@ -55,7 +57,7 @@ public:
     // Entry point for custom shader registration
     virtual void onRegisterShaders(gfx::ShaderRegistry&){};
 
-    virtual void onFrameRenderComplete() {}
+    virtual void onFrameRenderComplete(const TransformState&) {}
 };
 
 } // namespace mbgl

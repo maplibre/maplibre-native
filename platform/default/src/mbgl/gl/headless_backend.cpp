@@ -27,7 +27,7 @@ public:
         context.viewport = {0, 0, framebuffer.size};
     }
 
-    void swap() override { backend.swap(); }
+    void swap(std::function<void()>) override { backend.swap(); }
 
     HeadlessBackend& backend;
     gl::Context& context;

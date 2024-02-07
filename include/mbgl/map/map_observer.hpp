@@ -67,7 +67,7 @@ public:
     // as the registry becomes available.
     virtual void onRegisterShaders(gfx::ShaderRegistry&){};
 
-    virtual void onFrameRenderComplete(){};
+    virtual void onFrameRenderComplete(bool){};
 };
 
 } // namespace mbgl

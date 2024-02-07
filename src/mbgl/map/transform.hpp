@@ -107,6 +107,7 @@ public:
 
     // Transform state
     const TransformState& getState() const { return state; }
+    void setState(const TransformState& state_) { state = state_; }
     bool isRotating() const { return state.isRotating(); }
     bool isScaling() const { return state.isScaling(); }
     bool isPanning() const { return state.isPanning(); }

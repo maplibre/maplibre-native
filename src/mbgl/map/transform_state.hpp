@@ -222,6 +222,10 @@ public:
     FreeCameraOptions getFreeCameraOptions() const;
     void setFreeCameraOptions(const FreeCameraOptions& options);
 
+    bool operator!=(const TransformState& other) const {
+        return x != other.x || y != other.y || bearing != other.bearing || scale != other.scale || pitch != other.pitch;
+    };
+
 private:
     bool rotatedNorth() const;
 

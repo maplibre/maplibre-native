@@ -12,9 +12,12 @@ protected:
     explicit RenderableResource() = default;
 
 public:
-    virtual void swap(std::function<void()>) {
+    virtual void swap(std::function<void()> completionCallback) {
         // Renderable resources that require a swap function to be called
         // explicitly can override this method.
+        if (completionCallback) {
+            completionCallback();
+        }
     }
 };
 

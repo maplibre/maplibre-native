@@ -24,6 +24,7 @@ Map::Impl::Impl(RendererFrontend& frontend_,
     style->impl->setObserver(this);
     rendererFrontend.setObserver(*this);
     transform.resize(mapOptions.size());
+    currentTransform.setState(transform.getState());
 }
 
 Map::Impl::~Impl() {
@@ -169,10 +170,20 @@ void Map::Impl::onDidFinishRenderingMap() {
     }
 };
 
-void Map::Impl::onFrameRenderComplete() {
-    // TODO: update currentTransform
+void Map::Impl::onFrameRenderComplete(const TransformState& state) {
+    
+    //
+    // this is called on different thread. TODO: synchronize
+    //
+    
+    // if we didn't reach the desired transform state, repaint
+    bool needRepaint = (state != transform.getState());
+    
+    // update currentTransform
+    currentTransform.setState(state);
+
     if (mode == MapMode::Continuous) {
-        observer.onFrameRenderComplete();
+        observer.onFrameRenderComplete(needRepaint);
     }
 }
 
