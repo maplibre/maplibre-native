@@ -67,13 +67,15 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     // If we're not going to render anything, move our existing tiles into
     // the cache (if they're not stale) or abandon them, and return.
     if (!needsRendering) {
-        if (!needsRelayout) {
-            for (auto& entry : tiles) {
+        for (auto& entry : tiles) {
+            if (!needsRelayout) {
                 // These tiles are invisible, we set optional necessity
                 // for them and thus suppress network requests on
                 // tiles expiration (see `OnlineFileRequest`).
                 entry.second->setNecessity(TileNecessity::Optional);
                 cache.add(entry.first, std::move(entry.second));
+            } else {
+                cache.deferredRelease(std::move(entry.second));
             }
         }
 
@@ -229,20 +231,16 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         auto retainIt = retain.begin();
         while (tilesIt != tiles.end()) {
             if (retainIt == retain.end() || tilesIt->first < *retainIt) {
-                if (!needsRelayout) {
-                    tilesIt->second->setNecessity(TileNecessity::Optional);
-                    cache.add(tilesIt->first, std::move(tilesIt->second));
-                }
-
-                if (tilesIt->second) {
-                    tilesIt->second->cancel();
-                    // See `TileCache::deferredRelease`
-                    std::unique_ptr<Tile> tile = std::move(tiles.extract(tilesIt++).mapped());
-                    std::function<void()> func{[tile_{std::shared_ptr<Tile>(std::move(tile))}] {
-                    }};
-                    Scheduler::GetBackground()->schedule(std::move(func));
-                } else {
-                    tiles.erase(tilesIt++);
+                // Remove the tile from the map.
+                // If it requires re-layout, discard it asynchronously, otherwise keep it in the cache
+                const auto key = tilesIt->first;
+                if (std::unique_ptr<Tile> tile = std::move(tiles.extract(tilesIt++).mapped())) {
+                    if (needsRelayout) {
+                        cache.deferredRelease(std::move(tile));
+                    } else {
+                        tile->setNecessity(TileNecessity::Optional);
+                        cache.add(key, std::move(tile));
+                    }
                 }
             } else {
                 if (!(*retainIt < tilesIt->first)) {
