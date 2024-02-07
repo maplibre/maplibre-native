@@ -408,11 +408,11 @@ ScreenCoordinate Map::pixelForLatLng(const LatLng& latLng) const {
     // e.g. the next antimeridian side is visible.
     LatLng unwrappedLatLng = latLng.wrapped();
     unwrappedLatLng.unwrapForShortestPath(impl->transform.getLatLng());
-    return impl->currentTransform.latLngToScreenCoordinate(unwrappedLatLng);
+    return impl->transform.latLngToScreenCoordinate(unwrappedLatLng);
 }
 
 LatLng Map::latLngForPixel(const ScreenCoordinate& pixel) const {
-    return impl->currentTransform.screenCoordinateToLatLng(pixel);
+    return impl->transform.screenCoordinateToLatLng(pixel);
 }
 
 std::vector<ScreenCoordinate> Map::pixelsForLatLngs(const std::vector<LatLng>& latLngs) const {

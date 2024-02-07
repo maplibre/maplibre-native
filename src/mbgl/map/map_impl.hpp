@@ -61,7 +61,6 @@ public:
     RendererFrontend& rendererFrontend;
 
     Transform transform;
-    Transform currentTransform;
 
     const MapMode mode;
     const float pixelRatio;

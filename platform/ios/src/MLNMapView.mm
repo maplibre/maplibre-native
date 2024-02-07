@@ -1180,13 +1180,27 @@ public:
 
     if (!self.dormant && needsRender)
     {
+        // It's important to call this *before* `_rendererFrontend->render()`, as
+        // that function saves the current `updateParameters` before rendering. If this
+        // occurs after then the views will be a frame behind.
+        //
+        // The update parameters will have been updated earlier, for example by
+        // calls to easeTo, flyTo, called from gesture handlers.
 
+#if !MLN_RENDER_BACKEND_METAL
+        [self updateViewsWithCurrentUpdateParameters];
+#endif
+        
         if (_rendererFrontend) {
             
             _rendererFrontend->render();
 
         }
-        
+
+#if MLN_RENDER_BACKEND_METAL
+        [self updateViewsWithCurrentUpdateParameters];
+#endif
+
     }
 
     if (hasPendingBlocks) {
@@ -6813,12 +6827,10 @@ static void *windowScreenContext = &windowScreenContext;
 - (void)mapViewFrameRenderComplete:(BOOL)needRepaint {
     if(needRepaint) {
         self.needsDisplayRefresh = YES;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self renderSync];
+        });
     }
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self updateViewsWithCurrentUpdateParameters];
-        [self renderSync];
-    });
 }
 
 - (void)mapViewWillStartRenderingMap {
