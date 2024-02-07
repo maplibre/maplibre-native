@@ -381,10 +381,10 @@ position named center. In the rendering world, this is not the center of
 the 3D plane we render tiles on, rather the position of the camera.</em></p>
 <p><img src="media/perspective-frustum.png" alt="" /><br />
 <em>Figure 3: Perspective Frustum (Sourced from learnopengl.com)</em></p>
-<p>The benefit of tile coordinates continues here. The camera representation 
-we use here, to be specific the view matrix, can directly take the tile 
-coordinates to move the camera to a particular tile in a zoom level. 
-Once a tile is built, the GPU can quickly draw the same tile with different 
+<p>The benefit of tile coordinates continues here. The camera representation
+we use here, to be specific the view matrix, can directly take the tile
+coordinates to move the camera to a particular tile in a zoom level.
+Once a tile is built, the GPU can quickly draw the same tile with different
 bearing, pan, pitch, and zoom parameters<sup class="footnote-reference"><a href="#15">8</a></sup>.</p>
 <p>If we keep following Figure 2, we see we need to also add a projection
 matrix. And MapLibre Native uses a <em>perspective projection</em>.

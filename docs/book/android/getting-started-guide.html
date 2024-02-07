@@ -189,7 +189,7 @@
 </code></pre>
 </li>
 <li>
-<p>Add the library as a dependency into your module Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>). Replace <code>&lt;version&gt;</code> with the latest MapLibre Native version (e.g.: <code>org.maplibre.gl:android-sdk:10.0.2</code>). Visit <a href="https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk">https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk</a> to view the version history of MapLibre Native for android. </p>
+<p>Add the library as a dependency into your module Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>). Replace <code>&lt;version&gt;</code> with the latest MapLibre Native version (e.g.: <code>org.maplibre.gl:android-sdk:10.0.2</code>). Visit <a href="https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk">https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk</a> to view the version history of MapLibre Native for android.</p>
 <pre><code class="language-gradle">dependencies {
     ...
     implementation 'org.maplibre.gl:android-sdk:&lt;version&gt;'
@@ -204,9 +204,9 @@
 <p>Add a <code>MapView</code> to your layout XML file (usually <code>&lt;project&gt;/&lt;app-module&gt;/src/main/res/layout/activity_main.xml</code>).</p>
 <pre><code class="language-xml">...
 &lt;org.maplibre.android.maps.MapView
-    android:id=&quot;@+id/mapView&quot;
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot;
+    android:id="@+id/mapView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     /&gt;
 ...
 </code></pre>
@@ -241,7 +241,7 @@ class MainActivity : AppCompatActivity() {
         // Init the MapView
         mapView = rootView.findViewById(R.id.mapView)
         mapView.getMapAsync { map -&gt;
-            map.setStyle(&quot;https://demotiles.maplibre.org/style.json&quot;)
+            map.setStyle("https://demotiles.maplibre.org/style.json")
             map.cameraPosition = CameraPosition.Builder().target(LatLng(0.0,0.0)).zoom(1.0).build()
         }
     }

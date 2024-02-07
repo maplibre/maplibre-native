@@ -184,10 +184,10 @@
 </ol>
 <pre><code class="language-xml">&lt;manifest ... &gt;
   &lt;!-- Always include this permission --&gt;
-  &lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;
+  &lt;uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /&gt;
 
   &lt;!-- Include only if your app benefits from precise location access. --&gt;
-  &lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;
+  &lt;uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /&gt;
 &lt;/manifest&gt;
 </code></pre>
 <ol start="2">
@@ -235,7 +235,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
                 override fun onExplanationNeeded(permissionsToExplain: List&lt;String&gt;) {
                     Toast.makeText(
                         this@BasicLocationPulsingCircleActivity,
-                        &quot;You need to accept location permissions.&quot;,
+                        "You need to accept location permissions.",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -268,7 +268,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 <p>In this demonstration, we create an instance of this class.</p>
 <p>In this method:</p>
 <ul>
-<li>Use the annotation <code>@SuppressLint(&quot;MissingPermission&quot;)</code> to suppress warnings related to missing location access permissions.</li>
+<li>Use the annotation <code>@SuppressLint("MissingPermission")</code> to suppress warnings related to missing location access permissions.</li>
 <li>In <code>setStyle(),</code> you can utilize other public and token-free styles like <a href="https://demotiles.maplibre.org/style.json">demotiles</a> instead of the <a href="https://github.com/maplibre/maplibre-native/tree/main/src/mbgl/util/tile_server_options.cpp">predefined styles</a>.</li>
 <li>For the builder of <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html">LocationComponentOptions</a>, use <code>pulseEnabled(true)</code> to enable the pulse animation, which enhances awareness of the user's location.</li>
 <li>Use method <code>buildLocationComponentActivationOptions()</code> to set <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-activation-options/index.html">LocationComponentActivationOptions</a>, then activate <code>locatinoComponent</code> with it.</li>
@@ -278,10 +278,10 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 </ul>
 </li>
 </ol>
-<pre><code class="language-kotlin">    @SuppressLint(&quot;MissingPermission&quot;)
+<pre><code class="language-kotlin">    @SuppressLint("MissingPermission")
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        maplibreMap.setStyle(Style.getPredefinedStyle(&quot;Streets&quot;)) { style: Style -&gt;
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style -&gt;
             locationComponent = maplibreMap.locationComponent
             val locationComponentOptions =
                 LocationComponentOptions.builder(this@BasicLocationPulsingCircleActivity)
@@ -340,8 +340,10 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 </ol>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
 <p>A variety of <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.modes/-camera-mode/index.html">camera modes</a> determine how the camera will track the user location.<br />
-They provide the right context to your users at the correct time.<br />
-<sup class="footnote-reference"><a href="#2">2</a></sup>: In <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test APP</a>, it also uses menu items to manage user location icon.</p>
+They provide the right context to your users at the correct time.</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>In <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test APP</a>, it also uses menu items to manage user location icon.</p>
 </div>
 
                     </main>

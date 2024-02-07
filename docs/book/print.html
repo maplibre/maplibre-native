@@ -175,8 +175,8 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><em><a href="https://github.com/maplibre/maplibre-native">MapLibre Native</a></em> is a community led fork of <em>Mapbox GL Native</em>. It's a C++ library that powers 
-vector maps in native applications on multiple platforms by taking stylesheets that conform to the <em>MapLibre Style Specification,</em> a fork of the 
+<p><em><a href="https://github.com/maplibre/maplibre-native">MapLibre Native</a></em> is a community led fork of <em>Mapbox GL Native</em>. It's a C++ library that powers
+vector maps in native applications on multiple platforms by taking stylesheets that conform to the <em>MapLibre Style Specification,</em> a fork of the
 MapLibre Style Spec. Since it is derived from Mapbox's original work it also uses <em>Mapbox Vector Tile Specification</em> as its choice of vector tile format.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="design"><a class="header" href="#design">Design</a></h1>
 <p>This section is dedicated to documenting current state of MapLibre Native. <a href="design/./archictural-problems-and-recommendations.html">Architectural Problems and Recommendations</a> section notes recommendations for future improvements from an architectural perspective.</p>
@@ -215,7 +215,7 @@ composed of multiple <em>layers</em>.</p>
 </li>
 <li>
 <p>A <em><strong>Layer</strong></em> requires <em><strong>Style</strong></em>, <em><strong>Glyphs</strong></em>, and <em><strong>Sprites</strong></em>
-for to be ready for rendering. Features rendered in a <em><strong>Layer</strong></em> 
+for to be ready for rendering. Features rendered in a <em><strong>Layer</strong></em>
 come from data sources. And a <em><strong>Layer</strong></em> is composed of tiles produced
 from said features.</p>
 </li>
@@ -284,17 +284,17 @@ characters<sup class="footnote-reference"><a href="#5">5</a></sup>. Map tiles us
 administrative boundaries, or street names. Map tiles also need to show
 icons for amenities like bus stops and parks. A map style uses character
 map from fonts to display labels and icons. Collectively these are
-called <em>glyphs.</em> </p>
-<p><em>Glyphs</em> require resizing, rotation, and a halo for clarity in nearly every 
-interaction with the map. To achieve this, all <em>glyphs</em> are pre-rendered 
+called <em>glyphs.</em></p>
+<p><em>Glyphs</em> require resizing, rotation, and a halo for clarity in nearly every
+interaction with the map. To achieve this, all <em>glyphs</em> are pre-rendered
 in a shared texture, called <em>texture atlas</em>. This atlas is packed inside
 protobuf container. Each element of the atlas is an individual texture
 representing the SDF of the character to render.</p>
 <p>Each <em>glyph</em> bitmap inside is a field of floats, named signed distance. It
-represents how a <em>glyph</em> should be drawn by the GPU. Each <em>glyph</em> is of font 
+represents how a <em>glyph</em> should be drawn by the GPU. Each <em>glyph</em> is of font
 size 24 that stores the distance to the next outline in every pixel. Easily
 put if the pixel is inside the <em>glyph</em> outline it has a value between <code>192-255</code>.
-Every pixel outside the <em>glyph</em> outline has a value between <code>0-191</code>. This creates 
+Every pixel outside the <em>glyph</em> outline has a value between <code>0-191</code>. This creates
 a black and white atlas of all the <em>glyphs</em> inside.</p>
 <p>This document currently does not have a dedicated section on text rendering.
 When it does, we will dive more into <em>glyph</em> rendering.</p>
@@ -356,7 +356,7 @@ check <a href="design/./geometry-tile-worker.html">Geometry Tile Worker</a> chap
 <hr />
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
 <p>To read in depth about the data flow for map initialization and
-rendering in Android, please check 
+rendering in Android, please check
 <a href="design/./android-map-rendering-data-flow.html">Android Map Rendering Data Flow</a></p>
 </div>
 <div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
@@ -599,10 +599,10 @@ position named center. In the rendering world, this is not the center of
 the 3D plane we render tiles on, rather the position of the camera.</em></p>
 <p><img src="design/media/perspective-frustum.png" alt="" /><br />
 <em>Figure 3: Perspective Frustum (Sourced from learnopengl.com)</em></p>
-<p>The benefit of tile coordinates continues here. The camera representation 
-we use here, to be specific the view matrix, can directly take the tile 
-coordinates to move the camera to a particular tile in a zoom level. 
-Once a tile is built, the GPU can quickly draw the same tile with different 
+<p>The benefit of tile coordinates continues here. The camera representation
+we use here, to be specific the view matrix, can directly take the tile
+coordinates to move the camera to a particular tile in a zoom level.
+Once a tile is built, the GPU can quickly draw the same tile with different
 bearing, pan, pitch, and zoom parameters<sup class="footnote-reference"><a href="#15">8</a></sup>.</p>
 <p>If we keep following Figure 2, we see we need to also add a projection
 matrix. And MapLibre Native uses a <em>perspective projection</em>.
@@ -726,16 +726,16 @@ vector styles. Mapbox Vector Style is used in Mapbox Vector Tiles.
 Mapbox Vector Tiles is a vector tile specification initiated by Mapbox
 which was later widely adopted by the geospatial community.</p>
 <p>To recap, Mapbox Vector Styles have 2 significant parts - <em>Sources</em> and <em>Layers</em>.
-Sources define where the geospatial features to display the map are loaded from. 
+Sources define where the geospatial features to display the map are loaded from.
 They can be GeoJSON, Mapbox Vector Tiles (MVT) etc. We draw said features
-on map using <em>Layers</em>. </p>
-<p>A <em>Layer</em> references a single source. This is where expressions kick in. 
-Expressions define how the data from a source will be painted in a layer 
-following a style. For example, a heatmap, requires the ability to paint 
-features in different zoom levels with different colors. Expressions 
-facilitate that. The rendering depends on the style of the layer along with 
-pitch, bearing, and zoom of the map. This was called <em>Data Driven Styling (DDS)</em>. 
-Another option that was used was to completely change the style in run time to 
+on map using <em>Layers</em>.</p>
+<p>A <em>Layer</em> references a single source. This is where expressions kick in.
+Expressions define how the data from a source will be painted in a layer
+following a style. For example, a heatmap, requires the ability to paint
+features in different zoom levels with different colors. Expressions
+facilitate that. The rendering depends on the style of the layer along with
+pitch, bearing, and zoom of the map. This was called <em>Data Driven Styling (DDS)</em>.
+Another option that was used was to completely change the style in run time to
 achieve the same outcome<sup class="footnote-reference"><a href="#17">1</a></sup>.</p>
 <p>The desire of being able to render a layer in different zoom levels
 differently based on data drove the birth of <em>expressions</em>. To
@@ -755,23 +755,23 @@ property dependent, or in zoom and property dependent manner.</p>
 <p>For a simple example of an expression, we will build a layer that displays
 a text field fixed text <code>hello world</code> for all features in a vector source:</p>
 <pre><code class="language-json">{
-  &quot;id&quot;: &quot;test&quot;,
-  &quot;type&quot;: &quot;symbol&quot;,
-  &quot;source&quot;: &quot;source&quot;,
-  &quot;layout&quot;: { &quot;text-field&quot;: &quot;Hello world&quot; }
+  "id": "test",
+  "type": "symbol",
+  "source": "source",
+  "layout": { "text-field": "Hello world" }
 }
 </code></pre>
-<p>If we wanted it instead to display the name property of each feature, 
+<p>If we wanted it instead to display the name property of each feature,
 we can use an expression like this:</p>
-<pre><code class="language-json">{ &quot;text-field&quot;: [&quot;get&quot;, &quot;name&quot;] }
+<pre><code class="language-json">{ "text-field": ["get", "name"] }
 </code></pre>
 <p>We can also mutate the value fetched from properties of the features. For
 examplel, we can append a prefix <code>Hello</code> to the name by using the <code>concat</code>
 expression:</p>
-<pre><code class="language-json">{ &quot;text-field&quot;: [&quot;concat&quot;, &quot;Hello, &quot;, [&quot;get&quot;, &quot;name&quot;]] }
+<pre><code class="language-json">{ "text-field": ["concat", "Hello, ", ["get", "name"]] }
 </code></pre>
-<p>By now, you probably have figured it out that expressions use a JSON-like 
-syntax to define. For brevity, let's look at the construction of an example 
+<p>By now, you probably have figured it out that expressions use a JSON-like
+syntax to define. For brevity, let's look at the construction of an example
 expression below:</p>
 <pre><code>'^': [
 NumberType,
@@ -796,26 +796,26 @@ extending expressions library with custom expressions if desired.</p>
 <p>In the example expression, we saw how one expression is defined. The
 example also shows that expressions have types. Expression language can
 accept input and output types of null, number, string, boolean, color,
-object, value, array, error, collator, and formatted. The canonical 
-definition of Expressions is rooted in JSON. Like JSON, <code>object</code> type 
+object, value, array, error, collator, and formatted. The canonical
+definition of Expressions is rooted in JSON. Like JSON, <code>object</code> type
 is the mapping key type that maps a set of <em>keys</em> to <em>values</em>.</p>
 <p>Beside the aforementioned data types, Expressions offer built-in functions
-or operators such as assertion, coalesce, interpolate, distance etc. 
-The code uses the word <em>kind</em> to differentiate between these. 
+or operators such as assertion, coalesce, interpolate, distance etc.
+The code uses the word <em>kind</em> to differentiate between these.
 Each <em>kind</em> of expression performs a single responsibility.</p>
 <p><em>Assertion expressions</em> assert the returning type from one expression is
 asserted before putting into another. For example, a filter expression
-of <code>[&quot;get&quot;, &quot;feature_property&quot;]</code>, returns a generic <em>value</em> type. To
+of <code>["get", "feature_property"]</code>, returns a generic <em>value</em> type. To
 use it on another expression that accepts a string type, an assertion
-such as <code>[&quot;string&quot;, [&quot;get&quot;, &quot;feature_property&quot;]]</code> is necessary.
+such as <code>["string", ["get", "feature_property"]]</code> is necessary.
 Assertion throws an evaluation-time error if the types don't match
-during evaluation. </p>
-<p>You might think this is a <em>coercion</em> instead of an <em>assertion</em>. If you are 
-seeking for coercions, read the upcoming paragraph. Expression names 
+during evaluation.</p>
+<p>You might think this is a <em>coercion</em> instead of an <em>assertion</em>. If you are
+seeking for coercions, read the upcoming paragraph. Expression names
 that looks like <code>to-something</code> are coercions by convention.</p>
 <p><em>Coercion expressions</em> convert a return type to another type. It also
 allows to define a fallback if the conversion fails. A good example of
-this is <em>to-number</em> expression. For example, <code>[&quot;to-number&quot;, [&quot;get&quot;, &quot;feature_property&quot;], 0]</code> means that we are trying to cover the
+this is <em>to-number</em> expression. For example, <code>["to-number", ["get", "feature_property"], 0]</code> means that we are trying to cover the
 feature-property to a number. If it fails, we will use 0 as a fallback.</p>
 <p><em>Camera expressions</em> are expressions that allow style property
 manipulation based on zoom, pitch, and distance from center.</p>
@@ -932,7 +932,7 @@ for future improvement. This document intends to address the first.</p>
 Native to address the architectural shortcomings.</p>
 <p><img src="design/media/proposed-architecture-of-maplibre-gl.png" alt="" /><br />
 <em>Figure 4: Proposed Architecture of MapLibre Native</em></p>
-<p>Proposed architecture of MapLibre Native in Figure 4 addresses the 
+<p>Proposed architecture of MapLibre Native in Figure 4 addresses the
 aforementioned problems by:</p>
 <h4 id="modular-rendering"><a class="header" href="#modular-rendering">Modular Rendering</a></h4>
 <p>Introducing modularized rendering through <em>Unified Rendering Interface</em>.
@@ -1234,7 +1234,7 @@ brevity, this document does not speak of these classes.</p>
 </code></pre>
 </li>
 <li>
-<p>Add the library as a dependency into your module Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>). Replace <code>&lt;version&gt;</code> with the latest MapLibre Native version (e.g.: <code>org.maplibre.gl:android-sdk:10.0.2</code>). Visit <a href="https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk">https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk</a> to view the version history of MapLibre Native for android. </p>
+<p>Add the library as a dependency into your module Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>). Replace <code>&lt;version&gt;</code> with the latest MapLibre Native version (e.g.: <code>org.maplibre.gl:android-sdk:10.0.2</code>). Visit <a href="https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk">https://mvnrepository.com/artifact/org.maplibre.gl/android-sdk</a> to view the version history of MapLibre Native for android.</p>
 <pre><code class="language-gradle">dependencies {
     ...
     implementation 'org.maplibre.gl:android-sdk:&lt;version&gt;'
@@ -1249,9 +1249,9 @@ brevity, this document does not speak of these classes.</p>
 <p>Add a <code>MapView</code> to your layout XML file (usually <code>&lt;project&gt;/&lt;app-module&gt;/src/main/res/layout/activity_main.xml</code>).</p>
 <pre><code class="language-xml">...
 &lt;org.maplibre.android.maps.MapView
-    android:id=&quot;@+id/mapView&quot;
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot;
+    android:id="@+id/mapView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     /&gt;
 ...
 </code></pre>
@@ -1286,7 +1286,7 @@ class MainActivity : AppCompatActivity() {
         // Init the MapView
         mapView = rootView.findViewById(R.id.mapView)
         mapView.getMapAsync { map -&gt;
-            map.setStyle(&quot;https://demotiles.maplibre.org/style.json&quot;)
+            map.setStyle("https://demotiles.maplibre.org/style.json")
             map.cameraPosition = CameraPosition.Builder().target(LatLng(0.0,0.0)).zoom(1.0).build()
         }
     }
@@ -1389,7 +1389,7 @@ to make a HTTP request and transform data into the map annotations.</li>
 <pre><code class="language-kotlin">        mapView.getMapAsync { map -&gt;
             maplibreMap = map
 
-            maplibreMap.setStyle(&quot;https://demotiles.maplibre.org/style.json&quot;)
+            maplibreMap.setStyle("https://demotiles.maplibre.org/style.json")
 
             // Fetch data from USGS
             getEarthQuakeDataFromUSGS()
@@ -1402,20 +1402,20 @@ If we successfully get the response, call <code>addMarkersToMap()</code> on the 
 <pre><code class="language-kotlin">    // Get Earthquake data from usgs.gov, read API doc at:
     // https://earthquake.usgs.gov/fdsnws/event/1/
     private fun getEarthQuakeDataFromUSGS() {
-        val url = &quot;https://earthquake.usgs.gov/fdsnws/event/1/query&quot;.toHttpUrl().newBuilder()
-            .addQueryParameter(&quot;format&quot;, &quot;geojson&quot;)
-            .addQueryParameter(&quot;starttime&quot;, &quot;2022-01-01&quot;)
-            .addQueryParameter(&quot;endtime&quot;, &quot;2022-12-31&quot;)
-            .addQueryParameter(&quot;minmagnitude&quot;, &quot;5.8&quot;)
-            .addQueryParameter(&quot;latitude&quot;, &quot;24&quot;)
-            .addQueryParameter(&quot;longitude&quot;, &quot;121&quot;)
-            .addQueryParameter(&quot;maxradius&quot;, &quot;1.5&quot;)
+        val url = "https://earthquake.usgs.gov/fdsnws/event/1/query".toHttpUrl().newBuilder()
+            .addQueryParameter("format", "geojson")
+            .addQueryParameter("starttime", "2022-01-01")
+            .addQueryParameter("endtime", "2022-12-31")
+            .addQueryParameter("minmagnitude", "5.8")
+            .addQueryParameter("latitude", "24")
+            .addQueryParameter("longitude", "121")
+            .addQueryParameter("maxradius", "1.5")
             .build()
         val request: Request = Request.Builder().url(url).build()
 
         OkHttpClient().newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Toast.makeText(this@JsonApiActivity, &quot;Fail to fetch data&quot;, Toast.LENGTH_SHORT)
+                Toast.makeText(this@JsonApiActivity, "Fail to fetch data", Toast.LENGTH_SHORT)
                     .show()
             }
 
@@ -1465,12 +1465,12 @@ If we successfully get the response, call <code>addMarkersToMap()</code> on the 
             bounds.add(latLng)
 
             // Contents in InfoWindow of each marker
-            val title = feature.getStringProperty(&quot;title&quot;)
-            val epochTime = feature.getNumberProperty(&quot;time&quot;)
-            val dateString = SimpleDateFormat(&quot;yyyy/MM/dd HH:mm&quot;, Locale.TAIWAN).format(epochTime)
+            val title = feature.getStringProperty("title")
+            val epochTime = feature.getNumberProperty("time")
+            val dateString = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.TAIWAN).format(epochTime)
 
             // If magnitude &gt; 6.0, show marker with red icon. If not, show blue icon instead
-            val mag = feature.getNumberProperty(&quot;mag&quot;)
+            val mag = feature.getNumberProperty("mag")
             val icon = IconFactory.getInstance(this)
                 .fromBitmap(if (mag.toFloat() &gt; 6.0) bitmapRed else bitmapBlue)
 
@@ -1510,10 +1510,10 @@ If we successfully get the response, call <code>addMarkersToMap()</code> on the 
 </ol>
 <pre><code class="language-xml">&lt;manifest ... &gt;
   &lt;!-- Always include this permission --&gt;
-  &lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;
+  &lt;uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /&gt;
 
   &lt;!-- Include only if your app benefits from precise location access. --&gt;
-  &lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;
+  &lt;uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /&gt;
 &lt;/manifest&gt;
 </code></pre>
 <ol start="2">
@@ -1561,7 +1561,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
                 override fun onExplanationNeeded(permissionsToExplain: List&lt;String&gt;) {
                     Toast.makeText(
                         this@BasicLocationPulsingCircleActivity,
-                        &quot;You need to accept location permissions.&quot;,
+                        "You need to accept location permissions.",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -1594,7 +1594,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 <p>In this demonstration, we create an instance of this class.</p>
 <p>In this method:</p>
 <ul>
-<li>Use the annotation <code>@SuppressLint(&quot;MissingPermission&quot;)</code> to suppress warnings related to missing location access permissions.</li>
+<li>Use the annotation <code>@SuppressLint("MissingPermission")</code> to suppress warnings related to missing location access permissions.</li>
 <li>In <code>setStyle(),</code> you can utilize other public and token-free styles like <a href="https://demotiles.maplibre.org/style.json">demotiles</a> instead of the <a href="https://github.com/maplibre/maplibre-native/tree/main/src/mbgl/util/tile_server_options.cpp">predefined styles</a>.</li>
 <li>For the builder of <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html">LocationComponentOptions</a>, use <code>pulseEnabled(true)</code> to enable the pulse animation, which enhances awareness of the user's location.</li>
 <li>Use method <code>buildLocationComponentActivationOptions()</code> to set <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-activation-options/index.html">LocationComponentActivationOptions</a>, then activate <code>locatinoComponent</code> with it.</li>
@@ -1604,10 +1604,10 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 </ul>
 </li>
 </ol>
-<pre><code class="language-kotlin">    @SuppressLint(&quot;MissingPermission&quot;)
+<pre><code class="language-kotlin">    @SuppressLint("MissingPermission")
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        maplibreMap.setStyle(Style.getPredefinedStyle(&quot;Streets&quot;)) { style: Style -&gt;
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style -&gt;
             locationComponent = maplibreMap.locationComponent
             val locationComponentOptions =
                 LocationComponentOptions.builder(this@BasicLocationPulsingCircleActivity)
@@ -1666,8 +1666,10 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 </ol>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
 <p>A variety of <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.modes/-camera-mode/index.html">camera modes</a> determine how the camera will track the user location.<br />
-They provide the right context to your users at the correct time.<br />
-<sup class="footnote-reference"><a href="#2">2</a></sup>: In <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test APP</a>, it also uses menu items to manage user location icon.</p>
+They provide the right context to your users at the correct time.</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>In <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test APP</a>, it also uses menu items to manage user location icon.</p>
 </div>
 
                     </main>

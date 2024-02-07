@@ -208,7 +208,7 @@ composed of multiple <em>layers</em>.</p>
 </li>
 <li>
 <p>A <em><strong>Layer</strong></em> requires <em><strong>Style</strong></em>, <em><strong>Glyphs</strong></em>, and <em><strong>Sprites</strong></em>
-for to be ready for rendering. Features rendered in a <em><strong>Layer</strong></em> 
+for to be ready for rendering. Features rendered in a <em><strong>Layer</strong></em>
 come from data sources. And a <em><strong>Layer</strong></em> is composed of tiles produced
 from said features.</p>
 </li>
@@ -277,17 +277,17 @@ characters<sup class="footnote-reference"><a href="#5">5</a></sup>. Map tiles us
 administrative boundaries, or street names. Map tiles also need to show
 icons for amenities like bus stops and parks. A map style uses character
 map from fonts to display labels and icons. Collectively these are
-called <em>glyphs.</em> </p>
-<p><em>Glyphs</em> require resizing, rotation, and a halo for clarity in nearly every 
-interaction with the map. To achieve this, all <em>glyphs</em> are pre-rendered 
+called <em>glyphs.</em></p>
+<p><em>Glyphs</em> require resizing, rotation, and a halo for clarity in nearly every
+interaction with the map. To achieve this, all <em>glyphs</em> are pre-rendered
 in a shared texture, called <em>texture atlas</em>. This atlas is packed inside
 protobuf container. Each element of the atlas is an individual texture
 representing the SDF of the character to render.</p>
 <p>Each <em>glyph</em> bitmap inside is a field of floats, named signed distance. It
-represents how a <em>glyph</em> should be drawn by the GPU. Each <em>glyph</em> is of font 
+represents how a <em>glyph</em> should be drawn by the GPU. Each <em>glyph</em> is of font
 size 24 that stores the distance to the next outline in every pixel. Easily
 put if the pixel is inside the <em>glyph</em> outline it has a value between <code>192-255</code>.
-Every pixel outside the <em>glyph</em> outline has a value between <code>0-191</code>. This creates 
+Every pixel outside the <em>glyph</em> outline has a value between <code>0-191</code>. This creates
 a black and white atlas of all the <em>glyphs</em> inside.</p>
 <p>This document currently does not have a dedicated section on text rendering.
 When it does, we will dive more into <em>glyph</em> rendering.</p>
@@ -349,7 +349,7 @@ check <a href="./geometry-tile-worker.html">Geometry Tile Worker</a> chapter.</p
 <hr />
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
 <p>To read in depth about the data flow for map initialization and
-rendering in Android, please check 
+rendering in Android, please check
 <a href="./android-map-rendering-data-flow.html">Android Map Rendering Data Flow</a></p>
 </div>
 <div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>

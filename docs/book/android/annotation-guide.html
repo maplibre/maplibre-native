@@ -227,7 +227,7 @@ to make a HTTP request and transform data into the map annotations.</li>
 <pre><code class="language-kotlin">        mapView.getMapAsync { map -&gt;
             maplibreMap = map
 
-            maplibreMap.setStyle(&quot;https://demotiles.maplibre.org/style.json&quot;)
+            maplibreMap.setStyle("https://demotiles.maplibre.org/style.json")
 
             // Fetch data from USGS
             getEarthQuakeDataFromUSGS()
@@ -240,20 +240,20 @@ If we successfully get the response, call <code>addMarkersToMap()</code> on the 
 <pre><code class="language-kotlin">    // Get Earthquake data from usgs.gov, read API doc at:
     // https://earthquake.usgs.gov/fdsnws/event/1/
     private fun getEarthQuakeDataFromUSGS() {
-        val url = &quot;https://earthquake.usgs.gov/fdsnws/event/1/query&quot;.toHttpUrl().newBuilder()
-            .addQueryParameter(&quot;format&quot;, &quot;geojson&quot;)
-            .addQueryParameter(&quot;starttime&quot;, &quot;2022-01-01&quot;)
-            .addQueryParameter(&quot;endtime&quot;, &quot;2022-12-31&quot;)
-            .addQueryParameter(&quot;minmagnitude&quot;, &quot;5.8&quot;)
-            .addQueryParameter(&quot;latitude&quot;, &quot;24&quot;)
-            .addQueryParameter(&quot;longitude&quot;, &quot;121&quot;)
-            .addQueryParameter(&quot;maxradius&quot;, &quot;1.5&quot;)
+        val url = "https://earthquake.usgs.gov/fdsnws/event/1/query".toHttpUrl().newBuilder()
+            .addQueryParameter("format", "geojson")
+            .addQueryParameter("starttime", "2022-01-01")
+            .addQueryParameter("endtime", "2022-12-31")
+            .addQueryParameter("minmagnitude", "5.8")
+            .addQueryParameter("latitude", "24")
+            .addQueryParameter("longitude", "121")
+            .addQueryParameter("maxradius", "1.5")
             .build()
         val request: Request = Request.Builder().url(url).build()
 
         OkHttpClient().newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                Toast.makeText(this@JsonApiActivity, &quot;Fail to fetch data&quot;, Toast.LENGTH_SHORT)
+                Toast.makeText(this@JsonApiActivity, "Fail to fetch data", Toast.LENGTH_SHORT)
                     .show()
             }
 
@@ -303,12 +303,12 @@ If we successfully get the response, call <code>addMarkersToMap()</code> on the 
             bounds.add(latLng)
 
             // Contents in InfoWindow of each marker
-            val title = feature.getStringProperty(&quot;title&quot;)
-            val epochTime = feature.getNumberProperty(&quot;time&quot;)
-            val dateString = SimpleDateFormat(&quot;yyyy/MM/dd HH:mm&quot;, Locale.TAIWAN).format(epochTime)
+            val title = feature.getStringProperty("title")
+            val epochTime = feature.getNumberProperty("time")
+            val dateString = SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.TAIWAN).format(epochTime)
 
             // If magnitude &gt; 6.0, show marker with red icon. If not, show blue icon instead
-            val mag = feature.getNumberProperty(&quot;mag&quot;)
+            val mag = feature.getNumberProperty("mag")
             val icon = IconFactory.getInstance(this)
                 .fromBitmap(if (mag.toFloat() &gt; 6.0) bitmapRed else bitmapBlue)
 

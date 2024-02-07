@@ -179,16 +179,16 @@ vector styles. Mapbox Vector Style is used in Mapbox Vector Tiles.
 Mapbox Vector Tiles is a vector tile specification initiated by Mapbox
 which was later widely adopted by the geospatial community.</p>
 <p>To recap, Mapbox Vector Styles have 2 significant parts - <em>Sources</em> and <em>Layers</em>.
-Sources define where the geospatial features to display the map are loaded from. 
+Sources define where the geospatial features to display the map are loaded from.
 They can be GeoJSON, Mapbox Vector Tiles (MVT) etc. We draw said features
-on map using <em>Layers</em>. </p>
-<p>A <em>Layer</em> references a single source. This is where expressions kick in. 
-Expressions define how the data from a source will be painted in a layer 
-following a style. For example, a heatmap, requires the ability to paint 
-features in different zoom levels with different colors. Expressions 
-facilitate that. The rendering depends on the style of the layer along with 
-pitch, bearing, and zoom of the map. This was called <em>Data Driven Styling (DDS)</em>. 
-Another option that was used was to completely change the style in run time to 
+on map using <em>Layers</em>.</p>
+<p>A <em>Layer</em> references a single source. This is where expressions kick in.
+Expressions define how the data from a source will be painted in a layer
+following a style. For example, a heatmap, requires the ability to paint
+features in different zoom levels with different colors. Expressions
+facilitate that. The rendering depends on the style of the layer along with
+pitch, bearing, and zoom of the map. This was called <em>Data Driven Styling (DDS)</em>.
+Another option that was used was to completely change the style in run time to
 achieve the same outcome<sup class="footnote-reference"><a href="#17">1</a></sup>.</p>
 <p>The desire of being able to render a layer in different zoom levels
 differently based on data drove the birth of <em>expressions</em>. To
@@ -208,23 +208,23 @@ property dependent, or in zoom and property dependent manner.</p>
 <p>For a simple example of an expression, we will build a layer that displays
 a text field fixed text <code>hello world</code> for all features in a vector source:</p>
 <pre><code class="language-json">{
-  &quot;id&quot;: &quot;test&quot;,
-  &quot;type&quot;: &quot;symbol&quot;,
-  &quot;source&quot;: &quot;source&quot;,
-  &quot;layout&quot;: { &quot;text-field&quot;: &quot;Hello world&quot; }
+  "id": "test",
+  "type": "symbol",
+  "source": "source",
+  "layout": { "text-field": "Hello world" }
 }
 </code></pre>
-<p>If we wanted it instead to display the name property of each feature, 
+<p>If we wanted it instead to display the name property of each feature,
 we can use an expression like this:</p>
-<pre><code class="language-json">{ &quot;text-field&quot;: [&quot;get&quot;, &quot;name&quot;] }
+<pre><code class="language-json">{ "text-field": ["get", "name"] }
 </code></pre>
 <p>We can also mutate the value fetched from properties of the features. For
 examplel, we can append a prefix <code>Hello</code> to the name by using the <code>concat</code>
 expression:</p>
-<pre><code class="language-json">{ &quot;text-field&quot;: [&quot;concat&quot;, &quot;Hello, &quot;, [&quot;get&quot;, &quot;name&quot;]] }
+<pre><code class="language-json">{ "text-field": ["concat", "Hello, ", ["get", "name"]] }
 </code></pre>
-<p>By now, you probably have figured it out that expressions use a JSON-like 
-syntax to define. For brevity, let's look at the construction of an example 
+<p>By now, you probably have figured it out that expressions use a JSON-like
+syntax to define. For brevity, let's look at the construction of an example
 expression below:</p>
 <pre><code>'^': [
 NumberType,
@@ -249,26 +249,26 @@ extending expressions library with custom expressions if desired.</p>
 <p>In the example expression, we saw how one expression is defined. The
 example also shows that expressions have types. Expression language can
 accept input and output types of null, number, string, boolean, color,
-object, value, array, error, collator, and formatted. The canonical 
-definition of Expressions is rooted in JSON. Like JSON, <code>object</code> type 
+object, value, array, error, collator, and formatted. The canonical
+definition of Expressions is rooted in JSON. Like JSON, <code>object</code> type
 is the mapping key type that maps a set of <em>keys</em> to <em>values</em>.</p>
 <p>Beside the aforementioned data types, Expressions offer built-in functions
-or operators such as assertion, coalesce, interpolate, distance etc. 
-The code uses the word <em>kind</em> to differentiate between these. 
+or operators such as assertion, coalesce, interpolate, distance etc.
+The code uses the word <em>kind</em> to differentiate between these.
 Each <em>kind</em> of expression performs a single responsibility.</p>
 <p><em>Assertion expressions</em> assert the returning type from one expression is
 asserted before putting into another. For example, a filter expression
-of <code>[&quot;get&quot;, &quot;feature_property&quot;]</code>, returns a generic <em>value</em> type. To
+of <code>["get", "feature_property"]</code>, returns a generic <em>value</em> type. To
 use it on another expression that accepts a string type, an assertion
-such as <code>[&quot;string&quot;, [&quot;get&quot;, &quot;feature_property&quot;]]</code> is necessary.
+such as <code>["string", ["get", "feature_property"]]</code> is necessary.
 Assertion throws an evaluation-time error if the types don't match
-during evaluation. </p>
-<p>You might think this is a <em>coercion</em> instead of an <em>assertion</em>. If you are 
-seeking for coercions, read the upcoming paragraph. Expression names 
+during evaluation.</p>
+<p>You might think this is a <em>coercion</em> instead of an <em>assertion</em>. If you are
+seeking for coercions, read the upcoming paragraph. Expression names
 that looks like <code>to-something</code> are coercions by convention.</p>
 <p><em>Coercion expressions</em> convert a return type to another type. It also
 allows to define a fallback if the conversion fails. A good example of
-this is <em>to-number</em> expression. For example, <code>[&quot;to-number&quot;, [&quot;get&quot;, &quot;feature_property&quot;], 0]</code> means that we are trying to cover the
+this is <em>to-number</em> expression. For example, <code>["to-number", ["get", "feature_property"], 0]</code> means that we are trying to cover the
 feature-property to a number. If it fails, we will use 0 as a fallback.</p>
 <p><em>Camera expressions</em> are expressions that allow style property
 manipulation based on zoom, pitch, and distance from center.</p>
