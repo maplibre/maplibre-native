@@ -10,6 +10,7 @@
 #include <mbgl/style/layer.hpp>
 #endif
 
+MLN_EXPORT
 @interface MLNCustomDrawableStyleLayer : MLNStyleLayer
 
 #ifdef __cplusplus
