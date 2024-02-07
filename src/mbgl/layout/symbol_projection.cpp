@@ -147,7 +147,7 @@ void addDynamicAttributes(const Point<float>& anchorPoint,
 void hideGlyphs(size_t numGlyphs, gfx::VertexVector<gfx::Vertex<SymbolDynamicLayoutAttributes>>& dynamicVertexArray) {
     const Point<float> offscreenPoint = {-INFINITY, -INFINITY};
     if (dynamicVertexArray.empty()) {
-        dynamicVertexArray.reserve(numGlyphs * 4);
+        dynamicVertexArray.reserve(4 * numGlyphs);
     }
     for (size_t i = 0; i < numGlyphs; i++) {
         addDynamicAttributes(offscreenPoint, 0, dynamicVertexArray);
