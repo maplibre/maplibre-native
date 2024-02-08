@@ -53,6 +53,7 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNAnnotation.h",
     "src/MLNAttributedExpression.h",
     "src/MLNAttributionInfo.h",
+    "src/MLNBackendResource.h",
     "src/MLNClockDirectionFormatter.h",
     "src/MLNCluster.h",
     "src/MLNCompassDirectionFormatter.h",
