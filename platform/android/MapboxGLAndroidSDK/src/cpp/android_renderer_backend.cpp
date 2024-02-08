@@ -22,7 +22,7 @@ public:
         backend.setViewport(0, 0, backend.getSize());
     }
 
-    void swap(std::function < void()) override { backend.swap(); }
+    void swap(std::function<void()>) override { backend.swap(); }
 
 private:
     AndroidRendererBackend& backend;
