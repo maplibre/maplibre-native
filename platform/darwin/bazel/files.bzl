@@ -76,7 +76,6 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNOfflinePack.h",
     "src/MLNOfflineRegion.h",
     "src/MLNOfflineStorage.h",
-    "src/MLNOpenGLStyleLayer.h",
     "src/MLNOverlay.h",
     "src/MLNPointAnnotation.h",
     "src/MLNPointCollection.h",
