@@ -1,3 +1,6 @@
+# https://github.com/aspect-build/rules_js/issues/1408
+startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
+
 # TODO: remove with bazel 7.x
 common --enable_bzlmod
 
