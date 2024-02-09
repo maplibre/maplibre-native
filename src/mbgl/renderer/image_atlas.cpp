@@ -46,15 +46,18 @@ namespace {
 void populateImagePatches(ImagePositions& imagePositions,
                           const ImageManager& imageManager,
                           std::vector<ImagePatch>& /*out*/ patches) {
+    if (imagePositions.empty()) {
+        imagePositions.reserve(imageManager.updatedImageVersions.size());
+    }
     for (auto& updatedImageVersion : imageManager.updatedImageVersions) {
         const std::string& name = updatedImageVersion.first;
         const uint32_t version = updatedImageVersion.second;
-        auto it = imagePositions.find(updatedImageVersion.first);
+        const auto it = imagePositions.find(updatedImageVersion.first);
         if (it != imagePositions.end()) {
             auto& position = it->second;
             if (position.version == version) continue;
 
-            auto updatedImage = imageManager.getSharedImage(name);
+            const auto updatedImage = imageManager.getSharedImage(name);
             if (updatedImage == nullptr) continue;
 
             patches.emplace_back(*updatedImage, position.paddedRect);
