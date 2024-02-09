@@ -348,11 +348,6 @@ js_library(
         ":generated_style_hdrs",
         ":generated_style_srcs",
     ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            ":darwin_objcpp_opengl_srcs",
-        ],
-    }) + select({
         "//:legacy_renderer": [],
         "//conditions:default": [
             ":darwin_objcpp_custom_drawable_srcs",
