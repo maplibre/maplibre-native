@@ -4,6 +4,7 @@
 #include <mbgl/util/immutable.hpp>
 
 #include <map>
+#include <set>
 #include <string>
 
 namespace mbgl {

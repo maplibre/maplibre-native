@@ -83,12 +83,12 @@ public:
 
     void onImagesAvailable(ImageMap icons,
                            ImageMap patterns,
-                           std::unordered_map<std::string, uint32_t> versionMap,
+                           ImageVersionMap versionMap,
                            uint64_t imageCorrelationID_) final {
         if (imagesAvailable && imageCorrelationID == imageCorrelationID_) imagesAvailable(icons, patterns, versionMap);
     }
 
-    std::function<void(ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>)> imagesAvailable;
+    std::function<void(ImageMap, ImageMap, ImageVersionMap)> imagesAvailable;
     uint64_t imageCorrelationID = 0;
 };
 
@@ -101,7 +101,7 @@ TEST(ImageManager, NotifiesRequestorWhenSpriteIsLoaded) {
     ImageManagerObserver observer;
     imageManager.setObserver(&observer);
 
-    requestor.imagesAvailable = [&](ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>) {
+    requestor.imagesAvailable = [&](ImageMap, ImageMap, ImageVersionMap) {
         notified = true;
     };
 
@@ -126,7 +126,7 @@ TEST(ImageManager, NotifiesRequestorImmediatelyIfDependenciesAreSatisfied) {
     StubImageRequestor requestor(imageManager);
     bool notified = false;
 
-    requestor.imagesAvailable = [&](ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>) {
+    requestor.imagesAvailable = [&](ImageMap, ImageMap, ImageVersionMap) {
         notified = true;
     };
 
@@ -167,7 +167,7 @@ TEST(ImageManager, OnStyleImageMissingBeforeSpriteLoaded) {
 
     bool notified = false;
 
-    requestor.imagesAvailable = [&](ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>) {
+    requestor.imagesAvailable = [&](ImageMap, ImageMap, ImageVersionMap) {
         notified = true;
     };
 
@@ -222,7 +222,7 @@ TEST(ImageManager, OnStyleImageMissingAfterSpriteLoaded) {
 
     bool notified = false;
 
-    requestor.imagesAvailable = [&](ImageMap, ImageMap, std::unordered_map<std::string, uint32_t>) {
+    requestor.imagesAvailable = [&](ImageMap, ImageMap, ImageVersionMap) {
         notified = true;
     };
 

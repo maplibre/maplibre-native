@@ -1,10 +1,9 @@
 #pragma once
 
 #include <mbgl/style/image.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <string>
-#include <unordered_map>
-#include <set>
 #include <optional>
 
 namespace mbgl {
@@ -45,10 +44,10 @@ enum class ImageType : bool {
     Pattern
 };
 
-using ImageMap = std::unordered_map<std::string, Immutable<style::Image::Impl>>;
-using ImageDependencies = std::unordered_map<std::string, ImageType>;
+using ImageMap = mbgl::unordered_map<std::string, Immutable<style::Image::Impl>>;
+using ImageDependencies = mbgl::unordered_map<std::string, ImageType>;
 using ImageRequestPair = std::pair<ImageDependencies, uint64_t>;
-using ImageVersionMap = std::unordered_map<std::string, uint32_t>;
+using ImageVersionMap = mbgl::unordered_map<std::string, uint32_t>;
 inline bool operator<(const Immutable<mbgl::style::Image::Impl>& a, const Immutable<mbgl::style::Image::Impl>& b) {
     return a->id < b->id;
 }

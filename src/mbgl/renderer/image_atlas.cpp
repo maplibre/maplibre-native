@@ -72,28 +72,30 @@ std::vector<ImagePatch> ImageAtlas::getImagePatchesAndUpdateVersions(const Image
     return imagePatches;
 }
 
-ImageAtlas makeImageAtlas(const ImageMap& icons,
-                          const ImageMap& patterns,
-                          const std::unordered_map<std::string, uint32_t>& versionMap) {
+ImageAtlas makeImageAtlas(const ImageMap& icons, const ImageMap& patterns, const ImageVersionMap& versionMap) {
     ImageAtlas result;
 
     mapbox::ShelfPack::ShelfPackOptions options;
     options.autoResize = true;
     mapbox::ShelfPack pack(0, 0, options);
 
+    result.iconPositions.reserve(icons.size());
+
     for (const auto& entry : icons) {
         const style::Image::Impl& image = *entry.second;
         const mapbox::Bin& bin = _packImage(pack, image, result, ImageType::Icon);
-        auto it = versionMap.find(entry.first);
-        auto version = it != versionMap.end() ? it->second : 0;
+        const auto it = versionMap.find(entry.first);
+        const auto version = it != versionMap.end() ? it->second : 0;
         result.iconPositions.emplace(image.id, ImagePosition{bin, image, version});
     }
+
+    result.patternPositions.reserve(patterns.size());
 
     for (const auto& entry : patterns) {
         const style::Image::Impl& image = *entry.second;
         const mapbox::Bin& bin = _packImage(pack, image, result, ImageType::Pattern);
-        auto it = versionMap.find(entry.first);
-        auto version = it != versionMap.end() ? it->second : 0;
+        const auto it = versionMap.find(entry.first);
+        const auto version = it != versionMap.end() ? it->second : 0;
         result.patternPositions.emplace(image.id, ImagePosition{bin, image, version});
     }
 

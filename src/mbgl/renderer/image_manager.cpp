@@ -257,6 +257,10 @@ void ImageManager::notify(ImageRequestor& requestor, const ImageRequestPair& pai
     ImageMap patternMap;
     ImageVersionMap versionMap;
 
+    iconMap.reserve(pair.first.size());
+    patternMap.reserve(pair.first.size());
+    versionMap.reserve(pair.first.size());
+
     for (const auto& dependency : pair.first) {
         auto it = images.find(dependency.first);
         if (it != images.end()) {
