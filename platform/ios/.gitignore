@@ -38,6 +38,7 @@ test/fixtures/storage/assets.zip
 buck-out
 .buckd
 MapLibre.xcodeproj
+.docc-build
 
 # Visual Studio Code
 .vscode
