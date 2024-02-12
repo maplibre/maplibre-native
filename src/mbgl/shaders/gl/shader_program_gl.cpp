@@ -155,28 +155,6 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
             samplerLocations[textureInfo.id] = location;
         }
     }
-        
-    /*GLint maxLength = 0;
-    GLint numActiveUniforms = 0;
-    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numActiveUniforms));
-    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength));
-    auto name = std::vector<GLchar>(maxLength);
-    for (GLint index = 0; index < numActiveUniforms; ++index) {
-        GLsizei actualLength = 0;
-        GLint size = 0;
-        GLenum type = GL_ZERO;
-
-        MBGL_CHECK_ERROR(glGetActiveUniform(program, index, maxLength, &actualLength, &size, &type, name.data()));
-
-        if (type == GL_SAMPLER_2D) {
-            // This uniform is a texture sampler
-            GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, name.data()));
-            assert(location != -1);
-            if (location != -1) {
-                samplerLocations[stringIndexer().get(name.data())] = location;
-            }
-        }
-    }*/
 
     VertexAttributeArrayGL attrs;
     GLint count = 0;
