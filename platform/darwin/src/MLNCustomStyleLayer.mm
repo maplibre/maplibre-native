@@ -194,6 +194,7 @@ public:
 #if MLN_RENDER_BACKEND_METAL
         MTL::RenderCommandEncoder* ptr = static_cast<mbgl::style::mtl::CustomLayerRenderParameters&>(*parameters).encoder.get();
         id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
+        layer.renderEncoder = encoder;
 #endif
 
         MLNStyleLayerDrawingContext drawingContext = {
@@ -204,10 +205,6 @@ public:
             .pitch = static_cast<CGFloat>(parameters->pitch),
             .fieldOfView = static_cast<CGFloat>(parameters->fieldOfView),
             .projectionMatrix = MLNMatrix4Make(parameters->projectionMatrix)
-#if MLN_RENDER_BACKEND_METAL
-            ,
-            .renderEncoder = encoder
-#endif
         };
         if (layer.mapView) {
             [layer drawInMapView:layer.mapView withContext:drawingContext];

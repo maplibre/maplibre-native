@@ -128,7 +128,8 @@
 
 - (void)drawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context {
     // Use the supplied render command encoder to encode commands
-    if(context.renderEncoder != nil)
+    id<MTLRenderCommandEncoder> renderEncoder = self.renderEncoder;
+    if(renderEncoder != nil)
     {
         MLNBackendResource resource = [mapView backendResource];
         
@@ -149,9 +150,6 @@
             { { -250,  -250 }, { 0, 1, 0, 1 } },
             { {    0,   250 }, { 0, 0, 1, 1 } },
         };
-
-        // Use the supplied render command encoder
-        id<MTLRenderCommandEncoder> renderEncoder = context.renderEncoder;
 
         [renderEncoder setRenderPipelineState:_pipelineState];
         
