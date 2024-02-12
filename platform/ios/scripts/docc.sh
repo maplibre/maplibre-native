@@ -24,7 +24,7 @@ rm -rf "$build_dir"/symbol-graphs
 rm -rf "$build_dir"/headers/MapLibre
 rm -rf "$build_dir"/MapLibre.xcframework
 
-mkdir "$build_dir"/symbol-graphs
+mkdir -p "$build_dir"/symbol-graphs
 mkdir -p "$build_dir"/headers/MapLibre
 
 # unzip built XCFramework in build dir
