@@ -55,5 +55,7 @@ $(xcrun --find docc) "$cmd" MapLibre.docc \
 
 if [[ "$cmd" == "convert" ]]; then
   rm -rf build/docs
-  $(xcrun --find docc) process-archive transform-for-static-hosting "$build_dir"/MapLibre.doccarchive --output-path build/docs
+  $(xcrun --find docc) process-archive transform-for-static-hosting "$build_dir"/MapLibre.doccarchive \
+    --hosting-base-path maplibre-native/ios/latest \  # remove for local builds
+    --output-path build/docs
 fi
