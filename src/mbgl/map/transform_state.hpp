@@ -33,6 +33,10 @@ struct TransformStateProperties {
         scale = val;
         return *this;
     }
+    TransformStateProperties& withFov(const std::optional<double>& val) {
+        fov = val;
+        return *this;
+    }
     TransformStateProperties& withBearing(const std::optional<double>& val) {
         bearing = val;
         return *this;
@@ -88,6 +92,7 @@ struct TransformStateProperties {
 
     std::optional<double> x;
     std::optional<double> y;
+    std::optional<double> fov;
     std::optional<double> bearing;
     std::optional<double> scale;
     std::optional<double> pitch;
@@ -173,6 +178,7 @@ public:
     double getBearing() const;
     void setBearing(double);
     float getFieldOfView() const;
+    void setFieldOfView(double);
     float getCameraToCenterDistance() const;
     double getPitch() const;
     void setPitch(double);

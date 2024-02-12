@@ -41,6 +41,10 @@ struct CameraOptions {
         pitch = o;
         return *this;
     }
+    CameraOptions& withFov(const std::optional<double>& o) {
+        fov = o;
+        return *this;
+    }
 
     /** Coordinate at the center of the map. */
     std::optional<LatLng> center;
@@ -63,11 +67,13 @@ struct CameraOptions {
     /** Pitch toward the horizon measured in degrees , with 0 deg resulting in a
         two-dimensional map. */
     std::optional<double> pitch;
+    
+    std::optional<double> fov;
 };
 
 constexpr bool operator==(const CameraOptions& a, const CameraOptions& b) {
     return a.center == b.center && a.padding == b.padding && a.anchor == b.anchor && a.zoom == b.zoom &&
-           a.bearing == b.bearing && a.pitch == b.pitch;
+           a.bearing == b.bearing && a.pitch == b.pitch && a.fov == b.fov;
 }
 
 constexpr bool operator!=(const CameraOptions& a, const CameraOptions& b) {

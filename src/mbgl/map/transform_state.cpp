@@ -48,6 +48,9 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
     if (properties.bearing) {
         setBearing(*properties.bearing);
     }
+    if (properties.fov) {
+        setFieldOfView(*properties.fov);
+    }
     if (properties.pitch) {
         setPitch(*properties.pitch);
     }
@@ -429,7 +432,8 @@ CameraOptions TransformState::getCameraOptions(const std::optional<EdgeInsets>& 
         .withPadding(padding ? padding : edgeInsets)
         .withZoom(getZoom())
         .withBearing(util::rad2deg(-bearing))
-        .withPitch(util::rad2deg(pitch));
+        .withPitch(util::rad2deg(pitch))
+        .withFov(util::rad2deg(fov));
 }
 
 // MARK: - EdgeInsets
@@ -588,6 +592,13 @@ void TransformState::setBearing(double val) {
 
 float TransformState::getFieldOfView() const {
     return static_cast<float>(fov);
+}
+
+void TransformState::setFieldOfView(double val) {
+    if (fov != val) {
+        fov = val;
+        requestMatricesUpdate = true;
+    }
 }
 
 float TransformState::getCameraToCenterDistance() const {

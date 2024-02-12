@@ -33,6 +33,7 @@ int main(int argc, char* argv[]) {
 
     args::ValueFlag<double> lonValue(argumentParser, "degrees", "Longitude", {'x', "lon"});
     args::ValueFlag<double> latValue(argumentParser, "degrees", "Latitude", {'y', "lat"});
+    args::ValueFlag<double> fovValue(argumentParser, "degrees", "FOV", {'f', "fov"});
     args::ValueFlag<double> bearingValue(argumentParser, "degrees", "Bearing", {'b', "bearing"});
     args::ValueFlag<double> pitchValue(argumentParser, "degrees", "Pitch", {'p', "pitch"});
     args::ValueFlag<uint32_t> widthValue(argumentParser, "pixels", "Image width", {'w', "width"});
@@ -56,6 +57,7 @@ int main(int argc, char* argv[]) {
     const double lat = latValue ? args::get(latValue) : 0;
     const double lon = lonValue ? args::get(lonValue) : 0;
     const double zoom = zoomValue ? args::get(zoomValue) : 0;
+    const double fov = fovValue ? args::get(fovValue) : 37;
     const double bearing = bearingValue ? args::get(bearingValue) : 0;
     const double pitch = pitchValue ? args::get(pitchValue) : 0;
     const double pixelRatio = pixelRatioValue ? args::get(pixelRatioValue) : 1;
@@ -97,7 +99,7 @@ int main(int argc, char* argv[]) {
     }
 
     map.getStyle().loadURL(style);
-    map.jumpTo(CameraOptions().withCenter(LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch));
+    map.jumpTo(CameraOptions().withCenter(LatLng{lat, lon}).withZoom(zoom).withBearing(bearing).withPitch(pitch).withFov(fov));
 
     if (debug) {
         map.setDebug(debug ? mbgl::MapDebugOptions::TileBorders | mbgl::MapDebugOptions::ParseStatus
