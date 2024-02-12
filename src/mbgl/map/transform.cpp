@@ -158,9 +158,8 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
                                      util::interpolate(startEdgeInsets.bottom(), padding.bottom(), t),
                                      util::interpolate(startEdgeInsets.right(), padding.right(), t)});
             }
-            double maxPitch = getMaxPitchForEdgeInsets(state.getEdgeInsets());
-            if (pitch != startPitch || maxPitch < startPitch) {
-                state.setPitch(std::min(maxPitch, util::interpolate(startPitch, pitch, t)));
+            if (pitch != startPitch) {
+                state.setPitch(util::interpolate(startPitch, pitch, t));
             }
         },
         duration);
@@ -329,10 +328,9 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
                                      util::interpolate(startEdgeInsets.bottom(), padding.bottom(), k),
                                      util::interpolate(startEdgeInsets.right(), padding.right(), k)});
             }
-            double maxPitch = getMaxPitchForEdgeInsets(state.getEdgeInsets());
 
-            if (pitch != startPitch || maxPitch < startPitch) {
-                state.setPitch(std::min(maxPitch, util::interpolate(startPitch, pitch, k)));
+            if (pitch != startPitch) {
+                state.setPitch(util::interpolate(startPitch, pitch, k));
             }
         },
         duration);
@@ -427,6 +425,10 @@ double Transform::getBearing() const {
 
 double Transform::getPitch() const {
     return state.getPitch();
+}
+
+double Transform::getFieldOfView() const {
+    return state.getFieldOfView();
 }
 
 // MARK: - North Orientation
@@ -644,7 +646,8 @@ double Transform::getMaxPitchForEdgeInsets(const EdgeInsets& insets) const {
     // tangentOfFovAboveCenterAngle = (h/2 + centerOffsetY) / (height
     // * 1.5). 1.03 is a bit extra added to prevent parallel ground to viewport
     // clipping plane.
-    const double tangentOfFovAboveCenterAngle = 1.03 * (height / 2.0 + centerOffsetY) / (1.5 * height);
+    const double tangentOfFovAboveCenterAngle = 1.03 * (0.5 + centerOffsetY / height) * 2.0 *
+                                                tan(getFieldOfView() / 2.0);
     const double fovAboveCenter = std::atan(tangentOfFovAboveCenterAngle);
     return M_PI * 0.5 - fovAboveCenter;
     // e.g. Maximum pitch of 60 degrees is when perspective center's offset from
