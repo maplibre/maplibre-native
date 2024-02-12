@@ -120,7 +120,7 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     const double tanMultiple = tanFovAboveCenter * std::tan(getPitch());
     // Calculate z distance of the farthest fragment that should be rendered.
     double furthestDistance = 50000; // TODO: figure out units and set to reasonable value
-    if (cameraToCenterDistance < furthestDistance * (1 - tanMultiple)) {
+    if (getPitch() < M_PI_2 && cameraToCenterDistance < furthestDistance * (1 - tanMultiple)) {
         furthestDistance = cameraToCenterDistance / (1 - tanMultiple);
     }
     // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
