@@ -91,7 +91,7 @@ ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_)
 ShaderProgramGL::ShaderProgramGL(UniqueProgram&& program,
                                  UniformBlockArrayGL&& uniformBlocks_,
                                  VertexAttributeArrayGL&& attributes_,
-                                 SamplerLocationMap&& samplerLocations_)
+                                 SamplerLocationArray&& samplerLocations_)
     : ShaderProgramBase(),
       glProgram(std::move(program)),
       uniformBlocks(std::move(uniformBlocks_)),
@@ -105,20 +105,16 @@ ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
       vertexAttributes(std::move(other.vertexAttributes)),
       samplerLocations(std::move(other.samplerLocations)) {}
 
-std::optional<uint32_t> ShaderProgramGL::getSamplerLocation(const StringIdentity id) const {
-    std::optional<uint32_t> result{};
-    if (auto it = samplerLocations.find(id); it != samplerLocations.end()) {
-        result = it->second;
-    }
-    return result;
+std::optional<size_t> ShaderProgramGL::getSamplerLocation(const size_t id) const {
+    return (id < samplerLocations.size()) ? samplerLocations[id] : std::nullopt;
 }
 
 std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
     Context& context,
     const ProgramParameters& programParameters,
-    const std::string& /*name*/,
     const std::string_view firstAttribName,
     const std::vector<shaders::UniformBlockInfo>& uniformBlocksInfo,
+    const std::vector<shaders::TextureInfo>& texturesInfo,
     const std::string& vertexSource,
     const std::string& fragmentSource,
     const std::string& additionalDefines) noexcept(false) {
@@ -140,17 +136,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
          fragmentSource.c_str()});
     auto program = context.createProgram(vertProg, fragProg, firstAttribName.data());
 
-    // GLES3.1
-    // GLint numAttribs;
-    // glGetProgramInterfaceiv(program, GL_PROGRAM_INPUT, GL_ACTIVE_RESOURCES, &numAttribs);
-
     UniformBlockArrayGL uniformBlocks;
-
-    GLint count = 0;
-    GLint maxLength = 0;
-    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_BLOCKS, &count));
-    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH, &maxLength));
-
     for (const auto& blockInfo : uniformBlocksInfo) {
         GLint index = MBGL_CHECK_ERROR(glGetUniformBlockIndex(program, blockInfo.name.data()));
         GLint size = 0;
@@ -161,7 +147,16 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         uniformBlocks.set(blockInfo.id, binding, size);
     }
 
-    SamplerLocationMap samplerLocations;
+    SamplerLocationArray samplerLocations;
+    for (const auto& textureInfo : texturesInfo) {
+        GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, textureInfo.name.data()));
+        assert(location != -1);
+        if (location != -1) {
+            samplerLocations[textureInfo.id] = location;
+        }
+    }
+        
+    /*GLint maxLength = 0;
     GLint numActiveUniforms = 0;
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &numActiveUniforms));
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_UNIFORM_MAX_LENGTH, &maxLength));
@@ -181,14 +176,14 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
                 samplerLocations[stringIndexer().get(name.data())] = location;
             }
         }
-    }
+    }*/
 
     VertexAttributeArrayGL attrs;
-
-    count = 0;
+    GLint count = 0;
+    GLint maxLength = 0;
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &count));
     MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxLength));
-    name.resize(maxLength);
+    auto name = std::vector<GLchar>(maxLength);
     for (GLint index = 0; index < count; ++index) {
         GLsizei length = 0; // "number of characters actually written in name (excluding the null terminator)"
         GLint size = 0;     // "size of the attribute variable, in units of the type returned in type"
