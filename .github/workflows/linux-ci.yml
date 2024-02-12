@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+      - linux-*.*.x
+    tags:
+      - linux-*
 
   pull_request:
     branches:
