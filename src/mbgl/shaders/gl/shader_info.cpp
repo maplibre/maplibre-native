@@ -261,6 +261,5 @@ const std::vector<TextureInfo> ShaderInfo<BuiltIn::SymbolTextAndIconShader, gfx:
     TextureInfo{"u_texture_icon", idSymbolImageIconTexture},
 };
 
-
 } // namespace shaders
 } // namespace mbgl

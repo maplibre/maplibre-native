@@ -142,7 +142,7 @@ public:
 
     /// @brief Get the texture at the given internal ID.
     const gfx::Texture2DPtr& getTexture(size_t id) const;
-    
+
     /// @brief Attach the given texture at the given internal ID.
     /// @param texture Texture2D instance
     /// @param id Internal ID of the texture.

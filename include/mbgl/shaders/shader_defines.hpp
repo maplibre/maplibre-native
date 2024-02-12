@@ -40,7 +40,6 @@ static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backg
                                                        static_cast<size_t>(rasterUBOCount),
                                                        static_cast<size_t>(symbolUBOCount)});
 
-
 enum {
     idBackgroundImageTexture,
     backgroundTextureCount
