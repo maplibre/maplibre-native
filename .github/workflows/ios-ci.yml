@@ -183,6 +183,19 @@ jobs:
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
 
+      - name: Build DocC documentation main branch
+        if: github.ref == 'refs/heads/main'
+        run: |
+          scripts/docc.sh
+
+      - name: Deploy DocC documentation (main) 🚀
+        if: github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        with:
+          branch: gh-pages
+          folder: platform/ios/build/docs
+          target-folder: ios/latest/
+
       # Make Metal XCFramework release
       - name: Should make release?
         if: github.event.inputs.release == 'full' || github.event.inputs.release == 'pre'

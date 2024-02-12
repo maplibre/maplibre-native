@@ -1,7 +1,7 @@
 # ``MapLibre``
 
 @Metadata {
-    @DisplayName("MapLibre Native for iOS")
+    @Available(iOS, introduced: "12.0")
 }
 
 Powerful, free and open-source mapping toolkit with full control over data sources and styling.
@@ -19,16 +19,65 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 
 ### Style Layers
 
+- ``MLNBackgroundStyleLayer``
+- ``MLNCircleStyleLayer``
+- ``MLNFillExtrusionStyleLayer``
 - ``MLNFillStyleLayer``
+- ``MLNForegroundStyleLayer``
 - ``MLNHeatmapStyleLayer``
-- ``MLNRasterStyleLayer``
 - ``MLNHillshadeStyleLayer``
+- ``MLNLineStyleLayer``
+- ``MLNRasterStyleLayer``
+- ``MLNStyleLayer``
+- ``MLNSymbolStyleLayer``
+- ``MLNVectorStyleLayer``
+
+### Sources
+
+- ``MLNComputedShapeSource``
+- ``MLNImageSource``
+- ``MLNRasterDEMSource``
+- ``MLNRasterTileSource``
+- ``MLNShapeSource``
+- ``MLNSource``
+- ``MLNTileSource``
+
+### Shapes
+
+- ``MLNEmptyFeature``
+- ``MLNMultiPoint``
+- ``MLNMultiPolygon``
+- ``MLNMultiPolygonFeature``
+- ``MLNMultiPolyline``
+- ``MLNMultiPolylineFeature``
+- ``MLNMultiPolylineFeature``
+- ``MLNPointAnnotation``
+- ``MLNPointCollection``
+- ``MLNPointCollectionFeature``
+- ``MLNPolygon``
+- ``MLNPolyline``
+- ``MLNPolylineFeature``
+- ``MLNShape``
+- ``MLNShapeCollection``
+- ``MLNShapeCollectionFeature``
 
 ### Snapshotter
 
 - ``MLNMapSnapshot``
+- ``MLNMapSnapshotOptions``
+- ``MLNMapSnapshotter``
 
 ### Offline support
 
-- ``MLNOfflineStorage``
+- ``MLNOfflinePack``
 - ``MLNOfflineRegion``
+- ``MLNOfflineStorage``
+- ``MLNShapeOfflineRegion``
+- ``MLNTilePyramidOfflineRegion``
+
+### Annotations
+
+- ``MLNAnnotationImage``
+- ``MLNAnnotationView``
+- ``MLNPointFeature``
+- ``MLNPointFeatureCluster``
