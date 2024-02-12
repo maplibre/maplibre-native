@@ -80,28 +80,9 @@ jobs:
       - name: Upload external data for benchmark
         if: matrix.test.name == 'Android Benchmark'
         run: |
-          cat << EOF > benchmark-input.json
-          {
-            "styleNames": ["Facebook Light", "MapTiler Basic", "Americana"],
-            "styleURLs": [
-              "https://external.xx.fbcdn.net/maps/vt/style/canterbury_1_0/?locale=en_US",
-              "https://api.maptiler.com/maps/basic-v2/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL",
-              "https://zelonewolf.github.io/openstreetmap-americana/style.json"
-            ],
-            "resultsAPI": "${{ secrets.MLN_RESULTS_API }}"
-          }
-          EOF
-          zip benchmark-input.zip benchmark-input.json
-          upload_json="$(aws devicefarm create-upload --project-arn ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }} --type EXTERNAL_DATA --name benchmark-input.zip --output json)"
-          upload_url="$(echo "$upload_json" | jq -r '.upload.url')"
-          upload_arn="$(echo "$upload_json" | jq -r '.upload.arn')"
-          curl -T benchmark-input.zip "$upload_url"
-          upload_status="$(aws devicefarm get-upload --arn "$upload_arn" --output text --query upload.status)"
-          if [[ "$upload_status" != "SUCCEEDED" ]]; then
-            echo "Upload '$upload_arn' failed"
-            exit 1
-          fi
-
+          export RESULTS_API=${{ secrets.MLN_RESULTS_API }}
+          export AWS_DEVICE_FARM_PROJECT_ARN=${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          upload_arn="$(.github/workflows/android-device-test/upload-external-data.sh)"
           echo external_data_arn="$upload_arn" >> "$GITHUB_ENV"
 
       - uses: ./.github/actions/aws-device-farm-run
