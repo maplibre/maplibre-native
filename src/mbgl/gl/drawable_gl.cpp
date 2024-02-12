@@ -259,8 +259,8 @@ void DrawableGL::bindTextures() const {
 }
 
 void DrawableGL::unbindTextures() const {
-    for (size_t id = 0; id < textures.size(); id++) {
-        if (const auto& texture = textures[id]) {
+    for (const auto& texture : textures) {
+        if (texture) {
             static_cast<gl::Texture2D&>(*texture).unbind();
         }
     }
