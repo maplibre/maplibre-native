@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - android-*.*.x
     tags:
       - "android-*"
 
