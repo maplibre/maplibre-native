@@ -180,6 +180,7 @@ public:
     float getFieldOfView() const;
     void setFieldOfView(double);
     float getCameraToCenterDistance() const;
+    float getCameraAlt() const;
     double getPitch() const;
     void setPitch(double);
 

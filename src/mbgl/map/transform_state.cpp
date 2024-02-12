@@ -194,7 +194,7 @@ void TransformState::updateCameraState() const {
     }
 
     const double worldSize = Projection::worldSize(scale);
-    const double cameraToCenterDistance = getCameraToCenterDistance();
+    const double cameraAlt = getCameraAlt();
 
     // x & y tracks the center of the map in pixels. However as rendering is
     // done in pixel coordinates the rendering origo is actually in the middle
@@ -207,11 +207,7 @@ void TransformState::updateCameraState() const {
     // Set camera orientation and move it to a proper distance from the map
     camera.setOrientation(getPitch(), getBearing());
 
-    const vec3 forward = camera.forward();
-    const vec3 orbitPosition = {{-forward[0] * cameraToCenterDistance,
-                                 -forward[1] * cameraToCenterDistance,
-                                 -forward[2] * cameraToCenterDistance}};
-    vec3 cameraPosition = {{dx + orbitPosition[0], dy + orbitPosition[1], orbitPosition[2]}};
+    vec3 cameraPosition = {{dx, dy, cameraAlt}};
 
     cameraPosition[0] /= worldSize;
     cameraPosition[1] /= worldSize;
@@ -262,14 +258,7 @@ FreeCameraOptions TransformState::getFreeCameraOptions() const {
 bool TransformState::setCameraPosition(const vec3& position) {
     if (std::isnan(position[0]) || std::isnan(position[1]) || std::isnan(position[2])) return false;
 
-    const double maxWorldSize = Projection::worldSize(std::pow(2.0, getMaxZoom()));
-    const double minWorldSize = Projection::worldSize(std::pow(2.0, getMinZoom()));
-    const double distToCenter = getCameraToCenterDistance();
-
-    const vec3 updatedPos = vec3{
-        {position[0], position[1], util::clamp(position[2], distToCenter / maxWorldSize, distToCenter / minWorldSize)}};
-
-    camera.setPosition(updatedPos);
+    camera.setPosition(position);
     return true;
 }
 
@@ -602,7 +591,15 @@ void TransformState::setFieldOfView(double val) {
 }
 
 float TransformState::getCameraToCenterDistance() const {
-    return static_cast<float>(0.5 * size.height / std::tan(fov / 2.0));
+    if (pitch < M_PI_2) {
+        return static_cast<float>(getCameraAlt() / cos(pitch));
+    }
+    return 50000.f;
+}
+
+float TransformState::getCameraAlt() const {
+    double pixelsPerMeter = 1.0 / Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), getZoom());
+    return static_cast<float>(100000 * pixelsPerMeter);
 }
 
 double TransformState::getPitch() const {
