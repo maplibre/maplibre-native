@@ -26,6 +26,7 @@
 namespace mbgl {
 
 using namespace style;
+using namespace shaders;
 
 namespace {
 
@@ -275,8 +276,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         if (!rasterShader) {
             return;
         }
-        rasterSampler0 = rasterShader->getSamplerLocation(idTexImage0Name);
-        rasterSampler1 = rasterShader->getSamplerLocation(idTexImage1Name);
     }
 
     if (!layerTweaker) {
@@ -313,7 +312,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
     };
 
     const auto setTextures = [&](gfx::UniqueDrawableBuilder& builder, RasterBucket& bucket) {
-        if (bucket.image && (rasterSampler0 || rasterSampler1)) {
+        if (bucket.image) {
             if (!bucket.texture2d) {
                 if (auto tex = context.createTexture2D()) {
                     tex->setImage(bucket.image);
@@ -329,12 +328,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 bucket.texture2d->setSamplerConfiguration(
                     {filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
 
-                if (rasterSampler0) {
-                    builder->setTexture(bucket.texture2d, *rasterSampler0);
-                }
-                if (rasterSampler1) {
-                    builder->setTexture(bucket.texture2d, *rasterSampler1);
-                }
+                builder->setTexture(bucket.texture2d, idRasterImage0Texture);
+                builder->setTexture(bucket.texture2d, idRasterImage1Texture);
             }
         }
     };
@@ -500,7 +495,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 builder = createBuilder();
             }
 
-            if (bucket.image && builder->getTextures().size() == 0) {
+            if (bucket.image && !builder->getTexture(idRasterImage0Texture) && !builder->getTexture(idRasterImage1Texture)) {
                 setTextures(builder, bucket);
             };
 

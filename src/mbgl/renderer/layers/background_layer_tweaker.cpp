@@ -9,7 +9,6 @@
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/background_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
@@ -19,8 +18,6 @@ using namespace shaders;
 #if !defined(NDEBUG)
 constexpr auto BackgroundPatternShaderName = "BackgroundPatternShader";
 #endif
-
-static const StringIdentity idTexUniformName = stringIndexer().get("u_image");
 
 void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     const auto& state = parameters.state;
@@ -53,7 +50,6 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
     // properties are re-evaluated every time
     propertiesUpdated = false;
 
-    std::optional<uint32_t> samplerLocation{};
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID());
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
@@ -75,17 +71,10 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
         uniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context);
 
         if (hasPattern) {
-            if (!samplerLocation.has_value()) {
-                samplerLocation = shader->getSamplerLocation(idTexUniformName);
-                if (const auto& tex = parameters.patternAtlas.texture()) {
-                    tex->setSamplerConfiguration(
-                        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-                }
-            }
-            if (samplerLocation.has_value()) {
-                if (const auto& tex = parameters.patternAtlas.texture()) {
-                    drawable.setTexture(tex, samplerLocation.value());
-                }
+            if (const auto& tex = parameters.patternAtlas.texture()) {
+                tex->setSamplerConfiguration(
+                    {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                drawable.setTexture(tex, idBackgroundImageTexture);
             }
 
             // from BackgroundPatternProgram::layoutUniformValues

@@ -131,7 +131,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
     // create texture. to be reused for all the tiles of the debug layers
     auto texture = context.createTexture2D();
-    std::optional<uint32_t> samplerLocation;
     {
         std::array<uint8_t, 4> data{{0, 0, 0, 0}};
         auto emptyImage = std::make_shared<PremultipliedImage>(Size(1, 1), data.data(), data.size());
@@ -139,10 +138,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         texture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
         static const StringIdentity idDebugOverlayUniformName = stringIndexer().get("u_overlay");
-        samplerLocation = debugShader->getSamplerLocation(idDebugOverlayUniformName);
     }
-    assert(samplerLocation.has_value());
-    if (!samplerLocation.has_value()) return;
 
     // function to update existing tile drawables with UBO value. return number of updated drawables
     const auto updateDrawables =
@@ -172,7 +168,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         debugBuilder->addVertices(verts, 0, verts.size());
         debugBuilder->setSegments(mode, indexes, segments.data(), segments.size());
         // texture
-        debugBuilder->setTexture(texture, samplerLocation.value());
+        debugBuilder->setTexture(texture, idDebugOverlayTexture);
 
         // finish
         debugBuilder->flush(context);

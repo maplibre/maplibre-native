@@ -40,5 +40,74 @@ static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backg
                                                        static_cast<size_t>(rasterUBOCount),
                                                        static_cast<size_t>(symbolUBOCount)});
 
+
+enum {
+    idBackgroundImageTexture,
+    backgroundTextureCount
+};
+
+enum {
+    circleTextureCount
+};
+
+enum {
+    collisionTextureCount
+};
+
+enum {
+    idDebugOverlayTexture,
+    debugTextureCount
+};
+
+enum {
+    idFillExtrusionImageTexture,
+    fillExtrusionTextureCount
+};
+
+enum {
+    idFillImageTexture,
+    fillTextureCount
+};
+
+enum {
+    idHeatmapImageTexture,
+    idHeatmapColorRampTexture,
+    heatmapTextureCount
+};
+
+enum {
+    idHillshadeImageTexture,
+    hillshadeTextureCount
+};
+
+enum {
+    idLineImageTexture,
+    lineTextureCount
+};
+
+enum {
+    idRasterImage0Texture,
+    idRasterImage1Texture,
+    rasterTextureCount
+};
+
+enum {
+    idSymbolImageTexture,
+    idSymbolImageIconTexture,
+    symbolTextureCount
+};
+
+static constexpr auto maxTextureCountPerShader = std::max({static_cast<size_t>(backgroundTextureCount),
+                                                           static_cast<size_t>(circleTextureCount),
+                                                           static_cast<size_t>(collisionTextureCount),
+                                                           static_cast<size_t>(debugTextureCount),
+                                                           static_cast<size_t>(fillTextureCount),
+                                                           static_cast<size_t>(fillExtrusionTextureCount),
+                                                           static_cast<size_t>(heatmapTextureCount),
+                                                           static_cast<size_t>(hillshadeTextureCount),
+                                                           static_cast<size_t>(lineTextureCount),
+                                                           static_cast<size_t>(rasterTextureCount),
+                                                           static_cast<size_t>(symbolTextureCount)});
+
 } // namespace shaders
 } // namespace mbgl

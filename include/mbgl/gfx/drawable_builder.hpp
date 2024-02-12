@@ -140,13 +140,13 @@ public:
     /// The attribute names for vertex/position attributes
     void setVertexAttrNameId(const StringIdentity id) { vertexAttrNameId = id; }
 
-    /// @brief Attach the given texture at the given sampler location.
+    /// @brief Get the texture at the given internal ID.
+    const gfx::Texture2DPtr& getTexture(size_t id) const;
+    
+    /// @brief Attach the given texture at the given internal ID.
     /// @param texture Texture2D instance
-    /// @param location A sampler location in the shader being used.
-    void setTexture(const gfx::Texture2DPtr&, int32_t location);
-
-    /// Direct access to the current texture set
-    const gfx::Drawable::Textures& getTextures() const { return textures; }
+    /// @param id Internal ID of the texture.
+    void setTexture(const gfx::Texture2DPtr&, size_t id);
 
     /// Add a tweaker to emitted drawable
     void addTweaker(DrawableTweakerPtr value) { tweakers.emplace_back(std::move(value)); }

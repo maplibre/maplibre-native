@@ -4,6 +4,7 @@
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/programs/segment.hpp>
+#include <mbgl/util/string_indexer.hpp>
 
 #include <memory>
 

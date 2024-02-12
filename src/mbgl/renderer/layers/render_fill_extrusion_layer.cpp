@@ -42,8 +42,6 @@ namespace {
 const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
 const StringIdentity idNormAttribName = stringIndexer().get("a_normal_ed");
 
-const StringIdentity idIconTextureName = stringIndexer().get("u_image");
-
 #endif // MLN_DRAWABLE_RENDERER
 
 inline const FillExtrusionLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
@@ -460,7 +458,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             if (const auto& atlases = tile.getAtlasTextures()) {
                 tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
                                                                         std::nullopt,
-                                                                        idIconTextureName,
+                                                                        idFillExtrusionImageTexture,
                                                                         /*isText=*/false,
                                                                         false,
                                                                         style::AlignmentType::Auto,
