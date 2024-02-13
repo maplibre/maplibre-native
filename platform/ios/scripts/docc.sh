@@ -12,6 +12,7 @@
 # Go to http://localhost:8000/documentation/maplibre/
 
 set -e
+shopt -s extglob
 
 cmd="convert"
 if [[ "$1" == "preview" ]]; then
@@ -31,8 +32,7 @@ mkdir -p "$build_dir"/headers
 
 bazel build --//:renderer=metal //platform/darwin:generated_style_public_hdrs
 
-prefix="MapLibre.xcframework/ios-arm64/MapLibre.framework/Headers/"
-public_headers=$(zipinfo -1 bazel-bin/platform/ios/MapLibre.dynamic.xcframework.zip | grep $prefix | sed -e "s#^$prefix##")
+public_headers=$(bazel query 'kind("source file", deps(//platform:ios-sdk, 2))' --output location | grep ".h$" | sed -r 's#.*/([^:]+).*#\1#')
 
 filter_filenames() {
     local prefix="$1"
@@ -52,7 +52,7 @@ filter_filenames() {
 
 ios_headers=$(filter_filenames "platform/ios/src" "$public_headers")
 darwin_headers=$(filter_filenames "platform/darwin/src" "$public_headers")
-style_headers=$(filter_filenames "bazel-bin/platform/darwin/src" "$public_headers")
+style_headers=bazel-bin/platform/darwin/src/!(*_Private).h
 
 for header in $ios_headers $darwin_headers $style_headers; do
   xcrun --toolchain swift clang \
