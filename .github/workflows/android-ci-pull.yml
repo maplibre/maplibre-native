@@ -3,8 +3,6 @@ name: android-ci-pull
 on:
   workflow_dispatch:
   pull_request:
-    branches:
-      - main
     paths:
       - 'platform/android/**'
       - ".github/workflows/android-ci.yml"
