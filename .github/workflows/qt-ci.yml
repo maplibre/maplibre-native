@@ -27,8 +27,6 @@ on:
       - "!**/*.md"
 
   pull_request:
-    branches:
-      - main
     paths:
       - ".github/actions/qt5-build/**"
       - ".github/actions/qt6-build/**"

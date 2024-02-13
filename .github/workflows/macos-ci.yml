@@ -26,8 +26,6 @@ on:
       - "!**/*.md"
 
   pull_request:
-    branches:
-      - main
     paths:
       - 'platform/ios/**'
       - 'platform/darwin/**'
