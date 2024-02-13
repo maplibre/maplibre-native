@@ -33,6 +33,7 @@ mkdir -p "$build_dir"/headers
 bazel build --//:renderer=metal //platform/darwin:generated_style_public_hdrs
 
 public_headers=$(bazel query 'kind("source file", deps(//platform:ios-sdk, 2))' --output location | grep ".h$" | sed -r 's#.*/([^:]+).*#\1#')
+style_headers=$(bazel cquery --//:renderer=metal //platform/darwin:generated_style_public_hdrs --output=files)
 
 filter_filenames() {
     local prefix="$1"
@@ -52,7 +53,6 @@ filter_filenames() {
 
 ios_headers=$(filter_filenames "platform/ios/src" "$public_headers")
 darwin_headers=$(filter_filenames "platform/darwin/src" "$public_headers")
-style_headers=bazel-bin/platform/darwin/src/!(*_Private).h
 
 for header in $ios_headers $darwin_headers $style_headers; do
   xcrun --toolchain swift clang \
