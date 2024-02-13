@@ -188,23 +188,23 @@ public:
         }
     }
 
-    void render(const std::unique_ptr<mbgl::style::CustomLayerRenderParameters> parameters) {
+    void render(const mbgl::style::CustomLayerRenderParameters& parameters) {
         if(!layer) return;
 
 #if MLN_RENDER_BACKEND_METAL
-        MTL::RenderCommandEncoder* ptr = static_cast<mbgl::style::mtl::CustomLayerRenderParameters&>(*parameters).encoder.get();
+        MTL::RenderCommandEncoder* ptr = static_cast<const mbgl::style::mtl::CustomLayerRenderParameters&>(parameters).encoder.get();
         id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
         layer.renderEncoder = encoder;
 #endif
 
         MLNStyleLayerDrawingContext drawingContext = {
-            .size = CGSizeMake(parameters->width, parameters->height),
-            .centerCoordinate = CLLocationCoordinate2DMake(parameters->latitude, parameters->longitude),
-            .zoomLevel = parameters->zoom,
-            .direction = mbgl::util::wrap(parameters->bearing, 0., 360.),
-            .pitch = static_cast<CGFloat>(parameters->pitch),
-            .fieldOfView = static_cast<CGFloat>(parameters->fieldOfView),
-            .projectionMatrix = MLNMatrix4Make(parameters->projectionMatrix)
+            .size = CGSizeMake(parameters.width, parameters.height),
+            .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
+            .zoomLevel = parameters.zoom,
+            .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
+            .pitch = static_cast<CGFloat>(parameters.pitch),
+            .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
+            .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix)
         };
         if (layer.mapView) {
             [layer drawInMapView:layer.mapView withContext:drawingContext];

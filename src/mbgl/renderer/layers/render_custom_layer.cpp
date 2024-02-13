@@ -95,7 +95,7 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
     glContext.setColorMode(paintParameters.colorModeForRenderPass());
     glContext.setCullFaceMode(gfx::CullFaceMode::disabled());
 
-    MBGL_CHECK_ERROR(host->render(std::make_unique<CustomLayerRenderParameters>(paintParameters)));
+    MBGL_CHECK_ERROR(host->render(CustomLayerRenderParameters(paintParameters)));
 
     // Reset the view back to our original one, just in case the CustomLayer
     // changed the viewport or Framebuffer.

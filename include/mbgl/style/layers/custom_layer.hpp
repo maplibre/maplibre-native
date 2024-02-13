@@ -33,7 +33,7 @@ public:
      * advantage of the opaque fragment culling in case there are opaque layers
      * above your custom layer.
      */
-    virtual void render(const std::unique_ptr<CustomLayerRenderParameters>) = 0;
+    virtual void render(const mbgl::style::CustomLayerRenderParameters&) = 0;
 
     /**
      * Called when the system has destroyed the underlying GL/Metal context. The
