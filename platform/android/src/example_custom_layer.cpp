@@ -159,7 +159,7 @@ public:
         GL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), background, GL_STATIC_DRAW));
     }
 
-    void render(const std::unique_ptr<mbgl::style::CustomLayerRenderParameters>) {
+    void render(const mbgl::style::CustomLayerRenderParameters&) {
         __android_log_write(ANDROID_LOG_INFO, LOG_TAG, "Render");
         glUseProgram(program);
         glBindBuffer(GL_ARRAY_BUFFER, buffer);
