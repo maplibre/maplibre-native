@@ -302,8 +302,6 @@ protected:
     // Current renderable status as specified by the markLayerRenderable event
     bool isRenderable{false};
 
-    std::mutex mutex;
-
     struct Stats {
         size_t propertyEvaluations = 0;
         size_t drawablesAdded = 0;
