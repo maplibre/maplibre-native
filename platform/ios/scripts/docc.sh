@@ -29,7 +29,7 @@ rm -rf "$build_dir"/MapLibre.xcframework
 mkdir -p "$build_dir"/symbol-graphs
 mkdir -p "$build_dir"/headers
 
-bazel build --//:renderer=metal //platform/darwin:generated_style_public_hdrs //platform/ios:MapLibre.dynamic
+bazel build --//:renderer=metal //platform/darwin:generated_style_public_hdrs
 
 prefix="MapLibre.xcframework/ios-arm64/MapLibre.framework/Headers/"
 public_headers=$(zipinfo -1 bazel-bin/platform/ios/MapLibre.dynamic.xcframework.zip | grep $prefix | sed -e "s#^$prefix##")
