@@ -186,7 +186,7 @@ jobs:
       - name: Build DocC documentation main branch
         if: github.ref == 'refs/heads/main'
         run: |
-          scripts/docc.sh
+          HOSTING_BASE_PATH="maplibre-native/ios/latest" scripts/docc.sh
 
       - name: Deploy DocC documentation (main) 🚀
         if: github.ref == 'refs/heads/main'

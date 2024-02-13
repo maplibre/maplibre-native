@@ -11,6 +11,8 @@
 # $ python3 -m http.server
 # Go to http://localhost:8000/documentation/maplibre/
 
+set -e
+
 cmd="convert"
 if [[ "$1" == "preview" ]]; then
   cmd="preview"
@@ -25,37 +27,61 @@ rm -rf "$build_dir"/headers/MapLibre
 rm -rf "$build_dir"/MapLibre.xcframework
 
 mkdir -p "$build_dir"/symbol-graphs
-mkdir -p "$build_dir"/headers/MapLibre
+mkdir -p "$build_dir"/headers
 
-# unzip built XCFramework in build dir
-unzip ../../bazel-bin/platform/ios/MapLibre.dynamic.xcframework.zip -d "$build_dir"
+bazel build --//:renderer=metal //platform/darwin:generated_style_public_hdrs //platform/ios:MapLibre.dynamic
 
-# copy all public headers from XCFramework
-cp "$build_dir"/MapLibre.xcframework/ios-arm64/MapLibre.framework/Headers/*.h "$build_dir"/headers/MapLibre
+prefix="MapLibre.xcframework/ios-arm64/MapLibre.framework/Headers/"
+public_headers=$(zipinfo -1 bazel-bin/platform/ios/MapLibre.dynamic.xcframework.zip | grep $prefix | sed -e "s#^$prefix##")
 
-xcrun --toolchain swift clang \
+filter_filenames() {
+    local prefix="$1"
+    local filenames="$2"
+    local filtered_filenames=""
+
+    for filename in $filenames; do
+        local prefixed_filename="$prefix/$filename"
+
+        if [ -f "$prefixed_filename" ]; then
+            filtered_filenames="$filtered_filenames $prefixed_filename"
+        fi
+    done
+
+    echo "$filtered_filenames"
+}
+
+ios_headers=$(filter_filenames "platform/ios/src" "$public_headers")
+darwin_headers=$(filter_filenames "platform/darwin/src" "$public_headers")
+style_headers=$(filter_filenames "bazel-bin/platform/darwin/src" "$public_headers")
+
+for header in $ios_headers $darwin_headers $style_headers; do
+  xcrun --toolchain swift clang \
      -extract-api \
      --product-name=MapLibre \
      -isysroot $SDK_PATH \
      -F "$SDK_PATH"/System/Library/Frameworks \
      -I "$PWD" \
-     -I "$(realpath ../darwin/src)" \
-     -I "$build_dir"/headers \
+     -I "$(realpath "bazel-bin/platform/darwin/src")" \
+     -I platform/darwin/src \
      -x objective-c-header  \
-     -o "$build_dir"/symbol-graphs/MapLibre.symbols.json  \
-     "$build_dir"/headers/MapLibre/*.h
+     -o "$build_dir"/symbol-graphs/$(basename $header).symbols.json  \
+     $header
+done
 
 export DOCC_HTML_DIR=$(dirname $(xcrun --toolchain swift --find docc))/../share/docc/render
-$(xcrun --find docc) "$cmd" MapLibre.docc \
+$(xcrun --find docc) "$cmd" platform/ios/MapLibre.docc \
     --fallback-display-name "MapLibre Native for iOS" \
     --fallback-bundle-identifier org.swift.MyProject \
     --fallback-bundle-version 0.0.1  \
     --additional-symbol-graph-dir "$build_dir"/symbol-graphs \
+    --source-service github \
+    --source-service-base-url https://github.com/maplibre/maplibre-native/blob/main \
+    --checkout-path $(realpath .) \
     --output-path "$build_dir"/MapLibre.doccarchive
 
 if [[ "$cmd" == "convert" ]]; then
   rm -rf build/docs
   $(xcrun --find docc) process-archive transform-for-static-hosting "$build_dir"/MapLibre.doccarchive \
-    --hosting-base-path maplibre-native/ios/latest \  # remove for local builds
+    ${HOSTING_BASE_PATH:+--hosting-base-path "$HOSTING_BASE_PATH"} \
     --output-path build/docs
 fi
