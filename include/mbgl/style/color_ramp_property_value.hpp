@@ -46,6 +46,9 @@ public:
     bool hasDataDrivenPropertyDifference(const ColorRampPropertyValue&) const { return false; }
 
     const expression::Expression& getExpression() const { return *value; }
+
+    using Dependency = style::expression::Dependency;
+    Dependency getDependencies() const noexcept { return value ? value->dependencies : Dependency::None; }
 };
 
 } // namespace style

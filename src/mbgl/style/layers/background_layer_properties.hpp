@@ -45,6 +45,10 @@ public:
 
     unsigned long constantsMask() const override;
 
+    expression::Dependency getDependencies() const override {
+        return evaluated.getDependencies();
+    }
+
     const BackgroundLayer::Impl& layerImpl() const;
     // Data members.
     CrossfadeParameters crossfade;

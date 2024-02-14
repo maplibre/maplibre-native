@@ -76,6 +76,10 @@ public:
 
     unsigned long constantsMask() const override;
 
+    expression::Dependency getDependencies() const override {
+        return evaluated.getDependencies();
+    }
+
     const <%- camelize(type) %>Layer::Impl& layerImpl() const;
     // Data members.
 <% if (type === 'background' || type === 'fill' || type === 'line' || type === 'fill-extrusion') { -%>

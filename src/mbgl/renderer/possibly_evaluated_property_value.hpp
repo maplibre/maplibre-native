@@ -57,6 +57,12 @@ public:
                                return expression.evaluate(zoom, feature, featureState, defaultValue);
                            });
     }
+
+    using Dependency = style::expression::Dependency;
+    Dependency getDependencies() const {
+        return value.match([](const T&) { return Dependency::None; },
+                           [](const style::PropertyExpression<T>& expression) { return expression.getDependencies(); });
+    }
 };
 
 template <class T>
@@ -104,6 +110,12 @@ public:
                                    return Faded<T>{evaluated, evaluated};
                                }
                            });
+    }
+
+    using Dependency = style::expression::Dependency;
+    Dependency getDependencies() const {
+        return value.match([](const Faded<T>&) { return Dependency::None; },
+                           [](const style::PropertyExpression<T>& expression) { return expression.getDependencies(); });
     }
 };
 

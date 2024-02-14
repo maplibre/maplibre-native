@@ -292,8 +292,13 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     for (RenderLayer& layer : orderedLayers) {
         const std::string& id = layer.getID();
         const bool layerAddedOrChanged = layerDiff.added.count(id) || layerDiff.changed.count(id);
-        if (layerAddedOrChanged || zoomChanged || layer.hasTransition() || layer.hasCrossfade()) {
-            auto previousMask = layer.evaluatedProperties->constantsMask();
+
+        // Only re-evaluate on change of zoom if the style has some reference to it
+        const bool zoomChangedAndMatters = zoomChanged && !layerAddedOrChanged &&
+                                           (layer.getStyleDependencies() & expression::Dependency::Zoom);
+
+        if (layerAddedOrChanged || zoomChangedAndMatters || layer.hasTransition() || layer.hasCrossfade()) {
+            const auto previousMask = layer.evaluatedProperties->constantsMask();
             layer.evaluate(evaluationParameters);
             if (previousMask != layer.evaluatedProperties->constantsMask()) {
                 constantsMaskChanged.insert(id);

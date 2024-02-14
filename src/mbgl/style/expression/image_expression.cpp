@@ -7,7 +7,7 @@ namespace style {
 namespace expression {
 
 ImageExpression::ImageExpression(std::unique_ptr<Expression> imageID_)
-    : Expression(Kind::ImageExpression, type::Image),
+    : Expression(Kind::ImageExpression, type::Image, depsOf(imageID_)),
       imageID(std::move(imageID_)) {
     assert(imageID);
 }

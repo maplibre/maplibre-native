@@ -62,7 +62,9 @@ inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& imp
 
 RenderFillLayer::RenderFillLayer(Immutable<style::FillLayer::Impl> _impl)
     : RenderLayer(makeMutable<FillLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {}
+      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+    styleDependencies = unevaluated.getDependencies();
+}
 
 RenderFillLayer::~RenderFillLayer() = default;
 

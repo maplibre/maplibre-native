@@ -13,7 +13,7 @@ public:
     FormatSectionOverride(const type::Type& type_,
                           PossiblyEvaluatedPropertyValue<T> defaultValue_,
                           std::string propertyName_)
-        : Expression(Kind::FormatSectionOverride, type_),
+        : Expression(Kind::FormatSectionOverride, type_, defaultValue_.getDependencies() | Dependency::Override),
           defaultValue(std::move(defaultValue_)),
           propertyName(std::move(propertyName_)) {}
 

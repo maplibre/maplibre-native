@@ -28,6 +28,8 @@ class CustomDrawableLayerProperties final : public LayerProperties {
 public:
     explicit CustomDrawableLayerProperties(Immutable<CustomDrawableLayer::Impl> impl)
         : LayerProperties(std::move(impl)) {}
+
+    expression::Dependency getDependencies() const override { return expression::Dependency::None; }
 };
 
 } // namespace style

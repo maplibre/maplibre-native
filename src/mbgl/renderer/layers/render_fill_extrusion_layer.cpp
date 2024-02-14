@@ -53,7 +53,9 @@ inline const FillExtrusionLayer::Impl& impl_cast(const Immutable<style::Layer::I
 
 RenderFillExtrusionLayer::RenderFillExtrusionLayer(Immutable<style::FillExtrusionLayer::Impl> _impl)
     : RenderLayer(makeMutable<FillExtrusionLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {}
+      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+    styleDependencies = unevaluated.getDependencies();
+}
 
 RenderFillExtrusionLayer::~RenderFillExtrusionLayer() = default;
 

@@ -17,7 +17,7 @@ public:
     using Branch = std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>;
 
     Case(type::Type type_, std::vector<Branch> branches_, std::unique_ptr<Expression> otherwise_)
-        : Expression(Kind::Case, std::move(type_)),
+        : Expression(Kind::Case, std::move(type_), collectDependencies(branches) | depsOf(otherwise_)),
           branches(std::move(branches_)),
           otherwise(std::move(otherwise_)) {}
 
@@ -31,6 +31,12 @@ public:
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
     std::string getOperator() const override { return "case"; }
+
+protected:
+    using Expression::collectDependencies;
+    static Dependency collectDependencies(const std::vector<Branch>& branches) {
+        return collectDependencies(branches, [](const Branch& v) { return depsOf(v.first) | depsOf(v.second); });
+    }
 
 private:
     std::vector<Branch> branches;

@@ -133,6 +133,8 @@ public:
     using DataDrivenProperties = FilteredTypeList<PropertyTypes, IsDataDriven>;
     using OverridableProperties = FilteredTypeList<PropertyTypes, IsOverridable>;
 
+    using Dependency = expression::Dependency;
+
     template <class TypeList>
     using Tuple = IndexedTuple<PropertyTypes, TypeList>;
 
@@ -245,6 +247,25 @@ public:
             return Evaluated{evaluate<Ps>(z, feature)...};
         }
 
+        /// Extract dependencies from a possibly-evaluated property which may have an expression.
+        template <class P>
+        Dependency getDependencies(const P& x) const {
+            return Dependency::None;
+        }
+        template <class P>
+        Dependency getDependencies(const PossiblyEvaluatedPropertyValue<P>& v) const {
+            return v.getDependencies();
+        }
+        template <class P>
+        Dependency getDependencies(const PossiblyEvaluatedPropertyValue<Faded<P>>& v) const {
+            return v.getDependencies();
+        }
+
+        Dependency getDependencies() const {
+            return std::apply([](auto... v) { return (v | ...); },
+                              std::make_tuple(getDependencies(this->template get<Ps>())...));
+        }
+
         unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
     };
 
@@ -275,6 +296,20 @@ public:
             writer.StartObject();
             util::ignore({(conversion::stringify<Ps>(writer, this->template get<Ps>()), 0)...});
             writer.EndObject();
+        }
+
+        /// Get the combined dependencies of any contained expressions
+        Dependency getDependencies() const noexcept {
+            return std::apply([](auto... v) { return (v | ...); },
+                              std::make_tuple(getDependencies(this->template get<Ps>())...));
+        }
+
+        unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
+
+    protected:
+        template <class P>
+        Dependency getDependencies(const Transitioning<P>& v) const noexcept {
+            return v.getValue().getDependencies();
         }
     };
 

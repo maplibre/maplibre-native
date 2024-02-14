@@ -77,7 +77,7 @@ EvaluationResult toImage(const Value& imageValue) {
 }
 
 Coercion::Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_)
-    : Expression(Kind::Coercion, std::move(type_)),
+    : Expression(Kind::Coercion, std::move(type_), collectDependencies(inputs_)),
       inputs(std::move(inputs_)) {
     assert(!inputs.empty());
     type::Type t = getType();

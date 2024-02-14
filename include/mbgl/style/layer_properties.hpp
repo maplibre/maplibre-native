@@ -20,6 +20,8 @@ public:
     /// Contains render passes used by the renderer, see `mbgl::RenderPass`.
     uint8_t renderPasses = 0u;
 
+    virtual expression::Dependency getDependencies() const = 0; //{ return expression::Dependency::None; }
+
 protected:
     LayerProperties(Immutable<Layer::Impl> impl)
         : baseImpl(std::move(impl)) {}

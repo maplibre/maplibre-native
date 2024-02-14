@@ -5,12 +5,14 @@
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/color.hpp>
+#include <mbgl/util/traits.hpp>
 #include <mbgl/util/variant.hpp>
 
 #include <array>
-#include <vector>
 #include <memory>
+#include <numeric>
 #include <optional>
+#include <vector>
 
 namespace mbgl {
 
@@ -183,11 +185,23 @@ enum class Kind : int32_t {
     Slice
 };
 
+enum class Dependency : uint32_t {
+    None = 0,
+    Feature = 1 << 0,
+    Zoom = 1 << 1,
+    Var = 1 << 2,
+    Override = 1 << 3,
+};
+inline constexpr Dependency operator|(Dependency x, Dependency y) {
+    return Dependency{mbgl::underlying_type(x) | mbgl::underlying_type(y)};
+}
+
 class Expression {
 public:
-    Expression(Kind kind_, type::Type type_)
+    Expression(Kind kind_, type::Type type_, Dependency dependencies_)
         : kind(kind_),
-          type(std::move(type_)) {}
+          type(std::move(type_)),
+          dependencies(dependencies_) {}
     virtual ~Expression() = default;
 
     virtual EvaluationResult evaluate(const EvaluationContext& params) const = 0;
@@ -229,6 +243,8 @@ public:
 
     virtual std::string getOperator() const = 0;
 
+    const Dependency dependencies;
+
 protected:
     template <typename T>
     static bool childrenEqual(const T& lhs, const T& rhs) {
@@ -259,6 +275,43 @@ protected:
     static bool childEqual(const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& lhs,
                            const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& rhs) {
         return *(lhs.first) == *(rhs.first) && *(lhs.second) == *(rhs.second);
+    }
+
+    static Dependency depsOf(const std::shared_ptr<Expression>& ex) { return ex ? ex->dependencies : Dependency::None; }
+    static Dependency depsOf(const std::unique_ptr<Expression>& ex) { return ex ? ex->dependencies : Dependency::None; }
+
+    template <typename T>
+    static Dependency depsOf(const std::optional<T>& ex) {
+        return ex ? depsOf(*ex) : Dependency::None;
+    }
+
+    /// Combine the dependencies of all the expressions in a container of shared- or unique-pointers to expressions
+    template <typename T>
+    static constexpr Dependency collectDependencies(const std::vector<T>& container) {
+        return std::accumulate(container.begin(), container.end(), Dependency::None, [](auto a, const auto& ex) {
+            return a | depsOf(ex);
+        });
+    }
+
+    template <typename T, typename F>
+    static constexpr Dependency collectDependencies(const std::vector<T>& container, F op) {
+        return std::accumulate(container.begin(), container.end(), Dependency::None, [&](auto a, const auto& item) {
+            return a | op(item);
+        });
+    }
+
+    template <typename K, typename T>
+    static constexpr Dependency collectDependencies(const std::map<K, T>& container) {
+        return std::accumulate(container.begin(), container.end(), Dependency::None, [](auto a, const auto& v) {
+            return a | depsOf(v.second);
+        });
+    }
+
+    template <typename K, typename T>
+    static constexpr Dependency collectDependencies(const std::unordered_map<K, T>& container) {
+        return std::accumulate(container.begin(), container.end(), Dependency::None, [](auto a, const auto& kv) {
+            return a | depsOf(kv.second);
+        });
     }
 
 private:
