@@ -175,12 +175,11 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                                                     : TransitionOptions();
 
     const TransitionParameters transitionParameters{updateParameters->timePoint, transitionOptions};
+    const auto transitionDuration = transitionOptions.duration.value_or(
+        isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION : Duration::zero());
 
-    const PropertyEvaluationParameters evaluationParameters{
-        zoomHistory,
-        updateParameters->timePoint,
-        transitionOptions.duration.value_or(isMapModeContinuous ? util::DEFAULT_TRANSITION_DURATION
-                                                                : Duration::zero())};
+    PropertyEvaluationParameters evaluationParameters{zoomHistory, updateParameters->timePoint, transitionDuration};
+    evaluationParameters.zoomChanged = zoomChanged;
 
     const TileParameters tileParameters{updateParameters->pixelRatio,
                                         updateParameters->debugOptions,
@@ -300,13 +299,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     for (RenderLayer& layer : orderedLayers) {
         const std::string& id = layer.getID();
         const bool layerAddedOrChanged = layerDiff.added.count(id) || layerDiff.changed.count(id);
-
-        // Only re-evaluate on change of zoom if the style has some reference to it
-        using Dependency = expression::Dependency;
-        const bool zoomChangedAndMatters = zoomChanged && !layerAddedOrChanged &&
-                                           (layer.getStyleDependencies() & Dependency::Zoom) != Dependency::None;
-
-        if (layerAddedOrChanged || zoomChangedAndMatters || layer.hasTransition() || layer.hasCrossfade()) {
+        evaluationParameters.layerChanged = layerAddedOrChanged;
+        evaluationParameters.hasCrossfade = layer.hasCrossfade();
+        if (layerAddedOrChanged || zoomChanged || evaluationParameters.hasCrossfade || layer.hasTransition()) {
             const auto previousMask = layer.evaluatedProperties->constantsMask();
             layer.evaluate(evaluationParameters);
             if (previousMask != layer.evaluatedProperties->constantsMask()) {

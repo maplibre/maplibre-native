@@ -26,7 +26,7 @@ public:
         if constexpr (useIntegerZoom) { // Compiler will optimize out the unused branch.
             if (!expression.isFeatureConstant() || !expression.isRuntimeConstant()) {
                 auto returnExpression = expression;
-                returnExpression.useIntegerZoom = true;
+                returnExpression.setUseIntegerZoom(true);
                 return ResultType(returnExpression);
             }
             return ResultType(expression.evaluate(std::floor(parameters.z)));
