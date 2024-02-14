@@ -9,6 +9,8 @@
 #include <mbgl/util/projection.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
 
+constexpr double MAX_PITCH = 1.55;
+
 namespace mbgl {
 
 namespace {
@@ -109,7 +111,6 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
         return;
     }
 
-    const double cameraToCenterDistance = getCameraToCenterDistance();
     const ScreenCoordinate offset = getCenterOffset();
 
     // Find the Z distance from the viewport center point
@@ -120,12 +121,11 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     // See https://github.com/mapbox/mapbox-gl-native/pull/15195 for details.
     // See TransformState::fov description: fov = 2 * arctan((height / 2) / (height * 1.5)).
     const double tanFovAboveCenter = (0.5 + offset.y / size.height) * 2.0 * tan(getFieldOfView() / 2.0);
-    const double tanMultiple = tanFovAboveCenter * std::tan(getPitch());
+    const double maxElevationAngle = pitch + atan(tanFovAboveCenter);
     // Calculate z distance of the farthest fragment that should be rendered.
-    double furthestDistance = 50000; // TODO: figure out units and set to reasonable value
-    if (getPitch() < M_PI_2 && cameraToCenterDistance < furthestDistance * (1 - tanMultiple)) {
-        furthestDistance = cameraToCenterDistance / (1 - tanMultiple);
-    }
+
+    double furthestDistance = static_cast<float>(getCameraAlt() * tan(std::min(maxElevationAngle, MAX_PITCH)));
+
     // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
     const double farZ = furthestDistance * 1.01;
 
@@ -205,7 +205,7 @@ void TransformState::updateCameraState() const {
     const double dy = 0.5 * worldSize - y;
 
     // Set camera orientation and move it to a proper distance from the map
-    camera.setOrientation(getPitch(), getBearing());
+    camera.setOrientation(pitch, getBearing());
 
     vec3 cameraPosition = {{dx, dy, cameraAlt}};
 
@@ -591,10 +591,7 @@ void TransformState::setFieldOfView(double val) {
 }
 
 float TransformState::getCameraToCenterDistance() const {
-    if (pitch < M_PI_2) {
-        return static_cast<float>(getCameraAlt() / cos(pitch));
-    }
-    return 50000.f;
+    return static_cast<float>(getCameraAlt() / cos(std::min(pitch, MAX_PITCH)));
 }
 
 float TransformState::getCameraAlt() const {
@@ -603,7 +600,7 @@ float TransformState::getCameraAlt() const {
 }
 
 double TransformState::getPitch() const {
-    return pitch;
+    return std::min(pitch, MAX_PITCH);
 }
 
 void TransformState::setPitch(double val) {
@@ -721,7 +718,7 @@ TileCoordinate TransformState::screenCoordinateToTileCoordinate(const ScreenCoor
 
     double z0 = coord0[2] / w0;
     double z1 = coord1[2] / w1;
-    double t = z0 == z1 ? 0 : (targetZ - z0) / (z1 - z0);
+    double t = (z1 / z0 > 0.5) ? 0 : (targetZ - z0) / (z1 - z0);
 
     Point<double> p = util::interpolate(p0, p1, t) / scale * static_cast<double>(1 << atZoom);
     return {{p.x, p.y}, static_cast<double>(atZoom)};
