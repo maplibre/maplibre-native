@@ -31,9 +31,8 @@ public:
     void setPosition(const vec3& position);
 
     // Computes orientation using forward and up vectors of the provided
-    // coordinate frame. Only bearing and pitch components will be used. Does
-    // not return a value if input is invalid
-    static std::optional<Quaternion> orientationFromFrame(const vec3& forward, const vec3& up);
+    // coordinate frame.
+    static Quaternion orientationFromFrame(const vec3& forward, const vec3& up);
 
 private:
     Quaternion orientation;

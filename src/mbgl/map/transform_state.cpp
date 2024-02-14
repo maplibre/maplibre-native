@@ -290,10 +290,9 @@ bool TransformState::setCameraOrientation(const Quaternion& orientation_) {
         return false;
     }
 
-    const std::optional<Quaternion> updatedOrientation = util::Camera::orientationFromFrame(forward, up);
-    if (!updatedOrientation) return false;
+    Quaternion updatedOrientation = util::Camera::orientationFromFrame(forward, up);
 
-    camera.setOrientation(updatedOrientation.value());
+    camera.setOrientation(updatedOrientation);
     return true;
 }
 

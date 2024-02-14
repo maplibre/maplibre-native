@@ -170,7 +170,7 @@ void Camera::getOrientation(double& pitch, double& bearing, double& twist) const
 
     bearing = std::atan2(-r[1], r[0]);
     pitch = std::atan2(std::sqrt(f[0] * f[0] + f[1] * f[1]), -f[2]);
-    twist = 0;
+    twist = 0; //TODO
 }
 
 void Camera::setOrientation(double pitch, double bearing, double twist) {
@@ -187,32 +187,12 @@ void Camera::setPosition(const vec3& position) {
     updateTransform(transform, position);
 }
 
-std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, const vec3& up) {
-    vec3 upVector = up;
-
-    //vec2 xyForward = {{forward[0], forward[1]}};
-    //vec2 xyUp = {{up[0], up[1]}};
-    const double epsilon = 1e-15;
-
-    // Remove roll-component of the resulting orientation by projecting
-    // the up-vector to the forward vector on xy-plane
-    /*if (vec2Len(xyForward) >= epsilon) {
-        const vec2 xyDir = vec2Scale(xyForward, 1.0 / vec2Len(xyForward));
-
-        xyUp = vec2Scale(xyDir, vec2Dot(xyUp, xyDir));
-        upVector[0] = xyUp[0];
-        upVector[1] = xyUp[1];
-    }*/
-
-    const vec3 right = vec3Cross(upVector, forward);
-
-    if (vec3Length(right) < epsilon) {
-        return std::nullopt;
-    }
+Quaternion Camera::orientationFromFrame(const vec3& forward, const vec3& up) {
+    const vec3 right = vec3Cross(up, forward);
 
     const double bearing = std::atan2(-right[1], right[0]);
     const double pitch = std::atan2(std::sqrt(forward[0] * forward[0] + forward[1] * forward[1]), -forward[2]);
-    const double twist = 0;
+    const double twist = 0; //TODO
 
     return util::orientationFromPitchBearing(pitch, bearing, twist);
 }
@@ -254,14 +234,12 @@ void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<
     // Flip z-component of the up vector if it's pointing downwards
     up[2] = std::abs(up[2]);
 
-    const auto newOrientation = util::Camera::orientationFromFrame(forward, up);
-    if (newOrientation) {
-        orientation = newOrientation.value().m;
-    }
+    orientation = util::Camera::orientationFromFrame(forward, up).m;
 }
 
 void FreeCameraOptions::setPitchBearing(double pitch, double bearing, double twist) {
-    orientation = util::orientationFromPitchBearing(util::deg2rad(pitch), util::deg2rad(bearing), util::deg2rad(twist)).m;
+    orientation =
+        util::orientationFromPitchBearing(util::deg2rad(pitch), util::deg2rad(bearing), util::deg2rad(twist)).m;
 }
 
 } // namespace mbgl
