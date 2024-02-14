@@ -29,6 +29,10 @@ struct TransformStateProperties {
         y = val;
         return *this;
     }
+    TransformStateProperties& withZ(const std::optional<double>& val) {
+        z = val;
+        return *this;
+    }
     TransformStateProperties& withScale(const std::optional<double>& val) {
         scale = val;
         return *this;
@@ -92,6 +96,7 @@ struct TransformStateProperties {
 
     std::optional<double> x;
     std::optional<double> y;
+    std::optional<double> z;
     std::optional<double> fov;
     std::optional<double> bearing;
     std::optional<double> scale;
@@ -144,6 +149,7 @@ public:
 
     // Position
     LatLng getLatLng(LatLng::WrapMode = LatLng::Unwrapped) const;
+    double getAltM() const;
     double pixel_x() const;
     double pixel_y() const;
 
@@ -161,6 +167,8 @@ public:
     void setX(double);
     double getY() const;
     void setY(double);
+    double getZ() const;
+    void setZ(double);
 
     // Bounds
     void setLatLngBounds(LatLngBounds);
@@ -180,7 +188,6 @@ public:
     float getFieldOfView() const;
     void setFieldOfView(double);
     float getCameraToCenterDistance() const;
-    float getCameraAlt() const;
     double getPitch() const;
     void setPitch(double);
 
@@ -221,6 +228,7 @@ public:
         point on screen. */
     void moveLatLng(const LatLng&, const ScreenCoordinate&);
     void setLatLngZoom(const LatLng& latLng, double zoom);
+    void setAltM(double alt_m);
 
     void constrain(double& scale, double& x, double& y) const;
     const mat4& getProjectionMatrix() const;
@@ -278,7 +286,7 @@ private:
     bool gestureInProgress = false;
 
     // map position
-    double x = 0, y = 0;
+    double x = 0, y = 0, z = 0;
     double bearing = 0;
     double scale = 1;
     // This fov value is somewhat arbitrary. The altitude of the camera used

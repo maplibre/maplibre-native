@@ -44,6 +44,9 @@ void TransformState::setProperties(const TransformStateProperties& properties) {
     if (properties.y) {
         setY(*properties.y);
     }
+    if (properties.z) {
+        setZ(*properties.z);
+    }
     if (properties.scale) {
         setScale(*properties.scale);
     }
@@ -124,7 +127,7 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     const double maxElevationAngle = pitch + atan(tanFovAboveCenter);
     // Calculate z distance of the farthest fragment that should be rendered.
 
-    double furthestDistance = static_cast<float>(getCameraAlt() / cos(std::min(maxElevationAngle, MAX_PITCH)));
+    double furthestDistance = static_cast<float>(getZ() / cos(std::min(maxElevationAngle, MAX_PITCH)));
 
     // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
     const double farZ = furthestDistance * 1.01;
@@ -194,7 +197,6 @@ void TransformState::updateCameraState() const {
     }
 
     const double worldSize = Projection::worldSize(scale);
-    const double cameraAlt = getCameraAlt();
 
     // x & y tracks the center of the map in pixels. However as rendering is
     // done in pixel coordinates the rendering origo is actually in the middle
@@ -207,7 +209,7 @@ void TransformState::updateCameraState() const {
     // Set camera orientation and move it to a proper distance from the map
     camera.setOrientation(pitch, getBearing());
 
-    vec3 cameraPosition = {{dx, dy, cameraAlt}};
+    vec3 cameraPosition = {{dx, dy, z}};
 
     cameraPosition[0] /= worldSize;
     cameraPosition[1] /= worldSize;
@@ -418,6 +420,7 @@ void TransformState::setViewportMode(ViewportMode val) {
 CameraOptions TransformState::getCameraOptions(const std::optional<EdgeInsets>& padding) const {
     return CameraOptions()
         .withCenter(getLatLng())
+        .withAlt(getAltM())
         .withPadding(padding ? padding : edgeInsets)
         .withZoom(getZoom())
         .withBearing(util::rad2deg(-bearing))
@@ -438,6 +441,10 @@ void TransformState::setEdgeInsets(const EdgeInsets& val) {
 
 LatLng TransformState::getLatLng(LatLng::WrapMode wrapMode) const {
     return {util::rad2deg(2 * std::atan(std::exp(y / Cc)) - 0.5 * M_PI), -x / Bc, wrapMode};
+}
+
+double TransformState::getAltM() const {
+    return z * Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), getZoom());
 }
 
 double TransformState::pixel_x() const {
@@ -566,6 +573,17 @@ void TransformState::setY(double val) {
     }
 }
 
+double TransformState::getZ() const {
+    return z;
+}
+
+void TransformState::setZ(double val) {
+    if (z != val) {
+        z = val;
+        requestMatricesUpdate = true;
+    }
+}
+
 // MARK: - Rotation
 
 double TransformState::getBearing() const {
@@ -591,12 +609,7 @@ void TransformState::setFieldOfView(double val) {
 }
 
 float TransformState::getCameraToCenterDistance() const {
-    return static_cast<float>(getCameraAlt() / cos(std::min(pitch, MAX_PITCH)));
-}
-
-float TransformState::getCameraAlt() const {
-    double pixelsPerMeter = 1.0 / Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), getZoom());
-    return static_cast<float>(100000 * pixelsPerMeter);
+    return static_cast<float>(getZ() / cos(std::min(pitch, MAX_PITCH)));
 }
 
 double TransformState::getPitch() const {
@@ -799,6 +812,11 @@ void TransformState::setLatLngZoom(const LatLng& latLng, double zoom) {
         0.5 * Cc * std::log((1 + f) / (1 - f)),
     };
     setScalePoint(newScale, point);
+}
+
+void TransformState::setAltM(double alt_m) {
+    z = alt_m / Projection::getMetersPerPixelAtLatitude(getLatLng().latitude(), getZoom());
+    requestMatricesUpdate = true;
 }
 
 void TransformState::setScalePoint(const double newScale, const ScreenCoordinate& point) {

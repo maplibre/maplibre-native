@@ -58,8 +58,9 @@ void Transform::resize(const Size size) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
+    double z{state.getZ()};
     state.constrain(scale, x, y);
-    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
+    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y).withZ(z));
 
     observer.onCameraDidChange(MapObserver::CameraChangeMode::Immediate);
 }
@@ -98,6 +99,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
     double fov = camera.fov ? util::deg2rad(*camera.fov) : getFieldOfView();
+    double alt_m = camera.altM.value_or(100000);
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch)) {
         if (animation.transitionFinishFn) {
@@ -163,6 +165,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
                 state.setPitch(util::interpolate(startPitch, pitch, t));
             }
             state.setFieldOfView(fov);
+            state.setAltM(alt_m);
         },
         duration);
 }
@@ -440,8 +443,9 @@ void Transform::setNorthOrientation(NorthOrientation orientation) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
+    double z{state.getZ()};
     state.constrain(scale, x, y);
-    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
+    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y).withZ(z));
 }
 
 NorthOrientation Transform::getNorthOrientation() const {
@@ -455,8 +459,9 @@ void Transform::setConstrainMode(mbgl::ConstrainMode mode) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
+    double z{state.getZ()};
     state.constrain(scale, x, y);
-    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
+    state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y).withZ(z));
 }
 
 ConstrainMode Transform::getConstrainMode() const {
