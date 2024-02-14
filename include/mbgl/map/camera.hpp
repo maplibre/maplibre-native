@@ -45,6 +45,10 @@ struct CameraOptions {
         pitch = o;
         return *this;
     }
+    CameraOptions& withTwist(const std::optional<double>& o) {
+        twist = o;
+        return *this;
+    }
     CameraOptions& withFov(const std::optional<double>& o) {
         fov = o;
         return *this;
@@ -73,13 +77,14 @@ struct CameraOptions {
     /** Pitch toward the horizon measured in degrees , with 0 deg resulting in a
         two-dimensional map. */
     std::optional<double> pitch;
-    
+
+    std::optional<double> twist;
     std::optional<double> fov;
 };
 
 constexpr bool operator==(const CameraOptions& a, const CameraOptions& b) {
     return a.center == b.center && a.padding == b.padding && a.anchor == b.anchor && a.zoom == b.zoom &&
-           a.bearing == b.bearing && a.pitch == b.pitch && a.fov == b.fov && a.altM == b.altM;
+           a.bearing == b.bearing && a.pitch == b.pitch && a.twist == b.twist && a.fov == b.fov && a.altM == b.altM;
 }
 
 constexpr bool operator!=(const CameraOptions& a, const CameraOptions& b) {
@@ -165,7 +170,7 @@ struct FreeCameraOptions {
 
     /** Helper function for setting the orientation of the camera as a pitch and
        a bearing. Both values are in degrees */
-    void setPitchBearing(double pitch, double bearing);
+    void setPitchBearing(double pitch, double bearing, double twist);
 };
 
 } // namespace mbgl

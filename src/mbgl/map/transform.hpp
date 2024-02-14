@@ -77,6 +77,7 @@ public:
     // Pitch
 
     double getPitch() const;
+    double getTwist() const;
     double getFieldOfView() const;
 
     // North Orientation

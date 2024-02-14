@@ -100,6 +100,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
     double fov = camera.fov ? util::deg2rad(*camera.fov) : getFieldOfView();
     double alt_m = camera.altM.value_or(100000);
+    double twist = camera.twist ? util::deg2rad(*camera.twist) : getTwist();
 
     if (std::isnan(zoom) || std::isnan(bearing) || std::isnan(pitch)) {
         if (animation.transitionFinishFn) {
@@ -166,6 +167,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
             }
             state.setFieldOfView(fov);
             state.setAltM(alt_m);
+            state.setTwist(twist);
         },
         duration);
 }
@@ -430,6 +432,10 @@ double Transform::getBearing() const {
 
 double Transform::getPitch() const {
     return state.getPitch();
+}
+
+double Transform::getTwist() const {
+    return state.getTwist();
 }
 
 double Transform::getFieldOfView() const {

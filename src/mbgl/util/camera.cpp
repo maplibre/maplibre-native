@@ -10,7 +10,7 @@
 
 namespace mbgl {
 
-namespace {
+/*namespace {
 double vec2Len(const vec2& v) {
     return std::sqrt(v[0] * v[0] + v[1] * v[1]);
 };
@@ -22,7 +22,7 @@ double vec2Dot(const vec2& a, const vec2& b) {
 vec2 vec2Scale(const vec2& v, double s) {
     return vec2{{v[0] * s, v[1] * s}};
 };
-} // namespace
+} // namespace*/
 
 namespace util {
 
@@ -61,12 +61,13 @@ static vec3 toMercator(const LatLng& location, double altitudeMeters) {
              altitudeMeters * pixelsPerMeter / worldSize}};
 }
 
-static Quaternion orientationFromPitchBearing(double pitch, double bearing) {
+static Quaternion orientationFromPitchBearing(double pitch, double bearing, double twist) {
     // Both angles have to be negated to achieve CW rotation around the axis of rotation
     Quaternion rotBearing = Quaternion::fromAxisAngle({{0.0, 0.0, 1.0}}, -bearing);
     Quaternion rotPitch = Quaternion::fromAxisAngle({{1.0, 0.0, 0.0}}, -pitch);
+    Quaternion rotTwist = Quaternion::fromAxisAngle({{0.0, 0.0, 1.0}}, -twist);
 
-    return rotBearing.multiply(rotPitch);
+    return rotBearing.multiply(rotPitch).multiply(rotTwist);
 }
 
 static void updateTransform(mat4& transform, const Quaternion& orientation) {
@@ -163,16 +164,17 @@ vec3 Camera::up() const {
     return {{-column[0], -column[1], -column[2]}};
 }
 
-void Camera::getOrientation(double& pitch, double& bearing) const {
+void Camera::getOrientation(double& pitch, double& bearing, double& twist) const {
     const vec3 f = forward();
     const vec3 r = right();
 
     bearing = std::atan2(-r[1], r[0]);
     pitch = std::atan2(std::sqrt(f[0] * f[0] + f[1] * f[1]), -f[2]);
+    twist = 0;
 }
 
-void Camera::setOrientation(double pitch, double bearing) {
-    orientation = orientationFromPitchBearing(pitch, bearing);
+void Camera::setOrientation(double pitch, double bearing, double twist) {
+    orientation = orientationFromPitchBearing(pitch, bearing, twist);
     updateTransform(transform, orientation);
 }
 
@@ -188,19 +190,19 @@ void Camera::setPosition(const vec3& position) {
 std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, const vec3& up) {
     vec3 upVector = up;
 
-    vec2 xyForward = {{forward[0], forward[1]}};
-    vec2 xyUp = {{up[0], up[1]}};
+    //vec2 xyForward = {{forward[0], forward[1]}};
+    //vec2 xyUp = {{up[0], up[1]}};
     const double epsilon = 1e-15;
 
     // Remove roll-component of the resulting orientation by projecting
     // the up-vector to the forward vector on xy-plane
-    if (vec2Len(xyForward) >= epsilon) {
+    /*if (vec2Len(xyForward) >= epsilon) {
         const vec2 xyDir = vec2Scale(xyForward, 1.0 / vec2Len(xyForward));
 
         xyUp = vec2Scale(xyDir, vec2Dot(xyUp, xyDir));
         upVector[0] = xyUp[0];
         upVector[1] = xyUp[1];
-    }
+    }*/
 
     const vec3 right = vec3Cross(upVector, forward);
 
@@ -210,8 +212,9 @@ std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, cons
 
     const double bearing = std::atan2(-right[1], right[0]);
     const double pitch = std::atan2(std::sqrt(forward[0] * forward[0] + forward[1] * forward[1]), -forward[2]);
+    const double twist = 0;
 
-    return util::orientationFromPitchBearing(pitch, bearing);
+    return util::orientationFromPitchBearing(pitch, bearing, twist);
 }
 } // namespace util
 
@@ -257,8 +260,8 @@ void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<
     }
 }
 
-void FreeCameraOptions::setPitchBearing(double pitch, double bearing) {
-    orientation = util::orientationFromPitchBearing(util::deg2rad(pitch), util::deg2rad(bearing)).m;
+void FreeCameraOptions::setPitchBearing(double pitch, double bearing, double twist) {
+    orientation = util::orientationFromPitchBearing(util::deg2rad(pitch), util::deg2rad(bearing), util::deg2rad(twist)).m;
 }
 
 } // namespace mbgl
