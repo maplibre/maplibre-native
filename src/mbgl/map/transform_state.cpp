@@ -124,7 +124,7 @@ void TransformState::getProjMatrix(mat4& projMatrix, uint16_t nearZ, bool aligne
     const double maxElevationAngle = pitch + atan(tanFovAboveCenter);
     // Calculate z distance of the farthest fragment that should be rendered.
 
-    double furthestDistance = static_cast<float>(getCameraAlt() * tan(std::min(maxElevationAngle, MAX_PITCH)));
+    double furthestDistance = static_cast<float>(getCameraAlt() / cos(std::min(maxElevationAngle, MAX_PITCH)));
 
     // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
     const double farZ = furthestDistance * 1.01;
