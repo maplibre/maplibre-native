@@ -6,6 +6,7 @@
 #include <utility>
 
 namespace mbgl {
+namespace util {
 
 using Dependency = style::expression::Dependency;
 

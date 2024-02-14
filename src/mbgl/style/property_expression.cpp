@@ -3,12 +3,21 @@
 namespace mbgl {
 namespace style {
 
+using namespace expression::type;
+
 PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expression> expression_) noexcept
     : expression(std::move(expression_)),
-      isZoomConstant_(expression::isZoomConstant(*expression)),
-      isFeatureConstant_(expression::isFeatureConstant(*expression)),
-      isRuntimeConstant_(expression::isRuntimeConstant(*expression)),
-      zoomCurve(isZoomConstant_ ? nullptr : expression::findZoomCurveChecked(*expression)) {}
+      zoomCurve(expression->all(Dependency::Zoom) ? expression::findZoomCurveChecked(*expression) : nullptr),
+      useIntegerZoom_(false),
+      isZoomConstant_(expression->none(Dependency::Zoom)),
+      isFeatureConstant_(expression->none(Dependency::Feature)),
+      isRuntimeConstant_(expression->none(Dependency::Image)),
+      isGPUCapable_((expression->dependencies == Dependency::Zoom) && !zoomCurve.is<std::nullptr_t>() &&
+                    (expression->getType().is<NumberType>() || expression->getType().is<ColorType>())) {
+    assert(isZoomConstant_ == expression::isZoomConstant(*expression));
+    assert(isFeatureConstant_ == expression::isFeatureConstant(*expression));
+    assert(isRuntimeConstant_ == expression::isRuntimeConstant(*expression));
+}
 float PropertyExpressionBase::interpolationFactor(const Range<float>& inputLevels,
                                                   const float inputValue) const noexcept {
     return zoomCurve.match(

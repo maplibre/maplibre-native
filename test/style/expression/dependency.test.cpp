@@ -38,7 +38,13 @@ TEST(ExpressionDependencies, Convert) {
     EXPECT_EQ(Dependency::Feature, toString(number(string(get("color"))))->dependencies);
     EXPECT_EQ(Dependency::Feature, boolean(string(get("color")))->dependencies);
     EXPECT_EQ(Dependency::Feature, toFormatted(toColor(string(get("color"))))->dependencies);
-    EXPECT_EQ(Dependency::Feature | Dependency::Image, toImage(string(get("color")))->dependencies);
+
+    /// See `coercion.cpp`, `extraDependency`
+    EXPECT_EQ(Dependency::Feature /*| Dependency::Image*/, toImage(string(get("color")))->dependencies);
+
+    /// See `collator_expression.cpp`, `extraDependency`
+    EXPECT_EQ(Dependency::Feature,
+              createExpression(R"(["resolved-locale",["collator",{"locale": "de"}]])")->dependencies);
 }
 
 TEST(ExpressionDependencies, Compare) {
@@ -76,4 +82,26 @@ TEST(ExpressionDependencies, Distance) {
 TEST(ExpressionDependencies, CustomLayer) {
     auto impl = makeMutable<CustomLayer::Impl>("", nullptr);
     EXPECT_EQ(Dependency::None, CustomLayerProperties{std::move(impl)}.getDependencies());
+}
+
+TEST(ExpressionDependencies, Format) {
+    for (size_t i = 0; i < underlying_type(Dependency::MaskCount); ++i) {
+        const auto mask = Dependency{1u << i};
+        std::ostringstream ss;
+        ss << mask;
+        EXPECT_EQ(ss.str(), util::toString(mask));
+    }
+}
+
+TEST(ExpressionDependencies, MaskTests) {
+    EXPECT_FALSE(any(Dependency::Feature, Dependency::None));
+    EXPECT_TRUE(any(Dependency::Feature));
+    EXPECT_TRUE(any(Dependency::Feature, Dependency::Feature));
+    EXPECT_TRUE(any(Dependency::Feature, Dependency::Feature | Dependency::Zoom));
+    EXPECT_TRUE(any(Dependency::Feature | Dependency::Zoom, Dependency::Feature));
+
+    EXPECT_FALSE(all(Dependency::Feature));
+    EXPECT_TRUE(all(Dependency::Feature, Dependency::Feature));
+    EXPECT_FALSE(all(Dependency::Feature, Dependency::Feature | Dependency::Zoom));
+    EXPECT_TRUE(all(Dependency::Feature | Dependency::Zoom, Dependency::Feature | Dependency::Zoom));
 }

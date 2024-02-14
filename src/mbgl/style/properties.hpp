@@ -10,6 +10,7 @@
 #include <mbgl/util/ignore.hpp>
 
 #include <bitset>
+#include <tuple>
 
 namespace mbgl {
 
@@ -296,11 +297,79 @@ public:
             return PossiblyEvaluated{evaluate<Ps>(parameters)...};
         }
 
+        /// Evaluate the property if necessary, or produce a copy of the previous value if appropriate
+        template <class P>
+        auto maybeEvaluate(const PropertyEvaluationParameters& parameters,
+                           const typename P::EvaluatorType::ResultType& oldResult) const {
+            using Evaluator = typename P::EvaluatorType;
+            const auto& property = this->template get<P>();
+            const bool needEvaluate = parameters.layerChanged || parameters.hasCrossfade || property.hasTransition() ||
+                                      (parameters.zoomChanged && any(getDependencies(property), Dependency::Zoom));
+            return needEvaluate ? property.evaluate(Evaluator(parameters, P::defaultValue()), parameters.now)
+                                : oldResult;
+        }
+
+        /// Optionally evaluate each property or produce a copy of the previous value, if appropriate.
+        PossiblyEvaluated evaluate(const PropertyEvaluationParameters& parameters,
+                                   const PossiblyEvaluated& previous) const {
+            return PossiblyEvaluated{maybeEvaluate<Ps>(parameters, previous.template get<Ps>())...};
+        }
+
         template <class Writer>
         void stringify(Writer& writer) const {
             writer.StartObject();
             util::ignore({(conversion::stringify<Ps>(writer, this->template get<Ps>()), 0)...});
             writer.EndObject();
+        }
+
+        /// Get the combined dependencies of any contained expressions
+        constexpr Dependency getDependencies() const noexcept {
+            Dependency result = Dependency::None;
+            util::ignore({(result |= getDependencies(this->template get<Ps>()))...});
+            return result;
+        }
+
+        unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
+
+        template <typename... Ts>
+        static constexpr auto to_array(std::tuple<Ts...>&& tuple) {
+            constexpr auto get_array = [](auto&&... x) {
+                return std::array{std::forward<decltype(x)>(x)...};
+            };
+            return std::apply(get_array, std::forward<std::tuple<Ts...>>(tuple));
+        }
+
+        using ZoomCurves = std::array<expression::ZoomCurvePtr, UnevaluatedTypes::TypeCount>;
+        ZoomCurves getZoomCurves() const {
+            return to_array(std::make_tuple((((getZoomCurve(this->template get<Ps>()))))...));
+        }
+
+    protected:
+        template <class P>
+        Dependency getDependencies(const PropertyValue<P>& v) const noexcept {
+            return v.getDependencies();
+        }
+
+        template <class P>
+        Dependency getDependencies(const Transitioning<P>& v) const noexcept {
+            return v.getValue().getDependencies();
+        }
+
+        template <class P>
+        expression::ZoomCurvePtr getZoomCurve(const PropertyValue<P>& v) const {
+            const auto& val = v.getValue();
+            return val.isExpression() ? val.asExpression().getZoomCurve() : nullptr;
+        }
+
+        template <class P>
+        expression::ZoomCurvePtr getZoomCurve(const Transitioning<P>& v) const {
+            const auto& val = v.getValue();
+            return val.isExpression() ? val.asExpression().getZoomCurve() : nullptr;
+        }
+
+        template <>
+        expression::ZoomCurvePtr getZoomCurve(const Transitioning<style::ColorRampPropertyValue>&) const {
+            return nullptr;
         }
 
         /// Get the combined dependencies of any contained expressions

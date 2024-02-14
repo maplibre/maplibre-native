@@ -8,12 +8,17 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
+namespace {
+/// Collators are considered feature-dependent, see `isFeatureConstant`
+constexpr auto extraDependency = Dependency::Feature;
+} // namespace
+
 CollatorExpression::CollatorExpression(std::unique_ptr<Expression> caseSensitive_,
                                        std::unique_ptr<Expression> diacriticSensitive_,
                                        std::optional<std::unique_ptr<Expression>> locale_)
     : Expression(Kind::CollatorExpression,
                  type::Collator,
-                 depsOf(caseSensitive_) | depsOf(diacriticSensitive_) | depsOf(locale_)),
+                 depsOf(caseSensitive_) | depsOf(diacriticSensitive_) | depsOf(locale_) | extraDependency),
       caseSensitive(std::move(caseSensitive_)),
       diacriticSensitive(std::move(diacriticSensitive_)),
       locale(std::move(locale_)) {}

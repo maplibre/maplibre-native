@@ -58,9 +58,13 @@ void RenderFillExtrusionLayer::transition(const TransitionParameters& parameters
 }
 
 void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<FillExtrusionLayerProperties>(staticImmutableCast<FillExtrusionLayer::Impl>(baseImpl),
-                                                                parameters.getCrossfadeParameters(),
-                                                                unevaluated.evaluate(parameters));
+    const auto previousProperties = staticImmutableCast<FillExtrusionLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<FillExtrusionLayerProperties>(
+        staticImmutableCast<FillExtrusionLayer::Impl>(baseImpl),
+        parameters.getCrossfadeParameters(),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
+
+    const auto x = unevaluated.getZoomCurves();
 
     passes = (properties->evaluated.get<style::FillExtrusionOpacity>() > 0)
                  ? (RenderPass::Translucent | RenderPass::Pass3D)
