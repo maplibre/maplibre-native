@@ -24,8 +24,7 @@ SDK_PATH=$(xcrun -sdk iphoneos --show-sdk-path)
 build_dir=build
 
 rm -rf "$build_dir"/symbol-graphs
-rm -rf "$build_dir"/headers/MapLibre
-rm -rf "$build_dir"/MapLibre.xcframework
+rm -rf "$build_dir"/headers
 
 mkdir -p "$build_dir"/symbol-graphs
 mkdir -p "$build_dir"/headers
@@ -34,6 +33,8 @@ bazel build --//:renderer=metal //platform/darwin:generated_style_public_hdrs
 
 public_headers=$(bazel query 'kind("source file", deps(//platform:ios-sdk, 2))' --output location | grep ".h$" | sed -r 's#.*/([^:]+).*#\1#')
 style_headers=$(bazel cquery --//:renderer=metal //platform/darwin:generated_style_public_hdrs --output=files)
+
+cp $style_headers "$build_dir"/headers
 
 filter_filenames() {
     local prefix="$1"
@@ -61,7 +62,7 @@ for header in $ios_headers $darwin_headers $style_headers; do
      -isysroot $SDK_PATH \
      -F "$SDK_PATH"/System/Library/Frameworks \
      -I "$PWD" \
-     -I "$(realpath "bazel-bin/platform/darwin/src")" \
+     -I "$build_dir"/headers \
      -I platform/darwin/src \
      -x objective-c-header  \
      -o "$build_dir"/symbol-graphs/$(basename $header).symbols.json  \
