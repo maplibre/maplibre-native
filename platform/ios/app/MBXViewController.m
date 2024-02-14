@@ -15,6 +15,10 @@
 
 #import "LimeGreenStyleLayer.h"
 
+#if MLN_RENDER_BACKEND_METAL
+#import "WideLineStyleLayer.h"
+#endif
+
 #if MLN_DRAWABLE_RENDERER
 #import "ExampleCustomDrawableStyleLayer.h"
 #endif
@@ -105,6 +109,9 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingLineGradient,
 #if MLN_DRAWABLE_RENDERER
     MBXSettingsRuntimeStylingCustomDrawableLayer,
+#endif
+#if MLN_RENDER_BACKEND_METAL
+    MBXSettingsRuntimeStylingCustomWideLineLayer,
 #endif
 };
 
@@ -442,6 +449,10 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 #if MLN_DRAWABLE_RENDERER
                 @"Add Custom Drawable Layer",
 #endif
+#if MLN_RENDER_BACKEND_METAL
+                @"Add Custom Wide Line Layer (Metal)",
+#endif
+
             ]];
             break;
         case MBXSettingsMiscellaneous:
@@ -669,6 +680,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     [self addCustomDrawableLayer];
                     break;
 #endif
+#if MLN_RENDER_BACKEND_METAL
+                case MBXSettingsRuntimeStylingCustomWideLineLayer:
+                    [self styleAddWideLineCustomLayer];
+                    break;
+#endif
+                    
                 default:
                     NSAssert(NO, @"All runtime styling setting rows should be implemented");
                     break;
@@ -1605,6 +1622,14 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     LimeGreenStyleLayer *layer = [[LimeGreenStyleLayer alloc] initWithIdentifier:@"mbx-custom"];
     [self.mapView.style addLayer:layer];
 }
+
+#if MLN_RENDER_BACKEND_METAL
+- (void)styleAddWideLineCustomLayer
+{
+    WideLineStyleLayer *layer = [[WideLineStyleLayer alloc] initWithIdentifier:@"mbx-custom-wide-line"];
+    [self.mapView.style addLayer:layer];
+}
+#endif
 
 - (void)stylePolygonWithDDS {
     CLLocationCoordinate2D leftCoords[] = {

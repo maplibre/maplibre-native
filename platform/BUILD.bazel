@@ -190,7 +190,13 @@ objc_library(
         "//platform/ios:ios_app_srcs",
         "//platform/darwin:app/LimeGreenStyleLayer.h",
         "//platform/darwin:app/LimeGreenStyleLayer.m",
-    ],
+    ] + select({
+        "//:metal_renderer": [
+        "//platform/darwin:app/WideLineStyleLayer.h",
+        "//platform/darwin:app/WideLineStyleLayer.m",            
+        ],
+        "//conditions:default": [],
+    }),
     defines = ["GLES_SILENCE_DEPRECATION"],
     includes = [
         "darwin/app",
