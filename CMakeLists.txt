@@ -205,6 +205,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/image.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/image_expression.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/in.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/index_of.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/interpolate.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/interpolator.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/is_constant.hpp
@@ -215,6 +216,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/match.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/number_format.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/parsing_context.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/slice.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/step.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/type.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/expression/value.hpp
@@ -604,6 +606,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/image.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/image_expression.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/in.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/index_of.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/interpolate.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/is_constant.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/is_expression.cpp
@@ -613,6 +616,7 @@ target_sources(
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/match.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/number_format.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/parsing_context.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/slice.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/step.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/util.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/util.hpp
