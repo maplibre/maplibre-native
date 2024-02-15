@@ -55,9 +55,9 @@ public:
         auto& glContext = static_cast<gl::Context&>(context);
         shader = ShaderProgramGL::create(glContext,
                                          programParameters,
-                                         shaderName,
                                          firstAttribName,
                                          shaders::ShaderInfo<ShaderID, gfx::Backend::Type::OpenGL>::uniformBlocks,
+                                         shaders::ShaderInfo<ShaderID, gfx::Backend::Type::OpenGL>::textures,
                                          vert,
                                          frag,
                                          additionalDefines);

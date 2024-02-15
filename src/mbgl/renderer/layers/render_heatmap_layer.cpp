@@ -279,8 +279,6 @@ constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
 
 const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
-const StringIdentity idTexImageName = stringIndexer().get("u_image");
-const StringIdentity idTexColorRampName = stringIndexer().get("u_color_ramp");
 
 } // namespace
 
@@ -292,8 +290,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 const std::shared_ptr<UpdateParameters>&,
                                 [[maybe_unused]] const RenderTree& renderTree,
                                 UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -531,18 +527,13 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     heatmapTextureBuilder->setSegments(
         gfx::Triangles(), RenderStaticData::quadTriangleIndices().vector(), segments.data(), segments.size());
 
-    auto imageLocation = heatmapTextureShader->getSamplerLocation(idTexImageName);
-    if (imageLocation.has_value()) {
-        heatmapTextureBuilder->setTexture(renderTarget->getTexture(), imageLocation.value());
-    }
-    auto colorRampLocation = heatmapTextureShader->getSamplerLocation(idTexColorRampName);
-    if (colorRampLocation.has_value()) {
-        std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
-        texture->setImage(colorRamp);
-        texture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        heatmapTextureBuilder->setTexture(std::move(texture), colorRampLocation.value());
-    }
+    heatmapTextureBuilder->setTexture(renderTarget->getTexture(), idHeatmapImageTexture);
+
+    std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
+    texture->setImage(colorRamp);
+    texture->setSamplerConfiguration(
+        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+    heatmapTextureBuilder->setTexture(std::move(texture), idHeatmapColorRampTexture);
 
     heatmapTextureBuilder->flush(context);
 

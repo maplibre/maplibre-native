@@ -51,7 +51,6 @@ constexpr auto FillPatternShaderName = "FillPatternShader";
 constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 
 const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
-const StringIdentity idIconTextureName = stringIndexer().get("u_image");
 #endif // MLN_DRAWABLE_RENDERER
 
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
@@ -350,7 +349,7 @@ public:
 
     void init(gfx::Drawable&) override{};
 
-    void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
+    virtual void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
             return;
         }
@@ -400,8 +399,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              const std::shared_ptr<UpdateParameters>&,
                              [[maybe_unused]] const RenderTree& renderTree,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -600,7 +597,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
                         atlases,
                         std::nullopt,
-                        idIconTextureName,
+                        idFillImageTexture,
                         /*isText*/ false,
                         /*sdfIcons*/ true, // to force linear filter
                         /*rotationAlignment_*/ AlignmentType::Auto,

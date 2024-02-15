@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - topic/drawable
+      - node-*.*.x
     tags:
       - "node-*"
     paths:

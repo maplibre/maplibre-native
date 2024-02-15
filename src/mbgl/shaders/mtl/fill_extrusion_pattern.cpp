@@ -22,7 +22,7 @@ const std::array<UniformBlockInfo, 4>
 };
 const std::array<TextureInfo, 1>
     ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal>::textures = {
-        TextureInfo{0, "u_image"},
+        TextureInfo{0, idFillExtrusionImageTexture},
 };
 
 } // namespace shaders

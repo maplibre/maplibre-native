@@ -12,8 +12,8 @@ const std::array<UniformBlockInfo, 1> ShaderSource<BuiltIn::HeatmapTextureShader
         UniformBlockInfo{1, true, true, sizeof(HeatmapTextureDrawableUBO), idHeatmapTextureDrawableUBO},
 };
 const std::array<TextureInfo, 2> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_image"},
-    TextureInfo{1, "u_color_ramp"},
+    TextureInfo{0, idHeatmapImageTexture},
+    TextureInfo{1, idHeatmapColorRampTexture},
 };
 
 } // namespace shaders

@@ -33,7 +33,7 @@ public:
 
     /// @brief Gets the sampler location
     /// @param name uniform name
-    virtual std::optional<uint32_t> getSamplerLocation(const StringIdentity) const = 0;
+    virtual std::optional<size_t> getSamplerLocation(const size_t) const = 0;
 
     /// Get the available uniform blocks attached to this shader
     virtual const gfx::UniformBlockArray& getUniformBlocks() const = 0;
