@@ -44,6 +44,12 @@ inline const LineLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& imp
     return static_cast<const LineLayer::Impl&>(*impl);
 }
 
+#if MLN_DRAWABLE_RENDERER
+
+const auto posNormalAttribName = "a_pos_normal";
+
+#endif //MLN_DRAWABLE_RENDERER
+
 } // namespace
 
 RenderLineLayer::RenderLineLayer(Immutable<style::LineLayer::Impl> _impl)
@@ -606,7 +612,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            auto shader = lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+            auto shader = lineSDFShaderGroup->getOrCreateShader(context, propertiesAsUniforms, posNormalAttribName);
             if (!shader) {
                 continue;
             }
@@ -641,7 +647,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            auto shader = linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+            auto shader = linePatternShaderGroup->getOrCreateShader(context, propertiesAsUniforms, posNormalAttribName);
             if (!shader) {
                 continue;
             }
@@ -692,7 +698,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            auto shader = lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+            auto shader = lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms, posNormalAttribName);
             if (!shader) {
                 continue;
             }
@@ -739,7 +745,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+            auto shader = lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms, posNormalAttribName);
             if (!shader) {
                 continue;
             }
