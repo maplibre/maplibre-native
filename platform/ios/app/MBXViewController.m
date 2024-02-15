@@ -13,7 +13,7 @@
 #import "MBXState.h"
 #import "MLNSettings.h"
 
-#import "LimeGreenStyleLayer.h"
+#import "CustomStyleLayerExample.h"
 
 #if MLN_RENDER_BACKEND_METAL
 #import "WideLineStyleLayer.h"
@@ -103,7 +103,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingRasterTileSource,
     MBXSettingsRuntimeStylingImageSource,
     MBXSettingsRuntimeStylingRouteLine,
-    MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer,
+    MBXSettingsRuntimeStylingAddCustomTriangleLayer,
     MBXSettingsRuntimeStylingDDSPolygon,
     MBXSettingsRuntimeStylingCustomLatLonGrid,
     MBXSettingsRuntimeStylingLineGradient,
@@ -663,8 +663,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsRuntimeStylingRouteLine:
                     [self styleRouteLine];
                     break;
-                case MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer:
-                    [self styleAddLimeGreenTriangleLayer];
+                case MBXSettingsRuntimeStylingAddCustomTriangleLayer:
+                    [self styleAddCustomTriangleLayer];
                     break;
                 case MBXSettingsRuntimeStylingDDSPolygon:
                     [self stylePolygonWithDDS];
@@ -1617,9 +1617,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:routeLayer];
 }
 
-- (void)styleAddLimeGreenTriangleLayer
+- (void)styleAddCustomTriangleLayer
 {
-    LimeGreenStyleLayer *layer = [[LimeGreenStyleLayer alloc] initWithIdentifier:@"mbx-custom"];
+    CustomStyleLayerExample *layer = [[CustomStyleLayerExample alloc] initWithIdentifier:@"mbx-custom"];
     [self.mapView.style addLayer:layer];
 }
 
