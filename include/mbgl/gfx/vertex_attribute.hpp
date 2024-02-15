@@ -309,15 +309,6 @@ public:
                                                 AttributeDataType type = AttributeDataType::Invalid,
                                                 std::size_t count = 0);
 
-    // Set a value if the element is present
-    /*template <typename T>
-    bool set(const StringIdentity id, std::size_t i, T value) {
-        if (const auto& item = get(id)) {
-            return item->set(i, value);
-        }
-        return false;
-    }*/
-
     /// Indicates whether any values have changed
     virtual bool isDirty() const {
         return std::any_of(
@@ -416,11 +407,6 @@ protected:
         // Consider each attribute name in the attribute (e.g., pattern_from, pattern_to)
         for (std::size_t attrIndex = 0; attrIndex < DataDrivenPaintProperty::AttributeNames.size(); ++attrIndex) {
             const auto& attributeName = DataDrivenPaintProperty::AttributeNames[attrIndex];
-            /*auto& attributeNameID = DataDrivenPaintProperty::AttributeNameIDs[attrIndex];
-            if (!attributeNameID) {
-                const auto& attributeName = DataDrivenPaintProperty::AttributeNames[attrIndex];
-                attributeNameID = stringIndexer().get(attributePrefix + attributeName.data());
-            }*/
 
             // Apply the property, or add it to the uniforms collection if it's constant.
             if (!isConstant && binder->getVertexCount() > 0) {
@@ -462,8 +448,6 @@ protected:
             }
         }
     }
-
-    //const UniqueVertexAttribute& add(const StringIdentity id, std::unique_ptr<VertexAttribute>&&);
 
     virtual UniqueVertexAttribute create(int index, AttributeDataType dataType, std::size_t count) const {
         return std::make_unique<VertexAttribute>(index, dataType, count);

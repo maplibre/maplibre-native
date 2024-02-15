@@ -127,16 +127,5 @@ void VertexAttributeArray::clear() {
     }
 }
 
-/*const UniqueVertexAttribute& VertexAttributeArray::add(const StringIdentity id,
-                                                       std::unique_ptr<VertexAttribute>&& attr) {
-    const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
-    if (result.second) {
-        result.first->second = std::move(attr);
-        return result.first->second;
-    } else {
-        return nullref;
-    }
-}*/
-
 } // namespace gfx
 } // namespace mbgl
