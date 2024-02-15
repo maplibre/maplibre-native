@@ -32,7 +32,7 @@ public:
     bool has(const OverscaledTileID& key);
     void clear();
 
-protected:
+    /// Destroy a tile without blocking
     void deferredRelease(std::unique_ptr<Tile>&&);
 
 private:
