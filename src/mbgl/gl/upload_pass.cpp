@@ -216,7 +216,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     }
 
     // For each attribute in the program, with the corresponding default and optional override...
-    const auto resolveAttr = [&](auto& defaultAttr, auto& overrideAttr) -> void {
+    const auto resolveAttr = [&](const size_t id, auto& defaultAttr, auto& overrideAttr) -> void {
         auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
         const auto& defaultGL = static_cast<const VertexAttributeGL&>(defaultAttr);
         const auto stride = defaultAttr.getStride();
@@ -262,7 +262,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             // something else, the binding is invalid
             // TODO: throw?
             Log::Warning(Event::General,
-                         "Got " + util::toString(rawData.size()) + " bytes for attribute '" /*+ stringIndexer().get(id)*/ +
+                         "Got " + util::toString(rawData.size()) + " bytes for attribute '" + util::toString(id) +
                              "' (" + util::toString(defaultGL.getIndex()) + "), expected " + util::toString(stride) +
                              " or " + util::toString(stride * vertexCount));
             return;

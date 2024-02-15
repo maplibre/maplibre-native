@@ -329,11 +329,11 @@ public:
     }
 
     /// Call the provided delegate with each value, providing the override if one exists.
-    template <typename Func /* void(VertexAttribute&, const std::unique_ptr<VertexAttribute>&) */>
+    template <typename Func /* void(const size_t, VertexAttribute&, const std::unique_ptr<VertexAttribute>&) */>
     void resolve(const VertexAttributeArray& overrides, Func delegate) const {
         for (size_t id = 0; id < attrs.size(); id++) {
             if(const auto& attr = attrs[id]) {
-                delegate(*attr, overrides.get(id));
+                delegate(id, *attr, overrides.get(id));
             }
         }
     }
