@@ -1,47 +1,92 @@
 package org.maplibre.android.testapp.activity.benchmark
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.view.View
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.putJsonObject
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.maplibre.android.BuildConfig.GIT_REVISION
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
+import org.maplibre.android.log.Logger
+import org.maplibre.android.log.Logger.INFO
 import org.maplibre.android.maps.*
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
+import org.maplibre.android.testapp.BuildConfig
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.utils.FpsStore
+import org.maplibre.android.testapp.utils.BenchmarkResults
+import org.maplibre.android.testapp.utils.FrameTimeStore
+import java.io.File
+
 import java.util.*
 
-class FpsStore {
-    private val fpsValues = ArrayList<Double>(100000)
-
-    fun add(fps: Double) {
-        fpsValues.add(fps)
-    }
-
-    fun reset() {
-        fpsValues.clear()
-    }
-
-    fun low1p(): Double {
-        fpsValues.sort()
-        return fpsValues.slice(0..(fpsValues.size / 100)).average()
-    }
-
-    fun average(): Double {
-        return fpsValues.average()
+data class BenchmarkInputData(
+    val styleNames: List<String>,
+    val styleURLs: List<String>,
+    val resultsAPI: String = ""
+) {
+    init {
+        if (styleNames.size != styleURLs.size)
+            throw Error("Different size: styleNames=$styleNames, styleURLs=$styleURLs")
     }
 }
 
-data class Result(val average: Double, val low1p: Double)
+/**
+ * Prepares JSON payload that is sent to the API that collects benchmark results.
+ * See https://github.com/maplibre/ci-runners
+ */
+@SuppressLint("NewApi")
+fun jsonPayload(styleNames: List<String>, fpsResults: BenchmarkResults, encodingTimeResults: BenchmarkResults, renderingTimeResults: BenchmarkResults): JsonObject {
+    return buildJsonObject {
+        putJsonObject("resultsPerStyle") {
+            for (style in styleNames) {
+                putJsonObject(style) {
+                    fpsResults.resultsPerStyle[style].let { results ->
+                        if (results !== null) {
+                            put("avgFps", JsonPrimitive(results.map { it.average }.average()))
+                            put("low1pFps", JsonPrimitive(results.map { it.low1p }.average()))
+                        }
+                    }
 
-data class Results(
-    var map: MutableMap<String, List<Result>> = mutableMapOf<String, List<Result>>().withDefault { emptyList() })
-    {
+                    encodingTimeResults.resultsPerStyle[style].let { results ->
+                        if (results !== null) {
+                            put("avgEncodingTime", JsonPrimitive(results.map { it.average }.average()))
+                            put("low1pEncodingTime", JsonPrimitive(results.map { it.low1p }.average()))
+                        }
+                    }
 
-    fun addResult(styleName: String, fpsStore: FpsStore) {
-        val newResults = map.getValue(styleName).plus(Result(fpsStore.average(), fpsStore.low1p()))
-        map[styleName] = newResults
+                    renderingTimeResults.resultsPerStyle[style].let { results ->
+                        if (results !== null) {
+                            put("avgRenderingTime", JsonPrimitive(results.map { it.average }.average()))
+                            put("low1pRenderingTime", JsonPrimitive(results.map { it.low1p }.average()))
+                        }
+                    }
+                }
+            }
+        }
+        put("deviceManufacturer", JsonPrimitive(Build.MANUFACTURER))
+        put("model", JsonPrimitive(Build.MODEL))
+        put("renderer", JsonPrimitive(BuildConfig.FLAVOR))
+        put("debugBuild", JsonPrimitive(BuildConfig.DEBUG))
+        put("gitRevision", JsonPrimitive(GIT_REVISION))
     }
 }
 
@@ -49,13 +94,19 @@ data class Results(
  * Benchmark using a [android.view.TextureView]
  */
 class BenchmarkActivity : AppCompatActivity() {
+    private val TAG = "BenchmarkActivity"
+
     private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MapLibreMap
     private var handler: Handler? = null
     private var delayed: Runnable? = null
     private var fpsStore = FpsStore()
-    private var results = Results()
+    private var encodingTimeStore = FrameTimeStore()
+    private var renderingTimeStore = FrameTimeStore()
+    private var fpsResults = BenchmarkResults()
+    private var encodingTimeResults = BenchmarkResults()
+    private var renderingTimeResults = BenchmarkResults()
     private var runsLeft = 5
+    private var measureFrameTime = true
 
     // the styles used for the benchmark
     // can be overridden adding with developer-config.xml
@@ -67,27 +118,81 @@ class BenchmarkActivity : AppCompatActivity() {
     //    <item>https://zelonewolf.github.io/openstreetmap-americana/style.json</item>
     // </array>
     // ```
-    private var styles = listOf(Pair("Demotiles", "https://demotiles.maplibre.org/style.json"))
+    private lateinit var inputData: BenchmarkInputData
 
     @SuppressLint("DiscouragedApi")
+    private fun getStringFromResources(name: String): String {
+        return try {
+            resources.getString(applicationContext.resources.getIdentifier(
+                name,
+                "string",
+                applicationContext.packageName))
+        } catch (e: Throwable) {
+            ""
+        }
+    }
+
+    @SuppressLint("DiscouragedApi")
+    private fun getArrayFromResources(name: String): Array<String> {
+        return try {
+            resources.getStringArray(applicationContext.resources.getIdentifier(
+                name,
+                "array",
+                applicationContext.packageName))
+        } catch (e: Throwable) {
+            emptyArray()
+        }
+    }
+
+    private fun getBenchmarkInputData(): BenchmarkInputData {
+        // read input for benchmark from JSON file (on CI)
+        val jsonFile = File("${Environment.getExternalStorageDirectory()}/benchmark-input.json")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager() && jsonFile.isFile) {
+            val jsonFileContents = jsonFile.readText()
+            val jsonElement = Json.parseToJsonElement(jsonFileContents)
+            val styleNames = jsonElement.jsonObject["styleNames"]?.jsonArray?.map { it.jsonPrimitive.content }
+            val styleURLs = jsonElement.jsonObject["styleURLs"]?.jsonArray?.map { it.jsonPrimitive.content }
+            val resultsAPI = jsonElement.jsonObject["resultsAPI"]?.jsonPrimitive?.content
+            if (styleNames == null || styleURLs == null || resultsAPI == null) {
+                throw Error("${jsonFile.name} is missing elements")
+            }
+            return BenchmarkInputData(
+                styleNames = styleNames.toList(),
+                styleURLs = styleURLs.toList(),
+                resultsAPI = resultsAPI
+            )
+        } else {
+            Logger.i(TAG, "${jsonFile.name} not found, reading from developer-config.xml")
+        }
+
+        // try to read from developer-config.xml instead (for development)
+        val styleNames = getArrayFromResources("benchmark_style_names")
+        val styleURLs = getArrayFromResources("benchmark_style_urls")
+        if (styleNames.isNotEmpty() && styleURLs.isNotEmpty()) {
+            return BenchmarkInputData(
+                styleNames = styleNames.toList(),
+                styleURLs = styleURLs.toList()
+            )
+        }
+
+        // return default
+        return BenchmarkInputData(
+            styleNames = listOf("MapLibre Demotiles"),
+            styleURLs = listOf("https://demotiles.maplibre.org/style.json")
+        )
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Logger.setVerbosity(INFO)
+
         setContentView(R.layout.activity_benchmark)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
         handler = Handler(mainLooper)
         setupToolbar()
+        inputData = getBenchmarkInputData()
         setupMapView(savedInstanceState)
-
-        val styleNames = resources.getStringArray(applicationContext.resources.getIdentifier(
-            "benchmark_style_names",
-            "array",
-            applicationContext.packageName))
-        val styleURLs = resources.getStringArray(applicationContext.resources.getIdentifier(
-            "benchmark_style_urls",
-            "array",
-            applicationContext.packageName))
-        if (styleNames.isNotEmpty() && styleNames.size == styleURLs.size) {
-            styles = styleNames.zip(styleURLs)
-        }
     }
 
     private fun setupToolbar() {
@@ -100,10 +205,20 @@ class BenchmarkActivity : AppCompatActivity() {
 
     private fun setupMapView(savedInstanceState: Bundle?) {
         mapView = findViewById<View>(R.id.mapView) as MapView
+        if (measureFrameTime) {
+            mapView.addOnDidFinishRenderingFrameListener { fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double ->
+                encodingTimeStore.add(frameEncodingTime * 1e3)
+                renderingTimeStore.add(frameRenderingTime * 1e3)
+            }
+        }
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
-            this@BenchmarkActivity.maplibreMap = maplibreMap
-            maplibreMap.setStyle(styles[0].second)
-            setFpsView(maplibreMap)
+            maplibreMap.setStyle(inputData.styleURLs[0])
+            maplibreMap.setSwapBehaviorFlush(measureFrameTime)
+            if (!measureFrameTime) {
+                maplibreMap.setOnFpsChangedListener { fps: Double ->
+                    fpsStore.add(fps)
+                }
+            }
 
             // Start an animation on the map as well
             flyTo(maplibreMap, 0, 0,14.0)
@@ -127,20 +242,39 @@ class BenchmarkActivity : AppCompatActivity() {
 
                 override fun onFinish() {
                     if (place == PLACES.size - 1) {  // done with tour
-                        results.addResult(styles[style].first, fpsStore)
-                        fpsStore.reset()
+                        if (measureFrameTime) {
+                            encodingTimeResults.addResult(
+                                inputData.styleNames[style],
+                                encodingTimeStore
+                            )
+                            encodingTimeStore.reset()
 
-                        println("FPS results $results")
+                            println("Encoding time results $encodingTimeResults")
 
-                        if (style < styles.size - 1) {  // continue with next style
-                            maplibreMap.setStyle(styles[style + 1].second)
+                            renderingTimeResults.addResult(
+                                inputData.styleNames[style],
+                                renderingTimeStore
+                            )
+                            renderingTimeStore.reset()
+
+                            println("Rendering time results $renderingTimeResults")
+                        } else {
+                            fpsResults.addResult(inputData.styleNames[style], fpsStore)
+                            fpsStore.reset()
+
+                            println("FPS results $fpsResults")
+                        }
+                        println("Benchmark ${jsonPayload(inputData.styleNames, fpsResults, encodingTimeResults, renderingTimeResults)}")
+
+                        if (style < inputData.styleURLs.size - 1) {  // continue with next style
+                            maplibreMap.setStyle(inputData.styleURLs[style + 1])
                             flyTo(maplibreMap, 0, style + 1, zoom)
                         } else if (runsLeft > 0) {  // start over
                             --runsLeft
-                            maplibreMap.setStyle(styles[0].second)
+                            maplibreMap.setStyle(inputData.styleURLs[0])
                             flyTo(maplibreMap, 0, 0, zoom)
                         } else {
-                            finish()
+                            benchmarkDone()
                         }
                         return
                     }
@@ -150,12 +284,6 @@ class BenchmarkActivity : AppCompatActivity() {
                 }
             }
         )
-    }
-
-    private fun setFpsView(maplibreMap: MapLibreMap) {
-        maplibreMap.setOnFpsChangedListener { fps: Double ->
-            fpsStore.add(fps)
-        }
     }
 
     override fun onStart() {
@@ -194,6 +322,32 @@ class BenchmarkActivity : AppCompatActivity() {
     override fun onLowMemory() {
         super.onLowMemory()
         mapView.onLowMemory()
+    }
+
+    private fun sendResults() {
+        val api = inputData.resultsAPI
+        if (api.isEmpty()) {
+            Logger.i(TAG, "Not sending results to API")
+            return
+        }
+
+        val client = OkHttpClient()
+
+        val payload = jsonPayload(inputData.styleNames, fpsResults, encodingTimeResults, renderingTimeResults)
+        Logger.i(TAG, "Sending JSON payload to API: $payload")
+
+        val request = Request.Builder()
+            .url(api)
+            .post(
+                Json.encodeToString(payload).toRequestBody("application/json".toMediaType()))
+            .build()
+        client.newCall(request).execute()
+    }
+
+    private fun benchmarkDone() {
+        sendResults()
+        setResult(Activity.RESULT_OK)
+        finish()
     }
 
     companion object {

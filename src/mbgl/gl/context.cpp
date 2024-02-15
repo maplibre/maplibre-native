@@ -73,7 +73,11 @@ GLint getMaxVertexAttribs() {
 
 Context::Context(RendererBackend& backend_)
     : gfx::Context(/*maximumVertexBindingCount=*/getMaxVertexAttribs()),
-      backend(backend_) {}
+      backend(backend_) {
+#if MLN_DRAWABLE_RENDERER
+    uboAllocator = std::make_unique<gl::UniformBufferAllocator>();
+#endif
+}
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
@@ -83,6 +87,32 @@ Context::~Context() noexcept {
 #endif
         assert(stats.isZero());
     }
+}
+
+void Context::beginFrame() {
+#if MLN_DRAWABLE_RENDERER
+    frameInFlightFence = std::make_shared<gl::Fence>();
+
+    // Run allocator defragmentation on this frame interval.
+    constexpr auto defragFreq = 4;
+
+    if (frameNum == defragFreq) {
+        uboAllocator->defragment(frameInFlightFence);
+        frameNum = 0;
+    } else {
+        frameNum++;
+    }
+#endif
+}
+
+void Context::endFrame() {
+#if MLN_DRAWABLE_RENDERER
+    if (!frameInFlightFence) {
+        return;
+    }
+
+    frameInFlightFence->insert();
+#endif
 }
 
 void Context::initializeExtensions(const std::function<gl::ProcAddress(const char*)>& getProcAddress) {
@@ -460,7 +490,9 @@ void Context::setDirtyState() {
     stencilMask.setDirty();
     stencilTest.setDirty();
     stencilOp.setDirty();
+#if MLN_RENDER_BACKEND_OPENGL
     depthRange.setDirty();
+#endif
     depthMask.setDirty();
     depthTest.setDirty();
     depthFunc.setDirty();
@@ -494,7 +526,7 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
 }
 
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool /*persistent*/) {
-    return std::make_shared<gl::UniformBufferGL>(data, size);
+    return std::make_shared<gl::UniformBufferGL>(data, size, *uboAllocator);
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -585,12 +617,16 @@ void Context::setDepthMode(const gfx::DepthMode& depth) {
         // https://github.com/mapbox/mapbox-gl-native/issues/9164
         depthFunc = depth.func;
         depthMask = depth.mask;
+#if MLN_RENDER_BACKEND_OPENGL
         depthRange = depth.range;
+#endif
     } else {
         depthTest = true;
         depthFunc = depth.func;
         depthMask = depth.mask;
+#if MLN_RENDER_BACKEND_OPENGL
         depthRange = depth.range;
+#endif
     }
 }
 
@@ -633,6 +669,12 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
 void Context::finish() {
     MBGL_CHECK_ERROR(glFinish());
 }
+
+#if MLN_DRAWABLE_RENDERER
+std::shared_ptr<gl::Fence> Context::getCurrentFrameFence() const {
+    return frameInFlightFence;
+}
+#endif
 
 void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::size_t indexLength) {
     switch (drawMode.type) {

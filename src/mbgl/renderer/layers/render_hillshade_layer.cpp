@@ -64,6 +64,15 @@ void RenderHillshadeLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
 }
 
+#if MLN_DRAWABLE_RENDERER
+void RenderHillshadeLayer::layerChanged(const TransitionParameters& parameters,
+                                        const Immutable<style::Layer::Impl>& impl,
+                                        UniqueChangeRequestVec& changes) {
+    RenderLayer::layerChanged(parameters, impl, changes);
+    prepareLayerTweaker.reset();
+}
+#endif
+
 void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     auto properties = makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(baseImpl),
                                                             unevaluated.evaluate(parameters));
@@ -73,25 +82,11 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup) {
-        auto newTweaker = std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties);
-        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    if (layerTweaker) {
+        layerTweaker->updateProperties(evaluatedProperties);
     }
-
-    if (!activatedRenderTargets.empty()) {
-        auto newTweaker2 = std::make_shared<HillshadePrepareLayerTweaker>(getID(), evaluatedProperties);
-
-        std::vector<LayerGroupBasePtr> groups;
-        for (const auto& target : activatedRenderTargets) {
-            if (const auto& group = target->getLayerGroup(0)) {
-                groups.push_back(group);
-            }
-        }
-        if (groups.empty()) {
-            prepareLayerTweaker = newTweaker2;
-        } else {
-            replaceTweaker(prepareLayerTweaker, std::move(newTweaker2), groups);
-        }
+    if (prepareLayerTweaker) {
+        prepareLayerTweaker->updateProperties(evaluatedProperties);
     }
 #endif
 }
@@ -306,11 +301,9 @@ static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
                                   [[maybe_unused]] const TransformState& state,
-                                  const std::shared_ptr<UpdateParameters>& updateParameters,
+                                  const std::shared_ptr<UpdateParameters>&,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -331,7 +324,6 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!hillshadePrepareShader) {
         hillshadePrepareShader = context.getGenericShader(shaders, HillshadePrepareShaderGroupName);

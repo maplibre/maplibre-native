@@ -1,6 +1,6 @@
 {
   "name": "@maplibre/maplibre-gl-native",
-  "version": "5.2.0",
+  "version": "5.3.1",
   "description": "Renders map tiles with MapLibre Native",
   "keywords": [
     "maplibre",
@@ -21,7 +21,7 @@
   },
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@acalcutt/node-pre-gyp": "^1.0.11",
+    "@acalcutt/node-pre-gyp": "^1.0.14",
     "@acalcutt/node-pre-gyp-github": "1.4.8",
     "minimatch": "^7.2.0",
     "npm-run-all": "^4.0.2"
@@ -58,7 +58,7 @@
     "node": ">=6"
   },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build=true",
+    "install": "node-pre-gyp install --fallback-to-build=false",
     "test": "tape platform/node/test/js/**/*.test.js",
     "test-memory": "node --expose-gc platform/node/test/memory.test.js",
     "test-expressions": "node -r esm platform/node/test/expression.test.js",

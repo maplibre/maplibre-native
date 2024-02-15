@@ -9,11 +9,14 @@ struct alignas(16) HeatmapTextureDrawableUBO {
     std::array<float, 4 * 4> matrix;
     std::array<float, 2> world;
     float opacity;
-    // overdrawInspector is used only in Metal, while in GL this is a 4 bytes empty padding.
-    bool overdrawInspector;
-    uint8_t pad1, pad2, pad3;
+    float pad1;
 };
 static_assert(sizeof(HeatmapTextureDrawableUBO) % 16 == 0);
+
+enum {
+    idHeatmapTextureDrawableUBO,
+    heatmapTextureUBOCount
+};
 
 } // namespace shaders
 } // namespace mbgl

@@ -14,21 +14,19 @@
 namespace mbgl {
 namespace shaders {
 struct AttributeInfo {
-    AttributeInfo(std::size_t index, gfx::AttributeDataType dataType, std::size_t count, std::string_view name);
+    AttributeInfo(std::size_t index, gfx::AttributeDataType dataType, std::string_view name);
     std::size_t index;
     gfx::AttributeDataType dataType;
-    std::size_t count;
     std::string_view name;
     StringIdentity nameID;
 };
 struct UniformBlockInfo {
-    UniformBlockInfo(std::size_t index, bool vertex, bool fragment, std::size_t size, std::string_view name);
+    UniformBlockInfo(std::size_t index, bool vertex, bool fragment, std::size_t size, std::size_t id);
     std::size_t index;
     bool vertex;
     bool fragment;
     std::size_t size;
-    std::string_view name;
-    StringIdentity nameID;
+    std::size_t id;
 };
 struct TextureInfo {
     TextureInfo(std::size_t index, std::string_view name);
@@ -69,9 +67,6 @@ public:
     void initUniformBlock(const shaders::UniformBlockInfo&);
     void initTexture(const shaders::TextureInfo&);
 
-    bool getBindMissingAttributes() const { return bindMissingAttributes; }
-    void setBindMissingAttributes(bool value) { bindMissingAttributes = value; }
-
 protected:
     std::string shaderName;
     RendererBackend& backend;
@@ -80,7 +75,6 @@ protected:
     UniformBlockArray uniformBlocks;
     VertexAttributeArray vertexAttributes;
     std::unordered_map<StringIdentity, std::size_t> textureBindings;
-    bool bindMissingAttributes = true;
 };
 
 } // namespace mtl

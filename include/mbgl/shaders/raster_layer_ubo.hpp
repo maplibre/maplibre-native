@@ -17,12 +17,15 @@ struct alignas(16) RasterDrawableUBO {
     float brightness_high;
     float saturation_factor;
     float contrast_factor;
-    bool overdrawInspector;
-    uint8_t pad1, pad2, pad3;
-    float pad4;
+    float pad1, pad2;
 };
 static_assert(sizeof(RasterDrawableUBO) == 128);
 static_assert(sizeof(RasterDrawableUBO) % 16 == 0);
+
+enum {
+    idRasterDrawableUBO,
+    rasterUBOCount
+};
 
 } // namespace shaders
 } // namespace mbgl

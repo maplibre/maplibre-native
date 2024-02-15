@@ -72,7 +72,7 @@ public:
     int32_t getLayerIndex() const { return layerIndex; }
 
     /// Update the layer index to a new value
-    void updateLayerIndex(int32_t value) { layerIndex = value; }
+    virtual void updateLayerIndex(int32_t value) { layerIndex = value; }
 
     /// Get the number of drawables contained
     virtual std::size_t getDrawableCount() const = 0;
@@ -163,6 +163,13 @@ public:
 
     void setStencilTiles(RenderTiles);
 
+    void updateLayerIndex(int32_t value) override {
+        layerIndex = value;
+        for (auto* drawable : sortedDrawables) {
+            drawable->setLayerIndex(value);
+        }
+    }
+
 protected:
     // When stencil clipping is enabled for the layer, this is the set
     // of tile IDs that need to be rendered to the stencil buffer.
@@ -231,6 +238,13 @@ public:
     }
 
     std::size_t clearDrawables() override;
+
+    void updateLayerIndex(int32_t value) override {
+        layerIndex = value;
+        for (auto& drawable : drawables) {
+            drawable->setLayerIndex(value);
+        }
+    }
 
 protected:
     using DrawableCollection = std::set<gfx::UniqueDrawable, gfx::DrawableLessByPriority>;

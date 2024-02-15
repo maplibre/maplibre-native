@@ -13,6 +13,7 @@ on:
 jobs:
   upload-render-test-result:
     runs-on: ubuntu-22.04
+    if: github.event.workflow_run.event == 'pull_request'
     env:
       html_filename: "linux-drawable.html"
     steps:
@@ -24,9 +25,17 @@ jobs:
       - uses: ./.github/actions/download-workflow-run-artifact
         with:
           artifact-name: render-test-result
-          expect-files: ${{ env.html_filename }}
+
+      # when there are no results, the render test succeeded
+      # in this case the subsequent steps can be skipped
+      - name: "Check existence render test results HTML"
+        id: render_test_results
+        uses: andstor/file-existence-action@v2.0.0
+        with:
+          files: ${{ env.html_filename }}
   
       - name: Configure AWS Credentials
+        if: steps.render_test_results.outputs.files_exists
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: us-west-2
@@ -34,6 +43,7 @@ jobs:
           role-session-name: ${{ github.run_id }}
 
       - name: Upload render test results to S3
+        if: steps.render_test_results.outputs.files_exists
         id: upload_render_test_results
         run: |
           aws s3 cp metrics/${{ env.html_filename }} \
@@ -41,6 +51,7 @@ jobs:
             --expires "$(date -d '+30 days' --utc +'%Y-%m-%dT%H:%M:%SZ')"
 
       - name: 'Leave comment on PR with test results'
+        if: steps.render_test_results.outputs.files_exists
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: render-test-result

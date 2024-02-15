@@ -27,15 +27,12 @@ struct alignas(16) FillInterpolateUBO {
 };
 static_assert(sizeof(FillInterpolateUBO) % 16 == 0);
 
-struct alignas(16) FillPermutationUBO {
-    /*  0 */ Attribute color;
-    /*  8 */ Attribute opacity;
-    /* 16 */ bool overdrawInspector;
-    /* 17 */ bool pad1, pad2, pad3;
-    /* 20 */ float pad4, pad5, pad6;
-    /* 32 */
+enum {
+    idFillDrawableUBO,
+    idFillEvaluatedPropsUBO,
+    idFillInterpolateUBO,
+    fillUBOCount
 };
-static_assert(sizeof(FillPermutationUBO) == 2 * 16);
 
 //
 // Fill outline
@@ -62,15 +59,12 @@ struct alignas(16) FillOutlineInterpolateUBO {
 };
 static_assert(sizeof(FillOutlineInterpolateUBO) == 1 * 16);
 
-struct alignas(16) FillOutlinePermutationUBO {
-    /*  0 */ Attribute outline_color;
-    /*  8 */ Attribute opacity;
-    /* 16 */ bool overdrawInspector;
-    /* 17 */ bool pad1, pad2, pad3;
-    /* 20 */ float pad4, pad5, pad6;
-    /* 32 */
+enum {
+    idFillOutlineDrawableUBO,
+    idFillOutlineEvaluatedPropsUBO,
+    idFillOutlineInterpolateUBO,
+    fillOutlineUBOCount
 };
-static_assert(sizeof(FillOutlinePermutationUBO) == 2 * 16);
 
 //
 // Fill Pattern
@@ -107,16 +101,13 @@ struct alignas(16) FillPatternInterpolateUBO {
 };
 static_assert(sizeof(FillPatternInterpolateUBO) == 1 * 16);
 
-struct alignas(16) FillPatternPermutationUBO {
-    /*  0 */ Attribute pattern_from;
-    /*  8 */ Attribute pattern_to;
-    /* 16 */ Attribute opacity;
-    /* 24 */ bool overdrawInspector;
-    /* 25 */ bool pad1, pad2, pad3;
-    /* 28 */ float pad4;
-    /* 32 */
+enum {
+    idFillPatternDrawableUBO,
+    idFillPatternTilePropsUBO,
+    idFillPatternEvaluatedPropsUBO,
+    idFillPatternInterpolateUBO,
+    fillPatternUBOCount
 };
-static_assert(sizeof(FillPatternPermutationUBO) == 2 * 16);
 
 //
 // Fill pattern outline
@@ -152,16 +143,13 @@ struct alignas(16) FillOutlinePatternInterpolateUBO {
 };
 static_assert(sizeof(FillOutlinePatternInterpolateUBO) == 1 * 16);
 
-struct alignas(16) FillOutlinePatternPermutationUBO {
-    /* 0  */ Attribute pattern_from;
-    /* 8  */ Attribute pattern_to;
-    /* 16 */ Attribute opacity;
-    /* 24 */ bool overdrawInspector;
-    /* 17 */ bool pad1, pad2, pad3;
-    /* 20 */ float pad4;
-    /* 32 */
+enum {
+    idFillOutlinePatternDrawableUBO,
+    idFillOutlinePatternTilePropsUBO,
+    idFillOutlinePatternEvaluatedPropsUBO,
+    idFillOutlinePatternInterpolateUBO,
+    fillOutlinePatternUBOCount
 };
-static_assert(sizeof(FillOutlinePatternPermutationUBO) == 2 * 16);
 
 } // namespace shaders
 } // namespace mbgl

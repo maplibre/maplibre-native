@@ -43,6 +43,7 @@ node_modules
 /lib
 
 /bazel-*
+/MODULE.bazel.lock
 CMakeLists.txt.user
 CMakeFiles
 __generated__

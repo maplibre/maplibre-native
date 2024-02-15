@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - qt-*.*.x
     tags:
       - "qt-**"
     paths:
@@ -180,7 +181,8 @@ jobs:
         env:
           MLN_COMPILER: ${{ matrix.compiler }}
         run: |
-          brew install --overwrite python@3.11
+          # https://github.com/actions/runner-images/issues/8838#issuecomment-1817486924
+          brew link --overwrite python@3.12
           brew install "$MLN_COMPILER"
           echo "/usr/local/opt/${MLN_COMPILER}/bin" >> "$GITHUB_PATH"
           {

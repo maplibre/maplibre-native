@@ -66,9 +66,8 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& paramet
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup) {
-        auto newTweaker = std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties);
-        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    if (layerTweaker) {
+        layerTweaker->updateProperties(evaluatedProperties);
     }
 #endif
 }
@@ -213,11 +212,9 @@ static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatte
 void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::Context& context,
                                    const TransformState& state,
-                                   const std::shared_ptr<UpdateParameters>& updateParameters,
+                                   const std::shared_ptr<UpdateParameters>&,
                                    [[maybe_unused]] const RenderTree& renderTree,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     const auto zoom = state.getIntegerZoom();
     const auto tileCover = util::tileCover(state, zoom);
 
@@ -258,7 +255,6 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     if (!hasPattern && !plainShader) {
         plainShader = context.getGenericShader(shaders, std::string(BackgroundPlainShaderName));

@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+      - linux-*.*.x
+    tags:
+      - linux-*
 
   pull_request:
     branches:
@@ -32,7 +35,7 @@ jobs:
       - name: Get all Linux files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: tj-actions/changed-files@v40
+        uses: tj-actions/changed-files@v42
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -56,7 +59,7 @@ jobs:
           fetch-depth: 0
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
           languages: cpp
 
@@ -100,7 +103,7 @@ jobs:
 
       - name: Upload mbgl-render as artifact
         if: matrix.renderer == 'drawable' && github.event_name == 'pull_request' 
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mbgl-render
           path: |
@@ -108,7 +111,7 @@ jobs:
   
       - name: Upload mbgl-benchmark-runner as artifact
         if: matrix.renderer == 'drawable' && github.event_name == 'pull_request' 
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mbgl-benchmark-runner
           path: |
@@ -131,7 +134,7 @@ jobs:
       # CodeQL
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
         with:
           category: "/language:cpp"
 
@@ -152,7 +155,7 @@ jobs:
 
       - name: Upload render test result
         if: always() && steps.render_test.outcome == 'failure' && matrix.renderer == 'drawable'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: render-test-result
           path: |
@@ -191,7 +194,7 @@ jobs:
             x11-xserver-utils
 
       - name: Cache Bazel
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
           restore-keys: |
@@ -206,14 +209,14 @@ jobs:
       - name: Generate coverage report
         run: |
           xvfb-run -a \
-            bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" --//:maplibre_platform=linux \
+            bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" \
             --test_output=errors --local_test_jobs=1 \
             --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
             //test:core //render-test:render-test //expression-test:test
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: ${{ env.coverage_report }}

@@ -8,6 +8,8 @@
 
 namespace mbgl {
 
+class PaintParameters;
+
 namespace gfx {
 
 class Drawable;

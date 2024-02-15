@@ -71,10 +71,12 @@ void DrawableGL::draw(PaintParameters& parameters) const {
         }
     }
 
+#ifndef NDEBUG
     context.bindVertexArray = value::BindVertexArray::Default;
 
     unbindTextures();
     unbindUniformBuffers();
+#endif
 }
 
 void DrawableGL::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
@@ -102,29 +104,34 @@ void DrawableGL::setVertexAttrNameId(const StringIdentity id) {
 
 void DrawableGL::bindUniformBuffers() const {
     if (shader) {
-        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
-        for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
-            const auto& uniformBuffer = getUniformBuffers().get(element.first);
+        const auto& uniformBlocks = shader->getUniformBlocks();
+        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
+            const auto& block = uniformBlocks.get(id);
+            if (!block) continue;
+            const auto& uniformBuffer = getUniformBuffers().get(id);
+            assert(uniformBuffer && "UBO missing, drawable skipped");
             if (!uniformBuffer) {
                 using namespace std::string_literals;
                 const auto tileIDStr = getTileID() ? util::toString(*getTileID()) : "<no tile>";
                 Log::Error(Event::General,
-                           "bindUniformBuffers: UBO "s + std::string(stringIndexer().get(element.first)) +
-                               " not found for " + util::toString(getID()) + " / " + getName() + " / " + tileIDStr +
-                               ". skipping.");
+                           "bindUniformBuffers: UBO "s + util::toString(block->getIndex()) + " not found for " +
+                               util::toString(getID()) + " / " + getName() + " / " + tileIDStr + ". skipping.");
                 assert(false);
                 continue;
             }
-            element.second->bindBuffer(*uniformBuffer);
+            block->bindBuffer(*uniformBuffer);
         }
     }
 }
 
 void DrawableGL::unbindUniformBuffers() const {
     if (shader) {
-        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
-        for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
-            element.second->unbindBuffer();
+        const auto& uniformBlocks = shader->getUniformBlocks();
+        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
+            const auto& block = uniformBlocks.get(id);
+            if (block) {
+                block->unbindBuffer();
+            }
         }
     }
 }
@@ -138,7 +145,12 @@ struct IndexBufferGL : public gfx::IndexBufferBase {
 };
 
 void DrawableGL::upload(gfx::UploadPass& uploadPass) {
+    if (isCustom) {
+        return;
+    }
     if (!shader) {
+        Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
+        assert(false);
         return;
     }
 

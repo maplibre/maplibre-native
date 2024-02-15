@@ -20,4 +20,4 @@ done
 
 # Generate the Xcode project
 # Example invocation: bazel-xcodeproj.sh flavor split
-bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=$flavor --//:maplibre_platform=ios"
+bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=$flavor"

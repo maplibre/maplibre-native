@@ -88,15 +88,14 @@ struct RenderableSegment {
                       const LayerRenderData& renderData_,
                       const SymbolBucket::PaintProperties& bucketPaintProperties_,
                       float sortKey_,
-                      const SymbolType type_,
-                      const uint8_t overscaledZ_ = 0)
+                      const SymbolType type_)
         : segment(segment_),
           tile(tile_),
           renderData(renderData_),
           bucketPaintProperties(bucketPaintProperties_),
           sortKey(sortKey_),
           type(type_),
-          overscaledZ(overscaledZ_) {}
+          overscaledZ(tile.getOverscaledTileID().overscaledZ) {}
 
     SegmentWrapper segment;
     const RenderTile& tile;
@@ -128,6 +127,19 @@ struct RenderableSegment {
         return false;
     }
 };
+
+struct SegmentGroup {
+    // A reference to the first or only segment
+    RenderableSegment renderable;
+    // A reference to multiple segments, or none
+    SegmentVectorWrapper segments;
+
+    bool operator<(const SegmentGroup& other) const { return renderable < other.renderable; }
+};
+
+namespace {
+const SegmentVector<SymbolTextAttributes> emptySegmentVector;
+}
 
 #if MLN_LEGACY_RENDERER
 
@@ -748,13 +760,6 @@ SymbolDrawableTilePropsUBO buildTileUBO(const SymbolBucket& bucket,
     };
 }
 
-// Convert a properties-as-uniforms set to the type expected by `SymbolDrawableData`
-gfx::SymbolDrawableData::PropertyMapType toMap(const mbgl::unordered_set<StringIdentity>& set) {
-    // can we do this without allocating?
-    auto values = std::vector<bool>(set.size());
-    return gfx::SymbolDrawableData::PropertyMapType(set.begin(), set.end(), values.begin(), values.end());
-}
-
 const auto idDataAttibName = stringIndexer().get("a_data");
 const auto posOffsetAttribName = "a_pos_offset";
 const auto idPosOffsetAttribName = stringIndexer().get(posOffsetAttribName);
@@ -769,7 +774,7 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const SymbolBucket::PaintProperties& paintProps,
                           const SymbolPaintProperties::PossiblyEvaluated& evaluated,
                           gfx::VertexAttributeArray& attribs,
-                          mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                          mbgl::unordered_set<StringIdentity>* propertiesAsUniforms) {
     if (const auto& attr = attribs.getOrAdd(idPosOffsetAttribName)) {
         attr->setSharedRawData(buffer.sharedVertices,
                                offsetof(SymbolLayoutVertex, a1),
@@ -825,8 +830,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
                         const SymbolPaintProperties::PossiblyEvaluated& evaluated,
                         const TransformState& state,
                         gfx::UniformBufferPtr& textInterpUBO,
-                        gfx::UniformBufferPtr& iconInterpUBO,
-                        mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                        gfx::UniformBufferPtr& iconInterpUBO) {
     if (!drawable.getData()) {
         return;
     }
@@ -844,20 +848,20 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // Create or update the shared interpolation UBO
     gfx::UniformBufferPtr& interpUBO = isText ? textInterpUBO : iconInterpUBO;
     if (interpUBO) {
-        uniforms.addOrReplace(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, interpUBO);
+        uniforms.set(idSymbolDrawableInterpolateUBO, interpUBO);
     } else {
         const auto ubo = buildInterpUBO(paintProps, isText, currentZoom);
-        interpUBO = uniforms.get(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName);
+        interpUBO = uniforms.get(idSymbolDrawableInterpolateUBO);
         if (interpUBO) {
             interpUBO->update(&ubo, sizeof(ubo));
         } else {
             interpUBO = context.createUniformBuffer(&ubo, sizeof(ubo));
-            uniforms.addOrReplace(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, interpUBO);
+            uniforms.set(idSymbolDrawableInterpolateUBO, interpUBO);
         }
     }
 
     const auto tileUBO = buildTileUBO(bucket, drawData, currentZoom);
-    uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName, &tileUBO, context);
+    uniforms.createOrUpdate(idSymbolDrawableTilePropsUBO, &tileUBO, context);
 
     const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
     const auto vertexCount = buffer.vertices().elements();
@@ -868,7 +872,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // See `Placement::updateBucketDynamicVertices`
 
     if (auto& attribs = drawable.getVertexAttributes()) {
-        updateTileAttributes(buffer, isText, paintProps, evaluated, *attribs, propertiesAsUniforms);
+        updateTileAttributes(buffer, isText, paintProps, evaluated, *attribs, nullptr);
     }
 }
 
@@ -974,7 +978,7 @@ std::size_t RenderSymbolLayer::removeAllDrawables() {
 void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
-                               const std::shared_ptr<UpdateParameters>& updateParameters,
+                               const std::shared_ptr<UpdateParameters>&,
                                const RenderTree& /*renderTree*/,
                                UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
@@ -993,7 +997,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-    layerTweaker->enableOverdrawInspector(!!(updateParameters->debugOptions & MapDebugOptions::Overdraw));
 
     const auto& getCollisionTileLayerGroup = [&] {
         if (!collisionTileLayerGroup) {
@@ -1047,7 +1050,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     }
 
     const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
-    std::multiset<RenderableSegment> renderableSegments;
+    std::multiset<SegmentGroup> renderableSegments;
     std::unique_ptr<gfx::DrawableBuilder> builder;
 
     const auto currentZoom = static_cast<float>(state.getZoom());
@@ -1160,20 +1163,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             propertiesAsUniforms.clear();
 
             const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-            updateTileDrawable(drawable,
-                               context,
-                               bucket,
-                               bucketPaintProperties,
-                               evaluated,
-                               state,
-                               textInterpUBO,
-                               iconInterpUBO,
-                               propertiesAsUniforms);
-
-            // We assume that the properties-as-uniforms doesn't change without the style changing.
-            // That would require updating the shader as well.
-            [[maybe_unused]] const auto& drawData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
-            assert(drawData.propertiesAsUniforms == toMap(propertiesAsUniforms));
+            updateTileDrawable(
+                drawable, context, bucket, bucketPaintProperties, evaluated, state, textInterpUBO, iconInterpUBO);
             return true;
         };
         if (updateTile(passes, tileID, std::move(updateExisting))) {
@@ -1190,13 +1181,20 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         float serialKey = 1.0f;
-        auto addRenderables = [&, it = renderableSegments.begin()](const SymbolBucket::Buffer& buffer,
-                                                                   const SymbolType type) mutable {
-            for (const auto& segment : buffer.segments) {
-                const auto key = sortFeaturesByKey ? segment.sortKey : (serialKey += 1.0);
-                assert(segment.vertexOffset + segment.vertexLength <= buffer.vertices().elements());
-                it = renderableSegments.emplace_hint(
-                    it, std::ref(segment), tile, renderData, bucketPaintProperties, key, type, tileID.overscaledZ);
+        auto addRenderables = [&](const SymbolBucket::Buffer& buffer, const SymbolType type) mutable {
+            if (sortFeaturesByKey) {
+                // Features need to be rendered in a specific order, so we add each segment individually
+                for (const auto& segment : buffer.segments) {
+                    assert(segment.vertexOffset + segment.vertexLength <= buffer.vertices().elements());
+                    renderableSegments.emplace(SegmentGroup{
+                        {segment, tile, renderData, bucketPaintProperties, segment.sortKey, type}, emptySegmentVector});
+                }
+            } else if (!buffer.segments.empty()) {
+                // Features can be rendered in the order produced, and as grouped by the bucket
+                const auto& firstSeg = buffer.segments.front();
+                renderableSegments.emplace(SegmentGroup{
+                    {firstSeg, tile, renderData, bucketPaintProperties, serialKey, type}, buffer.segments});
+                serialKey += 1.0;
             }
         };
 
@@ -1229,7 +1227,10 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     };
     std::unordered_map<UnwrappedTileID, TileInfo> tileCache;
 
-    for (auto& renderable : renderableSegments) {
+    for (auto& group : renderableSegments) {
+        const auto& renderable = group.renderable;
+        const auto& segments = group.segments.get();
+
         const auto isText = (renderable.type == SymbolType::Text);
         const auto sdfIcons = (renderable.type == SymbolType::IconSDF);
 
@@ -1260,7 +1261,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         propertiesAsUniforms.clear();
         auto attribs = context.createVertexAttributeArray();
-        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *attribs, propertiesAsUniforms);
+        updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *attribs, &propertiesAsUniforms);
 
         const auto textHalo = evaluated.get<style::TextHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::TextHaloWidth>().constantOr(1);
@@ -1341,7 +1342,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setDrawableName(layerPrefix + std::string(suffix));
                 builder->setVertexAttributes(attribs);
 
-                builder->setSegments(gfx::Triangles(), buffer.sharedTriangles, &renderable.segment.get(), 1);
+                if (segments.empty()) {
+                    builder->setSegments(gfx::Triangles(), buffer.sharedTriangles, &renderable.segment.get(), 1);
+                } else {
+                    builder->setSegments(gfx::Triangles(), buffer.sharedTriangles, segments.data(), segments.size());
+                }
 
                 builder->flush(context);
 
@@ -1356,15 +1361,14 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                         /*.pitchAlignment=*/values.pitchAlignment,
                         /*.rotationAlignment=*/values.rotationAlignment,
                         /*.placement=*/layout.get<SymbolPlacement>(),
-                        /*.textFit=*/layout.get<IconTextFit>(),
-                        /*propertiesAsUniforms=*/toMap(propertiesAsUniforms));
+                        /*.textFit=*/layout.get<IconTextFit>());
 
                     const auto tileUBO = buildTileUBO(bucket, *drawData, currentZoom);
                     drawable->setData(std::move(drawData));
 
                     auto& uniforms = drawable->mutableUniformBuffers();
-                    uniforms.createOrUpdate(SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName, &tileUBO, context);
-                    uniforms.addOrReplace(SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName, interpUBO);
+                    uniforms.createOrUpdate(idSymbolDrawableTilePropsUBO, &tileUBO, context);
+                    uniforms.set(idSymbolDrawableInterpolateUBO, interpUBO);
 
                     tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                     ++stats.drawablesAdded;

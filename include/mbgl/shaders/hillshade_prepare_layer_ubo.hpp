@@ -11,12 +11,13 @@ struct alignas(16) HillshadePrepareDrawableUBO {
     std::array<float, 2> dimension;
     float zoom;
     float maxzoom;
-    // overdrawInspector is used only in Metal, while in GL this is a 16 bytes empty padding.
-    bool overdrawInspector;
-    uint8_t pad1, pad2, pad3;
-    float pad4, pad5, pad6;
 };
 static_assert(sizeof(HillshadePrepareDrawableUBO) % 16 == 0);
+
+enum {
+    idHillshadePrepareDrawableUBO,
+    hillshadePrepareUBOCount
+};
 
 } // namespace shaders
 } // namespace mbgl

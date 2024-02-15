@@ -24,7 +24,7 @@ The maintainers of MapLibre Native are committed to a fast and efficient resolut
 6. `[Committer]` A new release is pushed out from the branch that now contains the fix. The release process is automated and documented and can be done by anyone with write access.
 
     - Android: [platform/android/RELEASE.md](https://github.com/maplibre/maplibre-native/blob/main/platform/android/RELEASE.md)
-    - iOS: TODO, please see this issue: https://github.com/maplibre/maplibre-native/issues/1581
+    - iOS: [platform/ios/RELEASE.md](https://github.com/maplibre/maplibre-native/blob/main/platform/android/RELEASE.md)
 
 7. `[Maintainer]` The security advisory is [published](https://github.com/maplibre/maplibre-native/security/advisories?state=published).
 

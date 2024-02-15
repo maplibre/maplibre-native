@@ -9,11 +9,32 @@ on:
 jobs:
   create-check:
     strategy:
+      max-parallel: 2
       matrix:
         test: [
-          {artifactName: android-render-tests, testFile: RenderTests.apk, appFile: RenderTestsApp.apk, name: "Android Render Tests"},
+          {
+            artifactName: android-render-tests,
+            testFile: RenderTests.apk,
+            appFile: RenderTestsApp.apk,
+            name: "Android Render Tests",
+            # Google Pixel 7 Pro
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564"
+          },
+          {
+            artifactName: benchmarkAPKs,
+            testFile: "MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk",
+            appFile: "MapboxGLAndroidSDKTestApp-drawable-release.apk",
+            name: "Android Benchmark",
+            testFilter: "org.maplibre.android.benchmark.Benchmark",
+            # top devices, query with `aws list-device-pools --arn <project_arn>`
+            devicePool: "arn:aws:devicefarm:us-west-2::devicepool:082d10e5-d7d7-48a5-ba5c-b33d66efa1f5",
+            # benchmark-android.yaml
+            # see https://github.com/maplibre/ci-runners/tree/main/aws-device-farm/custom-test-envs
+            testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/14862afb-cf88-44aa-9f1e-5131cbb22f01"
+          }
         ]
     runs-on: ubuntu-latest
+    if: github.event.workflow_run.event == 'pull_request'
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +45,18 @@ jobs:
           app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
-      - uses: LouisBrunner/checks-action@v1.6.2
+      - uses: ./.github/actions/get-pr-number
+        id: get-pr-number
+
+      - name: Check if comment on PR contains '!benchmark android'
+        uses: peter-evans/find-comment@v3
+        id: fc
+        with:
+          issue-number: ${{ steps.get-pr-number.outputs.pr-number }}
+          body-regex: '^!benchmark.*android.*$'
+
+      - uses: LouisBrunner/checks-action@v2.0.0
+        if: matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id
         id: create_check
         with:
           token: ${{ steps.generate_token.outputs.token }}
@@ -34,17 +66,38 @@ jobs:
           sha: ${{ github.event.workflow_run.head_sha }}
 
       - uses: ./.github/actions/download-workflow-run-artifact
+        if: matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id
         with:
           artifact-name: ${{ matrix.test.artifactName }}
 
       - name: Check if test files exist (otherwise the parent workflow was skipped)
+        if: matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id
         id: check_files
         uses: andstor/file-existence-action@v2.0.0
         with:
           files: "${{ matrix.test.testFile }}, ${{ matrix.test.appFile }}"
 
+      - name: Configure AWS Credentials
+        if: matrix.test.name == 'Android Benchmark'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 21600
+          role-session-name: MySessionName
+
+      - name: Upload external data for benchmark
+        if: matrix.test.name == 'Android Benchmark'
+        run: |
+          export RESULTS_API=${{ secrets.MLN_RESULTS_API }}
+          export AWS_DEVICE_FARM_PROJECT_ARN=${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          upload_arn="$(.github/workflows/android-device-test/upload-external-data.sh)"
+          echo external_data_arn="$upload_arn" >> "$GITHUB_ENV"
+
       - uses: ./.github/actions/aws-device-farm-run
-        if: steps.check_files.outputs.files_exists == 'true'
+        if: steps.check_files.outputs.files_exists == 'true' && (matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id)
         with:
           name: ${{ matrix.test.name }}
           appType: ANDROID_APP
@@ -52,14 +105,17 @@ jobs:
           testFile: ${{ matrix.test.testFile }}
           testPackageType: INSTRUMENTATION_TEST_PACKAGE
           testType: INSTRUMENTATION
+          testFilter: ${{ matrix.test.testFilter }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME }}
           AWS_DEVICE_FARM_PROJECT_ARN: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
-          AWS_DEVICE_FARM_DEVICE_POOL_ARN: ${{ vars.AWS_DEVICE_FARM_DEVICE_POOL_ARN }}
+          AWS_DEVICE_FARM_DEVICE_POOL_ARN: ${{ matrix.test.devicePool }}
+          externalData: ${{ env.external_data_arn }}
+          testSpecArn: ${{ matrix.test.testSpecArn }}
 
-      - uses: LouisBrunner/checks-action@v1.6.2
-        if: always()
+      - uses: LouisBrunner/checks-action@v2.0.0
+        if: always() && (matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id)
         with:
           token: ${{ steps.generate_token.outputs.token }}
           check_id: ${{ steps.create_check.outputs.check_id }}

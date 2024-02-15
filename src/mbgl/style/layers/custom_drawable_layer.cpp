@@ -4,6 +4,7 @@
 #include <mbgl/renderer/layers/render_custom_drawable_layer.hpp>
 #include <mbgl/style/layer_observer.hpp>
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
@@ -26,6 +27,8 @@
 namespace mbgl {
 
 namespace style {
+
+using namespace shaders;
 
 namespace {
 const LayerTypeInfo typeInfoCustomDrawable{"custom-drawable",
@@ -95,18 +98,17 @@ public:
         parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
         const auto matrix = LayerTweaker::getTileMatrix(
-            tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
+            tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-        static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
-        const shaders::LineUBO lineUBO{
-            /*matrix = */ util::cast<float>(matrix),
-            /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
-            /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
-            /*device_pixel_ratio = */ parameters.pixelRatio};
+        const shaders::LineDynamicUBO dynamicUBO = {
+            /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, 0, 0};
 
-        static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
+        const shaders::LineUBO lineUBO{/*matrix = */ util::cast<float>(matrix),
+                                       /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+                                       0,
+                                       0,
+                                       0};
 
-        static const StringIdentity idLineInterpolationUBOName = stringIndexer().get("LineInterpolationUBO");
         const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
                                                                  /*blur_t =*/0.f,
                                                                  /*opacity_t =*/0.f,
@@ -116,33 +118,10 @@ public:
                                                                  0,
                                                                  0};
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idLineUBOName, &lineUBO, parameters.context);
-        uniforms.createOrUpdate(idLinePropertiesUBOName, &linePropertiesUBO, parameters.context);
-        uniforms.createOrUpdate(idLineInterpolationUBOName, &lineInterpolationUBO, parameters.context);
-
-#if MLN_RENDER_BACKEND_METAL
-        static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
-        const auto expressionUBO = LayerTweaker::buildExpressionUBO(zoom, parameters.frameCount);
-        uniforms.createOrUpdate(idExpressionInputsUBOName, &expressionUBO, parameters.context);
-
-        static const StringIdentity idLinePermutationUBOName = stringIndexer().get("LinePermutationUBO");
-        const shaders::LinePermutationUBO permutationUBO = {
-            /* .color = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-            /* .blur = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-            /* .gapwidth = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-            /* .offset = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-            /* .width = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-            /* .floorwidth = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-            /* .pattern_from = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-            /* .pattern_to = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-            /* .overdrawInspector = */ false,
-            /* .pad = */ 0,
-            0,
-            0,
-            0};
-        uniforms.createOrUpdate(idLinePermutationUBOName, &permutationUBO, parameters.context);
-#endif // MLN_RENDER_BACKEND_METAL
+        uniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
+        uniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
+        uniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
+        uniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
     };
 
 private:
@@ -168,12 +147,10 @@ public:
         parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
         const auto matrix = LayerTweaker::getTileMatrix(
-            tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
+            tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-        static const StringIdentity idFillDrawableUBOName = stringIndexer().get("FillDrawableUBO");
         const shaders::FillDrawableUBO fillUBO{/*matrix = */ util::cast<float>(matrix)};
 
-        static const StringIdentity idFillEvaluatedPropsUBOName = stringIndexer().get("FillEvaluatedPropsUBO");
         const shaders::FillEvaluatedPropsUBO fillPropertiesUBO{
             /* .color = */ color,
             /* .opacity = */ opacity,
@@ -182,7 +159,6 @@ public:
             0,
         };
 
-        static const StringIdentity idFillInterpolateUBOName = stringIndexer().get("FillInterpolateUBO");
         const shaders::FillInterpolateUBO fillInterpolateUBO{
             /* .color_t = */ 0.f,
             /* .opacity_t = */ 0.f,
@@ -190,30 +166,9 @@ public:
             0,
         };
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idFillDrawableUBOName, &fillUBO, parameters.context);
-        uniforms.createOrUpdate(idFillEvaluatedPropsUBOName, &fillPropertiesUBO, parameters.context);
-        uniforms.createOrUpdate(idFillInterpolateUBOName, &fillInterpolateUBO, parameters.context);
-
-#if MLN_RENDER_BACKEND_METAL
-        const auto zoom = parameters.state.getZoom();
-        static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
-        const auto expressionUBO = LayerTweaker::buildExpressionUBO(zoom, parameters.frameCount);
-        uniforms.createOrUpdate(idExpressionInputsUBOName, &expressionUBO, parameters.context);
-
-        static const StringIdentity idFillPermutationUBOName = stringIndexer().get("FillPermutationUBO");
-        const shaders::FillPermutationUBO permutationUBO = {
-            /* .color = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/shaders::AttributeSource::Constant, /*.expression=*/{}},
-            /* .overdrawInspector = */ false,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-        };
-        uniforms.createOrUpdate(idFillPermutationUBOName, &permutationUBO, parameters.context);
-#endif // MLN_RENDER_BACKEND_METAL
+        uniforms.createOrUpdate(idFillDrawableUBO, &fillUBO, parameters.context);
+        uniforms.createOrUpdate(idFillEvaluatedPropsUBO, &fillPropertiesUBO, parameters.context);
+        uniforms.createOrUpdate(idFillInterpolateUBO, &fillInterpolateUBO, parameters.context);
     };
 
 private:

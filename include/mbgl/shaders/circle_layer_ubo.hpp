@@ -15,8 +15,7 @@ static_assert(sizeof(CircleDrawableUBO) == 5 * 16);
 
 struct alignas(16) CirclePaintParamsUBO {
     /*  0 */ float camera_to_center_distance;
-    /*  4 */ float device_pixel_ratio;
-    /*  8 */ float pad1, pad2;
+    /*  4 */ float pad1, pad2, pad3;
     /* 16 */
 };
 static_assert(sizeof(CirclePaintParamsUBO) == 1 * 16);
@@ -47,20 +46,13 @@ struct alignas(16) CircleInterpolateUBO {
 };
 static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
 
-struct alignas(16) CirclePermutationUBO {
-    /*  0 */ Attribute color;
-    /*  8 */ Attribute radius;
-    /* 16 */ Attribute blur;
-    /* 24 */ Attribute opacity;
-    /* 32 */ Attribute stroke_color;
-    /* 40 */ Attribute stroke_width;
-    /* 48 */ Attribute stroke_opacity;
-    /* 56 */ bool overdrawInspector;
-    /* 57 */ uint8_t pad1, pad2, pad3;
-    /* 60 */ float pad4;
-    /* 64 */
+enum {
+    idCircleDrawableUBO,
+    idCirclePaintParamsUBO,
+    idCircleEvaluatedPropsUBO,
+    idCircleInterpolateUBO,
+    circleUBOCount
 };
-static_assert(sizeof(CirclePermutationUBO) == 4 * 16);
 
 } // namespace shaders
 } // namespace mbgl

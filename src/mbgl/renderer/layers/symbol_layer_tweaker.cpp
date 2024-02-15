@@ -46,8 +46,6 @@ std::array<float, 2> toArray(const Size& s) {
 
 const StringIdentity idTexUniformName = stringIndexer().get("u_texture");
 const StringIdentity idTexIconUniformName = stringIndexer().get("u_texture_icon");
-const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
-const StringIdentity idSymbolPermutationUBOName = stringIndexer().get("SymbolPermutationUBO");
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
@@ -64,14 +62,6 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 
 } // namespace
 
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = stringIndexer().get("SymbolDynamicUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = stringIndexer().get("SymbolDrawablePaintUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = stringIndexer().get(
-    "SymbolDrawableTilePropsUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = stringIndexer().get(
-    "SymbolDrawableInterpolateUBO");
-
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& state = parameters.state;
@@ -86,15 +76,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    const auto zoom = parameters.state.getZoom();
-
-#if MLN_RENDER_BACKEND_METAL
-    if (!expressionUniformBuffer) {
-        const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
-        expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
-    }
-#endif
-
     if (propertiesUpdated) {
         textPropertiesUpdated = true;
         iconPropertiesUpdated = true;
@@ -105,8 +86,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
                                          /*.camera_to_center_distance=*/camDist,
-                                         /*.device_pixel_ratio=*/parameters.pixelRatio,
-                                         /*.aspect_ratio=*/state.getSize().aspectRatio()};
+                                         /*.aspect_ratio=*/state.getSize().aspectRatio(),
+                                         0};
 
     if (!dynamicBuffer) {
         dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
@@ -139,10 +120,11 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                    : evaluated.get<style::IconTranslateAnchor>();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         // from symbol_program, makeValues
-        const auto currentZoom = static_cast<float>(zoom);
+        const auto currentZoom = static_cast<float>(parameters.state.getZoom());
         const float pixelsToTileUnits = tileID.pixelsToTileUnits(1.f, currentZoom);
         const bool pitchWithMap = symbolData.pitchAlignment == style::AlignmentType::Map;
         const bool rotateWithMap = symbolData.rotationAlignment == style::AlignmentType::Map;
@@ -179,35 +161,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         };
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idSymbolDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
 
-        uniforms.addOrReplace(idSymbolDynamicUBOName, dynamicBuffer);
-        uniforms.addOrReplace(idSymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
-
-#if MLN_RENDER_BACKEND_METAL
-        assert(propertiesAsUniforms.empty());
-
-        using namespace shaders;
-        using ShaderClass = ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal>;
-        const auto source = [&](int index) {
-            const auto nameID = ShaderClass::attributes[index].nameID;
-            const bool uniform = symbolData.propertiesAsUniforms.count(nameID);
-            return uniform ? AttributeSource::Constant : AttributeSource::PerVertex;
-        };
-
-        const SymbolPermutationUBO permutationUBO = {/* .fill_color = */ {/*.source=*/source(5), /*.expression=*/{}},
-                                                     /* .halo_color = */ {/*.source=*/source(6), /*.expression=*/{}},
-                                                     /* .opacity = */ {/*.source=*/source(7), /*.expression=*/{}},
-                                                     /* .halo_width = */ {/*.source=*/source(8), /*.expression=*/{}},
-                                                     /* .halo_blur = */ {/*.source=*/source(9), /*.expression=*/{}},
-                                                     /* .overdrawInspector = */ overdrawInspector,
-                                                     /* .pad = */ 0,
-                                                     0,
-                                                     0};
-        uniforms.createOrUpdate(idSymbolPermutationUBOName, &permutationUBO, context);
-
-        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
-#endif // MLN_RENDER_BACKEND_METAL
+        uniforms.set(idSymbolDynamicUBO, dynamicBuffer);
+        uniforms.set(idSymbolDrawablePaintUBO, isText ? textPaintBuffer : iconPaintBuffer);
     });
 }
 

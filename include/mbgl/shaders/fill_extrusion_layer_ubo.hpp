@@ -7,26 +7,6 @@
 namespace mbgl {
 namespace shaders {
 
-/// Evaluated properties that depend on the tile
-struct alignas(16) FillExtrusionDrawableTilePropsUBO {
-    /*  0 */ std::array<float, 4> pattern_from;
-    /* 16 */ std::array<float, 4> pattern_to;
-    /* 32 */
-};
-static_assert(sizeof(FillExtrusionDrawableTilePropsUBO) == 2 * 16);
-
-/// Attribute interpolations
-struct alignas(16) FillExtrusionInterpolateUBO {
-    /*  0 */ float base_t;
-    /*  4 */ float height_t;
-    /*  8 */ float color_t;
-    /* 12 */ float pattern_from_t;
-    /* 16 */ float pattern_to_t;
-    /* 20 */ float pad1, pad2, pad3;
-    /* 32 */
-};
-static_assert(sizeof(FillExtrusionInterpolateUBO) == 2 * 16);
-
 struct alignas(16) FillExtrusionDrawableUBO {
     /*   0 */ std::array<float, 4 * 4> matrix;
     /*  64 */ std::array<float, 4> scale;
@@ -56,18 +36,33 @@ struct alignas(16) FillExtrusionDrawablePropsUBO {
 };
 static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16);
 
-struct alignas(16) FillExtrusionPermutationUBO {
-    /*  0 */ Attribute color;
-    /*  8 */ Attribute base;
-    /* 16 */ Attribute height;
-    /* 24 */ Attribute pattern_from;
-    /* 32 */ Attribute pattern_to;
-    /* 40 */ bool overdrawInspector;
-    /* 41 */ uint8_t pad1, pad2, pad3;
-    /* 44 */ float pad4;
-    /* 48 */
+/// Evaluated properties that depend on the tile
+struct alignas(16) FillExtrusionDrawableTilePropsUBO {
+    /*  0 */ std::array<float, 4> pattern_from;
+    /* 16 */ std::array<float, 4> pattern_to;
+    /* 32 */
 };
-static_assert(sizeof(FillExtrusionPermutationUBO) == 3 * 16, "unexpected padding");
+static_assert(sizeof(FillExtrusionDrawableTilePropsUBO) == 2 * 16);
+
+/// Attribute interpolations
+struct alignas(16) FillExtrusionInterpolateUBO {
+    /*  0 */ float base_t;
+    /*  4 */ float height_t;
+    /*  8 */ float color_t;
+    /* 12 */ float pattern_from_t;
+    /* 16 */ float pattern_to_t;
+    /* 20 */ float pad1, pad2, pad3;
+    /* 32 */
+};
+static_assert(sizeof(FillExtrusionInterpolateUBO) == 2 * 16);
+
+enum {
+    idFillExtrusionDrawableUBO,
+    idFillExtrusionDrawablePropsUBO,
+    idFillExtrusionDrawableTilePropsUBO,
+    idFillExtrusionInterpolateUBO,
+    fillExtrusionUBOCount
+};
 
 } // namespace shaders
 } // namespace mbgl
