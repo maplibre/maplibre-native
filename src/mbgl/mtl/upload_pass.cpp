@@ -160,7 +160,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::BufferUsageType usage,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) {
     gfx::AttributeBindingArray bindings;
-    //bindings.resize(defaults.size());
+    bindings.resize(defaults.allocatedSize());
 
     constexpr std::size_t align = 16;
     constexpr std::uint8_t padding = 0;

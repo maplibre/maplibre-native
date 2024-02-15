@@ -285,8 +285,8 @@ public:
     VertexAttributeArray(const VertexAttributeArray&) = delete; // Would need to use the virtual assignment operator
     virtual ~VertexAttributeArray() = default;
 
-    /// Number of elements
-    //std::size_t size() const { return attrs.size(); }
+    /// Number of maximum allocated elements
+    std::size_t allocatedSize() const { return attrs.size(); }
 
     /// Sum of element strides, and the total size of a vertex in the buffer
     std::size_t getTotalSize() const;
