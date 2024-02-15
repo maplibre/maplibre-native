@@ -73,8 +73,7 @@ typedef NS_ENUM(NSUInteger, MLNOrnamentPosition) {
  `MLNMapView.userTrackingMode`.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/user-tracking-mode/">
- Switch between user tracking modes</a> example to learn how to toggle modes and
+ - TODO: Switch between user tracking modes</a> example to learn how to toggle modes and
  how each mode behaves.
  */
 typedef NS_ENUM(NSUInteger, MLNUserTrackingMode) {
@@ -146,22 +145,9 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNUserLocationAnnotationTyp
  <a href="https://github.com/mapbox/vector-tile-spec">Mapbox Vector Tile Specification</a>.
  It styles them with a style that conforms to the
  <a href="https://maplibre.org/maplibre-style-spec/">MapLibre Style Spec</a>.
- Such styles can be designed in
- <a href="https://www.mapbox.com/studio/">Mapbox Studio</a> and hosted on
- mapbox.com.
+ Such styles can be designed with
+ <a href="https://maplibre.org/maputnik/">Maputnik</a>.
 
- A collection of Mapbox-hosted styles is available through the `MLNStyle`
- class. These basic styles use
- <a href="https://www.mapbox.com/developers/vector-tiles/mapbox-streets">Mapbox Streets</a>
- or <a href="https://www.mapbox.com/satellite/">Mapbox Satellite</a> data
- sources, but you can specify a custom style that makes use of your own data.
-
- Mapbox-hosted vector tiles and styles require an API access token, which you
- can obtain from the
- <a href="https://www.mapbox.com/studio/account/tokens/">Mapbox account page</a>.
- Access tokens associate requests to Mapbox’s vector tile and style APIs with
- your Mapbox account. They also deter other developers from using your styles
- without your permission.
 
  Because `MLNMapView` loads asynchronously, several delegate methods are available
  for receiving map-related updates. These methods can be used to ensure that certain operations
@@ -184,10 +170,6 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNUserLocationAnnotationTyp
 
  @note You are responsible for getting permission to use the map data and for
  ensuring that your use adheres to the relevant terms of use.
-
- #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/simple-map-view/">
- Simple map view</a> example to learn how to initialize a basic `MLNMapView`.
  */
 MLN_EXPORT
 @interface MLNMapView : UIView <MLNStylable>
@@ -214,15 +196,9 @@ MLN_EXPORT
  @return An initialized map view.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/custom-style/">
- Apply a style designed in Mapbox Studio</a> example to learn how to
- initialize an `MLNMapView` with a custom style. See the
- <a href="https://docs.mapbox.com/ios/maps/examples/raster-styles/"> Apply a
- style designed in Mapbox Studio Classic</a> example to learn how to intialize
- an `MLNMapView` with a Studio Classic style _or_ a custom style JSON. See the
- <a href="https://docs.mapbox.com/ios/maps/examples/source-custom-vector/"> Use
- third-party vector tiles</a> example to learn how to initialize an
- `MLNMapView` with a third-party tile source.
+ 
+ - TODO: initialize an `MLNMapView` with a custom style
+ - TODO: how to initialize an `MLNMapView` with a third-party tile source
  */
 - (instancetype)initWithFrame:(CGRect)frame styleURL:(nullable NSURL *)styleURL;
 
@@ -252,13 +228,6 @@ MLN_EXPORT
  `-[MLNMapViewDelegate mapView:didFinishLoadingStyle:]` or
  `-[MLNMapViewDelegate mapViewDidFinishLoadingMap:]` method. It is not possible
  to manipulate the style before it has finished loading.
-
- @note The default styles provided by Mapbox contain sources and layers with
-    identifiers that will change over time. Applications that use APIs that
-    manipulate a style’s sources and layers must first set the style URL to an
-    explicitly versioned style using a convenience method like
-    `+[MLNStyle outdoorsStyleURLWithVersion:]`, `MLNMapView`’s “Style URL”
-    inspectable in Interface Builder, or a manually constructed `NSURL`.
  */
 @property (nonatomic, readonly, nullable) MLNStyle *style;
 
@@ -275,9 +244,7 @@ MLN_EXPORT
  you want to introspect individual style attributes, use the `style` property.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/switch-styles/">
- Switch between map styles</a> example to learn how to change the style of
- a map at runtime.
+ - TODO: change the style of a map at runtime.
  */
 @property (nonatomic, null_resettable) NSURL *styleURL;
 
@@ -285,9 +252,7 @@ MLN_EXPORT
  Reloads the style.
 
  You do not normally need to call this method. The map view automatically
- responds to changes in network connectivity by reloading the style. You may
- need to call this method if you change the access token after a style has
- loaded but before loading a style associated with a different Mapbox account.
+ responds to changes in network connectivity by reloading the style.
 
  This method does not bust the cache. Even if the style has recently changed on
  the server, calling this method does not necessarily ensure that the map view
@@ -365,13 +330,8 @@ MLN_EXPORT
 @property (nonatomic, assign) CGPoint compassViewMargins;
 
 /**
- The Mapbox wordmark, positioned in the lower-left corner.
-
- @note The Mapbox terms of service, which governs the use of Mapbox-hosted
-    vector tiles and styles,
-    <a href="https://docs.mapbox.com/help/how-mapbox-works/attribution/">requires</a> most Mapbox
-    customers to display the Mapbox wordmark. If this applies to you, do not
-    hide this view or change its contents.
+ A logo, the MapLibre logo by default, positioned in the lower-left corner.
+ You are not required to display this, but some vector-sources may require attribution.
  */
 @property (nonatomic, readonly) UIImageView *logoView;
 
@@ -393,11 +353,8 @@ MLN_EXPORT
  If you choose to reimplement this view, assign the `-showAttribution:` method
  as the action for your view to present the default notices and settings.
 
- @note The Mapbox terms of service, which governs the use of Mapbox-hosted
-    vector tiles and styles,
-    <a href="https://www.mapbox.com/tos/#[FamaFama]">requires</a> these
-    copyright notices to accompany any map that features Mapbox-designed styles,
-    OpenStreetMap data, or other Mapbox data such as satellite or terrain
+ @note Attribution is often required for many vector sources,
+    OpenStreetMap data, or other data such as satellite or terrain
     data. If that applies to this map view, do not hide this view or remove
     any notices from it.
 
@@ -515,8 +472,7 @@ MLN_EXPORT
  `-setUserTrackingMode:animated:` method instead.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/user-location-annotation/">
- Customize the user location annotation</a> to learn how to customize the
+ - TODO: Customize the user location annotation and learn how to customize the
  default user location annotation shown by `MLNUserTrackingMode`.
  */
 @property (nonatomic, assign) MLNUserTrackingMode userTrackingMode;
@@ -1144,9 +1100,7 @@ MLN_EXPORT
     immediately.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/camera-animation/">
- Camera animation</a> example to learn how to trigger an animation that
- rotates around a central point.
+ - TODO: Camera animation: learn how to trigger an animation that rotates around a central point.
  */
 - (void)setCamera:(MLNMapCamera *)camera animated:(BOOL)animated;
 
@@ -1164,8 +1118,7 @@ MLN_EXPORT
     is `0`, this parameter is ignored.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/camera-animation/">
- Camera animation</a> example to learn how to create a timed animation that
+ - TODO: Camera animation: learn how to create a timed animation that
  rotates around a central point for a specific duration.
  */
 - (void)setCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function;
@@ -1484,9 +1437,7 @@ MLN_EXPORT
  @return The geographic coordinate at the given point.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/point-conversion/">
- Point conversion</a> example to learn how to convert a `CGPoint` to a map
- coordinate.
+ - TODO: Point conversion example to learn how to convert a `CGPoint` to a map coordinate.
  */
 - (CLLocationCoordinate2D)convertPoint:(CGPoint)point toCoordinateFromView:(nullable UIView *)view;
 
@@ -1503,9 +1454,7 @@ MLN_EXPORT
     corresponding to the given geographic coordinate.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/point-conversion/">
- Point conversion</a> example to learn how to convert a map coordinate to a
- `CGPoint` object.
+ - TODO: Point conversion: learn how to convert a map coordinate to a `CGPoint` object.
  */
 - (CGPoint)convertCoordinate:(CLLocationCoordinate2D)coordinate toPointToView:(nullable UIView *)view;
 
@@ -1584,10 +1533,8 @@ MLN_EXPORT
     annotation object.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/annotation-models/">
- Annotation models</a> and <a href="https://docs.mapbox.com/ios/maps/examples/line-geojson/">
- Add a line annotation from GeoJSON</a> examples to learn how to add an
- annotation to an `MLNMapView` object.
+ - TODO: add a line annotation from GeoJSON.
+ - TODO: add an annotation to an `MLNMapView` object.
  */
 - (void)addAnnotation:(id <MLNAnnotation>)annotation;
 
@@ -1655,8 +1602,7 @@ MLN_EXPORT
     such object exists in the reuse queue.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/annotation-view-image/">
- Add annotation views and images</a> example learn how to most efficiently
+ - TODO: Add annotation views and images: learn how to most efficiently
  reuse an `MLNAnnotationImage`.
  */
 - (nullable __kindof MLNAnnotationImage *)dequeueReusableAnnotationImageWithIdentifier:(NSString *)identifier;
@@ -1848,8 +1794,7 @@ MLN_EXPORT
     represent features in the sources used by the current style.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/select-layer/">
- Select a feature within a layer</a> example to learn how to query an
+ - TODO: Select a feature within a layer: to learn how to query an
  `MLNMapView` object for visible `MLNFeature` objects.
  */
 - (NSArray<id <MLNFeature>> *)visibleFeaturesAtPoint:(CGPoint)point NS_SWIFT_NAME(visibleFeatures(at:));
@@ -1910,7 +1855,7 @@ MLN_EXPORT
  point, even if the road extends into other tiles.
 
  To find out the layer names in a particular style, view the style in
- <a href="https://www.mapbox.com/studio/">Mapbox Studio</a>.
+ <a href="https://maplibre.org/maputnik">Maputnik</a>.
 
  Only visible features are returned. To obtain features regardless of
  visibility, use the
@@ -2013,7 +1958,7 @@ MLN_EXPORT
  the road within each map tile is included individually.
 
  To find out the layer names in a particular style, view the style in
- <a href="https://www.mapbox.com/studio/">Mapbox Studio</a>.
+ <a href="https://maplibre.org/maputnik">Maputnik</a>.
 
  Only visible features are returned. To obtain features regardless of
  visibility, use the
