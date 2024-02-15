@@ -13,14 +13,7 @@ Tile::Tile(Kind kind_, OverscaledTileID id_)
       id(id_),
       observer(&nullObserver) {}
 
-Tile::~Tile() {
-#if !defined(NDEBUG)
-    if (renderThreadId && renderThreadId == std::this_thread::get_id()) {
-        Log::Warning(Event::General, "Tile destroyed on render thread");
-        assert(false);
-    }
-#endif
-}
+Tile::~Tile() = default;
 
 void Tile::setObserver(TileObserver* observer_) {
     observer = observer_;

@@ -143,10 +143,6 @@ public:
     // the map. Re-initialized at every source update.
     bool usedByRenderedLayers = false;
 
-#if !defined(NDEBUG)
-    std::optional<std::thread::id> renderThreadId;
-#endif
-
 protected:
     bool triedOptional = false;
     bool renderable = false;

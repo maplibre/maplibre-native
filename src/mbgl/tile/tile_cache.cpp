@@ -53,10 +53,6 @@ void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
 }
 
 void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {
-#if !defined(NDEBUG)
-    tile->renderThreadId = std::this_thread::get_id();
-#endif
-
     if (!tile->isRenderable() || !size) {
         deferredRelease(std::move(tile));
         return;
