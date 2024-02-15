@@ -242,7 +242,7 @@ gfx::StencilMode DrawableGL::makeStencilMode(PaintParameters& parameters) const 
 void DrawableGL::uploadTextures() const {
     for (const auto& texture : textures) {
         if (texture) {
-            static_cast<gl::Texture2D&>(*texture).upload();
+            texture->upload();
         }
     }
 }
