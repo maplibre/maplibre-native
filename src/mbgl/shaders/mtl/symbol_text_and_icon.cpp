@@ -27,8 +27,8 @@ const std::array<UniformBlockInfo, 5>
         UniformBlockInfo{13, true, false, sizeof(SymbolDrawableInterpolateUBO), idSymbolDrawableInterpolateUBO},
 };
 const std::array<TextureInfo, 2> ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_texture"},
-    TextureInfo{1, "u_texture_icon"},
+    TextureInfo{0, idSymbolImageTexture},
+    TextureInfo{1, idSymbolImageIconTexture},
 };
 
 } // namespace shaders

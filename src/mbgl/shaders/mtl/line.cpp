@@ -40,7 +40,7 @@ const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::LinePatternShader, g
     UniformBlockInfo{13, true, true, sizeof(LinePatternTilePropertiesUBO), idLinePatternTilePropertiesUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_image"},
+    TextureInfo{0, idLineImageTexture},
 };
 
 const std::array<AttributeInfo, 9> ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal>::attributes = {
@@ -61,7 +61,7 @@ const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineSDFShader, gfx::
     UniformBlockInfo{12, true, false, sizeof(LineSDFInterpolationUBO), idLineSDFInterpolationUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_image"},
+    TextureInfo{0, idLineImageTexture},
 };
 
 const std::array<AttributeInfo, 2> ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal>::attributes = {

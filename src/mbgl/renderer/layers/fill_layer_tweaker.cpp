@@ -15,7 +15,6 @@
 #include <mbgl/style/layers/fill_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/fill.hpp>
@@ -24,8 +23,6 @@
 namespace mbgl {
 
 using namespace style;
-
-static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 using namespace shaders;
 
 void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
@@ -135,12 +132,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         const int32_t pixelY = tileSizeAtNearestZoom * tileID.canonical.y;
 
         Size textureSize = {0, 0};
-        if (const auto shader = drawable.getShader()) {
-            if (const auto index = shader->getSamplerLocation(idTexImageName)) {
-                if (const auto& tex = drawable.getTexture(*index)) {
-                    textureSize = tex->getSize();
-                }
-            }
+        if (const auto& tex = drawable.getTexture(idFillImageTexture)) {
+            textureSize = tex->getSize();
         }
 
         auto& uniforms = drawable.mutableUniformBuffers();

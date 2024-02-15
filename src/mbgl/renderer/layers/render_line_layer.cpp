@@ -345,8 +345,6 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
 }
 
 #if MLN_DRAWABLE_RENDERER
-static const StringIdentity idLineImageUniformName = stringIndexer().get("u_image");
-
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
@@ -679,7 +677,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                     iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
                         atlases,
                         std::nullopt,
-                        idLineImageUniformName,
+                        idLineImageTexture,
                         /*isText*/ false,
                         /*sdfIcons*/ true, // to force linear filter
                         /*rotationAlignment_*/ AlignmentType::Auto,
@@ -727,33 +725,31 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             addAttributes(*builder, bucket, std::move(vertexAttrs));
 
             // texture
-            if (const auto samplerLocation = builder->getShader()->getSamplerLocation(idLineImageUniformName)) {
-                if (!colorRampTexture2D && colorRamp->valid()) {
-                    // create texture. to be reused for all the tiles of the layer
-                    colorRampTexture2D = context.createTexture2D();
-                    colorRampTexture2D->setImage(colorRamp);
-                    colorRampTexture2D->setSamplerConfiguration(
-                        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-                }
+            if (!colorRampTexture2D && colorRamp->valid()) {
+                // create texture. to be reused for all the tiles of the layer
+                colorRampTexture2D = context.createTexture2D();
+                colorRampTexture2D->setImage(colorRamp);
+                colorRampTexture2D->setSamplerConfiguration(
+                    {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            }
 
-                if (colorRampTexture2D) {
-                    builder->setTexture(colorRampTexture2D, samplerLocation.value());
+            if (colorRampTexture2D) {
+                builder->setTexture(colorRampTexture2D, idLineImageTexture);
 
-                    // segments
-                    setSegments(builder, bucket);
+                // segments
+                setSegments(builder, bucket);
 
-                    // finish
-                    builder->flush(context);
-                    for (auto& drawable : builder->clearDrawables()) {
-                        drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Gradient));
-                        drawable->setTileID(tileID);
-                        drawable->setLayerTweaker(layerTweaker);
-                        drawable->mutableUniformBuffers().createOrUpdate(
-                            idLineGradientInterpolationUBO, &getLineGradientInterpolationUBO(), context);
+                // finish
+                builder->flush(context);
+                for (auto& drawable : builder->clearDrawables()) {
+                    drawable->setType(mbgl::underlying_type(LineLayerTweaker::LineType::Gradient));
+                    drawable->setTileID(tileID);
+                    drawable->setLayerTweaker(layerTweaker);
+                    drawable->mutableUniformBuffers().createOrUpdate(
+                        idLineGradientInterpolationUBO, &getLineGradientInterpolationUBO(), context);
 
-                        tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.drawablesAdded;
-                    }
+                    tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                    ++stats.drawablesAdded;
                 }
             }
         } else {

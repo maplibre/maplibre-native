@@ -12,7 +12,7 @@ const std::array<UniformBlockInfo, 2> ShaderSource<BuiltIn::HillshadeShader, gfx
     UniformBlockInfo{3, false, true, sizeof(HillshadeEvaluatedPropsUBO), idHillshadeEvaluatedPropsUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_image"},
+    TextureInfo{0, idHillshadeImageTexture},
 };
 
 } // namespace shaders

@@ -14,7 +14,6 @@
 #include <mbgl/style/layers/fill_extrusion_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/fill_extrusion.hpp>
@@ -25,11 +24,6 @@ namespace mbgl {
 
 using namespace shaders;
 using namespace style;
-
-namespace {
-const StringIdentity idTexImageName = stringIndexer().get("u_image");
-
-} // namespace
 
 void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
@@ -95,12 +89,8 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         const auto heightFactor = static_cast<float>(-numTiles / util::tileSize_D / 8.0);
 
         Size textureSize = {0, 0};
-        if (const auto shader = drawable.getShader()) {
-            if (const auto index = shader->getSamplerLocation(idTexImageName)) {
-                if (const auto& tex = drawable.getTexture(*index)) {
-                    textureSize = tex->getSize();
-                }
-            }
+        if (const auto& tex = drawable.getTexture(idFillExtrusionImageTexture)) {
+            textureSize = tex->getSize();
         }
 
         const FillExtrusionDrawableUBO drawableUBO = {
