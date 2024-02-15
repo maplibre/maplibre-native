@@ -65,7 +65,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     if (!debugShader) {
         return;
     }
-    static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
     std::unique_ptr<gfx::DrawableBuilder> debugBuilder = [&]() -> std::unique_ptr<gfx::DrawableBuilder> {
         auto builder = context.createDrawableBuilder("debug-builder");
         builder->setShader(debugShader);
@@ -73,7 +72,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setEnableDepth(false);
         builder->setColorMode(gfx::ColorMode::unblended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder->setVertexAttrNameId(idVertexAttribName);
+        builder->setVertexAttrId(idDebugPosVertexAttribute);
 
         return builder;
     }();
@@ -102,7 +101,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setEnableDepth(false);
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder->setVertexAttrNameId(idVertexAttribName);
+        builder->setVertexAttrId(idLinePosNormalVertexAttribute);
 
         return builder;
     };

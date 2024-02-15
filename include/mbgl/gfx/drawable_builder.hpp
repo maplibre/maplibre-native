@@ -2,7 +2,6 @@
 
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/types.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/gfx/polyline_generator.hpp>
@@ -138,7 +137,7 @@ public:
     void setDrawableName(std::string value) { drawableName = std::move(value); }
 
     /// The attribute names for vertex/position attributes
-    void setVertexAttrNameId(const StringIdentity id) { vertexAttrNameId = id; }
+    void setVertexAttrId(const size_t id) { vertexAttrId = id; }
 
     /// @brief Get the texture at the given internal ID.
     const gfx::Texture2DPtr& getTexture(size_t id) const;
@@ -216,7 +215,7 @@ protected:
 protected:
     std::string name;
     std::string drawableName;
-    StringIdentity vertexAttrNameId;
+    std::size_t vertexAttrId;
     mbgl::RenderPass renderPass;
     bool enabled = true;
     bool enableColor = true;

@@ -246,11 +246,6 @@ void RenderRasterLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeReq
     changeLayerIndex(imageLayerGroup, newLayerIndex, changes);
 }
 
-static const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
-static const StringIdentity idTexturePosAttribName = stringIndexer().get("a_texture_pos");
-static const StringIdentity idTexImage0Name = stringIndexer().get("u_image0");
-static const StringIdentity idTexImage1Name = stringIndexer().get("u_image1");
-
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
@@ -307,7 +302,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         builder->setDepthType(gfx::DepthMaskType::ReadOnly);
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder->setVertexAttrNameId(idPosAttribName);
         return builder;
     };
 
@@ -360,7 +354,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             if (!vertexAttrs) {
                 vertexAttrs = context.createVertexAttributeArray();
 
-                if (auto& attr = vertexAttrs->add(idPosAttribName)) {
+                if (auto& attr = vertexAttrs->set(idRasterPosVertexAttribute)) {
                     attr->setSharedRawData(vertices,
                                            offsetof(RasterLayoutVertex, a1),
                                            /*vertexOffset=*/0,
@@ -368,7 +362,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                            gfx::AttributeDataType::Short2);
                 }
 
-                if (auto& attr = vertexAttrs->add(idTexturePosAttribName)) {
+                if (auto& attr = vertexAttrs->set(idRasterTexturePosVertexAttribute)) {
                     attr->setSharedRawData(vertices,
                                            offsetof(RasterLayoutVertex, a2),
                                            /*vertexOffset=*/0,

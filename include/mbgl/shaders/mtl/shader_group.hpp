@@ -48,7 +48,7 @@ public:
     ~ShaderGroup() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& gfxContext,
-                                     const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms,
+                                     const mbgl::unordered_set<size_t>& propertiesAsUniforms,
                                      std::string_view /*firstAttribName*/) override {
         using ShaderSource = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
         constexpr auto& name = ShaderSource::name;
@@ -78,7 +78,7 @@ public:
 
             using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Metal>;
             for (const auto& attrib : ShaderClass::attributes) {
-                if (!propertiesAsUniforms.count(attrib.nameID)) {
+                if (!propertiesAsUniforms.count(attrib.id)) {
                     shader->initAttribute(attrib);
                 }
             }

@@ -22,7 +22,6 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #endif
 
 namespace mbgl {
@@ -264,7 +263,6 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 namespace {
 
 constexpr auto CircleShaderGroupName = "CircleShader";
-const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
 
 } // namespace
 
@@ -380,15 +378,12 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                                          CircleStrokeOpacity>(
             paintPropertyBinders, evaluated, propertiesAsUniforms);
 
-        if (!circleShaderGroup) {
-            continue;
-        }
         const auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         if (!circleShader) {
             continue;
         }
 
-        if (const auto& attr = circleVertexAttrs->add(idVertexAttribName)) {
+        if (const auto& attr = circleVertexAttrs->set(idCirclePosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(CircleLayoutVertex, a1),
                                    0,

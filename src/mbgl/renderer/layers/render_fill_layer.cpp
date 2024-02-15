@@ -49,8 +49,6 @@ constexpr auto FillOutlineTriangulatedShaderName = "LineBasicShader";
 constexpr auto FillOutlineShaderName = "FillOutlineShader";
 constexpr auto FillPatternShaderName = "FillPatternShader";
 constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
-
-const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
 #endif // MLN_DRAWABLE_RENDERER
 
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
@@ -618,7 +616,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             binders, evaluated, propertiesAsUniforms);
 
         const auto vertexCount = bucket.vertices.elements();
-        if (const auto& attr = vertexAttrs->add(idPosAttribName)) {
+        if (const auto& attr = vertexAttrs->set(idFillPosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillLayoutVertex, a1),
                                    /*vertexOffset=*/0,
@@ -696,21 +694,18 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             auto createOutline = [&](auto& builder, Color color, float opacity) {
                 if (doOutline && builder && bucket.sharedLineIndexes->elements()) {
-                    static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos_normal");
-                    static const StringIdentity idDataAttribName = stringIndexer().get("a_data");
-                    builder->setVertexAttrNameId(idVertexAttribName);
                     builder->setShader(outlineTriangulatedShader);
                     builder->setRawVertices({}, bucket.lineVertices.elements(), gfx::AttributeDataType::Short2);
-
+                    
                     auto attrs = context.createVertexAttributeArray();
-                    if (const auto& attr = attrs->add(idVertexAttribName)) {
+                    if (const auto& attr = attrs->set(idLinePosNormalVertexAttribute)) {
                         attr->setSharedRawData(bucket.sharedLineVertices,
                                                offsetof(LineLayoutVertex, a1),
                                                /*vertexOffset=*/0,
                                                sizeof(LineLayoutVertex),
                                                gfx::AttributeDataType::Short2);
                     }
-                    if (const auto& attr = attrs->add(idDataAttribName)) {
+                    if (const auto& attr = attrs->set(idLineDataVertexAttribute)) {
                         attr->setSharedRawData(bucket.sharedLineVertices,
                                                offsetof(LineLayoutVertex, a2),
                                                /*vertexOffset=*/0,
@@ -772,7 +767,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                     const size_t interpolateUBOId,
                                     const auto& interpolateUBO,
                                     FillVariant type) {
-                builder.setVertexAttrNameId(idPosAttribName);
                 builder.flush(context);
 
                 for (auto& drawable : builder.clearDrawables()) {
@@ -899,7 +893,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             const auto finish = [&](gfx::DrawableBuilder& builder,
-                                    const StringIdentity interpolateNameId,
+                                    const size_t interpolateNameId,
                                     const auto& interpolateUBO,
                                     const size_t tileUBOId,
                                     const auto& tileUBO,

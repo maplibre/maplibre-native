@@ -38,12 +38,6 @@ using namespace shaders;
 
 namespace {
 
-#if MLN_DRAWABLE_RENDERER
-const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
-const StringIdentity idNormAttribName = stringIndexer().get("a_normal_ed");
-
-#endif // MLN_DRAWABLE_RENDERER
-
 inline const FillExtrusionLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == FillExtrusionLayer::Impl::staticTypeInfo());
     return static_cast<const FillExtrusionLayer::Impl&>(*impl);
@@ -473,14 +467,14 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        if (const auto& attr = vertexAttrs->add(idPosAttribName)) {
+        if (const auto& attr = vertexAttrs->set(idFillExtrusionPosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a1),
                                    /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        if (const auto& attr = vertexAttrs->add(idNormAttribName)) {
+        if (const auto& attr = vertexAttrs->set(idFillExtrusionNormalEdVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a2),
                                    /*vertexOffset=*/0,

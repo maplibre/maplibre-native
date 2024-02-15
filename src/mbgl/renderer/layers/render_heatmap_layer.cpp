@@ -278,8 +278,6 @@ namespace {
 constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
 
-const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
-
 } // namespace
 
 using namespace shaders;
@@ -437,7 +435,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        if (const auto& attr = heatmapVertexAttrs->add(idVertexAttribName)) {
+        if (const auto& attr = heatmapVertexAttrs->set(idHeatmapPosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(HeatmapLayoutVertex, a1),
                                    /*vertexOffset=*/0,
@@ -507,7 +505,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     const auto textureVertexCount = sharedTextureVertices->elements();
 
     auto textureVertexAttrs = context.createVertexAttributeArray();
-    if (const auto& attr = textureVertexAttrs->add(idVertexAttribName)) {
+    if (const auto& attr = textureVertexAttrs->set(idHeatmapPosVertexAttribute)) {
         attr->setSharedRawData(sharedTextureVertices,
                                offsetof(HeatmapLayoutVertex, a1),
                                /*vertexOffset=*/0,

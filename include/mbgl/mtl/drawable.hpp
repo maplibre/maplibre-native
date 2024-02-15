@@ -4,7 +4,6 @@
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/mtl/upload_pass.hpp>
 #include <mbgl/programs/segment.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <memory>
 
@@ -44,7 +43,7 @@ public:
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
 
-    void setVertexAttrNameId(const StringIdentity);
+    void setVertexAttrId(const size_t);
 
     void upload(gfx::UploadPass&);
 
