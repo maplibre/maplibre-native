@@ -408,7 +408,7 @@ void Drawable::unbindTextures(RenderPass& renderPass) const noexcept {
 void Drawable::uploadTextures(UploadPass&) const noexcept {
     for (const auto& texture : textures) {
         if (texture) {
-            static_cast<mtl::Texture2D&>(*texture).upload();
+            texture->upload();
         }
     }
 }
