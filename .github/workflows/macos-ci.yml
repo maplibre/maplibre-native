@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - opengl-2
+      - macos-*.*.x
     tags:
       - 'macos-*'
     paths:
