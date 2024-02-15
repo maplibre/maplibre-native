@@ -995,7 +995,6 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/shaders/shader_program_base.hpp",
     "include/mbgl/shaders/symbol_layer_ubo.hpp",
     "include/mbgl/shaders/ubo_max_count.hpp",
-    "include/mbgl/util/identity.hpp",
     "include/mbgl/util/suppress_copies.hpp",
     "include/mbgl/style/layers/custom_drawable_layer.hpp",
     "include/mbgl/layermanager/custom_drawable_layer_factory.hpp",
