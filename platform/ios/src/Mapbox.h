@@ -46,9 +46,6 @@ FOUNDATION_EXPORT MLN_EXPORT const unsigned char MapboxVersionString[];
 #import "MLNOfflinePack.h"
 #import "MLNOfflineRegion.h"
 #import "MLNOfflineStorage.h"
-#if !MLN_RENDER_BACKEND_METAL
-#import "MLNOpenGLStyleLayer.h"
-#endif
 #import "MLNOverlay.h"
 #import "MLNPointAnnotation.h"
 #import "MLNPointCollection.h"
@@ -77,6 +74,4 @@ FOUNDATION_EXPORT MLN_EXPORT const unsigned char MapboxVersionString[];
 #import "NSPredicate+MLNAdditions.h"
 #import "NSValue+MLNAdditions.h"
 #import "MLNUserLocationAnnotationViewStyle.h"
-#if defined(MLN_DRAWABLE_RENDERER) || defined(MLN_RENDER_BACKEND_METAL)
 #import "MLNCustomDrawableStyleLayer.h"
-#endif

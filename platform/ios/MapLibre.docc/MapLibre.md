@@ -15,7 +15,11 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 
 ### Map
 
+- ``MLNSettings``
+- ``MLNMapCamera``
+- ``MLNMapViewDelegate``
 - ``MLNMapView``
+- ``MLNUserTrackingMode``
 
 ### Style Layers
 
