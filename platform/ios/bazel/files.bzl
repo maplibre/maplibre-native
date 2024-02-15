@@ -14,6 +14,7 @@ MLN_IOS_SDK_HEADERS = [
 ]
 
 MLN_IOS_PUBLIC_HEADERS = [
+    "src/Mapbox.h",
 ]
 
 MLN_IOS_PRIVATE_HEADERS = [

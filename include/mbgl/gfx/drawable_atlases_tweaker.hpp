@@ -12,8 +12,9 @@ namespace mbgl {
 class TileAtlasTextures;
 using TileAtlasTexturesPtr = std::shared_ptr<TileAtlasTextures>;
 
-namespace gfx {
+class PaintParameters;
 
+namespace gfx {
 class Drawable;
 
 /**

@@ -4,6 +4,7 @@
 #include <mbgl/renderer/layers/render_custom_drawable_layer.hpp>
 #include <mbgl/style/layer_observer.hpp>
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>

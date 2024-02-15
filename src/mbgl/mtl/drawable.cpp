@@ -481,6 +481,9 @@ MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) noexcept {
 } // namespace
 
 void Drawable::upload(gfx::UploadPass& uploadPass_) {
+    if (isCustom) {
+        return;
+    }
     if (!shader) {
         Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
         assert(false);

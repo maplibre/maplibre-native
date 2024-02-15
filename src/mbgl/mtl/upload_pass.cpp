@@ -19,9 +19,7 @@ UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncod
     : commandEncoder(commandEncoder_) {
     auto& resource = renderable.getResource<RenderableResource>();
 
-    if (!resource.getCommandBuffer()) {
-        resource.bind();
-    }
+    resource.bind();
 
     if (const auto& buffer_ = resource.getCommandBuffer()) {
         buffer = buffer_;
