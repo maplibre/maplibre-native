@@ -52,8 +52,10 @@ public:
             commandQueue = [mtlView.device newCommandQueue];
         }
 
-        commandBuffer = [commandQueue commandBuffer];
-        commandBufferPtr = NS::RetainPtr((__bridge MTL::CommandBuffer*)commandBuffer);
+        if (!commandBuffer) {
+            commandBuffer = [commandQueue commandBuffer];
+            commandBufferPtr = NS::RetainPtr((__bridge MTL::CommandBuffer*)commandBuffer);
+        }
     }
 
     const mbgl::mtl::RendererBackend& getBackend() const override { return backend; }
@@ -227,4 +229,15 @@ void MLNMapViewMetalImpl::layoutChanged() {
     const auto scaleFactor = contentScaleFactor();
     size = { static_cast<uint32_t>(mapView.bounds.size.width * scaleFactor),
              static_cast<uint32_t>(mapView.bounds.size.height * scaleFactor) };
+}
+
+MLNBackendResource MLNMapViewMetalImpl::getObject() {
+    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+    auto renderPassDescriptor = resource.getRenderPassDescriptor().get();
+    return {
+        resource.mtlView,
+        resource.mtlView.device,
+        [MTLRenderPassDescriptor renderPassDescriptor],
+        resource.commandBuffer
+    };
 }

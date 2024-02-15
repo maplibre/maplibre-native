@@ -12,11 +12,6 @@ objc_library(
         "//platform/ios:ios_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
     ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objcpp_opengl_srcs",
-        ],
-    }) + select({
         "//:legacy_renderer": [],
         "//conditions:default": [
             "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
@@ -193,13 +188,9 @@ objc_library(
     name = "iosapp",
     srcs = [
         "//platform/ios:ios_app_srcs",
-    ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:app/LimeGreenStyleLayer.h",
-            "//platform/darwin:app/LimeGreenStyleLayer.m",
-        ],
-    }),
+        "//platform/darwin:app/CustomStyleLayerExample.h",
+        "//platform/darwin:app/CustomStyleLayerExample.m",
+    ],
     defines = ["GLES_SILENCE_DEPRECATION"],
     includes = [
         "darwin/app",
@@ -211,7 +202,7 @@ objc_library(
             "MetalKit",
         ],
         "//conditions:default": [
-            "GLKit",  # needed for LimeGreenStyleLayer
+            "GLKit",  # needed for CustomStyleLayerExample
         ],
     }),
     visibility = ["//visibility:public"],

@@ -3,6 +3,9 @@
 #include <mbgl/renderer/layer_group.hpp>
 
 namespace mbgl {
+
+class PaintParameters;
+
 namespace mtl {
 
 /**

@@ -2,6 +2,8 @@
 #import <mbgl/map/map_observer.hpp>
 #import <mbgl/util/image.hpp>
 
+#import "MLNBackendResource.h"
+
 #import <UIKit/UIView.h>
 #import <UIKit/UIImage.h>
 #import <QuartzCore/CALayer.h>
@@ -53,6 +55,8 @@ public:
 
     // Called by the view delegate when it's time to render.
     void render();
+
+    virtual MLNBackendResource getObject() = 0;
 
     // mbgl::MapObserver implementation
     void onCameraWillChange(mbgl::MapObserver::CameraChangeMode) override;

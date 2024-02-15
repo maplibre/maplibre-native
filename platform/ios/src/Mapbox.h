@@ -46,6 +46,7 @@ FOUNDATION_EXPORT MLN_EXPORT const unsigned char MapboxVersionString[];
 #import "MLNOfflinePack.h"
 #import "MLNOfflineRegion.h"
 #import "MLNOfflineStorage.h"
+#import "MLNCustomStyleLayer.h"
 #import "MLNOverlay.h"
 #import "MLNPointAnnotation.h"
 #import "MLNPointCollection.h"
