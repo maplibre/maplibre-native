@@ -171,7 +171,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     uint32_t vertexStride = 0;
 
     // For each attribute in the program, with the corresponding default and optional override...
-    const auto resolveAttr = [&](auto& default_, auto& override_) -> void {
+    const auto resolveAttr = [&](const size_t id, auto& default_, auto& override_) -> void {
         auto& effectiveAttr = override_ ? *override_ : default_;
         const auto& defaultAttr = static_cast<const VertexAttribute&>(default_);
         const auto stride = defaultAttr.getStride();
