@@ -8,6 +8,9 @@
 #include <optional>
 
 namespace mbgl {
+
+class PaintParameters;
+
 namespace mtl {
 
 /**

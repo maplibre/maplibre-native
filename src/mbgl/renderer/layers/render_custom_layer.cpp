@@ -12,6 +12,7 @@
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
+#include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 #endif
 
 #if MLN_DRAWABLE_RENDERER
@@ -86,7 +87,6 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
 
     // TODO: remove cast
     auto& glContext = static_cast<gl::Context&>(paintParameters.context);
-    const TransformState& state = paintParameters.state;
 
     // Reset GL state to a known state so the CustomLayer always has a clean slate.
     glContext.bindVertexArray = 0;
@@ -95,21 +95,7 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
     glContext.setColorMode(paintParameters.colorModeForRenderPass());
     glContext.setCullFaceMode(gfx::CullFaceMode::disabled());
 
-    CustomLayerRenderParameters parameters;
-
-    parameters.width = state.getSize().width;
-    parameters.height = state.getSize().height;
-    parameters.latitude = state.getLatLng().latitude();
-    parameters.longitude = state.getLatLng().longitude();
-    parameters.zoom = state.getZoom();
-    parameters.bearing = util::rad2deg(-state.getBearing());
-    parameters.pitch = state.getPitch();
-    parameters.fieldOfView = state.getFieldOfView();
-    mat4 projMatrix;
-    state.getProjMatrix(projMatrix);
-    parameters.projectionMatrix = projMatrix;
-
-    MBGL_CHECK_ERROR(host->render(parameters));
+    MBGL_CHECK_ERROR(host->render(CustomLayerRenderParameters(paintParameters)));
 
     // Reset the view back to our original one, just in case the CustomLayer
     // changed the viewport or Framebuffer.
