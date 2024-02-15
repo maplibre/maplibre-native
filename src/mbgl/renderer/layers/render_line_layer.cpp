@@ -422,7 +422,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
     tileLayerGroup->setStencilTiles(renderTiles);
 
-    mbgl::unordered_set<size_t> propertiesAsUniforms;
+    StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -583,7 +583,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
         
 
-        propertiesAsUniforms.clear();
+        propertiesAsUniforms.first.clear();
+        propertiesAsUniforms.second.clear();
+        
         auto vertexAttrs = context.createVertexAttributeArray();
         vertexAttrs->readDataDrivenPaintProperties<LineColor,
                                                    LineBlur,
@@ -593,7 +595,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                    LineWidth,
                                                    LineFloorWidth,
                                                    LinePattern>(
-            paintPropertyBinders, evaluated, propertiesAsUniforms);
+            paintPropertyBinders, evaluated, propertiesAsUniforms, idLineColorVertexAttribute);
         
         if (!evaluated.get<LineDasharray>().from.empty()) {
             // dash array line (SDF)

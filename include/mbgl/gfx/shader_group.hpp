@@ -13,7 +13,7 @@
 
 namespace mbgl {
 
-using StringIdentity = std::size_t;
+using StringIDSetsPair = std::pair<unordered_set<std::string_view>, unordered_set<size_t>>;
 
 namespace gfx {
 
@@ -149,7 +149,7 @@ public:
     /// @return A `gfx::ShaderPtr`
     virtual gfx::ShaderPtr getOrCreateShader(
         gfx::Context&,
-        [[maybe_unused]] const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms,
+        [[maybe_unused]] const StringIDSetsPair& propertiesAsUniforms,
         [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
         return {};
     }
@@ -162,9 +162,9 @@ protected:
     }
 
     /// Generate a map key for the specified combination of properties
-    PropertyHashType propertyHash(const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
-        const auto beg = propertiesAsUniforms.cbegin();
-        const auto end = propertiesAsUniforms.cend();
+    PropertyHashType propertyHash(const StringIDSetsPair& propertiesAsUniforms) {
+        const auto beg = propertiesAsUniforms.second.cbegin();
+        const auto end = propertiesAsUniforms.second.cend();
         return util::order_independent_hash<decltype(beg), PropertyHashType>(beg, end);
     }
 

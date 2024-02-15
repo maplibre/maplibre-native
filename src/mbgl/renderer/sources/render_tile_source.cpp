@@ -13,12 +13,12 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/shaders/debug_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/tile/geojson_tile_data.hpp>
 #include <mbgl/gfx/polyline_generator.hpp>
 #include <mbgl/style/types.hpp>
@@ -82,13 +82,23 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     gfx::ShaderPtr polylineShader;
     const auto createPolylineShader = [&]() -> gfx::ShaderPtr {
         gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("LineShader");
-        const mbgl::unordered_set<StringIdentity> propertiesAsUniforms{
-            stringIndexer().get("a_color"),
-            stringIndexer().get("a_blur"),
-            stringIndexer().get("a_opacity"),
-            stringIndexer().get("a_gapwidth"),
-            stringIndexer().get("a_offset"),
-            stringIndexer().get("a_width"),
+        const StringIDSetsPair propertiesAsUniforms{
+            {
+                "a_color",
+                "a_blur",
+                "a_opacity",
+                "a_gapwidth",
+                "a_offset",
+                "a_width"
+            },
+            {
+                idLineColorVertexAttribute,
+                idLineBlurVertexAttribute,
+                idLineOpacityVertexAttribute,
+                idLineGapWidthVertexAttribute,
+                idLineOffsetVertexAttribute,
+                idLineWidthVertexAttribute
+            }
         };
         return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
     };

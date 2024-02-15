@@ -9,7 +9,6 @@
 #include <mbgl/shaders/heatmap_texture_layer_ubo.hpp>
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 

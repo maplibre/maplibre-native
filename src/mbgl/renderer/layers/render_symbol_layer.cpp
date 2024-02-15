@@ -767,7 +767,7 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const SymbolBucket::PaintProperties& paintProps,
                           const SymbolPaintProperties::PossiblyEvaluated& evaluated,
                           gfx::VertexAttributeArray& attribs,
-                          mbgl::unordered_set<StringIdentity>* propertiesAsUniforms) {
+                          StringIDSetsPair* propertiesAsUniforms) {
     if (const auto& attr = attribs.set(idSymbolPosOffsetVertexAttribute)) {
         attr->setSharedRawData(buffer.sharedVertices,
                                offsetof(SymbolLayoutVertex, a1),
@@ -809,10 +809,10 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
 
     if (isText) {
         attribs.readDataDrivenPaintProperties<TextOpacity, TextColor, TextHaloColor, TextHaloWidth, TextHaloBlur>(
-            paintProps.textBinders, evaluated, propertiesAsUniforms);
+            paintProps.textBinders, evaluated, propertiesAsUniforms, idSymbolOpacityVertexAttribute);
     } else {
         attribs.readDataDrivenPaintProperties<IconOpacity, IconColor, IconHaloColor, IconHaloWidth, IconHaloBlur>(
-            paintProps.iconBinders, evaluated, propertiesAsUniforms);
+            paintProps.iconBinders, evaluated, propertiesAsUniforms, idSymbolOpacityVertexAttribute);
     }
 }
 
@@ -1052,7 +1052,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     collisionBuilder->setColorMode(gfx::ColorMode::alphaBlended());
     collisionBuilder->setVertexAttrId(idCollisionPosVertexAttribute);
 
-    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
+    StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -1143,7 +1143,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 return false;
             }
 
-            propertiesAsUniforms.clear();
+            propertiesAsUniforms.first.clear();
+            propertiesAsUniforms.second.clear();
 
             const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
             updateTileDrawable(
@@ -1242,7 +1243,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto vertexCount = buffer.vertices().elements();
 
-        propertiesAsUniforms.clear();
+        propertiesAsUniforms.first.clear();
+        propertiesAsUniforms.second.clear();
+        
         auto attribs = context.createVertexAttributeArray();
         updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *attribs, &propertiesAsUniforms);
 

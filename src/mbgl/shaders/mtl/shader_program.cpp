@@ -10,7 +10,6 @@
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <Metal/MTLLibrary.hpp>
 #include <Metal/MTLRenderPass.hpp>

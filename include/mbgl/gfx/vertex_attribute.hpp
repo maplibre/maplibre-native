@@ -2,7 +2,6 @@
 
 #include <mbgl/gfx/gfx_types.hpp>
 #include <mbgl/renderer/paint_property_binder.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/util/containers.hpp>
 
 #include <algorithm>
@@ -33,6 +32,7 @@ class VertexAttributeArray;
 class VertexVectorBase;
 
 using UniqueVertexAttribute = std::unique_ptr<VertexAttribute>;
+using StringIDSetsPair = std::pair<unordered_set<std::string_view>, unordered_set<size_t>>;
 
 class VertexAttribute {
 public:
@@ -359,14 +359,18 @@ public:
     template <typename... DataDrivenPaintProperty, typename Binders, typename Evaluated>
     void readDataDrivenPaintProperties(const Binders& binders,
                                        const Evaluated& evaluated,
-                                       mbgl::unordered_set<StringIdentity>* propertiesAsUniforms) {
+                                       StringIDSetsPair* propertiesAsUniforms,
+                                       const size_t firstDataDrivenAttrId) {
         // Read each property in the type pack
         if (propertiesAsUniforms) {
-            propertiesAsUniforms->reserve(sizeof...(DataDrivenPaintProperty));
+            propertiesAsUniforms->first.reserve(sizeof...(DataDrivenPaintProperty));
+            propertiesAsUniforms->second.reserve(sizeof...(DataDrivenPaintProperty));
         }
+        size_t dataDrivenAttrId = firstDataDrivenAttrId;
         (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
                                                               isConstant<DataDrivenPaintProperty>(evaluated),
-                                                              propertiesAsUniforms),
+                                                              propertiesAsUniforms,
+                                                              dataDrivenAttrId),
          ...);
     }
 
@@ -379,12 +383,17 @@ public:
     template <typename... DataDrivenPaintProperty, typename Binders, typename Evaluated>
     void readDataDrivenPaintProperties(const Binders& binders,
                                        const Evaluated& evaluated,
-                                       mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                                       StringIDSetsPair& propertiesAsUniforms,
+                                       const size_t firstDataDrivenAttrId) {
         // Read each property in the type pack
-        propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
+        propertiesAsUniforms.first.reserve(sizeof...(DataDrivenPaintProperty));
+        propertiesAsUniforms.second.reserve(sizeof...(DataDrivenPaintProperty));
+        
+        size_t dataDrivenAttrId = firstDataDrivenAttrId;
         (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
                                                               isConstant<DataDrivenPaintProperty>(evaluated),
-                                                              &propertiesAsUniforms),
+                                                              &propertiesAsUniforms,
+                                                              dataDrivenAttrId),
          ...);
     }
 
@@ -398,28 +407,31 @@ protected:
     template <typename DataDrivenPaintProperty, typename Binder>
     void readDataDrivenPaintProperty(const Binder& binder,
                                      const bool isConstant,
-                                     mbgl::unordered_set<StringIdentity>* propertiesAsUniforms) {
+                                     StringIDSetsPair* propertiesAsUniforms,
+                                     size_t& dataDrivenAttrId) {
         if (!binder) {
             return;
         }
 
         // Consider each attribute name in the attribute (e.g., pattern_from, pattern_to)
         for (std::size_t attrIndex = 0; attrIndex < DataDrivenPaintProperty::AttributeNames.size(); ++attrIndex) {
-            auto& attributeNameID = DataDrivenPaintProperty::AttributeNameIDs[attrIndex];
+            const auto& attributeName = DataDrivenPaintProperty::AttributeNames[attrIndex];
+            /*auto& attributeNameID = DataDrivenPaintProperty::AttributeNameIDs[attrIndex];
             if (!attributeNameID) {
                 const auto& attributeName = DataDrivenPaintProperty::AttributeNames[attrIndex];
                 attributeNameID = stringIndexer().get(attributePrefix + attributeName.data());
-            }
+            }*/
 
             // Apply the property, or add it to the uniforms collection if it's constant.
             if (!isConstant && binder->getVertexCount() > 0) {
                 using Attribute = typename DataDrivenPaintProperty::Attribute;
-                if(const auto& attr = set(*attributeNameID)) {
+                if(const auto& attr = set(dataDrivenAttrId)) {
                     applyPaintProperty<Attribute>(attrIndex, attr, binder);
                 }
             } else if (propertiesAsUniforms) {
-                propertiesAsUniforms->emplace(*attributeNameID);
+                propertiesAsUniforms->first.emplace(attributeName);
             }
+            dataDrivenAttrId++;
         }
     }
 

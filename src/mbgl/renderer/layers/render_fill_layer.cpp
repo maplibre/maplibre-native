@@ -30,7 +30,6 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/shaders/line_layer_ubo.hpp>
 #endif
 
@@ -479,7 +478,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     fillTileLayerGroup->setStencilTiles(renderTiles);
 
-    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
+    StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -608,12 +607,13 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return atlasTweaker;
         };
 
-        propertiesAsUniforms.clear();
+        propertiesAsUniforms.first.clear();
+        propertiesAsUniforms.second.clear();
 
         // `Fill*Program` all use `style::FillPaintProperties`
         auto vertexAttrs = context.createVertexAttributeArray();
         vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
-            binders, evaluated, propertiesAsUniforms);
+            binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
 
         const auto vertexCount = bucket.vertices.elements();
         if (const auto& attr = vertexAttrs->set(idFillPosVertexAttribute)) {
@@ -682,10 +682,17 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
             const auto outlineTriangulatedShader = doOutline && !dataDrivenOutline ? [&]() -> auto {
-                static const mbgl::unordered_set<StringIdentity> outlinePropertiesAsUniforms{
-                    stringIndexer().get("a_color"),
-                    stringIndexer().get("a_opacity"),
-                    stringIndexer().get("a_width"),
+                static const StringIDSetsPair outlinePropertiesAsUniforms{
+                    {
+                        "a_color",
+                        "a_opacity",
+                        "a_width"
+                    },
+                    {
+                        idLineColorVertexAttribute,
+                        idLineOpacityVertexAttribute,
+                        idLineWidthVertexAttribute
+                    }
                 };
                 return std::static_pointer_cast<gfx::ShaderProgramBase>(
                     outlineTriangulatedShaderGroup->getOrCreateShader(context, outlinePropertiesAsUniforms));

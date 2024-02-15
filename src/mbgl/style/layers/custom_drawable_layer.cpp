@@ -12,7 +12,6 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/shaders/line_layer_ubo.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/programs/fill_program.hpp>
@@ -319,13 +318,23 @@ void CustomDrawableLayerHost::Interface::finish() {
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
     gfx::ShaderGroupPtr lineShaderGroup = shaders.getShaderGroup("LineShader");
 
-    const mbgl::unordered_set<StringIdentity> propertiesAsUniforms{
-        stringIndexer().get("a_color"),
-        stringIndexer().get("a_blur"),
-        stringIndexer().get("a_opacity"),
-        stringIndexer().get("a_gapwidth"),
-        stringIndexer().get("a_offset"),
-        stringIndexer().get("a_width"),
+    const StringIDSetsPair propertiesAsUniforms{
+        {
+            "a_color",
+            "a_blur",
+            "a_opacity",
+            "a_gapwidth",
+            "a_offset",
+            "a_width"
+        },
+        {
+            idLineColorVertexAttribute,
+            idLineBlurVertexAttribute,
+            idLineOpacityVertexAttribute,
+            idLineGapWidthVertexAttribute,
+            idLineOffsetVertexAttribute,
+            idLineWidthVertexAttribute
+        }
     };
 
     return lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
@@ -334,9 +343,15 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {
     gfx::ShaderGroupPtr fillShaderGroup = shaders.getShaderGroup("FillShader");
 
-    const mbgl::unordered_set<StringIdentity> propertiesAsUniforms{
-        stringIndexer().get("a_color"),
-        stringIndexer().get("a_opacity"),
+    const StringIDSetsPair propertiesAsUniforms {
+        {
+            "a_color",
+            "a_opacity"
+        },
+        {
+            idFillColorVertexAttribute,
+            idFillOpacityVertexAttribute
+        }
     };
 
     return fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms);

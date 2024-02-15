@@ -332,7 +332,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
     tileLayerGroup->setStencilTiles(renderTiles);
 
-    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
+    StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -402,13 +402,15 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        propertiesAsUniforms.clear();
+        propertiesAsUniforms.first.clear();
+        propertiesAsUniforms.second.clear();
 
         auto vertexAttrs = context.createVertexAttributeArray();
         vertexAttrs->readDataDrivenPaintProperties<FillExtrusionBase,
                                                    FillExtrusionColor,
                                                    FillExtrusionHeight,
-                                                   FillExtrusionPattern>(binders, evaluated, propertiesAsUniforms);
+                                                   FillExtrusionPattern>(
+            binders, evaluated, propertiesAsUniforms, idFillExtrusionBaseVertexAttribute);
 
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
             shaderGroup->getOrCreateShader(context, propertiesAsUniforms));

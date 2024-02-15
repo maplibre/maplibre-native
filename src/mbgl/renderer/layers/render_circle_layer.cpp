@@ -314,7 +314,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
-    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
+    StringIDSetsPair propertiesAsUniforms;
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -367,7 +367,9 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
 
-        propertiesAsUniforms.clear();
+        propertiesAsUniforms.first.clear();
+        propertiesAsUniforms.second.clear();
+
         auto circleVertexAttrs = context.createVertexAttributeArray();
         circleVertexAttrs->readDataDrivenPaintProperties<CircleColor,
                                                          CircleRadius,
@@ -376,7 +378,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                                          CircleStrokeColor,
                                                          CircleStrokeWidth,
                                                          CircleStrokeOpacity>(
-            paintPropertyBinders, evaluated, propertiesAsUniforms);
+            paintPropertyBinders, evaluated, propertiesAsUniforms, idCircleColorVertexAttribute);
 
         const auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         if (!circleShader) {
