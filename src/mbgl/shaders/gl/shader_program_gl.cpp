@@ -71,8 +71,7 @@ gfx::AttributeDataType mapType(platform::GLenum attrType) {
 
 using namespace platform;
 
-void addAttr(
-    VertexAttributeArrayGL& attrs, const size_t id, GLint index, GLsizei length, GLint count, GLenum glType) {
+void addAttr(VertexAttributeArrayGL& attrs, const size_t id, GLint index, GLsizei length, GLint count, GLenum glType) {
     const auto elementType = mapType(glType);
     if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
         if (const auto& newAttr = attrs.set(id, index, elementType, count)) {
@@ -156,7 +155,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
             samplerLocations[textureInfo.id] = location;
         }
     }
-        
+
     VertexAttributeArrayGL attrs;
     GLint count = 0;
     GLint maxLength = 0;

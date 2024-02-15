@@ -1093,7 +1093,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             if (hasCollisionBox) {
                 const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
-                if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(collisionBoxGroup->getOrCreateShader(context, {}))) {
+                if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                        collisionBoxGroup->getOrCreateShader(context, {}))) {
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "box");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionBox->vertices().vector());
@@ -1108,7 +1109,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
             if (hasCollisionCircle) {
                 const auto& collisionCircle = isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle;
-                if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(collisionCircleGroup->getOrCreateShader(context, {}))) {
+                if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                        collisionCircleGroup->getOrCreateShader(context, {}))) {
                     collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "circle");
                     collisionBuilder->setShader(shader);
                     addVertices(collisionCircle->vertices().vector());
@@ -1244,7 +1246,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         propertiesAsUniforms.first.clear();
         propertiesAsUniforms.second.clear();
-        
+
         auto attribs = context.createVertexAttributeArray();
         updateTileAttributes(buffer, isText, bucketPaintProperties, evaluated, *attribs, &propertiesAsUniforms);
 

@@ -122,7 +122,7 @@ std::size_t VertexAttributeArray::getMaxCount() const {
 }
 
 void VertexAttributeArray::clear() {
-    for(auto& attr: attrs) {
+    for (auto& attr : attrs) {
         attr = nullptr;
     }
 }

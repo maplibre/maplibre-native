@@ -29,8 +29,9 @@ const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::BackgroundShader, gfx::B
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::BackgroundShader, gfx::Backend::Type::OpenGL>::textures = {};
 
 // Background Pattern
-const std::vector<AttributeInfo> ShaderInfo<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::OpenGL>::attributes = {
-    AttributeInfo{"a_pos", idBackgroundPosVertexAttribute},
+const std::vector<AttributeInfo> ShaderInfo<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::OpenGL>::attributes =
+    {
+        AttributeInfo{"a_pos", idBackgroundPosVertexAttribute},
 };
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
@@ -144,11 +145,12 @@ const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillPatternShader, gfx::Backe
 };
 
 // Fill Outline Pattern
-const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::OpenGL>::attributes = {
-    AttributeInfo{"a_pos", idFillPosVertexAttribute},
-    AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
-    AttributeInfo{"a_pattern_from", idFillPatternFromVertexAttribute},
-    AttributeInfo{"a_pattern_to", idFillPatternToVertexAttribute},
+const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::OpenGL>::attributes =
+    {
+        AttributeInfo{"a_pos", idFillPosVertexAttribute},
+        AttributeInfo{"a_opacity", idFillOpacityVertexAttribute},
+        AttributeInfo{"a_pattern_from", idFillPatternFromVertexAttribute},
+        AttributeInfo{"a_pattern_to", idFillPatternToVertexAttribute},
 };
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
@@ -179,13 +181,14 @@ const std::vector<UniformBlockInfo>
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL>::textures = {};
 
 // Fill Extrusion Pattern
-const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::OpenGL>::attributes = {
-    AttributeInfo{"a_pos", idFillExtrusionPosVertexAttribute},
-    AttributeInfo{"a_normal_ed", idFillExtrusionNormalEdVertexAttribute},
-    AttributeInfo{"a_base", idFillExtrusionBaseVertexAttribute},
-    AttributeInfo{"a_height", idFillExtrusionHeightVertexAttribute},
-    AttributeInfo{"a_pattern_from", idFillExtrusionPatternFromVertexAttribute},
-    AttributeInfo{"a_pattern_to", idFillExtrusionPatternToVertexAttribute},
+const std::vector<AttributeInfo>
+    ShaderInfo<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::OpenGL>::attributes = {
+        AttributeInfo{"a_pos", idFillExtrusionPosVertexAttribute},
+        AttributeInfo{"a_normal_ed", idFillExtrusionNormalEdVertexAttribute},
+        AttributeInfo{"a_base", idFillExtrusionBaseVertexAttribute},
+        AttributeInfo{"a_height", idFillExtrusionHeightVertexAttribute},
+        AttributeInfo{"a_pattern_from", idFillExtrusionPatternFromVertexAttribute},
+        AttributeInfo{"a_pattern_to", idFillExtrusionPatternToVertexAttribute},
 };
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
@@ -406,16 +409,17 @@ const std::vector<TextureInfo> ShaderInfo<BuiltIn::SymbolSDFIconShader, gfx::Bac
 };
 
 // Symbol Text & Icon
-const std::vector<AttributeInfo> ShaderInfo<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::OpenGL>::attributes = {
-    AttributeInfo{"a_pos_offset", idSymbolPosOffsetVertexAttribute},
-    AttributeInfo{"a_data", idSymbolDataVertexAttribute},
-    AttributeInfo{"a_projected_pos", idSymbolProjectedPosVertexAttribute},
-    AttributeInfo{"a_fade_opacity", idSymbolFadeOpacityVertexAttribute},
-    AttributeInfo{"a_fill_color", idSymbolColorVertexAttribute},
-    AttributeInfo{"a_halo_color", idSymbolHaloColorVertexAttribute},
-    AttributeInfo{"a_opacity", idSymbolOpacityVertexAttribute},
-    AttributeInfo{"a_halo_width", idSymbolHaloWidthVertexAttribute},
-    AttributeInfo{"a_halo_blur", idSymbolHaloBlurVertexAttribute},
+const std::vector<AttributeInfo> ShaderInfo<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::OpenGL>::attributes =
+    {
+        AttributeInfo{"a_pos_offset", idSymbolPosOffsetVertexAttribute},
+        AttributeInfo{"a_data", idSymbolDataVertexAttribute},
+        AttributeInfo{"a_projected_pos", idSymbolProjectedPosVertexAttribute},
+        AttributeInfo{"a_fade_opacity", idSymbolFadeOpacityVertexAttribute},
+        AttributeInfo{"a_fill_color", idSymbolColorVertexAttribute},
+        AttributeInfo{"a_halo_color", idSymbolHaloColorVertexAttribute},
+        AttributeInfo{"a_opacity", idSymbolOpacityVertexAttribute},
+        AttributeInfo{"a_halo_width", idSymbolHaloWidthVertexAttribute},
+        AttributeInfo{"a_halo_blur", idSymbolHaloBlurVertexAttribute},
 };
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {

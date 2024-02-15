@@ -48,7 +48,7 @@ inline const LineLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& imp
 
 const auto posNormalAttribName = "a_pos_normal";
 
-#endif //MLN_DRAWABLE_RENDERER
+#endif // MLN_DRAWABLE_RENDERER
 
 } // namespace
 
@@ -392,7 +392,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                                     : gfx::ColorMode::unblended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setEnableStencil(true);
-        
+
         return builder;
     };
 
@@ -532,7 +532,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         const std::optional<ImagePosition> patternPosA = tile.getPattern(linePatternValue.from.id());
         const std::optional<ImagePosition> patternPosB = tile.getPattern(linePatternValue.to.id());
         paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
-        
+
         auto getLinePatternTilePropertiesUBO = [&]() -> const LinePatternTilePropertiesUBO& {
             if (!linePatternTilePropertiesUBO) {
                 linePatternTilePropertiesUBO = {
@@ -585,11 +585,9 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        
-
         propertiesAsUniforms.first.clear();
         propertiesAsUniforms.second.clear();
-        
+
         auto vertexAttrs = context.createVertexAttributeArray();
         vertexAttrs->readDataDrivenPaintProperties<LineColor,
                                                    LineBlur,
@@ -600,7 +598,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                                                    LineFloorWidth,
                                                    LinePattern>(
             paintPropertyBinders, evaluated, propertiesAsUniforms, idLineColorVertexAttribute);
-        
+
         if (!evaluated.get<LineDasharray>().from.empty()) {
             // dash array line (SDF)
             if (!lineSDFShaderGroup) {
@@ -696,7 +694,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            auto shader = lineGradientShaderGroup->getOrCreateShader(context, propertiesAsUniforms, posNormalAttribName);
+            auto shader = lineGradientShaderGroup->getOrCreateShader(
+                context, propertiesAsUniforms, posNormalAttribName);
             if (!shader) {
                 continue;
             }

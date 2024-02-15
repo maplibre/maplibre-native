@@ -317,24 +317,13 @@ void CustomDrawableLayerHost::Interface::finish() {
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
     gfx::ShaderGroupPtr lineShaderGroup = shaders.getShaderGroup("LineShader");
 
-    const StringIDSetsPair propertiesAsUniforms{
-        {
-            "a_color",
-            "a_blur",
-            "a_opacity",
-            "a_gapwidth",
-            "a_offset",
-            "a_width"
-        },
-        {
-            idLineColorVertexAttribute,
-            idLineBlurVertexAttribute,
-            idLineOpacityVertexAttribute,
-            idLineGapWidthVertexAttribute,
-            idLineOffsetVertexAttribute,
-            idLineWidthVertexAttribute
-        }
-    };
+    const StringIDSetsPair propertiesAsUniforms{{"a_color", "a_blur", "a_opacity", "a_gapwidth", "a_offset", "a_width"},
+                                                {idLineColorVertexAttribute,
+                                                 idLineBlurVertexAttribute,
+                                                 idLineOpacityVertexAttribute,
+                                                 idLineGapWidthVertexAttribute,
+                                                 idLineOffsetVertexAttribute,
+                                                 idLineWidthVertexAttribute}};
 
     return lineShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
 }
@@ -342,16 +331,8 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {
     gfx::ShaderGroupPtr fillShaderGroup = shaders.getShaderGroup("FillShader");
 
-    const StringIDSetsPair propertiesAsUniforms {
-        {
-            "a_color",
-            "a_opacity"
-        },
-        {
-            idFillColorVertexAttribute,
-            idFillOpacityVertexAttribute
-        }
-    };
+    const StringIDSetsPair propertiesAsUniforms{{"a_color", "a_opacity"},
+                                                {idFillColorVertexAttribute, idFillOpacityVertexAttribute}};
 
     return fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
 }

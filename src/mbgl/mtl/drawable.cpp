@@ -322,9 +322,8 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
             attrib->setStride(VertexAttribute::getStrideOf(type));
         } else {
             using namespace std::string_literals;
-            Log::Warning(
-                Event::General,
-                "Vertex attribute type mismatch: "s + name + " / " + util::toString(impl->vertexAttrId));
+            Log::Warning(Event::General,
+                         "Vertex attribute type mismatch: "s + name + " / " + util::toString(impl->vertexAttrId));
             assert(false);
         }
     }

@@ -193,8 +193,7 @@ void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
     const auto index = static_cast<int>(info.index);
 #if !defined(NDEBUG)
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
-    vertexAttributes.visitAttributes(
-        [&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
     uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
     vertexAttributes.set(info.id, index, info.dataType, 1);
@@ -204,8 +203,7 @@ void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
     const auto index = static_cast<int>(info.index);
 #if !defined(NDEBUG)
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
-    vertexAttributes.visitAttributes(
-        [&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
     uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
     if (const auto& block_ = uniformBlocks.set(info.id, index, info.size)) {

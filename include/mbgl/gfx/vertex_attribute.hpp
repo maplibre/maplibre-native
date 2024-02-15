@@ -311,8 +311,7 @@ public:
 
     /// Indicates whether any values have changed
     virtual bool isDirty() const {
-        return std::any_of(
-            attrs.begin(), attrs.end(), [](const auto& attr) { return attr && attr->isDirty(); });
+        return std::any_of(attrs.begin(), attrs.end(), [](const auto& attr) { return attr && attr->isDirty(); });
     }
 
     /// Clear the collection
@@ -332,7 +331,7 @@ public:
     template <typename Func /* void(const size_t, VertexAttribute&, const std::unique_ptr<VertexAttribute>&) */>
     void resolve(const VertexAttributeArray& overrides, Func delegate) const {
         for (size_t id = 0; id < attrs.size(); id++) {
-            if(const auto& attr = attrs[id]) {
+            if (const auto& attr = attrs[id]) {
                 delegate(id, *attr, overrides.get(id));
             }
         }
@@ -379,7 +378,7 @@ public:
         // Read each property in the type pack
         propertiesAsUniforms.first.reserve(sizeof...(DataDrivenPaintProperty));
         propertiesAsUniforms.second.reserve(sizeof...(DataDrivenPaintProperty));
-        
+
         size_t dataDrivenAttrId = firstDataDrivenAttrId;
         (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
                                                               isConstant<DataDrivenPaintProperty>(evaluated),
@@ -411,7 +410,7 @@ protected:
             // Apply the property, or add it to the uniforms collection if it's constant.
             if (!isConstant && binder->getVertexCount() > 0) {
                 using Attribute = typename DataDrivenPaintProperty::Attribute;
-                if(const auto& attr = set(dataDrivenAttrId)) {
+                if (const auto& attr = set(dataDrivenAttrId)) {
                     applyPaintProperty<Attribute>(attrIndex, attr, binder);
                 }
             } else if (propertiesAsUniforms) {

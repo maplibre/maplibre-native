@@ -681,17 +681,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 #if MLN_TRIANGULATE_FILL_OUTLINES
             const auto outlineTriangulatedShader = doOutline && !dataDrivenOutline ? [&]() -> auto {
                 static const StringIDSetsPair outlinePropertiesAsUniforms{
-                    {
-                        "a_color",
-                        "a_opacity",
-                        "a_width"
-                    },
-                    {
-                        idLineColorVertexAttribute,
-                        idLineOpacityVertexAttribute,
-                        idLineWidthVertexAttribute
-                    }
-                };
+                    {"a_color", "a_opacity", "a_width"},
+                    {idLineColorVertexAttribute, idLineOpacityVertexAttribute, idLineWidthVertexAttribute}};
                 return std::static_pointer_cast<gfx::ShaderProgramBase>(
                     outlineTriangulatedShaderGroup->getOrCreateShader(context, outlinePropertiesAsUniforms));
             }()
@@ -701,7 +692,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (doOutline && builder && bucket.sharedLineIndexes->elements()) {
                     builder->setShader(outlineTriangulatedShader);
                     builder->setRawVertices({}, bucket.lineVertices.elements(), gfx::AttributeDataType::Short2);
-                    
+
                     auto attrs = context.createVertexAttributeArray();
                     if (const auto& attr = attrs->set(idLinePosNormalVertexAttribute)) {
                         attr->setSharedRawData(bucket.sharedLineVertices,

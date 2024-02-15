@@ -83,23 +83,13 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     const auto createPolylineShader = [&]() -> gfx::ShaderPtr {
         gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("LineShader");
         const StringIDSetsPair propertiesAsUniforms{
-            {
-                "a_color",
-                "a_blur",
-                "a_opacity",
-                "a_gapwidth",
-                "a_offset",
-                "a_width"
-            },
-            {
-                idLineColorVertexAttribute,
-                idLineBlurVertexAttribute,
-                idLineOpacityVertexAttribute,
-                idLineGapWidthVertexAttribute,
-                idLineOffsetVertexAttribute,
-                idLineWidthVertexAttribute
-            }
-        };
+            {"a_color", "a_blur", "a_opacity", "a_gapwidth", "a_offset", "a_width"},
+            {idLineColorVertexAttribute,
+             idLineBlurVertexAttribute,
+             idLineOpacityVertexAttribute,
+             idLineGapWidthVertexAttribute,
+             idLineOffsetVertexAttribute,
+             idLineWidthVertexAttribute}};
         return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
     };
 

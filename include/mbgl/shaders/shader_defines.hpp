@@ -129,7 +129,7 @@ enum {
 
 enum {
     idCirclePosVertexAttribute,
-    
+
     // Data driven
     idCircleColorVertexAttribute,
     idCircleRadiusVertexAttribute,
@@ -138,7 +138,7 @@ enum {
     idCircleStrokeColorVertexAttribute,
     idCircleStrokeWidthVertexAttribute,
     idCircleStrokeOpacityVertexAttribute,
-    
+
     circleVertexAttributeCount
 };
 
@@ -163,38 +163,38 @@ enum {
 
 enum {
     idFillPosVertexAttribute,
-    
+
     // Data driven
     idFillColorVertexAttribute,
     idFillOpacityVertexAttribute,
     idFillOutlineColorVertexAttribute,
     idFillPatternFromVertexAttribute,
     idFillPatternToVertexAttribute,
-    
+
     fillVertexAttributeCount
 };
 
 enum {
     idFillExtrusionPosVertexAttribute,
     idFillExtrusionNormalEdVertexAttribute,
-    
+
     // Data driven
     idFillExtrusionBaseVertexAttribute,
     idFillExtrusionColorVertexAttribute,
     idFillExtrusionHeightVertexAttribute,
     idFillExtrusionPatternFromVertexAttribute,
     idFillExtrusionPatternToVertexAttribute,
-    
+
     fillExtrusionVertexAttributeCount
 };
 
 enum {
     idHeatmapPosVertexAttribute,
-    
+
     // Data driven
     idHeatmapWeightVertexAttribute,
     idHeatmapRadiusVertexAttribute,
-    
+
     heatmapVertexAttributeCount
 };
 
@@ -207,7 +207,7 @@ enum {
 enum {
     idLinePosNormalVertexAttribute,
     idLineDataVertexAttribute,
-    
+
     // Data driven
     idLineColorVertexAttribute,
     idLineBlurVertexAttribute,
@@ -218,7 +218,7 @@ enum {
     idLineFloorWidthVertexAttribute,
     idLinePatternFromVertexAttribute,
     idLinePatternToVertexAttribute,
-    
+
     lineVertexAttributeCount
 };
 
@@ -234,29 +234,30 @@ enum {
     idSymbolPixelOffsetVertexAttribute,
     idSymbolProjectedPosVertexAttribute,
     idSymbolFadeOpacityVertexAttribute,
-    
+
     // Data driven
     idSymbolOpacityVertexAttribute,
     idSymbolColorVertexAttribute,
     idSymbolHaloColorVertexAttribute,
     idSymbolHaloWidthVertexAttribute,
     idSymbolHaloBlurVertexAttribute,
-    
+
     symbolVertexAttributeCount
 };
 
-static constexpr auto maxVertexAttributeCountPerShader = std::max({static_cast<size_t>(backgroundVertexAttributeCount),
-                                                                   static_cast<size_t>(circleVertexAttributeCount),
-                                                                   static_cast<size_t>(clippingMaskVertexAttributeCount),
-                                                                   static_cast<size_t>(collisionVertexAttributeCount),
-                                                                   static_cast<size_t>(debugVertexAttributeCount),
-                                                                   static_cast<size_t>(fillVertexAttributeCount),
-                                                                   static_cast<size_t>(fillExtrusionVertexAttributeCount),
-                                                                   static_cast<size_t>(heatmapVertexAttributeCount),
-                                                                   static_cast<size_t>(hillshadeVertexAttributeCount),
-                                                                   static_cast<size_t>(lineVertexAttributeCount),
-                                                                   static_cast<size_t>(rasterVertexAttributeCount),
-                                                                   static_cast<size_t>(symbolVertexAttributeCount)});
+static constexpr auto maxVertexAttributeCountPerShader = std::max(
+    {static_cast<size_t>(backgroundVertexAttributeCount),
+     static_cast<size_t>(circleVertexAttributeCount),
+     static_cast<size_t>(clippingMaskVertexAttributeCount),
+     static_cast<size_t>(collisionVertexAttributeCount),
+     static_cast<size_t>(debugVertexAttributeCount),
+     static_cast<size_t>(fillVertexAttributeCount),
+     static_cast<size_t>(fillExtrusionVertexAttributeCount),
+     static_cast<size_t>(heatmapVertexAttributeCount),
+     static_cast<size_t>(hillshadeVertexAttributeCount),
+     static_cast<size_t>(lineVertexAttributeCount),
+     static_cast<size_t>(rasterVertexAttributeCount),
+     static_cast<size_t>(symbolVertexAttributeCount)});
 
 } // namespace shaders
 } // namespace mbgl
