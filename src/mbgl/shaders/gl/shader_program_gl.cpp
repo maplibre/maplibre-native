@@ -72,10 +72,10 @@ gfx::AttributeDataType mapType(platform::GLenum attrType) {
 using namespace platform;
 
 void addAttr(
-    VertexAttributeArrayGL& attrs, const StringIdentity id, GLint index, GLsizei length, GLint count, GLenum glType) {
+    VertexAttributeArrayGL& attrs, const size_t id, GLint index, GLsizei length, GLint count, GLenum glType) {
     const auto elementType = mapType(glType);
     if (elementType != gfx::AttributeDataType::Invalid && length > 0) {
-        if (const auto& newAttr = attrs.add(id, index, elementType, count)) {
+        if (const auto& newAttr = attrs.set(id, index, elementType, count)) {
             const auto& glAttr = static_cast<VertexAttributeGL*>(newAttr.get());
             glAttr->setGLType(glType);
         }
@@ -115,6 +115,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
     const std::string_view firstAttribName,
     const std::vector<shaders::UniformBlockInfo>& uniformBlocksInfo,
     const std::vector<shaders::TextureInfo>& texturesInfo,
+    const std::vector<shaders::AttributeInfo>& attributesInfo,
     const std::string& vertexSource,
     const std::string& fragmentSource,
     const std::string& additionalDefines) noexcept(false) {
@@ -155,7 +156,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
             samplerLocations[textureInfo.id] = location;
         }
     }
-
+        
     VertexAttributeArrayGL attrs;
     GLint count = 0;
     GLint maxLength = 0;
@@ -171,7 +172,8 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
             continue;
         }
         const GLint location = MBGL_CHECK_ERROR(glGetAttribLocation(program, name.data()));
-        addAttr(attrs, stringIndexer().get(name.data()), location, length, size, glType);
+        assert(attributesInfo[location].name == std::string_view(name.data()));
+        addAttr(attrs, attributesInfo[location].id, location, length, size, glType);
     }
 
     return std::make_shared<ShaderProgramGL>(

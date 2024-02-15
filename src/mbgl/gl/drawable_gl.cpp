@@ -98,8 +98,8 @@ gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void DrawableGL::setVertexAttrNameId(const StringIdentity id) {
-    impl->idVertexAttrName = id;
+void DrawableGL::setVertexAttrId(const size_t id) {
+    impl->vertexAttrId = id;
 }
 
 void DrawableGL::bindUniformBuffers() const {
@@ -164,7 +164,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         const auto& defaults = shader->getVertexAttributes();
         const auto& overrides = *vertexAttributes;
 
-        const auto& indexAttribute = defaults.get(impl->idVertexAttrName);
+        const auto& indexAttribute = defaults.get(impl->vertexAttrId);
         const auto vertexAttributeIndex = static_cast<std::size_t>(indexAttribute ? indexAttribute->getIndex() : -1);
 
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;

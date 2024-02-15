@@ -44,7 +44,7 @@ public:
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
 
-    void setVertexAttrNameId(const StringIdentity id);
+    void setVertexAttrId(const size_t id);
 
     void upload(gfx::UploadPass&);
 

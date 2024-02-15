@@ -49,7 +49,7 @@ public:
     gfx::CullFaceMode cullFaceMode;
     GLfloat pointSize = 0.0f;
 
-    StringIdentity idVertexAttrName = stringIndexer().get("a_pos");
+    size_t vertexAttrId = 0;
 };
 
 struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {
