@@ -1,35 +1,43 @@
-#import "MLNOpenGLStyleLayer.h"
-#import "MLNOpenGLStyleLayer_Private.h"
+#import "MLNCustomStyleLayer.h"
+#import "MLNCustomStyleLayer_Private.h"
 
 #import "MLNMapView_Private.h"
 #import "MLNStyle_Private.h"
 #import "MLNStyleLayer_Private.h"
 #import "MLNGeometry_Private.h"
 
+#if MLN_RENDER_BACKEND_METAL
+#import <MetalKit/MetalKit.h>
+#endif
+
 #include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/math/wrap.hpp>
 
-class MLNOpenGLLayerHost;
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/style/layers/mtl/custom_layer_render_parameters.hpp>
+#endif
+
+class MLNCustomLayerHost;
 
 /**
- An `MLNOpenGLStyleLayer` is a style layer that is rendered by OpenGL code that
+ An `MLNCustomStyleLayer` is a style layer that is rendered by OpenGL / Metal code that
  you provide.
 
  By default, this class does nothing. You can subclass this class to provide
- custom OpenGL drawing code that is run on each frame of the map. Your subclass
+ custom OpenGL or Metal drawing code that is run on each frame of the map. Your subclass
  should override the `-didMoveToMapView:`, `-willMoveFromMapView:`, and
  `-drawInMapView:withContext:` methods.
 
- You can access an existing OpenGL style layer using the
+ You can access an existing MLNCustomStyleLayer using the
  `-[MLNStyle layerWithIdentifier:]` method if you know its identifier;
  otherwise, find it using the `MLNStyle.layers` property. You can also create a
- new OpenGL style layer and add it to the style using a method such as
+ new MLNCustomStyleLayer and add it to the style using a method such as
  `-[MLNStyle addLayer:]`.
 
  @warning This API is undocumented and therefore unsupported. It may change at
     any time without notice.
  */
-@interface MLNOpenGLStyleLayer ()
+@interface MLNCustomStyleLayer ()
 
 @property (nonatomic, readonly) mbgl::style::CustomLayer *rawLayer;
 
@@ -45,10 +53,10 @@ class MLNOpenGLLayerHost;
 
 @end
 
-@implementation MLNOpenGLStyleLayer
+@implementation MLNCustomStyleLayer
 
 /**
- Returns an OpenGL style layer object initialized with the given identifier.
+ Returns an MLNCustomStyleLayer style layer object initialized with the given identifier.
 
  After initializing and configuring the style layer, add it to a map view’s
  style using the `-[MLNStyle addLayer:]` or
@@ -60,7 +68,7 @@ class MLNOpenGLLayerHost;
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier {
     auto layer = std::make_unique<mbgl::style::CustomLayer>(identifier.UTF8String,
-                                                            std::make_unique<MLNOpenGLLayerHost>(self));
+                                                            std::make_unique<MLNCustomLayerHost>(self));
     return self = [super initWithPendingLayer:std::move(layer)];
 }
 
@@ -88,13 +96,13 @@ class MLNOpenGLLayerHost;
 // MARK: - Adding to and removing from a map view
 - (void)addToStyle:(MLNStyle *)style belowLayer:(MLNStyleLayer *)otherLayer {
     self.style = style;
-    self.style.openGLLayers[self.identifier] = self;
+    self.style.customLayers[self.identifier] = self;
     [super addToStyle:style belowLayer:otherLayer];
 }
 
 - (void)removeFromStyle:(MLNStyle *)style {
     [super removeFromStyle:style];
-    self.style.openGLLayers[self.identifier] = nil;
+    self.style.customLayers[self.identifier] = nil;
     self.style = nil;
 }
 
@@ -164,9 +172,9 @@ class MLNOpenGLLayerHost;
 
 @end
 
-class MLNOpenGLLayerHost : public mbgl::style::CustomLayerHost {
+class MLNCustomLayerHost : public mbgl::style::CustomLayerHost {
 public:
-    MLNOpenGLLayerHost(MLNOpenGLStyleLayer *styleLayer) {
+    MLNCustomLayerHost(MLNCustomStyleLayer *styleLayer) {
         layerRef = styleLayer;
         layer = nil;
     }
@@ -180,17 +188,23 @@ public:
         }
     }
 
-    void render(const mbgl::style::CustomLayerRenderParameters &params) {
+    void render(const mbgl::style::CustomLayerRenderParameters& parameters) {
         if(!layer) return;
 
+#if MLN_RENDER_BACKEND_METAL
+        MTL::RenderCommandEncoder* ptr = static_cast<const mbgl::style::mtl::CustomLayerRenderParameters&>(parameters).encoder.get();
+        id<MTLRenderCommandEncoder> encoder = (__bridge id<MTLRenderCommandEncoder>)ptr;
+        layer.renderEncoder = encoder;
+#endif
+
         MLNStyleLayerDrawingContext drawingContext = {
-            .size = CGSizeMake(params.width, params.height),
-            .centerCoordinate = CLLocationCoordinate2DMake(params.latitude, params.longitude),
-            .zoomLevel = params.zoom,
-            .direction = mbgl::util::wrap(params.bearing, 0., 360.),
-            .pitch = static_cast<CGFloat>(params.pitch),
-            .fieldOfView = static_cast<CGFloat>(params.fieldOfView),
-            .projectionMatrix = MLNMatrix4Make(params.projectionMatrix)
+            .size = CGSizeMake(parameters.width, parameters.height),
+            .centerCoordinate = CLLocationCoordinate2DMake(parameters.latitude, parameters.longitude),
+            .zoomLevel = parameters.zoom,
+            .direction = mbgl::util::wrap(parameters.bearing, 0., 360.),
+            .pitch = static_cast<CGFloat>(parameters.pitch),
+            .fieldOfView = static_cast<CGFloat>(parameters.fieldOfView),
+            .projectionMatrix = MLNMatrix4Make(parameters.projectionMatrix)
         };
         if (layer.mapView) {
             [layer drawInMapView:layer.mapView withContext:drawingContext];
@@ -209,14 +223,14 @@ public:
         layer = nil;
     }
 private:
-    __weak MLNOpenGLStyleLayer * layerRef;
-    MLNOpenGLStyleLayer * layer = nil;
+    __weak MLNCustomStyleLayer * layerRef;
+    MLNCustomStyleLayer * layer = nil;
 };
 
 namespace mbgl {
 
-MLNStyleLayer* OpenGLStyleLayerPeerFactory::createPeer(style::Layer* rawLayer) {
-    return [[MLNOpenGLStyleLayer alloc] initWithRawLayer:rawLayer];
+MLNStyleLayer* CustomStyleLayerPeerFactory::createPeer(style::Layer* rawLayer) {
+    return [[MLNCustomStyleLayer alloc] initWithRawLayer:rawLayer];
 }
 
 }  // namespace mbgl

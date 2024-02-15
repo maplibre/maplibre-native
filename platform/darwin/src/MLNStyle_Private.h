@@ -13,7 +13,7 @@ namespace mbgl {
 
 @class MLNAttributionInfo;
 @class MLNMapView;
-@class MLNOpenGLStyleLayer;
+@class MLNCustomStyleLayer;
 @class MLNVectorTileSource;
 @class MLNVectorStyleLayer;
 
@@ -25,7 +25,7 @@ namespace mbgl {
 @property (nonatomic, readonly) mbgl::style::Style *rawStyle;
 
 - (nullable NSArray<MLNAttributionInfo *> *)attributionInfosWithFontSize:(CGFloat)fontSize linkColor:(nullable MLNColor *)linkColor;
-@property (nonatomic, readonly, strong) NSMutableDictionary<NSString *, MLNOpenGLStyleLayer *> *openGLLayers;
+@property (nonatomic, readonly, strong) NSMutableDictionary<NSString *, MLNCustomStyleLayer *> *customLayers;
 - (void)setStyleClasses:(NSArray<NSString *> *)appliedClasses transitionDuration:(NSTimeInterval)transitionDuration;
 
 @end
