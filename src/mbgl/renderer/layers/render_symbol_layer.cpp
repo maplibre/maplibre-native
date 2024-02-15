@@ -1050,7 +1050,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     collisionBuilder->setRenderPass(passes);
     collisionBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
     collisionBuilder->setColorMode(gfx::ColorMode::alphaBlended());
-    collisionBuilder->setVertexAttrId(idCollisionPosVertexAttribute);
 
     StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
@@ -1309,7 +1308,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                         ((mbgl::underlying_type(passes) & mbgl::underlying_type(RenderPass::Translucent)) != 0)
                             ? gfx::ColorMode::alphaBlended()
                             : gfx::ColorMode::unblended());
-                    builder->setVertexAttrId(idSymbolPosOffsetVertexAttribute);
                 }
 
                 const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(

@@ -253,8 +253,6 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     gfx::generateFillBuffers(geometry, vertices, triangles, triangleSegments);
 
     // add to builder
-    builder->setVertexAttrId(idFillPosVertexAttribute);
-
     auto attrs = context.createVertexAttributeArray();
     if (const auto& attr = attrs->set(idFillPosVertexAttribute)) {
         attr->setSharedRawData(sharedVertices,

@@ -52,7 +52,7 @@ public:
     gfx::StencilMode stencilMode;
     gfx::CullFaceMode cullFaceMode;
     // GLfloat pointSize = 0.0f;
-    std::size_t idVertexAttrId = 0;
+    std::size_t vertexAttrId = 0;
 
     VertexBufferResource* noBindingBuffer = nullptr;
 

@@ -136,7 +136,7 @@ public:
     /// Set the name given to new drawables
     void setDrawableName(std::string value) { drawableName = std::move(value); }
 
-    /// The attribute names for vertex/position attributes
+    /// The attribute id for vertex/position attribute
     void setVertexAttrId(const size_t id) { vertexAttrId = id; }
 
     /// @brief Get the texture at the given internal ID.
