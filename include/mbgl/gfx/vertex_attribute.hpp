@@ -430,6 +430,7 @@ protected:
                 }
             } else if (propertiesAsUniforms) {
                 propertiesAsUniforms->first.emplace(attributeName);
+                propertiesAsUniforms->second.emplace(dataDrivenAttrId);
             }
             dataDrivenAttrId++;
         }
