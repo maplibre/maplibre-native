@@ -1,10 +1,10 @@
 #if !MLN_RENDER_BACKEND_METAL
 
 /* OPENGL Custom Layer example implementation */
-#import "LimeGreenStyleLayer.h"
+#import "CustomStyleLayerExample.h"
 #import <GLKit/GLKit.h>
 
-@implementation LimeGreenStyleLayer {
+@implementation CustomStyleLayerExample {
     GLuint _program;
     GLuint _vertexShader;
     GLuint _fragmentShader;
@@ -63,11 +63,12 @@
 #else // MLN_RENDER_BACKEND_METAL:
 
 /* Metal Custom Layer example implementation */
-#import "LimeGreenStyleLayer.h"
+#import "CustomStyleLayerExample.h"
 
-@implementation LimeGreenStyleLayer {
+@implementation CustomStyleLayerExample {
     // The render pipeline state
     id<MTLRenderPipelineState> _pipelineState;
+    id<MTLDepthStencilState> _depthStencilStateWithoutStencil;
 }
 
 - (void)didMoveToMapView:(MLNMapView *)mapView {
@@ -124,6 +125,14 @@
     _pipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
                                                              error:&error];
     NSAssert(_pipelineState, @"Failed to create pipeline state: %@", error);
+
+    // Notice that we don't configure the stencilTest property, leaving stencil testing disabled
+    MTLDepthStencilDescriptor *depthStencilDescriptor = [[MTLDepthStencilDescriptor alloc] init];
+    depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionAlways; // Or another value as needed
+    depthStencilDescriptor.depthWriteEnabled = NO;
+
+    _depthStencilStateWithoutStencil = [_device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
+
 }
 
 - (void)drawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context {
@@ -152,7 +161,8 @@
         };
 
         [renderEncoder setRenderPipelineState:_pipelineState];
-        
+        [renderEncoder setDepthStencilState:_depthStencilStateWithoutStencil];
+
         // Pass in the parameter data.
         [renderEncoder setVertexBytes:triangleVertices
                                length:sizeof(triangleVertices)

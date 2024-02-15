@@ -188,8 +188,8 @@ objc_library(
     name = "iosapp",
     srcs = [
         "//platform/ios:ios_app_srcs",
-        "//platform/darwin:app/LimeGreenStyleLayer.h",
-        "//platform/darwin:app/LimeGreenStyleLayer.m",
+        "//platform/darwin:app/CustomStyleLayerExample.h",
+        "//platform/darwin:app/CustomStyleLayerExample.m",
     ],
     defines = ["GLES_SILENCE_DEPRECATION"],
     includes = [
@@ -202,7 +202,7 @@ objc_library(
             "MetalKit",
         ],
         "//conditions:default": [
-            "GLKit",  # needed for LimeGreenStyleLayer
+            "GLKit",  # needed for CustomStyleLayerExample
         ],
     }),
     visibility = ["//visibility:public"],

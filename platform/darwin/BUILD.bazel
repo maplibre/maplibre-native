@@ -309,8 +309,8 @@ exports_files(
     [
         "test/amsterdam.geojson",
         "test/MLNSDKTestHelpers.swift",
-        "app/LimeGreenStyleLayer.h",
-        "app/LimeGreenStyleLayer.m",
+        "app/CustomStyleLayerExample.h",
+        "app/CustomStyleLayerExample.m",
         "app/ExampleCustomDrawableStyleLayer.h",
         "app/ExampleCustomDrawableStyleLayer.mm",
         "include/mbgl/util/image+MLNAdditions.hpp",
