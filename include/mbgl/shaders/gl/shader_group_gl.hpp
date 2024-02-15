@@ -39,9 +39,9 @@ public:
         // No match, we need to create the shader.
         std::string additionalDefines;
         additionalDefines.reserve(propertiesAsUniforms.first.size() * 48);
-        for (const auto name : propertiesAsUniforms.first) {
+        for (const auto propertyName : propertiesAsUniforms.first) {
             // We expect the names to be prefixed by "a_", but we need just the base here.
-            const auto* prefix = name.data();
+            const auto* prefix = propertyName.data();
             if (prefix[0] == 'a' && prefix[1] == '_') {
                 prefix += 2;
             }
