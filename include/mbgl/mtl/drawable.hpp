@@ -12,6 +12,7 @@ namespace mbgl {
 
 template <class AttributeList>
 class Segment;
+class PaintParameters;
 
 namespace gfx {
 

@@ -7,6 +7,10 @@
 #import "MLNStyleLayer.h"
 #import "MLNGeometry.h"
 
+#if MLN_RENDER_BACKEND_METAL
+#import <MetalKit/MetalKit.h>
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class MLNMapView;
@@ -23,7 +27,7 @@ typedef struct MLNStyleLayerDrawingContext {
 } MLNStyleLayerDrawingContext;
 
 MLN_EXPORT
-@interface MLNOpenGLStyleLayer : MLNStyleLayer
+@interface MLNCustomStyleLayer : MLNStyleLayer
 
 @property (nonatomic, weak, readonly) MLNStyle *style;
 
@@ -35,6 +39,10 @@ MLN_EXPORT
 @property (nonatomic, readonly) CGLContextObj context;
 #endif
 #pragma clang diagnostic pop
+
+#if MLN_RENDER_BACKEND_METAL
+@property (nonatomic, weak) id<MTLRenderCommandEncoder> renderEncoder;
+#endif
 
 - (instancetype)initWithIdentifier:(NSString *)identifier;
 

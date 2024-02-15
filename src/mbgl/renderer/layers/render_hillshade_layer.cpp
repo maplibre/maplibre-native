@@ -304,8 +304,6 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   const std::shared_ptr<UpdateParameters>&,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;

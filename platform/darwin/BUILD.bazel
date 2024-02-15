@@ -10,7 +10,6 @@ load(
     "MLN_DARWIN_OBJC_HEADERS",
     "MLN_DARWIN_PRIVATE_HEADERS",
     "MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE",
-    "MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJCPP_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJC_SOURCE",
     "MLN_GENERATED_DARWIN_STYLE_HEADERS",
@@ -33,22 +32,13 @@ filegroup(
 
 filegroup(
     name = "darwin_objcpp_hdrs",
-    srcs = MLN_DARWIN_OBJCPP_HEADERS + select({
-        "//:metal_renderer": [],
-        "//conditions:default": ["src/MLNOpenGLStyleLayer.h"],
-    }),
+    srcs = MLN_DARWIN_OBJCPP_HEADERS,
     visibility = ["//visibility:public"],
 )
 
 filegroup(
     name = "darwin_objcpp_srcs",
     srcs = MLN_DARWIN_PUBLIC_OBJCPP_SOURCE,
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "darwin_objcpp_opengl_srcs",
-    srcs = MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE,
     visibility = ["//visibility:public"],
 )
 
@@ -319,14 +309,13 @@ exports_files(
     [
         "test/amsterdam.geojson",
         "test/MLNSDKTestHelpers.swift",
-        "app/LimeGreenStyleLayer.h",
-        "app/LimeGreenStyleLayer.m",
+        "app/CustomStyleLayerExample.h",
+        "app/CustomStyleLayerExample.m",
         "app/ExampleCustomDrawableStyleLayer.h",
         "app/ExampleCustomDrawableStyleLayer.mm",
         "include/mbgl/util/image+MLNAdditions.hpp",
     ] + MLN_DARWIN_PUBLIC_OBJC_SOURCE +
     MLN_DARWIN_PUBLIC_OBJCPP_SOURCE +
-    MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE +
     MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE +
     MLN_DARWIN_PRIVATE_HEADERS +
     MLN_DARWIN_OBJC_HEADERS +
@@ -359,11 +348,6 @@ js_library(
         ":generated_style_hdrs",
         ":generated_style_srcs",
     ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            ":darwin_objcpp_opengl_srcs",
-        ],
-    }) + select({
         "//:legacy_renderer": [],
         "//conditions:default": [
             ":darwin_objcpp_custom_drawable_srcs",

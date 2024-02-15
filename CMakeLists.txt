@@ -1000,6 +1000,8 @@ if(MLN_WITH_OPENGL)
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer_render_parameters.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/mtl/custom_layer_render_parameters.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderable_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderer_backend.hpp
@@ -1072,6 +1074,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/fence.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/fence.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_render_parameters.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_layer_factory.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.hpp
