@@ -23,6 +23,9 @@ void TileCache::setSize(size_t size_) {
 }
 
 namespace {
+
+/// This exists solely to prevent a problem where temporary lambda captures
+/// are retained for the duration of the scope instead of being destroyed immediately.
 template <typename T>
 struct CaptureWrapper {
     CaptureWrapper(std::unique_ptr<T>&& item_)
@@ -45,13 +48,15 @@ void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
     // last one and the destruction actually occurs here on this thread.
     std::function<void()> func{[tile_{CaptureWrapper<Tile>{std::move(tile)}}]() {
     }};
-    // std::function<void()> func{[tile_{std::shared_ptr<Tile>(std::move(tile))}]() { }};
 
     threadPool->schedule(std::move(func));
 }
 
 void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {
+#if !defined(NDEBUG)
     tile->renderThreadId = std::this_thread::get_id();
+#endif
+
     if (!tile->isRenderable() || !size) {
         deferredRelease(std::move(tile));
         return;
@@ -76,6 +81,7 @@ void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {
     if (orderedKeys.size() > size) {
         deferredRelease(pop(orderedKeys.front()));
     }
+
     assert(orderedKeys.size() <= size);
 }
 
