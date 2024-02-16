@@ -23,8 +23,7 @@ UniformBufferArray& UniformBufferArray::operator=(const UniformBufferArray& othe
 }
 
 const std::shared_ptr<UniformBuffer>& UniformBufferArray::get(const size_t id) const {
-    const auto& result = (id < uniformBufferVector.size()) ? uniformBufferVector[id] : nullref;
-    return (result != nullptr) ? result : nullref;
+    return (id < uniformBufferVector.size()) ? uniformBufferVector[id] : nullref;
 }
 
 const std::shared_ptr<UniformBuffer>& UniformBufferArray::set(const size_t id,

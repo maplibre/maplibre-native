@@ -14,7 +14,7 @@ const std::array<UniformBlockInfo, 2>
         UniformBlockInfo{2, true, true, sizeof(BackgroundPatternLayerUBO), idBackgroundLayerUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_image"}};
+    TextureInfo{0, idBackgroundImageTexture}};
 
 } // namespace shaders
 } // namespace mbgl

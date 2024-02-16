@@ -51,7 +51,6 @@ constexpr auto FillPatternShaderName = "FillPatternShader";
 constexpr auto FillOutlinePatternShaderName = "FillOutlinePatternShader";
 
 const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
-const StringIdentity idIconTextureName = stringIndexer().get("u_image");
 #endif // MLN_DRAWABLE_RENDERER
 
 inline const FillLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
@@ -598,7 +597,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
                         atlases,
                         std::nullopt,
-                        idIconTextureName,
+                        idFillImageTexture,
                         /*isText*/ false,
                         /*sdfIcons*/ true, // to force linear filter
                         /*rotationAlignment_*/ AlignmentType::Auto,
