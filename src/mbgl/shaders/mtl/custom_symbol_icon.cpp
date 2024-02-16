@@ -6,8 +6,8 @@ namespace shaders {
 const std::array<AttributeInfo, 2>
     ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal>::attributes = {
         // always attributes
-        AttributeInfo{0, gfx::AttributeDataType::Float2, "a_pos"},
-        AttributeInfo{1, gfx::AttributeDataType::Float2, "a_tex"},
+        AttributeInfo{0, gfx::AttributeDataType::Float2, idCustomSymbolPosVertexAttribute},
+        AttributeInfo{1, gfx::AttributeDataType::Float2, idCustomSymbolTexVertexAttribute},
 };
 const std::array<UniformBlockInfo, 2>
     ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal>::uniforms = {

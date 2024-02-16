@@ -373,19 +373,15 @@ void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
     triangleSegments.emplace_back(Segment<CustomSymbolIcon>{0, 0, 4, 6});
 
     // add to builder
-    static const StringIdentity idPositionAttribName = stringIndexer().get("a_pos");
-    static const StringIdentity idTextureAttribName = stringIndexer().get("a_tex");
-    builder->setVertexAttrNameId(idPositionAttribName);
-
     auto attrs = context.createVertexAttributeArray();
-    if (const auto& attr = attrs->add(idPositionAttribName)) {
+    if (const auto& attr = attrs->set(idCustomSymbolPosVertexAttribute)) {
         attr->setSharedRawData(sharedVertices,
                                offsetof(CustomSymbolIcon, a_pos),
                                /*vertexOffset=*/0,
                                sizeof(CustomSymbolIcon),
                                gfx::AttributeDataType::Float2);
     }
-    if (const auto& attr = attrs->add(idTextureAttribName)) {
+    if (const auto& attr = attrs->set(idCustomSymbolTexVertexAttribute)) {
         attr->setSharedRawData(sharedVertices,
                                offsetof(CustomSymbolIcon, a_tex),
                                /*vertexOffset=*/0,

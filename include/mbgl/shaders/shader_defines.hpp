@@ -165,6 +165,12 @@ enum {
 };
 
 enum {
+    idCustomSymbolPosVertexAttribute,
+    idCustomSymbolTexVertexAttribute,
+    customSymbolVertexAttributeCount
+};
+
+enum {
     idDebugPosVertexAttribute,
     debugVertexAttributeCount
 };
@@ -258,6 +264,7 @@ static constexpr auto maxVertexAttributeCountPerShader = std::max(
      static_cast<size_t>(circleVertexAttributeCount),
      static_cast<size_t>(clippingMaskVertexAttributeCount),
      static_cast<size_t>(collisionVertexAttributeCount),
+     static_cast<size_t>(customSymbolVertexAttributeCount),
      static_cast<size_t>(debugVertexAttributeCount),
      static_cast<size_t>(fillVertexAttributeCount),
      static_cast<size_t>(fillExtrusionVertexAttributeCount),
