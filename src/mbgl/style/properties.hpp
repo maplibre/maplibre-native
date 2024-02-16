@@ -249,7 +249,7 @@ public:
 
         /// Extract dependencies from a possibly-evaluated property which may have an expression.
         template <class P>
-        Dependency getDependencies(const P& x) const {
+        Dependency getDependencies(const P&) const {
             return Dependency::None;
         }
         template <class P>
