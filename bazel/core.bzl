@@ -67,6 +67,7 @@ MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mbgl/shaders/gl/drawable_circle.hpp",
     "include/mbgl/shaders/gl/drawable_collision_box.hpp",
     "include/mbgl/shaders/gl/drawable_collision_circle.hpp",
+    "include/mbgl/shaders/gl/drawable_custom_symbol_icon.hpp",
     "include/mbgl/shaders/gl/drawable_debug.hpp",
     "include/mbgl/shaders/gl/drawable_fill.hpp",
     "include/mbgl/shaders/gl/drawable_fill_outline.hpp",
@@ -143,7 +144,6 @@ MLN_CORE_SOURCE = [
     "include/mbgl/gfx/backend.hpp",
     "src/mbgl/gfx/color_mode.hpp",
     "src/mbgl/gfx/command_encoder.hpp",
-    "src/mbgl/gfx/context.hpp",
     "src/mbgl/gfx/cull_face_mode.hpp",
     "src/mbgl/gfx/debug_group.hpp",
     "src/mbgl/gfx/depth_mode.hpp",
@@ -648,6 +648,7 @@ MLN_CORE_SOURCE = [
 ]
 
 MLN_CORE_HEADERS = [
+    "include/mbgl/gfx/context.hpp",
     "include/mbgl/actor/actor.hpp",
     "include/mbgl/actor/actor_ref.hpp",
     "include/mbgl/actor/aspiring_actor.hpp",
@@ -980,6 +981,7 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/shaders/background_layer_ubo.hpp",
     "include/mbgl/shaders/circle_layer_ubo.hpp",
     "include/mbgl/shaders/collision_layer_ubo.hpp",
+    "include/mbgl/shaders/custom_drawable_layer_ubo.hpp",
     "include/mbgl/shaders/debug_layer_ubo.hpp",
     "include/mbgl/shaders/fill_layer_ubo.hpp",
     "include/mbgl/shaders/fill_extrusion_layer_ubo.hpp",
@@ -1054,6 +1056,7 @@ MLN_DRAWABLES_MTL_SOURCE = [
     "src/mbgl/shaders/mtl/collision_box.cpp",
     "src/mbgl/shaders/mtl/collision_circle.cpp",
     "src/mbgl/shaders/mtl/clipping_mask.cpp",
+    "src/mbgl/shaders/mtl/custom_symbol_icon.cpp",
     "src/mbgl/shaders/mtl/debug.cpp",
     "src/mbgl/shaders/mtl/fill.cpp",
     "src/mbgl/shaders/mtl/fill_extrusion.cpp",
@@ -1098,6 +1101,7 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/shaders/mtl/collision_box.hpp",
     "include/mbgl/shaders/mtl/collision_circle.hpp",
     "include/mbgl/shaders/mtl/common.hpp",
+    "include/mbgl/shaders/mtl/custom_symbol_icon.hpp",
     "include/mbgl/shaders/mtl/debug.hpp",
     "include/mbgl/shaders/mtl/fill.hpp",
     "include/mbgl/shaders/mtl/fill_extrusion.hpp",
