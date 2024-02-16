@@ -28,6 +28,7 @@
 #include <mbgl/shaders/gl/drawable_symbol_icon.hpp>
 #include <mbgl/shaders/gl/drawable_symbol_sdf.hpp>
 #include <mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp>
+#include <mbgl/shaders/gl/drawable_custom_symbol_icon.hpp>
 #include <mbgl/shaders/gl/prelude.hpp>
 #include <mbgl/shaders/gl/background.hpp>
 #include <mbgl/shaders/gl/background_pattern.hpp>
