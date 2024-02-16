@@ -20,11 +20,9 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idHeatmapDrawableUBOName = stringIndexer().get("HeatmapDrawableUBO");
-static const StringIdentity idHeatmapEvaluatedPropsUBOName = stringIndexer().get("HeatmapEvaluatedPropsUBO");
-
 void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
+    const auto zoom = parameters.state.getZoom();
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
 
     if (layerGroup.empty()) {
@@ -36,17 +34,18 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    const auto zoom = parameters.state.getZoom();
-
-    if (!evaluatedPropsUniformBuffer) {
-        const HeatmapEvaluatedPropsUBO evaluatedPropsUBO = {
-            /* .weight = */ evaluated.get<HeatmapWeight>().constantOr(HeatmapWeight::defaultValue()),
-            /* .radius = */ evaluated.get<HeatmapRadius>().constantOr(HeatmapRadius::defaultValue()),
-            /* .intensity = */ evaluated.get<HeatmapIntensity>(),
-            /* .padding = */ 0};
-        evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO,
-                                                                             sizeof(evaluatedPropsUBO));
-    }
+    const auto getPropsBuffer = [&]() -> auto& {
+        if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
+            const HeatmapEvaluatedPropsUBO evaluatedPropsUBO = {
+                /* .weight = */ evaluated.get<HeatmapWeight>().constantOr(HeatmapWeight::defaultValue()),
+                /* .radius = */ evaluated.get<HeatmapRadius>().constantOr(HeatmapRadius::defaultValue()),
+                /* .intensity = */ evaluated.get<HeatmapIntensity>(),
+                /* .padding = */ 0};
+            parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
+            propertiesUpdated = false;
+        }
+        return evaluatedPropsUniformBuffer;
+    };
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
@@ -56,18 +55,18 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.addOrReplace(idHeatmapEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
+        uniforms.set(idHeatmapEvaluatedPropsUBO, getPropsBuffer());
 
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
         const auto matrix = getTileMatrix(
-            tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, nearClipped, inViewportPixelUnits);
+            tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, nearClipped, inViewportPixelUnits, drawable);
         const HeatmapDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
             /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
             /* .padding = */ {0}};
 
-        uniforms.createOrUpdate(idHeatmapDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idHeatmapDrawableUBO, &drawableUBO, context);
     });
 }
 

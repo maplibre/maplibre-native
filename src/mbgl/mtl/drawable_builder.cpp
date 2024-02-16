@@ -42,7 +42,7 @@ void DrawableBuilder::init() {
     drawable.setIndexData(std::move(impl->sharedIndexes), std::move(impl->segments));
 
     impl->clear();
-    textures.clear();
+    textures.fill(nullptr);
 }
 
 } // namespace mtl

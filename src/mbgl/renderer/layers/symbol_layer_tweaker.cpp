@@ -29,13 +29,9 @@ using namespace shaders;
 
 namespace {
 
-Size getTexSize(const gfx::Drawable& drawable, const StringIdentity nameId) {
-    if (const auto& shader = drawable.getShader()) {
-        if (const auto index = shader->getSamplerLocation(nameId)) {
-            if (const auto& tex = drawable.getTexture(*index)) {
-                return tex->getSize();
-            }
-        }
+Size getTexSize(const gfx::Drawable& drawable, const size_t texId) {
+    if (const auto& tex = drawable.getTexture(texId)) {
+        return tex->getSize();
     }
     return {0, 0};
 }
@@ -43,9 +39,6 @@ Size getTexSize(const gfx::Drawable& drawable, const StringIdentity nameId) {
 std::array<float, 2> toArray(const Size& s) {
     return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
-
-const StringIdentity idTexUniformName = stringIndexer().get("u_texture");
-const StringIdentity idTexIconUniformName = stringIndexer().get("u_texture_icon");
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
@@ -61,14 +54,6 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 }
 
 } // namespace
-
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = stringIndexer().get("SymbolDynamicUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = stringIndexer().get("SymbolDrawablePaintUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = stringIndexer().get(
-    "SymbolDrawableTilePropsUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = stringIndexer().get(
-    "SymbolDrawableInterpolateUBO");
 
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
@@ -128,7 +113,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                    : evaluated.get<style::IconTranslateAnchor>();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         // from symbol_program, makeValues
         const auto currentZoom = static_cast<float>(parameters.state.getZoom());
@@ -159,8 +145,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
             /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
 
-            /*.texsize=*/toArray(getTexSize(drawable, idTexUniformName)),
-            /*.texsize_icon=*/toArray(getTexSize(drawable, idTexIconUniformName)),
+            /*.texsize=*/toArray(getTexSize(drawable, idSymbolImageTexture)),
+            /*.texsize_icon=*/toArray(getTexSize(drawable, idSymbolImageIconTexture)),
 
             /*.gamma_scale=*/gammaScale,
             /*.rotate_symbol=*/rotateInShader,
@@ -168,10 +154,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         };
 
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idSymbolDrawableUBOName, &drawableUBO, context);
+        uniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
 
-        uniforms.addOrReplace(idSymbolDynamicUBOName, dynamicBuffer);
-        uniforms.addOrReplace(idSymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
+        uniforms.set(idSymbolDynamicUBO, dynamicBuffer);
+        uniforms.set(idSymbolDrawablePaintUBO, isText ? textPaintBuffer : iconPaintBuffer);
     });
 }
 

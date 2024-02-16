@@ -6,15 +6,15 @@ namespace shaders {
 
 const std::array<AttributeInfo, 1>
     ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>::attributes = {
-        AttributeInfo{0, gfx::AttributeDataType::Float3, 1, "a_pos"},
+        AttributeInfo{0, gfx::AttributeDataType::Float3, "a_pos"},
 };
 const std::array<UniformBlockInfo, 2>
     ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>::uniforms = {
-        UniformBlockInfo{1, true, false, sizeof(BackgroundDrawableUBO), "BackgroundDrawableUBO"},
-        UniformBlockInfo{2, true, true, sizeof(BackgroundPatternLayerUBO), "BackgroundLayerUBO"},
+        UniformBlockInfo{1, true, false, sizeof(BackgroundDrawableUBO), idBackgroundDrawableUBO},
+        UniformBlockInfo{2, true, true, sizeof(BackgroundPatternLayerUBO), idBackgroundLayerUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_image"}};
+    TextureInfo{0, idBackgroundImageTexture}};
 
 } // namespace shaders
 } // namespace mbgl

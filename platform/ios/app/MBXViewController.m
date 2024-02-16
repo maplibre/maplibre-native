@@ -13,9 +13,7 @@
 #import "MBXState.h"
 #import "MLNSettings.h"
 
-#if !MLN_RENDER_BACKEND_METAL
-#import "LimeGreenStyleLayer.h"
-#endif
+#import "CustomStyleLayerExample.h"
 
 #if MLN_DRAWABLE_RENDERER
 #import "ExampleCustomDrawableStyleLayer.h"
@@ -36,11 +34,6 @@ static const CLLocationCoordinate2D WorldTourDestinations[] = {
 static const MLNCoordinateBounds colorado = {
     .sw = { .latitude = 36.986207, .longitude = -109.049896},
     .ne = { .latitude = 40.989329, .longitude = -102.062592},
-};
-
-static const MLNCoordinateBounds areaAroundBelgium = {
-    .sw = { .latitude = 52.2782, .longitude = 8.289179999999988},
-    .ne = { .latitude = 48.5584, .longitude = 1.0162300000000073},
 };
 
 static NSString * const MBXViewControllerAnnotationViewReuseIdentifer = @"MBXViewControllerAnnotationViewReuseIdentifer";
@@ -106,9 +99,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingRasterTileSource,
     MBXSettingsRuntimeStylingImageSource,
     MBXSettingsRuntimeStylingRouteLine,
-#if !MLN_RENDER_BACKEND_METAL
-    MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer,
-#endif
+    MBXSettingsRuntimeStylingAddCustomTriangleLayer,
     MBXSettingsRuntimeStylingDDSPolygon,
     MBXSettingsRuntimeStylingCustomLatLonGrid,
     MBXSettingsRuntimeStylingLineGradient,
@@ -118,7 +109,6 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
-    MBXSettingsMiscellaneousLatLngBoundsConstraints,
     MBXSettingsMiscellaneousWorldTour,
     MBXSettingsMiscellaneousRandomTour,
     MBXSettingsMiscellaneousScrollView,
@@ -248,7 +238,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     BOOL _isTouringWorld;
     BOOL _contentInsetsEnabled;
     UIEdgeInsets _originalContentInsets;
-    BOOL _hasLatLngBoundConstraints;
 }
 
 // MARK: - Setup & Teardown
@@ -442,8 +431,10 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 @"Style Raster Tile Source",
                 @"Style Image Source",
                 @"Add Route Line",
-#if !MLN_RENDER_BACKEND_METAL
-                @"Add Lime Green Triangle Layer",
+#if MLN_RENDER_BACKEND_METAL
+                @"Add Custom Triangle Layer (Metal)",
+#else
+                @"Add Custom Triangle Layer (OpenGL)",
 #endif
                 @"Dynamically Style Polygon",
                 @"Add Custom Lat/Lon Grid",
@@ -455,7 +446,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
             break;
         case MBXSettingsMiscellaneous:
             [settingsTitles addObjectsFromArray:@[
-                _hasLatLngBoundConstraints ? @"Remove LatLng bound constraints" : @"Set LatLng bound box constraint",
                 @"Start World Tour",
                 @"Random Tour",
                 @"Embedded Map View",
@@ -662,11 +652,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsRuntimeStylingRouteLine:
                     [self styleRouteLine];
                     break;
-#if !MLN_RENDER_BACKEND_METAL
-                case MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer:
-                    [self styleAddLimeGreenTriangleLayer];
+                case MBXSettingsRuntimeStylingAddCustomTriangleLayer:
+                    [self styleAddCustomTriangleLayer];
                     break;
-#endif
                 case MBXSettingsRuntimeStylingDDSPolygon:
                     [self stylePolygonWithDDS];
                     break;
@@ -689,9 +677,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         case MBXSettingsMiscellaneous:
             switch (indexPath.row)
             {
-                case MBXSettingsMiscellaneousLatLngBoundsConstraints:
-                    [self setLatLngBoundsConstraints];
-                    break;
                 case MBXSettingsMiscellaneousLocalizeLabels:
                     [self toggleStyleLabelsLanguage];
                     break;
@@ -1506,20 +1491,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     }
 }
 
--(void)setLatLngBoundsConstraints
-{
-    if(_hasLatLngBoundConstraints) {
-        [self.mapView clearLatLnBounds];
-        [self.mapView resetPosition];
-    } else {
-        MLNMapCamera *newCamera = [self.mapView cameraThatFitsCoordinateBounds: areaAroundBelgium];
-        [self.mapView setCamera: newCamera];
-        [self.mapView setLatLngBounds: areaAroundBelgium];
-    }
-    
-    _hasLatLngBoundConstraints = !_hasLatLngBoundConstraints;
-}
-
 -(void)toggleStyleLabelsLanguage
 {
     _localizingLabels = !_localizingLabels;
@@ -1629,13 +1600,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:routeLayer];
 }
 
-#if !MLN_RENDER_BACKEND_METAL
-- (void)styleAddLimeGreenTriangleLayer
+- (void)styleAddCustomTriangleLayer
 {
-    LimeGreenStyleLayer *layer = [[LimeGreenStyleLayer alloc] initWithIdentifier:@"mbx-custom"];
+    CustomStyleLayerExample *layer = [[CustomStyleLayerExample alloc] initWithIdentifier:@"mbx-custom"];
     [self.mapView.style addLayer:layer];
 }
-#endif
 
 - (void)stylePolygonWithDDS {
     CLLocationCoordinate2D leftCoords[] = {

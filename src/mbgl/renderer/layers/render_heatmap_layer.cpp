@@ -53,6 +53,15 @@ void RenderHeatmapLayer::transition(const TransitionParameters& parameters) {
     updateColorRamp();
 }
 
+#if MLN_DRAWABLE_RENDERER
+void RenderHeatmapLayer::layerChanged(const TransitionParameters& parameters,
+                                      const Immutable<style::Layer::Impl>& impl,
+                                      UniqueChangeRequestVec& changes) {
+    RenderLayer::layerChanged(parameters, impl, changes);
+    textureTweaker.reset();
+}
+#endif
+
 void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     auto properties = makeMutable<HeatmapLayerProperties>(staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
                                                           unevaluated.evaluate(parameters));
@@ -63,16 +72,11 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup) {
-        auto newTextureTweaker = std::make_shared<HeatmapTextureLayerTweaker>(getID(), evaluatedProperties);
-        replaceTweaker(textureTweaker, std::move(newTextureTweaker), {layerGroup});
+    if (layerTweaker) {
+        layerTweaker->updateProperties(evaluatedProperties);
     }
-
-    if (renderTarget) {
-        if (auto tileLayerGroup = renderTarget->getLayerGroup(0)) {
-            auto newTweaker = std::make_shared<HeatmapLayerTweaker>(getID(), evaluatedProperties);
-            replaceTweaker(layerTweaker, std::move(newTweaker), {std::move(tileLayerGroup)});
-        }
+    if (textureTweaker) {
+        textureTweaker->updateProperties(evaluatedProperties);
     }
 #endif
 }
@@ -273,10 +277,8 @@ namespace {
 
 constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
-const StringIdentity idHeatmapInterpolateUBOName = stringIndexer().get("HeatmapInterpolateUBO");
+
 const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
-const StringIdentity idTexImageName = stringIndexer().get("u_image");
-const StringIdentity idTexColorRampName = stringIndexer().get("u_color_ramp");
 
 } // namespace
 
@@ -288,8 +290,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                 const std::shared_ptr<UpdateParameters>&,
                                 [[maybe_unused]] const RenderTree& renderTree,
                                 UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -398,7 +398,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             auto& uniforms = drawable.mutableUniformBuffers();
 
             if (auto buffer = getInterpolateBuffer()) {
-                uniforms.addOrReplace(idHeatmapInterpolateUBOName, std::move(buffer));
+                uniforms.set(idHeatmapInterpolateUBO, std::move(buffer));
             }
         });
 
@@ -463,7 +463,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             auto& uniforms = drawable->mutableUniformBuffers();
 
             if (auto buffer = getInterpolateBuffer()) {
-                uniforms.addOrReplace(idHeatmapInterpolateUBOName, std::move(buffer));
+                uniforms.set(idHeatmapInterpolateUBO, std::move(buffer));
             }
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
@@ -499,8 +499,6 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     // TODO: Don't rebuild drawables every time
     textureLayerGroup->clearDrawables();
 
-    std::unique_ptr<gfx::DrawableBuilder> heatmapTextureBuilder;
-
     if (!sharedTextureVertices) {
         sharedTextureVertices = std::make_shared<TextureVertexVector>(RenderStaticData::heatmapTextureVertices());
     }
@@ -515,7 +513,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::AttributeDataType::Short2);
     }
 
-    heatmapTextureBuilder = context.createDrawableBuilder("heatmapTexture");
+    auto heatmapTextureBuilder = context.createDrawableBuilder("heatmapTexture");
     heatmapTextureBuilder->setShader(heatmapTextureShader);
     heatmapTextureBuilder->setEnableDepth(false);
     heatmapTextureBuilder->setColorMode(gfx::ColorMode::alphaBlended());
@@ -529,18 +527,13 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     heatmapTextureBuilder->setSegments(
         gfx::Triangles(), RenderStaticData::quadTriangleIndices().vector(), segments.data(), segments.size());
 
-    auto imageLocation = heatmapTextureShader->getSamplerLocation(idTexImageName);
-    if (imageLocation.has_value()) {
-        heatmapTextureBuilder->setTexture(renderTarget->getTexture(), imageLocation.value());
-    }
-    auto colorRampLocation = heatmapTextureShader->getSamplerLocation(idTexColorRampName);
-    if (colorRampLocation.has_value()) {
-        std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
-        texture->setImage(colorRamp);
-        texture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        heatmapTextureBuilder->setTexture(std::move(texture), colorRampLocation.value());
-    }
+    heatmapTextureBuilder->setTexture(renderTarget->getTexture(), idHeatmapImageTexture);
+
+    std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
+    texture->setImage(colorRamp);
+    texture->setSamplerConfiguration(
+        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+    heatmapTextureBuilder->setTexture(std::move(texture), idHeatmapColorRampTexture);
 
     heatmapTextureBuilder->flush(context);
 

@@ -17,6 +17,7 @@ permissions:
 
 jobs:
   pr-bloaty:
+    if: github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -45,7 +46,7 @@ jobs:
 
       - name: Cache Bloaty
         id: cache-bloaty
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: bloaty/build/bloaty
           key: bloaty-${{ env.bloaty_sha }}
@@ -110,6 +111,7 @@ jobs:
           path: message.md
 
   pr-benchmark:
+    if: github.event.workflow_run.event == 'pull_request'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4

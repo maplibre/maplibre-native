@@ -19,18 +19,16 @@ UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncod
     : commandEncoder(commandEncoder_) {
     auto& resource = renderable.getResource<RenderableResource>();
 
-    if (!resource.getCommandBuffer()) {
-        resource.bind();
-    }
+    resource.bind();
 
     if (const auto& buffer_ = resource.getCommandBuffer()) {
         buffer = buffer_;
-        if (auto upd = resource.getUploadPassDescriptor()) {
-            encoder = NS::RetainPtr(buffer->blitCommandEncoder(upd.get()));
-        }
+        // blit encoder is not being used yet
+        // if (auto upd = resource.getUploadPassDescriptor()) {
+        //    encoder = NS::RetainPtr(buffer->blitCommandEncoder(upd.get()));
+        //}
+        // assert(encoder);
     }
-
-    assert(encoder);
 
     // Push the groups already accumulated by the encoder
     commandEncoder.visitDebugGroups([this](const auto& group) {
@@ -253,14 +251,12 @@ NS::String* toNSString(const char* str) {
 } // namespace
 
 void UploadPass::pushDebugGroup(const char* name) {
-    assert(encoder);
     if (encoder) {
         encoder->pushDebugGroup(toNSString(name));
     }
 }
 
 void UploadPass::popDebugGroup() {
-    assert(encoder);
     if (encoder) {
         encoder->popDebugGroup();
     }

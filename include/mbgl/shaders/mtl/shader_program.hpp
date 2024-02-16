@@ -14,27 +14,24 @@
 namespace mbgl {
 namespace shaders {
 struct AttributeInfo {
-    AttributeInfo(std::size_t index, gfx::AttributeDataType dataType, std::size_t count, std::string_view name);
+    AttributeInfo(std::size_t index, gfx::AttributeDataType dataType, std::string_view name);
     std::size_t index;
     gfx::AttributeDataType dataType;
-    std::size_t count;
     std::string_view name;
     StringIdentity nameID;
 };
 struct UniformBlockInfo {
-    UniformBlockInfo(std::size_t index, bool vertex, bool fragment, std::size_t size, std::string_view name);
+    UniformBlockInfo(std::size_t index, bool vertex, bool fragment, std::size_t size, std::size_t id);
     std::size_t index;
     bool vertex;
     bool fragment;
     std::size_t size;
-    std::string_view name;
-    StringIdentity nameID;
+    std::size_t id;
 };
 struct TextureInfo {
-    TextureInfo(std::size_t index, std::string_view name);
+    TextureInfo(std::size_t index, std::size_t id);
     std::size_t index;
-    std::string_view name;
-    StringIdentity nameID;
+    std::size_t id;
 };
 } // namespace shaders
 namespace mtl {
@@ -58,7 +55,7 @@ public:
                                                      const MTLVertexDescriptorPtr&,
                                                      const gfx::ColorMode& colorMode) const;
 
-    std::optional<uint32_t> getSamplerLocation(const StringIdentity id) const override;
+    std::optional<size_t> getSamplerLocation(const size_t id) const override;
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
 
@@ -76,7 +73,7 @@ protected:
     MTLFunctionPtr fragmentFunction;
     UniformBlockArray uniformBlocks;
     VertexAttributeArray vertexAttributes;
-    std::unordered_map<StringIdentity, std::size_t> textureBindings;
+    std::array<std::optional<size_t>, shaders::maxTextureCountPerShader> textureBindings;
 };
 
 } // namespace mtl

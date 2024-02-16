@@ -135,11 +135,11 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   }
 
   @Override
-  public void onDidFinishRenderingFrame(boolean fully) {
+  public void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime) {
     try {
       if (!onDidFinishRenderingFrameList.isEmpty()) {
         for (MapView.OnDidFinishRenderingFrameListener listener : onDidFinishRenderingFrameList) {
-          listener.onDidFinishRenderingFrame(fully);
+          listener.onDidFinishRenderingFrame(fully, frameEncodingTime, frameRenderingTime);
         }
       }
     } catch (Throwable err) {

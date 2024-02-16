@@ -1,7 +1,7 @@
 #import "MapDocument.h"
 
 #import "AppDelegate.h"
-#import "LimeGreenStyleLayer.h"
+#import "CustomStyleLayerExample.h"
 #import "DroppedPinAnnotation.h"
 #import "MLNMapsnapshotter.h"
 
@@ -787,7 +787,7 @@ NSArray<id <MLNAnnotation>> *MBXFlattenedShapes(NSArray<id <MLNAnnotation>> *sha
         [self.undoManager setActionName:@"Add Lime Green Layer"];
     }
 
-    LimeGreenStyleLayer *layer = [[LimeGreenStyleLayer alloc] initWithIdentifier:@"mbx-custom"];
+    CustomStyleLayerExample *layer = [[CustomStyleLayerExample alloc] initWithIdentifier:@"mbx-custom"];
     MLNStyleLayer *houseNumberLayer = [self.mapView.style layerWithIdentifier:@"housenum-label"];
     if (houseNumberLayer) {
         [self.mapView.style insertLayer:layer belowLayer:houseNumberLayer];

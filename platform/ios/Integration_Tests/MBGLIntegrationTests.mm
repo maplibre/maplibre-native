@@ -17,7 +17,7 @@
 
 // This test does not strictly need to be in this test file/target. Including here for convenience.
 - (void)testOpenGLLayerDoesNotLeakWhenCreatedAndDestroyedWithoutAddingToStyle {
-    MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+    MLNCustomStyleLayer *layer = [[MLNCustomStyleLayer alloc] initWithIdentifier:@"gl-layer"];
     __weak id weakLayer = layer;
     layer = nil;
 
@@ -31,7 +31,7 @@
         __weak id weakLayer = nil;
 
         @autoreleasepool {
-            MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+            MLNCustomStyleLayer *layer = [[MLNCustomStyleLayer alloc] initWithIdentifier:@"gl-layer"];
             [self.style insertLayer:layer atIndex:0];
             weakLayer = layer;
 
@@ -49,15 +49,15 @@
 }
 
 - (void)testReusingOpenGLLayerIdentifier {
-    __weak MLNOpenGLStyleLayer *weakLayer2;
+    __weak MLNCustomStyleLayer *weakLayer2;
 
     @autoreleasepool {
-        MLNOpenGLStyleLayer *layer1 = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+        MLNCustomStyleLayer *layer1 = [[MLNCustomStyleLayer alloc] initWithIdentifier:@"gl-layer"];
         [self.style insertLayer:layer1 atIndex:0];
         [self waitForMapViewToBeRendered];
         [self.style removeLayer:layer1];
 
-        MLNOpenGLStyleLayer *layer2 = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+        MLNCustomStyleLayer *layer2 = [[MLNCustomStyleLayer alloc] initWithIdentifier:@"gl-layer"];
         weakLayer2 = layer2;
 
         XCTAssertNotNil(layer2);
@@ -88,7 +88,7 @@
         __weak id retrievedLayer = nil;
         
         @autoreleasepool {
-            MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+            MLNCustomStyleLayer *layer = [[MLNCustomStyleLayer alloc] initWithIdentifier:@"gl-layer"];
             [self.style insertLayer:layer atIndex:0];
             layer = nil;
             
@@ -110,7 +110,7 @@
 }
 
 - (void)testReusingOpenGLLayer {
-    MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+    MLNCustomStyleLayer *layer = [[MLNCustomStyleLayer alloc] initWithIdentifier:@"gl-layer"];
     [self.style insertLayer:layer atIndex:0];
     [self waitForMapViewToBeRendered];
     
@@ -127,7 +127,7 @@
 - (void)testOpenGLLayerDoesNotLeakWhenRemovedFromStyle {
     __weak id weakLayer;
     @autoreleasepool {
-        MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+        MLNCustomStyleLayer *layer = [[MLNCustomStyleLayer alloc] initWithIdentifier:@"gl-layer"];
         weakLayer = layer;
         [self.style insertLayer:layer atIndex:0];
         layer = nil;
@@ -146,11 +146,11 @@
 }
 
 - (void)testOpenGLLayerDoesNotLeakWhenStyleChanged {
-    __weak MLNOpenGLStyleLayer *weakLayer;
+    __weak MLNCustomStyleLayer *weakLayer;
 
     @autoreleasepool {
         {
-            MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+            MLNCustomStyleLayer *layer = [[MLNCustomStyleLayer alloc] initWithIdentifier:@"gl-layer"];
             weakLayer = layer;
             [self.style insertLayer:layer atIndex:0];
             layer = nil;
@@ -192,7 +192,7 @@
         self.styleLoadingExpectation = [self expectationWithDescription:@"Map view should finish loading style."];
         [self waitForExpectationsWithTimeout:10 handler:nil];
 
-        MLNOpenGLStyleLayer *layer = [[MLNOpenGLStyleLayer alloc] initWithIdentifier:@"gl-layer"];
+        MLNCustomStyleLayer *layer = [[MLNCustomStyleLayer alloc] initWithIdentifier:@"gl-layer"];
         weakLayer = layer;
         [mapView2.style insertLayer:layer atIndex:0];
         layer = nil;

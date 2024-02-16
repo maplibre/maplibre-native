@@ -13,8 +13,9 @@ namespace mbgl {
 class TileAtlasTextures;
 using TileAtlasTexturesPtr = std::shared_ptr<TileAtlasTextures>;
 
-namespace gfx {
+class PaintParameters;
 
+namespace gfx {
 class Drawable;
 
 /**
@@ -23,21 +24,23 @@ class Drawable;
 class DrawableAtlasesTweaker : public gfx::DrawableTweaker {
 public:
     DrawableAtlasesTweaker(TileAtlasTexturesPtr atlases_,
-                           const StringIdentity iconNameId_,
-                           const StringIdentity glyphNameId_,
+                           const std::optional<size_t> iconTextureId_,
+                           const std::optional<size_t> glyphTextureId_,
                            bool isText_,
                            const bool sdfIcons_,
                            const style::AlignmentType rotationAlignment_,
                            const bool iconScaled_,
                            const bool textSizeIsZoomConstant_)
         : atlases(std::move(atlases_)),
-          iconNameId(iconNameId_),
-          glyphNameId(glyphNameId_),
+          iconTextureId(iconTextureId_),
+          glyphTextureId(glyphTextureId_),
           isText(isText_),
           sdfIcons(sdfIcons_),
           rotationAlignment(rotationAlignment_),
           iconScaled(iconScaled_),
-          textSizeIsZoomConstant(textSizeIsZoomConstant_) {}
+          textSizeIsZoomConstant(textSizeIsZoomConstant_) {
+        assert(iconTextureId_ != glyphTextureId_);
+    }
     ~DrawableAtlasesTweaker() override = default;
 
     void init(Drawable&) override;
@@ -48,8 +51,8 @@ protected:
     void setupTextures(Drawable&, const bool);
 
     TileAtlasTexturesPtr atlases;
-    StringIdentity iconNameId;
-    StringIdentity glyphNameId;
+    std::optional<size_t> iconTextureId;
+    std::optional<size_t> glyphTextureId;
     bool isText;
 
     const bool sdfIcons;

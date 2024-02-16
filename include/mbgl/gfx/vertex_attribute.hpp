@@ -33,7 +33,6 @@ class VertexAttributeArray;
 class VertexVectorBase;
 
 using UniqueVertexAttribute = std::unique_ptr<VertexAttribute>;
-using UniqueVertexAttributeArray = std::unique_ptr<VertexAttributeArray>;
 
 class VertexAttribute {
 public:
@@ -304,17 +303,18 @@ public:
     /// Add a new attribute element.
     /// Returns a pointer to the new element on success, or null if the attribute already exists.
     /// The result is valid only until the next non-const method call on this class.
+    /// @param count Number of items, zero for shared data
     const std::unique_ptr<VertexAttribute>& add(const StringIdentity id,
                                                 int index = -1,
-                                                AttributeDataType = AttributeDataType::Invalid,
-                                                std::size_t count = 1);
+                                                AttributeDataType type = AttributeDataType::Invalid,
+                                                std::size_t count = 0);
 
     /// Add a new attribute element if it doesn't already exist.
     /// Returns a pointer to the new element on success, or null if the type or count conflict with an existing entry.
     /// The result is valid only until the next non-const method call on this class.
     /// @param index index to match, or -1 for any
     /// @param type type to match, or `Invalid` for any
-    /// @param count type to match, or 0 for any
+    /// @param count Number of items, zero for shared data
     const std::unique_ptr<VertexAttribute>& getOrAdd(const StringIdentity id,
                                                      int index = -1,
                                                      AttributeDataType type = AttributeDataType::Invalid,
@@ -359,9 +359,25 @@ public:
     VertexAttributeArray& operator=(VertexAttributeArray&&);
     VertexAttributeArray& operator=(const VertexAttributeArray&) = delete;
 
-    /// Clone the collection
-
-    /// Copy another collection into this one
+    /// Specialized DataDrivenPaintProperty reader
+    /// @param binders Property binders for the target shader
+    /// @param evaluated Evaluated properties
+    /// @param propertiesAsUniforms [out] A set of string identities for the properties which will be constant, not
+    /// attributes.
+    /// @details The property name IDs refer to the "a\_" prefixed values to match the shader definitions.
+    template <typename... DataDrivenPaintProperty, typename Binders, typename Evaluated>
+    void readDataDrivenPaintProperties(const Binders& binders,
+                                       const Evaluated& evaluated,
+                                       mbgl::unordered_set<StringIdentity>* propertiesAsUniforms) {
+        // Read each property in the type pack
+        if (propertiesAsUniforms) {
+            propertiesAsUniforms->reserve(sizeof...(DataDrivenPaintProperty));
+        }
+        (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
+                                                              isConstant<DataDrivenPaintProperty>(evaluated),
+                                                              propertiesAsUniforms),
+         ...);
+    }
 
     /// Specialized DataDrivenPaintProperty reader
     /// @param binders Property binders for the target shader
@@ -377,7 +393,7 @@ public:
         propertiesAsUniforms.reserve(sizeof...(DataDrivenPaintProperty));
         (readDataDrivenPaintProperty<DataDrivenPaintProperty>(binders.template get<DataDrivenPaintProperty>(),
                                                               isConstant<DataDrivenPaintProperty>(evaluated),
-                                                              propertiesAsUniforms),
+                                                              &propertiesAsUniforms),
          ...);
     }
 
@@ -391,7 +407,7 @@ protected:
     template <typename DataDrivenPaintProperty, typename Binder>
     void readDataDrivenPaintProperty(const Binder& binder,
                                      const bool isConstant,
-                                     mbgl::unordered_set<StringIdentity>& propertiesAsUniforms) {
+                                     mbgl::unordered_set<StringIdentity>* propertiesAsUniforms) {
         if (!binder) {
             return;
         }
@@ -407,9 +423,11 @@ protected:
             // Apply the property, or add it to the uniforms collection if it's constant.
             if (!isConstant && binder->getVertexCount() > 0) {
                 using Attribute = typename DataDrivenPaintProperty::Attribute;
-                applyPaintProperty<Attribute>(attrIndex, getOrAdd(*attributeNameID), binder);
-            } else {
-                propertiesAsUniforms.emplace(*attributeNameID);
+                const auto& attr = getOrAdd(
+                    *attributeNameID, /*index=*/-1, /*type=*/gfx::AttributeDataType::Invalid, /*count=*/0);
+                applyPaintProperty<Attribute>(attrIndex, attr, binder);
+            } else if (propertiesAsUniforms) {
+                propertiesAsUniforms->emplace(*attributeNameID);
             }
         }
     }

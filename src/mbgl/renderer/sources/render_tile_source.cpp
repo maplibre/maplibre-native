@@ -66,7 +66,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         return;
     }
     static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
-    static const StringIdentity idDebugUBOName = stringIndexer().get("DebugUBO");
     std::unique_ptr<gfx::DrawableBuilder> debugBuilder = [&]() -> std::unique_ptr<gfx::DrawableBuilder> {
         auto builder = context.createDrawableBuilder("debug-builder");
         builder->setShader(debugShader);
@@ -132,18 +131,13 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
     // create texture. to be reused for all the tiles of the debug layers
     auto texture = context.createTexture2D();
-    std::optional<uint32_t> samplerLocation;
     {
         std::array<uint8_t, 4> data{{0, 0, 0, 0}};
         auto emptyImage = std::make_shared<PremultipliedImage>(Size(1, 1), data.data(), data.size());
         texture->setImage(emptyImage);
         texture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        static const StringIdentity idDebugOverlayUniformName = stringIndexer().get("u_overlay");
-        samplerLocation = debugShader->getSamplerLocation(idDebugOverlayUniformName);
     }
-    assert(samplerLocation.has_value());
-    if (!samplerLocation.has_value()) return;
 
     // function to update existing tile drawables with UBO value. return number of updated drawables
     const auto updateDrawables =
@@ -151,7 +145,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         auto updatedCount = tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             // update existing drawable
             auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(idDebugUBOName, &debugUBO, context);
+            uniforms.createOrUpdate(idDebugUBO, &debugUBO, context);
         });
         return updatedCount;
     };
@@ -173,14 +167,14 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         debugBuilder->addVertices(verts, 0, verts.size());
         debugBuilder->setSegments(mode, indexes, segments.data(), segments.size());
         // texture
-        debugBuilder->setTexture(texture, samplerLocation.value());
+        debugBuilder->setTexture(texture, idDebugOverlayTexture);
 
         // finish
         debugBuilder->flush(context);
         for (auto& drawable : debugBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
             auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.createOrUpdate(idDebugUBOName, &debugUBO, context);
+            uniforms.createOrUpdate(idDebugUBO, &debugUBO, context);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
         }
@@ -208,24 +202,19 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
                 const auto matrix = LayerTweaker::getTileMatrix(
-                    tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, false);
+                    tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-                static const StringIdentity idLineDynamicUBOName = stringIndexer().get("LineDynamicUBO");
                 const shaders::LineDynamicUBO dynamicUBO = {
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     0,
                     0};
 
-                static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
                 const shaders::LineUBO lineUBO{/*matrix = */ util::cast<float>(matrix),
                                                /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
                                                0,
                                                0,
                                                0};
 
-                static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
-
-                static const StringIdentity idLineInterpolationUBOName = stringIndexer().get("LineInterpolationUBO");
                 const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
                                                                          /*blur_t =*/0.f,
                                                                          /*opacity_t =*/0.f,
@@ -235,10 +224,10 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                                                          0,
                                                                          0};
                 auto& uniforms = drawable.mutableUniformBuffers();
-                uniforms.createOrUpdate(idLineDynamicUBOName, &dynamicUBO, parameters.context);
-                uniforms.createOrUpdate(idLineUBOName, &lineUBO, parameters.context);
-                uniforms.createOrUpdate(idLinePropertiesUBOName, &linePropertiesUBO, parameters.context);
-                uniforms.createOrUpdate(idLineInterpolationUBOName, &lineInterpolationUBO, parameters.context);
+                uniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
+                uniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
+                uniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
+                uniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
             };
 
         private:

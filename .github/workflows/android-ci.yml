@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - android-*.*.x
     tags:
       - "android-*"
 
@@ -27,7 +28,7 @@ jobs:
       - name: Get all Android files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: tj-actions/changed-files@v40
+        uses: tj-actions/changed-files@v42
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -70,7 +71,7 @@ jobs:
           java-version: "17"
 
       - name: Cache node modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-node-modules
         with:
@@ -90,7 +91,7 @@ jobs:
           key: ${{ github.job }}
 
       - name: restore-gradle-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: gradle-v1
         with:
@@ -121,12 +122,12 @@ jobs:
       - name: Build Benchmark, copy to platform/android
         if: github.ref != 'refs/heads/main'
         run: |
-          ./gradlew assembleDrawableRelease assembleDrawableReleaseAndroidTest
+          ./gradlew assembleDrawableRelease assembleDrawableReleaseAndroidTest -PtestBuildType=release
           cp MapboxGLAndroidSDKTestApp/build/outputs/apk/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release.apk .
           cp MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk .
 
       - name: Create artifact for benchmark APKs 
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: github.ref != 'refs/heads/main'
         with:
           if-no-files-found: error
@@ -140,7 +141,8 @@ jobs:
 
       - name: Build UI tests
         if: github.ref == 'refs/heads/main'
-        run: make android-ui-test-arm-v8
+        run: |
+          ./gradlew assembleLegacyDebug assembleLegacyDebugAndroidTest -PtestBuildType=debug
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main'
@@ -174,8 +176,8 @@ jobs:
       - name: Upload Android UI test
         if: github.ref == 'refs/heads/main'
         run: |
-          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/legacy/release/MapboxGLAndroidSDKTestApp-legacy-debug.apk '${{ steps.upload-android-app.outputs.url }}'
-          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/legacy/release/MapboxGLAndroidSDKTestApp-legacy-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/legacy/debug/MapboxGLAndroidSDKTestApp-legacy-debug.apk '${{ steps.upload-android-app.outputs.url }}'
+          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/legacy/debug/MapboxGLAndroidSDKTestApp-legacy-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
 
       - name: Write uploads.env
         if: github.ref == 'refs/heads/main'
@@ -184,7 +186,7 @@ jobs:
           echo "ANDROID_APP_ARN=${{ steps.upload-android-app.outputs.arn }}" >> uploads.env
           echo "ANDROID_TEST_ARN=${{ steps.upload-android-test.outputs.arn }}" >> uploads.env
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: github.ref == 'refs/heads/main'
         with:
           if-no-files-found: error
@@ -200,7 +202,7 @@ jobs:
         working-directory: ./render-test/android
 
       - name: Store Render Test .apk files
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-render-tests
           if-no-files-found: error
@@ -209,7 +211,7 @@ jobs:
             ./render-test/android/RenderTests.apk
 
       - name: Store debug artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: debug-artifacts
           path: |
@@ -227,7 +229,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'maplibre' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/android-annotations')
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: uploadsEnv
 

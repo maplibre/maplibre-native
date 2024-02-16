@@ -17,11 +17,11 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idRasterDrawableUBOName = stringIndexer().get("RasterDrawableUBO");
-
 void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                  [[maybe_unused]] const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
+
+    propertiesUpdated = false;
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!checkTweakDrawable(drawable)) {
@@ -65,7 +65,14 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
         } else {
             // this is a tile drawable
             const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-            matrix = parameters.matrixForTile(tileID, !parameters.state.isChanging());
+            matrix = getTileMatrix(tileID,
+                                   parameters,
+                                   {0.f, 0.f},
+                                   TranslateAnchorType::Viewport,
+                                   false,
+                                   false,
+                                   drawable,
+                                   !parameters.state.isChanging());
         }
 
         const RasterDrawableUBO drawableUBO{
@@ -83,7 +90,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             0,
             0};
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idRasterDrawableUBOName, &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(idRasterDrawableUBO, &drawableUBO, parameters.context);
     });
 }
 
