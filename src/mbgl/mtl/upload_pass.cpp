@@ -158,7 +158,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::BufferUsageType usage,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) {
     gfx::AttributeBindingArray bindings;
-    bindings.resize(defaults.size());
+    bindings.resize(defaults.allocatedSize());
 
     constexpr std::size_t align = 16;
     constexpr std::uint8_t padding = 0;
@@ -169,7 +169,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     uint32_t vertexStride = 0;
 
     // For each attribute in the program, with the corresponding default and optional override...
-    const auto resolveAttr = [&](const StringIdentity id, auto& default_, auto& override_) -> void {
+    const auto resolveAttr = [&](const size_t id, auto& default_, auto& override_) -> void {
         auto& effectiveAttr = override_ ? *override_ : default_;
         const auto& defaultAttr = static_cast<const VertexAttribute&>(default_);
         const auto stride = defaultAttr.getStride();

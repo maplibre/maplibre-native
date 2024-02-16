@@ -14,11 +14,10 @@
 namespace mbgl {
 namespace shaders {
 struct AttributeInfo {
-    AttributeInfo(std::size_t index, gfx::AttributeDataType dataType, std::string_view name);
+    AttributeInfo(std::size_t index, gfx::AttributeDataType dataType, std::size_t id);
     std::size_t index;
     gfx::AttributeDataType dataType;
-    std::string_view name;
-    StringIdentity nameID;
+    std::size_t id;
 };
 struct UniformBlockInfo {
     UniformBlockInfo(std::size_t index, bool vertex, bool fragment, std::size_t size, std::size_t id);
