@@ -15,17 +15,17 @@ public:
     CollatorExpression(std::unique_ptr<Expression>&& caseSensitive,
                        std::unique_ptr<Expression>&& diacriticSensitive,
                        std::unique_ptr<Expression>&& locale);
-    CollatorExpression(ParseResult&& caseSensitive, ParseResult&& diacriticSensitive, ParseResult&& locale)
-        : CollatorExpression(caseSensitive ? std::move(*caseSensitive) : std::unique_ptr<Expression>{},
-                             diacriticSensitive ? std::move(*diacriticSensitive) : std::unique_ptr<Expression>{},
-                             locale ? std::move(*locale) : std::unique_ptr<Expression>{}) {}
+    CollatorExpression(ParseResult&& caseSensitive_, ParseResult&& diacriticSensitive_, ParseResult&& locale_)
+        : CollatorExpression(caseSensitive_ ? std::move(*caseSensitive_) : std::unique_ptr<Expression>{},
+                             diacriticSensitive_ ? std::move(*diacriticSensitive_) : std::unique_ptr<Expression>{},
+                             locale_ ? std::move(*locale_) : std::unique_ptr<Expression>{}) {}
 
     EvaluationResult evaluate(const EvaluationContext&) const override;
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
 
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression&) const override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override {
         // Technically the set of possible outputs is the combinatoric set of
