@@ -222,8 +222,8 @@ public:
 
         // set UBOs
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idCustomSymbolIconDrawableUBO, &drawableUBO, parameters.context);
-        uniforms.createOrUpdate(idCustomSymbolIconParametersUBO, &parametersUBO, parameters.context);
+        uniforms.createOrUpdate(idCustomSymbolDrawableUBO, &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(idCustomSymbolParametersUBO, &parametersUBO, parameters.context);
     };
 
 private:
@@ -394,7 +394,7 @@ void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
 
     // texture
     if (symbolOptions.texture) {
-        builder->setTexture(symbolOptions.texture, idCustomSymbolIconTexture);
+        builder->setTexture(symbolOptions.texture, idCustomSymbolImageTexture);
     }
 
     // create fill tweaker

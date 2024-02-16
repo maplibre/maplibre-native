@@ -83,19 +83,24 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::CollisionCircleShader, gfx:
     AttributeInfo{"a_placed", idCollisionPlacedVertexAttribute},
 };
 const std::vector<UniformBlockInfo>
-    ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"CustomSymbolIconDrawableUBO", idCustomSymbolIconDrawableUBO},
-        UniformBlockInfo{"CustomSymbolIconParametersUBO", idCustomSymbolIconParametersUBO},
-};
-const std::vector<TextureInfo> ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>::textures = {
-    TextureInfo{"u_texture", idSymbolImageTexture},
-};
-
-const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::CollisionCircleShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
         UniformBlockInfo{"CollisionCircleUBO", idCollisionUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::CollisionCircleShader, gfx::Backend::Type::OpenGL>::textures = {};
+
+// Custom Symbol Icon
+const std::vector<AttributeInfo> ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>::attributes = {
+    AttributeInfo{"a_pos", idCustomSymbolPosVertexAttribute},
+    AttributeInfo{"a_tex", idCustomSymbolTexVertexAttribute},
+};
+const std::vector<UniformBlockInfo>
+    ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
+        UniformBlockInfo{"CustomSymbolIconDrawableUBO", idCustomSymbolDrawableUBO},
+        UniformBlockInfo{"CustomSymbolIconParametersUBO", idCustomSymbolParametersUBO},
+};
+const std::vector<TextureInfo> ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>::textures = {
+    TextureInfo{"u_texture", idCustomSymbolImageTexture},
+};
 
 // Debug
 const std::vector<AttributeInfo> ShaderInfo<BuiltIn::DebugShader, gfx::Backend::Type::OpenGL>::attributes = {

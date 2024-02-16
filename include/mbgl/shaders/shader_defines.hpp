@@ -30,7 +30,7 @@ static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backg
                                                        static_cast<size_t>(circleUBOCount),
                                                        static_cast<size_t>(clippingMaskUBOCount),
                                                        static_cast<size_t>(collisionUBOCount),
-                                                       static_cast<size_t>(customDrawableUBOCount),
+                                                       static_cast<size_t>(customSymbolUBOCount),
                                                        static_cast<size_t>(debugUBOCount),
                                                        static_cast<size_t>(fillUBOCount),
                                                        static_cast<size_t>(fillOutlineUBOCount),
@@ -68,8 +68,8 @@ enum {
 };
 
 enum {
-    idCustomSymbolIconTexture,
-    customSymbolIconTextureCount
+    idCustomSymbolImageTexture,
+    customSymbolTextureCount
 };
 
 enum {
@@ -119,7 +119,7 @@ static constexpr auto maxTextureCountPerShader = std::max({static_cast<size_t>(b
                                                            static_cast<size_t>(circleTextureCount),
                                                            static_cast<size_t>(clippingMaskTextureCount),
                                                            static_cast<size_t>(collisionTextureCount),
-                                                           static_cast<size_t>(customSymbolIconTextureCount),
+                                                           static_cast<size_t>(customSymbolTextureCount),
                                                            static_cast<size_t>(debugTextureCount),
                                                            static_cast<size_t>(fillTextureCount),
                                                            static_cast<size_t>(fillExtrusionTextureCount),
