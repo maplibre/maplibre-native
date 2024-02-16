@@ -199,9 +199,9 @@ inline constexpr Dependency operator|(Dependency x, Dependency y) {
 class Expression {
 public:
     Expression(Kind kind_, type::Type type_, Dependency dependencies_)
-        : kind(kind_),
-          type(std::move(type_)),
-          dependencies(dependencies_) {}
+        : dependencies(dependencies_),
+          kind(kind_),
+          type(std::move(type_)) {}
     virtual ~Expression() = default;
 
     virtual EvaluationResult evaluate(const EvaluationContext& params) const = 0;
