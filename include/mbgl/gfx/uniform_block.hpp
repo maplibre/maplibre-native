@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mbgl/shaders/ubo_max_count.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace gfx {

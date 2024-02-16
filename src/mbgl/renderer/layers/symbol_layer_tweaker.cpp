@@ -29,13 +29,9 @@ using namespace shaders;
 
 namespace {
 
-Size getTexSize(const gfx::Drawable& drawable, const StringIdentity nameId) {
-    if (const auto& shader = drawable.getShader()) {
-        if (const auto index = shader->getSamplerLocation(nameId)) {
-            if (const auto& tex = drawable.getTexture(*index)) {
-                return tex->getSize();
-            }
-        }
+Size getTexSize(const gfx::Drawable& drawable, const size_t texId) {
+    if (const auto& tex = drawable.getTexture(texId)) {
+        return tex->getSize();
     }
     return {0, 0};
 }
@@ -43,9 +39,6 @@ Size getTexSize(const gfx::Drawable& drawable, const StringIdentity nameId) {
 std::array<float, 2> toArray(const Size& s) {
     return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
-
-const StringIdentity idTexUniformName = stringIndexer().get("u_texture");
-const StringIdentity idTexIconUniformName = stringIndexer().get("u_texture_icon");
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
@@ -152,8 +145,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
             /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
 
-            /*.texsize=*/toArray(getTexSize(drawable, idTexUniformName)),
-            /*.texsize_icon=*/toArray(getTexSize(drawable, idTexIconUniformName)),
+            /*.texsize=*/toArray(getTexSize(drawable, idSymbolImageTexture)),
+            /*.texsize_icon=*/toArray(getTexSize(drawable, idSymbolImageIconTexture)),
 
             /*.gamma_scale=*/gammaScale,
             /*.rotate_symbol=*/rotateInShader,

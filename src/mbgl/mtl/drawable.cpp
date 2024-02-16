@@ -386,27 +386,29 @@ void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
 }
 
 void Drawable::bindTextures(RenderPass& renderPass) const noexcept {
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            const auto& location = pair.first;
-            static_cast<mtl::Texture2D&>(*tex).bind(renderPass, location);
+    for (size_t id = 0; id < textures.size(); id++) {
+        if (const auto& texture = textures[id]) {
+            if (const auto& location = shader->getSamplerLocation(id)) {
+                static_cast<mtl::Texture2D&>(*texture).bind(renderPass, static_cast<int32_t>(*location));
+            }
         }
     }
 }
 
 void Drawable::unbindTextures(RenderPass& renderPass) const noexcept {
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            const auto& location = pair.first;
-            static_cast<mtl::Texture2D&>(*tex).unbind(renderPass, location);
+    for (size_t id = 0; id < textures.size(); id++) {
+        if (const auto& texture = textures[id]) {
+            if (const auto& location = shader->getSamplerLocation(id)) {
+                static_cast<mtl::Texture2D&>(*texture).unbind(renderPass, static_cast<int32_t>(*location));
+            }
         }
     }
 }
 
 void Drawable::uploadTextures(UploadPass&) const noexcept {
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            static_cast<mtl::Texture2D&>(*tex).upload();
+    for (const auto& texture : textures) {
+        if (texture) {
+            texture->upload();
         }
     }
 }
@@ -584,7 +586,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     const bool texturesNeedUpload = std::any_of(
-        textures.begin(), textures.end(), [](const auto& pair) { return pair.second && pair.second->needsUpload(); });
+        textures.begin(), textures.end(), [](const auto& texture) { return texture && texture->needsUpload(); });
 
     if (texturesNeedUpload) {
         uploadTextures(uploadPass);

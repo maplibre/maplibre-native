@@ -766,8 +766,6 @@ const auto idPosOffsetAttribName = stringIndexer().get(posOffsetAttribName);
 const auto idPixOffsetAttribName = stringIndexer().get("a_pixeloffset");
 const auto idProjPosAttribName = stringIndexer().get("a_projected_pos");
 const auto idFadeOpacityAttribName = stringIndexer().get("a_fade_opacity");
-const auto idTexUniformName = stringIndexer().get("u_texture");
-const auto idTexIconUniformName = stringIndexer().get("u_texture_icon");
 
 void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const bool isText,
@@ -1293,8 +1291,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     const bool textSizeIsZoomConstant =
                         bucket.textSizeBinder->evaluateForZoom(static_cast<float>(state.getZoom())).isZoomConstant;
                     tileInfo.textTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
-                                                                                         idTexIconUniformName,
-                                                                                         idTexUniformName,
+                                                                                         idSymbolImageIconTexture,
+                                                                                         idSymbolImageTexture,
                                                                                          isText,
                                                                                          false,
                                                                                          values.rotationAlignment,
@@ -1304,8 +1302,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 if (!isText && !tileInfo.iconTweaker) {
                     const bool iconScaled = layout.get<IconSize>().constantOr(1.0) != 1.0 || bucket.iconsNeedLinear;
                     tileInfo.iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
-                                                                                         idTexIconUniformName,
-                                                                                         idTexUniformName,
+                                                                                         idSymbolImageIconTexture,
+                                                                                         idSymbolImageTexture,
                                                                                          isText,
                                                                                          sdfIcons,
                                                                                          values.rotationAlignment,
