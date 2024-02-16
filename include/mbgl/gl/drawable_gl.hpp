@@ -5,7 +5,6 @@
 #include <mbgl/gl/vertex_array.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
 #include <mbgl/programs/segment.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <memory>
 

@@ -13,7 +13,6 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <cstdint>
 #include <memory>
