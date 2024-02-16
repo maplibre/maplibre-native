@@ -68,9 +68,9 @@ public:
         FillExtrusionPaintProperties::PossiblyEvaluated);
     ~FillExtrusionLayerProperties() override;
 
-    unsigned long constantsMask() const override;
+    unsigned long constantsMask() const noexcept override;
 
-    const FillExtrusionLayer::Impl& layerImpl() const;
+    const FillExtrusionLayer::Impl& layerImpl() const noexcept;
     // Data members.
     CrossfadeParameters crossfade;
     FillExtrusionPaintProperties::PossiblyEvaluated evaluated;

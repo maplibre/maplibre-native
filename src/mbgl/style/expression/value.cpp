@@ -108,12 +108,12 @@ struct FromMBGLValue {
         return result;
     }
 
-    Value operator()(const std::string& s) { return s; }
-    Value operator()(const bool b) { return b; }
-    Value operator()(const NullValue) { return Null; }
-    Value operator()(const double v) { return v; }
-    Value operator()(const uint64_t& v) { return static_cast<double>(v); }
-    Value operator()(const int64_t& v) { return static_cast<double>(v); }
+    Value operator()(const std::string& s) noexcept { return s; }
+    Value operator()(const bool b) noexcept { return b; }
+    Value operator()(const NullValue) noexcept { return Null; }
+    Value operator()(const double v) noexcept { return v; }
+    Value operator()(const uint64_t& v) noexcept { return static_cast<double>(v); }
+    Value operator()(const int64_t& v) noexcept { return static_cast<double>(v); }
 };
 
 Value ValueConverter<mbgl::Value>::toExpressionValue(const mbgl::Value& value) {

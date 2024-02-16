@@ -12,7 +12,7 @@ class FormatSectionOverride final : public Expression {
 public:
     FormatSectionOverride(const type::Type& type_,
                           PossiblyEvaluatedPropertyValue<T> defaultValue_,
-                          std::string propertyName_)
+                          std::string propertyName_) noexcept
         : Expression(Kind::FormatSectionOverride, type_),
           defaultValue(std::move(defaultValue_)),
           propertyName(std::move(propertyName_)) {}
@@ -35,7 +35,7 @@ public:
         defaultValue.match([&fn](const style::PropertyExpression<T>& e) { fn(e.getExpression()); }, [](const T&) {});
     }
 
-    bool operator==(const Expression& e) const final {
+    bool operator==(const Expression& e) const noexcept final {
         if (e.getKind() == Kind::FormatSectionOverride) {
             const auto* other = static_cast<const FormatSectionOverride*>(&e);
 

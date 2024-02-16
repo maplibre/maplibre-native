@@ -12,18 +12,22 @@ namespace expression {
 
 class CollatorExpression : public Expression {
 public:
-    CollatorExpression(std::unique_ptr<Expression> caseSensitive,
-                       std::unique_ptr<Expression> diacriticSensitive,
-                       std::optional<std::unique_ptr<Expression>> locale);
+    CollatorExpression(std::unique_ptr<Expression>&& caseSensitive,
+                       std::unique_ptr<Expression>&& diacriticSensitive,
+                       std::unique_ptr<Expression>&& locale) noexcept;
+    CollatorExpression(ParseResult&& caseSensitive_, ParseResult&& diacriticSensitive_, ParseResult&& locale_) noexcept
+        : CollatorExpression(caseSensitive_ ? std::move(*caseSensitive_) : std::unique_ptr<Expression>{},
+                             diacriticSensitive_ ? std::move(*diacriticSensitive_) : std::unique_ptr<Expression>{},
+                             locale_ ? std::move(*locale_) : std::unique_ptr<Expression>{}) {}
 
     EvaluationResult evaluate(const EvaluationContext&) const override;
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
 
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
-    std::vector<std::optional<Value>> possibleOutputs() const override {
+    std::vector<std::optional<Value>> possibleOutputs() const noexcept override {
         // Technically the set of possible outputs is the combinatoric set of
         // Collators produced by all possibleOutputs of
         // locale/caseSensitive/diacriticSensitive But for the primary use of

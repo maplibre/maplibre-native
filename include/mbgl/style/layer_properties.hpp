@@ -15,23 +15,24 @@ class LayerProperties {
 public:
     virtual ~LayerProperties() = default;
     /// Returns constants mask for the data-driven properties.
-    virtual unsigned long constantsMask() const { return 0u; }
+    virtual unsigned long constantsMask() const noexcept { return 0u; }
+
     Immutable<Layer::Impl> baseImpl;
     /// Contains render passes used by the renderer, see `mbgl::RenderPass`.
     uint8_t renderPasses = 0u;
 
 protected:
-    LayerProperties(Immutable<Layer::Impl> impl)
+    LayerProperties(Immutable<Layer::Impl> impl) noexcept
         : baseImpl(std::move(impl)) {}
 };
 
 template <class Derived>
-inline const auto& getEvaluated(const Immutable<LayerProperties>& properties) {
+inline const auto& getEvaluated(const Immutable<LayerProperties>& properties) noexcept {
     return static_cast<const Derived&>(*properties).evaluated;
 }
 
 template <class Derived>
-inline const auto& getCrossfade(const Immutable<LayerProperties>& properties) {
+inline const auto& getCrossfade(const Immutable<LayerProperties>& properties) noexcept {
     return static_cast<const Derived&>(*properties).crossfade;
 }
 

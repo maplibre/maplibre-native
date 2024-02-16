@@ -14,7 +14,7 @@ namespace expression {
 class Coalesce : public Expression {
 public:
     using Args = std::vector<std::unique_ptr<Expression>>;
-    Coalesce(const type::Type& type_, Args args_)
+    Coalesce(const type::Type& type_, Args args_) noexcept
         : Expression(Kind::Coalesce, type_),
           args(std::move(args_)) {}
 
@@ -24,7 +24,7 @@ public:
 
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 

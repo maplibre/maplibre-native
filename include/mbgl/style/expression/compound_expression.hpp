@@ -29,17 +29,17 @@ struct SignatureBase;
 */
 class CompoundExpression : public Expression {
 public:
-    CompoundExpression(const detail::SignatureBase&, std::vector<std::unique_ptr<Expression>>);
+    CompoundExpression(const detail::SignatureBase&, std::vector<std::unique_ptr<Expression>>) noexcept;
 
     std::string getOperator() const override;
     EvaluationResult evaluate(const EvaluationContext& evaluationParams) const override;
-    std::vector<std::optional<Value>> possibleOutputs() const override;
+    std::vector<std::optional<Value>> possibleOutputs() const noexcept override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
-    std::optional<std::size_t> getParameterCount() const;
+    std::optional<std::size_t> getParameterCount() const noexcept;
 
-    static bool exists(const std::string& name);
+    static bool exists(const std::string& name) noexcept;
 
 protected:
     const detail::SignatureBase& signature;

@@ -10,7 +10,7 @@ namespace expression {
 
 class At : public Expression {
 public:
-    At(std::unique_ptr<Expression> index_, std::unique_ptr<Expression> input_)
+    At(std::unique_ptr<Expression> index_, std::unique_ptr<Expression> input_) noexcept
         : Expression(Kind::At, input_->getType().get<type::Array>().itemType),
           index(std::move(index_)),
           input(std::move(input_)) {}
@@ -20,7 +20,7 @@ public:
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
-    bool operator==(const Expression& e) const override {
+    bool operator==(const Expression& e) const noexcept override {
         if (e.getKind() == Kind::At) {
             auto rhs = static_cast<const At*>(&e);
             return *index == *(rhs->index) && *input == *(rhs->input);

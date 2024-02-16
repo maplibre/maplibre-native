@@ -21,11 +21,11 @@ SymbolLayerProperties::SymbolLayerProperties(
 
 SymbolLayerProperties::~SymbolLayerProperties() = default;
 
-unsigned long SymbolLayerProperties::constantsMask() const {
+unsigned long SymbolLayerProperties::constantsMask() const noexcept {
     return evaluated.constantsMask();
 }
 
-const SymbolLayer::Impl& SymbolLayerProperties::layerImpl() const {
+const SymbolLayer::Impl& SymbolLayerProperties::layerImpl() const noexcept {
     return static_cast<const SymbolLayer::Impl&>(*baseImpl);
 }
 

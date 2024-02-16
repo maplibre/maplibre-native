@@ -76,11 +76,11 @@ EvaluationResult toImage(const Value& imageValue) {
     return Image(toString(imageValue).c_str());
 }
 
-Coercion::Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_)
+Coercion::Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_) noexcept
     : Expression(Kind::Coercion, std::move(type_)),
       inputs(std::move(inputs_)) {
     assert(!inputs.empty());
-    type::Type t = getType();
+    const type::Type t = getType();
     if (t.is<type::BooleanType>()) {
         coerceSingleValue = toBoolean;
     } else if (t.is<type::ColorType>()) {
@@ -117,14 +117,15 @@ mbgl::Value Coercion::serialize() const {
 };
 
 std::string Coercion::getOperator() const {
-    return getType().match([](const type::BooleanType&) { return "to-boolean"; },
-                           [](const type::ColorType&) { return "to-color"; },
-                           [](const type::NumberType&) { return "to-number"; },
-                           [](const type::StringType&) { return "to-string"; },
-                           [](const auto&) {
-                               assert(false);
-                               return "";
-                           });
+    auto s = getType().match([](const type::BooleanType&) noexcept -> std::string_view { return "to-boolean"; },
+                             [](const type::ColorType&) noexcept -> std::string_view { return "to-color"; },
+                             [](const type::NumberType&) noexcept -> std::string_view { return "to-number"; },
+                             [](const type::StringType&) noexcept -> std::string_view { return "to-string"; },
+                             [](const auto&) noexcept -> std::string_view {
+                                 assert(false);
+                                 return "";
+                             });
+    return std::string(s);
 }
 
 using namespace mbgl::style::conversion;
@@ -188,9 +189,9 @@ void Coercion::eachChild(const std::function<void(const Expression&)>& visit) co
     }
 };
 
-bool Coercion::operator==(const Expression& e) const {
+bool Coercion::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Coercion) {
-        auto rhs = static_cast<const Coercion*>(&e);
+        const auto* rhs = static_cast<const Coercion*>(&e);
         return getType() == rhs->getType() && Expression::childrenEqual(inputs, rhs->inputs);
     }
     return false;

@@ -9,7 +9,7 @@ namespace expression {
 
 using namespace mbgl::style::conversion;
 
-Assertion::Assertion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_)
+Assertion::Assertion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_) noexcept
     : Expression(Kind::Assertion, std::move(type_)),
       inputs(std::move(inputs_)) {
     assert(!inputs.empty());
@@ -105,7 +105,7 @@ void Assertion::eachChild(const std::function<void(const Expression&)>& visit) c
     }
 };
 
-bool Assertion::operator==(const Expression& e) const {
+bool Assertion::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Assertion) {
         auto rhs = static_cast<const Assertion*>(&e);
         return getType() == rhs->getType() && Expression::childrenEqual(inputs, rhs->inputs);

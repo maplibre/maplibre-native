@@ -13,14 +13,14 @@ namespace expression {
 
 class Assertion : public Expression {
 public:
-    Assertion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_);
+    Assertion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_) noexcept;
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 

@@ -21,10 +21,13 @@ class Transitioning {
 public:
     Transitioning() = default;
 
-    explicit Transitioning(Value value_)
+    explicit Transitioning(Value value_) noexcept
         : value(std::move(value_)) {}
 
-    Transitioning(Value value_, Transitioning<Value> prior_, const TransitionOptions& transition, TimePoint now)
+    Transitioning(Value value_,
+                  Transitioning<Value> prior_,
+                  const TransitionOptions& transition,
+                  TimePoint now) noexcept
         : begin(now + transition.delay.value_or(Duration::zero())),
           end(begin + transition.duration.value_or(Duration::zero())),
           value(std::move(value_)) {
@@ -62,11 +65,11 @@ public:
         }
     }
 
-    bool hasTransition() const { return bool(prior); }
+    bool hasTransition() const noexcept { return bool(prior); }
 
-    bool isUndefined() const { return value.isUndefined(); }
+    bool isUndefined() const noexcept { return value.isUndefined(); }
 
-    const Value& getValue() const { return value; }
+    const Value& getValue() const noexcept { return value; }
 
 private:
     mutable std::optional<mapbox::util::recursive_wrapper<Transitioning<Value>>> prior;
@@ -98,7 +101,7 @@ struct ConstantsMask;
 template <class... Ps>
 struct ConstantsMask<TypeList<Ps...>> {
     template <class Properties>
-    static unsigned long getMask(const Properties& properties) {
+    static unsigned long getMask(const Properties& properties) noexcept {
         std::bitset<sizeof...(Ps)> result;
         util::ignore({result.set(TypeIndex<Ps, Ps...>::value, properties.template get<Ps>().isConstant())...});
         return result.to_ulong();
@@ -245,7 +248,7 @@ public:
             return Evaluated{evaluate<Ps>(z, feature)...};
         }
 
-        unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
+        unsigned long constantsMask() const noexcept { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
     };
 
     class Unevaluated : public Tuple<UnevaluatedTypes> {

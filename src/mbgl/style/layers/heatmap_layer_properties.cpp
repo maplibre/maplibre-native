@@ -21,11 +21,11 @@ HeatmapLayerProperties::HeatmapLayerProperties(
 
 HeatmapLayerProperties::~HeatmapLayerProperties() = default;
 
-unsigned long HeatmapLayerProperties::constantsMask() const {
+unsigned long HeatmapLayerProperties::constantsMask() const noexcept {
     return evaluated.constantsMask();
 }
 
-const HeatmapLayer::Impl& HeatmapLayerProperties::layerImpl() const {
+const HeatmapLayer::Impl& HeatmapLayerProperties::layerImpl() const noexcept {
     return static_cast<const HeatmapLayer::Impl&>(*baseImpl);
 }
 

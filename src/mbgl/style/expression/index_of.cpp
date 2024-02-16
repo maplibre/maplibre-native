@@ -9,7 +9,7 @@ namespace expression {
 
 IndexOf::IndexOf(std::unique_ptr<Expression> keyword_,
                  std::unique_ptr<Expression> input_,
-                 std::unique_ptr<Expression> fromIndex_)
+                 std::unique_ptr<Expression> fromIndex_) noexcept
     : Expression(Kind::IndexOf, type::Number),
       keyword(std::move(keyword_)),
       input(std::move(input_)),
@@ -115,7 +115,7 @@ ParseResult IndexOf::parse(const Convertible &value, ParsingContext &ctx) {
         std::make_unique<IndexOf>(std::move(*keyword), std::move(*input), fromIndex ? std::move(*fromIndex) : nullptr));
 }
 
-bool IndexOf::operator==(const Expression &e) const {
+bool IndexOf::operator==(const Expression &e) const noexcept {
     if (e.getKind() == Kind::IndexOf) {
         auto rhs = static_cast<const IndexOf *>(&e);
         const auto fromIndexEqual = (fromIndex && rhs->fromIndex && *fromIndex == *(rhs->fromIndex)) ||
@@ -127,10 +127,6 @@ bool IndexOf::operator==(const Expression &e) const {
 
 std::vector<std::optional<Value>> IndexOf::possibleOutputs() const {
     return {std::nullopt};
-}
-
-std::string IndexOf::getOperator() const {
-    return "index-of";
 }
 
 } // namespace expression

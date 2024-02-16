@@ -76,22 +76,22 @@ enum class TypeAnnotationOption {
 
 class ParsingContext {
 public:
-    ParsingContext()
+    ParsingContext() noexcept
         : errors(std::make_shared<std::vector<ParsingError>>()) {}
-    ParsingContext(std::string key_)
+    ParsingContext(std::string key_) noexcept
         : key(std::move(key_)),
           errors(std::make_shared<std::vector<ParsingError>>()) {}
-    explicit ParsingContext(type::Type expected_)
+    explicit ParsingContext(type::Type expected_) noexcept
         : expected(std::move(expected_)),
           errors(std::make_shared<std::vector<ParsingError>>()) {}
-    ParsingContext(ParsingContext&&) = default;
+    ParsingContext(ParsingContext&&) noexcept = default;
 
     ParsingContext(const ParsingContext&) = delete;
     ParsingContext& operator=(const ParsingContext&) = delete;
 
-    std::string getKey() const { return key; }
-    std::optional<type::Type> getExpected() const { return expected; }
-    const std::vector<ParsingError>& getErrors() const { return *errors; }
+    const std::string& getKey() const noexcept { return key; }
+    std::optional<type::Type> getExpected() const noexcept { return expected; }
+    const std::vector<ParsingError>& getErrors() const noexcept { return *errors; }
     std::string getCombinedErrors() const;
 
     /**
@@ -150,13 +150,13 @@ public:
         ctx.errors->clear();
     }
 
-    void clearErrors() { errors->clear(); }
+    void clearErrors() noexcept { errors->clear(); }
 
 private:
     ParsingContext(std::string key_,
                    std::shared_ptr<std::vector<ParsingError>> errors_,
                    std::optional<type::Type> expected_,
-                   std::shared_ptr<detail::Scope> scope_)
+                   std::shared_ptr<detail::Scope> scope_) noexcept
         : key(std::move(key_)),
           expected(std::move(expected_)),
           scope(std::move(scope_)),
@@ -177,7 +177,7 @@ private:
     std::shared_ptr<std::vector<ParsingError>> errors;
 };
 
-bool isExpression(const std::string&);
+bool isExpression(const std::string&) noexcept;
 
 } // namespace expression
 } // namespace style

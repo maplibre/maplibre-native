@@ -74,9 +74,9 @@ public:
         <%- camelize(type) %>PaintProperties::PossiblyEvaluated);
     ~<%- camelize(type) %>LayerProperties() override;
 
-    unsigned long constantsMask() const override;
+    unsigned long constantsMask() const noexcept override;
 
-    const <%- camelize(type) %>Layer::Impl& layerImpl() const;
+    const <%- camelize(type) %>Layer::Impl& layerImpl() const noexcept;
     // Data members.
 <% if (type === 'background' || type === 'fill' || type === 'line' || type === 'fill-extrusion') { -%>
     CrossfadeParameters crossfade;

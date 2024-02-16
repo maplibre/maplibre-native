@@ -14,11 +14,11 @@ namespace style {
 
 class PropertyExpressionBase {
 public:
-    explicit PropertyExpressionBase(std::unique_ptr<expression::Expression>);
+    explicit PropertyExpressionBase(std::unique_ptr<expression::Expression>) noexcept;
 
-    bool isZoomConstant() const noexcept;
-    bool isFeatureConstant() const noexcept;
-    bool isRuntimeConstant() const noexcept;
+    bool isZoomConstant() const noexcept { return isZoomConstant_; }
+    bool isFeatureConstant() const noexcept { return isFeatureConstant_; }
+    bool isRuntimeConstant() const noexcept { return isRuntimeConstant_; }
     float interpolationFactor(const Range<float>&, float) const noexcept;
     Range<float> getCoveringStops(float, float) const noexcept;
     const expression::Expression& getExpression() const noexcept;
@@ -43,7 +43,7 @@ class PropertyExpression final : public PropertyExpressionBase {
 public:
     // Second parameter to be used only for conversions from legacy functions.
     PropertyExpression(std::unique_ptr<expression::Expression> expression_,
-                       std::optional<T> defaultValue_ = std::nullopt)
+                       std::optional<T> defaultValue_ = std::nullopt) noexcept
         : PropertyExpressionBase(std::move(expression_)),
           defaultValue(std::move(defaultValue_)) {}
 

@@ -23,11 +23,11 @@ FillLayerProperties::FillLayerProperties(
 
 FillLayerProperties::~FillLayerProperties() = default;
 
-unsigned long FillLayerProperties::constantsMask() const {
+unsigned long FillLayerProperties::constantsMask() const noexcept {
     return evaluated.constantsMask();
 }
 
-const FillLayer::Impl& FillLayerProperties::layerImpl() const {
+const FillLayer::Impl& FillLayerProperties::layerImpl() const noexcept {
     return static_cast<const FillLayer::Impl&>(*baseImpl);
 }
 

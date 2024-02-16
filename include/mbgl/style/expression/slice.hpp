@@ -12,17 +12,17 @@ class Slice : public Expression {
 public:
     Slice(std::unique_ptr<Expression> input_,
           std::unique_ptr<Expression> fromIndex_,
-          std::unique_ptr<Expression> toIndex_);
+          std::unique_ptr<Expression> toIndex_) noexcept;
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
-    std::string getOperator() const override;
+    std::string getOperator() const override { return "slice"; }
 
 private:
     EvaluationResult evaluateForStringInput(const std::string& input, int fromIndexValue, int toIndexValue) const;

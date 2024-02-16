@@ -10,7 +10,7 @@ namespace expression {
 
 namespace {
 
-int normalizeIndex(int index, int length) {
+int normalizeIndex(int index, int length) noexcept {
     if (index < 0) {
         index += length;
     }
@@ -21,7 +21,7 @@ int normalizeIndex(int index, int length) {
 
 Slice::Slice(std::unique_ptr<Expression> input_,
              std::unique_ptr<Expression> fromIndex_,
-             std::unique_ptr<Expression> toIndex_)
+             std::unique_ptr<Expression> toIndex_) noexcept
     : Expression(Kind::Slice, input_->getType()),
       input(std::move(input_)),
       fromIndex(std::move(fromIndex_)),
@@ -133,7 +133,7 @@ ParseResult Slice::parse(const Convertible &value, ParsingContext &ctx) {
         std::make_unique<Slice>(std::move(*input), std::move(*fromIndex), toIndex ? std::move(*toIndex) : nullptr));
 }
 
-bool Slice::operator==(const Expression &e) const {
+bool Slice::operator==(const Expression &e) const noexcept {
     if (e.getKind() == Kind::Slice) {
         auto rhs = static_cast<const Slice *>(&e);
         const auto toIndexEqual = (toIndex && rhs->toIndex && *toIndex == *(rhs->toIndex)) ||
@@ -145,10 +145,6 @@ bool Slice::operator==(const Expression &e) const {
 
 std::vector<std::optional<Value>> Slice::possibleOutputs() const {
     return {std::nullopt};
-}
-
-std::string Slice::getOperator() const {
-    return "slice";
 }
 
 } // namespace expression

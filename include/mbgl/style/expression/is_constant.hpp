@@ -8,10 +8,10 @@ namespace style {
 namespace expression {
 
 template <typename T>
-bool isGlobalPropertyConstant(const Expression& expression, const T& properties) {
+bool isGlobalPropertyConstant(const Expression& expression, const T& properties) noexcept {
     if (expression.getKind() == Kind::CompoundExpression) {
-        auto e = static_cast<const CompoundExpression*>(&expression);
-        for (const std::string& property : properties) {
+        const auto* e = static_cast<const CompoundExpression*>(&expression);
+        for (const auto& property : properties) {
             if (e->getOperator() == property) {
                 return false;
             }
@@ -28,10 +28,10 @@ bool isGlobalPropertyConstant(const Expression& expression, const T& properties)
 }
 
 bool isFeatureConstant(const Expression& expression);
-bool isZoomConstant(const Expression& e);
+bool isZoomConstant(const Expression& e) noexcept;
 
 /// Returns true if expression does not depend on information provided by the runtime.
-bool isRuntimeConstant(const Expression& e);
+bool isRuntimeConstant(const Expression& e) noexcept;
 
 } // namespace expression
 } // namespace style

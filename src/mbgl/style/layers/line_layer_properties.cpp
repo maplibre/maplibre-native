@@ -23,11 +23,11 @@ LineLayerProperties::LineLayerProperties(
 
 LineLayerProperties::~LineLayerProperties() = default;
 
-unsigned long LineLayerProperties::constantsMask() const {
+unsigned long LineLayerProperties::constantsMask() const noexcept {
     return evaluated.constantsMask();
 }
 
-const LineLayer::Impl& LineLayerProperties::layerImpl() const {
+const LineLayer::Impl& LineLayerProperties::layerImpl() const noexcept {
     return static_cast<const LineLayer::Impl&>(*baseImpl);
 }
 

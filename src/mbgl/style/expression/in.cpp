@@ -10,25 +10,25 @@ namespace style {
 namespace expression {
 
 namespace {
-bool isComparableType(const type::Type& type) {
+bool isComparableType(const type::Type& type) noexcept {
     return type == type::Boolean || type == type::String || type == type::Number || type == type::Null ||
            type == type::Value;
 }
 
-bool isComparableRuntimeType(const type::Type& type) {
+bool isComparableRuntimeType(const type::Type& type) noexcept {
     return type == type::Boolean || type == type::String || type == type::Number || type == type::Null;
 }
 
-bool isSearchableType(const type::Type& type) {
+bool isSearchableType(const type::Type& type) noexcept {
     return type == type::String || type.is<type::Array>() || type == type::Null || type == type::Value;
 }
 
-bool isSearchableRuntimeType(const type::Type& type) {
+bool isSearchableRuntimeType(const type::Type& type) noexcept {
     return type == type::String || type.is<type::Array>() || type == type::Null;
 }
 } // namespace
 
-In::In(std::unique_ptr<Expression> needle_, std::unique_ptr<Expression> haystack_)
+In::In(std::unique_ptr<Expression> needle_, std::unique_ptr<Expression> haystack_) noexcept
     : Expression(Kind::In, type::Boolean),
       needle(std::move(needle_)),
       haystack(std::move(haystack_)) {
@@ -120,7 +120,7 @@ ParseResult In::parse(const Convertible& value, ParsingContext& ctx) {
     return ParseResult(std::make_unique<In>(std::move(*needle), std::move(*haystack)));
 }
 
-bool In::operator==(const Expression& e) const {
+bool In::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::In) {
         auto rhs = static_cast<const In*>(&e);
         return *needle == *(rhs->needle) && *haystack == *(rhs->haystack);
@@ -130,10 +130,6 @@ bool In::operator==(const Expression& e) const {
 
 std::vector<std::optional<Value>> In::possibleOutputs() const {
     return {{true}, {false}};
-}
-
-std::string In::getOperator() const {
-    return "in";
 }
 
 } // namespace expression

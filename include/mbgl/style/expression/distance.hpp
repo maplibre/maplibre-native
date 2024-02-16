@@ -21,22 +21,21 @@ namespace expression {
 
 class Distance final : public Expression {
 public:
-    Distance(GeoJSON geoJSONSource_, Feature::geometry_type geometries_);
-
+    Distance(GeoJSON geoJSONSource_, Feature::geometry_type geometries_) noexcept;
     ~Distance() override;
 
     EvaluationResult evaluate(const EvaluationContext&) const override;
 
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
 
-    void eachChild(const std::function<void(const Expression&)>&) const override {}
+    void eachChild(const std::function<void(const Expression&)>&) const noexcept override {}
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
     mbgl::Value serialize() const override;
-    std::string getOperator() const override;
+    std::string getOperator() const override { return "distance"; }
 
 private:
     GeoJSON geoJSONSource;

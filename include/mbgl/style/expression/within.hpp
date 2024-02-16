@@ -11,7 +11,7 @@ namespace expression {
 
 class Within final : public Expression {
 public:
-    explicit Within(GeoJSON geojson, Feature::geometry_type geometries_);
+    explicit Within(GeoJSON geojson, Feature::geometry_type geometries_) noexcept;
 
     ~Within() override;
 
@@ -21,12 +21,12 @@ public:
 
     void eachChild(const std::function<void(const Expression&)>&) const override {}
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
     mbgl::Value serialize() const override;
-    std::string getOperator() const override;
+    std::string getOperator() const override { return "within"; }
 
 private:
     GeoJSON geoJSONSource;

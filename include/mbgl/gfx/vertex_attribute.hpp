@@ -399,7 +399,7 @@ public:
 
 protected:
     template <typename DataDrivenPaintProperty, typename Evaluated>
-    static bool isConstant(const Evaluated& evaluated) {
+    static bool isConstant(const Evaluated& evaluated) noexcept {
         return evaluated.template get<DataDrivenPaintProperty>().isConstant();
     }
 

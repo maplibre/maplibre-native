@@ -43,20 +43,23 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-bool isConstant(const Expression& expression) {
-    if (expression.getKind() == Kind::Var) {
-        auto varExpression = static_cast<const Var*>(&expression);
-        return isConstant(*varExpression->getBoundExpression());
-    }
+namespace {
+const auto requiredProps = std::array<std::string_view, 4>{"zoom", "heatmap-density", "line-progress", "accumulated"};
 
-    if (expression.getKind() == Kind::CompoundExpression) {
-        auto compound = static_cast<const CompoundExpression*>(&expression);
+bool isConstant(const Expression& expression) {
+    const auto kind = expression.getKind();
+
+    if (kind == Kind::Var) {
+        const auto* varExpression = static_cast<const Var*>(&expression);
+        return isConstant(*varExpression->getBoundExpression());
+    } else if (kind == Kind::CompoundExpression) {
+        const auto* compound = static_cast<const CompoundExpression*>(&expression);
         if (compound->getOperator() == "error") {
             return false;
         }
     }
 
-    bool isTypeAnnotation = expression.getKind() == Kind::Coercion || expression.getKind() == Kind::Assertion;
+    const bool isTypeAnnotation = kind == Kind::Coercion || kind == Kind::Assertion;
 
     bool childrenConstant = true;
     expression.eachChild([&](const Expression& child) {
@@ -73,15 +76,10 @@ bool isConstant(const Expression& expression) {
             childrenConstant = childrenConstant && child.getKind() == Kind::Literal;
         }
     });
-    if (!childrenConstant) {
-        return false;
-    }
 
-    return isFeatureConstant(expression) &&
-           isGlobalPropertyConstant(expression, std::array<std::string, 2>{{"zoom", "heatmap-density"}}) &&
-           isGlobalPropertyConstant(expression, std::array<std::string, 2>{{"zoom", "line-progress"}}) &&
-           isGlobalPropertyConstant(expression, std::array<std::string, 2>{{"zoom", "accumulated"}});
+    return childrenConstant && isFeatureConstant(expression) && isGlobalPropertyConstant(expression, requiredProps);
 }
+} // namespace
 
 using namespace mbgl::style::conversion;
 
@@ -143,7 +141,7 @@ MAPBOX_ETERNAL_CONSTEXPR const auto expressionRegistry =
                                                                        {"index-of", IndexOf::parse},
                                                                        {"slice", Slice::parse}});
 
-bool isExpression(const std::string& name) {
+bool isExpression(const std::string& name) noexcept {
     return expressionRegistry.contains(name.c_str());
 }
 

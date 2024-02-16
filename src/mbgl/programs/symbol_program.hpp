@@ -94,16 +94,16 @@ public:
 
 class ConstantSymbolSizeBinder final : public SymbolSizeBinder {
 public:
-    ConstantSymbolSizeBinder(const float /*tileZoom*/, const float& size, const float /*defaultValue*/)
+    ConstantSymbolSizeBinder(const float /*tileZoom*/, const float& size, const float /*defaultValue*/) noexcept
         : layoutSize(size) {}
 
-    ConstantSymbolSizeBinder(const float /*tileZoom*/, const style::Undefined&, const float defaultValue)
+    ConstantSymbolSizeBinder(const float /*tileZoom*/, const style::Undefined&, const float defaultValue) noexcept
         : layoutSize(defaultValue) {}
 
     ConstantSymbolSizeBinder(const float tileZoom,
                              const style::PropertyExpression<float>& expression_,
                              const float /*defaultValue*/
-                             )
+                             ) noexcept
         : layoutSize(expression_.evaluate(tileZoom + 1)),
           expression(expression_) {
         const Range<float> zoomLevels = expression_.getCoveringStops(tileZoom, tileZoom + 1);
@@ -111,7 +111,7 @@ public:
             zoomLevels, Range<float>{expression_.evaluate(zoomLevels.min), expression_.evaluate(zoomLevels.max)});
     }
 
-    Range<float> getVertexSizeData(const GeometryTileFeature&) override { return {0.0f, 0.0f}; };
+    Range<float> getVertexSizeData(const GeometryTileFeature&) noexcept override { return {0.0f, 0.0f}; };
 
     ZoomEvaluatedSize evaluateForZoom(float currentZoom) const override {
         float size = layoutSize;
@@ -143,7 +143,7 @@ class SourceFunctionSymbolSizeBinder final : public SymbolSizeBinder {
 public:
     SourceFunctionSymbolSizeBinder(const float /*tileZoom*/,
                                    style::PropertyExpression<float> expression_,
-                                   const float defaultValue_)
+                                   const float defaultValue_) noexcept
         : expression(std::move(expression_)),
           defaultValue(defaultValue_) {}
 
@@ -152,7 +152,7 @@ public:
         return {size, size};
     };
 
-    ZoomEvaluatedSize evaluateForZoom(float) const override {
+    ZoomEvaluatedSize evaluateForZoom(float) const noexcept override {
         const float unused = 0.0f;
         return {true, false, unused, unused, unused};
     }
@@ -165,7 +165,7 @@ class CompositeFunctionSymbolSizeBinder final : public SymbolSizeBinder {
 public:
     CompositeFunctionSymbolSizeBinder(const float tileZoom,
                                       style::PropertyExpression<float> expression_,
-                                      const float defaultValue_)
+                                      const float defaultValue_) noexcept
         : expression(std::move(expression_)),
           defaultValue(defaultValue_),
           layoutZoom(tileZoom + 1),
@@ -176,7 +176,7 @@ public:
                 expression.evaluate(coveringZoomStops.max, feature, defaultValue)};
     };
 
-    ZoomEvaluatedSize evaluateForZoom(float currentZoom) const override {
+    ZoomEvaluatedSize evaluateForZoom(float currentZoom) const noexcept override {
         float sizeInterpolationT = util::clamp(
             expression.interpolationFactor(coveringZoomStops, currentZoom), 0.0f, 1.0f);
 

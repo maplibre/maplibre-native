@@ -15,25 +15,25 @@ class ColorRampPropertyValue {
 private:
     std::shared_ptr<expression::Expression> value;
 
-    friend bool operator==(const ColorRampPropertyValue& lhs, const ColorRampPropertyValue& rhs) {
+    friend bool operator==(const ColorRampPropertyValue& lhs, const ColorRampPropertyValue& rhs) noexcept {
         return (lhs.isUndefined() && rhs.isUndefined()) || (lhs.value && rhs.value && *(lhs.value) == *(rhs.value));
     }
 
-    friend bool operator!=(const ColorRampPropertyValue& lhs, const ColorRampPropertyValue& rhs) {
+    friend bool operator!=(const ColorRampPropertyValue& lhs, const ColorRampPropertyValue& rhs) noexcept {
         return !(lhs == rhs);
     }
 
 public:
     ColorRampPropertyValue()
         : value(nullptr) {}
-    ColorRampPropertyValue(std::shared_ptr<expression::Expression> value_)
+    ColorRampPropertyValue(std::shared_ptr<expression::Expression> value_) noexcept
         : value(std::move(value_)) {}
 
-    bool isUndefined() const { return value == nullptr; }
+    bool isUndefined() const noexcept { return value == nullptr; }
 
     // noop, needed for batch evaluation of paint property values to compile
     template <typename Evaluator>
-    Color evaluate(const Evaluator&, TimePoint = {}) const {
+    Color evaluate(const Evaluator&, TimePoint = {}) const noexcept {
         return {};
     }
 
@@ -42,10 +42,10 @@ public:
         return *expression::fromExpressionValue<Color>(*result);
     }
 
-    bool isDataDriven() const { return false; }
-    bool hasDataDrivenPropertyDifference(const ColorRampPropertyValue&) const { return false; }
+    bool isDataDriven() const noexcept { return false; }
+    bool hasDataDrivenPropertyDifference(const ColorRampPropertyValue&) const noexcept { return false; }
 
-    const expression::Expression& getExpression() const { return *value; }
+    const expression::Expression& getExpression() const noexcept { return *value; }
 };
 
 } // namespace style

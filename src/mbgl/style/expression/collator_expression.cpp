@@ -8,9 +8,9 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-CollatorExpression::CollatorExpression(std::unique_ptr<Expression> caseSensitive_,
-                                       std::unique_ptr<Expression> diacriticSensitive_,
-                                       std::optional<std::unique_ptr<Expression>> locale_)
+CollatorExpression::CollatorExpression(std::unique_ptr<Expression>&& caseSensitive_,
+                                       std::unique_ptr<Expression>&& diacriticSensitive_,
+                                       std::unique_ptr<Expression>&& locale_) noexcept
     : Expression(Kind::CollatorExpression, type::Collator),
       caseSensitive(std::move(caseSensitive_)),
       diacriticSensitive(std::move(diacriticSensitive_)),
@@ -73,9 +73,9 @@ void CollatorExpression::eachChild(const std::function<void(const Expression&)>&
     }
 }
 
-bool CollatorExpression::operator==(const Expression& e) const {
+bool CollatorExpression::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::CollatorExpression) {
-        auto rhs = static_cast<const CollatorExpression*>(&e);
+        const auto* rhs = static_cast<const CollatorExpression*>(&e);
         if ((locale && (!rhs->locale || **locale != **(rhs->locale))) || (!locale && rhs->locale)) {
             return false;
         }

@@ -41,26 +41,26 @@ struct UnitBezier {
           by(3.0 * (p2y - p1y) - (3.0 * p1y)),
           ay(1.0 - (3.0 * p1y) - (3.0 * (p2y - p1y) - (3.0 * p1y))) {}
 
-    std::pair<double, double> getP1() const { return {cx / 3.0, cy / 3.0}; }
+    std::pair<double, double> getP1() const noexcept { return {cx / 3.0, cy / 3.0}; }
 
-    std::pair<double, double> getP2() const {
+    std::pair<double, double> getP2() const noexcept {
         return {
             (bx + (3.0 * cx / 3.0) + cx) / 3.0,
             (by + (3.0 * cy / 3.0) + cy) / 3.0,
         };
     }
 
-    double sampleCurveX(double t) const {
+    double sampleCurveX(double t) const noexcept {
         // `ax t^3 + bx t^2 + cx t' expanded using Horner's rule.
         return ((ax * t + bx) * t + cx) * t;
     }
 
-    double sampleCurveY(double t) const { return ((ay * t + by) * t + cy) * t; }
+    double sampleCurveY(double t) const noexcept { return ((ay * t + by) * t + cy) * t; }
 
-    double sampleCurveDerivativeX(double t) const { return (3.0 * ax * t + 2.0 * bx) * t + cx; }
+    double sampleCurveDerivativeX(double t) const noexcept { return (3.0 * ax * t + 2.0 * bx) * t + cx; }
 
     /// Given an x value, find a parametric value it came from.
-    double solveCurveX(double x, double epsilon) const {
+    double solveCurveX(double x, double epsilon) const noexcept {
         double t0;
         double t1;
         double t2;
@@ -99,9 +99,9 @@ struct UnitBezier {
         return t2;
     }
 
-    double solve(double x, double epsilon) const { return sampleCurveY(solveCurveX(x, epsilon)); }
+    double solve(double x, double epsilon) const noexcept { return sampleCurveY(solveCurveX(x, epsilon)); }
 
-    bool operator==(const UnitBezier& rhs) const {
+    bool operator==(const UnitBezier& rhs) const noexcept {
         return std::tie(cx, bx, ax, cy, by, ay) == std::tie(rhs.cx, rhs.bx, rhs.ax, rhs.cy, rhs.by, rhs.ay);
     }
 

@@ -20,9 +20,9 @@ void Any::eachChild(const std::function<void(const Expression&)>& visit) const {
     }
 }
 
-bool Any::operator==(const Expression& e) const {
+bool Any::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Any) {
-        auto rhs = static_cast<const Any*>(&e);
+        const auto* rhs = static_cast<const Any*>(&e);
         return Expression::childrenEqual(inputs, rhs->inputs);
     }
     return false;
@@ -47,9 +47,9 @@ void All::eachChild(const std::function<void(const Expression&)>& visit) const {
     }
 }
 
-bool All::operator==(const Expression& e) const {
+bool All::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::All) {
-        auto rhs = static_cast<const All*>(&e);
+        const auto* rhs = static_cast<const All*>(&e);
         return Expression::childrenEqual(inputs, rhs->inputs);
     }
     return false;

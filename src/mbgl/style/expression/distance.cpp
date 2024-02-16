@@ -769,7 +769,7 @@ std::optional<Feature::geometry_type> getGeometry(const Feature& feature,
 namespace style {
 namespace expression {
 
-Distance::Distance(GeoJSON geojson, Feature::geometry_type geometries_)
+Distance::Distance(GeoJSON geojson, Feature::geometry_type geometries_) noexcept
     : Expression(Kind::Distance, type::Number),
       geoJSONSource(std::move(geojson)),
       geometries(std::move(geometries_)) {}
@@ -882,7 +882,7 @@ mbgl::Value Distance::serialize() const {
     return std::vector<mbgl::Value>{{getOperator(), serialized}};
 }
 
-bool Distance::operator==(const Expression& e) const {
+bool Distance::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Distance) {
         auto rhs = static_cast<const Distance*>(&e);
         return geoJSONSource == rhs->geoJSONSource && geometries == rhs->geometries;
@@ -892,10 +892,6 @@ bool Distance::operator==(const Expression& e) const {
 
 std::vector<std::optional<Value>> Distance::possibleOutputs() const {
     return {std::nullopt};
-}
-
-std::string Distance::getOperator() const {
-    return "distance";
 }
 
 } // namespace expression

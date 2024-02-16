@@ -12,11 +12,11 @@ namespace expression {
 
 class Literal : public Expression {
 public:
-    Literal(const Value& value_)
+    Literal(const Value& value_) noexcept
         : Expression(Kind::Literal, typeOf(value_)),
           value(value_) {}
 
-    Literal(const type::Array& type_, std::vector<Value> value_)
+    Literal(const type::Array& type_, std::vector<Value> value_) noexcept
         : Expression(Kind::Literal, type_),
           value(std::move(value_)) {}
 
@@ -26,9 +26,9 @@ public:
 
     void eachChild(const std::function<void(const Expression&)>&) const override {}
 
-    bool operator==(const Expression& e) const override {
+    bool operator==(const Expression& e) const noexcept override {
         if (e.getKind() == Kind::Literal) {
-            auto rhs = static_cast<const Literal*>(&e);
+            const auto* rhs = static_cast<const Literal*>(&e);
             return value == rhs->value;
         }
         return false;
@@ -36,7 +36,7 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override { return {{value}}; }
 
-    Value getValue() const { return value; }
+    Value getValue() const noexcept { return value; }
 
     mbgl::Value serialize() const override;
     std::string getOperator() const override { return "literal"; }

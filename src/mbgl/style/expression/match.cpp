@@ -18,9 +18,9 @@ void Match<T>::eachChild(const std::function<void(const Expression&)>& visit) co
 }
 
 template <typename T>
-bool Match<T>::operator==(const Expression& e) const {
+bool Match<T>::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Match) {
-        auto rhs = static_cast<const Match*>(&e);
+        const auto* rhs = static_cast<const Match*>(&e);
         return (*input == *(rhs->input) && *otherwise == *(rhs->otherwise) &&
                 Expression::childrenEqual(branches, rhs->branches));
     }
@@ -314,7 +314,7 @@ ParseResult parseMatch(const Convertible& value, ParsingContext& ctx) {
         [&](const type::StringType&) {
             return create<std::string>(*outputType, std::move(*input), std::move(branches), std::move(*otherwise), ctx);
         },
-        [&](const auto&) {
+        [&](const auto&) noexcept {
             // unreachable: inputType is set by parseInputValue(), which only
             // accepts string and (integer) numeric values.
             assert(false);

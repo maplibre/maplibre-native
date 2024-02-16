@@ -16,13 +16,13 @@
 namespace mbgl {
 namespace {
 
-Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mbgl::CanonicalTileID& canonical) {
+Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mbgl::CanonicalTileID& canonical) noexcept {
     const double size = util::EXTENT * std::pow(2, canonical.z);
 
-    auto x = (point.x + util::LONGITUDE_MAX) * size / util::DEGREES_MAX;
-    auto y = (util::LONGITUDE_MAX -
-              util::rad2deg(std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)))) *
-             size / util::DEGREES_MAX;
+    const auto x = (point.x + util::LONGITUDE_MAX) * size / util::DEGREES_MAX;
+    const auto y = (util::LONGITUDE_MAX -
+                    util::rad2deg(std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)))) *
+                   size / util::DEGREES_MAX;
 
     Point<int64_t> p;
     p.x = (util::clamp<int64_t>(
@@ -72,9 +72,10 @@ MultiPolygon<int64_t> getTilePolygons(const Feature::geometry_type& polygonGeoSe
         [](const auto&) { return MultiPolygon<int64_t>(); });
 }
 
-void updatePoint(Point<int64_t>& p, WithinBBox& bbox, const WithinBBox& polyBBox, const int64_t worldSize) {
+void updatePoint(Point<int64_t>& p, WithinBBox& bbox, const WithinBBox& polyBBox, const int64_t worldSize) noexcept {
     if (p.x < polyBBox[0] || p.x > polyBBox[2]) {
-        const auto getShift = [](Point<int64_t>& point, const int64_t polygonSide, const int64_t size) -> int64_t {
+        const auto getShift =
+            [](Point<int64_t>& point, const int64_t polygonSide, const int64_t size) noexcept -> int64_t {
             if (point.x - polygonSide > size / 2) {
                 return -size;
             }
@@ -205,7 +206,7 @@ std::optional<Feature::geometry_type> getPolygonInfo(const Feature& polyFeature,
 namespace style {
 namespace expression {
 
-Within::Within(GeoJSON geojson, Feature::geometry_type geometries_)
+Within::Within(GeoJSON geojson, Feature::geometry_type geometries_) noexcept
     : Expression(Kind::Within, type::Boolean),
       geoJSONSource(std::move(geojson)),
       geometries(std::move(geometries_)) {}
@@ -325,9 +326,9 @@ mbgl::Value Within::serialize() const {
     return std::vector<mbgl::Value>{{getOperator(), serialized}};
 }
 
-bool Within::operator==(const Expression& e) const {
+bool Within::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Within) {
-        auto rhs = static_cast<const Within*>(&e);
+        const auto* rhs = static_cast<const Within*>(&e);
         return geoJSONSource == rhs->geoJSONSource && geometries == rhs->geometries;
     }
     return false;
@@ -335,10 +336,6 @@ bool Within::operator==(const Expression& e) const {
 
 std::vector<std::optional<Value>> Within::possibleOutputs() const {
     return {{true}, {false}};
-}
-
-std::string Within::getOperator() const {
-    return "within";
 }
 
 } // namespace expression

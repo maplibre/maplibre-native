@@ -6,7 +6,7 @@ namespace expression {
 
 Range<float> getCoveringStops(const std::map<double, std::unique_ptr<Expression>>& stops,
                               const double lower,
-                              const double upper) {
+                              const double upper) noexcept {
     assert(!stops.empty());
     auto minIt = stops.lower_bound(lower);
     auto maxIt = stops.lower_bound(upper);

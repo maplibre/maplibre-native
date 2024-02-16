@@ -27,23 +27,23 @@ public:
 class EvaluationContext {
 public:
     EvaluationContext() = default;
-    explicit EvaluationContext(float zoom_)
+    explicit EvaluationContext(float zoom_) noexcept
         : zoom(zoom_) {}
-    explicit EvaluationContext(GeometryTileFeature const* feature_)
+    explicit EvaluationContext(GeometryTileFeature const* feature_) noexcept
         : feature(feature_) {}
-    EvaluationContext(float zoom_, GeometryTileFeature const* feature_)
+    EvaluationContext(float zoom_, GeometryTileFeature const* feature_) noexcept
         : zoom(zoom_),
           feature(feature_) {}
-    EvaluationContext(std::optional<mbgl::Value> accumulated_, GeometryTileFeature const* feature_)
+    EvaluationContext(std::optional<mbgl::Value> accumulated_, GeometryTileFeature const* feature_) noexcept
         : accumulated(std::move(accumulated_)),
           feature(feature_) {}
-    EvaluationContext(float zoom_, GeometryTileFeature const* feature_, const FeatureState* state_)
+    EvaluationContext(float zoom_, GeometryTileFeature const* feature_, const FeatureState* state_) noexcept
         : zoom(zoom_),
           feature(feature_),
           featureState(state_) {}
     EvaluationContext(std::optional<float> zoom_,
                       GeometryTileFeature const* feature_,
-                      std::optional<double> colorRampParameter_)
+                      std::optional<double> colorRampParameter_) noexcept
         : zoom(std::move(zoom_)),
           feature(feature_),
           colorRampParameter(std::move(colorRampParameter_)) {}
@@ -88,34 +88,34 @@ public:
     Result() = default;
 
     template <typename U>
-    VARIANT_INLINE Result(U&& val)
+    VARIANT_INLINE Result(U&& val) noexcept
         : variant<EvaluationError, T>(val) {}
 
-    explicit operator bool() const { return this->template is<T>(); }
+    explicit operator bool() const noexcept { return this->template is<T>(); }
 
     // optional does some type trait magic for this one, so this might
     // be problematic as is.
-    const T* operator->() const {
+    const T* operator->() const noexcept {
         assert(this->template is<T>());
         return std::addressof(this->template get<T>());
     }
 
-    T* operator->() {
+    T* operator->() noexcept {
         assert(this->template is<T>());
         return std::addressof(this->template get<T>());
     }
 
-    T& operator*() {
+    T& operator*() noexcept {
         assert(this->template is<T>());
         return this->template get<T>();
     }
 
-    const T& operator*() const {
+    const T& operator*() const noexcept {
         assert(this->template is<T>());
         return this->template get<T>();
     }
 
-    const EvaluationError& error() const {
+    const EvaluationError& error() const noexcept {
         assert(this->template is<EvaluationError>());
         return this->template get<EvaluationError>();
     }
@@ -131,7 +131,7 @@ public:
         : Result(toExpressionValue(arr)) {}
 
     // used only for the special (private) "error" expression
-    EvaluationResult(const type::ErrorType&) { assert(false); }
+    EvaluationResult(const type::ErrorType&) noexcept { assert(false); }
 };
 
 /**
@@ -185,18 +185,19 @@ enum class Kind : int32_t {
 
 class Expression {
 public:
-    Expression(Kind kind_, type::Type type_)
+    Expression(Kind kind_, type::Type type_) noexcept
         : kind(kind_),
           type(std::move(type_)) {}
     virtual ~Expression() = default;
 
     virtual EvaluationResult evaluate(const EvaluationContext& params) const = 0;
     virtual void eachChild(const std::function<void(const Expression&)>&) const = 0;
-    virtual bool operator==(const Expression&) const = 0;
-    bool operator!=(const Expression& rhs) const { return !operator==(rhs); }
 
-    Kind getKind() const { return kind; };
-    type::Type getType() const { return type; };
+    virtual bool operator==(const Expression&) const noexcept = 0;
+    bool operator!=(const Expression& rhs) const noexcept { return !operator==(rhs); }
+
+    Kind getKind() const noexcept { return kind; };
+    type::Type getType() const noexcept { return type; };
 
     EvaluationResult evaluate(std::optional<float> zoom,
                               const Feature& feature,
@@ -231,7 +232,7 @@ public:
 
 protected:
     template <typename T>
-    static bool childrenEqual(const T& lhs, const T& rhs) {
+    static bool childrenEqual(const T& lhs, const T& rhs) noexcept {
         if (lhs.size() != rhs.size()) return false;
         for (auto leftChild = lhs.begin(), rightChild = rhs.begin(); leftChild != lhs.end();
              leftChild++, rightChild++) {
@@ -240,24 +241,24 @@ protected:
         return true;
     }
 
-    static bool childEqual(const std::unique_ptr<Expression>& lhs, const std::unique_ptr<Expression>& rhs) {
+    static bool childEqual(const std::unique_ptr<Expression>& lhs, const std::unique_ptr<Expression>& rhs) noexcept {
         return *lhs == *rhs;
     }
 
     template <typename T>
     static bool childEqual(const std::pair<T, std::unique_ptr<Expression>>& lhs,
-                           const std::pair<T, std::unique_ptr<Expression>>& rhs) {
+                           const std::pair<T, std::unique_ptr<Expression>>& rhs) noexcept {
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
 
     template <typename T>
     static bool childEqual(const std::pair<T, std::shared_ptr<Expression>>& lhs,
-                           const std::pair<T, std::shared_ptr<Expression>>& rhs) {
+                           const std::pair<T, std::shared_ptr<Expression>>& rhs) noexcept {
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
 
     static bool childEqual(const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& lhs,
-                           const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& rhs) {
+                           const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& rhs) noexcept {
         return *(lhs.first) == *(rhs.first) && *(lhs.second) == *(rhs.second);
     }
 

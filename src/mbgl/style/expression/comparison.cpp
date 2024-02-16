@@ -8,7 +8,7 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-static bool isComparableType(const std::string& op, const type::Type& type) {
+static bool isComparableType(const std::string& op, const type::Type& type) noexcept {
     if (op == "==" || op == "!=") {
         return type == type::String || type == type::Number || type == type::Boolean || type == type::Null ||
                type == type::Value;
@@ -17,65 +17,65 @@ static bool isComparableType(const std::string& op, const type::Type& type) {
     }
 }
 
-bool eq(const Value& a, const Value& b) {
+bool eq(const Value& a, const Value& b) noexcept {
     return a == b;
 }
-bool neq(const Value& a, const Value& b) {
+bool neq(const Value& a, const Value& b) noexcept {
     return a != b;
 }
-bool lt(const Value& lhs, const Value& rhs) {
-    return lhs.match([&](const std::string& a) { return a < rhs.get<std::string>(); },
-                     [&](double a) { return a < rhs.get<double>(); },
-                     [&](const auto&) {
+bool lt(const Value& lhs, const Value& rhs) noexcept {
+    return lhs.match([&](const std::string& a) noexcept { return a < rhs.get<std::string>(); },
+                     [&](double a) noexcept { return a < rhs.get<double>(); },
+                     [&](const auto&) noexcept {
                          assert(false);
                          return false;
                      });
 }
-bool gt(const Value& lhs, const Value& rhs) {
-    return lhs.match([&](const std::string& a) { return a > rhs.get<std::string>(); },
-                     [&](double a) { return a > rhs.get<double>(); },
-                     [&](const auto&) {
+bool gt(const Value& lhs, const Value& rhs) noexcept {
+    return lhs.match([&](const std::string& a) noexcept { return a > rhs.get<std::string>(); },
+                     [&](double a) noexcept { return a > rhs.get<double>(); },
+                     [&](const auto&) noexcept {
                          assert(false);
                          return false;
                      });
 }
-bool lteq(const Value& lhs, const Value& rhs) {
-    return lhs.match([&](const std::string& a) { return a <= rhs.get<std::string>(); },
-                     [&](double a) { return a <= rhs.get<double>(); },
-                     [&](const auto&) {
+bool lteq(const Value& lhs, const Value& rhs) noexcept {
+    return lhs.match([&](const std::string& a) noexcept { return a <= rhs.get<std::string>(); },
+                     [&](double a) noexcept { return a <= rhs.get<double>(); },
+                     [&](const auto&) noexcept {
                          assert(false);
                          return false;
                      });
 }
-bool gteq(const Value& lhs, const Value& rhs) {
-    return lhs.match([&](const std::string& a) { return a >= rhs.get<std::string>(); },
-                     [&](double a) { return a >= rhs.get<double>(); },
-                     [&](const auto&) {
+bool gteq(const Value& lhs, const Value& rhs) noexcept {
+    return lhs.match([&](const std::string& a) noexcept { return a >= rhs.get<std::string>(); },
+                     [&](double a) noexcept { return a >= rhs.get<double>(); },
+                     [&](const auto&) noexcept {
                          assert(false);
                          return false;
                      });
 }
 
-bool eqCollate(const std::string& a, const std::string& b, const Collator& c) {
+bool eqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
     return c.compare(a, b) == 0;
 }
-bool neqCollate(const std::string& a, const std::string& b, const Collator& c) {
+bool neqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
     return !eqCollate(a, b, c);
 }
-bool ltCollate(const std::string& a, const std::string& b, const Collator& c) {
+bool ltCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
     return c.compare(a, b) < 0;
 }
-bool gtCollate(const std::string& a, const std::string& b, const Collator& c) {
+bool gtCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
     return c.compare(a, b) > 0;
 }
-bool lteqCollate(const std::string& a, const std::string& b, const Collator& c) {
+bool lteqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
     return c.compare(a, b) <= 0;
 }
-bool gteqCollate(const std::string& a, const std::string& b, const Collator& c) {
+bool gteqCollate(const std::string& a, const std::string& b, const Collator& c) noexcept {
     return c.compare(a, b) >= 0;
 }
 
-static BasicComparison::CompareFunctionType getBasicCompareFunction(const std::string& op) {
+static BasicComparison::CompareFunctionType getBasicCompareFunction(const std::string& op) noexcept {
     if (op == "==")
         return eq;
     else if (op == "!=")
@@ -92,7 +92,7 @@ static BasicComparison::CompareFunctionType getBasicCompareFunction(const std::s
     return nullptr;
 }
 
-static CollatorComparison::CompareFunctionType getCollatorComparisonFunction(const std::string& op) {
+static CollatorComparison::CompareFunctionType getCollatorComparisonFunction(const std::string& op) noexcept {
     if (op == "==")
         return eqCollate;
     else if (op == "!=")
@@ -109,7 +109,9 @@ static CollatorComparison::CompareFunctionType getCollatorComparisonFunction(con
     return nullptr;
 }
 
-BasicComparison::BasicComparison(std::string op_, std::unique_ptr<Expression> lhs_, std::unique_ptr<Expression> rhs_)
+BasicComparison::BasicComparison(std::string op_,
+                                 std::unique_ptr<Expression> lhs_,
+                                 std::unique_ptr<Expression> rhs_) noexcept
     : Expression(Kind::Comparison, type::Boolean),
       op(std::move(op_)),
       compare(getBasicCompareFunction(op)),
@@ -148,13 +150,9 @@ void BasicComparison::eachChild(const std::function<void(const Expression&)>& vi
     visit(*rhs);
 }
 
-std::string BasicComparison::getOperator() const {
-    return op;
-}
-
-bool BasicComparison::operator==(const Expression& e) const {
+bool BasicComparison::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Comparison) {
-        auto comp = static_cast<const BasicComparison*>(&e);
+        const auto* comp = static_cast<const BasicComparison*>(&e);
         return comp->op == op && *comp->lhs == *lhs && *comp->rhs == *rhs;
     }
     return false;
@@ -167,7 +165,7 @@ std::vector<std::optional<Value>> BasicComparison::possibleOutputs() const {
 CollatorComparison::CollatorComparison(std::string op_,
                                        std::unique_ptr<Expression> lhs_,
                                        std::unique_ptr<Expression> rhs_,
-                                       std::unique_ptr<Expression> collator_)
+                                       std::unique_ptr<Expression> collator_) noexcept
     : Expression(Kind::Comparison, type::Boolean),
       op(std::move(op_)),
       compare(getCollatorComparisonFunction(op)),
@@ -207,13 +205,9 @@ void CollatorComparison::eachChild(const std::function<void(const Expression&)>&
     visit(*collator);
 }
 
-std::string CollatorComparison::getOperator() const {
-    return op;
-}
-
-bool CollatorComparison::operator==(const Expression& e) const {
+bool CollatorComparison::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Comparison) {
-        auto comp = static_cast<const CollatorComparison*>(&e);
+        const auto* comp = static_cast<const CollatorComparison*>(&e);
         return comp->op == op && *comp->collator == *collator && *comp->lhs == *lhs && *comp->rhs == *rhs;
     }
     return false;

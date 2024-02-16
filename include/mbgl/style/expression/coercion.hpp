@@ -12,7 +12,7 @@ namespace expression {
 
 class Coercion : public Expression {
 public:
-    Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_);
+    Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_) noexcept;
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 
@@ -21,7 +21,7 @@ public:
 
     mbgl::Value serialize() const override;
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 

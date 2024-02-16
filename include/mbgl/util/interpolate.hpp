@@ -15,31 +15,31 @@
 namespace mbgl {
 namespace util {
 
-float interpolationFactor(float base, Range<float> range, float z);
+float interpolationFactor(float base, Range<float> range, float z) noexcept;
 
 template <class T, class Enabled = void>
 struct Interpolator;
 
 template <typename T>
-T interpolate(const T& a, const T& b, const double t) {
+T interpolate(const T& a, const T& b, const double t) noexcept {
     return Interpolator<T>()(a, b, t);
 }
 
 template <typename T>
-T interpolate(const T& a, const T& b, const float t) {
+T interpolate(const T& a, const T& b, const float t) noexcept {
     return Interpolator<T>()(a, b, t);
 }
 
 template <class T, class Enabled>
 struct Interpolator {
-    T operator()(const T& a, const T& b, const double t) const { return a * (1.0 - t) + b * t; }
+    T operator()(const T& a, const T& b, const double t) const noexcept { return a * (1.0 - t) + b * t; }
 };
 
 template <>
 struct Interpolator<float> {
-    float operator()(const float& a, const float& b, const float t) const { return a * (1.0f - t) + b * t; }
+    float operator()(const float& a, const float& b, const float t) const noexcept { return a * (1.0f - t) + b * t; }
 
-    float operator()(const float& a, const float& b, const double t) const {
+    float operator()(const float& a, const float& b, const double t) const noexcept {
         return static_cast<float>(a * (1.0 - t) + b * t);
     }
 };
@@ -50,12 +50,12 @@ private:
     using Array = std::array<T, N>;
 
     template <std::size_t... I>
-    Array operator()(const Array& a, const Array& b, const double t, std::index_sequence<I...>) {
+    Array operator()(const Array& a, const Array& b, const double t, std::index_sequence<I...>) noexcept {
         return {{interpolate(a[I], b[I], t)...}};
     }
 
 public:
-    Array operator()(const Array& a, const Array& b, const double t) {
+    Array operator()(const Array& a, const Array& b, const double t) noexcept {
         return operator()(a, b, t, std::make_index_sequence<N>());
     }
 };
@@ -66,12 +66,12 @@ private:
     using Array = std::array<float, N>;
 
     template <std::size_t... I>
-    Array operator()(const Array& a, const Array& b, const float t, std::index_sequence<I...>) {
+    Array operator()(const Array& a, const Array& b, const float t, std::index_sequence<I...>) noexcept {
         return {{interpolate(a[I], b[I], t)...}};
     }
 
 public:
-    Array operator()(const Array& a, const Array& b, const float t) {
+    Array operator()(const Array& a, const Array& b, const float t) noexcept {
         return operator()(a, b, t, std::make_index_sequence<N>());
     }
 };
@@ -105,7 +105,7 @@ struct Interpolator<std::vector<style::expression::Value>> {
 template <>
 struct Interpolator<style::Position> {
 public:
-    style::Position operator()(const style::Position& a, const style::Position& b, const float t) {
+    style::Position operator()(const style::Position& a, const style::Position& b, const float t) noexcept {
         auto pos = style::Position();
         auto interpolated = interpolate(a.getCartesian(), b.getCartesian(), t);
         pos.setCartesian(interpolated);
@@ -116,11 +116,11 @@ public:
 template <>
 struct Interpolator<Color> {
 public:
-    Color operator()(const Color& a, const Color& b, const float t) {
+    Color operator()(const Color& a, const Color& b, const float t) noexcept {
         return {interpolate(a.r, b.r, t), interpolate(a.g, b.g, t), interpolate(a.b, b.b, t), interpolate(a.a, b.a, t)};
     }
 
-    Color operator()(const Color& a, const Color& b, const double t) {
+    Color operator()(const Color& a, const Color& b, const double t) noexcept {
         return {interpolate(a.r, b.r, t), interpolate(a.g, b.g, t), interpolate(a.b, b.b, t), interpolate(a.a, b.a, t)};
     }
 };
@@ -128,7 +128,7 @@ public:
 template <>
 struct Interpolator<style::Rotation> {
 public:
-    style::Rotation operator()(const style::Rotation& a, const style::Rotation& b, const double t) {
+    style::Rotation operator()(const style::Rotation& a, const style::Rotation& b, const double t) noexcept {
         assert(a.period() == b.period());
         auto period = a.period();
         auto aAngle = std::fmod(a.getAngle(), period);
@@ -148,7 +148,7 @@ public:
 
 struct Uninterpolated {
     template <class T>
-    T operator()(const T& a, const T&, const double) const {
+    T operator()(const T& a, const T&, const double) const noexcept {
         return a;
     }
 };

@@ -10,14 +10,14 @@ class ParsingContext;
 
 class ImageExpression final : public Expression {
 public:
-    explicit ImageExpression(std::unique_ptr<Expression> imageID);
+    explicit ImageExpression(std::unique_ptr<Expression> imageID) noexcept;
 
     EvaluationResult evaluate(const EvaluationContext&) const override;
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
 
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override { return {std::nullopt}; }
 

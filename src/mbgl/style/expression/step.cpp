@@ -11,7 +11,7 @@ namespace expression {
 
 Step::Step(const type::Type& type_,
            std::unique_ptr<Expression> input_,
-           std::map<double, std::unique_ptr<Expression>> stops_)
+           std::map<double, std::unique_ptr<Expression>> stops_) noexcept
     : Expression(Kind::Step, type_),
       input(std::move(input_)),
       stops(std::move(stops_)) {
@@ -56,7 +56,7 @@ void Step::eachStop(const std::function<void(double, const Expression&)>& visit)
     }
 }
 
-bool Step::operator==(const Expression& e) const {
+bool Step::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Step) {
         auto rhs = static_cast<const Step*>(&e);
         return *input == *(rhs->input) && Expression::childrenEqual(stops, rhs->stops);
@@ -74,7 +74,7 @@ std::vector<std::optional<Value>> Step::possibleOutputs() const {
     return result;
 }
 
-Range<float> Step::getCoveringStops(const double lower, const double upper) const {
+Range<float> Step::getCoveringStops(const double lower, const double upper) const noexcept {
     return ::mbgl::style::expression::getCoveringStops(stops, lower, upper);
 }
 
