@@ -3,6 +3,7 @@
 #include <mbgl/shaders/background_layer_ubo.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/collision_layer_ubo.hpp>
+#include <mbgl/shaders/custom_drawable_layer_ubo.hpp>
 #include <mbgl/shaders/debug_layer_ubo.hpp>
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
@@ -22,6 +23,7 @@ namespace shaders {
 static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backgroundUBOCount),
                                                        static_cast<size_t>(circleUBOCount),
                                                        static_cast<size_t>(collisionUBOCount),
+                                                       static_cast<size_t>(customDrawableUBOCount),
                                                        static_cast<size_t>(debugUBOCount),
                                                        static_cast<size_t>(fillUBOCount),
                                                        static_cast<size_t>(fillOutlineUBOCount),
@@ -39,6 +41,80 @@ static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backg
                                                        static_cast<size_t>(lineBasicUBOCount),
                                                        static_cast<size_t>(rasterUBOCount),
                                                        static_cast<size_t>(symbolUBOCount)});
+
+enum {
+    idBackgroundImageTexture,
+    backgroundTextureCount
+};
+
+enum {
+    circleTextureCount
+};
+
+enum {
+    collisionTextureCount
+};
+
+enum {
+    idCustomSymbolIconTexture,
+    customSymbolIconTextureCount
+};
+
+enum {
+    idDebugOverlayTexture,
+    debugTextureCount
+};
+
+enum {
+    idFillExtrusionImageTexture,
+    fillExtrusionTextureCount
+};
+
+enum {
+    idFillImageTexture,
+    fillTextureCount
+};
+
+enum {
+    idHeatmapImageTexture,
+    idHeatmapColorRampTexture,
+    heatmapTextureCount
+};
+
+enum {
+    idHillshadeImageTexture,
+    hillshadeTextureCount
+};
+
+enum {
+    idLineImageTexture,
+    lineTextureCount
+};
+
+enum {
+    idRasterImage0Texture,
+    idRasterImage1Texture,
+    rasterTextureCount
+};
+
+enum {
+    idSymbolImageTexture,
+    idSymbolImageIconTexture,
+    symbolTextureCount
+};
+
+static constexpr auto maxTextureCountPerShader = std::max({static_cast<size_t>(backgroundTextureCount),
+                                                           static_cast<size_t>(circleTextureCount),
+                                                           static_cast<size_t>(collisionTextureCount),
+                                                           static_cast<size_t>(customSymbolIconTextureCount),
+                                                           static_cast<size_t>(debugTextureCount),
+                                                           static_cast<size_t>(fillTextureCount),
+                                                           static_cast<size_t>(fillExtrusionTextureCount),
+                                                           static_cast<size_t>(heatmapTextureCount),
+                                                           static_cast<size_t>(hillshadeTextureCount),
+                                                           static_cast<size_t>(lineTextureCount),
+                                                           static_cast<size_t>(rasterTextureCount),
+                                                           static_cast<size_t>(symbolTextureCount)});
 
 } // namespace shaders
 } // namespace mbgl

@@ -40,7 +40,7 @@ const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::FillPatternShader, g
     UniformBlockInfo{7, true, false, sizeof(FillPatternInterpolateUBO), idFillPatternInterpolateUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_image"},
+    TextureInfo{0, idFillImageTexture},
 };
 
 const std::array<AttributeInfo, 4>
@@ -59,7 +59,7 @@ const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::FillOutlinePatternSh
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>::textures =
     {
-        TextureInfo{0, "u_image"},
+        TextureInfo{0, idFillImageTexture},
 };
 
 } // namespace shaders

@@ -38,10 +38,9 @@ shaders::UniformBlockInfo::UniformBlockInfo(
       size(size_),
       id(id_) {}
 
-shaders::TextureInfo::TextureInfo(std::size_t index_, std::string_view name_)
+shaders::TextureInfo::TextureInfo(std::size_t index_, std::size_t id_)
     : index(index_),
-      name(name_),
-      nameID(stringIndexer().get(name_)) {}
+      id(id_) {}
 
 namespace mtl {
 namespace {
@@ -188,11 +187,8 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
     return rps;
 }
 
-std::optional<uint32_t> ShaderProgram::getSamplerLocation(const StringIdentity id) const {
-    if (auto it = textureBindings.find(id); it != textureBindings.end()) {
-        return it->second;
-    }
-    return std::nullopt;
+std::optional<size_t> ShaderProgram::getSamplerLocation(const size_t id) const {
+    return (id < textureBindings.size()) ? textureBindings[id] : std::nullopt;
 }
 
 void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
@@ -222,7 +218,11 @@ void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
 }
 
 void ShaderProgram::initTexture(const shaders::TextureInfo& info) {
-    textureBindings[stringIndexer().get(info.name.data())] = info.index;
+    assert(info.id < textureBindings.size());
+    if (info.id >= textureBindings.size()) {
+        return;
+    }
+    textureBindings[info.id] = info.index;
 }
 
 } // namespace mtl

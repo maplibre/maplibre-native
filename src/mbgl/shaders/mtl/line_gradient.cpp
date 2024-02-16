@@ -19,7 +19,7 @@ const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineGradientShader, 
     UniformBlockInfo{10, true, false, sizeof(LineGradientInterpolationUBO), idLineGradientInterpolationUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_image"},
+    TextureInfo{0, idLineImageTexture},
 };
 
 } // namespace shaders
