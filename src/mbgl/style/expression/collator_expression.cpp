@@ -10,7 +10,7 @@ namespace expression {
 
 CollatorExpression::CollatorExpression(std::unique_ptr<Expression>&& caseSensitive_,
                                        std::unique_ptr<Expression>&& diacriticSensitive_,
-                                       std::unique_ptr<Expression>&& locale_) noexcept
+                                       std::optional<std::unique_ptr<Expression>>&& locale_) noexcept
     : Expression(Kind::CollatorExpression, type::Collator),
       caseSensitive(std::move(caseSensitive_)),
       diacriticSensitive(std::move(diacriticSensitive_)),
@@ -68,7 +68,7 @@ ParseResult CollatorExpression::parse(const Convertible& value, ParsingContext& 
 void CollatorExpression::eachChild(const std::function<void(const Expression&)>& fn) const {
     fn(*caseSensitive);
     fn(*diacriticSensitive);
-    if (locale) {
+    if (locale && *locale) {
         fn(**locale);
     }
 }
@@ -88,7 +88,7 @@ mbgl::Value CollatorExpression::serialize() const {
     std::unordered_map<std::string, mbgl::Value> options;
     options["case-sensitive"] = caseSensitive->serialize();
     options["diacritic-sensitive"] = diacriticSensitive->serialize();
-    if (locale) {
+    if (locale && *locale) {
         options["locale"] = (*locale)->serialize();
     }
     return std::vector<mbgl::Value>{{std::string("collator"), options}};
@@ -104,7 +104,7 @@ EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) c
         return diacriticSensitiveResult.error();
     }
 
-    if (locale) {
+    if (locale && *locale) {
         auto localeResult = (*locale)->evaluate(params);
         if (!localeResult) {
             return localeResult.error();
