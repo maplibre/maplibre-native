@@ -56,6 +56,11 @@ enum {
 };
 
 enum {
+    idCustomSymbolIconTexture,
+    customSymbolIconTextureCount
+};
+
+enum {
     idDebugOverlayTexture,
     debugTextureCount
 };
@@ -101,6 +106,7 @@ enum {
 static constexpr auto maxTextureCountPerShader = std::max({static_cast<size_t>(backgroundTextureCount),
                                                            static_cast<size_t>(circleTextureCount),
                                                            static_cast<size_t>(collisionTextureCount),
+                                                           static_cast<size_t>(customSymbolIconTextureCount),
                                                            static_cast<size_t>(debugTextureCount),
                                                            static_cast<size_t>(fillTextureCount),
                                                            static_cast<size_t>(fillExtrusionTextureCount),

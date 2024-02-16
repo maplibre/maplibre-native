@@ -402,11 +402,7 @@ void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
 
     // texture
     if (symbolOptions.texture) {
-        static const StringIdentity idTextureUniformName = stringIndexer().get("u_texture");
-        if (auto textureLocation = builder->getShader()->getSamplerLocation(idTextureUniformName);
-            textureLocation.has_value()) {
-            builder->setTexture(symbolOptions.texture, *textureLocation);
-        }
+        builder->setTexture(symbolOptions.texture, idCustomSymbolIconTexture);
     }
 
     // create fill tweaker

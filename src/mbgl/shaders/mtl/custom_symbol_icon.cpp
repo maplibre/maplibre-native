@@ -15,7 +15,7 @@ const std::array<UniformBlockInfo, 2>
         UniformBlockInfo{3, true, false, sizeof(CustomSymbolIconParametersUBO), idCustomSymbolIconParametersUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_texture"},
+    TextureInfo{0, idCustomSymbolIconTexture},
 };
 
 } // namespace shaders
