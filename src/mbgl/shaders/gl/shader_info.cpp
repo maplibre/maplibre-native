@@ -83,6 +83,15 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::CollisionCircleShader, gfx:
     AttributeInfo{"a_placed", idCollisionPlacedVertexAttribute},
 };
 const std::vector<UniformBlockInfo>
+    ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
+        UniformBlockInfo{"CustomSymbolIconDrawableUBO", idCustomSymbolIconDrawableUBO},
+        UniformBlockInfo{"CustomSymbolIconParametersUBO", idCustomSymbolIconParametersUBO},
+};
+const std::vector<TextureInfo> ShaderInfo<BuiltIn::CustomSymbolIconShader, gfx::Backend::Type::OpenGL>::textures = {
+    TextureInfo{"u_texture", idSymbolImageTexture},
+};
+
+const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::CollisionCircleShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
         UniformBlockInfo{"CollisionCircleUBO", idCollisionUBO},
 };
