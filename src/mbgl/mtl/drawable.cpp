@@ -317,14 +317,13 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
         if (!vertexAttributes) {
             vertexAttributes = std::make_shared<VertexAttributeArray>();
         }
-        if (auto& attrib = vertexAttributes->getOrAdd(impl->idVertexAttrName, /*index=*/-1, type)) {
+        if (auto& attrib = vertexAttributes->set(impl->vertexAttrId, /*index=*/-1, type)) {
             attrib->setRawData(std::move(data));
             attrib->setStride(VertexAttribute::getStrideOf(type));
         } else {
             using namespace std::string_literals;
-            Log::Warning(
-                Event::General,
-                "Vertex attribute type mismatch: "s + name + " / " + stringIndexer().get(impl->idVertexAttrName));
+            Log::Warning(Event::General,
+                         "Vertex attribute type mismatch: "s + name + " / " + util::toString(impl->vertexAttrId));
             assert(false);
         }
     }
@@ -338,8 +337,8 @@ gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void Drawable::setVertexAttrNameId(const StringIdentity value) {
-    impl->idVertexAttrName = value;
+void Drawable::setVertexAttrId(const size_t id) {
+    impl->vertexAttrId = id;
 }
 
 void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
@@ -540,7 +539,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                     vertexBuffers);
         impl->attributeBuffers = std::move(vertexBuffers);
 
-        vertexAttributes->visitAttributes([](const auto&, gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
+        vertexAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
         if (impl->attributeBindings != attributeBindings_) {
             impl->attributeBindings = std::move(attributeBindings_);

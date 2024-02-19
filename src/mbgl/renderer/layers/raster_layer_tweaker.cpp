@@ -10,7 +10,6 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/gfx/image_drawable_data.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 

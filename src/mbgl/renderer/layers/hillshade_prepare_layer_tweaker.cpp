@@ -9,7 +9,6 @@
 #include <mbgl/shaders/hillshade_prepare_layer_ubo.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 

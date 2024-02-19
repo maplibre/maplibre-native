@@ -108,7 +108,7 @@ public:
 
     template <class... Args>
     void emplace_back(Args&&... args) {
-        static_assert(sizeof...(args) == groupSize, "wrong buffer element count");
+        static_assert(sizeof...(args) % groupSize == 0, "wrong buffer element count");
         assert(!released);
         util::ignore({(v.emplace_back(std::forward<Args>(args)), 0)...});
     }
