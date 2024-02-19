@@ -24,9 +24,8 @@ static hb_script_t getUnicodeScript (hb_codepoint_t u)
   return hb_unicode_script (unicode_funcs, u);
 }
 
-HBShaperWrap::HBShaperWrap(GlyphTypeWrap _type, const std::string &fontFileData, const FreeTypeLibrary &lib)
-    : face(fontFileData.data(), fontFileData.size(), lib),
-      type(_type) {
+HBShaperWrap::HBShaperWrap(const std::string &fontFileData, const FreeTypeLibrary &lib)
+    : face(fontFileData.data(), fontFileData.size(), lib) {
     if (!face.Valid()) return;
 
     font = hb_ft_font_create(face.face, NULL);

@@ -13,13 +13,6 @@ namespace mbgl {
 
 struct InternalHBLangInfo;
 
-enum GlyphTypeWrap : short {
-    FontPBFWrap = 0x00,
-    KhmerWrap = 0x01,
-    MyanmarWrap = 0x02,
-    DevanagariWrap = 0x03,
-};
-
 struct HBShapeAdjust {
     float x_offset;
     float y_offset;
@@ -31,7 +24,7 @@ struct HBShapeAdjust {
 
 class HBShaperWrap {
 public:
-    explicit HBShaperWrap(GlyphTypeWrap glyphType, const std::string& fontFileData, const FreeTypeLibrary& lib);
+    explicit HBShaperWrap(const std::string& fontFileData, const FreeTypeLibrary& lib);
     ~HBShaperWrap();
 
     void CreateComplexGlyphIDs(const std::u16string& text,
@@ -47,8 +40,6 @@ private:
 
     hb_font_t *font;
     hb_buffer_t *buffer;
-    
-    GlyphTypeWrap type;
 };
 
 } // namespace mbgl

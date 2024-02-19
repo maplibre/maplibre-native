@@ -9,7 +9,7 @@ namespace mbgl {
 
 HBShaper::HBShaper(GlyphIDType type_, const std::string &fontFileData, const FreeTypeLibrary &lib)
     : type(type_) {
-    shaper = std::make_unique<HBShaperWrap>((GlyphTypeWrap)type_, fontFileData, lib);
+    shaper = std::make_unique<HBShaperWrap>(fontFileData, lib);
 
     if (!shaper || !shaper->Valid()) return;
 }
