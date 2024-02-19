@@ -17,7 +17,7 @@ public:
     using Branch = std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>;
 
     Case(type::Type type_, std::vector<Branch> branches_, std::unique_ptr<Expression> otherwise_)
-        : Expression(Kind::Case, std::move(type_), collectDependencies(branches) | depsOf(otherwise_)),
+        : Expression(Kind::Case, std::move(type_), collectDependencies(branches_) | depsOf(otherwise_)),
           branches(std::move(branches_)),
           otherwise(std::move(otherwise_)) {}
 
