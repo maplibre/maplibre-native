@@ -407,7 +407,7 @@ void shapeLines(Shaping& shaping,
             const HBShapeAdjust* adjust = nullptr;
             if (section.adjusts) {
                 assert(section.startIndex >= 0);
-                if (i - section.startIndex >= 0 && i - section.startIndex < section.adjusts->size()) {
+                if (i >= (std::size_t)section.startIndex && i - section.startIndex < section.adjusts->size()) {
                     adjust = &((*section.adjusts)[i - section.startIndex]);
                 }
             }
