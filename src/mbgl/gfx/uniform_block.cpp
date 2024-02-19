@@ -6,34 +6,31 @@ namespace gfx {
 std::unique_ptr<UniformBlock> UniformBlockArray::nullref = nullptr;
 
 UniformBlockArray::UniformBlockArray(UniformBlockArray&& other)
-    : uniformBlockMap(std::move(other.uniformBlockMap)) {}
+    : uniformBlockVector(std::move(other.uniformBlockVector)) {}
 
 UniformBlockArray& UniformBlockArray::operator=(UniformBlockArray&& other) {
-    uniformBlockMap = std::move(other.uniformBlockMap);
+    uniformBlockVector = std::move(other.uniformBlockVector);
     return *this;
 }
 
 UniformBlockArray& UniformBlockArray::operator=(const UniformBlockArray& other) {
-    uniformBlockMap.clear();
-    for (const auto& kv : other.uniformBlockMap) {
-        add(kv.first, copy(*kv.second));
+    for (size_t id = 0; id < other.uniformBlockVector.size(); id++) {
+        uniformBlockVector[id] = copy(*other.uniformBlockVector[id]);
     }
     return *this;
 }
 
-const std::unique_ptr<UniformBlock>& UniformBlockArray::get(const StringIdentity id) const {
-    const auto result = uniformBlockMap.find(id);
-    return (result != uniformBlockMap.end()) ? result->second : nullref;
+const std::unique_ptr<UniformBlock>& UniformBlockArray::get(const size_t id) const {
+    return (id < uniformBlockVector.size()) ? uniformBlockVector[id] : nullref;
 }
 
-const std::unique_ptr<UniformBlock>& UniformBlockArray::add(const StringIdentity id, int index, std::size_t size) {
-    const auto result = uniformBlockMap.insert(std::make_pair(id, std::unique_ptr<UniformBlock>()));
-    if (result.second) {
-        result.first->second = create(index, size);
-        return result.first->second;
-    } else {
+const std::unique_ptr<UniformBlock>& UniformBlockArray::set(const size_t id, const size_t index, std::size_t size) {
+    assert(id < uniformBlockVector.size());
+    if (id >= uniformBlockVector.size()) {
         return nullref;
     }
+    uniformBlockVector[id] = create(static_cast<int>(index), size);
+    return uniformBlockVector[id];
 }
 
 } // namespace gfx

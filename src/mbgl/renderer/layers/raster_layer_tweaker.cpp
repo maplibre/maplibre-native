@@ -10,18 +10,17 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/gfx/image_drawable_data.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idRasterDrawableUBOName = stringIndexer().get("RasterDrawableUBO");
-
 void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                                  [[maybe_unused]] const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const RasterLayerProperties&>(*evaluatedProperties).evaluated;
+
+    propertiesUpdated = false;
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!checkTweakDrawable(drawable)) {
@@ -90,7 +89,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             0,
             0};
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idRasterDrawableUBOName, &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(idRasterDrawableUBO, &drawableUBO, parameters.context);
     });
 }
 

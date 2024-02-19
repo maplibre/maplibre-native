@@ -26,12 +26,6 @@ jobs:
             appFile: "MapboxGLAndroidSDKTestApp-drawable-release.apk",
             name: "Android Benchmark",
             testFilter: "org.maplibre.android.benchmark.Benchmark",
-            # echo '{"styleNames": [...], "styleURLs": [...], "resultsAPI: "..." }' > benchmark-input.json 
-            # zip benchmark-input.zip benchmark-input.json 
-            # aws devicefarm create-upload --project-arn <project_arn> --type EXTERNAL_DATA --name benchmark-input.zip
-            # curl -T benchmark-input.zip <upload_url>
-            # aws devicefarm get-upload <arn>
-            externalData: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/c27174c2-63f4-4cdb-9af9-68957d75ebed",
             # top devices, query with `aws list-device-pools --arn <project_arn>`
             devicePool: "arn:aws:devicefarm:us-west-2::devicepool:082d10e5-d7d7-48a5-ba5c-b33d66efa1f5",
             # benchmark-android.yaml
@@ -55,13 +49,13 @@ jobs:
         id: get-pr-number
 
       - name: Check if comment on PR contains '!benchmark android'
-        uses: peter-evans/find-comment@v2
+        uses: peter-evans/find-comment@v3
         id: fc
         with:
           issue-number: ${{ steps.get-pr-number.outputs.pr-number }}
           body-regex: '^!benchmark.*android.*$'
 
-      - uses: LouisBrunner/checks-action@v1.6.2
+      - uses: LouisBrunner/checks-action@v2.0.0
         if: matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id
         id: create_check
         with:
@@ -83,6 +77,25 @@ jobs:
         with:
           files: "${{ matrix.test.testFile }}, ${{ matrix.test.appFile }}"
 
+      - name: Configure AWS Credentials
+        if: matrix.test.name == 'Android Benchmark'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          role-duration-seconds: 21600
+          role-session-name: MySessionName
+
+      - name: Upload external data for benchmark
+        if: matrix.test.name == 'Android Benchmark'
+        run: |
+          export RESULTS_API=${{ secrets.MLN_RESULTS_API }}
+          export AWS_DEVICE_FARM_PROJECT_ARN=${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
+          upload_arn="$(.github/workflows/android-device-test/upload-external-data.sh)"
+          echo external_data_arn="$upload_arn" >> "$GITHUB_ENV"
+
       - uses: ./.github/actions/aws-device-farm-run
         if: steps.check_files.outputs.files_exists == 'true' && (matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id)
         with:
@@ -98,10 +111,10 @@ jobs:
           AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME }}
           AWS_DEVICE_FARM_PROJECT_ARN: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
           AWS_DEVICE_FARM_DEVICE_POOL_ARN: ${{ matrix.test.devicePool }}
-          externalData: ${{ matrix.test.externalData }}
+          externalData: ${{ env.external_data_arn }}
           testSpecArn: ${{ matrix.test.testSpecArn }}
 
-      - uses: LouisBrunner/checks-action@v1.6.2
+      - uses: LouisBrunner/checks-action@v2.0.0
         if: always() && (matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id)
         with:
           token: ${{ steps.generate_token.outputs.token }}

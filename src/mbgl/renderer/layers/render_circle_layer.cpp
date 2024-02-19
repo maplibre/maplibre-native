@@ -22,7 +22,6 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #endif
 
 namespace mbgl {
@@ -86,9 +85,8 @@ void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters)
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup) {
-        auto newTweaker = std::make_shared<CircleLayerTweaker>(getID(), evaluatedProperties);
-        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    if (layerTweaker) {
+        layerTweaker->updateProperties(evaluatedProperties);
     }
 #endif // MLN_DRAWABLE_RENDERER
 }
@@ -265,8 +263,6 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 namespace {
 
 constexpr auto CircleShaderGroupName = "CircleShader";
-const StringIdentity idCircleInterpolateUBOName = stringIndexer().get("CircleInterpolateUBO");
-const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
 
 } // namespace
 
@@ -278,8 +274,6 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                [[maybe_unused]] const std::shared_ptr<UpdateParameters>&,
                                [[maybe_unused]] const RenderTree& renderTree,
                                UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -318,7 +312,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
-    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
+    StringIDSetsPair propertiesAsUniforms;
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -362,7 +356,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(idCircleInterpolateUBOName, &interpolateUBO, context);
+            uniforms.createOrUpdate(idCircleInterpolateUBO, &interpolateUBO, context);
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
@@ -371,7 +365,9 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
 
-        propertiesAsUniforms.clear();
+        propertiesAsUniforms.first.clear();
+        propertiesAsUniforms.second.clear();
+
         auto circleVertexAttrs = context.createVertexAttributeArray();
         circleVertexAttrs->readDataDrivenPaintProperties<CircleColor,
                                                          CircleRadius,
@@ -380,17 +376,14 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                                          CircleStrokeColor,
                                                          CircleStrokeWidth,
                                                          CircleStrokeOpacity>(
-            paintPropertyBinders, evaluated, propertiesAsUniforms);
+            paintPropertyBinders, evaluated, propertiesAsUniforms, idCircleColorVertexAttribute);
 
-        if (!circleShaderGroup) {
-            continue;
-        }
         const auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         if (!circleShader) {
             continue;
         }
 
-        if (const auto& attr = circleVertexAttrs->add(idVertexAttribName)) {
+        if (const auto& attr = circleVertexAttrs->set(idCirclePosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(CircleLayoutVertex, a1),
                                    0,
@@ -418,7 +411,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setLayerTweaker(layerTweaker);
 
             auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.addOrReplace(idCircleInterpolateUBOName, interpBuffer);
+            uniforms.set(idCircleInterpolateUBO, interpBuffer);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

@@ -63,10 +63,10 @@ public:
           v(std::move(other.v)) {}
     ~VertexVector() override = default;
 
-    template <typename Arg>
-    void emplace_back(Arg&& vertex) {
+    template <class... Args>
+    void emplace_back(Args&&... args) {
         assert(!released);
-        v.emplace_back(std::forward<Arg>(vertex));
+        util::ignore({(v.emplace_back(std::forward<Args>(args)), 0)...});
         dirty = true;
     }
 
@@ -97,6 +97,8 @@ public:
         dirty = true;
         v.clear();
     }
+
+    void reserve(std::size_t count) { v.reserve(count); }
 
     /// Indicate that this shared vertex vector instance will no longer be updated.
     void release() {

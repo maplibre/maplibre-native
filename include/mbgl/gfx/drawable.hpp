@@ -44,8 +44,8 @@ using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
 
 class Drawable {
 public:
-    /// @brief Map from sampler location to texture info
-    using Textures = mbgl::unordered_map<int32_t, gfx::Texture2DPtr>;
+    /// @brief Array of textures to bind
+    using Textures = std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>;
 
 protected:
     Drawable(std::string name);
@@ -99,26 +99,18 @@ public:
     /// Set line width
     void setLineWidth(int32_t value) { lineWidth = value; }
 
-    /// @brief Remove an attached texture from this drawable at the given sampler location
-    /// @param location Texture sampler location
-    void removeTexture(int32_t location);
-
-    /// @brief Return the textures attached to this drawable
-    /// @return Texture and sampler location pairs
-    const Textures& getTextures() const { return textures; };
-
-    /// @brief Get the texture at the given sampler location.
-    const gfx::Texture2DPtr& getTexture(int32_t location) const;
+    /// @brief Get the texture at the given internal ID.
+    const gfx::Texture2DPtr& getTexture(size_t id) const;
 
     /// @brief Set the collection of textures bound to this drawable
     /// @param textures_ A Textures collection to set
     void setTextures(const Textures& textures_) noexcept { textures = textures_; }
     void setTextures(Textures&& textures_) noexcept { textures = std::move(textures_); }
 
-    /// @brief Attach the given texture to this drawable at the given sampler location.
+    /// @brief Attach the given texture to this drawable at the given internal ID.
     /// @param texture Texture2D instance
-    /// @param location A sampler location in the shader being used with this drawable.
-    void setTexture(gfx::Texture2DPtr texture, int32_t location);
+    /// @param id Internal ID of the texture.
+    void setTexture(gfx::Texture2DPtr texture, size_t id);
 
     /// Whether the drawble should be drawn
     bool getEnabled() const { return enabled; }
@@ -143,7 +135,7 @@ public:
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
 
     /// Whether to enable depth testing
-    bool getEnableDepth() { return enableDepth; }
+    bool getEnableDepth() const { return enableDepth; }
     virtual void setEnableDepth(bool value) { enableDepth = value; }
 
     /// Determines depth range within the layer for 2D drawables

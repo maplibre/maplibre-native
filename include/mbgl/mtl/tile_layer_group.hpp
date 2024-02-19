@@ -1,8 +1,16 @@
 #pragma once
 
+#include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 
+#include <Foundation/NSSharedPtr.hpp>
+
+#include <optional>
+
 namespace mbgl {
+
+class PaintParameters;
+
 namespace mtl {
 
 /**
@@ -17,6 +25,8 @@ public:
     void render(RenderOrchestrator&, PaintParameters&) override;
 
 protected:
+    std::optional<MTLDepthStencilStatePtr> stateNone;
+    std::optional<MTLDepthStencilStatePtr> stateDepth;
 };
 
 } // namespace mtl

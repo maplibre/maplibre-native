@@ -266,11 +266,6 @@ protected:
     /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
 
-    /// Update the layer tweaker and drawables which reference it
-    static void replaceTweaker(LayerTweakerPtr& toReplace,
-                               LayerTweakerPtr newTweaker,
-                               const std::vector<LayerGroupBasePtr>&);
-
 #endif // MLN_DRAWABLE_RENDERER
 
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
@@ -306,8 +301,6 @@ protected:
 
     // Current renderable status as specified by the markLayerRenderable event
     bool isRenderable{false};
-
-    std::mutex mutex;
 
     struct Stats {
         size_t propertyEvaluations = 0;

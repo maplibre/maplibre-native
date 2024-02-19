@@ -18,7 +18,7 @@ public:
     ~ShaderGroupGL() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,
-                                     const mbgl::unordered_set<StringIdentity>& propertiesAsUniforms,
+                                     const StringIDSetsPair& propertiesAsUniforms,
                                      std::string_view firstAttribName) override {
         constexpr auto& name = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::name;
         constexpr auto& vert = shaders::ShaderSource<ShaderID, gfx::Backend::Type::OpenGL>::vertex;
@@ -38,11 +38,10 @@ public:
 
         // No match, we need to create the shader.
         std::string additionalDefines;
-        additionalDefines.reserve(propertiesAsUniforms.size() * 48);
-        for (const auto nameID : propertiesAsUniforms) {
+        additionalDefines.reserve(propertiesAsUniforms.first.size() * 48);
+        for (const auto propertyName : propertiesAsUniforms.first) {
             // We expect the names to be prefixed by "a_", but we need just the base here.
-            const auto prefixedAttrName = stringIndexer().get(nameID);
-            const auto* prefix = prefixedAttrName.data();
+            const auto* prefix = propertyName.data();
             if (prefix[0] == 'a' && prefix[1] == '_') {
                 prefix += 2;
             }
@@ -53,8 +52,15 @@ public:
         }
 
         auto& glContext = static_cast<gl::Context&>(context);
-        shader = ShaderProgramGL::create(
-            glContext, programParameters, shaderName, firstAttribName, vert, frag, additionalDefines);
+        shader = ShaderProgramGL::create(glContext,
+                                         programParameters,
+                                         firstAttribName,
+                                         shaders::ShaderInfo<ShaderID, gfx::Backend::Type::OpenGL>::uniformBlocks,
+                                         shaders::ShaderInfo<ShaderID, gfx::Backend::Type::OpenGL>::textures,
+                                         shaders::ShaderInfo<ShaderID, gfx::Backend::Type::OpenGL>::attributes,
+                                         vert,
+                                         frag,
+                                         additionalDefines);
         if (!shader || !registerShader(shader, shaderName)) {
             throw std::runtime_error("Failed to register " + shaderName + " with shader group!");
         }

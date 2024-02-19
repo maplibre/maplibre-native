@@ -1,3 +1,4 @@
+load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 
 # Objcpp files for the iOS source
@@ -11,11 +12,6 @@ objc_library(
         "//platform/ios:ios_public_hdrs",
         "//platform/ios:ios_sdk_hdrs",
     ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objcpp_opengl_srcs",
-        ],
-    }) + select({
         "//:legacy_renderer": [],
         "//conditions:default": [
             "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
@@ -41,11 +37,11 @@ objc_library(
         "QuartzCore",
     ] + select({
         "//:metal_renderer": [
-            "MetalKit"
+            "MetalKit",
         ],
         "//conditions:default": [
             "OpenGLES",
-            "GLKit"
+            "GLKit",
         ],
     }),
     deps = [
@@ -170,8 +166,8 @@ objc_library(
 objc_library(
     name = "app_custom_drawable_layer_objcpp_srcs",
     srcs = [
-            "//platform/darwin:app/ExampleCustomDrawableStyleLayer.h",
-            "//platform/darwin:app/ExampleCustomDrawableStyleLayer.mm",
+        "//platform/darwin:app/ExampleCustomDrawableStyleLayer.h",
+        "//platform/darwin:app/ExampleCustomDrawableStyleLayer.mm",
     ],
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"] + [
         "-fcxx-modules",
@@ -184,8 +180,8 @@ objc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//:mbgl-core",
         ":ios-sdk",
+        "//:mbgl-core",
     ],
 )
 
@@ -193,26 +189,23 @@ objc_library(
     name = "iosapp",
     srcs = [
         "//platform/ios:ios_app_srcs",
-    ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:app/LimeGreenStyleLayer.h",
-            "//platform/darwin:app/LimeGreenStyleLayer.m",
-        ],
-    }),
+        "//platform/darwin:app/CustomStyleLayerExample.h",
+        "//platform/darwin:app/CustomStyleLayerExample.m",
+    ],
     defines = ["GLES_SILENCE_DEPRECATION"],
     includes = [
         "darwin/app",
         "darwin/src",
     ],
     sdk_frameworks = [
-        ] + select({
+    ] + select({
         "//:metal_renderer": [
-            "MetalKit"
+            "MetalKit",
         ],
         "//conditions:default": [
-            "GLKit",  # needed for LimeGreenStyleLayer
-        ]}),
+            "GLKit",  # needed for CustomStyleLayerExample
+        ],
+    }),
     visibility = ["//visibility:public"],
     deps = [
         ":ios-sdk",
@@ -226,9 +219,9 @@ objc_library(
 
 objc_library(
     name = "ios-benchapp",
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     srcs = ["//platform/ios/benchmark:ios_benchmark_srcs"],
     hdrs = ["//platform/ios/benchmark:ios_benchmark_hdrs"],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     includes = [
         "darwin/app",
         "darwin/src",
@@ -241,39 +234,17 @@ objc_library(
     ],
 )
 
-sh_binary(
+js_binary(
     name = "check-public-symbols",
-    srcs = ["//platform/darwin:scripts/check-public-symbols.sh"],
-    data = [
-        "//platform/darwin:darwin_objc_hdrs",
-        "//platform/darwin:darwin_objc_srcs",
-        "//platform/darwin:darwin_objcpp_hdrs",
-        "//platform/darwin:darwin_objcpp_srcs",
-        "//platform/darwin:darwin_private_hdrs",
-        "//platform/darwin:generated_style_hdrs",
-        "//platform/darwin:generated_style_srcs",
-        "//platform/darwin:scripts/check-public-symbols.js",
-        "//platform/ios:ios_objc_srcs",
-        "//platform/ios:ios_objcpp_srcs",
-        "//platform/ios:ios_private_hdrs",
-        "//platform/ios:ios_public_hdrs",
-        "//platform/ios:ios_sdk_hdrs",
-        "//platform/macos:macos_objc_srcs",
-        "//platform/macos:macos_objcpp_srcs",
-        "//platform/macos:macos_private_hdrs",
-        "//platform/macos:macos_public_hdrs",
-    ] + select({
-        "//:metal_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objcpp_opengl_srcs",
-        ],
-    }) + select({
-        "//:legacy_renderer": [],
-        "//conditions:default": [
-            "//platform/darwin:darwin_objcpp_custom_drawable_srcs",
-        ],
-    }),
-    deps = [
-        "//platform/darwin:generated_code",
+    args = [
+        "macOS",
+        "iOS",
     ],
+    data = [
+        "//:node_modules/lodash",
+        "//platform/darwin:symbols-to-check",
+        "//platform/ios:symbols-to-check",
+        "//platform/macos:symbols-to-check",
+    ],
+    entry_point = "scripts/check-public-symbols.js",
 )

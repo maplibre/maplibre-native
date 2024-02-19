@@ -29,6 +29,7 @@
 namespace mbgl {
 
 using namespace style;
+using namespace shaders;
 
 namespace {
 
@@ -66,9 +67,8 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& paramet
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup) {
-        auto newTweaker = std::make_shared<BackgroundLayerTweaker>(getID(), evaluatedProperties);
-        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    if (layerTweaker) {
+        layerTweaker->updateProperties(evaluatedProperties);
     }
 #endif
 }
@@ -216,8 +216,6 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    const std::shared_ptr<UpdateParameters>&,
                                    [[maybe_unused]] const RenderTree& renderTree,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     const auto zoom = state.getIntegerZoom();
     const auto tileCover = util::tileCover(state, zoom);
 
@@ -311,6 +309,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto verticesCopy = rawVertices;
+        builder->setVertexAttrId(idBackgroundPosVertexAttribute);
         builder->setRawVertices(std::move(verticesCopy), vertexCount, gfx::AttributeDataType::Short2);
         builder->setSegments(gfx::Triangles(), indexes.vector(), segs.data(), segs.size());
         builder->flush(context);

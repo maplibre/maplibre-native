@@ -30,6 +30,7 @@
 namespace mbgl {
 
 using namespace style;
+using namespace shaders;
 
 namespace {
 
@@ -64,6 +65,15 @@ void RenderHillshadeLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
 }
 
+#if MLN_DRAWABLE_RENDERER
+void RenderHillshadeLayer::layerChanged(const TransitionParameters& parameters,
+                                        const Immutable<style::Layer::Impl>& impl,
+                                        UniqueChangeRequestVec& changes) {
+    RenderLayer::layerChanged(parameters, impl, changes);
+    prepareLayerTweaker.reset();
+}
+#endif
+
 void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     auto properties = makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(baseImpl),
                                                             unevaluated.evaluate(parameters));
@@ -73,25 +83,11 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
     properties->renderPasses = mbgl::underlying_type(passes);
     evaluatedProperties = std::move(properties);
 #if MLN_DRAWABLE_RENDERER
-    if (layerGroup) {
-        auto newTweaker = std::make_shared<HillshadeLayerTweaker>(getID(), evaluatedProperties);
-        replaceTweaker(layerTweaker, std::move(newTweaker), {layerGroup});
+    if (layerTweaker) {
+        layerTweaker->updateProperties(evaluatedProperties);
     }
-
-    if (!activatedRenderTargets.empty()) {
-        auto newTweaker2 = std::make_shared<HillshadePrepareLayerTweaker>(getID(), evaluatedProperties);
-
-        std::vector<LayerGroupBasePtr> groups;
-        for (const auto& target : activatedRenderTargets) {
-            if (const auto& group = target->getLayerGroup(0)) {
-                groups.push_back(group);
-            }
-        }
-        if (groups.empty()) {
-            prepareLayerTweaker = newTweaker2;
-        } else {
-            replaceTweaker(prepareLayerTweaker, std::move(newTweaker2), groups);
-        }
+    if (prepareLayerTweaker) {
+        prepareLayerTweaker->updateProperties(evaluatedProperties);
     }
 #endif
 }
@@ -299,18 +295,12 @@ void RenderHillshadeLayer::removeRenderTargets(UniqueChangeRequestVec& changes) 
 static const std::string HillshadePrepareShaderGroupName = "HillshadePrepareShader";
 static const std::string HillshadeShaderGroupName = "HillshadeShader";
 
-static const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
-static const StringIdentity idTexturePosAttribName = stringIndexer().get("a_texture_pos");
-static const StringIdentity idTexImageName = stringIndexer().get("u_image");
-
 void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                                   gfx::Context& context,
                                   [[maybe_unused]] const TransformState& state,
                                   const std::shared_ptr<UpdateParameters>&,
                                   [[maybe_unused]] const RenderTree& renderTree,
                                   UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -343,10 +333,6 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    if (!hillshadeImageLocation) {
-        hillshadeImageLocation = hillshadeShader->getSamplerLocation(idTexImageName);
-    }
-
     auto renderPass = RenderPass::Translucent;
     if (!(mbgl::underlying_type(renderPass) & evaluatedProperties->renderPasses)) {
         return;
@@ -369,14 +355,14 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         if (!hillshadePrepareVertexAttrs) {
             hillshadePrepareVertexAttrs = context.createVertexAttributeArray();
 
-            if (const auto& attr = hillshadePrepareVertexAttrs->add(idPosAttribName)) {
+            if (const auto& attr = hillshadePrepareVertexAttrs->set(idHillshadePosVertexAttribute)) {
                 attr->setSharedRawData(staticDataSharedVertices,
                                        offsetof(HillshadeLayoutVertex, a1),
                                        0,
                                        sizeof(HillshadeLayoutVertex),
                                        gfx::AttributeDataType::Short2);
             }
-            if (const auto& attr = hillshadePrepareVertexAttrs->add(idTexturePosAttribName)) {
+            if (const auto& attr = hillshadePrepareVertexAttrs->set(idHillshadeTexturePosVertexAttribute)) {
                 attr->setSharedRawData(staticDataSharedVertices,
                                        offsetof(HillshadeLayoutVertex, a2),
                                        0,
@@ -440,14 +426,11 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             hillshadePrepareBuilder->setSegments(
                 gfx::Triangles(), staticDataIndices.vector(), staticDataSegments.data(), staticDataSegments.size());
 
-            auto imageLocation = hillshadePrepareShader->getSamplerLocation(idTexImageName);
-            if (imageLocation.has_value()) {
-                std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
-                texture->setImage(bucket.getDEMData().getImagePtr());
-                texture->setSamplerConfiguration(
-                    {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-                hillshadePrepareBuilder->setTexture(texture, imageLocation.value());
-            }
+            std::shared_ptr<gfx::Texture2D> texture = context.createTexture2D();
+            texture->setImage(bucket.getDEMData().getImagePtr());
+            texture->setSamplerConfiguration(
+                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            hillshadePrepareBuilder->setTexture(texture, idHillshadeImageTexture);
 
             hillshadePrepareBuilder->flush(context);
 
@@ -479,14 +462,14 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             if (!hillshadeVertexAttrs) {
                 hillshadeVertexAttrs = context.createVertexAttributeArray();
 
-                if (const auto& attr = hillshadeVertexAttrs->add(idPosAttribName)) {
+                if (const auto& attr = hillshadeVertexAttrs->set(idHillshadePosVertexAttribute)) {
                     attr->setSharedRawData(vertices,
                                            offsetof(HillshadeLayoutVertex, a1),
                                            0,
                                            sizeof(HillshadeLayoutVertex),
                                            gfx::AttributeDataType::Short2);
                 }
-                if (const auto& attr = hillshadeVertexAttrs->getOrAdd(idTexturePosAttribName)) {
+                if (const auto& attr = hillshadeVertexAttrs->set(idHillshadeTexturePosVertexAttribute)) {
                     attr->setSharedRawData(vertices,
                                            offsetof(HillshadeLayoutVertex, a2),
                                            0,
@@ -522,10 +505,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
                 drawSegments.emplace_back(hillshadeBuilder->createSegment(gfx::Triangles(), std::move(segCopy)));
             }
             drawable.setIndexData(indices->vector(), std::move(drawSegments));
-
-            if (hillshadeImageLocation) {
-                drawable.setTexture(bucket.renderTarget->getTexture(), *hillshadeImageLocation);
-            }
+            drawable.setTexture(bucket.renderTarget->getTexture(), idHillshadeImageTexture);
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
@@ -540,10 +520,7 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
         hillshadeBuilder->setVertexAttributes(buildVertexAttributes());
         hillshadeBuilder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);
         hillshadeBuilder->setSegments(gfx::Triangles(), indices->vector(), segments->data(), segments->size());
-
-        if (hillshadeImageLocation) {
-            hillshadeBuilder->setTexture(bucket.renderTarget->getTexture(), *hillshadeImageLocation);
-        }
+        hillshadeBuilder->setTexture(bucket.renderTarget->getTexture(), idHillshadeImageTexture);
 
         hillshadeBuilder->flush(context);
 
