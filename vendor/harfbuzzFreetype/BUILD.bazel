@@ -289,6 +289,7 @@ HARFBUZZ_HDRS = [
     "harfbuzz/src/hb-unicode.h",
     "harfbuzz/src/hb-version.h",
     "harfbuzz/src/hb.h",
+    "harfbuzz/src/hb-ft.h",
 ]
 
 HARFBUZZ_SRCS = [
@@ -598,7 +599,7 @@ HARFBUZZ_SRCS = [
 cc_library(
     name = "harfbuzz",
     srcs = HARFBUZZ_SRCS,
-    hdrs = HARFBUZZ_HDRS,
+    hdrs = HARFBUZZ_HDRS + glob(["freetype/include/*", "freetype/include/freetype/*", "freetype/include/freetype/config/*"]),
     defines = [
         "HAVE_OT",
         "HAVE_FREETYPE",
