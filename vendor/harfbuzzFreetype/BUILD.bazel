@@ -11,13 +11,11 @@ cc_library(
         "freetype/src/base/ftbitmap.c",
         "freetype/src/base/ftcid.c",
         "freetype/src/base/ftdebug.c",
-        "freetype/src/base/ftfntfmt.c",
         "freetype/src/base/ftfstype.c",
         "freetype/src/base/ftgasp.c",
         "freetype/src/base/ftglyph.c",
         "freetype/src/base/ftgxval.c",
         "freetype/src/base/ftinit.c",
-        "freetype/src/base/ftlcdfil.c",
         "freetype/src/base/ftmm.c",
         "freetype/src/base/ftotval.c",
         "freetype/src/base/ftpatent.c",
@@ -290,9 +288,6 @@ HARFBUZZ_HDRS = [
     "harfbuzz/src/hb-version.h",
     "harfbuzz/src/hb.h",
     "harfbuzz/src/hb-ft.h",
-]
-
-HARFBUZZ_SRCS = [
     "harfbuzz/src/OT/Color/CBDT/CBDT.hh",
     "harfbuzz/src/OT/Color/COLR/COLR.hh",
     "harfbuzz/src/OT/Color/COLR/colrv1-closure.hh",
@@ -582,7 +577,7 @@ HARFBUZZ_SRCS = [
     "harfbuzz/src/hb-subset-plan.hh",
     "harfbuzz/src/hb-subset-repacker.cc",
     "harfbuzz/src/hb-subset-repacker.h",
-    # "harfbuzz/src/hb-subset.cc",
+    "harfbuzz/src/hb-subset.cc",
     "harfbuzz/src/hb-subset.hh",
     "harfbuzz/src/hb-ucd-table.hh",
     "harfbuzz/src/hb-ucd.cc",
@@ -592,6 +587,21 @@ HARFBUZZ_SRCS = [
     "harfbuzz/src/hb-utf.hh",
     "harfbuzz/src/hb-vector.hh",
     "harfbuzz/src/hb.hh",
+    "harfbuzz/src/hb-ft-colr.hh",
+    "harfbuzz/src/hb-coretext.cc",
+    "harfbuzz/src/hb-directwrite.cc",
+    "harfbuzz/src/hb-fallback-shape.cc",
+    "harfbuzz/src/hb-gdi.cc",
+    "harfbuzz/src/hb-glib.cc",
+    "harfbuzz/src/hb-graphite2.cc",
+    "harfbuzz/src/hb-style.cc",
+    "harfbuzz/src/hb-uniscribe.cc",
+    "harfbuzz/src/hb-wasm-api.cc",
+    "harfbuzz/src/hb-wasm-shape.cc",
+]
+
+HARFBUZZ_SRCS = [
+    "harfbuzz/src/harfbuzz.cc"
 ]
 
 
