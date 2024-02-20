@@ -31,7 +31,7 @@ private:
     std::unique_ptr<Impl> impl;
 };
 
-int32_t coveringZoomLevel(double z, style::SourceType type, uint16_t tileSize);
+int32_t coveringZoomLevel(double z, style::SourceType type, uint16_t tileSize) noexcept;
 
 std::vector<OverscaledTileID> tileCover(const TransformState&,
                                         uint8_t z,
@@ -40,7 +40,7 @@ std::vector<UnwrappedTileID> tileCover(const LatLngBounds&, uint8_t z);
 std::vector<UnwrappedTileID> tileCover(const Geometry<double>&, uint8_t z);
 
 // Compute only the count of tiles needed for tileCover
-uint64_t tileCount(const LatLngBounds&, uint8_t z);
+uint64_t tileCount(const LatLngBounds&, uint8_t z) noexcept;
 uint64_t tileCount(const Geometry<double>&, uint8_t z);
 
 } // namespace util

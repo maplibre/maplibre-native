@@ -13,27 +13,27 @@ namespace util {
 
 class Camera {
 public:
-    Camera();
+    Camera() noexcept;
 
-    vec3 getPosition() const;
-    mat4 getCameraToWorld(double scale, bool flippedY) const;
-    mat4 getWorldToCamera(double scale, bool flippedY) const;
-    mat4 getCameraToClipPerspective(double fovy, double aspectRatio, double nearZ, double farZ) const;
+    vec3 getPosition() const noexcept;
+    mat4 getCameraToWorld(double scale, bool flippedY) const noexcept;
+    mat4 getWorldToCamera(double scale, bool flippedY) const noexcept;
+    mat4 getCameraToClipPerspective(double fovy, double aspectRatio, double nearZ, double farZ) const noexcept;
 
-    vec3 forward() const;
-    vec3 right() const;
-    vec3 up() const;
+    vec3 forward() const noexcept;
+    vec3 right() const noexcept;
+    vec3 up() const noexcept;
 
-    const Quaternion& getOrientation() const { return orientation; }
-    void getOrientation(double& pitch, double& bearing) const;
-    void setOrientation(double pitch, double bearing);
-    void setOrientation(const Quaternion& orientation_);
-    void setPosition(const vec3& position);
+    const Quaternion& getOrientation() const noexcept { return orientation; }
+    void getOrientation(double& pitch, double& bearing) const noexcept;
+    void setOrientation(double pitch, double bearing) noexcept;
+    void setOrientation(const Quaternion& orientation_) noexcept;
+    void setPosition(const vec3& position) noexcept;
 
     // Computes orientation using forward and up vectors of the provided
     // coordinate frame. Only bearing and pitch components will be used. Does
     // not return a value if input is invalid
-    static std::optional<Quaternion> orientationFromFrame(const vec3& forward, const vec3& up);
+    static std::optional<Quaternion> orientationFromFrame(const vec3& forward, const vec3& up) noexcept;
 
 private:
     Quaternion orientation;

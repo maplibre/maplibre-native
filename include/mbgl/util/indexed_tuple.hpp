@@ -30,18 +30,18 @@ public:
     static_assert(sizeof...(Is) == sizeof...(Ts), "IndexedTuple size mismatch");
 
     template <class I>
-    auto& get() {
+    auto& get() noexcept {
         return std::get<TypeIndex<I, Is...>::value>(*this);
     }
 
     template <class I>
-    const auto& get() const {
+    const auto& get() const noexcept {
         return std::get<TypeIndex<I, Is...>::value>(*this);
     }
 
     template <class... Us>
-    IndexedTuple(Us&&... other)
-        : std::tuple<Ts...>(std::forward<Us>(other)...){};
+    IndexedTuple(Us&&... other) noexcept
+        : std::tuple<Ts...>(std::forward<Us>(other)...) {}
 
     template <class... Js, class... Us>
     IndexedTuple<TypeList<Is..., Js...>, TypeList<Ts..., Us...>> concat(
@@ -50,11 +50,13 @@ public:
     }
 
     // Help out MSVC++
-    bool operator==(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const {
+    bool operator==(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const noexcept {
         return static_cast<const std::tuple<Ts...>&>(*this) == static_cast<const std::tuple<Ts...>&>(other);
     }
 
-    bool operator!=(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const { return !(*this == other); }
+    bool operator!=(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const noexcept {
+        return !(*this == other);
+    }
 };
 
 template <class, class T>

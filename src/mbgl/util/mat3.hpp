@@ -22,50 +22,54 @@
 
 #pragma once
 
-#include <array>
-#include <cmath>
 #include <mbgl/util/vectors.hpp>
+
+#include <array>
+#include <cassert>
+#include <cmath>
 
 namespace mbgl {
 
 using mat3 = std::array<double, 9>;
 
-inline vec3 vec3Cross(const vec3& a, const vec3& b) {
+constexpr inline vec3 vec3Cross(const vec3& a, const vec3& b) noexcept {
     return vec3{{a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]}};
 }
 
-inline double vec3Dot(const vec3& a, const vec3& b) {
+constexpr inline double vec3Dot(const vec3& a, const vec3& b) noexcept {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
-inline double vec3LengthSq(const vec3& a) {
+constexpr inline double vec3LengthSq(const vec3& a) noexcept {
     return vec3Dot(a, a);
 }
 
-inline double vec3Length(const vec3& a) {
+constexpr inline double vec3Length(const vec3& a) noexcept {
     return std::sqrt(vec3LengthSq(a));
 }
 
-inline vec3 vec3Scale(const vec3& a, double s) {
+constexpr inline vec3 vec3Scale(const vec3& a, double s) noexcept {
     return vec3{{a[0] * s, a[1] * s, a[2] * s}};
 }
 
-inline vec3 vec3Normalize(const vec3& a) {
-    return vec3Scale(a, 1.0 / vec3Length(a));
+constexpr inline vec3 vec3Normalize(const vec3& a) noexcept {
+    const auto length = vec3Length(a);
+    assert(length != 0);
+    return vec3Scale(a, 1.0 / length);
 }
 
-inline vec3 vec3Sub(const vec3& a, const vec3& b) {
+constexpr inline vec3 vec3Sub(const vec3& a, const vec3& b) noexcept {
     return vec3{{a[0] - b[0], a[1] - b[1], a[2] - b[2]}};
 }
 
 namespace matrix {
 
-void identity(mat3& out);
-void translate(mat3& out, const mat3& a, double x, double y);
-void rotate(mat3& out, const mat3& a, double rad);
-void scale(mat3& out, const mat3& a, double x, double y);
+void identity(mat3& out) noexcept;
+void translate(mat3& out, const mat3& a, double x, double y) noexcept;
+void rotate(mat3& out, const mat3& a, double rad) noexcept;
+void scale(mat3& out, const mat3& a, double x, double y) noexcept;
 
-void transformMat3f(vec3f& out, const vec3f& a, const mat3& m);
+void transformMat3f(vec3f& out, const vec3f& a, const mat3& m) noexcept;
 
 } // namespace matrix
 } // namespace mbgl

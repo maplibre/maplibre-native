@@ -12,25 +12,25 @@ namespace util {
  */
 class SimpleIdentity final {
 private:
-    constexpr SimpleIdentity(std::int64_t id)
+    constexpr SimpleIdentity(std::int64_t id) noexcept
         : uniqueID(id) {}
 
 public:
-    SimpleIdentity();
+    SimpleIdentity() noexcept;
     SimpleIdentity(const SimpleIdentity&) = default;
     ~SimpleIdentity() = default;
 
     static const SimpleIdentity Empty;
 
-    bool operator<(const SimpleIdentity& other) const { return uniqueID < other.uniqueID; }
-    bool operator==(const SimpleIdentity& other) const { return uniqueID == other.uniqueID; }
-    bool operator!=(const SimpleIdentity& other) const { return uniqueID != other.uniqueID; }
+    bool operator<(const SimpleIdentity& other) const noexcept { return uniqueID < other.uniqueID; }
+    bool operator==(const SimpleIdentity& other) const noexcept { return uniqueID == other.uniqueID; }
+    bool operator!=(const SimpleIdentity& other) const noexcept { return uniqueID != other.uniqueID; }
 
-    std::int64_t id() const { return uniqueID; }
-    bool isEmpty() const { return uniqueID != emptyID; }
+    std::int64_t id() const noexcept { return uniqueID; }
+    bool isEmpty() const noexcept { return uniqueID != emptyID; }
 
-    operator bool() const { return isEmpty(); }
-    bool operator!() const { return !isEmpty(); }
+    operator bool() const noexcept { return isEmpty(); }
+    bool operator!() const noexcept { return !isEmpty(); }
 
 private:
     static constexpr std::int64_t emptyID = 0;
@@ -46,7 +46,7 @@ protected:
     SimpleIdentifiable(const SimpleIdentifiable&) = default;
     virtual ~SimpleIdentifiable() = default;
 
-    const util::SimpleIdentity& getId() const { return uniqueID; }
+    const util::SimpleIdentity& getId() const noexcept { return uniqueID; }
 
 protected:
     util::SimpleIdentity uniqueID;

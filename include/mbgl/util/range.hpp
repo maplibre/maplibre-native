@@ -16,12 +16,12 @@ public:
 };
 
 template <class T>
-bool operator==(const Range<T>& a, const Range<T>& b) {
+bool operator==(const Range<T>& a, const Range<T>& b) noexcept {
     return a.min == b.min && a.max == b.max;
 }
 
 template <class T>
-bool operator!=(const Range<T>& a, const Range<T>& b) {
+bool operator!=(const Range<T>& a, const Range<T>& b) noexcept {
     return !(a == b);
 }
 

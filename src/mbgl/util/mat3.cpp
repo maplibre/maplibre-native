@@ -27,7 +27,7 @@
 namespace mbgl {
 namespace matrix {
 
-void identity(mat3& out) {
+void identity(mat3& out) noexcept {
     out[0] = 1.0f;
     out[1] = 0.0f;
     out[2] = 0.0f;
@@ -39,16 +39,16 @@ void identity(mat3& out) {
     out[8] = 1.0f;
 }
 
-void translate(mat3& out, const mat3& a, double x, double y) {
-    double a00 = a[0];
-    double a01 = a[1];
-    double a02 = a[2];
-    double a10 = a[3];
-    double a11 = a[4];
-    double a12 = a[5];
-    double a20 = a[6];
-    double a21 = a[7];
-    double a22 = a[8];
+void translate(mat3& out, const mat3& a, double x, double y) noexcept {
+    const double a00 = a[0];
+    const double a01 = a[1];
+    const double a02 = a[2];
+    const double a10 = a[3];
+    const double a11 = a[4];
+    const double a12 = a[5];
+    const double a20 = a[6];
+    const double a21 = a[7];
+    const double a22 = a[8];
 
     out[0] = a00;
     out[1] = a01;
@@ -63,18 +63,18 @@ void translate(mat3& out, const mat3& a, double x, double y) {
     out[8] = x * a02 + y * a12 + a22;
 }
 
-void rotate(mat3& out, const mat3& a, double rad) {
-    double s = std::sin(rad);
-    double c = std::cos(rad);
-    double a00 = a[0];
-    double a01 = a[1];
-    double a02 = a[2];
-    double a10 = a[3];
-    double a11 = a[4];
-    double a12 = a[5];
-    double a20 = a[6];
-    double a21 = a[7];
-    double a22 = a[8];
+void rotate(mat3& out, const mat3& a, double rad) noexcept {
+    const double s = std::sin(rad);
+    const double c = std::cos(rad);
+    const double a00 = a[0];
+    const double a01 = a[1];
+    const double a02 = a[2];
+    const double a10 = a[3];
+    const double a11 = a[4];
+    const double a12 = a[5];
+    const double a20 = a[6];
+    const double a21 = a[7];
+    const double a22 = a[8];
 
     out[0] = c * a00 + s * a10;
     out[1] = c * a01 + s * a11;
@@ -89,7 +89,7 @@ void rotate(mat3& out, const mat3& a, double rad) {
     out[8] = a22;
 }
 
-void scale(mat3& out, const mat3& a, double x, double y) {
+void scale(mat3& out, const mat3& a, double x, double y) noexcept {
     out[0] = x * a[0];
     out[1] = x * a[1];
     out[2] = x * a[2];
@@ -101,7 +101,7 @@ void scale(mat3& out, const mat3& a, double x, double y) {
     out[8] = a[8];
 }
 
-void transformMat3f(vec3f& out, const vec3f& a, const mat3& m) {
+void transformMat3f(vec3f& out, const vec3f& a, const mat3& m) noexcept {
     out[0] = static_cast<float>(m[0]) * a[0] + static_cast<float>(m[3]) * a[1] + static_cast<float>(m[6]) * a[2];
     out[1] = static_cast<float>(m[1]) * a[0] + static_cast<float>(m[4]) * a[1] + static_cast<float>(m[7]) * a[2];
     out[2] = static_cast<float>(m[2]) * a[0] + static_cast<float>(m[5]) * a[1] + static_cast<float>(m[8]) * a[2];

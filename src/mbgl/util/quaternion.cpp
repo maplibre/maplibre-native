@@ -6,65 +6,54 @@ namespace mbgl {
 
 Quaternion Quaternion::identity = Quaternion(0.0, 0.0, 0.0, 1.0);
 
-Quaternion Quaternion::conjugate() const {
+Quaternion Quaternion::conjugate() const noexcept {
     return {-x, -y, -z, w};
 }
 
-Quaternion Quaternion::normalized() const {
+Quaternion Quaternion::normalized() const noexcept {
     const double len = length();
     assert(len > 0.0);
     return {x / len, y / len, z / len, w / len};
 }
 
-Quaternion Quaternion::fromAxisAngle(const vec3& axis, double angleRad) {
+Quaternion Quaternion::fromAxisAngle(const vec3& axis, double angleRad) noexcept {
     const double coss = std::cos(0.5 * angleRad);
     const double sins = std::sin(0.5 * angleRad);
-
-    Quaternion q;
-    q.x = sins * axis[0];
-    q.y = sins * axis[1];
-    q.z = sins * axis[2];
-    q.w = coss;
-    return q;
+    return {sins * axis[0], sins * axis[1], sins * axis[2], coss};
 }
 
-Quaternion Quaternion::fromEulerAngles(double x, double y, double z) {
-    double cz = std::cos(z * 0.5);
-    double sz = std::sin(z * 0.5);
-    double cy = std::cos(y * 0.5);
-    double sy = std::sin(y * 0.5);
-    double cx = std::cos(x * 0.5);
-    double sx = std::sin(x * 0.5);
+Quaternion Quaternion::fromEulerAngles(double x, double y, double z) noexcept {
+    const double cz = std::cos(z * 0.5);
+    const double sz = std::sin(z * 0.5);
+    const double cy = std::cos(y * 0.5);
+    const double sy = std::sin(y * 0.5);
+    const double cx = std::cos(x * 0.5);
+    const double sx = std::sin(x * 0.5);
 
-    Quaternion q;
-    q.x = sx * cy * cz - cx * sy * sz;
-    q.y = cx * sy * cz + sx * cy * sz;
-    q.z = cx * cy * sz - sx * sy * cz;
-    q.w = cx * cy * cz + sx * sy * sz;
-
-    return q;
+    return {sx * cy * cz - cx * sy * sz,
+            cx * sy * cz + sx * cy * sz,
+            cx * cy * sz - sx * sy * cz,
+            cx * cy * cz + sx * sy * sz};
 }
 
-Quaternion Quaternion::multiply(const Quaternion& o) const {
-    Quaternion q;
-    q.w = w * o.w - x * o.x - y * o.y - z * o.z;
-    q.x = w * o.x + x * o.w + y * o.z - z * o.y;
-    q.y = w * o.y + y * o.w + z * o.x - x * o.z;
-    q.z = w * o.z + z * o.w + x * o.y - y * o.x;
-    return q;
+Quaternion Quaternion::multiply(const Quaternion& o) const noexcept {
+    return {w * o.w - x * o.x - y * o.y - z * o.z,
+            w * o.x + x * o.w + y * o.z - z * o.y,
+            w * o.y + y * o.w + z * o.x - x * o.z,
+            w * o.z + z * o.w + x * o.y - y * o.x};
 }
 
-double Quaternion::length() const {
+double Quaternion::length() const noexcept {
     return std::sqrt(x * x + y * y + z * z + w * w);
 }
 
-vec3 Quaternion::transform(const vec3& v) const {
+vec3 Quaternion::transform(const vec3& v) const noexcept {
     const Quaternion src = {v[0], v[1], v[2], 0.0};
     const Quaternion res = multiply(src).multiply(conjugate());
     return {res.x, res.y, res.z};
 }
 
-mat4 Quaternion::toRotationMatrix() const {
+mat4 Quaternion::toRotationMatrix() const noexcept {
     mat4 mat;
 
     const double tx = 2.0 * x;
@@ -100,11 +89,11 @@ mat4 Quaternion::toRotationMatrix() const {
     return mat;
 }
 
-bool operator!=(const Quaternion& a, const Quaternion& b) {
+bool operator!=(const Quaternion& a, const Quaternion& b) noexcept {
     return !(a == b);
 }
 
-bool operator==(const Quaternion& a, const Quaternion& b) {
+bool operator==(const Quaternion& a, const Quaternion& b) noexcept {
     return a.x == b.x && a.y == b.y && a.z == b.z && a.w == b.w;
 }
 

@@ -35,7 +35,7 @@ public:
 };
 
 template <class T>
-std::optional<T> numericValue(const Value& value) {
+std::optional<T> numericValue(const Value& value) noexcept {
     return value.match([](uint64_t t) { return std::optional<T>(static_cast<T>(t)); },
                        [](int64_t t) { return std::optional<T>(static_cast<T>(t)); },
                        [](double t) { return std::optional<T>(static_cast<T>(t)); },
