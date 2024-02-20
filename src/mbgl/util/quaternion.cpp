@@ -37,10 +37,10 @@ Quaternion Quaternion::fromEulerAngles(double x, double y, double z) noexcept {
 }
 
 Quaternion Quaternion::multiply(const Quaternion& o) const noexcept {
-    return {w * o.w - x * o.x - y * o.y - z * o.z,
-            w * o.x + x * o.w + y * o.z - z * o.y,
+    return {w * o.x + x * o.w + y * o.z - z * o.y,
             w * o.y + y * o.w + z * o.x - x * o.z,
-            w * o.z + z * o.w + x * o.y - y * o.x};
+            w * o.z + z * o.w + x * o.y - y * o.x,
+            w * o.w - x * o.x - y * o.y - z * o.z};
 }
 
 double Quaternion::length() const noexcept {
