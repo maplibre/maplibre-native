@@ -44,7 +44,7 @@ constexpr inline double vec3LengthSq(const vec3& a) noexcept {
     return vec3Dot(a, a);
 }
 
-constexpr inline double vec3Length(const vec3& a) noexcept {
+inline double vec3Length(const vec3& a) noexcept {
     return std::sqrt(vec3LengthSq(a));
 }
 
@@ -52,7 +52,7 @@ constexpr inline vec3 vec3Scale(const vec3& a, double s) noexcept {
     return vec3{{a[0] * s, a[1] * s, a[2] * s}};
 }
 
-constexpr inline vec3 vec3Normalize(const vec3& a) noexcept {
+inline vec3 vec3Normalize(const vec3& a) noexcept {
     const auto length = vec3Length(a);
     assert(length != 0);
     return vec3Scale(a, 1.0 / length);
