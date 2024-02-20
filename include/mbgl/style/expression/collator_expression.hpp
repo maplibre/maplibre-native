@@ -15,10 +15,6 @@ public:
     CollatorExpression(std::unique_ptr<Expression>&& caseSensitive,
                        std::unique_ptr<Expression>&& diacriticSensitive,
                        std::optional<std::unique_ptr<Expression>>&& locale) noexcept;
-    CollatorExpression(ParseResult&& caseSensitive_, ParseResult&& diacriticSensitive_, ParseResult&& locale_) noexcept
-        : CollatorExpression(caseSensitive_ ? std::move(*caseSensitive_) : std::unique_ptr<Expression>{},
-                             diacriticSensitive_ ? std::move(*diacriticSensitive_) : std::unique_ptr<Expression>{},
-                             std::move(locale_)) {}
 
     EvaluationResult evaluate(const EvaluationContext&) const override;
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
