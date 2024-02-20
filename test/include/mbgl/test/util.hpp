@@ -6,7 +6,8 @@
 
 #define TEST_READ_ONLY 0
 
-#if !ANDROID
+// iOS simulator server can work
+#if !ANDROID && !TARGET_OS_SIMULATOR
 #ifndef TEST_HAS_SERVER
 #define TEST_HAS_SERVER 1
 #endif
