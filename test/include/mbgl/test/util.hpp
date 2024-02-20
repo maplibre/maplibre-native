@@ -6,7 +6,7 @@
 
 #define TEST_READ_ONLY 0
 
-// iOS simulator server can work
+// iOS simulator server can work if port 3000 is available
 #if !ANDROID && !TARGET_OS_SIMULATOR
 #ifndef TEST_HAS_SERVER
 #define TEST_HAS_SERVER 1
