@@ -114,14 +114,12 @@ public:
     // Constructs a LatLngBounds object with the tile's exact boundaries.
     LatLngBounds(const CanonicalTileID&) noexcept;
 
-    constexpr bool valid() const noexcept {
-        return (sw.latitude() <= ne.latitude()) && (sw.longitude() <= ne.longitude());
-    }
+    bool valid() const noexcept { return (sw.latitude() <= ne.latitude()) && (sw.longitude() <= ne.longitude()); }
 
-    constexpr double south() const noexcept { return sw.latitude(); }
-    constexpr double west() const noexcept { return sw.longitude(); }
-    constexpr double north() const noexcept { return ne.latitude(); }
-    constexpr double east() const noexcept { return ne.longitude(); }
+    double south() const noexcept { return sw.latitude(); }
+    double west() const noexcept { return sw.longitude(); }
+    double north() const noexcept { return ne.latitude(); }
+    double east() const noexcept { return ne.longitude(); }
 
     LatLng southwest() const noexcept { return sw; }
     LatLng northeast() const noexcept { return ne; }
@@ -144,11 +142,9 @@ public:
         extend(bounds.ne);
     }
 
-    constexpr bool isEmpty() const noexcept { return sw.latitude() > ne.latitude() || sw.longitude() > ne.longitude(); }
+    bool isEmpty() const noexcept { return sw.latitude() > ne.latitude() || sw.longitude() > ne.longitude(); }
 
-    constexpr bool crossesAntimeridian() const noexcept {
-        return (sw.wrapped().longitude() > ne.wrapped().longitude());
-    }
+    bool crossesAntimeridian() const noexcept { return (sw.wrapped().longitude() > ne.wrapped().longitude()); }
 
     bool contains(const CanonicalTileID& tileID) const noexcept;
     bool contains(const LatLng& point, LatLng::WrapMode wrap = LatLng::Unwrapped) const noexcept;
@@ -168,11 +164,11 @@ private:
     bool containsLatitude(double latitude) const noexcept;
     bool containsLongitude(double longitude, LatLng::WrapMode wrap) const noexcept;
 
-    friend constexpr bool operator==(const LatLngBounds& a, const LatLngBounds& b) {
+    friend bool operator==(const LatLngBounds& a, const LatLngBounds& b) {
         return (!a.bounded && !b.bounded) || (a.bounded && b.bounded && a.sw == b.sw && a.ne == b.ne);
     }
 
-    friend constexpr bool operator!=(const LatLngBounds& a, const LatLngBounds& b) { return !(a == b); }
+    friend bool operator!=(const LatLngBounds& a, const LatLngBounds& b) { return !(a == b); }
 };
 
 // Determines the orientation of the map.
