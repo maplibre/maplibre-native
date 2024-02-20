@@ -4,7 +4,6 @@
 #include <mbgl/gfx/uniform_block.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/util/identity.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <string>
 #include <optional>
@@ -19,7 +18,7 @@ protected:
     ~ShaderProgramBase() noexcept override = default;
 
     template <typename T>
-    bool set(gfx::VertexAttributeArray& attrs, const StringIdentity id, std::size_t i, T value) {
+    bool set(gfx::VertexAttributeArray& attrs, const size_t id, std::size_t i, T value) {
         const auto& item = attrs.get(id);
         if (item && i < item->getCount()) {
             item->set(i, value);

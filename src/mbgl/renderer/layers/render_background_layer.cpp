@@ -29,6 +29,7 @@
 namespace mbgl {
 
 using namespace style;
+using namespace shaders;
 
 namespace {
 
@@ -308,6 +309,7 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto verticesCopy = rawVertices;
+        builder->setVertexAttrId(idBackgroundPosVertexAttribute);
         builder->setRawVertices(std::move(verticesCopy), vertexCount, gfx::AttributeDataType::Short2);
         builder->setSegments(gfx::Triangles(), indexes.vector(), segs.data(), segs.size());
         builder->flush(context);

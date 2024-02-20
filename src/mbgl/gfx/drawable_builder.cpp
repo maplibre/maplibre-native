@@ -5,7 +5,6 @@
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/gfx/gfx_types.hpp>
 
 namespace mbgl {
@@ -13,7 +12,7 @@ namespace gfx {
 
 DrawableBuilder::DrawableBuilder(std::string name_)
     : name(std::move(name_)),
-      vertexAttrNameId(stringIndexer().get("a_pos")),
+      vertexAttrId(0),
       renderPass(mbgl::RenderPass::Opaque),
       impl(std::make_unique<Impl>()) {}
 
