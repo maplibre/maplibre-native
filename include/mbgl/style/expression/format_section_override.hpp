@@ -10,10 +10,8 @@ namespace expression {
 template <class T>
 class FormatSectionOverride final : public Expression {
 public:
-    FormatSectionOverride(const type::Type& type_,
-                          PossiblyEvaluatedPropertyValue<T> defaultValue_,
-                          std::string propertyName_) noexcept
-        : Expression(Kind::FormatSectionOverride, type_),
+    FormatSectionOverride(type::Type type_, PossiblyEvaluatedPropertyValue<T> defaultValue_, std::string propertyName_)
+        : Expression(Kind::FormatSectionOverride, std::move(type_)),
           defaultValue(std::move(defaultValue_)),
           propertyName(std::move(propertyName_)) {}
 
@@ -28,11 +26,12 @@ public:
 
         return defaultValue.match(
             [&context](const style::PropertyExpression<T>& e) { return e.getExpression().evaluate(context); },
-            [](const T& t) -> EvaluationResult { return t; });
+            [](const T& t) noexcept -> EvaluationResult { return t; });
     }
 
     void eachChild(const std::function<void(const Expression&)>& fn) const final {
-        defaultValue.match([&fn](const style::PropertyExpression<T>& e) { fn(e.getExpression()); }, [](const T&) {});
+        defaultValue.match([&fn](const style::PropertyExpression<T>& e) { fn(e.getExpression()); },
+                           [](const T&) noexcept {});
     }
 
     bool operator==(const Expression& e) const noexcept final {
@@ -47,13 +46,15 @@ public:
             return defaultValue.match(
                 [other](const style::PropertyExpression<T>& thisExpr) {
                     return other->defaultValue.match(
-                        [&thisExpr](const style::PropertyExpression<T>& otherExpr) { return thisExpr == otherExpr; },
+                        [&thisExpr](const style::PropertyExpression<T>& otherExpr) noexcept {
+                            return thisExpr == otherExpr;
+                        },
                         [](const T&) { return false; });
                 },
                 [other](const T& thisValue) {
                     return other->defaultValue.match(
-                        [&thisValue](const T& otherValue) { return thisValue == otherValue; },
-                        [](const style::PropertyExpression<T>&) { return false; });
+                        [&thisValue](const T& otherValue) noexcept { return thisValue == otherValue; },
+                        [](const style::PropertyExpression<T>&) noexcept { return false; });
                 });
         }
 

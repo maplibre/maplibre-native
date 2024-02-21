@@ -1157,7 +1157,7 @@ ParseResult createCompoundExpression(const std::string& name,
 }
 
 CompoundExpression::CompoundExpression(const detail::SignatureBase& signature_,
-                                       std::vector<std::unique_ptr<Expression>> args_) noexcept
+                                       std::vector<std::unique_ptr<Expression>> args_)
     : Expression(Kind::CompoundExpression, signature_.result),
       signature(signature_),
       args(std::move(args_)) {}

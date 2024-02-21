@@ -14,8 +14,8 @@ namespace expression {
 class Coalesce : public Expression {
 public:
     using Args = std::vector<std::unique_ptr<Expression>>;
-    Coalesce(const type::Type& type_, Args args_) noexcept
-        : Expression(Kind::Coalesce, type_),
+    Coalesce(type::Type type_, Args args_)
+        : Expression(Kind::Coalesce, std::move(type_)),
           args(std::move(args_)) {}
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
@@ -28,7 +28,7 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
-    std::size_t getLength() const { return args.size(); }
+    std::size_t getLength() const noexcept { return args.size(); }
 
     Expression* getChild(std::size_t i) const { return args.at(i).get(); }
 

@@ -87,7 +87,7 @@ using namespace mbgl::style::conversion;
 ParseResult In::parse(const Convertible& value, ParsingContext& ctx) {
     assert(isArray(value));
 
-    std::size_t length = arrayLength(value);
+    const std::size_t length = arrayLength(value);
     if (length != 3) {
         ctx.error("Expected 2 arguments, but found " + util::toString(length - 1) + " instead.");
         return ParseResult();
@@ -99,8 +99,8 @@ ParseResult In::parse(const Convertible& value, ParsingContext& ctx) {
     ParseResult haystack = ctx.parse(arrayMember(value, 2), 2, {type::Value});
     if (!haystack) return ParseResult();
 
-    type::Type needleType = (*needle)->getType();
-    type::Type haystackType = (*haystack)->getType();
+    const type::Type needleType = (*needle)->getType();
+    const type::Type haystackType = (*haystack)->getType();
 
     if (!isComparableType(needleType)) {
         ctx.error(

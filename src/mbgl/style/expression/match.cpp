@@ -220,8 +220,8 @@ static ParseResult create(type::Type outputType,
 
         index += 2;
     }
-    return ParseResult(
-        std::make_unique<Match<T>>(outputType, std::move(input), std::move(typedBranches), std::move(otherwise)));
+    return ParseResult(std::make_unique<Match<T>>(
+        std::move(outputType), std::move(input), std::move(typedBranches), std::move(otherwise)));
 }
 
 ParseResult parseMatch(const Convertible& value, ParsingContext& ctx) {
@@ -309,10 +309,12 @@ ParseResult parseMatch(const Convertible& value, ParsingContext& ctx) {
 
     return inputType->match(
         [&](const type::NumberType&) {
-            return create<int64_t>(*outputType, std::move(*input), std::move(branches), std::move(*otherwise), ctx);
+            return create<int64_t>(
+                std::move(*outputType), std::move(*input), std::move(branches), std::move(*otherwise), ctx);
         },
         [&](const type::StringType&) {
-            return create<std::string>(*outputType, std::move(*input), std::move(branches), std::move(*otherwise), ctx);
+            return create<std::string>(
+                std::move(*outputType), std::move(*input), std::move(branches), std::move(*otherwise), ctx);
         },
         [&](const auto&) noexcept {
             // unreachable: inputType is set by parseInputValue(), which only

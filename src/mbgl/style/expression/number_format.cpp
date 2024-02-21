@@ -15,7 +15,7 @@ NumberFormat::NumberFormat(std::unique_ptr<Expression> number_,
                            std::unique_ptr<Expression> locale_,
                            std::unique_ptr<Expression> currency_,
                            std::unique_ptr<Expression> minFractionDigits_,
-                           std::unique_ptr<Expression> maxFractionDigits_)
+                           std::unique_ptr<Expression> maxFractionDigits_) noexcept
     : Expression(Kind::NumberFormat, type::String),
       number(std::move(number_)),
       locale(std::move(locale_)),

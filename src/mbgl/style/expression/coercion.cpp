@@ -8,26 +8,26 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-EvaluationResult toBoolean(const Value& v) {
-    return v.match([&](double f) { return static_cast<bool>(f); },
-                   [&](const std::string& s) { return s.length() > 0; },
-                   [&](bool b) { return b; },
-                   [&](const NullValue&) { return false; },
-                   [&](const Image& i) { return i.isAvailable(); },
-                   [&](const auto&) { return true; });
+EvaluationResult toBoolean(const Value& v) noexcept {
+    return v.match([&](double f) noexcept { return static_cast<bool>(f); },
+                   [&](const std::string& s) noexcept { return s.length() > 0; },
+                   [&](bool b) noexcept { return b; },
+                   [&](const NullValue&) noexcept { return false; },
+                   [&](const Image& i) noexcept { return i.isAvailable(); },
+                   [&](const auto&) noexcept { return true; });
 }
 
 EvaluationResult toNumber(const Value& v) {
-    std::optional<double> result = v.match([](NullValue) -> std::optional<double> { return 0.0; },
-                                           [](const double f) -> std::optional<double> { return f; },
-                                           [](const std::string& s) -> std::optional<double> {
+    std::optional<double> result = v.match([](NullValue) noexcept -> std::optional<double> { return 0.0; },
+                                           [](const double f) noexcept -> std::optional<double> { return f; },
+                                           [](const std::string& s) noexcept -> std::optional<double> {
                                                try {
                                                    return util::stof(s);
                                                } catch (...) {
                                                    return {};
                                                }
                                            },
-                                           [](const auto&) { return std::optional<double>(); });
+                                           [](const auto&) noexcept { return std::optional<double>(); });
     if (!result) {
         return EvaluationError{"Could not convert " + stringify(v) + " to number."};
     }
@@ -36,7 +36,7 @@ EvaluationResult toNumber(const Value& v) {
 
 EvaluationResult toColor(const Value& colorValue) {
     return colorValue.match(
-        [&](const Color& color) -> EvaluationResult { return color; },
+        [&](const Color& color) noexcept -> EvaluationResult { return color; },
         [&](const std::string& colorString) -> EvaluationResult {
             const std::optional<Color> result = Color::parse(colorString);
             if (result) {
@@ -46,8 +46,8 @@ EvaluationResult toColor(const Value& colorValue) {
             }
         },
         [&colorValue](const std::vector<Value>& components) -> EvaluationResult {
-            std::size_t len = components.size();
-            bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) -> bool {
+            const std::size_t len = components.size();
+            bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) noexcept -> bool {
                 return item.template is<double>();
             });
             if ((len == 3 || len == 4) && isNumeric) {
@@ -76,7 +76,7 @@ EvaluationResult toImage(const Value& imageValue) {
     return Image(toString(imageValue).c_str());
 }
 
-Coercion::Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_) noexcept
+Coercion::Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_)
     : Expression(Kind::Coercion, std::move(type_)),
       inputs(std::move(inputs_)) {
     assert(!inputs.empty());

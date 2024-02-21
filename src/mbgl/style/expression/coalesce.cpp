@@ -91,7 +91,8 @@ ParseResult Coalesce::parse(const Convertible& value, ParsingContext& ctx) {
                                return type::checkSubtype(*expectedType, arg->getType());
                            });
 
-    return ParseResult(std::make_unique<Coalesce>(needsAnnotation ? type::Value : *outputType, std::move(args)));
+    return ParseResult(
+        std::make_unique<Coalesce>(needsAnnotation ? type::Value : std::move(*outputType), std::move(args)));
 }
 
 } // namespace expression

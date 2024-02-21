@@ -180,14 +180,14 @@ ParseResult ParsingContext::parse(const Convertible& value,
         return parsed;
     }
 
-    auto annotate = [](std::unique_ptr<Expression> expression,
-                       const type::Type& type,
-                       TypeAnnotationOption typeAnnotation) -> std::unique_ptr<Expression> {
+    const auto annotate = [](std::unique_ptr<Expression> expression,
+                             type::Type type,
+                             TypeAnnotationOption typeAnnotation) -> std::unique_ptr<Expression> {
         switch (typeAnnotation) {
             case TypeAnnotationOption::assert:
-                return std::make_unique<Assertion>(type, dsl::vec(std::move(expression)));
+                return std::make_unique<Assertion>(std::move(type), dsl::vec(std::move(expression)));
             case TypeAnnotationOption::coerce:
-                return std::make_unique<Coercion>(type, dsl::vec(std::move(expression)));
+                return std::make_unique<Coercion>(std::move(type), dsl::vec(std::move(expression)));
             case TypeAnnotationOption::omit:
                 return expression;
         }
@@ -202,12 +202,12 @@ ParseResult ParsingContext::parse(const Convertible& value,
         if ((*expected == type::String || *expected == type::Number || *expected == type::Boolean ||
              *expected == type::Object || expected->is<type::Array>()) &&
             actual == type::Value) {
-            parsed = {
-                annotate(std::move(*parsed), *expected, typeAnnotationOption.value_or(TypeAnnotationOption::assert))};
+            parsed = {annotate(
+                std::move(*parsed), std::move(*expected), typeAnnotationOption.value_or(TypeAnnotationOption::assert))};
         } else if ((*expected == type::Color || *expected == type::Formatted || *expected == type::Image) &&
                    (actual == type::Value || actual == type::String)) {
-            parsed = {
-                annotate(std::move(*parsed), *expected, typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
+            parsed = {annotate(
+                std::move(*parsed), std::move(*expected), typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
         } else {
             checkType((*parsed)->getType());
             if (!errors->empty()) {
@@ -235,7 +235,7 @@ ParseResult ParsingContext::parse(const Convertible& value,
             return ParseResult(
                 std::make_unique<Literal>(type.get<type::Array>(), evaluated->get<std::vector<Value>>()));
         } else {
-            return ParseResult(std::make_unique<Literal>(*evaluated));
+            return ParseResult(std::make_unique<Literal>(std::move(*evaluated)));
         }
     }
 

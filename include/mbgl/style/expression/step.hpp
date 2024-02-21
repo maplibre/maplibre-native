@@ -16,15 +16,13 @@ namespace expression {
 
 class Step : public Expression {
 public:
-    Step(const type::Type& type_,
-         std::unique_ptr<Expression> input_,
-         std::map<double, std::unique_ptr<Expression>> stops_) noexcept;
+    Step(type::Type type_, std::unique_ptr<Expression> input_, std::map<double, std::unique_ptr<Expression>> stops_);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
     void eachStop(const std::function<void(double, const Expression&)>& visit) const;
 
-    const std::unique_ptr<Expression>& getInput() const { return input; }
+    const std::unique_ptr<Expression>& getInput() const noexcept { return input; }
     Range<float> getCoveringStops(double lower, double upper) const noexcept;
 
     bool operator==(const Expression& e) const noexcept override;

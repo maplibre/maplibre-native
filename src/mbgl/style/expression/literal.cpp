@@ -75,7 +75,7 @@ ParseResult Literal::parse(const Convertible& value, ParsingContext& ctx) {
                 util::toString(arrayLength(value) - 1) + " instead.");
             return ParseResult();
         }
-        const std::optional<Value> parsedValue = parseValue(arrayMember(value, 1), ctx);
+        std::optional<Value> parsedValue = parseValue(arrayMember(value, 1), ctx);
         if (!parsedValue) {
             return ParseResult();
         }
@@ -87,15 +87,15 @@ ParseResult Literal::parse(const Convertible& value, ParsingContext& ctx) {
             auto expected = ctx.getExpected()->template get<type::Array>();
             if (type.N && (*type.N == 0) && (!expected.N || (*expected.N == 0))) {
                 return ParseResult(
-                    std::make_unique<Literal>(expected, parsedValue->template get<std::vector<Value>>()));
+                    std::make_unique<Literal>(std::move(expected), parsedValue->template get<std::vector<Value>>()));
             }
         }
 
-        return ParseResult(std::make_unique<Literal>(*parsedValue));
+        return ParseResult(std::make_unique<Literal>(std::move(*parsedValue)));
     } else {
         // bare primitive value (string, number, boolean, null)
         const std::optional<Value> parsedValue = parseValue(value, ctx);
-        return ParseResult(std::make_unique<Literal>(*parsedValue));
+        return ParseResult(std::make_unique<Literal>(std::move(*parsedValue)));
     }
 }
 

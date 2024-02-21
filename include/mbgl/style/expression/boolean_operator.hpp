@@ -30,7 +30,7 @@ private:
 
 class All : public Expression {
 public:
-    All(std::vector<std::unique_ptr<Expression>> inputs_)
+    All(std::vector<std::unique_ptr<Expression>> inputs_) noexcept
         : Expression(Kind::All, type::Boolean),
           inputs(std::move(inputs_)) {}
 

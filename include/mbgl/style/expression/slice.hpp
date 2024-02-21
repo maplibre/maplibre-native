@@ -12,7 +12,7 @@ class Slice : public Expression {
 public:
     Slice(std::unique_ptr<Expression> input_,
           std::unique_ptr<Expression> fromIndex_,
-          std::unique_ptr<Expression> toIndex_) noexcept;
+          std::unique_ptr<Expression> toIndex_);
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 

@@ -12,19 +12,23 @@ namespace expression {
 
 class Literal : public Expression {
 public:
-    Literal(const Value& value_) noexcept
+    Literal(const Value& value_)
         : Expression(Kind::Literal, typeOf(value_)),
           value(value_) {}
 
-    Literal(const type::Array& type_, std::vector<Value> value_) noexcept
-        : Expression(Kind::Literal, type_),
+    Literal(Value&& value_)
+        : Expression(Kind::Literal, typeOf(value_)),
+          value(std::move(value_)) {}
+
+    Literal(type::Array type_, std::vector<Value> value_)
+        : Expression(Kind::Literal, std::move(type_)),
           value(std::move(value_)) {}
 
     EvaluationResult evaluate(const EvaluationContext&) const override { return value; }
 
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
 
-    void eachChild(const std::function<void(const Expression&)>&) const override {}
+    void eachChild(const std::function<void(const Expression&)>&) const noexcept override {}
 
     bool operator==(const Expression& e) const noexcept override {
         if (e.getKind() == Kind::Literal) {
@@ -36,7 +40,7 @@ public:
 
     std::vector<std::optional<Value>> possibleOutputs() const override { return {{value}}; }
 
-    Value getValue() const noexcept { return value; }
+    const Value& getValue() const noexcept { return value; }
 
     mbgl::Value serialize() const override;
     std::string getOperator() const override { return "literal"; }

@@ -13,7 +13,7 @@ namespace expression {
 
 class Assertion : public Expression {
 public:
-    Assertion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_) noexcept;
+    Assertion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_);
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 

@@ -22,7 +22,7 @@ public:
             static_cast<float>(input));
     }
 
-    bool operator==(const ExponentialInterpolator& rhs) const { return base == rhs.base; }
+    bool operator==(const ExponentialInterpolator& rhs) const noexcept { return base == rhs.base; }
 };
 
 class CubicBezierInterpolator {

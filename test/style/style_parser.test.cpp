@@ -129,10 +129,11 @@ INSTANTIATE_TEST_SUITE_P(StyleParser, StyleParserTest, ::testing::ValuesIn([] {
 TEST(StyleParser, FontStacks) {
     style::Parser parser;
     parser.parse(util::read_file("test/fixtures/style_parser/font_stacks.json"));
-    std::set<mbgl::FontStack> expected;
-    expected.insert(FontStack({"a"}));
-    expected.insert(FontStack({"a", "b"}));
-    expected.insert(FontStack({"a", "b", "c"}));
+    std::set<mbgl::FontStack> expected = {
+        {"a"},
+        {"a", "b"},
+        {"a", "b", "c"},
+    };
     std::set<mbgl::FontStack> result = parser.fontStacks();
     ASSERT_EQ(expected, result);
 }

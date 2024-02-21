@@ -22,7 +22,7 @@ public:
     Interpolate(const type::Type& type_,
                 Interpolator interpolator_,
                 std::unique_ptr<Expression> input_,
-                std::map<double, std::unique_ptr<Expression>> stops_) noexcept;
+                std::map<double, std::unique_ptr<Expression>> stops_);
 
     const std::unique_ptr<Expression>& getInput() const noexcept { return input; }
     const Interpolator& getInterpolator() const noexcept { return interpolator; }

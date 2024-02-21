@@ -13,7 +13,7 @@ public:
                  std::unique_ptr<Expression> locale_,
                  std::unique_ptr<Expression> currency_,
                  std::unique_ptr<Expression> minFractionDigits_,
-                 std::unique_ptr<Expression> maxFractionDigits_);
+                 std::unique_ptr<Expression> maxFractionDigits_) noexcept;
 
     ~NumberFormat() override;
 

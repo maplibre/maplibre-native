@@ -29,7 +29,7 @@ struct SignatureBase;
 */
 class CompoundExpression : public Expression {
 public:
-    CompoundExpression(const detail::SignatureBase&, std::vector<std::unique_ptr<Expression>>) noexcept;
+    CompoundExpression(const detail::SignatureBase&, std::vector<std::unique_ptr<Expression>>);
 
     std::string getOperator() const override;
     EvaluationResult evaluate(const EvaluationContext& evaluationParams) const override;

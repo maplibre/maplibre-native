@@ -129,7 +129,7 @@ public:
         return expression::fromExpressionValues<T>(expression->possibleOutputs());
     }
 
-    friend bool operator==(const PropertyExpression& lhs, const PropertyExpression& rhs) {
+    friend bool operator==(const PropertyExpression& lhs, const PropertyExpression& rhs) noexcept {
         return *lhs.expression == *rhs.expression;
     }
 

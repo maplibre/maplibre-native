@@ -15,11 +15,11 @@ class Match : public Expression {
 public:
     using Branches = std::unordered_map<T, std::shared_ptr<Expression>>;
 
-    Match(const type::Type& type_,
+    Match(type::Type type_,
           std::unique_ptr<Expression> input_,
           Branches branches_,
           std::unique_ptr<Expression> otherwise_)
-        : Expression(Kind::Match, type_),
+        : Expression(Kind::Match, std::move(type_)),
           input(std::move(input_)),
           branches(std::move(branches_)),
           otherwise(std::move(otherwise_)) {}

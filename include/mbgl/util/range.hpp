@@ -7,7 +7,7 @@ namespace mbgl {
 template <class T>
 class Range {
 public:
-    constexpr Range(T min_, T max_)
+    constexpr Range(T min_, T max_) noexcept
         : min(std::move(min_)),
           max(std::move(max_)) {}
 
@@ -16,12 +16,12 @@ public:
 };
 
 template <class T>
-bool operator==(const Range<T>& a, const Range<T>& b) noexcept {
+constexpr bool operator==(const Range<T>& a, const Range<T>& b) noexcept {
     return a.min == b.min && a.max == b.max;
 }
 
 template <class T>
-bool operator!=(const Range<T>& a, const Range<T>& b) noexcept {
+constexpr bool operator!=(const Range<T>& a, const Range<T>& b) noexcept {
     return !(a == b);
 }
 

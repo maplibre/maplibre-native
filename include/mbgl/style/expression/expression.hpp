@@ -185,7 +185,7 @@ enum class Kind : int32_t {
 
 class Expression {
 public:
-    Expression(Kind kind_, type::Type type_) noexcept
+    Expression(Kind kind_, type::Type type_)
         : kind(kind_),
           type(std::move(type_)) {}
     virtual ~Expression() = default;

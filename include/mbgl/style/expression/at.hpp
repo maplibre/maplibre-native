@@ -10,7 +10,7 @@ namespace expression {
 
 class At : public Expression {
 public:
-    At(std::unique_ptr<Expression> index_, std::unique_ptr<Expression> input_) noexcept
+    At(std::unique_ptr<Expression> index_, std::unique_ptr<Expression> input_)
         : Expression(Kind::At, input_->getType().get<type::Array>().itemType),
           index(std::move(index_)),
           input(std::move(input_)) {}

@@ -107,7 +107,7 @@ ParseResult Var::parse(const Convertible& value_, ParsingContext& ctx) {
         return ParseResult();
     }
 
-    return ParseResult(std::make_unique<Var>(name_, std::move(*bindingValue)));
+    return ParseResult(std::make_unique<Var>(std::move(name_), std::move(*bindingValue)));
 }
 
 mbgl::Value Var::serialize() const {

@@ -16,7 +16,7 @@ class Let : public Expression {
 public:
     using Bindings = std::map<std::string, std::shared_ptr<Expression>>;
 
-    Let(Bindings bindings_, std::unique_ptr<Expression> result_) noexcept
+    Let(Bindings bindings_, std::unique_ptr<Expression> result_)
         : Expression(Kind::Let, result_->getType()),
           bindings(std::move(bindings_)),
           result(std::move(result_)) {}
@@ -28,7 +28,7 @@ public:
 
     bool operator==(const Expression& e) const noexcept override {
         if (e.getKind() == Kind::Let) {
-            auto rhs = static_cast<const Let*>(&e);
+            const auto* rhs = static_cast<const Let*>(&e);
             return *result == *(rhs->result);
         }
         return false;
@@ -48,7 +48,7 @@ private:
 
 class Var : public Expression {
 public:
-    Var(std::string name_, std::shared_ptr<Expression> value_) noexcept
+    Var(std::string name_, std::shared_ptr<Expression> value_)
         : Expression(Kind::Var, value_->getType()),
           name(std::move(name_)),
           value(std::move(value_)) {}
