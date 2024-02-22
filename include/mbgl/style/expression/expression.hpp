@@ -242,23 +242,41 @@ protected:
     }
 
     static bool childEqual(const std::unique_ptr<Expression>& lhs, const std::unique_ptr<Expression>& rhs) noexcept {
+        static_assert(
+            std::is_nothrow_invocable_v<decltype(&Expression::operator==), const Expression&, const Expression&>);
         return *lhs == *rhs;
     }
 
-    template <typename T>
+    template <typename T, typename = std::enable_if_t<std::is_scalar_v<T>>>
     static bool childEqual(const std::pair<T, std::unique_ptr<Expression>>& lhs,
                            const std::pair<T, std::unique_ptr<Expression>>& rhs) noexcept {
+        static_assert(
+            std::is_nothrow_invocable_v<decltype(&Expression::operator==), const Expression&, const Expression&>);
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
 
-    template <typename T>
+    template <typename T, typename = std::enable_if_t<std::is_scalar_v<T>>, typename = void>
     static bool childEqual(const std::pair<T, std::shared_ptr<Expression>>& lhs,
                            const std::pair<T, std::shared_ptr<Expression>>& rhs) noexcept {
+        static_assert(
+            std::is_nothrow_invocable_v<decltype(&Expression::operator==), const Expression&, const Expression&>);
+        return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
+    }
+
+    template <typename T, typename = std::enable_if_t<!std::is_scalar_v<T>>>
+    static bool childEqual(const std::pair<T, std::shared_ptr<Expression>>& lhs,
+                           const std::pair<T, std::shared_ptr<Expression>>& rhs) noexcept {
+        bool (*eqaulity_method)(const T&, const T&) noexcept = &std::operator==;
+        static_assert(std::is_nothrow_invocable_v<decltype(eqaulity_method), const T&, const T&>);
+        static_assert(
+            std::is_nothrow_invocable_v<decltype(&Expression::operator==), const Expression&, const Expression&>);
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
 
     static bool childEqual(const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& lhs,
                            const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& rhs) noexcept {
+        static_assert(
+            std::is_nothrow_invocable_v<decltype(&Expression::operator==), const Expression&, const Expression&>);
         return *(lhs.first) == *(rhs.first) && *(lhs.second) == *(rhs.second);
     }
 
