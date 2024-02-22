@@ -33,7 +33,7 @@ jobs:
           files_yaml_from_source_file: .github/changed-files.yml
 
   android-build:
-    runs-on: ${{ github.event.pull_request && !github.event.pull_request.draft && 'MapLibre_Native_Linux_16_core' || 'ubuntu-22.04' }}
+    runs-on: ubuntu-22.04
     needs:
       - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
