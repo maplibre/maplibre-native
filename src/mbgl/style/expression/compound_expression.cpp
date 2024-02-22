@@ -1176,10 +1176,6 @@ std::optional<std::size_t> CompoundExpression::getParameterCount() const noexcep
         [&](const std::vector<type::Type>& p) noexcept -> std::optional<std::size_t> { return p.size(); });
 }
 
-std::vector<std::optional<Value>> CompoundExpression::possibleOutputs() const noexcept {
-    return {std::nullopt};
-}
-
 void CompoundExpression::eachChild(const std::function<void(const Expression&)>& visit) const {
     for (const std::unique_ptr<Expression>& e : args) {
         visit(*e);

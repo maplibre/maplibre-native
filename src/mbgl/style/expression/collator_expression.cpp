@@ -8,9 +8,9 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-CollatorExpression::CollatorExpression(std::unique_ptr<Expression>&& caseSensitive_,
-                                       std::unique_ptr<Expression>&& diacriticSensitive_,
-                                       std::optional<std::unique_ptr<Expression>>&& locale_) noexcept
+CollatorExpression::CollatorExpression(std::unique_ptr<Expression> caseSensitive_,
+                                       std::unique_ptr<Expression> diacriticSensitive_,
+                                       std::optional<std::unique_ptr<Expression>> locale_) noexcept
     : Expression(Kind::CollatorExpression, type::Collator),
       caseSensitive(std::move(caseSensitive_)),
       diacriticSensitive(std::move(diacriticSensitive_)),

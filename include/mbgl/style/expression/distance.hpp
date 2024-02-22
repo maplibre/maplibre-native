@@ -32,7 +32,7 @@ public:
 
     bool operator==(const Expression& e) const noexcept override;
 
-    std::vector<std::optional<Value>> possibleOutputs() const override;
+    std::vector<std::optional<Value>> possibleOutputs() const override { return {std::nullopt}; }
 
     mbgl::Value serialize() const override;
     std::string getOperator() const override { return "distance"; }
