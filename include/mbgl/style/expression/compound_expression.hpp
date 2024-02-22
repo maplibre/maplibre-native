@@ -33,7 +33,7 @@ public:
 
     std::string getOperator() const override;
     EvaluationResult evaluate(const EvaluationContext& evaluationParams) const override;
-    std::vector<std::optional<Value>> possibleOutputs() const noexcept override;
+    std::vector<std::optional<Value>> possibleOutputs() const override { return {std::nullopt}; }
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
     bool operator==(const Expression& e) const noexcept override;
 

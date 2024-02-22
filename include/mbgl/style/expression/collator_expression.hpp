@@ -12,9 +12,9 @@ namespace expression {
 
 class CollatorExpression : public Expression {
 public:
-    CollatorExpression(std::unique_ptr<Expression>&& caseSensitive,
-                       std::unique_ptr<Expression>&& diacriticSensitive,
-                       std::optional<std::unique_ptr<Expression>>&& locale) noexcept;
+    CollatorExpression(std::unique_ptr<Expression> caseSensitive,
+                       std::unique_ptr<Expression> diacriticSensitive,
+                       std::optional<std::unique_ptr<Expression>> locale) noexcept;
 
     EvaluationResult evaluate(const EvaluationContext&) const override;
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
@@ -23,7 +23,7 @@ public:
 
     bool operator==(const Expression& e) const noexcept override;
 
-    std::vector<std::optional<Value>> possibleOutputs() const noexcept override {
+    std::vector<std::optional<Value>> possibleOutputs() const override {
         // Technically the set of possible outputs is the combinatoric set of
         // Collators produced by all possibleOutputs of
         // locale/caseSensitive/diacriticSensitive But for the primary use of

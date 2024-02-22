@@ -198,6 +198,8 @@ struct Converter<int64_t> {
     }
 };
 
+namespace {
+
 enum class FunctionType {
     Interval,
     Exponential,
@@ -206,17 +208,17 @@ enum class FunctionType {
     Invalid
 };
 
-static bool interpolatable(type::Type type) noexcept {
+bool interpolatable(type::Type type) noexcept {
     return type.match([&](const type::NumberType&) noexcept { return true; },
                       [&](const type::ColorType&) noexcept { return true; },
                       [&](const type::Array& array) noexcept { return array.N && array.itemType == type::Number; },
                       [&](const auto&) noexcept { return false; });
 }
 
-static std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,
-                                                                 const Convertible& value,
-                                                                 Error& error,
-                                                                 bool convertTokens = false) {
+std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,
+                                                          const Convertible& value,
+                                                          Error& error,
+                                                          bool convertTokens = false) {
     return type.match(
         [&](const type::NumberType&) -> std::optional<std::unique_ptr<Expression>> {
             auto result = convert<float>(value, error);
@@ -324,10 +326,10 @@ static std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type
         });
 }
 
-static std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const type::Type& type,
-                                                                                 const Convertible& value,
-                                                                                 Error& error,
-                                                                                 bool convertTokens) {
+std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const type::Type& type,
+                                                                          const Convertible& value,
+                                                                          Error& error,
+                                                                          bool convertTokens) {
     auto stopsValue = objectMember(value, "stops");
     if (!stopsValue) {
         error.message = "function value must specify stops";
@@ -375,7 +377,7 @@ static std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops
     return {std::move(stops)};
 }
 
-static void omitFirstStop(std::map<double, std::unique_ptr<Expression>>& stops) {
+void omitFirstStop(std::map<double, std::unique_ptr<Expression>>& stops) {
     double min = std::numeric_limits<double>::max();
     for (auto& s : stops) {
         if (s.first < min) {
@@ -436,7 +438,7 @@ std::optional<std::map<T, std::unique_ptr<Expression>>> convertBranches(const ty
     return {std::move(stops)};
 }
 
-static std::optional<double> convertBase(const Convertible& value, Error& error) {
+std::optional<double> convertBase(const Convertible& value, Error& error) {
     auto baseValue = objectMember(value, "base");
 
     if (!baseValue) {
@@ -452,7 +454,6 @@ static std::optional<double> convertBase(const Convertible& value, Error& error)
     return *base;
 }
 
-namespace {
 std::unique_ptr<Expression> step(type::Type type,
                                  std::unique_ptr<Expression> input,
                                  std::map<double, std::unique_ptr<Expression>> stops) {
@@ -536,8 +537,9 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     }
     omitFirstStop(*stops);
 
+    auto expr = step(type, makeInput(true), std::move(*stops));
     return numberOrDefault(
-        std::move(type), makeInput(false), step(type, makeInput(true), std::move(*stops)), std::move(def));
+        std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
 std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
@@ -556,9 +558,10 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
         return std::nullopt;
     }
 
+    auto expr = interpolate(type, exponential(*base), makeInput(true), std::move(*stops));
     return numberOrDefault(std::move(type),
                            makeInput(false),
-                           interpolate(type, exponential(*base), makeInput(true), std::move(*stops)),
+                           std::move(expr),
                            std::move(def));
 }
 
