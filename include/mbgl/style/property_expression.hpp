@@ -40,6 +40,8 @@ protected:
 
 template <class T>
 class PropertyExpression final : public PropertyExpressionBase {
+    static_assert(std::is_nothrow_move_constructible_v<T>);
+
 public:
     // Second parameter to be used only for conversions from legacy functions.
     PropertyExpression(std::unique_ptr<expression::Expression> expression_,
@@ -128,6 +130,9 @@ public:
     std::vector<std::optional<T>> possibleOutputs() const {
         return expression::fromExpressionValues<T>(expression->possibleOutputs());
     }
+
+    using Expression = expression::Expression;
+    static_assert(std::is_nothrow_invocable_v<decltype(&Expression::operator==), const Expression&, const Expression&>);
 
     friend bool operator==(const PropertyExpression& lhs, const PropertyExpression& rhs) noexcept {
         return *lhs.expression == *rhs.expression;

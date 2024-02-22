@@ -34,7 +34,7 @@ public:
     EvaluationContext(float zoom_, GeometryTileFeature const* feature_) noexcept
         : zoom(zoom_),
           feature(feature_) {}
-    EvaluationContext(std::optional<mbgl::Value> accumulated_, GeometryTileFeature const* feature_) noexcept
+    EvaluationContext(std::optional<mbgl::Value> accumulated_, GeometryTileFeature const* feature_)
         : accumulated(std::move(accumulated_)),
           feature(feature_) {}
     EvaluationContext(float zoom_, GeometryTileFeature const* feature_, const FeatureState* state_) noexcept
@@ -84,12 +84,19 @@ class Result : private variant<EvaluationError, T> {
 public:
     using variant<EvaluationError, T>::variant;
     using Value = T;
+    using Variant = variant<EvaluationError, T>;
 
-    Result() = default;
+    Result() noexcept(std::is_nothrow_move_constructible_v<Variant>) = default;
+
+    static_assert(std::is_nothrow_constructible_v<Variant>);
 
     template <typename U>
-    VARIANT_INLINE Result(U&& val) noexcept
-        : variant<EvaluationError, T>(val) {}
+    VARIANT_INLINE Result(U&& val) noexcept(std::is_nothrow_move_constructible_v<Variant>)
+        : Variant(std::forward<U>(val)) {}
+
+    template <typename U>
+    VARIANT_INLINE Result(const U& val) noexcept(std::is_nothrow_constructible_v<Variant, const U&>)
+        : Variant(val) {}
 
     explicit operator bool() const noexcept { return this->template is<T>(); }
 
@@ -231,9 +238,6 @@ public:
     virtual std::string getOperator() const = 0;
 
 protected:
-    using ExprEquality = decltype(&Expression::operator==);
-    static_assert(std::is_nothrow_invocable_v<ExprEquality, const Expression&, const Expression&>);
-
     template <typename T>
     static bool childrenEqual(const T& lhs, const T& rhs) noexcept {
         if (lhs.size() != rhs.size()) return false;

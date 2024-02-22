@@ -39,7 +39,7 @@ struct Value : ValueBase {
         : ValueBase() {}
 
     template <typename T>
-    VARIANT_INLINE Value(T&& val) noexcept(std::is_nothrow_constructible<T>::value)
+    VARIANT_INLINE Value(T&& val) noexcept(std::is_nothrow_constructible_v<T>)
         : ValueBase(std::forward<T>(val)) {}
 
     template <typename T>
