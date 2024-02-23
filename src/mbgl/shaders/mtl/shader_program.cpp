@@ -10,7 +10,6 @@
 #include <mbgl/programs/program_parameters.hpp>
 #include <mbgl/shaders/shader_manifest.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <Metal/MTLLibrary.hpp>
 #include <Metal/MTLRenderPass.hpp>
@@ -24,11 +23,10 @@ using namespace std::string_literals;
 
 namespace mbgl {
 
-shaders::AttributeInfo::AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::string_view name_)
+shaders::AttributeInfo::AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_)
     : index(index_),
       dataType(dataType_),
-      name(name_),
-      nameID(stringIndexer().get(name_)) {}
+      id(id_) {}
 
 shaders::UniformBlockInfo::UniformBlockInfo(
     std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
@@ -195,19 +193,17 @@ void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {
     const auto index = static_cast<int>(info.index);
 #if !defined(NDEBUG)
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
-    vertexAttributes.visitAttributes(
-        [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
     uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
-    vertexAttributes.add(stringIndexer().get(info.name), index, info.dataType, 1);
+    vertexAttributes.set(info.id, index, info.dataType, 1);
 }
 
 void ShaderProgram::initUniformBlock(const shaders::UniformBlockInfo& info) {
     const auto index = static_cast<int>(info.index);
 #if !defined(NDEBUG)
     // Indexes must be unique, if there's a conflict check the `attributes` array in the shader
-    vertexAttributes.visitAttributes(
-        [&](auto, const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
+    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { assert(attrib.getIndex() != index); });
     uniformBlocks.visit([&](const gfx::UniformBlock& block) { assert(block.getIndex() != index); });
 #endif
     if (const auto& block_ = uniformBlocks.set(info.id, index, info.size)) {

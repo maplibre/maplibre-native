@@ -3,7 +3,6 @@
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/renderer/layers/render_symbol_layer.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <memory>
 #include <string>
