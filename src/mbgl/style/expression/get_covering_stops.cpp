@@ -1,5 +1,7 @@
 #include <mbgl/style/expression/get_covering_stops.hpp>
 
+#include <cmath>
+
 namespace mbgl {
 namespace style {
 namespace expression {
@@ -8,8 +10,12 @@ Range<float> getCoveringStops(const std::map<double, std::unique_ptr<Expression>
                               const double lower,
                               const double upper) noexcept {
     assert(!stops.empty());
+    if (stops.empty()) {
+        return {std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()};
+    }
+
     auto minIt = stops.lower_bound(lower);
-    auto maxIt = stops.lower_bound(upper);
+    const auto maxIt = stops.lower_bound(upper);
 
     // lower_bound yields first element >= lowerZoom, but we want the *last*
     // element <= lowerZoom, so if we found a stop > lowerZoom, back up by one.

@@ -33,17 +33,14 @@ using ValueBase = variant<NullValue,
                           mapbox::util::recursive_wrapper<std::vector<Value>>,
                           mapbox::util::recursive_wrapper<std::unordered_map<std::string, Value>>>;
 struct Value : ValueBase {
-    using ValueBase::ValueBase;
-
-    VARIANT_INLINE Value()
-        : ValueBase() {}
+    VARIANT_INLINE Value() noexcept {}
 
     template <typename T>
-    VARIANT_INLINE Value(T&& val) noexcept(std::is_nothrow_constructible_v<T>)
+    VARIANT_INLINE Value(T&& val) noexcept(std::is_nothrow_constructible_v<ValueBase, T&&>)
         : ValueBase(std::forward<T>(val)) {}
 
     template <typename T>
-    VARIANT_INLINE Value(const T& val)
+    VARIANT_INLINE Value(const T& val) noexcept(std::is_nothrow_constructible_v<ValueBase, const T&>)
         : ValueBase(val) {}
 
     // Javascript's Number.MAX_SAFE_INTEGER

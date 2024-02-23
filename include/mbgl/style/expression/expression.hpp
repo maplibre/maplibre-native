@@ -34,7 +34,7 @@ public:
     EvaluationContext(float zoom_, GeometryTileFeature const* feature_) noexcept
         : zoom(zoom_),
           feature(feature_) {}
-    EvaluationContext(std::optional<mbgl::Value> accumulated_, GeometryTileFeature const* feature_)
+    EvaluationContext(std::optional<mbgl::Value> accumulated_, GeometryTileFeature const* feature_) noexcept(false)
         : accumulated(std::move(accumulated_)),
           feature(feature_) {}
     EvaluationContext(float zoom_, GeometryTileFeature const* feature_, const FeatureState* state_) noexcept
