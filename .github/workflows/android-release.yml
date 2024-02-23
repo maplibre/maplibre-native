@@ -109,9 +109,6 @@ jobs:
           fi
         shell: bash
 
-      - name: Generate javadoc
-        run: make android-javadoc
-
       # create github release
       - name: Prepare release
         id: prepare_release
@@ -141,7 +138,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapboxGLAndroidSDK/build/outputs/aar/MapboxGLAndroidSDK-release.aar
+          asset_path: platform/android/MapboxGLAndroidSDK/build/outputs/aar/MapboxGLAndroidSDK-drawable-release.aar
           asset_name: MapboxGLAndroidSDK-release.aar
           asset_content_type: application/zip
 
