@@ -21,9 +21,9 @@ private:
     friend bool operator!=(const PropertyValue& lhs, const PropertyValue& rhs) noexcept { return !(lhs == rhs); }
 
 public:
-    PropertyValue() noexcept(std::is_nothrow_constructible_v<Value>) = default;
+    PropertyValue() = default;
 
-    PropertyValue(T constant) noexcept(std::is_nothrow_constructible_v<Value, T>)
+    PropertyValue(T constant)
         : value(std::forward<T>(constant)) {}
 
     PropertyValue(PropertyExpression<T> expression) noexcept

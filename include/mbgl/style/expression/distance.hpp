@@ -23,8 +23,7 @@ class Distance final : public Expression {
     static_assert(std::is_nothrow_move_constructible_v<Feature::geometry_type>);
 
 public:
-    Distance(GeoJSON geoJSONSource_,
-             Feature::geometry_type geometries_) noexcept(std::is_nothrow_move_constructible_v<GeoJSON>);
+    Distance(GeoJSON geoJSONSource_, Feature::geometry_type geometries_);
     ~Distance() override;
 
     EvaluationResult evaluate(const EvaluationContext&) const override;

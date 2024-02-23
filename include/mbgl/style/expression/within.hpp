@@ -13,8 +13,7 @@ class Within final : public Expression {
     static_assert(std::is_nothrow_move_constructible_v<Feature::geometry_type>);
 
 public:
-    explicit Within(GeoJSON geojson,
-                    Feature::geometry_type geometries_) noexcept(std::is_nothrow_move_constructible_v<GeoJSON>);
+    explicit Within(GeoJSON geojson, Feature::geometry_type geometries_);
 
     ~Within() override;
 

@@ -36,11 +36,11 @@ struct Value : ValueBase {
     VARIANT_INLINE Value() noexcept {}
 
     template <typename T>
-    VARIANT_INLINE Value(T&& val) noexcept(std::is_nothrow_constructible_v<ValueBase, T&&>)
+    VARIANT_INLINE Value(T&& val)
         : ValueBase(std::forward<T>(val)) {}
 
     template <typename T>
-    VARIANT_INLINE Value(const T& val) noexcept(std::is_nothrow_constructible_v<ValueBase, const T&>)
+    VARIANT_INLINE Value(const T& val)
         : ValueBase(val) {}
 
     // Javascript's Number.MAX_SAFE_INTEGER

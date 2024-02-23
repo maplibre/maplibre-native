@@ -86,16 +86,16 @@ public:
     using Value = T;
     using Variant = variant<EvaluationError, T>;
 
-    Result() noexcept(std::is_nothrow_move_constructible_v<Variant>) = default;
+    Result() = default;
 
     static_assert(std::is_nothrow_constructible_v<Variant>);
 
     template <typename U>
-    VARIANT_INLINE Result(U&& val) noexcept(std::is_nothrow_move_constructible_v<Variant>)
+    VARIANT_INLINE Result(U&& val)
         : Variant(std::forward<U>(val)) {}
 
     template <typename U>
-    VARIANT_INLINE Result(const U& val) noexcept(std::is_nothrow_constructible_v<Variant, const U&>)
+    VARIANT_INLINE Result(const U& val)
         : Variant(val) {}
 
     explicit operator bool() const noexcept { return this->template is<T>(); }
