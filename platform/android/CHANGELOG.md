@@ -6,10 +6,21 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### ✨ Features and improvements
 
+### 🐞 Bug fixes
+
+## 10.3.0
+
+### ✨ Features and improvements
+
 * Add support for the [`slice` expression](https://maplibre.org/maplibre-style-spec/expressions/#slice) ([#1133](https://github.com/maplibre/maplibre-native/pull/1133))
+* Add support for [index-of expression](https://maplibre.org/maplibre-style-spec/expressions/#index-of) ([#1113](https://github.com/maplibre/maplibre-native/pull/1113))
+* Change to a more natural fling animation and allow setting `flingThreshold` and `flingAnimationBaseTime` in `UiSettings` ([#963](https://github.com/maplibre/maplibre-native/pull/963))
 * Add support for [index-of expression](https://maplibre.org/maplibre-style-spec/expressions/#index-of) ([#1113](https://github.com/maplibre/maplibre-native/pull/1113))
 
 ### 🐞 Bug fixes
+
+* Fix regression in CameraUpdateFactory#zoomOut ([#1035](https://github.com/maplibre/maplibre-native/pull/1035))
+* `AndroidLocationEngineImpl` made public to create custom `LocationEngineProvider`([#850](https://github.com/maplibre/maplibre-native/pull/850))
 
 ### ⛵ Dependencies
 
