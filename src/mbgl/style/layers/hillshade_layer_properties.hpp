@@ -59,7 +59,7 @@ public:
 
     unsigned long constantsMask() const override;
 
-    expression::Dependency getDependencies() const override {
+    expression::Dependency getDependencies() const noexcept override {
         return evaluated.getDependencies();
     }
 

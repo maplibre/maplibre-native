@@ -59,9 +59,10 @@ public:
     }
 
     using Dependency = style::expression::Dependency;
-    Dependency getDependencies() const {
-        return value.match([](const T&) { return Dependency::None; },
-                           [](const style::PropertyExpression<T>& expression) { return expression.getDependencies(); });
+    Dependency getDependencies() const noexcept {
+        return value.match(
+            [](const T&) noexcept { return Dependency::None; },
+            [](const style::PropertyExpression<T>& expression) noexcept { return expression.getDependencies(); });
     }
 };
 
@@ -113,9 +114,10 @@ public:
     }
 
     using Dependency = style::expression::Dependency;
-    Dependency getDependencies() const {
-        return value.match([](const Faded<T>&) { return Dependency::None; },
-                           [](const style::PropertyExpression<T>& expression) { return expression.getDependencies(); });
+    Dependency getDependencies() const noexcept {
+        return value.match(
+            [](const Faded<T>&) noexcept { return Dependency::None; },
+            [](const style::PropertyExpression<T>& expression) noexcept { return expression.getDependencies(); });
     }
 };
 

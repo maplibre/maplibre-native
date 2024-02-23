@@ -249,20 +249,20 @@ public:
 
         /// Extract dependencies from a possibly-evaluated property which may have an expression.
         template <class P>
-        Dependency getDependencies(const P&) const {
+        Dependency getDependencies(const P&) const noexcept {
             return Dependency::None;
         }
         template <class P>
-        Dependency getDependencies(const PossiblyEvaluatedPropertyValue<P>& v) const {
+        Dependency getDependencies(const PossiblyEvaluatedPropertyValue<P>& v) const noexcept {
             return v.getDependencies();
         }
         template <class P>
-        Dependency getDependencies(const PossiblyEvaluatedPropertyValue<Faded<P>>& v) const {
+        Dependency getDependencies(const PossiblyEvaluatedPropertyValue<Faded<P>>& v) const noexcept {
             return v.getDependencies();
         }
 
-        Dependency getDependencies() const {
-            return std::apply([](auto... v) { return (v | ...); },
+        Dependency getDependencies() const noexcept {
+            return std::apply([](auto... v) noexcept { return (v | ...); },
                               std::make_tuple(getDependencies(this->template get<Ps>())...));
         }
 
