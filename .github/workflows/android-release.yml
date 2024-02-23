@@ -109,9 +109,6 @@ jobs:
           fi
         shell: bash
 
-      - name: Generate javadoc
-        run: make android-javadoc
-
       # create github release
       - name: Prepare release
         id: prepare_release
