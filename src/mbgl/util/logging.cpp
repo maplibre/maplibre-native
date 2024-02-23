@@ -47,8 +47,7 @@ private:
 };
 
 Log::Log()
-    : impl(std::make_unique<Impl>()) {
-    }
+    : impl(std::make_unique<Impl>()) {}
 
 Log::~Log() = default;
 

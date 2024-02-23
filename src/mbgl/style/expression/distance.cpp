@@ -41,7 +41,8 @@ bool isRangeSafe(const IndexRange& range, const std::size_t threshold) noexcept 
     return ret;
 }
 
-std::pair<std::optional<IndexRange>, std::optional<IndexRange>> splitRange(const IndexRange& range, bool isLine) noexcept {
+std::pair<std::optional<IndexRange>, std::optional<IndexRange>> splitRange(const IndexRange& range,
+                                                                           bool isLine) noexcept {
     if (range.first > range.second) {
         return std::make_pair(std::nullopt, std::nullopt);
     }

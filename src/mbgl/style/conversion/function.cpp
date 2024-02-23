@@ -538,8 +538,7 @@ std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     omitFirstStop(*stops);
 
     auto expr = step(type, makeInput(true), std::move(*stops));
-    return numberOrDefault(
-        std::move(type), makeInput(false), std::move(expr), std::move(def));
+    return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
 std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
@@ -559,10 +558,7 @@ std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
     }
 
     auto expr = interpolate(type, exponential(*base), makeInput(true), std::move(*stops));
-    return numberOrDefault(std::move(type),
-                           makeInput(false),
-                           std::move(expr),
-                           std::move(def));
+    return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
 std::optional<std::unique_ptr<Expression>> convertCategoricalFunction(type::Type type,
