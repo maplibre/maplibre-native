@@ -103,7 +103,7 @@ public:
     ConstantSymbolSizeBinder(const float tileZoom,
                              const style::PropertyExpression<float>& expression_,
                              const float /*defaultValue*/
-                             ) noexcept
+                             )
         : layoutSize(expression_.evaluate(tileZoom + 1)),
           expression(expression_) {
         const Range<float> zoomLevels = expression_.getCoveringStops(tileZoom, tileZoom + 1);

@@ -21,13 +21,13 @@ class Transitioning {
 public:
     Transitioning() = default;
 
-    explicit Transitioning(Value value_) noexcept
+    explicit Transitioning(Value value_) noexcept(std::is_nothrow_move_constructible_v<Value>)
         : value(std::move(value_)) {}
 
     Transitioning(Value value_,
                   Transitioning<Value> prior_,
                   const TransitionOptions& transition,
-                  TimePoint now) noexcept
+                  TimePoint now) noexcept(std::is_nothrow_move_constructible_v<Value>)
         : begin(now + transition.delay.value_or(Duration::zero())),
           end(begin + transition.duration.value_or(Duration::zero())),
           value(std::move(value_)) {

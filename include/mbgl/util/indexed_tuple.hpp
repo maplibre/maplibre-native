@@ -40,7 +40,7 @@ public:
     }
 
     template <class... Us>
-    IndexedTuple(Us&&... other) noexcept
+    IndexedTuple(Us&&... other) noexcept(std::is_nothrow_constructible_v<std::tuple<Ts...>, Us&&...>)
         : std::tuple<Ts...>(std::forward<Us>(other)...) {}
 
     template <class... Js, class... Us>

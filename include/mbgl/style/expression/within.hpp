@@ -10,8 +10,11 @@ namespace style {
 namespace expression {
 
 class Within final : public Expression {
+    static_assert(std::is_nothrow_move_constructible_v<Feature::geometry_type>);
+
 public:
-    explicit Within(GeoJSON geojson, Feature::geometry_type geometries_) noexcept;
+    explicit Within(GeoJSON geojson,
+                    Feature::geometry_type geometries_) noexcept(std::is_nothrow_move_constructible_v<GeoJSON>);
 
     ~Within() override;
 
@@ -19,7 +22,7 @@ public:
 
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
 
-    void eachChild(const std::function<void(const Expression&)>&) const override {}
+    void eachChild(const std::function<void(const Expression&)>&) const noexcept override {}
 
     bool operator==(const Expression& e) const noexcept override;
 

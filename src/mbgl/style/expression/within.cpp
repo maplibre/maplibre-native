@@ -206,7 +206,8 @@ std::optional<Feature::geometry_type> getPolygonInfo(const Feature& polyFeature,
 namespace style {
 namespace expression {
 
-Within::Within(GeoJSON geojson, Feature::geometry_type geometries_) noexcept
+Within::Within(GeoJSON geojson,
+               Feature::geometry_type geometries_) noexcept(std::is_nothrow_move_constructible_v<GeoJSON>)
     : Expression(Kind::Within, type::Boolean),
       geoJSONSource(std::move(geojson)),
       geometries(std::move(geometries_)) {}

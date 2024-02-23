@@ -806,10 +806,8 @@ std::optional<Feature::geometry_type> getGeometry(const Feature& feature,
 namespace style {
 namespace expression {
 
-static_assert(std::is_nothrow_move_constructible_v<GeoJSON>);
-static_assert(std::is_nothrow_move_constructible_v<Feature::geometry_type>);
-
-Distance::Distance(GeoJSON geojson, Feature::geometry_type geometries_) noexcept
+Distance::Distance(GeoJSON geojson,
+                   Feature::geometry_type geometries_) noexcept(std::is_nothrow_move_constructible_v<GeoJSON>)
     : Expression(Kind::Distance, type::Number),
       geoJSONSource(std::move(geojson)),
       geometries(std::move(geometries_)) {}
