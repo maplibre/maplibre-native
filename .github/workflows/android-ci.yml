@@ -217,6 +217,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}
+
       - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
