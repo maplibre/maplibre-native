@@ -24,8 +24,7 @@ private:
     }
 
 public:
-    ColorRampPropertyValue()
-        : value(nullptr) {}
+    ColorRampPropertyValue() noexcept = default;
     ColorRampPropertyValue(std::shared_ptr<expression::Expression> value_)
         : value(std::move(value_)) {}
 

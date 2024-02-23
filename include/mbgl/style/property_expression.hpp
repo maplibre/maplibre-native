@@ -34,6 +34,7 @@ public:
     Dependency getDependencies() const noexcept {
         auto v = expression ? expression->dependencies : Dependency::None;
         assert(isZoomConstant_ == !(underlying_type(v) & underlying_type(Dependency::Zoom)));
+        assert(isFeatureConstant_ == !(underlying_type(v) & underlying_type(Dependency::Feature)));
         return v;
     }
 
