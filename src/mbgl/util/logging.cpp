@@ -24,22 +24,20 @@ public:
     Impl()
         : scheduler(Scheduler::GetSequenced()) {}
 
-    void record(EventSeverity severity, Event event, int64_t code, const std::string& msg) {
-        try {
-            if (useThread) {
-                auto threadName = platform::getCurrentThreadName();
-                scheduler->schedule([=]() { Log::record(severity, event, code, msg, threadName); });
-            } else {
-                Log::record(severity, event, code, msg, {});
-            }
-        } catch (...) {
-            // ignore exceptions during logging
-            // What would we do, log them?
-#if !defined(NDEBUG)
-            [[maybe_unused]] auto ex = std::current_exception();
-            assert(!"unhandled exception while logging");
-#endif
+    void record(EventSeverity severity, Event event, int64_t code, const std::string& msg) try {
+        if (useThread) {
+            auto threadName = platform::getCurrentThreadName();
+            scheduler->schedule([=]() { Log::record(severity, event, code, msg, threadName); });
+        } else {
+            Log::record(severity, event, code, msg, {});
         }
+    } catch (...) {
+        // ignore exceptions during logging
+        // What would we do, log them?
+#if !defined(NDEBUG)
+        [[maybe_unused]] auto ex = std::current_exception();
+        assert(!"unhandled exception while logging");
+#endif
     }
 
 private:
