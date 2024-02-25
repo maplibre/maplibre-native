@@ -1,5 +1,5 @@
 # Runs Bloaty (size test) and Google Benchmark and reports results on PR
-name: pr-tests
+name: pr-linux-tests
 
 on:
   workflow_run:
@@ -16,8 +16,22 @@ permissions:
   id-token: write      # This is required for requesting the AWS JWT
 
 jobs:
-  pr-bloaty:
+  pre_job:
     if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.check_skip.outputs.should_skip }}
+    steps:
+      # if linux-build-and-test in linux-ci was skipped, the rest of the workflow can be skipped
+      - id: check_skip
+        run: |
+          conclusion=$(curl ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "linux-build-and-test").conclusion')
+          should_skip=$([ "$conclusion" = "skipped" ] && echo "true" || echo "false")
+          echo "should_skip=$should_skip" >> "$GITHUB_OUTPUT"
+
+  pr-bloaty:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip == 'false'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
