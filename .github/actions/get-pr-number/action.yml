@@ -10,7 +10,6 @@ runs:
     - uses: ./.github/actions/download-workflow-run-artifact
       with:
         artifact-name: pr-number
-        expect-files: "./pr_number"
 
     - id: cat
       run: echo pr-number="$(cat ./pr_number)" >> $GITHUB_OUTPUT
