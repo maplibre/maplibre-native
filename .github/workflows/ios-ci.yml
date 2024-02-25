@@ -196,9 +196,17 @@ jobs:
           folder: build/docs
           target-folder: ios/latest/
 
+      - name: VERSION file changed
+        id: version-file-ios-changed
+        uses: tj-actions/changed-files@v42
+        with:
+          files: platform/ios/VERSION
+
       # Make Metal XCFramework release
       - name: Should make release?
-        if: github.event.inputs.release == 'full' || github.event.inputs.release == 'pre'
+        if: |
+          github.event.inputs.release == 'full' || github.event.inputs.release == 'pre' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.version-file-ios-changed.outputs.any_changed == 'true')
         run: echo make_release=true >> "$GITHUB_ENV"
 
       - name: Build XCFramework
@@ -207,7 +215,7 @@ jobs:
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
 
       - name: Get version (release)
-        if: github.event.inputs.release == 'full'
+        if: github.event.inputs.release == 'full' || steps.version-file-ios-changed.outputs.any_changed == 'true'
         run: |
           echo version="$(head VERSION)" >> "$GITHUB_ENV"
           echo changelog_version_heading="## $(head VERSION)" >> "$GITHUB_ENV"
