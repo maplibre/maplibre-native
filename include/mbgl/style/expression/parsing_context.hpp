@@ -76,21 +76,21 @@ enum class TypeAnnotationOption {
 
 class ParsingContext {
 public:
-    ParsingContext() noexcept
+    ParsingContext()
         : errors(std::make_shared<std::vector<ParsingError>>()) {}
-    ParsingContext(std::string key_) noexcept
+    ParsingContext(std::string key_)
         : key(std::move(key_)),
           errors(std::make_shared<std::vector<ParsingError>>()) {}
-    explicit ParsingContext(type::Type expected_) noexcept
+    explicit ParsingContext(type::Type expected_)
         : expected(std::move(expected_)),
           errors(std::make_shared<std::vector<ParsingError>>()) {}
-    ParsingContext(ParsingContext&&) noexcept = default;
+    ParsingContext(ParsingContext&&) = default;
 
     ParsingContext(const ParsingContext&) = delete;
     ParsingContext& operator=(const ParsingContext&) = delete;
 
     const std::string& getKey() const noexcept { return key; }
-    std::optional<type::Type> getExpected() const noexcept { return expected; }
+    const std::optional<type::Type>& getExpected() const noexcept { return expected; }
     const std::vector<ParsingError>& getErrors() const noexcept { return *errors; }
     std::string getCombinedErrors() const;
 
@@ -156,7 +156,7 @@ private:
     ParsingContext(std::string key_,
                    std::shared_ptr<std::vector<ParsingError>> errors_,
                    std::optional<type::Type> expected_,
-                   std::shared_ptr<detail::Scope> scope_) noexcept
+                   std::shared_ptr<detail::Scope> scope_)
         : key(std::move(key_)),
           expected(std::move(expected_)),
           scope(std::move(scope_)),
