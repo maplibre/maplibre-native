@@ -45,10 +45,6 @@ This version is identical to 10.0.2.
 
 * `MapboxFusedLocationEngineImpl` constructor made public to create custom `LocationEngineProvider`([#850](https://github.com/maplibre/maplibre-native/pull/850))
 
-## 10.0.1 - February 23, 2023
-### 🐞 Bug fixes
-* `MapboxFusedLocationEngineImpl` constructor made public to create custom `LocationEngineProvider`([#850](https://github.com/maplibre/maplibre-gl-native/pull/850))
-
 ## 10.0.1 - February 22, 2023
 
 ### 🐞 Bug fixes
