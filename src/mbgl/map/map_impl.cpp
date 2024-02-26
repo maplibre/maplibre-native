@@ -4,6 +4,8 @@
 #include <mbgl/storage/file_source.hpp>
 #include <mbgl/style/style_impl.hpp>
 #include <mbgl/util/exception.hpp>
+#include <mbgl/util/logging.hpp>
+#include <mbgl/util/traits.hpp>
 
 namespace mbgl {
 
@@ -84,6 +86,33 @@ void Map::Impl::onStyleLoaded() {
         annotationManager.onStyleLoaded();
     }
     observer.onDidFinishLoadingStyle();
+
+#if !defined(NDEBUG)
+    using Dependency = style::expression::Dependency;
+    constexpr auto maskCount = underlying_type(Dependency::MaskCount);
+    std::array<std::size_t, maskCount + 1> counts = {0};
+    const auto layers = style->getLayers();
+    for (const auto& layer : layers) {
+        const auto deps = layer->getDependencies();
+        if (deps == Dependency::None) {
+            counts[0]++;
+        } else {
+            for (size_t i = 0; i < maskCount; ++i) {
+                const std::underlying_type_t<Dependency> mask = 1 << i;
+                if (underlying_type(deps) & mask) {
+                    counts[i + 1]++;
+                }
+            }
+        }
+    }
+    std::ostringstream ss;
+    ss << "Style '" << style->getName() << "' loaded " << layers.size() << " layers.\n";
+    ss << "  No Dependencies: " << counts[0] << "\n";
+    for (size_t i = 0; i < maskCount; ++i) {
+        ss << "  " << util::toString(Dependency{1 << i}) << ": " << counts[i + 1] << "\n";
+    }
+    Log::Info(Event::Style, ss.str());
+#endif
 }
 
 void Map::Impl::onStyleError(std::exception_ptr error) {

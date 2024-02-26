@@ -1,10 +1,11 @@
 #pragma once
 
-#include <mbgl/style/transition_options.hpp>
-#include <mbgl/style/conversion/stringify.hpp>
-#include <mbgl/renderer/transition_parameters.hpp>
 #include <mbgl/renderer/possibly_evaluated_property_value.hpp>
 #include <mbgl/renderer/property_evaluation_parameters.hpp>
+#include <mbgl/renderer/transition_parameters.hpp>
+#include <mbgl/style/color_ramp_property_value.hpp>
+#include <mbgl/style/conversion/stringify.hpp>
+#include <mbgl/style/transition_options.hpp>
 #include <mbgl/util/indexed_tuple.hpp>
 #include <mbgl/util/ignore.hpp>
 
@@ -301,12 +302,17 @@ public:
         /// Get the combined dependencies of any contained expressions
         Dependency getDependencies() const noexcept {
             return std::apply([](auto... v) { return (v | ...); },
-                              std::make_tuple(getDependencies(this->template get<Ps>())...));
+                              std::make_tuple(Dependency::None, getDependencies(this->template get<Ps>())...));
         }
 
         unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
 
     protected:
+        template <class P>
+        Dependency getDependencies(const PropertyValue<P>& v) const noexcept {
+            return v.getDependencies();
+        }
+
         template <class P>
         Dependency getDependencies(const Transitioning<P>& v) const noexcept {
             return v.getValue().getDependencies();
@@ -332,6 +338,23 @@ public:
             util::ignore({(result |= this->template get<Ps>().value.hasDataDrivenPropertyDifference(
                                other.template get<Ps>().value))...});
             return result;
+        }
+
+        Dependency getDependencies() const noexcept {
+            return std::apply([](auto... v) noexcept { return (v | ...); },
+                              std::make_tuple(getDependencies(this->template get<Ps>())...));
+        }
+
+    protected:
+        template <typename P>
+        Dependency getDependencies(const style::Transitionable<PropertyValue<P>>& v) const noexcept {
+            return v.value.getDependencies();
+        }
+        Dependency getDependencies(const style::ColorRampPropertyValue& v) const noexcept {
+            return v.getDependencies();
+        }
+        Dependency getDependencies(const style::Transitionable<ColorRampPropertyValue>& v) const noexcept {
+            return v.value.getDependencies();
         }
     };
 };

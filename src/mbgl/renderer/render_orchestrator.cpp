@@ -294,8 +294,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         const bool layerAddedOrChanged = layerDiff.added.count(id) || layerDiff.changed.count(id);
 
         // Only re-evaluate on change of zoom if the style has some reference to it
+        using Dependency = expression::Dependency;
         const bool zoomChangedAndMatters = zoomChanged && !layerAddedOrChanged &&
-                                           (layer.getStyleDependencies() & expression::Dependency::Zoom);
+                                           (layer.getStyleDependencies() & Dependency::Zoom) != Dependency::None;
 
         if (layerAddedOrChanged || zoomChangedAndMatters || layer.hasTransition() || layer.hasCrossfade()) {
             const auto previousMask = layer.evaluatedProperties->constantsMask();

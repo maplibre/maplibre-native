@@ -137,23 +137,23 @@ public:
 };
 
 /**
-    Expression is an abstract class that serves as an interface and base class
-    for particular expression implementations.
+ Expression is an abstract class that serves as an interface and base class
+ for particular expression implementations.
 
-    CompoundExpression implements the majority of expressions in the spec by
-    inferring the argument and output from a simple function (const T0& arg0,
-    const T1& arg1, ...) -> Result<U> where T0, T1, ..., U are member types of
-    mbgl::style::expression::Value.
+ CompoundExpression implements the majority of expressions in the spec by
+ inferring the argument and output from a simple function (const T0& arg0,
+ const T1& arg1, ...) -> Result<U> where T0, T1, ..., U are member types of
+ mbgl::style::expression::Value.
 
-    The other Expression subclasses (Let, Curve, Match, etc.) exist in order to
-    implement expressions that need specialized parsing, type checking, or
-    evaluation logic that can't be handled by CompoundExpression's inference
-    mechanism.
+ The other Expression subclasses (Let, Curve, Match, etc.) exist in order to
+ implement expressions that need specialized parsing, type checking, or
+ evaluation logic that can't be handled by CompoundExpression's inference
+ mechanism.
 
-    Each Expression subclass also provides a static
-    ParseResult ExpressionClass::parse(const V&, ParsingContext),
-    which handles parsing a style-spec JSON representation of the expression.
-*/
+ Each Expression subclass also provides a static
+ ParseResult ExpressionClass::parse(const V&, ParsingContext),
+ which handles parsing a style-spec JSON representation of the expression.
+ */
 
 enum class Kind : int32_t {
     Coalesce,
@@ -187,13 +187,20 @@ enum class Kind : int32_t {
 
 enum class Dependency : uint32_t {
     None = 0,
-    Feature = 1 << 0,
-    Zoom = 1 << 1,
-    Var = 1 << 2,
-    Override = 1 << 3,
+    Feature = 1 << 0,  // Data reference
+    Image = 1 << 1,    // Image reference (equivalent to not "runtime constant")
+    Zoom = 1 << 2,     // Zoom level
+    Location = 1 << 3, // Not used yet, "distance-from-center" not supported
+    Bind = 1 << 4,     // Create variable binding ("let")
+    Var = 1 << 5,      // Use variable binding
+    Override = 1 << 6, // Property override
+    MaskCount = 7,
 };
-inline constexpr Dependency operator|(Dependency x, Dependency y) {
+inline constexpr static Dependency operator|(Dependency x, Dependency y) {
     return Dependency{mbgl::underlying_type(x) | mbgl::underlying_type(y)};
+}
+inline constexpr static Dependency operator&(Dependency x, Dependency y) {
+    return Dependency{mbgl::underlying_type(x) & mbgl::underlying_type(y)};
 }
 
 class Expression {
@@ -321,4 +328,9 @@ private:
 
 } // namespace expression
 } // namespace style
+
+namespace util {
+std::string toString(style::expression::Dependency);
+} // namespace util
+
 } // namespace mbgl

@@ -45,9 +45,7 @@ public:
 
     unsigned long constantsMask() const override;
 
-    expression::Dependency getDependencies() const noexcept override {
-        return evaluated.getDependencies();
-    }
+    expression::Dependency getDependencies() const noexcept override;
 
     const BackgroundLayer::Impl& layerImpl() const;
     // Data members.

@@ -17,7 +17,7 @@ public:
     using Bindings = std::map<std::string, std::shared_ptr<Expression>>;
 
     Let(Bindings bindings_, std::unique_ptr<Expression> result_)
-        : Expression(Kind::Let, result_->getType(), collectDependencies(bindings_)),
+        : Expression(Kind::Let, result_->getType(), collectDependencies(bindings_) | Dependency::Bind),
           bindings(std::move(bindings_)),
           result(std::move(result_)) {}
 
