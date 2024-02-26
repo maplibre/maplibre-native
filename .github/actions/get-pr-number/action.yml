@@ -12,6 +12,7 @@ runs:
         artifact-name: pr-number
 
     - run: touch ./pr_number
+      shell: bash
 
     - id: cat
       run: echo pr-number="$(cat ./pr_number)" >> $GITHUB_OUTPUT
