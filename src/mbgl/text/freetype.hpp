@@ -26,7 +26,7 @@ private:
 };
 
 // call back format: width, height, left, top, advance, bitmap data
-using GlyphCallBack = std::function<void(uint32_t, uint32_t, int, int, uint32_t, unsigned char*)>;
+using GlyphCallBack = std::function<void(uint32_t, uint32_t, int, int, uint32_t, unsigned char *)>;
 
 class FreeTypeFace {
 public:

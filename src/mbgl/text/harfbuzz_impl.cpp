@@ -9,23 +9,23 @@ static hb_language_t getDefaultLanguage() {
     return language;
 }
 
-static hb_script_t getUnicodeScript (hb_codepoint_t u)
-{
-  static hb_unicode_funcs_t* unicode_funcs;
+static hb_script_t getUnicodeScript(hb_codepoint_t u) {
+    static hb_unicode_funcs_t *unicode_funcs;
 
-  unicode_funcs = hb_unicode_funcs_get_default ();
+    unicode_funcs = hb_unicode_funcs_get_default();
 
-  /* Make combining marks inherit the script of their bases, regardless of
-   * their own script.
-   */
-  if (hb_unicode_general_category (unicode_funcs, u) == HB_UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK)
-    return HB_SCRIPT_INHERITED;
+    /* Make combining marks inherit the script of their bases, regardless of
+     * their own script.
+     */
+    if (hb_unicode_general_category(unicode_funcs, u) == HB_UNICODE_GENERAL_CATEGORY_NON_SPACING_MARK)
+        return HB_SCRIPT_INHERITED;
 
-  return hb_unicode_script (unicode_funcs, u);
+    return hb_unicode_script(unicode_funcs, u);
 }
 
 HBShaper::Impl::Impl(GlyphIDType type_, const std::string &fontFileData, const FreeTypeLibrary &lib)
-    : type(type_), face(fontFileData.data(), fontFileData.size(), lib) {
+    : type(type_),
+      face(fontFileData.data(), fontFileData.size(), lib) {
     if (!face.isValid()) return;
 
     font = hb_ft_font_create(face.getFace(), NULL);
@@ -40,13 +40,13 @@ HBShaper::Impl::~Impl() {
     hb_font_destroy(font);
 }
 void HBShaper::Impl::createComplexGlyphIDs(const std::u16string &text,
-                                         std::vector<GlyphID> &glyphIDs,
-                                         std::vector<HBShapeAdjust> &adjusts) {
+                                           std::vector<GlyphID> &glyphIDs,
+                                           std::vector<HBShapeAdjust> &adjusts) {
     if (text.empty()) {
         return;
     }
 
-    struct TextPart{
+    struct TextPart {
         std::u16string text;
         hb_script_t script;
     };
@@ -57,11 +57,10 @@ void HBShaper::Impl::createComplexGlyphIDs(const std::u16string &text,
     lastTextPart->text = text[0];
     lastTextPart->script = getUnicodeScript(text[0]);
 
-
     for (std::size_t i = 1; i < text.size(); ++i) {
         auto ch = text[i];
         auto script = getUnicodeScript(text[i]);
-        
+
         if (lastTextPart->script == script || script == HB_SCRIPT_INHERITED) {
             lastTextPart->text += (ch);
         } else {
@@ -105,6 +104,5 @@ void HBShaper::Impl::createComplexGlyphIDs(const std::u16string &text,
         }
     }
 }
-
 
 } // namespace mbgl

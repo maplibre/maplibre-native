@@ -9,33 +9,25 @@ namespace mbgl {
 
 #define SDF_FONT_SIZE 24
 
-
 #ifndef MLN_TEXT_SHAPING_HARFBUZZ
 
 class HBShaper::Impl {
 public:
+    Impl(GlyphIDType, const std::string &, const FreeTypeLibrary &) {}
 
-Impl(GlyphIDType , const std::string &, const FreeTypeLibrary &) {
-}
+    bool valid() { return false; }
 
-bool valid() {
-    return false;
-}
-    
-void createComplexGlyphIDs(const std::u16string &, std::vector<GlyphID> &, std::vector<HBShapeAdjust> &) {
-    assert(false && "can't shaping text without harfbuzz.");
-}
+    void createComplexGlyphIDs(const std::u16string &, std::vector<GlyphID> &, std::vector<HBShapeAdjust> &) {
+        assert(false && "can't shaping text without harfbuzz.");
+    }
 
-Glyph rasterizeGlyph(const GlyphID &) {
-    assert(false && "can't rasterize glyph without harfbuzz + freetype.");
-    return {};
-}
-
+    Glyph rasterizeGlyph(const GlyphID &) {
+        assert(false && "can't rasterize glyph without harfbuzz + freetype.");
+        return {};
+    }
 };
 
 #endif
-
-
 
 HBShaper::HBShaper(GlyphIDType type, const std::string &fontFileData, const FreeTypeLibrary &lib) {
     impl = std::make_unique<Impl>(type, fontFileData, lib);
@@ -62,7 +54,8 @@ Glyph HBShaper::rasterizeGlyph(const GlyphID &glyph) {
 
     // Glyph fixedMetrics;
 
-    // auto setGlyph = [&](uint32_t width, uint32_t height, int left, int top, uint32_t advance, unsigned char *buffer) {
+    // auto setGlyph = [&](uint32_t width, uint32_t height, int left, int top, uint32_t advance, unsigned char *buffer)
+    // {
     //     fixedMetrics.id = glyphID;
 
     //     Size size(width + Glyph::borderSize * 2, height + Glyph::borderSize * 2);

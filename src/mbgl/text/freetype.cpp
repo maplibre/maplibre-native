@@ -90,7 +90,7 @@ Glyph FreeTypeFace::rasterizeGlyph(const GlyphID &glyph) {
                     &ftBitmap.buffer[ftBitmap.width * h],
                     ftBitmap.width);
     }
-    
+
     // if (callback) {
     //     callback(ftBitmap.width,
     //              ftBitmap.rows,
@@ -100,7 +100,7 @@ Glyph FreeTypeFace::rasterizeGlyph(const GlyphID &glyph) {
     //              &ftBitmap.buffer[0]);
     // }
 
-   return fixedMetrics;
+    return fixedMetrics;
 }
 
 } // namespace mbgl
