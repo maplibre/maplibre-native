@@ -2,7 +2,6 @@
 
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/types.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/gfx/polyline_generator.hpp>
@@ -42,7 +41,7 @@ public:
     UniqueDrawable& getCurrentDrawable(bool createIfNone);
 
     /// Close the current drawable, using a new one for any further work
-    void flush();
+    void flush(gfx::Context& context);
 
     /// Get all the completed drawables
     const std::vector<UniqueDrawable>& getDrawables() const { return drawables; }
@@ -134,22 +133,19 @@ public:
     /// Set the shader to be used
     void setShader(gfx::ShaderProgramBasePtr value) { shader = std::move(value); }
 
-    /// Get the vertex attributes that override default values in the shader program
-    const gfx::VertexAttributeArray& getVertexAttributes() const;
-
     /// Set the name given to new drawables
     void setDrawableName(std::string value) { drawableName = std::move(value); }
 
-    /// The attribute names for vertex/position attributes
-    void setVertexAttrNameId(const StringIdentity id) { vertexAttrNameId = id; }
+    /// The attribute id for vertex/position attribute
+    void setVertexAttrId(const size_t id) { vertexAttrId = id; }
 
-    /// @brief Attach the given texture at the given sampler location.
+    /// @brief Get the texture at the given internal ID.
+    const gfx::Texture2DPtr& getTexture(size_t id) const;
+
+    /// @brief Attach the given texture at the given internal ID.
     /// @param texture Texture2D instance
-    /// @param location A sampler location in the shader being used.
-    void setTexture(const gfx::Texture2DPtr&, int32_t location);
-
-    /// Direct access to the current texture set
-    const gfx::Drawable::Textures& getTextures() const { return textures; }
+    /// @param id Internal ID of the texture.
+    void setTexture(const gfx::Texture2DPtr&, size_t id);
 
     /// Add a tweaker to emitted drawable
     void addTweaker(DrawableTweakerPtr value) { tweakers.emplace_back(std::move(value)); }
@@ -157,9 +153,12 @@ public:
     /// Clear the tweaker collection
     void clearTweakers() { tweakers.clear(); }
 
+    /// Get the vertex attributes that override default values in the shader program
+    VertexAttributeArrayPtr& getVertexAttributes() { return vertexAttrs; }
+    const VertexAttributeArrayPtr& getVertexAttributes() const { return vertexAttrs; }
+
     /// A set of attribute values to be added for each vertex
-    void setVertexAttributes(const VertexAttributeArray& value);
-    void setVertexAttributes(VertexAttributeArray&&);
+    void setVertexAttributes(VertexAttributeArrayPtr attrs) { vertexAttrs = std::move(attrs); }
 
     /// Add some vertex elements, returns the index of the first one added
     std::size_t addVertices(const std::vector<std::array<int16_t, 2>>& vertices,
@@ -201,9 +200,12 @@ public:
     /// Add a polyline. If the last point equals the first it will be closed, otherwise open
     void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions&);
 
-protected:
+    /// return the curent vertex count
     std::size_t curVertexCount() const;
 
+    bool empty() const { return !(drawables.size() || curVertexCount()); }
+
+protected:
     /// Create an instance of the appropriate drawable type
     virtual UniqueDrawable createDrawable() const = 0;
 
@@ -213,7 +215,7 @@ protected:
 protected:
     std::string name;
     std::string drawableName;
-    StringIdentity vertexAttrNameId;
+    std::size_t vertexAttrId;
     mbgl::RenderPass renderPass;
     bool enabled = true;
     bool enableColor = true;
@@ -229,6 +231,7 @@ protected:
     std::vector<UniqueDrawable> drawables;
     gfx::Drawable::Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
+    gfx::VertexAttributeArrayPtr vertexAttrs;
 
     class Impl;
     std::unique_ptr<Impl> impl;

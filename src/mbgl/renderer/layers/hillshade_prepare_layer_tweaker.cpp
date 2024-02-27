@@ -9,27 +9,25 @@
 #include <mbgl/shaders/hillshade_prepare_layer_ubo.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idHillshadePrepareDrawableUBOName = stringIndexer().get("HillshadePrepareDrawableUBO");
+namespace {
+// https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb
+constexpr std::array<float, 4> unpackMapbox = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
 
-const std::array<float, 4>& getUnpackVector(Tileset::DEMEncoding encoding) {
-    // https://www.mapbox.com/help/access-elevation-data/#mapbox-terrain-rgb
-    static const std::array<float, 4> unpackMapbox = {{6553.6f, 25.6f, 0.1f, 10000.0f}};
-    // https://aws.amazon.com/public-datasets/terrain/
-    static const std::array<float, 4> unpackTerrarium = {{256.0f, 1.0f, 1.0f / 256.0f, 32768.0f}};
+// https://aws.amazon.com/public-datasets/terrain/
+constexpr std::array<float, 4> unpackTerrarium = {{256.0f, 1.0f, 1.0f / 256.0f, 32768.0f}};
 
-    return encoding == Tileset::DEMEncoding::Terrarium ? unpackTerrarium : unpackMapbox;
+constexpr const std::array<float, 4>& getUnpackVector(const Tileset::DEMEncoding encoding) {
+    return (encoding == Tileset::DEMEncoding::Terrarium) ? unpackTerrarium : unpackMapbox;
 }
+} // namespace
 
 void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
-    // const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
-
     if (layerGroup.empty()) {
         return;
     }
@@ -39,7 +37,7 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const Pai
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData() || !checkTweakDrawable(drawable)) {
             return;
         }
@@ -55,17 +53,10 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const Pai
             /* .unpack = */ getUnpackVector(drawableData.encoding),
             /* .dimension = */ {static_cast<float>(drawableData.stride), static_cast<float>(drawableData.stride)},
             /* .zoom = */ static_cast<float>(tileID.canonical.z),
-            /* .maxzoom = */ static_cast<float>(drawableData.maxzoom),
-            /* .overdrawInspector = */ overdrawInspector,
-            /* .pad1/2/3 = */ 0,
-            0,
-            0,
-            /* .pad4/5/6 = */ 0,
-            0,
-            0};
+            /* .maxzoom = */ static_cast<float>(drawableData.maxzoom)};
 
         drawable.mutableUniformBuffers().createOrUpdate(
-            idHillshadePrepareDrawableUBOName, &drawableUBO, parameters.context);
+            idHillshadePrepareDrawableUBO, &drawableUBO, parameters.context);
     });
 }
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/renderer/layer_tweaker.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <string>
 
@@ -20,15 +19,10 @@ public:
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
-    static const StringIdentity idSymbolDrawableUBOName;
-    static const StringIdentity idSymbolDynamicUBOName;
-    static const StringIdentity idSymbolDrawablePaintUBOName;
-    static const StringIdentity idSymbolDrawableTilePropsUBOName;
-    static const StringIdentity idSymbolDrawableInterpolateUBOName;
-
 private:
     gfx::UniformBufferPtr textPaintBuffer;
     gfx::UniformBufferPtr iconPaintBuffer;
+    gfx::UniformBufferPtr dynamicBuffer;
 
     bool textPropertiesUpdated = false;
     bool iconPropertiesUpdated = false;

@@ -3,8 +3,8 @@ load("//platform/ios/bazel:macros.bzl", "info_plist")
 filegroup(
     name = "ios_benchmark_srcs",
     srcs = [
-        "main.m",
-        "MBXBenchAppDelegate.m",
+        "main.mm",
+        "MBXBenchAppDelegate.mm",
         "MBXBenchViewController.mm",
         "locations.cpp",
     ],
@@ -24,11 +24,10 @@ filegroup(
 filegroup(
     name = "bundle_resources",
     srcs = glob([
-        "benchmark/*.lproj/**",
-        "benchmark/Assets.xcassets/**",
-        "benchmark/assets/**/*.pbf",
-        "benchmark/assets/**/*.json",
-        "benchmark/assets/**/*.png",
+        "*.lproj/**",
+        "Assets.xcassets/**",
+        "assets/**/*.json",
+        "assets/**/*.png",
     ]),
     visibility = ["//platform/ios:__pkg__"],
 )

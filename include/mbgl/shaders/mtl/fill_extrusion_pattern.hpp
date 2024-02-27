@@ -15,7 +15,7 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 6> attributes;
-    static const std::array<UniformBlockInfo, 6> uniforms;
+    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -62,35 +62,36 @@ struct alignas(16) FillExtrusionDrawablePropsUBO {
 };
 static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16, "unexpected padding");
 
-struct alignas(16) FillExtrusionPermutationUBO {
-    /*  0 */ Attribute color;
-    /*  8 */ Attribute base;
-    /* 16 */ Attribute height;
-    /* 24 */ Attribute pattern_from;
-    /* 32 */ Attribute pattern_to;
-    /* 40 */ bool overdrawInspector;
-    /* 41 */ uint8_t pad1, pad2, pad3;
-    /* 44 */ float pad4;
-    /* 48 */
-};
-static_assert(sizeof(FillExtrusionPermutationUBO) == 3 * 16, "unexpected padding");
-
 struct VertexStage {
     short2 pos [[attribute(0)]];
     short4 normal_ed [[attribute(1)]];
+
+#if !defined(HAS_UNIFORM_u_base)
     float base [[attribute(2)]];
+#endif
+#if !defined(HAS_UNIFORM_u_height)
     float height [[attribute(3)]];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
     ushort4 pattern_from [[attribute(4)]];
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
     ushort4 pattern_to [[attribute(5)]];
+#endif
 };
 
 struct FragmentStage {
     float4 position [[position, invariant]];
     float4 lighting;
-    float4 pattern_from;
-    float4 pattern_to;
     float2 pos_a;
     float2 pos_b;
+
+#if !defined(HAS_UNIFORM_u_pattern_from)
+    half4 pattern_from;
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_to)
+    half4 pattern_to;
+#endif
 };
 
 struct FragmentOutput {
@@ -102,13 +103,18 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillExtrusionDrawableUBO& fill [[buffer(6)]],
                                 device const FillExtrusionDrawablePropsUBO& props [[buffer(7)]],
                                 device const FillExtrusionDrawableTilePropsUBO& tileProps [[buffer(8)]],
-                                device const FillExtrusionInterpolateUBO& interp [[buffer(9)]],
-                                device const FillExtrusionPermutationUBO& permutation [[buffer(10)]],
-                                device const ExpressionInputsUBO& expr [[buffer(11)]]) {
+                                device const FillExtrusionInterpolateUBO& interp [[buffer(9)]]) {
 
-    const float u_base = props.light_position_base.w;
-    const auto base   = max(valueFor(permutation.base,   u_base,       vertx.base,   interp.base_t,   expr), 0.0);
-    const auto height = max(valueFor(permutation.height, props.height, vertx.height, interp.height_t, expr), 0.0);
+#if defined(HAS_UNIFORM_u_base)
+    const auto base   = props.light_position_base.w;
+#else
+    const auto base   = max(unpack_mix_float(vertx.base, interp.base_t), 0.0);
+#endif
+#if defined(HAS_UNIFORM_u_height)
+    const auto height = props.height;
+#else
+    const auto height = max(unpack_mix_float(vertx.height, interp.height_t), 0.0);
+#endif
 
     const float3 normal = float3(vertx.normal_ed.xyz);
     const float edgedistance = vertx.normal_ed.w;
@@ -116,34 +122,42 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
     const float4 position = fill.matrix * float4(float2(vertx.pos), z, 1);
 
-    const auto pattern_from   = patternFor(permutation.pattern_from, tileProps.pattern_from,  vertx.pattern_from,   interp.pattern_from_t,     expr);
-    const auto pattern_to     = patternFor(permutation.pattern_to,   tileProps.pattern_to,    vertx.pattern_to,     interp.pattern_to_t,       expr);
+#if defined(OVERDRAW_INSPECTOR)
+    return {
+        .position       = position,
+        .lighting       = float4(1.0),
+        .pattern_from   = float4(1.0),
+        .pattern_to     = float4(1.0),
+        .pos_a          = float2(1.0),
+        .pos_b          = float2(1.0),
+    };
+#endif
 
-    if (permutation.overdrawInspector) {
-        return {
-            .position       = position,
-            .lighting       = float4(1.0),
-            .pattern_from   = float4(1.0),
-            .pattern_to     = float4(1.0),
-            .pos_a          = float2(1.0),
-            .pos_b          = float2(1.0),
-        };
-    }
+#if defined(HAS_UNIFORM_u_pattern_from)
+    const auto pattern_from = tileProps.pattern_from;
+#else
+    const auto pattern_from = float4(vertx.pattern_from);
+#endif
+#if defined(HAS_UNIFORM_u_pattern_to)
+    const auto pattern_to   = tileProps.pattern_to;
+#else
+    const auto pattern_to   = float4(vertx.pattern_to);
+#endif
 
-    float2 pattern_tl_a = pattern_from.xy;
-    float2 pattern_br_a = pattern_from.zw;
-    float2 pattern_tl_b = pattern_to.xy;
-    float2 pattern_br_b = pattern_to.zw;
+    const float2 pattern_tl_a = pattern_from.xy;
+    const float2 pattern_br_a = pattern_from.zw;
+    const float2 pattern_tl_b = pattern_to.xy;
+    const float2 pattern_br_b = pattern_to.zw;
 
-    float pixelRatio = fill.scale.x;
-    float tileZoomRatio = fill.scale.y;
-    float fromScale = fill.scale.z;
-    float toScale = fill.scale.w;
+    const float pixelRatio = fill.scale.x;
+    const float tileZoomRatio = fill.scale.y;
+    const float fromScale = fill.scale.z;
+    const float toScale = fill.scale.w;
 
-    float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
-    float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
+    const float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
+    const float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
 
-    float2 pos = normal.x == 1.0 && normal.y == 0.0 && normal.z == 16384.0
+    const float2 pos = normal.x == 1.0 && normal.y == 0.0 && normal.z == 16384.0
         ? float2(vertx.pos) // extrusion top
         : float2(edgedistance, z * fill.height_factor); // extrusion side
     
@@ -165,8 +179,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     return {
         .position       = position,
         .lighting       = lighting,
-        .pattern_from   = pattern_from,
-        .pattern_to     = pattern_to,
+#if !defined(HAS_UNIFORM_u_pattern_from)
+        .pattern_from   = half4(pattern_from),
+#endif
+#if !defined(HAS_UNIFORM_u_pattern_from)
+        .pattern_to     = half4(pattern_to),
+#endif
         .pos_a          = get_pattern_pos(fill.pixel_coord_upper, fill.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, pos),
         .pos_b          = get_pattern_pos(fill.pixel_coord_upper, fill.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, pos),
     };
@@ -175,19 +193,28 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
                                     device const FillExtrusionDrawableUBO& fill [[buffer(6)]],
                                     device const FillExtrusionDrawablePropsUBO& props [[buffer(7)]],
-                                    device const FillExtrusionPermutationUBO& permutation [[buffer(10)]],
+                                    device const FillExtrusionDrawableTilePropsUBO& tileProps [[buffer(8)]],
                                     texture2d<float, access::sample> image0 [[texture(0)]],
                                     sampler image0_sampler [[sampler(0)]]) {
-    if (permutation.overdrawInspector) {
-        return {half4(1.0)/*, in.position.z*/};
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return {half4(1.0)/*, in.position.z*/};
+#endif
 
+#if defined(HAS_UNIFORM_u_pattern_from)
+    const auto pattern_from = float4(tileProps.pattern_from);
+#else
+    const auto pattern_from = float4(in.pattern_from);
+#endif
+#if defined(HAS_UNIFORM_u_pattern_to)
+    const auto pattern_to = float4(tileProps.pattern_to);
+#else
+    const auto pattern_to = float4(in.pattern_to);
+#endif
 
-    const float2 pattern_tl_a = in.pattern_from.xy;
-    const float2 pattern_br_a = in.pattern_from.zw;
-    const float2 pattern_tl_b = in.pattern_to.xy;
-    const float2 pattern_br_b = in.pattern_to.zw;
-
+    const float2 pattern_tl_a = pattern_from.xy;
+    const float2 pattern_br_a = pattern_from.zw;
+    const float2 pattern_tl_b = pattern_to.xy;
+    const float2 pattern_br_b = pattern_to.zw;
 
     const float2 imagecoord = glMod(in.pos_a, 1.0);
     const float2 pos = mix(pattern_tl_a / fill.texsize, pattern_br_a / fill.texsize, imagecoord);

@@ -15,7 +15,7 @@ static_assert(sizeof(BackgroundDrawableUBO) % 16 == 0);
 struct alignas(16) BackgroundLayerUBO {
     /*  0 */ Color color;
     /* 16 */ float opacity;
-    /* 20 */ float pad1, pad2, pad3;
+    /* 24 */ float pad1, pad2, pad3;
     /* 32 */
 };
 static_assert(sizeof(BackgroundLayerUBO) == 32);
@@ -35,10 +35,16 @@ struct alignas(16) BackgroundPatternLayerUBO {
     /* 80 */ float scale_b;
     /* 84 */ float mix;
     /* 88 */ float opacity;
-    /* 92 */ float pad;
+    /* 92 */ float pad1;
     /* 96 */
 };
 static_assert(sizeof(BackgroundPatternLayerUBO) == 96);
+
+enum {
+    idBackgroundDrawableUBO,
+    idBackgroundLayerUBO,
+    backgroundUBOCount
+};
 
 } // namespace shaders
 } // namespace mbgl

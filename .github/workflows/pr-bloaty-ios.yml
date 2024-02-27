@@ -1,0 +1,103 @@
+name: pr-bloaty-ios
+
+on:
+  workflow_run:
+    workflows: [ios-ci]
+    types:
+      - completed
+env:
+  download_url: https://maplibre-native.s3.eu-central-1.amazonaws.com
+
+permissions:
+  pull-requests: write
+  id-token: write      # This is required for requesting the AWS JWT
+
+jobs:
+  pre_job:
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.check_skip.outputs.should_skip }}
+    steps:
+      # if ios-build in ios-ci was skipped, the rest of the workflow can be skipped
+      - id: check_skip
+        run: |
+          conclusion=$(curl ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "ios-build").conclusion')
+          should_skip=$([ "$conclusion" = "skipped" ] && echo "true" || echo "false")
+          echo "should_skip=$should_skip" >> "$GITHUB_OUTPUT"
+
+  pr-bloaty-ios:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip == 'false'
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get latest CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latest
+          ninjaVersion: latest
+
+      - name: Cache Bloaty
+        id: cache-bloaty
+        uses: actions/cache@v4
+        with:
+          path: bloaty/build/bloaty
+          key: bloaty-${{ env.bloaty_sha }}
+
+      # because Google is not making a release...
+      # https://github.com/google/bloaty/issues/334
+      - name: Compile Bloaty
+        if: ${{ !steps.cache-bloaty.outputs.cache-hit }}
+        run: |
+          git clone https://github.com/google/bloaty.git
+          cd bloaty
+          git checkout "$bloaty_sha"
+          cmake -B build -G Ninja -S .
+          cmake --build build
+
+      - name: Download MapLibre_dynamic-main, MapLibre_DWARF-main
+        run: |
+          wget -O MapLibre_dynamic-main "${download_url}/size-test-ios/MapLibre_dynamic-main"
+          wget -O MapLibre_DWARF-main "${download_url}/size-test-ios/MapLibre_DWARF-main"
+
+      - uses: ./.github/actions/get-pr-number
+        id: get-pr-number
+
+      - uses: ./.github/actions/download-workflow-run-artifact
+        with:
+          artifact-name: ios-size-test-files
+          expect-files: "MapLibre_dynamic,MapLibre_DWARF"
+
+      - name: Run Bloaty
+        run: bloaty/build/bloaty --debug-file MapLibre_DWARF --debug-file MapLibre_DWARF-main MapLibre_dynamic -n 0 -s vm -d compileunits -- MapLibre_dynamic-main > bloaty_diff.txt
+
+      - name: Configure AWS Credentials
+        if: vars.OIDC_AWS_ROLE_TO_ASSUME 
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
+
+      - name: Prepare Bloaty message
+        run: |
+          report_path=bloaty-results-ios/pr-${{ steps.get-pr-number.outputs.pr-number }}-compared-to-main.txt
+          aws s3 cp bloaty_diff.txt s3://maplibre-native/"$report_path"
+          {
+            echo "# Bloaty Results (iOS) 🐋"
+            echo 'Compared to main'
+            echo '```'
+            awk 'NR <= 2; END { print }' bloaty_diff.txt
+            echo '```'
+            echo "Full report: $download_url/$report_path"
+            echo "---"
+          } >> message.md
+
+      - name: Leave a comment with Bloaty results
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ steps.get-pr-number.outputs.pr-number }}
+          header: bloaty-ios
+          path: message.md

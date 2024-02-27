@@ -84,6 +84,13 @@
         "uses_ubos": true
     },
     {
+        "name": "LineBasicShader",
+        "header": "drawable_line_basic",
+        "glsl_vert": "drawable.line_basic.vertex.glsl",
+        "glsl_frag": "drawable.line_basic.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
         "name": "FillPatternShader",
         "header": "drawable_fill_pattern",
         "glsl_vert": "drawable.fill_pattern.vertex.glsl",
@@ -165,6 +172,13 @@
         "header": "drawable_symbol_text_and_icon",
         "glsl_vert": "drawable.symbol_text_and_icon.vertex.glsl",
         "glsl_frag": "drawable.symbol_text_and_icon.fragment.glsl",
+        "uses_ubos": true
+    },
+    {
+        "name": "CustomSymbolIconShader",
+        "header": "drawable_custom_symbol_icon",
+        "glsl_vert": "drawable.custom.symbol_icon.vertex.glsl",
+        "glsl_frag": "drawable.custom.symbol_icon.fragment.glsl",
         "uses_ubos": true
     },
 

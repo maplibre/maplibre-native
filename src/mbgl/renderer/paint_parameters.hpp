@@ -95,14 +95,7 @@ public:
 
     // Stencil handling
 public:
-#if MLN_LEGACY_RENDERER
     void renderTileClippingMasks(const RenderTiles&);
-#else
-    void renderTileClippingMasks(const std::set<UnwrappedTileID>&);
-#endif // MLN_LEGACY_RENDERER
-
-    /// Clear any tile masks and the stencil buffer, if necessary
-    void clearTileClippingMasks();
 
     /// Clear the stencil buffer, even if there are no tile masks (for 3D)
     void clearStencil();
@@ -128,14 +121,18 @@ private:
     int32_t nextStencilID = 1;
 
 public:
-    const int numSublayers = 3;
     uint32_t currentLayer;
     float depthRangeSize;
     uint32_t opaquePassCutoff = 0;
     float symbolFadeChange;
     const uint64_t frameCount;
 
+    static constexpr int numSublayers = 3;
+#if MLN_RENDER_BACKEND_OPENGL
     static constexpr float depthEpsilon = 1.0f / (1 << 16);
+#else
+    static constexpr float depthEpsilon = 1.0f / (1 << 12);
+#endif
     static constexpr int maxStencilValue = 255;
 };
 

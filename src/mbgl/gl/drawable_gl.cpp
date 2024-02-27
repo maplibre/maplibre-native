@@ -8,7 +8,6 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -71,10 +70,12 @@ void DrawableGL::draw(PaintParameters& parameters) const {
         }
     }
 
+#ifndef NDEBUG
     context.bindVertexArray = value::BindVertexArray::Default;
 
     unbindTextures();
     unbindUniformBuffers();
+#endif
 }
 
 void DrawableGL::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueDrawSegment> segments) {
@@ -88,21 +89,6 @@ void DrawableGL::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx
     impl->vertexType = type_;
 }
 
-const gfx::VertexAttributeArray& DrawableGL::getVertexAttributes() const {
-    return impl->vertexAttributes;
-}
-
-gfx::VertexAttributeArray& DrawableGL::mutableVertexAttributes() {
-    return impl->vertexAttributes;
-}
-
-void DrawableGL::setVertexAttributes(const gfx::VertexAttributeArray& value) {
-    impl->vertexAttributes = static_cast<const VertexAttributeArrayGL&>(value);
-}
-void DrawableGL::setVertexAttributes(gfx::VertexAttributeArray&& value) {
-    impl->vertexAttributes = std::move(static_cast<VertexAttributeArrayGL&&>(value));
-}
-
 const gfx::UniformBufferArray& DrawableGL::getUniformBuffers() const {
     return impl->uniformBuffers;
 }
@@ -111,35 +97,40 @@ gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void DrawableGL::setVertexAttrNameId(const StringIdentity id) {
-    impl->idVertexAttrName = id;
+void DrawableGL::setVertexAttrId(const size_t id) {
+    impl->vertexAttrId = id;
 }
 
 void DrawableGL::bindUniformBuffers() const {
     if (shader) {
-        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
-        for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
-            const auto& uniformBuffer = getUniformBuffers().get(element.first);
+        const auto& uniformBlocks = shader->getUniformBlocks();
+        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
+            const auto& block = uniformBlocks.get(id);
+            if (!block) continue;
+            const auto& uniformBuffer = getUniformBuffers().get(id);
+            assert(uniformBuffer && "UBO missing, drawable skipped");
             if (!uniformBuffer) {
                 using namespace std::string_literals;
                 const auto tileIDStr = getTileID() ? util::toString(*getTileID()) : "<no tile>";
                 Log::Error(Event::General,
-                           "bindUniformBuffers: UBO "s + std::string(stringIndexer().get(element.first)) +
-                               " not found for " + util::toString(getID()) + " / " + getName() + " / " + tileIDStr +
-                               ". skipping.");
+                           "bindUniformBuffers: UBO "s + util::toString(block->getIndex()) + " not found for " +
+                               util::toString(getID()) + " / " + getName() + " / " + tileIDStr + ". skipping.");
                 assert(false);
                 continue;
             }
-            element.second->bindBuffer(*uniformBuffer);
+            block->bindBuffer(*uniformBuffer);
         }
     }
 }
 
 void DrawableGL::unbindUniformBuffers() const {
     if (shader) {
-        const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
-        for (const auto& element : shaderGL.getUniformBlocks().getMap()) {
-            element.second->unbindBuffer();
+        const auto& uniformBlocks = shader->getUniformBlocks();
+        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
+            const auto& block = uniformBlocks.get(id);
+            if (block) {
+                block->unbindBuffer();
+            }
         }
     }
 }
@@ -153,14 +144,20 @@ struct IndexBufferGL : public gfx::IndexBufferBase {
 };
 
 void DrawableGL::upload(gfx::UploadPass& uploadPass) {
+    if (isCustom) {
+        return;
+    }
     if (!shader) {
+        Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
+        assert(false);
         return;
     }
 
-    const bool build = impl->vertexAttributes.isDirty() ||
-                       std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
-                           return !static_cast<const DrawSegmentGL&>(*seg).getVertexArray().isValid();
-                       });
+    const bool build = vertexAttributes &&
+                       (vertexAttributes->isDirty() ||
+                        std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
+                            return !static_cast<const DrawSegmentGL&>(*seg).getVertexArray().isValid();
+                        }));
 
     if (build) {
         auto& context = uploadPass.getContext();
@@ -169,9 +166,9 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 
         // Apply drawable values to shader defaults
         const auto& defaults = shader->getVertexAttributes();
-        const auto& overrides = impl->vertexAttributes;
+        const auto& overrides = *vertexAttributes;
 
-        const auto& indexAttribute = defaults.get(impl->idVertexAttrName);
+        const auto& indexAttribute = defaults.get(impl->vertexAttrId);
         const auto vertexAttributeIndex = static_cast<std::size_t>(indexAttribute ? indexAttribute->getIndex() : -1);
 
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
@@ -225,7 +222,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     }
 
     const bool texturesNeedUpload = std::any_of(
-        textures.begin(), textures.end(), [](const auto& pair) { return pair.second && pair.second->needsUpload(); });
+        textures.begin(), textures.end(), [](const auto& texture) { return texture && texture->needsUpload(); });
 
     if (texturesNeedUpload) {
         uploadTextures();
@@ -247,27 +244,28 @@ gfx::StencilMode DrawableGL::makeStencilMode(PaintParameters& parameters) const 
 }
 
 void DrawableGL::uploadTextures() const {
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            std::static_pointer_cast<gl::Texture2D>(tex)->upload();
+    for (const auto& texture : textures) {
+        if (texture) {
+            texture->upload();
         }
     }
 }
 
 void DrawableGL::bindTextures() const {
     int32_t unit = 0;
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            const auto& location = pair.first;
-            std::static_pointer_cast<gl::Texture2D>(tex)->bind(location, unit++);
+    for (size_t id = 0; id < textures.size(); id++) {
+        if (const auto& texture = textures[id]) {
+            if (const auto& location = shader->getSamplerLocation(id)) {
+                static_cast<gl::Texture2D&>(*texture).bind(static_cast<int32_t>(*location), unit++);
+            }
         }
     }
 }
 
 void DrawableGL::unbindTextures() const {
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            std::static_pointer_cast<gl::Texture2D>(tex)->unbind();
+    for (const auto& texture : textures) {
+        if (texture) {
+            static_cast<gl::Texture2D&>(*texture).unbind();
         }
     }
 }

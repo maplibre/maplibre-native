@@ -34,34 +34,34 @@ namespace mbgl {
 
 using namespace style;
 
+LayerRenderItem::LayerRenderItem(RenderLayer& layer_, RenderSource* source_, uint32_t index_)
+    : layer(layer_),
+      source(source_),
+      index(index_) {}
+
+bool LayerRenderItem::hasRenderPass(RenderPass pass) const {
+    return layer.get().hasRenderPass(pass);
+}
+void LayerRenderItem::upload(gfx::UploadPass& pass) const {
+    layer.get().upload(pass);
+}
+void LayerRenderItem::render(PaintParameters& parameters) const {
+    layer.get().render(parameters);
+}
+const std::string& LayerRenderItem::getName() const {
+    return layer.get().getID();
+}
+
+#if MLN_DRAWABLE_RENDERER
+void LayerRenderItem::updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const {};
+#endif
+
 namespace {
 
 RendererObserver& nullObserver() {
     static RendererObserver observer;
     return observer;
 }
-
-class LayerRenderItem final : public RenderItem {
-public:
-    LayerRenderItem(RenderLayer& layer_, RenderSource* source_, uint32_t index_)
-        : layer(layer_),
-          source(source_),
-          index(index_) {}
-    bool operator<(const LayerRenderItem& other) const { return index < other.index; }
-
-    std::reference_wrapper<RenderLayer> layer;
-    RenderSource* source;
-    const uint32_t index;
-
-private:
-    bool hasRenderPass(RenderPass pass) const override { return layer.get().hasRenderPass(pass); }
-    void upload(gfx::UploadPass& pass) const override { layer.get().upload(pass); }
-    void render(PaintParameters& parameters) const override { layer.get().render(parameters); }
-    const std::string& getName() const override { return layer.get().getID(); }
-#if MLN_DRAWABLE_RENDERER
-    void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const override{};
-#endif
-};
 
 class RenderTreeImpl final : public RenderTree {
 public:
@@ -89,6 +89,7 @@ public:
         }
     }
 
+    const std::set<LayerRenderItem>& getLayerRenderItemMap() const noexcept override { return layerRenderItems; }
     RenderItems getLayerRenderItems() const override { return {layerRenderItems.begin(), layerRenderItems.end()}; }
     RenderItems getSourceRenderItems() const override {
         RenderItems result;
@@ -333,6 +334,11 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         filteredLayersForSource.reserve(layerImpls->size());
     }
 
+#if MLN_DRAWABLE_RENDERER
+    // Track which layers are flagged for rendering
+    std::vector<bool> updateList(orderedLayers.size());
+#endif
+
     // Update all sources and initialize renderItems.
     for (const auto& sourceImpl : *sourceImpls) {
         RenderSource* source = renderSources.at(sourceImpl->id).get();
@@ -357,6 +363,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                             sourceNeedsRendering = true;
                             renderItemsEmplaceHint = layerRenderItems.emplace_hint(
                                 renderItemsEmplaceHint, layer, source, static_cast<uint32_t>(index));
+#if MLN_DRAWABLE_RENDERER
+                            updateList[index] = true;
+#endif
                         }
                     }
                 }
@@ -375,26 +384,24 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                 }
                 renderItemsEmplaceHint = layerRenderItems.emplace_hint(
                     renderItemsEmplaceHint, layer, nullptr, static_cast<uint32_t>(index));
+#if MLN_DRAWABLE_RENDERER
+                updateList[index] = true;
+#endif
             }
         }
         source->update(sourceImpl, filteredLayersForSource, sourceNeedsRendering, sourceNeedsRelayout, tileParameters);
         filteredLayersForSource.clear();
-    }
 
 #if MLN_DRAWABLE_RENDERER
-    // Mark layers included in the renderable set as renderable
-    // @TODO: Optimize this logic, combine with the above
-    for (auto orderedLayer : orderedLayers) {
-        RenderLayer& layer = orderedLayer;
-        layer.markLayerRenderable(
-            layerRenderItems.find(LayerRenderItem(layer, nullptr, static_cast<uint32_t>(layer.getLayerIndex()))) !=
-                layerRenderItems.end(),
-            changes);
-    }
-
-    // Add all change requests up to this point
-    addChanges(changes);
+        // Update all layers with their new renderability status, if it changed.
+        for (size_t i = 0; i < updateList.size(); i++) {
+            if (orderedLayers[i].get().isLayerRenderable() != updateList[i]) {
+                orderedLayers[i].get().markLayerRenderable(updateList[i], changes);
+            }
+        }
+        addChanges(changes);
 #endif
+    }
 
     renderTreeParameters->loaded = updateParameters->styleLoaded && isLoaded();
     if (!isMapModeContinuous && !renderTreeParameters->loaded) {
@@ -871,22 +878,6 @@ int32_t RenderOrchestrator::maxLayerIndex() const {
     return -1;
 }
 
-void RenderOrchestrator::visitLayerGroups(std::function<void(LayerGroupBase&)> f) {
-    for (auto& pair : layerGroupsByLayerIndex) {
-        if (pair.second) {
-            f(*pair.second);
-        }
-    }
-}
-
-void RenderOrchestrator::visitLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
-    for (const auto& pair : layerGroupsByLayerIndex) {
-        if (pair.second) {
-            f(*pair.second);
-        }
-    }
-}
-
 void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState& state,
@@ -903,8 +894,8 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     };
 
     std::vector<std::unique_ptr<ChangeRequest>> changes;
-    for (const auto& item : renderTree.getLayerRenderItems()) {
-        auto& renderLayer = static_cast<const LayerRenderItem&>(item.get()).layer.get();
+    for (const auto& item : renderTree.getLayerRenderItemMap()) {
+        auto& renderLayer = item.layer.get();
         renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
     }
     addChanges(changes);
@@ -937,37 +928,9 @@ bool RenderOrchestrator::removeRenderTarget(const RenderTargetPtr& renderTarget)
     }
 }
 
-void RenderOrchestrator::visitRenderTargets(std::function<void(RenderTarget&)> f) {
-    for (auto& renderTarget : renderTargets) {
-        f(*renderTarget);
-    }
-}
-
-void RenderOrchestrator::visitRenderTargets(std::function<void(const RenderTarget&)> f) const {
-    for (const auto& renderTarget : renderTargets) {
-        f(*renderTarget);
-    }
-}
-
 void RenderOrchestrator::updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters) {
     for (const RenderItem& item : renderTree.getSourceRenderItems()) {
         item.updateDebugDrawables(debugLayerGroups, parameters);
-    }
-}
-
-void RenderOrchestrator::visitDebugLayerGroups(std::function<void(LayerGroupBase&)> f) {
-    for (auto& pair : debugLayerGroups) {
-        if (pair.second) {
-            f(*pair.second);
-        }
-    }
-}
-
-void RenderOrchestrator::visitDebugLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
-    for (const auto& pair : debugLayerGroups) {
-        if (pair.second) {
-            f(*pair.second);
-        }
     }
 }
 

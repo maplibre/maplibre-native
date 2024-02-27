@@ -76,6 +76,8 @@ size_t StringIndexer::size() {
 }
 
 StringIndexer& stringIndexer() {
+    // This is a static local rather than a global or member of `StringIndexer` so
+    // that static initializers can use it without worrying about ordering.
     static StringIndexer inst;
     return inst;
 }

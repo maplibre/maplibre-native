@@ -60,22 +60,6 @@ const LayerGroupBasePtr& RenderTarget::getLayerGroup(const int32_t layerIndex) c
     return (hit == layerGroupsByLayerIndex.end()) ? no_group : hit->second;
 }
 
-void RenderTarget::visitLayerGroups(std::function<void(LayerGroupBase&)> f) {
-    for (auto& pair : layerGroupsByLayerIndex) {
-        if (pair.second) {
-            f(*pair.second);
-        }
-    }
-}
-
-void RenderTarget::visitLayerGroups(std::function<void(const LayerGroupBase&)> f) const {
-    for (const auto& pair : layerGroupsByLayerIndex) {
-        if (pair.second) {
-            f(*pair.second);
-        }
-    }
-}
-
 void RenderTarget::upload(gfx::UploadPass& uploadPass) {
     visitLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.upload(uploadPass); }));
 }
@@ -90,7 +74,8 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
     // draw layer groups, opaque pass
     parameters.pass = RenderPass::Opaque;
     parameters.currentLayer = 0;
-    parameters.depthRangeSize = 1 - (numLayerGroups() + 2) * parameters.numSublayers * PaintParameters::depthEpsilon;
+    parameters.depthRangeSize = 1 -
+                                (numLayerGroups() + 2) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
 
     visitLayerGroups([&](LayerGroupBase& layerGroup) {
         layerGroup.render(orchestrator, parameters);
@@ -100,7 +85,8 @@ void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& re
     // draw layer groups, translucent pass
     parameters.pass = RenderPass::Translucent;
     parameters.currentLayer = static_cast<int32_t>(numLayerGroups()) - 1;
-    parameters.depthRangeSize = 1 - (numLayerGroups() + 2) * parameters.numSublayers * PaintParameters::depthEpsilon;
+    parameters.depthRangeSize = 1 -
+                                (numLayerGroups() + 2) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
 
     visitLayerGroups([&](LayerGroupBase& layerGroup) {
         layerGroup.render(orchestrator, parameters);

@@ -1,3 +1,5 @@
+#if MLN_RENDER_BACKEND_OPENGL
+
 #include <mbgl/test/util.hpp>
 
 #include <mbgl/gfx/headless_frontend.hpp>
@@ -12,6 +14,8 @@
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/mat4.hpp>
 #include <mbgl/util/run_loop.hpp>
+
+#include <memory>
 
 using namespace mbgl;
 using namespace mbgl::style;
@@ -109,3 +113,5 @@ TEST(CustomLayer, Basic) {
 
     test::checkImage("test/fixtures/custom_layer/basic", frontend.render(map).image, 0.0006, 0.1);
 }
+
+#endif

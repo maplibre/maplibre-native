@@ -82,6 +82,19 @@ size_t Texture2D::numChannels() const noexcept {
 }
 
 MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
+    // On iOS simulator, we need to use the combined depth/stencil format.  If the depth and stencil
+    // formats are both set on a render pipeline, they have to be identical or we'll get, e.g.:
+    //     validateWithDevice:4343: failed assertion `Render Pipeline Descriptor Validation
+    //                              depthAttachmentPixelFormat (MTLPixelFormatDepth32Float) and
+    //                              stencilAttachmentPixelFormat (MTLPixelFormatStencil8) must match.
+
+#if TARGET_OS_SIMULATOR
+    if (channelType == gfx::TextureChannelDataType::Float && pixelFormat == gfx::TexturePixelType::Depth &&
+        (usage & MTL::TextureUsageRenderTarget)) {
+        return MTL::PixelFormatDepth32Float_Stencil8;
+    }
+#endif
+
     switch (channelType) {
         case gfx::TextureChannelDataType::UnsignedByte:
             switch (pixelFormat) {
@@ -138,6 +151,24 @@ void Texture2D::createMetalTexture() noexcept {
     if (auto textureDescriptor = NS::RetainPtr(
             MTL::TextureDescriptor::texture2DDescriptor(format, size.width, size.height, /*mipmapped=*/false))) {
         textureDescriptor->setUsage(usage);
+#if TARGET_OS_SIMULATOR
+        switch (format) {
+            case MTL::PixelFormatDepth16Unorm:
+            case MTL::PixelFormatDepth32Float:
+            case MTL::PixelFormatStencil8:
+            case MTL::PixelFormatDepth24Unorm_Stencil8:
+            case MTL::PixelFormatDepth32Float_Stencil8:
+            case MTL::PixelFormatX32_Stencil8:
+            case MTL::PixelFormatX24_Stencil8:
+                // On iOS simulator, the default shared mode is invalid for depth and stencil textures.
+                //  'Texture Descriptor Validation MTLTextureDescriptor: Depth, Stencil, DepthStencil
+                //   textures cannot be allocated with MTLStorageModeShared on this device.
+                textureDescriptor->setStorageMode(MTL::StorageMode::StorageModePrivate);
+                break;
+            default:
+                break;
+        }
+#endif
         metalTexture = context.createMetalTexture(std::move(textureDescriptor));
     }
 
@@ -186,26 +217,21 @@ void Texture2D::updateSamplerConfiguration() noexcept {
     metalSamplerState = context.createMetalSamplerState(samplerDescriptor);
 }
 
-void Texture2D::bind(const RenderPass& renderPass, int32_t location) noexcept {
+void Texture2D::bind(RenderPass& renderPass, int32_t location) noexcept {
     assert(!textureDirty);
-    const auto& encoder = renderPass.getMetalEncoder();
 
     // Update the sampler state if it was changed after resource creation
     if (samplerStateDirty) {
         updateSamplerConfiguration();
     }
 
-    encoder->setFragmentTexture(metalTexture.get(), location);
-    encoder->setFragmentSamplerState(metalSamplerState.get(), location);
+    renderPass.setFragmentTexture(metalTexture, location);
+    renderPass.setFragmentSamplerState(metalSamplerState, location);
 
     context.renderingStats().numTextureBindings++;
 }
 
-void Texture2D::unbind(const RenderPass& renderPass, int32_t location) noexcept {
-    const auto& encoder = renderPass.getMetalEncoder();
-    encoder->setFragmentTexture(nullptr, location);
-    encoder->setFragmentSamplerState(nullptr, location);
-
+void Texture2D::unbind(RenderPass&, int32_t /*location*/) noexcept {
     context.renderingStats().numTextureBindings--;
 }
 

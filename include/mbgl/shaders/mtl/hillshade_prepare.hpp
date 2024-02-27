@@ -19,7 +19,6 @@ struct ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Metal> 
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
-
 struct VertexStage {
     short2 pos [[attribute(0)]];
     short2 texture_pos [[attribute(1)]];
@@ -36,9 +35,6 @@ struct alignas(16) HillshadePrepareDrawableUBO {
     float2 dimension;
     float zoom;
     float maxzoom;
-    bool overdrawInspector;
-    uint8_t pad1, pad2, pad3;
-    float pad4, pad5, pad6;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -67,10 +63,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const HillshadePrepareDrawableUBO& drawable [[buffer(2)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
-
-    if (drawable.overdrawInspector) {
-        return half4(1.0);
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
     float2 epsilon = 1.0 / drawable.dimension;
 

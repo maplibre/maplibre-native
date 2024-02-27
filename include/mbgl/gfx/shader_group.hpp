@@ -1,17 +1,19 @@
 #pragma once
 
 #include <mbgl/gfx/shader.hpp>
+#include <mbgl/util/containers.hpp>
+#include <mbgl/util/hash.hpp>
 
+#include <iomanip>
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
+#include <sstream>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 
 namespace mbgl {
 
-using StringIdentity = std::size_t;
+using StringIDSetsPair = std::pair<unordered_set<std::string_view>, unordered_set<size_t>>;
 
 namespace gfx {
 
@@ -145,15 +147,28 @@ public:
     /// @param propertiesAsUniforms Set of data driven properties as uniforms.
     /// @param firstAttribName Name of the first attribute
     /// @return A `gfx::ShaderPtr`
-    virtual gfx::ShaderPtr getOrCreateShader(
-        gfx::Context&,
-        [[maybe_unused]] const std::unordered_set<StringIdentity>& propertiesAsUniforms,
-        [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
+    virtual gfx::ShaderPtr getOrCreateShader(gfx::Context&,
+                                             [[maybe_unused]] const StringIDSetsPair& propertiesAsUniforms,
+                                             [[maybe_unused]] std::string_view firstAttribName = "a_pos") {
         return {};
     }
 
+protected:
+    using PropertyHashType = std::uint64_t;
+
+    std::string getShaderName(const std::string_view& name, const PropertyHashType key) {
+        return (std::ostringstream() << name << '#' << std::hex << key).str();
+    }
+
+    /// Generate a map key for the specified combination of properties
+    PropertyHashType propertyHash(const StringIDSetsPair& propertiesAsUniforms) {
+        const auto beg = propertiesAsUniforms.second.cbegin();
+        const auto end = propertiesAsUniforms.second.cend();
+        return util::order_independent_hash<decltype(beg), PropertyHashType>(beg, end);
+    }
+
 private:
-    std::unordered_map<std::string, std::shared_ptr<gfx::Shader>> programs;
+    mbgl::unordered_map<std::string, std::shared_ptr<gfx::Shader>> programs;
     mutable std::shared_mutex programLock;
 };
 

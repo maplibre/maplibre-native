@@ -21,7 +21,7 @@ public:
         colorTexture->setSize(size);
         colorTexture->setFormat(gfx::TexturePixelType::RGBA, type);
         colorTexture->setSamplerConfiguration(
-            {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
         static_cast<Texture2D*>(colorTexture.get())
             ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
 
@@ -30,20 +30,24 @@ public:
             depthTexture->setSize(size);
             depthTexture->setFormat(gfx::TexturePixelType::Depth, gfx::TextureChannelDataType::Float);
             depthTexture->setSamplerConfiguration(
-                {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
             static_cast<Texture2D*>(depthTexture.get())
                 ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
         }
 
+        // On iOS simulator, the depth target is PixelFormatDepth32Float_Stencil8
+#if !TARGET_OS_SIMULATOR
         if (stencil) {
             stencilTexture = context.createTexture2D();
             stencilTexture->setSize(size);
             stencilTexture->setFormat(gfx::TexturePixelType::Stencil, gfx::TextureChannelDataType::UnsignedByte);
             stencilTexture->setSamplerConfiguration(
-                {gfx::TextureFilterType::Nearest, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
             static_cast<Texture2D*>(stencilTexture.get())
                 ->setUsage(MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
         }
+#endif
+
         context.renderingStats().numFrameBuffers++;
     }
 

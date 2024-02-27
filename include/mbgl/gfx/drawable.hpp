@@ -7,6 +7,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/identity.hpp>
 #include <mbgl/util/traits.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -39,11 +40,12 @@ using DrawableTweakerPtr = std::shared_ptr<DrawableTweaker>;
 using IndexVectorBasePtr = std::shared_ptr<IndexVectorBase>;
 using ShaderProgramBasePtr = std::shared_ptr<ShaderProgramBase>;
 using Texture2DPtr = std::shared_ptr<Texture2D>;
+using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
 
 class Drawable {
 public:
-    /// @brief Map from sampler location to texture info
-    using Textures = std::unordered_map<int32_t, gfx::Texture2DPtr>;
+    /// @brief Array of textures to bind
+    using Textures = std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>;
 
 protected:
     Drawable(std::string name);
@@ -97,26 +99,18 @@ public:
     /// Set line width
     void setLineWidth(int32_t value) { lineWidth = value; }
 
-    /// @brief Remove an attached texture from this drawable at the given sampler location
-    /// @param location Texture sampler location
-    void removeTexture(int32_t location);
-
-    /// @brief Return the textures attached to this drawable
-    /// @return Texture and sampler location pairs
-    const Textures& getTextures() const { return textures; };
-
-    /// @brief Get the texture at the given sampler location.
-    const gfx::Texture2DPtr& getTexture(int32_t location) const;
+    /// @brief Get the texture at the given internal ID.
+    const gfx::Texture2DPtr& getTexture(size_t id) const;
 
     /// @brief Set the collection of textures bound to this drawable
     /// @param textures_ A Textures collection to set
     void setTextures(const Textures& textures_) noexcept { textures = textures_; }
     void setTextures(Textures&& textures_) noexcept { textures = std::move(textures_); }
 
-    /// @brief Attach the given texture to this drawable at the given sampler location.
+    /// @brief Attach the given texture to this drawable at the given internal ID.
     /// @param texture Texture2D instance
-    /// @param location A sampler location in the shader being used with this drawable.
-    void setTexture(gfx::Texture2DPtr texture, int32_t location);
+    /// @param id Internal ID of the texture.
+    void setTexture(gfx::Texture2DPtr texture, size_t id);
 
     /// Whether the drawble should be drawn
     bool getEnabled() const { return enabled; }
@@ -141,7 +135,7 @@ public:
     void setDrawPriority(DrawPriority value) { drawPriority = value; }
 
     /// Whether to enable depth testing
-    bool getEnableDepth() { return enableDepth; }
+    bool getEnableDepth() const { return enableDepth; }
     virtual void setEnableDepth(bool value) { enableDepth = value; }
 
     /// Determines depth range within the layer for 2D drawables
@@ -149,6 +143,9 @@ public:
 
     /// Set sub-layer index
     virtual void setSubLayerIndex(int32_t value) { subLayerIndex = value; }
+
+    void setLayerIndex(int32_t value) { layerIndex = value; }
+    int32_t getLayerIndex() const { return layerIndex; }
 
     /// Depth writability for 2D drawables
     DepthMaskType getDepthType() const { return depthType; }
@@ -187,16 +184,10 @@ public:
     virtual void setColorMode(const gfx::ColorMode&);
 
     /// Get the vertex attributes that override default values in the shader program
-    virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
-
-    /// Get the mutable vertex attribute array
-    virtual gfx::VertexAttributeArray& mutableVertexAttributes() = 0;
+    const gfx::VertexAttributeArrayPtr& getVertexAttributes() const noexcept { return vertexAttributes; }
 
     /// Set vertex attribute array
-    virtual void setVertexAttributes(const gfx::VertexAttributeArray&) = 0;
-
-    /// Set vertex attribute array
-    virtual void setVertexAttributes(gfx::VertexAttributeArray&&) = 0;
+    void setVertexAttributes(gfx::VertexAttributeArrayPtr value) noexcept { vertexAttributes = std::move(value); }
 
     /// Provide raw data for vertices. Incompatible with adding primitives
     virtual void setVertices(std::vector<uint8_t>&&, std::size_t, AttributeDataType) = 0;
@@ -256,8 +247,10 @@ protected:
     DrawPriority drawPriority = 0;
     int32_t lineWidth = 1;
     int32_t subLayerIndex = 0;
+    int32_t layerIndex = 0;
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
     UniqueDrawableData drawableData{};
+    gfx::VertexAttributeArrayPtr vertexAttributes;
 
     struct Impl;
     std::unique_ptr<Impl> impl;

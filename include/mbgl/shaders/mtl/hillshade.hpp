@@ -34,9 +34,6 @@ struct alignas(16) HillshadeDrawableUBO {
     float4x4 matrix;
     float2 latrange;
     float2 light;
-    bool overdrawInspector;
-    uint8_t pad1, pad2, pad3;
-    float pad4, pad5, pad6;
 };
 
 struct alignas(16) HillshadeEvaluatedPropsUBO {
@@ -63,10 +60,9 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const HillshadeEvaluatedPropsUBO& props [[buffer(3)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
-
-    if (drawable.overdrawInspector) {
-        return half4(1.0);
-    }
+#if defined(OVERDRAW_INSPECTOR)
+    return half4(1.0);
+#endif
 
     float4 pixel = image.sample(image_sampler, in.pos);
 

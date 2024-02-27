@@ -70,31 +70,6 @@ std::optional<Color> RenderLayer::getSolidBackground() const {
 }
 
 #if MLN_DRAWABLE_RENDERER
-void RenderLayer::replaceTweaker(LayerTweakerPtr& curTweaker,
-                                 LayerTweakerPtr newTweaker,
-                                 const std::vector<LayerGroupBasePtr>& layerGroups) {
-    const auto prevTweaker = curTweaker;
-
-    // We need to re-create the tweaker because it doesn't yet support modifying evaluated
-    // properties, but we don't want to stop updating drawables (as in the `layerChanged` case)
-    // so we need to update the tweaker reference on the outstanding drawables so that they
-    // pass the check in `updateExisting`.
-    // TODO: Once the tweaker doesn't need to be re-created on each property evaluation, this won't be needed.
-    for (const auto& group : layerGroups) {
-        if (group) {
-            group->addLayerTweaker(newTweaker);
-
-            group->visitDrawables([&](gfx::Drawable& drawable) {
-                if (drawable.getLayerTweaker() == prevTweaker) {
-                    drawable.setLayerTweaker(newTweaker);
-                }
-            });
-        }
-    }
-
-    curTweaker = std::move(newTweaker);
-}
-
 void RenderLayer::layerChanged(const TransitionParameters&,
                                const Immutable<style::Layer::Impl>&,
                                UniqueChangeRequestVec&) {
@@ -186,34 +161,32 @@ std::size_t RenderLayer::removeAllDrawables() {
 }
 
 void RenderLayer::updateRenderTileIDs() {
-    const auto oldMap = std::move(renderTileIDs);
-    renderTileIDs = std::unordered_map<OverscaledTileID, util::SimpleIdentity>{};
-    if (renderTiles) {
-        renderTileIDs.reserve(renderTiles->size());
-        for (const auto& tile : *renderTiles) {
-            // If the tile existed previously, retain the mapped value
-            const auto tileID = tile.get().getOverscaledTileID();
-            const auto hit = oldMap.find(tileID);
-            const auto bucketID = (hit != oldMap.end()) ? hit->second : util::SimpleIdentity::Empty;
-            [[maybe_unused]] const auto result = renderTileIDs.insert(std::make_pair(tileID, bucketID));
-            assert(result.second && "Unexpected duplicate TileID in renderTiles");
-        }
+    if (!renderTiles || renderTiles->empty()) {
+        renderTileIDs.clear();
+        return;
     }
+
+    newRenderTileIDs.assign(renderTiles->begin(), renderTiles->end(), [&](const auto& tile) {
+        const auto& tileID = tile.get().getOverscaledTileID();
+        return std::make_pair(tileID, getRenderTileBucketID(tileID));
+    });
+
+    renderTileIDs.swap(newRenderTileIDs);
+    newRenderTileIDs.clear();
 }
 
 bool RenderLayer::hasRenderTile(const OverscaledTileID& tileID) const {
-    return renderTileIDs.find(tileID) != renderTileIDs.end();
+    return renderTileIDs.find(tileID).has_value();
 }
 
 util::SimpleIdentity RenderLayer::getRenderTileBucketID(const OverscaledTileID& tileID) const {
-    const auto hit = renderTileIDs.find(tileID);
-    return (hit != renderTileIDs.end()) ? hit->second : util::SimpleIdentity::Empty;
+    const auto result = renderTileIDs.find(tileID);
+    return result.has_value() ? result->get() : util::SimpleIdentity::Empty;
 }
 
 bool RenderLayer::setRenderTileBucketID(const OverscaledTileID& tileID, util::SimpleIdentity bucketID) {
-    const auto hit = renderTileIDs.find(tileID);
-    if (hit != renderTileIDs.end() && hit->second != bucketID) {
-        hit->second = bucketID;
+    if (auto result = renderTileIDs.find(tileID); result && result->get() != bucketID) {
+        result->get() = bucketID;
         return true;
     }
     return false;

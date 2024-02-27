@@ -18,7 +18,7 @@ MBGL_DEFINE_ATTRIBUTE(int16_t, 2, anchor_pos);
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, texture_pos);
 MBGL_DEFINE_ATTRIBUTE(int16_t, 4, normal_ed);
 MBGL_DEFINE_ATTRIBUTE(float, 1, fade_opacity);
-MBGL_DEFINE_ATTRIBUTE(uint8_t, 2, placed);
+MBGL_DEFINE_ATTRIBUTE(uint16_t, 2, placed);
 MBGL_DEFINE_ATTRIBUTE(uint16_t, 3, size);
 MBGL_DEFINE_ATTRIBUTE(float, 1, offset);
 MBGL_DEFINE_ATTRIBUTE(float, 2, shift);

@@ -2,7 +2,7 @@ name: 'get-pr-number'
 description: 'Gets the PR number from an artifact'
 outputs:
   pr-number:
-    description: "PR number"
+    description: "PR number or empty string"
     value: ${{ steps.cat.outputs.pr-number }}
 runs:
   using: "composite"
@@ -10,7 +10,9 @@ runs:
     - uses: ./.github/actions/download-workflow-run-artifact
       with:
         artifact-name: pr-number
-        expect-files: "./pr_number"
+
+    - run: touch ./pr_number
+      shell: bash
 
     - id: cat
       run: echo pr-number="$(cat ./pr_number)" >> $GITHUB_OUTPUT

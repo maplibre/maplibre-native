@@ -22,7 +22,7 @@ std::unique_ptr<gfx::Drawable::DrawSegment> DrawableBuilder::createSegment(gfx::
 void DrawableBuilder::init() {
     auto& drawable = static_cast<Drawable&>(*currentDrawable);
 
-    drawable.setVertexAttrNameId(vertexAttrNameId);
+    drawable.setVertexAttrId(vertexAttrId);
 
     if (impl->rawVerticesCount) {
         auto raw = impl->rawVertices;
@@ -41,10 +41,8 @@ void DrawableBuilder::init() {
     assert(impl->sharedIndexes && impl->sharedIndexes->elements());
     drawable.setIndexData(std::move(impl->sharedIndexes), std::move(impl->segments));
 
-    impl->buildIndexes.clear();
-    impl->segments.clear();
-    impl->vertices.clear();
-    textures.clear();
+    impl->clear();
+    textures.fill(nullptr);
 }
 
 } // namespace mtl

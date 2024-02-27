@@ -1,17 +1,14 @@
 #pragma once
 
-#include <mbgl/util/string_indexer.hpp>
-
-#include <algorithm>
-#include <functional>
-#include <string>
-#include <memory>
-#include <unordered_map>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace gfx {
 
 class UniformBuffer;
+class UniformBlock;
+
+using UniqueUniformBlock = std::unique_ptr<UniformBlock>;
 
 /// @brief This class represents an uniform block
 class UniformBlock {
@@ -59,11 +56,9 @@ protected:
     std::size_t size;
 };
 
-/// Stores a collection of uniform blocks by name
+/// Stores a collection of uniform blocks by id
 class UniformBlockArray {
 public:
-    using UniformBlockMap = std::unordered_map<StringIdentity, std::unique_ptr<UniformBlock>>;
-
     /// @brief Constructor
     UniformBlockArray() = default;
 
@@ -76,22 +71,19 @@ public:
     /// @brief  Destructor
     virtual ~UniformBlockArray() = default;
 
-    /// @brief Get map of elements.
-    const UniformBlockMap& getMap() const { return uniformBlockMap; }
-
-    /// @brief Number of elements
-    std::size_t size() const { return uniformBlockMap.size(); }
+    /// @brief Number of maximum allocated elements
+    std::size_t allocatedSize() const { return uniformBlockVector.size(); }
 
     /// @brief Get an uniform block element.
     /// @return Pointer to the element on success, or null if the uniform block doesn't exists.
-    const std::unique_ptr<UniformBlock>& get(const StringIdentity id) const;
+    const std::unique_ptr<UniformBlock>& get(const size_t id) const;
 
-    /// @brief Add a new uniform block element.
-    /// @param name
+    /// @brief Set a new uniform block element.
+    /// @param id
     /// @param index
     /// @param size
     /// @return Pointer to the new element on success, or null if the uniform block already exists.
-    const std::unique_ptr<UniformBlock>& add(const StringIdentity id, int index, std::size_t size);
+    const std::unique_ptr<UniformBlock>& set(const size_t id, const size_t index, std::size_t size);
 
     /// @brief  Move assignment operator
     UniformBlockArray& operator=(UniformBlockArray&&);
@@ -100,30 +92,21 @@ public:
     UniformBlockArray& operator=(const UniformBlockArray&);
 
     /// Do something with each block
-    void visit(const std::function<void(const StringIdentity, const UniformBlock&)>& f) {
-        std::for_each(uniformBlockMap.begin(), uniformBlockMap.end(), [&](const auto& kv) {
-            if (kv.second) {
-                f(kv.first, *kv.second);
+    template <typename Func /* void(const UniformBlock&) */>
+    void visit(Func f) {
+        std::for_each(uniformBlockVector.begin(), uniformBlockVector.end(), [&](const auto& block) {
+            if (block) {
+                f(*block);
             }
         });
     }
 
 protected:
-    const std::unique_ptr<UniformBlock>& add(const StringIdentity id, std::unique_ptr<UniformBlock>&& uniformBlock) {
-        const auto result = uniformBlockMap.insert(std::make_pair(id, std::unique_ptr<UniformBlock>()));
-        if (result.second) {
-            result.first->second = std::move(uniformBlock);
-            return result.first->second;
-        } else {
-            return nullref;
-        }
-    }
-
     virtual std::unique_ptr<UniformBlock> create(int index, std::size_t size) = 0;
     virtual std::unique_ptr<UniformBlock> copy(const UniformBlock& uniformBlock) = 0;
 
 protected:
-    UniformBlockMap uniformBlockMap;
+    std::array<UniqueUniformBlock, shaders::maxUBOCountPerShader> uniformBlockVector;
     static std::unique_ptr<UniformBlock> nullref;
 };
 

@@ -1,20 +1,21 @@
+load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
+load(
+    "@build_bazel_rules_swift//swift:swift.bzl",
+    "swift_library",
+)
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 load(
     "bazel/files.bzl",
     "MLN_DARWIN_OBJCPP_HEADERS",
     "MLN_DARWIN_OBJC_HEADERS",
     "MLN_DARWIN_PRIVATE_HEADERS",
+    "MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJCPP_SOURCE",
-    "MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE",
     "MLN_DARWIN_PUBLIC_OBJC_SOURCE",
     "MLN_GENERATED_DARWIN_STYLE_HEADERS",
     "MLN_GENERATED_DARWIN_STYLE_PUBLIC_HEADERS",
     "MLN_GENERATED_DARWIN_STYLE_SOURCE",
     "MLN_GENERATED_DARWIN_TEST_CODE",
-)
-load(
-    "@build_bazel_rules_swift//swift:swift.bzl",
-    "swift_library",
 )
 
 filegroup(
@@ -42,8 +43,8 @@ filegroup(
 )
 
 filegroup(
-    name = "darwin_objcpp_opengl_srcs",
-    srcs = MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE,
+    name = "darwin_objcpp_custom_drawable_srcs",
+    srcs = MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE,
     visibility = ["//visibility:public"],
 )
 
@@ -108,17 +109,16 @@ filegroup(
     ],
 )
 
-genrule(
+js_run_binary(
     name = "generated_code",
     srcs = [
+        ":docs_ejs_templates",
         ":generator_data",
         ":test_ejs_templates",
-        ":docs_ejs_templates",
     ],
     outs = MLN_GENERATED_DARWIN_STYLE_SOURCE +
            MLN_GENERATED_DARWIN_STYLE_HEADERS + MLN_GENERATED_DARWIN_TEST_CODE,
-    cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)/../../",
-    tools = ["scripts/generate-style-code.js"],
+    tool = ":generate-style-code-script",
     visibility = ["//visibility:public"],
 )
 
@@ -140,14 +140,10 @@ objc_library(
             "test/*.m",
             "test/*.h",
         ],
-        allow_empty = False,
     ),
     copts = MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],
     data = glob(
-        [
-            "test/Media.xcassets/**",
-        ],
-        allow_empty = False,
+        ["test/Media.xcassets/**"],
     ),
     sdk_frameworks = [
         "MapKit",
@@ -168,7 +164,6 @@ objc_library(
             "test/*.h",
             "test/*.mm",
         ],
-        allow_empty = False,
         exclude = [
             "test/MLNOfflineStorageTests.mm",
         ],
@@ -185,12 +180,7 @@ objc_library(
 swift_library(
     name = "shared_tests_swift_srcs",
     testonly = True,
-    srcs = glob(
-        [
-            "test/*.swift",
-        ],
-        allow_empty = False,
-    ),
+    srcs = glob(["test/*.swift"]),
     data = [
         "test/amsterdam.geojson",
         "test/one-liner.json",
@@ -209,15 +199,12 @@ cc_library(
         ":darwin_objc_hdrs",
         ":darwin_objcpp_hdrs",
         ":darwin_private_hdrs",
-        ":generated_style_hdrs",
+        ":generated_code",
     ],
     hdrs = [
         ":generated_style_hdrs",
     ],
     visibility = ["//visibility:public"],
-    deps = [
-        ":generated_code",
-    ],
 )
 
 # Objc files for the iOS source
@@ -322,15 +309,49 @@ exports_files(
     [
         "test/amsterdam.geojson",
         "test/MLNSDKTestHelpers.swift",
-        "app/LimeGreenStyleLayer.h",
-        "app/LimeGreenStyleLayer.m",
+        "app/CustomStyleLayerExample.h",
+        "app/CustomStyleLayerExample.m",
+        "app/ExampleCustomDrawableStyleLayer.h",
+        "app/ExampleCustomDrawableStyleLayer.mm",
         "include/mbgl/util/image+MLNAdditions.hpp",
-        "scripts/check-public-symbols.js",
-        "scripts/check-public-symbols.sh",
     ] + MLN_DARWIN_PUBLIC_OBJC_SOURCE +
     MLN_DARWIN_PUBLIC_OBJCPP_SOURCE +
-    MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE +
+    MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE +
     MLN_DARWIN_PRIVATE_HEADERS +
     MLN_DARWIN_OBJC_HEADERS +
     MLN_DARWIN_OBJCPP_HEADERS,
+)
+
+js_binary(
+    name = "generate-style-code-script",
+    data = [
+        "scripts/style-spec-cocoa-conventions-v8.json",
+        "scripts/style-spec-overrides-v8.json",
+        "//:node_modules/argparse",
+        "//:node_modules/csscolorparser",
+        "//:node_modules/lodash",
+        "//:style-code",
+        "//:style-spec",
+    ],
+    entry_point = "scripts/generate-style-code.js",
+)
+
+js_library(
+    name = "symbols-to-check",
+    srcs = [
+        ":darwin_objc_hdrs",
+        ":darwin_objc_srcs",
+        ":darwin_objcpp_hdrs",
+        ":darwin_objcpp_srcs",
+        ":darwin_private_hdrs",
+        ":generated_code",
+        ":generated_style_hdrs",
+        ":generated_style_srcs",
+    ] + select({
+        "//:legacy_renderer": [],
+        "//conditions:default": [
+            ":darwin_objcpp_custom_drawable_srcs",
+        ],
+    }),
+    visibility = ["//platform:__pkg__"],
 )

@@ -29,13 +29,9 @@ using namespace shaders;
 
 namespace {
 
-Size getTexSize(const gfx::Drawable& drawable, const StringIdentity nameId) {
-    if (const auto& shader = drawable.getShader()) {
-        if (const auto index = shader->getSamplerLocation(nameId)) {
-            if (const auto& tex = drawable.getTexture(*index)) {
-                return tex->getSize();
-            }
-        }
+Size getTexSize(const gfx::Drawable& drawable, const size_t texId) {
+    if (const auto& tex = drawable.getTexture(texId)) {
+        return tex->getSize();
     }
     return {0, 0};
 }
@@ -43,11 +39,6 @@ Size getTexSize(const gfx::Drawable& drawable, const StringIdentity nameId) {
 std::array<float, 2> toArray(const Size& s) {
     return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
-
-const StringIdentity idTexUniformName = stringIndexer().get("u_texture");
-const StringIdentity idTexIconUniformName = stringIndexer().get("u_texture_icon");
-const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
-const StringIdentity idSymbolPermutationUBOName = stringIndexer().get("SymbolPermutationUBO");
 
 SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
@@ -64,14 +55,6 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
 
 } // namespace
 
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableUBOName = stringIndexer().get("SymbolDrawableUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDynamicUBOName = stringIndexer().get("SymbolDynamicUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawablePaintUBOName = stringIndexer().get("SymbolDrawablePaintUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableTilePropsUBOName = stringIndexer().get(
-    "SymbolDrawableTilePropsUBO");
-const StringIdentity SymbolLayerTweaker::idSymbolDrawableInterpolateUBOName = stringIndexer().get(
-    "SymbolDrawableInterpolateUBO");
-
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
     const auto& state = parameters.state;
@@ -86,42 +69,26 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    const auto zoom = parameters.state.getZoom();
-
-#if MLN_RENDER_BACKEND_METAL
-    if (permutationUpdated) {
-        const SymbolPermutationUBO permutationUBO = {
-            /* .fill_color = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(5), /*.expression=*/{}},
-            /* .halo_color = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(6), /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(7), /*.expression=*/{}},
-            /* .halo_width = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(8), /*.expression=*/{}},
-            /* .halo_blur = */ {/*.source=*/getAttributeSource<BuiltIn::SymbolSDFIconShader>(9), /*.expression=*/{}},
-            /* .overdrawInspector = */ overdrawInspector,
-            /* .pad = */ 0,
-            0,
-            0};
-
-        if (permutationUniformBuffer) {
-            permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
-        } else {
-            permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
-        }
-
-        permutationUpdated = false;
-    }
-    if (!expressionUniformBuffer) {
-        const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
-        expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
-    }
-#endif
-
     if (propertiesUpdated) {
         textPropertiesUpdated = true;
         iconPropertiesUpdated = true;
         propertiesUpdated = false;
     }
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    const auto camDist = state.getCameraToCenterDistance();
+
+    const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
+                                         /*.camera_to_center_distance=*/camDist,
+                                         /*.aspect_ratio=*/state.getSize().aspectRatio(),
+                                         0};
+
+    if (!dynamicBuffer) {
+        dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
+    } else {
+        dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
+    }
+
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
         }
@@ -146,10 +113,11 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                    : evaluated.get<style::IconTranslateAnchor>();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         // from symbol_program, makeValues
-        const auto currentZoom = static_cast<float>(zoom);
+        const auto currentZoom = static_cast<float>(parameters.state.getZoom());
         const float pixelsToTileUnits = tileID.pixelsToTileUnits(1.f, currentZoom);
         const bool pitchWithMap = symbolData.pitchAlignment == style::AlignmentType::Map;
         const bool rotateWithMap = symbolData.rotationAlignment == style::AlignmentType::Map;
@@ -163,7 +131,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                 matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
         const mat4 glCoordMatrix = getGlCoordMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
 
-        const auto camDist = state.getCameraToCenterDistance();
         const float gammaScale = (symbolData.pitchAlignment == AlignmentType::Map
                                       ? static_cast<float>(std::cos(state.getPitch())) * camDist
                                       : 1.0f);
@@ -178,32 +145,19 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
             /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
 
-            /*.texsize=*/toArray(getTexSize(drawable, idTexUniformName)),
-            /*.texsize_icon=*/toArray(getTexSize(drawable, idTexIconUniformName)),
+            /*.texsize=*/toArray(getTexSize(drawable, idSymbolImageTexture)),
+            /*.texsize_icon=*/toArray(getTexSize(drawable, idSymbolImageIconTexture)),
 
             /*.gamma_scale=*/gammaScale,
-            /*.device_pixel_ratio=*/parameters.pixelRatio,
-
-            /*.camera_to_center_distance=*/camDist,
-            /*.pitch=*/static_cast<float>(state.getPitch()),
             /*.rotate_symbol=*/rotateInShader,
-            /*.aspect_ratio=*/state.getSize().aspectRatio(),
             /*.pad=*/{0},
         };
 
-        const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
-                                             /*.pad1=*/0,
-                                             /*.pad2=*/{0, 0}};
-
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idSymbolDrawableUBOName, &drawableUBO, context);
-        uniforms.createOrUpdate(idSymbolDynamicUBOName, &dynamicUBO, context);
-        uniforms.addOrReplace(idSymbolDrawablePaintUBOName, isText ? textPaintBuffer : iconPaintBuffer);
+        uniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
 
-#if MLN_RENDER_BACKEND_METAL
-        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
-        uniforms.addOrReplace(idSymbolPermutationUBOName, permutationUniformBuffer);
-#endif // MLN_RENDER_BACKEND_METAL
+        uniforms.set(idSymbolDynamicUBO, dynamicBuffer);
+        uniforms.set(idSymbolDrawablePaintUBO, isText ? textPaintBuffer : iconPaintBuffer);
     });
 }
 

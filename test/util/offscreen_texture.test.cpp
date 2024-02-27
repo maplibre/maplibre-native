@@ -1,3 +1,4 @@
+#if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/test/util.hpp>
 
 #include <mbgl/platform/gl_functions.hpp>
@@ -203,3 +204,5 @@ TEST(OffscreenTexture, ClearRenderPassColor) {
     auto image = offscreenTexture->readStillImage();
     test::checkImage("test/fixtures/offscreen_texture/clear-render-pass-color", image, 0, 0);
 }
+
+#endif

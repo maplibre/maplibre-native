@@ -8,9 +8,9 @@
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable.hpp>
+#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/change_request.hpp>
-
-#include <unordered_map>
+#include <mbgl/util/tiny_unordered_map.hpp>
 #endif // MLN_DRAWABLE_RENDERER
 
 #include <list>
@@ -20,7 +20,6 @@
 namespace mbgl {
 class Bucket;
 class DynamicFeatureIndex;
-class LayerGroupBase;
 class LineAtlas;
 class PropertyEvaluationParameters;
 class PaintParameters;
@@ -190,6 +189,9 @@ public:
     /// @param willRender Indicates if this layer should render or not
     /// @param changes The collection of current pending change requests
     virtual void markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes);
+
+    /// Returns the current renderability mode of the layer
+    bool isLayerRenderable() const noexcept { return isRenderable; }
 #endif
 
 protected:
@@ -209,6 +211,35 @@ protected:
 
     /// Change the layer index on a layer group associated with this layer
     void changeLayerIndex(const LayerGroupBasePtr&, int32_t newLayerIndex, UniqueChangeRequestVec&);
+
+    /// Update the drawables for a tile.
+    /// @param renderPass The pass to consider
+    /// @param tileID The tile to consider
+    /// @param updateFunction A function that updates a single drawable.  Should return true if the drawable
+    ///                       was updated or false if it was skipped because it's for a previous style.
+    /// @return true if drawables were updated
+    template <typename Func /* bool(gfx::Drawable&) */>
+    bool updateTile(RenderPass renderPass, const OverscaledTileID& tileID, Func update) {
+        bool anyUpdated = false;
+        if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
+            bool unUpdatedDrawables = false;
+            tileGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
+                if (update(drawable)) {
+                    anyUpdated = true;
+                } else {
+                    unUpdatedDrawables = true;
+                }
+            });
+
+            // If any are updated, the caller shouldn't add new ones.
+            // If none are updated and some were skipped, remove those.
+            // This is to handle the case that the style layer changes but the bucket is not re-created.
+            if (!anyUpdated && unUpdatedDrawables) {
+                removeTile(renderPass, tileID);
+            }
+        }
+        return anyUpdated;
+    }
 
     /// Remove all drawables for the tile from the layer group
     /// @return The number of drawables actually removed.
@@ -235,11 +266,6 @@ protected:
     /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
 
-    /// Update the layer tweaker and drawables which reference it
-    static void replaceTweaker(LayerTweakerPtr& toReplace,
-                               LayerTweakerPtr newTweaker,
-                               const std::vector<LayerGroupBasePtr>&);
-
 #endif // MLN_DRAWABLE_RENDERER
 
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
@@ -261,9 +287,13 @@ protected:
     // An optional tweaker that will update drawables
     LayerTweakerPtr layerTweaker;
 
-    // The set of Tile IDs in `renderTiles`, along with the
-    // identity of the bucket from which they were built.
-    std::unordered_map<OverscaledTileID, util::SimpleIdentity> renderTileIDs;
+    // A sorted set of tile IDs in `renderTiles`, along with
+    // the identity of the bucket from which they were built.
+    // We swap between two instances to minimize reallocations.
+    static constexpr auto LinearTileIDs = 12; // From benchmarking, see #1805
+    using RenderTileIDMap = util::TinyUnorderedMap<OverscaledTileID, util::SimpleIdentity, LinearTileIDs>;
+    RenderTileIDMap renderTileIDs;
+    RenderTileIDMap newRenderTileIDs;
 #endif
 
     // Current layer index as specified by the layerIndexChanged event
@@ -271,8 +301,6 @@ protected:
 
     // Current renderable status as specified by the markLayerRenderable event
     bool isRenderable{false};
-
-    std::mutex mutex;
 
     struct Stats {
         size_t propertyEvaluations = 0;

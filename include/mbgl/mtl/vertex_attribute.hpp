@@ -17,23 +17,17 @@ class VertexAttribute final : public gfx::VertexAttribute {
 private:
     friend VertexAttributeArray;
     VertexAttribute(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
-        : gfx::VertexAttribute(index_, dataType_, count_, /*stride_=*/0) {}
-    VertexAttribute(const VertexAttribute& other)
-        : gfx::VertexAttribute(other) {}
+        : gfx::VertexAttribute(index_, dataType_, count_) {}
+    VertexAttribute(const VertexAttribute& other) = delete;
     VertexAttribute(VertexAttribute&& other)
         : gfx::VertexAttribute(std::move(other)) {}
 
 public:
     ~VertexAttribute() override = default;
 
-    /// Get the Metal buffer, creating it if necessary
-    // const gfx::UniqueVertexBufferResource& getBuffer(UploadPass&, const gfx::BufferUsageType);
-
     static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
                                                             UploadPass&,
                                                             const gfx::BufferUsageType);
-
-    static std::size_t getStrideOf(gfx::AttributeDataType);
 };
 
 /// Stores a collection of vertex attributes by name
@@ -47,26 +41,14 @@ public:
         gfx::VertexAttributeArray::operator=(std::move(other));
         return *this;
     }
-    VertexAttributeArray& operator=(const VertexAttributeArray& other) {
-        gfx::VertexAttributeArray::operator=(other);
-        return *this;
-    }
+    VertexAttributeArray& operator=(const VertexAttributeArray& other) = delete;
 
-    gfx::UniqueVertexAttributeArray clone() const override {
-        auto newAttrs = std::make_unique<VertexAttributeArray>();
-        newAttrs->copy(*this);
-        return newAttrs;
-    }
+    /// Indicates whether any values have changed
+    bool isDirty() const override;
 
 private:
     gfx::UniqueVertexAttribute create(int index, gfx::AttributeDataType dataType, std::size_t count) const override {
         return gfx::UniqueVertexAttribute(new VertexAttribute(index, dataType, count));
-    }
-
-    using gfx::VertexAttributeArray::copy;
-
-    gfx::UniqueVertexAttribute copy(const gfx::VertexAttribute& attr) const override {
-        return gfx::UniqueVertexAttribute(new VertexAttribute(static_cast<const VertexAttribute&>(attr)));
     }
 };
 

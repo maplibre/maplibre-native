@@ -52,10 +52,6 @@ bool RenderCustomDrawableLayer::hasCrossfade() const {
     return false;
 }
 
-void RenderCustomDrawableLayer::markContextDestroyed() {
-    contextDestroyed = true;
-}
-
 void RenderCustomDrawableLayer::prepare(const LayerPrepareParameters&) {}
 
 #if MLN_LEGACY_RENDERER
@@ -69,8 +65,6 @@ void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
                                        const std::shared_ptr<UpdateParameters>& updateParameters,
                                        const RenderTree& renderTree,
                                        UniqueChangeRequestVec& changes) {
-    std::unique_lock<std::mutex> guard(mutex);
-
     // check if host changed and update
     bool hostChanged = (host != impl(baseImpl).host);
     if (hostChanged) {
@@ -84,9 +78,12 @@ void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
 
     // delegate the call to the custom layer
     if (host) {
-        host->update(*this, shaders, context, state, updateParameters, renderTree, changes);
+        CustomDrawableLayerHost::Interface interface(
+            *this, layerGroup, shaders, context, state, updateParameters, renderTree, changes);
+        host->update(interface);
     }
 }
+
 #endif
 
 } // namespace mbgl

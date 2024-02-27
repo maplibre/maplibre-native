@@ -47,13 +47,11 @@ public:
     gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
 
-    VertexAttributeArray vertexAttrs;
-
     void addPolyline(gfx::DrawableBuilder& builder,
                      const GeometryCoordinates& coordinates,
                      const gfx::PolylineGeneratorOptions& options);
 
-    void setupForPolylines(gfx::DrawableBuilder& builder);
+    void setupForPolylines(gfx::Context&, gfx::DrawableBuilder&);
 
     bool checkAndSetMode(Mode);
 
@@ -63,6 +61,16 @@ public:
 
     std::size_t vertexCount() const {
         return std::max(rawVerticesCount, std::max(vertices.elements(), polylineVertices.elements()));
+    }
+
+    void clear() {
+        vertices.clear();
+        rawVertices.clear();
+        rawVerticesCount = 0;
+        polylineVertices.clear();
+        polylineIndexes.clear();
+        buildIndexes.clear();
+        segments.clear();
     }
 
 private:

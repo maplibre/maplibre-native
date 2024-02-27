@@ -2695,7 +2695,6 @@ public:
     currentCameraOptions.anchor = anchor;
     MLNCoordinateBounds bounds = MLNCoordinateBoundsFromLatLngBounds(self.mbglMap.latLngBoundsForCamera(currentCameraOptions));
     
-    
     return [self cameraThatFitsCoordinateBounds:bounds];
 }
 
@@ -3832,23 +3831,6 @@ static void *windowScreenContext = &windowScreenContext;
 {
     MLNLogDebug(@"Setting minimumZoomLevel: %f", minimumZoomLevel);
     self.mbglMap.setBounds(mbgl::BoundOptions().withMinZoom(minimumZoomLevel));
-}
-
-
-
-- (void)clearLatLnBounds
-{
-    mbgl::BoundOptions newBounds = mbgl::BoundOptions().withLatLngBounds(mbgl::LatLngBounds());
-    self.mbglMap.setBounds(newBounds);
-}
-
-- (void)setLatLngBounds:(MLNCoordinateBounds)latLngBounds
-{
-    mbgl::LatLng sw = {latLngBounds.sw.latitude, latLngBounds.sw.longitude};
-    mbgl::LatLng ne = {latLngBounds.ne.latitude, latLngBounds.ne.longitude};
-    mbgl::BoundOptions newBounds = mbgl::BoundOptions().withLatLngBounds(mbgl::LatLngBounds::hull(sw, ne));
-    
-    self.mbglMap.setBounds(newBounds);
 }
 
 - (double)minimumZoomLevel
@@ -6813,7 +6795,8 @@ static void *windowScreenContext = &windowScreenContext;
 }
 
 - (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
-                                          frameTime:(double)frameTime {
+                                  frameEncodingTime:(double)frameEncodingTime
+                                 frameRenderingTime:(double)frameRenderingTime {
     if (!_mbglMap)
     {
         return;
@@ -6825,9 +6808,9 @@ static void *windowScreenContext = &windowScreenContext;
         [self.style didChangeValueForKey:@"layers"];
     }
 
-    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:frameTime:)])
+    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:frameEncodingTime:frameRenderingTime:)])
     {
-        [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered frameTime:frameTime];
+        [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered frameEncodingTime:frameEncodingTime frameRenderingTime:frameRenderingTime];
     }
     else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:)])
     {
@@ -7342,6 +7325,10 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     return _annotationViewReuseQueueByIdentifier[identifier];
+}
+
+- (MLNBackendResource)backendResource {
+    return _mbglView->getObject();
 }
 
 @end

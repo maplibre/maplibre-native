@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - android-*.*.x
     tags:
       - "android-*"
 
@@ -27,12 +28,12 @@ jobs:
       - name: Get all Android files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: tj-actions/changed-files@v39
+        uses: tj-actions/changed-files@v42
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
   android-build:
-    runs-on: ${{ github.event.pull_request && !github.event.pull_request.draft && 'MapLibre_Native_Linux_16_core' || 'ubuntu-22.04' }}
+    runs-on: ubuntu-22.04
     needs:
       - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
@@ -64,13 +65,13 @@ jobs:
 
       - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
 
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: "17"
 
       - name: Cache node modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: cache-node-modules
         with:
@@ -90,7 +91,7 @@ jobs:
           key: ${{ github.job }}
 
       - name: restore-gradle-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: gradle-v1
         with:
@@ -118,8 +119,30 @@ jobs:
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, not copying..."
           fi
 
+      - name: Build Benchmark, copy to platform/android
+        if: github.ref != 'refs/heads/main'
+        run: |
+          ./gradlew assembleDrawableRelease assembleDrawableReleaseAndroidTest -PtestBuildType=release
+          cp MapboxGLAndroidSDKTestApp/build/outputs/apk/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release.apk .
+          cp MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk .
+
+      - name: Create artifact for benchmark APKs 
+        uses: actions/upload-artifact@v4
+        if: github.ref != 'refs/heads/main'
+        with:
+          if-no-files-found: error
+          name: benchmarkAPKs
+          path: |
+            platform/android/MapboxGLAndroidSDKTestApp-drawable-release.apk
+            platform/android/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk
+
+      - if: github.event_name == 'pull_request'
+        uses: ./.github/actions/save-pr-number
+
       - name: Build UI tests
-        run: make android-ui-test-arm-v8
+        if: github.ref == 'refs/heads/main'
+        run: |
+          ./gradlew assembleLegacyDebug assembleLegacyDebugAndroidTest -PtestBuildType=debug
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main'
@@ -163,32 +186,15 @@ jobs:
           echo "ANDROID_APP_ARN=${{ steps.upload-android-app.outputs.arn }}" >> uploads.env
           echo "ANDROID_TEST_ARN=${{ steps.upload-android-test.outputs.arn }}" >> uploads.env
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: github.ref == 'refs/heads/main'
         with:
           if-no-files-found: error
           name: uploadsEnv
           path: uploads.env
 
-      # render test
-      - name: Build Render Test App
-        run: |
-          ./gradlew assemble assembleAndroidTest
-          cp app/build/outputs/apk/release/app-release.apk RenderTestsApp.apk
-          cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk RenderTests.apk
-        working-directory: ./render-test/android
-
-      - name: Store Render Test .apk files
-        uses: actions/upload-artifact@v3
-        with:
-          name: android-render-tests
-          if-no-files-found: error
-          path: |
-            ./render-test/android/RenderTestsApp.apk
-            ./render-test/android/RenderTests.apk
-
       - name: Store debug artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: debug-artifacts
           path: |
@@ -200,13 +206,49 @@ jobs:
             MapboxGLAndroidSDKTestApp/lint-baseline.xml
             MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
 
+  android-build-render-test:
+    runs-on: ubuntu-latest
+    needs:
+      - pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Build Render Test App
+        run: |
+          ./gradlew assemble assembleAndroidTest
+          cp app/build/outputs/apk/release/app-release.apk RenderTestsApp.apk
+          cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk RenderTests.apk
+        working-directory: ./render-test/android
+
+      - name: Store Render Test .apk files
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-render-tests
+          if-no-files-found: error
+          path: |
+            ./render-test/android/RenderTestsApp.apk
+            ./render-test/android/RenderTests.apk
+
   android-instrumentation-test:
     needs: android-build
 
     runs-on: ubuntu-latest
     if: github.repository_owner == 'maplibre' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/android-annotations')
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: uploadsEnv
 
@@ -230,6 +272,7 @@ jobs:
           project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
           device_pool_arn: ${{ vars.AWS_DEVICE_FARM_DEVICE_POOL_ARN }}
           app_arn: ${{ env.ANDROID_APP_ARN }}
+          test_spec_arn: ${{ vars.AWS_DEVICE_FARM_TEST_SPEC_ARN_ANDROID_UI_TESTS }}
           app_type: ANDROID_APP
           test_type: INSTRUMENTATION
           test_package_arn: ${{ env.ANDROID_TEST_ARN }}
@@ -241,6 +284,7 @@ jobs:
     needs:
       - pre_job
       - android-build
+      - android-build-render-test
     steps:
       - name: Mark result as failed
         if: needs.android-build.result != 'success'

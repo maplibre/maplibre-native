@@ -1,3 +1,4 @@
+#if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/test/util.hpp>
 
 #include <mbgl/gfx/backend_scope.hpp>
@@ -122,3 +123,5 @@ TEST(GLContextMode, Shared) {
 
     test::checkImage("test/fixtures/shared_context", frontend.render(map).image, 0.5, 0.1);
 }
+
+#endif

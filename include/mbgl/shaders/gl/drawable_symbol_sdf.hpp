@@ -31,19 +31,15 @@ layout (std140) uniform SymbolDrawableUBO {
     highp vec2 u_texsize_icon;
 
     highp float u_gamma_scale;
-    highp float u_device_pixel_ratio;
-
-    highp float u_camera_to_center_distance;
-    highp float u_pitch;
     bool u_rotate_symbol;
-    highp float u_aspect_ratio;
     highp vec2 u_pad1;
 };
 
 layout (std140) uniform SymbolDynamicUBO {
     highp float u_fade_change;
-    highp float u_pad7;
-    highp vec2  u_pad8;
+    highp float u_camera_to_center_distance;
+    highp float u_aspect_ratio;
+    highp float pad0;
 };
 
 layout (std140) uniform SymbolDrawablePaintUBO {
@@ -206,19 +202,15 @@ layout (std140) uniform SymbolDrawableUBO {
     highp vec2 u_texsize_icon;
 
     highp float u_gamma_scale;
-    highp float u_device_pixel_ratio;
-
-    highp float u_camera_to_center_distance;
-    highp float u_pitch;
     bool u_rotate_symbol;
-    highp float u_aspect_ratio;
     highp vec2 u_pad1;
 };
 
 layout (std140) uniform SymbolDynamicUBO {
     highp float u_fade_change;
-    highp float u_pad7;
-    highp vec2  u_pad8;
+    highp float u_camera_to_center_distance;
+    highp float u_aspect_ratio;
+    highp float pad0;
 };
 
 layout (std140) uniform SymbolDrawablePaintUBO {
@@ -288,7 +280,7 @@ lowp float halo_width = u_halo_width;
 lowp float halo_blur = u_halo_blur;
 #endif
 
-    float EDGE_GAMMA = 0.105 / u_device_pixel_ratio;
+    float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
 
     vec2 tex = v_data0.xy;
     float gamma_scale = v_data1.x;

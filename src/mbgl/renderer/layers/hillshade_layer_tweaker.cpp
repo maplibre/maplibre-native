@@ -8,16 +8,13 @@
 #include <mbgl/shaders/hillshade_layer_ubo.hpp>
 #include <mbgl/style/layers/hillshade_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idHillshadeDrawableUBOName = stringIndexer().get("HillshadeDrawableUBO");
-static const StringIdentity idHillshadeEvaluatedPropsUBOName = stringIndexer().get("HillshadeEvaluatedPropsUBO");
-
+namespace {
 std::array<float, 2> getLatRange(const UnwrappedTileID& id) {
     const LatLng latlng0 = LatLng(id);
     const LatLng latlng1 = LatLng(UnwrappedTileID(id.canonical.z, id.canonical.x, id.canonical.y + 1));
@@ -27,10 +24,12 @@ std::array<float, 2> getLatRange(const UnwrappedTileID& id) {
 std::array<float, 2> getLight(const PaintParameters& parameters,
                               const HillshadePaintProperties::PossiblyEvaluated& evaluated) {
     float azimuthal = util::deg2radf(evaluated.get<HillshadeIlluminationDirection>());
-    if (evaluated.get<HillshadeIlluminationAnchor>() == HillshadeIlluminationAnchorType::Viewport)
+    if (evaluated.get<HillshadeIlluminationAnchor>() == HillshadeIlluminationAnchorType::Viewport) {
         azimuthal = azimuthal - static_cast<float>(parameters.state.getBearing());
+    }
     return {{evaluated.get<HillshadeExaggeration>(), azimuthal}};
 }
+} // namespace
 
 void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     const auto& evaluated = static_cast<const HillshadeLayerProperties&>(*evaluatedProperties).evaluated;
@@ -44,37 +43,34 @@ void HillshadeLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    if (!evaluatedPropsUniformBuffer) {
-        HillshadeEvaluatedPropsUBO evaluatedPropsUBO = {/* .highlight = */ evaluated.get<HillshadeHighlightColor>(),
-                                                        /* .shadow = */ evaluated.get<HillshadeShadowColor>(),
-                                                        /* .accent = */ evaluated.get<HillshadeAccentColor>()};
-        evaluatedPropsUniformBuffer = parameters.context.createUniformBuffer(&evaluatedPropsUBO,
-                                                                             sizeof(evaluatedPropsUBO));
-    }
+    const auto getPropsBuffer = [&]() -> auto& {
+        if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
+            const HillshadeEvaluatedPropsUBO evaluatedPropsUBO = {
+                /* .highlight = */ evaluated.get<HillshadeHighlightColor>(),
+                /* .shadow = */ evaluated.get<HillshadeShadowColor>(),
+                /* .accent = */ evaluated.get<HillshadeAccentColor>()};
+            parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
+            propertiesUpdated = false;
+        }
+        return evaluatedPropsUniformBuffer;
+    };
 
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
             return;
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
-        drawable.mutableUniformBuffers().addOrReplace(idHillshadeEvaluatedPropsUBOName, evaluatedPropsUniformBuffer);
+        auto& uniforms = drawable.mutableUniformBuffers();
+        uniforms.set(idHillshadeEvaluatedPropsUBO, getPropsBuffer());
 
         const auto matrix = getTileMatrix(
-            tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, true);
+            tileID, parameters, {0.f, 0.f}, TranslateAnchorType::Viewport, false, false, drawable, true);
         HillshadeDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix),
                                             /* .latrange = */ getLatRange(tileID),
-                                            /* .light = */ getLight(parameters, evaluated),
-                                            /* .overdrawInspector = */ overdrawInspector,
-                                            /* .pad1/2/3 = */ 0,
-                                            0,
-                                            0,
-                                            /* .pad4/5/6 = */ 0,
-                                            0,
-                                            0};
-
-        drawable.mutableUniformBuffers().createOrUpdate(idHillshadeDrawableUBOName, &drawableUBO, parameters.context);
+                                            /* .light = */ getLight(parameters, evaluated)};
+        uniforms.createOrUpdate(idHillshadeDrawableUBO, &drawableUBO, parameters.context);
     });
 }
 

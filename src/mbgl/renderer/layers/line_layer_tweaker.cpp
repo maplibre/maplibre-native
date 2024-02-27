@@ -3,7 +3,6 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/line_drawable_data.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/geometry/line_atlas.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/renderer/layer_group.hpp>
@@ -17,6 +16,7 @@
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/line.hpp>
+#include <mbgl/shaders/mtl/line_gradient.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 namespace mbgl {
@@ -24,28 +24,23 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-static const StringIdentity idLineUBOName = stringIndexer().get("LineUBO");
-static const StringIdentity idLinePropertiesUBOName = stringIndexer().get("LinePropertiesUBO");
-static const StringIdentity idLineGradientUBOName = stringIndexer().get("LineGradientUBO");
-static const StringIdentity idLineGradientPropertiesUBOName = stringIndexer().get("LineGradientPropertiesUBO");
-static const StringIdentity idLinePatternUBOName = stringIndexer().get("LinePatternUBO");
-static const StringIdentity idLinePatternPropertiesUBOName = stringIndexer().get("LinePatternPropertiesUBO");
-static const StringIdentity idLineSDFUBOName = stringIndexer().get("LineSDFUBO");
-static const StringIdentity idLineSDFPropertiesUBOName = stringIndexer().get("LineSDFPropertiesUBO");
-static const StringIdentity idTexImageName = stringIndexer().get("u_image");
-
-static const StringIdentity idExpressionInputsUBOName = stringIndexer().get("ExpressionInputsUBO");
-static const StringIdentity idLinePermutationUBOName = stringIndexer().get("LinePermutationUBO");
-
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
+    const auto zoom = parameters.state.getZoom();
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const LineLayerProperties&>(*evaluatedProperties).crossfade;
 
-    const auto zoom = parameters.state.getZoom();
+    // Each property UBO is updated at most once if new evaluated properties were set
+    if (propertiesUpdated) {
+        simplePropertiesUpdated = true;
+        gradientPropertiesUpdated = true;
+        patternPropertiesUpdated = true;
+        sdfPropertiesUpdated = true;
+        propertiesUpdated = false;
+    }
 
     const auto getLinePropsBuffer = [&]() {
-        if (!linePropertiesBuffer) {
+        if (!linePropertiesBuffer || simplePropertiesUpdated) {
             const LinePropertiesUBO linePropertiesUBO{
                 /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
@@ -56,12 +51,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
                 0,
                 0};
-            linePropertiesBuffer = context.createUniformBuffer(&linePropertiesUBO, sizeof(linePropertiesUBO));
+            context.emplaceOrUpdateUniformBuffer(linePropertiesBuffer, &linePropertiesUBO);
+            simplePropertiesUpdated = false;
         }
         return linePropertiesBuffer;
     };
     const auto getLineGradientPropsBuffer = [&]() {
-        if (!lineGradientPropertiesBuffer) {
+        if (!lineGradientPropertiesBuffer || gradientPropertiesUpdated) {
             const LineGradientPropertiesUBO lineGradientPropertiesUBO{
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
                 /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
@@ -71,13 +67,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
                 0,
                 0};
-            lineGradientPropertiesBuffer = context.createUniformBuffer(&lineGradientPropertiesUBO,
-                                                                       sizeof(lineGradientPropertiesUBO));
+            context.emplaceOrUpdateUniformBuffer(lineGradientPropertiesBuffer, &lineGradientPropertiesUBO);
+            gradientPropertiesUpdated = false;
         }
         return lineGradientPropertiesBuffer;
     };
     const auto getLinePatternPropsBuffer = [&]() {
-        if (!linePatternPropertiesBuffer) {
+        if (!linePatternPropertiesBuffer || patternPropertiesUpdated) {
             const LinePatternPropertiesUBO linePatternPropertiesUBO{
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
                 /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
@@ -87,13 +83,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 0,
                 0,
                 0};
-            linePatternPropertiesBuffer = context.createUniformBuffer(&linePatternPropertiesUBO,
-                                                                      sizeof(linePatternPropertiesUBO));
+            context.emplaceOrUpdateUniformBuffer(linePatternPropertiesBuffer, &linePatternPropertiesUBO);
+            patternPropertiesUpdated = false;
         }
         return linePatternPropertiesBuffer;
     };
     const auto getLineSDFPropsBuffer = [&]() {
-        if (!lineSDFPropertiesBuffer) {
+        if (!lineSDFPropertiesBuffer || sdfPropertiesUpdated) {
             const LineSDFPropertiesUBO lineSDFPropertiesUBO{
                 /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
                 /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
@@ -104,43 +100,17 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 /*floorwidth =*/evaluated.get<LineFloorWidth>().constantOr(LineFloorWidth::defaultValue()),
                 0,
                 0};
-            lineSDFPropertiesBuffer = context.createUniformBuffer(&lineSDFPropertiesUBO, sizeof(lineSDFPropertiesUBO));
+            context.emplaceOrUpdateUniformBuffer(lineSDFPropertiesBuffer, &lineSDFPropertiesUBO);
+            sdfPropertiesUpdated = false;
         }
         return lineSDFPropertiesBuffer;
     };
 
-#if MLN_RENDER_BACKEND_METAL
-    if (permutationUpdated) {
-        const LinePermutationUBO permutationUBO = {
-            /* .color = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(2), /*.expression=*/{}},
-            /* .blur = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(3), /*.expression=*/{}},
-            /* .opacity = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(4), /*.expression=*/{}},
-            /* .gapwidth = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(5), /*.expression=*/{}},
-            /* .offset = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(6), /*.expression=*/{}},
-            /* .width = */ {/*.source=*/getAttributeSource<BuiltIn::LineShader>(7), /*.expression=*/{}},
-            /* .floorwidth = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
-            /* .pattern_from = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
-            /* .pattern_to = */ {/*.source=*/AttributeSource::Constant, /*.expression=*/{}},
-            /* .overdrawInspector = */ overdrawInspector,
-            /* .pad = */ 0,
-            0,
-            0,
-            0};
+    const LineDynamicUBO dynamicUBO = {
+        /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, 0, 0};
+    context.emplaceOrUpdateUniformBuffer(dynamicBuffer, &dynamicUBO);
 
-        if (permutationUniformBuffer) {
-            permutationUniformBuffer->update(&permutationUBO, sizeof(permutationUBO));
-        } else {
-            permutationUniformBuffer = context.createUniformBuffer(&permutationUBO, sizeof(permutationUBO));
-        }
-        permutationUpdated = false;
-    }
-    if (!expressionUniformBuffer) {
-        const auto expressionUBO = buildExpressionUBO(zoom, parameters.frameCount);
-        expressionUniformBuffer = context.createUniformBuffer(&expressionUBO, sizeof(expressionUBO));
-    }
-#endif
-
-    layerGroup.visitDrawables([&](gfx::Drawable& drawable) {
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         const auto shader = drawable.getShader();
         if (!drawable.getTileID() || !shader || !checkTweakDrawable(drawable)) {
             return;
@@ -153,58 +123,65 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
         auto& uniforms = drawable.mutableUniformBuffers();
 
-        const auto matrix = getTileMatrix(tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits);
+        const auto matrix = getTileMatrix(
+            tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         const LineType type = static_cast<LineType>(drawable.getType());
-
         switch (type) {
             case LineType::Simple: {
-                const LineUBO lineUBO{
-                    /*matrix = */ util::cast<float>(matrix),
-                    /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
-                    /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                    /*device_pixel_ratio = */ parameters.pixelRatio};
-                uniforms.createOrUpdate(idLineUBOName, &lineUBO, context);
+                const LineUBO lineUBO{/*matrix = */ util::cast<float>(matrix),
+                                      /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
+                                      0,
+                                      0,
+                                      0};
+                uniforms.createOrUpdate(idLineUBO, &lineUBO, context);
 
                 // properties UBO
-                uniforms.addOrReplace(idLinePropertiesUBOName, getLinePropsBuffer());
+                uniforms.set(idLinePropertiesUBO, getLinePropsBuffer());
+
+                // dynamic UBO
+                uniforms.set(idLineDynamicUBO, dynamicBuffer);
             } break;
 
             case LineType::Gradient: {
                 const LineGradientUBO lineGradientUBO{
                     /*matrix = */ util::cast<float>(matrix),
-                    /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                    /*device_pixel_ratio = */ parameters.pixelRatio};
-                uniforms.createOrUpdate(idLineGradientUBOName, &lineGradientUBO, context);
+                    0,
+                    0,
+                    0};
+                uniforms.createOrUpdate(idLineGradientUBO, &lineGradientUBO, context);
 
                 // properties UBO
-                uniforms.addOrReplace(idLineGradientPropertiesUBOName, getLineGradientPropsBuffer());
+                uniforms.set(idLineGradientPropertiesUBO, getLineGradientPropsBuffer());
+
+                // dynamic UBO
+                uniforms.set(idLineGradientDynamicUBO, dynamicBuffer);
             } break;
 
             case LineType::Pattern: {
                 Size textureSize{0, 0};
-                if (const auto index = shader->getSamplerLocation(idTexImageName)) {
-                    if (const auto& texture = drawable.getTexture(index.value())) {
-                        textureSize = texture->getSize();
-                    }
+                if (const auto& texture = drawable.getTexture(idLineImageTexture)) {
+                    textureSize = texture->getSize();
                 }
                 const LinePatternUBO linePatternUBO{
                     /*matrix =*/util::cast<float>(matrix),
+                    /*scale =*/
                     {parameters.pixelRatio,
                      1 / tileID.pixelsToTileUnits(1, parameters.state.getIntegerZoom()),
                      crossfade.fromScale,
                      crossfade.toScale},
                     /*texsize =*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                    /*units_to_pixels =*/{1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio =*/1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                    /*device_pixel_ratio =*/parameters.pixelRatio,
-                    /*fade =*/crossfade.t,
-                    0};
-                uniforms.createOrUpdate(idLinePatternUBOName, &linePatternUBO, context);
+                    /*fade =*/crossfade.t};
+                uniforms.createOrUpdate(idLinePatternUBO, &linePatternUBO, context);
 
                 // properties UBO
-                uniforms.addOrReplace(idLinePatternPropertiesUBOName, getLinePatternPropsBuffer());
+                uniforms.set(idLinePatternPropertiesUBO, getLinePatternPropsBuffer());
+
+                // dynamic UBO
+                uniforms.set(idLinePatternDynamicUBO, dynamicBuffer);
+
             } break;
 
             case LineType::SDF: {
@@ -216,13 +193,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         lineData.linePatternCap);
 
                     // texture
-                    if (const auto index = shader->getSamplerLocation(idTexImageName)) {
-                        if (!drawable.getTexture(index.value())) {
-                            const auto& texture = dashPatternTexture.getTexture();
-                            drawable.setEnabled(!!texture);
-                            if (texture) {
-                                drawable.setTexture(texture, index.value());
-                            }
+                    if (!drawable.getTexture(idLineImageTexture)) {
+                        const auto& texture = dashPatternTexture.getTexture();
+                        drawable.setEnabled(!!texture);
+                        if (texture) {
+                            drawable.setTexture(texture, idLineImageTexture);
                         }
                     }
 
@@ -232,24 +207,28 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     const float widthB = posB.width * crossfade.toScale;
                     const LineSDFUBO lineSDFUBO{
                         /* matrix = */ util::cast<float>(matrix),
-                        {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
+                        /* patternscale_a = */
                         {1.0f / tileID.pixelsToTileUnits(widthA, parameters.state.getIntegerZoom()),
                          -posA.height / 2.0f},
                         /* patternscale_b = */
                         {1.0f / tileID.pixelsToTileUnits(widthB, parameters.state.getIntegerZoom()),
                          -posB.height / 2.0f},
-                        /* ratio = */ 1.0f /
-                            tileID.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom())),
-                        /* device_pixel_ratio = */ parameters.pixelRatio,
+                        /* ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                         /* tex_y_a = */ posA.y,
                         /* tex_y_b = */ posB.y,
                         /* sdfgamma = */ static_cast<float>(dashPatternTexture.getSize().width) /
                             (std::min(widthA, widthB) * 256.0f * parameters.pixelRatio) / 2.0f,
-                        /* mix = */ crossfade.t};
-                    uniforms.createOrUpdate(idLineSDFUBOName, &lineSDFUBO, context);
+                        /* mix = */ crossfade.t,
+                        0,
+                        0,
+                        0};
+                    uniforms.createOrUpdate(idLineSDFUBO, &lineSDFUBO, context);
 
                     // properties UBO
-                    uniforms.addOrReplace(idLineSDFPropertiesUBOName, getLineSDFPropsBuffer());
+                    uniforms.set(idLineSDFPropertiesUBO, getLineSDFPropsBuffer());
+
+                    // dynamic UBO
+                    uniforms.set(idLineSDFDynamicUBO, dynamicBuffer);
                 }
             } break;
 
@@ -259,11 +238,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                            "LineLayerTweaker: unknown line type: "s + std::to_string(mbgl::underlying_type(type)));
             } break;
         }
-
-#if MLN_RENDER_BACKEND_METAL
-        uniforms.addOrReplace(idExpressionInputsUBOName, expressionUniformBuffer);
-        uniforms.addOrReplace(idLinePermutationUBOName, permutationUniformBuffer);
-#endif // MLN_RENDER_BACKEND_METAL
     });
 }
 

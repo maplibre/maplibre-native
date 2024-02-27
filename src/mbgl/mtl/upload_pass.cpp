@@ -19,18 +19,16 @@ UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncod
     : commandEncoder(commandEncoder_) {
     auto& resource = renderable.getResource<RenderableResource>();
 
-    if (!resource.getCommandBuffer()) {
-        resource.bind();
-    }
+    resource.bind();
 
     if (const auto& buffer_ = resource.getCommandBuffer()) {
         buffer = buffer_;
-        if (auto upd = resource.getUploadPassDescriptor()) {
-            encoder = NS::RetainPtr(buffer->blitCommandEncoder(upd.get()));
-        }
+        // blit encoder is not being used yet
+        // if (auto upd = resource.getUploadPassDescriptor()) {
+        //    encoder = NS::RetainPtr(buffer->blitCommandEncoder(upd.get()));
+        //}
+        // assert(encoder);
     }
-
-    assert(encoder);
 
     // Push the groups already accumulated by the encoder
     commandEncoder.visitDebugGroups([this](const auto& group) {
@@ -60,8 +58,10 @@ void UploadPass::endEncoding() {
 
 std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResource(const void* data,
                                                                                   const std::size_t size,
-                                                                                  const gfx::BufferUsageType usage) {
-    return std::make_unique<VertexBufferResource>(commandEncoder.context.createBuffer(data, size, usage));
+                                                                                  const gfx::BufferUsageType usage,
+                                                                                  bool persistent) {
+    return std::make_unique<VertexBufferResource>(
+        commandEncoder.context.createBuffer(data, size, usage, /*isIndexBuffer=*/false, persistent));
 }
 
 void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {
@@ -70,8 +70,10 @@ void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource,
 
 std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(const void* data,
                                                                                 const std::size_t size,
-                                                                                const gfx::BufferUsageType usage) {
-    return std::make_unique<IndexBufferResource>(commandEncoder.context.createBuffer(data, size, usage));
+                                                                                const gfx::BufferUsageType usage,
+                                                                                bool persistent) {
+    return std::make_unique<IndexBufferResource>(
+        commandEncoder.context.createBuffer(data, size, usage, /*isIndexBuffer=*/true, persistent));
 }
 
 void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, const void* data, std::size_t size) {
@@ -137,7 +139,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         // Otherwise, create a new one
         if (rawBufSize > 0) {
             auto buffer = std::make_unique<VertexBuffer>();
-            buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage);
+            buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
             vec->setBuffer(std::move(buffer));
             vec->setDirty(false);
             return static_cast<VertexBuffer*>(vec->getBuffer())->resource;
@@ -156,7 +158,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::BufferUsageType usage,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) {
     gfx::AttributeBindingArray bindings;
-    bindings.resize(defaults.size());
+    bindings.resize(defaults.allocatedSize());
 
     constexpr std::size_t align = 16;
     constexpr std::uint8_t padding = 0;
@@ -167,7 +169,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     uint32_t vertexStride = 0;
 
     // For each attribute in the program, with the corresponding default and optional override...
-    const auto resolveAttr = [&](const StringIdentity id, auto& default_, auto& override_) -> void {
+    const auto resolveAttr = [&](const size_t id, auto& default_, auto& override_) -> void {
         auto& effectiveAttr = override_ ? *override_ : default_;
         const auto& defaultAttr = static_cast<const VertexAttribute&>(default_);
         const auto stride = defaultAttr.getStride();
@@ -223,7 +225,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     assert(vertexStride * vertexCount <= allData.size());
 
     if (!allData.empty()) {
-        if (auto vertBuf = createVertexBufferResource(allData.data(), allData.size(), usage)) {
+        if (auto vertBuf = createVertexBufferResource(allData.data(), allData.size(), usage, /*persistent=*/false)) {
             // Fill in the buffer in each binding that was generated without its own buffer
             std::for_each(bindings.begin(), bindings.end(), [&](auto& b) {
                 if (b && !b->vertexBufferResource) {
@@ -249,14 +251,12 @@ NS::String* toNSString(const char* str) {
 } // namespace
 
 void UploadPass::pushDebugGroup(const char* name) {
-    assert(encoder);
     if (encoder) {
         encoder->pushDebugGroup(toNSString(name));
     }
 }
 
 void UploadPass::popDebugGroup() {
-    assert(encoder);
     if (encoder) {
         encoder->popDebugGroup();
     }

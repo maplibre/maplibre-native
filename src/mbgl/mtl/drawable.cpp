@@ -24,6 +24,9 @@
 #include <simd/simd.h>
 
 #include <cassert>
+#if !defined(NDEBUG)
+#include <sstream>
+#endif
 
 namespace mbgl {
 namespace mtl {
@@ -43,16 +46,6 @@ Drawable::Drawable(std::string name_)
 Drawable::~Drawable() {}
 
 namespace {
-// Downcast a generic vertex buffer resource and extract the Metal buffer
-MTL::Buffer* getMetalBuffer(const gfx::VertexBufferResource* resource_) {
-    if (const auto* resource = static_cast<const VertexBufferResource*>(resource_)) {
-        if (const auto& bufferResource = resource->get()) {
-            return bufferResource.getMetalBuffer().get();
-        }
-    }
-    return nullptr;
-}
-
 #if !defined(NDEBUG)
 std::size_t getBufferSize(const gfx::VertexBufferResource* resource_) {
     if (const auto* resource = static_cast<const VertexBufferResource*>(resource_)) {
@@ -64,7 +57,7 @@ std::size_t getBufferSize(const gfx::VertexBufferResource* resource_) {
 }
 #endif // !defined(NDEBUG)
 
-MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) {
+MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) noexcept {
     switch (type) {
         default:
             assert(false);
@@ -73,6 +66,8 @@ MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) {
             return MTL::PrimitiveType::PrimitiveTypePoint;
         case gfx::DrawModeType::Lines:
             return MTL::PrimitiveType::PrimitiveTypeLine;
+        case gfx::DrawModeType::LineStrip:
+            return MTL::PrimitiveType::PrimitiveTypeLineStrip;
         case gfx::DrawModeType::Triangles:
             return MTL::PrimitiveType::PrimitiveTypeTriangle;
     }
@@ -80,15 +75,20 @@ MTL::PrimitiveType getPrimitiveType(const gfx::DrawModeType type) {
 
 #if !defined(NDEBUG)
 std::string debugLabel(const gfx::Drawable& drawable) {
-    std::string result = drawable.getName();
+    std::ostringstream oss;
+    oss << drawable.getID().id() << "/" << drawable.getName() << "/tile=";
+
     if (const auto& tileID = drawable.getTileID()) {
-        result.append("/tile=").append(util::toString(*tileID));
+        oss << util::toString(*tileID);
+    } else {
+        oss << "(none)";
     }
-    return result;
+
+    return oss.str();
 }
 #endif // !defined(NDEBUG)
 
-MTL::Buffer* getMetalBuffer(const gfx::IndexVectorBasePtr& indexes) {
+MTL::Buffer* getMetalBuffer(const gfx::IndexVectorBasePtr& indexes) noexcept {
     if (const auto* buf0 = indexes->getBuffer()) {
         if (const auto* buf1 = static_cast<const IndexBuffer*>(buf0)->buffer.get()) {
             const auto& buf2 = buf1->getResource<IndexBufferResource>().get();
@@ -98,7 +98,7 @@ MTL::Buffer* getMetalBuffer(const gfx::IndexVectorBasePtr& indexes) {
     return nullptr;
 }
 
-MTL::CullMode mapCullMode(const gfx::CullFaceSideType mode) {
+MTL::CullMode mapCullMode(const gfx::CullFaceSideType mode) noexcept {
     switch (mode) {
         case gfx::CullFaceSideType::Front:
             return MTL::CullModeFront;
@@ -110,7 +110,7 @@ MTL::CullMode mapCullMode(const gfx::CullFaceSideType mode) {
     }
 }
 
-MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) {
+MTL::Winding mapWindingMode(const gfx::CullFaceWindingType mode) noexcept {
     switch (mode) {
         case gfx::CullFaceWindingType::Clockwise:
             return MTL::Winding::WindingClockwise;
@@ -158,7 +158,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     auto& context = static_cast<Context&>(parameters.context);
-    const auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
+    auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
     const auto& encoder = renderPass.getMetalEncoder();
     if (!encoder) {
         assert(false);
@@ -235,16 +235,16 @@ void Drawable::draw(PaintParameters& parameters) const {
             if (enableStencil && !newStencilMode) {
                 newStencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
             }
-            const auto depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+            const auto depthMode = getEnableDepth()
+                                       ? parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType())
+                                       : gfx::DepthMode::disabled();
             const auto stencilMode = enableStencil ? parameters.stencilModeForClipping(tileID->toUnwrapped())
                                                    : gfx::StencilMode::disabled();
             impl->depthStencilState = context.makeDepthStencilState(depthMode, stencilMode, renderable);
             impl->previousStencilMode = *newStencilMode;
         }
-        if (impl->depthStencilState) {
-            encoder->setDepthStencilState(impl->depthStencilState.get());
-            encoder->setStencilReferenceValue(impl->previousStencilMode.ref);
-        }
+        renderPass.setDepthStencilState(impl->depthStencilState);
+        renderPass.setStencilReference(impl->previousStencilMode.ref);
     }
 
     for (const auto& seg_ : impl->segments) {
@@ -284,16 +284,6 @@ void Drawable::draw(PaintParameters& parameters) const {
 
             assert(mlSegment.indexOffset + mlSegment.indexLength <= indexBufferLength);
             assert(static_cast<std::size_t>(maxIndex) < mlSegment.vertexLength);
-
-            for (const auto& binding : impl->attributeBindings) {
-                if (binding) {
-                    if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
-                        assert((maxIndex + mlSegment.vertexOffset) * binding->vertexStride <= buffer->length());
-                    } else if (impl->noBindingBuffer) {
-                        assert(binding->vertexStride <= impl->noBindingBuffer->length());
-                    }
-                }
-            }
 #endif
 
             encoder->drawIndexedPrimitives(primitiveType,
@@ -324,32 +314,19 @@ void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::
     impl->vertexType = type;
 
     if (count && type != gfx::AttributeDataType::Invalid && !data.empty()) {
-        if (auto& attrib = impl->vertexAttributes.getOrAdd(impl->idVertexAttrName, /*index=*/-1, type)) {
+        if (!vertexAttributes) {
+            vertexAttributes = std::make_shared<VertexAttributeArray>();
+        }
+        if (auto& attrib = vertexAttributes->set(impl->vertexAttrId, /*index=*/-1, type)) {
             attrib->setRawData(std::move(data));
             attrib->setStride(VertexAttribute::getStrideOf(type));
         } else {
             using namespace std::string_literals;
-            Log::Warning(
-                Event::General,
-                "Vertex attribute type mismatch: "s + name + " / " + stringIndexer().get(impl->idVertexAttrName));
+            Log::Warning(Event::General,
+                         "Vertex attribute type mismatch: "s + name + " / " + util::toString(impl->vertexAttrId));
             assert(false);
         }
     }
-}
-
-const gfx::VertexAttributeArray& Drawable::getVertexAttributes() const {
-    return impl->vertexAttributes;
-}
-
-gfx::VertexAttributeArray& Drawable::mutableVertexAttributes() {
-    return impl->vertexAttributes;
-}
-
-void Drawable::setVertexAttributes(const gfx::VertexAttributeArray& value) {
-    impl->vertexAttributes = static_cast<const VertexAttributeArray&>(value);
-}
-void Drawable::setVertexAttributes(gfx::VertexAttributeArray&& value) {
-    impl->vertexAttributes = std::move(static_cast<VertexAttributeArray&&>(value));
 }
 
 const gfx::UniformBufferArray& Drawable::getUniformBuffers() const {
@@ -360,107 +337,83 @@ gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void Drawable::setVertexAttrNameId(const StringIdentity value) {
-    impl->idVertexAttrName = value;
+void Drawable::setVertexAttrId(const size_t id) {
+    impl->vertexAttrId = id;
 }
 
-void Drawable::bindAttributes(const RenderPass& renderPass) const {
+void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
     const auto& encoder = renderPass.getMetalEncoder();
 
     NS::UInteger attributeIndex = 0;
     for (const auto& binding : impl->attributeBindings) {
-        if (const auto buffer = getMetalBuffer(binding ? binding->vertexBufferResource : nullptr)) {
+        const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding ? binding->vertexBufferResource
+                                                                                   : nullptr);
+        if (buffer && buffer->get()) {
             assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
-            encoder->setVertexBuffer(buffer, /*offset=*/0, attributeIndex);
-        } else if (impl->noBindingBuffer) {
-            encoder->setVertexBuffer(impl->noBindingBuffer, /*offset=*/0, attributeIndex);
+            renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
+        } else {
+            const auto* shaderMTL = static_cast<const ShaderProgram*>(shader.get());
+            auto& context = renderPass.getCommandEncoder().getContext();
+            renderPass.bindVertex(context.getEmptyBuffer(), /*offset=*/0, attributeIndex);
         }
         attributeIndex += 1;
     }
 }
 
-void Drawable::unbindAttributes(const RenderPass& renderPass) const {
-    const auto& encoder = renderPass.getMetalEncoder();
-
-    NS::UInteger attributeIndex = 0;
-    for (const auto& binding : impl->attributeBindings) {
-        encoder->setVertexBuffer(nullptr, /*offset=*/0, attributeIndex);
-        attributeIndex += 1;
-    }
-}
-
-void Drawable::bindUniformBuffers(const RenderPass& renderPass) const {
+void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
     if (shader) {
-        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
-        const auto& encoder = renderPass.getMetalEncoder();
-        for (const auto& element : shaderMTL.getUniformBlocks().getMap()) {
-            const auto& uniformBuffer = getUniformBuffers().get(element.first);
-            if (!uniformBuffer) {
-                using namespace std::string_literals;
-                const auto tileID = getTileID() ? util::toString(*getTileID()) : "<no tile>";
-                const auto tileLabel = util::toString(getID()) + "/" + getName() + "/" + tileID;
-                Log::Error(Event::General,
-                           "bindUniformBuffers: UBO "s + stringIndexer().get(element.first) + " not found on " +
-                               tileLabel + ". skipping.");
-                assert(false);
-                continue;
-            }
+        const auto& uniformBlocks = shader->getUniformBlocks();
+        for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
+            const auto& block = uniformBlocks.get(id);
+            if (!block) continue;
+            const auto& uniformBuffer = getUniformBuffers().get(id);
+            assert(uniformBuffer && "UBO missing, drawable skipped");
+            if (uniformBuffer) {
+                const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
+                const auto& resource = buffer.getBufferResource();
+                const auto& mtlBlock = static_cast<const UniformBlock&>(*block);
 
-            const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
-            const auto& bufferMTL = buffer.getBufferResource().getMetalBuffer().get();
-
-            const auto& block = static_cast<const UniformBlock&>(*element.second);
-            const auto index = block.getIndex();
-
-            if (block.getBindVertex()) {
-                encoder->setVertexBuffer(bufferMTL, /*offset=*/0, index);
-            }
-            if (block.getBindFragment()) {
-                encoder->setFragmentBuffer(bufferMTL, /*offset=*/0, index);
+                if (mtlBlock.getBindVertex()) {
+                    renderPass.bindVertex(resource, /*offset=*/0, block->getIndex());
+                }
+                if (mtlBlock.getBindFragment()) {
+                    renderPass.bindFragment(resource, /*offset=*/0, block->getIndex());
+                }
             }
         }
     }
 }
 
-void Drawable::unbindUniformBuffers(const RenderPass& renderPass) const {
-    if (shader) {
-        const auto& shaderMTL = static_cast<const ShaderProgram&>(*shader);
-        const auto& encoder = renderPass.getMetalEncoder();
-        for (const auto& element : shaderMTL.getUniformBlocks().getMap()) {
-            const auto index = element.second->getIndex();
-            encoder->setVertexBuffer(nullptr, 0, index);
+void Drawable::bindTextures(RenderPass& renderPass) const noexcept {
+    for (size_t id = 0; id < textures.size(); id++) {
+        if (const auto& texture = textures[id]) {
+            if (const auto& location = shader->getSamplerLocation(id)) {
+                static_cast<mtl::Texture2D&>(*texture).bind(renderPass, static_cast<int32_t>(*location));
+            }
         }
     }
 }
 
-void Drawable::bindTextures(const RenderPass& renderPass) const {
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            const auto& location = pair.first;
-            std::static_pointer_cast<mtl::Texture2D>(tex)->bind(renderPass, location);
+void Drawable::unbindTextures(RenderPass& renderPass) const noexcept {
+    for (size_t id = 0; id < textures.size(); id++) {
+        if (const auto& texture = textures[id]) {
+            if (const auto& location = shader->getSamplerLocation(id)) {
+                static_cast<mtl::Texture2D&>(*texture).unbind(renderPass, static_cast<int32_t>(*location));
+            }
         }
     }
 }
 
-void Drawable::unbindTextures(const RenderPass& renderPass) const {
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            const auto& location = pair.first;
-            std::static_pointer_cast<mtl::Texture2D>(tex)->unbind(renderPass, location);
-        }
-    }
-}
-
-void Drawable::uploadTextures() const {
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            std::static_pointer_cast<mtl::Texture2D>(tex)->upload();
+void Drawable::uploadTextures(UploadPass&) const noexcept {
+    for (const auto& texture : textures) {
+        if (texture) {
+            texture->upload();
         }
     }
 }
 
 namespace {
-MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) {
+MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) noexcept {
     switch (type) {
         case gfx::AttributeDataType::Byte:
             return MTL::VertexFormatChar;
@@ -527,6 +480,9 @@ MTL::VertexFormat mtlVertexTypeOf(gfx::AttributeDataType type) {
 } // namespace
 
 void Drawable::upload(gfx::UploadPass& uploadPass_) {
+    if (isCustom) {
+        return;
+    }
     if (!shader) {
         Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
         assert(false);
@@ -548,8 +504,10 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     if (impl->indexes->getDirty()) {
-        auto indexBufferResource{
-            uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
+        // Create or update a buffer for the index data.  We don't update any
+        // existing buffer because it may still be in use by the previous frame.
+        auto indexBufferResource{uploadPass.createIndexBufferResource(
+            impl->indexes->data(), impl->indexes->bytes(), usage, /*persistent=*/false)};
         auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(),
                                                               std::move(indexBufferResource));
         auto buffer = std::make_unique<IndexBuffer>(std::move(indexBuffer));
@@ -558,12 +516,16 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         impl->indexes->setDirty(false);
     }
 
-    const bool buildAttribs = impl->vertexAttributes.isDirty() || !impl->vertexDesc;
+    const bool buildAttribs = !vertexAttributes || vertexAttributes->isDirty() || !impl->vertexDesc;
 
     if (buildAttribs) {
 #if !defined(NDEBUG)
         const auto debugGroup = uploadPass.createDebugGroup(debugLabel(*this));
 #endif
+
+        if (!vertexAttributes) {
+            vertexAttributes = std::make_shared<VertexAttributeArray>();
+        }
 
         // Apply drawable values to shader defaults
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
@@ -572,16 +534,15 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                     /*vertexAttributeIndex=*/-1,
                                                                     /*vertexData=*/{},
                                                                     shader->getVertexAttributes(),
-                                                                    impl->vertexAttributes,
+                                                                    *vertexAttributes,
                                                                     usage,
                                                                     vertexBuffers);
         impl->attributeBuffers = std::move(vertexBuffers);
 
-        impl->vertexAttributes.visitAttributes(
-            [](const auto&, gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
+        vertexAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
         if (impl->attributeBindings != attributeBindings_) {
-            impl->attributeBindings = attributeBindings_;
+            impl->attributeBindings = std::move(attributeBindings_);
 
             // Create a layout descriptor for each attribute
             auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
@@ -590,12 +551,13 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
             for (auto& binding : impl->attributeBindings) {
                 if (!binding) {
                     assert("Missing attribute binding");
+                    index += 1;
                     continue;
                 }
 
                 if (!binding->vertexBufferResource && !impl->noBindingBuffer) {
                     if (const auto& buf = context.getEmptyVertexBuffer()) {
-                        impl->noBindingBuffer = getMetalBuffer(buf.get());
+                        impl->noBindingBuffer = buf.get();
                     }
                 }
 
@@ -623,26 +585,12 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     const bool texturesNeedUpload = std::any_of(
-        textures.begin(), textures.end(), [](const auto& pair) { return pair.second && pair.second->needsUpload(); });
+        textures.begin(), textures.end(), [](const auto& texture) { return texture && texture->needsUpload(); });
 
     if (texturesNeedUpload) {
-        uploadTextures();
+        uploadTextures(uploadPass);
     }
-}
-/*
-gfx::ColorMode Drawable::makeColorMode(PaintParameters& parameters) const {
-    return enableColor ? parameters.colorModeForRenderPass() : gfx::ColorMode::disabled();
 }
 
-gfx::StencilMode Drawable::makeStencilMode(PaintParameters& parameters) const {
-    if (enableStencil) {
-        if (!is3D && tileID) {
-            return parameters.stencilModeForClipping(tileID->toUnwrapped());
-        }
-        assert(false);
-    }
-    return gfx::StencilMode::disabled();
-}
-*/
 } // namespace mtl
 } // namespace mbgl

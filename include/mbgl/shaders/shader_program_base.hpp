@@ -4,7 +4,6 @@
 #include <mbgl/gfx/uniform_block.hpp>
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/util/identity.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #include <string>
 #include <optional>
@@ -19,7 +18,7 @@ protected:
     ~ShaderProgramBase() noexcept override = default;
 
     template <typename T>
-    bool set(gfx::VertexAttributeArray& attrs, const StringIdentity id, std::size_t i, T value) {
+    bool set(gfx::VertexAttributeArray& attrs, const size_t id, std::size_t i, T value) {
         const auto& item = attrs.get(id);
         if (item && i < item->getCount()) {
             item->set(i, value);
@@ -33,7 +32,7 @@ public:
 
     /// @brief Gets the sampler location
     /// @param name uniform name
-    virtual std::optional<uint32_t> getSamplerLocation(const StringIdentity) const = 0;
+    virtual std::optional<size_t> getSamplerLocation(const size_t) const = 0;
 
     /// Get the available uniform blocks attached to this shader
     virtual const gfx::UniformBlockArray& getUniformBlocks() const = 0;
@@ -41,14 +40,8 @@ public:
     /// Get the available vertex attributes and their default values
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
 
-    template <typename T>
-    bool setAttribute(const std::string& name, std::size_t i, T value) {
-        return set(mutableVertexAttributes(), name, i, value);
-    }
-
 protected:
     virtual gfx::UniformBlockArray& mutableUniformBlocks() = 0;
-    virtual gfx::VertexAttributeArray& mutableVertexAttributes() = 0;
 
 protected:
     util::SimpleIdentity shaderProgramID;

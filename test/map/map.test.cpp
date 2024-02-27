@@ -8,7 +8,6 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/gl/context.hpp>
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/math/log2.hpp>
 #include <mbgl/renderer/renderer.hpp>
@@ -1606,10 +1605,6 @@ TEST(Map, ObserveShaderRegistration) {
 TEST(Map, StencilOverflow) {
     MapTest<> test;
 
-    const auto& backend = test.frontend.getBackend();
-    gfx::BackendScope scope{*backend};
-    const auto& context = backend->getContext();
-
     auto& style = test.map.getStyle();
     style.loadJSON("{}");
 
@@ -1627,17 +1622,17 @@ TEST(Map, StencilOverflow) {
     style.addLayer(std::make_unique<style::FillLayer>("fill", "custom"));
 
     test.map.jumpTo(CameraOptions().withZoom(5));
-    test.frontend.render(test.map);
+    auto result = test.frontend.render(test.map);
 
     // In drawable builds, no drawables are built because no bucket/tiledata is available.
 #if MLN_DRAWABLE_RENDERER
-    ASSERT_LE(0, context.renderingStats().stencilUpdates);
+    ASSERT_LE(0, result.stats.stencilUpdates);
 #else
-    ASSERT_LT(0, context.renderingStats().stencilClears);
+    ASSERT_LT(0, result.stats.stencilClears);
 #endif // MLN_DRAWABLE_RENDERER
 
 #if !defined(NDEBUG)
-    Log::Info(Event::General, context.renderingStats().toString("\n"));
+    Log::Info(Event::General, result.stats.toString("\n"));
 #endif // !defined(NDEBUG)
 
     // TODO: confirm that the stencil masking actually worked

@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/drawable_data.hpp>
 #include <mbgl/style/types.hpp>
+#include <mbgl/util/tiny_unordered_map.hpp>
 
 #include <memory>
 

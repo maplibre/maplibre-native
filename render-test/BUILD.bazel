@@ -34,8 +34,8 @@ cc_library(
     deps = [
         "//expression-test:test_runner_common",
     ] + select({
-        "//:ios": ["//platform:ios-sdk"],
-        "//:linux": ["//platform/linux:impl"],
+        "@platforms//os:ios": ["//platform:ios-sdk"],
+        "@platforms//os:linux": ["//platform/linux:impl"],
     }),
 )
 
@@ -49,6 +49,7 @@ cc_test(
     data = [
         "//metrics:render-test-files",
     ],
+    tags = ["no-sandbox"],
     deps = [
         "render-test-srcs",
         "//platform/default:render-test-bin",

@@ -21,6 +21,7 @@
 
 .DS_Store
 .cache
+compile_commands.json
 /build
 **/.idea
 /platform/android/MapboxGLAndroidSDKTestApp/local.properties
@@ -42,6 +43,7 @@ node_modules
 /lib
 
 /bazel-*
+/MODULE.bazel.lock
 CMakeLists.txt.user
 CMakeFiles
 __generated__

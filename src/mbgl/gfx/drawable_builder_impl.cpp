@@ -1,15 +1,17 @@
 #include <mbgl/gfx/drawable_builder_impl.hpp>
 
 #include <mbgl/gfx/drawable_impl.hpp>
-#include <mbgl/util/math.hpp>
-#include <mbgl/style/types.hpp>
 #include <mbgl/gfx/polyline_generator.hpp>
+#include <mbgl/style/types.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/math.hpp>
 
 #include <string>
 
 namespace mbgl {
 namespace gfx {
+
+using namespace shaders;
 
 DrawableBuilder::Impl::LineLayoutVertex DrawableBuilder::Impl::layoutVertex(
     Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar /*= 0*/) {
@@ -59,20 +61,16 @@ void DrawableBuilder::Impl::addPolyline(gfx::DrawableBuilder& builder,
     generator.generate(coordinates, options);
 }
 
-void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {
+void DrawableBuilder::Impl::setupForPolylines(gfx::Context& context, gfx::DrawableBuilder& builder) {
     // setup vertex attributes
-    static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos_normal");
-    static const StringIdentity idDataAttribName = stringIndexer().get("a_data");
-
-    builder.setVertexAttrNameId(idVertexAttribName);
-
+    builder.setVertexAttrId(idLinePosNormalVertexAttribute);
     builder.setRawVertices({}, polylineVertices.elements(), gfx::AttributeDataType::Short2);
 
-    gfx::VertexAttributeArray attrs;
+    auto attrs = context.createVertexAttributeArray();
     using VertexVector = gfx::VertexVector<LineLayoutVertex>;
-    std::shared_ptr<VertexVector> verts = std::make_shared<VertexVector>(polylineVertices);
+    std::shared_ptr<VertexVector> verts = std::make_shared<VertexVector>(std::move(polylineVertices));
 
-    if (const auto& attr = attrs.add(idVertexAttribName)) {
+    if (const auto& attr = attrs->set(idLinePosNormalVertexAttribute)) {
         attr->setSharedRawData(verts,
                                offsetof(LineLayoutVertex, a1),
                                /*vertexOffset=*/0,
@@ -80,7 +78,7 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::DrawableBuilder& builder) {
                                gfx::AttributeDataType::Short2);
     }
 
-    if (const auto& attr = attrs.add(idDataAttribName)) {
+    if (const auto& attr = attrs->set(idLineDataVertexAttribute)) {
         attr->setSharedRawData(verts,
                                offsetof(LineLayoutVertex, a2),
                                /*vertexOffset=*/0,

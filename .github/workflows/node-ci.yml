@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - topic/drawable
+      - node-*.*.x
     tags:
       - "node-*"
     paths:
@@ -77,6 +78,12 @@ jobs:
           #   arch: arm64
           - runs-on: [self-hosted, linux, ARM64]
             arch: arm64
+          # Disabled until Metal backend is complete
+          # A release for macOS can be made from the opengl-2 branch
+          # - runs-on: macos-12
+          #   arch: x86_64
+          # - runs-on: [self-hosted, macOS, ARM64]
+          #   arch: arm64
           - runs-on: windows-2022
             arch: x86_64
     continue-on-error: true
@@ -138,10 +145,10 @@ jobs:
             libwebp-dev
           /usr/sbin/update-ccache-symlinks
 
-      - name: Setup node
-        uses: actions/setup-node@v3
+      - name: Use Node.js from nvmrc
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
 
       - name: npm ci
         run: npm ci --ignore-scripts
@@ -159,7 +166,7 @@ jobs:
           "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Setup cmake (Linux)
-        if: runner.os == 'Linux' && runner.arch != 'arm64'
+        if: runner.os == 'Linux' && matrix.arch != 'arm64'
         uses: jwlawson/actions-setup-cmake@v1.14
         with:
           cmake-version: "3.19.x"
@@ -186,7 +193,7 @@ jobs:
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
 
       - name: Cache cmake-node-module deps
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           # downloaded with platform/node/cmake/module.cmake
           path: build/headers
@@ -224,7 +231,7 @@ jobs:
 
       - name: Restore vcpkg cache (Windows)
         if: runner.os == 'Windows'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/platform/windows/vendor/vcpkg
@@ -260,7 +267,7 @@ jobs:
 
       - name: Upload render test artifacts (MacOS)
         if: runner.os == 'MacOS'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: render-query-test-results
           path: metrics/macos-xcode11-release-style.html
@@ -286,6 +293,5 @@ jobs:
 
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
-        if: github.ref != 'refs/heads/main'
         run: |
           npm pack --dry-run
