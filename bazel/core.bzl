@@ -1122,3 +1122,10 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/shaders/mtl/symbol_text_and_icon.hpp",
     "include/mbgl/style/layers/mtl/custom_layer_render_parameters.hpp",
 ]
+
+MLN_SHAPING_HARFBUZZ_SRCS = [
+    "src/mbgl/text/freetype.hpp",
+    "src/mbgl/text/freetype.cpp",
+    "src/mbgl/text/harfbuzz_impl.hpp",
+    "src/mbgl/text/harfbuzz_impl.cpp",
+]

@@ -1298,15 +1298,51 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
         SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz_impl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/harfbuzz_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/freetype.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/text/freetype.hpp
     )
 
     set(SHAPE_TARGETS
-        harfbuzzFreetype
         freetype
         harfbuzz
     ) 
 
-    add_subdirectory(vendor/harfbuzzFreetype)
+    set(FT_DISABLE_BROTLI ON CACHE BOOL "freetype option")
+    set(FT_REQUIRE_BROTLI OFF CACHE BOOL "freetype option")
+    add_subdirectory(vendor/freetype)
+    add_subdirectory(vendor/harfbuzz)
+
+    target_compile_definitions(harfbuzz PRIVATE -DHAVE_FREETYPE)
+
+    set_target_properties(
+        freetype
+        PROPERTIES
+            INTERFACE_MAPBOX_NAME "freetype"
+            INTERFACE_MAPBOX_URL "https://github.com/freetype/freetype"
+            INTERFACE_MAPBOX_AUTHOR "David Turner"
+            INTERFACE_MAPBOX_LICENSE vendor/freetype/docs/FTL.TXT
+    )
+
+    set_target_properties(
+        harfbuzz
+        PROPERTIES
+            INTERFACE_MAPBOX_NAME "harfbuzz"
+            INTERFACE_MAPBOX_URL "https://github.com/harfbuzz/harfbuzz"
+            INTERFACE_MAPBOX_AUTHOR vendor/harfbuzz/AUTHORS
+            INTERFACE_MAPBOX_LICENSE vendor/harfbuzz/COPYING
+    )
+
+    target_include_directories(
+        mbgl-core SYSTEM
+        PUBLIC vendor/freetype/include
+    )
+
+    target_include_directories(
+        mbgl-core SYSTEM
+        PUBLIC vendor/harfbuzz/src
+    )
 endif()
 
 target_sources(

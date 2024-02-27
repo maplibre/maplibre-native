@@ -1,4 +1,4 @@
-#include "harfbuzz_wrap.hpp"
+#include "harfbuzz_impl.hpp"
 
 #include <hb-ft.h>
 
@@ -24,25 +24,24 @@ static hb_script_t getUnicodeScript (hb_codepoint_t u)
   return hb_unicode_script (unicode_funcs, u);
 }
 
-HBShaperWrap::HBShaperWrap(const std::string &fontFileData, const FreeTypeLibrary &lib)
-    : face(fontFileData.data(), fontFileData.size(), lib) {
-    if (!face.Valid()) return;
+HBShaper::Impl::Impl(GlyphIDType type_, const std::string &fontFileData, const FreeTypeLibrary &lib)
+    : type(type_), face(fontFileData.data(), fontFileData.size(), lib) {
+    if (!face.isValid()) return;
 
-    font = hb_ft_font_create(face.face, NULL);
+    font = hb_ft_font_create(face.getFace(), NULL);
     buffer = hb_buffer_create();
 
     hb_buffer_allocation_successful(buffer);
 }
 
-HBShaperWrap::~HBShaperWrap() {
-    if (!face.valid) return;
+HBShaper::Impl::~Impl() {
+    if (!face.isValid()) return;
     hb_buffer_destroy(buffer);
     hb_font_destroy(font);
 }
-
-void HBShaperWrap::CreateComplexGlyphIDs(const std::u16string& text,
-                                         std::vector<uint32_t>& glyphIDs,
-                                         std::vector<HBShapeAdjust>& adjusts) {
+void HBShaper::Impl::createComplexGlyphIDs(const std::u16string &text,
+                                         std::vector<GlyphID> &glyphIDs,
+                                         std::vector<HBShapeAdjust> &adjusts) {
     if (text.empty()) {
         return;
     }
@@ -96,7 +95,7 @@ void HBShaperWrap::CreateComplexGlyphIDs(const std::u16string& text,
         adjusts.reserve(glyphCount);
 
         for (uint32_t i = 0; i < glyphCount; ++i) {
-            glyphIDs.emplace_back(glyphInfo[i].codepoint);
+            glyphIDs.emplace_back(glyphInfo[i].codepoint, type);
 
             float x_advance = static_cast<float>(glyphPos[i].x_advance / 64.0f);
             float x_offset = static_cast<float>(glyphPos[i].x_offset / 64.0f);
@@ -106,5 +105,6 @@ void HBShaperWrap::CreateComplexGlyphIDs(const std::u16string& text,
         }
     }
 }
+
 
 } // namespace mbgl

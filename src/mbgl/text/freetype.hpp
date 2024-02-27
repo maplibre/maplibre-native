@@ -1,6 +1,6 @@
 #pragma once
 
-//#include "glyph.hpp"
+#include "glyph.hpp"
 
 #include <string>
 #include <vector>
@@ -17,7 +17,7 @@ namespace mbgl {
 
 class FreeTypeLibrary {
 public:
-    friend class FreeTypeFaceWrap;
+    friend class FreeTypeFace;
     FreeTypeLibrary();
     ~FreeTypeLibrary();
 
@@ -28,16 +28,17 @@ private:
 // call back format: width, height, left, top, advance, bitmap data
 using GlyphCallBack = std::function<void(uint32_t, uint32_t, int, int, uint32_t, unsigned char*)>;
 
-class FreeTypeFaceWrap {
+class FreeTypeFace {
 public:
-    friend class HBShaperWrap;
-    explicit FreeTypeFaceWrap(const std::string &fontFileName, const FreeTypeLibrary &lib);
-    explicit FreeTypeFaceWrap(const char *fontData, size_t fontDataSize, const FreeTypeLibrary &lib);
-    ~FreeTypeFaceWrap();
+    explicit FreeTypeFace(const std::string &fontFileName, const FreeTypeLibrary &lib);
+    explicit FreeTypeFace(const char *fontData, size_t fontDataSize, const FreeTypeLibrary &lib);
+    ~FreeTypeFace();
 
-    void rasterizeGlyph(char16_t glyph, GlyphCallBack callback);
+    Glyph rasterizeGlyph(const GlyphID &glyph);
 
-    bool Valid() const { return valid; }
+    bool isValid() const { return valid; }
+
+    FT_Face getFace() { return face; }
 
 private:
     FT_Face face;

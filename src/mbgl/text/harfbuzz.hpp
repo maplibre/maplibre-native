@@ -1,9 +1,17 @@
 #pragma once
 
+#include "glyph.hpp"
+
 #ifdef MLN_TEXT_SHAPING_HARFBUZZ
-#include <harfbuzz_wrap.hpp>
-#else
+#include "freetype.hpp"
+#endif
+
+namespace mbgl {
+
+#ifndef MLN_TEXT_SHAPING_HARFBUZZ
 struct FreeTypeLibrary {};
+#endif
+
 struct HBShapeAdjust {
     float x_offset;
     float y_offset;
@@ -15,30 +23,22 @@ struct HBShapeAdjust {
           y_offset(y),
           advance(a) {}
 };
-#endif
-#include "glyph.hpp"
-
-namespace mbgl {
 
 class HBShaper {
 public:
-    explicit HBShaper(GlyphIDType type_, const std::string &fontFileData, const FreeTypeLibrary &lib);
+    explicit HBShaper(GlyphIDType type, const std::string &fontFileData, const FreeTypeLibrary &lib);
     ~HBShaper();
 
-    void CreateComplexGlyphIDs(const std::u16string &text,
+    void createComplexGlyphIDs(const std::u16string &text,
                                std::vector<GlyphID> &glyphIDs,
                                std::vector<HBShapeAdjust> &adjusts);
-    Glyph rasterizeGlyph(GlyphID glyphID);
+    Glyph rasterizeGlyph(const GlyphID &glyph);
 
-#ifdef MLN_TEXT_SHAPING_HARFBUZZ
-    bool Valid() { return shaper->Valid(); }
-
+    bool valid();
 private:
-    GlyphIDType type;
-    std::unique_ptr<HBShaperWrap> shaper = nullptr;
-#else
-    bool Valid() { return false; }
-#endif
+    class Impl;
+    
+    std::unique_ptr<Impl> impl;
 };
 
 } // namespace mbgl

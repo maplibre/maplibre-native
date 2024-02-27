@@ -205,7 +205,7 @@ std::shared_ptr<HBShaper> GlyphManager::getHBShaper(FontStack fontStack, GlyphID
 
 bool GlyphManager::loadHBShaper(const FontStack& fontStack, GlyphIDType type, const std::string& data) {
     auto shaper = std::make_shared<HBShaper>(type, data, ftLibrary);
-    if (!shaper->Valid()) return false;
+    if (!shaper->valid()) return false;
     hbShapers[fontStack][type] = shaper;
     return true;
 }
@@ -237,7 +237,7 @@ void GlyphManager::hbShaping(const std::u16string& text,
                              std::vector<HBShapeAdjust>& adjusts) {
     auto shaper = getHBShaper(font, type);
     if (shaper) {
-        shaper->CreateComplexGlyphIDs(text, glyphIDs, adjusts);
+        shaper->createComplexGlyphIDs(text, glyphIDs, adjusts);
     }
 }
 
