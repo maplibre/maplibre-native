@@ -2,6 +2,9 @@
 #import "MLNStyleLayer.h"
 #import "MLNCustomDrawableStyleLayer.h"
 
+#import <UIKit/UIKit.h>
+
+#include <mbgl/util/image+MLNAdditions.hpp>
 #include <mbgl/layermanager/layer_factory.hpp>
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/layers/custom_drawable_layer.hpp>
@@ -81,7 +84,7 @@ public:
                 interface.addPolyline(polyline);
             }
         }
-        
+
         // add fill polygon
         {
             using namespace mbgl;
@@ -110,6 +113,36 @@ public:
 
             // add fill
             interface.addFill(geometry);
+        }
+        
+        // add symbol
+        {
+            using namespace mbgl;
+            GeometryCoordinate position {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)};
+            
+            // load image
+            UIImage *assetImage = [UIImage imageNamed:@"pin"];
+            assert(assetImage.CGImage != NULL);
+            std::shared_ptr<PremultipliedImage> image = std::make_shared<PremultipliedImage>(MLNPremultipliedImageFromCGImage(assetImage.CGImage));
+
+            // set symbol options
+            Interface::SymbolOptions options;
+            options.texture = interface.context.createTexture2D();
+            options.texture->setImage(image);
+            options.texture->setSamplerConfiguration({gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+            options.textureCoordinates = {{{0.0f, 0.08f}, {1.0f, 0.9f}}};
+            const float xspan = options.textureCoordinates[1][0] - options.textureCoordinates[0][0];
+            const float yspan = options.textureCoordinates[1][1] - options.textureCoordinates[0][1];
+            assert(xspan > 0.0f && yspan > 0.0f);
+            options.size = {static_cast<uint32_t>(image->size.width * xspan), static_cast<uint32_t>(image->size.height * yspan)};
+            options.anchor = {0.5f, 0.95f};
+            options.angleDegrees = 45.0f;
+            options.scaleWithMap = true;
+            options.pitchWithMap = false;
+            interface.setSymbolOptions(options);
+
+            // add symbol
+            interface.addSymbol(position);
         }
                 
         // finish

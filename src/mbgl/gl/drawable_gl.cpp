@@ -8,7 +8,6 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -98,8 +97,8 @@ gfx::UniformBufferArray& DrawableGL::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void DrawableGL::setVertexAttrNameId(const StringIdentity id) {
-    impl->idVertexAttrName = id;
+void DrawableGL::setVertexAttrId(const size_t id) {
+    impl->vertexAttrId = id;
 }
 
 void DrawableGL::bindUniformBuffers() const {
@@ -169,7 +168,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         const auto& defaults = shader->getVertexAttributes();
         const auto& overrides = *vertexAttributes;
 
-        const auto& indexAttribute = defaults.get(impl->idVertexAttrName);
+        const auto& indexAttribute = defaults.get(impl->vertexAttrId);
         const auto vertexAttributeIndex = static_cast<std::size_t>(indexAttribute ? indexAttribute->getIndex() : -1);
 
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
@@ -223,7 +222,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     }
 
     const bool texturesNeedUpload = std::any_of(
-        textures.begin(), textures.end(), [](const auto& pair) { return pair.second && pair.second->needsUpload(); });
+        textures.begin(), textures.end(), [](const auto& texture) { return texture && texture->needsUpload(); });
 
     if (texturesNeedUpload) {
         uploadTextures();
@@ -245,27 +244,28 @@ gfx::StencilMode DrawableGL::makeStencilMode(PaintParameters& parameters) const 
 }
 
 void DrawableGL::uploadTextures() const {
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            std::static_pointer_cast<gl::Texture2D>(tex)->upload();
+    for (const auto& texture : textures) {
+        if (texture) {
+            texture->upload();
         }
     }
 }
 
 void DrawableGL::bindTextures() const {
     int32_t unit = 0;
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            const auto& location = pair.first;
-            std::static_pointer_cast<gl::Texture2D>(tex)->bind(location, unit++);
+    for (size_t id = 0; id < textures.size(); id++) {
+        if (const auto& texture = textures[id]) {
+            if (const auto& location = shader->getSamplerLocation(id)) {
+                static_cast<gl::Texture2D&>(*texture).bind(static_cast<int32_t>(*location), unit++);
+            }
         }
     }
 }
 
 void DrawableGL::unbindTextures() const {
-    for (const auto& pair : textures) {
-        if (const auto& tex = pair.second) {
-            std::static_pointer_cast<gl::Texture2D>(tex)->unbind();
+    for (const auto& texture : textures) {
+        if (texture) {
+            static_cast<gl::Texture2D&>(*texture).unbind();
         }
     }
 }

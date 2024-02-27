@@ -1,13 +1,19 @@
-# Changelog for the MapLibre Maps SDK for Android
-
-MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-native/blob/main/CONTRIBUTING.md) to get started.
+# Changelog MapLibre Native for Android
 
 ## main
 
 ### ✨ Features and improvements
-- Add support for the [`slice` expression](https://maplibre.org/maplibre-style-spec/expressions/#slice) ([#1113](https://github.com/maplibre/maplibre-native/pull/1133))
 
+### 🐞 Bug fixes
+
+## 11.0.0
+
+### ✨ Features and improvements
+
+- Add support for the [`slice` expression](https://maplibre.org/maplibre-style-spec/expressions/#slice) ([#1113](https://github.com/maplibre/maplibre-native/pull/1133))
+- Add support for the [`index-of` expression](https://maplibre.org/maplibre-style-spec/expressions/#index-of) ([#1113](https://github.com/maplibre/maplibre-native/pull/1113))
 - Add support for [multi sprites](https://github.com/maplibre/maplibre-native/pull/1858). More information on this feature can be found in the [Style Spec Documentation](https://maplibre.org/maplibre-style-spec/sprite/#multiple-sprite-sources).
+- Change to a more natural fling animation and allow setting `flingThreshold` and `flingAnimationBaseTime` in `UiSettings` ([#963](https://github.com/maplibre/maplibre-native/pull/963))
 
 - 💥 Breaking: Change package of all classes from `com.mapbox.mapboxsdk` to `org.maplibre.android` ([#1201](https://github.com/maplibre/maplibre-native/pull/1201)). This means you will need to fix your imports.
 
@@ -31,7 +37,11 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 - Fix "... has unresolved theme attributes" error in BitMapUtils ([#1274](https://github.com/maplibre/maplibre-native/issues/1274)).
 
-### ⛵ Dependencies
+## 10.2.0
+
+Revert changes of 10.1.0, which was a breaking release by accident.
+
+This version is identical to 10.0.2.
 
 ## 10.1.0 - May 9, 2023
 

@@ -22,7 +22,6 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #endif
 
 namespace mbgl {
@@ -264,7 +263,6 @@ bool RenderCircleLayer::queryIntersectsFeature(const GeometryCoordinates& queryG
 namespace {
 
 constexpr auto CircleShaderGroupName = "CircleShader";
-const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
 
 } // namespace
 
@@ -314,7 +312,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
-    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
+    StringIDSetsPair propertiesAsUniforms;
 
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
@@ -367,7 +365,9 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto interpBuffer = context.createUniformBuffer(&interpolateUBO, sizeof(interpolateUBO));
 
-        propertiesAsUniforms.clear();
+        propertiesAsUniforms.first.clear();
+        propertiesAsUniforms.second.clear();
+
         auto circleVertexAttrs = context.createVertexAttributeArray();
         circleVertexAttrs->readDataDrivenPaintProperties<CircleColor,
                                                          CircleRadius,
@@ -376,17 +376,14 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                                          CircleStrokeColor,
                                                          CircleStrokeWidth,
                                                          CircleStrokeOpacity>(
-            paintPropertyBinders, evaluated, propertiesAsUniforms);
+            paintPropertyBinders, evaluated, propertiesAsUniforms, idCircleColorVertexAttribute);
 
-        if (!circleShaderGroup) {
-            continue;
-        }
         const auto circleShader = circleShaderGroup->getOrCreateShader(context, propertiesAsUniforms);
         if (!circleShader) {
             continue;
         }
 
-        if (const auto& attr = circleVertexAttrs->add(idVertexAttribName)) {
+        if (const auto& attr = circleVertexAttrs->set(idCirclePosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(CircleLayoutVertex, a1),
                                    0,

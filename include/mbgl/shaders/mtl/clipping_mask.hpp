@@ -1,8 +1,6 @@
 #pragma once
 
 #include <mbgl/shaders/shader_source.hpp>
-#include <mbgl/shaders/background_layer_ubo.hpp>
-#include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 
 namespace mbgl {

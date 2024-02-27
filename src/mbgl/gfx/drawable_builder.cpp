@@ -5,7 +5,6 @@
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/util/logging.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/gfx/gfx_types.hpp>
 
 namespace mbgl {
@@ -13,7 +12,7 @@ namespace gfx {
 
 DrawableBuilder::DrawableBuilder(std::string name_)
     : name(std::move(name_)),
-      vertexAttrNameId(stringIndexer().get("a_pos")),
+      vertexAttrId(0),
       renderPass(mbgl::RenderPass::Opaque),
       impl(std::make_unique<Impl>()) {}
 
@@ -102,8 +101,18 @@ void DrawableBuilder::resetDrawPriority(DrawPriority value) {
     }
 }
 
-void DrawableBuilder::setTexture(const std::shared_ptr<gfx::Texture2D>& texture, int32_t location) {
-    textures.insert(std::make_pair(location, gfx::Texture2DPtr{})).first->second = std::move(texture);
+static const gfx::Texture2DPtr noTexture;
+
+const gfx::Texture2DPtr& DrawableBuilder::getTexture(size_t id) const {
+    return (id < textures.size()) ? textures[id] : noTexture;
+}
+
+void DrawableBuilder::setTexture(const std::shared_ptr<gfx::Texture2D>& texture, size_t id) {
+    assert(id < textures.size());
+    if (id >= textures.size()) {
+        return;
+    }
+    textures[id] = std::move(texture);
 }
 
 void DrawableBuilder::addTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2) {

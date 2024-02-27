@@ -3,7 +3,6 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/line_drawable_data.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/geometry/line_atlas.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/renderer/layer_group.hpp>
@@ -24,8 +23,6 @@ namespace mbgl {
 
 using namespace style;
 using namespace shaders;
-
-static const StringIdentity idTexImageName = stringIndexer().get("u_image");
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
@@ -164,10 +161,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
             case LineType::Pattern: {
                 Size textureSize{0, 0};
-                if (const auto index = shader->getSamplerLocation(idTexImageName)) {
-                    if (const auto& texture = drawable.getTexture(index.value())) {
-                        textureSize = texture->getSize();
-                    }
+                if (const auto& texture = drawable.getTexture(idLineImageTexture)) {
+                    textureSize = texture->getSize();
                 }
                 const LinePatternUBO linePatternUBO{
                     /*matrix =*/util::cast<float>(matrix),
@@ -198,13 +193,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         lineData.linePatternCap);
 
                     // texture
-                    if (const auto index = shader->getSamplerLocation(idTexImageName)) {
-                        if (!drawable.getTexture(index.value())) {
-                            const auto& texture = dashPatternTexture.getTexture();
-                            drawable.setEnabled(!!texture);
-                            if (texture) {
-                                drawable.setTexture(texture, index.value());
-                            }
+                    if (!drawable.getTexture(idLineImageTexture)) {
+                        const auto& texture = dashPatternTexture.getTexture();
+                        drawable.setEnabled(!!texture);
+                        if (texture) {
+                            drawable.setTexture(texture, idLineImageTexture);
                         }
                     }
 

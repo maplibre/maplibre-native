@@ -8,7 +8,6 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/gl/context.hpp>
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/math/log2.hpp>
 #include <mbgl/renderer/renderer.hpp>
