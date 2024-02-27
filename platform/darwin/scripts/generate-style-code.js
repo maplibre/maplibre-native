@@ -15,12 +15,8 @@ const args = (() => {
     const parser = new ArgumentParser({
         description: "MapLibre Shader Tools"
     });
-    parser.add_argument("--root", "--r", {
-        help: "Directory root to generate code from. See '--out' for controlling the output directory. By deafult, the output directory is the same as root.",
-        required: false
-    });
     parser.add_argument("--out", "--o", {
-        help: "Directory root to write generated code. By default, this is the same as the value of '--root'.",
+        help: "Directory root to write generated code.",
         required: false
     });
     return parser.parse_args();
@@ -791,7 +787,7 @@ const lightProperties = Object.keys(spec['light']).reduce((memo, name) => {
 const lightDoc = spec['light-cocoa-doc'];
 const lightType = 'light';
 
-const root = args.root ? args.root : path.dirname(path.dirname(path.dirname(__dirname)));
+const root = path.dirname(path.dirname(path.dirname(__dirname)));
 const outLocation = args.out ? args.out : root;
 
 const layerH = readAndCompile('platform/darwin/src/MLNStyleLayer.h.ejs', root);

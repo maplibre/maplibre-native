@@ -14,12 +14,8 @@ const args = (() => {
   const parser = new ArgumentParser({
       description: "MapLibre Shader Tools"
   });
-  parser.add_argument("--root", "--r", {
-      help: "Directory root to generate code from. See '--out' for controlling the output directory. By deafult, the output directory is the same as root.",
-      required: false
-  });
   parser.add_argument("--out", "--o", {
-      help: "Directory root to write generated code. By default, this is the same as the value of '--root'.",
+      help: "Directory root to write generated code.",
       required: false
   });
   return parser.parse_args();
@@ -226,7 +222,7 @@ global.defaultValue = function (property) {
 };
 
 console.log("Generating style code...");
-const root = args.root ? args.root : path.dirname(__dirname);
+const root = path.dirname(__dirname);
 const outLocation = args.out ? args.out : root;
 
 const layerHpp = readAndCompile(`include/mbgl/style/layers/layer.hpp.ejs`, root);

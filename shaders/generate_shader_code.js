@@ -202,12 +202,8 @@ const args = (() => {
     const parser = new ArgumentParser({
         description: "MapLibre Shader Tools"
     });
-    parser.add_argument("--root", "--r", {
-        help: "Directory root to generate code from. See '--out' for controlling the output directory. By deafult, the output directory is the same as root.",
-        required: false
-    });
     parser.add_argument("--out", "--o", {
-        help: "Directory root to write generated code. By default, this is the same as the value of '--root'.",
+        help: "Directory root to write generated code.",
         required: false
     });
     parser.add_argument("--compress", "--c", {
@@ -224,7 +220,7 @@ const args = (() => {
 
 
 // Generate shader source headers
-const root = args.root ? args.root : path.dirname(__dirname);
+const root = path.dirname(__dirname);
 const outLocation = args.out ? args.out : root;
 const shaderRoot = path.join(root, "shaders");
 const outputRoot = path.join(outLocation, "include/mbgl/shaders");
