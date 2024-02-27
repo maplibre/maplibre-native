@@ -1,0 +1,11 @@
+{
+  "version": 8,
+  "sprite": [{
+      "id": "default",
+      "url": "https://example.com"
+    },
+    {
+        "id": "default",
+        "url": "https://example2.com"
+  }]
+}

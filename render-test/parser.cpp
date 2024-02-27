@@ -18,6 +18,7 @@
 #include <mbgl/style/conversion/layer.hpp>
 #include <mbgl/style/conversion/light.hpp>
 #include <mbgl/style/conversion/source.hpp>
+#include <mbgl/style/conversion/sprite.hpp>
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/light.hpp>
 #include <mbgl/style/source.hpp>
