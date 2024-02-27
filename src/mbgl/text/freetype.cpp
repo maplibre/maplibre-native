@@ -91,15 +91,6 @@ Glyph FreeTypeFace::rasterizeGlyph(const GlyphID &glyph) {
                     ftBitmap.width);
     }
 
-    // if (callback) {
-    //     callback(ftBitmap.width,
-    //              ftBitmap.rows,
-    //              slot->bitmap_left,
-    //              slot->bitmap_top,
-    //              (uint32_t)(slot->metrics.horiAdvance / 64),
-    //              &ftBitmap.buffer[0]);
-    // }
-
     return fixedMetrics;
 }
 
