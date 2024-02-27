@@ -7,21 +7,7 @@ on:
       - completed
 
 jobs:
-  pre_job:
-    runs-on: ubuntu-latest
-    outputs:
-      should_skip: ${{ steps.check_skip.outputs.should_skip }}
-    steps:
-      # if android-build in android-ci was skipped, the android-device-test job can be skipped entirely
-      - id: check_skip
-        run: |
-          conclusion=$(curl ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "android-build").conclusion')
-          should_skip=$([ "$conclusion" = "skipped" ] && echo "true" || echo "false")
-          echo "should_skip=$should_skip" >> "$GITHUB_OUTPUT"
-
   android-device-test:
-    needs: pre_job
-    if: needs.pre_job.outputs.should_skip == 'false'
     strategy:
       max-parallel: 2
       matrix:
@@ -51,11 +37,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Sanity check, test files should exist
-        uses: andstor/file-existence-action@v2.0.0
-        with:
-          files: "${{ matrix.test.testFile }}, ${{ matrix.test.appFile }}"
-          fail: true
+      - id: parent_workflow
+        run: |
+          conclusion=$(curl ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "android-build").conclusion')
+          was_skipped=$([[ "$conclusion" = "skipped" || "$conclusion" = "cancelled" ]] && echo "true" || echo "false")
+          echo "was_skipped=$was_skipped" >> "$GITHUB_OUTPUT"
 
       # get comment from PR
 
@@ -82,9 +68,10 @@ jobs:
         # always run when something was merged into main
         # run benchmark when comment with '!benchmark android' exists in PR
         if: |
-          (github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'push') ||
+          steps.parent_workflow.outputs.was_skipped == 'false' &&
+          ((github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'push') ||
           matrix.test.name == 'Android Benchmark' && steps.benchmark_comment.outputs.comment-id ||
-          matrix.test.name != 'Android Benchmark'
+          matrix.test.name != 'Android Benchmark')
         run: 
           echo "run_device_test=true" >> "$GITHUB_ENV"
 
@@ -102,6 +89,7 @@ jobs:
         if: env.run_device_test == 'true'
         with:
           artifact-name: ${{ matrix.test.artifactName }}
+          expect-files: "${{ matrix.test.testFile }}, ${{ matrix.test.appFile }}"
 
       - name: Configure AWS Credentials
         if: env.run_device_test == 'true' && matrix.test.name == 'Android Benchmark'
