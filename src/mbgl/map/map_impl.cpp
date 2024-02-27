@@ -98,8 +98,8 @@ void Map::Impl::onStyleLoaded() {
             counts[0]++;
         } else {
             for (size_t i = 0; i < maskCount; ++i) {
-                const std::underlying_type_t<Dependency> mask = 1 << i;
-                if (underlying_type(deps) & mask) {
+                const auto mask = Dependency{1u << i};
+                if ((deps & mask) == mask) {
                     counts[i + 1]++;
                 }
             }
@@ -109,7 +109,7 @@ void Map::Impl::onStyleLoaded() {
     ss << "Style '" << style->getName() << "' loaded " << layers.size() << " layers.\n";
     ss << "  No Dependencies: " << counts[0] << "\n";
     for (size_t i = 0; i < maskCount; ++i) {
-        ss << "  " << util::toString(Dependency{1 << i}) << ": " << counts[i + 1] << "\n";
+        ss << "  " << util::toString(Dependency{1u << i}) << ": " << counts[i + 1] << "\n";
     }
     Log::Info(Event::Style, ss.str());
 #endif
