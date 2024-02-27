@@ -62,7 +62,7 @@ ${precision} ${type} ${name} = u_${name};
     return source.replace(re, (match, operation, precision, type, name) => {
         const attrType = type === 'float' ? 'vec2' : 'vec4';
         const unpackType = name.match(/color/) ? 'color' : attrType;
-        
+
         if (pragmaMap[name]) {
             if (operation === 'define') {
                 return `#ifndef HAS_UNIFORM_u_${name}
@@ -140,7 +140,7 @@ ${precision} ${type} ${name} = u_${name};
     return source.replace(re, (match, operation, precision, type, name) => {
         const attrType = type === 'float' ? 'vec2' : 'vec4';
         const unpackType = name.match(/color/) ? 'color' : attrType;
-        
+
         if (pragmaMap[name]) {
             if (operation === 'define') {
                 return `#ifndef HAS_UNIFORM_u_${name}
@@ -203,7 +203,11 @@ const args = (() => {
         description: "MapLibre Shader Tools"
     });
     parser.add_argument("--root", "--r", {
-        help: "Directory root to place generated code",
+        help: "Directory root to generate code from. See '--out' for controlling the output directory. By deafult, the output directory is the same as root.",
+        required: false
+    });
+    parser.add_argument("--out", "--o", {
+        help: "Directory root to write generated code. By default, this is the same as the value of '--root'.",
         required: false
     });
     parser.add_argument("--compress", "--c", {
@@ -221,8 +225,9 @@ const args = (() => {
 
 // Generate shader source headers
 const root = args.root ? args.root : path.dirname(__dirname);
+const outLocation = args.out ? args.out : root;
 const shaderRoot = path.join(root, "shaders");
-const outputRoot = path.join(root, "include/mbgl/shaders");
+const outputRoot = path.join(outLocation, "include/mbgl/shaders");
 let generatedHeaders = [];
 let shaderNames = [];
 

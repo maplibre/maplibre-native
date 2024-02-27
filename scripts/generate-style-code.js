@@ -15,7 +15,11 @@ const args = (() => {
       description: "MapLibre Shader Tools"
   });
   parser.add_argument("--root", "--r", {
-      help: "Directory root to place generated code",
+      help: "Directory root to generate code from. See '--out' for controlling the output directory. By deafult, the output directory is the same as root.",
+      required: false
+  });
+  parser.add_argument("--out", "--o", {
+      help: "Directory root to write generated code. By default, this is the same as the value of '--root'.",
       required: false
   });
   return parser.parse_args();
@@ -223,6 +227,7 @@ global.defaultValue = function (property) {
 
 console.log("Generating style code...");
 const root = args.root ? args.root : path.dirname(__dirname);
+const outLocation = args.out ? args.out : root;
 
 const layerHpp = readAndCompile(`include/mbgl/style/layers/layer.hpp.ejs`, root);
 const layerCpp = readAndCompile(`src/mbgl/style/layers/layer.cpp.ejs`, root);
@@ -275,16 +280,16 @@ const layers = Object.keys(spec.layer.type.values).map((type) => {
 for (const layer of layers) {
   const layerFileName = layer.type.replace('-', '_');
 
-  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.hpp`, propertiesHpp(layer), root);
-  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.cpp`, propertiesCpp(layer), root);
+  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.hpp`, propertiesHpp(layer), outLocation);
+  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.cpp`, propertiesCpp(layer), outLocation);
 
   // Remove our fake property for the external interace.
   if (layer.type === 'line') {
     layer.paintProperties = layer.paintProperties.filter(property => property.name !== 'line-floor-width');
   }
 
-  writeIfModified(`include/mbgl/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer), root);
-  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer), root);
+  writeIfModified(`include/mbgl/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer), outLocation);
+  writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer), outLocation);
 }
 
 // Light
@@ -302,5 +307,5 @@ lightProperties.sort((a, b) => collator.compare(a.name, b.name));
 
 const lightHpp = readAndCompile(`include/mbgl/style/light.hpp.ejs`, root);
 const lightCpp = readAndCompile(`src/mbgl/style/light.cpp.ejs`, root);
-writeIfModified(`include/mbgl/style/light.hpp`, lightHpp({properties: lightProperties}), root);
-writeIfModified(`src/mbgl/style/light.cpp`, lightCpp({properties: lightProperties}), root);
+writeIfModified(`include/mbgl/style/light.hpp`, lightHpp({properties: lightProperties}), outLocation);
+writeIfModified(`src/mbgl/style/light.cpp`, lightCpp({properties: lightProperties}), outLocation);
