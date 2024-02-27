@@ -13,7 +13,6 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/shaders/line_layer_ubo.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/programs/fill_program.hpp>
@@ -223,8 +222,8 @@ public:
 
         // set UBOs
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idCustomSymbolIconDrawableUBO, &drawableUBO, parameters.context);
-        uniforms.createOrUpdate(idCustomSymbolIconParametersUBO, &parametersUBO, parameters.context);
+        uniforms.createOrUpdate(idCustomSymbolDrawableUBO, &drawableUBO, parameters.context);
+        uniforms.createOrUpdate(idCustomSymbolParametersUBO, &parametersUBO, parameters.context);
     };
 
 private:
@@ -317,11 +316,8 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
     gfx::generateFillBuffers(geometry, vertices, triangles, triangleSegments);
 
     // add to builder
-    static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
-    builder->setVertexAttrNameId(idVertexAttribName);
-
     auto attrs = context.createVertexAttributeArray();
-    if (const auto& attr = attrs->add(idVertexAttribName)) {
+    if (const auto& attr = attrs->set(idFillPosVertexAttribute)) {
         attr->setSharedRawData(sharedVertices,
                                offsetof(FillLayoutVertex, a1),
                                /*vertexOffset=*/0,
@@ -377,19 +373,15 @@ void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
     triangleSegments.emplace_back(Segment<CustomSymbolIcon>{0, 0, 4, 6});
 
     // add to builder
-    static const StringIdentity idPositionAttribName = stringIndexer().get("a_pos");
-    static const StringIdentity idTextureAttribName = stringIndexer().get("a_tex");
-    builder->setVertexAttrNameId(idPositionAttribName);
-
     auto attrs = context.createVertexAttributeArray();
-    if (const auto& attr = attrs->add(idPositionAttribName)) {
+    if (const auto& attr = attrs->set(idCustomSymbolPosVertexAttribute)) {
         attr->setSharedRawData(sharedVertices,
                                offsetof(CustomSymbolIcon, a_pos),
                                /*vertexOffset=*/0,
                                sizeof(CustomSymbolIcon),
                                gfx::AttributeDataType::Float2);
     }
-    if (const auto& attr = attrs->add(idTextureAttribName)) {
+    if (const auto& attr = attrs->set(idCustomSymbolTexVertexAttribute)) {
         attr->setSharedRawData(sharedVertices,
                                offsetof(CustomSymbolIcon, a_tex),
                                /*vertexOffset=*/0,
@@ -402,7 +394,7 @@ void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
 
     // texture
     if (symbolOptions.texture) {
-        builder->setTexture(symbolOptions.texture, idCustomSymbolIconTexture);
+        builder->setTexture(symbolOptions.texture, idCustomSymbolImageTexture);
     }
 
     // create fill tweaker
@@ -467,14 +459,13 @@ void CustomDrawableLayerHost::Interface::finish() {
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
     gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("LineShader");
 
-    const mbgl::unordered_set<StringIdentity> propertiesAsUniforms{
-        stringIndexer().get("a_color"),
-        stringIndexer().get("a_blur"),
-        stringIndexer().get("a_opacity"),
-        stringIndexer().get("a_gapwidth"),
-        stringIndexer().get("a_offset"),
-        stringIndexer().get("a_width"),
-    };
+    const StringIDSetsPair propertiesAsUniforms{{"a_color", "a_blur", "a_opacity", "a_gapwidth", "a_offset", "a_width"},
+                                                {idLineColorVertexAttribute,
+                                                 idLineBlurVertexAttribute,
+                                                 idLineOpacityVertexAttribute,
+                                                 idLineGapWidthVertexAttribute,
+                                                 idLineOffsetVertexAttribute,
+                                                 idLineWidthVertexAttribute}};
 
     return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
 }
@@ -482,10 +473,8 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {
     gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("FillShader");
 
-    const mbgl::unordered_set<StringIdentity> propertiesAsUniforms{
-        stringIndexer().get("a_color"),
-        stringIndexer().get("a_opacity"),
-    };
+    const StringIDSetsPair propertiesAsUniforms{{"a_color", "a_opacity"},
+                                                {idFillColorVertexAttribute, idFillOpacityVertexAttribute}};
 
     return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
 }

@@ -9,7 +9,6 @@
 #include <mbgl/shaders/heatmap_layer_ubo.hpp>
 #include <mbgl/style/layers/heatmap_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/string_indexer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/shaders/mtl/heatmap.hpp>

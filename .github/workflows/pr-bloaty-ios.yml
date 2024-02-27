@@ -13,8 +13,21 @@ permissions:
   id-token: write      # This is required for requesting the AWS JWT
 
 jobs:
-  pr-bloaty-ios:
+  pre_job:
     if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.check_skip.outputs.should_skip }}
+    steps:
+      - id: check_skip
+        run: |
+          conclusion=$(curl ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "ios-build").conclusion')
+          should_skip=$([[ "$conclusion" = "skipped" || "$conclusion" = "cancelled" ]] && echo "true" || echo "false")
+          echo "should_skip=$should_skip" >> "$GITHUB_OUTPUT"
+
+  pr-bloaty-ios:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip == 'false'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
