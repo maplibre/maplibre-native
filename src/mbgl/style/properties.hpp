@@ -300,14 +300,20 @@ public:
         }
 
         /// Get the combined dependencies of any contained expressions
-        Dependency getDependencies() const noexcept {
-            return std::apply([](auto... v) { return (v | ...); },
-                              std::make_tuple(Dependency::None, getDependencies(this->template get<Ps>())...));
-        }
+        constexpr Dependency getDependencies() const noexcept { return collectDependenciesFromIndex<0>(); }
 
         unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
 
     protected:
+        template <std::size_t I>
+        constexpr Dependency collectDependenciesFromIndex() const noexcept {
+            if constexpr (I == sizeof...(Ps)) {
+                return Dependency::None;
+            } else {
+                return getDependencies(std::get<I>(*this)) | collectDependenciesFromIndex<I + 1>();
+            }
+        }
+
         template <class P>
         Dependency getDependencies(const PropertyValue<P>& v) const noexcept {
             return v.getDependencies();
