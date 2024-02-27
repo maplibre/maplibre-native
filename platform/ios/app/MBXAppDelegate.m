@@ -11,8 +11,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-#ifndef MLN_DISABLE_LOGGING
-    [MLNLoggingConfiguration sharedConfiguration].loggingLevel = MLNLoggingLevelFault;
+#ifndef MLN_LOGGING_DISABLED
+    [MLNLoggingConfiguration sharedConfiguration].loggingLevel = MLNLoggingLevelDebug;
 #endif
     [MLNSettings useWellKnownTileServer:MLNMapTiler];
 
