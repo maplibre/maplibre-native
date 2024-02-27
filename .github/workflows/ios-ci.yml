@@ -96,7 +96,7 @@ jobs:
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run --//:renderer=metal //platform/ios:xcodeproj
+          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
           render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
