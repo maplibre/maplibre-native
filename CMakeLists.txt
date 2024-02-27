@@ -1321,8 +1321,8 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
         PROPERTIES
             INTERFACE_MAPBOX_NAME "freetype"
             INTERFACE_MAPBOX_URL "https://github.com/freetype/freetype"
-            INTERFACE_MAPBOX_AUTHOR "David Turner"
-            INTERFACE_MAPBOX_LICENSE vendor/freetype/docs/FTL.TXT
+            INTERFACE_MAPBOX_AUTHOR "David Turner, Robert Wilhelm, Werner Lemberg and FreeType contributors"
+            INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/freetype/docs/FTL.TXT
     )
 
     set_target_properties(
@@ -1330,8 +1330,8 @@ if (MLN_TEXT_SHAPING_HARFBUZZ)
         PROPERTIES
             INTERFACE_MAPBOX_NAME "harfbuzz"
             INTERFACE_MAPBOX_URL "https://github.com/harfbuzz/harfbuzz"
-            INTERFACE_MAPBOX_AUTHOR vendor/harfbuzz/AUTHORS
-            INTERFACE_MAPBOX_LICENSE vendor/harfbuzz/COPYING
+            INTERFACE_MAPBOX_AUTHOR ${PROJECT_SOURCE_DIR}/vendor/harfbuzz/AUTHORS
+            INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/harfbuzz/COPYING
     )
 
     target_include_directories(
