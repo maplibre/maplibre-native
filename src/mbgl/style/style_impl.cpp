@@ -118,11 +118,22 @@ void Style::Impl::parse(const std::string& json_) {
 
     setLight(std::make_unique<Light>(parser.light));
 
-    spriteLoaded = false;
     if (fileSource) {
-        spriteLoader->load(parser.spriteURL, *fileSource);
+        if (parser.sprites.empty()) {
+            // We identify no sprite with 'default' as string in the sprite loading status.
+            spritesLoadingStatus["default"] = false;
+            spriteLoader->load(std::nullopt, *fileSource);
+        } else {
+            for (const auto& sprite : parser.sprites) {
+                spritesLoadingStatus[sprite.id] = false;
+                spriteLoader->load(std::optional(sprite), *fileSource);
+            }
+        }
     } else {
-        onSpriteError(std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite url.")));
+        // We identify no sprite with 'default' as string in the sprite loading status.
+        spritesLoadingStatus["default"] = false;
+        onSpriteError(std::nullopt,
+                      std::make_exception_ptr(std::runtime_error("Unable to find resource provider for sprite url.")));
     }
     glyphURL = parser.glyphURL;
 
@@ -255,12 +266,24 @@ Source* Style::Impl::getSource(const std::string& id) const {
     return sources.get(id);
 }
 
+bool Style::Impl::areSpritesLoaded() const {
+    if (spritesLoadingStatus.empty()) {
+        return false; // If nothing is stored inside, sprites are not yet loaded.
+    }
+    for (const auto& entry : spritesLoadingStatus) {
+        if (!entry.second) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool Style::Impl::isLoaded() const {
     if (!loaded) {
         return false;
     }
 
-    if (!spriteLoaded) {
+    if (!areSpritesLoaded()) {
         return false;
     }
 
@@ -338,7 +361,8 @@ void Style::Impl::onSourceDescriptionChanged(Source& source) {
     }
 }
 
-void Style::Impl::onSpriteLoaded(std::vector<Immutable<style::Image::Impl>> images_) {
+void Style::Impl::onSpriteLoaded(std::optional<style::Sprite> sprite,
+                                 std::vector<Immutable<style::Image::Impl>> images_) {
     auto newImages = makeMutable<ImageImpls>(*images);
     assert(std::is_sorted(newImages->begin(), newImages->end()));
 
@@ -358,16 +382,24 @@ void Style::Impl::onSpriteLoaded(std::vector<Immutable<style::Image::Impl>> imag
         newImages->end(), std::make_move_iterator(images_.begin()), std::make_move_iterator(images_.end()));
     std::sort(newImages->begin(), newImages->end());
     images = std::move(newImages);
-    spriteLoaded = true;
+    if (sprite) {
+        spritesLoadingStatus[sprite->id] = true;
+    } else {
+        spritesLoadingStatus["default"] = true;
+    }
     observer->onUpdate(); // For *-pattern properties.
 }
 
-void Style::Impl::onSpriteError(std::exception_ptr error) {
+void Style::Impl::onSpriteError(std::optional<style::Sprite> sprite, std::exception_ptr error) {
     lastError = error;
     Log::Error(Event::Style, "Failed to load sprite: " + util::toString(error));
     observer->onResourceError(error);
+    if (sprite) {
+        spritesLoadingStatus[sprite->id] = true;
+    } else {
+        spritesLoadingStatus["default"] = false;
+    }
     // Unblock rendering tiles (even though sprite request has failed).
-    spriteLoaded = true;
     observer->onUpdate();
 }
 
