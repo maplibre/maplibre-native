@@ -19,6 +19,7 @@ std::ostream& operator<<(std::ostream& os, const Dependency deps) {
     const auto add = [&](Dependency dep, std::string_view name) {
         if ((deps & dep) != Dependency::None) {
             os << (any ? "|" : std::string_view{}) << name;
+            any = true;
         }
     };
 

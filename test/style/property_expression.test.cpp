@@ -56,19 +56,26 @@ TEST(PropertyExpression, Constant) {
     EXPECT_EQ(2.0f, evaluate(PropertyValue<float>(2.0f), 22));
     EXPECT_EQ(3.8f, evaluate(PropertyValue<float>(3.8f), 22));
     EXPECT_EQ(22.0f, evaluate(PropertyValue<float>(22.0f), 22));
+
+    EXPECT_EQ(Dependency::None, PropertyValue<float>(2.0f).getDependencies());
 }
 
 TEST(PropertyExpression, Expression) {
     PropertyExpression<float> expression(interpolate(linear(), zoom(), 0.0, literal(0.0), 1.0, literal(1.0)));
     EXPECT_EQ(0.0, evaluate(expression, 0.0));
     EXPECT_EQ(0.5, evaluate(expression, 0.5));
+    EXPECT_EQ(Dependency::Zoom, expression.getDependencies());
 }
 
 TEST(PropertyExpression, Defaults) {
-    EXPECT_EQ(1.0f, PropertyExpression<float>(number(get("property")), 0.0f).evaluate(oneInteger, 2.0f));
-    EXPECT_EQ(1.0f, PropertyExpression<float>(number(get("property")), 0.0f).evaluate(oneDouble, 2.0f));
-    EXPECT_EQ(0.0f, PropertyExpression<float>(number(get("property")), 0.0f).evaluate(oneString, 2.0f));
-    EXPECT_EQ(2.0f, PropertyExpression<float>(number(get("property"))).evaluate(oneString, 2.0f));
+    const PropertyExpression<float> noDefault(number(get("property")));
+    const PropertyExpression<float> withDefault(number(get("property")), 0.0f);
+    EXPECT_EQ(1.0f, withDefault.evaluate(oneInteger, 2.0f));
+    EXPECT_EQ(1.0f, withDefault.evaluate(oneDouble, 2.0f));
+    EXPECT_EQ(0.0f, withDefault.evaluate(oneString, 2.0f));
+    EXPECT_EQ(2.0f, noDefault.evaluate(oneString, 2.0f));
+
+    EXPECT_EQ(Dependency::Feature, noDefault.getDependencies());
 }
 
 TEST(PropertyExpression, ZoomInterpolation) {
@@ -170,6 +177,8 @@ TEST(PropertyExpression, FormatSectionOverride) {
     PossiblyEvaluatedPropertyValue<Color> constantValueGreen(Color::green());
     PossiblyEvaluatedPropertyValue<Color> ddsValueRed(toColor(string(get("color"))));
 
+    EXPECT_EQ(Dependency::Feature, ddsValueRed.getDependencies());
+
     // Evaluation test
     {
         auto override1 = createOverride(expression::type::Color, constantValueGreen, "text-color");
@@ -229,10 +238,14 @@ TEST(PropertyExpression, ImageExpression) {
         EXPECT_TRUE(evaluatedImage.isAvailable());
         EXPECT_EQ(evaluatedImage.id(), "airport-11"s);
 
+        EXPECT_EQ(Dependency::Image, propExpr.getDependencies());
+
         PropertyExpression<expression::Image> ddPropExpr(image(get(literal("image_name"s))));
         evaluatedImage = ddPropExpr.evaluate(oneImage, availableImages, expression::Image());
         EXPECT_TRUE(evaluatedImage.isAvailable());
         EXPECT_EQ(evaluatedImage.id(), "maki-11"s);
+
+        EXPECT_EQ(Dependency::Image | Dependency::Feature, ddPropExpr.getDependencies());
 
         evaluatedImage = ddPropExpr.evaluate(emptyTileFeature, availableImages, expression::Image());
         EXPECT_FALSE(evaluatedImage.isAvailable());
@@ -297,6 +310,8 @@ TEST(PropertyExpression, WithinExpression) {
     auto expression = createExpression(ss.str().c_str());
     ASSERT_TRUE(expression);
     PropertyExpression<bool> propExpr(std::move(expression));
+
+    EXPECT_EQ(Dependency::Feature, propExpr.getDependencies());
 
     // evaluation test with valid geojson source but FeatureType is not Point/LineString
     // (currently only support FeatureType::Point and FeatureType::LineString)
@@ -546,6 +561,8 @@ TEST(PropertyExpression, DistanceExpression) {
         auto expression = createExpression(ss.str().c_str());
         ASSERT_TRUE(expression);
         PropertyExpression<double> propExpr(std::move(expression));
+
+        EXPECT_EQ(Dependency::Feature, propExpr.getDependencies());
 
         auto evaluatedResult = propExpr.evaluate(EvaluationContext(&pointFeature).withCanonicalTileID(&canonicalTileID),
                                                  invalidResult);

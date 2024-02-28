@@ -220,8 +220,8 @@ public:
     virtual bool operator==(const Expression&) const = 0;
     bool operator!=(const Expression& rhs) const { return !operator==(rhs); }
 
-    Kind getKind() const { return kind; };
-    type::Type getType() const { return type; };
+    Kind getKind() const { return kind; }
+    const type::Type& getType() const { return type; }
 
     EvaluationResult evaluate(std::optional<float> zoom,
                               const Feature& feature,
