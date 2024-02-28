@@ -121,7 +121,8 @@ RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_, const std::
       sourceImpls(makeMutable<std::vector<Immutable<style::Source::Impl>>>()),
       layerImpls(makeMutable<std::vector<Immutable<style::Layer::Impl>>>()),
       renderLight(makeMutable<Light::Impl>()),
-      backgroundLayerAsColor(backgroundLayerAsColor_) {
+      backgroundLayerAsColor(backgroundLayerAsColor_),
+      threadPool(Scheduler::GetBackground()) {
     glyphManager->setObserver(this);
     imageManager->setObserver(this);
 }
@@ -137,6 +138,13 @@ RenderOrchestrator::~RenderOrchestrator() {
             layer.markContextDestroyed();
         }
     }
+
+    // Wait for any deferred cleanup tasks to complete before releasing and potentially
+    // destroying the scheduler.  Those cleanup tasks must not hold the final reference
+    // to the scheduler because it cannot be destroyed from one of its own pool threads.
+    constexpr auto deferredCleanupTimeout = Milliseconds{1000};
+    [[maybe_unused]] const auto remaining = threadPool->waitForEmpty(deferredCleanupTimeout);
+    assert(remaining == 0);
 }
 
 void RenderOrchestrator::setObserver(RendererObserver* observer_) {
@@ -180,8 +188,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                         updateParameters->fileSource,
                                         updateParameters->mode,
                                         updateParameters->annotationManager,
-                                        *imageManager,
-                                        *glyphManager,
+                                        imageManager,
+                                        glyphManager,
                                         updateParameters->prefetchZoomDelta};
 
     glyphManager->setURL(updateParameters->glyphURL);
@@ -317,7 +325,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Create render sources for newly added sources.
     for (const auto& entry : sourceDiff.added) {
-        std::unique_ptr<RenderSource> renderSource = RenderSource::create(entry.second);
+        std::unique_ptr<RenderSource> renderSource = RenderSource::create(entry.second, threadPool);
         renderSource->setObserver(this);
         renderSources.emplace(entry.first, std::move(renderSource));
     }

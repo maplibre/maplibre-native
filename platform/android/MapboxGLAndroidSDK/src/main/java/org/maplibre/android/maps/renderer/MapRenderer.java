@@ -120,6 +120,11 @@ public abstract class MapRenderer implements MapRendererScheduler {
     this.queueEvent((Runnable) runnable);
   }
 
+  /// Wait indefinitely for the queue to become empty
+  public void waitForEmpty() {
+    waitForEmpty(0);
+  }
+
   private native void nativeInitialize(MapRenderer self,
                                        float pixelRatio,
                                        String localIdeographFontFamily);

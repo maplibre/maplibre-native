@@ -7,8 +7,9 @@ namespace mbgl {
 
 using namespace style;
 
-RenderCustomGeometrySource::RenderCustomGeometrySource(Immutable<style::CustomGeometrySource::Impl> impl_)
-    : RenderTileSource(std::move(impl_)) {
+RenderCustomGeometrySource::RenderCustomGeometrySource(Immutable<style::CustomGeometrySource::Impl> impl_,
+                                                       std::shared_ptr<Scheduler> threadPool_)
+    : RenderTileSource(std::move(impl_), std::move(threadPool_)) {
     tilePyramid.setObserver(this);
 }
 
