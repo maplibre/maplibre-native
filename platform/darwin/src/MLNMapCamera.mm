@@ -180,11 +180,11 @@ BOOL MLNEqualFloatWithAccuracy(CGFloat left, CGFloat right, CGFloat accuracy)
         return YES;
     }
     
-    return (MLNEqualFloatWithAccuracy(_centerCoordinate.latitude, otherCamera.centerCoordinate.latitude, 1e-6)
-            && MLNEqualFloatWithAccuracy(_centerCoordinate.longitude, otherCamera.centerCoordinate.longitude, 1e-6)
+    return (MLNEqualFloatWithAccuracy(_centerCoordinate.latitude, otherCamera.centerCoordinate.latitude, 1e-8)
+            && MLNEqualFloatWithAccuracy(_centerCoordinate.longitude, otherCamera.centerCoordinate.longitude, 1e-8)
             && MLNEqualFloatWithAccuracy(_altitude, otherCamera.altitude, 1e-6)
-            && MLNEqualFloatWithAccuracy(_pitch, otherCamera.pitch, 1)
-            && MLNEqualFloatWithAccuracy(_heading, otherCamera.heading, 1));
+            && MLNEqualFloatWithAccuracy(_pitch, otherCamera.pitch, 1e-2)
+            && MLNEqualFloatWithAccuracy(_heading, otherCamera.heading, 1e-2));
 }
 
 - (NSUInteger)hash

@@ -4,9 +4,17 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.2.0
+
+- Add support for [multi sprites](https://github.com/maplibre/maplibre-native/pull/1858). More information on this feature can be found in the [Style Spec Documentation](https://maplibre.org/maplibre-style-spec/sprite/#multiple-sprite-sources).
+
+## 6.1.1
+
+- Tighten camera equality requirements ([#2139](https://github.com/maplibre/maplibre-native/pull/2139)).
+
 ## 6.1.0
 
-- Addition of an MLNCustomStyleLayer that allows running custom Metal shaders and code. Example included in the PR. ([#2041](https://github.com/maplibre/maplibre-native/pull/2006))
+- Addition of an MLNCustomStyleLayer that allows running custom Metal shaders and code. Example included in the PR. ([#2006](https://github.com/maplibre/maplibre-native/pull/2006))
 - Various performance optimizations.
   - Avoid redundant bindings/states based on Metal profiler feedback. ([#2006](https://github.com/maplibre/maplibre-native/pull/2006))
   - Eliminate the remaining examples of tweakers being re-created on each update, which reduced reuse of uniform buffers. ([#2050](https://github.com/maplibre/maplibre-native/pull/2050))

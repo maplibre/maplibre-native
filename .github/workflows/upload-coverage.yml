@@ -7,7 +7,20 @@ on:
       - completed
 
 jobs:
+  pre_job:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.check_skip.outputs.should_skip }}
+    steps:
+      - id: check_skip
+        run: |
+          conclusion=$(curl ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "linux-coverage").conclusion')
+          should_skip=$([[ "$conclusion" = "skipped" || "$conclusion" = "cancelled" ]] && echo "true" || echo "false")
+          echo "should_skip=$should_skip" >> "$GITHUB_OUTPUT"
+
   upload-coverage:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip == 'false'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,12 +32,11 @@ jobs:
 
       - name: Upload coverage report
         if: '!cancelled()'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v3
         with:
           override_commit: ${{ github.event.workflow_run.head_sha }}
           override_pr: ${{ github.event.workflow_run.pull_requests[0].number }}
           token: ${{ secrets.CODECOV_TOKEN }}
           files: "_coverage_report.dat"
-          disable_search: true
           fail_ci_if_error: true
           verbose: true

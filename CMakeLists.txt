@@ -700,6 +700,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/collection.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/color_ramp_property_value.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/constant.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/sprite.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/coordinate.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/custom_geometry_source_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/filter.cpp
@@ -759,6 +760,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/within.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/filter.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/image.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sprite.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sprite.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/image_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/image_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layer.cpp

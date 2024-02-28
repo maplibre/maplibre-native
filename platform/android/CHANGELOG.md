@@ -12,6 +12,7 @@
 
 - Add support for the [`slice` expression](https://maplibre.org/maplibre-style-spec/expressions/#slice) ([#1113](https://github.com/maplibre/maplibre-native/pull/1133))
 - Add support for the [`index-of` expression](https://maplibre.org/maplibre-style-spec/expressions/#index-of) ([#1113](https://github.com/maplibre/maplibre-native/pull/1113))
+- Add support for [multi sprites](https://github.com/maplibre/maplibre-native/pull/1858). More information on this feature can be found in the [Style Spec Documentation](https://maplibre.org/maplibre-style-spec/sprite/#multiple-sprite-sources).
 - Change to a more natural fling animation and allow setting `flingThreshold` and `flingAnimationBaseTime` in `UiSettings` ([#963](https://github.com/maplibre/maplibre-native/pull/963))
 
 - 💥 Breaking: Change package of all classes from `com.mapbox.mapboxsdk` to `org.maplibre.android` ([#1201](https://github.com/maplibre/maplibre-native/pull/1201)). This means you will need to fix your imports.
