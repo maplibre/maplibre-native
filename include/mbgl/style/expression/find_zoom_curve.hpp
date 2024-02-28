@@ -12,9 +12,11 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-std::optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCurve(const expression::Expression* e);
+std::optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCurve(const expression::Expression*);
 
-variant<std::nullptr_t, const Interpolate*, const Step*> findZoomCurveChecked(const expression::Expression* e);
+variant<std::nullptr_t, const Interpolate*, const Step*> findZoomCurveChecked(const expression::Expression&);
+variant<std::nullptr_t, const Interpolate*, const Step*> findZoomCurveChecked(const expression::Expression&,
+                                                                              bool isZoomConstant);
 
 } // namespace expression
 } // namespace style

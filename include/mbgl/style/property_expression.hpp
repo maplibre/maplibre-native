@@ -40,10 +40,10 @@ public:
 
 protected:
     std::shared_ptr<const expression::Expression> expression;
-    variant<std::nullptr_t, const expression::Interpolate*, const expression::Step*> zoomCurve;
     bool isZoomConstant_;
     bool isFeatureConstant_;
     bool isRuntimeConstant_;
+    variant<std::nullptr_t, const expression::Interpolate*, const expression::Step*> zoomCurve;
 };
 
 template <class T>

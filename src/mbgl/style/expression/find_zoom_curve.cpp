@@ -79,11 +79,15 @@ std::optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCu
     return result;
 }
 
-variant<std::nullptr_t, const Interpolate*, const Step*> findZoomCurveChecked(const expression::Expression* e) {
-    if (isZoomConstant(*e)) {
+variant<std::nullptr_t, const Interpolate*, const Step*> findZoomCurveChecked(const expression::Expression& e) {
+    return findZoomCurveChecked(e, isZoomConstant(e));
+}
+variant<std::nullptr_t, const Interpolate*, const Step*> findZoomCurveChecked(const expression::Expression& e,
+                                                                              bool isZoomConstant_) {
+    if (isZoomConstant_) {
         return nullptr;
     }
-    return findZoomCurve(e)->match(
+    return findZoomCurve(&e)->match(
         [](const ParsingError&) -> variant<std::nullptr_t, const Interpolate*, const Step*> {
             assert(false);
             return nullptr;
