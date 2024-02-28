@@ -32,18 +32,18 @@ class StyleParserTest : public ::testing::TestWithParam<std::string> {};
 TEST_P(StyleParserTest, ParseStyle) {
     const std::string base = std::string("test/fixtures/style_parser/") + GetParam();
 
+    using namespace std::string_literals;
+    SCOPED_TRACE("Loading: "s + base);
+
+    FixtureLog log;
+
     rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> infoDoc;
     infoDoc.Parse<0>(util::read_file(base + ".info.json").c_str());
     ASSERT_FALSE(infoDoc.HasParseError());
     ASSERT_TRUE(infoDoc.IsObject());
 
-    auto observer = new FixtureLogObserver();
-    Log::setObserver(std::unique_ptr<Log::Observer>(observer));
-
     style::Parser parser;
-    auto error = parser.parse(util::read_file(base + ".style.json"));
-
-    if (error) {
+    if (auto error = parser.parse(util::read_file(base + ".style.json"))) {
         Log::Error(Event::ParseStyle, "Failed to parse style: " + util::toString(error));
     }
 
@@ -71,11 +71,14 @@ TEST_P(StyleParserTest, ParseStyle) {
                 Sleep(10);
 #endif
 
-                EXPECT_EQ(count, observer->count(message)) << "Message: " << message << std::endl;
+                SCOPED_TRACE("Checking: "s + message.msg);
+
+                const auto observedCount = log.count(message);
+                EXPECT_EQ(count, observedCount) << "Message: " << message << std::endl;
             }
         }
 
-        const auto& unchecked = observer->unchecked();
+        const auto& unchecked = log.unchecked();
         if (unchecked.size()) {
             std::cerr << "Unchecked Log Messages (" << base << "/" << name << "): " << std::endl << unchecked;
         }
