@@ -27,8 +27,8 @@ public:
     util::RunLoop loop;
     style::Style style{fileSource, 1};
     AnnotationManager annotationManager{style};
-    ImageManager imageManager;
-    GlyphManager glyphManager;
+    std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
+    std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
 
     TileParameters tileParameters{1.0,

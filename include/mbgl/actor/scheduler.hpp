@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mbgl/util/chrono.hpp>
+
 #include <mapbox/std/weak.hpp>
 
 #include <functional>
@@ -36,9 +38,12 @@ public:
     virtual ~Scheduler() = default;
 
     /// Enqueues a function for execution.
-    virtual void schedule(std::function<void()>) = 0;
+    virtual void schedule(std::function<void()>&&) = 0;
     /// Makes a weak pointer to this Scheduler.
     virtual mapbox::base::WeakPtr<Scheduler> makeWeakPtr() = 0;
+    /// Enqueues a function for execution on the render thread.
+    virtual void runOnRenderThread(std::function<void()>&&){};
+    virtual void runRenderJobs() {}
 
     /// Returns a closure wrapping the given one.
     ///
@@ -62,6 +67,11 @@ public:
         scheduleAndReplyValue(task, reply, GetCurrent()->makeWeakPtr());
     }
 
+    /// Wait until there's nothing pending or in process
+    /// Must not be called from a task provided to this scheduler.
+    /// @param timeout Time to wait, or zero to wait forever.
+    virtual std::size_t waitForEmpty(Milliseconds timeout = Milliseconds{0}) = 0;
+
     /// Set/Get the current Scheduler for this thread
     static Scheduler* GetCurrent();
     static void SetCurrent(Scheduler*);
@@ -84,6 +94,9 @@ public:
     /// on the same thread-unsafe object.
     [[nodiscard]] static std::shared_ptr<Scheduler> GetSequenced();
 
+    /// Set a function to be called when an exception occurs on a thread controlled by the scheduler
+    void setExceptionHandler(std::function<void(const std::exception_ptr)> handler_) { handler = std::move(handler_); }
+
 protected:
     template <typename TaskFn, typename ReplyFn>
     void scheduleAndReplyValue(const TaskFn& task,
@@ -97,9 +110,10 @@ protected:
             };
             replyScheduler->schedule(std::move(scheduledReply));
         };
-
         schedule(std::move(scheduled));
     }
+
+    std::function<void(const std::exception_ptr)> handler;
 };
 
 } // namespace mbgl

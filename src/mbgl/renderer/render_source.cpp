@@ -12,28 +12,36 @@
 
 #include <mbgl/layermanager/layer_manager.hpp>
 #include <mbgl/util/constants.hpp>
+
+#include <memory>
 #include <utility>
 
 namespace mbgl {
 
 using namespace style;
 
-std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>& impl) {
+std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>& impl,
+                                                   std::shared_ptr<Scheduler> threadPool_) {
     switch (impl->type) {
         case SourceType::Vector:
-            return std::make_unique<RenderVectorSource>(staticImmutableCast<VectorSource::Impl>(impl));
+            return std::make_unique<RenderVectorSource>(staticImmutableCast<VectorSource::Impl>(impl),
+                                                        std::move(threadPool_));
         case SourceType::Raster:
-            return std::make_unique<RenderRasterSource>(staticImmutableCast<RasterSource::Impl>(impl));
+            return std::make_unique<RenderRasterSource>(staticImmutableCast<RasterSource::Impl>(impl),
+                                                        std::move(threadPool_));
         case SourceType::RasterDEM:
-            return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<RasterSource::Impl>(impl));
+            return std::make_unique<RenderRasterDEMSource>(staticImmutableCast<RasterSource::Impl>(impl),
+                                                           std::move(threadPool_));
         case SourceType::GeoJSON:
-            return std::make_unique<RenderGeoJSONSource>(staticImmutableCast<GeoJSONSource::Impl>(impl));
+            return std::make_unique<RenderGeoJSONSource>(staticImmutableCast<GeoJSONSource::Impl>(impl),
+                                                         std::move(threadPool_));
         case SourceType::Video:
             assert(false);
             return nullptr;
         case SourceType::Annotations:
             if (LayerManager::annotationsEnabled) {
-                return std::make_unique<RenderAnnotationSource>(staticImmutableCast<AnnotationSource::Impl>(impl));
+                return std::make_unique<RenderAnnotationSource>(staticImmutableCast<AnnotationSource::Impl>(impl),
+                                                                std::move(threadPool_));
             } else {
                 assert(false);
                 return nullptr;
@@ -41,7 +49,8 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
         case SourceType::Image:
             return std::make_unique<RenderImageSource>(staticImmutableCast<ImageSource::Impl>(impl));
         case SourceType::CustomVector:
-            return std::make_unique<RenderCustomGeometrySource>(staticImmutableCast<CustomGeometrySource::Impl>(impl));
+            return std::make_unique<RenderCustomGeometrySource>(staticImmutableCast<CustomGeometrySource::Impl>(impl),
+                                                                std::move(threadPool_));
     }
 
     // Not reachable, but placate GCC.

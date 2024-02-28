@@ -51,7 +51,7 @@ public:
     void dumpDebugLogs() const override;
 
 protected:
-    RenderTileSource(Immutable<style::Source::Impl>);
+    RenderTileSource(Immutable<style::Source::Impl>, std::shared_ptr<Scheduler>);
     TilePyramid tilePyramid;
     Immutable<std::vector<RenderTile>> renderTiles;
     mutable RenderTiles filteredRenderTiles;
@@ -67,7 +67,7 @@ private:
  */
 class RenderTileSetSource : public RenderTileSource {
 protected:
-    RenderTileSetSource(Immutable<style::Source::Impl>);
+    RenderTileSetSource(Immutable<style::Source::Impl>, std::shared_ptr<Scheduler>);
     ~RenderTileSetSource() override;
 
     virtual void updateInternal(const Tileset&,
