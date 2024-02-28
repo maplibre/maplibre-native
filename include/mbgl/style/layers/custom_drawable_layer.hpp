@@ -7,6 +7,8 @@
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/gfx/texture2d.hpp>
+#include <mbgl/gfx/context.hpp>
 
 #include <array>
 #include <memory>
@@ -44,6 +46,16 @@ public:
     struct FillOptions {
         Color color;
         float opacity = 1.f;
+    };
+
+    struct SymbolOptions {
+        Size size;
+        gfx::Texture2DPtr texture;
+        std::array<float, 2> anchor{0.5f, 0.5f};
+        std::array<std::array<float, 2>, 2> textureCoordinates{{{0, 0}, {1, 1}}};
+        float angleDegrees{.0f};
+        bool scaleWithMap{false};
+        bool pitchWithMap{false};
     };
 
 public:
@@ -85,6 +97,13 @@ public:
     void setFillOptions(const FillOptions& options);
 
     /**
+     * @brief Set the Symbol options
+     *
+     * @param options
+     */
+    void setSymbolOptions(const SymbolOptions& options);
+
+    /**
      * @brief Add a polyline
      *
      * @param coordinates
@@ -92,7 +111,19 @@ public:
      */
     void addPolyline(const GeometryCoordinates& coordinates);
 
+    /**
+     * @brief Add a multipolygon area fill
+     *
+     * @param geometry a collection of rings with optional holes
+     */
     void addFill(const GeometryCollection& geometry);
+
+    /**
+     * @brief Add a symbol
+     *
+     * @param point
+     */
+    void addSymbol(const GeometryCoordinate& point);
 
     /**
      * @brief Finish the current drawable building session
@@ -113,15 +144,20 @@ public:
 private:
     gfx::ShaderPtr lineShaderDefault() const;
     gfx::ShaderPtr fillShaderDefault() const;
+    gfx::ShaderPtr symbolShaderDefault() const;
 
     std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
 
-    gfx::ShaderPtr lineShader;
-    gfx::ShaderPtr fillShader;
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
+
+    gfx::ShaderPtr lineShader;
+    gfx::ShaderPtr fillShader;
+    gfx::ShaderPtr symbolShader;
+
     LineOptions lineOptions;
     FillOptions fillOptions;
+    SymbolOptions symbolOptions;
 };
 
 class CustomDrawableLayer final : public Layer {

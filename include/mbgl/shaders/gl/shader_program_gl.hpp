@@ -17,13 +17,13 @@ namespace gl {
 
 class ShaderProgramGL final : public gfx::ShaderProgramBase {
 public:
-    using SamplerLocationMap = std::unordered_map<StringIdentity, int>;
+    using SamplerLocationArray = std::array<std::optional<size_t>, shaders::maxTextureCountPerShader>;
 
     ShaderProgramGL(UniqueProgram&& glProgram_);
     ShaderProgramGL(UniqueProgram&&,
                     UniformBlockArrayGL&& uniformBlocks,
                     VertexAttributeArrayGL&& attributes,
-                    SamplerLocationMap&& samplerLocations);
+                    SamplerLocationArray&& samplerLocations);
     ShaderProgramGL(ShaderProgramGL&& other);
     ~ShaderProgramGL() noexcept override = default;
 
@@ -32,14 +32,15 @@ public:
 
     static std::shared_ptr<ShaderProgramGL> create(Context&,
                                                    const ProgramParameters& programParameters,
-                                                   const std::string& name,
                                                    const std::string_view firstAttribName,
                                                    const std::vector<shaders::UniformBlockInfo>& uniformBlocksInfo,
+                                                   const std::vector<shaders::TextureInfo>& texturesInfo,
+                                                   const std::vector<shaders::AttributeInfo>& attributesInfo,
                                                    const std::string& vertexSource,
                                                    const std::string& fragmentSource,
                                                    const std::string& additionalDefines = "") noexcept(false);
 
-    std::optional<uint32_t> getSamplerLocation(const StringIdentity id) const override;
+    std::optional<size_t> getSamplerLocation(const size_t id) const override;
 
     const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
 
@@ -55,7 +56,7 @@ protected:
 
     UniformBlockArrayGL uniformBlocks;
     VertexAttributeArrayGL vertexAttributes;
-    SamplerLocationMap samplerLocations;
+    SamplerLocationArray samplerLocations;
 };
 
 } // namespace gl

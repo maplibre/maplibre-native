@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/style/image.hpp>
+#include <mbgl/style/sprite.hpp>
 #include <mapbox/std/weak.hpp>
 
 #include <string>
@@ -21,12 +22,12 @@ public:
     SpriteLoader(float pixelRatio);
     ~SpriteLoader();
 
-    void load(const std::string& url, FileSource&);
+    void load(const std::optional<style::Sprite> sprite, FileSource&);
 
     void setObserver(SpriteLoaderObserver*);
 
 private:
-    void emitSpriteLoadedIfComplete();
+    void emitSpriteLoadedIfComplete(style::Sprite sprite);
 
     // Invoked by SpriteAtlasWorker
     friend class SpriteLoaderWorker;
@@ -34,7 +35,8 @@ private:
     const float pixelRatio;
 
     struct Data;
-    std::unique_ptr<Data> data;
+    std::map<std::string, std::unique_ptr<Data>> dataMap;
+    std::mutex dataMapMutex;
 
     SpriteLoaderObserver* observer = nullptr;
     std::shared_ptr<Scheduler> threadPool;

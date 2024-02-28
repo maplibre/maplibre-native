@@ -53,11 +53,13 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNAnnotation.h",
     "src/MLNAttributedExpression.h",
     "src/MLNAttributionInfo.h",
+    "src/MLNBackendResource.h",
     "src/MLNClockDirectionFormatter.h",
     "src/MLNCluster.h",
     "src/MLNCompassDirectionFormatter.h",
     "src/MLNComputedShapeSource.h",
     "src/MLNCoordinateFormatter.h",
+    "src/MLNCustomStyleLayer.h",
     "src/MLNCustomDrawableStyleLayer.h",
     "src/MLNDefaultStyle.h",
     "src/MLNDistanceFormatter.h",
@@ -75,7 +77,6 @@ MLN_DARWIN_OBJC_HEADERS = [
     "src/MLNOfflinePack.h",
     "src/MLNOfflineRegion.h",
     "src/MLNOfflineStorage.h",
-    "src/MLNOpenGLStyleLayer.h",
     "src/MLNOverlay.h",
     "src/MLNPointAnnotation.h",
     "src/MLNPointCollection.h",
@@ -126,6 +127,7 @@ MLN_DARWIN_OBJCPP_HEADERS = [
 MLN_DARWIN_PRIVATE_HEADERS = [
     "src/MLNAttributionInfo_Private.h",
     "src/MLNComputedShapeSource_Private.h",
+    "src/MLNCustomStyleLayer_Private.h",
     "src/MLNFeature_Private.h",
     "src/MLNFoundation_Private.h",
     "src/MLNGeometry_Private.h",
@@ -160,6 +162,7 @@ MLN_DARWIN_PRIVATE_HEADERS = [
 MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNAttributionInfo.mm",
     "src/MLNComputedShapeSource.mm",
+    "src/MLNCustomStyleLayer.mm",
     "src/MLNDefaultStyle.mm",
     "src/MLNFeature.mm",
     "src/MLNForegroundStyleLayer.mm",
@@ -204,11 +207,6 @@ MLN_DARWIN_PUBLIC_OBJCPP_SOURCE = [
     "src/NSExpression+MLNAdditions.mm",
     "src/NSPredicate+MLNAdditions.mm",
     "src/NSValue+MLNStyleAttributeAdditions.mm",
-]
-MLN_DARWIN_PUBLIC_OBJCPP_OPENGL_SOURCE = [
-    "src/MLNOpenGLStyleLayer_Private.h",
-    "src/MLNOpenGLStyleLayer.h",
-    "src/MLNOpenGLStyleLayer.mm",
 ]
 MLN_DARWIN_PUBLIC_OBJCPP_CUSTOM_DRAWABLE_SOURCE = [
     "src/MLNCustomDrawableStyleLayer_Private.h",

@@ -13,12 +13,12 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/shaders/debug_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #include <mbgl/tile/geojson_tile_data.hpp>
 #include <mbgl/gfx/polyline_generator.hpp>
 #include <mbgl/style/types.hpp>
@@ -65,7 +65,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     if (!debugShader) {
         return;
     }
-    static const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
     std::unique_ptr<gfx::DrawableBuilder> debugBuilder = [&]() -> std::unique_ptr<gfx::DrawableBuilder> {
         auto builder = context.createDrawableBuilder("debug-builder");
         builder->setShader(debugShader);
@@ -73,7 +72,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setEnableDepth(false);
         builder->setColorMode(gfx::ColorMode::unblended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder->setVertexAttrNameId(idVertexAttribName);
+        builder->setVertexAttrId(idDebugPosVertexAttribute);
 
         return builder;
     }();
@@ -83,14 +82,14 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     gfx::ShaderPtr polylineShader;
     const auto createPolylineShader = [&]() -> gfx::ShaderPtr {
         gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("LineShader");
-        const mbgl::unordered_set<StringIdentity> propertiesAsUniforms{
-            stringIndexer().get("a_color"),
-            stringIndexer().get("a_blur"),
-            stringIndexer().get("a_opacity"),
-            stringIndexer().get("a_gapwidth"),
-            stringIndexer().get("a_offset"),
-            stringIndexer().get("a_width"),
-        };
+        const StringIDSetsPair propertiesAsUniforms{
+            {"a_color", "a_blur", "a_opacity", "a_gapwidth", "a_offset", "a_width"},
+            {idLineColorVertexAttribute,
+             idLineBlurVertexAttribute,
+             idLineOpacityVertexAttribute,
+             idLineGapWidthVertexAttribute,
+             idLineOffsetVertexAttribute,
+             idLineWidthVertexAttribute}};
         return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
     };
 
@@ -102,7 +101,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setEnableDepth(false);
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder->setVertexAttrNameId(idVertexAttribName);
+        builder->setVertexAttrId(idLinePosNormalVertexAttribute);
 
         return builder;
     };
@@ -131,18 +130,13 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
     // create texture. to be reused for all the tiles of the debug layers
     auto texture = context.createTexture2D();
-    std::optional<uint32_t> samplerLocation;
     {
         std::array<uint8_t, 4> data{{0, 0, 0, 0}};
         auto emptyImage = std::make_shared<PremultipliedImage>(Size(1, 1), data.data(), data.size());
         texture->setImage(emptyImage);
         texture->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        static const StringIdentity idDebugOverlayUniformName = stringIndexer().get("u_overlay");
-        samplerLocation = debugShader->getSamplerLocation(idDebugOverlayUniformName);
     }
-    assert(samplerLocation.has_value());
-    if (!samplerLocation.has_value()) return;
 
     // function to update existing tile drawables with UBO value. return number of updated drawables
     const auto updateDrawables =
@@ -172,7 +166,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         debugBuilder->addVertices(verts, 0, verts.size());
         debugBuilder->setSegments(mode, indexes, segments.data(), segments.size());
         // texture
-        debugBuilder->setTexture(texture, samplerLocation.value());
+        debugBuilder->setTexture(texture, idDebugOverlayTexture);
 
         // finish
         debugBuilder->flush(context);

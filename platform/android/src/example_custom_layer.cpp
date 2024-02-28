@@ -3,6 +3,7 @@
 #include <jni.h>
 #include <mbgl/style/layers/custom_layer.hpp>
 #include <sstream>
+#include <memory>
 
 // DEBUGGING
 

@@ -38,14 +38,6 @@ using namespace shaders;
 
 namespace {
 
-#if MLN_DRAWABLE_RENDERER
-const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
-const StringIdentity idNormAttribName = stringIndexer().get("a_normal_ed");
-
-const StringIdentity idIconTextureName = stringIndexer().get("u_image");
-
-#endif // MLN_DRAWABLE_RENDERER
-
 inline const FillExtrusionLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == FillExtrusionLayer::Impl::staticTypeInfo());
     return static_cast<const FillExtrusionLayer::Impl&>(*impl);
@@ -340,7 +332,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
     tileLayerGroup->setStencilTiles(renderTiles);
 
-    mbgl::unordered_set<StringIdentity> propertiesAsUniforms;
+    StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 
@@ -410,13 +402,15 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        propertiesAsUniforms.clear();
+        propertiesAsUniforms.first.clear();
+        propertiesAsUniforms.second.clear();
 
         auto vertexAttrs = context.createVertexAttributeArray();
         vertexAttrs->readDataDrivenPaintProperties<FillExtrusionBase,
                                                    FillExtrusionColor,
                                                    FillExtrusionHeight,
-                                                   FillExtrusionPattern>(binders, evaluated, propertiesAsUniforms);
+                                                   FillExtrusionPattern>(
+            binders, evaluated, propertiesAsUniforms, idFillExtrusionBaseVertexAttribute);
 
         const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
             shaderGroup->getOrCreateShader(context, propertiesAsUniforms));
@@ -460,7 +454,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             if (const auto& atlases = tile.getAtlasTextures()) {
                 tweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
                                                                         std::nullopt,
-                                                                        idIconTextureName,
+                                                                        idFillExtrusionImageTexture,
                                                                         /*isText=*/false,
                                                                         false,
                                                                         style::AlignmentType::Auto,
@@ -475,14 +469,14 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        if (const auto& attr = vertexAttrs->add(idPosAttribName)) {
+        if (const auto& attr = vertexAttrs->set(idFillExtrusionPosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a1),
                                    /*vertexOffset=*/0,
                                    sizeof(FillExtrusionLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
-        if (const auto& attr = vertexAttrs->add(idNormAttribName)) {
+        if (const auto& attr = vertexAttrs->set(idFillExtrusionNormalEdVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillExtrusionLayoutVertex, a2),
                                    /*vertexOffset=*/0,

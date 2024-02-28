@@ -93,65 +93,37 @@ VertexAttributeArray& VertexAttributeArray::operator=(VertexAttributeArray&& oth
     return *this;
 }
 
-const std::unique_ptr<VertexAttribute>& VertexAttributeArray::get(const StringIdentity id) const {
-    const auto result = attrs.find(id);
-    return (result != attrs.end()) ? result->second : nullref;
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::get(const size_t id) const {
+    return (id < attrs.size()) ? attrs[id] : nullref;
 }
 
-const std::unique_ptr<VertexAttribute>& VertexAttributeArray::add(const StringIdentity id,
+const std::unique_ptr<VertexAttribute>& VertexAttributeArray::set(const size_t id,
                                                                   int index,
                                                                   AttributeDataType dataType,
                                                                   std::size_t count) {
-    const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
-    if (result.second) {
-        result.first->second = create(index, dataType, count);
-        return result.first->second;
-    } else {
+    assert(id < attrs.size());
+    if (id >= attrs.size()) {
         return nullref;
     }
-}
-
-const std::unique_ptr<VertexAttribute>& VertexAttributeArray::getOrAdd(const StringIdentity id,
-                                                                       int index,
-                                                                       AttributeDataType dataType,
-                                                                       std::size_t count) {
-    const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
-    auto& attr = result.first->second;
-    if (result.second) {
-        // inserted
-        attr = create(index, dataType, count);
-    } else {
-        // already present
-        assert(dataType == AttributeDataType::Invalid || attr->getDataType() == dataType);
-        assert((index < 0 || attr->getIndex() == index) && (count == 0 || attr->getCount() == count));
-    }
-    return attr;
+    attrs[id] = create(index, dataType, count);
+    return attrs[id];
 }
 
 std::size_t VertexAttributeArray::getTotalSize() const {
-    return std::accumulate(attrs.begin(), attrs.end(), std::size_t(0), [](const auto acc, const auto& kv) {
-        return acc + kv.second->getStride();
+    return std::accumulate(attrs.begin(), attrs.end(), std::size_t(0), [](const auto acc, const auto& attr) {
+        return acc + (attr ? attr->getStride() : 0);
     });
 }
 
 std::size_t VertexAttributeArray::getMaxCount() const {
-    return std::accumulate(attrs.begin(), attrs.end(), std::size_t(0), [](const auto acc, const auto& kv) {
-        return std::max(acc, kv.second->getCount());
+    return std::accumulate(attrs.begin(), attrs.end(), std::size_t(0), [](const auto acc, const auto& attr) {
+        return std::max(acc, (attr ? attr->getCount() : 0));
     });
 }
 
 void VertexAttributeArray::clear() {
-    attrs.clear();
-}
-
-const UniqueVertexAttribute& VertexAttributeArray::add(const StringIdentity id,
-                                                       std::unique_ptr<VertexAttribute>&& attr) {
-    const auto result = attrs.insert(std::make_pair(id, std::unique_ptr<VertexAttribute>()));
-    if (result.second) {
-        result.first->second = std::move(attr);
-        return result.first->second;
-    } else {
-        return nullref;
+    for (auto& attr : attrs) {
+        attr = nullptr;
     }
 }
 

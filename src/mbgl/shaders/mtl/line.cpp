@@ -4,14 +4,14 @@ namespace mbgl {
 namespace shaders {
 
 const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos_normal"},
-    AttributeInfo{1, gfx::AttributeDataType::UByte4, "a_data"},
-    AttributeInfo{2, gfx::AttributeDataType::Float4, "a_color"},
-    AttributeInfo{3, gfx::AttributeDataType::Float2, "a_blur"},
-    AttributeInfo{4, gfx::AttributeDataType::Float2, "a_opacity"},
-    AttributeInfo{5, gfx::AttributeDataType::Float2, "a_gapwidth"},
-    AttributeInfo{6, gfx::AttributeDataType::Float2, "a_offset"},
-    AttributeInfo{7, gfx::AttributeDataType::Float2, "a_width"},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idLinePosNormalVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::UByte4, idLineDataVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Float4, idLineColorVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float2, idLineBlurVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, idLineOpacityVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Float2, idLineGapWidthVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float2, idLineOffsetVertexAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::Float2, idLineWidthVertexAttribute},
 };
 const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{8, true, false, sizeof(LineDynamicUBO), idLineDynamicUBO},
@@ -22,15 +22,15 @@ const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineShader, gfx::Bac
 const std::array<TextureInfo, 0> ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal>::textures = {};
 
 const std::array<AttributeInfo, 9> ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos_normal"},
-    AttributeInfo{1, gfx::AttributeDataType::UByte4, "a_data"},
-    AttributeInfo{2, gfx::AttributeDataType::Float2, "a_blur"},
-    AttributeInfo{3, gfx::AttributeDataType::Float2, "a_opacity"},
-    AttributeInfo{4, gfx::AttributeDataType::Float2, "a_gapwidth"},
-    AttributeInfo{5, gfx::AttributeDataType::Float2, "a_offset"},
-    AttributeInfo{6, gfx::AttributeDataType::Float2, "a_width"},
-    AttributeInfo{7, gfx::AttributeDataType::UShort4, "a_pattern_from"},
-    AttributeInfo{8, gfx::AttributeDataType::UShort4, "a_pattern_to"},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idLinePosNormalVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::UByte4, idLineDataVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Float2, idLineBlurVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float2, idLineOpacityVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, idLineGapWidthVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Float2, idLineOffsetVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float2, idLineWidthVertexAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::UShort4, idLinePatternFromVertexAttribute},
+    AttributeInfo{8, gfx::AttributeDataType::UShort4, idLinePatternToVertexAttribute},
 };
 const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{9, true, false, sizeof(LineDynamicUBO), idLinePatternDynamicUBO},
@@ -40,19 +40,19 @@ const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::LinePatternShader, g
     UniformBlockInfo{13, true, true, sizeof(LinePatternTilePropertiesUBO), idLinePatternTilePropertiesUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_image"},
+    TextureInfo{0, idLineImageTexture},
 };
 
 const std::array<AttributeInfo, 9> ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos_normal"},
-    AttributeInfo{1, gfx::AttributeDataType::UByte4, "a_data"},
-    AttributeInfo{2, gfx::AttributeDataType::Float4, "a_color"},
-    AttributeInfo{3, gfx::AttributeDataType::Float2, "a_blur"},
-    AttributeInfo{4, gfx::AttributeDataType::Float2, "a_opacity"},
-    AttributeInfo{5, gfx::AttributeDataType::Float2, "a_gapwidth"},
-    AttributeInfo{6, gfx::AttributeDataType::Float2, "a_offset"},
-    AttributeInfo{7, gfx::AttributeDataType::Float2, "a_width"},
-    AttributeInfo{8, gfx::AttributeDataType::Float2, "a_floorwidth"},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idLinePosNormalVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::UByte4, idLineDataVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Float4, idLineColorVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float2, idLineBlurVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, idLineOpacityVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Float2, idLineGapWidthVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float2, idLineOffsetVertexAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::Float2, idLineWidthVertexAttribute},
+    AttributeInfo{8, gfx::AttributeDataType::Float2, idLineFloorWidthVertexAttribute},
 };
 const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{9, true, false, sizeof(LineDynamicUBO), idLineSDFDynamicUBO},
@@ -61,12 +61,12 @@ const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineSDFShader, gfx::
     UniformBlockInfo{12, true, false, sizeof(LineSDFInterpolationUBO), idLineSDFInterpolationUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal>::textures = {
-    TextureInfo{0, "u_image"},
+    TextureInfo{0, idLineImageTexture},
 };
 
 const std::array<AttributeInfo, 2> ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos_normal"},
-    AttributeInfo{1, gfx::AttributeDataType::UByte4, "a_data"},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idLinePosNormalVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::UByte4, idLineDataVertexAttribute},
 };
 const std::array<UniformBlockInfo, 2> ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{2, true, true, sizeof(LineBasicUBO), idLineBasicUBO},

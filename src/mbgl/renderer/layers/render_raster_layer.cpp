@@ -26,6 +26,7 @@
 namespace mbgl {
 
 using namespace style;
+using namespace shaders;
 
 namespace {
 
@@ -245,11 +246,6 @@ void RenderRasterLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeReq
     changeLayerIndex(imageLayerGroup, newLayerIndex, changes);
 }
 
-static const StringIdentity idPosAttribName = stringIndexer().get("a_pos");
-static const StringIdentity idTexturePosAttribName = stringIndexer().get("a_texture_pos");
-static const StringIdentity idTexImage0Name = stringIndexer().get("u_image0");
-static const StringIdentity idTexImage1Name = stringIndexer().get("u_image1");
-
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
@@ -273,8 +269,6 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         if (!rasterShader) {
             return;
         }
-        rasterSampler0 = rasterShader->getSamplerLocation(idTexImage0Name);
-        rasterSampler1 = rasterShader->getSamplerLocation(idTexImage1Name);
     }
 
     if (!layerTweaker) {
@@ -306,12 +300,11 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         builder->setDepthType(gfx::DepthMaskType::ReadOnly);
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder->setVertexAttrNameId(idPosAttribName);
         return builder;
     };
 
     const auto setTextures = [&](gfx::UniqueDrawableBuilder& builder, RasterBucket& bucket) {
-        if (bucket.image && (rasterSampler0 || rasterSampler1)) {
+        if (bucket.image) {
             if (!bucket.texture2d) {
                 if (auto tex = context.createTexture2D()) {
                     tex->setImage(bucket.image);
@@ -327,12 +320,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 bucket.texture2d->setSamplerConfiguration(
                     {filter, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
 
-                if (rasterSampler0) {
-                    builder->setTexture(bucket.texture2d, *rasterSampler0);
-                }
-                if (rasterSampler1) {
-                    builder->setTexture(bucket.texture2d, *rasterSampler1);
-                }
+                builder->setTexture(bucket.texture2d, idRasterImage0Texture);
+                builder->setTexture(bucket.texture2d, idRasterImage1Texture);
             }
         }
     };
@@ -363,7 +352,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             if (!vertexAttrs) {
                 vertexAttrs = context.createVertexAttributeArray();
 
-                if (auto& attr = vertexAttrs->add(idPosAttribName)) {
+                if (auto& attr = vertexAttrs->set(idRasterPosVertexAttribute)) {
                     attr->setSharedRawData(vertices,
                                            offsetof(RasterLayoutVertex, a1),
                                            /*vertexOffset=*/0,
@@ -371,7 +360,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                            gfx::AttributeDataType::Short2);
                 }
 
-                if (auto& attr = vertexAttrs->add(idTexturePosAttribName)) {
+                if (auto& attr = vertexAttrs->set(idRasterTexturePosVertexAttribute)) {
                     attr->setSharedRawData(vertices,
                                            offsetof(RasterLayoutVertex, a2),
                                            /*vertexOffset=*/0,
@@ -498,7 +487,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 builder = createBuilder();
             }
 
-            if (bucket.image && builder->getTextures().size() == 0) {
+            if (bucket.image && !builder->getTexture(idRasterImage0Texture) &&
+                !builder->getTexture(idRasterImage1Texture)) {
                 setTextures(builder, bucket);
             };
 

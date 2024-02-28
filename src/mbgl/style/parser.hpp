@@ -1,9 +1,9 @@
 #pragma once
 
 #include <mbgl/style/layer.hpp>
+#include <mbgl/style/sprite.hpp>
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/light.hpp>
-
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/rapidjson.hpp>
 #include <mbgl/util/font_stack.hpp>
@@ -27,7 +27,7 @@ public:
 
     StyleParseResult parse(const std::string&);
 
-    std::string spriteURL;
+    std::vector<Sprite> sprites;
     std::string glyphURL;
 
     std::vector<std::unique_ptr<Source>> sources;
@@ -49,6 +49,7 @@ private:
     void parseTransition(const JSValue&);
     void parseLight(const JSValue&);
     void parseSources(const JSValue&);
+    void parseSprites(const JSValue&);
     void parseLayers(const JSValue&);
     void parseLayer(const std::string& id, const JSValue&, std::unique_ptr<Layer>&);
 
