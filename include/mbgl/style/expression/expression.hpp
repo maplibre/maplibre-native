@@ -196,11 +196,15 @@ enum class Dependency : uint32_t {
     Override = 1 << 6, // Property override
     MaskCount = 7,
 };
-inline constexpr static Dependency operator|(Dependency x, Dependency y) {
+inline constexpr static Dependency operator|(Dependency x, Dependency y) noexcept {
     return Dependency{mbgl::underlying_type(x) | mbgl::underlying_type(y)};
 }
-inline constexpr static Dependency operator&(Dependency x, Dependency y) {
+inline constexpr static Dependency operator&(Dependency x, Dependency y) noexcept {
     return Dependency{mbgl::underlying_type(x) & mbgl::underlying_type(y)};
+}
+inline static Dependency& operator|=(Dependency& target, Dependency source) noexcept {
+    target = target | source;
+    return target;
 }
 
 class Expression {
