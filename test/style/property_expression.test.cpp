@@ -178,6 +178,9 @@ TEST(PropertyExpression, FormatSectionOverride) {
         EXPECT_EQ(Color::green(), propExpr.evaluate(oneDouble, Color()));
         EXPECT_EQ(Color::blue(), propExpr.evaluate(ctx));
 
+        /// Override implies a feature dependency (See `::isFeatureConstant`)
+        EXPECT_EQ(Dependency::Override | Dependency::Feature, propExpr.getDependencies());
+
         auto override2 = createOverride(expression::type::Color, ddsValueRed, "text-color");
         PropertyExpression<Color> propExprDDS(std::move(override2));
         EXPECT_EQ(Color::red(), propExprDDS.evaluate(oneColor, Color()));
@@ -206,6 +209,8 @@ TEST(PropertyExpression, ImageExpression) {
         auto evaluatedImage = propExpr.evaluate(emptyTileFeature, emptySet, expression::Image());
         EXPECT_FALSE(evaluatedImage.isAvailable());
         EXPECT_EQ(evaluatedImage.id(), "airport-11"s);
+
+        EXPECT_EQ(Dependency::Image, propExpr.getDependencies());
 
         PropertyExpression<expression::Image> ddPropExpr(image(get(literal("image_name"s))));
         evaluatedImage = ddPropExpr.evaluate(oneImage, emptySet, expression::Image());
@@ -244,6 +249,8 @@ TEST(PropertyExpression, ImageExpression) {
         evaluatedImage = propExpr.evaluate(18.0, emptyTileFeature, availableImages, expression::Image());
         EXPECT_TRUE(evaluatedImage.isAvailable());
         EXPECT_EQ(evaluatedImage.id(), "bicycle-15"s);
+
+        EXPECT_EQ(Dependency::Image | Dependency::Zoom, propExpr.getDependencies());
     }
 }
 
