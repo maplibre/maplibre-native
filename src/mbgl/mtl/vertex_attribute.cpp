@@ -34,15 +34,15 @@ const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAtt
 }
 
 bool VertexAttributeArray::isDirty() const {
-    return std::any_of(attrs.begin(), attrs.end(), [](const auto& kv) {
-        if (kv.second) {
+    return std::any_of(attrs.begin(), attrs.end(), [](const auto& attr) {
+        if (attr) {
             // If we have shared data, the dirty flag from that overrides ours
-            const auto& attrib = static_cast<const VertexAttribute&>(*kv.second);
+            const auto& attrib = static_cast<const VertexAttribute&>(*attr);
             if (const auto& shared = attrib.getSharedRawData()) {
                 return shared->getDirty();
             }
         }
-        return kv.second && kv.second->isDirty();
+        return attr && attr->isDirty();
     });
 }
 
