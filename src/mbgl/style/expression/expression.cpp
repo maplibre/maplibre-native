@@ -6,19 +6,19 @@
 #include <utility>
 
 namespace mbgl {
-namespace util {
 
 using Dependency = style::expression::Dependency;
 
-std::string toString(const Dependency deps) {
-    std::ostringstream ss;
+std::ostream& operator<<(std::ostream& os, const Dependency deps) {
     if (deps == Dependency::None) {
-        return "None";
+        os << "None";
+        return os;
     }
 
+    bool any = false;
     const auto add = [&](Dependency dep, std::string_view name) {
         if ((deps & dep) != Dependency::None) {
-            ss << (ss.tellp() ? "|" : std::string_view{}) << name;
+            os << (any ? "|" : std::string_view{}) << name;
         }
     };
 
@@ -30,6 +30,14 @@ std::string toString(const Dependency deps) {
     add(Dependency::Var, "Var");
     add(Dependency::Override, "Override");
 
+    return os;
+}
+
+namespace util {
+
+std::string toString(const style::expression::Dependency deps) {
+    std::ostringstream ss;
+    ss << deps;
     return ss.str();
 }
 

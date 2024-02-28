@@ -337,4 +337,6 @@ namespace util {
 std::string toString(style::expression::Dependency);
 } // namespace util
 
+std::ostream& operator<<(std::ostream&, style::expression::Dependency);
+
 } // namespace mbgl

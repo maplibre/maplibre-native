@@ -19,6 +19,10 @@ using namespace mbgl::style::expression::dsl;
 
 using namespace std::string_literals;
 
+namespace std {
+using ::mbgl::operator<<;
+}
+
 static const StubGeometryTileFeature oneInteger{PropertyMap{{"property", uint64_t(1)}}};
 
 static const StubGeometryTileFeature oneDouble{PropertyMap{{"property", 1.0}}};
