@@ -108,8 +108,8 @@ Dependency extraDependency(const type::Type& t) {
 
 } // namespace
 
-Coercion::Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_)
-    : Expression(Kind::Coercion, std::move(type_), collectDependencies(inputs_) | extraDependency(type_)),
+Coercion::Coercion(const type::Type& type_, std::vector<std::unique_ptr<Expression>> inputs_)
+    : Expression(Kind::Coercion, type_, collectDependencies(inputs_) | extraDependency(type_)),
       coerceSingleValue(getCoerceFunction(getType())),
       inputs(std::move(inputs_)) {
     assert(!inputs.empty());
