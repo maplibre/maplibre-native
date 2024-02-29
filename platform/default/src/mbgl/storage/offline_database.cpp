@@ -484,7 +484,6 @@ std::optional<int64_t> OfflineDatabase::extractResourceDataSize(const Resource& 
 }
 
 std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
-    
     // First, try to find the resource in the 'resources' table
 
     std::optional<int64_t> selectResourcesResult = extractResourceDataSize(
@@ -736,7 +735,6 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
             "SELECT length(data) FROM ambient_tiles WHERE url_template = ?1 AND pixel_ratio = ?2 AND x = ?3 AND y = ?4 "
             "AND z = ?5");
         if (selectAmbientTilesResult) {
-
             mapbox::sqlite::Query insertQuery(
                 getStatement("INSERT INTO tiles (url_template, pixel_ratio, z, x, y, expires, modified, etag, data, "
                              "compressed, accessed, must_revalidate) "
