@@ -76,7 +76,7 @@ public:
     // render data with the given properties.
     //
     // Returns `true` if the corresponding render layer data is present in this
-    // tile (and i.e. it was succesfully updated); returns `false` otherwise.
+    // tile (and i.e. it was successfully updated); returns `false` otherwise.
     virtual bool layerPropertiesUpdated(const Immutable<style::LayerProperties>& layerProperties) = 0;
     virtual void setShowCollisionBoxes(const bool) {}
     virtual void setLayers(const std::vector<Immutable<style::LayerProperties>>&) {}

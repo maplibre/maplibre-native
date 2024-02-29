@@ -184,8 +184,8 @@ private:
     ZoomHistory zoomHistory;
     TransformState transformState;
 
-    std::unique_ptr<GlyphManager> glyphManager;
-    std::unique_ptr<ImageManager> imageManager;
+    std::shared_ptr<GlyphManager> glyphManager;
+    std::shared_ptr<ImageManager> imageManager;
     std::unique_ptr<LineAtlas> lineAtlas;
     std::unique_ptr<PatternAtlas> patternAtlas;
 
@@ -209,6 +209,8 @@ private:
     std::vector<Immutable<style::LayerProperties>> filteredLayersForSource;
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;
+
+    std::shared_ptr<Scheduler> threadPool;
 
 #if MLN_DRAWABLE_RENDERER
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
