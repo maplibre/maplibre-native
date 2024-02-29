@@ -94,16 +94,16 @@ void each_subset(const TSet& sofar, TIter beg, TIter end, TFunc f) {
 /// Ensure that no combination of attributes used by a shader definition produce a hash conflict
 template <typename ShaderType>
 void checkShaderHashes() {
-    using AttribSet = mbgl::unordered_set<StringIdentity>;
+    using AttribSet = mbgl::unordered_set<size_t>;
     AttribSet attributes;
     for (const auto& attrib : ShaderType::attributes) {
-        attributes.insert(attrib.nameID);
+        attributes.insert(attrib.id);
     }
 
     std::set<std::size_t> subsetHashes;
     each_subset(AttribSet{}, attributes.cbegin(), attributes.cend(), [&](auto beg, auto end) {
         if (beg != end) {
-            std::vector<StringIdentity> subset(beg, end);
+            std::vector<size_t> subset(beg, end);
             std::optional<std::size_t> firstHash;
             do {
                 const auto hash = util::order_independent_hash(subset.begin(), subset.end());

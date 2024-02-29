@@ -6,12 +6,12 @@ namespace shaders {
 
 const std::array<AttributeInfo, 6>
     ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal>::attributes = {
-        AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos"},
-        AttributeInfo{1, gfx::AttributeDataType::Short4, "a_normal_ed"},
-        AttributeInfo{2, gfx::AttributeDataType::Float, "a_base"},
-        AttributeInfo{3, gfx::AttributeDataType::Float, "a_height"},
-        AttributeInfo{4, gfx::AttributeDataType::UShort4, "a_pattern_from"},
-        AttributeInfo{5, gfx::AttributeDataType::UShort4, "a_pattern_to"},
+        AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
+        AttributeInfo{1, gfx::AttributeDataType::Short4, idFillExtrusionNormalEdVertexAttribute},
+        AttributeInfo{2, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
+        AttributeInfo{3, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
+        AttributeInfo{4, gfx::AttributeDataType::UShort4, idFillExtrusionPatternFromVertexAttribute},
+        AttributeInfo{5, gfx::AttributeDataType::UShort4, idFillExtrusionPatternToVertexAttribute},
 };
 const std::array<UniformBlockInfo, 4>
     ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal>::uniforms = {

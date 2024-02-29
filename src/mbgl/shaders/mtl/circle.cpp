@@ -4,14 +4,14 @@ namespace mbgl {
 namespace shaders {
 
 const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos"},
-    AttributeInfo{1, gfx::AttributeDataType::Float4, "a_color"},
-    AttributeInfo{2, gfx::AttributeDataType::Float2, "a_radius"},
-    AttributeInfo{3, gfx::AttributeDataType::Float2, "a_blur"},
-    AttributeInfo{4, gfx::AttributeDataType::Float2, "a_opacity"},
-    AttributeInfo{5, gfx::AttributeDataType::Float4, "a_stroke_color"},
-    AttributeInfo{6, gfx::AttributeDataType::Float2, "a_stroke_width"},
-    AttributeInfo{7, gfx::AttributeDataType::Float2, "a_stroke_opacity"},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idCirclePosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Float4, idCircleColorVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Float2, idCircleRadiusVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float2, idCircleBlurVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, idCircleOpacityVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Float4, idCircleStrokeColorVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float2, idCircleStrokeWidthVertexAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::Float2, idCircleStrokeOpacityVertexAttribute},
 };
 const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{8, true, false, sizeof(CircleDrawableUBO), idCircleDrawableUBO},

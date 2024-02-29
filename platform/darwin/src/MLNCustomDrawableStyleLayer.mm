@@ -12,6 +12,12 @@
 #include <memory>
 #include <cmath>
 
+#include <mbgl/style/layer.hpp>
+
+@interface MLNCustomDrawableStyleLayer (Internal)
+- (instancetype)initWithPendingLayer:(std::unique_ptr<mbgl::style::Layer>)pendingLayer;
+@end
+
 @implementation MLNCustomDrawableStyleLayer
 
 - (instancetype)initWithRawLayer:(mbgl::style::Layer *)rawLayer {

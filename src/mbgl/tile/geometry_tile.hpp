@@ -106,12 +106,14 @@ private:
     // Used to signal the worker that it should abandon parsing this tile as soon as possible.
     std::atomic<bool> obsolete{false};
 
-    std::shared_ptr<Mailbox> mailbox;
+    const std::shared_ptr<Scheduler> threadPool;
+
+    const std::shared_ptr<Mailbox> mailbox;
     Actor<GeometryTileWorker> worker;
 
-    std::shared_ptr<FileSource> fileSource;
-    GlyphManager& glyphManager;
-    ImageManager& imageManager;
+    const std::shared_ptr<FileSource> fileSource;
+    const std::shared_ptr<GlyphManager> glyphManager;
+    const std::shared_ptr<ImageManager> imageManager;
 
     uint64_t correlationID = 0;
 
