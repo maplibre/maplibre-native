@@ -8,7 +8,7 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-typedef EvaluationResult (*CoerceFunction)(const Value&);
+using CoerceFunction = EvaluationResult (*)(const Value&);
 
 namespace {
 
