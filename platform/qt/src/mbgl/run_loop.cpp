@@ -1,6 +1,7 @@
 #include "run_loop_impl.hpp"
 
 #include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 
 #include <QCoreApplication>
 
@@ -87,6 +88,25 @@ void RunLoop::runOnce() {
         QCoreApplication::instance()->processEvents();
     } else {
         impl->loop->processEvents();
+    }
+}
+
+std::size_t RunLoop::waitForEmpty(std::chrono::milliseconds timeout) {
+    const auto startTime = mbgl::util::MonotonicTimer::now();
+    while (true) {
+        std::size_t remaining;
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            remaining = defaultQueue.size() + highPriorityQueue.size();
+        }
+
+        const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
+        const auto elapsedMillis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+        if (remaining == 0 || timeout <= elapsedMillis) {
+            return remaining;
+        }
+
+        runOnce();
     }
 }
 

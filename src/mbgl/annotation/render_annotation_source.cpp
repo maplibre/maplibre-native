@@ -9,8 +9,9 @@ namespace mbgl {
 
 using namespace style;
 
-RenderAnnotationSource::RenderAnnotationSource(Immutable<AnnotationSource::Impl> impl_)
-    : RenderTileSource(std::move(impl_)) {
+RenderAnnotationSource::RenderAnnotationSource(Immutable<AnnotationSource::Impl> impl_,
+                                               std::shared_ptr<Scheduler> threadPool_)
+    : RenderTileSource(std::move(impl_), std::move(threadPool_)) {
     assert(LayerManager::annotationsEnabled);
     tilePyramid.setObserver(this);
 }
