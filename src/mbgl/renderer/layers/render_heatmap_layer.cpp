@@ -24,7 +24,6 @@
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/util/string_indexer.hpp>
 #endif
 
 namespace mbgl {
@@ -278,8 +277,6 @@ namespace {
 constexpr auto HeatmapShaderGroupName = "HeatmapShader";
 constexpr auto HeatmapTextureShaderGroupName = "HeatmapTextureShader";
 
-const StringIdentity idVertexAttribName = stringIndexer().get("a_pos");
-
 } // namespace
 
 using namespace shaders;
@@ -345,9 +342,9 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
 
     const auto& evaluated = static_cast<const HeatmapLayerProperties&>(*evaluatedProperties).evaluated;
-    std::optional<mbgl::unordered_set<StringIdentity>> propertiesAsUniforms;
+    std::optional<StringIDSetsPair> propertiesAsUniforms;
 #if !defined(NDEBUG)
-    std::optional<mbgl::unordered_set<StringIdentity>> previousPropertiesAsUniforms;
+    std::optional<StringIDSetsPair> previousPropertiesAsUniforms;
 #endif
 
     gfx::ShaderPtr heatmapShader;
@@ -411,13 +408,14 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
         }
 #if !defined(NDEBUG)
         else {
-            propertiesAsUniforms->clear();
+            propertiesAsUniforms->first.clear();
+            propertiesAsUniforms->second.clear();
         }
 #endif
 
         auto heatmapVertexAttrs = context.createVertexAttributeArray();
         heatmapVertexAttrs->readDataDrivenPaintProperties<HeatmapWeight, HeatmapRadius>(
-            paintPropertyBinders, evaluated, *propertiesAsUniforms);
+            paintPropertyBinders, evaluated, *propertiesAsUniforms, idHeatmapWeightVertexAttribute);
 
 #if !defined(NDEBUG)
         // We assume the properties are the same across tiles.
@@ -435,7 +433,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
 
-        if (const auto& attr = heatmapVertexAttrs->add(idVertexAttribName)) {
+        if (const auto& attr = heatmapVertexAttrs->set(idHeatmapPosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(HeatmapLayoutVertex, a1),
                                    /*vertexOffset=*/0,
@@ -505,7 +503,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
     const auto textureVertexCount = sharedTextureVertices->elements();
 
     auto textureVertexAttrs = context.createVertexAttributeArray();
-    if (const auto& attr = textureVertexAttrs->add(idVertexAttribName)) {
+    if (const auto& attr = textureVertexAttrs->set(idHeatmapPosVertexAttribute)) {
         attr->setSharedRawData(sharedTextureVertices,
                                offsetof(HeatmapLayoutVertex, a1),
                                /*vertexOffset=*/0,

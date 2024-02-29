@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/gfx/backend.hpp>
 #include <mbgl/gfx/command_encoder.hpp>
 #include <mbgl/gfx/draw_scope.hpp>
@@ -53,7 +54,8 @@ using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
 class Context {
 protected:
     Context(uint32_t maximumVertexBindingCount_)
-        : maximumVertexBindingCount(maximumVertexBindingCount_) {}
+        : maximumVertexBindingCount(maximumVertexBindingCount_),
+          backgroundScheduler(Scheduler::GetBackground()) {}
 
 public:
     static constexpr const uint32_t minimumRequiredVertexBindingCount = 8;
@@ -161,6 +163,8 @@ protected:
     virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;
 
     gfx::RenderingStats stats;
+
+    std::shared_ptr<Scheduler> backgroundScheduler;
 };
 
 } // namespace gfx

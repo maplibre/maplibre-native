@@ -35,6 +35,7 @@ public:
                                                    const std::string_view firstAttribName,
                                                    const std::vector<shaders::UniformBlockInfo>& uniformBlocksInfo,
                                                    const std::vector<shaders::TextureInfo>& texturesInfo,
+                                                   const std::vector<shaders::AttributeInfo>& attributesInfo,
                                                    const std::string& vertexSource,
                                                    const std::string& fragmentSource,
                                                    const std::string& additionalDefines = "") noexcept(false);

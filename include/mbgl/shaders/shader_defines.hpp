@@ -3,6 +3,7 @@
 #include <mbgl/shaders/background_layer_ubo.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/collision_layer_ubo.hpp>
+#include <mbgl/shaders/custom_drawable_layer_ubo.hpp>
 #include <mbgl/shaders/debug_layer_ubo.hpp>
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
@@ -19,9 +20,17 @@
 namespace mbgl {
 namespace shaders {
 
+// UBO defines
+enum {
+    idClippingMaskUBO,
+    clippingMaskUBOCount
+};
+
 static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backgroundUBOCount),
                                                        static_cast<size_t>(circleUBOCount),
+                                                       static_cast<size_t>(clippingMaskUBOCount),
                                                        static_cast<size_t>(collisionUBOCount),
+                                                       static_cast<size_t>(customSymbolUBOCount),
                                                        static_cast<size_t>(debugUBOCount),
                                                        static_cast<size_t>(fillUBOCount),
                                                        static_cast<size_t>(fillOutlineUBOCount),
@@ -40,6 +49,7 @@ static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backg
                                                        static_cast<size_t>(rasterUBOCount),
                                                        static_cast<size_t>(symbolUBOCount)});
 
+// Texture defines
 enum {
     idBackgroundImageTexture,
     backgroundTextureCount
@@ -50,7 +60,16 @@ enum {
 };
 
 enum {
+    clippingMaskTextureCount
+};
+
+enum {
     collisionTextureCount
+};
+
+enum {
+    idCustomSymbolImageTexture,
+    customSymbolTextureCount
 };
 
 enum {
@@ -59,13 +78,13 @@ enum {
 };
 
 enum {
-    idFillExtrusionImageTexture,
-    fillExtrusionTextureCount
+    idFillImageTexture,
+    fillTextureCount
 };
 
 enum {
-    idFillImageTexture,
-    fillTextureCount
+    idFillExtrusionImageTexture,
+    fillExtrusionTextureCount
 };
 
 enum {
@@ -98,7 +117,9 @@ enum {
 
 static constexpr auto maxTextureCountPerShader = std::max({static_cast<size_t>(backgroundTextureCount),
                                                            static_cast<size_t>(circleTextureCount),
+                                                           static_cast<size_t>(clippingMaskTextureCount),
                                                            static_cast<size_t>(collisionTextureCount),
+                                                           static_cast<size_t>(customSymbolTextureCount),
                                                            static_cast<size_t>(debugTextureCount),
                                                            static_cast<size_t>(fillTextureCount),
                                                            static_cast<size_t>(fillExtrusionTextureCount),
@@ -107,6 +128,151 @@ static constexpr auto maxTextureCountPerShader = std::max({static_cast<size_t>(b
                                                            static_cast<size_t>(lineTextureCount),
                                                            static_cast<size_t>(rasterTextureCount),
                                                            static_cast<size_t>(symbolTextureCount)});
+
+// Vertex attribute defines
+enum {
+    idBackgroundPosVertexAttribute,
+    backgroundVertexAttributeCount
+};
+
+enum {
+    idCirclePosVertexAttribute,
+
+    // Data driven
+    idCircleColorVertexAttribute,
+    idCircleRadiusVertexAttribute,
+    idCircleBlurVertexAttribute,
+    idCircleOpacityVertexAttribute,
+    idCircleStrokeColorVertexAttribute,
+    idCircleStrokeWidthVertexAttribute,
+    idCircleStrokeOpacityVertexAttribute,
+
+    circleVertexAttributeCount
+};
+
+enum {
+    idClippingMaskPosVertexAttribute,
+    clippingMaskVertexAttributeCount
+};
+
+enum {
+    idCollisionPosVertexAttribute,
+    idCollisionAnchorPosVertexAttribute,
+    idCollisionExtrudeVertexAttribute,
+    idCollisionPlacedVertexAttribute,
+    idCollisionShiftVertexAttribute,
+    collisionVertexAttributeCount
+};
+
+enum {
+    idCustomSymbolPosVertexAttribute,
+    idCustomSymbolTexVertexAttribute,
+    customSymbolVertexAttributeCount
+};
+
+enum {
+    idDebugPosVertexAttribute,
+    debugVertexAttributeCount
+};
+
+enum {
+    idFillPosVertexAttribute,
+
+    // Data driven
+    idFillColorVertexAttribute,
+    idFillOpacityVertexAttribute,
+    idFillOutlineColorVertexAttribute,
+    idFillPatternFromVertexAttribute,
+    idFillPatternToVertexAttribute,
+
+    fillVertexAttributeCount
+};
+
+enum {
+    idFillExtrusionPosVertexAttribute,
+    idFillExtrusionNormalEdVertexAttribute,
+
+    // Data driven
+    idFillExtrusionBaseVertexAttribute,
+    idFillExtrusionColorVertexAttribute,
+    idFillExtrusionHeightVertexAttribute,
+    idFillExtrusionPatternFromVertexAttribute,
+    idFillExtrusionPatternToVertexAttribute,
+
+    fillExtrusionVertexAttributeCount
+};
+
+enum {
+    idHeatmapPosVertexAttribute,
+
+    // Data driven
+    idHeatmapWeightVertexAttribute,
+    idHeatmapRadiusVertexAttribute,
+
+    heatmapVertexAttributeCount
+};
+
+enum {
+    idHillshadePosVertexAttribute,
+    idHillshadeTexturePosVertexAttribute,
+    hillshadeVertexAttributeCount
+};
+
+enum {
+    idLinePosNormalVertexAttribute,
+    idLineDataVertexAttribute,
+
+    // Data driven
+    idLineColorVertexAttribute,
+    idLineBlurVertexAttribute,
+    idLineOpacityVertexAttribute,
+    idLineGapWidthVertexAttribute,
+    idLineOffsetVertexAttribute,
+    idLineWidthVertexAttribute,
+    idLineFloorWidthVertexAttribute,
+    idLinePatternFromVertexAttribute,
+    idLinePatternToVertexAttribute,
+
+    lineVertexAttributeCount
+};
+
+enum {
+    idRasterPosVertexAttribute,
+    idRasterTexturePosVertexAttribute,
+    rasterVertexAttributeCount
+};
+
+enum {
+    idSymbolPosOffsetVertexAttribute,
+    idSymbolDataVertexAttribute,
+    idSymbolPixelOffsetVertexAttribute,
+    idSymbolProjectedPosVertexAttribute,
+    idSymbolFadeOpacityVertexAttribute,
+
+    // Data driven
+    idSymbolOpacityVertexAttribute,
+    idSymbolColorVertexAttribute,
+    idSymbolHaloColorVertexAttribute,
+    idSymbolHaloWidthVertexAttribute,
+    idSymbolHaloBlurVertexAttribute,
+
+    symbolVertexAttributeCount
+};
+
+static constexpr auto maxVertexAttributeCountPerShader = std::max(
+    {static_cast<size_t>(backgroundVertexAttributeCount),
+     static_cast<size_t>(circleVertexAttributeCount),
+     static_cast<size_t>(clippingMaskVertexAttributeCount),
+     static_cast<size_t>(collisionVertexAttributeCount),
+     static_cast<size_t>(customSymbolVertexAttributeCount),
+     static_cast<size_t>(debugVertexAttributeCount),
+     static_cast<size_t>(fillVertexAttributeCount),
+     static_cast<size_t>(fillExtrusionVertexAttributeCount),
+     static_cast<size_t>(heatmapVertexAttributeCount),
+     static_cast<size_t>(hillshadeVertexAttributeCount),
+     static_cast<size_t>(lineVertexAttributeCount),
+     static_cast<size_t>(rasterVertexAttributeCount),
+     static_cast<size_t>(symbolVertexAttributeCount)});
 
 } // namespace shaders
 } // namespace mbgl

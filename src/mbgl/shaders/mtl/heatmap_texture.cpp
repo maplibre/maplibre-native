@@ -5,7 +5,7 @@ namespace shaders {
 
 const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal>::attributes =
     {
-        AttributeInfo{0, gfx::AttributeDataType::Short2, "a_pos"},
+        AttributeInfo{0, gfx::AttributeDataType::Short2, idHeatmapPosVertexAttribute},
 };
 const std::array<UniformBlockInfo, 1> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal>::uniforms =
     {

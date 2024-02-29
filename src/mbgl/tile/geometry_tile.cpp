@@ -20,6 +20,7 @@
 #include <mbgl/tile/geometry_tile_worker.hpp>
 #include <mbgl/tile/tile_observer.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/thread_pool.hpp>
 
 #include <mbgl/gfx/upload_pass.hpp>
 #include <utility>
@@ -159,8 +160,9 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, c
     : Tile(Kind::Geometry, id_),
       ImageRequestor(parameters.imageManager),
       sourceID(std::move(sourceID_)),
+      threadPool(Scheduler::GetBackground()),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(Scheduler::GetBackground(),
+      worker(threadPool,
              ActorRef<GeometryTile>(*this, mailbox),
              id_,
              sourceID,
@@ -175,8 +177,15 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, c
       showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
 
 GeometryTile::~GeometryTile() {
-    glyphManager.removeRequestor(*this);
     markObsolete();
+
+    glyphManager->removeRequestor(*this);
+    imageManager->removeRequestor(*this);
+
+    if (layoutResult) {
+        threadPool->runOnRenderThread(
+            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {});
+    }
 }
 
 void GeometryTile::cancel() {
@@ -185,6 +194,7 @@ void GeometryTile::cancel() {
 
 void GeometryTile::markObsolete() {
     obsolete = true;
+    mailbox->abandon();
 }
 
 void GeometryTile::setError(std::exception_ptr err) {
@@ -193,13 +203,17 @@ void GeometryTile::setError(std::exception_ptr err) {
 }
 
 void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
+    if (obsolete) {
+        return;
+    }
+
     // Mark the tile as pending again if it was complete before to prevent
     // signaling a complete state despite pending parse operations.
     pending = true;
 
     ++correlationID;
     worker.self().invoke(
-        &GeometryTileWorker::setData, std::move(data_), imageManager.getAvailableImages(), correlationID);
+        &GeometryTileWorker::setData, std::move(data_), imageManager->getAvailableImages(), correlationID);
 }
 
 void GeometryTile::reset() {
@@ -238,7 +252,7 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
 
     ++correlationID;
     worker.self().invoke(
-        &GeometryTileWorker::setLayers, std::move(impls), imageManager.getAvailableImages(), correlationID);
+        &GeometryTileWorker::setLayers, std::move(impls), imageManager->getAvailableImages(), correlationID);
 }
 
 void GeometryTile::setShowCollisionBoxes(const bool showCollisionBoxes_) {
@@ -278,7 +292,7 @@ void GeometryTile::onGlyphsAvailable(GlyphMap glyphs) {
 
 void GeometryTile::getGlyphs(GlyphDependencies glyphDependencies) {
     if (fileSource) {
-        glyphManager.getGlyphs(*this, std::move(glyphDependencies), *fileSource);
+        glyphManager->getGlyphs(*this, std::move(glyphDependencies), *fileSource);
     }
 }
 
@@ -294,7 +308,7 @@ void GeometryTile::onImagesAvailable(ImageMap images,
 }
 
 void GeometryTile::getImages(ImageRequestPair pair) {
-    imageManager.getImages(*this, std::move(pair));
+    imageManager->getImages(*this, std::move(pair));
 }
 
 std::shared_ptr<FeatureIndex> GeometryTile::getFeatureIndex() const {
