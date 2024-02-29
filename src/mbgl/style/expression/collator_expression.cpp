@@ -80,7 +80,7 @@ bool CollatorExpression::operator==(const Expression& e) const {
         const auto* rhs = static_cast<const CollatorExpression*>(&e);
         const bool lLocSet = locale && *locale;
         const bool rLocSet = rhs->locale && *rhs->locale;
-        if ((!lLocSet && rLocSet) || (lLocSet && (!rLocSet || *locale != *rhs->locale))) {
+        if ((!lLocSet && rLocSet) || (lLocSet && (!rLocSet || **locale != **rhs->locale))) {
             return false;
         }
         return *caseSensitive == *(rhs->caseSensitive) && *diacriticSensitive == *(rhs->diacriticSensitive);

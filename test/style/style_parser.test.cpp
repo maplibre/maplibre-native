@@ -1,6 +1,7 @@
 #include <mbgl/test/util.hpp>
 #include <mbgl/test/fixture_log_observer.hpp>
 
+#include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/parser.hpp>
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/enum.hpp>
@@ -294,4 +295,22 @@ TEST(StyleParser, FontStacksGetExpression) {
     })");
     auto result = parser.fontStacks();
     ASSERT_EQ(0u, result.size());
+}
+
+TEST(StyleParser, ZoomCurve) {
+    using namespace mbgl::style;
+    using namespace mbgl::style::expression;
+    using namespace mbgl::style::expression::dsl;
+
+    const auto zoomInterp = []() {
+        return interpolate(linear(), zoom(), 0.0, literal(0.0), 0.0, literal(0.0));
+    };
+
+    auto expr1 = interpolate(linear(), literal(0.0), 0.0, zoomInterp(), 0.0, zoomInterp());
+    ASSERT_TRUE(expr1);
+    ASSERT_TRUE(findZoomCurveChecked(*expr1).is<std::nullptr_t>());
+
+    auto expr2 = interpolate(linear(), zoom(), 0.0, literal(0.0), 0.0, zoomInterp());
+    ASSERT_TRUE(expr2);
+    ASSERT_TRUE(findZoomCurveChecked(*expr2).is<std::nullptr_t>());
 }

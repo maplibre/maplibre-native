@@ -1,0 +1,11 @@
+[
+    "==",
+    [
+      "resolved-locale",
+      [
+        "collator",
+        {"case-sensitive": true, "diacritic-sensitive": false, "locale": "en"}
+      ]
+    ],
+    "en"
+]

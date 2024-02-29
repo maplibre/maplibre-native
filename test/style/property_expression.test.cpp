@@ -1,12 +1,11 @@
-#include <mbgl/test/util.hpp>
-#include <mbgl/test/stub_geometry_tile_feature.hpp>
-
-#include <mbgl/style/property_expression.hpp>
 #include <mbgl/renderer/property_evaluator.hpp>
 #include <mbgl/renderer/property_evaluation_parameters.hpp>
 #include <mbgl/style/expression/dsl.hpp>
+#include <mbgl/style/expression/find_zoom_curve.hpp>
 #include <mbgl/style/expression/format_section_override.hpp>
-
+#include <mbgl/style/property_expression.hpp>
+#include <mbgl/test/stub_geometry_tile_feature.hpp>
+#include <mbgl/test/util.hpp>
 #include <mbgl/util/geojson.hpp>
 #include <mbgl/util/io.hpp>
 

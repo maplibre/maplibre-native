@@ -1,5 +1,6 @@
 #include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/expression/format_section_override.hpp>
+#include <mbgl/style/layers/custom_layer_impl.hpp>
 #include <mbgl/test/util.hpp>
 
 using namespace mbgl;
@@ -70,4 +71,9 @@ TEST(ExpressionDependencies, Distance) {
     const auto exprStr = R"(["distance", )" + pointGeoSource + R"( ])";
     const auto expression = createExpression(exprStr.c_str());
     EXPECT_EQ(Dependency::Feature, expression->dependencies);
+}
+
+TEST(ExpressionDependencies, CustomLayer) {
+    auto impl = makeMutable<CustomLayer::Impl>("", nullptr);
+    EXPECT_EQ(Dependency::None, CustomLayerProperties{std::move(impl)}.getDependencies());
 }

@@ -3,7 +3,7 @@
 #include <mbgl/style/expression/let.hpp>
 #include <mbgl/style/expression/coalesce.hpp>
 #include <mbgl/style/expression/is_constant.hpp>
-
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/variant.hpp>
 
 #include <optional>
@@ -79,20 +79,16 @@ std::optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCu
     return result;
 }
 
-variant<std::nullptr_t, const Interpolate*, const Step*> findZoomCurveChecked(const expression::Expression& e) {
-    return findZoomCurveChecked(e, isZoomConstant(e));
-}
-variant<std::nullptr_t, const Interpolate*, const Step*> findZoomCurveChecked(const expression::Expression& e,
-                                                                              bool isZoomConstant_) {
-    if (isZoomConstant_) {
-        return nullptr;
-    }
+using ZoomCurveOrNull = variant<std::nullptr_t, const Interpolate*, const Step*>;
+
+ZoomCurveOrNull findZoomCurveChecked(const expression::Expression& e) {
+    assert(!expression::isZoomConstant(e));
     return findZoomCurve(&e)->match(
-        [](const ParsingError&) -> variant<std::nullptr_t, const Interpolate*, const Step*> {
-            assert(false);
+        [](const ParsingError& err) -> ZoomCurveOrNull {
+            Log::Error(Event::Style, "Invalid Expression: " + err.message);
             return nullptr;
         },
-        [](auto zoomCurve) -> variant<std::nullptr_t, const Interpolate*, const Step*> { return zoomCurve; });
+        [](auto zoomCurve) -> ZoomCurveOrNull { return zoomCurve; });
 }
 
 } // namespace expression
