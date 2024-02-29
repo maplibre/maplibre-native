@@ -484,17 +484,13 @@ std::optional<int64_t> OfflineDatabase::extractResourceDataSize(const Resource& 
 }
 
 std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
-    // std::cout<<"-------- HASRESOURCE FOR URL = ";
-    // std::cout<<resource.url;
-    // std::cout<<"\n";
-
+    
     // First, try to find the resource in the 'resources' table
 
     std::optional<int64_t> selectResourcesResult = extractResourceDataSize(
         resource, "SELECT length(data) FROM resources WHERE url = ?1");
 
     if (selectResourcesResult) {
-        // std::cout << "-------- HASRESOURCE - FOUND IN RESOURCES\n";
         return selectResourcesResult;
     } else {
         // If not found in 'resources', try the 'ambient_resources' table
@@ -503,7 +499,6 @@ std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
             resource, "SELECT length(data) FROM ambient_resources WHERE url = ?1");
 
         if (selectAmbientResourcesResult) {
-            // std::cout << "-------- HASRESOURCE - FOUND IN AMBIENT_RESOURCES - COPYING TO RESOURCES\n";
             mapbox::sqlite::Query insertQuery(
                 getStatement("INSERT INTO resources (url, kind, expires, modified, etag, data, compressed, accessed, "
                              "must_revalidate) "
@@ -516,8 +511,6 @@ std::optional<int64_t> OfflineDatabase::hasResource(const Resource& resource) {
             mapbox::sqlite::Query deleteQuery(getStatement("DELETE FROM ambient_resources WHERE url = ?1"));
             deleteQuery.bind(1, resource.url);
             deleteQuery.run();
-        } else {
-            // std::cout << "-------- HASRESOURCE - NOT FOUND\n";
         }
         return selectResourcesResult;
     }
@@ -649,12 +642,9 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
         "AND x            = ?3 "
         "AND y            = ?4 "
         "AND z            = ?5 ");
-    // std::cout << "######## GET AMBIENT\n";
     if (ambientResult) {
-        // std::cout << "######## OK FROM AMBIENT\n";
         return ambientResult; // Return if found in ambient resources
     }
-    // std::cout << "######## GET OFFLINE\n";
 
     // If not found, try to get tile from offline regions (tiles table)
     std::optional<std::pair<Response, uint64_t>> offlineResult = extractTileData(
@@ -666,12 +656,6 @@ std::optional<std::pair<Response, uint64_t>> OfflineDatabase::getTile(const Reso
         "AND x            = ?3 "
         "AND y            = ?4 "
         "AND z            = ?5 ");
-    /*if (offlineResult) {
-        std::cout << "######## OK FROM OFFLINE\n";
-    } else {
-        std::cout << "######## NOT FOUND : " + tile.urlTemplate + " - " + std::to_string(tile.z) + "/" +
-                         std::to_string(tile.x) + "/" + std::to_string(tile.y) + "\n";
-    }*/
     return offlineResult;
 }
 
@@ -744,7 +728,6 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
         tile,
         "SELECT length(data) FROM tiles WHERE url_template = ?1 AND pixel_ratio = ?2 AND x = ?3 AND y = ?4 AND z = ?5");
     if (selectTilesResult) {
-        // std::cout << "-------- HASTILE - FOUND IN TILES\n";
         return selectTilesResult;
     } else {
         // If not found in 'tiles', try the 'ambient_tiles' table
@@ -753,7 +736,6 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
             "SELECT length(data) FROM ambient_tiles WHERE url_template = ?1 AND pixel_ratio = ?2 AND x = ?3 AND y = ?4 "
             "AND z = ?5");
         if (selectAmbientTilesResult) {
-            // std::cout << "-------- HASTILE - FOUND IN AMBIENT_TILES\n";
 
             mapbox::sqlite::Query insertQuery(
                 getStatement("INSERT INTO tiles (url_template, pixel_ratio, z, x, y, expires, modified, etag, data, "
@@ -769,7 +751,6 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
             insertQuery.bind(5, tile.y);
             insertQuery.run();
 
-            // std::cout << "-------- HASTILE - NOW FOUND IN TILES - DELETING FROM AMBIENT_TILES\n";
             mapbox::sqlite::Query deleteQuery(
                 getStatement("DELETE FROM ambient_tiles WHERE url_template = ?1 AND pixel_ratio = ?2 AND z = ?3 AND x "
                              "= ?4 AND y = ?5"));
@@ -779,8 +760,6 @@ std::optional<int64_t> OfflineDatabase::hasTile(const Resource::TileData& tile) 
             deleteQuery.bind(4, tile.x);
             deleteQuery.bind(5, tile.y);
             deleteQuery.run();
-        } else {
-            // std::cout << "-------- HASTILE - NOT FOUND\n";
         }
         return selectAmbientTilesResult;
     }
@@ -1556,10 +1535,8 @@ std::exception_ptr OfflineDatabase::initAmbientCacheSize() {
             "    FROM ambient_resources "
             ") ") };
             // clang-format on
-            // std::cout << "######## BEFORE INITAMBIENT\n";
             query.run();
             currentAmbientCacheSize = query.get<int64_t>(0);
-            // std::cout << "######## AFTER INITAMBIENT\n";
         } catch (const mapbox::sqlite::Exception& ex) {
             handleError(ex, "cannot get current ambient cache size");
             return std::current_exception();
