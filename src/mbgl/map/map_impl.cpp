@@ -31,9 +31,9 @@ void logStyleDependencies(EventSeverity severity, Event event, const style::Styl
     }
     std::ostringstream ss;
     ss << "Style '" << style.getName() << "' has " << layers.size() << " layers:\n";
-    ss << "  No Dependencies: " << counts[0] << "\n";
+    ss << "  " << Dependency::None << ": " << counts[0] << "\n";
     for (size_t i = 0; i < maskCount; ++i) {
-        ss << "  " << util::toString(Dependency{1u << i}) << ": " << counts[i + 1] << "\n";
+        ss << "  " << Dependency{1u << i} << ": " << counts[i + 1] << "\n";
     }
     Log::Record(severity, event, ss.str());
 }
@@ -119,9 +119,7 @@ void Map::Impl::onStyleLoaded() {
     observer.onDidFinishLoadingStyle();
 
 #if !defined(NDEBUG)
-    if (style) {
-        logStyleDependencies(EventSeverity::Info, Event::Style, *style);
-    }
+    logStyleDependencies(EventSeverity::Info, Event::Style, *style);
 #endif
 }
 
