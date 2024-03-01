@@ -193,7 +193,8 @@ objc_library(
     ] + select({
         "//:metal_renderer": [
         "//platform/darwin:app/WideLineStyleLayer.h",
-        "//platform/darwin:app/WideLineStyleLayer.m",            
+        "//platform/darwin:app/WideLineStyleLayer.mm",
+        "//platform/darwin:app/wideline.metal.h",
         ],
         "//conditions:default": [],
     }),
