@@ -22,8 +22,7 @@ void logStyleDependencies(EventSeverity severity, Event event, const style::Styl
             counts[0]++;
         } else {
             for (size_t i = 0; i < maskCount; ++i) {
-                const auto mask = Dependency{1u << i};
-                if ((deps & mask) == mask) {
+                if (style::expression::all(deps, Dependency{1u << i})) {
                     counts[i + 1]++;
                 }
             }

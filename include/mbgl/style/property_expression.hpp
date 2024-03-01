@@ -31,12 +31,7 @@ public:
     bool useIntegerZoom = false;
 
     using Dependency = expression::Dependency;
-    Dependency getDependencies() const noexcept {
-        auto v = expression ? expression->dependencies : Dependency::None;
-        assert(isZoomConstant_ == !(underlying_type(v) & underlying_type(Dependency::Zoom)));
-        assert(isFeatureConstant_ == !(underlying_type(v) & underlying_type(Dependency::Feature)));
-        return v;
-    }
+    Dependency getDependencies() const noexcept { return expression ? expression->dependencies : Dependency::None; }
 
 protected:
     std::shared_ptr<const expression::Expression> expression;

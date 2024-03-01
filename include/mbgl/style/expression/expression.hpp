@@ -195,6 +195,7 @@ enum class Dependency : uint32_t {
     Var = 1 << 5,      // Use variable binding
     Override = 1 << 6, // Property override
     MaskCount = 7,
+    All = (1 << MaskCount) - 1,
 };
 inline constexpr static Dependency operator|(Dependency x, Dependency y) noexcept {
     return Dependency{mbgl::underlying_type(x) | mbgl::underlying_type(y)};
@@ -205,6 +206,14 @@ inline constexpr static Dependency operator&(Dependency x, Dependency y) noexcep
 inline static Dependency& operator|=(Dependency& target, Dependency source) noexcept {
     target = target | source;
     return target;
+}
+/// @return true if any bits in `deps` are present in `term`
+inline constexpr bool any(const Dependency term, const Dependency deps = Dependency::All) {
+    return (term & deps) != Dependency::None;
+}
+/// @return true if all  bits in `deps` are present in `term`
+inline constexpr bool all(const Dependency term, const Dependency deps = Dependency::All) {
+    return (term & deps) == deps;
 }
 
 class Expression {

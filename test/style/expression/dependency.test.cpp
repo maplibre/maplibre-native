@@ -77,3 +77,25 @@ TEST(ExpressionDependencies, CustomLayer) {
     auto impl = makeMutable<CustomLayer::Impl>("", nullptr);
     EXPECT_EQ(Dependency::None, CustomLayerProperties{std::move(impl)}.getDependencies());
 }
+
+TEST(ExpressionDependencies, Format) {
+    for (size_t i = 0; i < underlying_type(Dependency::MaskCount); ++i) {
+        const auto mask = Dependency{1u << i};
+        std::ostringstream ss;
+        ss << mask;
+        EXPECT_EQ(ss.str(), util::toString(mask));
+    }
+}
+
+TEST(ExpressionDependencies, MaskTests) {
+    EXPECT_FALSE(any(Dependency::Feature, Dependency::None));
+    EXPECT_TRUE(any(Dependency::Feature));
+    EXPECT_TRUE(any(Dependency::Feature, Dependency::Feature));
+    EXPECT_TRUE(any(Dependency::Feature, Dependency::Feature | Dependency::Zoom));
+    EXPECT_TRUE(any(Dependency::Feature | Dependency::Zoom, Dependency::Feature));
+
+    EXPECT_FALSE(all(Dependency::Feature));
+    EXPECT_TRUE(all(Dependency::Feature, Dependency::Feature));
+    EXPECT_FALSE(all(Dependency::Feature, Dependency::Feature | Dependency::Zoom));
+    EXPECT_TRUE(all(Dependency::Feature | Dependency::Zoom, Dependency::Feature | Dependency::Zoom));
+}
