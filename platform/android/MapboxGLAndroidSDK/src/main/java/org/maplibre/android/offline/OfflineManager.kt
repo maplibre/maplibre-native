@@ -21,11 +21,7 @@ import java.nio.channels.FileChannel
 /**
  * The offline manager is the main entry point for offline-related functionality.
  *
- *
  * It'll help you list and create offline regions.
- *
- *
- * @see [Offline Maps Information/](https://docs.mapbox.com/help/troubleshooting/mobile-offline/)
  */
 @UiThread
 class OfflineManager private constructor(context: Context) {
@@ -106,9 +102,6 @@ class OfflineManager private constructor(context: Context) {
         fun onError(error: String)
     }
 
-    /*
-   * Constructor
-   */
     init {
         this.context = context.applicationContext
         fileSource = FileSource.getInstance(this.context)
@@ -126,10 +119,8 @@ class OfflineManager private constructor(context: Context) {
     /**
      * Retrieve all regions in the offline database.
      *
-     *
      * The query will be executed asynchronously and the results passed to the given
      * callback on the main thread.
-     *
      *
      * @param callback the callback to be invoked
      */
@@ -158,25 +149,20 @@ class OfflineManager private constructor(context: Context) {
     /**
      * Merge offline regions from a secondary database into the main offline database.
      *
-     *
      * When the merge is completed, or fails, the [MergeOfflineRegionsCallback] will be invoked on the main thread.
      * The callback reference is **strongly kept** throughout the process,
      * so it needs to be wrapped in a weak reference or released on the client side if necessary.
-     *
      *
      * The secondary database may need to be upgraded to the latest schema.
      * This is done in-place and requires write-access to the provided path.
      * If the app's process doesn't have write-access to the provided path,
      * the file will be copied to the temporary, internal directory for the duration of the merge.
      *
-     *
      * Only resources and tiles that belong to a region will be copied over. Identical
      * regions will be flattened into a single new region in the main database.
      *
-     *
      * The operation will be aborted and [MergeOfflineRegionsCallback.onError] with an appropriate message
      * will be invoked if the merge would result in the offline tile count limit being exceeded.
-     *
      *
      * Merged regions may not be in a completed status if the secondary database
      * does not contain all the tiles or resources required by the region definition.
@@ -218,11 +204,9 @@ class OfflineManager private constructor(context: Context) {
     /**
      * Delete existing database and re-initialize.
      *
-     *
      * When the operation is complete or encounters an error, the given callback will be
-     * executed on the database thread; it is the responsibility of the SDK bindings
+     * executed on the database thread; it is the responsibility of the platform bindings
      * to re-execute a user-provided callback on the main thread.
-     *
      *
      * @param callback the callback to be invoked when the database was reset or when the operation erred.
      */
@@ -248,16 +232,12 @@ class OfflineManager private constructor(context: Context) {
     /**
      * Packs the existing database file into a minimal amount of disk space.
      *
-     *
      * This operation has a performance impact as it will vacuum the database,
      * forcing it to move pages on the filesystem.
-     *
-     *
      *
      * When the operation is complete or encounters an error, the given callback will be
      * executed on the database thread; it is the responsibility of the SDK bindings
      * to re-execute a user-provided callback on the main thread.
-     *
      *
      * @param callback the callback to be invoked when the database was reset or when the operation erred.
      */
@@ -283,17 +263,14 @@ class OfflineManager private constructor(context: Context) {
     /**
      * Forces re-validation of the ambient cache.
      *
-     *
-     * Forces MapLibre GL Native to revalidate resources stored in the ambient
+     * Forces MapLibre Native to revalidate resources stored in the ambient
      * cache with the tile server before using them, making sure they
      * are the latest version. This is more efficient than cleaning the
      * cache because if the resource is considered valid after the server
      * lookup, it will not get downloaded again.
      *
-     *
      * Resources overlapping with offline regions will not be affected
      * by this call.
-     *
      *
      * @param callback the callback to be invoked when the ambient cache was invalidated or when the operation erred.
      */
@@ -319,12 +296,9 @@ class OfflineManager private constructor(context: Context) {
     /**
      * Erase resources from the ambient cache, freeing storage space.
      *
-     *
      * Erases the ambient cache, freeing resources.
      * Note that this operation can be potentially slow if packing the database
      * occurs automatically ([OfflineManager.runPackDatabaseAutomatically]).
-     *
-     *
      *
      * Resources overlapping with offline regions will not be affected
      * by this call.
@@ -354,7 +328,6 @@ class OfflineManager private constructor(context: Context) {
     /**
      * Sets the maximum size in bytes for the ambient cache.
      *
-     *
      * This call is potentially expensive because it will try
      * to trim the data in case the database is larger than the
      * size defined. The size of offline regions are not affected
@@ -362,24 +335,16 @@ class OfflineManager private constructor(context: Context) {
      * to not exceed the maximum size defined, taking into account
      * the current size for the offline regions.
      *
-     *
-     *
      * Note that if you use the SDK's offline functionality, your ability to set the ambient cache size will be limited.
      * Space that offline regions take up detract from the space available for ambient caching, and the ambient cache
      * size does not block offline downloads. For example: if the maximum cache size is set to 50 MB and 40 MB are
      * already used by offline regions, the ambient cache size will effectively be 10 MB.
      *
-     *
-     *
      * Setting the size to 0 will disable the cache if there is no
      * offline region on the database.
      *
-     * <[
-     *
-     *
      * This method should always be called at the start of an app, before setting the style and loading a map.
      * Otherwise, the map will instantiate with the default cache size of 50 MB.
-     *
      *
      * @param size     the maximum size of the ambient cache
      * @param callback the callback to be invoked when the the maximum size has been set or when the operation erred.
@@ -458,22 +423,12 @@ class OfflineManager private constructor(context: Context) {
      * Creates an offline region in the database by downloading the resources needed to use
      * the given region offline.
      *
-     *
-     * As of version 8.3.0 of the Maps SDK for Android, offline tile requests are no longer exempt from
-     * billing on mobile. Developers are subject to separate Vector Tile or Raster Tile API pricing for
-     * offline use. See [our pricing page](https://www.mapbox.com/pricing/) for more information.
-     *
-     *
-     *
      * When the initial database queries have completed, the provided callback will be
      * executed on the main thread.
-     *
-     *
      *
      * Note that the resulting region will be in an inactive download state; to begin
      * downloading resources, call `OfflineRegion.setDownloadState(DownloadState.STATE_ACTIVE)`,
      * optionally registering an `OfflineRegionObserver` beforehand.
-     *
      *
      * @param definition the offline region definition
      * @param metadata   the metadata in bytes
@@ -521,14 +476,12 @@ class OfflineManager private constructor(context: Context) {
     }
 
     /**
-     * Sets the maximum number of MapLibre-hosted tiles that may be downloaded and stored on the current device.
+     * Sets the maximum number of tiles that may be downloaded and stored on the current device.
      * By default, the limit is set to 6,000.
-     *
      *
      * Once this limit is reached, [OfflineRegion.OfflineRegionObserver.mapboxTileCountLimitExceeded]
      * fires every additional attempt to download additional tiles until already downloaded tiles are removed
      * by calling [OfflineRegion.delete].
-     *
      *
      * @param limit the maximum number of tiles allowed to be downloaded
      */
@@ -539,7 +492,6 @@ class OfflineManager private constructor(context: Context) {
      * Sets whether database file packing occurs automatically.
      * By default, the automatic database file packing is enabled.
      *
-     *
      * If packing is enabled, database file packing occurs automatically
      * after an offline region is deleted by calling
      * [OfflineRegion.delete]
@@ -547,7 +499,6 @@ class OfflineManager private constructor(context: Context) {
      *
      * If packing is disabled, disk space will not be freed after
      * resources are removed unless [OfflineManager.packDatabase] is explicitly called.
-     *
      *
      * @param autopack flag setting the automatic database file packing.
      */
@@ -592,7 +543,6 @@ class OfflineManager private constructor(context: Context) {
      * resource were requested in the process of map rendering.
      * Use this method to pre-warm the cache with resources you know
      * will be requested.
-     *
      *
      * This call is asynchronous: the data may not be immediately available
      * for in-progress requests, although subsequent requests should have
