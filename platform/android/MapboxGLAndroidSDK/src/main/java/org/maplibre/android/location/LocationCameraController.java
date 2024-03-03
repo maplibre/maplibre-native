@@ -224,6 +224,14 @@ final class LocationCameraController {
     onCameraMoveInvalidateListener.onInvalidateCameraMove();
   }
 
+  private void setPadding(double[] padding) {
+    if (isTransitioning) {
+      return;
+    }
+
+    transform.moveCamera(maplibreMap, CameraUpdateFactory.paddingTo(padding), null);
+    onCameraMoveInvalidateListener.onInvalidateCameraMove();
+  }
   private void setTilt(float tilt) {
     if (isTransitioning) {
       return;
@@ -273,6 +281,14 @@ final class LocationCameraController {
       }
     };
 
+  private final MapLibreAnimator.AnimationsValueChangeListener<double[]> paddingValueListener =
+          new MapLibreAnimator.AnimationsValueChangeListener<double[]>() {
+            @Override
+            public void onNewAnimationValue(double[] value) {
+              setPadding(value);
+            }
+          };
+
   private final MapLibreAnimator.AnimationsValueChangeListener<Float> tiltValueListener =
     new MapLibreAnimator.AnimationsValueChangeListener<Float>() {
       @Override
@@ -299,6 +315,7 @@ final class LocationCameraController {
 
     holders.add(new AnimatorListenerHolder(MapLibreAnimator.ANIMATOR_ZOOM, zoomValueListener));
     holders.add(new AnimatorListenerHolder(MapLibreAnimator.ANIMATOR_TILT, tiltValueListener));
+    holders.add(new AnimatorListenerHolder(MapLibreAnimator.ANIMATOR_PADDING, paddingValueListener));
     return holders;
   }
 
