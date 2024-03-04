@@ -79,22 +79,23 @@
                 int index;
             };
             
-            // TODO: .. encoding
+            // create vertex buffer
+            vector_float4 color {.5f, 0, 0, .5f};
             VertexTriWideVecB vertexBuffer[12] {
-                {{0, 0, 0}, {1.0f, .0f, .0f, 1.0f},  (0 << 16) + 0 },
-                {{0, 0, 0}, {1.0f, .0f, .0f, 1.0f},  (1 << 16) + 0 },
-                {{0, 0, 0}, {1.0f, .0f, .0f, 1.0f},  (2 << 16) + 0 },
-                {{0, 0, 0}, {1.0f, .0f, .0f, 1.0f},  (3 << 16) + 0 },
+                {{0, 0, 0}, color,  (0 << 16) + 0 },
+                {{0, 0, 0}, color,  (1 << 16) + 0 },
+                {{0, 0, 0}, color,  (2 << 16) + 0 },
+                {{0, 0, 0}, color,  (3 << 16) + 0 },
 
-                {{0, 0, 0}, {1.0f, .0f, .0f, 1.0f},  (0 << 16) + 1 },
-                {{0, 0, 0}, {1.0f, .0f, .0f, 1.0f},  (1 << 16) + 1 },
-                {{0, 0, 0}, {1.0f, .0f, .0f, 1.0f},  (2 << 16) + 1 },
-                {{0, 0, 0}, {1.0f, .0f, .0f, 1.0f},  (3 << 16) + 1 },
+                {{0, 0, 0}, color,  (4 << 16) + 1 },
+                {{0, 0, 0}, color,  (5 << 16) + 1 },
+                {{0, 0, 0}, color,  (6 << 16) + 1 },
+                {{0, 0, 0}, color,  (7 << 16) + 1 },
 
-                {{0, 0, 0}, {1.0f, .0f, .0f, 1.0f},  (0 << 16) + 2 },
-                {{0, 0, 0}, {1.0f, .0f, .0f, 1.0f},  (1 << 16) + 2 },
-                {{0, 0, 0}, {1.0f, .0f, .0f, 1.0f},  (2 << 16) + 2 },
-                {{0, 0, 0}, {1.0f, .0f, .0f, 1.0f},  (3 << 16) + 2 },
+                {{0, 0, 0}, color,  ( 8 << 16) + 2 },
+                {{0, 0, 0}, color,  ( 9 << 16) + 2 },
+                {{0, 0, 0}, color,  (10 << 16) + 2 },
+                {{0, 0, 0}, color,  (11 << 16) + 2 },
             };
 
             // uniforms
@@ -113,23 +114,23 @@
             
             // argument buffer. Need only wideVec only
             UniformWideVec wideVec {
-                /*float w2;                  */  16.0f,
+                /*float w2;                  */  8.0f,
                 /*float offset;              */  0.0f,
-                /*float edge;                */  0.0f,
+                /*float edge;                */  1.0f,
                 /*float texRepeat;           */  0.0f,
                 /*simd::float2 texOffset;    */  {},
                 /*float miterLimit;          */  1.0f,
                 /*WKSVertexLineJoinType join;*/  WKSVertexLineJoinMiter,
                 /*WKSVertexLineCapType cap;  */  WKSVertexLineCapButt,
                 /*bool hasExp;               */  false,
-                /*float interClipLimit;      */  true
+                /*float interClipLimit;      */  0.0f
             };
             
             // instance buffer. center line buffer. VertexTriWideVecInstance
             VertexTriWideVecInstance centerline[3] {
-                {{ 250, -250, 0}, {1.0f, 0, 0, 1.0f}, -1, 1},
-                {{-250, -250, 0}, {1.0f, 0, 0, 1.0f}, 0, 2},
-                {{   0, -250, 0}, {1.0f, 0, 0, 1.0f}, 1, -1},
+                {{ 0.5, -0.5, 0}, {1.0f, 0, 0, 1.0f}, -1, 1},
+                {{-0.5, -0.5, 0}, {1.0f, 0, 0, 1.0f}, 0, 2},
+                {{   0, +0.5, 0}, {1.0f, 0, 0, 1.0f}, 1, -1},
             };
             
 //            [renderEncoder setVertexBuffer:vertexBuffer offset:0 atIndex: WKSVertexBuffer];
@@ -160,14 +161,6 @@
 
         }
 
-        //drawable->addTriangle(BasicDrawable::Triangle(0,3,1));
-        //drawable->addTriangle(BasicDrawable::Triangle(0,2,3));
-        //base = 4;
-        //drawable->addTriangle(BasicDrawable::Triangle(base+0,base+3,base+1));
-        //drawable->addTriangle(BasicDrawable::Triangle(base+0,base+2,base+3));
-        //base += 4;
-        //drawable->addTriangle(BasicDrawable::Triangle(base+0,base+3,base+1));
-        //drawable->addTriangle(BasicDrawable::Triangle(base+0,base+2,base+3));
         // build triangle indexes
         uint16_t data[] {
             0, 3, 1,
@@ -177,6 +170,7 @@
             8 + 0, 8 + 3, 8 + 1,
             8 + 0, 8 + 2, 8 + 3,
         };
+        
         // create index buffer
         id<MTLBuffer> indexBuffer = [_device newBufferWithBytes:data length: sizeof(data) options:MTLResourceStorageModeShared];
         
