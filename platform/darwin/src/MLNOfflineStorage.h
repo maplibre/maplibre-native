@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
  path.
  
  #### Related examples
- TODO:Download an offline map, learn how to calculate the progress
+ TODO: Download an offline map, learn how to calculate the progress
  of an offline download.
  */
 FOUNDATION_EXTERN MLN_EXPORT const NSNotificationName MLNOfflinePackProgressChangedNotification;
