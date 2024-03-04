@@ -371,8 +371,10 @@ void RenderSymbolLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<SymbolLayerProperties>(staticImmutableCast<SymbolLayer::Impl>(baseImpl),
-                                                         unevaluated.evaluate(parameters));
+    const auto previousProperties = staticImmutableCast<SymbolLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<SymbolLayerProperties>(
+        staticImmutableCast<SymbolLayer::Impl>(baseImpl),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
     auto& evaluated = properties->evaluated;
     const auto& layout = impl_cast(baseImpl).layout;
 

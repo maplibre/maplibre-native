@@ -63,8 +63,10 @@ void RenderHeatmapLayer::layerChanged(const TransitionParameters& parameters,
 #endif
 
 void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<HeatmapLayerProperties>(staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
-                                                          unevaluated.evaluate(parameters));
+    const auto previousProperties = staticImmutableCast<HeatmapLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<HeatmapLayerProperties>(
+        staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
 
     passes = (properties->evaluated.get<style::HeatmapOpacity>() > 0) ? (RenderPass::Translucent | RenderPass::Pass3D)
                                                                       : RenderPass::None;

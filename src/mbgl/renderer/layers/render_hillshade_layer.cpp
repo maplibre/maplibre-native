@@ -77,8 +77,10 @@ void RenderHillshadeLayer::layerChanged(const TransitionParameters& parameters,
 #endif
 
 void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<HillshadeLayerProperties>(staticImmutableCast<HillshadeLayer::Impl>(baseImpl),
-                                                            unevaluated.evaluate(parameters));
+    const auto previousProperties = staticImmutableCast<HillshadeLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<HillshadeLayerProperties>(
+        staticImmutableCast<HillshadeLayer::Impl>(baseImpl),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
     passes = (properties->evaluated.get<style::HillshadeExaggeration>() > 0)
                  ? (RenderPass::Translucent | RenderPass::Pass3D)
                  : RenderPass::None;

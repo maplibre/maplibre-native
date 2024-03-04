@@ -70,9 +70,10 @@ void RenderFillLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    const auto previousProperties = staticImmutableCast<FillLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<FillLayerProperties>(staticImmutableCast<FillLayer::Impl>(baseImpl),
                                                        parameters.getCrossfadeParameters(),
-                                                       unevaluated.evaluate(parameters));
+                                                       unevaluated.evaluate(parameters, previousProperties->evaluated));
     auto& evaluated = properties->evaluated;
 
     if (unevaluated.get<style::FillOutlineColor>().isUndefined()) {

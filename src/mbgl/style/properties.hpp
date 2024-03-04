@@ -293,6 +293,24 @@ public:
             return PossiblyEvaluated{evaluate<Ps>(parameters)...};
         }
 
+        /// Evaluate the property if necessary, or produce a copy of the previous value if appropriate
+        template <class P>
+        auto maybeEvaluate(const PropertyEvaluationParameters& parameters,
+                           const typename P::EvaluatorType::ResultType& oldResult) const {
+            using Evaluator = typename P::EvaluatorType;
+            const auto& property = this->template get<P>();
+            const bool needEvaluate = parameters.layerChanged || parameters.hasCrossfade || property.hasTransition() ||
+                                      (parameters.zoomChanged && any(getDependencies(property), Dependency::Zoom));
+            return needEvaluate ? property.evaluate(Evaluator(parameters, P::defaultValue()), parameters.now)
+                                : oldResult;
+        }
+
+        /// Optionally evaluate each property or produce a copy of the previous value, if appropriate.
+        PossiblyEvaluated evaluate(const PropertyEvaluationParameters& parameters,
+                                   const PossiblyEvaluated& previous) const {
+            return PossiblyEvaluated{maybeEvaluate<Ps>(parameters, previous.template get<Ps>())...};
+        }
+
         template <class Writer>
         void stringify(Writer& writer) const {
             writer.StartObject();

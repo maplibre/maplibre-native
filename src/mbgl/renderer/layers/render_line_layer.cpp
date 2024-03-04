@@ -67,9 +67,10 @@ void RenderLineLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    const auto previousProperties = staticImmutableCast<LineLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(baseImpl),
                                                        parameters.getCrossfadeParameters(),
-                                                       unevaluated.evaluate(parameters));
+                                                       unevaluated.evaluate(parameters, previousProperties->evaluated));
     auto& evaluated = properties->evaluated;
 
     passes = (evaluated.get<style::LineOpacity>().constantOr(1.0) > 0 &&

@@ -53,7 +53,8 @@ void RenderBackgroundLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto evaluated = unevaluated.evaluate(parameters);
+    const auto previousProperties = staticImmutableCast<BackgroundLayerProperties>(evaluatedProperties);
+    auto evaluated = unevaluated.evaluate(parameters, previousProperties->evaluated);
     auto properties = makeMutable<BackgroundLayerProperties>(
         staticImmutableCast<BackgroundLayer::Impl>(baseImpl), parameters.getCrossfadeParameters(), evaluated);
 

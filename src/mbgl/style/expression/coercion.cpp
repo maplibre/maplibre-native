@@ -102,8 +102,9 @@ CoerceFunction getCoerceFunction(const type::Type& t) {
     return toStringValue;
 }
 
-Dependency extraDependency(const type::Type& t) {
-    return t.is<type::ImageType>() ? Dependency::Image : Dependency::None;
+/// `isRuntimeConstant` does not consider values coerced to `Type` image to be of `Kind` image, so we don't either.
+constexpr Dependency extraDependency(const type::Type& t) {
+    return /*t.is<type::ImageType>() ? Dependency::Image :*/ Dependency::None;
 }
 
 } // namespace

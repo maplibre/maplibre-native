@@ -9,9 +9,9 @@ PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expre
       isFeatureConstant_(!expression::any(expression->dependencies, Dependency::Feature)),
       isRuntimeConstant_(!expression::any(expression->dependencies, Dependency::Image)),
       zoomCurve(isZoomConstant_ ? nullptr : expression::findZoomCurveChecked(*expression)) {
-    assert(isZoomConstant_ == !expression::any(expression->dependencies, Dependency::Zoom));
-    assert(isFeatureConstant_ == !expression::any(expression->dependencies, Dependency::Feature));
-    assert(isRuntimeConstant_ == !expression::any(expression->dependencies, Dependency::Image));
+    assert(isZoomConstant_ == expression::isZoomConstant(*expression));
+    assert(isFeatureConstant_ == expression::isFeatureConstant(*expression));
+    assert(isRuntimeConstant_ == expression::isRuntimeConstant(*expression));
 }
 
 float PropertyExpressionBase::interpolationFactor(const Range<float>& inputLevels,
