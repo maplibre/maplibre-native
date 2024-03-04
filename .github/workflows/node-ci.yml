@@ -118,6 +118,8 @@ jobs:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
+          brew list openssl || brew install openssl
+          brew list cmake || brew install cmake
           brew list ccache || brew install ccache
           brew list ninja || brew install ninja
           brew list pkg-config || brew install pkg-config
