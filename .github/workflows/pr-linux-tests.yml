@@ -22,11 +22,10 @@ jobs:
     outputs:
       should_skip: ${{ steps.check_skip.outputs.should_skip }}
     steps:
-      # if linux-build-and-test in linux-ci was skipped, the rest of the workflow can be skipped
       - id: check_skip
         run: |
           conclusion=$(curl ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "linux-build-and-test").conclusion')
-          should_skip=$([ "$conclusion" = "skipped" ] && echo "true" || echo "false")
+          should_skip=$([[ "$conclusion" = "skipped" || "$conclusion" = "cancelled" ]] && echo "true" || echo "false")
           echo "should_skip=$should_skip" >> "$GITHUB_OUTPUT"
 
   pr-bloaty:

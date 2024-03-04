@@ -4,6 +4,11 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.2.0
+
+- Add support for [multi sprites](https://github.com/maplibre/maplibre-native/pull/1858). More information on this feature can be found in the [Style Spec Documentation](https://maplibre.org/maplibre-style-spec/sprite/#multiple-sprite-sources).
+- Fix for C++ header in public Objective-C header ([#2156](https://github.com/maplibre/maplibre-native/pull/q 56)).
+
 ## 6.1.1
 
 - Tighten camera equality requirements ([#2139](https://github.com/maplibre/maplibre-native/pull/2139)).
