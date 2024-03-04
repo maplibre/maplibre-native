@@ -72,10 +72,10 @@ jobs:
         include:
           - runs-on: ubuntu-22.04
             arch: x86_64
-          - runs-on: macos-12
+          - runs-on: macos-13
             arch: x86_64
-          # - runs-on: macos-12-arm
-          #   arch: arm64
+          - runs-on: macos-14
+            arch: arm64
           - runs-on: [self-hosted, linux, ARM64]
             arch: arm64
           # Disabled until Metal backend is complete
