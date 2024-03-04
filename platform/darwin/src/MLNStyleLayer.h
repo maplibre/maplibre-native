@@ -45,8 +45,7 @@ MLN_EXPORT
  Whether this layer is displayed. A value of `NO` hides the layer.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/runtime-toggle-layer/">
- Show and hide a layer</a> example to learn how to toggle an `MLNStyleLayer`
+ TODO: Show and hide a layer, learn how to toggle an `MLNStyleLayer`
  object's visibility.
  */
 @property (nonatomic, assign, getter=isVisible) BOOL visible;

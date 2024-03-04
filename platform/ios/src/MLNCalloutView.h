@@ -14,8 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
  use the optional methods available in the `MLNCalloutViewDelegate` protocol.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/custom-callout/">
- Display custom views as callouts</a> example to learn how to customize an
+ TODO: Display custom views as callouts by customizing an
  `MLNCalloutView`.
  */
 @protocol MLNCalloutView <NSObject>

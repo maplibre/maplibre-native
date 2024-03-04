@@ -28,8 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
  path.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/offline-pack/">
- Download an offline map</a> example to learn how to calculate the progress
+ TODO:Download an offline map, learn how to calculate the progress
  of an offline download.
  */
 FOUNDATION_EXTERN MLN_EXPORT const NSNotificationName MLNOfflinePackProgressChangedNotification;
@@ -189,8 +188,7 @@ typedef NS_ENUM(NSUInteger, MLNResourceKind) {
  information.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/offline-pack/">
- Download an offline map</a> example to learn how to create and register an
+ TODO: Download an offline map, learn how to create and register an
  offline pack for a defined region.
  */
 MLN_EXPORT
