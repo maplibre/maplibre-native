@@ -1186,7 +1186,7 @@ if(MLN_WITH_METAL)
     target_compile_definitions(
         mbgl-core
         PRIVATE
-            MBGL_RENDER_BACKEND_METAL=1
+            MLN_RENDER_BACKEND_METAL=1
             "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
     list(APPEND 
