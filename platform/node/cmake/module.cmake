@@ -98,7 +98,7 @@ function(add_node_module NAME)
     if(_NAN_VERSION AND NOT EXISTS "${_CACHE_DIR}/nan/${_NAN_VERSION}/nan.h")
         _node_module_unpack_tar_gz(
             "Nan ${_NAN_VERSION}"
-            "https://registry.yarnpkg.com/nan/-/nan-${_NAN_VERSION}.tgz"
+            "https://registry.npmjs.org/nan/-/nan-${_NAN_VERSION}.tgz"
             "package"
             "${_CACHE_DIR}/nan/${_NAN_VERSION}"
         )
