@@ -224,9 +224,7 @@ MLN_EXPORT
     change is immediate.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/annotation-vie
- ws/">Annotation views</a> example to learn how to modify an
- `MLNAnnotationView`'s behavior when it is selected.
+ TODO: modify an `MLNAnnotationView`'s behavior when it is selected.
  */
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated;
 
@@ -257,9 +255,7 @@ MLN_EXPORT
  continue to completion.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/draggable-views
- /">Draggable annotation views</a> to learn how to enable users to drag
- `MLNAnnotationView` objects on your map.
+ TODO: Enable users to drag `MLNAnnotationView` objects on your map.
  */
 @property (nonatomic, assign, getter=isDraggable) BOOL draggable;
 
