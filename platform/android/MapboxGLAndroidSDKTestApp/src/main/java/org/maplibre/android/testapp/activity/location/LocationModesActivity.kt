@@ -25,12 +25,13 @@ import org.maplibre.android.location.modes.CameraMode
 import org.maplibre.android.location.modes.RenderMode
 import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import java.util.Random
 
 class LocationModesActivity :
     AppCompatActivity(),
@@ -190,6 +191,27 @@ class LocationModesActivity :
                 }
             )
             if (locationComponent!!.cameraMode == CameraMode.NONE) {
+                Toast.makeText(this, "Not possible to animate - not tracking", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        } else if (id == R.id.action_component_padding_animation_while_tracking) {
+            val paddingRandom = Random()
+            locationComponent!!.paddingWhileTracking(
+                doubleArrayOf(
+                    paddingRandom.nextDouble() * 500,
+                    paddingRandom.nextDouble() * 500,
+                    paddingRandom.nextDouble() * 500,
+                    paddingRandom.nextDouble() * 500
+                ), 1000L, object : CancelableCallback {
+                    override fun onCancel() {
+                        // No impl
+                    }
+
+                    override fun onFinish() {
+                        locationComponent!!.zoomWhileTracking(16.0)
+                    }
+                })
+            if (locationComponent!!.getCameraMode() == CameraMode.NONE) {
                 Toast.makeText(this, "Not possible to animate - not tracking", Toast.LENGTH_SHORT)
                     .show()
             }
