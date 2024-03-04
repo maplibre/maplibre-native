@@ -209,6 +209,7 @@ jobs:
             -DMLN_WITH_NODE=ON \
             -DMLN_WITH_OPENGL=OFF \
             -DMLN_WITH_METAL=ON \
+            -DMLN_RENDER_BACKEND_METAL=ON \
             -DMLN_LEGACY_RENDERER=OFF \
             -DMLN_WITH_WERROR=OFF
 
