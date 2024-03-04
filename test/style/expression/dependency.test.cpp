@@ -38,7 +38,13 @@ TEST(ExpressionDependencies, Convert) {
     EXPECT_EQ(Dependency::Feature, toString(number(string(get("color"))))->dependencies);
     EXPECT_EQ(Dependency::Feature, boolean(string(get("color")))->dependencies);
     EXPECT_EQ(Dependency::Feature, toFormatted(toColor(string(get("color"))))->dependencies);
-    EXPECT_EQ(Dependency::Feature | Dependency::Image, toImage(string(get("color")))->dependencies);
+
+    /// See `coercion.cpp`, `extraDependency`
+    EXPECT_EQ(Dependency::Feature /*| Dependency::Image*/, toImage(string(get("color")))->dependencies);
+
+    /// See `collator_expression.cpp`, `extraDependency`
+    EXPECT_EQ(Dependency::Feature,
+              createExpression(R"(["resolved-locale",["collator",{"locale": "de"}]])")->dependencies);
 }
 
 TEST(ExpressionDependencies, Compare) {
