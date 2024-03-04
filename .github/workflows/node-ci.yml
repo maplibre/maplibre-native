@@ -124,7 +124,6 @@ jobs:
           brew list pkg-config || brew install pkg-config
           brew list glfw || brew install glfw
           brew list libuv || brew install libuv
-          brew list ca-certificates || brew install ca-certificates
 
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
