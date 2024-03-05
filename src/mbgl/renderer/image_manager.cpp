@@ -21,6 +21,7 @@ void ImageManager::setObserver(ImageManagerObserver* observer_) {
 }
 
 void ImageManager::setLoaded(bool loaded_) {
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
     if (loaded == loaded_) {
         return;
     }
@@ -31,6 +32,7 @@ void ImageManager::setLoaded(bool loaded_) {
         for (const auto& entry : requestors) {
             checkMissingAndNotify(*entry.first, entry.second);
         }
+
         requestors.clear();
     }
 }
@@ -40,16 +42,21 @@ bool ImageManager::isLoaded() const {
 }
 
 void ImageManager::addImage(Immutable<style::Image::Impl> image_) {
+    std::lock_guard<std::recursive_mutex> readLock(rwLock);
     assert(images.find(image_->id) == images.end());
+
     // Increase cache size if requested image was provided.
     if (requestedImages.find(image_->id) != requestedImages.end()) {
         requestedImagesCacheSize += image_->image.bytes();
     }
+
     availableImages.emplace(image_->id);
     images.emplace(image_->id, std::move(image_));
 }
 
 bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
+
     auto oldImage = images.find(image_->id);
     assert(oldImage != images.end());
     if (oldImage == images.end()) return false;
@@ -74,8 +81,10 @@ bool ImageManager::updateImage(Immutable<style::Image::Impl> image_) {
 }
 
 void ImageManager::removeImage(const std::string& id) {
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
     auto it = images.find(id);
     assert(it != images.end());
+
     // Reduce cache size for requested images.
     auto requestedIt = requestedImages.find(it->second->id);
     if (requestedIt != requestedImages.end()) {
@@ -83,12 +92,14 @@ void ImageManager::removeImage(const std::string& id) {
         requestedImagesCacheSize -= it->second->image.bytes();
         requestedImages.erase(requestedIt);
     }
+
     images.erase(it);
     availableImages.erase(id);
     updatedImageVersions.erase(id);
 }
 
 const style::Image::Impl* ImageManager::getImage(const std::string& id) const {
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
     if (auto* image = getSharedImage(id)) {
         return image->get();
     }
@@ -96,6 +107,7 @@ const style::Image::Impl* ImageManager::getImage(const std::string& id) const {
 }
 
 const Immutable<style::Image::Impl>* ImageManager::getSharedImage(const std::string& id) const {
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
     const auto it = images.find(id);
     if (it != images.end()) {
         return &(it->second);
@@ -106,6 +118,8 @@ const Immutable<style::Image::Impl>* ImageManager::getSharedImage(const std::str
 void ImageManager::getImages(ImageRequestor& requestor, ImageRequestPair&& pair) {
     // remove previous requests from this tile
     removeRequestor(requestor);
+
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
 
     // If all the icon dependencies are already present ((i.e. if they've been addeded via
     // runtime styling), then notify the requestor immediately. Otherwise, if the
@@ -133,6 +147,8 @@ void ImageManager::getImages(ImageRequestor& requestor, ImageRequestPair&& pair)
 }
 
 void ImageManager::removeRequestor(ImageRequestor& requestor) {
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
+
     requestors.erase(&requestor);
     missingImageRequestors.erase(&requestor);
     for (auto& requestedImage : requestedImages) {
@@ -141,6 +157,8 @@ void ImageManager::removeRequestor(ImageRequestor& requestor) {
 }
 
 void ImageManager::notifyIfMissingImageAdded() {
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
+
     for (auto it = missingImageRequestors.begin(); it != missingImageRequestors.end();) {
         ImageRequestor& requestor = *it->first;
         if (!requestor.hasPendingRequests()) {
@@ -153,6 +171,8 @@ void ImageManager::notifyIfMissingImageAdded() {
 }
 
 void ImageManager::reduceMemoryUse() {
+    std::lock_guard<std::recursive_mutex> readLock(rwLock);
+
     std::vector<std::string> unusedIDs;
     unusedIDs.reserve(requestedImages.size());
 
@@ -173,11 +193,18 @@ void ImageManager::reduceMemoryUseIfCacheSizeExceedsLimit() {
     }
 }
 
-const std::set<std::string>& ImageManager::getAvailableImages() const {
-    return availableImages;
+std::set<std::string> ImageManager::getAvailableImages() const {
+    std::set<std::string> copy;
+    {
+        std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
+        copy = availableImages;
+    }
+    return copy;
 }
 
 void ImageManager::clear() {
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
+
     assert(requestors.empty());
     assert(missingImageRequestors.empty());
 
@@ -229,6 +256,7 @@ void ImageManager::checkMissingAndNotify(ImageRequestor& requestor, const ImageR
             }
 
             auto removePendingRequests = [this, missingImage] {
+                std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
                 auto existingRequest = requestedImages.find(missingImage);
                 if (existingRequest == requestedImages.end()) {
                     return;
@@ -282,11 +310,11 @@ void ImageManager::dumpDebugLogs() const {
     Log::Info(Event::General, ss.str());
 }
 
-ImageRequestor::ImageRequestor(ImageManager& imageManager_)
-    : imageManager(imageManager_) {}
+ImageRequestor::ImageRequestor(std::shared_ptr<ImageManager> imageManager_)
+    : imageManager(std::move(imageManager_)) {}
 
 ImageRequestor::~ImageRequestor() {
-    imageManager.removeRequestor(*this);
+    imageManager->removeRequestor(*this);
 }
 
 } // namespace mbgl

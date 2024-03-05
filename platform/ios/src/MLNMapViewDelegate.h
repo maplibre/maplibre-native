@@ -44,8 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
  `oldCamera` or change to `newCamera`.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/constraining-gestures/">
- Restrict map panning to an area</a> example to learn how to use this method
+ TODO: Restrict map panning to an area, learn how to use this method
  and `MLNMapCamera` objects to restrict a users ability to pan your map.
  */
 - (BOOL)mapView:(MLNMapView *)mapView shouldChangeFromCamera:(MLNMapCamera *)oldCamera toCamera:(MLNMapCamera *)newCamera;
@@ -117,8 +116,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param mapView The map view whose viewpoint is changing.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/clustering/">
- Cluster point data</a> example to learn how to trigger an action whenever
+ TODO: Cluster point data, learn how to trigger an action whenever
  the map region changes.
  */
 - (void)mapViewRegionIsChanging:(MLNMapView *)mapView;
@@ -286,10 +284,9 @@ NS_ASSUME_NONNULL_BEGIN
  @param style The style that was loaded.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/runtime-multiple-annotations/">
- Dynamically style interactive points</a> and <a href="https://docs.mapbox.com/ios/maps/examples/shape-collection/">
- Add multiple shapes from a single shape source</a> examples to learn how to
- ensure a map's style has loaded before modifying it at runtime.
+ TODO: Dynamically style interactive points
+ TODO: Add multiple shapes from a single shape source examples, learn how to
+ ensure a map's style has loaded before modifying it at runtime
  */
 - (void)mapView:(MLNMapView *)mapView didFinishLoadingStyle:(MLNStyle *)style;
 
@@ -436,12 +433,11 @@ NS_ASSUME_NONNULL_BEGIN
     `nil` if you want to display the default marker image or an annotation view.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/annotation-models/">
- Annotation models</a>, <a href="https://docs.mapbox.com/ios/maps/examples/annotation-view-image/">
- Add annotation views and images</a>, and <a href="https://docs.mapbox.com/ios/maps/examples/marker-image/">
- Mark a place on the map with an image</a> examples to learn to specify which
+ TODO: Annotation models
+ TODO: Add annotation views and images
+ TODO: Mark a place on the map with an image, learn to specify which
  image should be used for `MLNAnnotation` objects that have been added to
- your map.
+ your map
  */
 - (nullable MLNAnnotationImage *)mapView:(MLNMapView *)mapView imageForAnnotation:(id <MLNAnnotation>)annotation;
 
@@ -476,8 +472,7 @@ NS_ASSUME_NONNULL_BEGIN
  @return A color to use for the shape outline.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/annotation-models/">
- Annotation models</a> example to learn how to modify the outline color of an
+ TODO: Annotation models, learn how to modify the outline color of an
  `MLNShape` object that has been added to your map as an annotation.
  */
 - (UIColor *)mapView:(MLNMapView *)mapView strokeColorForShapeAnnotation:(MLNShape *)annotation;
@@ -496,8 +491,7 @@ NS_ASSUME_NONNULL_BEGIN
  @return The polygon’s interior fill color.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/polygon/">Add
- a polygon annotation</a> example to learn how to modify the color of a an
+ TODO: Add a polygon annotation, learn how to modify the color of a an
  `MLNPolygon` at runtime.
  */
 - (UIColor *)mapView:(MLNMapView *)mapView fillColorForPolygonAnnotation:(MLNPolygon *)annotation;
@@ -513,8 +507,7 @@ NS_ASSUME_NONNULL_BEGIN
  @return A line width for the polyline, measured in points.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/line-geojson/">
- Add a line annotation from GeoJSON</a> example to learn how to modify the
+ TODO: Add a line annotation from GeoJSON, learn how to modify the
  line width of an `MLNPolylineFeature` on your map.
  */
 - (CGFloat)mapView:(MLNMapView *)mapView lineWidthForPolylineAnnotation:(MLNPolyline *)annotation;
@@ -545,8 +538,7 @@ NS_ASSUME_NONNULL_BEGIN
     want to display an annotation image instead.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/annotation-view-image/">
- Add annotation views and images</a> example to learn how to specify what
+ TODO: Add annotation views and images, learn how to specify what
  `MLNViewAnnotation` to use for a given `MLNPointAnnotation` object on your
  map.
  */
@@ -592,8 +584,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param annotation The annotation that was selected.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/runtime-multiple-annotations/">
- Dynamically style interactive points</a> example to learn how to remove an
+ TODO: Dynamically style interactive points, learn how to remove an
  annotation view if it has already been selected.
  */
 - (void)mapView:(MLNMapView *)mapView didSelectAnnotation:(id <MLNAnnotation>)annotation;
@@ -671,10 +662,9 @@ NS_ASSUME_NONNULL_BEGIN
     callout.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/annotation-view-image/">
- Add annotation views and images</a>, <a href="https://docs.mapbox.com/ios/maps/examples/custom-callout/">
- Display custom views as callouts</a>, and <a href="https://docs.mapbox.com/ios/maps/examples/default-callout/">
- Default callout usage</a> examples to learn how to show callouts for
+ TODO: Add annotation views and images
+ TODO: Display custom views as callouts
+ TODO: Default callout usage, learn how to show callouts for
  `MLNAnnotation` objects.
  */
 - (BOOL)mapView:(MLNMapView *)mapView annotationCanShowCallout:(id <MLNAnnotation>)annotation;
@@ -695,8 +685,7 @@ NS_ASSUME_NONNULL_BEGIN
     default callout view.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/custom-callout/">
- Display custom views as callouts</a> example to learn how to customize an
+ TODO: Display custom views as callouts, learn how to customize an
  `MLNAnnotation` object's `MLNCalloutView`.
  */
 - (nullable id <MLNCalloutView>)mapView:(MLNMapView *)mapView calloutViewForAnnotation:(id <MLNAnnotation>)annotation;
@@ -726,8 +715,7 @@ NS_ASSUME_NONNULL_BEGIN
  @return The accessory view to display.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/default-callout/">
- Default callout usage</a> example to learn how to modify the view that is
+ TODO: Default callout usage, learn how to modify the view that is
  displayed on the left side of the standard callout bubble.
  */
 - (nullable UIView *)mapView:(MLNMapView *)mapView leftCalloutAccessoryViewForAnnotation:(id <MLNAnnotation>)annotation;
@@ -757,8 +745,7 @@ NS_ASSUME_NONNULL_BEGIN
  @return The accessory view to display.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/default-callout/">
- Default callout usage</a> example to learn how to modify the view that is
+ TODO: Default callout usage, learn how to modify the view that is
  displayed on the right side of the standard callout bubble.
  */
 - (nullable UIView *)mapView:(MLNMapView *)mapView rightCalloutAccessoryViewForAnnotation:(id <MLNAnnotation>)annotation;
@@ -787,8 +774,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param control The control that was tapped.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/default-callout/">
- Default callout usage</a> example to learn how to trigger an action when the
+ TODO: Default callout usage, learn how to trigger an action when the
  standard callout bubble's accessory control is tapped.
  */
 - (void)mapView:(MLNMapView *)mapView annotation:(id <MLNAnnotation>)annotation calloutAccessoryControlTapped:(UIControl *)control;
@@ -810,8 +796,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param annotation The annotation whose callout was tapped.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/custom-callout/">
- Display custom views as callouts</a> example to learn how to trigger an
+ TODO: Display custom views as callouts, learn how to trigger an
  action when an `MLNAnnotation`s `MLNCalloutView` is tapped.
  */
 - (void)mapView:(MLNMapView *)mapView tapOnCalloutForAnnotation:(id <MLNAnnotation>)annotation;

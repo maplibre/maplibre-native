@@ -234,7 +234,7 @@ run-android-test-app-center:
 # Uploads the compiled Android SDK to Maven Central Staging
 .PHONY: run-android-publish
 run-android-publish:
-	$(MLN_ANDROID_GRADLE_SINGLE_JOB) --debug -Pmapbox.abis=all :MapboxGLAndroidSDK:publishReleasePublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+	$(MLN_ANDROID_GRADLE_SINGLE_JOB)-Pmapbox.abis=all :MapboxGLAndroidSDK:publishReleasePublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
 
 # Dump system graphics information for the test app
 .PHONY: android-gfxinfo

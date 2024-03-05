@@ -2,9 +2,7 @@ load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 cc_library(
     name = "testutils",
-    hdrs = [
-        "include/mbgl/test/util.hpp",
-    ],
+    hdrs = glob(["include/mbgl/test/*.hpp"]),
     strip_include_prefix = "include",
     deps = [
         "//vendor/googletest:gtest",

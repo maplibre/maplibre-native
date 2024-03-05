@@ -33,6 +33,8 @@ TEST(ImageManager, Basic) {
         ASSERT_TRUE(stored);
         EXPECT_EQ(image->image.size, stored->image.size);
     }
+
+    imageManager.dumpDebugLogs();
 }
 
 TEST(ImageManager, AddRemove) {
@@ -79,7 +81,7 @@ TEST(ImageManager, RemoveReleasesBinPackRect) {
 
 class StubImageRequestor : public ImageRequestor {
 public:
-    StubImageRequestor(ImageManager& imageManager_)
+    StubImageRequestor(std::shared_ptr<ImageManager> imageManager_)
         : ImageRequestor(imageManager_) {}
 
     void onImagesAvailable(ImageMap icons,
@@ -95,8 +97,9 @@ public:
 
 TEST(ImageManager, NotifiesRequestorWhenSpriteIsLoaded) {
     util::RunLoop runLoop;
-    ImageManager imageManager;
-    StubImageRequestor requestor(imageManager);
+    auto imageManagerPtr = std::make_shared<ImageManager>();
+    auto& imageManager = *imageManagerPtr;
+    StubImageRequestor requestor(imageManagerPtr);
     bool notified = false;
 
     ImageManagerObserver observer;
@@ -123,8 +126,9 @@ TEST(ImageManager, NotifiesRequestorWhenSpriteIsLoaded) {
 }
 
 TEST(ImageManager, NotifiesRequestorImmediatelyIfDependenciesAreSatisfied) {
-    ImageManager imageManager;
-    StubImageRequestor requestor(imageManager);
+    auto imageManagerPtr = std::make_shared<ImageManager>();
+    auto& imageManager = *imageManagerPtr;
+    StubImageRequestor requestor(imageManagerPtr);
     bool notified = false;
 
     requestor.imagesAvailable = [&](ImageMap, ImageMap, ImageVersionMap) {
@@ -160,8 +164,9 @@ public:
 
 TEST(ImageManager, OnStyleImageMissingBeforeSpriteLoaded) {
     util::RunLoop runLoop;
-    ImageManager imageManager;
-    StubImageRequestor requestor(imageManager);
+    auto imageManagerPtr = std::make_shared<ImageManager>();
+    auto& imageManager = *imageManagerPtr;
+    StubImageRequestor requestor(imageManagerPtr);
     StubImageManagerObserver observer;
 
     imageManager.setObserver(&observer);
@@ -203,7 +208,7 @@ TEST(ImageManager, OnStyleImageMissingBeforeSpriteLoaded) {
     ASSERT_FALSE(requestor.hasPendingRequests());
 
     // Another requestor shall not have pending requests for already obtained images.
-    StubImageRequestor anotherRequestor(imageManager);
+    StubImageRequestor anotherRequestor(imageManagerPtr);
     imageManager.getImages(anotherRequestor, std::make_pair(dependencies, ++imageCorrelationID));
     ASSERT_FALSE(anotherRequestor.hasPendingRequests());
 
@@ -215,8 +220,9 @@ TEST(ImageManager, OnStyleImageMissingBeforeSpriteLoaded) {
 
 TEST(ImageManager, OnStyleImageMissingAfterSpriteLoaded) {
     util::RunLoop runLoop;
-    ImageManager imageManager;
-    StubImageRequestor requestor(imageManager);
+    auto imageManagerPtr = std::make_shared<ImageManager>();
+    auto& imageManager = *imageManagerPtr;
+    StubImageRequestor requestor(imageManagerPtr);
     StubImageManagerObserver observer;
 
     imageManager.setObserver(&observer);
@@ -251,7 +257,8 @@ TEST(ImageManager, OnStyleImageMissingAfterSpriteLoaded) {
 
 TEST(ImageManager, RemoveUnusedStyleImages) {
     util::RunLoop runLoop;
-    ImageManager imageManager;
+    auto imageManagerPtr = std::make_shared<ImageManager>();
+    auto& imageManager = *imageManagerPtr;
     StubImageManagerObserver observer;
     imageManager.setObserver(&observer);
     imageManager.setLoaded(true);
@@ -276,7 +283,7 @@ TEST(ImageManager, RemoveUnusedStyleImages) {
 
     // Single requestor
     {
-        std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManager);
+        std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManagerPtr);
         imageManager.getImages(*requestor, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 0ull));
         runLoop.runOnce();
         EXPECT_EQ(observer.count, 1);
@@ -296,7 +303,7 @@ TEST(ImageManager, RemoveUnusedStyleImages) {
 
     // Single requestor, exceed cache size limit.
     {
-        std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManager);
+        std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManagerPtr);
         imageManager.getImages(*requestor, std::make_pair(ImageDependencies{{"1024px", ImageType::Icon}}, 0ull));
         runLoop.runOnce();
         EXPECT_EQ(observer.count, 2);
@@ -311,8 +318,8 @@ TEST(ImageManager, RemoveUnusedStyleImages) {
 
     // Multiple requestors
     {
-        std::unique_ptr<StubImageRequestor> requestor1 = std::make_unique<StubImageRequestor>(imageManager);
-        std::unique_ptr<StubImageRequestor> requestor2 = std::make_unique<StubImageRequestor>(imageManager);
+        std::unique_ptr<StubImageRequestor> requestor1 = std::make_unique<StubImageRequestor>(imageManagerPtr);
+        std::unique_ptr<StubImageRequestor> requestor2 = std::make_unique<StubImageRequestor>(imageManagerPtr);
         imageManager.getImages(*requestor1, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 0ull));
         imageManager.getImages(*requestor2, std::make_pair(ImageDependencies{{"missing", ImageType::Icon}}, 1ull));
         runLoop.runOnce();
@@ -330,9 +337,9 @@ TEST(ImageManager, RemoveUnusedStyleImages) {
 
     // Multiple requestors, check that image resource is not destroyed if there
     // is at least 1 requestor that uses it.
-    std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManager);
+    std::unique_ptr<StubImageRequestor> requestor = std::make_unique<StubImageRequestor>(imageManagerPtr);
     {
-        std::unique_ptr<StubImageRequestor> requestor1 = std::make_unique<StubImageRequestor>(imageManager);
+        std::unique_ptr<StubImageRequestor> requestor1 = std::make_unique<StubImageRequestor>(imageManagerPtr);
         imageManager.getImages(
             *requestor,
             std::make_pair(ImageDependencies{{"missing", ImageType::Icon}, {"1024px", ImageType::Icon}}, 0ull));

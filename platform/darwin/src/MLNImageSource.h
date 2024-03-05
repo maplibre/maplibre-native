@@ -43,9 +43,7 @@ MLN_EXPORT
  ```
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/image-source/">
- Add an image</a> example to learn how to add an image to your map using
- `MLNImageSource`.
+ TODO: Add an image, learn how to add an image to your map using `MLNImageSource`.
  */
 MLN_EXPORT
 @interface MLNImageSource : MLNSource

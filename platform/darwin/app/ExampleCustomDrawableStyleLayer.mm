@@ -13,6 +13,10 @@
 #include <memory>
 #include <cmath>
 
+@interface MLNCustomDrawableStyleLayer (Internal)
+- (instancetype)initWithPendingLayer:(std::unique_ptr<mbgl::style::Layer>)pendingLayer;
+@end
+
 class ExampleCustomDrawableStyleLayerHost;
 
 @implementation ExampleCustomDrawableStyleLayer

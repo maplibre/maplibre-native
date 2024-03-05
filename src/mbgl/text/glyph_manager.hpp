@@ -7,6 +7,7 @@
 #include <mbgl/util/font_stack.hpp>
 #include <mbgl/util/immutable.hpp>
 
+#include <mutex>
 #include <string>
 #include <unordered_map>
 
@@ -71,6 +72,8 @@ private:
     GlyphManagerObserver* observer = nullptr;
 
     std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer;
+
+    std::recursive_mutex rwLock;
 };
 
 } // namespace mbgl

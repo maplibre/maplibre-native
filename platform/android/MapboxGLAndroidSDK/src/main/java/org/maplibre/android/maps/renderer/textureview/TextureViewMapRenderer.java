@@ -35,6 +35,7 @@ public class TextureViewMapRenderer extends MapRenderer {
     super(context, localIdeographFontFamily);
     this.translucentSurface = translucentSurface;
     renderThread = new TextureViewRenderThread(textureView, this);
+    renderThread.setName("TextureViewRenderer");
     renderThread.start();
   }
 
@@ -84,6 +85,14 @@ public class TextureViewMapRenderer extends MapRenderer {
   @Override
   public void queueEvent(Runnable runnable) {
     renderThread.queueEvent(runnable);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public long waitForEmpty(long timeoutMillis) {
+    return renderThread.waitForEmpty(timeoutMillis);
   }
 
   /**
