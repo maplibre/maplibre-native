@@ -25,8 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
  ```
   
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/offline-pack/">
- Download an offline map</a> example to learn how to define an offline region
+ TODO: Download an offline map, learn how to define an offline region
  to be downloaded to a user's device.
  */
 MLN_EXPORT

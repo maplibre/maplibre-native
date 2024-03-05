@@ -217,8 +217,7 @@ typedef void (^MLNMapSnapshotCompletionHandler)(MLNMapSnapshot* _Nullable snapsh
  ```
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/map-snapshotter/">
- Create a static map snapshot</a> example to learn how to use the
+ TODO: Create a static map snapshot, learn how to use the
  `MLNMapSnapshotter` to generate a static image based on an `MLNMapView`
  object's style, camera, and view bounds.
  */

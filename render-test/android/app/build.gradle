@@ -12,7 +12,7 @@ android {
             abi = project.getProperty('mapbox.abis')
         }
         ndk {
-            if (abi != 'all') {
+            if (abi != 'all' && abi != 'none') {
                 abiFilters abi.split(' ')
             } else {
                 abiFilters 'armeabi-v7a', 'x86', 'arm64-v8a', 'x86_64'
