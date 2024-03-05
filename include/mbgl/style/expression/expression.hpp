@@ -215,6 +215,16 @@ inline constexpr bool any(const Dependency term, const Dependency deps = Depende
 inline constexpr bool all(const Dependency term, const Dependency deps = Dependency::All) {
     return (term & deps) == deps;
 }
+/// @return true if no bits in `deps` are present in `term`
+inline constexpr bool none(const Dependency term, const Dependency deps = Dependency::All) {
+    return (term & deps) == Dependency::None;
+}
+
+class Interpolate;
+class Step;
+
+using ZoomCurveOrError = std::optional<variant<const Interpolate*, const Step*, ParsingError>>;
+using ZoomCurvePtr = variant<std::nullptr_t, const Interpolate*, const Step*>;
 
 class Expression {
 public:
@@ -264,6 +274,13 @@ public:
     virtual std::string getOperator() const = 0;
 
     const Dependency dependencies;
+
+    /// Test the expression's dependencies for any of one or more values
+    bool any(Dependency dep) const { return expression::any(dependencies, dep); }
+    /// Test the expression's dependencies for all of one or more values
+    bool all(Dependency dep) const { return expression::all(dependencies, dep); }
+    /// Test that expression's dependencies has none of one or more values
+    bool none(Dependency dep) const { return expression::none(dependencies, dep); }
 
 protected:
     template <typename T>

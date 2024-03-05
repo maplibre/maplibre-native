@@ -250,18 +250,21 @@ ParseResult ParsingContext::parseExpression(const Convertible& value,
 }
 
 ParseResult ParsingContext::parseLayerPropertyExpression(const Convertible& value) {
-    std::optional<TypeAnnotationOption> typeAnnotationOption;
-    if (expected && *expected == type::String) {
-        typeAnnotationOption = TypeAnnotationOption::coerce;
-    }
+    const auto typeAnnotationOption = (expected && *expected == type::String)
+                                          ? std::make_optional(TypeAnnotationOption::coerce)
+                                          : std::nullopt;
     ParseResult parsed = parse(value, typeAnnotationOption);
-    if (parsed && !isZoomConstant(**parsed)) {
-        std::optional<variant<const Interpolate*, const Step*, ParsingError>> zoomCurve = findZoomCurve(parsed->get());
-        if (!zoomCurve) {
+
+    // If the expression is zoom-dependent, validate that we can resolve a zoom curve or treat it as an error
+    assert(!parsed || !*parsed || none((*parsed)->dependencies, Dependency::Zoom) == isZoomConstant(**parsed));
+    if (parsed && (*parsed)->any(Dependency::Zoom)) {
+        if (const auto zoomCurve = findZoomCurve(**parsed)) {
+            if (zoomCurve->is<ParsingError>()) {
+                error(zoomCurve->get<ParsingError>().message);
+                return ParseResult();
+            }
+        } else {
             error(R"("zoom" expression may only be used as input to a top-level "step" or "interpolate" expression.)");
-            return ParseResult();
-        } else if (zoomCurve->is<ParsingError>()) {
-            error(zoomCurve->get<ParsingError>().message);
             return ParseResult();
         }
     }

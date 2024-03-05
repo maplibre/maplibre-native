@@ -12,42 +12,46 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-std::optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCurve(const expression::Expression* e) {
-    std::optional<variant<const Interpolate*, const Step*, ParsingError>> result;
+ZoomCurveOrError findZoomCurve(const expression::Expression& e) {
+    ZoomCurveOrError result;
 
-    switch (e->getKind()) {
+    switch (e.getKind()) {
         case Kind::Let: {
-            auto let = static_cast<const Let*>(e);
-            result = findZoomCurve(let->getResult());
-            break;
+            const auto& let = static_cast<const Let&>(e);
+            if (const auto& child = let.getResult()) {
+                result = findZoomCurve(*child);
+                break;
+            }
         }
         case Kind::Coalesce: {
-            auto coalesce = static_cast<const Coalesce*>(e);
-            std::size_t length = coalesce->getLength();
+            const auto& coalesce = static_cast<const Coalesce&>(e);
+            const std::size_t length = coalesce.getLength();
             for (std::size_t i = 0; i < length; i++) {
-                result = findZoomCurve(coalesce->getChild(i));
-                if (result) {
-                    break;
+                if (const auto* child = coalesce.getChild(i)) {
+                    result = findZoomCurve(*child);
+                    if (result) {
+                        break;
+                    }
                 }
             }
             break;
         }
         case Kind::Interpolate: {
-            auto curve = static_cast<const Interpolate*>(e);
-            if (curve->getInput()->getKind() == Kind::CompoundExpression) {
-                auto z = static_cast<CompoundExpression*>(curve->getInput().get());
+            const auto& curve = static_cast<const Interpolate&>(e);
+            if (curve.getInput()->getKind() == Kind::CompoundExpression) {
+                const auto* z = static_cast<CompoundExpression*>(curve.getInput().get());
                 if (z && z->getOperator() == "zoom") {
-                    result = {curve};
+                    result = {&curve};
                 }
             }
             break;
         }
         case Kind::Step: {
-            auto step = static_cast<const Step*>(e);
-            if (step->getInput()->getKind() == Kind::CompoundExpression) {
-                auto z = static_cast<CompoundExpression*>(step->getInput().get());
+            const auto& step = static_cast<const Step&>(e);
+            if (step.getInput()->getKind() == Kind::CompoundExpression) {
+                const auto* z = static_cast<CompoundExpression*>(step.getInput().get());
                 if (z && z->getOperator() == "zoom") {
-                    result = {step};
+                    result = {&step};
                 }
             }
             break;
@@ -60,9 +64,8 @@ std::optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCu
         return result;
     }
 
-    e->eachChild([&](const Expression& child) {
-        std::optional<variant<const Interpolate*, const Step*, ParsingError>> childResult(findZoomCurve(&child));
-        if (childResult) {
+    e.eachChild([&](const Expression& child) {
+        if (const ZoomCurveOrError childResult = findZoomCurve(child)) {
             if (childResult->is<ParsingError>()) {
                 result = childResult;
             } else if (!result && childResult) {
@@ -79,16 +82,16 @@ std::optional<variant<const Interpolate*, const Step*, ParsingError>> findZoomCu
     return result;
 }
 
-using ZoomCurveOrNull = variant<std::nullptr_t, const Interpolate*, const Step*>;
-
-ZoomCurveOrNull findZoomCurveChecked(const expression::Expression& e) {
-    assert(!expression::isZoomConstant(e));
-    return findZoomCurve(&e)->match(
-        [](const ParsingError& err) -> ZoomCurveOrNull {
+ZoomCurvePtr findZoomCurveChecked(const expression::Expression& e) {
+    if (e.none(Dependency::Zoom)) {
+        return nullptr;
+    }
+    return findZoomCurve(e)->match(
+        [](const ParsingError& err) -> ZoomCurvePtr {
             Log::Error(Event::Style, "Invalid Expression: " + err.message);
             return nullptr;
         },
-        [](auto zoomCurve) -> ZoomCurveOrNull { return zoomCurve; });
+        [](auto zoomCurve) -> ZoomCurvePtr { return zoomCurve; });
 }
 
 } // namespace expression

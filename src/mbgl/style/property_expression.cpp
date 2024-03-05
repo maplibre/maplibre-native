@@ -5,9 +5,9 @@ namespace style {
 
 PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expression> expression_)
     : expression(std::move(expression_)),
-      isZoomConstant_(!expression::any(expression->dependencies, Dependency::Zoom)),
-      isFeatureConstant_(!expression::any(expression->dependencies, Dependency::Feature)),
-      isRuntimeConstant_(!expression::any(expression->dependencies, Dependency::Image)),
+      isZoomConstant_(expression->none(Dependency::Zoom)),
+      isFeatureConstant_(expression->none(Dependency::Feature)),
+      isRuntimeConstant_(expression->none(Dependency::Image)),
       zoomCurve(isZoomConstant_ ? nullptr : expression::findZoomCurveChecked(*expression)) {
     assert(isZoomConstant_ == expression::isZoomConstant(*expression));
     assert(isFeatureConstant_ == expression::isFeatureConstant(*expression));
