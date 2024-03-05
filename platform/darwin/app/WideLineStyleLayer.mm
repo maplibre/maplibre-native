@@ -16,29 +16,8 @@
     NSError *error = nil;
     id<MTLDevice> _device = resource.device;
 
-// Load either from resource or compiled shaders
-#if 0
-
-    // Load shader source from resource
-    NSString *filePath = [[NSBundle mainBundle] pathForResource:@"wideline" ofType:@"metal"];
-    NSAssert(filePath, @"wideline.metal: resource not found");
-    
-    NSString *shaderSource = nil;
-    
-    if (filePath) {
-        shaderSource = [NSString stringWithContentsOfFile:filePath encoding:NSUTF8StringEncoding error:&error];
-
-        if (error) {
-            NSLog(@"Error reading file: %@", error.localizedDescription);
-        }
-    }
-    NSAssert(shaderSource, @"Failed to load shader: %@", error);
-
-    id<MTLLibrary> library = [_device newLibraryWithSource:shaderSource options:nil error:&error];
-    NSAssert(library, @"Error compiling shaders: %@", error);
-#else
+// Load shader from the default library
     id<MTLLibrary> library = [_device newDefaultLibrary];
-#endif
     
     id<MTLFunction> vertexFunction = [library newFunctionWithName:@"vertexTri_wideVecPerf"];
     id<MTLFunction> fragmentFunction = [library newFunctionWithName:@"fragmentTri_wideVecPerf"];
