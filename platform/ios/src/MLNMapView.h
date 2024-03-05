@@ -1932,8 +1932,7 @@ MLN_EXPORT
  which are unsupported by this SDK.
 
  The returned features are drawn by a style layer in the current style. For
- example, suppose the current style uses the
- <a href="https://www.mapbox.com/vector-tiles/mapbox-streets/">Mapbox Streets source</a>,
+ example, suppose the current style uses a particular source,
  but none of the specified style layers includes features that have the `maki`
  property set to `bus`. If you pass a rectangle containing the location of a bus
  stop into this method, the bus stop feature does not appear in the resulting

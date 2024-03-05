@@ -19,6 +19,7 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/exception.hpp>
 #include <mbgl/util/stopwatch.hpp>
+#include <mbgl/util/thread_pool.hpp>
 
 #include <unordered_set>
 #include <utility>
@@ -46,7 +47,9 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
       fontFaces(fontFaces_),
       showCollisionBoxes(showCollisionBoxes_) {}
 
-GeometryTileWorker::~GeometryTileWorker() = default;
+GeometryTileWorker::~GeometryTileWorker() {
+    Scheduler::GetBackground()->runOnRenderThread([renderData_{std::move(renderData)}]() {});
+}
 
 /*
    GeometryTileWorker is a state machine. This is its transition diagram.

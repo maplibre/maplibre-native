@@ -21,7 +21,7 @@ jobs:
   pre_job:
     runs-on: ubuntu-latest
     outputs:
-      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.android_any_changed != 'true' }}
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.android_any_modified != 'true' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -33,7 +33,7 @@ jobs:
           files_yaml_from_source_file: .github/changed-files.yml
 
   android-build:
-    runs-on: ${{ github.event.pull_request && !github.event.pull_request.draft && 'MapLibre_Native_Linux_16_core' || 'ubuntu-22.04' }}
+    runs-on: ubuntu-22.04
     needs:
       - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
@@ -193,7 +193,39 @@ jobs:
           name: uploadsEnv
           path: uploads.env
 
-      # render test
+      - name: Store debug artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-artifacts
+          path: |
+            MapboxGLAndroidSDKTestApp/build/outputs/apk/debug
+            MapboxGLAndroidSDK/build/reports/lint-results.html
+            MapboxGLAndroidSDK/lint-baseline.xml
+            MapboxGLAndroidSDKTestApp/build/reports/lint-results.html
+            MapboxGLAndroidSDKTestApp/build/reports/lint-results.xml
+            MapboxGLAndroidSDKTestApp/lint-baseline.xml
+            MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
+
+  android-build-render-test:
+    runs-on: ubuntu-latest
+    needs:
+      - pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
       - name: Build Render Test App
         run: |
           ./gradlew assemble assembleAndroidTest
@@ -209,19 +241,6 @@ jobs:
           path: |
             ./render-test/android/RenderTestsApp.apk
             ./render-test/android/RenderTests.apk
-
-      - name: Store debug artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-artifacts
-          path: |
-            MapboxGLAndroidSDKTestApp/build/outputs/apk/debug
-            MapboxGLAndroidSDK/build/reports/lint-results.html
-            MapboxGLAndroidSDK/lint-baseline.xml
-            MapboxGLAndroidSDKTestApp/build/reports/lint-results.html
-            MapboxGLAndroidSDKTestApp/build/reports/lint-results.xml
-            MapboxGLAndroidSDKTestApp/lint-baseline.xml
-            MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
 
   android-instrumentation-test:
     needs: android-build
@@ -265,6 +284,7 @@ jobs:
     needs:
       - pre_job
       - android-build
+      - android-build-render-test
     steps:
       - name: Mark result as failed
         if: needs.android-build.result != 'success'

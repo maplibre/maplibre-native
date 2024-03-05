@@ -8,7 +8,6 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/gl/context.hpp>
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/math/log2.hpp>
 #include <mbgl/renderer/renderer.hpp>
@@ -1452,11 +1451,14 @@ TEST(Map, KeepRenderData) {
     test.map.getStyle().loadURL("maptiler://maps/streets");
     const int iterations = 3;
     const int resourcesCount = 4 /*tiles*/;
+
+    requestsCount = 0;
     // Keep render data.
     for (int i = 1; i <= iterations; ++i) {
         test.frontend.render(test.map);
         EXPECT_EQ(resourcesCount, requestsCount);
     }
+
     requestsCount = 0;
     // Clear render data.
     for (int i = 1; i <= iterations; ++i) {

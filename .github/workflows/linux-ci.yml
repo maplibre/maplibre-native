@@ -28,7 +28,7 @@ jobs:
   pre_job:
     runs-on: ubuntu-22.04
     outputs:
-      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_changed != 'true' }}
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_modified != 'true' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -40,7 +40,7 @@ jobs:
           files_yaml_from_source_file: .github/changed-files.yml
 
       - name: List changed files
-        if: steps.changed-files.outputs.linux_any_changed == 'true'  
+        if: steps.changed-files.outputs.linux_any_modified == 'true'  
         run: |
           echo "Changed file(s): ${{ steps.changed-files.outputs.linux_all_changed_files }}"
 
@@ -51,7 +51,7 @@ jobs:
       fail-fast: true
       matrix:
         renderer: [legacy, drawable]
-    runs-on: ${{ github.event.pull_request && !github.event.pull_request.draft && 'MapLibre_Native_Linux_16_core' || 'ubuntu-22.04' }}
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:

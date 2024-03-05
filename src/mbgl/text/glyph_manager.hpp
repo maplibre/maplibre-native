@@ -7,6 +7,7 @@
 #include <mbgl/util/font_stack.hpp>
 #include <mbgl/util/immutable.hpp>
 
+#include <mutex>
 #include <string>
 #include <unordered_map>
 
@@ -101,13 +102,15 @@ private:
 
     GlyphManagerObserver *observer = nullptr;
 
+    // Shaping objects
     std::unique_ptr<LocalGlyphRasterizer> localGlyphRasterizer;
-
     std::shared_ptr<FontFaces> fontFaces;
     FreeTypeLibrary ftLibrary;
     std::map<FontStack, std::map<GlyphIDType, std::shared_ptr<HBShaper>>> hbShapers;
-
     bool loadHBShaper(const FontStack &fontStack, GlyphIDType type, const std::string &data);
+
+    std::recursive_mutex rwLock;
+
 };
 
 } // namespace mbgl

@@ -15,8 +15,8 @@ const args = (() => {
     const parser = new ArgumentParser({
         description: "MapLibre Shader Tools"
     });
-    parser.add_argument("--root", "--r", {
-        help: "Directory root to place generated code",
+    parser.add_argument("--out", "--o", {
+        help: "Directory root to write generated code.",
         required: false
     });
     return parser.parse_args();
@@ -787,7 +787,8 @@ const lightProperties = Object.keys(spec['light']).reduce((memo, name) => {
 const lightDoc = spec['light-cocoa-doc'];
 const lightType = 'light';
 
-const root = args.root ? args.root : path.dirname(path.dirname(path.dirname(__dirname)));
+const root = path.dirname(path.dirname(path.dirname(__dirname)));
+const outLocation = args.out ? args.out : root;
 
 const layerH = readAndCompile('platform/darwin/src/MLNStyleLayer.h.ejs', root);
 const layerPrivateH = readAndCompile('platform/darwin/src/MLNStyleLayer_Private.h.ejs', root);
@@ -801,11 +802,11 @@ const lightH = readAndCompile('platform/darwin/src/MLNLight.h.ejs', root);
 const lightM = readAndCompile('platform/darwin/src/MLNLight.mm.ejs', root);
 const testLight = readAndCompile('platform/darwin/test/MLNLightTest.mm.ejs', root);
 writeIfModified(`platform/darwin/src/MLNLight.h`, duplicatePlatformDecls(
-    lightH({ properties: lightProperties, doc: lightDoc, type: lightType })), root);
+    lightH({ properties: lightProperties, doc: lightDoc, type: lightType })), outLocation);
 writeIfModified(`platform/darwin/src/MLNLight.mm`,
-    lightM({ properties: lightProperties, doc: lightDoc, type: lightType }), root);
+    lightM({ properties: lightProperties, doc: lightDoc, type: lightType }), outLocation);
 writeIfModified(`platform/darwin/test/MLNLightTest.mm`,
-    testLight({ properties: lightProperties, doc: lightDoc, type: lightType }), root);
+    testLight({ properties: lightProperties, doc: lightDoc, type: lightType }), outLocation);
 
 const layers = _(spec.layer.type.values).map((value, layerType) => {
     const layoutProperties = Object.keys(spec[`layout_${layerType}`]).reduce((memo, name) => {
@@ -879,13 +880,13 @@ for (var layer of layers) {
     }
 
     writeIfModified(`platform/darwin/src/${prefix}${camelize(layer.type)}${suffix}.h`,
-        duplicatePlatformDecls(layerH(layer)), root);
+        duplicatePlatformDecls(layerH(layer)), outLocation);
     writeIfModified(`platform/darwin/src/${prefix}${camelize(layer.type)}${suffix}_Private.h`,
-        duplicatePlatformDecls(layerPrivateH(layer)),  root);
+        duplicatePlatformDecls(layerPrivateH(layer)),  outLocation);
     writeIfModified(`platform/darwin/src/${prefix}${camelize(layer.type)}${suffix}.mm`,
-        layerM(layer),  root);
+        layerM(layer),  outLocation);
     writeIfModified(`platform/darwin/test/${prefix}${camelize(layer.type)}${suffix}Tests.mm`,
-        testLayers(layer), root);
+        testLayers(layer), outLocation);
 }
 
 // Extract examples for guides from unit tests.
@@ -927,21 +928,21 @@ writeIfModified(`platform/ios/docs/guides/For Style Authors.md`, forStyleAuthors
     os: 'iOS',
     renamedProperties: renamedPropertiesByLayerType,
     layers: layers,
-}), root);
+}), outLocation);
 writeIfModified(`platform/macos/docs/guides/For Style Authors.md`, forStyleAuthorsMD({
     os: 'macOS',
     renamedProperties: renamedPropertiesByLayerType,
     layers: layers,
-}), root);
+}), outLocation);
 writeIfModified(`platform/ios/docs/guides/Migrating to Expressions.md`, ddsGuideMD({
     os: 'iOS',
-}), root);
+}), outLocation);
 writeIfModified(`platform/macos/docs/guides/Migrating to Expressions.md`, ddsGuideMD({
     os: 'macOS',
-}), root);
+}), outLocation);
 writeIfModified(`platform/ios/docs/guides/Tile URL Templates.md`, templatesMD({
     os: 'iOS',
-}), root);
+}), outLocation);
 writeIfModified(`platform/macos/docs/guides/Tile URL Templates.md`, templatesMD({
     os: 'macOS',
-}), root);*/
+}), rooutLocationot);*/

@@ -56,7 +56,7 @@ void Map::Impl::onUpdate() {
                                transform.getState(),
                                style->impl->getGlyphURL(),
                                style->impl->getFontFaces(),
-                               style->impl->spriteLoaded,
+                               style->impl->areSpritesLoaded(),
                                style->impl->getTransitionOptions(),
                                style->impl->getLight()->impl,
                                style->impl->getImageImpls(),

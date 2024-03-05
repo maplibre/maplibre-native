@@ -1,4 +1,5 @@
 #include <mbgl/tile/tile_cache.hpp>
+#include <mbgl/actor/scheduler.hpp>
 #include <cassert>
 
 namespace mbgl {
@@ -7,23 +8,66 @@ void TileCache::setSize(size_t size_) {
     size = size_;
 
     while (orderedKeys.size() > size) {
-        auto key = orderedKeys.front();
+        const auto key = orderedKeys.front();
         orderedKeys.remove(key);
-        tiles.erase(key);
+
+        auto hit = tiles.find(key);
+        if (hit != tiles.end()) {
+            auto tile = std::move(hit->second);
+            tiles.erase(hit);
+            deferredRelease(std::move(tile));
+        }
     }
 
     assert(orderedKeys.size() <= size);
 }
 
-void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile> tile) {
+namespace {
+
+/// This exists solely to prevent a problem where temporary lambda captures
+/// are retained for the duration of the scope instead of being destroyed immediately.
+template <typename T>
+struct CaptureWrapper {
+    CaptureWrapper(std::unique_ptr<T>&& item_)
+        : item(std::move(item_)) {}
+    CaptureWrapper(const CaptureWrapper& other)
+        : item(other.item) {}
+    std::shared_ptr<T> item;
+};
+} // namespace
+
+void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
+    tile->cancel();
+
+    // The `std::function` must be created in a separate statement from the `schedule` call.
+    // Creating a `std::function` from a lambda involves a copy, which is why we must use
+    // `shared_ptr` rather than `unique_ptr` for the capture.  As a result, a temporary holds
+    // a reference until the construction is complete and the lambda is destroyed.
+    // If this temporary outlives the `schedule` call, and the function is executed immediately
+    // by a waiting thread and is already complete, that temporary reference ends up being the
+    // last one and the destruction actually occurs here on this thread.
+    std::function<void()> func{[tile_{CaptureWrapper<Tile>{std::move(tile)}}]() {
+    }};
+
+    threadPool->schedule(std::move(func));
+}
+
+void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {
     if (!tile->isRenderable() || !size) {
+        deferredRelease(std::move(tile));
         return;
     }
 
-    // insert new or query existing tile
-    if (!tiles.emplace(key, std::move(tile)).second) {
-        // remove existing tile key
+    const auto result = tiles.insert(std::make_pair(key, std::unique_ptr<Tile>{}));
+    if (result.second) {
+        // inserted
+        result.first->second = std::move(tile);
+    } else {
+        // already present
+        // remove existing tile key to move it to the end
         orderedKeys.remove(key);
+        // release the newly-provided item
+        deferredRelease(std::move(tile));
     }
 
     // (re-)insert tile key as newest
@@ -31,7 +75,7 @@ void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile> tile) {
 
     // purge oldest key/tile if necessary
     if (orderedKeys.size() > size) {
-        pop(orderedKeys.front());
+        deferredRelease(pop(orderedKeys.front()));
     }
 
     assert(orderedKeys.size() <= size);
@@ -49,10 +93,9 @@ Tile* TileCache::get(const OverscaledTileID& key) {
 std::unique_ptr<Tile> TileCache::pop(const OverscaledTileID& key) {
     std::unique_ptr<Tile> tile;
 
-    auto it = tiles.find(key);
+    const auto it = tiles.find(key);
     if (it != tiles.end()) {
-        tile = std::move(it->second);
-        tiles.erase(it);
+        tile = std::move(tiles.extract(it).mapped());
         orderedKeys.remove(key);
         assert(tile->isRenderable());
     }
@@ -65,6 +108,9 @@ bool TileCache::has(const OverscaledTileID& key) {
 }
 
 void TileCache::clear() {
+    for (auto& item : tiles) {
+        deferredRelease(std::move(item.second));
+    }
     orderedKeys.clear();
     tiles.clear();
 }

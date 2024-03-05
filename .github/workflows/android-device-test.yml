@@ -7,7 +7,7 @@ on:
       - completed
 
 jobs:
-  create-check:
+  android-device-test:
     strategy:
       max-parallel: 2
       matrix:
@@ -34,9 +34,19 @@ jobs:
           }
         ]
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.event == 'pull_request'
     steps:
       - uses: actions/checkout@v4
+
+      - id: parent_workflow
+        run: |
+          conclusion=$(curl ${{ github.event.workflow_run.jobs_url }} | jq -r '.jobs[] | select(.name == "android-build").conclusion')
+          was_skipped=$([[ "$conclusion" = "skipped" || "$conclusion" = "cancelled" ]] && echo "true" || echo "false")
+          echo "was_skipped=$was_skipped" >> "$GITHUB_OUTPUT"
+
+      # get comment from PR
+
+      - uses: ./.github/actions/get-pr-number
+        id: get-pr-number
 
       - name: Generate token
         id: generate_token
@@ -45,18 +55,27 @@ jobs:
           app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
-      - uses: ./.github/actions/get-pr-number
-        id: get-pr-number
-
       - name: Check if comment on PR contains '!benchmark android'
+        if: matrix.test.name == 'Android Benchmark' && steps.get-pr-number.outputs.pr-number
         uses: peter-evans/find-comment@v3
-        id: fc
+        id: benchmark_comment
         with:
           issue-number: ${{ steps.get-pr-number.outputs.pr-number }}
           body-regex: '^!benchmark.*android.*$'
 
+      - name: Should we run this device test?
+        # always run when something was merged into main
+        # run benchmark when comment with '!benchmark android' exists in PR
+        if: |
+          steps.parent_workflow.outputs.was_skipped == 'false' &&
+          ((github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'push') ||
+          matrix.test.name == 'Android Benchmark' && steps.benchmark_comment.outputs.comment-id ||
+          matrix.test.name != 'Android Benchmark')
+        run: 
+          echo "run_device_test=true" >> "$GITHUB_ENV"
+
       - uses: LouisBrunner/checks-action@v2.0.0
-        if: matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id
+        if: env.run_device_test == 'true' || matrix.test.name == 'Android Render Tests'
         id: create_check
         with:
           token: ${{ steps.generate_token.outputs.token }}
@@ -66,19 +85,13 @@ jobs:
           sha: ${{ github.event.workflow_run.head_sha }}
 
       - uses: ./.github/actions/download-workflow-run-artifact
-        if: matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id
+        if: env.run_device_test == 'true'
         with:
           artifact-name: ${{ matrix.test.artifactName }}
-
-      - name: Check if test files exist (otherwise the parent workflow was skipped)
-        if: matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id
-        id: check_files
-        uses: andstor/file-existence-action@v2.0.0
-        with:
-          files: "${{ matrix.test.testFile }}, ${{ matrix.test.appFile }}"
+          expect-files: "${{ matrix.test.testFile }}, ${{ matrix.test.appFile }}"
 
       - name: Configure AWS Credentials
-        if: matrix.test.name == 'Android Benchmark'
+        if: env.run_device_test == 'true' && matrix.test.name == 'Android Benchmark'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -89,7 +102,7 @@ jobs:
           role-session-name: MySessionName
 
       - name: Upload external data for benchmark
-        if: matrix.test.name == 'Android Benchmark'
+        if: env.run_device_test == 'true' && matrix.test.name == 'Android Benchmark'
         run: |
           export RESULTS_API=${{ secrets.MLN_RESULTS_API }}
           export AWS_DEVICE_FARM_PROJECT_ARN=${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
@@ -97,7 +110,7 @@ jobs:
           echo external_data_arn="$upload_arn" >> "$GITHUB_ENV"
 
       - uses: ./.github/actions/aws-device-farm-run
-        if: steps.check_files.outputs.files_exists == 'true' && (matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id)
+        if: env.run_device_test == 'true'
         with:
           name: ${{ matrix.test.name }}
           appType: ANDROID_APP
@@ -115,7 +128,7 @@ jobs:
           testSpecArn: ${{ matrix.test.testSpecArn }}
 
       - uses: LouisBrunner/checks-action@v2.0.0
-        if: always() && (matrix.test.name != 'Android Benchmark' || steps.fc.outputs.comment-id)
+        if: always() && (env.run_device_test == 'true' || matrix.test.name == 'Android Render Tests')
         with:
           token: ${{ steps.generate_token.outputs.token }}
           check_id: ${{ steps.create_check.outputs.check_id }}

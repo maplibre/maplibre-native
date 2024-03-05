@@ -4,6 +4,28 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.2.0
+
+- Add support for [multi sprites](https://github.com/maplibre/maplibre-native/pull/1858). More information on this feature can be found in the [Style Spec Documentation](https://maplibre.org/maplibre-style-spec/sprite/#multiple-sprite-sources).
+- Fix for C++ header in public Objective-C header ([#2156](https://github.com/maplibre/maplibre-native/pull/q 56)).
+
+## 6.1.1
+
+- Tighten camera equality requirements ([#2139](https://github.com/maplibre/maplibre-native/pull/2139)).
+
+## 6.1.0
+
+- Addition of an MLNCustomStyleLayer that allows running custom Metal shaders and code. Example included in the PR. ([#2006](https://github.com/maplibre/maplibre-native/pull/2006))
+- Various performance optimizations.
+  - Avoid redundant bindings/states based on Metal profiler feedback. ([#2006](https://github.com/maplibre/maplibre-native/pull/2006))
+  - Eliminate the remaining examples of tweakers being re-created on each update, which reduced reuse of uniform buffers. ([#2050](https://github.com/maplibre/maplibre-native/pull/2050))
+  - Eliminate an extra vector allocation for many attributes ([#2049](https://github.com/maplibre/maplibre-native/pull/2049))
+  - Don't save an extra copy of properties-as-uniforms set with symbol data, or re-build it when updating properties on existing drawables. ([#2054](https://github.com/maplibre/maplibre-native/pull/2054))
+  - Combine multiple segments into a drawable when `sortFeaturesByKey` is not used ([#2060](https://github.com/maplibre/maplibre-native/pull/2060))
+  - UBO by index instead of map ([#1980](https://github.com/maplibre/maplibre-native/pull/1980))
+  - Use `enableDepth` option ([#2073](https://github.com/maplibre/maplibre-native/pull/2073))
+  - Minor optimizations ([#2091](https://github.com/maplibre/maplibre-native/pull/2091))
+
 ## 6.0.0
 
 * This is the first release that uses **Metal** for rendering. This is a graphics API from Apple that replaces OpenGL ES on Apple platforms.
