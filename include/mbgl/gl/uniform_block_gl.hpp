@@ -21,6 +21,7 @@ private:
         : UniformBlock(std::move(other)) {}
 
 public:
+    void bindBuffer(const gfx::UniformBuffer& uniformBuffer, const std::size_t offset);
     void bindBuffer(const gfx::UniformBuffer& uniformBuffer) override;
     void unbindBuffer() override;
 };

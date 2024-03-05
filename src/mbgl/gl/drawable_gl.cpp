@@ -107,7 +107,9 @@ void DrawableGL::bindUniformBuffers() const {
         for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
             const auto& block = uniformBlocks.get(id);
             if (!block) continue;
-            const auto& uniformBuffer = getUniformBuffers().get(id);
+            const auto& pair = getUniformBuffers().getPair(id);
+            const auto& uniformBuffer = pair.first;
+            const auto offset = pair.second;
             assert(uniformBuffer && "UBO missing, drawable skipped");
             if (!uniformBuffer) {
                 using namespace std::string_literals;
@@ -118,7 +120,8 @@ void DrawableGL::bindUniformBuffers() const {
                 assert(false);
                 continue;
             }
-            block->bindBuffer(*uniformBuffer);
+            auto& glBlock = static_cast<UniformBlockGL&>(*block);
+            glBlock.bindBuffer(*uniformBuffer, offset);
         }
     }
 }
