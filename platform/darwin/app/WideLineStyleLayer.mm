@@ -8,6 +8,7 @@
 @implementation WideLineStyleLayer {
     // The render pipeline state
     id<MTLRenderPipelineState> _pipelineState;
+    id<MTLDepthStencilState> _depthStencilState;
 }
 
 - (void)didMoveToMapView:(MLNMapView *)mapView {
@@ -34,6 +35,13 @@
     _pipelineState = [_device newRenderPipelineStateWithDescriptor:pipelineStateDescriptor
                                                              error:&error];
     NSAssert(_pipelineState, @"Failed to create pipeline state: %@", error);
+
+    // Notice that we don't configure the stencilTest property, leaving stencil testing disabled
+    MTLDepthStencilDescriptor *depthStencilDescriptor = [[MTLDepthStencilDescriptor alloc] init];
+    depthStencilDescriptor.depthCompareFunction = MTLCompareFunctionAlways; // Or another value as needed
+    depthStencilDescriptor.depthWriteEnabled = NO;
+
+    _depthStencilState = [_device newDepthStencilStateWithDescriptor:depthStencilDescriptor];
 }
 
 - (void)drawInMapView:(MLNMapView *)mapView withContext:(MLNStyleLayerDrawingContext)context {
@@ -45,6 +53,7 @@
         id<MTLDevice> _device = resource.device;
         
         [renderEncoder setRenderPipelineState:_pipelineState];
+        [renderEncoder setDepthStencilState:_depthStencilState];
         
         // Setup buffers
         {
