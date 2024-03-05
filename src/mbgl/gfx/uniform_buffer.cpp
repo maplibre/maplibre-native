@@ -6,6 +6,7 @@ namespace mbgl {
 namespace gfx {
 
 std::shared_ptr<UniformBuffer> UniformBufferArray::nullref = nullptr;
+UniformBufferPtrWithOffset UniformBufferArray::nullrefPair = std::make_pair(nullptr, 0);
 
 UniformBufferArray::UniformBufferArray(UniformBufferArray&& other)
     : uniformBufferVector(std::move(other.uniformBufferVector)) {}
@@ -23,17 +24,22 @@ UniformBufferArray& UniformBufferArray::operator=(const UniformBufferArray& othe
 }
 
 const std::shared_ptr<UniformBuffer>& UniformBufferArray::get(const size_t id) const {
-    return (id < uniformBufferVector.size()) ? uniformBufferVector[id] : nullref;
+    return (id < uniformBufferVector.size()) ? uniformBufferVector[id].first : nullref;
+}
+
+const UniformBufferPtrWithOffset& UniformBufferArray::getPair(const size_t id) const {
+    return (id < uniformBufferVector.size()) ? uniformBufferVector[id] : nullrefPair;
 }
 
 const std::shared_ptr<UniformBuffer>& UniformBufferArray::set(const size_t id,
-                                                              std::shared_ptr<UniformBuffer> uniformBuffer) {
+                                                              std::shared_ptr<UniformBuffer> uniformBuffer,
+                                                              const std::size_t offset) {
     assert(id < uniformBufferVector.size());
     if (id >= uniformBufferVector.size()) {
         return nullref;
     }
-    uniformBufferVector[id] = std::move(uniformBuffer);
-    return uniformBufferVector[id];
+    uniformBufferVector[id] = std::make_pair(std::move(uniformBuffer), offset);
+    return uniformBufferVector[id].first;
 }
 
 void UniformBufferArray::createOrUpdate(const size_t id,
@@ -48,7 +54,7 @@ void UniformBufferArray::createOrUpdate(
     if (auto& ubo = get(id); ubo && ubo->getSize() == size) {
         ubo->update(data, size);
     } else {
-        uniformBufferVector[id] = context.createUniformBuffer(data, size, persistent);
+        uniformBufferVector[id] = std::make_pair(context.createUniformBuffer(data, size, persistent), 0);
     }
 }
 

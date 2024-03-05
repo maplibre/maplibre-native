@@ -88,6 +88,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
     }
 
+    int i = 0;
+    std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
@@ -96,16 +98,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto tileID = drawable.getTileID()->toUnwrapped();
         const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
         const auto isText = (symbolData.symbolType == SymbolType::Text);
-
-        if (isText && (!textPaintBuffer || textPropertiesUpdated)) {
-            const auto props = buildPaintUBO(true, evaluated);
-            textPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
-            textPropertiesUpdated = false;
-        } else if (!isText && (!iconPaintBuffer || iconPropertiesUpdated)) {
-            const auto props = buildPaintUBO(false, evaluated);
-            iconPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
-            iconPropertiesUpdated = false;
-        }
 
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
@@ -140,7 +132,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         // Unpitched point labels need to have their rotation applied after projection
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
-        const SymbolDrawableUBO drawableUBO = {
+        drawableUBOVector[i] = {
             /*.matrix=*/util::cast<float>(matrix),
             /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
             /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
@@ -152,12 +144,42 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.rotate_symbol=*/rotateInShader,
             /*.pad=*/{0},
         };
+        
+        i++;
+    });
+    
+    if (!drawableBuffer || drawableBuffer->getSize() < sizeof(SymbolDrawableUBO) * drawableUBOVector.size()) {
+        drawableBuffer = parameters.context.createUniformBuffer(drawableUBOVector.data(), sizeof(SymbolDrawableUBO) * drawableUBOVector.size());
+    } else {
+        drawableBuffer->update(drawableUBOVector.data(), sizeof(SymbolDrawableUBO) * drawableUBOVector.size());
+    }
+    
+    i = 0;
+    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
+        if (!drawable.getTileID() || !drawable.getData()) {
+            return;
+        }
 
+        const auto tileID = drawable.getTileID()->toUnwrapped();
+        const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
+        const auto isText = (symbolData.symbolType == SymbolType::Text);
+
+        if (isText && (!textPaintBuffer || textPropertiesUpdated)) {
+            const auto props = buildPaintUBO(true, evaluated);
+            textPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
+            textPropertiesUpdated = false;
+        } else if (!isText && (!iconPaintBuffer || iconPropertiesUpdated)) {
+            const auto props = buildPaintUBO(false, evaluated);
+            iconPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
+            iconPropertiesUpdated = false;
+        }
+        
         auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
-
+        uniforms.set(idSymbolDrawableUBO, drawableBuffer, i * sizeof(SymbolDrawableUBO));
         uniforms.set(idSymbolDynamicUBO, dynamicBuffer);
         uniforms.set(idSymbolDrawablePaintUBO, isText ? textPaintBuffer : iconPaintBuffer);
+        
+        i++;
     });
 }
 

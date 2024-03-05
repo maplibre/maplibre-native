@@ -10,6 +10,7 @@ class UniformBuffer;
 class UniformBufferArray;
 
 using UniformBufferPtr = std::shared_ptr<UniformBuffer>;
+using UniformBufferPtrWithOffset = std::pair<std::shared_ptr<UniformBuffer>, std::size_t>;
 using UniqueUniformBuffer = std::unique_ptr<UniformBuffer>;
 using UniqueUniformBufferArray = std::unique_ptr<UniformBufferArray>;
 
@@ -56,9 +57,11 @@ public:
     /// Get an uniform buffer element.
     /// Returns a pointer to the element on success, or null if the uniform buffer doesn't exists.
     const std::shared_ptr<UniformBuffer>& get(const size_t id) const;
+    
+    const UniformBufferPtrWithOffset& getPair(const size_t id) const;
 
     /// Set a new uniform buffer element or replace the existing one.
-    const std::shared_ptr<UniformBuffer>& set(const size_t id, std::shared_ptr<UniformBuffer> uniformBuffer);
+    const std::shared_ptr<UniformBuffer>& set(const size_t id, std::shared_ptr<UniformBuffer> uniformBuffer, const std::size_t offset = 0);
 
     /// Create and add a new buffer or update an existing one
     void createOrUpdate(const size_t id, const std::vector<uint8_t>& data, gfx::Context&, bool persistent = false);
@@ -78,8 +81,9 @@ protected:
     virtual std::unique_ptr<UniformBuffer> copy(const UniformBuffer&) = 0;
 
 protected:
-    std::array<UniformBufferPtr, shaders::maxUBOCountPerShader> uniformBufferVector;
+    std::array<UniformBufferPtrWithOffset, shaders::maxUBOCountPerShader> uniformBufferVector;
     static std::shared_ptr<UniformBuffer> nullref;
+    static UniformBufferPtrWithOffset nullrefPair;
 };
 
 } // namespace gfx

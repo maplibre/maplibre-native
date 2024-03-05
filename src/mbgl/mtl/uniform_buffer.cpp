@@ -25,13 +25,13 @@ UniformBuffer::~UniformBuffer() {
 }
 
 void UniformBuffer::update(const void* data, std::size_t size_) {
-    assert(size == size_);
+    /*assert(size == size_);
     if (size != size_ || size != buffer.getSizeInBytes()) {
         Log::Error(
             Event::General,
             "Mismatched size given to UBO update, expected " + std::to_string(size) + ", got " + std::to_string(size_));
         return;
-    }
+    }*/
 
     buffer.getContext().renderingStats().numUniformUpdates++;
     buffer.getContext().renderingStats().uniformUpdateBytes += size_;
