@@ -21,7 +21,7 @@ jobs:
   pre_job:
     runs-on: ubuntu-latest
     outputs:
-      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.android_any_changed != 'true' }}
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.android_any_modified != 'true' }}
     steps:
       - uses: actions/checkout@v4
 

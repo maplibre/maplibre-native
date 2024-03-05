@@ -13,8 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
  `userLocation` property of the map view displayed in your application.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/user-location-annotation/">
- Customize the user location annotation</a> example to learn how to overide the
+ TODO: Customize the user location annotation,learn how to overide the
  default user location annotation.
  */
 MLN_EXPORT
