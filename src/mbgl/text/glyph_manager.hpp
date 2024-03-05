@@ -110,7 +110,6 @@ private:
     bool loadHBShaper(const FontStack &fontStack, GlyphIDType type, const std::string &data);
 
     std::recursive_mutex rwLock;
-
 };
 
 } // namespace mbgl

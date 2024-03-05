@@ -129,7 +129,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
                         glyphs.emplace_back(std::move(temp));
                     }
                 }
-    
+
             } catch (...) {
                 observer->onGlyphsError(fontStack, range, std::current_exception());
                 return;
