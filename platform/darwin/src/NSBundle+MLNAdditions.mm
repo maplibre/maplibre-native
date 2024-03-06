@@ -18,7 +18,7 @@ const MLNExceptionName MLNBundleNotFoundException = @"MLNBundleNotFoundException
             bundle = [self bundleWithPath:bundlePath];
         } else {
             [NSException raise:MLNBundleNotFoundException
-                        format:@"The Mapbox framework bundle could not be found. If using the Mapbox Maps SDK for iOS as a static framework, make sure that Mapbox.bundle is copied into the root of the app bundle."];
+                        format:@"The MapLibre framework bundle could not be found. If using the MapLibre Native for iOS as a static framework, make sure that MapLibre bundle is copied into the root of the app bundle."];
         }
     }
 #endif
