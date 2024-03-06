@@ -185,8 +185,7 @@ MLN_EXPORT
  identifier and attributes.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/runtime-multiple-annotations/">
- Dynamically style interactive points</a> example to learn how to initialize
+ TODO: Dynamically style interactive points, learn how to initialize
  `MLNPointFeature` objects and add them to your map.
  */
 MLN_EXPORT
@@ -200,8 +199,7 @@ MLN_EXPORT
  @see `MLNCluster`
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/clustering/">
- Clustering point data</a> example to learn how to initialize
+ TODO: Clustering point data, learn how to initialize
  clusters and add them to your map.
  */
 MLN_EXPORT
@@ -217,8 +215,7 @@ MLN_EXPORT
  feature in GeoJSON.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/line-geojson/">
- Add a line annotation from GeoJSON</a> example to learn how to initialize an
+ TODO: Add a line annotation from GeoJSON, learn how to initialize an
  `MLNPolylineFeature` and add it to an `MLNMapView` object.
  */
 MLN_EXPORT
@@ -284,8 +281,7 @@ MLN_EXPORT
  in GeoJSON.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/shape-collection/">
- Add multiple shapes from a single shape source</a> example to learn how to
+ TODO: Add multiple shapes from a single shape source, learn how to
  add shape data to your map using an `MLNShapeCollectionFeature` object.
  */
 MLN_EXPORT
