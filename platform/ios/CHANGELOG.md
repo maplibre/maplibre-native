@@ -4,7 +4,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-## 6.2.1 (unreleased)
+## (unreleased)
 
 - Temporary workaround for map display freeze / stutter when using annotation views with Metal backend. [Issue 2117](https://github.com/maplibre/maplibre-native/issues/2117) fixed by [PR 2148](https://github.com/maplibre/maplibre-native/pull/2148)
 
