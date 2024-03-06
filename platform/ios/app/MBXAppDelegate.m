@@ -11,6 +11,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(
+                                                         NSApplicationSupportDirectory,
+                                                         NSUserDomainMask, YES);
+        
 #ifndef MLN_DISABLE_LOGGING
     [MLNLoggingConfiguration sharedConfiguration].loggingLevel = MLNLoggingLevelFault;
 #endif
