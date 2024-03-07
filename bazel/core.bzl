@@ -1123,4 +1123,5 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/shaders/mtl/symbol_sdf.hpp",
     "include/mbgl/shaders/mtl/symbol_text_and_icon.hpp",
     "include/mbgl/style/layers/mtl/custom_layer_render_parameters.hpp",
+    "include/mbgl/shaders/mtl/widevector.hpp",
 ]

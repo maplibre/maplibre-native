@@ -61,7 +61,9 @@ enum class BuiltIn {
     SymbolIconProgram,
     SymbolSDFTextProgram,
     SymbolSDFIconProgram,
-    SymbolTextAndIconProgram
+    SymbolTextAndIconProgram,
+    
+    WideVectorShader
 };
 
 /// @brief Select shader source based on a program type and a desired

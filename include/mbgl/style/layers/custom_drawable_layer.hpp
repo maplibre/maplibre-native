@@ -33,6 +33,11 @@ public:
 
 class CustomDrawableLayerHost::Interface {
 public:
+    enum class LineShaderType {
+        Classic,
+        MetalWideVector
+    };
+    
     struct LineOptions {
         Color color;
         float blur = 0.f;
@@ -41,6 +46,7 @@ public:
         float offset = 0.f;
         float width = 1.f;
         gfx::PolylineGeneratorOptions geometry;
+        LineShaderType shaderType = LineShaderType::Classic;
     };
 
     struct FillOptions {

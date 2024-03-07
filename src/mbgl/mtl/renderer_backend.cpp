@@ -33,6 +33,7 @@
 #include <mbgl/shaders/mtl/symbol_icon.hpp>
 #include <mbgl/shaders/mtl/symbol_sdf.hpp>
 #include <mbgl/shaders/mtl/symbol_text_and_icon.hpp>
+#include <mbgl/shaders/mtl/widevector.hpp>
 
 #include <cassert>
 #include <string>
@@ -150,7 +151,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::RasterShader,
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFIconShader,
-                  shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
+                  shaders::BuiltIn::SymbolTextAndIconShader,
+                  shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
 }
 
 } // namespace mtl
