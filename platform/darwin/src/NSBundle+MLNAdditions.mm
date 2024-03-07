@@ -9,6 +9,7 @@ const MLNExceptionName MLNBundleNotFoundException = @"MLNBundleNotFoundException
 + (instancetype)mgl_frameworkBundle {
     NSBundle *bundle = [self bundleForClass:[MLNSettings class]];
 
+#ifndef MLN_CUSTOM_COMBINED_BUNDLE
     if (![bundle.infoDictionary[@"CFBundlePackageType"] isEqualToString:@"FMWK"]) {
         // For static frameworks, the bundle is the containing application
         // bundle but the resources are in Mapbox.bundle.
@@ -17,9 +18,10 @@ const MLNExceptionName MLNBundleNotFoundException = @"MLNBundleNotFoundException
             bundle = [self bundleWithPath:bundlePath];
         } else {
             [NSException raise:MLNBundleNotFoundException
-                        format:@"The Mapbox framework bundle could not be found. If using the Mapbox Maps SDK for iOS as a static framework, make sure that Mapbox.bundle is copied into the root of the app bundle."];
+                        format:@"The MapLibre framework bundle could not be found. If using the MapLibre Native for iOS as a static framework, make sure that MapLibre bundle is copied into the root of the app bundle."];
         }
     }
+#endif
 
     return bundle;
 }
