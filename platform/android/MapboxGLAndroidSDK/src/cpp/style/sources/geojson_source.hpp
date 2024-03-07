@@ -16,7 +16,8 @@ using GeoJSONDataCallback = std::function<void(std::shared_ptr<style::GeoJSONDat
 class FeatureConverter {
 public:
     explicit FeatureConverter(Immutable<style::GeoJSONOptions> options_)
-        : options(std::move(options_)), sequencedScheduler(Scheduler::GetSequenced()) {}
+        : options(std::move(options_)),
+          sequencedScheduler(Scheduler::GetSequenced()) {}
     void convertJson(std::shared_ptr<std::string>, ActorRef<GeoJSONDataCallback>);
 
     template <class JNIType>

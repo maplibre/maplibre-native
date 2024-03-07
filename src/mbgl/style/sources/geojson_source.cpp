@@ -77,7 +77,9 @@ void GeoJSONSource::loadDescription(FileSource& fileSource) {
         } else if (res.noContent) {
             observer->onSourceError(*this, std::make_exception_ptr(std::runtime_error("unexpectedly empty GeoJSON")));
         } else {
-            auto makeImplInBackground = [currentImpl = baseImpl, data = res.data, seqScheduler{sequencedScheduler}]() -> Immutable<Source::Impl> {
+            auto makeImplInBackground = [currentImpl = baseImpl,
+                                         data = res.data,
+                                         seqScheduler{sequencedScheduler}]() -> Immutable<Source::Impl> {
                 assert(data);
                 auto& current = static_cast<const Impl&>(*currentImpl);
                 conversion::Error error;
