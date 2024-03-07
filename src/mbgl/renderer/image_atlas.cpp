@@ -15,6 +15,8 @@ ImagePosition::ImagePosition(const mapbox::Bin& bin, const style::Image::Impl& i
       stretchY(image.stretchY),
       content(image.content) {}
 
+namespace {
+
 const mapbox::Bin& _packImage(mapbox::ShelfPack& pack,
                               const style::Image::Impl& image,
                               ImageAtlas& resultImage,
@@ -26,12 +28,13 @@ const mapbox::Bin& _packImage(mapbox::ShelfPack& pack,
 
     PremultipliedImage::copy(
         image.image, resultImage.image, {0, 0}, {bin.x + padding, bin.y + padding}, image.image.size);
-    uint32_t x = bin.x + padding;
-    uint32_t y = bin.y + padding;
-    uint32_t w = image.image.size.width;
-    uint32_t h = image.image.size.height;
 
     if (imageType == ImageType::Pattern) {
+        const uint32_t x = bin.x + padding;
+        const uint32_t y = bin.y + padding;
+        const uint32_t w = image.image.size.width;
+        const uint32_t h = image.image.size.height;
+
         // Add 1 pixel wrapped padding on each side of the image.
         PremultipliedImage::copy(image.image, resultImage.image, {0, h - 1}, {x, y - 1}, {w, 1}); // T
         PremultipliedImage::copy(image.image, resultImage.image, {0, 0}, {x, y + h}, {w, 1});     // B
@@ -40,8 +43,6 @@ const mapbox::Bin& _packImage(mapbox::ShelfPack& pack,
     }
     return bin;
 }
-
-namespace {
 
 void populateImagePatches(ImagePositions& imagePositions,
                           const ImageManager& imageManager,
