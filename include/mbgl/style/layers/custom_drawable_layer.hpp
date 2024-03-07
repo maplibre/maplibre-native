@@ -37,7 +37,7 @@ public:
         Classic,
         MetalWideVector
     };
-    
+
     struct LineOptions {
         Color color;
         float blur = 0.f;

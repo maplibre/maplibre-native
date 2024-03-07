@@ -62,7 +62,7 @@ enum class BuiltIn {
     SymbolSDFTextProgram,
     SymbolSDFIconProgram,
     SymbolTextAndIconProgram,
-    
+
     WideVectorShader
 };
 
