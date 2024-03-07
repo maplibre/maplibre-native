@@ -20,8 +20,8 @@ ZoomCurveOrError findZoomCurve(const expression::Expression& e) {
             const auto& let = static_cast<const Let&>(e);
             if (const auto& child = let.getResult()) {
                 result = findZoomCurve(*child);
-                break;
             }
+            break;
         }
         case Kind::Coalesce: {
             const auto& coalesce = static_cast<const Coalesce&>(e);
