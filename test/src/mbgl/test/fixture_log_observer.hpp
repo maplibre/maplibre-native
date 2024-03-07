@@ -51,6 +51,7 @@ public:
     bool empty() const;
     size_t uncheckedCount() const;
     size_t count(const Message& message, bool substring = false) const;
+    std::vector<Message> unchecked() const;
 
     ~FixtureLog();
 

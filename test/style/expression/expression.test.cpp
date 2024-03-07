@@ -1,9 +1,10 @@
+#include <mbgl/style/conversion_impl.hpp>
+#include <mbgl/style/rapidjson_conversion.hpp>
+#include <mbgl/style/expression/dsl.hpp>
+#include <mbgl/style/expression/is_expression.hpp>
 #include <mbgl/test/util.hpp>
 #include <mbgl/util/io.hpp>
-#include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/rapidjson.hpp>
-#include <mbgl/style/rapidjson_conversion.hpp>
-#include <mbgl/style/expression/is_expression.hpp>
 
 #include <rapidjson/document.h>
 
@@ -81,6 +82,10 @@ TEST_P(ExpressionEqualityTest, ExpressionEquality) {
 
     EXPECT_TRUE(*expression_a1 == *expression_a2);
     EXPECT_TRUE(*expression_a1 != *expression_b);
+
+    // Exercise the type-not-equal branches
+    using namespace expression;
+    EXPECT_FALSE(*expression_b == *((expression_b->getKind() == Kind::Literal) ? dsl::id() : dsl::literal(0.0)));
 }
 
 static void populateNames(std::vector<std::string>& names) {
@@ -127,6 +132,7 @@ static void populateNames(std::vector<std::string>& names) {
 INSTANTIATE_TEST_SUITE_P(Expression, ExpressionEqualityTest, ::testing::ValuesIn([] {
                              std::vector<std::string> names;
                              populateNames(names);
+                             std::sort(names.begin(), names.end());
                              EXPECT_GT(names.size(), 0u);
                              return names;
                          }()));

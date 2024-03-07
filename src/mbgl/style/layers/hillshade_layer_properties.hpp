@@ -59,6 +59,8 @@ public:
 
     unsigned long constantsMask() const override;
 
+    expression::Dependency getDependencies() const noexcept override;
+
     const HillshadeLayer::Impl& layerImpl() const;
     // Data members.
     HillshadePaintProperties::PossiblyEvaluated evaluated;

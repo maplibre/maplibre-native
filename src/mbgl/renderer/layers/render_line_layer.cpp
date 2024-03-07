@@ -55,7 +55,9 @@ const auto posNormalAttribName = "a_pos_normal";
 RenderLineLayer::RenderLineLayer(Immutable<style::LineLayer::Impl> _impl)
     : RenderLayer(makeMutable<LineLayerProperties>(std::move(_impl))),
       unevaluated(impl_cast(baseImpl).paint.untransitioned()),
-      colorRamp(std::make_shared<PremultipliedImage>(Size(256, 1))) {}
+      colorRamp(std::make_shared<PremultipliedImage>(Size(256, 1))) {
+    styleDependencies = unevaluated.getDependencies();
+}
 
 RenderLineLayer::~RenderLineLayer() = default;
 

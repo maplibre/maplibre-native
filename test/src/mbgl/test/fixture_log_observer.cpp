@@ -72,9 +72,14 @@ size_t FixtureLog::uncheckedCount() const {
     return observer ? observer->uncheckedCount() : 0;
 }
 
+std::vector<FixtureLog::Message> FixtureLog::unchecked() const {
+    return observer ? observer->unchecked() : std::vector<FixtureLog::Message>{};
+}
+
 FixtureLog::~FixtureLog() {
     if (observer) {
-        Log::removeObserver();
+        Log::removeObserver(); // destroys `observer`
+        observer = nullptr;
     }
 }
 

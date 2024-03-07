@@ -248,14 +248,14 @@ namespace  mbgl {
         double totalFrameEncodingTime = 0;
         double totalFrameRenderingTime = 0;
         for (const auto& row : result) {
-            NSLog(@"| %-*s | %4.1f ms | %4.1f ms |", int(colWidth), row.first.c_str(), 1e3 * row.second.first, 1e3 * row.second.second);
+            NSLog(@"| %-*s | %4.2f ms | %4.2f ms |", int(colWidth), row.first.c_str(), 1e3 * row.second.first, 1e3 * row.second.second);
             totalFrameEncodingTime += row.second.first;
             totalFrameRenderingTime += row.second.second;
         }
 
-        NSLog(@"Average frame encoding time: %4.1f ms", totalFrameEncodingTime * 1e3 / result.size());
-        NSLog(@"Average frame rendering time: %4.1f ms", totalFrameRenderingTime * 1e3 / result.size());
-        
+        NSLog(@"Average frame encoding time: %4.2f ms", totalFrameEncodingTime * 1e3 / result.size());
+        NSLog(@"Average frame rendering time: %4.2f ms", totalFrameRenderingTime * 1e3 / result.size());
+
         // NSLog(@"Total uploads: %zu", mbgl::uploadCount);
         // NSLog(@"Total uploads with dirty vattr: %zu", mbgl::uploadVertextAttrsDirty);
         // NSLog(@"Total uploads with invalid segs: %zu", mbgl::uploadInvalidSegments);
