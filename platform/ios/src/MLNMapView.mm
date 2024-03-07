@@ -2862,7 +2862,7 @@ public:
         }
     }
 
-    NSString *actionSheetTitle = NSLocalizedStringWithDefaultValue(@"SDK_NAME", nil, nil, @"Mapbox Maps SDK for iOS", @"Action sheet title");
+    NSString *actionSheetTitle = NSLocalizedStringWithDefaultValue(@"SDK_NAME", nil, nil, @"MapLibre Native for iOS", @"Action sheet title");
     UIAlertController *attributionController = [UIAlertController alertControllerWithTitle:actionSheetTitle
                                                                                    message:nil
                                                                             preferredStyle:UIAlertControllerStyleActionSheet];
@@ -6974,17 +6974,14 @@ static void *windowScreenContext = &windowScreenContext;
 
         if (annotationView)
         {
-            CLLocationCoordinate2D coordinate = annotation.coordinate;
+            annotationView.center = MLNPointRounded([self convertCoordinate:annotationContext.annotation.coordinate toPointToView:self]);
+
             // Every so often (1 out of 1000 frames?) the mbgl query mechanism fails. This logic spot checks the
             // offscreenAnnotations values -- if they are actually still on screen then the view center is
             // moved and the enqueue operation is avoided. This allows us to keep the performance benefit of
             // using the mbgl query result. It also forces views that have just gone offscreen to be cleared
             // fully from view.
-            if (MLNCoordinateInCoordinateBounds(coordinate, coordinateBounds))
-            {
-                annotationView.center = [self convertCoordinate:annotationContext.annotation.coordinate toPointToView:self];
-            }
-            else
+            if (!MLNCoordinateInCoordinateBounds(annotation.coordinate, coordinateBounds))
             {
                 if (annotationView.layer.animationKeys.count > 0) {
                     continue;
@@ -6995,7 +6992,11 @@ static void *windowScreenContext = &windowScreenContext;
                 adjustedCenter.x = -CGRectGetWidth(self.frame) * 10.0;
                 annotationView.center = adjustedCenter;
 
-                [self enqueueAnnotationViewForAnnotationContext:annotationContext];
+                // Disable the offscreen annotation view recycling on Metal because of issue https://github.com/maplibre/maplibre-native/issues/2117
+                // TLDR: Metal view rendering stutter / freeze
+#if !MLN_RENDER_BACKEND_METAL
+                 [self enqueueAnnotationViewForAnnotationContext:annotationContext];
+#endif
             }
         }
     }

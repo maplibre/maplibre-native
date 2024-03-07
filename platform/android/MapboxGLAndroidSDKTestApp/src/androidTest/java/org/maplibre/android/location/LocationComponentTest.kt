@@ -31,6 +31,7 @@ import org.maplibre.android.utils.BitmapUtils
 import org.maplibre.android.utils.ColorUtils
 import org.hamcrest.CoreMatchers.*
 import org.junit.*
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
@@ -1602,6 +1603,122 @@ class LocationComponentTest : EspressoTest() {
                 uiController.loopMainThreadForAtLeast(DEFAULT_TRACKING_TILT_ANIM_DURATION / 2)
 
                 assertEquals(30.0 / 2.0, maplibreMap.cameraPosition.tilt, 3.0)
+            }
+        }
+
+        executeComponentTest(componentAction)
+    }
+
+    @Test
+    fun animators_dontPaddingWhileNotTracking() {
+        val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
+            override fun onLocationComponentAction(
+                component: LocationComponent,
+                maplibreMap: MapLibreMap,
+                style: Style,
+                uiController: UiController,
+                context: Context
+            ) {
+                component.activateLocationComponent(LocationComponentActivationOptions
+                    .builder(context, style)
+                    .useDefaultLocationEngine(false)
+                    .build())
+                component.isLocationComponentEnabled = true
+                component.cameraMode = CameraMode.NONE
+                val padding = maplibreMap.cameraPosition.padding
+                component.paddingWhileTracking(doubleArrayOf(100.0, 200.0, 300.0, 400.0))
+                uiController.loopMainThreadForAtLeast(DEFAULT_TRACKING_PADDING_ANIM_DURATION)
+                TestingAsyncUtils.waitForLayer(uiController, mapView)
+
+                assertArrayEquals(padding, maplibreMap.cameraPosition.padding, 0.1)
+            }
+        }
+
+        executeComponentTest(componentAction)
+    }
+
+    @Test
+    fun animators_dontPaddingWhileStopped() {
+        val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
+            override fun onLocationComponentAction(
+                component: LocationComponent,
+                maplibreMap: MapLibreMap,
+                style: Style,
+                uiController: UiController,
+                context: Context
+            ) {
+                component.activateLocationComponent(LocationComponentActivationOptions
+                    .builder(context, style)
+                    .useDefaultLocationEngine(false)
+                    .build())
+                component.isLocationComponentEnabled = true
+                component.cameraMode = CameraMode.TRACKING
+                val padding = maplibreMap.cameraPosition.padding
+
+                component.onStop()
+                component.paddingWhileTracking(doubleArrayOf(100.0, 200.0, 300.0, 400.0))
+                uiController.loopMainThreadForAtLeast(DEFAULT_TRACKING_PADDING_ANIM_DURATION)
+                TestingAsyncUtils.waitForLayer(uiController, mapView)
+
+                assertArrayEquals(padding, maplibreMap.cameraPosition.padding, 0.1)
+            }
+        }
+
+        executeComponentTest(componentAction)
+    }
+
+    @Test
+    fun animators_dontPaddingWhileTransitioning() {
+        val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
+            override fun onLocationComponentAction(
+                component: LocationComponent,
+                maplibreMap: MapLibreMap,
+                style: Style,
+                uiController: UiController,
+                context: Context
+            ) {
+                component.activateLocationComponent(LocationComponentActivationOptions
+                    .builder(context, style)
+                    .useDefaultLocationEngine(false)
+                    .build())
+                component.isLocationComponentEnabled = true
+                component.forceLocationUpdate(location)
+
+                val padding = maplibreMap.cameraPosition.padding
+                component.setCameraMode(CameraMode.TRACKING_GPS, 500L, null, null, null, null)
+                component.paddingWhileTracking(doubleArrayOf(100.0, 200.0, 300.0, 400.0), 1000L)
+                uiController.loopMainThreadForAtLeast(1000L)
+                TestingAsyncUtils.waitForLayer(uiController, mapView)
+
+                assertArrayEquals(padding, maplibreMap.cameraPosition.padding, 0.1)
+            }
+        }
+
+        executeComponentTest(componentAction)
+    }
+
+    @Test
+    fun animators_paddingWhileTracking() {
+        val componentAction = object : LocationComponentAction.OnPerformLocationComponentAction {
+            override fun onLocationComponentAction(
+                component: LocationComponent,
+                maplibreMap: MapLibreMap,
+                style: Style,
+                uiController: UiController,
+                context: Context
+            ) {
+                component.activateLocationComponent(LocationComponentActivationOptions
+                    .builder(context, style)
+                    .useDefaultLocationEngine(false)
+                    .build())
+                component.isLocationComponentEnabled = true
+                component.cameraMode = CameraMode.TRACKING
+                val padding = doubleArrayOf(100.0, 200.0, 300.0, 400.0)
+                component.paddingWhileTracking(padding)
+                uiController.loopMainThreadForAtLeast(DEFAULT_TRACKING_PADDING_ANIM_DURATION)
+                TestingAsyncUtils.waitForLayer(uiController, mapView)
+
+                assertArrayEquals(padding, maplibreMap.cameraPosition.padding, 0.01)
             }
         }
 
