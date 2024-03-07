@@ -29,6 +29,10 @@ const HillshadeLayer::Impl& HillshadeLayerProperties::layerImpl() const noexcept
     return static_cast<const HillshadeLayer::Impl&>(*baseImpl);
 }
 
+expression::Dependency HillshadeLayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies();
+}
+
 } // namespace style
 } // namespace mbgl
 

@@ -11,7 +11,9 @@ namespace expression {
 CollatorExpression::CollatorExpression(std::unique_ptr<Expression> caseSensitive_,
                                        std::unique_ptr<Expression> diacriticSensitive_,
                                        std::optional<std::unique_ptr<Expression>> locale_) noexcept
-    : Expression(Kind::CollatorExpression, type::Collator),
+    : Expression(Kind::CollatorExpression,
+                 type::Collator,
+                 depsOf(caseSensitive_) | depsOf(diacriticSensitive_) | depsOf(locale_)),
       caseSensitive(std::move(caseSensitive_)),
       diacriticSensitive(std::move(diacriticSensitive_)),
       locale(std::move(locale_)) {}
@@ -56,7 +58,7 @@ ParseResult CollatorExpression::parse(const Convertible& value, ParsingContext& 
     ParseResult locale;
     if (localeOption) {
         locale = ctx.parse(*localeOption, 1, {type::String});
-        if (!locale) {
+        if (!locale || !*locale) {
             return ParseResult();
         }
     }
@@ -76,7 +78,9 @@ void CollatorExpression::eachChild(const std::function<void(const Expression&)>&
 bool CollatorExpression::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::CollatorExpression) {
         const auto* rhs = static_cast<const CollatorExpression*>(&e);
-        if ((locale && (!rhs->locale || **locale != **(rhs->locale))) || (!locale && rhs->locale)) {
+        const bool lLocSet = locale && *locale;
+        const bool rLocSet = rhs->locale && *rhs->locale;
+        if ((!lLocSet && rLocSet) || (lLocSet && (!rLocSet || **locale != **rhs->locale))) {
             return false;
         }
         return *caseSensitive == *(rhs->caseSensitive) && *diacriticSensitive == *(rhs->diacriticSensitive);
@@ -105,12 +109,13 @@ EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) c
     }
 
     if (locale && *locale) {
-        auto localeResult = (*locale)->evaluate(params);
-        if (!localeResult) {
+        if (auto localeResult = (*locale)->evaluate(params)) {
+            return Collator(caseSensitiveResult->get<bool>(),
+                            diacriticSensitiveResult->get<bool>(),
+                            localeResult->get<std::string>());
+        } else {
             return localeResult.error();
         }
-        return Collator(
-            caseSensitiveResult->get<bool>(), diacriticSensitiveResult->get<bool>(), localeResult->get<std::string>());
     } else {
         return Collator(caseSensitiveResult->get<bool>(), diacriticSensitiveResult->get<bool>());
     }

@@ -29,6 +29,10 @@ const RasterLayer::Impl& RasterLayerProperties::layerImpl() const noexcept {
     return static_cast<const RasterLayer::Impl&>(*baseImpl);
 }
 
+expression::Dependency RasterLayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies();
+}
+
 } // namespace style
 } // namespace mbgl
 

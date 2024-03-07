@@ -19,7 +19,8 @@ public:
           std::unique_ptr<Expression> input_,
           Branches branches_,
           std::unique_ptr<Expression> otherwise_)
-        : Expression(Kind::Match, std::move(type_)),
+        : Expression(
+              Kind::Match, std::move(type_), depsOf(input_) | depsOf(otherwise_) | collectDependencies(branches_)),
           input(std::move(input_)),
           branches(std::move(branches_)),
           otherwise(std::move(otherwise_)) {}

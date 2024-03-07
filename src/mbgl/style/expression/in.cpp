@@ -29,7 +29,7 @@ bool isSearchableRuntimeType(const type::Type& type) noexcept {
 } // namespace
 
 In::In(std::unique_ptr<Expression> needle_, std::unique_ptr<Expression> haystack_) noexcept
-    : Expression(Kind::In, type::Boolean),
+    : Expression(Kind::In, type::Boolean, depsOf(needle_) | depsOf(haystack_)),
       needle(std::move(needle_)),
       haystack(std::move(haystack_)) {
     assert(isComparableType(needle->getType()));

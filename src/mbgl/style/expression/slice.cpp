@@ -22,7 +22,7 @@ int normalizeIndex(int index, int length) noexcept {
 Slice::Slice(std::unique_ptr<Expression> input_,
              std::unique_ptr<Expression> fromIndex_,
              std::unique_ptr<Expression> toIndex_)
-    : Expression(Kind::Slice, input_->getType()),
+    : Expression(Kind::Slice, input_->getType(), depsOf(input_) | depsOf(fromIndex_) | depsOf(toIndex_)),
       input(std::move(input_)),
       fromIndex(std::move(fromIndex_)),
       toIndex(std::move(toIndex_)) {}

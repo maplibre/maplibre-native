@@ -11,7 +11,9 @@ template <class T>
 class FormatSectionOverride final : public Expression {
 public:
     FormatSectionOverride(type::Type type_, PossiblyEvaluatedPropertyValue<T> defaultValue_, std::string propertyName_)
-        : Expression(Kind::FormatSectionOverride, std::move(type_)),
+        : Expression(Kind::FormatSectionOverride,
+                     std::move(type_),
+                     defaultValue_.getDependencies() | Dependency::Override | Dependency::Feature),
           defaultValue(std::move(defaultValue_)),
           propertyName(std::move(propertyName_)) {}
 

@@ -21,6 +21,8 @@ public:
     /// Contains render passes used by the renderer, see `mbgl::RenderPass`.
     uint8_t renderPasses = 0u;
 
+    virtual expression::Dependency getDependencies() const noexcept = 0;
+
 protected:
     LayerProperties(Immutable<Layer::Impl> impl) noexcept
         : baseImpl(std::move(impl)) {}

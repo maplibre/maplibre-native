@@ -1,6 +1,7 @@
 #include <mbgl/test/util.hpp>
 #include <mbgl/test/fixture_log_observer.hpp>
 
+#include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/parser.hpp>
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/enum.hpp>
@@ -32,18 +33,18 @@ class StyleParserTest : public ::testing::TestWithParam<std::string> {};
 TEST_P(StyleParserTest, ParseStyle) {
     const std::string base = std::string("test/fixtures/style_parser/") + GetParam();
 
+    using namespace std::string_literals;
+    SCOPED_TRACE("Loading: "s + base);
+
+    FixtureLog log;
+
     rapidjson::GenericDocument<rapidjson::UTF8<>, rapidjson::CrtAllocator> infoDoc;
     infoDoc.Parse<0>(util::read_file(base + ".info.json").c_str());
     ASSERT_FALSE(infoDoc.HasParseError());
     ASSERT_TRUE(infoDoc.IsObject());
 
-    auto observer = new FixtureLogObserver();
-    Log::setObserver(std::unique_ptr<Log::Observer>(observer));
-
     style::Parser parser;
-    auto error = parser.parse(util::read_file(base + ".style.json"));
-
-    if (error) {
+    if (auto error = parser.parse(util::read_file(base + ".style.json"))) {
         Log::Error(Event::ParseStyle, "Failed to parse style: " + util::toString(error));
     }
 
@@ -71,11 +72,14 @@ TEST_P(StyleParserTest, ParseStyle) {
                 Sleep(10);
 #endif
 
-                EXPECT_EQ(count, observer->count(message)) << "Message: " << message << std::endl;
+                SCOPED_TRACE("Checking: "s + message.msg);
+
+                const auto observedCount = log.count(message);
+                EXPECT_EQ(count, observedCount) << "Message: " << message << std::endl;
             }
         }
 
-        const auto& unchecked = observer->unchecked();
+        const auto& unchecked = log.unchecked();
         if (unchecked.size()) {
             std::cerr << "Unchecked Log Messages (" << base << "/" << name << "): " << std::endl << unchecked;
         }
@@ -292,4 +296,22 @@ TEST(StyleParser, FontStacksGetExpression) {
     })");
     auto result = parser.fontStacks();
     ASSERT_EQ(0u, result.size());
+}
+
+TEST(StyleParser, ZoomCurve) {
+    using namespace mbgl::style;
+    using namespace mbgl::style::expression;
+    using namespace mbgl::style::expression::dsl;
+
+    const auto zoomInterp = []() {
+        return interpolate(linear(), zoom(), 0.0, literal(0.0), 0.0, literal(0.0));
+    };
+
+    auto expr1 = interpolate(linear(), literal(0.0), 0.0, zoomInterp(), 0.0, zoomInterp());
+    ASSERT_TRUE(expr1);
+    ASSERT_TRUE(findZoomCurveChecked(*expr1).is<std::nullptr_t>());
+
+    auto expr2 = interpolate(linear(), zoom(), 0.0, literal(0.0), 0.0, zoomInterp());
+    ASSERT_TRUE(expr2);
+    ASSERT_TRUE(findZoomCurveChecked(*expr2).is<std::nullptr_t>());
 }

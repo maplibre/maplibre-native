@@ -112,7 +112,7 @@ static CollatorComparison::CompareFunctionType getCollatorComparisonFunction(con
 BasicComparison::BasicComparison(std::string op_,
                                  std::unique_ptr<Expression> lhs_,
                                  std::unique_ptr<Expression> rhs_) noexcept
-    : Expression(Kind::Comparison, type::Boolean),
+    : Expression(Kind::Comparison, type::Boolean, depsOf(lhs_) | depsOf(rhs_)),
       op(std::move(op_)),
       compare(getBasicCompareFunction(op)),
       lhs(std::move(lhs_)),
@@ -166,7 +166,7 @@ CollatorComparison::CollatorComparison(std::string op_,
                                        std::unique_ptr<Expression> lhs_,
                                        std::unique_ptr<Expression> rhs_,
                                        std::unique_ptr<Expression> collator_) noexcept
-    : Expression(Kind::Comparison, type::Boolean),
+    : Expression(Kind::Comparison, type::Boolean, depsOf(lhs_) | depsOf(rhs_) | depsOf(collator_)),
       op(std::move(op_)),
       compare(getCollatorComparisonFunction(op)),
       lhs(std::move(lhs_)),

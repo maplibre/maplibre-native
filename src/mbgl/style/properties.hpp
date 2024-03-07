@@ -1,10 +1,11 @@
 #pragma once
 
-#include <mbgl/style/transition_options.hpp>
-#include <mbgl/style/conversion/stringify.hpp>
-#include <mbgl/renderer/transition_parameters.hpp>
 #include <mbgl/renderer/possibly_evaluated_property_value.hpp>
 #include <mbgl/renderer/property_evaluation_parameters.hpp>
+#include <mbgl/renderer/transition_parameters.hpp>
+#include <mbgl/style/color_ramp_property_value.hpp>
+#include <mbgl/style/conversion/stringify.hpp>
+#include <mbgl/style/transition_options.hpp>
 #include <mbgl/util/indexed_tuple.hpp>
 #include <mbgl/util/ignore.hpp>
 
@@ -144,6 +145,8 @@ public:
     using DataDrivenProperties = FilteredTypeList<PropertyTypes, IsDataDriven>;
     using OverridableProperties = FilteredTypeList<PropertyTypes, IsOverridable>;
 
+    using Dependency = expression::Dependency;
+
     template <class TypeList>
     using Tuple = IndexedTuple<PropertyTypes, TypeList>;
 
@@ -256,6 +259,26 @@ public:
             return Evaluated{evaluate<Ps>(z, feature)...};
         }
 
+        /// Extract dependencies from a possibly-evaluated property which may have an expression.
+        template <class P>
+        Dependency getDependencies(const P&) const noexcept {
+            return Dependency::None;
+        }
+        template <class P>
+        Dependency getDependencies(const PossiblyEvaluatedPropertyValue<P>& v) const noexcept {
+            return v.getDependencies();
+        }
+        template <class P>
+        Dependency getDependencies(const PossiblyEvaluatedPropertyValue<Faded<P>>& v) const noexcept {
+            return v.getDependencies();
+        }
+
+        Dependency getDependencies() const noexcept {
+            Dependency result = Dependency::None;
+            util::ignore({(result |= getDependencies(this->template get<Ps>()))...});
+            return result;
+        }
+
         unsigned long constantsMask() const noexcept { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
     };
 
@@ -287,6 +310,26 @@ public:
             util::ignore({(conversion::stringify<Ps>(writer, this->template get<Ps>()), 0)...});
             writer.EndObject();
         }
+
+        /// Get the combined dependencies of any contained expressions
+        constexpr Dependency getDependencies() const noexcept {
+            Dependency result = Dependency::None;
+            util::ignore({(result |= getDependencies(this->template get<Ps>()))...});
+            return result;
+        }
+
+        unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
+
+    protected:
+        template <class P>
+        Dependency getDependencies(const PropertyValue<P>& v) const noexcept {
+            return v.getDependencies();
+        }
+
+        template <class P>
+        Dependency getDependencies(const Transitioning<P>& v) const noexcept {
+            return v.getValue().getDependencies();
+        }
     };
 
     class Transitionable : public Tuple<TransitionableTypes> {
@@ -308,6 +351,24 @@ public:
             util::ignore({(result |= this->template get<Ps>().value.hasDataDrivenPropertyDifference(
                                other.template get<Ps>().value))...});
             return result;
+        }
+
+        Dependency getDependencies() const noexcept {
+            Dependency result = Dependency::None;
+            util::ignore({(result |= getDependencies(this->template get<Ps>()))...});
+            return result;
+        }
+
+    protected:
+        template <typename P>
+        Dependency getDependencies(const style::Transitionable<PropertyValue<P>>& v) const noexcept {
+            return v.value.getDependencies();
+        }
+        Dependency getDependencies(const style::ColorRampPropertyValue& v) const noexcept {
+            return v.getDependencies();
+        }
+        Dependency getDependencies(const style::Transitionable<ColorRampPropertyValue>& v) const noexcept {
+            return v.value.getDependencies();
         }
     };
 };

@@ -40,6 +40,10 @@ const <%- camelize(type) %>Layer::Impl& <%- camelize(type) %>LayerProperties::la
     return static_cast<const <%- camelize(type) %>Layer::Impl&>(*baseImpl);
 }
 
+expression::Dependency <%- camelize(type) %>LayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies()<% if (layoutProperties.length) { -%> | layerImpl().layout.getDependencies()<% } -%>;
+}
+
 } // namespace style
 } // namespace mbgl
 

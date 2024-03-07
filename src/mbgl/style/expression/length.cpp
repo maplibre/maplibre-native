@@ -7,7 +7,7 @@ namespace style {
 namespace expression {
 
 Length::Length(std::unique_ptr<Expression> input_) noexcept
-    : Expression(Kind::Length, type::Number),
+    : Expression(Kind::Length, type::Number, depsOf(input_)),
       input(std::move(input_)) {}
 
 EvaluationResult Length::evaluate(const EvaluationContext& params) const {

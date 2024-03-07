@@ -24,8 +24,7 @@ private:
     }
 
 public:
-    ColorRampPropertyValue()
-        : value(nullptr) {}
+    ColorRampPropertyValue() noexcept = default;
     ColorRampPropertyValue(std::shared_ptr<expression::Expression> value_) noexcept
         : value(std::move(value_)) {}
 
@@ -46,6 +45,9 @@ public:
     bool hasDataDrivenPropertyDifference(const ColorRampPropertyValue&) const noexcept { return false; }
 
     const expression::Expression& getExpression() const noexcept { return *value; }
+
+    using Dependency = style::expression::Dependency;
+    Dependency getDependencies() const noexcept { return value ? value->dependencies : Dependency::None; }
 };
 
 } // namespace style

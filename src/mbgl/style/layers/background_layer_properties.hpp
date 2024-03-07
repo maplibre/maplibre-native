@@ -45,6 +45,8 @@ public:
 
     unsigned long constantsMask() const noexcept override;
 
+    expression::Dependency getDependencies() const noexcept override;
+
     const BackgroundLayer::Impl& layerImpl() const noexcept;
     // Data members.
     CrossfadeParameters crossfade;

@@ -10,7 +10,7 @@ namespace style {
 namespace expression {
 
 Step::Step(type::Type type_, std::unique_ptr<Expression> input_, std::map<double, std::unique_ptr<Expression>> stops_)
-    : Expression(Kind::Step, std::move(type_)),
+    : Expression(Kind::Step, std::move(type_), depsOf(input_) | collectDependencies(stops_)),
       input(std::move(input_)),
       stops(std::move(stops_)) {
     assert(input->getType() == type::Number);

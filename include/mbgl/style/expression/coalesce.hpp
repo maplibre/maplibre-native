@@ -15,7 +15,7 @@ class Coalesce : public Expression {
 public:
     using Args = std::vector<std::unique_ptr<Expression>>;
     Coalesce(type::Type type_, Args args_)
-        : Expression(Kind::Coalesce, std::move(type_)),
+        : Expression(Kind::Coalesce, std::move(type_), collectDependencies(args_)),
           args(std::move(args_)) {}
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);

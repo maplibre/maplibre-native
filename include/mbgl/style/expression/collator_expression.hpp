@@ -21,7 +21,7 @@ public:
 
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
-    bool operator==(const Expression& e) const noexcept override;
+    bool operator==(const Expression&) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override {
         // Technically the set of possible outputs is the combinatoric set of

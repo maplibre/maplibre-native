@@ -100,6 +100,8 @@ public:
 
     unsigned long constantsMask() const noexcept override;
 
+    expression::Dependency getDependencies() const noexcept override;
+
     const LocationIndicatorLayer::Impl& layerImpl() const noexcept;
     // Data members.
     LocationIndicatorPaintProperties::PossiblyEvaluated evaluated;

@@ -207,7 +207,7 @@ namespace style {
 namespace expression {
 
 Within::Within(GeoJSON geojson, Feature::geometry_type geometries_)
-    : Expression(Kind::Within, type::Boolean),
+    : Expression(Kind::Within, type::Boolean, Dependency::Feature),
       geoJSONSource(std::move(geojson)),
       geometries(std::move(geometries_)) {}
 

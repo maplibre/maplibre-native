@@ -11,7 +11,7 @@ namespace expression {
 class At : public Expression {
 public:
     At(std::unique_ptr<Expression> index_, std::unique_ptr<Expression> input_)
-        : Expression(Kind::At, input_->getType().get<type::Array>().itemType),
+        : Expression(Kind::At, input_->getType().get<type::Array>().itemType, depsOf(index_) | depsOf(input_)),
           index(std::move(index_)),
           input(std::move(input_)) {}
 

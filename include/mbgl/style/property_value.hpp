@@ -64,6 +64,13 @@ public:
     bool hasDataDrivenPropertyDifference(const PropertyValue<T>& other) const noexcept {
         return *this != other && (isDataDriven() || other.isDataDriven());
     }
+
+    using Dependency = style::expression::Dependency;
+    Dependency getDependencies() const noexcept {
+        return value.match([](const Undefined&) noexcept { return Dependency::None; },
+                           [](const T&) noexcept { return Dependency::None; },
+                           [](const PropertyExpression<T>& ex) noexcept { return ex.getDependencies(); });
+    }
 };
 
 } // namespace style

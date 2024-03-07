@@ -11,7 +11,7 @@ namespace expression {
 class Error : public Expression {
 public:
     Error(std::string message_) noexcept
-        : Expression(Kind::Error, type::Error),
+        : Expression(Kind::Error, type::Error, Dependency::None),
           message(std::move(message_)) {}
 
     void eachChild(const std::function<void(const Expression&)>&) const override {}
