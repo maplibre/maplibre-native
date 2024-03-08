@@ -288,7 +288,29 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
 
             std::vector<mbgl::filesystem::path> expectedMetricPaths{expectedMetricPath};
 #if defined(__ANDROID__)
-            expectedMetricPaths.emplace_back("/sdcard/baselines/");
+            // todo: use `Context.getExternalFilesDir()` or similar via JNI to select an appropriate destination
+            const auto locations = std::vector<std::string>{
+                "/sdcard",
+                "/storage/emulated/0",
+                "/storage/self/primary",
+            };
+            static bool reportedOnce = false;
+            for (const auto& location : locations) {
+                // Checking `mbgl::filesystem::status` doesn't accurately reflect whether we can create subdirectories,
+                // so just try it. (See `TestRunner::checkProbingResults`)
+                try {
+                    const auto baselinesPath = location + "/baselines";
+                    mbgl::filesystem::create_directories(baselinesPath);
+                    expectedMetricPaths.emplace_back(baselinesPath);
+                    break;
+                } catch (mbgl::filesystem::filesystem_error& ex) {
+                    if (!reportedOnce) {
+                        mbgl::Log::Warning(mbgl::Event::Android, "Not a writable directory: " + std::string(ex.what()));
+                    }
+                }
+            }
+            // Only log on the first case
+            reportedOnce = true;
 #elif defined(__APPLE__)
             expectedMetricPaths.emplace_back(manifest.manifestPath + "/baselines/");
 #endif

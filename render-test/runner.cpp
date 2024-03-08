@@ -11,6 +11,7 @@
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/io.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/projection.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/string.hpp>
@@ -287,9 +288,16 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
     if (resultMetadata.metrics.isEmpty()) return;
     const auto writeMetrics = [&resultMetadata](const mbgl::filesystem::path& path,
                                                 const std::string& message = std::string()) {
-        mbgl::filesystem::create_directories(path);
-        mbgl::util::write_file(path / "metrics.json", serializeMetrics(resultMetadata.metrics));
-        resultMetadata.errorMessage += message;
+        try {
+            mbgl::filesystem::create_directories(path);
+            mbgl::util::write_file(path / "metrics.json", serializeMetrics(resultMetadata.metrics));
+            resultMetadata.errorMessage += message;
+        } catch (mbgl::filesystem::filesystem_error& ex) {
+            const auto msg = "Failed to write metrics. path='" + path.string() + "' err='" + ex.what() +
+                             "' msg=" + message;
+            resultMetadata.errorMessage += msg;
+            Log::Warning(Event::General, msg);
+        }
     };
 
     const std::vector<mbgl::filesystem::path>& expectedMetrics = resultMetadata.paths.expectedMetrics;
