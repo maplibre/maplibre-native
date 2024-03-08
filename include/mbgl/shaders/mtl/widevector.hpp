@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
