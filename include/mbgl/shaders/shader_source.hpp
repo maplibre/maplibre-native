@@ -35,6 +35,7 @@ enum class BuiltIn {
     SymbolSDFIconShader,
     SymbolTextAndIconShader,
     CustomSymbolIconShader,
+    WideVectorShader,
     Prelude,
     BackgroundProgram,
     BackgroundPatternProgram,
@@ -61,9 +62,7 @@ enum class BuiltIn {
     SymbolIconProgram,
     SymbolSDFTextProgram,
     SymbolSDFIconProgram,
-    SymbolTextAndIconProgram,
-
-    WideVectorShader
+    SymbolTextAndIconProgram
 };
 
 /// @brief Select shader source based on a program type and a desired
