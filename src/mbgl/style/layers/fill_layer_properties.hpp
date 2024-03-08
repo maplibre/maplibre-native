@@ -74,6 +74,8 @@ public:
 
     unsigned long constantsMask() const override;
 
+    expression::Dependency getDependencies() const noexcept override;
+
     const FillLayer::Impl& layerImpl() const;
     // Data members.
     CrossfadeParameters crossfade;

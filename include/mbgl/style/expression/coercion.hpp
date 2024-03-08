@@ -12,7 +12,7 @@ namespace expression {
 
 class Coercion : public Expression {
 public:
-    Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_);
+    Coercion(const type::Type& type_, std::vector<std::unique_ptr<Expression>> inputs_);
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 

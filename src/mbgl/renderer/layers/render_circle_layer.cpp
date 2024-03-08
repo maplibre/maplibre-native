@@ -62,7 +62,9 @@ inline const style::CircleLayer::Impl& impl_cast(const Immutable<style::Layer::I
 
 RenderCircleLayer::RenderCircleLayer(Immutable<style::CircleLayer::Impl> _impl)
     : RenderLayer(makeMutable<CircleLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {}
+      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+    styleDependencies = unevaluated.getDependencies();
+}
 
 void RenderCircleLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));

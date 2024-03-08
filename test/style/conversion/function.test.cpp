@@ -4,6 +4,7 @@
 #include <mbgl/style/conversion/constant.hpp>
 #include <mbgl/style/conversion/property_value.hpp>
 #include <mbgl/style/expression/dsl.hpp>
+#include <mbgl/util/logging.hpp>
 
 using namespace mbgl;
 using namespace mbgl::style;
@@ -52,33 +53,37 @@ TEST(StyleConversion, Function) {
     ASSERT_EQ("function base must be a number", error.message);
 }
 
-TEST(StyleConversion, CompositeFunctionExpression) {
+namespace {
+
+template <typename T>
+void parseCheck(const std::string& json, std::string expectedError = {}) {
+    using namespace std::string_literals;
+    SCOPED_TRACE("Expression: "s + json);
+
     Error error;
+    const auto expr = convertJSON<PropertyValue<T>>(json, error, true, false);
+    if (expectedError.empty()) {
+        ASSERT_TRUE(expr);
+    } else {
+        ASSERT_FALSE(expr);
+        ASSERT_EQ(expectedError, error.message);
+    }
+}
+} // namespace
 
-    auto parseFunction = [&](const std::string& json) {
-        return convertJSON<PropertyValue<float>>(json, error, true, false);
-    };
-
-    auto fn1 = parseFunction(R"(["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10])");
-    ASSERT_TRUE(fn1);
-
-    auto fn2 = parseFunction(
-        R"(["coalesce", ["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10], 0])");
-    ASSERT_TRUE(fn2);
-
-    auto fn3 = parseFunction(
+TEST(StyleConversion, CompositeFunctionExpression) {
+    parseCheck<float>(R"(["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10])");
+    parseCheck<float>(R"(["coalesce", ["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10], 0])");
+    parseCheck<float>(
         R"(["let", "a", 0, ["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10] ])");
-    ASSERT_TRUE(fn3);
-
-    auto fn4 = parseFunction(
+    parseCheck<float>(
         R"(["coalesce", ["let", "a", 0, ["interpolate", ["linear"], ["zoom"], 0, ["number", ["get", "x"]], 10, 10]], 0])");
-    ASSERT_TRUE(fn4);
-
-    auto fn5 = parseFunction(
-        R"(["coalesce", ["interpolate", ["linear"], ["number", ["get", "x"]], 0, ["zoom"], 10, 10], 0])");
-    ASSERT_FALSE(fn5);
-    ASSERT_EQ(R"("zoom" expression may only be used as input to a top-level "step" or "interpolate" expression.)",
-              error.message);
+    parseCheck<float>(
+        R"(["coalesce", ["interpolate", ["linear"], ["number", ["get", "x"]], 0, ["zoom"], 10, 10], 0])",
+        R"("zoom" expression may only be used as input to a top-level "step" or "interpolate" expression.)");
+    parseCheck<float>(R"(["number", ["get", "x", ["literal", {"x": 0}]]])");
+    parseCheck<bool>(R"(["has", "x", ["literal", {"x": 0}]])");
+    parseCheck<bool>(R"(["has", "x", ["properties"]])");
 }
 
 TEST(StyleConversion, TokenStrings) {
