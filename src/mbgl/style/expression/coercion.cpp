@@ -8,6 +8,10 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
+using CoerceFunction = EvaluationResult (*)(const Value&);
+
+namespace {
+
 EvaluationResult toBoolean(const Value& v) {
     return v.match([&](double f) { return static_cast<bool>(f); },
                    [&](const std::string& s) { return s.length() > 0; },
@@ -76,28 +80,39 @@ EvaluationResult toImage(const Value& imageValue) {
     return Image(toString(imageValue).c_str());
 }
 
-Coercion::Coercion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_)
-    : Expression(Kind::Coercion, std::move(type_)),
+EvaluationResult toStringValue(const Value& imageValue) {
+    return toString(imageValue);
+}
+
+CoerceFunction getCoerceFunction(const type::Type& t) {
+    if (t.is<type::BooleanType>()) {
+        return toBoolean;
+    } else if (t.is<type::ColorType>()) {
+        return toColor;
+    } else if (t.is<type::NumberType>()) {
+        return toNumber;
+    } else if (t.is<type::StringType>()) {
+        return toStringValue;
+    } else if (t.is<type::FormattedType>()) {
+        return toFormatted;
+    } else if (t.is<type::ImageType>()) {
+        return toImage;
+    }
+    assert(false);
+    return toStringValue;
+}
+
+Dependency extraDependency(const type::Type& t) {
+    return t.is<type::ImageType>() ? Dependency::Image : Dependency::None;
+}
+
+} // namespace
+
+Coercion::Coercion(const type::Type& type_, std::vector<std::unique_ptr<Expression>> inputs_)
+    : Expression(Kind::Coercion, type_, collectDependencies(inputs_) | extraDependency(type_)),
+      coerceSingleValue(getCoerceFunction(getType())),
       inputs(std::move(inputs_)) {
     assert(!inputs.empty());
-    type::Type t = getType();
-    if (t.is<type::BooleanType>()) {
-        coerceSingleValue = toBoolean;
-    } else if (t.is<type::ColorType>()) {
-        coerceSingleValue = toColor;
-    } else if (t.is<type::NumberType>()) {
-        coerceSingleValue = toNumber;
-    } else if (t.is<type::StringType>()) {
-        coerceSingleValue = [](const Value& v) -> EvaluationResult {
-            return toString(v);
-        };
-    } else if (t.is<type::FormattedType>()) {
-        coerceSingleValue = toFormatted;
-    } else if (t.is<type::ImageType>()) {
-        coerceSingleValue = toImage;
-    } else {
-        assert(false);
-    }
 }
 
 mbgl::Value Coercion::serialize() const {
