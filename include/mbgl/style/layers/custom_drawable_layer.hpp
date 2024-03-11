@@ -39,14 +39,14 @@ public:
     };
 
     struct LineOptions {
-        Color color;
+        gfx::PolylineGeneratorOptions geometry;
         float blur = 0.f;
         float opacity = 1.f;
         float gapWidth = 0.f;
         float offset = 0.f;
         float width = 1.f;
-        gfx::PolylineGeneratorOptions geometry;
         LineShaderType shaderType = LineShaderType::Classic;
+        Color color;
     };
 
     struct FillOptions {
