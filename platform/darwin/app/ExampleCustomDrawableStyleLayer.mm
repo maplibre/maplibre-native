@@ -57,12 +57,12 @@ public:
             
             constexpr auto numLines = 6;
             Interface::LineOptions options[numLines] {
-                {/*color=*/Color::red(),                /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     {} },
-                {/*color=*/Color::blue(),               /*blur=*/4.0f,  /*opacity=*/1.0f, /*gapWidth=*/2.0f, /*offset=*/-1.0f,  /*width=*/4.0f,     {} },
-                {/*color=*/Color(1.f, 0.5f, 0, 0.5f),   /*blur=*/16.0f, /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/2.0f,   /*width=*/16.0f,    {} },
-                {/*color=*/Color(1.f, 1.f, 0, 0.3f),    /*blur=*/2.0f,  /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/-2.0f,  /*width=*/2.0f,     {} },
-                {/*color=*/Color::black(),              /*blur=*/0.5f,  /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/0.5f,   /*width=*/0.5f,     {} },
-                {/*color=*/Color(1.f, 0, 1.f, 0.2f),    /*blur=*/24.0f, /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/-5.0f,  /*width=*/24.0f,    {} },
+                {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     /*shaderType=*/{}, /*color=*/Color::red() },
+                {/*geometry=*/{},   /*blur=*/4.0f,  /*opacity=*/1.0f, /*gapWidth=*/2.0f, /*offset=*/-1.0f,  /*width=*/4.0f,     /*shaderType=*/{}, /*color=*/Color::blue() },
+                {/*geometry=*/{},   /*blur=*/16.0f, /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/2.0f,   /*width=*/16.0f,    /*shaderType=*/{}, /*color=*/Color(1.f, 0.5f, 0, 0.5f) },
+                {/*geometry=*/{},   /*blur=*/2.0f,  /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/-2.0f,  /*width=*/2.0f,     /*shaderType=*/{}, /*color=*/Color(1.f, 1.f, 0, 0.3f) },
+                {/*geometry=*/{},   /*blur=*/0.5f,  /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/0.5f,   /*width=*/0.5f,     /*shaderType=*/{}, /*color=*/Color::black() },
+                {/*geometry=*/{},   /*blur=*/24.0f, /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/-5.0f,  /*width=*/24.0f,    /*shaderType=*/{}, /*color=*/Color(1.f, 0, 1.f, 0.2f) },
             };
             for(auto& opt: options) {
                 opt.geometry.beginCap = style::LineCapType::Round;
