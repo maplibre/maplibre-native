@@ -53,6 +53,24 @@
       }
     },
     {
+      "id": "invalid value - must be a string",
+      "type": "fill",
+      "source": "source",
+      "source-layer": 42069,
+      "layout": {
+        "visibility": "visible"
+      }
+    },
+    {
+      "id": "invalid value - must be a string (enum)",
+      "type": "fill",
+      "source": "source",
+      "source-layer": "layer",
+      "layout": {
+        "visibility": [42069, true]
+      }
+    },
+    {
       "id": "invalid expression - not a DDS property",
       "type": "fill-extrusion",
       "source": "source",

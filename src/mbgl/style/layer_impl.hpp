@@ -48,6 +48,9 @@ public:
     // Populates the given \a fontStack with fonts being used by the layer.
     virtual void populateFontStack(std::set<FontStack>& fontStack) const;
 
+    /// Collect the style dependencies for this layer
+    virtual expression::Dependency getDependencies() const noexcept { return expression::Dependency::None; }
+
     std::string id;
     std::string source;
     std::string sourceLayer;

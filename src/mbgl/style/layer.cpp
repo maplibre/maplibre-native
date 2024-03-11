@@ -223,5 +223,10 @@ const LayerTypeInfo* Layer::getTypeInfo() const noexcept {
     return baseImpl->getTypeInfo();
 }
 
+/// Collect dependencies
+expression::Dependency Layer::getDependencies() const noexcept {
+    return baseImpl->getDependencies();
+}
+
 } // namespace style
 } // namespace mbgl
