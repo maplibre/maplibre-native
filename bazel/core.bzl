@@ -88,6 +88,7 @@ MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mbgl/shaders/gl/drawable_symbol_icon.hpp",
     "include/mbgl/shaders/gl/drawable_symbol_sdf.hpp",
     "include/mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp",
+    "include/mbgl/shaders/gl/drawable_wide_vector.hpp",
     "include/mbgl/shaders/gl/fill_extrusion_pattern.hpp",
     "include/mbgl/shaders/gl/fill_extrusion.hpp",
     "include/mbgl/shaders/gl/fill_outline_pattern.hpp",
