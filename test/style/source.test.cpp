@@ -969,8 +969,10 @@ TEST(Source, VectorSourceUrlSetTiles) {
 TEST(Source, GeoJSONSourceTilesAfterDataReset) {
     SourceTest test;
     GeoJSONSource source("source");
-    auto geoJSONData = GeoJSONData::create(mapbox::geojson::parse(
-        R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})"));
+    auto geoJSONData = GeoJSONData::create(
+        mapbox::geojson::parse(
+            R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})"),
+        Scheduler::GetSequenced());
     source.setGeoJSONData(geoJSONData);
     RenderGeoJSONSource renderSource{staticImmutableCast<GeoJSONSource::Impl>(source.baseImpl), test.threadPool};
 
