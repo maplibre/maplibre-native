@@ -2,6 +2,7 @@ package org.maplibre.android.testapp.activity.style
 
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.*
@@ -16,7 +17,7 @@ import java.net.URISyntaxException
  * Test activity showcasing using realtime GeoJSON to move a symbol on your map
  *
  *
- * GL-native equivalent of https://maplibre.org/maplibre-gl-js-docs/example/live-geojson/
+ * MapLibre Native equivalent of https://maplibre.org/maplibre-gl-js-docs/example/live-geojson/
  *
  */
 class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -43,11 +44,11 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
 
             // add layer
             val layer = SymbolLayer(ID_GEOJSON_LAYER, ID_GEOJSON_SOURCE)
-            layer.setProperties(PropertyFactory.iconImage("rocket-15"))
+            layer.setProperties(PropertyFactory.iconImage("rocket_15"))
             style.addLayer(layer)
 
             // loop refresh geojson
-            handler = Handler()
+            handler = Handler(Looper.getMainLooper())
             runnable = RefreshGeoJsonRunnable(maplibreMap!!, handler!!)
             runnable?.let {
                 handler!!.postDelayed(it, 2000)
@@ -88,20 +89,20 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onSaveInstanceState(outState)
     }
 
-    private class RefreshGeoJsonRunnable internal constructor(
+    private class RefreshGeoJsonRunnable(
         private val maplibreMap: MapLibreMap,
         private val handler: Handler
     ) : Runnable {
         override fun run() {
             val geoJsonSource = maplibreMap.style!!.getSource(ID_GEOJSON_SOURCE) as GeoJsonSource
-            geoJsonSource.url = URL_GEOJSON_SOURCE
+            geoJsonSource.setUri(URL_GEOJSON_SOURCE)
             handler.postDelayed(this, 2000)
         }
     }
 
     companion object {
-        private const val ID_GEOJSON_LAYER = "wanderdrone"
+        private const val ID_GEOJSON_LAYER = "border"
         private const val ID_GEOJSON_SOURCE = ID_GEOJSON_LAYER
-        private const val URL_GEOJSON_SOURCE = "https://wanderdrone.appspot.com/"
+        private const val URL_GEOJSON_SOURCE = "https://m6rgfvqjp34nnwqcdm4cmmy3cm0dtupu.lambda-url.us-east-1.on.aws/"
     }
 }
