@@ -972,7 +972,7 @@ TEST(Source, GeoJSONSourceTilesAfterDataReset) {
     auto geoJSONData = GeoJSONData::create(
         mapbox::geojson::parse(
             R"({"geometry": {"type": "Point", "coordinates": [1.1, 1.1]}, "type": "Feature", "properties": {}})"),
-        source.getSequencedScheduler());
+        Scheduler::GetSequenced());
     source.setGeoJSONData(geoJSONData);
     RenderGeoJSONSource renderSource{staticImmutableCast<GeoJSONSource::Impl>(source.baseImpl), test.threadPool};
 

@@ -74,8 +74,6 @@ public:
 
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
-    const std::shared_ptr<Scheduler>& getSequencedScheduler() noexcept { return sequencedScheduler; }
-
 protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
 
