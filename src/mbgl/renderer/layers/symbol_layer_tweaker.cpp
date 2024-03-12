@@ -15,6 +15,7 @@
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/math.hpp>
 #include <mbgl/util/std.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
@@ -51,6 +52,146 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
         /*.halo_blur=*/isText ? constOrDefault<TextHaloBlur>(evaluated) : constOrDefault<IconHaloBlur>(evaluated),
         /*.padding=*/0,
     };
+}
+
+/*void computeMatrixFor(mat4& matrix, const UnwrappedTileID& tileID, const double scale) {
+    const uint64_t tileScale = 1ull << tileID.canonical.z;
+    const double s = Projection::worldSize(scale) / tileScale;
+
+    matrix::identity(matrix);
+    matrix::translate(matrix,
+                      matrix,
+                      int64_t(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
+                      int64_t(tileID.canonical.y) * s,
+                      0);
+    matrix::scale(matrix, matrix, s / util::EXTENT, s / util::EXTENT, 1);
+}
+
+mat4 computeTranslateVtxMatrix(const UnwrappedTileID& id,
+                               const mat4& tileMatrix,
+                               const std::array<float, 2>& translation,
+                               TranslateAnchorType anchor,
+                               const double bearing,
+                               const double scale,
+                               const bool inViewportPixelUnits) {
+    if (translation[0] == 0 && translation[1] == 0) {
+        return tileMatrix;
+    }
+
+    mat4 vtxMatrix;
+
+    const float angle = inViewportPixelUnits
+                            ? (anchor == TranslateAnchorType::Map ? static_cast<float>(bearing) : 0.0f)
+                            : (anchor == TranslateAnchorType::Viewport ? static_cast<float>(-bearing)
+                                                                       : 0.0f);
+
+    Point<float> translate = util::rotate(Point<float>{translation[0], translation[1]}, angle);
+
+    if (inViewportPixelUnits) {
+        matrix::translate(vtxMatrix, tileMatrix, translate.x, translate.y, 0);
+    } else {
+        matrix::translate(vtxMatrix,
+                          tileMatrix,
+                          id.pixelsToTileUnits(translate.x, static_cast<float>(scale)),
+                          id.pixelsToTileUnits(translate.y, static_cast<float>(scale)),
+                          0);
+    }
+
+    return vtxMatrix;
+}
+
+mat4 computeGPUTileMatrix(const UnwrappedTileID& tileID,
+                          const mat4 projMatrix,
+                          const std::array<float, 2>& translation,
+                          const style::TranslateAnchorType anchor,
+                          const double bearing,
+                          const double scale,
+                          const bool inViewportPixelUnits) {
+    // from RenderTile::prepare
+    mat4 tileMatrix;
+    computeMatrixFor(tileMatrix, tileID, scale);
+
+    matrix::multiply(tileMatrix, projMatrix, tileMatrix);
+
+    return computeTranslateVtxMatrix(
+        tileID, tileMatrix, translation, anchor, bearing, scale, inViewportPixelUnits);
+}*/
+
+mat4 computeGPUTileMatrix(const UnwrappedTileID& tileID,
+                          const double drawableProjOffset,
+                          const std::array<float, 2>& translation,
+                          const style::TranslateAnchorType anchor,
+                          mat4 projMatrix,
+                          const double bearing,
+                          const double scale,
+                          const bool inViewportPixelUnits) {
+    // from RenderTile::prepare
+    mat4 tileMatrix;
+    const uint64_t tileScale = 1ull << tileID.canonical.z;
+    const double s = Projection::worldSize(scale) / tileScale;
+
+    matrix::identity(tileMatrix);
+    matrix::translate(tileMatrix,
+                      tileMatrix,
+                      int64_t(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
+                      int64_t(tileID.canonical.y) * s,
+                      0);
+    matrix::scale(tileMatrix, tileMatrix, s / util::EXTENT, s / util::EXTENT, 1);
+
+    projMatrix[14] -= drawableProjOffset;
+    matrix::multiply(tileMatrix, projMatrix, tileMatrix);
+
+    if (translation[0] == 0 && translation[1] == 0) {
+        return tileMatrix;
+    }
+
+    mat4 vtxMatrix;
+
+    const float angle = inViewportPixelUnits
+                            ? (anchor == TranslateAnchorType::Map ? static_cast<float>(bearing) : 0.0f)
+                            : (anchor == TranslateAnchorType::Viewport ? static_cast<float>(-bearing)
+                                                                       : 0.0f);
+
+    Point<float> translate = util::rotate(Point<float>{translation[0], translation[1]}, angle);
+
+    if (inViewportPixelUnits) {
+        matrix::translate(vtxMatrix, tileMatrix, translate.x, translate.y, 0);
+    } else {
+        matrix::translate(vtxMatrix,
+                          tileMatrix,
+                          tileID.pixelsToTileUnits(translate.x, static_cast<float>(scale)),
+                          tileID.pixelsToTileUnits(translate.y, static_cast<float>(scale)),
+                          0);
+    }
+    
+    return vtxMatrix;
+}
+
+mat4 computeTileMatrix(const UnwrappedTileID& tileID,
+                       const PaintParameters& parameters,
+                       const std::array<float, 2>& translation,
+                       style::TranslateAnchorType anchor,
+                       bool nearClipped,
+                       bool inViewportPixelUnits,
+                       [[maybe_unused]] const gfx::Drawable& drawable,
+                       bool aligned = false) {
+    
+    // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
+    auto projMatrix = aligned ? parameters.transformParams.alignedProjMatrix
+                              : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
+                                             : parameters.transformParams.projMatrix);
+
+#if !MLN_RENDER_BACKEND_OPENGL
+    // If this drawable is participating in depth testing, offset the
+    // projection matrix NDC depth range for the drawable's layer and sublayer.
+    auto drawableProjOffset = 0;
+    if (!drawable.getIs3D() && drawable.getEnableDepth()) {
+        drawableProjOffset = ((1 + drawable.getLayerIndex()) * PaintParameters::numSublayers -
+                                    drawable.getSubLayerIndex()) * PaintParameters::depthEpsilon;
+    }
+#endif
+
+    return computeGPUTileMatrix(tileID, drawableProjOffset, translation, anchor, projMatrix, parameters.state.getBearing(), parameters.state.getScale(), inViewportPixelUnits);
 }
 
 } // namespace
@@ -105,7 +246,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                    : evaluated.get<style::IconTranslateAnchor>();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
-        const auto matrix = getTileMatrix(
+        const auto matrix = computeTileMatrix(
             tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
 
         // from symbol_program, makeValues
