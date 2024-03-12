@@ -128,7 +128,6 @@ jobs:
 
       - name: Create artifact for benchmark APKs 
         uses: actions/upload-artifact@v4
-        if: github.ref != 'refs/heads/main'
         with:
           if-no-files-found: error
           name: benchmarkAPKs
