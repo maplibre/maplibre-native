@@ -86,10 +86,10 @@ public:
     Immutable<std::vector<Immutable<Layer::Impl>>> getLayerImpls() const;
 
     void dumpDebugLogs() const;
+    bool areSpritesLoaded() const;
 
     bool mutated = false;
     bool loaded = false;
-    bool spriteLoaded = false;
 
 private:
     void parse(const std::string&);
@@ -108,14 +108,15 @@ private:
     Collection<Layer> layers;
     TransitionOptions transitionOptions;
     std::unique_ptr<Light> light;
+    std::unordered_map<std::string, bool> spritesLoadingStatus;
 
     // Defaults
     std::string name;
     CameraOptions defaultCamera;
 
     // SpriteLoaderObserver implementation.
-    void onSpriteLoaded(std::vector<Immutable<style::Image::Impl>>) override;
-    void onSpriteError(std::exception_ptr) override;
+    void onSpriteLoaded(std::optional<style::Sprite> sprite, std::vector<Immutable<style::Image::Impl>>) override;
+    void onSpriteError(std::optional<style::Sprite> sprite, std::exception_ptr) override;
 
     // SourceObserver implementation.
     void onSourceLoaded(Source&) override;
