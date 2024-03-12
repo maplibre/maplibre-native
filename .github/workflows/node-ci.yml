@@ -74,7 +74,7 @@ jobs:
             arch: arm64
           - runs-on: macos-12
             arch: x86_64
-          - runs-on: [self-hosted, macOS, ARM64]
+          - runs-on: macos-13
             arch: arm64
           - runs-on: windows-2022
             arch: x86_64
@@ -82,17 +82,26 @@ jobs:
     env:
       BUILDTYPE: "Release"
 
-    defaults:
-      run:
-        working-directory: ./
-        shell: bash
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
+      - name: Downgrade cmake version
+        run: |
+          brew uninstall cmake
+          mkdir ~/Downloads/CMake
+          curl --silent --location --retry 3 "https://github.com/Kitware/CMake/releases/download/v3.28.1/cmake-3.28.1-macos-universal.dmg" --output ~/Downloads/CMake/cmake-Darwin-x86_64.dmg
+          yes | PAGER=cat hdiutil attach -quiet -mountpoint /Volumes/cmake-Darwin-x86_64 ~/Downloads/CMake/cmake-Darwin-x86_64.dmg
+          cp -R /Volumes/cmake-Darwin-x86_64/CMake.app /Applications/
+          hdiutil detach /Volumes/cmake-Darwin-x86_64
+          sudo "/Applications/CMake.app/Contents/bin/cmake-gui" --install=/usr/local/bin
+ 
+      - name: cmake version
+        run: |
+          cmake --version
+ 
       - name: Setup submodules
         shell: bash
         run: |
@@ -110,7 +119,6 @@ jobs:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
-          brew list cmake || brew install cmake
           brew list ccache || brew install ccache
           brew list ninja || brew install ninja
           brew list pkg-config || brew install pkg-config
@@ -250,7 +258,7 @@ jobs:
           cmake --build build
 
       - name: Run render tests on macOS
-        if: runner.os == 'macOS' && matrix.arch != 'arm64'
+        if: runner.os == 'macOS'
         run: set -o pipefail && ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Upload render test artifacts (MacOS)
