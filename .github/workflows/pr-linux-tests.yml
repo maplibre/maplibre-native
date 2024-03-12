@@ -140,10 +140,10 @@ jobs:
           artifact-name: mbgl-benchmark-runner
           expect-files: "mbgl-benchmark-runner"
 
-      - name: Download mbgl-benchmark-runner-main
+      - name: Download mbgl-benchmark-runner-main, set permissions
         run: |
           wget -O mbgl-benchmark-runner-main "${download_url}/mbgl-benchmark-runner-main"
-          chmod +x mbgl-benchmark-runner-main
+          chmod +x mbgl-benchmark-runner-main mbgl-benchmark-runner
 
       # needed for compare.py
       - name: Install scipy
