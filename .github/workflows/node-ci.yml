@@ -88,7 +88,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Downgrade cmake version
+      - name: Downgrade cmake version (MacOS)
+        if: runner.os == 'MacOS'
         run: |
           brew uninstall cmake
           mkdir ~/Downloads/CMake
