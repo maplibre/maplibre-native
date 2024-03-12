@@ -235,11 +235,26 @@ ios_application(
     ],
 )
 
+filegroup(
+    name = "extra_files",
+    srcs = [
+        "BAZEL.md",
+        "MapLibre.podspec",
+        "README.md",
+        "RELEASE.md",
+        "VERSION",
+    ],
+    visibility = ["@rules_xcodeproj//xcodeproj:generated"],
+)
+
 xcodeproj(
     name = "xcodeproj",
     bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin"},
     build_mode = BUILD_MODE,
     default_xcode_configuration = "Debug",
+    extra_files = [
+        ":extra_files",
+    ],
     minimum_xcode_version = "14",
     project_name = "MapLibre",
     tags = ["manual"],
