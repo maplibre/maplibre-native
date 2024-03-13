@@ -83,6 +83,9 @@ public final class UiSettings {
 
   private boolean deselectMarkersOnTap = true;
 
+  private long flingAnimationBaseTime = MapboxConstants.ANIMATION_DURATION_FLING_BASE;
+  private long flingThreshold = MapboxConstants.VELOCITY_THRESHOLD_IGNORE_FLING;
+
   @Nullable
   private PointF userProvidedFocalPoint;
 
@@ -314,6 +317,22 @@ public final class UiSettings {
       savedInstanceState.getInt(MapboxConstants.STATE_ATTRIBUTION_MARGIN_TOP),
       savedInstanceState.getInt(MapboxConstants.STATE_ATTRIBUTION_MARGIN_RIGHT),
       savedInstanceState.getInt(MapboxConstants.STATE_ATTRIBUTION_MARGIN_BOTTOM));
+  }
+
+  public long getFlingAnimationBaseTime() {
+    return flingAnimationBaseTime;
+  }
+
+  public long getFlingThreshold() {
+    return flingThreshold;
+  }
+
+  public void setFlingAnimationBaseTime(long t) {
+    flingAnimationBaseTime = t;
+  }
+
+  public void setFlingThreshold(long t) {
+    flingThreshold = t;
   }
 
   /**
