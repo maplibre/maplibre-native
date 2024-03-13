@@ -47,12 +47,12 @@ final class LocationCameraController {
   private boolean isEnabled;
 
   LocationCameraController(
-    Context context,
-    MapboxMap mapboxMap,
-    Transform transform,
-    OnCameraTrackingChangedListener internalCameraTrackingChangedListener,
-    @NonNull LocationComponentOptions options,
-    OnCameraMoveInvalidateListener onCameraMoveInvalidateListener) {
+          Context context,
+          MapboxMap mapboxMap,
+          Transform transform,
+          OnCameraTrackingChangedListener internalCameraTrackingChangedListener,
+          @NonNull LocationComponentOptions options,
+          OnCameraMoveInvalidateListener onCameraMoveInvalidateListener) {
     this.mapboxMap = mapboxMap;
     this.transform = transform;
 
@@ -123,7 +123,7 @@ final class LocationCameraController {
     adjustGesturesThresholds();
     notifyCameraTrackingChangeListener(wasTracking);
     transitionToCurrentLocation(
-      wasTracking, lastLocation, transitionDuration, zoom, bearing, tilt, internalTransitionListener);
+            wasTracking, lastLocation, transitionDuration, zoom, bearing, tilt, internalTransitionListener);
   }
 
   /**
@@ -175,15 +175,15 @@ final class LocationCameraController {
       CameraPosition currentPosition = mapboxMap.getCameraPosition();
       if (Utils.immediateAnimation(mapboxMap.getProjection(), currentPosition.target, target)) {
         transform.moveCamera(
-          mapboxMap,
-          update,
-          callback);
+                mapboxMap,
+                update,
+                callback);
       } else {
         transform.animateCamera(
-          mapboxMap,
-          update,
-          (int) transitionDuration,
-          callback);
+                mapboxMap,
+                update,
+                (int) transitionDuration,
+                callback);
       }
     } else {
       if (internalTransitionListener != null) {
@@ -242,19 +242,14 @@ final class LocationCameraController {
   }
 
   private final MapboxAnimator.AnimationsValueChangeListener<LatLng> latLngValueListener =
-    new MapboxAnimator.AnimationsValueChangeListener<LatLng>() {
-      @Override
-      public void onNewAnimationValue(LatLng value) {
-        setLatLng(value);
-      }
-    };
+    value -> setLatLng(value);
 
   private final MapboxAnimator.AnimationsValueChangeListener<Float> gpsBearingValueListener =
     new MapboxAnimator.AnimationsValueChangeListener<Float>() {
       @Override
       public void onNewAnimationValue(Float value) {
         boolean trackingNorth = cameraMode == CameraMode.TRACKING_GPS_NORTH
-          && mapboxMap.getCameraPosition().bearing == 0;
+                && mapboxMap.getCameraPosition().bearing == 0;
 
         if (!trackingNorth) {
           setBearing(value);
@@ -267,35 +262,20 @@ final class LocationCameraController {
       @Override
       public void onNewAnimationValue(Float value) {
         if (cameraMode == CameraMode.TRACKING_COMPASS
-          || cameraMode == CameraMode.NONE_COMPASS) {
+                || cameraMode == CameraMode.NONE_COMPASS) {
           setBearing(value);
         }
       }
     };
 
   private final MapboxAnimator.AnimationsValueChangeListener<Float> zoomValueListener =
-    new MapboxAnimator.AnimationsValueChangeListener<Float>() {
-      @Override
-      public void onNewAnimationValue(Float value) {
-        setZoom(value);
-      }
-    };
+    value -> setZoom(value);
 
   private final MapboxAnimator.AnimationsValueChangeListener<double[]> paddingValueListener =
-          new MapboxAnimator.AnimationsValueChangeListener<double[]>() {
-            @Override
-            public void onNewAnimationValue(double[] value) {
-              setPadding(value);
-            }
-          };
+    value -> setPadding(value);
 
   private final MapboxAnimator.AnimationsValueChangeListener<Float> tiltValueListener =
-    new MapboxAnimator.AnimationsValueChangeListener<Float>() {
-      @Override
-      public void onNewAnimationValue(Float value) {
-        setTilt(value);
-      }
-    };
+    value -> setTilt(value);
 
   Set<AnimatorListenerHolder> getAnimationListeners() {
     Set<AnimatorListenerHolder> holders = new HashSet<>();
@@ -309,8 +289,8 @@ final class LocationCameraController {
 
     if (isConsumingCompass()) {
       holders.add(new AnimatorListenerHolder(
-        MapboxAnimator.ANIMATOR_CAMERA_COMPASS_BEARING,
-        compassBearingValueListener));
+              MapboxAnimator.ANIMATOR_CAMERA_COMPASS_BEARING,
+              compassBearingValueListener));
     }
 
     holders.add(new AnimatorListenerHolder(MapboxAnimator.ANIMATOR_ZOOM, zoomValueListener));
@@ -336,7 +316,7 @@ final class LocationCameraController {
 
   boolean isConsumingCompass() {
     return cameraMode == CameraMode.TRACKING_COMPASS
-      || cameraMode == CameraMode.NONE_COMPASS;
+            || cameraMode == CameraMode.NONE_COMPASS;
   }
 
   void setEnabled(boolean enabled) {
@@ -345,23 +325,23 @@ final class LocationCameraController {
 
   private boolean isLocationTracking() {
     return cameraMode == CameraMode.TRACKING
-      || cameraMode == CameraMode.TRACKING_COMPASS
-      || cameraMode == CameraMode.TRACKING_GPS
-      || cameraMode == CameraMode.TRACKING_GPS_NORTH;
+            || cameraMode == CameraMode.TRACKING_COMPASS
+            || cameraMode == CameraMode.TRACKING_GPS
+            || cameraMode == CameraMode.TRACKING_GPS_NORTH;
   }
 
   private boolean isBearingTracking() {
     return cameraMode == CameraMode.NONE_COMPASS
-      || cameraMode == CameraMode.TRACKING_COMPASS
-      || cameraMode == CameraMode.NONE_GPS
-      || cameraMode == CameraMode.TRACKING_GPS
-      || cameraMode == CameraMode.TRACKING_GPS_NORTH;
+            || cameraMode == CameraMode.TRACKING_COMPASS
+            || cameraMode == CameraMode.NONE_GPS
+            || cameraMode == CameraMode.TRACKING_GPS
+            || cameraMode == CameraMode.TRACKING_GPS_NORTH;
   }
 
   private boolean isLocationBearingTracking() {
     return cameraMode == CameraMode.TRACKING_GPS
-      || cameraMode == CameraMode.TRACKING_GPS_NORTH
-      || cameraMode == CameraMode.NONE_GPS;
+            || cameraMode == CameraMode.TRACKING_GPS_NORTH
+            || cameraMode == CameraMode.NONE_GPS;
   }
 
   private void notifyCameraTrackingChangeListener(boolean wasTracking) {
