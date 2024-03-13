@@ -4,10 +4,10 @@
 # https://github.com/bazelbuild/rules_apple/issues/2241
 # To use this script, make sure the XCFramework is built with Bazel (see ios-ci.yml).
 # Then to start a local preview, run:
-# $ scripts/docc.sh bazel
+# $ platform/ios/scripts/docc.sh bazel
 # You can also build the documentation locally
-# $ scripts/docc.sh
-# Then go to build/ios and run
+# $ platform/ios/scripts/docc.sh
+# Then go to build/MapLibre.doccarchive and run
 # $ python3 -m http.server
 # Go to http://localhost:8000/documentation/maplibre/
 

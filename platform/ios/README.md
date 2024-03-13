@@ -90,22 +90,19 @@ brew install bazelisk
 You need to configure Bazel. Copy the example config from `platform/ios`.
 
 ```
-cp bazel/example_config.bzl bazel/config.bzl
+cp platform/ios/bazel/example_config.bzl platform/ios/bazel/config.bzl
 ```
 
 You need to set your `BUNDLE_ID_PREFIX` to be unique (ideally use a domain that you own in reverse domain name notation).
 
 You can keep leave the `APPLE_MOBILE_PROVISIONING_PROFILE_NAME` alone.
 
-Set the Team ID to the Team ID of your Apple Developer Account (paid or unpaid both work). If you do not know your Team ID, enter the following command in the terminal:
+Set the Team ID to the Team ID of your Apple Developer Account (paid or unpaid both work).
+If you do not know your Team ID, go to your [Apple Developer account](https://developer.apple.com/account), log in, and scroll down to find your Team ID.
 
-```
-cd ~/Library/MobileDevice/Provisioning\ Profiles && open .
-```
+If you don't already have a developer account, continue this guide and let Xcode generate a provisioning profile for you. You will need to update the Team ID later once a certificate is generated.
 
-Then select one of the profiles and click spacebar. Your Team ID is the string between parentheses in the value of "Team".
-
-If there are no provisioning profiles available, continue this guide and let Xcode generate a provisioning profile for you. You will need to update the Team ID after this happened.
+If you are encountering build errors due to provisioning profiles, skip down to the troubleshooting section.
 
 #### Create the Xcode Project
 
@@ -124,7 +121,12 @@ Confirm that no errors are shown:
 
 Try to run the example App in the simulator and on a device to confirm your setup works.
 
+#### Troubleshooting Provisioning Profiles
+
 If no provisioning profile was found, you could try changing the `BUILD_MODE` in `config.bzl` to `"xcode"`. Try the steps in this section again afterwards.
+
+If on the other hand you get a Python `KeyError` when processing provisioning profiles, you probably have some _really_ old or corrupted profiles.
+Have a look through `~/Library/MobileDevice/Provisioning\ Profiles` and remove any expired profiles.
 
 #### Using Bazel from the Command Line
 
