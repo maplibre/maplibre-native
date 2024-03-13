@@ -39,6 +39,12 @@ final class MapboxAnimatorProvider {
     return new MapboxCameraAnimatorAdapter(values, updateListener, cancelableCallback);
   }
 
+  MapboxPaddingAnimator paddingAnimator(double[][] values,
+                                        MapboxAnimator.AnimationsValueChangeListener<double[]> updateListener,
+                                        @Nullable MapboxMap.CancelableCallback cancelableCallback) {
+    return new MapboxPaddingAnimator(values, updateListener, cancelableCallback);
+  }
+
   /**
    * This animator is for the LocationComponent pulsing circle.
    *

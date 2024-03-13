@@ -33,6 +33,7 @@ import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_ACCURA
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_COMPASS_BEARING;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_GPS_BEARING;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_LAYER_LATLNG;
+import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_PADDING;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_PULSING_CIRCLE;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_TILT;
 import static com.mapbox.mapboxsdk.location.MapboxAnimator.ANIMATOR_ZOOM;
@@ -216,6 +217,12 @@ final class LocationAnimatorCoordinator {
     playAnimators(animationDuration, ANIMATOR_ZOOM);
   }
 
+  void feedNewPadding(double[] padding, @NonNull CameraPosition currentCameraPosition, long animationDuration,
+                      @Nullable MapboxMap.CancelableCallback callback) {
+    updatePaddingAnimator(padding, currentCameraPosition.padding, callback);
+    playAnimators(animationDuration, ANIMATOR_PADDING);
+  }
+
   void feedNewTilt(double targetTilt, @NonNull CameraPosition currentCameraPosition, long animationDuration,
                    @Nullable MapboxMap.CancelableCallback callback) {
     updateTiltAnimator((float) targetTilt, (float) currentCameraPosition.tilt, callback);
@@ -316,6 +323,11 @@ final class LocationAnimatorCoordinator {
     createNewCameraAdapterAnimator(ANIMATOR_ZOOM, new Float[] {previousZoomLevel, targetZoomLevel}, cancelableCallback);
   }
 
+  private void updatePaddingAnimator(double[] targetPadding, double[] previousPadding,
+                                     @Nullable MapboxMap.CancelableCallback cancelableCallback) {
+    createNewPaddingAnimator(ANIMATOR_PADDING, new double[][] {previousPadding, targetPadding}, cancelableCallback);
+  }
+
   private void updateTiltAnimator(float targetTilt, float previousTiltLevel,
                                   @Nullable MapboxMap.CancelableCallback cancelableCallback) {
     createNewCameraAdapterAnimator(ANIMATOR_TILT, new Float[] {previousTiltLevel, targetTilt}, cancelableCallback);
@@ -352,6 +364,16 @@ final class LocationAnimatorCoordinator {
     MapboxAnimator.AnimationsValueChangeListener listener = listeners.get(animatorType);
     if (listener != null) {
       animatorArray.put(animatorType, animatorProvider.cameraAnimator(values, listener, cancelableCallback));
+    }
+  }
+
+  private void createNewPaddingAnimator(@MapboxAnimator.Type int animatorType,
+                                        @NonNull @Size(min = 2) double[][] values,
+                                        @Nullable MapboxMap.CancelableCallback cancelableCallback) {
+    cancelAnimator(animatorType);
+    MapboxAnimator.AnimationsValueChangeListener listener = listeners.get(animatorType);
+    if (listener != null) {
+      animatorArray.put(animatorType, animatorProvider.paddingAnimator(values, listener, cancelableCallback));
     }
   }
 
@@ -476,6 +498,10 @@ final class LocationAnimatorCoordinator {
 
   void cancelZoomAnimation() {
     cancelAnimator(ANIMATOR_ZOOM);
+  }
+
+  void cancelPaddingAnimation() {
+    cancelAnimator(ANIMATOR_PADDING);
   }
 
   void cancelTiltAnimation() {

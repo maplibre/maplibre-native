@@ -639,4 +639,5 @@ class LocationComponentTest {
 
         verify(locationAnimatorCoordinator).feedNewAccuracyRadius(location.accuracy, false)
     }
+
 }
