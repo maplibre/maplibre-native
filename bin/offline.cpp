@@ -230,8 +230,8 @@ int main(int argc, char* argv[]) {
             std::cout << status.completedResourceCount << " / " << status.requiredResourceCount << " resources | "
                       << status.completedTileCount << " / " << status.requiredTileCount << " tiles"
                       << (status.requiredResourceCountIsPrecise ? " | " : " (indeterminate); ")
-                      << status.completedResourceSize << " bytes downloaded"
-                      << " (" << bytesPerSecond << " bytes/sec)" << std::endl;
+                      << status.completedResourceSize << " bytes downloaded" << " (" << bytesPerSecond << " bytes/sec)"
+                      << std::endl;
 
             if (status.complete()) {
                 std::cout << "Finished Download" << std::endl;

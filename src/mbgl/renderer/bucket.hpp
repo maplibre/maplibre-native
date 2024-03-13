@@ -42,7 +42,7 @@ public:
                             const ImagePositions&,
                             const PatternLayerMap&,
                             std::size_t,
-                            const CanonicalTileID&){};
+                            const CanonicalTileID&) {};
 
     virtual void update(const FeatureStates&, const GeometryTileLayer&, const std::string&, const ImagePositions&) {}
 
