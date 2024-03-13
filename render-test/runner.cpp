@@ -77,10 +77,8 @@ std::string simpleDiff(const Value& result, const Value& expected) {
         }
 
         if (resultTokens[i] != expectedTokens[i]) {
-            diff << "<b>"
-                 << "-" << expectedTokens[i] << "</b>" << std::endl;
-            diff << "<b>"
-                 << "+" << resultTokens[i] << "</b>" << std::endl;
+            diff << "<b>" << "-" << expectedTokens[i] << "</b>" << std::endl;
+            diff << "<b>" << "+" << resultTokens[i] << "</b>" << std::endl;
         } else {
             diff << resultTokens[i] << std::endl;
         }
