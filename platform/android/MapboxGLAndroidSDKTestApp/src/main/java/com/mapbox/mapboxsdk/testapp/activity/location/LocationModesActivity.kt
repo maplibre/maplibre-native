@@ -31,6 +31,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMap.CancelableCallback
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.testapp.R
+import java.util.Random
 
 class LocationModesActivity :
     AppCompatActivity(),
@@ -190,6 +191,27 @@ class LocationModesActivity :
                 }
             )
             if (locationComponent!!.cameraMode == CameraMode.NONE) {
+                Toast.makeText(this, "Not possible to animate - not tracking", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        } else if (id == R.id.action_component_padding_animation_while_tracking) {
+            val paddingRandom = Random()
+            locationComponent!!.paddingWhileTracking(
+                doubleArrayOf(
+                    paddingRandom.nextDouble() * 500,
+                    paddingRandom.nextDouble() * 500,
+                    paddingRandom.nextDouble() * 500,
+                    paddingRandom.nextDouble() * 500
+                ), 1000L, object : CancelableCallback {
+                    override fun onCancel() {
+                        // No impl
+                    }
+
+                    override fun onFinish() {
+                        locationComponent!!.zoomWhileTracking(16.0)
+                    }
+                })
+            if (locationComponent!!.getCameraMode() == CameraMode.NONE) {
                 Toast.makeText(this, "Not possible to animate - not tracking", Toast.LENGTH_SHORT)
                     .show()
             }

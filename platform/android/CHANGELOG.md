@@ -15,6 +15,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 * Add support for the [`slice` expression](https://maplibre.org/maplibre-style-spec/expressions/#slice) ([#1133](https://github.com/maplibre/maplibre-native/pull/1133))
 * Add support for [index-of expression](https://maplibre.org/maplibre-style-spec/expressions/#index-of) ([#1113](https://github.com/maplibre/maplibre-native/pull/1113))
 * Change to a more natural fling animation and allow setting `flingThreshold` and `flingAnimationBaseTime` in `UiSettings` ([#963](https://github.com/maplibre/maplibre-native/pull/963))
+* Add setting padding when camera is tracking ([#2165](https://github.com/maplibre/maplibre-native/pull/2165)).
 
 ### 🐞 Bug fixes
 

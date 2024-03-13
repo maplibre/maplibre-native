@@ -29,7 +29,8 @@ abstract class MapboxAnimator<K> extends ValueAnimator implements ValueAnimator.
     ANIMATOR_LAYER_ACCURACY,
     ANIMATOR_ZOOM,
     ANIMATOR_TILT,
-    ANIMATOR_PULSING_CIRCLE
+    ANIMATOR_PULSING_CIRCLE,
+    ANIMATOR_PADDING
   })
   @interface Type {
   }
@@ -44,6 +45,8 @@ abstract class MapboxAnimator<K> extends ValueAnimator implements ValueAnimator.
   static final int ANIMATOR_ZOOM = 7;
   static final int ANIMATOR_TILT = 8;
   static final int ANIMATOR_PULSING_CIRCLE = 9;
+  static final int ANIMATOR_PADDING = 10;
+
 
   private final AnimationsValueChangeListener<K> updateListener;
   private final K target;

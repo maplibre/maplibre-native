@@ -7,6 +7,7 @@ import android.util.SparseArray
 import android.view.animation.LinearInterpolator
 import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.location.LocationComponentConstants.DEFAULT_TRACKING_PADDING_ANIM_DURATION
 import com.mapbox.mapboxsdk.location.LocationComponentConstants.DEFAULT_TRACKING_TILT_ANIM_DURATION
 import com.mapbox.mapboxsdk.location.LocationComponentConstants.DEFAULT_TRACKING_ZOOM_ANIM_DURATION
 import com.mapbox.mapboxsdk.location.MapboxAnimator.*
@@ -58,7 +59,8 @@ class LocationAnimatorCoordinatorTest {
                 ANIMATOR_CAMERA_COMPASS_BEARING,
                 ANIMATOR_LAYER_ACCURACY,
                 ANIMATOR_ZOOM,
-                ANIMATOR_TILT
+                ANIMATOR_TILT,
+                ANIMATOR_PADDING
             )
         )
     }
@@ -93,6 +95,20 @@ class LocationAnimatorCoordinatorTest {
             animatorProvider.cameraAnimator(capture(floatsSlot), capture(listenerSlot), null)
         } answers {
             MapboxCameraAnimatorAdapter(floatsSlot.captured, listenerSlot.captured, null)
+        }
+
+
+        val doubleArraySlot = slot<Array<DoubleArray>>()
+        val doubleArrayListenerSlot = slot<AnimationsValueChangeListener<DoubleArray>>()
+        every {
+            animatorProvider.paddingAnimator(capture(doubleArraySlot), capture(doubleArrayListenerSlot), capture(callback))
+        } answers {
+            MapboxPaddingAnimator(doubleArraySlot.captured, doubleArrayListenerSlot.captured, callback.captured)
+        }
+        every {
+            animatorProvider.paddingAnimator(capture(doubleArraySlot), capture(doubleArrayListenerSlot), null)
+        } answers {
+            MapboxPaddingAnimator(doubleArraySlot.captured, doubleArrayListenerSlot.captured, null)
         }
     }
 
@@ -489,6 +505,33 @@ class LocationAnimatorCoordinatorTest {
     }
 
     @Test
+    fun feedNewPadding_animatorsCreated() {
+        locationAnimatorCoordinator.feedNewPadding(
+            doubleArrayOf(100.0, 200.0, 300.0, 400.0),
+            cameraPosition,
+            DEFAULT_TRACKING_PADDING_ANIM_DURATION,
+            null
+        )
+
+        assertTrue(locationAnimatorCoordinator.animatorArray[ANIMATOR_PADDING] != null)
+    }
+
+    @Test
+    fun feedNewPadding_animatorValue() {
+        val padding = doubleArrayOf(100.0, 200.0, 300.0, 400.0)
+        locationAnimatorCoordinator.feedNewPadding(
+            padding,
+            cameraPosition,
+            DEFAULT_TRACKING_PADDING_ANIM_DURATION,
+            null
+        )
+
+        val animator = locationAnimatorCoordinator.animatorArray[ANIMATOR_PADDING]
+        assertTrue(padding.contentEquals(animator.target as DoubleArray))
+        verify { animatorSetProvider.startAnimation(eq(listOf(animator)), any<LinearInterpolator>(), DEFAULT_TRACKING_PADDING_ANIM_DURATION) }
+    }
+
+    @Test
     fun feedNewTiltLevel_animatorsCreated() {
         locationAnimatorCoordinator.feedNewTilt(
             30.0,
@@ -538,6 +581,21 @@ class LocationAnimatorCoordinatorTest {
         locationAnimatorCoordinator.cancelZoomAnimation()
 
         assertFalse(locationAnimatorCoordinator.animatorArray[ANIMATOR_ZOOM].isStarted)
+    }
+
+    @Test
+    fun cancelPaddingAnimators() {
+        locationAnimatorCoordinator.feedNewPadding(
+            doubleArrayOf(100.0, 200.0, 300.0, 400.0),
+            cameraPosition,
+            DEFAULT_TRACKING_PADDING_ANIM_DURATION,
+            null
+        )
+        assertTrue(locationAnimatorCoordinator.animatorArray[ANIMATOR_PADDING].isStarted)
+
+        locationAnimatorCoordinator.cancelPaddingAnimation()
+
+        assertFalse(locationAnimatorCoordinator.animatorArray[ANIMATOR_PADDING].isStarted)
     }
 
     @Test
