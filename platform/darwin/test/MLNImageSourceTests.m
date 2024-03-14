@@ -41,7 +41,7 @@
 
 - (void)testSetCoordinates {
     // Create a test instance of MLNImageSource
-    MLNCoordinateQuad originalQuad = { { 80, 37}, { 81, 37}, { 81, 39}, { 80, 39}};
+    MLNCoordinateQuad quad = { { 80, 37}, { 81, 37}, { 81, 39}, { 80, 39}};
     MLNImageSource *source = [[MLNImageSource alloc] initWithIdentifier:@"source-id" coordinateQuad:quad URL:[NSURL URLWithString:@"http://host/image.png"]];
 
     // Define a new set of coordinates
