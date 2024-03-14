@@ -42,7 +42,7 @@
 - (void)testSetCoordinates {
     // Create a test instance of MLNImageSource
     MLNCoordinateQuad originalQuad = { { 80, 37}, { 81, 37}, { 81, 39}, { 80, 39}};
-    MLNImageSource *source = [[MLNImageSource alloc] initWithIdentifier:@"source-id" coordinateQuad:originalQuad URL:nil];
+    MLNImageSource *source = [[MLNImageSource alloc] initWithIdentifier:@"source-id" coordinateQuad:quad URL:[NSURL URLWithString:@"http://host/image.png"]];
 
     // Define a new set of coordinates
     MLNCoordinateQuad newQuad = { { 40, 50}, { 41, 50}, { 41, 52}, { 40, 52} };
@@ -54,8 +54,8 @@
     MLNCoordinateQuad retrievedQuad = source.coordinates;
 
     // Assert that the coordinates are set correctly
-    XCTAssertEqual(retrievedQuad[0].latitude, 40);
-    XCTAssertEqual(retrievedQuad[0].longitude, 50);
+    XCTAssertEqual(retrievedQuad.bottomLeft.latitude, 40);
+    XCTAssertEqual(retrievedQuad.bottomLeft.longitude, 50);
 }
 
 @end
