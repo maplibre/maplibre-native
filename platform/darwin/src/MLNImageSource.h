@@ -99,6 +99,14 @@ MLN_EXPORT
  The coordinates at which the corners of the source image will be placed.
  */
 @property (nonatomic) MLNCoordinateQuad coordinates;
+
+/**
+ Sets the coordinates for the image source.
+
+ @param coordinateQuad The coordinates to set for the image source.
+ */
+- (void)setCoordinates:(MLNCoordinateQuad)coordinateQuad;
+
 @end
 
 NS_ASSUME_NONNULL_END
