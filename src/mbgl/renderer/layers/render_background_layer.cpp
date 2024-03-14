@@ -58,7 +58,7 @@ void RenderBackgroundLayer::evaluate(const PropertyEvaluationParameters& paramet
     auto properties = makeMutable<BackgroundLayerProperties>(
         staticImmutableCast<BackgroundLayer::Impl>(baseImpl), parameters.getCrossfadeParameters(), evaluated);
 
-    const auto x = unevaluated.getZoomCurves();
+    const auto y = unevaluated.getGPUExpressions();
 
     passes = properties->evaluated.get<style::BackgroundOpacity>() == 0.0f ? RenderPass::None
              : (!unevaluated.get<style::BackgroundPattern>().isUndefined() ||

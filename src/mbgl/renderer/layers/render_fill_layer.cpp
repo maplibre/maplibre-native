@@ -76,7 +76,7 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
                                                        unevaluated.evaluate(parameters, previousProperties->evaluated));
     auto& evaluated = properties->evaluated;
 
-    const auto x = unevaluated.getZoomCurves();
+    const auto y = unevaluated.getGPUExpressions();
 
     if (unevaluated.get<style::FillOutlineColor>().isUndefined()) {
         evaluated.get<style::FillOutlineColor>() = evaluated.get<style::FillColor>();

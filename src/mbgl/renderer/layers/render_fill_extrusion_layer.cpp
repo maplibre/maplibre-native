@@ -64,7 +64,7 @@ void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& para
         parameters.getCrossfadeParameters(),
         unevaluated.evaluate(parameters, previousProperties->evaluated));
 
-    const auto x = unevaluated.getZoomCurves();
+    const auto y = unevaluated.getGPUExpressions();
 
     passes = (properties->evaluated.get<style::FillExtrusionOpacity>() > 0)
                  ? (RenderPass::Translucent | RenderPass::Pass3D)

@@ -24,5 +24,12 @@ constexpr std::array<To, Size> cast(const std::array<From, Size>& from) {
     return to;
 }
 
+/// Convert an `N`-tuple of all `T`s to `array<T,N>`
+template <typename... Ts>
+inline constexpr auto to_array(std::tuple<Ts...>&& tuple) {
+    return std::apply([](auto&&... x) { return std::array{std::forward<decltype(x)>(x)...}; },
+                      std::forward<std::tuple<Ts...>>(tuple));
+}
+
 } // namespace util
 } // namespace mbgl
