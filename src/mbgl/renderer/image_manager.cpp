@@ -10,7 +10,9 @@
 
 namespace mbgl {
 
-static ImageManagerObserver nullObserver;
+namespace {
+ImageManagerObserver nullObserver;
+} // namespace
 
 ImageManager::ImageManager() = default;
 

@@ -20,6 +20,8 @@ public:
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
+
+    std::size_t getStopCount() const { return stops.size(); }
     void eachStop(const std::function<void(double, const Expression&)>& visit) const;
 
     const std::unique_ptr<Expression>& getInput() const noexcept { return input; }

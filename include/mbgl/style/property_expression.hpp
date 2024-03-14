@@ -6,11 +6,66 @@
 #include <mbgl/style/expression/step.hpp>
 #include <mbgl/style/expression/find_zoom_curve.hpp>
 #include <mbgl/util/range.hpp>
+#include <mbgl/util/suppress_copies.hpp>
 
 #include <optional>
 
 namespace mbgl {
 namespace style {
+
+enum class GPUInterpType : std::uint16_t {
+    Linear,
+    Exponential,
+    Bezier
+};
+enum class GPUOutputType : std::uint16_t {
+    Float,
+    Color,
+};
+
+struct GPUExpression;
+struct GPUExpressionDeleter {
+    void operator()(const GPUExpression* expr);
+};
+using UniqueGPUExpression = std::unique_ptr<const GPUExpression, GPUExpressionDeleter>;
+using MutableUniqueGPUExpression = std::unique_ptr<GPUExpression, GPUExpressionDeleter>;
+
+struct GPUExpression {
+    const GPUOutputType outputType;
+    const std::uint16_t stopCount;
+
+    GPUInterpType interpolation;
+    float expBase = 0.0f;
+
+    struct FloatStop {
+        float input;
+        float output;
+    };
+    struct ColorStop {
+        float input;
+        float output[4];
+    };
+    union Stops {
+        FloatStop floatStops[1];
+        ColorStop colorStops[1];
+    } stops;
+
+    static constexpr std::size_t alignment = 16;
+
+    static MutableUniqueGPUExpression create(GPUOutputType, std::uint16_t stopCount);
+
+private:
+    GPUExpression(GPUOutputType type, uint16_t count)
+        : outputType(type),
+          stopCount(count) {}
+    GPUExpression(GPUExpression&&) = delete;
+    GPUExpression(const GPUExpression&) = delete;
+    GPUExpression& operator=(GPUExpression&&) = delete;
+    GPUExpression& operator=(const GPUExpression&) = delete;
+
+    static std::size_t stopSize(GPUOutputType);
+    static std::size_t sizeFor(GPUOutputType, std::uint16_t count);
+};
 
 class PropertyExpressionBase {
 public:
@@ -18,7 +73,8 @@ public:
     using Dependency = expression::Dependency;
     using ZoomCurvePtr = expression::ZoomCurvePtr;
 
-    explicit PropertyExpressionBase(std::unique_ptr<expression::Expression>);
+    explicit PropertyExpressionBase(std::unique_ptr<Expression>);
+    virtual ~PropertyExpressionBase() = default;
 
     bool isZoomConstant() const noexcept { return isZoomConstant_; }
     bool isFeatureConstant() const noexcept { return isFeatureConstant_; }
@@ -36,6 +92,7 @@ public:
     /// expression. May be removed if a better way of aggregation is found.
     std::shared_ptr<const Expression> getSharedExpression() const noexcept;
 
+    UniqueGPUExpression getGPUExpression() const;
 
     Dependency getDependencies() const noexcept { return expression ? expression->dependencies : Dependency::None; }
 
@@ -43,7 +100,9 @@ public:
 
 protected:
     std::shared_ptr<const Expression> expression;
+
     ZoomCurvePtr zoomCurve;
+
     bool useIntegerZoom_ = false;
     bool isZoomConstant_;
     bool isFeatureConstant_;

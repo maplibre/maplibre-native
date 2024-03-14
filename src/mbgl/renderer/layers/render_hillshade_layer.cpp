@@ -82,7 +82,7 @@ void RenderHillshadeLayer::evaluate(const PropertyEvaluationParameters& paramete
         staticImmutableCast<HillshadeLayer::Impl>(baseImpl),
         unevaluated.evaluate(parameters, previousProperties->evaluated));
 
-    const auto x = unevaluated.getZoomCurves();
+    const auto y = unevaluated.getGPUExpressions();
 
     passes = (properties->evaluated.get<style::HillshadeExaggeration>() > 0)
                  ? (RenderPass::Translucent | RenderPass::Pass3D)

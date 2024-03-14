@@ -376,7 +376,7 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
         staticImmutableCast<SymbolLayer::Impl>(baseImpl),
         unevaluated.evaluate(parameters, previousProperties->evaluated));
 
-    const auto x = unevaluated.getZoomCurves();
+    const auto y = unevaluated.getGPUExpressions();
 
     auto& evaluated = properties->evaluated;
     const auto& layout = impl_cast(baseImpl).layout;

@@ -73,7 +73,7 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
                                                        unevaluated.evaluate(parameters, previousProperties->evaluated));
     auto& evaluated = properties->evaluated;
 
-    const auto x = unevaluated.getZoomCurves();
+    const auto y = unevaluated.getGPUExpressions();
 
     passes = (evaluated.get<style::LineOpacity>().constantOr(1.0) > 0 &&
               evaluated.get<style::LineColor>().constantOr(Color::black()).a > 0 &&

@@ -6,6 +6,7 @@
 #include <mbgl/style/color_ramp_property_value.hpp>
 #include <mbgl/style/conversion/stringify.hpp>
 #include <mbgl/style/transition_options.hpp>
+#include <mbgl/util/convert.hpp>
 #include <mbgl/util/indexed_tuple.hpp>
 #include <mbgl/util/ignore.hpp>
 
@@ -322,6 +323,8 @@ public:
             writer.EndObject();
         }
 
+        unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
+
         /// Get the combined dependencies of any contained expressions
         constexpr Dependency getDependencies() const noexcept {
             Dependency result = Dependency::None;
@@ -329,22 +332,17 @@ public:
             return result;
         }
 
-        unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
+        using GPUExpressions = std::array<UniqueGPUExpression, UnevaluatedTypes::TypeCount>;
 
-        template <typename... Ts>
-        static constexpr auto to_array(std::tuple<Ts...>&& tuple) {
-            constexpr auto get_array = [](auto&&... x) {
-                return std::array{std::forward<decltype(x)>(x)...};
-            };
-            return std::apply(get_array, std::forward<std::tuple<Ts...>>(tuple));
-        }
-
-        using ZoomCurves = std::array<expression::ZoomCurvePtr, UnevaluatedTypes::TypeCount>;
-        ZoomCurves getZoomCurves() const {
-            return to_array(std::make_tuple((((getZoomCurve(this->template get<Ps>()))))...));
+        /// Get the GPU expressions, if applicable, for each item in the tuple.
+        /// Expression lifetimes match this object.
+        GPUExpressions getGPUExpressions() const {
+            return util::to_array(std::make_tuple((((getGPUExpression(this->template get<Ps>()))))...));
         }
 
     protected:
+        // gather dependencies for each type that can appear in this tuple
+
         template <class P>
         Dependency getDependencies(const PropertyValue<P>& v) const noexcept {
             return v.getDependencies();
@@ -355,41 +353,18 @@ public:
             return v.getValue().getDependencies();
         }
 
-        template <class P>
-        expression::ZoomCurvePtr getZoomCurve(const PropertyValue<P>& v) const {
-            const auto& val = v.getValue();
-            return val.isExpression() ? val.asExpression().getZoomCurve() : nullptr;
-        }
+        // gather GPU expression representation for each type that can appear in this tuple
 
         template <class P>
-        expression::ZoomCurvePtr getZoomCurve(const Transitioning<P>& v) const {
-            const auto& val = v.getValue();
-            return val.isExpression() ? val.asExpression().getZoomCurve() : nullptr;
+        UniqueGPUExpression getGPUExpression(const PropertyValue<P>& val) const {
+            return val.isExpression() ? val.asExpression().getGPUExpression() : nullptr;
         }
 
-        template <>
-        expression::ZoomCurvePtr getZoomCurve(const Transitioning<style::ColorRampPropertyValue>&) const {
-            return nullptr;
-        }
-
-        /// Get the combined dependencies of any contained expressions
-        constexpr Dependency getDependencies() const noexcept {
-            Dependency result = Dependency::None;
-            util::ignore({(result |= getDependencies(this->template get<Ps>()))...});
-            return result;
-        }
-
-        unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
-
-    protected:
-        template <class P>
-        Dependency getDependencies(const PropertyValue<P>& v) const noexcept {
-            return v.getDependencies();
-        }
+        UniqueGPUExpression getGPUExpression(const style::ColorRampPropertyValue&) const { return nullptr; }
 
         template <class P>
-        Dependency getDependencies(const Transitioning<P>& v) const noexcept {
-            return v.getValue().getDependencies();
+        UniqueGPUExpression getGPUExpression(const Transitioning<P>& val) const {
+            return getGPUExpression(val.getValue());
         }
     };
 
