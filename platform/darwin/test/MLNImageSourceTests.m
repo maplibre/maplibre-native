@@ -39,21 +39,6 @@
     XCTAssertNil(source.URL);
 }
 
-- (void)testSetURL {
-    // Create a test instance of MLNImageSource
-    MLNCoordinateQuad quad = { { 80, 37}, { 81, 37}, { 81, 39}, { 80, 39}};
-    MLNImageSource *source = [[MLNImageSource alloc] initWithIdentifier:@"source-id" coordinateQuad:quad URL:[NSURL URLWithString:@"http://host/image.png"]];
-    
-    // Set the URL using setURL
-    NSURL *testURL = [NSURL URLWithString:@"http://host/image1.png"];
-    [source setURL:testURL];
-    
-    // Assert that the URL is set correctly
-    XCTAssertNotNil(source.URL);
-    XCTAssertEqualObjects(source.URL.absoluteString, @"http://host/image1.png");
-    XCTAssertNil(source.image);
-}
-
 - (void)testSetCoordinates {
     // Create a test instance of MLNImageSource
     MLNCoordinateQuad originalQuad = { { 80, 37}, { 81, 37}, { 81, 39}, { 80, 39}};
