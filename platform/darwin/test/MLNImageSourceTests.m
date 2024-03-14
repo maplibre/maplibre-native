@@ -54,8 +54,8 @@
     MLNCoordinateQuad retrievedQuad = source.coordinates;
 
     // Assert that the coordinates are set correctly
-    XCTAssertEqual(retrievedQuad.bottomLeft.latitude, 40);
-    XCTAssertEqual(retrievedQuad.bottomLeft.longitude, 50);
+    XCTAssertEqual(retrievedQuad.bottomLeft.latitude, newQuad.bottomLeft.latitude);
+    XCTAssertEqual(retrievedQuad.bottomLeft.longitude, newQuad.bottomLeft.latitude);
 }
 
 @end
