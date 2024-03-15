@@ -70,7 +70,7 @@
 
     // Assert that the coordinates are set correctly
     XCTAssertEqual(retrievedQuad.bottomLeft.latitude, newQuad.bottomLeft.latitude);
-    XCTAssertEqual(retrievedQuad.bottomLeft.longitude, newQuad.bottomLeft.latitude);
+    XCTAssertEqual(retrievedQuad.bottomLeft.longitude, newQuad.bottomLeft.longitude);
 }
 
 @end
