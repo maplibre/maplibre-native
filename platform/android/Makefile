@@ -90,7 +90,7 @@ run-android-core-test-$1-%: android-core-test-$1
 
 	# Push all needed files to the device
 	adb push $(MLN_ANDROID_CORE_TEST_DIR)/classes.dex $(MLN_ANDROID_LOCAL_WORK_DIR) > /dev/null 2>&1
-	adb push MapboxGLAndroidSDK/build/intermediates/intermediate-jars/$(buildtype)/jni/$2/libmapbox-gl.so $(MLN_ANDROID_LOCAL_WORK_DIR) > /dev/null 2>&1
+	adb push MapboxGLAndroidSDK/build/intermediates/intermediate-jars/$(buildtype)/jni/$2/libmaplibre-gl.so $(MLN_ANDROID_LOCAL_WORK_DIR) > /dev/null 2>&1
 	adb push test/fixtures $(MLN_ANDROID_LOCAL_WORK_DIR)/test > /dev/null 2>&1
 	adb push scripts/style-spec-reference/v8.json $(MLN_ANDROID_LOCAL_WORK_DIR)/scripts/style-spec-reference > /dev/null 2>&1
 	adb push MapboxGLAndroidSDK/build/intermediates/cmake/$(buildtype)/obj/$2/mbgl-test $(MLN_ANDROID_LOCAL_WORK_DIR) > /dev/null 2>&1
@@ -124,7 +124,7 @@ run-android-benchmark-$1-%: android-benchmark-$1
 
 	# Push compiled java sources, test data and executable to device
 	adb push $(MLN_ANDROID_BENCHMARK_DIR)/classes.dex $(MLN_ANDROID_LOCAL_BENCHMARK_DIR) > /dev/null 2>&1
-	adb push MapboxGLAndroidSDK/build/intermediates/intermediate-jars/$(buildtype)/jni/$2/libmapbox-gl.so $(MLN_ANDROID_LOCAL_BENCHMARK_DIR) > /dev/null 2>&1
+	adb push MapboxGLAndroidSDK/build/intermediates/intermediate-jars/$(buildtype)/jni/$2/libmaplibre-gl.so $(MLN_ANDROID_LOCAL_BENCHMARK_DIR) > /dev/null 2>&1
 	adb push benchmark/fixtures $(MLN_ANDROID_LOCAL_BENCHMARK_DIR)/benchmark > /dev/null 2>&1
 	adb push test/fixtures $(MLN_ANDROID_LOCAL_BENCHMARK_DIR)/test > /dev/null 2>&1
 	adb push MapboxGLAndroidSDK/build/intermediates/cmake/$(buildtype)/obj/$2/mbgl-benchmark $(MLN_ANDROID_LOCAL_BENCHMARK_DIR) > /dev/null 2>&1

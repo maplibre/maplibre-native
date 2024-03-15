@@ -31,7 +31,7 @@ public abstract class LibraryLoader {
   }
 
   /**
-   * Loads "libmapbox-gl.so" native shared library.
+   * Loads "libmaplibre-gl.so" native shared library.
    * <p>
    * Catches UnsatisfiedLinkErrors and prints a warning to logcat.
    * </p>
@@ -40,7 +40,7 @@ public abstract class LibraryLoader {
     try {
       if (!loaded) {
         loaded = true;
-        loader.load("mapbox-gl");
+        loader.load("maplibre-gl");
       }
     } catch (UnsatisfiedLinkError error) {
       loaded = false;

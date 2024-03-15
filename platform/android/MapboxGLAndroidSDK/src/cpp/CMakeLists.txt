@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 target_compile_options(mbgl-compiler-options INTERFACE -frtti)
 
-add_library(mapbox-gl SHARED
+add_library(maplibre-gl SHARED
             ${PROJECT_SOURCE_DIR}/main.cpp
             ${PROJECT_SOURCE_DIR}/jni_native.cpp
             ${PROJECT_SOURCE_DIR}/jni_native.hpp
@@ -193,20 +193,20 @@ add_library(mapbox-gl SHARED
             ${PROJECT_SOURCE_DIR}/util/tile_server_options.hpp)
 
 target_include_directories(
-  mapbox-gl
+  maplibre-gl
   PRIVATE ${PROJECT_SOURCE_DIR}
           ../../../../../src
           ../../../src
           ../../../../default/include)
 
-target_compile_options(mapbox-gl
+target_compile_options(maplibre-gl
                        PRIVATE $<$<CONFIG:Release>:-Oz>
                                $<$<CONFIG:Release>:-Qunused-arguments>
                                $<$<CONFIG:Release>:-flto>
                                $<$<CONFIG:Release>:-fvisibility=hidden>
                                $<$<CONFIG:Release>:-fvisibility-inlines-hidden>)
 
-target_link_libraries(mapbox-gl
+target_link_libraries(maplibre-gl
                       PRIVATE $<$<CONFIG:Release>:-Oz>
                               $<$<CONFIG:Release>:-Wl,--icf=all>
                               $<$<CONFIG:Release>:-Wl,--gc-sections>
@@ -216,4 +216,4 @@ target_link_libraries(mapbox-gl
                               mbgl-core
                               mbgl-vendor-unique_resource)
 
-install(TARGETS mapbox-gl LIBRARY DESTINATION lib)
+install(TARGETS maplibre-gl LIBRARY DESTINATION lib)
