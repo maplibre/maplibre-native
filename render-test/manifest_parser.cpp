@@ -287,9 +287,7 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
             testId = testId.substr(rootLength + 1, testId.length() - rootLength - 1);
 
             std::vector<mbgl::filesystem::path> expectedMetricPaths{expectedMetricPath};
-#if defined(__ANDROID__)
-            expectedMetricPaths.emplace_back("/sdcard/baselines/");
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
             expectedMetricPaths.emplace_back(manifest.manifestPath + "/baselines/");
 #endif
             testPaths.emplace_back(testPath,
