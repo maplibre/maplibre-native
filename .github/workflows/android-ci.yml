@@ -120,7 +120,6 @@ jobs:
           fi
 
       - name: Build Benchmark, copy to platform/android
-        if: github.ref != 'refs/heads/main'
         run: |
           ./gradlew assembleDrawableRelease assembleDrawableReleaseAndroidTest -PtestBuildType=release
           cp MapboxGLAndroidSDKTestApp/build/outputs/apk/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release.apk .
