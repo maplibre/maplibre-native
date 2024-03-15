@@ -6,7 +6,6 @@
 #include <mbgl/style/expression/step.hpp>
 #include <mbgl/style/expression/find_zoom_curve.hpp>
 #include <mbgl/util/range.hpp>
-#include <mbgl/util/suppress_copies.hpp>
 
 #include <optional>
 
@@ -14,6 +13,7 @@ namespace mbgl {
 namespace style {
 
 enum class GPUInterpType : std::uint16_t {
+    Step,
     Linear,
     Exponential,
     Bezier
@@ -22,49 +22,78 @@ enum class GPUOutputType : std::uint16_t {
     Float,
     Color,
 };
+enum class GPUOptions : std::uint16_t {
+    None = 0,
+    IntegerZoom = 1 << 0,
+    Transitioning = 1 << 1,
+};
+inline constexpr static GPUOptions operator|(GPUOptions x, GPUOptions y) noexcept {
+    return bitmaskEnumUnion(x, y);
+}
+inline constexpr static GPUOptions operator&(GPUOptions x, GPUOptions y) noexcept {
+    return bitmaskEnumIntersection(x, y);
+}
+/// @return true if any bits in `deps` are present in `term`
+inline constexpr bool any(const GPUOptions term, const GPUOptions opts) {
+    return (term & opts) != GPUOptions::None;
+}
 
 struct GPUExpression;
-struct GPUExpressionDeleter {
-    void operator()(const GPUExpression* expr);
-};
-using UniqueGPUExpression = std::unique_ptr<const GPUExpression, GPUExpressionDeleter>;
-using MutableUniqueGPUExpression = std::unique_ptr<GPUExpression, GPUExpressionDeleter>;
+using UniqueGPUExpression = std::unique_ptr<const GPUExpression>;
+using MutableUniqueGPUExpression = std::unique_ptr<GPUExpression>;
 
 struct GPUExpression {
+    static constexpr std::size_t maxStops = 16;
+
     const GPUOutputType outputType;
     const std::uint16_t stopCount;
-
+    GPUOptions options;
     GPUInterpType interpolation;
-    float expBase = 0.0f;
+
+    union InterpOptions {
+        struct Exponential {
+            float base;
+        } exponential;
+
+        struct Bezier {
+            float x1;
+            float y1;
+            float x2;
+            float y2;
+        } bezier;
+    } interpOptions;
 
     struct FloatStop {
         float input;
         float output;
+        bool operator<(const FloatStop& rhs) const { return input < rhs.input; }
     };
+
     struct ColorStop {
         float input;
-        float output[4];
+        float rgba[4];
+        bool operator<(const ColorStop& rhs) const { return input < rhs.input; }
     };
-    union Stops {
-        FloatStop floatStops[1];
-        ColorStop colorStops[1];
-    } stops;
 
-    static constexpr std::size_t alignment = 16;
+    union Stops {
+        FloatStop floatStops[maxStops];
+        ColorStop colorStops[maxStops];
+    } stops;
 
     static MutableUniqueGPUExpression create(GPUOutputType, std::uint16_t stopCount);
 
-private:
-    GPUExpression(GPUOutputType type, uint16_t count)
-        : outputType(type),
-          stopCount(count) {}
+    float evaluateFloat(const float zoom) const;
+    Color evaluateColor(const float zoom) const;
+
     GPUExpression(GPUExpression&&) = delete;
     GPUExpression(const GPUExpression&) = delete;
     GPUExpression& operator=(GPUExpression&&) = delete;
     GPUExpression& operator=(const GPUExpression&) = delete;
 
-    static std::size_t stopSize(GPUOutputType);
-    static std::size_t sizeFor(GPUOutputType, std::uint16_t count);
+private:
+    GPUExpression(GPUOutputType type, uint16_t count)
+        : outputType(type),
+          stopCount(count) {}
 };
 
 class PropertyExpressionBase {
@@ -92,7 +121,7 @@ public:
     /// expression. May be removed if a better way of aggregation is found.
     std::shared_ptr<const Expression> getSharedExpression() const noexcept;
 
-    UniqueGPUExpression getGPUExpression() const;
+    UniqueGPUExpression getGPUExpression(bool transitioning) const;
 
     Dependency getDependencies() const noexcept { return expression ? expression->dependencies : Dependency::None; }
 

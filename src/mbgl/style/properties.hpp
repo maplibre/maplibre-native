@@ -356,15 +356,18 @@ public:
         // gather GPU expression representation for each type that can appear in this tuple
 
         template <class P>
-        UniqueGPUExpression getGPUExpression(const PropertyValue<P>& val) const {
-            return val.isExpression() ? val.asExpression().getGPUExpression() : nullptr;
+        UniqueGPUExpression getGPUExpression(const PropertyValue<P>& val, bool transitioning = false) const {
+            return (!transitioning && val.isExpression()) ? val.asExpression().getGPUExpression(transitioning)
+                                                          : nullptr;
         }
 
-        UniqueGPUExpression getGPUExpression(const style::ColorRampPropertyValue&) const { return nullptr; }
+        UniqueGPUExpression getGPUExpression(const style::ColorRampPropertyValue&, bool /*transitioning*/) const {
+            return nullptr;
+        }
 
         template <class P>
         UniqueGPUExpression getGPUExpression(const Transitioning<P>& val) const {
-            return getGPUExpression(val.getValue());
+            return getGPUExpression(val.getValue(), /*transitioning=*/true);
         }
     };
 

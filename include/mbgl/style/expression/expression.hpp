@@ -205,10 +205,10 @@ enum class Dependency : uint32_t {
     All = (1 << MaskCount) - 1,
 };
 inline constexpr static Dependency operator|(Dependency x, Dependency y) noexcept {
-    return Dependency{mbgl::underlying_type(x) | mbgl::underlying_type(y)};
+    return bitmaskEnumUnion(x, y);
 }
 inline constexpr static Dependency operator&(Dependency x, Dependency y) noexcept {
-    return Dependency{mbgl::underlying_type(x) & mbgl::underlying_type(y)};
+    return bitmaskEnumIntersection(x, y);
 }
 inline static Dependency& operator|=(Dependency& target, Dependency source) noexcept {
     target = target | source;
@@ -289,7 +289,6 @@ public:
     bool all(Dependency dep) const { return expression::all(dependencies, dep); }
     /// Test that expression's dependencies has none of one or more values
     bool none(Dependency dep) const { return expression::none(dependencies, dep); }
-
 
 protected:
     template <typename T>
