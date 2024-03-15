@@ -4,7 +4,7 @@ android {
     compileSdkVersion 33
 
     defaultConfig {
-        applicationId = 'com.mapbox.mapboxsdk.maps.render_test_runner'
+        applicationId = 'org.maplibre.render_test_runner'
         minSdkVersion 21
         targetSdkVersion 33
         def abi = 'all'
