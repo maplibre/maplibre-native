@@ -82,6 +82,13 @@ MLN_EXPORT
 @property (nonatomic, copy, nullable)NSURL *URL;
 
 /**
+ Sets the URL for the image source, performing necessary validations.
+
+ @param url The URL to set for the image source.
+ */
+- (void)setURL:(NSURL *)url;
+
+/**
  The source image.
 
  If the receiver was initialized using `-initWithIdentifier:coordinateQuad:URL:` or if the `URL` property is set, this property is set to `nil`.
