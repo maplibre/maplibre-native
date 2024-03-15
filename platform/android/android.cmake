@@ -244,17 +244,31 @@ target_link_libraries(
         mbgl-render-test
 )
 
+if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/__always_rebuild)
+    message(FATAL_ERROR "File \"${CMAKE_CURRENT_BINARY_DIR}/__always_rebuild\" found, \
+    this should never be created, remove!")
+endif()
+
 add_custom_command(
-    TARGET mbgl-render-test-runner PRE_BUILD
     COMMAND
-        ${CMAKE_COMMAND}
-        -E
-        tar
-        "chf"
-        "render-test/android/app/src/main/assets/data.zip"
-        --format=zip
-        --files-from=render-test/android/app/src/main/assets/to_zip.txt
+    ${CMAKE_COMMAND}
+    -E
+    tar
+    "chf"
+    "render-test/android/app/src/main/assets/data.zip"
+    --format=zip
+    --files-from=render-test/android/app/src/main/assets/to_zip.txt
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    OUTPUT
+        ${PROJECT_SOURCE_DIR}/render-test/android/app/src/main/assets/data.zip
+        ${CMAKE_CURRENT_BINARY_DIR}/__always_rebuild
 )
+
+add_custom_target(
+    render-test-data-zip
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/__always_rebuild
+)
+
+add_dependencies(mbgl-render-test-runner render-test-data-zip)
 
 install(TARGETS mbgl-render-test-runner LIBRARY DESTINATION lib)

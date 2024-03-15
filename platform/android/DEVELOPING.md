@@ -37,6 +37,8 @@ Run the configuration for the `MapboxGLAndroidSDKTestApp` module and select a de
 
 To run the render tests for Android, run the configuration for the `androidRenderTest.app` module.
 
+More information on working on the render tests can be found [in the wiki](https://github.com/maplibre/maplibre-native/wiki/Working-on-Android-Render-Tests).
+
 ## Instrumentation Tests
 
 To run the instrumentatin tests, find the `MapboxGLAndroidSDKTestApp` project in the sidebar, go to `src > androidTest`, right click and select "Run 'All Tests'".
