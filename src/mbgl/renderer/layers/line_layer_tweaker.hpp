@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/layer_tweaker.hpp>
+#include <mbgl/style/layers/line_layer_properties.hpp>
 
 #include <string_view>
 
@@ -30,6 +31,11 @@ public:
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
+#if MLN_RENDER_BACKEND_METAL
+    using Unevaluated = style::LinePaintProperties::Unevaluated;
+    void setGPUExpressions(Unevaluated::GPUExpressions&&);
+#endif // MLN_RENDER_BACKEND_METAL
+
 protected:
     gfx::UniformBufferPtr linePropertiesBuffer;
     gfx::UniformBufferPtr lineGradientPropertiesBuffer;
@@ -40,6 +46,8 @@ protected:
 #if MLN_RENDER_BACKEND_METAL
     gfx::UniformBufferPtr permutationUniformBuffer;
     gfx::UniformBufferPtr expressionUniformBuffer;
+
+    Unevaluated::GPUExpressions gpuExpressions;
 #endif // MLN_RENDER_BACKEND_METAL
 
     bool simplePropertiesUpdated = true;

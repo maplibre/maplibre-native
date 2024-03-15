@@ -24,11 +24,58 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
+#if MLN_RENDER_BACKEND_METAL
+constexpr bool diff(float actual, float expected, float e = 1.0e-6) {
+    return actual != expected && (expected == 0 || std::fabs((actual - expected) / expected) > e);
+}
+void check(const UniqueGPUExpression& expr,
+           const PossiblyEvaluatedPropertyValue<Color>& prop,
+           const float zoom,
+           const uint8_t intZoom) {
+    if (expr) {
+        const float effectiveZoom = any(expr->options, GPUOptions::IntegerZoom) ? intZoom : zoom;
+        const auto color = expr->evaluateColor(effectiveZoom);
+        const auto color2 = prop.evaluate(effectiveZoom);
+        assert(!diff(color.r, color2.r));
+        assert(!diff(color.g, color2.g));
+        assert(!diff(color.b, color2.b));
+        assert(!diff(color.a, color2.a));
+    }
+}
+
+void check(const UniqueGPUExpression& expr,
+           const PossiblyEvaluatedPropertyValue<float>& prop,
+           const float zoom,
+           const uint8_t intZoom) {
+    if (expr) {
+        const float effectiveZoom = any(expr->options, GPUOptions::IntegerZoom) ? intZoom : zoom;
+        const auto value = expr->evaluateFloat(effectiveZoom);
+        const auto value2 = prop.evaluate(effectiveZoom);
+        if (diff(value, value2)) {
+            assert(false);
+        }
+    }
+}
+#endif // MLN_RENDER_BACKEND_METAL
+
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
-    const auto zoom = parameters.state.getZoom();
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const LineLayerProperties&>(*evaluatedProperties).crossfade;
+
+    const auto zoom = static_cast<float>(parameters.state.getZoom());
+    const auto intZoom = parameters.state.getIntegerZoom();
+
+#if MLN_RENDER_BACKEND_METAL
+    using PropertyIndexes = LinePaintProperties::Tuple<LinePaintProperties::PropertyTypes>;
+    check(gpuExpressions[PropertyIndexes::getIndex<LineColor>()], evaluated.get<LineColor>(), zoom, intZoom);
+    check(gpuExpressions[PropertyIndexes::getIndex<LineBlur>()], evaluated.get<LineBlur>(), zoom, intZoom);
+    check(gpuExpressions[PropertyIndexes::getIndex<LineOpacity>()], evaluated.get<LineOpacity>(), zoom, intZoom);
+    check(gpuExpressions[PropertyIndexes::getIndex<LineWidth>()], evaluated.get<LineWidth>(), zoom, intZoom);
+    check(gpuExpressions[PropertyIndexes::getIndex<LineGapWidth>()], evaluated.get<LineGapWidth>(), zoom, intZoom);
+    check(gpuExpressions[PropertyIndexes::getIndex<LineFloorWidth>()], evaluated.get<LineFloorWidth>(), zoom, intZoom);
+    check(gpuExpressions[PropertyIndexes::getIndex<LineOffset>()], evaluated.get<LineOffset>(), zoom, intZoom);
+#endif // MLN_RENDER_BACKEND_METAL
 
     // Each property UBO is updated at most once if new evaluated properties were set
     if (propertiesUpdated) {
@@ -130,7 +177,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         switch (type) {
             case LineType::Simple: {
                 const LineUBO lineUBO{/*matrix = */ util::cast<float>(matrix),
-                                      /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
+                                      /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
                                       0,
                                       0,
                                       0};
@@ -144,12 +191,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             } break;
 
             case LineType::Gradient: {
-                const LineGradientUBO lineGradientUBO{
-                    /*matrix = */ util::cast<float>(matrix),
-                    /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                    0,
-                    0,
-                    0};
+                const LineGradientUBO lineGradientUBO{/*matrix = */ util::cast<float>(matrix),
+                                                      /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+                                                      0,
+                                                      0,
+                                                      0};
                 uniforms.createOrUpdate(idLineGradientUBO, &lineGradientUBO, context);
 
                 // properties UBO
@@ -168,11 +214,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /*matrix =*/util::cast<float>(matrix),
                     /*scale =*/
                     {parameters.pixelRatio,
-                     1 / tileID.pixelsToTileUnits(1, parameters.state.getIntegerZoom()),
+                     1 / tileID.pixelsToTileUnits(1, intZoom),
                      crossfade.fromScale,
                      crossfade.toScale},
                     /*texsize =*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                    /*ratio =*/1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
+                    /*ratio =*/1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
                     /*fade =*/crossfade.t};
                 uniforms.createOrUpdate(idLinePatternUBO, &linePatternUBO, context);
 
@@ -208,12 +254,10 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     const LineSDFUBO lineSDFUBO{
                         /* matrix = */ util::cast<float>(matrix),
                         /* patternscale_a = */
-                        {1.0f / tileID.pixelsToTileUnits(widthA, parameters.state.getIntegerZoom()),
-                         -posA.height / 2.0f},
+                        {1.0f / tileID.pixelsToTileUnits(widthA, intZoom), -posA.height / 2.0f},
                         /* patternscale_b = */
-                        {1.0f / tileID.pixelsToTileUnits(widthB, parameters.state.getIntegerZoom()),
-                         -posB.height / 2.0f},
-                        /* ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
+                        {1.0f / tileID.pixelsToTileUnits(widthB, intZoom), -posB.height / 2.0f},
+                        /* ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
                         /* tex_y_a = */ posA.y,
                         /* tex_y_b = */ posB.y,
                         /* sdfgamma = */ static_cast<float>(dashPatternTexture.getSize().width) /
@@ -240,5 +284,11 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         }
     });
 }
+
+#if MLN_RENDER_BACKEND_METAL
+void LineLayerTweaker::setGPUExpressions(Unevaluated::GPUExpressions&& exprs) {
+    gpuExpressions = std::move(exprs);
+}
+#endif // MLN_RENDER_BACKEND_METAL
 
 } // namespace mbgl
