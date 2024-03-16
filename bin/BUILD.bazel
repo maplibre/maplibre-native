@@ -10,3 +10,14 @@ cc_binary(
         "//platform:macos-objcpp",
     ],
 )
+
+cc_binary(
+    name = "render_tool",
+    srcs = [
+        "render.cpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    deps = [
+        "//platform:macos-objcpp",
+    ],
+)
