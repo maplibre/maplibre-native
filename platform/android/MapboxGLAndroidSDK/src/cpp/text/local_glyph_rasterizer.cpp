@@ -44,7 +44,7 @@ LocalGlyphRasterizer::LocalGlyphRasterizer() {
 
 PremultipliedImage LocalGlyphRasterizer::drawGlyphBitmap(const std::string& fontFamily,
                                                          const bool bold,
-                                                         const GlyphID glyphID) {
+                                                         const char16_t glyphID) {
     UniqueEnv env{AttachEnv()};
 
     static auto& javaClass = jni::Class<LocalGlyphRasterizer>::Singleton(*env);
