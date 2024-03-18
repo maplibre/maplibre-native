@@ -2,6 +2,7 @@ package org.maplibre.android.style.sources
 
 import androidx.annotation.Keep
 import androidx.annotation.UiThread
+import com.google.gson.JsonObject
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Geometry
@@ -238,7 +239,12 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
-        nativeSetFeature(feature)
+
+        if (feature != null) {
+            nativeSetFeature(Feature.fromGeometry(feature.geometry(), feature.properties()?.deepCopy() ?: JsonObject(), feature.id(),  feature.bbox()))
+        } else {
+            nativeSetFeature(null)
+        }
     }
 
     /**
@@ -266,12 +272,19 @@ class GeoJsonSource : Source {
             return
         }
         checkThread()
-        if (featureCollection != null && featureCollection.features() != null) {
-            val features = featureCollection.features()
-            val featuresCopy: List<Feature> = ArrayList(features)
-            nativeSetFeatureCollection(FeatureCollection.fromFeatures(featuresCopy))
+        if (featureCollection != null) {
+            if (featureCollection?.features() != null) {
+                val features = featureCollection.features()
+                val featuresCopy: MutableList<Feature> = ArrayList()
+                features?.forEach{
+                    featuresCopy.add(Feature.fromGeometry(it.geometry(), it.properties()?.deepCopy() ?: JsonObject(), it.id(), it.bbox()))
+                }
+                nativeSetFeatureCollection(FeatureCollection.fromFeatures(featuresCopy))
+            } else {
+                nativeSetFeatureCollection(featureCollection)
+            }
         } else {
-            nativeSetFeatureCollection(featureCollection)
+            nativeSetFeatureCollection(null)
         }
     }
 
