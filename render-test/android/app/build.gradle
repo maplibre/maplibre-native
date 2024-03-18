@@ -3,6 +3,12 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 33
 
+    sourceSets {
+        test {
+            assets.srcDirs += ['../../../metrics']
+        }
+    }
+
     defaultConfig {
         applicationId = 'org.maplibre.render_test_runner'
         minSdkVersion 21
