@@ -1,6 +1,6 @@
-# Distributing Mapbox GL Native for Android
+# Distributing MapLibre Native for Android
 
-Depending on your use case, you may want to support all or just a subset of [Android ABIs](http://developer.android.com/ndk/guides/abis.html). This document covers building an `.aar` file from the Mapbox Maps SDK for Android and building `.so` files for specific ABIs. In normal circumstances an application developer will use [APK splits](https://developer.android.com/studio/build/configure-apk-splits.html) to optimize this at application level.
+Depending on your use case, you may want to support all or just a subset of [Android ABIs](http://developer.android.com/ndk/guides/abis.html). This document covers building an `.aar` file from the MapLibre Native for Android and building `.so` files for specific ABIs. In normal circumstances an application developer will use [APK splits](https://developer.android.com/studio/build/configure-apk-splits.html) to optimize this at application level.
 
 ##### Build types
 
@@ -24,7 +24,7 @@ This will build native libraries to support following ABIs:
 - x86_64
 - mips
 
-After succesfully finish building the native libraries, gradle will build the MapboxAndroidSDK module and generate an Android Archive file in `MapboxAndroidSDK/build/outputs/aar `. The packaged native libraries can be found in `MapboxAndroidSDK/src/main/jniLibs/<abi>`.
+After successfully finish building the native libraries, Gradle will build the MapboxAndroidSDK module and generate an Android Archive file in `MapboxAndroidSDK/build/outputs/aar `. The packaged native libraries can be found in `MapboxAndroidSDK/src/main/jniLibs/<abi>`.
 
 ##### Build native libraries for a specific ABI
 

@@ -16,6 +16,9 @@
 
 namespace mbgl {
 namespace style {
+namespace expression {
+enum class Dependency : uint32_t;
+} // namespace expression
 
 class LayerObserver;
 class Filter;
@@ -158,6 +161,9 @@ public:
     const LayerTypeInfo* getTypeInfo() const noexcept;
 
     mapbox::base::WeakPtr<Layer> makeWeakPtr() { return weakFactory.makeWeakPtr(); }
+
+    /// Collect dependencies
+    expression::Dependency getDependencies() const noexcept;
 
 protected:
     virtual Mutable<Impl> mutableBaseImpl() const = 0;

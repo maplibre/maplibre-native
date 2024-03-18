@@ -132,7 +132,7 @@ public:
     bool supportsZoom(float zoom) const;
 
     virtual void upload(gfx::UploadPass&) {}
-    virtual void render(PaintParameters&){};
+    virtual void render(PaintParameters&) {};
 
     // Check wether the given geometry intersects
     // with the feature
@@ -193,6 +193,9 @@ public:
     /// Returns the current renderability mode of the layer
     bool isLayerRenderable() const noexcept { return isRenderable; }
 #endif
+
+    using Dependency = style::expression::Dependency;
+    Dependency getStyleDependencies() const { return styleDependencies; }
 
 protected:
     // Checks whether the current hardware can render this layer. If it can't,
@@ -298,6 +301,8 @@ protected:
 
     // Current layer index as specified by the layerIndexChanged event
     int32_t layerIndex{0};
+
+    Dependency styleDependencies = Dependency::None;
 
     // Current renderable status as specified by the markLayerRenderable event
     bool isRenderable{false};

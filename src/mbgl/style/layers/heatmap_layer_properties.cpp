@@ -29,6 +29,10 @@ const HeatmapLayer::Impl& HeatmapLayerProperties::layerImpl() const {
     return static_cast<const HeatmapLayer::Impl&>(*baseImpl);
 }
 
+expression::Dependency HeatmapLayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies();
+}
+
 } // namespace style
 } // namespace mbgl
 

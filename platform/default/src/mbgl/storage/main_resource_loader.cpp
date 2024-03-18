@@ -50,11 +50,9 @@ public:
                 if (res.kind == Resource::Kind::Tile) {
                     // onlineResponse.data will be null if data not modified
                     MBGL_TIMING_FINISH(watch,
-                                       " Action: "
-                                           << "Requesting,"
-                                           << " URL: " << res.url.c_str() << " Size: "
-                                           << (response.data != nullptr ? response.data->size() : 0) << "B,"
-                                           << " Time")
+                                       " Action: " << "Requesting," << " URL: " << res.url.c_str() << " Size: "
+                                                   << (response.data != nullptr ? response.data->size() : 0) << "B,"
+                                                   << " Time")
                 }
                 callback(response);
             });

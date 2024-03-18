@@ -69,6 +69,8 @@ public:
 
     unsigned long constantsMask() const override;
 
+    expression::Dependency getDependencies() const noexcept override;
+
     const RasterLayer::Impl& layerImpl() const;
     // Data members.
     RasterPaintProperties::PossiblyEvaluated evaluated;

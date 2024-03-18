@@ -16,9 +16,9 @@ class PropertyExpressionBase {
 public:
     explicit PropertyExpressionBase(std::unique_ptr<expression::Expression>);
 
-    bool isZoomConstant() const noexcept;
-    bool isFeatureConstant() const noexcept;
-    bool isRuntimeConstant() const noexcept;
+    bool isZoomConstant() const noexcept { return isZoomConstant_; }
+    bool isFeatureConstant() const noexcept { return isFeatureConstant_; }
+    bool isRuntimeConstant() const noexcept { return isRuntimeConstant_; }
     float interpolationFactor(const Range<float>&, float) const noexcept;
     Range<float> getCoveringStops(float, float) const noexcept;
     const expression::Expression& getExpression() const noexcept;
@@ -30,12 +30,20 @@ public:
 
     bool useIntegerZoom = false;
 
+    using Dependency = expression::Dependency;
+    Dependency getDependencies() const noexcept {
+        auto v = expression ? expression->dependencies : Dependency::None;
+        assert(isZoomConstant_ == !(underlying_type(v) & underlying_type(Dependency::Zoom)));
+        assert(isFeatureConstant_ == !(underlying_type(v) & underlying_type(Dependency::Feature)));
+        return v;
+    }
+
 protected:
     std::shared_ptr<const expression::Expression> expression;
-    variant<std::nullptr_t, const expression::Interpolate*, const expression::Step*> zoomCurve;
     bool isZoomConstant_;
     bool isFeatureConstant_;
     bool isRuntimeConstant_;
+    variant<std::nullptr_t, const expression::Interpolate*, const expression::Step*> zoomCurve;
 };
 
 template <class T>

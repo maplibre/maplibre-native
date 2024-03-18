@@ -14,6 +14,10 @@ public:
     bool hasLayoutDifference(const Layer::Impl&) const override;
     void stringifyLayout(rapidjson::Writer<rapidjson::StringBuffer>&) const override;
 
+    expression::Dependency getDependencies() const noexcept override {
+        return layout.getDependencies() | paint.getDependencies();
+    }
+
     LineLayoutProperties::Unevaluated layout;
     LinePaintProperties::Transitionable paint;
 

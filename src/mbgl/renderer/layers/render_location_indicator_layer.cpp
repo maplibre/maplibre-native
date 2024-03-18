@@ -146,7 +146,7 @@ protected:
         }
         virtual void bind() { MBGL_CHECK_ERROR(glUseProgram(program)); }
         void detach() { MBGL_CHECK_ERROR(glUseProgram(0)); }
-        virtual void pullLocations(){};
+        virtual void pullLocations() {};
 
         GLuint program = 0;
         GLuint vertexShader = 0;
