@@ -63,6 +63,9 @@ xcodeproj(
                 "simulator",
             ],
         ),
+        top_level_target(
+            "//platform/macos/app:macos_app",
+        ),
     ],
     xcode_configurations = {
         "Debug": {"//command_line_option:compilation_mode": "dbg"},
