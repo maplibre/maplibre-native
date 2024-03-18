@@ -87,7 +87,7 @@ android {
     }
 
     // build native libraries
-    List nativeTargets = ["maplibre-gl"]
+    List nativeTargets = ["maplibre"]
     if (project.hasProperty("mapbox.with_test")) {
         nativeTargets.add("mbgl-test")
     }

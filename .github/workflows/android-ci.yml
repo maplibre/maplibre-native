@@ -106,7 +106,7 @@ jobs:
       - name: Run Android unit tests
         run: make run-android-unit-test
 
-      - name: Build libmaplibre-gl.so for arm-v8
+      - name: Build libmaplibre.so for arm-v8
         run: make android-lib-arm-v8
 
       - name: Copy developer config with API key for UI tests
