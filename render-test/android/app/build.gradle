@@ -3,8 +3,14 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 33
 
+    sourceSets {
+        test {
+            assets.srcDirs += ['../../../metrics']
+        }
+    }
+
     defaultConfig {
-        applicationId = 'com.mapbox.mapboxsdk.maps.render_test_runner'
+        applicationId = 'org.maplibre.render_test_runner'
         minSdkVersion 21
         targetSdkVersion 33
         def abi = 'all'
