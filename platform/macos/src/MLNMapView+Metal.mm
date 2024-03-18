@@ -108,6 +108,25 @@ MLNMapViewMetalImpl::MLNMapViewMetalImpl(MLNMapView* nativeView_)
     : MLNMapViewImpl(nativeView_),
       mbgl::mtl::RendererBackend(mbgl::gfx::ContextMode::Unique),
       mbgl::gfx::Renderable({ 0, 0 }, std::make_unique<MLNMapViewMetalRenderableResource>(*this)) {
+          
+      auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+      if (resource.mtlView) {
+          return;
+      }
+
+      id<MTLDevice> device = (__bridge id<MTLDevice>)resource.getBackend().getDevice().get();
+
+      resource.mtlView = [[MTKView alloc] initWithFrame:mapView.bounds device:device];
+      resource.mtlView.delegate = resource.delegate;
+      resource.mtlView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+      resource.mtlView.colorPixelFormat = MTLPixelFormatBGRA8Unorm;
+      resource.mtlView.depthStencilPixelFormat = MTLPixelFormatDepth32Float_Stencil8;
+      resource.mtlView.layer.opaque = mapView.opaque;
+      resource.mtlView.enableSetNeedsDisplay = NO;
+      CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
+      metalLayer.presentsWithTransaction = presentsWithTransaction;
+
+      [mapView addSubview:resource.mtlView positioned:NSWindowBelow relativeTo:nil];
 }
 
 MLNMapViewMetalImpl::~MLNMapViewMetalImpl() = default;

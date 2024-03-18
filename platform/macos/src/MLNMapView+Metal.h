@@ -41,8 +41,6 @@ public:
 
     mbgl::PremultipliedImage readStillImage() override;
 
-    // End implementation of MLNMapViewImpl
-
 private:
     bool presentsWithTransaction = false;
 };
