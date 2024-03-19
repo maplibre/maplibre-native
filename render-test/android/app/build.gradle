@@ -3,8 +3,14 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 33
 
+    sourceSets {
+        test {
+            assets.srcDirs += ['../../../metrics']
+        }
+    }
+
     defaultConfig {
-        applicationId = 'com.mapbox.mapboxsdk.maps.render_test_runner'
+        applicationId = 'org.maplibre.render_test_runner'
         minSdkVersion 21
         targetSdkVersion 33
         def abi = 'all'
@@ -12,7 +18,7 @@ android {
             abi = project.getProperty('mapbox.abis')
         }
         ndk {
-            if (abi != 'all') {
+            if (abi != 'all' && abi != 'none') {
                 abiFilters abi.split(' ')
             } else {
                 abiFilters 'armeabi-v7a', 'x86', 'arm64-v8a', 'x86_64'

@@ -54,8 +54,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionTileSi
  ```
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/source-custom-raster/">
- Add raster imagery</a> example to learn how to add a `MLNRasterStyleLayer`
+ TODO: Add raster imagery, learn how to add a `MLNRasterStyleLayer`
  to your map using an `MLNRasterTileSource`.
  */
 MLN_EXPORT

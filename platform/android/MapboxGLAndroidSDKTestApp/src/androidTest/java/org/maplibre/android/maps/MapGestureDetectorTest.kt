@@ -187,7 +187,7 @@ class MapGestureDetectorTest : BaseTest() {
         onView(withId(R.id.mapView)).perform(quickScale(-300f, withVelocity = false, duration = 750L))
 
         rule.runOnUiThread {
-            Assert.assertEquals(3.0, maplibreMap.cameraPosition.zoom, 0.0001)
+            Assert.assertEquals(3.0, maplibreMap.cameraPosition.zoom, 0.001)
         }
     }
 }

@@ -12,7 +12,7 @@ namespace expression {
 class Any : public Expression {
 public:
     Any(std::vector<std::unique_ptr<Expression>> inputs_)
-        : Expression(Kind::Any, type::Boolean),
+        : Expression(Kind::Any, type::Boolean, collectDependencies(inputs_)),
           inputs(std::move(inputs_)) {}
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
@@ -31,7 +31,7 @@ private:
 class All : public Expression {
 public:
     All(std::vector<std::unique_ptr<Expression>> inputs_)
-        : Expression(Kind::All, type::Boolean),
+        : Expression(Kind::All, type::Boolean, collectDependencies(inputs_)),
           inputs(std::move(inputs_)) {}
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);

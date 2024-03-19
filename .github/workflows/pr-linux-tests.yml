@@ -124,7 +124,8 @@ jobs:
           path: message.md
 
   pr-benchmark:
-    if: github.event.workflow_run.event == 'pull_request'
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip == 'false'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -139,18 +140,31 @@ jobs:
           artifact-name: mbgl-benchmark-runner
           expect-files: "mbgl-benchmark-runner"
 
-      - name: Download mbgl-benchmark-runner-main
+      - name: Download mbgl-benchmark-runner-main, set permissions
         run: |
           wget -O mbgl-benchmark-runner-main "${download_url}/mbgl-benchmark-runner-main"
-          chmod +x mbgl-benchmark-runner-main
+          chmod +x mbgl-benchmark-runner-main mbgl-benchmark-runner
 
       # needed for compare.py
       - name: Install scipy
         run: pip3 install scipy
 
+      # not sure which one of these are runtime dependencies
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libuv1-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libglfw3-dev \
+            libwebp-dev \
+            libopengl0
+
       - name: Run Benchmarks
         # excluding the API tests because they hang https://github.com/maplibre/maplibre-native/issues/1808
-        run: python3 vendor/benchmark/tools/compare.py --no-color benchmarks ./mbgl-benchmark-runner-main mbgl-benchmark-runner --benchmark_filter='^[^A][^P][^I].*' > benchmark_out.txt
+        run: python3 vendor/benchmark/tools/compare.py --no-color benchmarks ./mbgl-benchmark-runner-main ./mbgl-benchmark-runner --benchmark_filter='^[^A][^P][^I].*' > benchmark_out.txt
 
       - name: Configure AWS Credentials
         if: github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 

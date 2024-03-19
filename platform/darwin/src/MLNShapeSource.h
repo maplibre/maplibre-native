@@ -27,7 +27,9 @@ typedef NSString *MLNShapeSourceOption NS_STRING_ENUM;
  is ignored when creating an `MLNComputedShapeSource` object.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/clustering/">Cluster point data</a> and <a href="https://docs.mapbox.com/ios/maps/examples/clustering-with-images/">Use images to cluster point data</a> examples to learn how to cluster point data with this `MLNShapeSourceOption`.
+ TODO: Cluster point data
+ TODO: Use images to cluster point data
+ Learn how to cluster point data with this `MLNShapeSourceOption`.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionClustered;
 
@@ -181,7 +183,10 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionLine
  ```
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/clustering/">Cluster point data</a>, <a href="https://docs.mapbox.com/ios/maps/examples/clustering-with-images/">Use images to cluster point data</a>, and <a href="https://docs.mapbox.com/ios/maps/examples/live-data/">Add live data</a> examples to learn how to add data to your map using this `MLNSource` object.
+ TODO: Cluster point data
+ TODO: Use images to cluster point data
+ TODO: Add live data
+ Learn how to add data to your map using this `MLNSource` object.
  */
 MLN_EXPORT
 @interface MLNShapeSource : MLNSource
@@ -207,8 +212,7 @@ MLN_EXPORT
  @return An initialized shape source.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/live-data/">
- Add live data</a> example to learn how to add live data to your map by
+ TODO: Add live data, learn how to add live data to your map by
  updating the an `MLNShapeSource` object's `URL` property.
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier URL:(NSURL *)url options:(nullable NSDictionary<MLNShapeSourceOption, id> *)options NS_DESIGNATED_INITIALIZER;
@@ -241,8 +245,7 @@ MLN_EXPORT
  @return An initialized shape source.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/runtime-animate-line/">
- Animate a line</a> example to learn how to animate line data by continously
+ TODO: Animate a line, learn how to animate line data by continously
  updating an `MLNShapeSource`'s `shape` attribute.
  */
 - (instancetype)initWithIdentifier:(NSString *)identifier shape:(nullable MLNShape *)shape options:(nullable NSDictionary<MLNShapeSourceOption, id> *)options NS_DESIGNATED_INITIALIZER;

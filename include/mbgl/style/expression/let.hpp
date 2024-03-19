@@ -17,7 +17,7 @@ public:
     using Bindings = std::map<std::string, std::shared_ptr<Expression>>;
 
     Let(Bindings bindings_, std::unique_ptr<Expression> result_)
-        : Expression(Kind::Let, result_->getType()),
+        : Expression(Kind::Let, result_->getType(), collectDependencies(bindings_) | Dependency::Bind),
           bindings(std::move(bindings_)),
           result(std::move(result_)) {}
 
@@ -49,7 +49,7 @@ private:
 class Var : public Expression {
 public:
     Var(std::string name_, std::shared_ptr<Expression> value_)
-        : Expression(Kind::Var, value_->getType()),
+        : Expression(Kind::Var, value_->getType(), depsOf(value_) | Dependency::Var),
           name(std::move(name_)),
           value(std::move(value_)) {}
 

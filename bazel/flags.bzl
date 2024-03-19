@@ -68,6 +68,14 @@ WARNING_FLAGS = {
         "-Wno-tautological-constant-compare",
         "-Wno-gnu-anonymous-struct",
     ] + GCC_CLANG_COMMON_FLAGS,
+    "macos": [
+        "-Wno-newline-eof",
+        "-Wno-nested-anon-types",
+        "-Wno-c++11-narrowing",
+        "-Wno-pointer-to-int-cast",
+        "-Wno-tautological-constant-compare",
+        "-Wno-gnu-anonymous-struct",
+    ] + GCC_CLANG_COMMON_FLAGS,
     "linux": GCC_CLANG_COMMON_FLAGS,
     "windows": MSVC_FLAGS,
 }

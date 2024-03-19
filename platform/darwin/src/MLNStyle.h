@@ -23,9 +23,8 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNRedundantSourceIdentifier
 /**
  The proxy object for the current map style.
 
- MLNStyle provides a set of convenience methods for changing Mapbox
- default styles using `MLNMapView.styleURL`.
- <a href="https://www.mapbox.com/maps/">Learn more about Mapbox default styles</a>.
+ MLNStyle provides a set of convenience methods for changing default styles included
+ with MapLibre.
 
  It is also possible to directly manipulate the current map style
  via `MLNMapView.style` by updating the style's data sources or layers.
@@ -35,11 +34,6 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNRedundantSourceIdentifier
     `-[MLNMapViewDelegate mapView:didFinishLoadingStyle:]` or
     `-[MLNMapViewDelegate mapViewDidFinishLoadingMap:]` methods as indicators
     that it's safe to modify the map's style.
-
- #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/default-styles/">
- Default styles</a> example to learn how to initialize an `MLNMapView` object
- with a Mapbox default style using `MLNStyle`'s class methods.
  */
 MLN_EXPORT
 @interface MLNStyle : NSObject
@@ -245,8 +239,7 @@ MLN_EXPORT
  @param sibling An existing layer in the style.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/shape-collection/">
- Add multiple shapes from a single shape source</a> example to learn how to
+ TODO: Add multiple shapes from a single shape source, learn how to
  add a layer to your map below an existing layer.
  */
 - (void)insertLayer:(MLNStyleLayer *)layer belowLayer:(MLNStyleLayer *)sibling;
@@ -270,8 +263,7 @@ MLN_EXPORT
  @param sibling An existing layer in the style.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/image-source/">
- Add an image</a> example to learn how to add a layer to your map above an
+ TODO: Add an image, learn how to add a layer to your map above an
  existing layer.
  */
 - (void)insertLayer:(MLNStyleLayer *)layer aboveLayer:(MLNStyleLayer *)sibling;
@@ -322,10 +314,9 @@ MLN_EXPORT
  @param name The name of the image to set to the style.
 
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/clustering-with-images/">
- Use images to cluster point data</a> and <a href="https://docs.mapbox.com/ios/maps/examples/clustering/">
- Cluster point data</a> examples to learn how to add images to your map using
- an `MLNStyle` object.
+ TODO: Use images to cluster point data
+ TODO: Cluster point data
+ Learn how to add images to your map using an `MLNStyle` object.
  */
 - (void)setImage:(MLNImage *)image forName:(NSString *)name;
 

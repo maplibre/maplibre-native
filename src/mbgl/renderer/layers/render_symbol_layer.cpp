@@ -358,7 +358,9 @@ inline const SymbolLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& i
 
 RenderSymbolLayer::RenderSymbolLayer(Immutable<style::SymbolLayer::Impl> _impl)
     : RenderLayer(makeMutable<SymbolLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {}
+      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+    styleDependencies = unevaluated.getDependencies();
+}
 
 RenderSymbolLayer::~RenderSymbolLayer() = default;
 

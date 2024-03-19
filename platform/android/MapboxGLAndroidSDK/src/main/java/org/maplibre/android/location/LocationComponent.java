@@ -47,6 +47,7 @@ import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_FASTEST_INTERVAL_MILLIS;
 import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_INTERVAL_MILLIS;
+import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_PADDING_ANIM_DURATION;
 import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_TILT_ANIM_DURATION;
 import static org.maplibre.android.location.LocationComponentConstants.DEFAULT_TRACKING_ZOOM_ANIM_DURATION;
 import static org.maplibre.android.location.LocationComponentConstants.TRANSITION_ANIMATION_DURATION_MS;
@@ -604,6 +605,84 @@ public final class LocationComponent {
   }
 
   /**
+   * Sets the padding.
+   * This API can only be used in pair with camera modes other than {@link CameraMode#NONE}.
+   * If you are not using any of {@link CameraMode} modes,
+   * use one of {@link MapLibreMap#moveCamera(CameraUpdate)},
+   * {@link MapLibreMap#easeCamera(CameraUpdate)} or {@link MapLibreMap#animateCamera(CameraUpdate)} instead.
+   * <p>
+   * If the camera is transitioning when the padding change is requested, the call is going to be ignored.
+   * Use {@link CameraTransitionListener} to chain the animations, or provide the padding as a camera change argument.
+   * </p>
+   *
+   * @param padding The desired padding.
+   */
+  public void paddingWhileTracking(double[] padding) {
+    paddingWhileTracking(padding, DEFAULT_TRACKING_PADDING_ANIM_DURATION, null);
+  }
+
+  /**
+   * Sets the padding.
+   * This API can only be used in pair with camera modes other than {@link CameraMode#NONE}.
+   * If you are not using any of {@link CameraMode} modes,
+   * use one of {@link MapLibreMap#moveCamera(CameraUpdate)},
+   * {@link MapLibreMap#easeCamera(CameraUpdate)} or {@link MapLibreMap#animateCamera(CameraUpdate)} instead.
+   * <p>
+   * If the camera is transitioning when the padding change is requested, the call is going to be ignored.
+   * Use {@link CameraTransitionListener} to chain the animations, or provide the padding as a camera change argument.
+   * </p>
+   *
+   * @param padding           The desired padding.
+   * @param animationDuration The padding animation duration.
+   */
+  public void paddingWhileTracking(double[] padding, long animationDuration) {
+    paddingWhileTracking(padding, animationDuration, null);
+  }
+
+  /**
+   * Sets the padding.
+   * This API can only be used in pair with camera modes other than {@link CameraMode#NONE}.
+   * If you are not using any of {@link CameraMode} modes,
+   * use one of {@link MapLibreMap#moveCamera(CameraUpdate)},
+   * {@link MapLibreMap#easeCamera(CameraUpdate)} or {@link MapLibreMap#animateCamera(CameraUpdate)} instead.
+   * <p>
+   * If the camera is transitioning when the padding change is requested, the call is going to be ignored.
+   * Use {@link CameraTransitionListener} to chain the animations, or provide the padding as a camera change argument.
+   * </p>
+   *
+   * @param padding           The desired padding.
+   * @param animationDuration The padding animation duration.
+   * @param callback          The callback with finish/cancel information
+   */
+  public void paddingWhileTracking(double[] padding, long animationDuration,
+                                   @Nullable MapLibreMap.CancelableCallback callback) {
+    checkActivationState();
+    if (!isLayerReady) {
+      notifyUnsuccessfulCameraOperation(callback, null);
+      return;
+    } else if (getCameraMode() == CameraMode.NONE) {
+      notifyUnsuccessfulCameraOperation(callback, String.format("%s%s",
+              "LocationComponent#paddingWhileTracking method can only be used",
+              " when a camera mode other than CameraMode#NONE is engaged."));
+      return;
+    } else if (locationCameraController.isTransitioning()) {
+      notifyUnsuccessfulCameraOperation(callback,
+              "LocationComponent#paddingWhileTracking method call is ignored because the camera mode is transitioning");
+      return;
+    }
+
+    locationAnimatorCoordinator.feedNewPadding(padding, maplibreMap.getCameraPosition(), animationDuration, callback);
+  }
+
+  /**
+   * Cancels animation started by {@link #paddingWhileTracking(double[], long, MapLibreMap.CancelableCallback)}.
+   */
+  public void cancelPaddingWhileTrackingAnimation() {
+    checkActivationState();
+    locationAnimatorCoordinator.cancelPaddingAnimation();
+  }
+
+  /**
    * Tilts the camera.
    * This API can only be used in pair with camera modes other than {@link CameraMode#NONE}.
    * If you are not using any of {@link CameraMode} modes,
@@ -732,10 +811,10 @@ public final class LocationComponent {
    * Example usage:
    * <pre>
    * {@code
-   * mapboxMap.addOnCameraIdleListener(new MapboxMap.OnCameraIdleListener() {
+   * MapLibreMap.addOnCameraIdleListener(new MapLibreMap.OnCameraIdleListener() {
    *   {@literal @}Override
    *   public void onCameraIdle() {
-   *     double zoom = mapboxMap.getCameraPosition().zoom;
+   *     double zoom = MapLibreMap.getCameraPosition().zoom;
    *     int maxAnimationFps;
    *     if (zoom < 5) {
    *       maxAnimationFps = 3;

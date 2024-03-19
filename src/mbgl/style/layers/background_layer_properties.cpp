@@ -31,6 +31,10 @@ const BackgroundLayer::Impl& BackgroundLayerProperties::layerImpl() const {
     return static_cast<const BackgroundLayer::Impl&>(*baseImpl);
 }
 
+expression::Dependency BackgroundLayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies();
+}
+
 } // namespace style
 } // namespace mbgl
 

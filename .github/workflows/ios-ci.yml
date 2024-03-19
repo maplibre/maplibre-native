@@ -30,7 +30,7 @@ jobs:
   pre_job:
     runs-on: ubuntu-latest
     outputs:
-      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_changed != 'true' }}
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_modified != 'true' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,7 +42,7 @@ jobs:
           files_yaml_from_source_file: .github/changed-files.yml
 
       - name: Run step if test file(s) change
-        if: steps.changed-files-yaml.outputs.ios_any_changed == 'true'  
+        if: steps.changed-files-yaml.outputs.ios_any_modified == 'true'  
         run: |
           echo "One or more iOS file(s) has changed."
           echo "List of changes: ${{ steps.changed-files-yaml.outputs.ios_all_changed_files }}"

@@ -23,7 +23,7 @@ public:
     ResultType operator()(const T& constant) const { return ResultType(constant); }
 
     ResultType operator()(const style::PropertyExpression<T>& expression) const {
-        if (useIntegerZoom) { // Compiler will optimize out the unused branch.
+        if constexpr (useIntegerZoom) { // Compiler will optimize out the unused branch.
             if (!expression.isFeatureConstant() || !expression.isRuntimeConstant()) {
                 auto returnExpression = expression;
                 returnExpression.useIntegerZoom = true;

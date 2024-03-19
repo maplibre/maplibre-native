@@ -10,7 +10,7 @@ namespace expression {
 using namespace mbgl::style::conversion;
 
 Assertion::Assertion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_)
-    : Expression(Kind::Assertion, std::move(type_)),
+    : Expression(Kind::Assertion, std::move(type_), collectDependencies(inputs_)),
       inputs(std::move(inputs_)) {
     assert(!inputs.empty());
 }

@@ -1,1 +1,4 @@
 include ':MapboxGLAndroidSDK', ':MapboxGLAndroidSDKTestApp', ':MapboxGLAndroidSDKLint'
+
+def renderTestProjectDir = new File(rootDir, '../../render-test/android')
+includeBuild(renderTestProjectDir)

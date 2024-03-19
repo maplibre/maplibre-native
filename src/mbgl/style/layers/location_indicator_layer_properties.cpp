@@ -29,6 +29,10 @@ const LocationIndicatorLayer::Impl& LocationIndicatorLayerProperties::layerImpl(
     return static_cast<const LocationIndicatorLayer::Impl&>(*baseImpl);
 }
 
+expression::Dependency LocationIndicatorLayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies() | layerImpl().layout.getDependencies();
+}
+
 } // namespace style
 } // namespace mbgl
 
