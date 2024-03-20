@@ -51,7 +51,7 @@ public:
         interface.setTileID({11, 327, 791});
         constexpr float extent = mbgl::util::EXTENT;
 
-        // add polylines
+        // add classic polylines
         {
             using namespace mbgl;
             
@@ -148,7 +148,32 @@ public:
             // add symbol
             interface.addSymbol(position);
         }
+
+        // add polyline using wide vectors
+        {
+            using namespace mbgl;
+            
+            Interface::LineOptions options
+                {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/Color::red() };
+            options.geometry.beginCap = style::LineCapType::Round;
+            options.geometry.endCap = style::LineCapType::Round;
+            options.geometry.joinType = style::LineJoinType::Round;
+            
+            GeometryCoordinates polyline;
+//            {
+//                { 0.5, -0.5},
+//                {-0.5, -0.5},
+//                { 0.0, +0.5},
+//                { 0.0,  0.0},
+//            };
                 
+            // set property values
+            interface.setLineOptions(options);
+                
+            // add polyline
+            interface.addPolyline(polyline);
+        }
+
         // finish
         interface.finish();
     }

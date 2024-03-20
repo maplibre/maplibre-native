@@ -149,10 +149,20 @@ public:
 
 private:
     gfx::ShaderPtr lineShaderDefault() const;
+    gfx::ShaderPtr lineShaderWideVector() const;
     gfx::ShaderPtr fillShaderDefault() const;
     gfx::ShaderPtr symbolShaderDefault() const;
+    
+    enum class BuilderType {
+        None,
+        LineClassic,
+        LineWideVector,
+        Fill,
+        Symbol
+    };
 
     std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
+    void updateBuilder(BuilderType type, const std::string& name, gfx::ShaderPtr shader);
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
@@ -164,6 +174,8 @@ private:
     LineOptions lineOptions;
     FillOptions fillOptions;
     SymbolOptions symbolOptions;
+    
+    BuilderType builderType {BuilderType::None};
 };
 
 class CustomDrawableLayer final : public Layer {

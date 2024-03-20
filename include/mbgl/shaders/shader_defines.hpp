@@ -259,6 +259,23 @@ enum {
     symbolVertexAttributeCount
 };
 
+enum {
+    idWideVectorScreenPos,
+    idWideVectorColor,
+    idWideVectorIndex,
+
+    wideVectorAttributeCount
+};
+
+enum {
+    idWideVectorInstanceCenter,
+    idWideVectorInstanceColor,
+    idWideVectorInstancePrevious,
+    idWideVectorInstanceNext,
+
+    wideVectorInstanceAttributeCount
+};
+
 static constexpr auto maxVertexAttributeCountPerShader = std::max(
     {static_cast<size_t>(backgroundVertexAttributeCount),
      static_cast<size_t>(circleVertexAttributeCount),
@@ -272,7 +289,10 @@ static constexpr auto maxVertexAttributeCountPerShader = std::max(
      static_cast<size_t>(hillshadeVertexAttributeCount),
      static_cast<size_t>(lineVertexAttributeCount),
      static_cast<size_t>(rasterVertexAttributeCount),
-     static_cast<size_t>(symbolVertexAttributeCount)});
+     static_cast<size_t>(symbolVertexAttributeCount),
+     static_cast<size_t>(wideVectorAttributeCount),
+     static_cast<size_t>(wideVectorInstanceAttributeCount),
+     });
 
 } // namespace shaders
 } // namespace mbgl

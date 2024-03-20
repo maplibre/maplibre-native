@@ -189,6 +189,12 @@ public:
     /// Set vertex attribute array
     void setVertexAttributes(gfx::VertexAttributeArrayPtr value) noexcept { vertexAttributes = std::move(value); }
 
+    /// Get the instance attributes
+    const gfx::VertexAttributeArrayPtr& getInstanceAttributes() const noexcept { return instanceAttributes; }
+
+    /// Set instance attribute array
+    void setInstanceAttributes(gfx::VertexAttributeArrayPtr value) noexcept { instanceAttributes = std::move(value); }
+
     /// Provide raw data for vertices. Incompatible with adding primitives
     virtual void setVertices(std::vector<uint8_t>&&, std::size_t, AttributeDataType) = 0;
 
@@ -251,6 +257,7 @@ protected:
     DepthMaskType depthType; // = DepthMaskType::ReadOnly;
     UniqueDrawableData drawableData{};
     gfx::VertexAttributeArrayPtr vertexAttributes;
+    gfx::VertexAttributeArrayPtr instanceAttributes;
 
     struct Impl;
     std::unique_ptr<Impl> impl;

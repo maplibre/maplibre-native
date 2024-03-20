@@ -22,6 +22,7 @@
 #include <mbgl/util/containers.hpp>
 #include <mbgl/gfx/fill_generator.hpp>
 #include <mbgl/shaders/custom_drawable_layer_ubo.hpp>
+#include <mbgl/shaders/shader_source.hpp>
 
 #include <cmath>
 
@@ -86,7 +87,7 @@ public:
         : linePropertiesUBO(properties) {}
     ~LineDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override{};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -136,7 +137,7 @@ public:
           opacity(opacity_) {}
     ~FillDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override{};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -183,7 +184,7 @@ public:
         : options(options_) {}
     ~SymbolDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override{};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -279,27 +280,127 @@ void CustomDrawableLayerHost::Interface::setSymbolOptions(const SymbolOptions& o
     symbolOptions = options;
 }
 
-void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates) {
-    if (!lineShader) lineShader = lineShaderDefault();
-    assert(lineShader);
-    if (!builder || builder->getShader() != lineShader) {
+void CustomDrawableLayerHost::Interface::updateBuilder(BuilderType type,
+                                                       const std::string& name,
+                                                       gfx::ShaderPtr shader) {
+    assert(shader);
+    if (type != builderType || !builder || builder->getShader() != shader) {
         finish();
-        builder = createBuilder("lines", lineShader);
+        builder = createBuilder(name, shader);
+        builderType = type;
     }
     assert(builder);
-    assert(builder->getShader() == lineShader);
-    builder->addPolyline(coordinates, lineOptions.geometry);
+    assert(builder->getShader() == shader);
+};
+
+void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates) {
+    switch (lineOptions.shaderType) {
+        case LineShaderType::Classic: {
+            // build classic polyline
+            updateBuilder(BuilderType::LineClassic, "custom-lines", lineShaderDefault());
+            builder->addPolyline(coordinates, lineOptions.geometry);
+        } break;
+
+        case LineShaderType::MetalWideVector: {
+            // build wide vector polyline
+            updateBuilder(BuilderType::LineWideVector, "custom-lines-widevector", lineShaderWideVector());
+
+            struct VertexTriWideVecB {
+                // x, y offset around the center
+                std::array<float, 3> screenPos;
+                std::array<float, 4> color;
+                int index;
+            };
+            std::array<float, 4> color{1.0f, 0, 0, .5f};
+            VertexTriWideVecB vertexBuffer[12]{
+                {{0, 0, 0}, color, (0 << 16) + 0},
+                {{0, 0, 0}, color, (1 << 16) + 0},
+                {{0, 0, 0}, color, (2 << 16) + 0},
+                {{0, 0, 0}, color, (3 << 16) + 0},
+
+                {{0, 0, 0}, color, (4 << 16) + 1},
+                {{0, 0, 0}, color, (5 << 16) + 1},
+                {{0, 0, 0}, color, (6 << 16) + 1},
+                {{0, 0, 0}, color, (7 << 16) + 1},
+
+                {{0, 0, 0}, color, (8 << 16) + 2},
+                {{0, 0, 0}, color, (9 << 16) + 2},
+                {{0, 0, 0}, color, (10 << 16) + 2},
+                {{0, 0, 0}, color, (11 << 16) + 2},
+            };
+
+            struct Uniforms {
+                std::array<float, 4 * 4> mvpMatrix;
+                std::array<float, 4 * 4> mvpMatrixDiff;
+                std::array<float, 4 * 4> mvMatrix;
+                std::array<float, 4 * 4> mvMatrixDiff;
+                std::array<float, 4 * 4> pMatrix;
+                std::array<float, 4 * 4> pMatrixDiff;
+                std::array<float, 2> frameSize;
+            };
+            Uniforms uniforms{/*mvpMatrix     */ mbgl::matrix::identity4f(),
+                              /*mvpMatrixDiff */ {0.0f},
+                              /*mvMatrix      */ mbgl::matrix::identity4f(),
+                              /*mvMatrixDiff  */ {0.0f},
+                              /*pMatrix       */ mbgl::matrix::identity4f(),
+                              /*pMatrixDiff   */ {0.0f},
+                              /*frameSize     */ {/*TODO: */ 640.0, 480.0}};
+
+            enum class WKSVertexLineJoinType {
+                WKSVertexLineJoinMiter = 0,
+                WKSVertexLineJoinMiterClip = 1,
+                WKSVertexLineJoinMiterSimple = 2,
+                WKSVertexLineJoinRound = 3,
+                WKSVertexLineJoinBevel = 4,
+                WKSVertexLineJoinNone = 5,
+            };
+            enum class WKSVertexLineCapType {
+                WKSVertexLineCapButt = 0,
+                WKSVertexLineCapRound = 1,
+                WKSVertexLineCapSquare = 2,
+            };
+            struct UniformWideVec {
+                float w2;
+                float offset;
+                float edge;
+                float texRepeat;
+                std::array<float, 2> texOffset;
+                float miterLimit;
+                WKSVertexLineJoinType join;
+                WKSVertexLineCapType cap;
+                bool hasExp;
+                float interClipLimit;
+            };
+            UniformWideVec wideVec{/*w2            */ 16.0f,
+                                   /*offset        */ 0.0f,
+                                   /*edge          */ 1.0f,
+                                   /*texRepeat     */ 0.0f,
+                                   /*texOffset     */ {},
+                                   /*miterLimit    */ 1.0f,
+                                   /*join          */ WKSVertexLineJoinType::WKSVertexLineJoinMiter,
+                                   /*cap           */ WKSVertexLineCapType::WKSVertexLineCapButt,
+                                   /*hasExp        */ false,
+                                   /*interClipLimit*/ 0.0f};
+
+            struct VertexTriWideVecInstance {
+                std::array<float, 3> center;
+                std::array<float, 4> color;
+                int prev;
+                int next;
+            };
+            VertexTriWideVecInstance centerline[4]{
+                {{0.5, -0.5, 0}, {0}, -1, 1},
+                {{-0.5, -0.5, 0}, {0}, 0, 2},
+                {{0.0, +0.5, 0}, {0}, 1, 3},
+                {{0.0, 0.0, 0}, {0}, 2, -1},
+            };
+        } break;
+    }
 }
 
 void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geometry) {
-    if (!fillShader) fillShader = fillShaderDefault();
-    assert(fillShader);
-    if (!builder || builder->getShader() != fillShader) {
-        finish();
-        builder = createBuilder("fill", fillShader);
-    }
-    assert(builder);
-    assert(builder->getShader() == fillShader);
+    // build fill
+    updateBuilder(BuilderType::Fill, "custom-fill", fillShaderDefault());
 
     // provision buffers for fill vertices, indexes and segments
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
@@ -333,14 +434,8 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
 }
 
 void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& point) {
-    if (!symbolShader) symbolShader = symbolShaderDefault();
-    assert(symbolShader);
-    if (!builder || builder->getShader() != symbolShader) {
-        finish();
-        builder = createBuilder("symbol", symbolShader);
-    }
-    assert(builder);
-    assert(builder->getShader() == symbolShader);
+    // build symbol
+    updateBuilder(BuilderType::Symbol, "custom-symbol", symbolShaderDefault());
 
     // temporary: buffers
     struct CustomSymbolIcon {
@@ -412,7 +507,7 @@ void CustomDrawableLayerHost::Interface::finish() {
             builder->flush(context);
             for (auto& drawable : builder->clearDrawables()) {
                 assert(tileID.has_value());
-                drawable->setTileID(tileID.value());
+                drawable->setTileID(tileID.value()); // TODO: fix usage of tileID
                 if (tweaker) {
                     drawable->addTweaker(tweaker);
                 }
@@ -422,42 +517,52 @@ void CustomDrawableLayerHost::Interface::finish() {
             }
         };
 
-        if (builder->getShader() == lineShader) {
-            // finish building lines
+        // what were we building?
+        switch (builderType) {
+            case BuilderType::LineClassic: {
+                // finish building classic lines
 
-            // create line tweaker
-            const shaders::LinePropertiesUBO linePropertiesUBO{lineOptions.color,
-                                                               lineOptions.blur,
-                                                               lineOptions.opacity,
-                                                               lineOptions.gapWidth,
-                                                               lineOptions.offset,
-                                                               lineOptions.width,
-                                                               0,
-                                                               0,
-                                                               0};
-            auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
+                // create line tweaker
+                const shaders::LinePropertiesUBO linePropertiesUBO{lineOptions.color,
+                                                                   lineOptions.blur,
+                                                                   lineOptions.opacity,
+                                                                   lineOptions.gapWidth,
+                                                                   lineOptions.offset,
+                                                                   lineOptions.width,
+                                                                   0,
+                                                                   0,
+                                                                   0};
+                auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
 
-            // finish drawables
-            finish_(tweaker);
-        } else if (builder->getShader() == fillShader) {
-            // finish building fills
+                // finish drawables
+                finish_(tweaker);
+            } break;
+            case BuilderType::LineWideVector: {
+                // TODO: finish building wide vector lines
+            } break;
+            case BuilderType::Fill: {
+                // finish building fills
 
-            // create fill tweaker
-            auto tweaker = std::make_shared<FillDrawableTweaker>(fillOptions.color, fillOptions.opacity);
+                // create fill tweaker
+                auto tweaker = std::make_shared<FillDrawableTweaker>(fillOptions.color, fillOptions.opacity);
 
-            // finish drawables
-            finish_(tweaker);
-        } else if (builder->getShader() == symbolShader) {
-            // finish building symbols
-
-            // finish drawables
-            finish_(nullptr);
+                // finish drawables
+                finish_(tweaker);
+            } break;
+            case BuilderType::Symbol:
+                // finish building symbols
+                finish_(nullptr);
+                break;
+            default:
+                break;
         }
     }
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
     gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("LineShader");
+    assert(shaderGroup);
+    if (!shaderGroup) return gfx::ShaderPtr();
 
     const StringIDSetsPair propertiesAsUniforms{{"a_color", "a_blur", "a_opacity", "a_gapwidth", "a_offset", "a_width"},
                                                 {idLineColorVertexAttribute,
@@ -468,6 +573,14 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
                                                  idLineWidthVertexAttribute}};
 
     return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
+}
+
+gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderWideVector() const {
+    gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("WideVectorShader");
+    assert(shaderGroup);
+    if (!shaderGroup) return gfx::ShaderPtr();
+
+    return shaderGroup->getOrCreateShader(context, {});
 }
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::fillShaderDefault() const {

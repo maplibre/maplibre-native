@@ -319,7 +319,7 @@ public:
 
     /// Do something with each attribute
     template <typename Func /* void(VertexAttribute&) */>
-    void visitAttributes(Func f) {
+    void visitAttributes(Func f) const {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& attr) {
             if (attr) {
                 f(*attr);

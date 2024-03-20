@@ -7,14 +7,56 @@
 namespace mbgl {
 namespace shaders {
 
+struct alignas(16) WideVectorUniformsUBO {
+    std::array<float, 4 * 4> mvpMatrix;
+    std::array<float, 4 * 4> mvpMatrixDiff;
+    std::array<float, 4 * 4> mvMatrix;
+    std::array<float, 4 * 4> mvMatrixDiff;
+    std::array<float, 4 * 4> pMatrix;
+    std::array<float, 4 * 4> pMatrixDiff;
+    std::array<float, 2> frameSize;
+};
+static_assert(sizeof(WideVectorUniformsUBO) % 16 == 0);
+
+struct alignas(16) WideVectorUniformWideVecUBO {
+    float w2;
+    float offset;
+    float edge;
+    float texRepeat;
+    std::array<float, 2> texOffset;
+    float miterLimit;
+    int32_t join;
+    int32_t cap;
+    int32_t hasExp;
+    float interClipLimit;
+};
+static_assert(sizeof(WideVectorUniformWideVecUBO) % 16 == 0);
+
+enum {
+    idWideVectorUniformsUBO,
+    idWideVectorUniformWideVecUBO,
+    wideVectorUBOCount
+};
+
 template <>
 struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
     static constexpr auto name = "WideVectorShader";
     static constexpr auto vertexMainFunction = "vertexTri_wideVecPerf";
     static constexpr auto fragmentMainFunction = "fragmentTri_wideVecPerf";
 
-    static constexpr std::array<AttributeInfo, 0> attributes{};
-    static constexpr std::array<UniformBlockInfo, 0> uniforms{};
+    static constexpr std::array<AttributeInfo, 3> attributes{
+        AttributeInfo{0, gfx::AttributeDataType::Float3, idWideVectorScreenPos},
+        AttributeInfo{1, gfx::AttributeDataType::Float4, idWideVectorColor},
+        AttributeInfo{2, gfx::AttributeDataType::Int, idWideVectorIndex}};
+    static constexpr std::array<UniformBlockInfo, 2> uniforms{
+        UniformBlockInfo{3, true, false, sizeof(WideVectorUniformsUBO), idWideVectorUniformsUBO},
+        UniformBlockInfo{4, true, false, sizeof(WideVectorUniformWideVecUBO), idWideVectorUniformWideVecUBO},
+    };
+    static constexpr std::array<AttributeInfo, 4> instanceAttributes{
+        AttributeInfo{5, gfx::AttributeDataType::Float3, idWideVectorInstanceCenter},
+        AttributeInfo{5, gfx::AttributeDataType::Float4, idWideVectorInstanceColor},
+        AttributeInfo{5, gfx::AttributeDataType::Int, idWideVectorInstancePrevious},
+        AttributeInfo{5, gfx::AttributeDataType::Int, idWideVectorInstanceNext}};
     static constexpr std::array<TextureInfo, 0> textures{};
 
     static constexpr auto source = R"(
@@ -76,7 +118,7 @@ typedef enum {
 
 // All the buffer entries (other than stage_in) for the vertex shaders
 typedef enum {
-    WKSVertexBuffer = 12,
+    WKSVertexBuffer = 0,
     WKSVertUniformArgBuffer,
     WKSVertLightingArgBuffer,
     // These are free form with their own subsections
@@ -185,9 +227,9 @@ typedef struct
 struct VertexTriWideVecB
 {
     // x, y offset around the center
-    float3 screenPos [[attribute(WhirlyKitShader::WKSVertexPositionAttribute)]];
-    float4 color [[attribute(WhirlyKitShader::WKSVertexColorAttribute)]];
-    int index [[attribute(WhirlyKitShader::WKSVertexWideVecInstIndexAttribute)]];
+    float3 screenPos [[attribute(0)]];
+    float4 color [[attribute(1)]];
+    int index [[attribute(2)]];
 };
 
 // Wide vector vertex passed to fragment shader (new version)
@@ -306,19 +348,16 @@ constant constexpr float4 discardPt(0,0,-1e6,NAN);
 
 // Performance version of wide vector shader
 vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
-          uint vertexID [[vertex_id]],
-          device const VertexTriWideVecB *vertices [[ buffer(WKSVertexBuffer) ]],
-          constant Uniforms &uniforms [[ buffer(WKSVertUniformArgBuffer) ]],
-          constant UniformWideVec &wideVec [[ buffer(WKSVertexArgBuffer) ]],
+          thread const VertexTriWideVecB vert [[ stage_in ]],
+          constant Uniforms &uniforms [[ buffer(3) ]],
+          constant UniformWideVec &wideVec [[ buffer(4) ]],
           uint instanceID [[ instance_id ]],
-          constant VertexTriWideVecInstance *wideVecInsts   [[ buffer(WKSVertModelInstanceArgBuffer) ]])
+          constant VertexTriWideVecInstance *wideVecInsts   [[ buffer(5) ]])
 {
     ProjVertexTriWideVecPerf outVert = {
         .position = discardPt,
         .roundJoin = false,
     };
-
-    const device VertexTriWideVecB &vert = vertices[vertexID];
     
     // Vertex index within the instance, 0-11
     // Odd indexes are on the left, evens are on the right.
@@ -676,17 +715,10 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
     return outVert;
 }
 
-struct TriWideArgBufferFrag {
-    UniformDrawStateA uniDrawState      [[ id(WKSUniformDrawStateEntry) ]];
-    UniformWideVec wideVec              [[ id(WKSUniformWideVecEntry) ]];
-    bool hasTextures;
-};
-
 // Fragment shader that takes the back of the globe into account
 fragment float4 fragmentTri_wideVecPerf(
             ProjVertexTriWideVecPerf vert [[stage_in]],
-            constant Uniforms &uniforms [[ buffer(WKSFragUniformArgBuffer) ]],
-            constant TriWideArgBufferFrag & fragArgs [[buffer(WKSFragmentArgBuffer)]])
+            constant Uniforms &uniforms [[ buffer(3) ]])
 {
     float patternAlpha = 1.0;
 
