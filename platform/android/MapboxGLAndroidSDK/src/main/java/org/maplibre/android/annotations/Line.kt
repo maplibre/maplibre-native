@@ -68,16 +68,31 @@ class Line @JvmOverloads constructor(
         }
     var gap: Float? = gap
         set(value) {
+            if (value != null && value <= 0) {
+                throw IllegalArgumentException(
+                    "You tried setting a gap of $gap for a Line object. This means that no line gap is to be used. " +
+                            "Please use `null` to indicate that `gap` is not used."
+                )
+            }
             field = value
             updateThis()
         }
     var offset: Float = offset
         set(value) {
+            if (value > 1f || value < 0f) {
+                throw IllegalArgumentException("Opacity must be between 0 and 1 (inclusive)")
+            }
             field = value
             updateThis()
         }
     var blur: Float? = blur
         set(value) {
+            if (value != null && value <= 0) {
+                throw IllegalArgumentException(
+                    "You tried setting a blur of $blur for a Line object. This means that no blur is to be used. " +
+                            "Please use `null` to indicate that `blur` is not used."
+                )
+            }
             field = value
             updateThis()
         }
@@ -98,6 +113,12 @@ class Line @JvmOverloads constructor(
         }
     var dashArray: Array<Float>? = dashArray
         set(value) {
+            if (value != null && value.size % 2 != 0) {
+                throw IllegalArgumentException(
+                    "You attempted setting a dash array of the uneven size ${value.size}. Dash arrays " +
+                            "need an even amount of entries."
+                )
+            }
             field = value
             updateAll()
         }

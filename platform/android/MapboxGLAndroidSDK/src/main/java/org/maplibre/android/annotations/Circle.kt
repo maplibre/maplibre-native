@@ -45,6 +45,9 @@ class Circle @JvmOverloads constructor(
         }
     var opacity: Float = opacity
         set(value) {
+            if (value > 1f || value < 0f) {
+                throw IllegalArgumentException("Opacity must be between 0 and 1 (inclusive)")
+            }
             field = value
             updateThis()
         }

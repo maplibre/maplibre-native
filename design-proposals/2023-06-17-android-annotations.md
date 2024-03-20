@@ -179,7 +179,7 @@ The following list shows concrete public properties or functions that should be 
     * `val rotate: Float` (default `0f` in degrees)
     * `val transform: Transform?` (`null` represents `NONE`)
     * `val offset: Offset?`
-    * `val opacity: Float` (default `1f`)
+    * `val opacity: Float` (default `1f`) (throws if not between `0f` and `1f`)
     * `val color: @ColorInt Int` (default `Color.BLACK`)
     * `val halo: Halo?`
     * `val pitchAlignment: Alignment?` (`null` represents `"auto"`) (NDD)
@@ -194,7 +194,7 @@ The following list shows concrete public properties or functions that should be 
 * `Line extends Annotation`
     * `var path: List<LatLng>`
     * `var join: Join` (default `MITER`)
-    * `var opacity: Float` (default `1f`)
+    * `var opacity: Float` (default `1f`) (throws if not between `0f` and `1f`)
     * `var color: @ColorInt Int` (default `Color.BLACK`)
     * `var width: Float` (default `1f`)
     * `var gap: Float?` (throws if <= 0)
@@ -211,7 +211,7 @@ The following list shows concrete public properties or functions that should be 
 * `enum Anchor` (inner class of `Translate`): `MAP`, `VIEWPORT`
 * `Fill extends Annotation`
     * `var paths: List<List<LatLng>>`
-    * `var opacity: Float` (default `1f`)
+    * `var opacity: Float` (default `1f`) (throws if not between `0f` and `1f`)
     * `var color: @ColorInt Int` (default `Color.BLACK`)
     * `var outlineColor: @ColorInt Int?`
     * `var pattern: Bitmap?` (note: if set, `outlineColor` is ignored)
@@ -222,7 +222,7 @@ The following list shows concrete public properties or functions that should be 
     * `var radius: Float` (default `5f`, in pixels)
     * `var color: @ColorInt Int` (default `Color.BLACK`)
     * `var blur: Float?` (throw if <= 0)
-    * `var opacity: Float` (default `1f`)
+    * `var opacity: Float` (default `1f`) (throws if not between `0f` and `1f`)
     * `var stroke: Stroke?`
     * `var translate: Translate?` (NDD)
     * `var pitchScale: Alignment` (default `MAP`) (NDD)
@@ -230,7 +230,7 @@ The following list shows concrete public properties or functions that should be 
 * `Stroke` (inner class of `Circle`)
     * `val width: Float` (throws if <= 0)
     * `val color: @ColorInt Int` (default `Color.BLACK`)
-    * `val opacity: Float` (default `1f`)
+    * `val opacity: Float` (default `1f`) (throws if not between `0f` and `1f`)
 * `enum PitchScale` (inner class of `Circle`): `MAP`, `VIEWPORT`
 * `ClusterGroup` (defaults match former `ClusterOptions`)
     * `val symbols: List<Symbol> by Delegates.observable(mutableListOf(), onChange = { _, _, new -> … })`
