@@ -12,9 +12,9 @@ sealed class KAnnotation<T : Geometry>(
     zLayer: Int = Defaults.Z_LAYER,
     draggable: Boolean = Defaults.DRAGGABLE,
     data: JsonElement? = Defaults.JSON_ELEMENT,
-    var clickListener: OnAnnotationClickListener<out KAnnotation<T>>? = null,
+    open val clickListener: OnAnnotationClickListener<*>? = null,
     var dragListener: OnAnnotationDragListener<out KAnnotation<T>>? = null,
-    var longClickListener: OnAnnotationLongClickListener<out KAnnotation<T>>? = null
+    open val longClickListener: OnAnnotationLongClickListener<*>? = null
 ) {
 
     var zLayer = zLayer
@@ -93,14 +93,16 @@ sealed class KAnnotation<T : Geometry>(
         }
     }
 
-    abstract fun getOffsetGeometry(
+    /**
+     * Applies the given offset to the internal geometry, and applies this new Geometry to the annotation
+     * itself. Afterwards, the annotation updates.
+     *
+     * @return True iff the geometry update was applied successfully.
+     */
+    internal abstract fun offsetGeometry(
         projection: Projection,
         moveDistancesObject: MoveDistancesObject,
         touchAreaShiftX: Float,
         touchAreaShiftY: Float
-    ): Geometry?
-
-    companion object {
-        internal const val PROPERTY_IS_DRAGGABLE = "is-draggable"
-    }
+    ): Boolean
 }

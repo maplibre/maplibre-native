@@ -1120,9 +1120,7 @@ class SymbolManagerTest {
 
     @Test
     fun testClickListener() {
-        val listener = object : OnSymbolClickListener {
-            override fun onAnnotationClick(t: Symbol) = false
-        }
+        val listener: OnSymbolClickListener = { false }
         symbolManager = SymbolManager(
             mapView,
             maplibreMap,
@@ -1142,9 +1140,7 @@ class SymbolManagerTest {
 
     @Test
     fun testLongClickListener() {
-        val listener = object : OnSymbolLongClickListener {
-            override fun onAnnotationLongClick(t: Symbol) = false
-        }
+        val listener: OnSymbolLongClickListener = { false }
         symbolManager = SymbolManager(
             mapView,
             maplibreMap,

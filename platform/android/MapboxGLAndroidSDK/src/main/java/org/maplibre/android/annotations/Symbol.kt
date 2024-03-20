@@ -33,21 +33,23 @@ class Symbol @JvmOverloads constructor(
             updateThis()
         }
 
+    override var clickListener: OnAnnotationClickListener<Symbol>? = null
+    override var longClickListener: OnAnnotationLongClickListener<Symbol>? = null
+
     override var geometry: Point = Point.fromLngLat(position.longitude, position.latitude)
 
     override val dataDrivenProperties: List<PairWithDefault>
         get() = listOfNotNull(icon?.flattenedValues, text?.flattenedValues).flatten() +
             listOf(
-                PROPERTY_SYMBOL_SORT_KEY to zLayer default Defaults.Z_LAYER,
-                PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE
+                PROPERTY_SYMBOL_SORT_KEY to zLayer default Defaults.Z_LAYER
             )
 
-    override fun getOffsetGeometry(
+    override fun offsetGeometry(
         projection: Projection,
         moveDistancesObject: MoveDistancesObject,
         touchAreaShiftX: Float,
         touchAreaShiftY: Float
-    ): Geometry? {
+    ): Boolean {
         val pointF = PointF(
             moveDistancesObject.currentX - touchAreaShiftX,
             moveDistancesObject.currentY - touchAreaShiftY
@@ -57,7 +59,11 @@ class Symbol @JvmOverloads constructor(
             null
         } else {
             Point.fromLngLat(latLng.longitude, latLng.latitude)
-        }
+        }?.let {
+            geometry = it
+            updateThis()
+            true
+        } ?: false
     }
 
     companion object {

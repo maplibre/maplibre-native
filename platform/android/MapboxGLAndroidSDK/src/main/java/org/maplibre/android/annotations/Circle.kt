@@ -51,13 +51,14 @@ class Circle @JvmOverloads constructor(
             updateThis()
         }
 
+    override var clickListener: OnAnnotationClickListener<Circle>? = null
+    override var longClickListener: OnAnnotationLongClickListener<Circle>? = null
+
     override var geometry: Point = Point.fromLngLat(center.longitude, center.latitude)
 
     override val dataDrivenProperties: List<PairWithDefault>
         get() = listOf(
-            PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE,
             PROPERTY_CIRCLE_SORT_KEY to zLayer default Defaults.Z_LAYER,
-            PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE,
             PROPERTY_CIRCLE_RADIUS to radius default Defaults.CIRCLE_RADIUS,
             PROPERTY_CIRCLE_COLOR to color.asColorString() default Defaults.CIRCLE_COLOR.asColorString(),
             PROPERTY_CIRCLE_BLUR to blur default Defaults.CIRCLE_BLUR,
@@ -73,12 +74,12 @@ class Circle @JvmOverloads constructor(
         }
     }
 
-    override fun getOffsetGeometry(
+    override fun offsetGeometry(
         projection: Projection,
         moveDistancesObject: MoveDistancesObject,
         touchAreaShiftX: Float,
         touchAreaShiftY: Float
-    ): Geometry? {
+    ): Boolean {
         val pointF = PointF(
             moveDistancesObject.currentX - touchAreaShiftX,
             moveDistancesObject.currentY - touchAreaShiftY
@@ -88,7 +89,11 @@ class Circle @JvmOverloads constructor(
             null
         } else {
             Point.fromLngLat(latLng.longitude, latLng.latitude)
-        }
+        }?.let {
+            geometry = it
+            updateThis()
+            true
+        } ?: false
     }
 
     data class Stroke(

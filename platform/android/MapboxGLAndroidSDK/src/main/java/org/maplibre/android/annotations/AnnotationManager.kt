@@ -186,7 +186,10 @@ abstract class AnnotationManager<L : Layer, T : KAnnotation<*>> @UiThread intern
         val features: List<Feature> = annotations.values.map {
             Feature.fromGeometry(
                 it.geometry,
-                it.dataDrivenProperties.nonDefaultMap().plus(PROPERTY_ID to it.id).asJsonObject()
+                it.dataDrivenProperties.nonDefaultMap()
+                    .plus(PROPERTY_ID to it.id)
+                    .plus(PROPERTY_IS_DRAGGABLE to it.draggable)
+                    .asJsonObject()
             )
         }
 
@@ -342,21 +345,43 @@ abstract class AnnotationManager<L : Layer, T : KAnnotation<*>> @UiThread intern
      */
     private inner class MapClickResolver : OnMapClickListener, OnMapLongClickListener {
 
-        override fun onMapClick(point: LatLng): Boolean = if (clickListeners.isNotEmpty()) {
-            queryMapForFeatures(point)?.let { annotation ->
-                clickListeners.any { it.onAnnotationClick(annotation) }
-            } ?: false
-        } else {
-            false
-        }
+        override fun onMapClick(point: LatLng): Boolean =
+            if (annotations.values.any { it.clickListener != null } || clickListeners.isNotEmpty()) {
+                queryMapForFeatures(point)?.let { annotation ->
+                    /* Unchecked cast is guaranteed to work, as this AnnotationManager can only handle
+                     * annotations of type T, which in turn only accept click listeners of type T.
+                     */
+                    val annotationHandlesClick =
+                        (annotation.clickListener as OnAnnotationClickListener<T>?)?.invoke(annotation)
 
-        override fun onMapLongClick(point: LatLng): Boolean = if (longClickListeners.isNotEmpty()) {
-            queryMapForFeatures(point)?.let { annotation ->
-                longClickListeners.any { it.onAnnotationLongClick(annotation) }
-            } ?: false
-        } else {
-            false
-        }
+                    if (annotationHandlesClick == true) {
+                        true
+                    } else {
+                        clickListeners.any { it(annotation) }
+                    }
+                } ?: false
+            } else {
+                false
+            }
+
+        override fun onMapLongClick(point: LatLng): Boolean =
+            if (annotations.values.any { it.longClickListener != null } || longClickListeners.isNotEmpty()) {
+                queryMapForFeatures(point)?.let { annotation ->
+                    // Unchecked cast see above.
+                    val annotationHandlesLongClick =
+                        (annotation.longClickListener as OnAnnotationLongClickListener<T>?)?.invoke(
+                            annotation
+                        )
+
+                    if (annotationHandlesLongClick == true) {
+                        true
+                    } else {
+                        longClickListeners.any { it(annotation) }
+                    }
+                } ?: false
+            } else {
+                false
+            }
     }
 
     private fun queryMapForFeatures(point: LatLng): T? =
@@ -370,6 +395,7 @@ abstract class AnnotationManager<L : Layer, T : KAnnotation<*>> @UiThread intern
 
     companion object {
         private const val TAG = "AnnotationManager"
-        const val PROPERTY_ID = "id"
+        internal const val PROPERTY_ID = "id"
+        internal const val PROPERTY_IS_DRAGGABLE = "is-draggable"
     }
 }

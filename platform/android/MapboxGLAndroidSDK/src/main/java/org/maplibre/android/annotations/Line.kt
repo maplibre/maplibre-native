@@ -74,13 +74,15 @@ class Line @JvmOverloads constructor(
             updateThis()
         }
 
+    override var clickListener: OnAnnotationClickListener<Line>? = null
+    override var longClickListener: OnAnnotationLongClickListener<Line>? = null
+
     override var geometry: LineString = LineString.fromLngLats(
             path.map { Point.fromLngLat(it.longitude, it.latitude) }
         )
 
     override val dataDrivenProperties: List<PairWithDefault>
         get() = listOf(
-            PROPERTY_IS_DRAGGABLE to draggable default Defaults.DRAGGABLE,
             PROPERTY_LINE_SORT_KEY to zLayer default Defaults.Z_LAYER,
             PROPERTY_LINE_JOIN to join.toString().lowercase() default Defaults.LINE_JOIN.toString().lowercase(),
             PROPERTY_LINE_OPACITY to opacity default Defaults.LINE_OPACITY,
@@ -92,9 +94,9 @@ class Line @JvmOverloads constructor(
             PROPERTY_LINE_PATTERN to pattern default Defaults.LINE_PATTERN
         )
 
-    override fun getOffsetGeometry(
+    override fun offsetGeometry(
         projection: Projection, moveDistancesObject: MoveDistancesObject, touchAreaShiftX: Float, touchAreaShiftY: Float
-    ): Geometry? =
+    ): Boolean =
         geometry.coordinates().map {
             val pointF = projection.toScreenLocation(LatLng(it.latitude(), it.longitude())).apply {
                 x -= moveDistancesObject.distanceXSinceLast
@@ -103,10 +105,14 @@ class Line @JvmOverloads constructor(
 
             val latLng = projection.fromScreenLocation(pointF)
             if (latLng.latitude > MAX_MERCATOR_LATITUDE || latLng.latitude < MIN_MERCATOR_LATITUDE) {
-                return null
+                return false
             }
             Point.fromLngLat(latLng.longitude, latLng.latitude)
-        }.let { LineString.fromLngLats(it) }
+        }.let { LineString.fromLngLats(it) }?.let {
+            geometry = it
+            updateThis()
+            true
+        } ?: false
 
     init {
         if (gap != null && gap <= 0) {

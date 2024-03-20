@@ -10,6 +10,7 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.MenuItemCompat
@@ -17,8 +18,8 @@ import org.maplibre.android.annotations.Symbol
 import org.maplibre.android.annotations.data.Icon
 import org.maplibre.android.annotations.data.Text
 import org.maplibre.android.geometry.LatLng
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
@@ -104,7 +105,18 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
                     position = latLng,
                     text = Text(i.toString(), color = Color.WHITE),
                     icon = icon
-                )
+                ).apply {
+                    if (i == 0) {
+                        clickListener = {
+                            Toast.makeText(this@BulkMarkerActivity, "You have clicked the very first marker!", Toast.LENGTH_SHORT).show()
+                                true
+                            }
+                    }
+
+                    if (i == 1) {
+                        draggable = true
+                    }
+                }
             )
         }
     }
