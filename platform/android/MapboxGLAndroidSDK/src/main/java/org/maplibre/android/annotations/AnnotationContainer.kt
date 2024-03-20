@@ -10,6 +10,7 @@ import org.maplibre.android.annotations.data.toArray
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.Property
 import kotlin.reflect.KClass
 
 /**
@@ -136,10 +137,10 @@ class KAnnotationContainer(
                     // Apply NDD properties from key
 
                     iconTextFit = key.iconFitText.let { fitText ->
-                        if (fitText.width && fitText.height) "both"
-                        else if (fitText.width) "width"
-                        else if (fitText.height) "height"
-                        else "none"
+                        if (fitText.width && fitText.height) Property.ICON_TEXT_FIT_BOTH
+                        else if (fitText.width) Property.ICON_TEXT_FIT_WIDTH
+                        else if (fitText.height) Property.ICON_TEXT_FIT_HEIGHT
+                        else Property.ICON_TEXT_FIT_NONE
                     }
                     iconTextFitPadding = key.iconFitText.padding.let { padding ->
                         arrayOf(padding.top, padding.right, padding.bottom, padding.left)
@@ -147,15 +148,15 @@ class KAnnotationContainer(
 
                     iconKeepUpright = key.iconKeepUpright
                     iconPitchAlignment = when (key.iconPitchAlignment) {
-                        Alignment.MAP -> "map"
-                        Alignment.VIEWPORT -> "viewport"
-                        null -> "auto"
+                        Alignment.MAP -> Property.ICON_PITCH_ALIGNMENT_MAP
+                        Alignment.VIEWPORT -> Property.ICON_PITCH_ALIGNMENT_VIEWPORT
+                        null -> Property.ICON_PITCH_ALIGNMENT_AUTO
                     }
 
                     textPitchAlignment = when (key.textPitchAlignment) {
-                        Alignment.MAP -> "map"
-                        Alignment.VIEWPORT -> "viewport"
-                        null -> "auto"
+                        Alignment.MAP -> Property.TEXT_PITCH_ALIGNMENT_MAP
+                        Alignment.VIEWPORT -> Property.TEXT_PITCH_ALIGNMENT_VIEWPORT
+                        null -> Property.TEXT_PITCH_ALIGNMENT_AUTO
                     }
                     textLineHeight = key.textLineHeight
 
@@ -163,15 +164,15 @@ class KAnnotationContainer(
 
                 is LineKey -> LineManager(mapView, mapLibreMap, style, below).apply {
                     lineCap = when (key.cap) {
-                        Cap.BUTT -> "butt"
-                        Cap.ROUND -> "round"
-                        Cap.SQUARE -> "square"
+                        Cap.BUTT -> Property.LINE_CAP_BUTT
+                        Cap.ROUND -> Property.LINE_CAP_ROUND
+                        Cap.SQUARE -> Property.LINE_CAP_SQUARE
                     }
                     key.translate?.let { translate ->
                         lineTranslate = arrayOf(translate.offset.x, translate.offset.y)
                         lineTranslateAnchor = when (translate.anchor) {
-                            Translate.Anchor.MAP -> "map"
-                            Translate.Anchor.VIEWPORT -> "viewport"
+                            Translate.Anchor.MAP -> Property.LINE_TRANSLATE_ANCHOR_MAP
+                            Translate.Anchor.VIEWPORT -> Property.LINE_TRANSLATE_ANCHOR_VIEWPORT
                         }
                     }
                     key.dashArray?.let { dash ->
@@ -184,18 +185,18 @@ class KAnnotationContainer(
                     key.translate?.let { translate ->
                         circleTranslate = arrayOf(translate.offset.x, translate.offset.y)
                         circleTranslateAnchor = when (translate.anchor) {
-                            Translate.Anchor.MAP -> "map"
-                            Translate.Anchor.VIEWPORT -> "viewport"
+                            Translate.Anchor.MAP -> Property.CIRCLE_TRANSLATE_ANCHOR_MAP
+                            Translate.Anchor.VIEWPORT -> Property.CIRCLE_TRANSLATE_ANCHOR_VIEWPORT
                         }
                     }
 
                     circlePitchScale = when (key.pitchScale) {
-                        Alignment.MAP -> "map"
-                        Alignment.VIEWPORT -> "viewport"
+                        Alignment.MAP -> Property.CIRCLE_PITCH_SCALE_MAP
+                        Alignment.VIEWPORT -> Property.CIRCLE_PITCH_SCALE_VIEWPORT
                     }
                     circlePitchAlignment = when (key.pitchAlignment) {
-                        Alignment.MAP -> "map"
-                        Alignment.VIEWPORT -> "viewport"
+                        Alignment.MAP -> Property.CIRCLE_PITCH_ALIGNMENT_MAP
+                        Alignment.VIEWPORT -> Property.CIRCLE_PITCH_ALIGNMENT_VIEWPORT
                     }
                 }
 
@@ -205,8 +206,8 @@ class KAnnotationContainer(
                     key.translate?.let { translate ->
                         fillTranslate = arrayOf(translate.offset.x, translate.offset.y)
                         fillTranslateAnchor = when (translate.anchor) {
-                            Translate.Anchor.MAP -> "map"
-                            Translate.Anchor.VIEWPORT -> "viewport"
+                            Translate.Anchor.MAP -> Property.FILL_TRANSLATE_ANCHOR_MAP
+                            Translate.Anchor.VIEWPORT -> Property.FILL_TRANSLATE_ANCHOR_VIEWPORT
                         }
                     }
                 }
