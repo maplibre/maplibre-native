@@ -1,5 +1,6 @@
 package org.maplibre.android.annotations
 
+import android.graphics.Bitmap
 import android.graphics.Paint.Cap
 import androidx.annotation.UiThread
 import org.maplibre.android.annotations.data.Alignment
@@ -22,6 +23,7 @@ class KAnnotationContainer(
 
     private val annotationList: MutableList<KAnnotation<*>> = mutableListOf()
     private val managers: MutableMap<Key, AnnotationManager<*, *>> = mutableMapOf()
+    private val bitmapUsers: MutableMap<Bitmap, MutableSet<KAnnotation<*>>> = mutableMapOf()
 
     @JvmName("setStyle")
     internal fun setStyle(style: Style) {
@@ -32,10 +34,20 @@ class KAnnotationContainer(
     @UiThread
     fun add(annotation: KAnnotation<*>) {
         annotationList.add(annotation)
+        annotation.icon()?.add(forAnnotation = annotation)
         addToManager(annotation)
-        if (annotation is Symbol) annotation.icon?.let { style?.addImage(it.image.toString(), it.image) }
-        if (annotation is Line) annotation.pattern?.let { style?.addImage(it.toString(), it) }
-        if (annotation is Fill) annotation.pattern?.let { style?.addImage(it.toString(), it) }
+    }
+
+    fun KAnnotation<*>.icon(): Bitmap? = when (this) {
+        is Symbol -> icon?.image
+        is Line -> pattern
+        is Fill -> pattern
+        else -> null
+    }
+
+    fun Bitmap.add(forAnnotation: KAnnotation<*>) {
+        style?.addImage(toString(), this)
+        bitmapUsers.getOrPut(this) { mutableSetOf() }.add(forAnnotation)
     }
 
     @UiThread
@@ -79,6 +91,15 @@ class KAnnotationContainer(
                     is Circle -> (manager as CircleManager).delete(annotation)
                     is Line -> (manager as LineManager).delete(annotation)
                     is Fill -> (manager as FillManager).delete(annotation)
+                }
+            }
+
+            // Remove any icon if no other annotations are using it
+            annotation.icon()?.let {
+                bitmapUsers[it]?.remove(annotation)
+                if (bitmapUsers[it]?.isEmpty() == true) {
+                    style?.removeImage(it.toString())
+                    bitmapUsers.remove(it)
                 }
             }
 
