@@ -9,7 +9,7 @@
 - (instancetype)initWithAttributionInfo:(MLNAttributionInfo *)info {
     if (self = [super initWithFrame:NSZeroRect]) {
         self.bordered = NO;
-        self.bezelStyle = NSRegularSquareBezelStyle;
+        self.bezelStyle = NSBezelStyleBadge;
 
         // Extract any prefix consisting of intellectual property symbols.
         NSScanner *scanner = [NSScanner scannerWithString:info.title.string];

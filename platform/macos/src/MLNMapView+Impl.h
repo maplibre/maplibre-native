@@ -22,6 +22,9 @@ public:
         return nullptr;
     }
 
+    // Called by the view delegate when it's time to render.
+    void render();
+
     // mbgl::MapObserver implementation
     void onCameraWillChange(mbgl::MapObserver::CameraChangeMode) override;
     void onCameraIsChanging() override;

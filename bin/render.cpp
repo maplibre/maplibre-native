@@ -14,7 +14,7 @@
 #include <fstream>
 
 int main(int argc, char* argv[]) {
-    args::ArgumentParser argumentParser("Mapbox GL render tool");
+    args::ArgumentParser argumentParser("MapLibre Native render tool");
     args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", {"help"});
 
     args::ValueFlag<std::string> backendValue(argumentParser, "Backend", "Rendering backend", {"backend"});

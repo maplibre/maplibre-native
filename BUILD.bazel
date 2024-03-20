@@ -139,6 +139,9 @@ cc_library(
         "@platforms//os:ios": [
             "//vendor:icu",
         ],
+        "@platforms//os:osx": [
+            "//vendor:icu",
+        ],
         "//conditions:default": [],
     }) + select({
         ":metal_renderer": [
