@@ -6,35 +6,37 @@ import org.maplibre.android.annotations.data.Defaults
 import org.maplibre.android.annotations.data.Icon
 import org.maplibre.android.annotations.data.Translate
 
-internal sealed class Key(val z: Int)
-internal class SymbolKey(
-    z: Int,
+internal sealed interface Key {
+    val z: Int
+}
+internal data class SymbolKey(
+    override val z: Int,
     val iconFitText: Icon.FitText,
     val iconKeepUpright: Boolean,
     val iconPitchAlignment: Alignment?,
     val textPitchAlignment: Alignment?,
     val textLineHeight: Float
-) : Key(z)
+) : Key
 
-internal class LineKey(
-    z: Int,
+internal data class LineKey(
+    override val z: Int,
     val cap: Paint.Cap,
     val translate: Translate?,
     val dashArray: Array<Float>?
-) : Key(z)
+) : Key
 
-internal class FillKey(
-    z: Int,
+internal data class FillKey(
+    override val z: Int,
     val antialias: Boolean,
     val translate: Translate?
-) : Key(z)
+) : Key
 
-internal class CircleKey(
-    z: Int,
+internal data class CircleKey(
+    override val z: Int,
     val translate: Translate?,
     val pitchScale: Alignment,
     val pitchAlignment: Alignment
-) : Key(z)
+) : Key
 
 internal fun KAnnotation<*>.key() = when (this) {
     is Symbol -> SymbolKey(
