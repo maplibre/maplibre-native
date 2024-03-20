@@ -9,7 +9,7 @@ import org.maplibre.android.annotations.asColorString
 import org.maplibre.android.annotations.default
 import org.maplibre.android.style.layers.Property
 
-class Text(
+data class Text(
     val string: String,
     val font: List<String>? = Defaults.TEXT_FONT,
     val size: Float = Defaults.TEXT_SIZE,
@@ -24,8 +24,14 @@ class Text(
     val opacity: Float = Defaults.TEXT_OPACITY,
     @ColorInt val color: Int = Defaults.TEXT_COLOR,
     val halo: Halo? = Defaults.TEXT_HALO,
-    // val pitchAlignment: Alignment?, (NDD)
-    // val lineHeight: Float = 1.2f (NDD)
+    /**
+     * NDD
+     */
+    val pitchAlignment: Alignment? = Defaults.TEXT_PITCH_ALIGNMENT,
+    /**
+     * NDD
+     */
+    val lineHeight: Float = Defaults.TEXT_LINE_HEIGHT
 ) {
 
     init {

@@ -201,12 +201,11 @@ The following list shows concrete public properties or functions that should be 
     * `var offset: Float` (default `0f`)
     * `var blur: Float?` (throws if <= 0)
     * `var pattern: Bitmap?`
-    * `var cap: Cap` (default `BUTT`) (NDD)
+    * `var cap: android.graphics.Paint.Cap` (default `BUTT`) (NDD)
     * `var translate: Translate?` (NDD)
-    * `var dashArray: Float[]?` (throws if `.length % 2 != 0`) (NDD)
+    * `var dashArray: Array<Float>?` (throws if `.size % 2 != 0`) (NDD)
 * `enum Join` (inner class of `Line`): `BEVEL`, `ROUND`, `MITER`
-* `enum Cap` (inner class of `Line`): `BUTT`, `ROUND`, `SQUARE`
-* `Translate` (inner class of `Line`, `Circle` and `Fill`)
+* `Translate`
     * `val offset: PointF` (maps to `line-translate`)
     * `val anchor: Translate.Anchor`
 * `enum Anchor` (inner class of `Translate`): `MAP`, `VIEWPORT`

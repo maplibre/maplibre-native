@@ -26,9 +26,18 @@ open class Icon(
     val anchor: Anchor = Defaults.ICON_ANCHOR,
     @FloatRange(from = 0.0, to = 1.0)
     val opacity: Float = Defaults.ICON_OPACITY,
-    // TODO val fitText: FitText = Defaults.ICON_FIT_TEXT, // NDD
-    // TODO val keepUpright: Boolean = false // (NDD)
-    // TODO val pitchAlignment: Alignment? (NDD)
+    /**
+     * NDD
+     */
+    val fitText: FitText = Defaults.ICON_FIT_TEXT,
+    /**
+     * NDD
+     */
+    val keepUpright: Boolean = Defaults.ICON_KEEP_UPRIGHT,
+    /**
+     * NDD
+     */
+    val pitchAlignment: Alignment? = Defaults.ICON_PITCH_ALIGNMENT
 ) {
 
     constructor(
