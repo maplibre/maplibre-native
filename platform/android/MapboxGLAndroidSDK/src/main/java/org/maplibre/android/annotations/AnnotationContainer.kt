@@ -176,7 +176,7 @@ class KAnnotationContainer(
                         }
                     }
                     key.dashArray?.let { dash ->
-                        lineDasharray = dash
+                        lineDasharray = dash.toTypedArray()
                     }
 
                 }

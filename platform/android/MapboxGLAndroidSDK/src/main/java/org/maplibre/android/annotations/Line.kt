@@ -35,7 +35,7 @@ class Line @JvmOverloads constructor(
     /**
      * NDD
      */
-    dashArray: Array<Float>? = Defaults.LINE_DASH_ARRAY
+    dashArray: List<Float>? = Defaults.LINE_DASH_ARRAY
 ) : KAnnotation<LineString>() {
 
     var path: List<LatLng> = path
@@ -111,7 +111,7 @@ class Line @JvmOverloads constructor(
             field = value
             updateAll()
         }
-    var dashArray: Array<Float>? = dashArray
+    var dashArray: List<Float>? = dashArray
         set(value) {
             if (value != null && value.size % 2 != 0) {
                 throw IllegalArgumentException(

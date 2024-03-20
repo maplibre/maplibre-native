@@ -79,7 +79,7 @@ class Defaults {
         val LINE_PATTERN: Bitmap? = null
         val LINE_CAP: Cap = Cap.BUTT
         val LINE_TRANSLATE: Translate? = null
-        val LINE_DASH_ARRAY: Array<Float>? = null
+        val LINE_DASH_ARRAY: List<Float>? = null
 
         val FILL_OPACITY: Float = 1f
         @ColorInt

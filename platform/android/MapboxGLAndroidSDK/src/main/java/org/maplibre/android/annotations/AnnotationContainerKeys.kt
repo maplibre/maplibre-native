@@ -22,7 +22,7 @@ internal data class LineKey(
     override val z: Int,
     val cap: Paint.Cap,
     val translate: Translate?,
-    val dashArray: Array<Float>?
+    val dashArray: List<Float>?
 ) : Key
 
 internal data class FillKey(

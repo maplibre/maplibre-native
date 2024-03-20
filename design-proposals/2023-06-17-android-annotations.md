@@ -203,7 +203,7 @@ The following list shows concrete public properties or functions that should be 
     * `var pattern: Bitmap?`
     * `var cap: android.graphics.Paint.Cap` (default `BUTT`) (NDD)
     * `var translate: Translate?` (NDD)
-    * `var dashArray: Array<Float>?` (throws if `.size % 2 != 0`) (NDD)
+    * `var dashArray: List<Float>?` (throws if `.size % 2 != 0`) (NDD)
 * `enum Join` (inner class of `Line`): `BEVEL`, `ROUND`, `MITER`
 * `Translate`
     * `val offset: PointF` (maps to `line-translate`)
