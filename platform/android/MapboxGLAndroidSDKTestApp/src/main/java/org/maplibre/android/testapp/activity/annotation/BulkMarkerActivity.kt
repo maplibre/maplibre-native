@@ -116,6 +116,8 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
                     if (i == 1) {
                         draggable = true
                     }
+
+                    zLayer = i % 10
                 }
             )
         }
