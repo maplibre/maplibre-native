@@ -68,7 +68,7 @@ void RenderHeatmapLayer::evaluate(const PropertyEvaluationParameters& parameters
         staticImmutableCast<HeatmapLayer::Impl>(baseImpl),
         unevaluated.evaluate(parameters, previousProperties->evaluated));
 
-    const auto y = unevaluated.getGPUExpressions();
+    const auto y = unevaluated.getGPUExpressions(parameters.now);
 
     passes = (properties->evaluated.get<style::HeatmapOpacity>() > 0) ? (RenderPass::Translucent | RenderPass::Pass3D)
                                                                       : RenderPass::None;

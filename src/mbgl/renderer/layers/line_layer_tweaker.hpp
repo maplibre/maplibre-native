@@ -36,6 +36,10 @@ public:
     void setGPUExpressions(Unevaluated::GPUExpressions&&);
 #endif // MLN_RENDER_BACKEND_METAL
 
+private:
+    template <typename Property>
+    auto evaluate(const PaintParameters& parameters) const;
+
 protected:
     gfx::UniformBufferPtr linePropertiesBuffer;
     gfx::UniformBufferPtr lineGradientPropertiesBuffer;

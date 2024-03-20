@@ -24,39 +24,34 @@ namespace mbgl {
 using namespace style;
 using namespace shaders;
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL && !defined(NDEBUG)
 constexpr bool diff(float actual, float expected, float e = 1.0e-6) {
     return actual != expected && (expected == 0 || std::fabs((actual - expected) / expected) > e);
 }
-void check(const UniqueGPUExpression& expr,
-           const PossiblyEvaluatedPropertyValue<Color>& prop,
-           const float zoom,
-           const uint8_t intZoom) {
-    if (expr) {
-        const float effectiveZoom = any(expr->options, GPUOptions::IntegerZoom) ? intZoom : zoom;
-        const auto color = expr->evaluateColor(effectiveZoom);
-        const auto color2 = prop.evaluate(effectiveZoom);
-        assert(!diff(color.r, color2.r));
-        assert(!diff(color.g, color2.g));
-        assert(!diff(color.b, color2.b));
-        assert(!diff(color.a, color2.a));
-    }
-}
-
-void check(const UniqueGPUExpression& expr,
-           const PossiblyEvaluatedPropertyValue<float>& prop,
-           const float zoom,
-           const uint8_t intZoom) {
-    if (expr) {
-        const float effectiveZoom = any(expr->options, GPUOptions::IntegerZoom) ? intZoom : zoom;
-        const auto value = expr->evaluateFloat(effectiveZoom);
-        const auto value2 = prop.evaluate(effectiveZoom);
-        if (diff(value, value2)) {
-            assert(false);
-        }
-    }
+constexpr bool diff(Color actual, Color expected, float e = 1.0e-6) {
+    return diff(actual.r, expected.r, e) || diff(actual.g, expected.g, e) || diff(actual.b, expected.b, e) ||
+           diff(actual.a, expected.a, e);
 }
 #endif // MLN_RENDER_BACKEND_METAL
+
+template <typename Property>
+auto LineLayerTweaker::evaluate([[maybe_unused]] const PaintParameters& parameters) const {
+    const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
+
+#if MLN_RENDER_BACKEND_METAL
+    using PropertyIndexes = LinePaintProperties::Tuple<LinePaintProperties::PropertyTypes>;
+    if (const auto& gpu = gpuExpressions[PropertyIndexes::getIndex<Property>()]) {
+        const float effectiveZoom = any(gpu->options, GPUOptions::IntegerZoom)
+                                        ? parameters.state.getIntegerZoom()
+                                        : static_cast<float>(parameters.state.getZoom());
+        auto gpuValue = gpu->template evaluate<typename Property::Type>(effectiveZoom);
+        assert(!diff(gpuValue, evaluated.get<Property>().constantOr(Property::defaultValue())));
+        return gpuValue;
+    }
+#endif // MLN_RENDER_BACKEND_METAL
+
+    return evaluated.get<Property>().constantOr(Property::defaultValue());
+}
 
 void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
     auto& context = parameters.context;
@@ -65,17 +60,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
     const auto zoom = static_cast<float>(parameters.state.getZoom());
     const auto intZoom = parameters.state.getIntegerZoom();
-
-#if MLN_RENDER_BACKEND_METAL
-    using PropertyIndexes = LinePaintProperties::Tuple<LinePaintProperties::PropertyTypes>;
-    check(gpuExpressions[PropertyIndexes::getIndex<LineColor>()], evaluated.get<LineColor>(), zoom, intZoom);
-    check(gpuExpressions[PropertyIndexes::getIndex<LineBlur>()], evaluated.get<LineBlur>(), zoom, intZoom);
-    check(gpuExpressions[PropertyIndexes::getIndex<LineOpacity>()], evaluated.get<LineOpacity>(), zoom, intZoom);
-    check(gpuExpressions[PropertyIndexes::getIndex<LineWidth>()], evaluated.get<LineWidth>(), zoom, intZoom);
-    check(gpuExpressions[PropertyIndexes::getIndex<LineGapWidth>()], evaluated.get<LineGapWidth>(), zoom, intZoom);
-    check(gpuExpressions[PropertyIndexes::getIndex<LineFloorWidth>()], evaluated.get<LineFloorWidth>(), zoom, intZoom);
-    check(gpuExpressions[PropertyIndexes::getIndex<LineOffset>()], evaluated.get<LineOffset>(), zoom, intZoom);
-#endif // MLN_RENDER_BACKEND_METAL
 
     // Each property UBO is updated at most once if new evaluated properties were set
     if (propertiesUpdated) {
@@ -88,16 +72,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
     const auto getLinePropsBuffer = [&]() {
         if (!linePropertiesBuffer || simplePropertiesUpdated) {
-            const LinePropertiesUBO linePropertiesUBO{
-                /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
-                /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
-                /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
-                /*gapwidth =*/evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
-                /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
-                /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
-                0,
-                0,
-                0};
+            const LinePropertiesUBO linePropertiesUBO{/*color =*/evaluate<LineColor>(parameters),
+                                                      /*blur =*/evaluate<LineBlur>(parameters),
+                                                      /*opacity =*/evaluate<LineOpacity>(parameters),
+                                                      /*gapwidth =*/evaluate<LineGapWidth>(parameters),
+                                                      /*offset =*/evaluate<LineOffset>(parameters),
+                                                      /*width =*/evaluate<LineWidth>(parameters),
+                                                      0,
+                                                      0,
+                                                      0};
             context.emplaceOrUpdateUniformBuffer(linePropertiesBuffer, &linePropertiesUBO);
             simplePropertiesUpdated = false;
         }
@@ -105,15 +88,14 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     };
     const auto getLineGradientPropsBuffer = [&]() {
         if (!lineGradientPropertiesBuffer || gradientPropertiesUpdated) {
-            const LineGradientPropertiesUBO lineGradientPropertiesUBO{
-                /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
-                /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
-                /*gapwidth =*/evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
-                /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
-                /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
-                0,
-                0,
-                0};
+            const LineGradientPropertiesUBO lineGradientPropertiesUBO{/*blur =*/evaluate<LineBlur>(parameters),
+                                                                      /*opacity =*/evaluate<LineOpacity>(parameters),
+                                                                      /*gapwidth =*/evaluate<LineGapWidth>(parameters),
+                                                                      /*offset =*/evaluate<LineOffset>(parameters),
+                                                                      /*width =*/evaluate<LineWidth>(parameters),
+                                                                      0,
+                                                                      0,
+                                                                      0};
             context.emplaceOrUpdateUniformBuffer(lineGradientPropertiesBuffer, &lineGradientPropertiesUBO);
             gradientPropertiesUpdated = false;
         }
@@ -121,15 +103,14 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     };
     const auto getLinePatternPropsBuffer = [&]() {
         if (!linePatternPropertiesBuffer || patternPropertiesUpdated) {
-            const LinePatternPropertiesUBO linePatternPropertiesUBO{
-                /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
-                /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
-                /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
-                /*gapwidth =*/evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
-                /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
-                0,
-                0,
-                0};
+            const LinePatternPropertiesUBO linePatternPropertiesUBO{/*blur =*/evaluate<LineBlur>(parameters),
+                                                                    /*opacity =*/evaluate<LineOpacity>(parameters),
+                                                                    /*offset =*/evaluate<LineOffset>(parameters),
+                                                                    /*gapwidth =*/evaluate<LineGapWidth>(parameters),
+                                                                    /*width =*/evaluate<LineWidth>(parameters),
+                                                                    0,
+                                                                    0,
+                                                                    0};
             context.emplaceOrUpdateUniformBuffer(linePatternPropertiesBuffer, &linePatternPropertiesUBO);
             patternPropertiesUpdated = false;
         }
@@ -137,16 +118,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     };
     const auto getLineSDFPropsBuffer = [&]() {
         if (!lineSDFPropertiesBuffer || sdfPropertiesUpdated) {
-            const LineSDFPropertiesUBO lineSDFPropertiesUBO{
-                /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
-                /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
-                /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
-                /*gapwidth =*/evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
-                /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
-                /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
-                /*floorwidth =*/evaluated.get<LineFloorWidth>().constantOr(LineFloorWidth::defaultValue()),
-                0,
-                0};
+            const LineSDFPropertiesUBO lineSDFPropertiesUBO{/*color =*/evaluate<LineColor>(parameters),
+                                                            /*blur =*/evaluate<LineBlur>(parameters),
+                                                            /*opacity =*/evaluate<LineOpacity>(parameters),
+                                                            /*gapwidth =*/evaluate<LineGapWidth>(parameters),
+                                                            /*offset =*/evaluate<LineOffset>(parameters),
+                                                            /*width =*/evaluate<LineWidth>(parameters),
+                                                            /*floorwidth =*/evaluate<LineFloorWidth>(parameters),
+                                                            0,
+                                                            0};
             context.emplaceOrUpdateUniformBuffer(lineSDFPropertiesBuffer, &lineSDFPropertiesUBO);
             sdfPropertiesUpdated = false;
         }
