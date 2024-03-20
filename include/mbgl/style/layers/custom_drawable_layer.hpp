@@ -152,7 +152,7 @@ private:
     gfx::ShaderPtr lineShaderWideVector() const;
     gfx::ShaderPtr fillShaderDefault() const;
     gfx::ShaderPtr symbolShaderDefault() const;
-    
+
     enum class BuilderType {
         None,
         LineClassic,
@@ -174,8 +174,8 @@ private:
     LineOptions lineOptions;
     FillOptions fillOptions;
     SymbolOptions symbolOptions;
-    
-    BuilderType builderType {BuilderType::None};
+
+    BuilderType builderType{BuilderType::None};
 };
 
 class CustomDrawableLayer final : public Layer {

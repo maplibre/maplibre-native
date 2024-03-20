@@ -60,7 +60,6 @@ public:
 
     VertexBufferResource* noBindingBuffer = nullptr;
 
-
     MTLRenderPipelineStatePtr pipelineState;
 
     std::optional<gfx::RenderPassDescriptor> renderPassDescriptor;

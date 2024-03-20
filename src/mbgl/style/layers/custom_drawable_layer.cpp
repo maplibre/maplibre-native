@@ -87,7 +87,7 @@ public:
         : linePropertiesUBO(properties) {}
     ~LineDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override{};
+    void init(gfx::Drawable&) override {};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -137,7 +137,7 @@ public:
           opacity(opacity_) {}
     ~FillDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override{};
+    void init(gfx::Drawable&) override {};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -184,7 +184,7 @@ public:
         : options(options_) {}
     ~SymbolDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override{};
+    void init(gfx::Drawable&) override {};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
