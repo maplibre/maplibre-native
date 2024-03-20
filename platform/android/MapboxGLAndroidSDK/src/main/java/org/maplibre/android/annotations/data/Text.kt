@@ -9,7 +9,7 @@ import org.maplibre.android.annotations.asColorString
 import org.maplibre.android.annotations.default
 import org.maplibre.android.style.layers.Property
 
-data class Text(
+class Text(
     val string: String,
     val font: List<String>? = Defaults.TEXT_FONT,
     val size: Float = Defaults.TEXT_SIZE,
