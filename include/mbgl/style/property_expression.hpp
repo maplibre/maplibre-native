@@ -85,6 +85,9 @@ struct GPUExpression {
     float evaluateFloat(const float zoom) const;
     Color evaluateColor(const float zoom) const;
 
+    template <typename T>
+    auto evaluate(const float zoom) const;
+
     GPUExpression(GPUExpression&&) = delete;
     GPUExpression(const GPUExpression&) = delete;
     GPUExpression& operator=(GPUExpression&&) = delete;
@@ -95,6 +98,15 @@ private:
         : outputType(type),
           stopCount(count) {}
 };
+
+template <>
+inline auto GPUExpression::evaluate<Color>(const float zoom) const {
+    return evaluateColor(zoom);
+}
+template <>
+inline auto GPUExpression::evaluate<float>(const float zoom) const {
+    return evaluateFloat(zoom);
+}
 
 class PropertyExpressionBase {
 public:
@@ -121,7 +133,7 @@ public:
     /// expression. May be removed if a better way of aggregation is found.
     std::shared_ptr<const Expression> getSharedExpression() const noexcept;
 
-    UniqueGPUExpression getGPUExpression(bool transitioning) const;
+    UniqueGPUExpression getGPUExpression(bool transitioning, bool intZoom) const;
 
     Dependency getDependencies() const noexcept { return expression ? expression->dependencies : Dependency::None; }
 

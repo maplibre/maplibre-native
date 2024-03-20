@@ -55,7 +55,7 @@ void RenderRasterLayer::evaluate(const PropertyEvaluationParameters& parameters)
         staticImmutableCast<RasterLayer::Impl>(baseImpl),
         unevaluated.evaluate(parameters, previousProperties->evaluated));
 
-    const auto y = unevaluated.getGPUExpressions();
+    const auto y = unevaluated.getGPUExpressions(parameters.now);
 
     passes = properties->evaluated.get<style::RasterOpacity>() > 0 ? RenderPass::Translucent : RenderPass::None;
     properties->renderPasses = mbgl::underlying_type(passes);

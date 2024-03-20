@@ -123,6 +123,8 @@ Color GPUExpression::evaluateColor(const float zoom) const {
 
     const Range<double> range{stops.colorStops[index - 1].input, stops.colorStops[index].input};
     switch (interpolation) {
+        case GPUInterpType::Step:
+            return stops.colorStops[index - 1].rgba;
         default:
             assert(false);
             [[fallthrough]];
@@ -154,13 +156,13 @@ PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expre
     assert(isRuntimeConstant_ == expression::isRuntimeConstant(*expression));
 }
 
-UniqueGPUExpression PropertyExpressionBase::getGPUExpression(bool transitioning) const {
+UniqueGPUExpression PropertyExpressionBase::getGPUExpression(bool transitioning, bool intZoom) const {
     if (!isGPUCapable_) {
         return {};
     }
     std::size_t index = 0;
     const auto outType = getOutputType(*expression);
-    const auto options = (useIntegerZoom_ ? GPUOptions::IntegerZoom : GPUOptions::None) |
+    const auto options = ((useIntegerZoom_ || intZoom) ? GPUOptions::IntegerZoom : GPUOptions::None) |
                          (transitioning ? GPUOptions::Transitioning : GPUOptions::None);
     return zoomCurve.match(
         [&](const Step* step) {
