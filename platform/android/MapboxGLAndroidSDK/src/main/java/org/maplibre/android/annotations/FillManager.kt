@@ -125,7 +125,7 @@ class FillManager @UiThread internal constructor(
     /**
      * The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.
      */
-    var fillTranslate: Array<Float?>?
+    var fillTranslate: Array<Float>?
         get() = layer.fillTranslate.value
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.fillTranslate(value)

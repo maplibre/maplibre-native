@@ -1,6 +1,11 @@
 package org.maplibre.android.annotations
 
+import android.graphics.Paint.Cap
 import androidx.annotation.UiThread
+import org.maplibre.android.annotations.data.Alignment
+import org.maplibre.android.annotations.data.Icon
+import org.maplibre.android.annotations.data.Translate
+import org.maplibre.android.annotations.data.toArray
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
@@ -67,6 +72,7 @@ class KAnnotationContainer(
 
         if (annotationList.remove(annotation)) {
 
+            // Delete annotation from manager
             managers[annotation.key()]?.let { manager ->
                 when (annotation) {
                     is Symbol -> (manager as SymbolManager).delete(annotation)
@@ -76,6 +82,7 @@ class KAnnotationContainer(
                 }
             }
 
+            // Destroy manager if no more annotations with same key remain
             if (!groupAnnotations().containsKey(annotation.key())) {
                 managers.remove(annotation.key())?.onDestroy()
             }
@@ -94,23 +101,91 @@ class KAnnotationContainer(
     private fun groupAnnotations(): Map<Key, List<KAnnotation<*>>> =
         annotationList.groupBy { it.key() }
 
-    private data class Key(val type: KClass<out KAnnotation<*>>) // TODO will be expanded in the future
-
-    private fun KAnnotation<*>.key() = Key(this::class)
-
     private fun MutableMap<Key, AnnotationManager<*, *>>.getOrCreate(key: Key): AnnotationManager<*, *>? =
         get(key) ?: style?.let {
-            when (key.type) {
-                Symbol::class -> SymbolManager(mapView, mapLibreMap, it).apply {
+            when (key) {
+                is SymbolKey -> SymbolManager(mapView, mapLibreMap, it).apply {
+                    // Non-collision group symbols do not interfere with each other
                     textAllowOverlap = true
                     iconAllowOverlap = true
+
+                    // Apply NDD properties from key
+
+                    iconTextFit = key.iconFitText.let { fitText ->
+                        if (fitText.width && fitText.height) "both"
+                        else if (fitText.width) "width"
+                        else if (fitText.height) "height"
+                        else "none"
+                    }
+                    iconTextFitPadding = key.iconFitText.padding.let { padding ->
+                        arrayOf(padding.top, padding.right, padding.bottom, padding.left)
+                    }
+
+                    iconKeepUpright = key.iconKeepUpright
+                    iconPitchAlignment = when (key.iconPitchAlignment) {
+                        Alignment.MAP -> "map"
+                        Alignment.VIEWPORT -> "viewport"
+                        null -> "auto"
+                    }
+
+                    textPitchAlignment = when (key.textPitchAlignment) {
+                        Alignment.MAP -> "map"
+                        Alignment.VIEWPORT -> "viewport"
+                        null -> "auto"
+                    }
+                    textLineHeight = key.textLineHeight
+
                 }
-                Circle::class -> CircleManager(mapView, mapLibreMap, it)
-                Line::class -> LineManager(mapView, mapLibreMap, it)
-                Fill::class -> FillManager(mapView, mapLibreMap, it)
-                else -> throw IllegalArgumentException(
-                    "Impossible key! This should never occur because KAnnotation is a sealed class."
-                )
+
+                is LineKey -> LineManager(mapView, mapLibreMap, it).apply {
+                    lineCap = when (key.cap) {
+                        Cap.BUTT -> "butt"
+                        Cap.ROUND -> "round"
+                        Cap.SQUARE -> "square"
+                    }
+                    key.translate?.let { translate ->
+                        lineTranslate = arrayOf(translate.offset.x, translate.offset.y)
+                        lineTranslateAnchor = when (translate.anchor) {
+                            Translate.Anchor.MAP -> "map"
+                            Translate.Anchor.VIEWPORT -> "viewport"
+                        }
+                    }
+                    key.dashArray?.let { dash ->
+                        lineDasharray = dash
+                    }
+
+                }
+
+                is CircleKey -> CircleManager(mapView, mapLibreMap, it).apply {
+                    key.translate?.let { translate ->
+                        circleTranslate = arrayOf(translate.offset.x, translate.offset.y)
+                        circleTranslateAnchor = when (translate.anchor) {
+                            Translate.Anchor.MAP -> "map"
+                            Translate.Anchor.VIEWPORT -> "viewport"
+                        }
+                    }
+
+                    circlePitchScale = when (key.pitchScale) {
+                        Alignment.MAP -> "map"
+                        Alignment.VIEWPORT -> "viewport"
+                    }
+                    circlePitchAlignment = when (key.pitchAlignment) {
+                        Alignment.MAP -> "map"
+                        Alignment.VIEWPORT -> "viewport"
+                    }
+                }
+
+                is FillKey -> FillManager(mapView, mapLibreMap, it).apply {
+                    fillAntialias = key.antialias
+
+                    key.translate?.let { translate ->
+                        fillTranslate = arrayOf(translate.offset.x, translate.offset.y)
+                        fillTranslateAnchor = when (translate.anchor) {
+                            Translate.Anchor.MAP -> "map"
+                            Translate.Anchor.VIEWPORT -> "viewport"
+                        }
+                    }
+                }
             }
         }?.also { put(key, it) }
 

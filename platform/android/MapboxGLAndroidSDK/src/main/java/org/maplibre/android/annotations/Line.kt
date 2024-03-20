@@ -101,7 +101,7 @@ class Line @JvmOverloads constructor(
             field = value
             updateThis()
         }
-    var cap: Cap? = cap
+    var cap: Cap = cap
         set(value) {
             field = value
             updateAll()
