@@ -102,9 +102,12 @@ class KAnnotationContainer(
         annotationList.groupBy { it.key() }
 
     private fun MutableMap<Key, AnnotationManager<*, *>>.getOrCreate(key: Key): AnnotationManager<*, *>? =
-        get(key) ?: style?.let {
+        get(key) ?: style?.let { style ->
+
+            val below = managers.keys.firstOrNull { it.z > key.z }?.let { managers[it] }?.layerId
+
             when (key) {
-                is SymbolKey -> SymbolManager(mapView, mapLibreMap, it).apply {
+                is SymbolKey -> SymbolManager(mapView, mapLibreMap, style, below).apply {
                     // Non-collision group symbols do not interfere with each other
                     textAllowOverlap = true
                     iconAllowOverlap = true
@@ -137,7 +140,7 @@ class KAnnotationContainer(
 
                 }
 
-                is LineKey -> LineManager(mapView, mapLibreMap, it).apply {
+                is LineKey -> LineManager(mapView, mapLibreMap, style, below).apply {
                     lineCap = when (key.cap) {
                         Cap.BUTT -> "butt"
                         Cap.ROUND -> "round"
@@ -156,7 +159,7 @@ class KAnnotationContainer(
 
                 }
 
-                is CircleKey -> CircleManager(mapView, mapLibreMap, it).apply {
+                is CircleKey -> CircleManager(mapView, mapLibreMap, style, below).apply {
                     key.translate?.let { translate ->
                         circleTranslate = arrayOf(translate.offset.x, translate.offset.y)
                         circleTranslateAnchor = when (translate.anchor) {
@@ -175,7 +178,7 @@ class KAnnotationContainer(
                     }
                 }
 
-                is FillKey -> FillManager(mapView, mapLibreMap, it).apply {
+                is FillKey -> FillManager(mapView, mapLibreMap, style, below).apply {
                     fillAntialias = key.antialias
 
                     key.translate?.let { translate ->

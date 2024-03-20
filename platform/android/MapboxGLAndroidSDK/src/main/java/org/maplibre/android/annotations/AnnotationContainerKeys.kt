@@ -6,7 +6,7 @@ import org.maplibre.android.annotations.data.Defaults
 import org.maplibre.android.annotations.data.Icon
 import org.maplibre.android.annotations.data.Translate
 
-internal sealed class Key(z: Int)
+internal sealed class Key(val z: Int)
 internal class SymbolKey(
     z: Int,
     val iconFitText: Icon.FitText,
