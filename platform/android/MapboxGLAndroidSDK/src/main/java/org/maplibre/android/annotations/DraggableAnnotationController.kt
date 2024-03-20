@@ -91,7 +91,7 @@ internal class DraggableAnnotationController @SuppressLint("ClickableViewAccessi
 
     private fun <T : KAnnotation<*>> onMove(detector: MoveGestureDetector, drag: DragPair<T>): Boolean {
         if (detector.pointersCount > 1 || !drag.annotation.draggable) {
-            // Stopping the drag when we don't work with a simple, on-pointer move anymore
+            // Stopping the drag when we don't work with a simple, one-pointer move anymore
             stopDragging(drag)
             return true
         }
