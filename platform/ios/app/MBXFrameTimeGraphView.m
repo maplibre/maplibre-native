@@ -1,6 +1,6 @@
 #import "MBXFrameTimeGraphView.h"
 
-const CGFloat MBXFrameTimeExaggeration = 4.f * 1000.f;
+const CGFloat MBXFrameTimeExaggeration = 10.f;
 const CGFloat MBXFrameTimeBarWidth = 4.f;
 
 @interface MBXFrameTimeGraphView ()
@@ -58,7 +58,7 @@ const CGFloat MBXFrameTimeBarWidth = 4.f;
     if (!CGRectEqualToRect(self.scrollLayer.frame, self.bounds)) {
         self.scrollLayer.frame = self.bounds;
 
-        CGRect thresholdLineRect = CGRectMake(0, self.frame.size.height - [self renderDurationTargetMilliseconds], self.frame.size.width, 1);
+        CGRect thresholdLineRect = CGRectMake(0, self.frame.size.height - self.frame.size.height * MBXFrameTimeExaggeration * [self renderDurationTargetMilliseconds], self.frame.size.width, 1);
         
         {
             CGPathRef path = CGPathCreateWithRect(thresholdLineRect, nil);        
@@ -96,8 +96,8 @@ const CGFloat MBXFrameTimeBarWidth = 4.f;
         maximumFramesPerSecond = 60;
     }
 
-    CGFloat target = (1.0 / maximumFramesPerSecond) * MBXFrameTimeExaggeration;
-    return [self roundedFloat:target];
+    CGFloat target = (1.0 / maximumFramesPerSecond);
+    return target;
 }
 
 - (CGFloat)roundedFloat:(CGFloat)f {
@@ -112,7 +112,7 @@ const CGFloat MBXFrameTimeBarWidth = 4.f;
 - (CAShapeLayer *)barWithFrameDuration:(CFTimeInterval)frameDuration {
     CAShapeLayer *bar = [CAShapeLayer layer];
 
-    CGRect barRect = CGRectMake(0, 0, MBXFrameTimeBarWidth, -(fminf(frameDuration * MBXFrameTimeExaggeration, self.frame.size.height)));
+    CGRect barRect = CGRectMake(0, 0, MBXFrameTimeBarWidth, -(fminf(frameDuration * MBXFrameTimeExaggeration * self.frame.size.height, self.frame.size.height)));
     UIBezierPath *barPath = [UIBezierPath bezierPathWithRect:barRect];
     bar.path = barPath.CGPath;
     bar.fillColor = [self colorForFrameDuration:frameDuration].CGColor;
@@ -121,15 +121,15 @@ const CGFloat MBXFrameTimeBarWidth = 4.f;
 }
 
 - (UIColor *)colorForFrameDuration:(CFTimeInterval)frameDuration {
-    CGFloat renderDurationTargetMilliseconds = [self renderDurationTargetMilliseconds];
-    frameDuration *= MBXFrameTimeExaggeration;
+    const double greenLevel = [self renderDurationTargetMilliseconds];
+    const double yellowLevel = greenLevel * 3.0;
 
-    if (frameDuration < renderDurationTargetMilliseconds && frameDuration > (renderDurationTargetMilliseconds * 0.75)) {
-        return self.warningColor;
-    } else if (frameDuration > renderDurationTargetMilliseconds) {
-        return self.dangerColor;
-    } else {
+    if (frameDuration <= greenLevel) {
         return self.safeColor;
+    } else if (frameDuration <= yellowLevel) {
+        return self.warningColor;
+    } else {
+        return self.dangerColor;
     }
 }
 

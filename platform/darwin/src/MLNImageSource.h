@@ -43,9 +43,7 @@ MLN_EXPORT
  ```
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/image-source/">
- Add an image</a> example to learn how to add an image to your map using
- `MLNImageSource`.
+ TODO: Add an image, learn how to add an image to your map using `MLNImageSource`.
  */
 MLN_EXPORT
 @interface MLNImageSource : MLNSource
@@ -84,6 +82,13 @@ MLN_EXPORT
 @property (nonatomic, copy, nullable)NSURL *URL;
 
 /**
+ Sets the URL for the image source, performing necessary validations.
+
+ @param url The URL to set for the image source.
+ */
+- (void)setURL:(NSURL *)url;
+
+/**
  The source image.
 
  If the receiver was initialized using `-initWithIdentifier:coordinateQuad:URL:` or if the `URL` property is set, this property is set to `nil`.
@@ -94,6 +99,14 @@ MLN_EXPORT
  The coordinates at which the corners of the source image will be placed.
  */
 @property (nonatomic) MLNCoordinateQuad coordinates;
+
+/**
+ Sets the coordinates for the image source.
+
+ @param coordinateQuad The coordinates to set for the image source.
+ */
+- (void)setCoordinates:(MLNCoordinateQuad)coordinateQuad;
+
 @end
 
 NS_ASSUME_NONNULL_END

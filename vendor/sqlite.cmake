@@ -2,8 +2,14 @@ if(TARGET mbgl-vendor-sqlite)
     return()
 endif()
 
-add_library(
-    mbgl-vendor-sqlite STATIC
+if(MLN_WITH_QT)
+    add_library(mbgl-vendor-sqlite OBJECT)
+else()
+    add_library(mbgl-vendor-sqlite STATIC)
+endif()
+
+target_sources(
+    mbgl-vendor-sqlite PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/sqlite/src/sqlite3.c
 )
 
@@ -32,3 +38,7 @@ export(TARGETS
     mbgl-vendor-sqlite
     APPEND FILE MapboxCoreTargets.cmake
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    set_target_properties(mbgl-vendor-sqlite PROPERTIES COMPILE_FLAGS "-pthread")
+endif()

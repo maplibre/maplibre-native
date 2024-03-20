@@ -1,14 +1,16 @@
+#if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/test/util.hpp>
 
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
 #include <mbgl/gl/context.hpp>
-#include <mbgl/gl/custom_layer.hpp>
+#include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/map/map.hpp>
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/platform/gl_functions.hpp>
+#include <mbgl/renderer/renderer.hpp>
 #include <mbgl/storage/resource_options.hpp>
 #include <mbgl/style/layers/background_layer.hpp>
 #include <mbgl/style/layers/fill_layer.hpp>
@@ -114,7 +116,12 @@ TEST(GLContextMode, Shared) {
         MBGL_CHECK_ERROR(glEnableVertexAttribArray(paintShader.a_pos));
         MBGL_CHECK_ERROR(glVertexAttribPointer(paintShader.a_pos, 2, GL_FLOAT, GL_FALSE, 0, nullptr));
         MBGL_CHECK_ERROR(glDrawArrays(GL_TRIANGLE_STRIP, 0, 3));
+
+        frontend.getRenderer()->reduceMemoryUse();
+        ASSERT_TRUE(static_cast<gl::Context&>(frontend.getBackend()->getContext()).empty());
     }
 
     test::checkImage("test/fixtures/shared_context", frontend.render(map).image, 0.5, 0.1);
 }
+
+#endif

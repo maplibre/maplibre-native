@@ -36,7 +36,7 @@ if(MLN_WITH_OPENGL)
     )
     target_compile_definitions(
         mbgl-glfw
-        PRIVATE MBGL_RENDER_BACKEND_OPENGL=1
+        PRIVATE MLN_RENDER_BACKEND_OPENGL=1
     )
 endif()
 

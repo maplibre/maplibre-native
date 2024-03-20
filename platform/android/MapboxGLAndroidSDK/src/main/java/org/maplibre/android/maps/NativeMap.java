@@ -239,6 +239,8 @@ interface NativeMap {
 
   void triggerRepaint();
 
+  void setSwapBehaviorFlush(boolean flush);
+
   //
   // Deprecated Annotations API
   //

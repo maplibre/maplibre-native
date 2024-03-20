@@ -32,8 +32,13 @@ bool TestRunner::startTest(const std::string& manifestBasePath) {
 
     bool status = false;
     try {
+#if MLN_RENDER_BACKEND_METAL
+        status = runTestWithManifest(manifestBasePath + "/ios-metal-render-test-runner-style.json");
+        status = runTestWithManifest(manifestBasePath + "/ios-metal-render-test-runner-metrics.json") && status;
+#else
         status = runTestWithManifest(manifestBasePath + "/ios-render-test-runner-style.json");
         status = runTestWithManifest(manifestBasePath + "/ios-render-test-runner-metrics.json") && status;
+#endif
     } catch (...) {
         mbgl::Log::Info(mbgl::Event::General, "Failed with exception");
     }

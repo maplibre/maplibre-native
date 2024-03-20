@@ -24,8 +24,7 @@ public:
     bool isConstant() const { return value.template is<T>(); }
 
     std::optional<T> constant() const {
-        return value.match([&](const T& t) { return std::optional<T>(t); },
-                           [&](const auto&) { return std::optional<T>(); });
+        return value.match([&](const T& t) { return std::optional<T>(t); }, [&](const auto&) { return std::nullopt; });
     }
 
     T constantOr(const T& t) const { return constant().value_or(t); }
@@ -57,6 +56,13 @@ public:
                            [&](const style::PropertyExpression<T>& expression) {
                                return expression.evaluate(zoom, feature, featureState, defaultValue);
                            });
+    }
+
+    using Dependency = style::expression::Dependency;
+    Dependency getDependencies() const noexcept {
+        return value.match(
+            [](const T&) noexcept { return Dependency::None; },
+            [](const style::PropertyExpression<T>& expression) noexcept { return expression.getDependencies(); });
     }
 };
 
@@ -105,6 +111,13 @@ public:
                                    return Faded<T>{evaluated, evaluated};
                                }
                            });
+    }
+
+    using Dependency = style::expression::Dependency;
+    Dependency getDependencies() const noexcept {
+        return value.match(
+            [](const Faded<T>&) noexcept { return Dependency::None; },
+            [](const style::PropertyExpression<T>& expression) noexcept { return expression.getDependencies(); });
     }
 };
 

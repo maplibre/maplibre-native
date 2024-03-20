@@ -24,11 +24,13 @@ void ImageSourceRenderData::upload(gfx::UploadPass& uploadPass) const {
         bucket->upload(uploadPass);
     }
 
+#if MLN_LEGACY_RENDERER
     if (!debugTexture) {
         std::array<uint8_t, 4> data{{0, 0, 0, 0}};
         static const PremultipliedImage emptyImage{Size(1, 1), data.data(), data.size()};
         debugTexture = uploadPass.createTexture(emptyImage);
     }
+#endif
 }
 
 void ImageSourceRenderData::render(PaintParameters& parameters) const {
@@ -39,7 +41,7 @@ void ImageSourceRenderData::render(PaintParameters& parameters) const {
     static const style::Properties<>::PossiblyEvaluated properties{};
     static const DebugProgram::Binders paintAttributeData(properties, 0);
 
-    auto programInstance = parameters.shaders.get<DebugProgram>();
+    auto programInstance = parameters.shaders.getLegacyGroup().get<DebugProgram>();
     if (!programInstance) {
         return;
     }

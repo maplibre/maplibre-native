@@ -152,7 +152,9 @@ std::optional<style::ImageContent> getContent(const JSValue& value, const char* 
 
 } // namespace
 
-std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& encodedImage, const std::string& json) {
+std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& id,
+                                                       const std::string& encodedImage,
+                                                       const std::string& json) {
     const PremultipliedImage raster = decodeImage(encodedImage);
 
     JSDocument doc;
@@ -170,6 +172,11 @@ std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& encode
     images.reserve(properties.MemberCount());
     for (const auto& property : properties) {
         const std::string name = {property.name.GetString(), property.name.GetStringLength()};
+        std::string completeName = name;
+        if (id != "default") {
+            completeName = id + ":";
+            completeName += name;
+        }
         const JSValue& value = property.value;
 
         if (value.IsObject()) {
@@ -183,8 +190,17 @@ std::vector<Immutable<style::Image::Impl>> parseSprite(const std::string& encode
             style::ImageStretches stretchY = getStretches(value, "stretchY", name.c_str());
             std::optional<style::ImageContent> content = getContent(value, "content", name.c_str());
 
-            auto image = createStyleImage(
-                name, raster, x, y, width, height, pixelRatio, sdf, std::move(stretchX), std::move(stretchY), content);
+            auto image = createStyleImage(completeName,
+                                          raster,
+                                          x,
+                                          y,
+                                          width,
+                                          height,
+                                          pixelRatio,
+                                          sdf,
+                                          std::move(stretchX),
+                                          std::move(stretchY),
+                                          content);
             if (image) {
                 images.push_back(std::move(image->baseImpl));
             }

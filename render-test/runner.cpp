@@ -77,10 +77,8 @@ std::string simpleDiff(const Value& result, const Value& expected) {
         }
 
         if (resultTokens[i] != expectedTokens[i]) {
-            diff << "<b>"
-                 << "-" << expectedTokens[i] << "</b>" << std::endl;
-            diff << "<b>"
-                 << "+" << resultTokens[i] << "</b>" << std::endl;
+            diff << "<b>" << "-" << expectedTokens[i] << "</b>" << std::endl;
+            diff << "<b>" << "+" << resultTokens[i] << "</b>" << std::endl;
         } else {
             diff << resultTokens[i] << std::endl;
         }
@@ -689,7 +687,7 @@ TestRunner::Impl::Impl(const TestMetadata& metadata,
       fileSource(mbgl::FileSourceManager::get()->getFileSource(
           mbgl::FileSourceType::ResourceLoader, resourceOptions, clientOptions)),
       map(frontend,
-          *observer.get(),
+          *observer,
           mbgl::MapOptions()
               .withMapMode(metadata.mapMode)
               .withSize(metadata.size)
@@ -817,11 +815,14 @@ void TestRunner::run(TestMetadata& metadata) {
 
 // TODO: remove usage of std::codecvt_utf8
 // https://github.com/maplibre/maplibre-native/issues/1269
+#if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
                     static std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> cv;
+#if defined(__clang__)
 #pragma clang diagnostic pop
-
+#endif
                     if (it == symbols.end()) {
                         symbols.push_back({tileId, box, placed, isIcon});
                         return;

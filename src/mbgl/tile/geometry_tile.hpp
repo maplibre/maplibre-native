@@ -8,6 +8,7 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/tile/geometry_tile_worker.hpp>
 #include <mbgl/util/feature.hpp>
+#include <mbgl/util/containers.hpp>
 
 #include <atomic>
 #include <memory>
@@ -65,14 +66,14 @@ public:
 
     class LayoutResult {
     public:
-        std::unordered_map<std::string, LayerRenderData> layerRenderData;
+        mbgl::unordered_map<std::string, LayerRenderData> layerRenderData;
         std::shared_ptr<FeatureIndex> featureIndex;
         std::optional<AlphaImage> glyphAtlasImage;
         ImageAtlas iconAtlas;
 
         LayerRenderData* getLayerRenderData(const style::Layer::Impl&);
 
-        LayoutResult(std::unordered_map<std::string, LayerRenderData> renderData_,
+        LayoutResult(mbgl::unordered_map<std::string, LayerRenderData> renderData_,
                      std::unique_ptr<FeatureIndex> featureIndex_,
                      std::optional<AlphaImage> glyphAtlasImage_,
                      ImageAtlas iconAtlas_)
@@ -105,12 +106,14 @@ private:
     // Used to signal the worker that it should abandon parsing this tile as soon as possible.
     std::atomic<bool> obsolete{false};
 
-    std::shared_ptr<Mailbox> mailbox;
+    const std::shared_ptr<Scheduler> threadPool;
+
+    const std::shared_ptr<Mailbox> mailbox;
     Actor<GeometryTileWorker> worker;
 
-    std::shared_ptr<FileSource> fileSource;
-    GlyphManager& glyphManager;
-    ImageManager& imageManager;
+    const std::shared_ptr<FileSource> fileSource;
+    const std::shared_ptr<GlyphManager> glyphManager;
+    const std::shared_ptr<ImageManager> imageManager;
 
     uint64_t correlationID = 0;
 

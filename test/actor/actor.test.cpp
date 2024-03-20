@@ -91,7 +91,12 @@ TEST(Actor, DestructionBlocksOnSend) {
 
         ~TestScheduler() override { EXPECT_TRUE(waited.load()); }
 
-        void schedule(std::function<void()>) final {
+        std::size_t waitForEmpty(Milliseconds) override {
+            assert(false);
+            return 0;
+        }
+
+        void schedule(std::function<void()>&&) final {
             promise.set_value();
             future.wait();
             std::this_thread::sleep_for(1ms);

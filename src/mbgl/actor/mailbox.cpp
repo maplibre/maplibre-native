@@ -1,6 +1,7 @@
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/actor/message.hpp>
 #include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/scoped.hpp>
 
 #include <cassert>
 
@@ -32,6 +33,8 @@ void Mailbox::open(Scheduler& scheduler_) {
 }
 
 void Mailbox::close() {
+    abandon();
+
     // Block until neither receive() nor push() are in progress. Two mutexes are
     // used because receive() must not block send(). Of the two, the receiving
     // mutex must be acquired first, because that is the order that an actor
@@ -44,14 +47,37 @@ void Mailbox::close() {
     closed = true;
 }
 
+void Mailbox::abandon() {
+    auto idleValue = State::Idle;
+    while (!state.compare_exchange_strong(idleValue, State::Abandoned)) {
+        if (state == State::Abandoned) {
+            break;
+        }
+    }
+}
+
 bool Mailbox::isOpen() const {
     return bool(weakScheduler);
 }
 
 void Mailbox::push(std::unique_ptr<Message> message) {
+    auto idleState = State::Idle;
+    while (!state.compare_exchange_strong(idleState, State::Processing)) {
+        if (state == State::Abandoned) {
+            return;
+        }
+    }
+
+    Scoped activityFlag{[this]() {
+        if (state == State::Processing) {
+            state = State::Idle;
+        }
+    }};
+
     std::lock_guard<std::mutex> pushingLock(pushingMutex);
 
     if (closed) {
+        state = State::Abandoned;
         return;
     }
 
@@ -65,12 +91,25 @@ void Mailbox::push(std::unique_ptr<Message> message) {
 }
 
 void Mailbox::receive() {
+    auto idleState = State::Idle;
+    while (!state.compare_exchange_strong(idleState, State::Processing)) {
+        if (state == State::Abandoned) {
+            return;
+        }
+    }
+
+    Scoped activityFlag{[this]() {
+        if (state == State::Processing) {
+            state = State::Idle;
+        }
+    }};
     std::lock_guard<std::recursive_mutex> receivingLock(receivingMutex);
 
     auto guard = weakScheduler.lock();
     assert(weakScheduler);
 
     if (closed) {
+        state = State::Abandoned;
         return;
     }
 

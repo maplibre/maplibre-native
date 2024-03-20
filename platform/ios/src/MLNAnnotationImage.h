@@ -11,8 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
  by the map view.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/marker-image/">
- Mark a place on the map with an image</a> example to learn how use an image
+ TODO: Mark a place on the map with an image, learn how use an image
  as a marker using `MLNAnnotationImage`. 
  */
 MLN_EXPORT

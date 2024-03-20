@@ -9,14 +9,13 @@
 
 namespace mbgl {
 
-template <class AttributeList>
-class Segment {
+class SegmentBase {
 public:
-    Segment(std::size_t vertexOffset_,
-            std::size_t indexOffset_,
-            std::size_t vertexLength_ = 0,
-            std::size_t indexLength_ = 0,
-            float sortKey_ = 0.0f)
+    SegmentBase(std::size_t vertexOffset_,
+                std::size_t indexOffset_,
+                std::size_t vertexLength_ = 0,
+                std::size_t indexLength_ = 0,
+                float sortKey_ = 0.0f)
         : vertexOffset(vertexOffset_),
           indexOffset(indexOffset_),
           vertexLength(vertexLength_),
@@ -28,7 +27,7 @@ public:
     // explicitly defaulted move constructor does not match
     // the calculated one" when marking this 'noexcept'.
     // NOLINTNEXTLINE(performance-noexcept-move-constructor)
-    Segment(Segment&&) = default;
+    SegmentBase(SegmentBase&&) = default;
 
     const std::size_t vertexOffset;
     const std::size_t indexOffset;
@@ -46,6 +45,11 @@ public:
     mutable std::map<std::string, gfx::DrawScope> drawScopes;
 
     float sortKey;
+};
+
+template <class AttributeList>
+class Segment : public SegmentBase {
+    using SegmentBase::SegmentBase;
 };
 
 template <class AttributeList>

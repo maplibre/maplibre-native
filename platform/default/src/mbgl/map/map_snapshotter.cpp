@@ -36,8 +36,14 @@ public:
 
     void onResourceError(std::exception_ptr err) override { delegate.invoke(&RendererObserver::onResourceError, err); }
 
-    void onDidFinishRenderingFrame(RenderMode mode, bool repaintNeeded, bool placementChanged) override {
-        delegate.invoke(&RendererObserver::onDidFinishRenderingFrame, mode, repaintNeeded, placementChanged);
+    void onDidFinishRenderingFrame(RenderMode mode,
+                                   bool repaintNeeded,
+                                   bool placementChanged,
+                                   double frameEncodingTime,
+                                   double frameRenderingTime) override {
+        void (RendererObserver::*f)(
+            RenderMode, bool, bool, double, double) = &RendererObserver::onDidFinishRenderingFrame;
+        delegate.invoke(f, mode, repaintNeeded, placementChanged, frameEncodingTime, frameRenderingTime);
     }
 
     void onStyleImageMissing(const std::string& image, const StyleImageMissingCallback& cb) override {
@@ -75,6 +81,18 @@ public:
             stillImage = frontend.readStillImage();
         }
         rendererObserver->onDidFinishRenderingFrame(mode, repaintNeeded, placementChanged);
+    }
+
+    void onDidFinishRenderingFrame(RenderMode mode,
+                                   bool repaintNeeded,
+                                   bool placementChanged,
+                                   double frameEncodingTime,
+                                   double frameRenderingTime) override {
+        if (mode == RenderMode::Full && hasPendingStillImageRequest) {
+            stillImage = frontend.readStillImage();
+        }
+        rendererObserver->onDidFinishRenderingFrame(
+            mode, repaintNeeded, placementChanged, frameEncodingTime, frameRenderingTime);
     }
 
     void onStyleImageMissing(const std::string& id, const StyleImageMissingCallback& done) override {

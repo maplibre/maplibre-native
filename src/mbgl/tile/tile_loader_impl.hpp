@@ -30,6 +30,9 @@ TileLoader<T>::TileLoader(T& tile_,
                               Resource::LoadingMethod::CacheOnly)),
       fileSource(parameters.fileSource) {
     assert(!request);
+
+    shared = std::make_shared<Shared>();
+
     if (!fileSource) {
         tile.setError(getCantLoadTileError());
         return;
@@ -55,7 +58,12 @@ TileLoader<T>::TileLoader(T& tile_,
 }
 
 template <typename T>
-TileLoader<T>::~TileLoader() = default;
+TileLoader<T>::~TileLoader() {
+    std::unique_lock<std::shared_mutex> lock(shared->requestLock);
+    shared->aborted = true;
+    tile.cancel();
+    request.reset();
+};
 
 template <typename T>
 void TileLoader<T>::setNecessity(TileNecessity newNecessity) {
@@ -90,29 +98,36 @@ void TileLoader<T>::loadFromCache() {
     }
 
     resource.loadingMethod = Resource::LoadingMethod::CacheOnly;
-    request = fileSource->request(resource, [this](const Response& res) {
-        request.reset();
+    request = fileSource->request(resource, [this, shared_{shared}](const Response& res) {
+        do {
+            if (shared_->requestLock.try_lock_shared()) {
+                std::shared_lock<std::shared_mutex> lock(shared_->requestLock, std::adopt_lock);
+                if (shared_->aborted) return;
 
-        tile.setTriedCache();
+                request.reset();
+                tile.setTriedCache();
 
-        if (res.error && res.error->reason == Response::Error::Reason::NotFound) {
-            // When the cache-only request could not be satisfied, don't treat
-            // it as an error. A cache lookup could still return data, _and_ an
-            // error, in particular when we were able to find the data, but it
-            // is expired and the Cache-Control headers indicated that we aren't
-            // allowed to use expired responses. In this case, we still get the
-            // data which we can use in our conditional network request.
-            resource.priorModified = res.modified;
-            resource.priorExpires = res.expires;
-            resource.priorEtag = res.etag;
-            resource.priorData = res.data;
-        } else {
-            loadedData(res);
-        }
+                if (res.error && res.error->reason == Response::Error::Reason::NotFound) {
+                    // When the cache-only request could not be satisfied, don't treat
+                    // it as an error. A cache lookup could still return data, _and_ an
+                    // error, in particular when we were able to find the data, but it
+                    // is expired and the Cache-Control headers indicated that we aren't
+                    // allowed to use expired responses. In this case, we still get the
+                    // data which we can use in our conditional network request.
+                    resource.priorModified = res.modified;
+                    resource.priorExpires = res.expires;
+                    resource.priorEtag = res.etag;
+                    resource.priorData = res.data;
+                } else {
+                    loadedData(res);
+                }
 
-        if (necessity == TileNecessity::Required) {
-            loadFromNetwork();
-        }
+                if (necessity == TileNecessity::Required) {
+                    loadFromNetwork();
+                }
+                break;
+            }
+        } while (!shared_->aborted);
     });
 }
 
@@ -164,7 +179,19 @@ void TileLoader<T>::loadFromNetwork() {
     resource.minimumUpdateInterval = updateParameters.minimumUpdateInterval;
     resource.storagePolicy = updateParameters.isVolatile ? Resource::StoragePolicy::Volatile
                                                          : Resource::StoragePolicy::Permanent;
-    request = fileSource->request(resource, [this](const Response& res) { loadedData(res); });
+
+    request = fileSource->request(resource, [this, shared_{shared}](const Response& res) {
+        do {
+            if (shared_->requestLock.try_lock_shared()) {
+                std::shared_lock<std::shared_mutex> lock(shared_->requestLock, std::adopt_lock);
+                if (shared_->aborted) return;
+
+                request.reset();
+                loadedData(res);
+                break;
+            }
+        } while (!shared_->aborted);
+    });
 }
 
 } // namespace mbgl

@@ -10,12 +10,7 @@ configure_device_profiles()
 swift_library(
     name = "uitest_srcs",
     testonly = True,
-    srcs = glob(
-        [
-            "*.swift",
-        ],
-        allow_empty = False,
-    ),
+    srcs = glob(["*.swift"]),
 )
 
 ios_ui_test(

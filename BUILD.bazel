@@ -1,9 +1,17 @@
-load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+load("@aspect_rules_js//js:defs.bzl", "js_binary", "js_library", "js_run_binary")
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("@npm//:defs.bzl", "npm_link_all_packages")
 load(
     "//bazel:core.bzl",
     "MLN_CORE_HEADERS",
     "MLN_CORE_SOURCE",
+    "MLN_DRAWABLES_GL_HEADERS",
+    "MLN_DRAWABLES_GL_SOURCE",
+    "MLN_DRAWABLES_HEADERS",
+    "MLN_DRAWABLES_MTL_HEADERS",
+    "MLN_DRAWABLES_MTL_SOURCE",
+    "MLN_DRAWABLES_SOURCE",
+    "MLN_GENERATED_OPENGL_SHADER_HEADERS",
     "MLN_GENERATED_SHADER_HEADERS",
     "MLN_GENERATED_STYLE_SOURCE",
     "MLN_OPENGL_HEADERS",
@@ -11,65 +19,54 @@ load(
     "MLN_PRIVATE_GENERATED_STYLE_HEADERS",
     "MLN_PUBLIC_GENERATED_STYLE_HEADERS",
 )
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
 # Generate code required by the core
-filegroup(
-    name = "style_data",
+
+js_run_binary(
+    name = "generated_style_code",
     srcs = glob(
         ["**/*.ejs"],
         allow_empty = False,
     ),
-)
-
-genrule(
-    name = "generated_style_code",
-    srcs = ["style_data"],
     outs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
            MLN_PRIVATE_GENERATED_STYLE_HEADERS +
            MLN_GENERATED_STYLE_SOURCE,
-    cmd = "node $(execpath scripts/generate-style-code.js) --root $(RULEDIR)",
-    tools = ["scripts/generate-style-code.js"],
+    tool = ":generate-style-code-script",
 )
 
-filegroup(
-    name = "shader_data",
+js_run_binary(
+    name = "generated_shaders",
     srcs = ["shaders/manifest.json"] + glob(
         ["shaders/*.glsl"],
         allow_empty = False,
     ),
-)
-
-genrule(
-    name = "generated_shaders",
-    srcs = ["shader_data"],
-    outs = MLN_GENERATED_SHADER_HEADERS,
-    cmd = "node $(execpath shaders/generate_shader_code.js) --root $(RULEDIR)",
-    tools = ["shaders/generate_shader_code.js"],
+    outs = MLN_GENERATED_SHADER_HEADERS +
+           MLN_GENERATED_OPENGL_SHADER_HEADERS,
+    tool = ":generate-shader-code-script",
 )
 
 # This header only target strips the __generated__ prefix for the compiler
 # search paths, making the location of generated code transparent to the build
 cc_library(
     name = "mbgl-core-generated-public-artifacts",
-    srcs = [],
-    hdrs = MLN_PUBLIC_GENERATED_STYLE_HEADERS +
-           MLN_GENERATED_SHADER_HEADERS,
+    hdrs = [
+               ":generated_shaders",
+               ":generated_style_code",
+           ] + MLN_PUBLIC_GENERATED_STYLE_HEADERS +
+           MLN_GENERATED_SHADER_HEADERS +
+           select({
+               "//:metal_renderer": [],
+               "//conditions:default": MLN_GENERATED_OPENGL_SHADER_HEADERS,
+           }),
     visibility = ["//visibility:public"],
-    deps = [
-        ":generated_shaders",
-        ":generated_style_code",
-    ],
 )
 
 # ditto, but for private headers (under the src/ path)
 cc_library(
     name = "mbgl-core-generated-private-artifacts",
-    srcs = [],
-    hdrs = MLN_PRIVATE_GENERATED_STYLE_HEADERS,
+    hdrs = [":generated_style_code"] + MLN_PRIVATE_GENERATED_STYLE_HEADERS,
     visibility = ["//visibility:private"],
-    deps = [
-        ":generated_style_code",
-    ],
 )
 
 # Generated source is inserted directly into the core target, no need to remove
@@ -77,19 +74,48 @@ cc_library(
 cc_library(
     name = "mbgl-core",
     srcs = MLN_CORE_SOURCE +
-           MLN_GENERATED_STYLE_SOURCE +
-           MLN_OPENGL_SOURCE,
-    hdrs = MLN_CORE_HEADERS +
-           MLN_OPENGL_HEADERS,
+           MLN_GENERATED_STYLE_SOURCE + select({
+        ":drawable_renderer": MLN_OPENGL_SOURCE + MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_GL_SOURCE,
+        ":legacy_renderer": MLN_OPENGL_SOURCE,
+        ":metal_renderer": MLN_DRAWABLES_SOURCE + MLN_DRAWABLES_MTL_SOURCE,
+        "//conditions:default": [],
+    }),
+    hdrs = MLN_CORE_HEADERS + select({
+        ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
+        ":legacy_renderer": MLN_OPENGL_HEADERS,
+        ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
+        "//conditions:default": [],
+    }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     defines = select({
-        "//:ios": ["GLES_SILENCE_DEPRECATION=1"],
+        ":legacy_renderer": [
+            "MLN_RENDER_BACKEND_OPENGL=1",
+            "MLN_LEGACY_RENDERER=1",
+            "MLN_DRAWABLE_RENDERER=0",
+        ],
+        ":drawable_renderer": [
+            "MLN_RENDER_BACKEND_OPENGL=1",
+            "MLN_LEGACY_RENDERER=0",
+            "MLN_DRAWABLE_RENDERER=1",
+        ],
+        ":metal_renderer": [
+            "MLN_RENDER_BACKEND_METAL=1",
+            "MLN_LEGACY_RENDERER=0",
+            "MLN_DRAWABLE_RENDERER=1",
+        ],
+    }) + select({
+        "@platforms//os:ios": ["GLES_SILENCE_DEPRECATION=1"],
         "//conditions:default": [],
     }),
     includes = [
         "include",
         "src",
-    ],
+    ] + select({
+        ":metal_renderer": [
+            "vendor/metal-cpp",
+        ],
+        "//conditions:default": [],
+    }),
     local_defines = [
         r"MLN_VERSION_REV=\"standalone\"",
     ],
@@ -106,11 +132,17 @@ cc_library(
         "//vendor:polylabel",
         "//vendor:protozero",
         "//vendor:unique_resource",
+        "//vendor:unordered_dense",
         "//vendor:vector-tile",
         "//vendor:wagyu",
     ] + select({
-        "//:ios": [
+        "@platforms//os:ios": [
             "//vendor:icu",
+        ],
+        "//conditions:default": [],
+    }) + select({
+        ":metal_renderer": [
+            "//vendor:metal-cpp",
         ],
         "//conditions:default": [],
     }),
@@ -126,35 +158,36 @@ genrule(
     visibility = ["//visibility:public"],
 )
 
-# The next three rules are a bit of a hack
-# they are needed until rules_apple has platforms support
-# https://github.com/bazelbuild/rules_apple/issues/1658
-# Allows passing a command line flag to set the Platform
-# bazel build [target] --//:maplibre_platform=ios
+# Selects the rendering implementation to utilize in the core
 
 string_flag(
-    name = "maplibre_platform",
-    build_setting_default = "ios",
+    name = "renderer",
+    build_setting_default = "legacy",
+    values = [
+        "legacy",
+        "drawable",
+        "metal",
+    ],
 )
 
 config_setting(
-    name = "linux",
+    name = "legacy_renderer",
     flag_values = {
-        ":maplibre_platform": "linux",
+        ":renderer": "legacy",
     },
 )
 
 config_setting(
-    name = "ios",
+    name = "drawable_renderer",
     flag_values = {
-        ":maplibre_platform": "ios",
+        ":renderer": "drawable",
     },
 )
 
 config_setting(
-    name = "windows",
+    name = "metal_renderer",
     flag_values = {
-        ":maplibre_platform": "windows",
+        ":renderer": "metal",
     },
 )
 
@@ -164,4 +197,46 @@ exports_files(
         "scripts/style-spec-reference/v8.json",
     ],
     visibility = ["//visibility:public"],
+)
+
+npm_link_all_packages(
+    name = "node_modules",
+)
+
+js_binary(
+    name = "generate-style-code-script",
+    data = [
+        ":node_modules/argparse",
+        ":node_modules/csscolorparser",
+        ":style-code",
+        ":style-spec",
+    ],
+    entry_point = "scripts/generate-style-code.js",
+)
+
+js_binary(
+    name = "generate-shader-code-script",
+    data = [
+        ":node_modules/argparse",
+    ],
+    entry_point = "shaders/generate_shader_code.js",
+)
+
+js_library(
+    name = "style-spec",
+    srcs = ["scripts/style-spec.js"],
+    data = glob([
+        "scripts/style-spec-reference/*.js",
+        "scripts/style-spec-reference/*.json",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+js_library(
+    name = "style-code",
+    srcs = ["scripts/style-code.js"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":node_modules/ejs",
+    ],
 )

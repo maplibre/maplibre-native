@@ -1,6 +1,4 @@
 // Generated code, do not modify this file!
-// Generated on 2023-04-05T16:25:15.886Z by mwilsnd using shaders/generate_shader_code.js
-
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -9,6 +7,7 @@ namespace shaders {
 
 template <>
 struct ShaderSource<BuiltIn::CollisionCircleProgram, gfx::Backend::Type::OpenGL> {
+    static constexpr const char* name = "CollisionCircleProgram";
     static constexpr const char* vertex = R"(layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec2 a_anchor_pos;
 layout (location = 2) in vec2 a_extrude;
@@ -21,7 +20,7 @@ uniform float u_camera_to_center_distance;
 out float v_placed;
 out float v_notUsed;
 out float v_radius;
-out vec2 v_extrude;
+out highp vec2 v_extrude;
 out vec2 v_extrude_scale;
 
 void main() {
@@ -50,7 +49,7 @@ void main() {
 in float v_placed;
 in float v_notUsed;
 in float v_radius;
-in vec2 v_extrude;
+in highp vec2 v_extrude;
 in vec2 v_extrude_scale;
 
 void main() {

@@ -1,5 +1,7 @@
 #pragma once
-
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/renderer/layer_group.hpp>
+#endif
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
 #include <mbgl/renderer/render_light.hpp>
@@ -12,13 +14,18 @@
 #include <mbgl/text/glyph_manager_observer.hpp>
 #include <mbgl/renderer/image_manager_observer.hpp>
 #include <mbgl/text/placement.hpp>
+#include <mbgl/renderer/render_tree.hpp>
 
+#include <map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace mbgl {
-
+#if MLN_DRAWABLE_RENDERER
+class ChangeRequest;
+#endif
 class RendererObserver;
 class RenderSource;
 class UpdateParameters;
@@ -32,9 +39,19 @@ class PatternAtlas;
 class CrossTileSymbolIndex;
 class RenderTree;
 
+namespace gfx {
+class ShaderRegistry;
+#if MLN_DRAWABLE_RENDERER
+class Drawable;
+using DrawablePtr = std::shared_ptr<Drawable>;
+#endif
+} // namespace gfx
+
 namespace style {
 class LayerProperties;
 } // namespace style
+
+using ImmutableLayer = Immutable<style::Layer::Impl>;
 
 class RenderOrchestrator final : public GlyphManagerObserver, public ImageManagerObserver, public RenderSourceObserver {
 public:
@@ -78,6 +95,56 @@ public:
     const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
     void clearData();
 
+    void update(const std::shared_ptr<UpdateParameters>&);
+
+#if MLN_DRAWABLE_RENDERER
+    bool addLayerGroup(LayerGroupBasePtr);
+    bool removeLayerGroup(const LayerGroupBasePtr&);
+    size_t numLayerGroups() const noexcept;
+    int32_t maxLayerIndex() const;
+    void updateLayerIndex(LayerGroupBasePtr, int32_t newIndex);
+
+    template <typename Func /* void(LayerGroupBase&) */>
+    void visitLayerGroups(Func f) {
+        for (auto& pair : layerGroupsByLayerIndex) {
+            if (pair.second) {
+                f(*pair.second);
+            }
+        }
+    }
+
+    void updateLayers(gfx::ShaderRegistry&,
+                      gfx::Context&,
+                      const TransformState&,
+                      const std::shared_ptr<UpdateParameters>&,
+                      const RenderTree&);
+
+    void processChanges();
+
+    bool addRenderTarget(RenderTargetPtr);
+    bool removeRenderTarget(const RenderTargetPtr&);
+
+    template <typename Func /* void(RenderTarget&) */>
+    void visitRenderTargets(Func f) {
+        for (auto& renderTarget : renderTargets) {
+            f(*renderTarget);
+        }
+    }
+
+    void updateDebugLayerGroups(const RenderTree& renderTree, PaintParameters& parameters);
+
+    template <typename Func /* void(LayerGroupBase&) */>
+    void visitDebugLayerGroups(Func f) {
+        for (auto& pair : debugLayerGroups) {
+            if (pair.second) {
+                f(*pair.second);
+            }
+        }
+    }
+#endif
+
+    const ZoomHistory& getZoomHistory() const { return zoomHistory; }
+
 private:
     bool isLoaded() const;
     bool hasTransitions(TimePoint) const;
@@ -107,13 +174,18 @@ private:
     void onStyleImageMissing(const std::string&, const std::function<void()>&) override;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) override;
 
+#if MLN_DRAWABLE_RENDERER
+    /// Move changes into the pending set, clearing the provided collection
+    void addChanges(UniqueChangeRequestVec&);
+#endif
+
     RendererObserver* observer;
 
     ZoomHistory zoomHistory;
     TransformState transformState;
 
-    std::unique_ptr<GlyphManager> glyphManager;
-    std::unique_ptr<ImageManager> imageManager;
+    std::shared_ptr<GlyphManager> glyphManager;
+    std::shared_ptr<ImageManager> imageManager;
     std::unique_ptr<LineAtlas> lineAtlas;
     std::unique_ptr<PatternAtlas> patternAtlas;
 
@@ -137,6 +209,18 @@ private:
     std::vector<Immutable<style::LayerProperties>> filteredLayersForSource;
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;
+
+    std::shared_ptr<Scheduler> threadPool;
+
+#if MLN_DRAWABLE_RENDERER
+    std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
+
+    using LayerGroupMap = std::multimap<int32_t, LayerGroupBasePtr>;
+    LayerGroupMap layerGroupsByLayerIndex;
+
+    std::vector<RenderTargetPtr> renderTargets;
+    RenderItem::DebugLayerGroupMap debugLayerGroups;
+#endif
 };
 
 } // namespace mbgl

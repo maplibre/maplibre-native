@@ -13,13 +13,6 @@
 
 #endif
 
-// GCC 4.9 compatibility
-#if !defined(__GNUC__) || __GNUC__ >= 5
-#define MBGL_CONSTEXPR constexpr
-#else
-#define MBGL_CONSTEXPR inline
-#endif
-
 // Compiler defines for making symbols visible, otherwise they
 // will be defined as hidden by default.
 

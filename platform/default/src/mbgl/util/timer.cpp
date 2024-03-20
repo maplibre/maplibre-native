@@ -1,10 +1,11 @@
 #include <mbgl/util/timer.hpp>
 
-#include <stdexcept>
-
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/string.hpp>
 
 #include <uv.h>
+
+#include <stdexcept>
 
 namespace mbgl {
 namespace util {
@@ -28,6 +29,14 @@ public:
 
     void start(uint64_t timeout, uint64_t repeat, std::function<void()>&& cb_) {
         cb = std::move(cb_);
+
+        // Update the event loop’s concept of “now”.
+        // This resolves test failures on some systems, where only the following sequence of tests fails:
+        //     Thread.InvokeBeforeChildStarts:Thread.DeleteBeforeChildStarts:Timer.Basic
+        // This implies that "you have callbacks that block the event loop for ... on the order of a millisecond
+        // or more," so this may be masking some unexpected interaction between successive `RunLoop` instances.
+        uv_update_time(reinterpret_cast<uv_loop_t*>(RunLoop::getLoopHandle()));
+
         if (uv_timer_start(timer, timerCallback, timeout, repeat) != 0) {
             throw std::runtime_error("Failed to start timer.");
         }

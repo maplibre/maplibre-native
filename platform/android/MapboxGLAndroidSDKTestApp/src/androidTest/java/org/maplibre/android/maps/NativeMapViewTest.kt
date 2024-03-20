@@ -442,5 +442,10 @@ class NativeMapViewTest : AppCenter() {
         override fun queueEvent(runnable: Runnable?) {
             // no-op
         }
+        
+        override fun waitForEmpty(timeoutMillis: Long): Long {
+            // no-op
+            return 0
+        }
     }
 }

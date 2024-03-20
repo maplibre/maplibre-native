@@ -2,9 +2,12 @@
 
 #include <mbgl/util/immutable.hpp>
 
+#include <algorithm>
+#include <cassert>
 #include <memory>
-#include <string>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace mbgl {
 namespace style {

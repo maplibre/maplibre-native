@@ -1,3 +1,5 @@
+#if MLN_RENDER_BACKEND_OPENGL
+
 #include <mbgl/test/util.hpp>
 
 #include <mbgl/platform/gl_functions.hpp>
@@ -257,3 +259,5 @@ TEST(GLFunctions, OpenGLES) {
     EXPECT_NE(glTexStorage3D, nullptr);
     EXPECT_NE(glGetInternalformativ, nullptr);
 }
+
+#endif

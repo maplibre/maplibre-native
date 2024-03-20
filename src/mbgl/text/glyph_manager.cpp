@@ -21,33 +21,36 @@ GlyphManager::~GlyphManager() = default;
 void GlyphManager::getGlyphs(GlyphRequestor& requestor, GlyphDependencies glyphDependencies, FileSource& fileSource) {
     auto dependencies = std::make_shared<GlyphDependencies>(std::move(glyphDependencies));
 
-    // Figure out which glyph ranges need to be fetched. For each range that
-    // does need to be fetched, record an entry mapping the requestor to a
-    // shared pointer containing the dependencies. When the shared pointer
-    // becomes unique, we know that all the dependencies for that requestor have
-    // been fetched, and can notify it of completion.
-    for (const auto& dependency : *dependencies) {
-        const FontStack& fontStack = dependency.first;
-        Entry& entry = entries[fontStack];
+    {
+        std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
+        // Figure out which glyph ranges need to be fetched. For each range that
+        // does need to be fetched, record an entry mapping the requestor to a
+        // shared pointer containing the dependencies. When the shared pointer
+        // becomes unique, we know that all the dependencies for that requestor have
+        // been fetched, and can notify it of completion.
+        for (const auto& dependency : *dependencies) {
+            const FontStack& fontStack = dependency.first;
+            Entry& entry = entries[fontStack];
 
-        const GlyphIDs& glyphIDs = dependency.second;
-        std::unordered_set<GlyphRange> ranges;
-        for (const auto& glyphID : glyphIDs) {
-            if (localGlyphRasterizer->canRasterizeGlyph(fontStack, glyphID)) {
-                if (entry.glyphs.find(glyphID) == entry.glyphs.end()) {
-                    entry.glyphs.emplace(glyphID, makeMutable<Glyph>(generateLocalSDF(fontStack, glyphID)));
+            const GlyphIDs& glyphIDs = dependency.second;
+            std::unordered_set<GlyphRange> ranges;
+            for (const auto& glyphID : glyphIDs) {
+                if (localGlyphRasterizer->canRasterizeGlyph(fontStack, glyphID)) {
+                    if (entry.glyphs.find(glyphID) == entry.glyphs.end()) {
+                        entry.glyphs.emplace(glyphID, makeMutable<Glyph>(generateLocalSDF(fontStack, glyphID)));
+                    }
+                } else {
+                    ranges.insert(getGlyphRange(glyphID));
                 }
-            } else {
-                ranges.insert(getGlyphRange(glyphID));
             }
-        }
 
-        for (const auto& range : ranges) {
-            auto it = entry.ranges.find(range);
-            if (it == entry.ranges.end() || !it->second.parsed) {
-                GlyphRequest& request = entry.ranges[range];
-                request.requestors[&requestor] = dependencies;
-                requestRange(request, fontStack, range, fileSource);
+            for (const auto& range : ranges) {
+                auto it = entry.ranges.find(range);
+                if (it == entry.ranges.end() || !it->second.parsed) {
+                    GlyphRequest& request = entry.ranges[range];
+                    request.requestors[&requestor] = dependencies;
+                    requestRange(request, fontStack, range, fileSource);
+                }
             }
         }
     }
@@ -88,39 +91,43 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
         return;
     }
 
-    Entry& entry = entries[fontStack];
-    GlyphRequest& request = entry.ranges[range];
+    {
+        std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
 
-    if (!res.noContent) {
-        std::vector<Glyph> glyphs;
+        Entry& entry = entries[fontStack];
+        GlyphRequest& request = entry.ranges[range];
 
-        try {
-            glyphs = parseGlyphPBF(range, *res.data);
-        } catch (...) {
-            observer->onGlyphsError(fontStack, range, std::current_exception());
-            return;
-        }
+        if (!res.noContent) {
+            std::vector<Glyph> glyphs;
 
-        for (auto& glyph : glyphs) {
-            auto id = glyph.id;
-            if (!localGlyphRasterizer->canRasterizeGlyph(fontStack, id)) {
-                entry.glyphs.erase(id);
-                entry.glyphs.emplace(id, makeMutable<Glyph>(std::move(glyph)));
+            try {
+                glyphs = parseGlyphPBF(range, *res.data);
+            } catch (...) {
+                observer->onGlyphsError(fontStack, range, std::current_exception());
+                return;
+            }
+
+            for (auto& glyph : glyphs) {
+                auto id = glyph.id;
+                if (!localGlyphRasterizer->canRasterizeGlyph(fontStack, id)) {
+                    entry.glyphs.erase(id);
+                    entry.glyphs.emplace(id, makeMutable<Glyph>(std::move(glyph)));
+                }
             }
         }
-    }
 
-    request.parsed = true;
+        request.parsed = true;
 
-    for (auto& pair : request.requestors) {
-        GlyphRequestor& requestor = *pair.first;
-        const std::shared_ptr<GlyphDependencies>& dependencies = pair.second;
-        if (dependencies.unique()) {
-            notify(requestor, *dependencies);
+        for (auto& pair : request.requestors) {
+            GlyphRequestor& requestor = *pair.first;
+            const std::shared_ptr<GlyphDependencies>& dependencies = pair.second;
+            if (dependencies.unique()) {
+                notify(requestor, *dependencies);
+            }
         }
-    }
 
-    request.requestors.clear();
+        request.requestors.clear();
+    }
 
     observer->onGlyphsLoaded(fontStack, range);
 }
@@ -153,6 +160,7 @@ void GlyphManager::notify(GlyphRequestor& requestor, const GlyphDependencies& gl
 }
 
 void GlyphManager::removeRequestor(GlyphRequestor& requestor) {
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
     for (auto& entry : entries) {
         for (auto& range : entry.second.ranges) {
             range.second.requestors.erase(&requestor);
@@ -161,6 +169,7 @@ void GlyphManager::removeRequestor(GlyphRequestor& requestor) {
 }
 
 void GlyphManager::evict(const std::set<FontStack>& keep) {
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
     util::erase_if(entries, [&](const auto& entry) { return keep.count(entry.first) == 0; });
 }
 

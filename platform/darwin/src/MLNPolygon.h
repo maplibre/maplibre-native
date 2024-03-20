@@ -46,8 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
  than −180 degrees or greater than 180 degrees.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/polygon/">
- Add a polygon annotation</a> example to learn how to initialize an
+ TODO: Add a polygon annotation, learn how to initialize an
  `MLNPolygon` object from an array of coordinates.
  */
 MLN_EXPORT

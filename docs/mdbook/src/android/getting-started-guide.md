@@ -1,5 +1,11 @@
 # Quickstart
 
+<div class="warning">
+
+In versions prior to the (upcoming) MapLibre Native for Android 11.0 release, you need to use `com.mapbox.mapboxsdk.*` for imports instead of `org.maplibre.android.*`. Classes with `Mapbox` in the name are replaced with `MapLibre`. Details can be found in the [changelog](https://github.com/maplibre/maplibre-native/blob/main/platform/android/CHANGELOG.md).
+
+</div>
+
 1. Add bintray Maven repositories to your project-level Gradle file (usually `<project>/<app-module>/build.gradle`).
 
     ```gradle

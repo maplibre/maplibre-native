@@ -30,8 +30,8 @@ ThreadLocalBase::~ThreadLocalBase() {
     }
 }
 
-void* ThreadLocalBase::get() {
-    return pthread_getspecific(reinterpret_cast<pthread_key_t&>(storage));
+void* ThreadLocalBase::get() const {
+    return pthread_getspecific(reinterpret_cast<const pthread_key_t&>(storage));
 }
 
 void ThreadLocalBase::set(void* ptr) {

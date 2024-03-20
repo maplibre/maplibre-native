@@ -45,23 +45,23 @@ enum class MapDebugOptions : EnumType {
     DepthBuffer = 1 << 7,
 };
 
-MBGL_CONSTEXPR MapDebugOptions operator|(MapDebugOptions lhs, MapDebugOptions rhs) {
+constexpr MapDebugOptions operator|(MapDebugOptions lhs, MapDebugOptions rhs) {
     return MapDebugOptions(mbgl::underlying_type(lhs) | mbgl::underlying_type(rhs));
 }
 
-MBGL_CONSTEXPR MapDebugOptions& operator|=(MapDebugOptions& lhs, MapDebugOptions rhs) {
+constexpr MapDebugOptions& operator|=(MapDebugOptions& lhs, MapDebugOptions rhs) {
     return (lhs = MapDebugOptions(mbgl::underlying_type(lhs) | mbgl::underlying_type(rhs)));
 }
 
-MBGL_CONSTEXPR bool operator&(MapDebugOptions lhs, MapDebugOptions rhs) {
+constexpr bool operator&(MapDebugOptions lhs, MapDebugOptions rhs) {
     return mbgl::underlying_type(lhs) & mbgl::underlying_type(rhs);
 }
 
-MBGL_CONSTEXPR MapDebugOptions& operator&=(MapDebugOptions& lhs, MapDebugOptions rhs) {
+constexpr MapDebugOptions& operator&=(MapDebugOptions& lhs, MapDebugOptions rhs) {
     return (lhs = MapDebugOptions(mbgl::underlying_type(lhs) & mbgl::underlying_type(rhs)));
 }
 
-MBGL_CONSTEXPR MapDebugOptions operator~(MapDebugOptions value) {
+constexpr MapDebugOptions operator~(MapDebugOptions value) {
     return MapDebugOptions(~mbgl::underlying_type(value));
 }
 

@@ -9,7 +9,11 @@
 #import "MLNLineStyleLayer_Private.h"
 #import "MLNRasterStyleLayer_Private.h"
 #import "MLNSymbolStyleLayer_Private.h"
-#import "MLNOpenGLStyleLayer_Private.h"
+#import "MLNCustomStyleLayer_Private.h"
+
+#if MLN_DRAWABLE_RENDERER
+#import "MLNCustomDrawableStyleLayer_Private.h"
+#endif
 
 #include <vector>
 
@@ -64,7 +68,15 @@ LayerManagerDarwin::LayerManagerDarwin() {
 #if defined(MBGL_LAYER_CUSTOM_DISABLE_RUNTIME)
     addLayerTypeCoreOnly(std::make_unique<CustomLayerFactory>());
 #elif !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
-    addLayerType(std::make_unique<OpenGLStyleLayerPeerFactory>());
+    addLayerType(std::make_unique<CustomStyleLayerPeerFactory>());
+#endif
+    
+#if MLN_DRAWABLE_RENDERER
+#if defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_RUNTIME)
+    addLayerTypeCoreOnly(std::make_unique<CustomDrawableLayerFactory>());
+#elif !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
+    addLayerType(std::make_unique<CustomDrawableStyleLayerPeerFactory>());
+#endif
 #endif
 }
 

@@ -22,6 +22,8 @@ public:
         backend.setViewport(0, 0, backend.getSize());
     }
 
+    void swap() override { backend.swap(); }
+
 private:
     AndroidRendererBackend& backend;
 };
@@ -59,6 +61,16 @@ void AndroidRendererBackend::updateAssumedState() {
 void AndroidRendererBackend::markContextLost() {
     if (context) {
         getContext<gl::Context>().setCleanupOnDestruction(false);
+    }
+}
+
+void AndroidRendererBackend::setSwapBehavior(SwapBehaviour swapBehaviour_) {
+    swapBehaviour = swapBehaviour_;
+}
+
+void AndroidRendererBackend::swap() {
+    if (swapBehaviour == SwapBehaviour::Flush) {
+        static_cast<gl::Context&>(getContext()).finish();
     }
 }
 

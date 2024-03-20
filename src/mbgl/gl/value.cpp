@@ -133,6 +133,7 @@ StencilOp::Type StencilOp::Get() {
             Enum<gfx::StencilOpType>::from(dppass)};
 }
 
+#if MLN_RENDER_BACKEND_OPENGL
 const constexpr DepthRange::Type DepthRange::Default;
 
 void DepthRange::Set(const Type& value) {
@@ -144,6 +145,7 @@ DepthRange::Type DepthRange::Get() {
     MBGL_CHECK_ERROR(glGetFloatv(GL_DEPTH_RANGE, floats));
     return {floats[0], floats[1]};
 }
+#endif
 
 const constexpr DepthTest::Type DepthTest::Default;
 
@@ -483,7 +485,7 @@ GLint components(const gfx::AttributeDataType type) {
 #endif
 
 void VertexAttribute::Set(const Type& binding, Context& context, AttributeLocation location) {
-    if (binding) {
+    if (binding && binding->vertexBufferResource) {
         context.vertexBuffer = reinterpret_cast<const gl::VertexBufferResource&>(*binding->vertexBufferResource).buffer;
         MBGL_CHECK_ERROR(glEnableVertexAttribArray(location));
         MBGL_CHECK_ERROR(glVertexAttribPointer(

@@ -36,4 +36,8 @@
     <item android:id="@+id/action_component_animate_while_tracking"
         android:title="Animate while tracking"
         app:showAsAction="never"/>
+
+    <item android:id="@+id/action_component_padding_animation_while_tracking"
+        android:title="PaddingAnimation while tracking"
+        app:showAsAction="never"/>
 </menu>

@@ -27,7 +27,6 @@ cc_test(
             "*.cpp",
             "*.hpp",
         ],
-        allow_empty = False,
     ),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     data = [

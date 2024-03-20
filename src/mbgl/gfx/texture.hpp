@@ -19,6 +19,7 @@
 namespace mbgl {
 namespace gfx {
 
+constexpr int32_t MaxActiveTextureUnits = 8;
 class TextureResource {
 protected:
     TextureResource() = default;
@@ -38,6 +39,8 @@ public:
         assert(resource);
         return static_cast<T&>(*resource);
     }
+
+    const Size& getSize() const noexcept { return size; }
 
     Size size;
 

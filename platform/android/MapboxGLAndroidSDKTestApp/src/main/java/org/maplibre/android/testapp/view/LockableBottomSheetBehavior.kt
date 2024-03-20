@@ -16,7 +16,7 @@ class LockableBottomSheetBehavior<V : View?>(context: Context, attrs: AttributeS
 
     override fun onInterceptTouchEvent(
         parent: CoordinatorLayout,
-        child: V,
+        child: V & Any,
         event: MotionEvent
     ): Boolean {
         var handled = false
@@ -26,7 +26,11 @@ class LockableBottomSheetBehavior<V : View?>(context: Context, attrs: AttributeS
         return handled
     }
 
-    override fun onTouchEvent(parent: CoordinatorLayout, child: V, event: MotionEvent): Boolean {
+    override fun onTouchEvent(
+        parent: CoordinatorLayout,
+        child: V & Any,
+        event: MotionEvent
+    ): Boolean {
         var handled = false
         if (!locked) {
             handled = super.onTouchEvent(parent, child, event)
@@ -36,7 +40,7 @@ class LockableBottomSheetBehavior<V : View?>(context: Context, attrs: AttributeS
 
     override fun onStartNestedScroll(
         coordinatorLayout: CoordinatorLayout,
-        child: V,
+        child: V & Any,
         directTargetChild: View,
         target: View,
         nestedScrollAxes: Int
@@ -56,7 +60,7 @@ class LockableBottomSheetBehavior<V : View?>(context: Context, attrs: AttributeS
 
     override fun onNestedPreScroll(
         coordinatorLayout: CoordinatorLayout,
-        child: V,
+        child: V & Any,
         target: View,
         dx: Int,
         dy: Int,
@@ -67,7 +71,11 @@ class LockableBottomSheetBehavior<V : View?>(context: Context, attrs: AttributeS
         }
     }
 
-    override fun onStopNestedScroll(coordinatorLayout: CoordinatorLayout, child: V, target: View) {
+    override fun onStopNestedScroll(
+        coordinatorLayout: CoordinatorLayout,
+        child: V & Any,
+        target: View
+    ) {
         if (!locked) {
             super.onStopNestedScroll(coordinatorLayout, child, target)
         }
@@ -75,7 +83,7 @@ class LockableBottomSheetBehavior<V : View?>(context: Context, attrs: AttributeS
 
     override fun onNestedPreFling(
         coordinatorLayout: CoordinatorLayout,
-        child: V,
+        child: V & Any,
         target: View,
         velocityX: Float,
         velocityY: Float

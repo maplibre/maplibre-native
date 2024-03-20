@@ -11,7 +11,7 @@ jobs:
     name: Build
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: extractions/setup-just@v1
       - name: Setup mdBook
         uses: peaceiris/actions-mdbook@v1
@@ -22,7 +22,7 @@ jobs:
         working-directory: docs/mdbook
         shell: bash
         run: mdbook build
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: book
           path: docs/mdbook/book/
@@ -32,14 +32,14 @@ jobs:
     name: Deploy
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download book
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: book
           path: artifacts/book
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.4.3
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
         with:
           branch: gh-pages
           folder: artifacts/book

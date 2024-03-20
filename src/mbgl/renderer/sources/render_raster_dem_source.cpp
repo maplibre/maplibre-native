@@ -10,8 +10,9 @@ namespace mbgl {
 
 using namespace style;
 
-RenderRasterDEMSource::RenderRasterDEMSource(Immutable<style::RasterSource::Impl> impl_)
-    : RenderTileSetSource(std::move(impl_)) {}
+RenderRasterDEMSource::RenderRasterDEMSource(Immutable<style::RasterSource::Impl> impl_,
+                                             std::shared_ptr<Scheduler> threadPool_)
+    : RenderTileSetSource(std::move(impl_), std::move(threadPool_)) {}
 
 const style::RasterSource::Impl& RenderRasterDEMSource::impl() const {
     return static_cast<const style::RasterSource::Impl&>(*baseImpl);

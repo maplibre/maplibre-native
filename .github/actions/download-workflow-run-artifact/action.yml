@@ -23,7 +23,10 @@ runs:
           let matchArtifact = allArtifacts.data.artifacts.filter((artifact) => {
             return artifact.name == "${{ inputs.artifact-name }}"
           })[0];
-          if (!matchArtifact) throw new Error("Could not find artifact ${{ inputs.artifact-name }}");
+          if (!matchArtifact) {
+            console.log("Could not find artifact '${{ inputs.artifact-name }}'");
+            return;
+          }
           let download = await github.rest.actions.downloadArtifact({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -33,8 +36,15 @@ runs:
           let fs = require('fs');
           fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/${{ inputs.artifact-name }}.zip`, Buffer.from(download.data));
 
+    - name: "Check .zip file existence"
+      id: zip_exists
+      uses: andstor/file-existence-action@v2.0.0
+      with:
+        files: ${{ inputs.artifact-name }}.zip
+
     - name: Unzip artifact
       shell: bash
+      if: steps.zip_exists.outputs.files_exists == 'true'
       run: unzip ${{ inputs.artifact-name }}.zip
 
     - name: "Check file existence"

@@ -116,4 +116,11 @@ public class GLSurfaceViewMapRenderer extends MapRenderer implements GLSurfaceVi
     glSurfaceView.queueEvent(runnable);
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public long waitForEmpty(long timeoutMillis) {
+    return glSurfaceView.waitForEmpty(timeoutMillis);
+  }
 }

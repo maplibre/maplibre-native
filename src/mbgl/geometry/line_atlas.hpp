@@ -1,13 +1,20 @@
 #pragma once
 
 #include <mbgl/gfx/texture.hpp>
+#include <mbgl/gfx/context.hpp>
 #include <mbgl/util/image.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/texture2d.hpp>
+#include <variant>
+#else
 #include <mbgl/util/variant.hpp>
+#include <optional>
+#endif
 
 #include <map>
 #include <memory>
 #include <vector>
-#include <optional>
 
 namespace mbgl {
 
@@ -44,7 +51,11 @@ public:
     void upload(gfx::UploadPass&);
 
     // Binds the atlas texture to the GPU, and uploads data if it is out of date.
+#if MLN_DRAWABLE_RENDERER
+    const std::shared_ptr<gfx::Texture2D>& getTexture() const;
+#else
     gfx::TextureBinding textureBinding() const;
+#endif
 
     // Returns the size of the texture image.
     Size getSize() const;
@@ -54,7 +65,12 @@ public:
 
 private:
     LinePatternPos from, to;
+
+#if MLN_DRAWABLE_RENDERER
+    std::variant<AlphaImage, gfx::Texture2DPtr> texture;
+#else
     variant<AlphaImage, gfx::Texture> texture;
+#endif
 };
 
 class LineAtlas {
@@ -75,7 +91,7 @@ public:
 private:
     std::map<size_t, DashPatternTexture> textures;
 
-    // Stores a list of hashes of texture objcts that need uploading.
+    // Stores a list of hashes of texture objects that need uploading.
     std::vector<size_t> needsUpload;
 };
 

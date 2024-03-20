@@ -1,9 +1,49 @@
 #include <mbgl/style/expression/compound_expression.hpp>
 #include <mbgl/style/expression/expression.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
+
+#include <sstream>
 #include <utility>
 
 namespace mbgl {
+
+using Dependency = style::expression::Dependency;
+
+std::ostream& operator<<(std::ostream& os, const Dependency deps) {
+    if (deps == Dependency::None) {
+        os << "None";
+        return os;
+    }
+
+    bool any = false;
+    const auto add = [&](Dependency dep, std::string_view name) {
+        if ((deps & dep) != Dependency::None) {
+            os << (any ? "|" : std::string_view{}) << name;
+            any = true;
+        }
+    };
+
+    add(Dependency::Feature, "Feature");
+    add(Dependency::Image, "Image");
+    add(Dependency::Zoom, "Zoom");
+    add(Dependency::Location, "Location");
+    add(Dependency::Bind, "Bind");
+    add(Dependency::Var, "Var");
+    add(Dependency::Override, "Override");
+
+    return os;
+}
+
+namespace util {
+
+std::string toString(const style::expression::Dependency deps) {
+    std::ostringstream ss;
+    ss << deps;
+    return ss.str();
+}
+
+} // namespace util
+
 namespace style {
 namespace expression {
 

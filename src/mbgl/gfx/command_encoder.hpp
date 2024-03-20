@@ -3,6 +3,7 @@
 #include <mbgl/gfx/debug_group.hpp>
 
 #include <memory>
+#include <string>
 
 namespace mbgl {
 namespace gfx {
@@ -26,8 +27,9 @@ public:
     CommandEncoder& operator=(const CommandEncoder&) = delete;
 
     DebugGroup<CommandEncoder> createDebugGroup(const char* name) { return {*this, name}; }
+    DebugGroup<CommandEncoder> createDebugGroup(std::string_view name) { return createDebugGroup(name.data()); }
 
-    virtual std::unique_ptr<UploadPass> createUploadPass(const char* name) = 0;
+    virtual std::unique_ptr<UploadPass> createUploadPass(const char* name, Renderable&) = 0;
     virtual std::unique_ptr<RenderPass> createRenderPass(const char* name, const RenderPassDescriptor&) = 0;
     virtual void present(Renderable&) = 0;
 };

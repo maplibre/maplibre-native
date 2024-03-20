@@ -1,9 +1,9 @@
-load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_unit_test")
 load(
     "@build_bazel_rules_swift//swift:swift.bzl",
     "swift_library",
 )
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 
 objc_library(
     name = "ios_tests_objc_srcs",
@@ -12,7 +12,6 @@ objc_library(
             "*.h",
             "*.m",
         ],
-        allow_empty = False,
         exclude = [
             "MLNMapViewContentInsetTests.m",
         ],
@@ -30,9 +29,8 @@ objc_library(
             "*.mm",
             "*.h",
         ],
-        allow_empty = False,
     ),
-    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS,
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + WARNING_FLAGS["ios"],
     deps = [
         "//platform:ios-sdk",
     ],
@@ -41,10 +39,7 @@ objc_library(
 swift_library(
     name = "ios_tests_swift_srcs",
     testonly = True,
-    srcs = glob(
-        ["*.swift"],
-        allow_empty = False,
-    ) + [
+    srcs = glob(["*.swift"]) + [
         "//platform/darwin:test/MLNSDKTestHelpers.swift",
     ],
     deps = [
@@ -54,6 +49,7 @@ swift_library(
 
 ios_unit_test(
     name = "ios_test",
+    timeout = "long",
     minimum_os_version = "12.0",
     runner = "@build_bazel_rules_apple//apple/testing/default_runner:ios_xctestrun_ordered_runner",
     visibility = [
@@ -63,6 +59,8 @@ ios_unit_test(
         "ios_tests_objc_srcs",
         "ios_tests_objcpp_srcs",
         "ios_tests_swift_srcs",
+        "//platform/darwin:darwin_objc_hdrs",
+        "//platform/darwin:darwin_objcpp_hdrs",
         "//platform/darwin:shared_tests_objc_srcs",
         "//platform/darwin:shared_tests_objcpp_srcs",
         "//platform/darwin:shared_tests_swift_srcs",

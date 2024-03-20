@@ -8,15 +8,11 @@ objc_library(
             "SMCalloutView/*.h",
             "SMCalloutView/*.m",
         ],
-        allow_empty = False,
     ),
     hdrs = glob(
-        [
-            "SMCalloutView/*.h",
-        ],
-        allow_empty = False,
+        ["SMCalloutView/*.h"],
     ),
-    copts = WARNING_FLAGS,
+    copts = WARNING_FLAGS["ios"],
     includes = ["SMCalloutView"],
     sdk_frameworks = ["UIKit"],
     tags = ["manual"],

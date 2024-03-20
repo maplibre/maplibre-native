@@ -8,10 +8,10 @@ namespace gfx {
 
 class IndexBufferResource {
 protected:
-    IndexBufferResource() = default;
+    IndexBufferResource() noexcept = default;
 
 public:
-    virtual ~IndexBufferResource() = default;
+    virtual ~IndexBufferResource() noexcept = default;
 };
 
 class IndexBuffer {

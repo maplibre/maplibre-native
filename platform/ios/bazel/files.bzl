@@ -14,26 +14,23 @@ MLN_IOS_SDK_HEADERS = [
 ]
 
 MLN_IOS_PUBLIC_HEADERS = [
-    "src/MLNAnnotationContainerView.h",
-    "src/MLNCompactCalloutView.h",
-    "src/MLNFaux3DUserLocationAnnotationView.h",
-    "src/MLNMapAccessibilityElement.h",
-    "src/MLNMapView+Impl.h",
-    "src/MLNMapView+OpenGL.h",
-    "src/MLNScaleBar.h",
-    "src/MLNUserLocationHeadingArrowLayer.h",
-    "src/MLNUserLocationHeadingBeamLayer.h",
-    "src/MLNUserLocationHeadingIndicator.h",
     "src/Mapbox.h",
-    "src/NSOrthography+MLNAdditions.h",
-    "src/UIColor+MLNAdditions.h",
-    "src/UIDevice+MLNAdditions.h",
-    "src/UIImage+MLNAdditions.h",
-    "src/UIView+MLNAdditions.h",
-    "src/UIViewController+MLNAdditions.h",
 ]
 
 MLN_IOS_PRIVATE_HEADERS = [
+    "src/NSOrthography+MLNAdditions.h",
+    "src/UIDevice+MLNAdditions.h",
+    "src/UIImage+MLNAdditions.h",
+    "src/MLNUserLocationHeadingArrowLayer.h",
+    "src/MLNUserLocationHeadingIndicator.h",
+    "src/UIColor+MLNAdditions.h",
+    "src/MLNMapAccessibilityElement.h",
+    "src/UIViewController+MLNAdditions.h",
+    "src/UIView+MLNAdditions.h",
+    "src/MLNScaleBar.h",
+    "src/MLNFaux3DUserLocationAnnotationView.h",
+    "src/MLNUserLocationHeadingBeamLayer.h",
+    "src/MLNAnnotationContainerView.h",
     "src/MLNAnnotationContainerView_Private.h",
     "src/MLNAnnotationImage_Private.h",
     "src/MLNAnnotationView_Private.h",
@@ -41,6 +38,10 @@ MLN_IOS_PRIVATE_HEADERS = [
     "src/MLNMapView_Private.h",
     "src/MLNUserLocationAnnotationView_Private.h",
     "src/MLNUserLocation_Private.h",
+    "src/MLNCompactCalloutView.h",
+    "src/MLNMapView+Impl.h",
+    "src/MLNMapView+Metal.h",
+    "src/MLNMapView+OpenGL.h",
 ]
 
 MLN_IOS_PUBLIC_OBJC_SOURCE = [
@@ -66,10 +67,15 @@ MLN_IOS_PUBLIC_OBJCPP_SOURCE = [
     "src/MLNMapProjection.mm",
     "src/MLNMapView.mm",
     "src/MLNMapView+Impl.mm",
-    "src/MLNMapView+OpenGL.mm",
     "src/MLNScaleBar.mm",
     "src/UIColor+MLNAdditions.mm",
     "src/UIImage+MLNAdditions.mm",
+]
+MLN_IOS_PUBLIC_OBJCPP_OPENGL_SOURCE = [
+    "src/MLNMapView+OpenGL.mm",
+]
+MLN_IOS_PUBLIC_OBJCPP_METAL_SOURCE = [
+    "src/MLNMapView+Metal.mm",
 ]
 
 MLN_PUBLIC_IOS_APP_SOPURCE = [

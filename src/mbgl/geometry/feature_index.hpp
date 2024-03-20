@@ -75,6 +75,9 @@ public:
 
     const GeometryTileData* getData() { return tileData.get(); }
 
+    /// Set the expected number of elements per cell to avoid small re-allocations for populated cells
+    void reserve(std::size_t value) { grid.reserve(value); }
+
     void insert(const GeometryCollection&,
                 std::size_t index,
                 const std::string& sourceLayerName,

@@ -31,6 +31,10 @@ const FillExtrusionLayer::Impl& FillExtrusionLayerProperties::layerImpl() const 
     return static_cast<const FillExtrusionLayer::Impl&>(*baseImpl);
 }
 
+expression::Dependency FillExtrusionLayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies();
+}
+
 } // namespace style
 } // namespace mbgl
 

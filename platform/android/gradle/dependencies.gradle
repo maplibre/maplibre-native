@@ -7,7 +7,7 @@ ext {
     ]
 
     androidSdkVersions = [
-            buildToolsVersion: '31.0.0',
+            buildToolsVersion: '33.0.1',
             ndkVersion       : '25.1.8937393',
             cmakeVersion     : '3.18.1+',
     ]
@@ -34,7 +34,7 @@ ext {
             robolectric     : '4.9.1',
             timber          : '5.0.1',
             okhttp          : '4.11.0',
-            kotlin          : '1.7.20',
+            kotlin          : '1.9.21',
             licenses        : '0.8.80',
             lint            : '30.3.1',
             //        jacoco           : '0.8.5',
@@ -78,7 +78,6 @@ ext {
             okhttp3                : "com.squareup.okhttp3:okhttp:${versions.okhttp}",
             leakCanary             : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanary}",
 
-            kotlinLib              : "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}",
             kotlinPlugin           : "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}",
             licensesPlugin         : "com.jaredsburrows:gradle-license-plugin:${versions.licenses}",
             //        jacocoPlugin           : "org.jacoco:org.jacoco.core:${versions.jacoco}",

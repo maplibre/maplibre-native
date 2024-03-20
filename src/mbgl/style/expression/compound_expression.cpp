@@ -47,17 +47,22 @@ namespace detail {
 struct SignatureBase {
     using Args = std::vector<std::unique_ptr<Expression>>;
 
-    SignatureBase(type::Type result_, variant<std::vector<type::Type>, VarargsType> params_, std::string name_)
+    SignatureBase(type::Type result_,
+                  variant<std::vector<type::Type>, VarargsType> params_,
+                  std::string name_,
+                  Dependency dependencies_)
         : result(std::move(result_)),
           params(std::move(params_)),
-          name(std::move(name_)) {}
+          name(std::move(name_)),
+          dependencies(dependencies_) {}
     virtual ~SignatureBase() = default;
 
     virtual EvaluationResult apply(const EvaluationContext&, const Args&) const = 0;
 
-    type::Type result;
-    variant<std::vector<type::Type>, VarargsType> params;
-    std::string name;
+    const type::Type result;
+    const variant<std::vector<type::Type>, VarargsType> params;
+    const std::string name;
+    const Dependency dependencies;
 };
 
 /*
@@ -87,10 +92,11 @@ struct Signature;
 // Simple evaluate function (const T0&, const T1&, ...) -> Result<U>
 template <class R, class... Params>
 struct Signature<R(Params...)> : SignatureBase {
-    Signature(R (*evaluate_)(Params...), const std::string& name_)
+    Signature(R (*evaluate_)(Params...), const std::string& name_, Dependency dependencies_)
         : SignatureBase(valueTypeToExpressionType<std::decay_t<typename R::Value>>(),
                         std::vector<type::Type>{valueTypeToExpressionType<std::decay_t<Params>>()...},
-                        name_),
+                        name_,
+                        dependencies_),
           evaluate(evaluate_) {}
 
     EvaluationResult apply(const EvaluationContext& evaluationParameters, const Args& args) const override {
@@ -119,10 +125,11 @@ private:
 // Varargs evaluate function (const Varargs<T>&) -> Result<U>
 template <class R, typename T>
 struct Signature<R(const Varargs<T>&)> : SignatureBase {
-    Signature(R (*evaluate_)(const Varargs<T>&), const std::string& name_)
+    Signature(R (*evaluate_)(const Varargs<T>&), const std::string& name_, Dependency dependencies_)
         : SignatureBase(valueTypeToExpressionType<std::decay_t<typename R::Value>>(),
                         VarargsType{valueTypeToExpressionType<T>()},
-                        name_),
+                        name_,
+                        dependencies_),
           evaluate(evaluate_) {}
 
     EvaluationResult apply(const EvaluationContext& evaluationParameters, const Args& args) const override {
@@ -145,10 +152,11 @@ struct Signature<R(const Varargs<T>&)> : SignatureBase {
 // (const EvaluationParams&, const T0&, const T1&, ...) -> Result<U>
 template <class R, class... Params>
 struct Signature<R(const EvaluationContext&, Params...)> : SignatureBase {
-    Signature(R (*evaluate_)(const EvaluationContext&, Params...), const std::string& name_)
+    Signature(R (*evaluate_)(const EvaluationContext&, Params...), const std::string& name_, Dependency dependencies_)
         : SignatureBase(valueTypeToExpressionType<std::decay_t<typename R::Value>>(),
                         std::vector<type::Type>{valueTypeToExpressionType<std::decay_t<Params>>()...},
-                        name_),
+                        name_,
+                        dependencies_),
           evaluate(evaluate_) {}
 
     EvaluationResult apply(const EvaluationContext& evaluationParameters, const Args& args) const override {
@@ -178,10 +186,13 @@ private:
 // (const EvaluationContext&, const Varargs<T>&) -> Result<U>
 template <class R, typename T>
 struct Signature<R(const EvaluationContext&, const Varargs<T>&)> : SignatureBase {
-    Signature(R (*evaluate_)(const EvaluationContext&, const Varargs<T>&), const std::string& name_)
+    Signature(R (*evaluate_)(const EvaluationContext&, const Varargs<T>&),
+              const std::string& name_,
+              Dependency dependencies_)
         : SignatureBase(valueTypeToExpressionType<std::decay_t<typename R::Value>>(),
                         VarargsType{valueTypeToExpressionType<T>()},
-                        name_),
+                        name_,
+                        dependencies_),
           evaluate(evaluate_) {}
 
     EvaluationResult apply(const EvaluationContext& evaluationParameters, const Args& args) const override {
@@ -215,8 +226,11 @@ struct SignatureType<Lambda, std::enable_if_t<std::is_class_v<Lambda>>> {
 };
 
 template <typename Fn>
-static std::unique_ptr<detail::SignatureBase> makeSignature(std::string name, Fn evaluateFunction) {
-    return std::make_unique<Signature<typename SignatureType<Fn>::Type>>(evaluateFunction, std::move(name));
+static std::unique_ptr<detail::SignatureBase> makeSignature(std::string name,
+                                                            Fn evaluateFunction,
+                                                            Dependency dependencies = Dependency::None) {
+    return std::make_unique<Signature<typename SignatureType<Fn>::Type>>(
+        evaluateFunction, std::move(name), dependencies);
 }
 
 } // namespace detail
@@ -322,14 +336,17 @@ const auto& rgbCompoundExpression() {
 }
 
 const auto& zoomCompoundExpression() {
-    static auto signature = detail::makeSignature("zoom", [](const EvaluationContext& params) -> Result<double> {
-        if (!params.zoom) {
-            return EvaluationError{
-                "The 'zoom' expression is unavailable in the current "
-                "evaluation context."};
-        }
-        return *(params.zoom);
-    });
+    static auto signature = detail::makeSignature(
+        "zoom",
+        [](const EvaluationContext& params) -> Result<double> {
+            if (!params.zoom) {
+                return EvaluationError{
+                    "The 'zoom' expression is unavailable in the current "
+                    "evaluation context."};
+            }
+            return *(params.zoom);
+        },
+        Dependency::Zoom);
     return signature;
 }
 
@@ -374,7 +391,8 @@ const auto& accumulatedCompoundExpression() {
 
 const auto& hasContextCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "has", [](const EvaluationContext& params, const std::string& key) -> Result<bool> {
+        "has",
+        [](const EvaluationContext& params, const std::string& key) -> Result<bool> {
             if (!params.feature) {
                 return EvaluationError{
                     "Feature data is unavailable in the current evaluation "
@@ -382,21 +400,25 @@ const auto& hasContextCompoundExpression() {
             }
 
             return static_cast<bool>(params.feature->getValue(key));
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& hasObjectCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "has", [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<bool> {
+        "has",
+        [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<bool> {
             return object.find(key) != object.end();
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& getContextCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "get", [](const EvaluationContext& params, const std::string& key) -> Result<Value> {
+        "get",
+        [](const EvaluationContext& params, const std::string& key) -> Result<Value> {
             if (!params.feature) {
                 return EvaluationError{
                     "Feature data is unavailable in the current evaluation "
@@ -408,28 +430,30 @@ const auto& getContextCompoundExpression() {
                 return Null;
             }
             return Value(toExpressionValue(*propertyValue));
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& getObjectCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "get", [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<Value> {
+        "get",
+        [](const std::string& key, const std::unordered_map<std::string, Value>& object) -> Result<Value> {
             if (object.find(key) == object.end()) {
                 return Null;
             }
             return object.at(key);
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& propertiesCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "properties", [](const EvaluationContext& params) -> Result<std::unordered_map<std::string, Value>> {
+        "properties",
+        [](const EvaluationContext& params) -> Result<std::unordered_map<std::string, Value>> {
             if (!params.feature) {
-                return EvaluationError{
-                    "Feature data is unavailable in the current evaluation "
-                    "context."};
+                return EvaluationError{"Feature data is unavailable in the current evaluation context."};
             }
             std::unordered_map<std::string, Value> result;
             const PropertyMap& properties = params.feature->getProperties();
@@ -438,44 +462,50 @@ const auto& propertiesCompoundExpression() {
                 result[entry.first] = toExpressionValue(entry.second);
             }
             return result;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& geometryTypeCompoundExpression() {
-    static auto signature = detail::makeSignature("geometry-type",
-                                                  [](const EvaluationContext& params) -> Result<std::string> {
-                                                      if (!params.feature) {
-                                                          return EvaluationError{
-                                                              "Feature data is unavailable in the current evaluation "
-                                                              "context."};
-                                                      }
+    static auto signature = detail::makeSignature(
+        "geometry-type",
+        [](const EvaluationContext& params) -> Result<std::string> {
+            if (!params.feature) {
+                return EvaluationError{
+                    "Feature data is unavailable in the current evaluation "
+                    "context."};
+            }
 
-                                                      auto type = params.feature->getType();
-                                                      if (type == FeatureType::Point) {
-                                                          return "Point";
-                                                      } else if (type == FeatureType::LineString) {
-                                                          return "LineString";
-                                                      } else if (type == FeatureType::Polygon) {
-                                                          return "Polygon";
-                                                      } else {
-                                                          return "Unknown";
-                                                      }
-                                                  });
+            auto type = params.feature->getType();
+            if (type == FeatureType::Point) {
+                return "Point";
+            } else if (type == FeatureType::LineString) {
+                return "LineString";
+            } else if (type == FeatureType::Polygon) {
+                return "Polygon";
+            } else {
+                return "Unknown";
+            }
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& idCompoundExpression() {
-    static auto signature = detail::makeSignature("id", [](const EvaluationContext& params) -> Result<Value> {
-        if (!params.feature) {
-            return EvaluationError{
-                "Feature data is unavailable in the current evaluation "
-                "context."};
-        }
+    static auto signature = detail::makeSignature(
+        "id",
+        [](const EvaluationContext& params) -> Result<Value> {
+            if (!params.feature) {
+                return EvaluationError{
+                    "Feature data is unavailable in the current evaluation "
+                    "context."};
+            }
 
-        auto id = params.feature->getID();
-        return id.match([](const auto& idValue) { return toExpressionValue(mbgl::Value(idValue)); });
-    });
+            auto id = params.feature->getID();
+            return id.match([](const auto& idValue) { return toExpressionValue(mbgl::Value(idValue)); });
+        },
+        Dependency::Feature);
     return signature;
 }
 
@@ -675,7 +705,8 @@ const auto& errorCompoundExpression() {
 
 const auto& featureStateCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "feature-state", [](const EvaluationContext& params, const std::string& key) -> Result<Value> {
+        "feature-state",
+        [](const EvaluationContext& params, const std::string& key) -> Result<Value> {
             mbgl::Value state;
             if (params.featureState != nullptr) {
                 auto it = params.featureState->find(key);
@@ -684,43 +715,52 @@ const auto& featureStateCompoundExpression() {
                 }
             }
             return toExpressionValue(state);
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 // Legacy Filters
 const auto& filterEqualsCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-==", [](const EvaluationContext& params, const std::string& key, const Value& lhs) -> Result<bool> {
+        "filter-==",
+        [](const EvaluationContext& params, const std::string& key, const Value& lhs) -> Result<bool> {
             const auto rhs = featurePropertyAsExpressionValue(params, key);
             return rhs ? lhs == *rhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterIdEqualsCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-id-==", [](const EvaluationContext& params, const Value& lhs) -> Result<bool> {
+        "filter-id-==",
+        [](const EvaluationContext& params, const Value& lhs) -> Result<bool> {
             return lhs == featureIdAsExpressionValue(params);
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterTypeEqualsCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-type-==", [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
+        "filter-type-==",
+        [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
             if (!params.feature) return false;
             return featureTypeAsString(params.feature->getType()) == lhs;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterLessThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-<", [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
+        "filter-<",
+        [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
             auto rhs = featurePropertyAsDouble(params, key);
             return rhs ? rhs < lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
@@ -730,34 +770,41 @@ const auto& filterLessThanStringCompoundExpression() {
         [](const EvaluationContext& params, const std::string& key, const std::string& lhs) -> Result<bool> {
             auto rhs = featurePropertyAsString(params, key);
             return rhs ? rhs < lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterIdLessThanNumberCompoundExpression() {
-    static auto signature = detail::makeSignature("filter-id-<",
-                                                  [](const EvaluationContext& params, double lhs) -> Result<bool> {
-                                                      auto rhs = featureIdAsDouble(params);
-                                                      return rhs ? rhs < lhs : false;
-                                                  });
+    static auto signature = detail::makeSignature(
+        "filter-id-<",
+        [](const EvaluationContext& params, double lhs) -> Result<bool> {
+            auto rhs = featureIdAsDouble(params);
+            return rhs ? rhs < lhs : false;
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterIdLessThanStringCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-id-<", [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
+        "filter-id-<",
+        [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
             auto rhs = featureIdAsString(params);
             return rhs ? rhs < lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterMoreThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter->", [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
+        "filter->",
+        [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
             auto rhs = featurePropertyAsDouble(params, key);
             return rhs ? rhs > lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
@@ -767,34 +814,41 @@ const auto& filterMoreThanStringCompoundExpression() {
         [](const EvaluationContext& params, const std::string& key, const std::string& lhs) -> Result<bool> {
             auto rhs = featurePropertyAsString(params, key);
             return rhs ? rhs > lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterIdMoreThanNumberCompoundExpression() {
-    static auto signature = detail::makeSignature("filter-id->",
-                                                  [](const EvaluationContext& params, double lhs) -> Result<bool> {
-                                                      auto rhs = featureIdAsDouble(params);
-                                                      return rhs ? rhs > lhs : false;
-                                                  });
+    static auto signature = detail::makeSignature(
+        "filter-id->",
+        [](const EvaluationContext& params, double lhs) -> Result<bool> {
+            auto rhs = featureIdAsDouble(params);
+            return rhs ? rhs > lhs : false;
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterIdMoreThanStringCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-id->", [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
+        "filter-id->",
+        [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
             auto rhs = featureIdAsString(params);
             return rhs ? rhs > lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterLessOrEqualThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-<=", [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
+        "filter-<=",
+        [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
             auto rhs = featurePropertyAsDouble(params, key);
             return rhs ? rhs <= lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
@@ -804,34 +858,41 @@ const auto& filterLessOrEqualThanStringCompoundExpression() {
         [](const EvaluationContext& params, const std::string& key, const std::string& lhs) -> Result<bool> {
             auto rhs = featurePropertyAsString(params, key);
             return rhs ? rhs <= lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterIdLessOrEqualThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-id-<=", [](const EvaluationContext& params, double lhs) -> Result<bool> {
+        "filter-id-<=",
+        [](const EvaluationContext& params, double lhs) -> Result<bool> {
             auto rhs = featureIdAsDouble(params);
             return rhs ? rhs <= lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterIdLessOrEqualThanStringCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-id-<=", [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
+        "filter-id-<=",
+        [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
             auto rhs = featureIdAsString(params);
             return rhs ? rhs <= lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterGreaterOrEqualThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter->=", [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
+        "filter->=",
+        [](const EvaluationContext& params, const std::string& key, double lhs) -> Result<bool> {
             auto rhs = featurePropertyAsDouble(params, key);
             return rhs ? rhs >= lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
@@ -841,72 +902,88 @@ const auto& filterGreaterOrEqualThanStringCompoundExpression() {
         [](const EvaluationContext& params, const std::string& key, const std::string& lhs) -> Result<bool> {
             auto rhs = featurePropertyAsString(params, key);
             return rhs ? rhs >= lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterIdGreaterOrEqualThanNumberCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-id->=", [](const EvaluationContext& params, double lhs) -> Result<bool> {
+        "filter-id->=",
+        [](const EvaluationContext& params, double lhs) -> Result<bool> {
             auto rhs = featureIdAsDouble(params);
             return rhs ? rhs >= lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterIdGreaterOrEqualThanStringCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-id->=", [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
+        "filter-id->=",
+        [](const EvaluationContext& params, const std::string& lhs) -> Result<bool> {
             auto rhs = featureIdAsString(params);
             return rhs ? rhs >= lhs : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterHasCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-has", [](const EvaluationContext& params, const std::string& key) -> Result<bool> {
+        "filter-has",
+        [](const EvaluationContext& params, const std::string& key) -> Result<bool> {
             assert(params.feature);
             return bool(params.feature->getValue(key));
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterHasIdCompoundExpression() {
-    static auto signature = detail::makeSignature("filter-has-id", [](const EvaluationContext& params) -> Result<bool> {
-        assert(params.feature);
-        return !params.feature->getID().is<NullValue>();
-    });
+    static auto signature = detail::makeSignature(
+        "filter-has-id",
+        [](const EvaluationContext& params) -> Result<bool> {
+            assert(params.feature);
+            return !params.feature->getID().is<NullValue>();
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterTypeInCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-type-in", [](const EvaluationContext& params, const Varargs<std::string>& types) -> Result<bool> {
+        "filter-type-in",
+        [](const EvaluationContext& params, const Varargs<std::string>& types) -> Result<bool> {
             assert(params.feature);
             std::optional<std::string> type = featureTypeAsString(params.feature->getType());
             return std::find(types.begin(), types.end(), type) != types.end();
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterIdInCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-id-in", [](const EvaluationContext& params, const Varargs<Value>& ids) -> Result<bool> {
+        "filter-id-in",
+        [](const EvaluationContext& params, const Varargs<Value>& ids) -> Result<bool> {
             auto id = featureIdAsExpressionValue(params);
             return std::find(ids.begin(), ids.end(), id) != ids.end();
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
 const auto& filterInCompoundExpression() {
     static auto signature = detail::makeSignature(
-        "filter-in", [](const EvaluationContext& params, const Varargs<Value>& varargs) -> Result<bool> {
+        "filter-in",
+        [](const EvaluationContext& params, const Varargs<Value>& varargs) -> Result<bool> {
             if (varargs.size() < 2) return false;
             assert(varargs[0].is<std::string>());
             auto value = featurePropertyAsExpressionValue(params, varargs[0].get<std::string>());
             return value ? std::find(varargs.begin() + 1, varargs.end(), *value) != varargs.end() : false;
-        });
+        },
+        Dependency::Feature);
     return signature;
 }
 
@@ -1158,7 +1235,7 @@ ParseResult createCompoundExpression(const std::string& name,
 
 CompoundExpression::CompoundExpression(const detail::SignatureBase& signature_,
                                        std::vector<std::unique_ptr<Expression>> args_)
-    : Expression(Kind::CompoundExpression, signature_.result),
+    : Expression(Kind::CompoundExpression, signature_.result, signature_.dependencies | collectDependencies(args_)),
       signature(signature_),
       args(std::move(args_)) {}
 

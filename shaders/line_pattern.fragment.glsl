@@ -10,15 +10,14 @@ in vec2 v_width2;
 in float v_linesofar;
 in float v_gamma_scale;
 
-#pragma mapbox: define lowp vec4 pattern_from
-#pragma mapbox: define lowp vec4 pattern_to
+#pragma mapbox: define mediump vec4 pattern_from
+#pragma mapbox: define mediump vec4 pattern_to
 #pragma mapbox: define lowp float blur
 #pragma mapbox: define lowp float opacity
 
 void main() {
     #pragma mapbox: initialize mediump vec4 pattern_from
     #pragma mapbox: initialize mediump vec4 pattern_to
-
     #pragma mapbox: initialize lowp float blur
     #pragma mapbox: initialize lowp float opacity
 

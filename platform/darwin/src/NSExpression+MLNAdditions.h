@@ -123,11 +123,10 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode MLNExpressionI
  @param stops The stops must be an `NSDictionary` constant `NSExpression`.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/dds-circle-layer/">
- Data-driven circles</a>, <a href="https://docs.mapbox.com/ios/maps/examples/clustering/">
- Cluster point data</a>, and <a href="https://docs.mapbox.com/ios/maps/examples/clustering-with-images/">
- Use images to cluster point data</a> examples to learn how to use this
- expression to style a map layer based on an attribute value.
+ TODO: Data-driven circles
+ TODO: Cluster point data
+ TODO: Use images to cluster point data
+ Learn how to use this expression to style a map layer based on an attribute value.
  */
 + (instancetype)mgl_expressionForSteppingExpression:(nonnull NSExpression*)steppingExpression fromExpression:(nonnull NSExpression *)minimumExpression stops:(nonnull NSExpression*)stops NS_SWIFT_NAME(init(forMLNStepping:from:stops:));
 
@@ -143,8 +142,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode MLNExpressionI
  @param stops The stops expression.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/heatmap-example/">
- Create a heatmap layer</a> example to learn how to style an `MLNHeatmapStyleLayer`
+ TODO: Create a heatmap layer, learn how to style an `MLNHeatmapStyleLayer`
  based on zoom level and point density with this expression.
  */
 + (instancetype)mgl_expressionForInterpolatingExpression:(nonnull NSExpression*)inputExpression withCurveType:(nonnull MLNExpressionInterpolationMode)curveType parameters:(nullable NSExpression *)parameters stops:(nonnull NSExpression*)stops NS_SWIFT_NAME(init(forMLNInterpolating:curveType:parameters:stops:));

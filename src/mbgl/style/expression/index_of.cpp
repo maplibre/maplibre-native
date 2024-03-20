@@ -2,7 +2,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/expression/index_of.hpp>
 #include <mbgl/util/string.hpp>
-#include <iostream>
+
 namespace mbgl {
 namespace style {
 namespace expression {
@@ -10,7 +10,7 @@ namespace expression {
 IndexOf::IndexOf(std::unique_ptr<Expression> keyword_,
                  std::unique_ptr<Expression> input_,
                  std::unique_ptr<Expression> fromIndex_)
-    : Expression(Kind::IndexOf, type::Number),
+    : Expression(Kind::IndexOf, type::Number, depsOf(keyword_) | depsOf(input_) | depsOf(fromIndex_)),
       keyword(std::move(keyword_)),
       input(std::move(input_)),
       fromIndex(std::move(fromIndex_)) {}

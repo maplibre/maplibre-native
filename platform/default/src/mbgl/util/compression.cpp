@@ -106,5 +106,20 @@ std::string decompress(const std::string &raw, int windowBits) {
 
     return result;
 }
+
+std::uint32_t crc32(const void *raw, size_t size) {
+    auto hash = ::crc32(0L, Z_NULL, 0);
+    if (raw) {
+        const auto *p = static_cast<const Bytef *>(raw);
+        while (size > 0) {
+            const auto blockSize = static_cast<uInt>(size);
+            hash = ::crc32(hash, p, blockSize);
+            p += blockSize;
+            size -= blockSize;
+        }
+    }
+    return static_cast<std::uint32_t>(hash);
+}
+
 } // namespace util
 } // namespace mbgl

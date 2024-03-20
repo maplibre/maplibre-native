@@ -770,7 +770,7 @@ namespace style {
 namespace expression {
 
 Distance::Distance(GeoJSON geojson, Feature::geometry_type geometries_)
-    : Expression(Kind::Distance, type::Number),
+    : Expression(Kind::Distance, type::Number, Dependency::Feature),
       geoJSONSource(std::move(geojson)),
       geometries(std::move(geometries_)) {}
 

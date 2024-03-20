@@ -70,7 +70,8 @@ DebugBucket::DebugBucket(const OverscaledTileID& id,
     segments.emplace_back(0, 0, vertices.elements(), indices.elements());
 }
 
-void DebugBucket::upload(gfx::UploadPass& uploadPass) {
+void DebugBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
+#if MLN_LEGACY_RENDERER
     if (!vertices.empty()) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
         indexBuffer = uploadPass.createIndexBuffer(std::move(indices));
@@ -80,6 +81,7 @@ void DebugBucket::upload(gfx::UploadPass& uploadPass) {
         static const PremultipliedImage emptyImage{Size(1, 1), data.data(), data.size()};
         texture = uploadPass.createTexture(emptyImage);
     }
+#endif // MLN_LEGACY_RENDERER
 }
 
 } // namespace mbgl

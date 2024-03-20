@@ -14,8 +14,9 @@ namespace gl {
 
 class OSMesaBackendImpl final : public HeadlessBackend::Impl {
 public:
-    OSMesaBackendImpl() {
-        context = OSMesaCreateContextAttribs(std::initializer_list<int>({OSMESA_FORMAT,
+    OSMesaBackendImpl()
+        : buffer(std::make_unique<uint8_t[]>(2048 * 2048 * 4)),
+          context(OSMesaCreateContextAttribs(std::initializer_list<int>({OSMESA_FORMAT,
                                                                          OSMESA_RGBA,
                                                                          OSMESA_DEPTH_BITS,
                                                                          24,
@@ -23,10 +24,13 @@ public:
                                                                          8,
                                                                          OSMESA_PROFILE,
                                                                          OSMESA_COMPAT_PROFILE,
+                                                                         OSMESA_CONTEXT_MAJOR_VERSION,
+                                                                         3,
+                                                                         OSMESA_CONTEXT_MINOR_VERSION,
+                                                                         0,
                                                                          NULL})
                                                  .begin(),
-                                             NULL);
-    }
+                                             nullptr)) {}
 
     ~OSMesaBackendImpl() final { OSMesaDestroyContext(context); }
 
@@ -36,11 +40,11 @@ public:
 
     void activateContext() final { OSMesaMakeCurrent(context, buffer.get(), GL_UNSIGNED_BYTE, 2048, 2048); }
 
-    void deactivateContext() final {}
+    void deactivateContext() final { OSMesaMakeCurrent(nullptr, nullptr, GL_UNSIGNED_BYTE, 0, 0); }
 
 private:
-    std::unique_ptr<uint8_t[]> buffer = std::make_unique<uint8_t[]>(2048 * 2048 * 4);
-    OSMesaContext context = NULL;
+    std::unique_ptr<uint8_t[]> buffer;
+    OSMesaContext context;
 };
 
 void HeadlessBackend::createImpl() {

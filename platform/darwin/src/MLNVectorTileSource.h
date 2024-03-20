@@ -55,8 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
  ```
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/dds-circle-layer/">
- Data-driven circles</a> example to learn how to add data to your map using
+ TODO: Data-driven circles, learn how to add data to your map using
  an `MLNVectorTileSource` object.
  */
 MLN_EXPORT

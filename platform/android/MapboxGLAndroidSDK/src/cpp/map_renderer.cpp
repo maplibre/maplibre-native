@@ -60,7 +60,7 @@ ActorRef<Renderer> MapRenderer::actor() const {
     return *rendererRef;
 }
 
-void MapRenderer::schedule(std::function<void()> scheduled) {
+void MapRenderer::schedule(std::function<void()>&& scheduled) {
     try {
         // Create a runnable
         android::UniqueEnv _env = android::AttachEnv();
@@ -81,6 +81,23 @@ void MapRenderer::schedule(std::function<void()> scheduled) {
         runnable.release();
     } catch (const std::exception& exception) {
         Log::Error(Event::Android, std::string("MapRenderer::schedule failed: ") + exception.what());
+    }
+}
+
+std::size_t MapRenderer::waitForEmpty(Milliseconds timeout) {
+    try {
+        android::UniqueEnv _env = android::AttachEnv();
+        static auto& javaClass = jni::Class<MapRenderer>::Singleton(*_env);
+        static auto waitForEmpty = javaClass.GetMethod<jni::jint(jni::jlong)>(*_env, "waitForEmpty");
+        if (auto weakReference = javaPeer.get(*_env)) {
+            return weakReference.Call(*_env, waitForEmpty, static_cast<int64_t>(timeout.count()));
+        }
+        // If the peer is already cleaned up, there's nothing to wait for
+        return 0;
+    } catch (...) {
+        Log::Error(Event::Android, "MapRenderer::waitForEmpty failed");
+        jni::ThrowJavaError(*android::AttachEnv(), std::current_exception());
+        return 0;
     }
 }
 
@@ -236,6 +253,10 @@ void MapRenderer::onSurfaceDestroyed(JNIEnv&) {
     resetRenderer();
 }
 
+void MapRenderer::setSwapBehaviorFlush(JNIEnv&, jboolean flush) {
+    backend->setSwapBehavior(flush ? gfx::Renderable::SwapBehaviour::Flush : gfx::Renderable::SwapBehaviour::NoFlush);
+}
+
 // Static methods //
 
 void MapRenderer::registerNative(jni::JNIEnv& env) {
@@ -256,7 +277,8 @@ void MapRenderer::registerNative(jni::JNIEnv& env) {
         METHOD(&MapRenderer::onRendererReset, "nativeReset"),
         METHOD(&MapRenderer::onSurfaceCreated, "nativeOnSurfaceCreated"),
         METHOD(&MapRenderer::onSurfaceChanged, "nativeOnSurfaceChanged"),
-        METHOD(&MapRenderer::onSurfaceDestroyed, "nativeOnSurfaceDestroyed"));
+        METHOD(&MapRenderer::onSurfaceDestroyed, "nativeOnSurfaceDestroyed"),
+        METHOD(&MapRenderer::setSwapBehaviorFlush, "nativeSetSwapBehaviorFlush"));
 }
 
 MapRenderer& MapRenderer::getNativePeer(JNIEnv& env, const jni::Object<MapRenderer>& jObject) {

@@ -30,6 +30,11 @@ public:
     std::optional<gfx::Texture> dem;
     std::optional<gfx::Texture> texture;
 
+#if MLN_DRAWABLE_RENDERER
+    RenderTargetPtr renderTarget;
+    bool renderTargetPrepared = false;
+#endif
+
     TileMask mask{{0, 0, 0}};
 
     const DEMData& getDEMData() const;
@@ -40,12 +45,17 @@ public:
     void setPrepared(bool preparedState) { prepared = preparedState; }
 
     // Raster-DEM Tile Sources use the default buffers from Painter
-    gfx::VertexVector<HillshadeLayoutVertex> vertices;
+    using VertexVector = gfx::VertexVector<HillshadeLayoutVertex>;
+    std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
+    VertexVector& vertices = *sharedVertices;
+
     gfx::IndexVector<gfx::Triangles> indices;
     SegmentVector<HillshadeAttributes> segments;
 
+#if MLN_LEGACY_RENDERER
     std::optional<gfx::VertexBuffer<HillshadeLayoutVertex>> vertexBuffer;
     std::optional<gfx::IndexBuffer> indexBuffer;
+#endif // MLN_LEGACY_RENDERER
 
 private:
     DEMData demdata;

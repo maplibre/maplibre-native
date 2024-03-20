@@ -122,6 +122,10 @@ public final class MapLibreMap {
     nativeMapView.triggerRepaint();
   }
 
+  public void setSwapBehaviorFlush(boolean flush) {
+    nativeMapView.setSwapBehaviorFlush(flush);
+  }
+
   void initialise(@NonNull Context context, @NonNull MapLibreMapOptions options) {
     transform.initialise(this, options);
     uiSettings.initialise(context, options);

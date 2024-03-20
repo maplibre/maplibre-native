@@ -1,5 +1,5 @@
 #pragma once
-
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -28,6 +28,9 @@ public:
     void open(Scheduler& scheduler_);
     void close();
 
+    // Indicate this mailbox will no longer be checked for messages
+    void abandon();
+
     bool isOpen() const;
 
     void push(std::unique_ptr<Message>);
@@ -37,11 +40,18 @@ public:
     static std::function<void()> makeClosure(std::weak_ptr<Mailbox>);
 
 private:
+    enum class State : uint32_t {
+        Idle = 0,
+        Processing,
+        Abandoned
+    };
+
     mapbox::base::WeakPtr<Scheduler> weakScheduler;
 
     std::recursive_mutex receivingMutex;
     std::mutex pushingMutex;
 
+    std::atomic<State> state{State::Idle};
     bool closed{false};
 
     std::mutex queueMutex;

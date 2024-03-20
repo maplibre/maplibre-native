@@ -74,7 +74,7 @@ std::vector<std::pair<std::string, std::string>> parseIgnores(const std::vector<
 
 // defaultExpectationPath: absolute path that constains the style.json file for testing
 // testId: Test case id that used for composing expectation path
-// expectatedPaths: absolute paths that constain possible expected.png/metrics.json files for result checking
+// expectatedPaths: absolute paths that contain possible expected.png/metrics.json files for result checking
 std::vector<mbgl::filesystem::path> getTestExpectations(const mbgl::filesystem::path& defaultExpectationPath,
                                                         const std::string& testId,
                                                         std::vector<mbgl::filesystem::path> expectatedPaths) {
@@ -287,9 +287,7 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
             testId = testId.substr(rootLength + 1, testId.length() - rootLength - 1);
 
             std::vector<mbgl::filesystem::path> expectedMetricPaths{expectedMetricPath};
-#if defined(__ANDROID__)
-            expectedMetricPaths.emplace_back("/sdcard/baselines/");
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
             expectedMetricPaths.emplace_back(manifest.manifestPath + "/baselines/");
 #endif
             testPaths.emplace_back(testPath,

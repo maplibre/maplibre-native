@@ -31,6 +31,10 @@ const LineLayer::Impl& LineLayerProperties::layerImpl() const {
     return static_cast<const LineLayer::Impl&>(*baseImpl);
 }
 
+expression::Dependency LineLayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies() | layerImpl().layout.getDependencies();
+}
+
 } // namespace style
 } // namespace mbgl
 

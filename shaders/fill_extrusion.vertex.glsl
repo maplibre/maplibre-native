@@ -11,7 +11,6 @@ out vec4 v_color;
 
 #pragma mapbox: define highp float base
 #pragma mapbox: define highp float height
-
 #pragma mapbox: define highp vec4 color
 
 void main() {

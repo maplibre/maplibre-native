@@ -102,6 +102,10 @@ public abstract class MapRenderer implements MapRendererScheduler {
     }
   }
 
+  public void setSwapBehaviorFlush(boolean flush) {
+    nativeSetSwapBehaviorFlush(flush);
+  }
+
   /**
    * May be called from any thread.
    * <p>
@@ -114,6 +118,11 @@ public abstract class MapRenderer implements MapRendererScheduler {
   @CallSuper
   void queueEvent(MapRendererRunnable runnable) {
     this.queueEvent((Runnable) runnable);
+  }
+
+  /// Wait indefinitely for the queue to become empty
+  public void waitForEmpty() {
+    waitForEmpty(0);
   }
 
   private native void nativeInitialize(MapRenderer self,
@@ -134,12 +143,16 @@ public abstract class MapRenderer implements MapRendererScheduler {
 
   private native void nativeRender();
 
+  private native void nativeSetSwapBehaviorFlush(boolean flush);
+
   private long timeElapsed;
 
   private void updateFps() {
     long currentTime = System.nanoTime();
-    double fps = 1E9 / ((currentTime - timeElapsed));
-    onFpsChangedListener.onFpsChanged(fps);
+    if (timeElapsed > 0) {
+      double fps = 1E9 / ((currentTime - timeElapsed));
+      onFpsChangedListener.onFpsChanged(fps);
+    }
     timeElapsed = currentTime;
   }
 

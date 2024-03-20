@@ -7,12 +7,17 @@
 #import "MBXOfflinePacksTableViewController.h"
 #import "MBXAnnotationView.h"
 #import "MBXUserLocationAnnotationView.h"
-#import "LimeGreenStyleLayer.h"
 #import "MBXEmbeddedMapViewController.h"
 #import "MBXOrnamentsViewController.h"
 #import "MBXStateManager.h"
 #import "MBXState.h"
 #import "MLNSettings.h"
+
+#import "CustomStyleLayerExample.h"
+
+#if MLN_DRAWABLE_RENDERER
+#import "ExampleCustomDrawableStyleLayer.h"
+#endif
 
 #import "MBXFrameTimeGraphView.h"
 #import "MLNMapView_Experimental.h"
@@ -29,11 +34,6 @@ static const CLLocationCoordinate2D WorldTourDestinations[] = {
 static const MLNCoordinateBounds colorado = {
     .sw = { .latitude = 36.986207, .longitude = -109.049896},
     .ne = { .latitude = 40.989329, .longitude = -102.062592},
-};
-
-static const MLNCoordinateBounds areaAroundBelgium = {
-    .sw = { .latitude = 52.2782, .longitude = 8.289179999999988},
-    .ne = { .latitude = 48.5584, .longitude = 1.0162300000000073},
 };
 
 static NSString * const MBXViewControllerAnnotationViewReuseIdentifer = @"MBXViewControllerAnnotationViewReuseIdentifer";
@@ -66,6 +66,7 @@ typedef NS_ENUM(NSInteger, MBXSettingsAnnotationsRows) {
     MBXSettingsAnnotations10000Sprites,
     MBXSettingsAnnotationAnimation,
     MBXSettingsAnnotationsTestShapes,
+    MBXSettingsAnnotationsManyTestShapes,
     MBXSettingsAnnotationsCustomCallout,
     MBXSettingsAnnotationsQueryAnnotations,
     MBXSettingsAnnotationsCustomUserDot,
@@ -98,13 +99,16 @@ typedef NS_ENUM(NSInteger, MBXSettingsRuntimeStylingRows) {
     MBXSettingsRuntimeStylingRasterTileSource,
     MBXSettingsRuntimeStylingImageSource,
     MBXSettingsRuntimeStylingRouteLine,
-    MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer,
+    MBXSettingsRuntimeStylingAddCustomTriangleLayer,
     MBXSettingsRuntimeStylingDDSPolygon,
     MBXSettingsRuntimeStylingCustomLatLonGrid,
+    MBXSettingsRuntimeStylingLineGradient,
+#if MLN_DRAWABLE_RENDERER
+    MBXSettingsRuntimeStylingCustomDrawableLayer,
+#endif
 };
 
 typedef NS_ENUM(NSInteger, MBXSettingsMiscellaneousRows) {
-    MBXSettingsMiscellaneousLatLngBoundsConstraints,
     MBXSettingsMiscellaneousWorldTour,
     MBXSettingsMiscellaneousRandomTour,
     MBXSettingsMiscellaneousScrollView,
@@ -234,7 +238,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     BOOL _isTouringWorld;
     BOOL _contentInsetsEnabled;
     UIEdgeInsets _originalContentInsets;
-    BOOL _hasLatLngBoundConstraints;
 }
 
 // MARK: - Setup & Teardown
@@ -394,6 +397,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 @"Add 10,000 Sprites",
                 @"Animate an Annotation View",
                 @"Add Test Shapes",
+                @"Add 10x Test Shapes",
                 @"Add Point With Custom Callout",
                 @"Query Annotations",
                 [NSString stringWithFormat:@"%@ Custom User Dot", (_customUserLocationAnnnotationEnabled ? @"Disable" : @"Enable")],
@@ -427,14 +431,21 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 @"Style Raster Tile Source",
                 @"Style Image Source",
                 @"Add Route Line",
-                @"Add Lime Green Triangle Layer",
+#if MLN_RENDER_BACKEND_METAL
+                @"Add Custom Triangle Layer (Metal)",
+#else
+                @"Add Custom Triangle Layer (OpenGL)",
+#endif
                 @"Dynamically Style Polygon",
                 @"Add Custom Lat/Lon Grid",
+                @"Style Route line with gradient",
+#if MLN_DRAWABLE_RENDERER
+                @"Add Custom Drawable Layer",
+#endif
             ]];
             break;
         case MBXSettingsMiscellaneous:
             [settingsTitles addObjectsFromArray:@[
-                _hasLatLngBoundConstraints ? @"Remove LatLng bound constraints" : @"Set LatLng bound box constraint",
                 @"Start World Tour",
                 @"Random Tour",
                 @"Embedded Map View",
@@ -541,7 +552,10 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                     [self animateAnnotationView];
                     break;
                 case MBXSettingsAnnotationsTestShapes:
-                    [self addTestShapes];
+                    [self addTestShapes:1];
+                    break;
+                case MBXSettingsAnnotationsManyTestShapes:
+                    [self addTestShapes:10];
                     break;
                 case MBXSettingsAnnotationsCustomCallout:
                     [self addAnnotationWithCustomCallout];
@@ -638,8 +652,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsRuntimeStylingRouteLine:
                     [self styleRouteLine];
                     break;
-                case MBXSettingsRuntimeStylingAddLimeGreenTriangleLayer:
-                    [self styleAddLimeGreenTriangleLayer];
+                case MBXSettingsRuntimeStylingAddCustomTriangleLayer:
+                    [self styleAddCustomTriangleLayer];
                     break;
                 case MBXSettingsRuntimeStylingDDSPolygon:
                     [self stylePolygonWithDDS];
@@ -647,6 +661,14 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                 case MBXSettingsRuntimeStylingCustomLatLonGrid:
                     [self addLatLonGrid];
                     break;
+                case MBXSettingsRuntimeStylingLineGradient:
+                    [self styleLineGradient];
+                    break;
+#if MLN_DRAWABLE_RENDERER
+                case MBXSettingsRuntimeStylingCustomDrawableLayer:
+                    [self addCustomDrawableLayer];
+                    break;
+#endif
                 default:
                     NSAssert(NO, @"All runtime styling setting rows should be implemented");
                     break;
@@ -655,9 +677,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         case MBXSettingsMiscellaneous:
             switch (indexPath.row)
             {
-                case MBXSettingsMiscellaneousLatLngBoundsConstraints:
-                    [self setLatLngBoundsConstraints];
-                    break;
                 case MBXSettingsMiscellaneousLocalizeLabels:
                     [self toggleStyleLabelsLanguage];
                     break;
@@ -869,102 +888,107 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         });
     };
 
-- (void)addTestShapes
+- (void)addTestShapes:(NSUInteger)featuresCount
 {
-    // Pacific Northwest triangle
-    //
-    CLLocationCoordinate2D triangleCoordinates[3] =
-    {
-        CLLocationCoordinate2DMake(44, -122),
-        CLLocationCoordinate2DMake(46, -122),
-        CLLocationCoordinate2DMake(46, -121)
-    };
-
-    MLNPolygon *triangle = [MLNPolygon polygonWithCoordinates:triangleCoordinates count:3];
-
-    [self.mapView addAnnotation:triangle];
-
-    // West coast polyline
-    //
-    CLLocationCoordinate2D lineCoordinates[4] = {
-        CLLocationCoordinate2DMake(47.6025, -122.3327),
-        CLLocationCoordinate2DMake(45.5189, -122.6726),
-        CLLocationCoordinate2DMake(37.7790, -122.4177),
-        CLLocationCoordinate2DMake(34.0532, -118.2349)
-    };
-    MLNPolyline *line = [MLNPolyline polylineWithCoordinates:lineCoordinates count:4];
-    [self.mapView addAnnotation:line];
-
-    // Orcas Island, WA hike polyline
-    //
-    NSDictionary *hike = [NSJSONSerialization JSONObjectWithData:
-                             [NSData dataWithContentsOfFile:
-                                 [[NSBundle mainBundle] pathForResource:@"polyline" ofType:@"geojson"]]
-                                                         options:0
-                                                           error:nil];
-
-    NSArray *hikeCoordinatePairs = hike[@"features"][0][@"geometry"][@"coordinates"];
-
-    CLLocationCoordinate2D *polylineCoordinates = (CLLocationCoordinate2D *)malloc([hikeCoordinatePairs count] * sizeof(CLLocationCoordinate2D));
-
-    for (NSUInteger i = 0; i < [hikeCoordinatePairs count]; i++)
-    {
-        polylineCoordinates[i] = CLLocationCoordinate2DMake([hikeCoordinatePairs[i][1] doubleValue], [hikeCoordinatePairs[i][0] doubleValue]);
-    }
-
-    MLNPolyline *polyline = [MLNPolyline polylineWithCoordinates:polylineCoordinates
-                                                           count:[hikeCoordinatePairs count]];
-
-    [self.mapView addAnnotation:polyline];
-
-    free(polylineCoordinates);
-
-    // PA/NJ/DE polygons
-    //
-    NSDictionary *threestates = [NSJSONSerialization JSONObjectWithData:
-                          [NSData dataWithContentsOfFile:
-                           [[NSBundle mainBundle] pathForResource:@"threestates" ofType:@"geojson"]]
-                                                         options:0
-                                                           error:nil];
-
-    for (NSDictionary *feature in threestates[@"features"])
-    {
-        NSArray *stateCoordinatePairs = feature[@"geometry"][@"coordinates"];
-
-        while ([stateCoordinatePairs count] == 1) stateCoordinatePairs = stateCoordinatePairs[0];
-
-        CLLocationCoordinate2D *polygonCoordinates = (CLLocationCoordinate2D *)malloc([stateCoordinatePairs count] * sizeof(CLLocationCoordinate2D));
-
-        for (NSUInteger i = 0; i < [stateCoordinatePairs count]; i++)
+    for (int featureIndex = 0; featureIndex < featuresCount; ++featureIndex) {
+        double deltaLongitude = featureIndex * 0.01;
+        double deltaLatitude = -featureIndex * 0.01;
+        
+        // Pacific Northwest triangle
+        //
+        CLLocationCoordinate2D triangleCoordinates[3] =
         {
-            polygonCoordinates[i] = CLLocationCoordinate2DMake([stateCoordinatePairs[i][1] doubleValue], [stateCoordinatePairs[i][0] doubleValue]);
+            CLLocationCoordinate2DMake(44 + deltaLatitude, -122 + deltaLongitude),
+            CLLocationCoordinate2DMake(46 + deltaLatitude, -122 + deltaLongitude),
+            CLLocationCoordinate2DMake(46 + deltaLatitude, -121 + deltaLongitude)
+        };
+        
+        MLNPolygon *triangle = [MLNPolygon polygonWithCoordinates:triangleCoordinates count:3];
+        
+        [self.mapView addAnnotation:triangle];
+        
+        // West coast polyline
+        //
+        CLLocationCoordinate2D lineCoordinates[4] = {
+            CLLocationCoordinate2DMake(47.6025 + deltaLatitude, -122.3327 + deltaLongitude),
+            CLLocationCoordinate2DMake(45.5189 + deltaLatitude, -122.6726 + deltaLongitude),
+            CLLocationCoordinate2DMake(37.7790 + deltaLatitude, -122.4177 + deltaLongitude),
+            CLLocationCoordinate2DMake(34.0532 + deltaLatitude, -118.2349 + deltaLongitude)
+        };
+        MLNPolyline *line = [MLNPolyline polylineWithCoordinates:lineCoordinates count:4];
+        [self.mapView addAnnotation:line];
+        
+        // Orcas Island, WA hike polyline
+        //
+        NSDictionary *hike = [NSJSONSerialization JSONObjectWithData:
+                              [NSData dataWithContentsOfFile:
+                               [[NSBundle mainBundle] pathForResource:@"polyline" ofType:@"geojson"]]
+                                                             options:0
+                                                               error:nil];
+        
+        NSArray *hikeCoordinatePairs = hike[@"features"][0][@"geometry"][@"coordinates"];
+        
+        CLLocationCoordinate2D *polylineCoordinates = (CLLocationCoordinate2D *)malloc([hikeCoordinatePairs count] * sizeof(CLLocationCoordinate2D));
+        
+        for (NSUInteger i = 0; i < [hikeCoordinatePairs count]; i++)
+        {
+            polylineCoordinates[i] = CLLocationCoordinate2DMake([hikeCoordinatePairs[i][1] doubleValue] + deltaLatitude, [hikeCoordinatePairs[i][0] doubleValue] + deltaLongitude);
         }
-
-        MLNPolygon *polygon = [MLNPolygon polygonWithCoordinates:polygonCoordinates count:[stateCoordinatePairs count]];
-        polygon.title = feature[@"properties"][@"NAME"];
-
-        [self.mapView addAnnotation:polygon];
-
-        free(polygonCoordinates);
+        
+        MLNPolyline *polyline = [MLNPolyline polylineWithCoordinates:polylineCoordinates
+                                                               count:[hikeCoordinatePairs count]];
+        
+        [self.mapView addAnnotation:polyline];
+        
+        free(polylineCoordinates);
+        
+        // PA/NJ/DE polygons
+        //
+        NSDictionary *threestates = [NSJSONSerialization JSONObjectWithData:
+                                     [NSData dataWithContentsOfFile:
+                                      [[NSBundle mainBundle] pathForResource:@"threestates" ofType:@"geojson"]]
+                                                                    options:0
+                                                                      error:nil];
+        
+        for (NSDictionary *feature in threestates[@"features"])
+        {
+            NSArray *stateCoordinatePairs = feature[@"geometry"][@"coordinates"];
+            
+            while ([stateCoordinatePairs count] == 1) stateCoordinatePairs = stateCoordinatePairs[0];
+            
+            CLLocationCoordinate2D *polygonCoordinates = (CLLocationCoordinate2D *)malloc([stateCoordinatePairs count] * sizeof(CLLocationCoordinate2D));
+            
+            for (NSUInteger i = 0; i < [stateCoordinatePairs count]; i++)
+            {
+                polygonCoordinates[i] = CLLocationCoordinate2DMake([stateCoordinatePairs[i][1] doubleValue] + deltaLatitude, [stateCoordinatePairs[i][0] doubleValue] + deltaLongitude);
+            }
+            
+            MLNPolygon *polygon = [MLNPolygon polygonWithCoordinates:polygonCoordinates count:[stateCoordinatePairs count]];
+            polygon.title = feature[@"properties"][@"NAME"];
+            
+            [self.mapView addAnnotation:polygon];
+            
+            free(polygonCoordinates);
+        }
+        
+        // Null Island polygon with an interior hole
+        //
+        CLLocationCoordinate2D innerCoordinates[] = {
+            CLLocationCoordinate2DMake(-5 + deltaLatitude, -5 + deltaLongitude),
+            CLLocationCoordinate2DMake(-5 + deltaLatitude, 5 + deltaLongitude),
+            CLLocationCoordinate2DMake(5 + deltaLatitude, 5 + deltaLongitude),
+            CLLocationCoordinate2DMake(5 + deltaLatitude, -5 + deltaLongitude),
+        };
+        MLNPolygon *innerPolygon = [MLNPolygon polygonWithCoordinates:innerCoordinates count:sizeof(innerCoordinates) / sizeof(innerCoordinates[0])];
+        CLLocationCoordinate2D outerCoordinates[] = {
+            CLLocationCoordinate2DMake(-10 + deltaLatitude, -10 + deltaLongitude),
+            CLLocationCoordinate2DMake(-10 + deltaLatitude, 10 + deltaLongitude),
+            CLLocationCoordinate2DMake(10 + deltaLatitude, 10 + deltaLongitude),
+            CLLocationCoordinate2DMake(10 + deltaLatitude, -10 + deltaLongitude),
+        };
+        MLNPolygon *outerPolygon = [MLNPolygon polygonWithCoordinates:outerCoordinates count:sizeof(outerCoordinates) / sizeof(outerCoordinates[0]) interiorPolygons:@[innerPolygon]];
+        [self.mapView addAnnotation:outerPolygon];
     }
-
-    // Null Island polygon with an interior hole
-    //
-    CLLocationCoordinate2D innerCoordinates[] = {
-        CLLocationCoordinate2DMake(-5, -5),
-        CLLocationCoordinate2DMake(-5, 5),
-        CLLocationCoordinate2DMake(5, 5),
-        CLLocationCoordinate2DMake(5, -5),
-    };
-    MLNPolygon *innerPolygon = [MLNPolygon polygonWithCoordinates:innerCoordinates count:sizeof(innerCoordinates) / sizeof(innerCoordinates[0])];
-    CLLocationCoordinate2D outerCoordinates[] = {
-        CLLocationCoordinate2DMake(-10, -10),
-        CLLocationCoordinate2DMake(-10, 10),
-        CLLocationCoordinate2DMake(10, 10),
-        CLLocationCoordinate2DMake(10, -10),
-    };
-    MLNPolygon *outerPolygon = [MLNPolygon polygonWithCoordinates:outerCoordinates count:sizeof(outerCoordinates) / sizeof(outerCoordinates[0]) interiorPolygons:@[innerPolygon]];
-    [self.mapView addAnnotation:outerPolygon];
 }
 
 - (void)addAnnotationWithCustomCallout
@@ -1467,25 +1491,76 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     }
 }
 
--(void)setLatLngBoundsConstraints
-{
-    if(_hasLatLngBoundConstraints) {
-        [self.mapView clearLatLnBounds];
-        [self.mapView resetPosition];
-    } else {
-        MLNMapCamera *newCamera = [self.mapView cameraThatFitsCoordinateBounds: areaAroundBelgium];
-        [self.mapView setCamera: newCamera];
-        [self.mapView setLatLngBounds: areaAroundBelgium];
-    }
-    
-    _hasLatLngBoundConstraints = !_hasLatLngBoundConstraints;
-}
-
 -(void)toggleStyleLabelsLanguage
 {
     _localizingLabels = !_localizingLabels;
     [self.mapView.style localizeLabelsIntoLocale:_localizingLabels ? [NSLocale localeWithLocaleIdentifier:@"mul"] : nil];
 }
+
+- (void)styleLineGradient
+{
+    CLLocationCoordinate2D coords[] = {
+        { 43.84455590478528, 10.504238605499268 },
+        { 43.84385562343126, 10.504125952720642 },
+        { 43.84388657526694, 10.503299832344055 },
+        { 43.84332557075269, 10.503235459327698 },
+        { 43.843441641085036, 10.502264499664307 },
+        { 43.84396395478592, 10.50242006778717 },
+        { 43.84406067904351, 10.501744151115416 },
+        { 43.84422317544319, 10.501792430877686 }
+    };
+    NSInteger count = sizeof(coords) / sizeof(coords[0]);
+
+    [self.mapView setCenterCoordinate:coords[0] zoomLevel:16 animated:YES];
+
+    MLNPolylineFeature *routeLine = [MLNPolylineFeature polylineWithCoordinates:coords count:count];
+
+    NSDictionary *sourceOptions = @{ MLNShapeSourceOptionLineDistanceMetrics: @YES };
+    
+    MLNShapeSource *routeSource = [[MLNShapeSource alloc] initWithIdentifier:@"style-route-source" shape:routeLine options:sourceOptions];
+    [self.mapView.style addSource:routeSource];
+
+    MLNLineStyleLayer *baseRouteLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-base-route-layer" source:routeSource];
+    baseRouteLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor orangeColor]];
+    baseRouteLayer.lineWidth = [NSExpression expressionForConstantValue:@20];
+    baseRouteLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.95];
+    baseRouteLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
+    baseRouteLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
+    [self.mapView.style addLayer:baseRouteLayer];
+
+    MLNLineStyleLayer *routeLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-route-layer" source:routeSource];
+    routeLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor whiteColor]];
+    routeLayer.lineWidth = [NSExpression expressionForConstantValue:@15];
+    routeLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.8];
+    routeLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
+    routeLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
+    // Create stops dictionary
+    NSDictionary *stops = @{
+        @0: [UIColor blueColor],
+        @0.1: [UIColor colorWithRed:25 / 255.0 green:41 /255.0 blue:88 / 255.0 alpha:1.0],
+        @0.3: [UIColor cyanColor],
+        @0.5: [UIColor greenColor],
+        @0.7: [UIColor yellowColor],
+        @1: [UIColor redColor],
+    };
+    // Create an expression that will interpolate the color of the line
+    // (mgl_interpolate:withCurveType:parameters:stops:($lineProgress, 'linear', nil, %@))
+    NSExpression *lineGradientExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($lineProgress, 'linear', nil, %@)", stops];
+    routeLayer.lineGradient = lineGradientExpression;
+    [self.mapView.style addLayer:routeLayer];
+}
+
+#if MLN_DRAWABLE_RENDERER
+- (void)addCustomDrawableLayer
+{
+    // Create a CustomLayer that uses the Drawable/Builder toolkit to generate and render geometry
+    ExampleCustomDrawableStyleLayer* layer = [[ExampleCustomDrawableStyleLayer alloc] initWithIdentifier:@"custom-drawable-layer"];
+
+    if (layer) {
+        [self.mapView.style addLayer:layer];
+    }
+}
+#endif
 
 - (void)styleRouteLine
 {
@@ -1525,9 +1600,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:routeLayer];
 }
 
-- (void)styleAddLimeGreenTriangleLayer
+- (void)styleAddCustomTriangleLayer
 {
-    LimeGreenStyleLayer *layer = [[LimeGreenStyleLayer alloc] initWithIdentifier:@"mbx-custom"];
+    CustomStyleLayerExample *layer = [[CustomStyleLayerExample alloc] initWithIdentifier:@"mbx-custom"];
     [self.mapView.style addLayer:layer];
 }
 
@@ -1740,7 +1815,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 - (UIImage *)mapView:(MLNMapView *)mapView didFailToLoadImage:(NSString *)imageName {
-    UIImage *backupImage = [UIImage imageNamed:@"AppIcon"];
+    UIImage *backupImage = [UIImage imageNamed:@"MissingImage"];
     return backupImage;
 }
 
@@ -2372,9 +2447,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     return features;
 }
 
-- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered {
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered frameEncodingTime:(double)frameEncodingTime frameRenderingTime:(double)frameRenderingTime {
     if (self.frameTimeGraphEnabled) {
-        [self.frameTimeGraphView updatePathWithFrameDuration:mapView.frameTime];
+        [self.frameTimeGraphView updatePathWithFrameDuration:frameEncodingTime];
     }
 }
 

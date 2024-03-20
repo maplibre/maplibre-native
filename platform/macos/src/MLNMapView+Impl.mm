@@ -1,7 +1,12 @@
 #import "MLNMapView+Impl.h"
-#import "MLNMapView+OpenGL.h"
 #import "MLNStyle_Private.h"
 #import "NSBundle+MLNAdditions.h"
+
+#if MLN_RENDER_BACKEND_METAL
+#import "MLNMapView+Metal.h"
+#else // MLN_RENDER_BACKEND_OPENGL
+#import "MLNMapView+OpenGL.h"
+#endif
 
 #include <mbgl/map/map.hpp>
 #include <mbgl/style/style.hpp>

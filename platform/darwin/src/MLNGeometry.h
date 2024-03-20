@@ -150,8 +150,7 @@ NS_INLINE BOOL MLNCoordinateBoundsIntersectsCoordinateBounds(MLNCoordinateBounds
  Returns `YES` if the coordinate is within the coordinate bounds.
  
  #### Related examples
- See the <a href="https://docs.mapbox.com/ios/maps/examples/constraining-gestures/">
- Restrict map panning to an area</a> example to learn how to use
+ TODO: Restrict map panning to an area, learn how to use
  `MLNCoordinateInCoordinateBounds` to determine if a point is within, or
  intersects, a given bounding box.
  */

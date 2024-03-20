@@ -18,8 +18,8 @@ void android_main(struct android_app* app) {
     int outFd, outEvents;
     struct android_poll_source* source = nullptr;
     if (!copyFile(env, app->activity->assetManager, zipFile, storagePath, "data.zip")) {
-        mbgl::Log::Error(
-            mbgl::Event::General, "Failed to copy zip File '%s' to external storage for upzipping", zipFile.c_str());
+        mbgl::Log::Error(mbgl::Event::General,
+                         "Failed to copy zip File '" + zipFile + "' to external storage for upzipping");
     } else {
         unZipFile(env, zipFile, storagePath);
 
@@ -41,12 +41,12 @@ void android_main(struct android_app* app) {
                     source->process(app, source);
                 }
 
-                mbgl::Log::Info(mbgl::Event::General, "Current finished tests number is '%d' ", ++finishedTestCount);
+                mbgl::Log::Info(mbgl::Event::General,
+                                "Current finished tests number is '" + std::to_string(++finishedTestCount) + "'");
             };
-            mbgl::Log::Info(
-                mbgl::Event::General, "Start running RenderTestRunner with manifest: '%s'", manifest.c_str());
+            mbgl::Log::Info(mbgl::Event::General, "Start running RenderTestRunner with manifest: '" + manifest + "'");
             bool result = mbgl::runRenderTests(argv.size() - 1, argv.data(), testStatus) == 0;
-            mbgl::Log::Info(mbgl::Event::General, "End running RenderTestRunner with manifest: '%s'", manifest.c_str());
+            mbgl::Log::Info(mbgl::Event::General, "End running RenderTestRunner with manifest: '" + manifest + "'");
             return result;
         };
 

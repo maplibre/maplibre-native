@@ -12,7 +12,6 @@
 #import "MLNHillshadeStyleLayer.h"
 #import "MLNRasterStyleLayer.h"
 #import "MLNBackgroundStyleLayer.h"
-#import "MLNOpenGLStyleLayer.h"
 #import "MLNStyleLayerManager.h"
 
 #import "MLNSource.h"
@@ -39,6 +38,8 @@
 #include <mbgl/style/sources/image_source.hpp>
 
 #import "NSDate+MLNAdditions.h"
+
+#import "MLNCustomStyleLayer.h"
 
 #if TARGET_OS_IPHONE
     #import "UIImage+MLNAdditions.h"
@@ -79,7 +80,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
 @property (nonatomic, readonly, weak) id <MLNStylable> stylable;
 @property (nonatomic, readonly) mbgl::style::Style *rawStyle;
 @property (readonly, copy, nullable) NSURL *URL;
-@property (nonatomic, readwrite, strong) NSMutableDictionary<NSString *, MLNOpenGLStyleLayer *> *openGLLayers;
+@property (nonatomic, readwrite, strong) NSMutableDictionary<NSString *, MLNCustomStyleLayer *> *customLayers;
 @property (nonatomic) NSMutableDictionary<NSString *, NSDictionary<NSObject *, MLNTextLanguage *> *> *localizedLayersByIdentifier;
 
 @end
@@ -122,7 +123,7 @@ const MLNExceptionName MLNRedundantSourceIdentifierException = @"MLNRedundantSou
     if (self = [super init]) {
         _stylable = stylable;
         _rawStyle = rawStyle;
-        _openGLLayers = [NSMutableDictionary dictionary];
+        _customLayers = [NSMutableDictionary dictionary];
         _localizedLayersByIdentifier = [NSMutableDictionary dictionary];
         MLNLogDebug(@"Initializing with style name: %@ stylable: %@", self.name, stylable);
     }

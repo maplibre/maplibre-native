@@ -1,20 +1,20 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
     -   id: check-yaml
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v16.0.6
+  rev: v18.1.1
   hooks:
   - id: clang-format
     files: '.*\.(hpp|cpp|h)'
     exclude: '(vendor/.*|platform/(ios|darwin|macos)/.*|test/ios/.*|render-test/ios/.*|benchmark/ios/.*)'
 - repo: https://github.com/keith/pre-commit-buildifier
-  rev: 6.1.0.2
+  rev: 6.4.0
   hooks:
     - id: buildifier
 - repo: https://github.com/Mateusz-Grzelinski/actionlint-py
-  rev: v1.6.25.9
+  rev: v1.6.26.11
   hooks:
     - id: actionlint
       additional_dependencies: [shellcheck-py]

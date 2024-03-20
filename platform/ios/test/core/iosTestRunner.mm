@@ -23,7 +23,6 @@
         self.testStatus = NO;
         self.runner = new TestRunner();
 
-        NSError *error;
         NSFileManager *fileManager = [NSFileManager defaultManager];
 
         NSString *xcTestBundleRoot = [[NSBundle bundleForClass:[self class]] resourcePath];

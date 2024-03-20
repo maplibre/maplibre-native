@@ -2,14 +2,8 @@
 
 ## Upcoming
 
-### ✨ New features
-
-- Support for GeoJSON feature collections using std::list ([#541](https://github.com/maplibre/maplibre-native/pull/541)).
-- Based on Qt 6.5.0
-
-### 🐞 Bug fixes
-
-- Fixed bitcode issues on iOS.
+MapLibre native Qt bindings have been moved to
+[maplibre-native-qt](https://github.com/maplibre/maplibre-native-qt) repository.
 
 ## v2.0.1
 

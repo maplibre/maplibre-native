@@ -1,6 +1,9 @@
 #pragma once
-
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/drawable.hpp>
+#endif
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 
 #include <cassert>
 #include <memory>
@@ -10,20 +13,54 @@
 
 namespace mbgl {
 
-class PaintParameters;
 class PatternAtlas;
+class PaintParameters;
 
 namespace gfx {
 class UploadPass;
+class Context;
 } // namespace gfx
+
+class LayerGroupBase;
+using LayerGroupBasePtr = std::shared_ptr<LayerGroupBase>;
 
 class RenderItem {
 public:
+    enum class DebugType {
+        TextOutline,
+        Text,
+        Border
+    };
+    using DebugLayerGroupMap = std::map<DebugType, LayerGroupBasePtr>;
+
     virtual ~RenderItem() = default;
     virtual void upload(gfx::UploadPass&) const = 0;
     virtual void render(PaintParameters&) const = 0;
     virtual bool hasRenderPass(RenderPass) const = 0;
     virtual const std::string& getName() const = 0;
+#if MLN_DRAWABLE_RENDERER
+    virtual void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const = 0;
+#endif
+};
+
+class RenderSource;
+class LayerRenderItem final : public RenderItem {
+public:
+    LayerRenderItem(RenderLayer& layer_, RenderSource* source_, uint32_t index_);
+    bool operator<(const LayerRenderItem& other) const { return index < other.index; }
+
+    std::reference_wrapper<RenderLayer> layer;
+    RenderSource* source;
+    const uint32_t index;
+
+private:
+    bool hasRenderPass(RenderPass pass) const override;
+    void upload(gfx::UploadPass& pass) const override;
+    void render(PaintParameters& parameters) const override;
+    const std::string& getName() const override;
+#if MLN_DRAWABLE_RENDERER
+    void updateDebugDrawables(DebugLayerGroupMap&, PaintParameters&) const override;
+#endif
 };
 
 using RenderItems = std::vector<std::reference_wrapper<const RenderItem>>;
@@ -59,6 +96,7 @@ public:
     virtual ~RenderTree() = default;
     virtual void prepare() {}
     // Render items
+    virtual const std::set<LayerRenderItem>& getLayerRenderItemMap() const noexcept = 0;
     virtual RenderItems getLayerRenderItems() const = 0;
     virtual RenderItems getSourceRenderItems() const = 0;
     // Resources
@@ -67,12 +105,17 @@ public:
     // Parameters
     const RenderTreeParameters& getParameters() const { return *parameters; }
 
+    double getElapsedTime() const { return util::MonotonicTimer::now().count() - startTime; }
+
 protected:
-    RenderTree(std::unique_ptr<RenderTreeParameters> parameters_)
-        : parameters(std::move(parameters_)) {
+    RenderTree(std::unique_ptr<RenderTreeParameters> parameters_, double startTime_)
+        : parameters(std::move(parameters_)),
+          startTime(startTime_) {
         assert(parameters);
     }
     std::unique_ptr<RenderTreeParameters> parameters;
+
+    double startTime;
 };
 
 } // namespace mbgl

@@ -2,9 +2,7 @@
 
 #include <mbgl/layermanager/background_layer_factory.hpp>
 #include <mbgl/layermanager/circle_layer_factory.hpp>
-#ifdef MBGL_RENDER_BACKEND_OPENGL
-#include <mbgl/gl/custom_layer_factory.hpp>
-#endif
+#include <mbgl/layermanager/custom_layer_factory.hpp>
 #include <mbgl/layermanager/fill_extrusion_layer_factory.hpp>
 #include <mbgl/layermanager/fill_layer_factory.hpp>
 #include <mbgl/layermanager/heatmap_layer_factory.hpp>
@@ -14,6 +12,10 @@
 #include <mbgl/layermanager/raster_layer_factory.hpp>
 #include <mbgl/layermanager/symbol_layer_factory.hpp>
 #include <mbgl/util/logging.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/layermanager/custom_drawable_layer_factory.hpp>
+#endif
 
 #include <map>
 #include <memory>
@@ -63,12 +65,18 @@ LayerManagerDefault::LayerManagerDefault() {
 #if !defined(MBGL_LAYER_HEATMAP_DISABLE_ALL)
     addLayerType(std::make_unique<HeatmapLayerFactory>());
 #endif
-#ifdef MBGL_RENDER_BACKEND_OPENGL
+#ifdef MLN_RENDER_BACKEND_OPENGL
 #if !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
     addLayerType(std::make_unique<CustomLayerFactory>());
 #endif
 #if !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
     addLayerType(std::make_unique<LocationIndicatorLayerFactory>());
+#endif
+#endif
+
+#if MLN_DRAWABLE_RENDERER
+#if !defined(MLN_LAYER_CUSTOM_DRAWABLE_DISABLE_ALL)
+    addLayerType(std::make_unique<CustomDrawableLayerFactory>());
 #endif
 #endif
 }

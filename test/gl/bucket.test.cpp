@@ -1,3 +1,5 @@
+#if MLN_RENDER_BACKEND_OPENGL
+
 #include <mbgl/test/util.hpp>
 #include <mbgl/test/stub_geometry_tile_feature.hpp>
 
@@ -67,7 +69,7 @@ TEST(Buckets, CircleBucket) {
     ASSERT_TRUE(bucket.needsUpload());
 
     auto commandEncoder = context.createCommandEncoder();
-    auto uploadPass = commandEncoder->createUploadPass("upload");
+    auto uploadPass = commandEncoder->createUploadPass("upload", backend.getDefaultRenderable());
     bucket.upload(*uploadPass);
     ASSERT_TRUE(bucket.hasData());
     ASSERT_FALSE(bucket.needsUpload());
@@ -94,7 +96,7 @@ TEST(Buckets, FillBucket) {
     ASSERT_TRUE(bucket.needsUpload());
 
     auto commandEncoder = context.createCommandEncoder();
-    auto uploadPass = commandEncoder->createUploadPass("upload");
+    auto uploadPass = commandEncoder->createUploadPass("upload", backend.getDefaultRenderable());
     bucket.upload(*uploadPass);
     ASSERT_FALSE(bucket.needsUpload());
 }
@@ -130,7 +132,7 @@ TEST(Buckets, LineBucket) {
     ASSERT_TRUE(bucket.needsUpload());
 
     auto commandEncoder = context.createCommandEncoder();
-    auto uploadPass = commandEncoder->createUploadPass("upload");
+    auto uploadPass = commandEncoder->createUploadPass("upload", backend.getDefaultRenderable());
     bucket.upload(*uploadPass);
     ASSERT_FALSE(bucket.needsUpload());
 }
@@ -188,7 +190,7 @@ TEST(Buckets, SymbolBucket) {
     ASSERT_TRUE(bucket.needsUpload());
 
     auto commandEncoder = context.createCommandEncoder();
-    auto uploadPass = commandEncoder->createUploadPass("upload");
+    auto uploadPass = commandEncoder->createUploadPass("upload", backend.getDefaultRenderable());
     bucket.upload(*uploadPass);
     ASSERT_FALSE(bucket.needsUpload());
 }
@@ -206,7 +208,7 @@ TEST(Buckets, RasterBucket) {
     ASSERT_TRUE(bucket.needsUpload());
 
     auto commandEncoder = context.createCommandEncoder();
-    auto uploadPass = commandEncoder->createUploadPass("upload");
+    auto uploadPass = commandEncoder->createUploadPass("upload", backend.getDefaultRenderable());
     bucket.upload(*uploadPass);
     ASSERT_FALSE(bucket.needsUpload());
 
@@ -380,3 +382,5 @@ TEST(Buckets, RasterBucketMaskComplex) {
     expectedSegments.emplace_back(0, 0, 24, 36);
     EXPECT_EQ(expectedSegments, bucket.segments);
 }
+
+#endif

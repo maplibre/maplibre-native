@@ -13,11 +13,11 @@ namespace expression {
 class Literal : public Expression {
 public:
     Literal(const Value& value_)
-        : Expression(Kind::Literal, typeOf(value_)),
+        : Expression(Kind::Literal, typeOf(value_), Dependency::None),
           value(value_) {}
 
     Literal(const type::Array& type_, std::vector<Value> value_)
-        : Expression(Kind::Literal, type_),
+        : Expression(Kind::Literal, type_, Dependency::None),
           value(std::move(value_)) {}
 
     EvaluationResult evaluate(const EvaluationContext&) const override { return value; }

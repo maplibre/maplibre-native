@@ -64,8 +64,13 @@
     if (path) {
         std::string basePath = std::string([path UTF8String]);
         self.testStatus = self.runner->startTest(basePath) ? YES : NO;
+#if MLN_RENDER_BACKEND_METAL
+        self.styleResultPath =  [path stringByAppendingPathComponent:@"/ios-metal-render-test-runner-style.html"];
+        self.metricResultPath =  [path stringByAppendingPathComponent:@"/ios-metal-render-test-runner-metrics.html"];
+#else
         self.styleResultPath =  [path stringByAppendingPathComponent:@"/ios-render-test-runner-style.html"];
         self.metricResultPath =  [path stringByAppendingPathComponent:@"/ios-render-test-runner-metrics.html"];
+#endif
 
         BOOL fileFound = [fileManager fileExistsAtPath: self.styleResultPath];
         if (fileFound == NO) {

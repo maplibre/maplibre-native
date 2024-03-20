@@ -47,7 +47,7 @@ FOUNDATION_EXPORT MLN_EXPORT const unsigned char MapboxVersionString[];
 #import "MLNBackgroundStyleLayer.h"
 #import "MLNHeatmapStyleLayer.h"
 #import "MLNHillshadeStyleLayer.h"
-#import "MLNOpenGLStyleLayer.h"
+#import "MLNCustomStyleLayer.h"
 #import "MLNSource.h"
 #import "MLNTileSource.h"
 #import "MLNVectorTileSource.h"

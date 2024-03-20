@@ -62,7 +62,7 @@ ${precision} ${type} ${name} = u_${name};
     return source.replace(re, (match, operation, precision, type, name) => {
         const attrType = type === 'float' ? 'vec2' : 'vec4';
         const unpackType = name.match(/color/) ? 'color' : attrType;
-        
+
         if (pragmaMap[name]) {
             if (operation === 'define') {
                 return `#ifndef HAS_UNIFORM_u_${name}
@@ -140,7 +140,7 @@ ${precision} ${type} ${name} = u_${name};
     return source.replace(re, (match, operation, precision, type, name) => {
         const attrType = type === 'float' ? 'vec2' : 'vec4';
         const unpackType = name.match(/color/) ? 'color' : attrType;
-        
+
         if (pragmaMap[name]) {
             if (operation === 'define') {
                 return `#ifndef HAS_UNIFORM_u_${name}
@@ -202,9 +202,9 @@ const args = (() => {
     const parser = new ArgumentParser({
         description: "MapLibre Shader Tools"
     });
-    parser.add_argument("--root", "--r", {
-        help: "Directory root to place generated code",
-        required: true
+    parser.add_argument("--out", "--o", {
+        help: "Directory root to write generated code.",
+        required: false
     });
     parser.add_argument("--compress", "--c", {
         help: "Compress shader text with zlib and output byte arrays instead of strings",
@@ -220,8 +220,10 @@ const args = (() => {
 
 
 // Generate shader source headers
-const shaderRoot = "shaders/";
-const outputRoot = path.join((args.root ? args.root : ""), "include/mbgl/shaders");
+const root = path.dirname(__dirname);
+const outLocation = args.out ? args.out : root;
+const shaderRoot = path.join(root, "shaders");
+const outputRoot = path.join(outLocation, "include/mbgl/shaders");
 let generatedHeaders = [];
 let shaderNames = [];
 
@@ -278,7 +280,7 @@ fs.writeFileSync(path.join(outputRoot, "shader_manifest.hpp"),
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-#ifdef MBGL_RENDER_BACKEND_OPENGL
+#if !MLN_RENDER_BACKEND_METAL
 ${generatedHeaders.join('\n')}
 #endif
 `);

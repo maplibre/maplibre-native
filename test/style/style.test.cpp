@@ -82,14 +82,12 @@ TEST(Style, DuplicateSource) {
 TEST(Style, RemoveSourceInUse) {
     util::RunLoop loop;
 
-    auto log = new FixtureLogObserver();
-    Log::setObserver(std::unique_ptr<Log::Observer>(log));
+    FixtureLog log;
 
     auto fileSource = std::make_shared<StubFileSource>();
     Style::Impl style{fileSource, 1.0};
 
     style.loadJSON(util::read_file("test/fixtures/resources/style-unused-sources.json"));
-
     style.addSource(std::make_unique<VectorSource>("sourceId", "mptiler://tiles/contours"));
     style.addLayer(std::make_unique<LineLayer>("layerId", "sourceId"));
 
@@ -109,7 +107,7 @@ TEST(Style, RemoveSourceInUse) {
     Sleep(1000);
 #endif
 
-    EXPECT_EQ(log->count(logMessage), 1u);
+    EXPECT_EQ(log.count(logMessage), 1u);
 }
 
 TEST(Style, SourceImplsOrder) {

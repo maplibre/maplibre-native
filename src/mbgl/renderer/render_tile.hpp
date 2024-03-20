@@ -14,6 +14,11 @@
 namespace mbgl {
 
 namespace gfx {
+#if MLN_DRAWABLE_RENDERER
+class Texture2D;
+using Texture2DPtr = std::shared_ptr<Texture2D>;
+#endif
+
 class UploadPass;
 } // namespace gfx
 
@@ -25,6 +30,7 @@ class PaintParameters;
 class DebugBucket;
 class SourcePrepareParameters;
 class FeatureIndex;
+class TileAtlasTextures;
 class TileRenderData;
 
 class RenderTile final {
@@ -55,12 +61,35 @@ public:
     Bucket* getBucket(const style::Layer::Impl&) const;
     const LayerRenderData* getLayerRenderData(const style::Layer::Impl&) const;
     std::optional<ImagePosition> getPattern(const std::string& pattern) const;
-    const gfx::Texture& getGlyphAtlasTexture() const;
-    const gfx::Texture& getIconAtlasTexture() const;
+
+#if MLN_DRAWABLE_RENDERER
+    bool hasGlyphAtlasTexture() const;
+    const gfx::Texture2DPtr& getGlyphAtlasTexture() const;
+
+    bool hasIconAtlasTexture() const;
+    const gfx::Texture2DPtr& getIconAtlasTexture() const;
+
+    const std::shared_ptr<TileAtlasTextures>& getAtlasTextures() const;
+
+    bool getNeedsRendering() const { return needsRendering; };
+#else
+    gfx::TextureBinding getGlyphAtlasTextureBinding(gfx::TextureFilterType) const;
+    gfx::TextureBinding getIconAtlasTextureBinding(gfx::TextureFilterType) const;
+
+    const gfx::Texture* getGlyphAtlasTexture() const;
+    const gfx::Texture* getIconAtlasTexture() const;
+#endif
 
     void upload(gfx::UploadPass&) const;
     void prepare(const SourcePrepareParameters&);
     void finishRender(PaintParameters&) const;
+
+    static mat4 translateVtxMatrix(const UnwrappedTileID& id,
+                                   const mat4& tileMatrix,
+                                   const std::array<float, 2>& translation,
+                                   style::TranslateAnchorType anchor,
+                                   const TransformState& state,
+                                   bool inViewportPixelUnits);
 
     mat4 translateVtxMatrix(const mat4& tileMatrix,
                             const std::array<float, 2>& translation,

@@ -1,3 +1,4 @@
+#if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/test/util.hpp>
 
 #include <mbgl/gfx/backend_scope.hpp>
@@ -66,3 +67,5 @@ TEST(GLObject, Store) {
     context.reset();
     EXPECT_TRUE(context.empty());
 }
+
+#endif

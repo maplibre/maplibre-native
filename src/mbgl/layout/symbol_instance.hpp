@@ -113,7 +113,6 @@ public:
     std::array<float, 2> textOffset;
     std::array<float, 2> iconOffset;
     std::u16string key;
-    bool isDuplicate;
     std::optional<size_t> placedRightTextIndex;
     std::optional<size_t> placedCenterTextIndex;
     std::optional<size_t> placedLeftTextIndex;

@@ -8,7 +8,6 @@
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/headless_frontend.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/gl/context.hpp>
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/math/log2.hpp>
 #include <mbgl/renderer/renderer.hpp>
@@ -21,6 +20,7 @@
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layers/background_layer.hpp>
+#include <mbgl/style/layers/fill_layer.hpp>
 #include <mbgl/style/layers/raster_layer.hpp>
 #include <mbgl/style/layers/symbol_layer.hpp>
 #include <mbgl/style/sources/custom_geometry_source.hpp>
@@ -33,6 +33,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/io.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/util/run_loop.hpp>
 
 #include <atomic>
@@ -1450,11 +1451,14 @@ TEST(Map, KeepRenderData) {
     test.map.getStyle().loadURL("maptiler://maps/streets");
     const int iterations = 3;
     const int resourcesCount = 4 /*tiles*/;
+
+    requestsCount = 0;
     // Keep render data.
     for (int i = 1; i <= iterations; ++i) {
         test.frontend.render(test.map);
         EXPECT_EQ(resourcesCount, requestsCount);
     }
+
     requestsCount = 0;
     // Clear render data.
     for (int i = 1; i <= iterations; ++i) {
@@ -1599,4 +1603,40 @@ TEST(Map, ObserveShaderRegistration) {
     observedRegistry = false;
     test.frontend.render(test.map);
     EXPECT_EQ(observedRegistry, false);
+}
+
+TEST(Map, StencilOverflow) {
+    MapTest<> test;
+
+    auto& style = test.map.getStyle();
+    style.loadJSON("{}");
+
+    // Create a tile source with small tiles that produces enough tiles to
+    // exceed the stencil ID limit and causes a clearing of the stencil buffer.
+    CustomGeometrySource::Options options;
+    options.tileOptions.tileSize = util::tileSize_I / 32;
+    options.fetchTileFunction = [&](const CanonicalTileID& tileID) {
+        if (auto* customSrc = static_cast<CustomGeometrySource*>(style.getSource("custom"))) {
+            customSrc->setTileData(tileID, {});
+        }
+    };
+
+    style.addSource(std::make_unique<CustomGeometrySource>("custom", std::move(options)));
+    style.addLayer(std::make_unique<style::FillLayer>("fill", "custom"));
+
+    test.map.jumpTo(CameraOptions().withZoom(5));
+    auto result = test.frontend.render(test.map);
+
+    // In drawable builds, no drawables are built because no bucket/tiledata is available.
+#if MLN_DRAWABLE_RENDERER
+    ASSERT_LE(0, result.stats.stencilUpdates);
+#else
+    ASSERT_LT(0, result.stats.stencilClears);
+#endif // MLN_DRAWABLE_RENDERER
+
+#if !defined(NDEBUG)
+    Log::Info(Event::General, result.stats.toString("\n"));
+#endif // !defined(NDEBUG)
+
+    // TODO: confirm that the stencil masking actually worked
 }

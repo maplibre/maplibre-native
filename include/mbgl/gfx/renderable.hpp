@@ -16,9 +16,17 @@ public:
     virtual ~RenderableResource() = default;
     RenderableResource(const RenderableResource&) = delete;
     RenderableResource& operator=(const RenderableResource&) = delete;
+
+    virtual void bind() = 0;
 };
 
 class Renderable {
+public:
+    enum class SwapBehaviour {
+        NoFlush,
+        Flush
+    };
+
 protected:
     Renderable(const Size size_, std::unique_ptr<RenderableResource> resource_)
         : size(size_),
@@ -35,6 +43,8 @@ public:
     }
 
     virtual void wait() {}
+
+    bool operator!=(const Renderable& other) const { return resource.get() != other.resource.get(); }
 
 protected:
     Size size;

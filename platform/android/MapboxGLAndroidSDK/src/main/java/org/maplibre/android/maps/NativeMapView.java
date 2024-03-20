@@ -1026,6 +1026,11 @@ final class NativeMapView implements NativeMap {
     nativeTriggerRepaint();
   }
 
+  @Override
+  public void setSwapBehaviorFlush(boolean flush) {
+    mapRenderer.setSwapBehaviorFlush(flush);
+  }
+
   @NonNull
   @Override
   public RectF getDensityDependantRectangle(final RectF rectangle) {
@@ -1091,9 +1096,9 @@ final class NativeMapView implements NativeMap {
   }
 
   @Keep
-  private void onDidFinishRenderingFrame(boolean fully) {
+  private void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime) {
     if (stateCallback != null) {
-      stateCallback.onDidFinishRenderingFrame(fully);
+      stateCallback.onDidFinishRenderingFrame(fully, frameEncodingTime, frameRenderingTime);
     }
   }
 
@@ -1581,7 +1586,7 @@ final class NativeMapView implements NativeMap {
 
     void onWillStartRenderingFrame();
 
-    void onDidFinishRenderingFrame(boolean fully);
+    void onDidFinishRenderingFrame(boolean fully, double frameEncodingTime, double frameRenderingTime);
 
     void onWillStartRenderingMap();
 

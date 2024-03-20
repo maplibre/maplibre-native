@@ -5,23 +5,10 @@ namespace style {
 
 PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expression> expression_)
     : expression(std::move(expression_)),
-      zoomCurve(expression::findZoomCurveChecked(expression.get())) {
-    isZoomConstant_ = expression::isZoomConstant(*expression);
-    isFeatureConstant_ = expression::isFeatureConstant(*expression);
-    isRuntimeConstant_ = expression::isRuntimeConstant(*expression);
-}
-
-bool PropertyExpressionBase::isZoomConstant() const noexcept {
-    return isZoomConstant_;
-}
-
-bool PropertyExpressionBase::isFeatureConstant() const noexcept {
-    return isFeatureConstant_;
-}
-
-bool PropertyExpressionBase::isRuntimeConstant() const noexcept {
-    return isRuntimeConstant_;
-}
+      isZoomConstant_(expression::isZoomConstant(*expression)),
+      isFeatureConstant_(expression::isFeatureConstant(*expression)),
+      isRuntimeConstant_(expression::isRuntimeConstant(*expression)),
+      zoomCurve(isZoomConstant_ ? nullptr : expression::findZoomCurveChecked(*expression)) {}
 
 float PropertyExpressionBase::interpolationFactor(const Range<float>& inputLevels,
                                                   const float inputValue) const noexcept {

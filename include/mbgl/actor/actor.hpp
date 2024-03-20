@@ -71,7 +71,7 @@ public:
     ActorRef<std::decay_t<Object>> self() { return parent.self(); }
 
 private:
-    std::shared_ptr<Scheduler> retainer;
+    const std::shared_ptr<Scheduler> retainer;
     AspiringActor<Object> parent;
     EstablishedActor<Object> target;
 };

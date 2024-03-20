@@ -31,8 +31,7 @@ bool hasTokens(const std::string& source) {
     while (pos != end) {
         auto brace = std::find(pos, end, '{');
         if (brace == end) return false;
-        for (brace++; brace != end && tokenReservedChars.find(*brace) == std::string::npos; brace++)
-            ;
+        for (brace++; brace != end && tokenReservedChars.find(*brace) == std::string::npos; brace++);
         if (brace != end && *brace == '}') {
             return true;
         }
@@ -65,8 +64,7 @@ std::unique_ptr<Expression> convertTokenStringToExpression(const std::string& so
         }
         pos = brace;
         if (pos != end) {
-            for (brace++; brace != end && tokenReservedChars.find(*brace) == std::string::npos; brace++)
-                ;
+            for (brace++; brace != end && tokenReservedChars.find(*brace) == std::string::npos; brace++);
             if (brace != end && *brace == '}') {
                 inputs.push_back(get(literal(std::string(pos + 1, brace))));
                 pos = brace + 1;

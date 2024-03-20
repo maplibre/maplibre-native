@@ -52,7 +52,9 @@ FillExtrusionBucket::FillExtrusionBucket(
     }
 }
 
-FillExtrusionBucket::~FillExtrusionBucket() = default;
+FillExtrusionBucket::~FillExtrusionBucket() {
+    sharedVertices->release();
+}
 
 void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
                                      const GeometryCollection& geometry,
@@ -149,7 +151,9 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
 
         for (std::size_t i = 0; i < nIndices; i += 3) {
             // Counter-Clockwise winding order.
-            triangles.emplace_back(flatIndices[indices[i]], flatIndices[indices[i + 2]], flatIndices[indices[i + 1]]);
+            triangles.emplace_back(static_cast<uint16_t>(flatIndices[indices[i]]),
+                                   static_cast<uint16_t>(flatIndices[indices[i + 2]]),
+                                   static_cast<uint16_t>(flatIndices[indices[i + 1]]));
         }
 
         triangleSegment.vertexLength += totalVertices;
@@ -167,7 +171,8 @@ void FillExtrusionBucket::addFeature(const GeometryTileFeature& feature,
     }
 }
 
-void FillExtrusionBucket::upload(gfx::UploadPass& uploadPass) {
+void FillExtrusionBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
+#if MLN_LEGACY_RENDERER
     if (!uploaded) {
         vertexBuffer = uploadPass.createVertexBuffer(std::move(vertices));
         indexBuffer = uploadPass.createIndexBuffer(std::move(triangles));
@@ -176,6 +181,7 @@ void FillExtrusionBucket::upload(gfx::UploadPass& uploadPass) {
     for (auto& pair : paintPropertyBinders) {
         pair.second.upload(uploadPass);
     }
+#endif // MLN_LEGACY_RENDERER
 
     uploaded = true;
 }

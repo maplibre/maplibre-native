@@ -1,17 +1,31 @@
 #include <mbgl/gl/context.hpp>
+
+#include <mbgl/gfx/shader_registry.hpp>
+#include <mbgl/gl/command_encoder.hpp>
+#include <mbgl/gl/defines.hpp>
+#include <mbgl/gl/draw_scope_resource.hpp>
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/renderer_backend.hpp>
-#include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gl/renderbuffer_resource.hpp>
-#include <mbgl/gl/draw_scope_resource.hpp>
+#include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gl/texture.hpp>
 #include <mbgl/gl/offscreen_texture.hpp>
-#include <mbgl/gl/command_encoder.hpp>
 #include <mbgl/gl/debugging_extension.hpp>
-#include <mbgl/gl/defines.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/thread_pool.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gl/drawable_gl.hpp>
+#include <mbgl/gl/drawable_gl_builder.hpp>
+#include <mbgl/gl/layer_group_gl.hpp>
+#include <mbgl/gl/uniform_buffer_gl.hpp>
+#include <mbgl/gl/texture2d.hpp>
+#include <mbgl/renderer/render_target.hpp>
+#include <mbgl/shaders/gl/shader_program_gl.hpp>
+#endif
 
 #include <cstring>
 #include <iterator>
@@ -50,20 +64,60 @@ static_assert(underlying_type(UniformDataType::FloatMat4) == GL_FLOAT_MAT4, "Ope
 static_assert(underlying_type(UniformDataType::Sampler2D) == GL_SAMPLER_2D, "OpenGL type mismatch");
 static_assert(underlying_type(UniformDataType::SamplerCube) == GL_SAMPLER_CUBE, "OpenGL type mismatch");
 
+namespace {
+GLint getMaxVertexAttribs() {
+    GLint value = 0;
+    MBGL_CHECK_ERROR(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &value));
+    return value;
+}
+} // namespace
+
 Context::Context(RendererBackend& backend_)
-    : gfx::Context([] {
-          GLint value;
-          MBGL_CHECK_ERROR(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &value));
-          return value;
-      }()),
-      backend(backend_),
-      stats() {}
+    : gfx::Context(/*maximumVertexBindingCount=*/getMaxVertexAttribs()),
+      backend(backend_) {
+#if MLN_DRAWABLE_RENDERER
+    uboAllocator = std::make_unique<gl::UniformBufferAllocator>();
+#endif
+}
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
+        Scheduler::GetBackground()->runRenderJobs();
+
         reset();
+#if !defined(NDEBUG)
+        Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
+#endif
         assert(stats.isZero());
     }
+}
+
+void Context::beginFrame() {
+    Scheduler::GetBackground()->runRenderJobs();
+
+#if MLN_DRAWABLE_RENDERER
+    frameInFlightFence = std::make_shared<gl::Fence>();
+
+    // Run allocator defragmentation on this frame interval.
+    constexpr auto defragFreq = 4;
+
+    if (frameNum == defragFreq) {
+        uboAllocator->defragment(frameInFlightFence);
+        frameNum = 0;
+    } else {
+        frameNum++;
+    }
+#endif
+}
+
+void Context::endFrame() {
+#if MLN_DRAWABLE_RENDERER
+    if (!frameInFlightFence) {
+        return;
+    }
+
+    frameInFlightFence->insert();
+#endif
 }
 
 void Context::initializeExtensions(const std::function<gl::ProcAddress(const char*)>& getProcAddress) {
@@ -410,6 +464,30 @@ void Context::reset() {
     performCleanup();
 }
 
+#if MLN_DRAWABLE_RENDERER
+void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {
+    // Reset GL state to a known state so the CustomLayer always has a clean slate.
+    bindVertexArray = value::BindVertexArray::Default;
+    setDepthMode(depthMode);
+    setStencilMode(gfx::StencilMode::disabled());
+    setColorMode(colorMode);
+    setCullFaceMode(gfx::CullFaceMode::disabled());
+}
+
+bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
+                                           const void* data,
+                                           std::size_t size,
+                                           bool persistent) {
+    if (buffer) {
+        buffer->update(data, size);
+        return false;
+    } else {
+        buffer = createUniformBuffer(data, size, persistent);
+        return true;
+    }
+}
+#endif
+
 void Context::setDirtyState() {
     // Note: does not set viewport/scissorTest/bindFramebuffer to dirty
     // since they are handled separately in the view object.
@@ -417,7 +495,9 @@ void Context::setDirtyState() {
     stencilMask.setDirty();
     stencilTest.setDirty();
     stencilOp.setDirty();
+#if MLN_RENDER_BACKEND_OPENGL
     depthRange.setDirty();
+#endif
     depthMask.setDirty();
     depthTest.setDirty();
     depthFunc.setDirty();
@@ -444,6 +524,57 @@ void Context::setDirtyState() {
     bindVertexArray.setDirty();
     globalVertexArrayState.setDirty();
 }
+
+#if MLN_DRAWABLE_RENDERER
+gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
+    return std::make_unique<gl::DrawableGLBuilder>(std::move(name));
+}
+
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool /*persistent*/) {
+    return std::make_shared<gl::UniformBufferGL>(data, size, *uboAllocator);
+}
+
+gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
+    auto shaderGroup = shaders.getShaderGroup(name);
+    if (!shaderGroup) {
+        return nullptr;
+    }
+    return std::static_pointer_cast<gfx::ShaderProgramBase>(shaderGroup->getOrCreateShader(*this, {}));
+}
+
+TileLayerGroupPtr Context::createTileLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+    return std::make_shared<TileLayerGroupGL>(layerIndex, initialCapacity, std::move(name));
+}
+
+LayerGroupPtr Context::createLayerGroup(int32_t layerIndex, std::size_t initialCapacity, std::string name) {
+    return std::make_shared<LayerGroupGL>(layerIndex, initialCapacity, std::move(name));
+}
+
+gfx::Texture2DPtr Context::createTexture2D() {
+    return std::make_shared<gl::Texture2D>(*this);
+}
+
+RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
+    return std::make_shared<RenderTarget>(*this, size, type);
+}
+
+Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
+    auto fbo = createFramebuffer();
+    bindFramebuffer = fbo;
+    MBGL_CHECK_ERROR(glFramebufferTexture2D(GL_FRAMEBUFFER,
+                                            GL_COLOR_ATTACHMENT0,
+                                            GL_TEXTURE_2D,
+                                            static_cast<const gl::Texture2D&>(color).getTextureID(),
+                                            0));
+    checkFramebuffer();
+    return {color.getSize(), std::move(fbo)};
+}
+
+gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
+    return std::make_shared<VertexAttributeArrayGL>();
+}
+
+#endif
 
 void Context::clear(std::optional<mbgl::Color> color, std::optional<float> depth, std::optional<int32_t> stencil) {
     GLbitfield mask = 0;
@@ -491,12 +622,16 @@ void Context::setDepthMode(const gfx::DepthMode& depth) {
         // https://github.com/mapbox/mapbox-gl-native/issues/9164
         depthFunc = depth.func;
         depthMask = depth.mask;
+#if MLN_RENDER_BACKEND_OPENGL
         depthRange = depth.range;
+#endif
     } else {
         depthTest = true;
         depthFunc = depth.func;
         depthMask = depth.mask;
+#if MLN_RENDER_BACKEND_OPENGL
         depthRange = depth.range;
+#endif
     }
 }
 
@@ -536,17 +671,15 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
     return std::make_unique<gl::CommandEncoder>(*this);
 }
 
-gfx::RenderingStats& Context::renderingStats() {
-    return stats;
-}
-
-const gfx::RenderingStats& Context::renderingStats() const {
-    return stats;
-}
-
 void Context::finish() {
     MBGL_CHECK_ERROR(glFinish());
 }
+
+#if MLN_DRAWABLE_RENDERER
+std::shared_ptr<gl::Fence> Context::getCurrentFrameFence() const {
+    return frameInFlightFence;
+}
+#endif
 
 void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::size_t indexLength) {
     switch (drawMode.type) {
@@ -573,10 +706,10 @@ void Context::performCleanup() {
     // TODO: Find a better way to unbind VAOs after we're done with them without
     // introducing unnecessary bind(0)/bind(N) sequences.
     {
-        activeTextureUnit = 1;
-        texture[1] = 0;
-        activeTextureUnit = 0;
-        texture[0] = 0;
+        for (auto i = 0; i < gfx::MaxActiveTextureUnits; i++) {
+            activeTextureUnit = i;
+            texture[i] = 0;
+        }
 
         bindVertexArray = 0;
     }
@@ -670,6 +803,8 @@ void Context::visualizeDepthBuffer([[maybe_unused]] const float depthRangeSize) 
 void Context::clearStencilBuffer(const int32_t bits) {
     MBGL_CHECK_ERROR(glClearStencil(bits));
     MBGL_CHECK_ERROR(glClear(GL_STENCIL_BUFFER_BIT));
+
+    stats.stencilClears++;
 }
 
 } // namespace gl

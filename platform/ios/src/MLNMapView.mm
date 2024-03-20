@@ -12,7 +12,7 @@
 #include <mbgl/style/style.hpp>
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/transition_options.hpp>
-#include <mbgl/gl/custom_layer.hpp>
+#include <mbgl/style/layers/custom_layer.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/math/wrap.hpp>
 #include <mbgl/util/client_options.hpp>
@@ -1131,7 +1131,7 @@ public:
 - (CGSize)sizeForOrnament:(UIView *)view
               constraints:(NSMutableArray *)constraints {
     // avoid regenerating size constraints
-    CGSize size;
+    CGSize size = view.bounds.size;
     if(constraints && constraints.count > 0) {
         for (NSLayoutConstraint * constraint in constraints) {
             if([constraint.identifier isEqualToString:@"width"]) {
@@ -1142,10 +1142,7 @@ public:
             }
         }
     }
-    else {
-        size = view.bounds.size;
-    }
-    
+
     return size;
 }
 
@@ -2698,7 +2695,6 @@ public:
     currentCameraOptions.anchor = anchor;
     MLNCoordinateBounds bounds = MLNCoordinateBoundsFromLatLngBounds(self.mbglMap.latLngBoundsForCamera(currentCameraOptions));
     
-    
     return [self cameraThatFitsCoordinateBounds:bounds];
 }
 
@@ -2866,7 +2862,7 @@ public:
         }
     }
 
-    NSString *actionSheetTitle = NSLocalizedStringWithDefaultValue(@"SDK_NAME", nil, nil, @"Mapbox Maps SDK for iOS", @"Action sheet title");
+    NSString *actionSheetTitle = NSLocalizedStringWithDefaultValue(@"SDK_NAME", nil, nil, @"MapLibre Native for iOS", @"Action sheet title");
     UIAlertController *attributionController = [UIAlertController alertControllerWithTitle:actionSheetTitle
                                                                                    message:nil
                                                                             preferredStyle:UIAlertControllerStyleActionSheet];
@@ -3835,23 +3831,6 @@ static void *windowScreenContext = &windowScreenContext;
 {
     MLNLogDebug(@"Setting minimumZoomLevel: %f", minimumZoomLevel);
     self.mbglMap.setBounds(mbgl::BoundOptions().withMinZoom(minimumZoomLevel));
-}
-
-
-
-- (void)clearLatLnBounds
-{
-    mbgl::BoundOptions newBounds = mbgl::BoundOptions().withLatLngBounds(mbgl::LatLngBounds());
-    self.mbglMap.setBounds(newBounds);
-}
-
-- (void)setLatLngBounds:(MLNCoordinateBounds)latLngBounds
-{
-    mbgl::LatLng sw = {latLngBounds.sw.latitude, latLngBounds.sw.longitude};
-    mbgl::LatLng ne = {latLngBounds.ne.latitude, latLngBounds.ne.longitude};
-    mbgl::BoundOptions newBounds = mbgl::BoundOptions().withLatLngBounds(mbgl::LatLngBounds::hull(sw, ne));
-    
-    self.mbglMap.setBounds(newBounds);
 }
 
 - (double)minimumZoomLevel
@@ -6815,7 +6794,9 @@ static void *windowScreenContext = &windowScreenContext;
     }
 }
 
-- (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered {
+- (void)mapViewDidFinishRenderingFrameFullyRendered:(BOOL)fullyRendered
+                                  frameEncodingTime:(double)frameEncodingTime
+                                 frameRenderingTime:(double)frameRenderingTime {
     if (!_mbglMap)
     {
         return;
@@ -6827,7 +6808,11 @@ static void *windowScreenContext = &windowScreenContext;
         [self.style didChangeValueForKey:@"layers"];
     }
 
-    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:)])
+    if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:frameEncodingTime:frameRenderingTime:)])
+    {
+        [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered frameEncodingTime:frameEncodingTime frameRenderingTime:frameRenderingTime];
+    }
+    else if ([self.delegate respondsToSelector:@selector(mapViewDidFinishRenderingFrame:fullyRendered:)])
     {
         [self.delegate mapViewDidFinishRenderingFrame:self fullyRendered:fullyRendered];
     }
@@ -6989,17 +6974,14 @@ static void *windowScreenContext = &windowScreenContext;
 
         if (annotationView)
         {
-            CLLocationCoordinate2D coordinate = annotation.coordinate;
+            annotationView.center = MLNPointRounded([self convertCoordinate:annotationContext.annotation.coordinate toPointToView:self]);
+
             // Every so often (1 out of 1000 frames?) the mbgl query mechanism fails. This logic spot checks the
             // offscreenAnnotations values -- if they are actually still on screen then the view center is
             // moved and the enqueue operation is avoided. This allows us to keep the performance benefit of
             // using the mbgl query result. It also forces views that have just gone offscreen to be cleared
             // fully from view.
-            if (MLNCoordinateInCoordinateBounds(coordinate, coordinateBounds))
-            {
-                annotationView.center = [self convertCoordinate:annotationContext.annotation.coordinate toPointToView:self];
-            }
-            else
+            if (!MLNCoordinateInCoordinateBounds(annotation.coordinate, coordinateBounds))
             {
                 if (annotationView.layer.animationKeys.count > 0) {
                     continue;
@@ -7010,7 +6992,11 @@ static void *windowScreenContext = &windowScreenContext;
                 adjustedCenter.x = -CGRectGetWidth(self.frame) * 10.0;
                 annotationView.center = adjustedCenter;
 
-                [self enqueueAnnotationViewForAnnotationContext:annotationContext];
+                // Disable the offscreen annotation view recycling on Metal because of issue https://github.com/maplibre/maplibre-native/issues/2117
+                // TLDR: Metal view rendering stutter / freeze
+#if !MLN_RENDER_BACKEND_METAL
+                 [self enqueueAnnotationViewForAnnotationContext:annotationContext];
+#endif
             }
         }
     }
@@ -7340,6 +7326,10 @@ static void *windowScreenContext = &windowScreenContext;
     }
 
     return _annotationViewReuseQueueByIdentifier[identifier];
+}
+
+- (MLNBackendResource)backendResource {
+    return _mbglView->getObject();
 }
 
 @end

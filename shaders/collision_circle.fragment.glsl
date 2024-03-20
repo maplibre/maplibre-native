@@ -3,7 +3,7 @@ uniform float u_overscale_factor;
 in float v_placed;
 in float v_notUsed;
 in float v_radius;
-in vec2 v_extrude;
+in highp vec2 v_extrude;
 in vec2 v_extrude_scale;
 
 void main() {

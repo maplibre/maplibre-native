@@ -17,20 +17,21 @@
 
 namespace mbgl {
 
-class PaintParameters;
-class TransformState;
-class RenderTile;
-class RenderLayer;
-class RenderedQueryOptions;
-class SourceQueryOptions;
-class Tile;
-class RenderSourceObserver;
-class TileParameters;
 class CollisionIndex;
-class TransformParameters;
 class ImageManager;
 class ImageSourceRenderData;
+class PaintParameters;
+class RenderedQueryOptions;
 class RenderItem;
+class RenderLayer;
+class RenderSourceObserver;
+class RenderTile;
+class Scheduler;
+class SourceQueryOptions;
+class Tile;
+class TileParameters;
+class TransformParameters;
+class TransformState;
 
 namespace gfx {
 class UploadPass;
@@ -47,7 +48,7 @@ using RenderTiles = std::shared_ptr<const std::vector<std::reference_wrapper<con
 
 class RenderSource : protected TileObserver {
 public:
-    static std::unique_ptr<RenderSource> create(const Immutable<style::Source::Impl>&);
+    static std::unique_ptr<RenderSource> create(const Immutable<style::Source::Impl>&, std::shared_ptr<Scheduler>);
     ~RenderSource() override;
 
     bool isEnabled() const;

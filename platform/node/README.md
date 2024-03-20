@@ -8,10 +8,10 @@
 Binaries are available and downloaded during install for the following platforms:
 
 - Operating systems:
-  - Ubuntu 20.04 (amd64/arm64)
+  - Ubuntu 22.04 (amd64/arm64)
   - macOS 12 (amd64/arm64)
   - Windows (amd64)
-- Node.js 14, 16, 18
+- Node.js 16, 18, 20
 
 Run:
 
@@ -25,7 +25,6 @@ Further platforms might work [with additional libraries installed](https://githu
 
 ```
 npm test
-npm run test-suite
 ```
 
 ## Rendering a map tile

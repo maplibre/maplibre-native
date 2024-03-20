@@ -12,13 +12,11 @@ const style::LayerTypeInfo* HillshadeLayerFactory::getTypeInfo() const noexcept 
 
 std::unique_ptr<style::Layer> HillshadeLayerFactory::createLayer(const std::string& id,
                                                                  const style::conversion::Convertible& value) noexcept {
-    auto const source = getSource(value);
+    const auto source = getSource(value);
     if (!source) {
         return nullptr;
     }
-
-    std::unique_ptr<style::Layer> layer = std::unique_ptr<style::Layer>(new style::HillshadeLayer(id, *source));
-    return layer;
+    return std::unique_ptr<style::Layer>(new (std::nothrow) style::HillshadeLayer(id, *source));
 }
 
 std::unique_ptr<RenderLayer> HillshadeLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {

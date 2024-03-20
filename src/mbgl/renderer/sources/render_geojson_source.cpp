@@ -65,8 +65,9 @@ MAPBOX_ETERNAL_CONSTEXPR const auto extensionGetters =
 
 } // namespace
 
-RenderGeoJSONSource::RenderGeoJSONSource(Immutable<style::GeoJSONSource::Impl> impl_)
-    : RenderTileSource(std::move(impl_)) {}
+RenderGeoJSONSource::RenderGeoJSONSource(Immutable<style::GeoJSONSource::Impl> impl_,
+                                         std::shared_ptr<Scheduler> threadPool_)
+    : RenderTileSource(std::move(impl_), std::move(threadPool_)) {}
 
 RenderGeoJSONSource::~RenderGeoJSONSource() = default;
 

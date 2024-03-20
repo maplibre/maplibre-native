@@ -11,6 +11,7 @@
 #include <mbgl/style/style.hpp>
 #include <mbgl/renderer/render_light.hpp>
 
+#include <array>
 #include <string>
 
 namespace mbgl {
@@ -68,7 +69,7 @@ public:
         const auto factor = pow(2, 13);
 
         return LayoutVertex{{{p.x, p.y}},
-                            {{// Multiply normal vector components by 2^14 to pack them into
+                            {{// Multiply normal vector components by 2^13 to pack them into
                               // integers We pack a bool (`t`) into the x component indicating
                               // whether it is an upper or lower vertex
                               static_cast<int16_t>(floor(nx * factor) * 2 + t),
@@ -78,8 +79,12 @@ public:
                               static_cast<int16_t>(e)}}};
     }
 
+    static std::array<float, 3> lightColor(const EvaluatedLight&);
+    static std::array<float, 3> lightPosition(const EvaluatedLight&, const TransformState&);
+    static float lightIntensity(const EvaluatedLight&);
+
     static LayoutUniformValues layoutUniformValues(
-        mat4, const TransformState&, float opacity, const EvaluatedLight&, float verticalGradient);
+        const mat4&, const TransformState&, float opacity, const EvaluatedLight&, float verticalGradient);
 };
 
 class FillExtrusionPatternProgram final : public Program<FillExtrusionPatternProgram,
@@ -95,7 +100,7 @@ public:
 
     using Program::Program;
 
-    static LayoutUniformValues layoutUniformValues(mat4,
+    static LayoutUniformValues layoutUniformValues(const mat4&,
                                                    Size atlasSize,
                                                    const CrossfadeParameters&,
                                                    const UnwrappedTileID&,

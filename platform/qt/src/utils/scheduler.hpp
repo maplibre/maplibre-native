@@ -5,21 +5,25 @@
 
 #include <QObject>
 
+#include <condition_variable>
 #include <memory>
 #include <mutex>
 #include <queue>
 
-namespace QMapLibreGL {
+namespace QMapLibre {
 
 class Scheduler : public QObject, public mbgl::Scheduler {
     Q_OBJECT
 
 public:
     Scheduler();
-    virtual ~Scheduler();
+    ~Scheduler() override;
 
     // mbgl::Scheduler implementation.
-    void schedule(std::function<void()> scheduled) final;
+    void schedule(std::function<void()>&& function) final;
+
+    std::size_t waitForEmpty(std::chrono::milliseconds timeout) override;
+
     mapbox::base::WeakPtr<mbgl::Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
     void processEvents();
@@ -31,8 +35,10 @@ private:
     MBGL_STORE_THREAD(tid);
 
     std::mutex m_taskQueueMutex;
+    std::condition_variable cvEmpty;
+    std::atomic<std::size_t> pendingItems;
     std::queue<std::function<void()>> m_taskQueue;
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
 };
 
-} // namespace QMapLibreGL
+} // namespace QMapLibre

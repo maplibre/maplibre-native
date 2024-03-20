@@ -7,11 +7,12 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
-#include <string>
 #include <limits>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace mbgl {
-
 namespace style {
 
 /**
@@ -46,6 +47,9 @@ public:
 
     // Populates the given \a fontStack with fonts being used by the layer.
     virtual void populateFontStack(std::set<FontStack>& fontStack) const;
+
+    /// Collect the style dependencies for this layer
+    virtual expression::Dependency getDependencies() const noexcept { return expression::Dependency::None; }
 
     std::string id;
     std::string source;

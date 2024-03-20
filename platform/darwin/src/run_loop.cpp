@@ -1,6 +1,8 @@
-#include <mbgl/util/run_loop.hpp>
-#include <mbgl/util/async_task.hpp>
 #include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/async_task.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
+#include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/string.hpp>
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -43,6 +45,25 @@ void RunLoop::runOnce() {
 
 void RunLoop::stop() {
     invoke([&] { CFRunLoopStop(CFRunLoopGetCurrent()); });
+}
+
+std::size_t RunLoop::waitForEmpty(Milliseconds timeout) {
+    const auto startTime = mbgl::util::MonotonicTimer::now();
+    while (true) {
+        std::size_t remaining;
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            remaining = defaultQueue.size() + highPriorityQueue.size();
+        }
+
+        const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
+        const auto elapsedMillis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+        if (remaining == 0 || (Milliseconds::zero() < timeout && timeout <= elapsedMillis)) {
+            return remaining;
+        }
+
+        runOnce();
+    }
 }
 
 } // namespace util

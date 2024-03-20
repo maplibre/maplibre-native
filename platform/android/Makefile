@@ -211,9 +211,9 @@ run-android-ui-test-%: run-android-ui-test-arm-v7-%
 # Run Java Unit tests on the JVM of the development machine executing this
 .PHONY: run-android-unit-test
 run-android-unit-test:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:testDebugUnitTest --info
+	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:testLegacyDebugUnitTest --info
 run-android-unit-test-%:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:testDebugUnitTest  --info --tests "$*"
+	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapboxGLAndroidSDK:testLegacyDebugUnitTest --info --tests "$*"
 
 # Builds a release package of the Android SDK
 .PHONY: apackage
@@ -234,7 +234,7 @@ run-android-test-app-center:
 # Uploads the compiled Android SDK to Maven Central Staging
 .PHONY: run-android-publish
 run-android-publish:
-	$(MLN_ANDROID_GRADLE_SINGLE_JOB) -Pmapbox.abis=all :MapboxGLAndroidSDK:publishReleasePublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+	$(MLN_ANDROID_GRADLE_SINGLE_JOB)-Pmapbox.abis=all :MapboxGLAndroidSDK:publishReleasePublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
 
 # Dump system graphics information for the test app
 .PHONY: android-gfxinfo

@@ -1,12 +1,16 @@
+#import <AppKit/AppKit.h>
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class MLNMapView;
 @class MLNAnnotationImage;
+@class MLNMapCamera;
+@class MLNMapView;
 @class MLNPolygon;
 @class MLNPolyline;
 @class MLNShape;
+@class MLNStyle;
+@protocol MLNAnnotation;
 
 /**
  The `MLNMapViewDelegate` protocol defines a set of optional methods that you
@@ -150,6 +154,22 @@ NS_ASSUME_NONNULL_BEGIN
  @param mapView The map view that has just redrawn.
  */
 - (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView fullyRendered:(BOOL)fullyRendered;
+
+/**
+ Tells the delegate that the map view has just redrawn.
+
+ This method is called any time the map view needs to redraw due to a change in
+ the viewpoint or style property transition. This method may be called very
+ frequently, even moreso than `-mapViewRegionIsChanging:`. Therefore, your
+ implementation of this method should be as lightweight as possible to avoid
+ affecting performance.
+
+ @param mapView The map view that has just redrawn.
+ @param frameTimeNanos The time taken to render the frame, in nanoseconds
+ */
+- (void)mapViewDidFinishRenderingFrame:(MLNMapView *)mapView
+                         fullyRendered:(BOOL)fullyRendered
+                             frameTime:(double)frameTime;
 
 /**
  Tells the delegate that the map view is entering an idle state, and no more
