@@ -257,7 +257,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             const auto primitiveType = getPrimitiveType(mode.type);
             constexpr auto indexType = MTL::IndexType::IndexTypeUInt16;
             constexpr auto indexSize = sizeof(std::uint16_t);
-            constexpr NS::UInteger instanceCount = 1;
+            const NS::UInteger instanceCount = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
             constexpr NS::UInteger baseInstance = 0;
             const NS::UInteger indexOffset = static_cast<NS::UInteger>(indexSize *
                                                                        mlSegment.indexOffset); // in bytes, not indexes

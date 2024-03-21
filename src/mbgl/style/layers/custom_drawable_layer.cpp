@@ -387,17 +387,20 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
             }
 
             // instance data
-            struct VertexTriWideVecInstance { // TODO: alignment?
-                std::array<float, 3> center;
+            struct VertexTriWideVecInstance {
+                std::array<float, 4> center;
                 std::array<float, 4> color;
-                int prev;
-                int next;
+                int32_t prev;
+                int32_t next;
+                int64_t pad_;
             };
+            static_assert(sizeof(VertexTriWideVecInstance) == 48);
+            
             VertexTriWideVecInstance centerline[4]{
-                {{0.5, -0.5, 0}, {0}, -1, 1},
-                {{-0.5, -0.5, 0}, {0}, 0, 2},
-                {{0.0, +0.5, 0}, {0}, 1, 3},
-                {{0.0, 0.0, 0}, {0}, 2, -1},
+                {{0.5, -0.5, 0}, {3}, -1, 1, 0},
+                {{-0.5, -0.5, 0}, {3}, 0, 2, 0},
+                {{0.0, +0.5, 0}, {3}, 1, 3, 0},
+                {{0.0, 0.0, 0}, {3}, 2, -1, 0},
             };
 
             using InstanceVector = gfx::VertexVector<VertexTriWideVecInstance>;
@@ -464,14 +467,14 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
                 }
                 if (const auto& attr = instanceAttributes->set(idWideVectorInstancePrevious)) {
                     attr->setSharedRawData(sharedInstanceData,
-                                           offsetof(VertexTriWideVecInstance, center),
+                                           offsetof(VertexTriWideVecInstance, prev),
                                            /*vertexOffset=*/0,
                                            sizeof(VertexTriWideVecInstance),
                                            gfx::AttributeDataType::Int);
                 }
                 if (const auto& attr = instanceAttributes->set(idWideVectorInstanceNext)) {
                     attr->setSharedRawData(sharedInstanceData,
-                                           offsetof(VertexTriWideVecInstance, center),
+                                           offsetof(VertexTriWideVecInstance, next),
                                            /*vertexOffset=*/0,
                                            sizeof(VertexTriWideVecInstance),
                                            gfx::AttributeDataType::Int);
