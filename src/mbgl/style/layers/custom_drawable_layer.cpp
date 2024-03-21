@@ -395,7 +395,7 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
                 int64_t pad_;
             };
             static_assert(sizeof(VertexTriWideVecInstance) == 48);
-            
+
             VertexTriWideVecInstance centerline[4]{
                 {{0.5, -0.5, 0}, {3}, -1, 1, 0},
                 {{-0.5, -0.5, 0}, {3}, 0, 2, 0},
