@@ -145,11 +145,11 @@ Color GPUExpression::evaluateColor(const float zoom) const {
 
 PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expression> expression_) noexcept
     : expression(std::move(expression_)),
-      zoomCurve(expression->all(Dependency::Zoom) ? expression::findZoomCurveChecked(*expression) : nullptr),
+      zoomCurve(expression->has(Dependency::Zoom) ? expression::findZoomCurveChecked(*expression) : nullptr),
       useIntegerZoom_(false),
-      isZoomConstant_(expression->none(Dependency::Zoom)),
-      isFeatureConstant_(expression->none(Dependency::Feature)),
-      isRuntimeConstant_(expression->none(Dependency::Image)),
+      isZoomConstant_(!expression->has(Dependency::Zoom)),
+      isFeatureConstant_(!expression->has(Dependency::Feature)),
+      isRuntimeConstant_(!expression->has(Dependency::Image)),
       isGPUCapable_(checkGPUCapable(*expression, zoomCurve)) {
     assert(isZoomConstant_ == expression::isZoomConstant(*expression));
     assert(isFeatureConstant_ == expression::isFeatureConstant(*expression));

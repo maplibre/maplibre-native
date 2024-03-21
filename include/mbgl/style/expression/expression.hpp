@@ -4,6 +4,7 @@
 #include <mbgl/style/expression/type.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/tile/tile_id.hpp>
+#include <mbgl/util/bitmask_operations.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/variant.hpp>
@@ -204,28 +205,6 @@ enum class Dependency : uint32_t {
     MaskCount = 7,
     All = (1 << MaskCount) - 1,
 };
-inline constexpr static Dependency operator|(Dependency x, Dependency y) noexcept {
-    return bitmaskEnumUnion(x, y);
-}
-inline constexpr static Dependency operator&(Dependency x, Dependency y) noexcept {
-    return bitmaskEnumIntersection(x, y);
-}
-inline static Dependency& operator|=(Dependency& target, Dependency source) noexcept {
-    target = target | source;
-    return target;
-}
-/// @return true if any bits in `deps` are present in `term`
-inline constexpr bool any(const Dependency term, const Dependency deps = Dependency::All) {
-    return (term & deps) != Dependency::None;
-}
-/// @return true if all  bits in `deps` are present in `term`
-inline constexpr bool all(const Dependency term, const Dependency deps = Dependency::All) {
-    return (term & deps) == deps;
-}
-/// @return true if no bits in `deps` are present in `term`
-inline constexpr bool none(const Dependency term, const Dependency deps = Dependency::All) {
-    return (term & deps) == Dependency::None;
-}
 
 class Interpolate;
 class Step;
@@ -284,11 +263,7 @@ public:
     const Dependency dependencies;
 
     /// Test the expression's dependencies for any of one or more values
-    bool any(Dependency dep) const { return expression::any(dependencies, dep); }
-    /// Test the expression's dependencies for all of one or more values
-    bool all(Dependency dep) const { return expression::all(dependencies, dep); }
-    /// Test that expression's dependencies has none of one or more values
-    bool none(Dependency dep) const { return expression::none(dependencies, dep); }
+    bool has(Dependency dep) const { return (dependencies & dep); }
 
 protected:
     template <typename T>

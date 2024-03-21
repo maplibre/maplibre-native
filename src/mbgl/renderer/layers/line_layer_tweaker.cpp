@@ -41,7 +41,7 @@ auto LineLayerTweaker::evaluate([[maybe_unused]] const PaintParameters& paramete
 #if MLN_RENDER_BACKEND_METAL
     using PropertyIndexes = LinePaintProperties::Tuple<LinePaintProperties::PropertyTypes>;
     if (const auto& gpu = gpuExpressions[PropertyIndexes::getIndex<Property>()]) {
-        const float effectiveZoom = any(gpu->options, GPUOptions::IntegerZoom)
+        const float effectiveZoom = (gpu->options & GPUOptions::IntegerZoom)
                                         ? parameters.state.getIntegerZoom()
                                         : static_cast<float>(parameters.state.getZoom());
         auto gpuValue = gpu->template evaluate<typename Property::Type>(effectiveZoom);

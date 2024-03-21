@@ -36,15 +36,4 @@ public:
         return it == std::end(T##_names) ? std::optional<T>() : it->first;                             \
     }
 
-/// Generic union for `operator|` on bitmask enums
-template <typename T> // `is_scoped_enum` is c++23
-inline constexpr static std::enable_if_t<std::is_enum_v<T>, T> bitmaskEnumUnion(T x, T y) noexcept {
-    return T{static_cast<std::underlying_type_t<T>>(mbgl::underlying_type(x) | mbgl::underlying_type(y))};
-}
-/// Generic union for `operator&` on bitmask enums
-template <typename T>
-inline constexpr static std::enable_if_t<std::is_enum_v<T>, T> bitmaskEnumIntersection(T x, T y) noexcept {
-    return T{static_cast<std::underlying_type_t<T>>(mbgl::underlying_type(x) & mbgl::underlying_type(y))};
-}
-
 } // namespace mbgl

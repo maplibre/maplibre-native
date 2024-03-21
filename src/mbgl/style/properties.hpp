@@ -310,7 +310,7 @@ public:
             using Evaluator = typename P::EvaluatorType;
             const auto& property = this->template get<P>();
             const bool needEvaluate = parameters.layerChanged || parameters.hasCrossfade || property.hasTransition() ||
-                                      (parameters.zoomChanged && any(getDependencies(property), Dependency::Zoom));
+                                      (parameters.zoomChanged && (getDependencies(property) & Dependency::Zoom));
             return needEvaluate ? property.evaluate(Evaluator(parameters, P::defaultValue()), parameters.now)
                                 : oldResult;
         }

@@ -83,7 +83,7 @@ ZoomCurveOrError findZoomCurve(const expression::Expression& e) {
 }
 
 ZoomCurvePtr findZoomCurveChecked(const expression::Expression& e) {
-    if (e.none(Dependency::Zoom)) {
+    if (!e.has(Dependency::Zoom)) {
         return nullptr;
     }
     return findZoomCurve(e)->match(

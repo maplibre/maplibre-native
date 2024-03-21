@@ -254,8 +254,8 @@ ParseResult ParsingContext::parseLayerPropertyExpression(const Convertible& valu
     ParseResult parsed = parse(value, typeAnnotationOption);
 
     // If the expression is zoom-dependent, validate that we can resolve a zoom curve or treat it as an error
-    assert(!parsed || !*parsed || none((*parsed)->dependencies, Dependency::Zoom) == isZoomConstant(**parsed));
-    if (parsed && (*parsed)->any(Dependency::Zoom)) {
+    assert(!parsed || !*parsed || !((*parsed)->dependencies & Dependency::Zoom) == isZoomConstant(**parsed));
+    if (parsed && (*parsed)->has(Dependency::Zoom)) {
         if (const auto zoomCurve = findZoomCurve(**parsed)) {
             if (zoomCurve->is<ParsingError>()) {
                 error(zoomCurve->get<ParsingError>().message);
