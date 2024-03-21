@@ -92,13 +92,13 @@ struct alignas(16) SymbolComputeUBO {
 
     /*   8 */ std::array<float, 2> translation;
     
-    /*   4 */ double scale;
-    /*   4 */ double bearing;
-    /*   4 */ double zoom;
+    /*   4 */ float scale;
+    /*   4 */ float bearing;
+    /*   4 */ float zoom;
     /*   4 */ uint32_t width;
     /*   4 */ uint32_t height;
     /*   4 */ float camDist;
-    /*   4 */ double pitch;
+    /*   4 */ float pitch;
     
     /*   8 */ std::array<float, 2> texsize;
     /*   8 */ std::array<float, 2> texsize_icon;
