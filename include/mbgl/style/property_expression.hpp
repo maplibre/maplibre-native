@@ -5,6 +5,7 @@
 #include <mbgl/style/expression/interpolate.hpp>
 #include <mbgl/style/expression/step.hpp>
 #include <mbgl/style/expression/find_zoom_curve.hpp>
+#include <mbgl/util/bitmask_operations.hpp>
 #include <mbgl/util/range.hpp>
 
 #include <optional>
@@ -27,16 +28,6 @@ enum class GPUOptions : std::uint16_t {
     IntegerZoom = 1 << 0,
     Transitioning = 1 << 1,
 };
-inline constexpr static GPUOptions operator|(GPUOptions x, GPUOptions y) noexcept {
-    return bitmaskEnumUnion(x, y);
-}
-inline constexpr static GPUOptions operator&(GPUOptions x, GPUOptions y) noexcept {
-    return bitmaskEnumIntersection(x, y);
-}
-/// @return true if any bits in `deps` are present in `term`
-inline constexpr bool any(const GPUOptions term, const GPUOptions opts) {
-    return (term & opts) != GPUOptions::None;
-}
 
 struct GPUExpression;
 using UniqueGPUExpression = std::unique_ptr<const GPUExpression>;
