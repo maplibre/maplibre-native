@@ -1,9 +1,21 @@
 #pragma once
 
 #include <mbgl/shaders/layer_ubo.hpp>
+#include <mbgl/style/property_expression.hpp>
+#include <mbgl/util/bitmask_operations.hpp>
 
 namespace mbgl {
 namespace shaders {
+
+enum class LinePropertyMask : uint32_t {
+    None = 0,
+    Color = 1 << 0,
+    Opacity = 1 << 1,
+    Blur = 1 << 2,
+    Width = 1 << 3,
+    GapWidth = 1 << 4,
+    Offset = 1 << 5,
+};
 
 //
 // Line
@@ -29,7 +41,10 @@ struct alignas(16) LinePropertiesUBO {
     float gapwidth;
     float offset;
     float width;
-    float pad1, pad2, pad3;
+
+    LinePropertyMask expressionMask;
+
+    float pad1, pad2;
 };
 static_assert(sizeof(LinePropertiesUBO) % 16 == 0);
 
@@ -44,11 +59,22 @@ struct alignas(16) LineInterpolationUBO {
 };
 static_assert(sizeof(LineInterpolationUBO) % 16 == 0);
 
+struct alignas(16) LineExpressionUBO {
+    style::GPUExpression color;
+    style::GPUExpression blur;
+    style::GPUExpression opacity;
+    style::GPUExpression gapwidth;
+    style::GPUExpression offset;
+    style::GPUExpression width;
+};
+static_assert(sizeof(LineExpressionUBO) % 16 == 0);
+
 enum {
     idLineDynamicUBO,
     idLineUBO,
     idLinePropertiesUBO,
     idLineInterpolationUBO,
+    idLineExpressionUBO,
     lineUBOCount
 };
 

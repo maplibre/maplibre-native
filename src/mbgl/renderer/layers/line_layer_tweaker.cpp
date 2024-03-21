@@ -34,19 +34,30 @@ constexpr bool diff(Color actual, Color expected, float e = 1.0e-6) {
 }
 #endif // MLN_RENDER_BACKEND_METAL
 
+#if MLN_RENDER_BACKEND_METAL
+template <typename Result>
+std::optional<Result> LineLayerTweaker::gpuEvaluate(const LinePaintProperties::PossiblyEvaluated& evaluated,
+                                                    const PaintParameters& parameters,
+                                                    const std::size_t index) const {
+    if (const auto& gpu = gpuExpressions[index]) {
+        const float effectiveZoom = (gpu->options & GPUOptions::IntegerZoom)
+                                        ? parameters.state.getIntegerZoom()
+                                        : static_cast<float>(parameters.state.getZoom());
+        return gpu->template evaluate<Result>(effectiveZoom);
+    }
+    return {};
+}
+#endif // MLN_RENDER_BACKEND_METAL
+
 template <typename Property>
 auto LineLayerTweaker::evaluate([[maybe_unused]] const PaintParameters& parameters) const {
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
 
 #if MLN_RENDER_BACKEND_METAL
-    using PropertyIndexes = LinePaintProperties::Tuple<LinePaintProperties::PropertyTypes>;
-    if (const auto& gpu = gpuExpressions[PropertyIndexes::getIndex<Property>()]) {
-        const float effectiveZoom = (gpu->options & GPUOptions::IntegerZoom)
-                                        ? parameters.state.getIntegerZoom()
-                                        : static_cast<float>(parameters.state.getZoom());
-        auto gpuValue = gpu->template evaluate<typename Property::Type>(effectiveZoom);
-        assert(!diff(gpuValue, evaluated.get<Property>().constantOr(Property::defaultValue())));
-        return gpuValue;
+    constexpr auto index = propertyIndex<Property>();
+    if (auto gpuValue = gpuEvaluate<typename Property::Type>(evaluated, parameters, index)) {
+        assert(!diff(*gpuValue, evaluated.get<Property>().constantOr(Property::defaultValue())));
+        return *gpuValue;
     }
 #endif // MLN_RENDER_BACKEND_METAL
 
@@ -70,15 +81,45 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         propertiesUpdated = false;
     }
 
+#if MLN_RENDER_BACKEND_METAL
+    const auto getExpressionBuffer = [&]() {
+        if (!expressionUniformBuffer || gpuExpressionsUpdated) {
+            LineExpressionUBO exprUBO = {
+                /* color = */ gpuExpressions[propertyIndex<LineColor>()].get(),
+                /* blur = */ gpuExpressions[propertyIndex<LineBlur>()].get(),
+                /* opacity = */ gpuExpressions[propertyIndex<LineOpacity>()].get(),
+                /* gapwidth = */ gpuExpressions[propertyIndex<LineGapWidth>()].get(),
+                /* offset = */ gpuExpressions[propertyIndex<LineOffset>()].get(),
+                /* width = */ gpuExpressions[propertyIndex<LineWidth>()].get(),
+            };
+            context.emplaceOrUpdateUniformBuffer(expressionUniformBuffer, &exprUBO);
+            gpuExpressionsUpdated = false;
+        }
+        return expressionUniformBuffer;
+    };
+#endif // MLN_RENDER_BACKEND_METAL
+
     const auto getLinePropsBuffer = [&]() {
         if (!linePropertiesBuffer || simplePropertiesUpdated) {
+#if MLN_RENDER_BACKEND_METAL
+            const LinePropertyMask expressionMask =
+                (gpuExpressions[propertyIndex<LineColor>()] ? LinePropertyMask::Color : LinePropertyMask::None) |
+                (gpuExpressions[propertyIndex<LineBlur>()] ? LinePropertyMask::Blur : LinePropertyMask::None) |
+                (gpuExpressions[propertyIndex<LineOpacity>()] ? LinePropertyMask::Opacity : LinePropertyMask::None) |
+                (gpuExpressions[propertyIndex<LineGapWidth>()] ? LinePropertyMask::GapWidth : LinePropertyMask::None) |
+                (gpuExpressions[propertyIndex<LineOffset>()] ? LinePropertyMask::Offset : LinePropertyMask::None) |
+                (gpuExpressions[propertyIndex<LineWidth>()] ? LinePropertyMask::Width : LinePropertyMask::None);
+#else
+            constexpr LinePropertyMask expressionMask = LinePropertyMask::None;
+#endif // MLN_RENDER_BACKEND_METAL
+
             const LinePropertiesUBO linePropertiesUBO{/*color =*/evaluate<LineColor>(parameters),
                                                       /*blur =*/evaluate<LineBlur>(parameters),
                                                       /*opacity =*/evaluate<LineOpacity>(parameters),
                                                       /*gapwidth =*/evaluate<LineGapWidth>(parameters),
                                                       /*offset =*/evaluate<LineOffset>(parameters),
                                                       /*width =*/evaluate<LineWidth>(parameters),
-                                                      0,
+                                                      expressionMask,
                                                       0,
                                                       0};
             context.emplaceOrUpdateUniformBuffer(linePropertiesBuffer, &linePropertiesUBO);
@@ -168,6 +209,12 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
                 // dynamic UBO
                 uniforms.set(idLineDynamicUBO, dynamicBuffer);
+
+#if MLN_RENDER_BACKEND_METAL
+                // GPU Expressions
+                uniforms.set(idLineExpressionUBO, getExpressionBuffer());
+#endif // MLN_RENDER_BACKEND_METAL
+
             } break;
 
             case LineType::Gradient: {
@@ -267,6 +314,12 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
 #if MLN_RENDER_BACKEND_METAL
 void LineLayerTweaker::setGPUExpressions(Unevaluated::GPUExpressions&& exprs) {
+    if (exprs != gpuExpressions) {
+        gpuExpressionsUpdated = true;
+
+        // Masks also need to be updated
+        propertiesUpdated = true;
+    }
     gpuExpressions = std::move(exprs);
 }
 #endif // MLN_RENDER_BACKEND_METAL

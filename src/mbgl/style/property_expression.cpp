@@ -73,6 +73,8 @@ auto addStop(MutableUniqueGPUExpression& expr, GPUOutputType outType, std::size_
 
 } // namespace
 
+const GPUExpression GPUExpression::empty = {GPUOutputType::Float, 0};
+
 MutableUniqueGPUExpression GPUExpression::create(GPUOutputType type, std::uint16_t count) {
     if (1 < count && count <= maxStops) {
         return MutableUniqueGPUExpression{new GPUExpression(type, count)};
