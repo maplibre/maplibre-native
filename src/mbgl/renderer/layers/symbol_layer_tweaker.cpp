@@ -54,144 +54,124 @@ SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::P
     };
 }
 
-/*void computeMatrixFor(mat4& matrix, const UnwrappedTileID& tileID, const double scale) {
-    const uint64_t tileScale = 1ull << tileID.canonical.z;
-    const double s = Projection::worldSize(scale) / tileScale;
-
-    matrix::identity(matrix);
-    matrix::translate(matrix,
-                      matrix,
-                      int64_t(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
-                      int64_t(tileID.canonical.y) * s,
-                      0);
-    matrix::scale(matrix, matrix, s / util::EXTENT, s / util::EXTENT, 1);
+float pixelsToTileUnits(const float pixelValue, const uint8_t tileIdCanonicalZ, const float zoom) {
+    return pixelValue * (static_cast<float>(util::EXTENT) / (static_cast<float>(util::tileSize_D) * std::pow(2.f, zoom - tileIdCanonicalZ)));
 }
 
-mat4 computeTranslateVtxMatrix(const UnwrappedTileID& id,
-                               const mat4& tileMatrix,
-                               const std::array<float, 2>& translation,
-                               TranslateAnchorType anchor,
-                               const double bearing,
-                               const double scale,
-                               const bool inViewportPixelUnits) {
-    if (translation[0] == 0 && translation[1] == 0) {
-        return tileMatrix;
-    }
-
-    mat4 vtxMatrix;
-
-    const float angle = inViewportPixelUnits
-                            ? (anchor == TranslateAnchorType::Map ? static_cast<float>(bearing) : 0.0f)
-                            : (anchor == TranslateAnchorType::Viewport ? static_cast<float>(-bearing)
-                                                                       : 0.0f);
-
-    Point<float> translate = util::rotate(Point<float>{translation[0], translation[1]}, angle);
-
-    if (inViewportPixelUnits) {
-        matrix::translate(vtxMatrix, tileMatrix, translate.x, translate.y, 0);
-    } else {
-        matrix::translate(vtxMatrix,
-                          tileMatrix,
-                          id.pixelsToTileUnits(translate.x, static_cast<float>(scale)),
-                          id.pixelsToTileUnits(translate.y, static_cast<float>(scale)),
-                          0);
-    }
-
-    return vtxMatrix;
-}
-
-mat4 computeGPUTileMatrix(const UnwrappedTileID& tileID,
-                          const mat4 projMatrix,
-                          const std::array<float, 2>& translation,
-                          const style::TranslateAnchorType anchor,
-                          const double bearing,
-                          const double scale,
-                          const bool inViewportPixelUnits) {
+mat4 computeTileMatrix(SymbolComputeUBO& computeUBO) {
     // from RenderTile::prepare
     mat4 tileMatrix;
-    computeMatrixFor(tileMatrix, tileID, scale);
-
-    matrix::multiply(tileMatrix, projMatrix, tileMatrix);
-
-    return computeTranslateVtxMatrix(
-        tileID, tileMatrix, translation, anchor, bearing, scale, inViewportPixelUnits);
-}*/
-
-mat4 computeGPUTileMatrix(const UnwrappedTileID& tileID,
-                          const double drawableProjOffset,
-                          const std::array<float, 2>& translation,
-                          const style::TranslateAnchorType anchor,
-                          mat4 projMatrix,
-                          const double bearing,
-                          const double scale,
-                          const bool inViewportPixelUnits) {
-    // from RenderTile::prepare
-    mat4 tileMatrix;
-    const uint64_t tileScale = 1ull << tileID.canonical.z;
-    const double s = Projection::worldSize(scale) / tileScale;
+    const uint64_t tileScale = 1ull << computeUBO.tileIdCanonicalZ;
+    const double s = Projection::worldSize(computeUBO.scale) / tileScale;
 
     matrix::identity(tileMatrix);
     matrix::translate(tileMatrix,
                       tileMatrix,
-                      int64_t(tileID.canonical.x + tileID.wrap * static_cast<int64_t>(tileScale)) * s,
-                      int64_t(tileID.canonical.y) * s,
+                      int64_t(computeUBO.tileIdCanonicalX + computeUBO.tileIdWrap * static_cast<int64_t>(tileScale)) * s,
+                      int64_t(computeUBO.tileIdCanonicalY) * s,
                       0);
     matrix::scale(tileMatrix, tileMatrix, s / util::EXTENT, s / util::EXTENT, 1);
 
-    projMatrix[14] -= drawableProjOffset;
-    matrix::multiply(tileMatrix, projMatrix, tileMatrix);
+    computeUBO.projMatrix[14] -= ((1 + computeUBO.layerIndex) * PaintParameters::numSublayers - computeUBO.subLayerIndex) * PaintParameters::depthEpsilon;
+    matrix::multiply(tileMatrix, computeUBO.projMatrix, tileMatrix);
 
-    if (translation[0] == 0 && translation[1] == 0) {
+    if (computeUBO.translation[0] == 0 && computeUBO.translation[1] == 0) {
         return tileMatrix;
     }
 
     mat4 vtxMatrix;
 
-    const float angle = inViewportPixelUnits
-                            ? (anchor == TranslateAnchorType::Map ? static_cast<float>(bearing) : 0.0f)
-                            : (anchor == TranslateAnchorType::Viewport ? static_cast<float>(-bearing)
-                                                                       : 0.0f);
+    const float angle = computeUBO.inViewportPixelUnits
+                            ? (computeUBO.isAnchorMap ? static_cast<float>(computeUBO.bearing) : 0.0f)
+                            : (computeUBO.isAnchorMap ? 0.0f : static_cast<float>(-computeUBO.bearing));
 
-    Point<float> translate = util::rotate(Point<float>{translation[0], translation[1]}, angle);
+    Point<float> translate = util::rotate(Point<float>{computeUBO.translation[0], computeUBO.translation[1]}, angle);
 
-    if (inViewportPixelUnits) {
+    if (computeUBO.inViewportPixelUnits) {
         matrix::translate(vtxMatrix, tileMatrix, translate.x, translate.y, 0);
     } else {
         matrix::translate(vtxMatrix,
                           tileMatrix,
-                          tileID.pixelsToTileUnits(translate.x, static_cast<float>(scale)),
-                          tileID.pixelsToTileUnits(translate.y, static_cast<float>(scale)),
+                          pixelsToTileUnits(translate.x, computeUBO.tileIdCanonicalZ, static_cast<float>(computeUBO.zoom)),
+                          pixelsToTileUnits(translate.y, computeUBO.tileIdCanonicalZ, static_cast<float>(computeUBO.zoom)),
                           0);
     }
     
     return vtxMatrix;
 }
 
-mat4 computeTileMatrix(const UnwrappedTileID& tileID,
-                       const PaintParameters& parameters,
-                       const std::array<float, 2>& translation,
-                       style::TranslateAnchorType anchor,
-                       bool nearClipped,
-                       bool inViewportPixelUnits,
-                       [[maybe_unused]] const gfx::Drawable& drawable,
-                       bool aligned = false) {
-    
-    // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
-    auto projMatrix = aligned ? parameters.transformParams.alignedProjMatrix
-                              : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
-                                             : parameters.transformParams.projMatrix);
-
-#if !MLN_RENDER_BACKEND_OPENGL
-    // If this drawable is participating in depth testing, offset the
-    // projection matrix NDC depth range for the drawable's layer and sublayer.
-    auto drawableProjOffset = 0;
-    if (!drawable.getIs3D() && drawable.getEnableDepth()) {
-        drawableProjOffset = ((1 + drawable.getLayerIndex()) * PaintParameters::numSublayers -
-                                    drawable.getSubLayerIndex()) * PaintParameters::depthEpsilon;
+mat4 computeLabelPlaneMatrix(const mat4& posMatrix,
+                             const SymbolComputeUBO& computeUBO,
+                             const float pixelsToTileUnits) {
+    if (computeUBO.alongLine || computeUBO.hasVariablePlacement) {
+        return matrix::identity4();
     }
-#endif
+    
+    mat4 m;
+    matrix::identity(m);
+    if (computeUBO.pitchWithMap) {
+        matrix::scale(m, m, 1 / pixelsToTileUnits, 1 / pixelsToTileUnits, 1);
+        if (!computeUBO.rotateWithMap) {
+            matrix::rotate_z(m, m, computeUBO.bearing);
+        }
+    } else {
+        matrix::scale(m, m, computeUBO.width / 2.0, -(computeUBO.height / 2.0), 1.0);
+        matrix::translate(m, m, 1, -1, 0);
+        matrix::multiply(m, m, posMatrix);
+    }
+    return m;
+}
 
-    return computeGPUTileMatrix(tileID, drawableProjOffset, translation, anchor, projMatrix, parameters.state.getBearing(), parameters.state.getScale(), inViewportPixelUnits);
+mat4 computeGlCoordMatrix(const mat4& posMatrix,
+                          const SymbolComputeUBO& computeUBO,
+                          const float pixelsToTileUnits) {
+    mat4 m;
+    matrix::identity(m);
+    if (computeUBO.pitchWithMap) {
+        matrix::multiply(m, m, posMatrix);
+        matrix::scale(m, m, pixelsToTileUnits, pixelsToTileUnits, 1);
+        if (!computeUBO.rotateWithMap) {
+            matrix::rotate_z(m, m, -computeUBO.bearing);
+        }
+    } else {
+        matrix::scale(m, m, 1, -1, 1);
+        matrix::translate(m, m, -1, -1, 0);
+        matrix::scale(m, m, 2.0 / computeUBO.width, 2.0 / computeUBO.height, 1.0);
+    }
+    return m;
+}
+
+void computeDrawableUBO(std::vector<SymbolDrawableUBO>& out, std::vector<SymbolComputeUBO>& in, int i) {
+    auto& computeUBO = in[i];
+    
+    const auto matrix = computeTileMatrix(computeUBO);
+
+    // from symbol_program, makeValues
+    const auto currentZoom = static_cast<float>(computeUBO.zoom);
+    const float pixelsToUnits = pixelsToTileUnits(1.f, computeUBO.tileIdCanonicalZ, currentZoom);
+
+    const mat4 labelPlaneMatrix = computeLabelPlaneMatrix(matrix, computeUBO, pixelsToUnits);
+    const mat4 glCoordMatrix = computeGlCoordMatrix(matrix, computeUBO, pixelsToUnits);
+
+    const float gammaScale = (computeUBO.pitchWithMap ? static_cast<float>(std::cos(computeUBO.pitch)) * computeUBO.camDist : 1.0f);
+
+    // Line label rotation happens in `updateLineLabels`/`reprojectLineLabels``
+    // Pitched point labels are automatically rotated by the labelPlaneMatrix projection
+    // Unpitched point labels need to have their rotation applied after projection
+    const bool rotateInShader = computeUBO.rotateWithMap && !computeUBO.pitchWithMap && !computeUBO.alongLine;
+    
+    out[i] = {
+        /*.matrix=*/util::cast<float>(matrix),
+        /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
+        /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
+
+        /*.texsize=*/computeUBO.texsize,
+        /*.texsize_icon=*/computeUBO.texsize_icon,
+
+        /*.gamma_scale=*/gammaScale,
+        /*.rotate_symbol=*/rotateInShader,
+        /*.pad=*/{0},
+    };
 }
 
 } // namespace
@@ -231,6 +211,11 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     int i = 0;
     std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+    std::vector<SymbolComputeUBO> computeUBOVector(layerGroup.getDrawableCount());
+    
+    constexpr bool aligned = false;
+    constexpr bool nearClipped = false;
+    constexpr bool inViewportPixelUnits = false;
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
@@ -242,49 +227,57 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
-        const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
-                                   : evaluated.get<style::IconTranslateAnchor>();
-        constexpr bool nearClipped = false;
-        constexpr bool inViewportPixelUnits = false;
-        const auto matrix = computeTileMatrix(
-            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
-
-        // from symbol_program, makeValues
-        const auto currentZoom = static_cast<float>(parameters.state.getZoom());
-        const float pixelsToTileUnits = tileID.pixelsToTileUnits(1.f, currentZoom);
+        const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>() : evaluated.get<style::IconTranslateAnchor>();
         const bool pitchWithMap = symbolData.pitchAlignment == style::AlignmentType::Map;
         const bool rotateWithMap = symbolData.rotationAlignment == style::AlignmentType::Map;
-        const bool alongLine = symbolData.placement != SymbolPlacementType::Point &&
-                               symbolData.rotationAlignment == AlignmentType::Map;
-        const bool hasVariablePlacement = symbolData.bucketVariablePlacement &&
-                                          (isText || symbolData.textFit != IconTextFitType::None);
-        const mat4 labelPlaneMatrix = (alongLine || hasVariablePlacement)
-                                          ? matrix::identity4()
-                                          : getLabelPlaneMatrix(
-                                                matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
-        const mat4 glCoordMatrix = getGlCoordMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        const bool alongLine = symbolData.placement != SymbolPlacementType::Point && symbolData.rotationAlignment == AlignmentType::Map;
+        const bool hasVariablePlacement = symbolData.bucketVariablePlacement && (isText || symbolData.textFit != IconTextFitType::None);
+        
+        int32_t layerIndex = -1;
+        int32_t subLayerIndex = 0;
+        if (!drawable.getIs3D() && drawable.getEnableDepth()) {
+            layerIndex = drawable.getLayerIndex();
+            subLayerIndex = drawable.getSubLayerIndex();
+        }
+        
+        // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
+        auto& projMatrix = aligned ? parameters.transformParams.alignedProjMatrix
+                                   : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
+                                                  : parameters.transformParams.projMatrix);
+        
+        computeUBOVector[i] = {
+            /*.projMatrix=*/projMatrix,
+            
+            /*.tileIdCanonicalX=*/tileID.canonical.x,
+            /*.tileIdCanonicalY=*/tileID.canonical.y,
+            /*.tileIdCanonicalZ=*/tileID.canonical.z,
+            /*.tileIdWrap=*/tileID.wrap,
 
-        const float gammaScale = (symbolData.pitchAlignment == AlignmentType::Map
-                                      ? static_cast<float>(std::cos(state.getPitch())) * camDist
-                                      : 1.0f);
-
-        // Line label rotation happens in `updateLineLabels`/`reprojectLineLabels``
-        // Pitched point labels are automatically rotated by the labelPlaneMatrix projection
-        // Unpitched point labels need to have their rotation applied after projection
-        const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
-
-        drawableUBOVector[i] = {
-            /*.matrix=*/util::cast<float>(matrix),
-            /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
-            /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
-
+            /*.layerIndex=*/layerIndex,
+            /*.subLayerIndex=*/subLayerIndex,
+            
+            /*.translation=*/translate,
+            
+            /*.scale=*/state.getScale(),
+            /*.bearing=*/state.getBearing(),
+            /*.zoom=*/state.getZoom(),
+            /*.width=*/state.getSize().width,
+            /*.height=*/state.getSize().height,
+            /*.camDist=*/camDist,
+            /*.pitch=*/state.getPitch(),
+            
             /*.texsize=*/toArray(getTexSize(drawable, idSymbolImageTexture)),
             /*.texsize_icon=*/toArray(getTexSize(drawable, idSymbolImageIconTexture)),
 
-            /*.gamma_scale=*/gammaScale,
-            /*.rotate_symbol=*/rotateInShader,
-            /*.pad=*/{0},
+            /*.isAnchorMap=*/(anchor == TranslateAnchorType::Map),
+            /*.inViewportPixelUnits=*/inViewportPixelUnits,
+            /*.inViewportPixelUnits=*/pitchWithMap,
+            /*.inViewportPixelUnits=*/rotateWithMap,
+            /*.inViewportPixelUnits=*/alongLine,
+            /*.inViewportPixelUnits=*/hasVariablePlacement,
         };
+        
+        computeDrawableUBO(drawableUBOVector, computeUBOVector, i);
         
         i++;
     });

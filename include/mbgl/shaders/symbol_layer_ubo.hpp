@@ -78,5 +78,39 @@ enum {
     symbolUBOCount
 };
 
+/// Compute UBO
+struct alignas(16) SymbolComputeUBO {
+    /*  64 */ std::array<double, 4 * 4> projMatrix;
+    
+    /*   4 */ uint32_t tileIdCanonicalX;
+    /*   4 */ uint32_t tileIdCanonicalY;
+    /*   1 */ uint8_t tileIdCanonicalZ;
+    /*   2 */ int16_t tileIdWrap;
+
+    /*   4 */ int32_t layerIndex;
+    /*   4 */ int32_t subLayerIndex;
+
+    /*   8 */ std::array<float, 2> translation;
+    
+    /*   4 */ double scale;
+    /*   4 */ double bearing;
+    /*   4 */ double zoom;
+    /*   4 */ uint32_t width;
+    /*   4 */ uint32_t height;
+    /*   4 */ float camDist;
+    /*   4 */ double pitch;
+    
+    /*   8 */ std::array<float, 2> texsize;
+    /*   8 */ std::array<float, 2> texsize_icon;
+    
+    /*   1 */ bool isAnchorMap;
+    /*   1 */ bool inViewportPixelUnits;
+    /*   1 */ bool pitchWithMap;
+    /*   1 */ bool rotateWithMap;
+    /*   1 */ bool alongLine;
+    /*   1 */ bool hasVariablePlacement;
+};
+static_assert(sizeof(SymbolComputeUBO) % 16 == 0);
+
 } // namespace shaders
 } // namespace mbgl
