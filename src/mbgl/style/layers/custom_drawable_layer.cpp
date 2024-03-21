@@ -332,8 +332,7 @@ void CustomDrawableLayerHost::Interface::setSymbolOptions(const SymbolOptions& o
 bool CustomDrawableLayerHost::Interface::updateBuilder(BuilderType type,
                                                        const std::string& name,
                                                        gfx::ShaderPtr shader) {
-    if(!shader)
-        return false;
+    if (!shader) return false;
     if (type != builderType || !builder || builder->getShader() != shader) {
         finish();
         builder = createBuilder(name, shader);
@@ -348,14 +347,13 @@ bool CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
     switch (lineOptions.shaderType) {
         case LineShaderType::Classic: {
             // build classic polyline
-            if(!updateBuilder(BuilderType::LineClassic, "custom-lines", lineShaderDefault()))
-                return false;
+            if (!updateBuilder(BuilderType::LineClassic, "custom-lines", lineShaderDefault())) return false;
             builder->addPolyline(coordinates, lineOptions.geometry);
         } break;
 
         case LineShaderType::MetalWideVector: {
             // build wide vector polyline
-            if(!updateBuilder(BuilderType::LineWideVector, "custom-lines-widevector", lineShaderWideVector()))
+            if (!updateBuilder(BuilderType::LineWideVector, "custom-lines-widevector", lineShaderWideVector()))
                 return false;
 
             // vertices
@@ -493,14 +491,13 @@ bool CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
             builder->flush(context);
         } break;
     }
-    
+
     return true;
 }
 
 bool CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geometry) {
     // build fill
-    if(!updateBuilder(BuilderType::Fill, "custom-fill", fillShaderDefault()))
-        return false;
+    if (!updateBuilder(BuilderType::Fill, "custom-fill", fillShaderDefault())) return false;
 
     // provision buffers for fill vertices, indexes and segments
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
@@ -531,14 +528,13 @@ bool CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
 
     // flush current builder drawable
     builder->flush(context);
-    
+
     return true;
 }
 
 bool CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& point) {
     // build symbol
-    if(!updateBuilder(BuilderType::Symbol, "custom-symbol", symbolShaderDefault()))
-        return false;
+    if (!updateBuilder(BuilderType::Symbol, "custom-symbol", symbolShaderDefault())) return false;
 
     // temporary: buffers
     struct CustomSymbolIcon {
@@ -601,7 +597,7 @@ bool CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
 
     // flush current builder drawable
     builder->flush(context);
-    
+
     return true;
 }
 
