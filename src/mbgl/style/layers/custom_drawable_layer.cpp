@@ -137,17 +137,15 @@ public:
     void init(gfx::Drawable&) override {};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
-
         const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
         shaders::WideVectorUniformsUBO uniform{
-              /*mvpMatrix     */ mbgl::matrix::identity4f(),
-              /*mvpMatrixDiff */ {0.0f},
-              /*mvMatrix      */ mbgl::matrix::identity4f(),
-              /*mvMatrixDiff  */ {0.0f},
-              /*pMatrix       */ mbgl::matrix::identity4f(),
-              /*pMatrixDiff   */ {0.0f},
-              /*frameSize     */ {(float)renderableSize.width, (float)renderableSize.height}
-            };
+            /*mvpMatrix     */ mbgl::matrix::identity4f(),
+            /*mvpMatrixDiff */ {0.0f},
+            /*mvMatrix      */ mbgl::matrix::identity4f(),
+            /*mvMatrixDiff  */ {0.0f},
+            /*pMatrix       */ mbgl::matrix::identity4f(),
+            /*pMatrixDiff   */ {0.0f},
+            /*frameSize     */ {(float)renderableSize.width, (float)renderableSize.height}};
 
         enum class WKSVertexLineJoinType {
             WKSVertexLineJoinMiter = 0,
@@ -162,16 +160,17 @@ public:
             WKSVertexLineCapRound = 1,
             WKSVertexLineCapSquare = 2,
         };
-        style::WideVectorUniformWideVecUBO wideVec{/*w2            */ 16.0f,
-                               /*offset        */ 0.0f,
-                               /*edge          */ 1.0f,
-                               /*texRepeat     */ 0.0f,
-                               /*texOffset     */ {},
-                               /*miterLimit    */ 1.0f,
-                               /*join          */ static_cast<int32_t>(WKSVertexLineJoinType::WKSVertexLineJoinMiter),
-                               /*cap           */ static_cast<int32_t>(WKSVertexLineCapType::WKSVertexLineCapButt),
-                               /*hasExp        */ false,
-                               /*interClipLimit*/ 0.0f};
+        style::WideVectorUniformWideVecUBO wideVec{
+            /*w2            */ 16.0f,
+            /*offset        */ 0.0f,
+            /*edge          */ 1.0f,
+            /*texRepeat     */ 0.0f,
+            /*texOffset     */ {},
+            /*miterLimit    */ 1.0f,
+            /*join          */ static_cast<int32_t>(WKSVertexLineJoinType::WKSVertexLineJoinMiter),
+            /*cap           */ static_cast<int32_t>(WKSVertexLineCapType::WKSVertexLineCapButt),
+            /*hasExp        */ false,
+            /*interClipLimit*/ 0.0f};
 
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(idWideVectorUniformsUBO, &uniform, parameters.context);
@@ -379,14 +378,14 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
                 {{0, 0, 0}, color, (10 << 16) + 2},
                 {{0, 0, 0}, color, (11 << 16) + 2},
             };
-            
+
             using VertexVector = gfx::VertexVector<VertexTriWideVecB>;
             const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
             VertexVector& vertices = *sharedVertices;
-            for(const auto& v: vertexBuffer) {
+            for (const auto& v : vertexBuffer) {
                 vertices.emplace_back(v);
             }
-            
+
             // instance data
             struct VertexTriWideVecInstance { // TODO: alignment?
                 std::array<float, 3> center;
@@ -400,26 +399,20 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
                 {{0.0, +0.5, 0}, {0}, 1, 3},
                 {{0.0, 0.0, 0}, {0}, 2, -1},
             };
-            
+
             using InstanceVector = gfx::VertexVector<VertexTriWideVecInstance>;
             const std::shared_ptr<InstanceVector> sharedInstanceData = std::make_shared<InstanceVector>();
             InstanceVector& instanceData = *sharedInstanceData;
-            for(const auto& data: centerline) {
+            for (const auto& data : centerline) {
                 instanceData.emplace_back(data);
             }
-            
+
             // indexes
             using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
             const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
             TriangleIndexVector& triangles = *sharedTriangles;
             triangles.emplace_back(
-                                   0, 3, 1,
-                                   0, 2, 3,
-                                   4 + 0, 4 + 3, 4 + 1,
-                                   4 + 0, 4 + 2, 4 + 3,
-                                   8 + 0, 8 + 3, 8 + 1,
-                                   8 + 0, 8 + 2, 8 + 3
-                                   );
+                0, 3, 1, 0, 2, 3, 4 + 0, 4 + 3, 4 + 1, 4 + 0, 4 + 2, 4 + 3, 8 + 0, 8 + 3, 8 + 1, 8 + 0, 8 + 2, 8 + 3);
 
             SegmentVector<VertexTriWideVecB> triangleSegments;
             triangleSegments.emplace_back(Segment<VertexTriWideVecB>{0, 0, 12, 18});
@@ -451,7 +444,7 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
                 }
                 builder->setVertexAttributes(std::move(vertexAttributes));
             }
-            
+
             {
                 // add instance attributes
                 auto instanceAttributes = context.createVertexAttributeArray();
@@ -485,11 +478,10 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
                 }
                 builder->setInstanceAttributes(std::move(instanceAttributes));
             }
-            
-            
+
             builder->setRawVertices({}, vertices.elements(), gfx::AttributeDataType::Float2);
             builder->setSegments(gfx::Triangles(), sharedTriangles, triangleSegments.data(), triangleSegments.size());
-            
+
             // flush current builder drawable
             builder->flush(context);
         } break;
@@ -637,7 +629,7 @@ void CustomDrawableLayerHost::Interface::finish() {
             } break;
             case BuilderType::LineWideVector: {
                 // finish building wide vector lines
-                
+
                 // create line tweaker
                 auto tweaker = std::make_shared<WideVectorDrawableTweaker>();
 
