@@ -160,6 +160,13 @@ public:
     /// A set of attribute values to be added for each vertex
     void setVertexAttributes(VertexAttributeArrayPtr attrs) { vertexAttrs = std::move(attrs); }
 
+    /// Get the instance attributes that override default values in the shader program
+    VertexAttributeArrayPtr& getInstanceAttributes() { return instanceAttrs; }
+    const VertexAttributeArrayPtr& getInstanceAttributes() const { return instanceAttrs; }
+
+    /// A set of attribute values to be added for each instance
+    void setInstanceAttributes(VertexAttributeArrayPtr attrs) { instanceAttrs = std::move(attrs); }
+
     /// Add some vertex elements, returns the index of the first one added
     std::size_t addVertices(const std::vector<std::array<int16_t, 2>>& vertices,
                             std::size_t vertexOffset,
@@ -232,6 +239,7 @@ protected:
     gfx::Drawable::Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
     gfx::VertexAttributeArrayPtr vertexAttrs;
+    gfx::VertexAttributeArrayPtr instanceAttrs;
 
     class Impl;
     std::unique_ptr<Impl> impl;

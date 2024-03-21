@@ -45,7 +45,7 @@ void DrawableBuilder::flush(gfx::Context& context) {
             // setup for polylines
             impl->setupForPolylines(context, *this);
         }
-
+        
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
         draw->setEnabled(enabled);
         draw->setLineWidth(static_cast<int32_t>(lineWidth));
@@ -62,11 +62,15 @@ void DrawableBuilder::flush(gfx::Context& context) {
         draw->setShader(shader);
         draw->setTextures(textures);
         draw->setTweakers(tweakers);
-
+        
         if (vertexAttrs) {
             draw->setVertexAttributes(vertexAttrs);
         } else {
             draw->setVertexAttributes(context.createVertexAttributeArray());
+        }
+        
+        if (instanceAttrs) {
+            draw->setInstanceAttributes(instanceAttrs);
         }
 
         init();
