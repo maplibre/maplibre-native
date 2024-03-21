@@ -33,15 +33,22 @@ struct GPUExpression;
 using UniqueGPUExpression = std::unique_ptr<const GPUExpression>;
 using MutableUniqueGPUExpression = std::unique_ptr<GPUExpression>;
 
-struct GPUExpression {
+struct alignas(16) GPUExpression {
     static constexpr std::size_t maxStops = 16;
 
-    const GPUOutputType outputType;
-    const std::uint16_t stopCount;
-    GPUOptions options;
-    GPUInterpType interpolation;
+    GPUExpression(GPUExpression&&) = default;
+    GPUExpression(const GPUExpression&) = default;
+    GPUExpression(const GPUExpression* other)
+        : GPUExpression(other ? *other : empty) {}
+    GPUExpression& operator=(GPUExpression&&) = default;
+    GPUExpression& operator=(const GPUExpression&) = default;
 
-    union InterpOptions {
+    /* 0 */ const GPUOutputType outputType;
+    /* 2 */ const std::uint16_t stopCount;
+    /* 4 */ GPUOptions options;
+    /* 6 */ GPUInterpType interpolation;
+
+    /* 8 */ union InterpOptions {
         struct Exponential {
             float base;
         } exponential;
@@ -53,6 +60,8 @@ struct GPUExpression {
             float y2;
         } bezier;
     } interpOptions;
+
+    /* 24 */ float pad[2];
 
     struct FloatStop {
         float input;
@@ -66,7 +75,7 @@ struct GPUExpression {
         bool operator<(const ColorStop& rhs) const { return input < rhs.input; }
     };
 
-    union Stops {
+    /* 32 */ union Stops {
         FloatStop floatStops[maxStops];
         ColorStop colorStops[maxStops];
     } stops;
@@ -79,16 +88,15 @@ struct GPUExpression {
     template <typename T>
     auto evaluate(const float zoom) const;
 
-    GPUExpression(GPUExpression&&) = delete;
-    GPUExpression(const GPUExpression&) = delete;
-    GPUExpression& operator=(GPUExpression&&) = delete;
-    GPUExpression& operator=(const GPUExpression&) = delete;
+    static const GPUExpression empty;
 
 private:
+    GPUExpression() = default;
     GPUExpression(GPUOutputType type, uint16_t count)
         : outputType(type),
           stopCount(count) {}
 };
+static_assert(sizeof(GPUExpression) == 32 + 20 * GPUExpression::maxStops);
 
 template <>
 inline auto GPUExpression::evaluate<Color>(const float zoom) const {

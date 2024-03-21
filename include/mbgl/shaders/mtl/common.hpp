@@ -54,6 +54,17 @@ float4 unpack_mix_color(const float4 packedColors, const float t) {
                decode_color(float2(packedColors[2], packedColors[3])), t);
 }
 
+
+enum class LinePropertyMask : uint32_t {
+    None = 0,
+    Color = 1 << 0,
+    Opacity = 1 << 1,
+    Blur = 1 << 2,
+    Width = 1 << 3,
+    GapWidth = 1 << 4,
+    Offset = 1 << 5,
+};
+
 struct alignas(16) LineDynamicUBO {
     float2 units_to_pixels;
     float pad1, pad2;
@@ -85,7 +96,10 @@ struct alignas(16) LinePropertiesUBO {
     float gapwidth;
     float offset;
     float width;
-    float pad1, pad2, pad3;
+
+    LinePropertyMask expressionMask;
+
+    float pad1, pad2;
 };
 
 struct alignas(16) LineBasicPropertiesUBO {

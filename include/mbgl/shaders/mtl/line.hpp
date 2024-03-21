@@ -15,10 +15,75 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 8> attributes;
-    static const std::array<UniformBlockInfo, 4> uniforms;
+    static const std::array<UniformBlockInfo, lineUBOCount> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
+
+enum class GPUInterpType : uint16_t {
+    Step,
+    Linear,
+    Exponential,
+    Bezier
+};
+enum class GPUOutputType : uint16_t {
+    Float,
+    Color,
+};
+enum class GPUOptions : uint16_t {
+    None = 0,
+    IntegerZoom = 1 << 0,
+    Transitioning = 1 << 1,
+};
+constant const int maxExprStops = 16;
+struct alignas(16) GPUExpression {
+    GPUOutputType outputType;
+    uint16_t stopCount;
+    GPUOptions options;
+    GPUInterpType interpolation;
+
+    union InterpOptions {
+        struct Exponential {
+            float base;
+        } exponential;
+
+        struct Bezier {
+            float x1;
+            float y1;
+            float x2;
+            float y2;
+        } bezier;
+    } interpOptions;
+
+    struct FloatStop {
+        float input;
+        float output;
+    };
+
+    struct ColorStop {
+        float input;
+        float rgba[4];
+    };
+
+    union Stops {
+        FloatStop floatStops[maxExprStops];
+        ColorStop colorStops[maxExprStops];
+    } stops;
+};
+static_assert(sizeof(GPUExpression) == 32 + 20 * maxExprStops, "wrong alignment");
+
+
+struct alignas(16) LineExpressionUBO {
+    GPUExpression color;
+    GPUExpression blur;
+    GPUExpression opacity;
+    GPUExpression gapwidth;
+    GPUExpression offset;
+    GPUExpression width;
+};
+static_assert(sizeof(LineExpressionUBO) % 16 == 0, "wrong alignment");
+
+
 struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
@@ -64,7 +129,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const LineDynamicUBO& dynamic [[buffer(8)]],
                                 device const LineUBO& line [[buffer(9)]],
                                 device const LinePropertiesUBO& props [[buffer(10)]],
-                                device const LineInterpolationUBO& interp [[buffer(11)]]) {
+                                device const LineInterpolationUBO& interp [[buffer(11)]],
+                                device const LineExpressionUBO& expr [[buffer(12)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth = props.gapwidth / 2;
