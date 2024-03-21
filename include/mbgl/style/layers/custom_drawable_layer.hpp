@@ -115,21 +115,21 @@ public:
      * @param coordinates
      * @param options Polyline options
      */
-    void addPolyline(const GeometryCoordinates& coordinates);
+    bool addPolyline(const GeometryCoordinates& coordinates);
 
     /**
      * @brief Add a multipolygon area fill
      *
      * @param geometry a collection of rings with optional holes
      */
-    void addFill(const GeometryCollection& geometry);
+    bool addFill(const GeometryCollection& geometry);
 
     /**
      * @brief Add a symbol
      *
      * @param point
      */
-    void addSymbol(const GeometryCoordinate& point);
+    bool addSymbol(const GeometryCoordinate& point);
 
     /**
      * @brief Finish the current drawable building session
@@ -162,7 +162,7 @@ private:
     };
 
     std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
-    void updateBuilder(BuilderType type, const std::string& name, gfx::ShaderPtr shader);
+    bool updateBuilder(BuilderType type, const std::string& name, gfx::ShaderPtr shader);
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;

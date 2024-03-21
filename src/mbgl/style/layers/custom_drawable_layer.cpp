@@ -329,10 +329,11 @@ void CustomDrawableLayerHost::Interface::setSymbolOptions(const SymbolOptions& o
     symbolOptions = options;
 }
 
-void CustomDrawableLayerHost::Interface::updateBuilder(BuilderType type,
+bool CustomDrawableLayerHost::Interface::updateBuilder(BuilderType type,
                                                        const std::string& name,
                                                        gfx::ShaderPtr shader) {
-    assert(shader);
+    if(!shader)
+        return false;
     if (type != builderType || !builder || builder->getShader() != shader) {
         finish();
         builder = createBuilder(name, shader);
@@ -340,19 +341,22 @@ void CustomDrawableLayerHost::Interface::updateBuilder(BuilderType type,
     }
     assert(builder);
     assert(builder->getShader() == shader);
+    return true;
 };
 
-void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates) {
+bool CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates) {
     switch (lineOptions.shaderType) {
         case LineShaderType::Classic: {
             // build classic polyline
-            updateBuilder(BuilderType::LineClassic, "custom-lines", lineShaderDefault());
+            if(!updateBuilder(BuilderType::LineClassic, "custom-lines", lineShaderDefault()))
+                return false;
             builder->addPolyline(coordinates, lineOptions.geometry);
         } break;
 
         case LineShaderType::MetalWideVector: {
             // build wide vector polyline
-            updateBuilder(BuilderType::LineWideVector, "custom-lines-widevector", lineShaderWideVector());
+            if(!updateBuilder(BuilderType::LineWideVector, "custom-lines-widevector", lineShaderWideVector()))
+                return false;
 
             // vertices
             struct VertexTriWideVecB {
@@ -489,11 +493,14 @@ void CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
             builder->flush(context);
         } break;
     }
+    
+    return true;
 }
 
-void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geometry) {
+bool CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geometry) {
     // build fill
-    updateBuilder(BuilderType::Fill, "custom-fill", fillShaderDefault());
+    if(!updateBuilder(BuilderType::Fill, "custom-fill", fillShaderDefault()))
+        return false;
 
     // provision buffers for fill vertices, indexes and segments
     using VertexVector = gfx::VertexVector<FillLayoutVertex>;
@@ -524,11 +531,14 @@ void CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
 
     // flush current builder drawable
     builder->flush(context);
+    
+    return true;
 }
 
-void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& point) {
+bool CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& point) {
     // build symbol
-    updateBuilder(BuilderType::Symbol, "custom-symbol", symbolShaderDefault());
+    if(!updateBuilder(BuilderType::Symbol, "custom-symbol", symbolShaderDefault()))
+        return false;
 
     // temporary: buffers
     struct CustomSymbolIcon {
@@ -591,6 +601,8 @@ void CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
 
     // flush current builder drawable
     builder->flush(context);
+    
+    return true;
 }
 
 void CustomDrawableLayerHost::Interface::finish() {
@@ -676,7 +688,6 @@ gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderDefault() const {
 
 gfx::ShaderPtr CustomDrawableLayerHost::Interface::lineShaderWideVector() const {
     gfx::ShaderGroupPtr shaderGroup = shaders.getShaderGroup("WideVectorShader");
-    assert(shaderGroup);
     if (!shaderGroup) return gfx::ShaderPtr();
 
     return shaderGroup->getOrCreateShader(context, {});
