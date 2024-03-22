@@ -21,7 +21,7 @@ jobs:
     runs-on: [macos-14]
     defaults:
       run:
-        working-directory: platform/ios
+        working-directory: platform/macos
         shell: bash
 
     steps:
