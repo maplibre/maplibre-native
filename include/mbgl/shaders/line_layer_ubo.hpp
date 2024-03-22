@@ -7,7 +7,7 @@
 namespace mbgl {
 namespace shaders {
 
-enum class LinePropertyMask : uint32_t {
+enum class LineExpressionMask : uint32_t {
     None = 0,
     Color = 1 << 0,
     Opacity = 1 << 1,
@@ -21,8 +21,9 @@ enum class LinePropertyMask : uint32_t {
 // Line
 
 struct alignas(16) LineDynamicUBO {
-    /* 0 */ std::array<float, 2> units_to_pixels;
-    /* 8 */ float pad1, pad2;
+    /*  0 */ std::array<float, 2> units_to_pixels;
+    /*  8 */ float zoom;
+    /* 12 */ float pad1;
     /* 16 */
 };
 static_assert(sizeof(LineDynamicUBO) == 16);
@@ -42,7 +43,7 @@ struct alignas(16) LinePropertiesUBO {
     float offset;
     float width;
 
-    LinePropertyMask expressionMask;
+    LineExpressionMask expressionMask;
 
     float pad1, pad2;
 };

@@ -1,4 +1,6 @@
 #include <mbgl/style/property_expression.hpp>
+
+#include <mbgl/renderer/paint_property_binder.hpp>
 #include <mbgl/util/convert.hpp>
 
 namespace mbgl {
@@ -40,12 +42,11 @@ auto addStop(MutableUniqueGPUExpression& expr, GPUOutputType outType, std::size_
         if (expr) {
             if (const auto result = output.evaluate(EvaluationContext{/*zoom=*/0.0f})) {
                 const expression::Value& value = *result;
+                expr->inputs[index] = static_cast<float>(input);
                 if (outType == GPUOutputType::Float) {
                     assert(value.is<double>());
                     if (value.is<double>()) {
-                        auto& stop = expr->stops.floatStops[index++];
-                        stop.input = static_cast<float>(input);
-                        stop.output = static_cast<float>(value.get<double>());
+                        expr->stops.floats[index++] = static_cast<float>(value.get<double>());
                     } else {
                         // Evaluation error, cancel
                         expr.reset();
@@ -53,14 +54,8 @@ auto addStop(MutableUniqueGPUExpression& expr, GPUOutputType outType, std::size_
                 } else if (outType == GPUOutputType::Color) {
                     assert(value.is<Color>());
                     if (value.is<Color>()) {
-                        auto& stop = expr->stops.colorStops[index++];
-                        stop.input = static_cast<float>(input);
-
-                        const auto& color = value.get<Color>();
-                        stop.rgba[0] = color.r;
-                        stop.rgba[1] = color.g;
-                        stop.rgba[2] = color.b;
-                        stop.rgba[3] = color.a;
+                        const auto& color = attributeValue(value.get<Color>());
+                        std::copy(color.begin(), color.end(), &expr->stops.colors[2 * index++]);
                     } else {
                         // Evaluation error, cancel
                         expr.reset();
@@ -83,19 +78,15 @@ MutableUniqueGPUExpression GPUExpression::create(GPUOutputType type, std::uint16
 }
 
 float GPUExpression::evaluateFloat(const float zoom) const {
-    const auto upperBound = std::upper_bound(&stops.floatStops[0], &stops.floatStops[stopCount], FloatStop{zoom, 0});
-    const auto index = std::distance(&stops.floatStops[0], upperBound);
+    const auto index = std::distance(&inputs[0], std::upper_bound(&inputs[0], &inputs[stopCount], zoom));
     if (index == 0) {
-        return stops.floatStops[0].output;
+        return stops.floats[0];
+    } else if (index == stopCount) {
+        return stops.floats[stopCount - 1];
     }
-    if (index == stopCount) {
-        return stops.floatStops[stopCount - 1].output;
-    }
-
-    const Range<double> range{stops.floatStops[index - 1].input, stops.floatStops[index].input};
     switch (interpolation) {
         case GPUInterpType::Step:
-            return stops.floatStops[index - 1].output;
+            return stops.floats[index - 1];
         default:
             assert(false);
             [[fallthrough]];
@@ -103,30 +94,45 @@ float GPUExpression::evaluateFloat(const float zoom) const {
             assert(interpOptions.exponential.base == 1.0f);
             [[fallthrough]];
         case GPUInterpType::Exponential: {
+            const Range<double> range{inputs[index - 1], inputs[index]};
             const expression::ExponentialInterpolator interpolator{interpOptions.exponential.base};
             const auto t = interpolator.interpolationFactor(range, zoom);
-            return util::Interpolator<float>()(stops.floatStops[index - 1].output, stops.floatStops[index].output, t);
+            return util::Interpolator<float>()(stops.floats[index - 1], stops.floats[index], t);
         }
         case GPUInterpType::Bezier:
             assert(false);
-            return stops.floatStops[0].output;
+            return stops.floats[0];
     }
 }
 
-Color GPUExpression::evaluateColor(const float zoom) const {
-    const auto upperBound = std::upper_bound(&stops.colorStops[0], &stops.colorStops[stopCount], ColorStop{zoom, {0}});
-    const auto index = std::distance(&stops.colorStops[0], upperBound);
-    if (index == 0) {
-        return {stops.colorStops[0].rgba};
-    }
-    if (index == stopCount) {
-        return {stops.colorStops[stopCount - 1].rgba};
-    }
+namespace {
+std::tuple<float, float> unpack_float(const float packedValue) {
+    const int packedIntValue = int(packedValue);
+    const int v0 = packedIntValue / 256;
+    return {static_cast<float>(v0) / 255, static_cast<float>(packedIntValue - v0 * 256) / 255};
+}
+std::tuple<float, float, float, float> decode_color(const float encoded[2]) {
+    return std::tuple_cat(unpack_float(encoded[0]), unpack_float(encoded[1]));
+}
+Color toColor(std::tuple<float, float, float, float> rgba) {
+    return {std::get<0>(rgba), std::get<1>(rgba), std::get<2>(rgba), std::get<3>(rgba)};
+}
+} // namespace
 
-    const Range<double> range{stops.colorStops[index - 1].input, stops.colorStops[index].input};
+Color GPUExpression::getColor(std::size_t index) const {
+    return toColor(decode_color(&stops.colors[2 * index]));
+}
+
+Color GPUExpression::evaluateColor(const float zoom) const {
+    const auto index = std::distance(&inputs[0], std::upper_bound(&inputs[0], &inputs[stopCount], zoom));
+    if (index == 0) {
+        return getColor(0);
+    } else if (index == stopCount) {
+        return getColor(stopCount - 1);
+    }
     switch (interpolation) {
         case GPUInterpType::Step:
-            return stops.colorStops[index - 1].rgba;
+            return getColor(index - 1);
         default:
             assert(false);
             [[fallthrough]];
@@ -134,14 +140,15 @@ Color GPUExpression::evaluateColor(const float zoom) const {
             assert(interpOptions.exponential.base == 1.0f);
             [[fallthrough]];
         case GPUInterpType::Exponential: {
+            const Range<double> range{inputs[index - 1], inputs[index]};
             const expression::ExponentialInterpolator interpolator{interpOptions.exponential.base};
             const auto t = interpolator.interpolationFactor(range, zoom);
-            return util::Interpolator<Color>()({stops.colorStops[index - 1].rgba}, {stops.colorStops[index].rgba}, t);
+            return util::Interpolator<Color>()(getColor(index - 1), getColor(index), t);
             break;
         }
         case GPUInterpType::Bezier:
             assert(false);
-            return {stops.colorStops[0].rgba};
+            return getColor(0);
     }
 }
 

@@ -102,15 +102,17 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     const auto getLinePropsBuffer = [&]() {
         if (!linePropertiesBuffer || simplePropertiesUpdated) {
 #if MLN_RENDER_BACKEND_METAL
-            const LinePropertyMask expressionMask =
-                (gpuExpressions[propertyIndex<LineColor>()] ? LinePropertyMask::Color : LinePropertyMask::None) |
-                (gpuExpressions[propertyIndex<LineBlur>()] ? LinePropertyMask::Blur : LinePropertyMask::None) |
-                (gpuExpressions[propertyIndex<LineOpacity>()] ? LinePropertyMask::Opacity : LinePropertyMask::None) |
-                (gpuExpressions[propertyIndex<LineGapWidth>()] ? LinePropertyMask::GapWidth : LinePropertyMask::None) |
-                (gpuExpressions[propertyIndex<LineOffset>()] ? LinePropertyMask::Offset : LinePropertyMask::None) |
-                (gpuExpressions[propertyIndex<LineWidth>()] ? LinePropertyMask::Width : LinePropertyMask::None);
+            const LineExpressionMask expressionMask =
+                (gpuExpressions[propertyIndex<LineColor>()] ? LineExpressionMask::Color : LineExpressionMask::None) |
+                (gpuExpressions[propertyIndex<LineBlur>()] ? LineExpressionMask::Blur : LineExpressionMask::None) |
+                (gpuExpressions[propertyIndex<LineOpacity>()] ? LineExpressionMask::Opacity
+                                                              : LineExpressionMask::None) |
+                (gpuExpressions[propertyIndex<LineGapWidth>()] ? LineExpressionMask::GapWidth
+                                                               : LineExpressionMask::None) |
+                (gpuExpressions[propertyIndex<LineOffset>()] ? LineExpressionMask::Offset : LineExpressionMask::None) |
+                (gpuExpressions[propertyIndex<LineWidth>()] ? LineExpressionMask::Width : LineExpressionMask::None);
 #else
-            constexpr LinePropertyMask expressionMask = LinePropertyMask::None;
+            constexpr LineExpressionMask expressionMask = LineExpressionMask::None;
 #endif // MLN_RENDER_BACKEND_METAL
 
             const LinePropertiesUBO linePropertiesUBO{/*color =*/evaluate<LineColor>(parameters),
@@ -174,8 +176,9 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         return lineSDFPropertiesBuffer;
     };
 
+    // TODO: Update only on zoom change?
     const LineDynamicUBO dynamicUBO = {
-        /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, 0, 0};
+        /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, zoom, 0};
     context.emplaceOrUpdateUniformBuffer(dynamicBuffer, &dynamicUBO);
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {

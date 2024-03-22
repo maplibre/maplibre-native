@@ -15,11 +15,11 @@ const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::LineShader, gfx::Backen
 };
 const std::array<UniformBlockInfo, lineUBOCount>
     ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal>::uniforms = {
-        UniformBlockInfo{8, true, false, sizeof(LineDynamicUBO), idLineDynamicUBO},
+        UniformBlockInfo{8, true, true, sizeof(LineDynamicUBO), idLineDynamicUBO},
         UniformBlockInfo{9, true, true, sizeof(LineUBO), idLineUBO},
         UniformBlockInfo{10, true, true, sizeof(LinePropertiesUBO), idLinePropertiesUBO},
         UniformBlockInfo{11, true, false, sizeof(LineInterpolationUBO), idLineInterpolationUBO},
-        UniformBlockInfo{12, true, false, sizeof(LineExpressionUBO), idLineExpressionUBO},
+        UniformBlockInfo{12, true, true, sizeof(LineExpressionUBO), idLineExpressionUBO},
 };
 const std::array<TextureInfo, 0> ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal>::textures = {};
 

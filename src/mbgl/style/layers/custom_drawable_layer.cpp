@@ -432,7 +432,7 @@ void CustomDrawableLayerHost::Interface::finish() {
                                                                lineOptions.gapWidth,
                                                                lineOptions.offset,
                                                                lineOptions.width,
-                                                               LinePropertyMask::None,
+                                                               LineExpressionMask::None,
                                                                0,
                                                                0};
             auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);

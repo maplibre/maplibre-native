@@ -61,23 +61,11 @@ struct alignas(16) GPUExpression {
         } bezier;
     } interpOptions;
 
-    /* 24 */ float pad[2];
+    /* 24 */ float inputs[maxStops];
 
-    struct FloatStop {
-        float input;
-        float output;
-        bool operator<(const FloatStop& rhs) const { return input < rhs.input; }
-    };
-
-    struct ColorStop {
-        float input;
-        float rgba[4];
-        bool operator<(const ColorStop& rhs) const { return input < rhs.input; }
-    };
-
-    /* 32 */ union Stops {
-        FloatStop floatStops[maxStops];
-        ColorStop colorStops[maxStops];
+    /* 24 + (4 * maxStops) = 88 */ union Stops {
+        float floats[maxStops];
+        float colors[2 * maxStops];
     } stops;
 
     static MutableUniqueGPUExpression create(GPUOutputType, std::uint16_t stopCount);
@@ -88,6 +76,8 @@ struct alignas(16) GPUExpression {
     template <typename T>
     auto evaluate(const float zoom) const;
 
+    Color getColor(std::size_t index) const;
+
     static const GPUExpression empty;
 
 private:
@@ -96,7 +86,8 @@ private:
         : outputType(type),
           stopCount(count) {}
 };
-static_assert(sizeof(GPUExpression) == 32 + 20 * GPUExpression::maxStops);
+static_assert(sizeof(GPUExpression) == 32 + (4 + 8) * GPUExpression::maxStops);
+static_assert(sizeof(GPUExpression) % 16 == 0);
 
 template <>
 inline auto GPUExpression::evaluate<Color>(const float zoom) const {
