@@ -1,0 +1,42 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+# build with
+# bazel build platform/glfw:app --//:renderer=metal --linkopt=-L/opt/homebrew/lib
+# glfw needs to be installed with homebrew
+
+cc_binary(
+    name = "app",
+    srcs = glob(
+               [
+                   "*.cpp",
+                   "*.hpp",
+               ],
+               exclude = [
+                   "glfw_*_backend.*",
+               ],
+           ) +
+           select({
+               "//:metal_renderer": [
+                   "glfw_metal_backend.cpp",
+                   "glfw_metal_backend.hpp",
+               ],
+               "//conditions:default": [
+                   "glfw_gl_backend.cpp",
+                   "glfw_gl_backend.hpp",
+               ],
+           }),
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    linkopts = [
+        "-lglfw3",
+    ] + select({
+        "@platforms//os:macos": [
+            "-framework Cocoa",
+            "-framework IOKit",
+        ],
+        "//conditions:default": [],
+    }),
+    deps = [
+        "//:maplibre_lib",
+        "@glfw",
+    ],
+)

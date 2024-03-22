@@ -31,8 +31,11 @@ jobs:
           fetch-depth: 0
       
       - name: Setup Bazel
-        run: cp platform/macos/bazel/example_config.bzl platform/macos/bazel/config.bzl
+        run: cp bazel/example_config.bzl bazel/config.bzl
       
-      - name: Build app for macOS
+      - name: Build AppKit app for macOS
         run: bazel build //platform/macos/app:macos_app --//:renderer=metal
       
+      - name: Build GLFW app for macOS
+        run: bazel build //platform/glfw/app --//:renderer=metal
+        

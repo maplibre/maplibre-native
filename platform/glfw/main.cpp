@@ -36,7 +36,7 @@ void quit_handler(int) {
 }
 
 int main(int argc, char* argv[]) {
-    args::ArgumentParser argumentParser("Mapbox GL GLFW example");
+    args::ArgumentParser argumentParser("MapLibre Native GLFW example");
     args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", {'h', "help"});
 
     args::Flag fullscreenFlag(argumentParser, "fullscreen", "Toggle fullscreen", {'f', "fullscreen"});
