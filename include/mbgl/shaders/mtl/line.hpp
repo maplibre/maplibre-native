@@ -20,59 +20,6 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 
-enum class GPUInterpType : uint16_t {
-    Step,
-    Linear,
-    Exponential,
-    Bezier
-};
-enum class GPUOutputType : uint16_t {
-    Float,
-    Color,
-};
-enum class GPUOptions : uint16_t {
-    None = 0,
-    IntegerZoom = 1 << 0,
-    Transitioning = 1 << 1,
-};
-constant const int maxExprStops = 16;
-struct alignas(16) GPUExpression {
-    GPUOutputType outputType;
-    uint16_t stopCount;
-    GPUOptions options;
-    GPUInterpType interpolation;
-
-    union InterpOptions {
-        struct Exponential {
-            float base;
-        } exponential;
-
-        struct Bezier {
-            float x1;
-            float y1;
-            float x2;
-            float y2;
-        } bezier;
-    } interpOptions;
-
-    struct FloatStop {
-        float input;
-        float output;
-    };
-
-    struct ColorStop {
-        float input;
-        float rgba[4];
-    };
-
-    union Stops {
-        FloatStop floatStops[maxExprStops];
-        ColorStop colorStops[maxExprStops];
-    } stops;
-};
-static_assert(sizeof(GPUExpression) == 32 + 20 * maxExprStops, "wrong alignment");
-
-
 struct alignas(16) LineExpressionUBO {
     GPUExpression color;
     GPUExpression blur;
@@ -123,6 +70,11 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_opacity)
     float opacity;
 #endif
+        bool expr;
+        float2 pos;
+        float2 offset2;
+        float4 extr;
+        float4 tpos;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
@@ -143,12 +95,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto offset   = unpack_mix_float(vertx.offset, interp.offset_t) * -1;
 #endif
 #if defined(HAS_UNIFORM_u_width)
-    const auto width    = props.width;
+    const float4 tpos = line.matrix * float4(floor(float2(vertx.pos_normal) * 0.5), 0.0, 1.0);
+    const auto exprWidth = /*(tpos.x > 0) &&*/ (props.expressionMask & LineExpressionMask::Width);
+    const auto width    = exprWidth ? expr.width.eval(dynamic.zoom) : props.width;
 #else
+    const float4 tpos = float4(0,0,0,0);
+    const auto exprWidth = false;
     const auto width    = unpack_mix_float(vertx.width, interp.width_t);
 #endif
 
-    // the distance over which the line edge fades out.
+    // the distance over which the line edge fades out.e
     // Retina devices need a smaller distance to avoid aliasing.
     const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
@@ -199,20 +155,33 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity     = unpack_mix_float(vertx.opacity, interp.opacity_t),
 #endif
+        .expr = exprWidth,
+        .pos = pos,
+        .offset2 = offset2,
+        .extr = projected_extrude,
+        .tpos = tpos,
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+                            device const LineDynamicUBO& dynamic [[buffer(8)]],
                             device const LineUBO& line [[buffer(9)]],
-                            device const LinePropertiesUBO& props [[buffer(10)]]) {
+                            device const LinePropertiesUBO& props [[buffer(10)]],
+                            device const LineExpressionUBO& expr [[buffer(12)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
-    const float4 color = props.color;
+    //const float4 color = props.color;
+    //const float4 color = in.expr ? float4(1,0,1,1) : props.color;
+
+    const auto exprColor = (props.expressionMask & LineExpressionMask::Color);
+    const auto color    = exprColor ? expr.color.evalColor(dynamic.zoom) : props.color;
+
 #else
-    const float4 color = in.color;
+    //const float4 color = in.color;
+    const float4 color = in.expr ? float4(1,0,1,1) : in.color;
 #endif
 #if defined(HAS_UNIFORM_u_blur)
     const float blur = props.blur;

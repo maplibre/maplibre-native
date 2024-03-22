@@ -250,7 +250,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                                            /*gapwidth*/ 0.f,
                                                            /*offset*/ 0.f,
                                                            /*width*/ 4.f,
-                                                           LinePropertyMask::None,
+                                                           LineExpressionMask::None,
                                                            0,
                                                            0};
         auto tweaker = std::make_shared<PolylineDrawableTweaker>(linePropertiesUBO);
