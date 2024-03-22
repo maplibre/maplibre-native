@@ -39,7 +39,7 @@ jobs:
           path: ~/.cache/bazel
             
       - name: Install dependencies
-        run: brew install libuv webp
+        run: brew install libuv webp icu4c
       
       - name: Setup Bazel
         run: cp bazel/example_config.bzl bazel/config.bzl
