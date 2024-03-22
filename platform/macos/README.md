@@ -8,10 +8,10 @@ Clone the repo:
 git clone --recurse-submodules git@github.com:maplibre/maplibre-native.git
 ```
 
-Install needed tooling:
+Install needed tooling and dependencies:
 
 ```sh
-brew install bazelisk
+brew install bazelisk webp libuv jpeg-turbo
 ```
 
 Setup Bazel config:

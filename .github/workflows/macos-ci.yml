@@ -29,9 +29,17 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Cache Bazel
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+          path: ~/.cache/bazel
             
       - name: Install dependencies
-        run: brew install libuv
+        run: brew install libuv webp
       
       - name: Setup Bazel
         run: cp bazel/example_config.bzl bazel/config.bzl
