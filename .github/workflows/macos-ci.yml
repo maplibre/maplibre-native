@@ -29,13 +29,16 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+            
+      - name: Install dependencies
+        run: brew install libuv
       
       - name: Setup Bazel
         run: cp bazel/example_config.bzl bazel/config.bzl
       
       - name: Build AppKit app for macOS
-        run: bazel build //platform/macos/app:macos_app --//:renderer=metal
+        run: bazel build //platform/macos/app:macos_app --//:renderer=metal --linkopt=-L/opt/homebrew/lib
       
       - name: Build GLFW app for macOS
-        run: bazel build //platform/glfw/app --//:renderer=metal
+        run: bazel build //platform/glfw/app --//:renderer=metal --linkopt=-L/opt/homebrew/lib
         
