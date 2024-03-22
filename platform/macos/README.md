@@ -11,7 +11,7 @@ git clone --recurse-submodules git@github.com:maplibre/maplibre-native.git
 Install needed tooling and dependencies:
 
 ```sh
-brew install bazelisk webp libuv jpeg-turbo
+brew install bazelisk webp libuv jpeg-turbo icu4c
 ```
 
 Setup Bazel config:
