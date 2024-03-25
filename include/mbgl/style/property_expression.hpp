@@ -38,8 +38,8 @@ struct alignas(16) GPUExpression {
 
     GPUExpression(GPUExpression&&) = default;
     GPUExpression(const GPUExpression&) = default;
-    GPUExpression(const GPUExpression* other)
-        : GPUExpression(other ? *other : empty) {}
+    GPUExpression(const GPUExpression* ptr)
+        : GPUExpression(ptr ? *ptr : empty) {}
     GPUExpression& operator=(GPUExpression&&) = default;
     GPUExpression& operator=(const GPUExpression&) = default;
 
@@ -104,8 +104,28 @@ public:
     using Dependency = expression::Dependency;
     using ZoomCurvePtr = expression::ZoomCurvePtr;
 
+    PropertyExpressionBase(const PropertyExpressionBase& other)
+        : expression(other.expression),
+          gpuExpression(other.gpuExpression ? new GPUExpression(*(other.gpuExpression)) : nullptr),
+          zoomCurve(other.zoomCurve),
+          useIntegerZoom_(other.useIntegerZoom_),
+          isZoomConstant_(other.isZoomConstant_),
+          isFeatureConstant_(other.isFeatureConstant_),
+          isRuntimeConstant_(other.isRuntimeConstant_),
+          isGPUCapable_(other.isGPUCapable_) {}
     explicit PropertyExpressionBase(std::unique_ptr<Expression>);
     virtual ~PropertyExpressionBase() = default;
+
+    PropertyExpressionBase& operator=(const PropertyExpressionBase& other) {
+        expression = other.expression;
+        gpuExpression.reset(other.gpuExpression ? new GPUExpression(*(other.gpuExpression)) : nullptr);
+        zoomCurve = other.zoomCurve;
+        useIntegerZoom_ = other.useIntegerZoom_;
+        isZoomConstant_ = other.isZoomConstant_;
+        isFeatureConstant_ = other.isFeatureConstant_;
+        isRuntimeConstant_ = other.isRuntimeConstant_;
+        isGPUCapable_ = other.isGPUCapable_;
+    }
 
     bool isZoomConstant() const noexcept { return isZoomConstant_; }
     bool isFeatureConstant() const noexcept { return isFeatureConstant_; }
@@ -123,7 +143,8 @@ public:
     /// expression. May be removed if a better way of aggregation is found.
     std::shared_ptr<const Expression> getSharedExpression() const noexcept;
 
-    UniqueGPUExpression getGPUExpression(bool transitioning, bool intZoom) const;
+    /// Build a cached GPU representation of the expression, with the same lifetime as this object.
+    const GPUExpression* getGPUExpression(bool intZoom);
 
     Dependency getDependencies() const noexcept { return expression ? expression->dependencies : Dependency::None; }
 
@@ -131,6 +152,7 @@ public:
 
 protected:
     std::shared_ptr<const Expression> expression;
+    UniqueGPUExpression gpuExpression;
 
     ZoomCurvePtr zoomCurve;
 

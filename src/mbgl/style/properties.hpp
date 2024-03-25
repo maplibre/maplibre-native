@@ -74,6 +74,7 @@ public:
 
     bool isUndefined() const noexcept { return value.isUndefined(); }
 
+    Value& getValue() noexcept { return value; }
     const Value& getValue() const noexcept { return value; }
 
 private:
@@ -337,11 +338,11 @@ public:
             return result;
         }
 
-        using GPUExpressions = std::array<UniqueGPUExpression, UnevaluatedTypes::TypeCount>;
+        using GPUExpressions = std::array<const GPUExpression*, UnevaluatedTypes::TypeCount>;
 
         /// Get the GPU expressions, if applicable, for each item in the tuple.
         /// Expression lifetimes match this object.
-        GPUExpressions getGPUExpressions(TimePoint now) const {
+        GPUExpressions getGPUExpressions(TimePoint now) {
             return util::to_array(std::make_tuple((getGPUExpression<Ps>(now))...));
         }
 
@@ -361,24 +362,23 @@ public:
         // gather GPU expression representation for each type that can appear in this tuple
 
         template <class P>
-        UniqueGPUExpression getGPUExpression(TimePoint now) const {
+        const GPUExpression* getGPUExpression(TimePoint now) {
             return getGPUExpression(this->template get<P>(), now, P::EvaluatorType::useIntegerZoom);
         }
 
         template <class P>
-        UniqueGPUExpression getGPUExpression(const PropertyValue<P>& val, bool transitioning, bool intZoom) const {
-            return (!transitioning && val.isExpression()) ? val.asExpression().getGPUExpression(false, intZoom)
-                                                          : nullptr;
+        static const GPUExpression* getGPUExpression(PropertyValue<P>& val, bool transitioning, bool intZoom) {
+            return (!transitioning && val.isExpression()) ? val.asExpression().getGPUExpression(intZoom) : nullptr;
         }
 
-        UniqueGPUExpression getGPUExpression(const style::ColorRampPropertyValue&,
-                                             bool /*transitioning*/,
-                                             bool /*intZoom*/) const {
+        static const GPUExpression* getGPUExpression(const style::ColorRampPropertyValue&,
+                                                     bool /*transitioning*/,
+                                                     bool /*intZoom*/) {
             return nullptr;
         }
 
         template <class P>
-        UniqueGPUExpression getGPUExpression(const Transitioning<P>& val, TimePoint now, bool intZoom) const {
+        static const GPUExpression* getGPUExpression(Transitioning<P>& val, TimePoint now, bool intZoom) {
             return getGPUExpression(val.getValue(), val.isTransitioning(now), intZoom);
         }
     };
