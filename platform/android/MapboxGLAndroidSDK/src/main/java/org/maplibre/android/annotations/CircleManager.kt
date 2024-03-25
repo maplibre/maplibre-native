@@ -127,7 +127,7 @@ class CircleManager @UiThread internal constructor(
     /**
      * The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.
      */
-    var circleTranslate: Array<Float?>?
+    var circleTranslate: Array<Float>?
         get() = layer.circleTranslate.value
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.circleTranslate(value)

@@ -24,8 +24,14 @@ class Text(
     val opacity: Float = Defaults.TEXT_OPACITY,
     @ColorInt val color: Int = Defaults.TEXT_COLOR,
     val halo: Halo? = Defaults.TEXT_HALO,
-    // val pitchAlignment: Alignment?, (NDD)
-    // val lineHeight: Float = 1.2f (NDD)
+    /**
+     * NDD
+     */
+    val pitchAlignment: Alignment? = Defaults.TEXT_PITCH_ALIGNMENT,
+    /**
+     * NDD
+     */
+    val lineHeight: Float = Defaults.TEXT_LINE_HEIGHT
 ) {
 
     init {

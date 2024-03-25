@@ -160,7 +160,7 @@ class LineManager @UiThread internal constructor(
     /**
      * The geometry's offset. Values are [x, y] where negatives indicate left and up, respectively.
      */
-    var lineTranslate: Array<Float?>?
+    var lineTranslate: Array<Float>?
         get() = layer.lineTranslate.value
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.lineTranslate(value)
@@ -182,7 +182,7 @@ class LineManager @UiThread internal constructor(
     /**
      * Specifies the lengths of the alternating dashes and gaps that form the dash pattern. The lengths are later scaled by the line width. To convert a dash length to density-independent pixels, multiply the length by the current line width. Note that GeoJSON sources with `lineMetrics: true` specified won't render dashed lines to the expected scale. Also note that zoom-dependent expressions will be evaluated only at integer zoom levels.
      */
-    var lineDasharray: Array<Float?>?
+    var lineDasharray: Array<Float>?
         get() = layer.lineDasharray.value
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.lineDasharray(value)

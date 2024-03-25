@@ -3,9 +3,10 @@ package org.maplibre.android.annotations
 import android.graphics.PointF
 import androidx.annotation.ColorInt
 import com.mapbox.android.gestures.MoveDistancesObject
-import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
+import org.maplibre.android.annotations.data.Alignment
 import org.maplibre.android.annotations.data.Defaults
+import org.maplibre.android.annotations.data.Translate
 import org.maplibre.android.constants.GeometryConstants
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Projection
@@ -17,7 +18,9 @@ class Circle @JvmOverloads constructor(
     blur: Float? = Defaults.CIRCLE_BLUR,
     opacity: Float = Defaults.CIRCLE_OPACITY,
     stroke: Stroke? = Defaults.CIRCLE_STROKE,
-    // TODO: NDD translate, pitchScale, pitchAlignment
+    translate: Translate? = Defaults.CIRCLE_TRANSLATE,
+    pitchScale: Alignment = Defaults.CIRCLE_PITCH_SCALE,
+    pitchAlignment: Alignment = Defaults.CIRCLE_PITCH_ALIGNMENT
 ) : KAnnotation<Point>() {
     var center: LatLng = center
         set(value) {
@@ -42,6 +45,9 @@ class Circle @JvmOverloads constructor(
         }
     var opacity: Float = opacity
         set(value) {
+            if (value > 1f || value < 0f) {
+                throw IllegalArgumentException("Opacity must be between 0 and 1 (inclusive)")
+            }
             field = value
             updateThis()
         }
@@ -49,6 +55,21 @@ class Circle @JvmOverloads constructor(
         set(value) {
             field = value
             updateThis()
+        }
+    var translate: Translate? = translate
+        set(value) {
+            field = value
+            updateAll()
+        }
+    var pitchScale: Alignment = pitchScale
+        set(value) {
+            field = value
+            updateAll()
+        }
+    var pitchAlignment: Alignment = pitchAlignment
+        set(value) {
+            field = value
+            updateAll()
         }
 
     override var clickListener: OnAnnotationClickListener<Circle>? = null

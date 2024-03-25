@@ -13,8 +13,10 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.MenuItemCompat
 import org.maplibre.android.annotations.Symbol
+import org.maplibre.android.annotations.data.Alignment
 import org.maplibre.android.annotations.data.Icon
 import org.maplibre.android.annotations.data.Text
 import org.maplibre.android.geometry.LatLng
@@ -96,15 +98,17 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
     private fun showGlMarkers(amount: Int) {
         val random = Random()
         var randomIndex: Int
-        val icon = Icon(AppCompatResources.getDrawable(this, R.drawable.ic_android)!!)
+        val bitmap = AppCompatResources.getDrawable(this, R.drawable.ic_android)!!.toBitmap()
         for (i in 0 until amount) {
             randomIndex = random.nextInt(locations!!.size)
             val latLng = locations!![randomIndex]
+
+            val pitchAlignment = if (i == 2) Alignment.VIEWPORT else Alignment.MAP
             maplibreMap.addAnnotation(
                 Symbol(
                     position = latLng,
-                    text = Text(i.toString(), color = Color.WHITE),
-                    icon = icon
+                    text = Text(i.toString(), color = Color.WHITE, pitchAlignment = pitchAlignment),
+                    icon = Icon(bitmap, pitchAlignment = pitchAlignment)
                 ).apply {
                     if (i == 0) {
                         clickListener = {
@@ -116,6 +120,8 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
                     if (i == 1) {
                         draggable = true
                     }
+
+                    zLayer = i % 10
                 }
             )
         }

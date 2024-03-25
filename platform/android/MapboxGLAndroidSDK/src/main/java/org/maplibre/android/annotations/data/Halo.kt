@@ -3,7 +3,7 @@ package org.maplibre.android.annotations.data
 import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
 
-class Halo(
+data class Halo(
     @FloatRange(from = 0.0, fromInclusive = false)
     val width: Float,
     @ColorInt val color: Int,

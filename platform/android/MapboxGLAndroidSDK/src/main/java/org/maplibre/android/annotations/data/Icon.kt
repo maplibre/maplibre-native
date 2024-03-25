@@ -26,9 +26,18 @@ open class Icon(
     val anchor: Anchor = Defaults.ICON_ANCHOR,
     @FloatRange(from = 0.0, to = 1.0)
     val opacity: Float = Defaults.ICON_OPACITY,
-    // TODO val fitText: FitText = Defaults.ICON_FIT_TEXT, // NDD
-    // TODO val keepUpright: Boolean = false // (NDD)
-    // TODO val pitchAlignment: Alignment? (NDD)
+    /**
+     * NDD
+     */
+    val fitText: FitText = Defaults.ICON_FIT_TEXT,
+    /**
+     * NDD
+     */
+    val keepUpright: Boolean = Defaults.ICON_KEEP_UPRIGHT,
+    /**
+     * NDD
+     */
+    val pitchAlignment: Alignment? = Defaults.ICON_PITCH_ALIGNMENT
 ) {
 
     constructor(
@@ -37,8 +46,11 @@ open class Icon(
         rotate: Float = Defaults.ICON_ROTATE,
         offset: PointF = Defaults.ICON_OFFSET,
         anchor: Anchor = Defaults.ICON_ANCHOR,
-        opacity: Float = Defaults.ICON_OPACITY
-    ) : this(image.toBitmap(), size, rotate, offset, anchor, opacity)
+        opacity: Float = Defaults.ICON_OPACITY,
+        fitText: FitText = Defaults.ICON_FIT_TEXT,
+        keepUpright: Boolean = Defaults.ICON_KEEP_UPRIGHT,
+        pitchAlignment: Alignment? = Defaults.ICON_PITCH_ALIGNMENT
+    ) : this(image.toBitmap(), size, rotate, offset, anchor, opacity, fitText, keepUpright, pitchAlignment)
 
     init {
         if (opacity > 1f || opacity < 0f) {
