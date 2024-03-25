@@ -3,23 +3,33 @@ package org.maplibre.android.annotations
 import android.graphics.Bitmap
 import android.graphics.Paint.Cap
 import androidx.annotation.UiThread
+import androidx.annotation.VisibleForTesting
 import org.maplibre.android.annotations.data.Alignment
-import org.maplibre.android.annotations.data.Icon
 import org.maplibre.android.annotations.data.Translate
-import org.maplibre.android.annotations.data.toArray
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import org.maplibre.android.style.layers.CircleLayer
+import org.maplibre.android.style.layers.FillLayer
+import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.Property
-import kotlin.reflect.KClass
+import org.maplibre.android.style.layers.SymbolLayer
 
 /**
  * Has logic for spawning annotation managers for its collection of annotations.
  */
-class KAnnotationContainer(
+internal class KAnnotationContainer
+@JvmOverloads constructor(
     private val mapLibreMap: MapLibreMap,
     private val mapView: MapView,
-    private var style: Style?
+    private var style: Style?,
+    private val draggableAnnotationController: DraggableAnnotationController = DraggableAnnotationController.getInstance(
+        mapView, mapLibreMap
+    ),
+    private val symbolElementProvider: CoreElementProvider<SymbolLayer> = SymbolElementProvider(),
+    private val lineElementProvider: CoreElementProvider<LineLayer> = LineElementProvider(),
+    private val circleElementProvider: CoreElementProvider<CircleLayer> = CircleElementProvider(),
+    private val fillElementProvider: CoreElementProvider<FillLayer> = FillElementProvider()
 ) {
 
     private val annotationList: MutableList<KAnnotation<*>> = mutableListOf()
@@ -129,7 +139,14 @@ class KAnnotationContainer(
             val below = managers.keys.firstOrNull { it.z > key.z }?.let { managers[it] }?.layerId
 
             when (key) {
-                is SymbolKey -> SymbolManager(mapView, mapLibreMap, style, below).apply {
+                is SymbolKey -> SymbolManager(
+                    mapView,
+                    mapLibreMap,
+                    style,
+                    belowLayerId = below,
+                    draggableAnnotationController = draggableAnnotationController,
+                    coreElementProvider = symbolElementProvider
+                ).apply {
                     // Non-collision group symbols do not interfere with each other
                     textAllowOverlap = true
                     iconAllowOverlap = true
@@ -162,7 +179,14 @@ class KAnnotationContainer(
 
                 }
 
-                is LineKey -> LineManager(mapView, mapLibreMap, style, below).apply {
+                is LineKey -> LineManager(
+                    mapView = mapView,
+                    maplibreMap = mapLibreMap,
+                    style = style,
+                    belowLayerId = below,
+                    draggableAnnotationController = draggableAnnotationController,
+                    coreElementProvider = lineElementProvider
+                ).apply {
                     lineCap = when (key.cap) {
                         Cap.BUTT -> Property.LINE_CAP_BUTT
                         Cap.ROUND -> Property.LINE_CAP_ROUND
@@ -181,7 +205,14 @@ class KAnnotationContainer(
 
                 }
 
-                is CircleKey -> CircleManager(mapView, mapLibreMap, style, below).apply {
+                is CircleKey -> CircleManager(
+                    mapView = mapView,
+                    maplibreMap = mapLibreMap,
+                    style = style,
+                    belowLayerId = below,
+                    draggableAnnotationController = draggableAnnotationController,
+                    coreElementProvider = circleElementProvider
+                ).apply {
                     key.translate?.let { translate ->
                         circleTranslate = arrayOf(translate.offset.x, translate.offset.y)
                         circleTranslateAnchor = when (translate.anchor) {
@@ -200,7 +231,14 @@ class KAnnotationContainer(
                     }
                 }
 
-                is FillKey -> FillManager(mapView, mapLibreMap, style, below).apply {
+                is FillKey -> FillManager(
+                    mapView = mapView,
+                    maplibreMap = mapLibreMap,
+                    style = style,
+                    belowLayerId = below,
+                    draggableAnnotationController = draggableAnnotationController,
+                    coreElementProvider = fillElementProvider
+                ).apply {
                     fillAntialias = key.antialias
 
                     key.translate?.let { translate ->
@@ -214,4 +252,9 @@ class KAnnotationContainer(
             }
         }?.also { put(key, it) }
 
+    @VisibleForTesting
+    internal val size get() = annotationList.size
+
+    @VisibleForTesting
+    internal val managerCount get() = managers.size
 }
