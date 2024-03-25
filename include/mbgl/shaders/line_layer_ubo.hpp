@@ -75,7 +75,9 @@ enum {
     idLineUBO,
     idLinePropertiesUBO,
     idLineInterpolationUBO,
+#if MLN_RENDER_BACKEND_METAL
     idLineExpressionUBO,
+#endif // MLN_RENDER_BACKEND_METAL
     lineUBOCount
 };
 

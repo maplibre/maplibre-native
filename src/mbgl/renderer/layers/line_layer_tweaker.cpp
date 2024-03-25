@@ -85,12 +85,12 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     const auto getExpressionBuffer = [&]() {
         if (!expressionUniformBuffer || gpuExpressionsUpdated) {
             LineExpressionUBO exprUBO = {
-                /* color = */ gpuExpressions[propertyIndex<LineColor>()].get(),
-                /* blur = */ gpuExpressions[propertyIndex<LineBlur>()].get(),
-                /* opacity = */ gpuExpressions[propertyIndex<LineOpacity>()].get(),
-                /* gapwidth = */ gpuExpressions[propertyIndex<LineGapWidth>()].get(),
-                /* offset = */ gpuExpressions[propertyIndex<LineOffset>()].get(),
-                /* width = */ gpuExpressions[propertyIndex<LineWidth>()].get(),
+                /* color = */ gpuExpressions[propertyIndex<LineColor>()],
+                /* blur = */ gpuExpressions[propertyIndex<LineBlur>()],
+                /* opacity = */ gpuExpressions[propertyIndex<LineOpacity>()],
+                /* gapwidth = */ gpuExpressions[propertyIndex<LineGapWidth>()],
+                /* offset = */ gpuExpressions[propertyIndex<LineOffset>()],
+                /* width = */ gpuExpressions[propertyIndex<LineWidth>()],
             };
             context.emplaceOrUpdateUniformBuffer(expressionUniformBuffer, &exprUBO);
             gpuExpressionsUpdated = false;

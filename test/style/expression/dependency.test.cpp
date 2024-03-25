@@ -94,14 +94,8 @@ TEST(ExpressionDependencies, Format) {
 }
 
 TEST(ExpressionDependencies, MaskTests) {
-    EXPECT_FALSE(any(Dependency::Feature, Dependency::None));
-    EXPECT_TRUE(any(Dependency::Feature));
-    EXPECT_TRUE(any(Dependency::Feature, Dependency::Feature));
-    EXPECT_TRUE(any(Dependency::Feature, Dependency::Feature | Dependency::Zoom));
-    EXPECT_TRUE(any(Dependency::Feature | Dependency::Zoom, Dependency::Feature));
-
-    EXPECT_FALSE(all(Dependency::Feature));
-    EXPECT_TRUE(all(Dependency::Feature, Dependency::Feature));
-    EXPECT_FALSE(all(Dependency::Feature, Dependency::Feature | Dependency::Zoom));
-    EXPECT_TRUE(all(Dependency::Feature | Dependency::Zoom, Dependency::Feature | Dependency::Zoom));
+    EXPECT_FALSE(Dependency::Feature & Dependency::None);
+    EXPECT_TRUE(Dependency::Feature & Dependency::Feature);
+    EXPECT_TRUE(Dependency::Feature & (Dependency::Feature | Dependency::Zoom));
+    EXPECT_TRUE((Dependency::Feature | Dependency::Zoom) & Dependency::Feature);
 }

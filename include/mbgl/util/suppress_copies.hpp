@@ -11,10 +11,18 @@ struct SuppressCopies {
     SuppressCopies(SuppressCopies const&) {}
     SuppressCopies(SuppressCopies&& other)
         : value(std::forward<T>(other.value)) {}
+    SuppressCopies& operator=(T&& o) {
+        value = std::move(o);
+        return *this;
+    }
     SuppressCopies& operator=(SuppressCopies o) {
         std::swap(value, o.value);
         return *this;
     }
+
+    T& operator->() { return value; }
+    const T& operator->() const { return value; }
+
     operator T&() { return value; }
     T& get() { return value; }
 

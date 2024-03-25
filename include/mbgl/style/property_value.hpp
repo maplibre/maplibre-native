@@ -47,6 +47,7 @@ public:
 
     const T& asConstant() const { return value.template get<T>(); }
 
+    PropertyExpression<T>& asExpression() { return value.template get<PropertyExpression<T>>(); }
     const PropertyExpression<T>& asExpression() const { return value.template get<PropertyExpression<T>>(); }
 
     template <class... Ts>
