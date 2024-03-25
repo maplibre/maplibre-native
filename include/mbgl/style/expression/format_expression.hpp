@@ -25,22 +25,22 @@ struct FormatExpressionSection {
 
 class FormatExpression final : public Expression {
 public:
-    explicit FormatExpression(std::vector<FormatExpressionSection> sections);
+    explicit FormatExpression(std::vector<FormatExpressionSection> sections) noexcept;
 
     EvaluationResult evaluate(const EvaluationContext&) const override;
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
 
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
-    std::vector<std::optional<Value>> possibleOutputs() const override {
+    std::vector<std::optional<Value>> possibleOutputs() const noexcept override {
         // Technically the combinatoric set of all children
         // Usually, this.text will be undefined anyway
         return {std::nullopt};
     }
 
-    const std::vector<FormatExpressionSection>& getSections() const { return sections; }
+    const std::vector<FormatExpressionSection>& getSections() const noexcept { return sections; }
 
     mbgl::Value serialize() const override;
     std::string getOperator() const override { return "format"; }

@@ -29,11 +29,12 @@ std::unique_ptr<Expression> createExpression(const mbgl::style::conversion::Conv
 std::unique_ptr<Expression> error(std::string);
 
 std::unique_ptr<Expression> literal(const char* value);
+std::unique_ptr<Expression> literal(Value&& value);
 std::unique_ptr<Expression> literal(const Value& value);
 std::unique_ptr<Expression> literal(std::initializer_list<double> value);
 std::unique_ptr<Expression> literal(std::initializer_list<const char*> value);
 
-std::unique_ptr<Expression> assertion(const type::Type&,
+std::unique_ptr<Expression> assertion(type::Type,
                                       std::unique_ptr<Expression>,
                                       std::unique_ptr<Expression> def = nullptr);
 std::unique_ptr<Expression> number(std::unique_ptr<Expression>, std::unique_ptr<Expression> def = nullptr);
@@ -61,9 +62,9 @@ std::unique_ptr<Expression> step(std::unique_ptr<Expression> input,
                                  double input1,
                                  std::unique_ptr<Expression> output1);
 
-Interpolator linear();
-Interpolator exponential(double base);
-Interpolator cubicBezier(double x1, double y1, double x2, double y2);
+Interpolator linear() noexcept;
+Interpolator exponential(double base) noexcept;
+Interpolator cubicBezier(double x1, double y1, double x2, double y2) noexcept;
 
 std::unique_ptr<Expression> interpolate(Interpolator interpolator,
                                         std::unique_ptr<Expression> input,

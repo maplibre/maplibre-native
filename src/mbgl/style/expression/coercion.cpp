@@ -12,26 +12,26 @@ using CoerceFunction = EvaluationResult (*)(const Value&);
 
 namespace {
 
-EvaluationResult toBoolean(const Value& v) {
-    return v.match([&](double f) { return static_cast<bool>(f); },
-                   [&](const std::string& s) { return s.length() > 0; },
-                   [&](bool b) { return b; },
-                   [&](const NullValue&) { return false; },
-                   [&](const Image& i) { return i.isAvailable(); },
-                   [&](const auto&) { return true; });
+EvaluationResult toBoolean(const Value& v) noexcept {
+    return v.match([&](double f) noexcept { return static_cast<bool>(f); },
+                   [&](const std::string& s) noexcept { return s.length() > 0; },
+                   [&](bool b) noexcept { return b; },
+                   [&](const NullValue&) noexcept { return false; },
+                   [&](const Image& i) noexcept { return i.isAvailable(); },
+                   [&](const auto&) noexcept { return true; });
 }
 
 EvaluationResult toNumber(const Value& v) {
-    std::optional<double> result = v.match([](NullValue) -> std::optional<double> { return 0.0; },
-                                           [](const double f) -> std::optional<double> { return f; },
-                                           [](const std::string& s) -> std::optional<double> {
+    std::optional<double> result = v.match([](NullValue) noexcept -> std::optional<double> { return 0.0; },
+                                           [](const double f) noexcept -> std::optional<double> { return f; },
+                                           [](const std::string& s) noexcept -> std::optional<double> {
                                                try {
                                                    return util::stof(s);
                                                } catch (...) {
                                                    return {};
                                                }
                                            },
-                                           [](const auto&) { return std::optional<double>(); });
+                                           [](const auto&) noexcept { return std::optional<double>(); });
     if (!result) {
         return EvaluationError{"Could not convert " + stringify(v) + " to number."};
     }
@@ -40,7 +40,7 @@ EvaluationResult toNumber(const Value& v) {
 
 EvaluationResult toColor(const Value& colorValue) {
     return colorValue.match(
-        [&](const Color& color) -> EvaluationResult { return color; },
+        [&](const Color& color) noexcept -> EvaluationResult { return color; },
         [&](const std::string& colorString) -> EvaluationResult {
             const std::optional<Color> result = Color::parse(colorString);
             if (result) {
@@ -50,8 +50,8 @@ EvaluationResult toColor(const Value& colorValue) {
             }
         },
         [&colorValue](const std::vector<Value>& components) -> EvaluationResult {
-            std::size_t len = components.size();
-            bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) -> bool {
+            const std::size_t len = components.size();
+            bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) noexcept -> bool {
                 return item.template is<double>();
             });
             if ((len == 3 || len == 4) && isNumeric) {
@@ -132,14 +132,15 @@ mbgl::Value Coercion::serialize() const {
 };
 
 std::string Coercion::getOperator() const {
-    return getType().match([](const type::BooleanType&) { return "to-boolean"; },
-                           [](const type::ColorType&) { return "to-color"; },
-                           [](const type::NumberType&) { return "to-number"; },
-                           [](const type::StringType&) { return "to-string"; },
-                           [](const auto&) {
-                               assert(false);
-                               return "";
-                           });
+    auto s = getType().match([](const type::BooleanType&) noexcept -> std::string_view { return "to-boolean"; },
+                             [](const type::ColorType&) noexcept -> std::string_view { return "to-color"; },
+                             [](const type::NumberType&) noexcept -> std::string_view { return "to-number"; },
+                             [](const type::StringType&) noexcept -> std::string_view { return "to-string"; },
+                             [](const auto&) noexcept -> std::string_view {
+                                 assert(false);
+                                 return "";
+                             });
+    return std::string(s);
 }
 
 using namespace mbgl::style::conversion;
@@ -203,9 +204,9 @@ void Coercion::eachChild(const std::function<void(const Expression&)>& visit) co
     }
 };
 
-bool Coercion::operator==(const Expression& e) const {
+bool Coercion::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Coercion) {
-        auto rhs = static_cast<const Coercion*>(&e);
+        const auto* rhs = static_cast<const Coercion*>(&e);
         return getType() == rhs->getType() && Expression::childrenEqual(inputs, rhs->inputs);
     }
     return false;

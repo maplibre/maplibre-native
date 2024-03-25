@@ -63,11 +63,11 @@ public:
         }
     }
 
-    bool hasTransition() const { return bool(prior); }
+    bool hasTransition() const noexcept { return bool(prior); }
 
-    bool isUndefined() const { return value.isUndefined(); }
+    bool isUndefined() const noexcept { return value.isUndefined(); }
 
-    const Value& getValue() const { return value; }
+    const Value& getValue() const noexcept { return value; }
 
 private:
     mutable std::optional<mapbox::util::recursive_wrapper<Transitioning<Value>>> prior;
@@ -99,10 +99,21 @@ struct ConstantsMask;
 template <class... Ps>
 struct ConstantsMask<TypeList<Ps...>> {
     template <class Properties>
-    static unsigned long getMask(const Properties& properties) {
-        std::bitset<sizeof...(Ps)> result;
-        util::ignore({result.set(TypeIndex<Ps, Ps...>::value, properties.template get<Ps>().isConstant())...});
-        return result.to_ulong();
+    static unsigned long getMask(const Properties& properties) noexcept {
+        const auto result = std::apply(
+            [](auto... v) noexcept { return (v | ...); },
+            std::make_tuple(
+                0ul,
+                (((properties.template get<Ps>().isConstant()) ? (1ul << (TypeIndex<Ps, Ps...>::value)) : 0ul))...));
+
+// temporary, for validation
+#if !defined(NDEBUG)
+        std::bitset<sizeof...(Ps)> old_result;
+        util::ignore({old_result.set(TypeIndex<Ps, Ps...>::value, properties.template get<Ps>().isConstant())...});
+        assert(result == old_result.to_ulong());
+#endif
+
+        return result;
     }
 };
 
@@ -268,7 +279,7 @@ public:
             return result;
         }
 
-        unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
+        unsigned long constantsMask() const noexcept { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
     };
 
     class Unevaluated : public Tuple<UnevaluatedTypes> {

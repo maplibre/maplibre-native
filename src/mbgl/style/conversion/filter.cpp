@@ -167,7 +167,7 @@ ParseResult convertLegacyHasFilter(const Convertible& values, Error& error) {
     } else if (*property == "$id") {
         return createExpression("filter-has-id", std::vector<std::unique_ptr<Expression>>(), error);
     } else {
-        return createExpression("filter-has", {std::make_unique<Literal>(*property)}, error);
+        return createExpression("filter-has", {std::make_unique<Literal>(std::move(*property))}, error);
     }
 }
 

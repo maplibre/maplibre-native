@@ -77,7 +77,7 @@ public:
         : TinyUnorderedMap(values_.begin(), values_.end()) {}
 
     /// Move constructor
-    TinyUnorderedMap(TinyUnorderedMap&& rhs)
+    TinyUnorderedMap(TinyUnorderedMap&& rhs) noexcept
         : linearSize(rhs.linearSize),
           keys(std::move(rhs.keys)),
           values(std::move(rhs.values)) {
@@ -127,7 +127,7 @@ public:
     }
 
     /// Swap all contents with another instance
-    TinyUnorderedMap& swap(TinyUnorderedMap& other) {
+    TinyUnorderedMap& swap(TinyUnorderedMap& other) noexcept {
         this->Super::swap(other);
         std::swap(keys, other.keys);
         std::swap(values, other.values);
@@ -154,12 +154,12 @@ public:
 
     std::size_t count(const Key& key) const noexcept { return find(key) ? 1 : 0; }
 
-    void clear() {
+    void clear() noexcept {
         linearSize = 0;
         this->Super::clear();
     }
 
-    bool operator==(const TinyUnorderedMap& other) const {
+    bool operator==(const TinyUnorderedMap& other) const noexcept {
         if (size() != other.size()) return false;
         assert(linearSize == other.linearSize);
         if (linearSize) {
@@ -179,7 +179,7 @@ private:
     std::array<std::optional<T>, LinearThreshold> values;
 
     auto makeFindPredicate(const Key& key) const noexcept {
-        return [&, eq = this->Super::key_eq()](const auto& x) {
+        return [&, eq = this->Super::key_eq()](const auto& x) noexcept {
             return eq(key, *x);
         };
     }

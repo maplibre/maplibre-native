@@ -121,11 +121,11 @@ public:
         LinePaintProperties::PossiblyEvaluated);
     ~LineLayerProperties() override;
 
-    unsigned long constantsMask() const override;
+    unsigned long constantsMask() const noexcept override;
 
     expression::Dependency getDependencies() const noexcept override;
 
-    const LineLayer::Impl& layerImpl() const;
+    const LineLayer::Impl& layerImpl() const noexcept;
     // Data members.
     CrossfadeParameters crossfade;
     LinePaintProperties::PossiblyEvaluated evaluated;

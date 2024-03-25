@@ -11,7 +11,7 @@ namespace expression {
 
 class Any : public Expression {
 public:
-    Any(std::vector<std::unique_ptr<Expression>> inputs_)
+    Any(std::vector<std::unique_ptr<Expression>> inputs_) noexcept
         : Expression(Kind::Any, type::Boolean, collectDependencies(inputs_)),
           inputs(std::move(inputs_)) {}
 
@@ -19,7 +19,7 @@ public:
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
     std::string getOperator() const override { return "any"; }
@@ -30,7 +30,7 @@ private:
 
 class All : public Expression {
 public:
-    All(std::vector<std::unique_ptr<Expression>> inputs_)
+    All(std::vector<std::unique_ptr<Expression>> inputs_) noexcept
         : Expression(Kind::All, type::Boolean, collectDependencies(inputs_)),
           inputs(std::move(inputs_)) {}
 
@@ -38,7 +38,7 @@ public:
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
     std::string getOperator() const override { return "all"; }

@@ -7,21 +7,21 @@
 namespace mbgl {
 namespace {
 
-vec3 toVec3(const vec4& v) {
+vec3 toVec3(const vec4& v) noexcept {
     return vec3{{v[0], v[1], v[2]}};
 }
 
-double vec4Dot(const vec4& a, const vec4& b) {
+double vec4Dot(const vec4& a, const vec4& b) noexcept {
     return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
 }
 
 template <size_t N>
-Point<double> ProjectPointsToAxis(const std::array<vec3, N>& points, const vec3& origin, const vec3& axis) {
+Point<double> ProjectPointsToAxis(const std::array<vec3, N>& points, const vec3& origin, const vec3& axis) noexcept {
     double min = std::numeric_limits<double>::max();
     double max = -std::numeric_limits<double>::max();
 
     for (const vec3& point : points) {
-        double projectedPoint = vec3Dot(vec3Sub(point, origin), axis);
+        const double projectedPoint = vec3Dot(vec3Sub(point, origin), axis);
         min = std::min(projectedPoint, min);
         max = std::max(projectedPoint, max);
     }
@@ -33,21 +33,21 @@ Point<double> ProjectPointsToAxis(const std::array<vec3, N>& points, const vec3&
 
 namespace util {
 
-AABB::AABB()
+AABB::AABB() noexcept
     : min({{0, 0, 0}}),
       max({{0, 0, 0}}) {}
 
-AABB::AABB(const vec3& min_, const vec3& max_)
+AABB::AABB(const vec3& min_, const vec3& max_) noexcept
     : min(min_),
       max(max_) {}
 
-vec3 AABB::closestPoint(const vec3& point) const {
+constexpr vec3 AABB::closestPoint(const vec3& point) const noexcept {
     return {{std::max(std::min(max[0], point[0]), min[0]),
              std::max(std::min(max[1], point[1]), min[1]),
              std::max(std::min(max[2], point[2]), min[2])}};
 }
 
-vec3 AABB::distanceXYZ(const vec3& point) const {
+vec3 AABB::distanceXYZ(const vec3& point) const noexcept {
     vec3 vec = vec3Sub(closestPoint(point), point);
 
     vec[0] = std::abs(vec[0]);
@@ -57,7 +57,7 @@ vec3 AABB::distanceXYZ(const vec3& point) const {
     return vec;
 }
 
-AABB AABB::quadrant(int idx) const {
+AABB AABB::quadrant(int idx) const noexcept {
     assert(idx >= 0 && idx < 4);
     vec3 quadrantMin = min;
     vec3 quadrantMax = max;
@@ -79,18 +79,18 @@ AABB AABB::quadrant(int idx) const {
     return {quadrantMin, quadrantMax};
 }
 
-bool AABB::intersects(const AABB& aabb) const {
+bool AABB::intersects(const AABB& aabb) const noexcept {
     if (min[0] > aabb.max[0] || aabb.min[0] > max[0]) return false;
     if (min[1] > aabb.max[1] || aabb.min[1] > max[1]) return false;
     if (min[2] > aabb.max[2] || aabb.min[2] > max[2]) return false;
     return true;
 }
 
-bool AABB::operator==(const AABB& aabb) const {
+bool AABB::operator==(const AABB& aabb) const noexcept {
     return min == aabb.min && max == aabb.max;
 }
 
-bool AABB::operator!=(const AABB& aabb) const {
+bool AABB::operator!=(const AABB& aabb) const noexcept {
     return !(*this == aabb);
 }
 

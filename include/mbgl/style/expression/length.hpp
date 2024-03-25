@@ -13,13 +13,13 @@ namespace expression {
 
 class Length : public Expression {
 public:
-    Length(std::unique_ptr<Expression> input);
+    Length(std::unique_ptr<Expression> input) noexcept;
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
     std::vector<std::optional<Value>> possibleOutputs() const override;
     std::string getOperator() const override { return "length"; }
 

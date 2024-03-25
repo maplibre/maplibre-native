@@ -98,11 +98,11 @@ public:
         LocationIndicatorPaintProperties::PossiblyEvaluated);
     ~LocationIndicatorLayerProperties() override;
 
-    unsigned long constantsMask() const override;
+    unsigned long constantsMask() const noexcept override;
 
     expression::Dependency getDependencies() const noexcept override;
 
-    const LocationIndicatorLayer::Impl& layerImpl() const;
+    const LocationIndicatorLayer::Impl& layerImpl() const noexcept;
     // Data members.
     LocationIndicatorPaintProperties::PossiblyEvaluated evaluated;
 };

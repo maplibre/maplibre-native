@@ -14,7 +14,7 @@ public:
     Range<uint8_t> zoomRange;
 
     // Compute the range of tiles covered by the bounds at maxZoom.
-    static TileRange fromLatLngBounds(const LatLngBounds& bounds, uint8_t minZoom, uint8_t maxZoom) {
+    static TileRange fromLatLngBounds(const LatLngBounds& bounds, uint8_t minZoom, uint8_t maxZoom) noexcept {
         if (minZoom > maxZoom) {
             std::swap(minZoom, maxZoom);
         }
@@ -33,9 +33,11 @@ public:
     }
 
     // Compute the range of tiles covered by the bounds.
-    static TileRange fromLatLngBounds(const LatLngBounds& bounds, uint8_t z) { return fromLatLngBounds(bounds, z, z); }
+    static TileRange fromLatLngBounds(const LatLngBounds& bounds, uint8_t z) noexcept {
+        return fromLatLngBounds(bounds, z, z);
+    }
 
-    bool contains(const CanonicalTileID& tileID) {
+    bool contains(const CanonicalTileID& tileID) noexcept {
         if (tileID.z <= zoomRange.max && tileID.z >= zoomRange.min) {
             if (tileID.z == 0) {
                 return true;

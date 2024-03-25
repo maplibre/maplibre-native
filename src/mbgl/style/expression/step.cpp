@@ -9,10 +9,8 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-Step::Step(const type::Type& type_,
-           std::unique_ptr<Expression> input_,
-           std::map<double, std::unique_ptr<Expression>> stops_)
-    : Expression(Kind::Step, type_, depsOf(input_) | collectDependencies(stops_)),
+Step::Step(type::Type type_, std::unique_ptr<Expression> input_, std::map<double, std::unique_ptr<Expression>> stops_)
+    : Expression(Kind::Step, std::move(type_), depsOf(input_) | collectDependencies(stops_)),
       input(std::move(input_)),
       stops(std::move(stops_)) {
     assert(input->getType() == type::Number);
@@ -56,7 +54,7 @@ void Step::eachStop(const std::function<void(double, const Expression&)>& visit)
     }
 }
 
-bool Step::operator==(const Expression& e) const {
+bool Step::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Step) {
         auto rhs = static_cast<const Step*>(&e);
         return *input == *(rhs->input) && Expression::childrenEqual(stops, rhs->stops);
@@ -74,7 +72,7 @@ std::vector<std::optional<Value>> Step::possibleOutputs() const {
     return result;
 }
 
-Range<float> Step::getCoveringStops(const double lower, const double upper) const {
+Range<float> Step::getCoveringStops(const double lower, const double upper) const noexcept {
     return ::mbgl::style::expression::getCoveringStops(stops, lower, upper);
 }
 
@@ -123,28 +121,28 @@ ParseResult Step::parse(const mbgl::style::conversion::Convertible& value, Parsi
         std::optional<double> label;
         if (labelValue) {
             labelValue->match(
-                [&](uint64_t n) {
+                [&](uint64_t n) noexcept {
                     if (n > std::numeric_limits<double>::max()) {
                         label = std::optional<double>{std::numeric_limits<double>::infinity()};
                     } else {
                         label = std::optional<double>{static_cast<double>(n)};
                     }
                 },
-                [&](int64_t n) {
+                [&](int64_t n) noexcept {
                     if (n > std::numeric_limits<double>::max()) {
                         label = std::optional<double>{std::numeric_limits<double>::infinity()};
                     } else {
                         label = std::optional<double>{static_cast<double>(n)};
                     }
                 },
-                [&](double n) {
+                [&](double n) noexcept {
                     if (n > std::numeric_limits<double>::max()) {
                         label = std::optional<double>{std::numeric_limits<double>::infinity()};
                     } else {
                         label = std::optional<double>{n};
                     }
                 },
-                [&](const auto&) {});
+                [&](const auto&) noexcept {});
         }
         if (!label) {
             ctx.error(
@@ -174,7 +172,7 @@ ParseResult Step::parse(const mbgl::style::conversion::Convertible& value, Parsi
 
     assert(outputType);
 
-    return ParseResult(std::make_unique<Step>(*outputType, std::move(*input), std::move(stops)));
+    return ParseResult(std::make_unique<Step>(std::move(*outputType), std::move(*input), std::move(stops)));
 }
 
 mbgl::Value Step::serialize() const {

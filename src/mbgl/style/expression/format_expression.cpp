@@ -25,7 +25,7 @@ void FormatExpressionSection::setTextSectionOptions(std::unique_ptr<Expression>&
     }
 }
 
-FormatExpression::FormatExpression(std::vector<FormatExpressionSection> sections_)
+FormatExpression::FormatExpression(std::vector<FormatExpressionSection> sections_) noexcept
     : Expression(Kind::FormatExpression, type::Formatted, collectDependencies(sections_, &depsOfSection)),
       sections(std::move(sections_)) {}
 
@@ -110,9 +110,9 @@ void FormatExpression::eachChild(const std::function<void(const Expression&)>& f
     }
 }
 
-bool FormatExpression::operator==(const Expression& e) const {
+bool FormatExpression::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::FormatExpression) {
-        auto rhs = static_cast<const FormatExpression*>(&e);
+        const auto* rhs = static_cast<const FormatExpression*>(&e);
         if (sections.size() != rhs->sections.size()) {
             return false;
         }

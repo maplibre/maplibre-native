@@ -14,14 +14,14 @@ class CollatorExpression : public Expression {
 public:
     CollatorExpression(std::unique_ptr<Expression> caseSensitive,
                        std::unique_ptr<Expression> diacriticSensitive,
-                       std::optional<std::unique_ptr<Expression>> locale);
+                       std::optional<std::unique_ptr<Expression>> locale) noexcept;
 
     EvaluationResult evaluate(const EvaluationContext&) const override;
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
 
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
-    bool operator==(const Expression&) const override;
+    bool operator==(const Expression&) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override {
         // Technically the set of possible outputs is the combinatoric set of

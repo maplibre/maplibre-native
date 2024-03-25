@@ -32,11 +32,11 @@ namespace style {
 
 <%- camelize(type) %>LayerProperties::~<%- camelize(type) %>LayerProperties() = default;
 
-unsigned long <%- camelize(type) %>LayerProperties::constantsMask() const {
+unsigned long <%- camelize(type) %>LayerProperties::constantsMask() const noexcept {
     return evaluated.constantsMask();
 }
 
-const <%- camelize(type) %>Layer::Impl& <%- camelize(type) %>LayerProperties::layerImpl() const {
+const <%- camelize(type) %>Layer::Impl& <%- camelize(type) %>LayerProperties::layerImpl() const noexcept {
     return static_cast<const <%- camelize(type) %>Layer::Impl&>(*baseImpl);
 }
 

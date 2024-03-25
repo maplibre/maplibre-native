@@ -28,12 +28,12 @@ public:
     Mutable(const Mutable&) = delete;
     Mutable& operator=(const Mutable&) = delete;
 
-    T* get() { return ptr.get(); }
-    T* operator->() { return ptr.get(); }
-    T& operator*() { return *ptr; }
+    T* get() noexcept { return ptr.get(); }
+    T* operator->() noexcept { return ptr.get(); }
+    T& operator*() noexcept { return *ptr; }
 
 private:
-    Mutable(std::shared_ptr<T>&& s)
+    Mutable(std::shared_ptr<T>&& s) noexcept
         : ptr(std::move(s)) {}
 
     std::shared_ptr<T> ptr;
@@ -45,7 +45,7 @@ private:
     friend Mutable<S> makeMutable(Args&&...);
     // NOLINTNEXTLINE(readability-redundant-declaration)
     template <class S, class U>
-    friend Mutable<S> staticMutableCast(const Mutable<U>&);
+    friend Mutable<S> staticMutableCast(const Mutable<U>&) noexcept;
 };
 
 template <class T, class... Args>
@@ -54,7 +54,7 @@ Mutable<T> makeMutable(Args&&... args) {
 }
 
 template <class S, class U>
-Mutable<S> staticMutableCast(const Mutable<U>& u) {
+Mutable<S> staticMutableCast(const Mutable<U>& u) noexcept {
     return Mutable<S>(std::static_pointer_cast<S>(u.ptr));
 }
 
@@ -73,18 +73,18 @@ template <class T>
 class Immutable {
 public:
     template <class S>
-    Immutable(Mutable<S>&& s)
+    Immutable(Mutable<S>&& s) noexcept
         : ptr(std::const_pointer_cast<const S>(std::move(s.ptr))) {}
 
     template <class S>
-    Immutable(Immutable<S> s)
+    Immutable(Immutable<S> s) noexcept
         : ptr(std::move(s.ptr)) {}
 
     Immutable(Immutable&&) noexcept = default;
     Immutable(const Immutable&) = default;
 
     template <class S>
-    Immutable& operator=(Mutable<S>&& s) {
+    Immutable& operator=(Mutable<S>&& s) noexcept {
         ptr = std::const_pointer_cast<const S>(std::move(s.ptr));
         return *this;
     }
@@ -92,16 +92,16 @@ public:
     Immutable& operator=(Immutable&&) noexcept = default;
     Immutable& operator=(const Immutable&) = default;
 
-    const T* get() const { return ptr.get(); }
-    const T* operator->() const { return ptr.get(); }
-    const T& operator*() const { return *ptr; }
+    const T* get() const noexcept { return ptr.get(); }
+    const T* operator->() const noexcept { return ptr.get(); }
+    const T& operator*() const noexcept { return *ptr; }
 
-    friend bool operator==(const Immutable<T>& lhs, const Immutable<T>& rhs) { return lhs.ptr == rhs.ptr; }
+    friend bool operator==(const Immutable<T>& lhs, const Immutable<T>& rhs) noexcept { return lhs.ptr == rhs.ptr; }
 
-    friend bool operator!=(const Immutable<T>& lhs, const Immutable<T>& rhs) { return lhs.ptr != rhs.ptr; }
+    friend bool operator!=(const Immutable<T>& lhs, const Immutable<T>& rhs) noexcept { return lhs.ptr != rhs.ptr; }
 
 private:
-    Immutable(std::shared_ptr<const T>&& s)
+    Immutable(std::shared_ptr<const T>&& s) noexcept
         : ptr(std::move(s)) {}
 
     std::shared_ptr<const T> ptr;
@@ -111,11 +111,11 @@ private:
 
     // NOLINTNEXTLINE(readability-redundant-declaration)
     template <class S, class U>
-    friend Immutable<S> staticImmutableCast(const Immutable<U>&);
+    friend Immutable<S> staticImmutableCast(const Immutable<U>&) noexcept;
 };
 
 template <class S, class U>
-Immutable<S> staticImmutableCast(const Immutable<U>& u) {
+Immutable<S> staticImmutableCast(const Immutable<U>& u) noexcept {
     return Immutable<S>(std::static_pointer_cast<const S>(u.ptr));
 }
 

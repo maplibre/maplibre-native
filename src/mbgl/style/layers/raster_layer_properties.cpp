@@ -21,11 +21,11 @@ RasterLayerProperties::RasterLayerProperties(
 
 RasterLayerProperties::~RasterLayerProperties() = default;
 
-unsigned long RasterLayerProperties::constantsMask() const {
+unsigned long RasterLayerProperties::constantsMask() const noexcept {
     return evaluated.constantsMask();
 }
 
-const RasterLayer::Impl& RasterLayerProperties::layerImpl() const {
+const RasterLayer::Impl& RasterLayerProperties::layerImpl() const noexcept {
     return static_cast<const RasterLayer::Impl&>(*baseImpl);
 }
 

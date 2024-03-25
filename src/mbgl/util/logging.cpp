@@ -6,6 +6,7 @@
 
 #include <cstdio>
 #include <cstdarg>
+#include <exception>
 #include <sstream>
 
 namespace mbgl {
@@ -23,13 +24,20 @@ public:
     Impl()
         : scheduler(Scheduler::GetSequenced()) {}
 
-    void record(EventSeverity severity, Event event, int64_t code, const std::string& msg) {
+    void record(EventSeverity severity, Event event, int64_t code, const std::string& msg) try {
         if (useThread) {
             auto threadName = platform::getCurrentThreadName();
             scheduler->schedule([=]() { Log::record(severity, event, code, msg, threadName); });
         } else {
             Log::record(severity, event, code, msg, {});
         }
+    } catch (...) {
+        // ignore exceptions during logging
+        // What would we do, log them?
+#if !defined(NDEBUG)
+        [[maybe_unused]] auto ex = std::current_exception();
+        assert(!"unhandled exception while logging");
+#endif
     }
 
 private:
@@ -46,7 +54,7 @@ Log* Log::get() noexcept {
     return &instance;
 }
 
-void Log::useLogThread(bool enable) {
+void Log::useLogThread(bool enable) noexcept {
     useThread = enable;
 }
 
@@ -62,11 +70,11 @@ std::unique_ptr<Log::Observer> Log::removeObserver() {
     return observer;
 }
 
-void Log::record(EventSeverity severity, Event event, const std::string& msg) {
+void Log::record(EventSeverity severity, Event event, const std::string& msg) noexcept {
     get()->impl->record(severity, event, -1, msg);
 }
 
-void Log::record(EventSeverity severity, Event event, int64_t code, const std::string& msg) {
+void Log::record(EventSeverity severity, Event event, int64_t code, const std::string& msg) noexcept {
     get()->impl->record(severity, event, code, msg);
 }
 

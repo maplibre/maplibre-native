@@ -21,11 +21,11 @@ HillshadeLayerProperties::HillshadeLayerProperties(
 
 HillshadeLayerProperties::~HillshadeLayerProperties() = default;
 
-unsigned long HillshadeLayerProperties::constantsMask() const {
+unsigned long HillshadeLayerProperties::constantsMask() const noexcept {
     return evaluated.constantsMask();
 }
 
-const HillshadeLayer::Impl& HillshadeLayerProperties::layerImpl() const {
+const HillshadeLayer::Impl& HillshadeLayerProperties::layerImpl() const noexcept {
     return static_cast<const HillshadeLayer::Impl&>(*baseImpl);
 }
 

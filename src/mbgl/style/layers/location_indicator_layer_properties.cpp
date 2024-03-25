@@ -21,11 +21,11 @@ LocationIndicatorLayerProperties::LocationIndicatorLayerProperties(
 
 LocationIndicatorLayerProperties::~LocationIndicatorLayerProperties() = default;
 
-unsigned long LocationIndicatorLayerProperties::constantsMask() const {
+unsigned long LocationIndicatorLayerProperties::constantsMask() const noexcept {
     return evaluated.constantsMask();
 }
 
-const LocationIndicatorLayer::Impl& LocationIndicatorLayerProperties::layerImpl() const {
+const LocationIndicatorLayer::Impl& LocationIndicatorLayerProperties::layerImpl() const noexcept {
     return static_cast<const LocationIndicatorLayer::Impl&>(*baseImpl);
 }
 

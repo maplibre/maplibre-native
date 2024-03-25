@@ -10,18 +10,18 @@ namespace expression {
 
 class In final : public Expression {
 public:
-    In(std::unique_ptr<Expression> needle_, std::unique_ptr<Expression> haystack_);
+    In(std::unique_ptr<Expression> needle_, std::unique_ptr<Expression> haystack_) noexcept;
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
-    std::string getOperator() const override;
+    std::string getOperator() const override { return "in"; }
 
 private:
     std::unique_ptr<Expression> needle;

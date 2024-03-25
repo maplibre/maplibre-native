@@ -58,12 +58,17 @@ std::unique_ptr<Expression> literal(const Value& value) {
     return std::make_unique<Literal>(value);
 }
 
+std::unique_ptr<Expression> literal(Value&& value) {
+    return std::make_unique<Literal>(std::move(value));
+}
+
 std::unique_ptr<Expression> literal(std::initializer_list<double> value) {
     std::vector<Value> values;
+    values.reserve(value.size());
     for (auto i : value) {
         values.emplace_back(i);
     }
-    return literal(values);
+    return literal(std::move(values));
 }
 
 std::unique_ptr<Expression> literal(std::initializer_list<const char*> value) {
@@ -74,14 +79,14 @@ std::unique_ptr<Expression> literal(std::initializer_list<const char*> value) {
     return literal(values);
 }
 
-std::unique_ptr<Expression> assertion(const type::Type& type,
+std::unique_ptr<Expression> assertion(type::Type type,
                                       std::unique_ptr<Expression> value,
                                       std::unique_ptr<Expression> def) {
     std::vector<std::unique_ptr<Expression>> v = vec(std::move(value));
     if (def) {
         v.push_back(std::move(def));
     }
-    return std::make_unique<Assertion>(type, std::move(v));
+    return std::make_unique<Assertion>(std::move(type), std::move(v));
 }
 
 std::unique_ptr<Expression> number(std::unique_ptr<Expression> value, std::unique_ptr<Expression> def) {
@@ -96,15 +101,17 @@ std::unique_ptr<Expression> boolean(std::unique_ptr<Expression> value, std::uniq
     return assertion(type::Boolean, std::move(value), std::move(def));
 }
 
-std::unique_ptr<Expression> coercion(const type::Type& type,
+namespace {
+std::unique_ptr<Expression> coercion(type::Type type,
                                      std::unique_ptr<Expression> value,
                                      std::unique_ptr<Expression> def) {
     std::vector<std::unique_ptr<Expression>> v = vec(std::move(value));
     if (def) {
         v.push_back(std::move(def));
     }
-    return std::make_unique<Coercion>(type, std::move(v));
+    return std::make_unique<Coercion>(std::move(type), std::move(v));
 }
+} // namespace
 
 std::unique_ptr<Expression> toColor(std::unique_ptr<Expression> value, std::unique_ptr<Expression> def) {
     return coercion(type::Color, std::move(value), std::move(def));
@@ -162,18 +169,18 @@ std::unique_ptr<Expression> step(std::unique_ptr<Expression> input,
     std::map<double, std::unique_ptr<Expression>> stops;
     stops[-std::numeric_limits<double>::infinity()] = std::move(output0);
     stops[input1] = std::move(output1);
-    return std::make_unique<Step>(type, std::move(input), std::move(stops));
+    return std::make_unique<Step>(std::move(type), std::move(input), std::move(stops));
 }
 
-Interpolator linear() {
+Interpolator linear() noexcept {
     return ExponentialInterpolator(1.0);
 }
 
-Interpolator exponential(double base) {
+Interpolator exponential(double base) noexcept {
     return ExponentialInterpolator(base);
 }
 
-Interpolator cubicBezier(double x1, double y1, double x2, double y2) {
+Interpolator cubicBezier(double x1, double y1, double x2, double y2) noexcept {
     return CubicBezierInterpolator(x1, y1, x2, y2);
 }
 

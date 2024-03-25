@@ -20,7 +20,7 @@ public:
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
-    bool operator==(const Expression& e) const override {
+    bool operator==(const Expression& e) const noexcept override {
         if (e.getKind() == Kind::At) {
             auto rhs = static_cast<const At*>(&e);
             return *index == *(rhs->index) && *input == *(rhs->input);

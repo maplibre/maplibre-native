@@ -349,11 +349,11 @@ public:
         SymbolPaintProperties::PossiblyEvaluated);
     ~SymbolLayerProperties() override;
 
-    unsigned long constantsMask() const override;
+    unsigned long constantsMask() const noexcept override;
 
     expression::Dependency getDependencies() const noexcept override;
 
-    const SymbolLayer::Impl& layerImpl() const;
+    const SymbolLayer::Impl& layerImpl() const noexcept;
     // Data members.
     SymbolPaintProperties::PossiblyEvaluated evaluated;
 };
