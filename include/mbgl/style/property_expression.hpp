@@ -125,6 +125,7 @@ public:
         isFeatureConstant_ = other.isFeatureConstant_;
         isRuntimeConstant_ = other.isRuntimeConstant_;
         isGPUCapable_ = other.isGPUCapable_;
+        return *this;
     }
 
     bool isZoomConstant() const noexcept { return isZoomConstant_; }
