@@ -165,6 +165,50 @@ PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expre
     assert(isRuntimeConstant_ == expression::isRuntimeConstant(*expression));
 }
 
+PropertyExpressionBase::PropertyExpressionBase(PropertyExpressionBase&& other)
+    : expression(other.expression),
+      gpuExpression(std::move(other.gpuExpression)),
+      zoomCurve(other.zoomCurve),
+      useIntegerZoom_(other.useIntegerZoom_),
+      isZoomConstant_(other.isZoomConstant_),
+      isFeatureConstant_(other.isFeatureConstant_),
+      isRuntimeConstant_(other.isRuntimeConstant_),
+      isGPUCapable_(other.isGPUCapable_) {}
+
+PropertyExpressionBase::PropertyExpressionBase(const PropertyExpressionBase& other)
+    : expression(other.expression),
+      gpuExpression(other.gpuExpression ? new GPUExpression(*(other.gpuExpression)) : nullptr),
+      zoomCurve(other.zoomCurve),
+      useIntegerZoom_(other.useIntegerZoom_),
+      isZoomConstant_(other.isZoomConstant_),
+      isFeatureConstant_(other.isFeatureConstant_),
+      isRuntimeConstant_(other.isRuntimeConstant_),
+      isGPUCapable_(other.isGPUCapable_) {}
+
+PropertyExpressionBase& PropertyExpressionBase::operator=(PropertyExpressionBase&& other) {
+    expression = std::move(other.expression);
+    gpuExpression = std::move(other.gpuExpression);
+    zoomCurve = other.zoomCurve;
+    useIntegerZoom_ = other.useIntegerZoom_;
+    isZoomConstant_ = other.isZoomConstant_;
+    isFeatureConstant_ = other.isFeatureConstant_;
+    isRuntimeConstant_ = other.isRuntimeConstant_;
+    isGPUCapable_ = other.isGPUCapable_;
+    return *this;
+}
+
+PropertyExpressionBase& PropertyExpressionBase::operator=(const PropertyExpressionBase& other) {
+    expression = other.expression;
+    gpuExpression.reset(other.gpuExpression ? new GPUExpression(*(other.gpuExpression)) : nullptr);
+    zoomCurve = other.zoomCurve;
+    useIntegerZoom_ = other.useIntegerZoom_;
+    isZoomConstant_ = other.isZoomConstant_;
+    isFeatureConstant_ = other.isFeatureConstant_;
+    isRuntimeConstant_ = other.isRuntimeConstant_;
+    isGPUCapable_ = other.isGPUCapable_;
+    return *this;
+}
+
 const GPUExpression* PropertyExpressionBase::getGPUExpression(bool intZoom) {
     if (!isGPUCapable_) {
         return {};
