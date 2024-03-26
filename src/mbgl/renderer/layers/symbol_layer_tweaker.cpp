@@ -73,7 +73,7 @@ mat4 computeTileMatrix(SymbolComputeUBO& computeUBO) {
     matrix::scale(tileMatrix, tileMatrix, s / util::EXTENT, s / util::EXTENT, 1);
 
     computeUBO.projMatrix[14] -= ((1 + computeUBO.layerIndex) * PaintParameters::numSublayers - computeUBO.subLayerIndex) * PaintParameters::depthEpsilon;
-    matrix::multiply(tileMatrix, computeUBO.projMatrix, tileMatrix);
+    matrix::multiply(tileMatrix, util::cast<double>(computeUBO.projMatrix), tileMatrix);
 
     if (computeUBO.translation[0] == 0 && computeUBO.translation[1] == 0) {
         return tileMatrix;
@@ -246,7 +246,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                   : parameters.transformParams.projMatrix);
         
         computeUBOVector[i] = {
-            /*.projMatrix=*/projMatrix,
+            /*.projMatrix=*/util::cast<float>(projMatrix),
             
             /*.tileIdCanonicalX=*/tileID.canonical.x,
             /*.tileIdCanonicalY=*/tileID.canonical.y,
@@ -271,10 +271,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
             /*.isAnchorMap=*/(anchor == TranslateAnchorType::Map),
             /*.inViewportPixelUnits=*/inViewportPixelUnits,
-            /*.inViewportPixelUnits=*/pitchWithMap,
-            /*.inViewportPixelUnits=*/rotateWithMap,
-            /*.inViewportPixelUnits=*/alongLine,
-            /*.inViewportPixelUnits=*/hasVariablePlacement,
+            /*.pitchWithMap=*/pitchWithMap,
+            /*.rotateWithMap=*/rotateWithMap,
+            /*.alongLine=*/alongLine,
+            /*.hasVariablePlacement=*/hasVariablePlacement,
         };
         
         computeDrawableUBO(drawableUBOVector, computeUBOVector, i);

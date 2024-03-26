@@ -80,7 +80,7 @@ enum {
 
 /// Compute UBO
 struct alignas(16) SymbolComputeUBO {
-    /*  64 */ std::array<double, 4 * 4> projMatrix;
+    /*  64 */ std::array<float, 4 * 4> projMatrix;
     
     /*   4 */ uint32_t tileIdCanonicalX;
     /*   4 */ uint32_t tileIdCanonicalY;
