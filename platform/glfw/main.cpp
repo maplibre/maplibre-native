@@ -217,6 +217,9 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // FIXME
+    style = "https://demotiles.maplibre.org/style.json";
+
     map.getStyle().loadURL(style);
 
     view->run();

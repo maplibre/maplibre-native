@@ -53,11 +53,11 @@ xcodeproj(
     bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin"},
     build_mode = BUILD_MODE,
     default_xcode_configuration = "Debug",
-    focused_targets = [
-        "//platform/macos:MapLibreMac",
-        "//platform/macos/app:macos_app",
-        "//platform/glfw:glfw_app",
-    ],
+    # focused_targets = [
+    #     "//platform/macos:MapLibreMac",
+    #     "//platform/macos/app:macos_app",
+    #     "//platform/glfw:glfw_app",
+    # ],
     minimum_xcode_version = "14",
     project_name = "MapLibre",
     tags = ["manual"],

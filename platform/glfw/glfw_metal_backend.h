@@ -1,11 +1,13 @@
 #pragma once
 
 #include "glfw_backend.hpp"
+#include "metal_backend.h"
 
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/mtl/renderer_backend.hpp>
 
 struct GLFWwindow;
+@class NSWindow;
 
 class GLFWMetalBackend final : public GLFWBackend {
 public:
@@ -16,7 +18,8 @@ public:
     mbgl::Size getSize() const override;
 
 private:
-    std::unique_ptr<mbgl::gfx::RendererBackend> rendererBackend;
+    NSWindow *window;
+    MetalBackend rendererBackend;
 };
 
 namespace mbgl {
