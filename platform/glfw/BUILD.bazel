@@ -5,7 +5,7 @@ load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 # glfw needs to be installed with homebrew
 
 cc_binary(
-    name = "app",
+    name = "glfw_app",
     srcs = glob(
                [
                    "*.cpp",
@@ -35,6 +35,9 @@ cc_binary(
         ],
         "//conditions:default": [],
     }),
+    visibility = [
+        "@rules_xcodeproj//xcodeproj:generated",
+    ],
     deps = [
         "//:maplibre_lib",
         "@glfw",
