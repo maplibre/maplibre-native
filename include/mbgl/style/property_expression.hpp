@@ -36,12 +36,12 @@ using MutableUniqueGPUExpression = std::unique_ptr<GPUExpression>;
 struct alignas(16) GPUExpression {
     static constexpr std::size_t maxStops = 16;
 
-    GPUExpression(GPUExpression&&) = default;
+    GPUExpression(GPUExpression&&) = delete;
     GPUExpression(const GPUExpression&) = default;
     GPUExpression(const GPUExpression* ptr)
         : GPUExpression(ptr ? *ptr : empty) {}
-    GPUExpression& operator=(GPUExpression&&) = default;
-    GPUExpression& operator=(const GPUExpression&) = default;
+    GPUExpression& operator=(GPUExpression&&) = delete;
+    GPUExpression& operator=(const GPUExpression&) = delete;
 
     /* 0 */ const GPUOutputType outputType;
     /* 2 */ const std::uint16_t stopCount;
