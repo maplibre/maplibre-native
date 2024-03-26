@@ -76,7 +76,7 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
                                                        unevaluated.evaluate(parameters, previousProperties->evaluated));
     auto& evaluated = properties->evaluated;
 
-    const auto y = unevaluated.getGPUExpressions(parameters.now);
+    // const auto y = unevaluated.getGPUExpressions(parameters.now);
 
     if (unevaluated.get<style::FillOutlineColor>().isUndefined()) {
         evaluated.get<style::FillOutlineColor>() = evaluated.get<style::FillColor>();
@@ -349,7 +349,7 @@ public:
           opacity(opacity_) {}
     ~OutlineDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override{};
 
     virtual void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {

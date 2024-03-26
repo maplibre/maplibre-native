@@ -36,12 +36,13 @@ using MutableUniqueGPUExpression = std::unique_ptr<GPUExpression>;
 struct alignas(16) GPUExpression {
     static constexpr std::size_t maxStops = 16;
 
+    GPUExpression() = delete;
     GPUExpression(GPUExpression&&) = default;
     GPUExpression(const GPUExpression&) = default;
     GPUExpression(const GPUExpression* ptr)
         : GPUExpression(ptr ? *ptr : empty) {}
-    GPUExpression& operator=(GPUExpression&&) = default;
-    GPUExpression& operator=(const GPUExpression&) = default;
+    GPUExpression& operator=(GPUExpression&&) = delete;
+    GPUExpression& operator=(const GPUExpression&) = delete;
 
     /* 0 */ const GPUOutputType outputType;
     /* 2 */ const std::uint16_t stopCount;
@@ -81,7 +82,6 @@ struct alignas(16) GPUExpression {
     static const GPUExpression empty;
 
 private:
-    GPUExpression() = default;
     GPUExpression(GPUOutputType type, uint16_t count)
         : outputType(type),
           stopCount(count) {}
@@ -104,28 +104,13 @@ public:
     using Dependency = expression::Dependency;
     using ZoomCurvePtr = expression::ZoomCurvePtr;
 
-    PropertyExpressionBase(const PropertyExpressionBase& other)
-        : expression(other.expression),
-          gpuExpression(other.gpuExpression ? new GPUExpression(*(other.gpuExpression)) : nullptr),
-          zoomCurve(other.zoomCurve),
-          useIntegerZoom_(other.useIntegerZoom_),
-          isZoomConstant_(other.isZoomConstant_),
-          isFeatureConstant_(other.isFeatureConstant_),
-          isRuntimeConstant_(other.isRuntimeConstant_),
-          isGPUCapable_(other.isGPUCapable_) {}
+    PropertyExpressionBase(PropertyExpressionBase&&);
+    PropertyExpressionBase(const PropertyExpressionBase&);
     explicit PropertyExpressionBase(std::unique_ptr<Expression>);
     virtual ~PropertyExpressionBase() = default;
 
-    PropertyExpressionBase& operator=(const PropertyExpressionBase& other) {
-        expression = other.expression;
-        gpuExpression.reset(other.gpuExpression ? new GPUExpression(*(other.gpuExpression)) : nullptr);
-        zoomCurve = other.zoomCurve;
-        useIntegerZoom_ = other.useIntegerZoom_;
-        isZoomConstant_ = other.isZoomConstant_;
-        isFeatureConstant_ = other.isFeatureConstant_;
-        isRuntimeConstant_ = other.isRuntimeConstant_;
-        isGPUCapable_ = other.isGPUCapable_;
-    }
+    PropertyExpressionBase& operator=(PropertyExpressionBase&&);
+    PropertyExpressionBase& operator=(const PropertyExpressionBase&);
 
     bool isZoomConstant() const noexcept { return isZoomConstant_; }
     bool isFeatureConstant() const noexcept { return isFeatureConstant_; }
