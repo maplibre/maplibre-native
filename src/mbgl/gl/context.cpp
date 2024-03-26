@@ -18,6 +18,7 @@
 #include <mbgl/util/thread_pool.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/compute_pass.hpp>
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_builder.hpp>
 #include <mbgl/gl/layer_group_gl.hpp>
@@ -556,6 +557,10 @@ gfx::Texture2DPtr Context::createTexture2D() {
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
     return std::make_shared<RenderTarget>(*this, size, type);
+}
+
+gfx::ComputePassPtr Context::createComputePass() {
+    return std::make_unique<gfx::ComputePass>(*this);
 }
 
 Framebuffer Context::createFramebuffer(const gfx::Texture2D& color) {
