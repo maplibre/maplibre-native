@@ -201,7 +201,11 @@ float4x4 computeGlCoordMatrix(const float4x4 posMatrix,
 
 kernel void kernelMain(device const SymbolComputeUBO* computeUBOVector [[buffer(0)]],
                        device SymbolDrawableUBO* drawableUBOVector [[buffer(1)]],
+                       constant uint& size [[buffer(2)]],
                        uint index [[thread_position_in_grid]]) {
+    if (index >= size) {
+        return;
+    }
     device const SymbolComputeUBO& computeUBO = computeUBOVector[index];
     
     const auto matrix = computeTileMatrix(computeUBO);
@@ -326,10 +330,12 @@ void ComputePass::computeDrawableBuffer(std::vector<SymbolComputeUBO>& computeUB
     
     const auto& mtlComputeBuffer = static_cast<const UniformBuffer&>(*computeBuffer);
     const auto& mtlOutBuffer = static_cast<const UniformBuffer&>(*drawableBuffer);
+    const auto size = computeUBOVector.size();
     
     computeCommandEncoder->setComputePipelineState(computePipelineState.get());
     computeCommandEncoder->setBuffer(mtlComputeBuffer.getBufferResource().getMetalBuffer().get(), 0, 0);
     computeCommandEncoder->setBuffer(mtlOutBuffer.getBufferResource().getMetalBuffer().get(), 0, 1);
+    computeCommandEncoder->setBytes(&size, sizeof(size), 2);
     
     MTL::Size gridSize = MTL::Size(computeUBOVector.size(), 1, 1);
 
@@ -340,7 +346,8 @@ void ComputePass::computeDrawableBuffer(std::vector<SymbolComputeUBO>& computeUB
         threadGroupSize = computeUBOVector.size();
     }
     MTL::Size threadgroupSize = MTL::Size(threadGroupSize, 1, 1);
-    computeCommandEncoder->dispatchThreads(gridSize, threadgroupSize);
+    //computeCommandEncoder->dispatchThreads(gridSize, threadgroupSize);
+    computeCommandEncoder->dispatchThreadgroups(gridSize, threadgroupSize);
 }
 
 } // namespace gfx
