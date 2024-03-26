@@ -329,12 +329,12 @@ void ComputePass::computeDrawableBuffer(std::vector<SymbolComputeUBO>& computeUB
     }
     
     const auto& mtlComputeBuffer = static_cast<const UniformBuffer&>(*computeBuffer);
-    const auto& mtlOutBuffer = static_cast<const UniformBuffer&>(*drawableBuffer);
+    const auto& mtlDrawableBuffer = static_cast<const UniformBuffer&>(*drawableBuffer);
     const auto size = computeUBOVector.size();
     
     computeCommandEncoder->setComputePipelineState(computePipelineState.get());
     computeCommandEncoder->setBuffer(mtlComputeBuffer.getBufferResource().getMetalBuffer().get(), 0, 0);
-    computeCommandEncoder->setBuffer(mtlOutBuffer.getBufferResource().getMetalBuffer().get(), 0, 1);
+    computeCommandEncoder->setBuffer(mtlDrawableBuffer.getBufferResource().getMetalBuffer().get(), 0, 1);
     computeCommandEncoder->setBytes(&size, sizeof(size), 2);
     
     MTL::Size gridSize = MTL::Size(computeUBOVector.size(), 1, 1);

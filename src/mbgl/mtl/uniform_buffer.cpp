@@ -35,7 +35,7 @@ void UniformBuffer::update(const void* data, std::size_t size_) {
 
     buffer.getContext().renderingStats().numUniformUpdates++;
     buffer.getContext().renderingStats().uniformUpdateBytes += size_;
-    buffer.update(data, size, /*offset=*/0);
+    buffer.update(data, size_, /*offset=*/0);
 }
 
 } // namespace mtl
