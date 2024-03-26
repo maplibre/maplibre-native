@@ -5,6 +5,7 @@
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/map/mode.hpp>
 #include <mbgl/map/transform_state.hpp>
+#include <mbgl/gfx/compute_pass.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
@@ -65,6 +66,7 @@ public:
     gfx::RendererBackend& backend;
     std::unique_ptr<gfx::CommandEncoder> encoder;
     std::unique_ptr<gfx::RenderPass> renderPass;
+    std::unique_ptr<gfx::ComputePass> computePass;
 
     const TransformParameters& transformParams;
     const TransformState& state;

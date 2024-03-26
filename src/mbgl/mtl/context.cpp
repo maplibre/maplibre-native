@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/mtl/command_encoder.hpp>
+#include <mbgl/mtl/compute_pass.hpp>
 #include <mbgl/mtl/drawable_builder.hpp>
 #include <mbgl/mtl/layer_group.hpp>
 #include <mbgl/mtl/offscreen_texture.hpp>
@@ -201,6 +202,10 @@ gfx::Texture2DPtr Context::createTexture2D() {
 
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
     return std::make_shared<RenderTarget>(*this, size, type);
+}
+
+gfx::ComputePassPtr Context::createComputePass() {
+    return std::make_unique<mtl::ComputePass>(*this);
 }
 
 void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {}

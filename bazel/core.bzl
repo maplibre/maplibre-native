@@ -143,6 +143,8 @@ MLN_CORE_SOURCE = [
     "src/mbgl/gfx/attribute.hpp",
     "src/mbgl/gfx/color_mode.hpp",
     "src/mbgl/gfx/command_encoder.hpp",
+    "src/mbgl/gfx/compute_pass.cpp",
+    "src/mbgl/gfx/compute_pass.hpp",
     "src/mbgl/gfx/cull_face_mode.hpp",
     "src/mbgl/gfx/debug_group.hpp",
     "src/mbgl/gfx/depth_mode.hpp",
@@ -1036,6 +1038,8 @@ MLN_DRAWABLES_GL_HEADERS = [
 MLN_DRAWABLES_MTL_SOURCE = [
     "src/mbgl/mtl/buffer_resource.cpp",
     "src/mbgl/mtl/command_encoder.cpp",
+    "src/mbgl/mtl/compute_pass.cpp",
+    "src/mbgl/mtl/compute_pass.hpp",
     "src/mbgl/mtl/context.cpp",
     "src/mbgl/mtl/drawable.cpp",
     "src/mbgl/mtl/drawable_impl.hpp",

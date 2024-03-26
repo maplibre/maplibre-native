@@ -466,6 +466,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/attribute.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/color_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/command_encoder.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/compute_pass.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/compute_pass.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/cull_face_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/debug_group.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/depth_mode.hpp
@@ -1238,6 +1240,8 @@ if(MBGL_WITH_METAL)
         SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/command_encoder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/compute_pass.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/compute_pass.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/drawable_impl.hpp

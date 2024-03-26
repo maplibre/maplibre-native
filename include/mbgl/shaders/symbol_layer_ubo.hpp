@@ -81,27 +81,27 @@ enum {
 /// Compute UBO
 struct alignas(16) SymbolComputeUBO {
     /*  64 */ std::array<float, 4 * 4> projMatrix;
-    
-    /*   4 */ uint32_t tileIdCanonicalX;
-    /*   4 */ uint32_t tileIdCanonicalY;
-    /*   1 */ uint8_t tileIdCanonicalZ;
-    /*   2 */ int16_t tileIdWrap;
 
     /*   4 */ int32_t layerIndex;
     /*   4 */ int32_t subLayerIndex;
+    /*   4 */ uint32_t width;
+    /*   4 */ uint32_t height;
 
-    /*   8 */ std::array<float, 2> translation;
+    /*   8 */ std::array<float, 2> texsize;
+    /*   8 */ std::array<float, 2> texsize_icon;
+    
+    /*   4 */ uint32_t tileIdCanonicalX;
+    /*   4 */ uint32_t tileIdCanonicalY;
+    /*   2 */ uint16_t tileIdCanonicalZ;
+    /*   2 */ int16_t tileIdWrap;
+    /*   4 */ float camDist;
     
     /*   4 */ float scale;
     /*   4 */ float bearing;
     /*   4 */ float zoom;
-    /*   4 */ uint32_t width;
-    /*   4 */ uint32_t height;
-    /*   4 */ float camDist;
     /*   4 */ float pitch;
     
-    /*   8 */ std::array<float, 2> texsize;
-    /*   8 */ std::array<float, 2> texsize_icon;
+    /*   8 */ std::array<float, 2> translation;
     
     /*   1 */ bool isAnchorMap;
     /*   1 */ bool inViewportPixelUnits;
@@ -109,8 +109,10 @@ struct alignas(16) SymbolComputeUBO {
     /*   1 */ bool rotateWithMap;
     /*   1 */ bool alongLine;
     /*   1 */ bool hasVariablePlacement;
+    
+    /*   2 */ int16_t padding;
 };
-static_assert(sizeof(SymbolComputeUBO) % 16 == 0);
+static_assert(sizeof(SymbolComputeUBO) == 9 * 16);
 
 } // namespace shaders
 } // namespace mbgl

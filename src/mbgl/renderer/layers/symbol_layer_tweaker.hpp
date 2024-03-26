@@ -24,6 +24,7 @@ private:
     gfx::UniformBufferPtr iconPaintBuffer;
     gfx::UniformBufferPtr dynamicBuffer;
     gfx::UniformBufferPtr drawableBuffer;
+    gfx::UniformBufferPtr computeBuffer;
 
     bool textPropertiesUpdated = false;
     bool iconPropertiesUpdated = false;
