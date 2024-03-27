@@ -313,6 +313,10 @@ exports_files(
         "app/CustomStyleLayerExample.m",
         "app/ExampleCustomDrawableStyleLayer.h",
         "app/ExampleCustomDrawableStyleLayer.mm",
+        "app/WideLineStyleLayer.h",
+        "app/WideLineStyleLayer.mm",
+        "app/wideline.metal",
+        "app/wideline.metal.h",
         "include/mbgl/util/image+MLNAdditions.hpp",
     ] + MLN_DARWIN_PUBLIC_OBJC_SOURCE +
     MLN_DARWIN_PUBLIC_OBJCPP_SOURCE +
