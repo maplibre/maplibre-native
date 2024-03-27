@@ -41,7 +41,7 @@ cc_binary(
            }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
     linkopts = [
-        "-lglfw3",
+        "-lglfw",
     ] + select({
         "@platforms//os:macos": [
             "-framework Cocoa",

@@ -2,6 +2,8 @@
 
 #include <mbgl/mtl/renderer_backend.hpp>
 #include <mbgl/gfx/renderable.hpp>
+#include <mbgl/mtl/texture2d.hpp>
+#include <mbgl/gfx/context.hpp>
 
 #import <Cocoa/Cocoa.h>
 
