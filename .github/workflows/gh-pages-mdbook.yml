@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - uses: extractions/setup-just@v1
+      - uses: extractions/setup-just@v2
       - name: Setup mdBook
         uses: peaceiris/actions-mdbook@v1
       - name: Install Dependencies
