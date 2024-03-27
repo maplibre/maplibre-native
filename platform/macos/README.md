@@ -23,14 +23,14 @@ cp platform/macos/bazel/example_config.bzl platform/macos/bazel/config.bzl
 Create and open Xcode project:
 
 ```sh
-bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal --linkopt=-L/opt/homebrew/lib"
+bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal
 xed platform/macos/MapLibre.xcodeproj
 ```
 
 Build and run AppKit sample app directly from the command line:
 
 ```sh
-bazel run //platform/macos/app:macos_app --//:renderer=metal --linkopt=-L/opt/homebrew/lib
+bazel run //platform/macos/app:macos_app --//:renderer=metal
 ```
 
 ---
