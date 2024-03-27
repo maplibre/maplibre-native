@@ -201,11 +201,11 @@ GLFWView::GLFWView(bool fullscreen_,
     backend = GLFWBackend::Create(window, benchmark);
     
 #ifdef __APPLE__
-    int width, height;
-    glfwGetWindowSize(window, &width, &height);
-    backend->setSize({
-        width, height
-    });
+          int fbW, fbH;
+          glfwGetFramebufferSize(window, &fbW, &fbH);
+          backend->setSize({
+              fbW, fbH
+          });
 #endif
           
     pixelRatio = static_cast<float>(backend->getSize().width) / width;
@@ -851,8 +851,10 @@ void GLFWView::onWindowResize(GLFWwindow *window, int width, int height) {
     view->map->setSize({static_cast<uint32_t>(view->width), static_cast<uint32_t>(view->height)});
 
 #ifdef __APPLE__
+    int fbW, fbH;
+    glfwGetFramebufferSize(window, &fbW, &fbH);
     view->backend->setSize({
-        width, height
+        fbW, fbH
     });
 #endif
 }
