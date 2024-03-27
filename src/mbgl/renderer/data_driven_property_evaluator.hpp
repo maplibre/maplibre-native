@@ -9,10 +9,11 @@
 
 namespace mbgl {
 
-template <typename T, bool useIntegerZoom = false>
+template <typename T, bool useIntegerZoom_ = false>
 class DataDrivenPropertyEvaluator {
 public:
     using ResultType = PossiblyEvaluatedPropertyValue<T>;
+    static constexpr bool useIntegerZoom = useIntegerZoom_;
 
     DataDrivenPropertyEvaluator(const PropertyEvaluationParameters& parameters_, T defaultValue_)
         : parameters(parameters_),
@@ -26,7 +27,7 @@ public:
         if constexpr (useIntegerZoom) { // Compiler will optimize out the unused branch.
             if (!expression.isFeatureConstant() || !expression.isRuntimeConstant()) {
                 auto returnExpression = expression;
-                returnExpression.useIntegerZoom = true;
+                returnExpression.setUseIntegerZoom(true);
                 return ResultType(returnExpression);
             }
             return ResultType(expression.evaluate(std::floor(parameters.z)));
@@ -47,6 +48,7 @@ template <typename T>
 class DataDrivenPropertyEvaluator<Faded<T>> {
 public:
     using ResultType = PossiblyEvaluatedPropertyValue<Faded<T>>;
+    static constexpr bool useIntegerZoom = false;
 
     DataDrivenPropertyEvaluator(const PropertyEvaluationParameters& parameters_, T defaultValue_)
         : parameters(parameters_),

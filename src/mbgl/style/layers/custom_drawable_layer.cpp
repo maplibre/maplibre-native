@@ -123,6 +123,11 @@ public:
         uniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
         uniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
         uniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
+
+#if MLN_RENDER_BACKEND_METAL
+        const auto expressionUBO = shaders::LineExpressionUBO{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+        uniforms.createOrUpdate(idLineExpressionUBO, &expressionUBO, parameters.context);
+#endif // MLN_RENDER_BACKEND_METAL
     };
 
 private:
@@ -432,7 +437,7 @@ void CustomDrawableLayerHost::Interface::finish() {
                                                                lineOptions.gapWidth,
                                                                lineOptions.offset,
                                                                lineOptions.width,
-                                                               0,
+                                                               LineExpressionMask::None,
                                                                0,
                                                                0};
             auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);

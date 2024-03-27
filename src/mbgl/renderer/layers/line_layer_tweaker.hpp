@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/layer_tweaker.hpp>
+#include <mbgl/style/layers/line_layer_properties.hpp>
 
 #include <string_view>
 
@@ -30,6 +31,28 @@ public:
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
+#if MLN_RENDER_BACKEND_METAL
+    using LinePaintProperties = style::LinePaintProperties;
+    using Unevaluated = LinePaintProperties::Unevaluated;
+    void setGPUExpressions(Unevaluated::GPUExpressions&&);
+
+    template <typename T>
+    static constexpr std::size_t propertyIndex() {
+        return LinePaintProperties::Tuple<LinePaintProperties::PropertyTypes>::getIndex<T>();
+    }
+#endif // MLN_RENDER_BACKEND_METAL
+
+private:
+    template <typename Property>
+    auto evaluate(const PaintParameters& parameters) const;
+
+#if MLN_RENDER_BACKEND_METAL
+    template <typename Result>
+    std::optional<Result> gpuEvaluate(const LinePaintProperties::PossiblyEvaluated&,
+                                      const PaintParameters&,
+                                      const std::size_t index) const;
+#endif // MLN_RENDER_BACKEND_METAL
+
 protected:
     gfx::UniformBufferPtr linePropertiesBuffer;
     gfx::UniformBufferPtr lineGradientPropertiesBuffer;
@@ -40,12 +63,16 @@ protected:
 #if MLN_RENDER_BACKEND_METAL
     gfx::UniformBufferPtr permutationUniformBuffer;
     gfx::UniformBufferPtr expressionUniformBuffer;
+
+    Unevaluated::GPUExpressions gpuExpressions;
 #endif // MLN_RENDER_BACKEND_METAL
 
     bool simplePropertiesUpdated = true;
     bool gradientPropertiesUpdated = true;
     bool patternPropertiesUpdated = true;
     bool sdfPropertiesUpdated = true;
+
+    bool gpuExpressionsUpdated = true;
 };
 
 } // namespace mbgl

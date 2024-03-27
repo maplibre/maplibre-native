@@ -227,6 +227,12 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 uniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
                 uniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
                 uniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
+
+#if MLN_RENDER_BACKEND_METAL
+                const auto expressionUBO = shaders::LineExpressionUBO{
+                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+                uniforms.createOrUpdate(idLineExpressionUBO, &expressionUBO, parameters.context);
+#endif // MLN_RENDER_BACKEND_METAL
             };
 
         private:
@@ -250,7 +256,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                                            /*gapwidth*/ 0.f,
                                                            /*offset*/ 0.f,
                                                            /*width*/ 4.f,
-                                                           0,
+                                                           LineExpressionMask::None,
                                                            0,
                                                            0};
         auto tweaker = std::make_shared<PolylineDrawableTweaker>(linePropertiesUBO);

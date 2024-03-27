@@ -15,10 +15,22 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
     static const std::array<AttributeInfo, 8> attributes;
-    static const std::array<UniformBlockInfo, 4> uniforms;
+    static const std::array<UniformBlockInfo, lineUBOCount> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
+
+struct alignas(16) LineExpressionUBO {
+    GPUExpression color;
+    GPUExpression blur;
+    GPUExpression opacity;
+    GPUExpression gapwidth;
+    GPUExpression offset;
+    GPUExpression width;
+};
+static_assert(sizeof(LineExpressionUBO) % 16 == 0, "wrong alignment");
+
+
 struct VertexStage {
     short2 pos_normal [[attribute(0)]];
     uchar4 data [[attribute(1)]];
@@ -58,13 +70,19 @@ struct FragmentStage {
 #if !defined(HAS_UNIFORM_u_opacity)
     float opacity;
 #endif
+        bool expr;
+        float2 pos;
+        float2 offset2;
+        float4 extr;
+        float4 tpos;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const LineDynamicUBO& dynamic [[buffer(8)]],
                                 device const LineUBO& line [[buffer(9)]],
                                 device const LinePropertiesUBO& props [[buffer(10)]],
-                                device const LineInterpolationUBO& interp [[buffer(11)]]) {
+                                device const LineInterpolationUBO& interp [[buffer(11)]],
+                                device const LineExpressionUBO& expr [[buffer(12)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth = props.gapwidth / 2;
@@ -77,12 +95,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto offset   = unpack_mix_float(vertx.offset, interp.offset_t) * -1;
 #endif
 #if defined(HAS_UNIFORM_u_width)
-    const auto width    = props.width;
+    const float4 tpos = line.matrix * float4(floor(float2(vertx.pos_normal) * 0.5), 0.0, 1.0);
+    const auto exprWidth = /*(tpos.x > 0) &&*/ (props.expressionMask & LineExpressionMask::Width);
+    const auto width    = exprWidth ? expr.width.eval(dynamic.zoom) : props.width;
 #else
+    const float4 tpos = float4(0,0,0,0);
+    const auto exprWidth = false;
     const auto width    = unpack_mix_float(vertx.width, interp.width_t);
 #endif
 
-    // the distance over which the line edge fades out.
+    // the distance over which the line edge fades out.e
     // Retina devices need a smaller distance to avoid aliasing.
     const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
@@ -133,20 +155,33 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_opacity)
         .opacity     = unpack_mix_float(vertx.opacity, interp.opacity_t),
 #endif
+        .expr = exprWidth,
+        .pos = pos,
+        .offset2 = offset2,
+        .extr = projected_extrude,
+        .tpos = tpos,
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+                            device const LineDynamicUBO& dynamic [[buffer(8)]],
                             device const LineUBO& line [[buffer(9)]],
-                            device const LinePropertiesUBO& props [[buffer(10)]]) {
+                            device const LinePropertiesUBO& props [[buffer(10)]],
+                            device const LineExpressionUBO& expr [[buffer(12)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
-    const float4 color = props.color;
+    //const float4 color = props.color;
+    //const float4 color = in.expr ? float4(1,0,1,1) : props.color;
+
+    const auto exprColor = (props.expressionMask & LineExpressionMask::Color);
+    const auto color    = exprColor ? expr.color.evalColor(dynamic.zoom) : props.color;
+
 #else
-    const float4 color = in.color;
+    //const float4 color = in.color;
+    const float4 color = in.expr ? float4(1,0,1,1) : in.color;
 #endif
 #if defined(HAS_UNIFORM_u_blur)
     const float blur = props.blur;

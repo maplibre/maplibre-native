@@ -1,5 +1,7 @@
 #pragma once
 
+#include <mbgl/util/traits.hpp>
+
 #include <algorithm>
 #include <cassert>
 #include <string>

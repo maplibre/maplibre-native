@@ -27,6 +27,8 @@ public:
         assert(a_ >= 0.0f);
         assert(a_ <= 1.0f);
     }
+    Color(const float rgba[4])
+        : Color(rgba[0], rgba[1], rgba[2], rgba[3]) {}
 
     float r = 0.0f;
     float g = 0.0f;

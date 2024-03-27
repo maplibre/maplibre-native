@@ -34,6 +34,8 @@ public:
         }
     }
 
+    std::size_t getStopCount() const { return stops.size(); }
+
     void eachStop(const std::function<void(double, const Expression&)>& visit) const {
         for (const auto& stop : stops) {
             visit(stop.first, *stop.second);
