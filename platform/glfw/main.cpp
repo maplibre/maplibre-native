@@ -206,7 +206,7 @@ int main(int argc, char* argv[]) {
 
     // Load style
     if (style.empty()) {
-        const char* url = getenv("MAPBOX_STYLE_URL");
+        const char* url = getenv("MLN_STYLE_URL");
         if (url == nullptr) {
             mbgl::util::DefaultStyle newStyle = orderedStyles[0];
             style = newStyle.getUrl();
@@ -216,9 +216,6 @@ int main(int argc, char* argv[]) {
             view->setWindowTitle(url);
         }
     }
-
-    // FIXME
-    style = "https://demotiles.maplibre.org/style.json";
 
     map.getStyle().loadURL(style);
 
