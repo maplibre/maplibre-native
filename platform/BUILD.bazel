@@ -33,11 +33,13 @@ objc_library(
     ],
     module_name = "MapLibre",
     sdk_frameworks = [
+        "Metal",
         "MetalKit",
         "QuartzCore",
         "CoreGraphics",
         "CoreLocation",
         "AppKit",
+        "SystemConfiguration",
     ],
     visibility = ["//visibility:public"],
     deps = [

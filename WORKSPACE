@@ -6,3 +6,9 @@ http_archive(
     strip_prefix = "glfw-3.4",
     url = "https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip",
 )
+
+new_local_repository(
+    name = "libuv",
+    build_file = "@//vendor:libuv.BUILD",
+    path = "/opt/homebrew/opt/libuv",
+)

@@ -15,11 +15,18 @@ public:
     }
     
     void bind() override {
-        auto surface = swapchain->nextDrawable();
+        surface = NS::TransferPtr(swapchain->nextDrawable());
         
-        commandBuffer = NS::RetainPtr(commandQueue->commandBuffer());
+        commandBuffer = NS::TransferPtr(commandQueue->commandBuffer());
         renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::renderPassDescriptor());
         renderPassDescriptor->colorAttachments()->object(0)->setTexture(surface->texture());
+    }
+    
+    void swap() override {
+        commandBuffer->presentDrawable(surface.get());
+        commandBuffer->commit();
+        commandBuffer.reset();
+        renderPassDescriptor.reset();
     }
     
     const mbgl::mtl::RendererBackend& getBackend() const override {
@@ -47,13 +54,14 @@ private:
     NS::SharedPtr<MTL::CommandQueue> commandQueue;
     NS::SharedPtr<MTL::CommandBuffer> commandBuffer;
     NS::SharedPtr<MTL::RenderPassDescriptor> renderPassDescriptor;
+    NS::SharedPtr<CA::MetalDrawable> surface;
     
     NS::SharedPtr<CA::MetalLayer> swapchain;
 };
 
 MetalBackend::MetalBackend(NSWindow *window):
   mbgl::mtl::RendererBackend(mbgl::gfx::ContextMode::Unique),
-  mbgl::gfx::Renderable(mbgl::Size{ 0, 0 }, std::make_unique<MetalRenderableResource>(*this)) 
+  mbgl::gfx::Renderable(mbgl::Size{ 0, 0 }, std::make_unique<MetalRenderableResource>(*this))
 {
     window.contentView.layer = (__bridge CALayer *)getDefaultRenderable().getResource<MetalRenderableResource>().getSwapchain().get();
     window.contentView.wantsLayer = YES;
