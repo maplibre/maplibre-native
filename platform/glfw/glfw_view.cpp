@@ -1030,7 +1030,7 @@ void GLFWView::setShouldClose() {
 }
 
 void GLFWView::setWindowTitle(const std::string &title) {
-    glfwSetWindowTitle(window, (std::string{"Mapbox GL: "} + title).c_str());
+    glfwSetWindowTitle(window, (std::string{"MapLibre Native (GLFW): "} + title).c_str());
 }
 
 void GLFWView::onDidFinishLoadingStyle() {
