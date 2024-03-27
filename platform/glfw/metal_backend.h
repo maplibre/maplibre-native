@@ -15,4 +15,6 @@ public:
     void activate() override;
     void deactivate() override;
     void updateAssumedState() override;
+    void setSize(mbgl::Size size_);
+    mbgl::Size getSize() const;
 };

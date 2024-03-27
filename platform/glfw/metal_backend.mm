@@ -16,16 +16,30 @@ public:
         swapchain->setDevice(backend.getDevice().get());
     }
     
+    void setBackendSize(mbgl::Size size_) {
+        size = size_;
+        swapchain->setDrawableSize({size.width, size.height});
+        buffersInvalid = true;
+    }
+    
+    mbgl::Size getSize() const {
+        return size;
+    }
+    
     void bind() override {
         surface = NS::TransferPtr(swapchain->nextDrawable());
+        auto texSize = mbgl::Size{
+            static_cast<uint32_t>(swapchain->drawableSize().width),
+            static_cast<uint32_t>(swapchain->drawableSize().height)};
         
         commandBuffer = NS::TransferPtr(commandQueue->commandBuffer());
         renderPassDescriptor = NS::TransferPtr(MTL::RenderPassDescriptor::renderPassDescriptor());
         renderPassDescriptor->colorAttachments()->object(0)->setTexture(surface->texture());
         
-        if (!depthTexture || !stencilTexture) {
+        if (buffersInvalid || !depthTexture || !stencilTexture) {
+            buffersInvalid = false;
             depthTexture = rendererBackend.getContext().createTexture2D();
-            depthTexture->setSize(rendererBackend.getSize());
+            depthTexture->setSize(texSize);
             depthTexture->setFormat(gfx::TexturePixelType::Depth, gfx::TextureChannelDataType::Float);
             depthTexture->setSamplerConfiguration(
                                                   {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
@@ -33,7 +47,7 @@ public:
                                                                        MTL::TextureUsageShaderRead | MTL::TextureUsageShaderWrite | MTL::TextureUsageRenderTarget);
             
             stencilTexture = rendererBackend.getContext().createTexture2D();
-            stencilTexture->setSize(rendererBackend.getSize());
+            stencilTexture->setSize(texSize);
             stencilTexture->setFormat(gfx::TexturePixelType::Stencil, gfx::TextureChannelDataType::UnsignedByte);
             stencilTexture->setSamplerConfiguration(
                                                     {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
@@ -91,13 +105,15 @@ private:
     NS::SharedPtr<CA::MetalLayer> swapchain;
     gfx::Texture2DPtr depthTexture;
     gfx::Texture2DPtr stencilTexture;
+    mbgl::Size size;
+    bool buffersInvalid = true;
 };
 
 } // namespace mbgl
 
 MetalBackend::MetalBackend(NSWindow *window):
 mbgl::mtl::RendererBackend(mbgl::gfx::ContextMode::Unique),
-mbgl::gfx::Renderable(mbgl::Size{[[window contentView] frame].size.width, [[window contentView] frame].size.height}, std::make_unique<mbgl::MetalRenderableResource>(*this))
+mbgl::gfx::Renderable(mbgl::Size{0, 0}, std::make_unique<mbgl::MetalRenderableResource>(*this))
 {
     window.contentView.layer = (__bridge CALayer *)getDefaultRenderable().getResource<mbgl::MetalRenderableResource>().getSwapchain().get();
     window.contentView.wantsLayer = YES;
@@ -110,3 +126,9 @@ mbgl::gfx::Renderable &MetalBackend::getDefaultRenderable() {
 void MetalBackend::activate() {}
 void MetalBackend::deactivate() {}
 void MetalBackend::updateAssumedState() {}
+
+void MetalBackend::setSize(mbgl::Size size_) {
+    getResource<mbgl::MetalRenderableResource>().setBackendSize(size_);
+}
+
+mbgl::Size MetalBackend::getSize() const { return getResource<mbgl::MetalRenderableResource>().getSize(); }

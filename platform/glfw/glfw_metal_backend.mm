@@ -17,8 +17,10 @@ mbgl::gfx::RendererBackend& GLFWMetalBackend::getRendererBackend() {
     return rendererBackend;
 }
 
-void GLFWMetalBackend::setSize(mbgl::Size) {}
+void GLFWMetalBackend::setSize(mbgl::Size size) {
+    rendererBackend.setSize(size);
+}
 
 mbgl::Size GLFWMetalBackend::getSize() const {
-    return mbgl::Size(0, 0);
+    return rendererBackend.getSize();
 }
