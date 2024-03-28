@@ -8,11 +8,7 @@ Clone the repo:
 git clone --recurse-submodules git@github.com:maplibre/maplibre-native.git
 ```
 
-Install needed tooling and dependencies:
-
-```sh
-brew install bazelisk webp libuv jpeg-turbo icu4c
-```
+Install needed tooling and dependencies with Homebrew. See [macos-ci.yml](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/macos-ci.yml) for the most up-to-date dependencies.
 
 Setup Bazel config:
 

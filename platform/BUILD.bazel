@@ -1,10 +1,6 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 
-# MacOS targets
-# darwin_objcpp -> macos_public
-# darwin_objcpp -> macos_private
-
 objc_library(
     name = "macos-objcpp",
     srcs = [
@@ -330,84 +326,3 @@ js_binary(
     ],
     entry_point = "scripts/check-public-symbols.js",
 )
-
-# cc_library(
-#     name = "glfw-cpp",
-#     srcs = [
-#         "glfw/main.cpp",
-#         "glfw/glfw_view.cpp",
-#         "glfw/glfw_renderer_frontend.cpp",
-#         "glfw/settings_json.cpp",
-#         "glfw/test_writer.cpp",
-#         "default/src/mbgl/map/map_snapshotter.cpp",
-#     ]
-#     hdrs = MLN_CORE_HEADERS + select({
-#         ":drawable_renderer": MLN_OPENGL_HEADERS + MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_GL_HEADERS,
-#         ":legacy_renderer": MLN_OPENGL_HEADERS,
-#         ":metal_renderer": MLN_DRAWABLES_HEADERS + MLN_DRAWABLES_MTL_HEADERS,
-#         "//conditions:default": [],
-#     }),
-#     copts = CPP_FLAGS + MAPLIBRE_FLAGS,
-#     defines = select({
-#         ":legacy_renderer": [
-#             "MLN_RENDER_BACKEND_OPENGL=1",
-#             "MLN_LEGACY_RENDERER=1",
-#             "MLN_DRAWABLE_RENDERER=0",
-#         ],
-#         ":drawable_renderer": [
-#             "MLN_RENDER_BACKEND_OPENGL=1",
-#             "MLN_LEGACY_RENDERER=0",
-#             "MLN_DRAWABLE_RENDERER=1",
-#         ],
-#         ":metal_renderer": [
-#             "MLN_RENDER_BACKEND_METAL=1",
-#             "MLN_LEGACY_RENDERER=0",
-#             "MLN_DRAWABLE_RENDERER=1",
-#         ],
-#     }) + select({
-#         "@platforms//os:ios": ["GLES_SILENCE_DEPRECATION=1"],
-#         "//conditions:default": [],
-#     }),
-#     includes = [
-#         "include",
-#         "src",
-#     ] + select({
-#         ":metal_renderer": [
-#             "vendor/metal-cpp",
-#         ],
-#         "//conditions:default": [],
-#     }),
-#     local_defines = [
-#         r"MLN_VERSION_REV=\"standalone\"",
-#     ],
-#     visibility = ["//visibility:public"],
-#     deps = [
-#         ":mbgl-core-generated-private-artifacts",
-#         ":mbgl-core-generated-public-artifacts",
-#         "//vendor:boost",
-#         "//vendor:csscolorparser",
-#         "//vendor:earcut.hpp",
-#         "//vendor:eternal",
-#         "//vendor:mapbox-base",
-#         "//vendor:parsedate",
-#         "//vendor:polylabel",
-#         "//vendor:protozero",
-#         "//vendor:unique_resource",
-#         "//vendor:unordered_dense",
-#         "//vendor:vector-tile",
-#         "//vendor:wagyu",
-#     ] + select({
-#         "@platforms//os:ios": [
-#             "//vendor:icu",
-#         ],
-#         "@platforms//os:osx": [
-#             "//vendor:icu",
-#         ],
-#         "//conditions:default": [],
-#     }) + select({
-#         ":metal_renderer": [
-#             "//vendor:metal-cpp",
-#         ],
-#         "//conditions:default": [],
-#     }),
-# )
