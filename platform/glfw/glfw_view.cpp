@@ -199,15 +199,13 @@ GLFWView::GLFWView(bool fullscreen_,
     glfwGetWindowSize(window, &width, &height);
 
     backend = GLFWBackend::Create(window, benchmark);
-    
+
 #ifdef __APPLE__
-          int fbW, fbH;
-          glfwGetFramebufferSize(window, &fbW, &fbH);
-          backend->setSize({
-              fbW, fbH
-          });
+    int fbW, fbH;
+    glfwGetFramebufferSize(window, &fbW, &fbH);
+    backend->setSize({fbW, fbH});
 #endif
-          
+
     pixelRatio = static_cast<float>(backend->getSize().width) / width;
 
     glfwMakeContextCurrent(nullptr);
@@ -853,9 +851,7 @@ void GLFWView::onWindowResize(GLFWwindow *window, int width, int height) {
 #ifdef __APPLE__
     int fbW, fbH;
     glfwGetFramebufferSize(window, &fbW, &fbH);
-    view->backend->setSize({
-        fbW, fbH
-    });
+    view->backend->setSize({fbW, fbH});
 #endif
 }
 
