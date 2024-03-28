@@ -1,9 +1,5 @@
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
 
-# build with
-# bazel build platform/glfw:app --//:renderer=metal --linkopt=-L/opt/homebrew/lib
-# glfw needs to be installed with homebrew
-
 objc_library(
     name = "metal_backend",
     srcs = [
