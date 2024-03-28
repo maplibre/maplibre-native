@@ -40,7 +40,7 @@ jobs:
             
       - name: Install dependencies
         run: |
-          brew install bazelisk webp libuv webp icu4c jpeg-turbo
+          brew install bazelisk webp libuv webp icu4c jpeg-turbo glfw
           brew link icu4c --force
       
       - name: Setup Bazel
