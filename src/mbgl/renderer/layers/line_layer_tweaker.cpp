@@ -83,14 +83,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
 #if MLN_RENDER_BACKEND_METAL
     const auto getExpressionBuffer = [&]() {
-        if (!expressionUniformBuffer || gpuExpressionsUpdated) {
+        const bool enableEval = (parameters.debugOptions & MapDebugOptions::NoGPUEval);
+        if (!expressionUniformBuffer || (gpuExpressionsUpdated && enableEval)) {
             LineExpressionUBO exprUBO = {
-                /* color = */ gpuExpressions[propertyIndex<LineColor>()],
-                /* blur = */ gpuExpressions[propertyIndex<LineBlur>()],
-                /* opacity = */ gpuExpressions[propertyIndex<LineOpacity>()],
-                /* gapwidth = */ gpuExpressions[propertyIndex<LineGapWidth>()],
-                /* offset = */ gpuExpressions[propertyIndex<LineOffset>()],
-                /* width = */ gpuExpressions[propertyIndex<LineWidth>()],
+                /* color = */ enableEval ? gpuExpressions[propertyIndex<LineColor>()] : nullptr,
+                /* blur = */ enableEval ? gpuExpressions[propertyIndex<LineBlur>()] : nullptr,
+                /* opacity = */ enableEval ? gpuExpressions[propertyIndex<LineOpacity>()] : nullptr,
+                /* gapwidth = */ enableEval ? gpuExpressions[propertyIndex<LineGapWidth>()] : nullptr,
+                /* offset = */ enableEval ? gpuExpressions[propertyIndex<LineOffset>()] : nullptr,
+                /* width = */ enableEval ? gpuExpressions[propertyIndex<LineWidth>()] : nullptr,
             };
             context.emplaceOrUpdateUniformBuffer(expressionUniformBuffer, &exprUBO);
             gpuExpressionsUpdated = false;
@@ -102,15 +103,21 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     const auto getLinePropsBuffer = [&]() {
         if (!linePropertiesBuffer || simplePropertiesUpdated) {
 #if MLN_RENDER_BACKEND_METAL
+            const bool enableEval = (parameters.debugOptions & MapDebugOptions::NoGPUEval);
             const LineExpressionMask expressionMask =
-                (gpuExpressions[propertyIndex<LineColor>()] ? LineExpressionMask::Color : LineExpressionMask::None) |
-                (gpuExpressions[propertyIndex<LineBlur>()] ? LineExpressionMask::Blur : LineExpressionMask::None) |
-                (gpuExpressions[propertyIndex<LineOpacity>()] ? LineExpressionMask::Opacity
-                                                              : LineExpressionMask::None) |
-                (gpuExpressions[propertyIndex<LineGapWidth>()] ? LineExpressionMask::GapWidth
-                                                               : LineExpressionMask::None) |
-                (gpuExpressions[propertyIndex<LineOffset>()] ? LineExpressionMask::Offset : LineExpressionMask::None) |
-                (gpuExpressions[propertyIndex<LineWidth>()] ? LineExpressionMask::Width : LineExpressionMask::None);
+                !enableEval ? LineExpressionMask::None
+                            : ((gpuExpressions[propertyIndex<LineColor>()] ? LineExpressionMask::Color
+                                                                           : LineExpressionMask::None) |
+                               (gpuExpressions[propertyIndex<LineBlur>()] ? LineExpressionMask::Blur
+                                                                          : LineExpressionMask::None) |
+                               (gpuExpressions[propertyIndex<LineOpacity>()] ? LineExpressionMask::Opacity
+                                                                             : LineExpressionMask::None) |
+                               (gpuExpressions[propertyIndex<LineGapWidth>()] ? LineExpressionMask::GapWidth
+                                                                              : LineExpressionMask::None) |
+                               (gpuExpressions[propertyIndex<LineOffset>()] ? LineExpressionMask::Offset
+                                                                            : LineExpressionMask::None) |
+                               (gpuExpressions[propertyIndex<LineWidth>()] ? LineExpressionMask::Width
+                                                                           : LineExpressionMask::None));
 #else
             constexpr LineExpressionMask expressionMask = LineExpressionMask::None;
 #endif // MLN_RENDER_BACKEND_METAL
