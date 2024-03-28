@@ -9,19 +9,19 @@ const MLNExceptionName MLNBundleNotFoundException = @"MLNBundleNotFoundException
 + (instancetype)mgl_frameworkBundle {
     NSBundle *bundle = [self bundleForClass:[MLNSettings class]];
 
-// #ifndef MLN_CUSTOM_COMBINED_BUNDLE
-//     if (![bundle.infoDictionary[@"CFBundlePackageType"] isEqualToString:@"FMWK"]) {
-//         // For static frameworks, the bundle is the containing application
-//         // bundle but the resources are in Mapbox.bundle.
-//         NSString *bundlePath = [bundle pathForResource:@"Mapbox" ofType:@"bundle"];
-//         if (bundlePath) {
-//             bundle = [self bundleWithPath:bundlePath];
-//         } else {
-//             [NSException raise:MLNBundleNotFoundException
-//                         format:@"The MapLibre framework bundle could not be found. If using the MapLibre Native for iOS as a static framework, make sure that MapLibre bundle is copied into the root of the app bundle."];
-//         }
-//     }
-// #endif
+#ifndef MLN_CUSTOM_COMBINED_BUNDLE
+    if (![bundle.infoDictionary[@"CFBundlePackageType"] isEqualToString:@"FMWK"]) {
+        // For static frameworks, the bundle is the containing application
+        // bundle but the resources are in Mapbox.bundle.
+        NSString *bundlePath = [bundle pathForResource:@"Mapbox" ofType:@"bundle"];
+        if (bundlePath) {
+            bundle = [self bundleWithPath:bundlePath];
+        } else {
+            [NSException raise:MLNBundleNotFoundException
+                        format:@"The MapLibre framework bundle could not be found. If using the MapLibre Native for iOS as a static framework, make sure that MapLibre bundle is copied into the root of the app bundle."];
+        }
+    }
+#endif
 
     return bundle;
 }
