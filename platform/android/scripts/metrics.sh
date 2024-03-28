@@ -4,10 +4,10 @@ set -e
 set -o pipefail
 
 # Track individual architectures
-scripts/check_binary_size.js "MapboxGLAndroidSDK/build/intermediates/intermediate-jars/release/jni/armeabi-v7a/libmapbox-gl.so" "Android arm-v7"
-scripts/check_binary_size.js "MapboxGLAndroidSDK/build/intermediates/intermediate-jars/release/jni/arm64-v8a/libmapbox-gl.so"   "Android arm-v8"
-scripts/check_binary_size.js "MapboxGLAndroidSDK/build/intermediates/intermediate-jars/release/jni/x86/libmapbox-gl.so"         "Android x86"
-scripts/check_binary_size.js "MapboxGLAndroidSDK/build/intermediates/intermediate-jars/release/jni/x86_64/libmapbox-gl.so"      "Android x86_64"
+scripts/check_binary_size.js "MapboxGLAndroidSDK/build/intermediates/intermediate-jars/release/jni/armeabi-v7a/libmaplibre.so" "Android arm-v7"
+scripts/check_binary_size.js "MapboxGLAndroidSDK/build/intermediates/intermediate-jars/release/jni/arm64-v8a/libmaplibre.so"   "Android arm-v8"
+scripts/check_binary_size.js "MapboxGLAndroidSDK/build/intermediates/intermediate-jars/release/jni/x86/libmaplibre.so"         "Android x86"
+scripts/check_binary_size.js "MapboxGLAndroidSDK/build/intermediates/intermediate-jars/release/jni/x86_64/libmaplibre.so"      "Android x86_64"
 
 # Track overall library size
 scripts/check_binary_size.js "MapboxGLAndroidSDK/build/outputs/aar/MapboxGLAndroidSDK-release.aar" "Android AAR"
