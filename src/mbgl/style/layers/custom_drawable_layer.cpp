@@ -91,7 +91,7 @@ public:
     LineDrawableTweaker(const shaders::LinePropertiesUBO& properties)
         : linePropertiesUBO(properties) {}
 
-    void init(gfx::Drawable&) override{};
+    void init(gfx::Drawable&) override {};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -139,7 +139,7 @@ public:
     WideVectorDrawableTweaker(const CustomDrawableLayerHost::Interface::LineOptions& options)
         : options(options) {}
 
-    void init(gfx::Drawable&) override{};
+    void init(gfx::Drawable&) override {};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -213,7 +213,7 @@ public:
         : color(color_),
           opacity(opacity_) {}
 
-    void init(gfx::Drawable&) override{};
+    void init(gfx::Drawable&) override {};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -259,7 +259,7 @@ public:
     SymbolDrawableTweaker(const CustomDrawableLayerHost::Interface::SymbolOptions& options_)
         : options(options_) {}
 
-    void init(gfx::Drawable&) override{};
+    void init(gfx::Drawable&) override {};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {

@@ -42,7 +42,7 @@ public:
     gfx::IndexVector<gfx::Triangles> polylineIndexes;
 
     gfx::VertexVector<shaders::VertexTriWideVecInstance> wideVectorInstanceData;
-    
+
     std::vector<uint16_t> buildIndexes;
     std::shared_ptr<gfx::IndexVectorBase> sharedIndexes;
     std::vector<std::unique_ptr<Drawable::DrawSegment>> segments;
@@ -50,7 +50,7 @@ public:
     AttributeDataType rawVerticesType = static_cast<AttributeDataType>(-1);
     gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
-    
+
     // methods
     void addPolyline(gfx::DrawableBuilder& builder,
                      const GeometryCoordinates& coordinates,
@@ -75,7 +75,8 @@ public:
     bool setMode(Mode value) { return mode == value; };
 
     std::size_t vertexCount() const {
-        return std::max({rawVerticesCount, vertices.elements(), polylineVertices.elements(), wideVectorInstanceData.elements()});
+        return std::max(
+            {rawVerticesCount, vertices.elements(), polylineVertices.elements(), wideVectorInstanceData.elements()});
     }
 
     void clear() {

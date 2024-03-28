@@ -133,11 +133,11 @@ void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& builder,
         Point<double> pSource{merc.x * mbgl::util::EXTENT, merc.y * mbgl::util::EXTENT};
         Point<float> pValue{pSource.x, pSource.y};
         Point<float> pDiff{pSource.x - pValue.x, pSource.y - pValue.y};
-        
+
         VertexTriWideVecInstance data;
         data.center = {pValue.x, pValue.y, 0};
         data.diff = {pDiff.x, pDiff.y, 0};
-        
+
         if (FeatureType::Polygon == options.type) {
             // loop line
             data.prev = (index - 1 + coord_size) % coord_size;
@@ -148,7 +148,7 @@ void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& builder,
             data.prev = index - 1;
             data.next = index + 1 >= coord_size ? -1 : index + 1;
         }
-        
+
         wideVectorInstanceData.emplace_back(data);
         ++index;
     }
@@ -179,22 +179,23 @@ void DrawableBuilder::Impl::setupForWideVectors(gfx::Context& context, gfx::Draw
     for (const auto& v : wideVectorVertices) {
         vertices.emplace_back(v);
     }
-    
+
     // instance data
     using InstanceVector = gfx::VertexVector<VertexTriWideVecInstance>;
-    const std::shared_ptr<InstanceVector> sharedInstanceData = std::make_shared<InstanceVector>(std::move(wideVectorInstanceData));
-    
+    const std::shared_ptr<InstanceVector> sharedInstanceData = std::make_shared<InstanceVector>(
+        std::move(wideVectorInstanceData));
+
     // indexes
     using TriangleIndexVector = gfx::IndexVector<gfx::Triangles>;
     const std::shared_ptr<TriangleIndexVector> sharedTriangles = std::make_shared<TriangleIndexVector>();
     TriangleIndexVector& triangles = *sharedTriangles;
     triangles.emplace_back(
         0, 3, 1, 0, 2, 3, 4 + 0, 4 + 3, 4 + 1, 4 + 0, 4 + 2, 4 + 3, 8 + 0, 8 + 3, 8 + 1, 8 + 0, 8 + 2, 8 + 3);
-    
+
     // segments
     SegmentVector<VertexTriWideVecB> triangleSegments;
     triangleSegments.emplace_back(Segment<VertexTriWideVecB>{0, 0, 12, 18});
-    
+
     // add to builder
     {
         // add vertex attributes
