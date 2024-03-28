@@ -46,6 +46,8 @@ public:
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
 
+    const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
+
     ProgramID getGLProgramID() const { return glProgram; }
 
 protected:
@@ -56,6 +58,7 @@ protected:
 
     UniformBlockArrayGL uniformBlocks;
     VertexAttributeArrayGL vertexAttributes;
+    VertexAttributeArrayGL instanceAttributes;
     SamplerLocationArray samplerLocations;
 };
 

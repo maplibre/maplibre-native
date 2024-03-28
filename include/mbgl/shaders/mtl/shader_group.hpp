@@ -78,6 +78,9 @@ public:
                     shader->initAttribute(attrib);
                 }
             }
+            for (const auto& attrib : ShaderClass::instanceAttributes) {
+                shader->initInstanceAttribute(attrib);
+            }
             for (const auto& uniform : ShaderClass::uniforms) {
                 shader->initUniformBlock(uniform);
             }

@@ -35,6 +35,7 @@ enum class BuiltIn {
     SymbolSDFIconShader,
     SymbolTextAndIconShader,
     CustomSymbolIconShader,
+    WideVectorShader,
     Prelude,
     BackgroundProgram,
     BackgroundPatternProgram,

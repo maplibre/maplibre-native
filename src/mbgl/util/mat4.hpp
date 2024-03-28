@@ -53,5 +53,6 @@ void multiply(mat4& out, const mat4& a, const mat4& b);
 
 void transformMat4(vec4& out, const vec4& a, const mat4& m);
 
+void diffsplit(matf4& outValue, matf4& outDiff, const mat4& source);
 } // namespace matrix
 } // namespace mbgl

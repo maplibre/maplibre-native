@@ -33,14 +33,20 @@ public:
 
 class CustomDrawableLayerHost::Interface {
 public:
+    enum class LineShaderType {
+        Classic,
+        MetalWideVector
+    };
+
     struct LineOptions {
-        Color color;
+        gfx::PolylineGeneratorOptions geometry;
         float blur = 0.f;
         float opacity = 1.f;
         float gapWidth = 0.f;
         float offset = 0.f;
         float width = 1.f;
-        gfx::PolylineGeneratorOptions geometry;
+        LineShaderType shaderType = LineShaderType::Classic;
+        Color color;
     };
 
     struct FillOptions {
@@ -106,24 +112,30 @@ public:
     /**
      * @brief Add a polyline
      *
-     * @param coordinates
-     * @param options Polyline options
+     * @param coordinates in tile range
      */
-    void addPolyline(const GeometryCoordinates& coordinates);
+    bool addPolyline(const GeometryCoordinates& coordinates);
+
+    /**
+     * @brief Add a polyline
+     *
+     * @param coordinates Geographic coordinates
+     */
+    bool addPolyline(const LineString<double>& coordinates);
 
     /**
      * @brief Add a multipolygon area fill
      *
      * @param geometry a collection of rings with optional holes
      */
-    void addFill(const GeometryCollection& geometry);
+    bool addFill(const GeometryCollection& geometry);
 
     /**
      * @brief Add a symbol
      *
      * @param point
      */
-    void addSymbol(const GeometryCoordinate& point);
+    bool addSymbol(const GeometryCoordinate& point);
 
     /**
      * @brief Finish the current drawable building session
@@ -143,10 +155,20 @@ public:
 
 private:
     gfx::ShaderPtr lineShaderDefault() const;
+    gfx::ShaderPtr lineShaderWideVector() const;
     gfx::ShaderPtr fillShaderDefault() const;
     gfx::ShaderPtr symbolShaderDefault() const;
 
+    enum class BuilderType {
+        None,
+        LineClassic,
+        LineWideVector,
+        Fill,
+        Symbol
+    };
+
     std::unique_ptr<gfx::DrawableBuilder> createBuilder(const std::string& name, gfx::ShaderPtr shader) const;
+    bool updateBuilder(BuilderType type, const std::string& name, gfx::ShaderPtr shader);
 
     std::unique_ptr<gfx::DrawableBuilder> builder;
     std::optional<OverscaledTileID> tileID;
@@ -158,6 +180,8 @@ private:
     LineOptions lineOptions;
     FillOptions fillOptions;
     SymbolOptions symbolOptions;
+
+    BuilderType builderType{BuilderType::None};
 };
 
 class CustomDrawableLayer final : public Layer {

@@ -40,6 +40,9 @@ public:
     /// Get the available vertex attributes and their default values
     virtual const gfx::VertexAttributeArray& getVertexAttributes() const = 0;
 
+    /// Get the available instance attributes and their default values
+    virtual const gfx::VertexAttributeArray& getInstanceAttributes() const = 0;
+
 protected:
     virtual gfx::UniformBlockArray& mutableUniformBlocks() = 0;
 

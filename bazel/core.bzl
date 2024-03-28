@@ -88,6 +88,7 @@ MLN_GENERATED_OPENGL_SHADER_HEADERS = [
     "include/mbgl/shaders/gl/drawable_symbol_icon.hpp",
     "include/mbgl/shaders/gl/drawable_symbol_sdf.hpp",
     "include/mbgl/shaders/gl/drawable_symbol_text_and_icon.hpp",
+    "include/mbgl/shaders/gl/drawable_wide_vector.hpp",
     "include/mbgl/shaders/gl/fill_extrusion_pattern.hpp",
     "include/mbgl/shaders/gl/fill_extrusion.hpp",
     "include/mbgl/shaders/gl/fill_outline_pattern.hpp",
@@ -1000,6 +1001,7 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/shaders/shader_defines.hpp",
     "include/mbgl/shaders/shader_program_base.hpp",
     "include/mbgl/shaders/symbol_layer_ubo.hpp",
+    "include/mbgl/shaders/widevector_ubo.hpp",
     "include/mbgl/util/suppress_copies.hpp",
     "include/mbgl/style/layers/custom_drawable_layer.hpp",
     "include/mbgl/layermanager/custom_drawable_layer_factory.hpp",
@@ -1123,4 +1125,5 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/shaders/mtl/symbol_sdf.hpp",
     "include/mbgl/shaders/mtl/symbol_text_and_icon.hpp",
     "include/mbgl/style/layers/mtl/custom_layer_render_parameters.hpp",
+    "include/mbgl/shaders/mtl/widevector.hpp",
 ]

@@ -4,6 +4,7 @@
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/immutable.hpp>
 #include <mbgl/util/containers.hpp>
+#include <mbgl/util/mat4.hpp>
 
 #include <array>
 #include <memory>
@@ -27,8 +28,6 @@ class LayerGroupBase;
 class PaintParameters;
 class RenderTree;
 class UnwrappedTileID;
-
-using mat4 = std::array<double, 16>;
 
 /**
     Base class for layer tweakers, which manipulate layer group per frame
