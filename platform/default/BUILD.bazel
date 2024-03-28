@@ -74,7 +74,12 @@ cc_library(
             "src/mbgl/util/timer.cpp",
             "src/mbgl/util/webp_reader.cpp",
         ],
-        "@platforms//os:ios": [],
+        "@platforms//os:osx": [
+            "src/mbgl/util/async_task.cpp",
+            "src/mbgl/util/run_loop.cpp",
+            "src/mbgl/util/timer.cpp",
+        ],
+        "//conditions:default": [],
     }),
     hdrs = [
         "include/mbgl/gfx/headless_backend.hpp",
@@ -96,11 +101,27 @@ cc_library(
     includes = [
         "include",
     ],
+    linkopts = select({
+        "@platforms//os:macos": [
+            "-lsqlite3",
+            "-luv",
+            "-lz",
+            "-lcurl",
+            "-lpng",
+            "-ljpeg",
+            "-lwebp",
+            "-licuuc ",
+            "-licui18n",
+            "-licudata",
+        ],
+        "//conditions:default": [],
+    }),
     visibility = [
         "//platform:__pkg__",
         "//platform/darwin:__pkg__",
         "//platform/ios:__pkg__",
         "//platform/linux:__pkg__",
+        "//platform/macos:__pkg__",
         "//test:__pkg__",
     ],
     deps = [
@@ -111,6 +132,11 @@ cc_library(
         ],
         "@platforms//os:linux": [
             "default-collator",
+        ],
+        "@platforms//os:osx": [
+            ":default-collator",
+            "//platform/darwin:darwin-loop",
+            "@libuv",
         ],
     }),
 )

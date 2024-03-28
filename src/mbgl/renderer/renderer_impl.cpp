@@ -77,6 +77,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {
         const auto& mtlBackend = static_cast<mtl::RendererBackend&>(backend);
+
         const auto& mtlDevice = mtlBackend.getDevice();
 
         if (!commandCaptureScope) {

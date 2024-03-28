@@ -1,0 +1,23 @@
+load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS")
+
+cc_binary(
+    name = "cache_tool",
+    srcs = [
+        "cache.cpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    deps = [
+        "//platform:macos-objcpp",
+    ],
+)
+
+cc_binary(
+    name = "render_tool",
+    srcs = [
+        "render.cpp",
+    ],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS,
+    deps = [
+        "//platform:macos-objcpp",
+    ],
+)

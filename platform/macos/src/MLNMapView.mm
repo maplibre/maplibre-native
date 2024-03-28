@@ -672,6 +672,11 @@ public:
     _mbglMap->setPrefetchZoomDelta(prefetchesTiles ? mbgl::util::DEFAULT_PREFETCH_ZOOM_DELTA : 0);
 }
 
+- (BOOL)prefetchesTiles
+{
+    return _mbglMap->getPrefetchZoomDelta() > 0 ? YES : NO;
+}
+
 - (mbgl::Renderer *)renderer {
     return _rendererFrontend->getRenderer();
 }

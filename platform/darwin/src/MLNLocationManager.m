@@ -94,9 +94,11 @@
     [self.locationManager startUpdatingLocation];
 }
 
+#if TARGET_OS_IPHONE
 - (void)stopUpdatingHeading {
     [self.locationManager stopUpdatingHeading];
 }
+#endif
 
 - (void)stopUpdatingLocation {
     [self.locationManager stopUpdatingLocation];
@@ -105,7 +107,9 @@
 - (void)dealloc
 {
     [self.locationManager stopUpdatingLocation];
+#if TARGET_OS_IPHONE
     [self.locationManager stopUpdatingHeading];
+#endif
     self.locationManager.delegate = nil;
     self.delegate = nil;
 }

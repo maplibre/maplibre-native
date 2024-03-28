@@ -3,7 +3,7 @@
 #import "LocationCoordinate2DTransformer.h"
 #import "TimeIntervalTransformer.h"
 
-#import <Mapbox/Mapbox.h>
+#import <Mapbox.h>
 
 static MLNCoordinateFormatter *DroppedPinCoordinateFormatter;
 

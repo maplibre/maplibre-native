@@ -7,11 +7,11 @@ class RendererBackend;
 
 class BackendScope {
 public:
-    /// There are two types of scopes: Creating an "Implicit" scope tells Mapbox
-    /// GL that the supporting windowing system has already activated the GL
-    /// Backend and that no further actions are required. Creating an "Explicit"
-    /// scope actually enables the GL Backend, and disables it when the
-    /// BackendScope is destroyed.
+    /// There are two types of scopes: Creating an "Implicit" scope tells MapLibre
+    /// Native that the supporting windowing system has already activated the
+    /// RenderBackend and that no further actions are required. Creating an "Explicit"
+    /// scope (the default) actually enables the RenderBackend, and disables it when
+    /// the BackendScope is destroyed.
     enum class ScopeType : bool {
         Implicit,
         Explicit,
