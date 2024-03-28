@@ -47,13 +47,14 @@ public:
         if (interface.getDrawableCount())
             return;
         
-        // set tile
-        interface.setTileID({11, 327, 791});
         constexpr float extent = mbgl::util::EXTENT;
 
         // add classic polylines
         {
             using namespace mbgl;
+            
+            // set tile
+            interface.setTileID({11, 327, 791});
             
             constexpr auto numLines = 6;
             Interface::LineOptions options[numLines] {
@@ -93,6 +94,9 @@ public:
         {
             using namespace mbgl;
 
+            // set tile
+            interface.setTileID({11, 327, 791});
+
             GeometryCollection geometry{
                 {
                     // ring 1
@@ -122,6 +126,10 @@ public:
         // add symbol
         {
             using namespace mbgl;
+
+            // set tile
+            interface.setTileID({11, 327, 791});
+
             GeometryCoordinate position {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)};
             
             // load image
@@ -141,7 +149,7 @@ public:
             options.size = {static_cast<uint32_t>(image->size.width * xspan), static_cast<uint32_t>(image->size.height * yspan)};
             options.anchor = {0.5f, 0.95f};
             options.angleDegrees = 45.0f;
-            options.scaleWithMap = true;
+            options.scaleWithMap = false;
             options.pitchWithMap = false;
             interface.setSymbolOptions(options);
 
@@ -153,25 +161,65 @@ public:
         {
             using namespace mbgl;
             
+            // set tile
+            interface.setTileID({11, 327, 791});
+
             Interface::LineOptions options
-                {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/Color::red() };
+            {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/7.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/{1.0f, 0, 0, .5f} };
             options.geometry.beginCap = style::LineCapType::Round;
             options.geometry.endCap = style::LineCapType::Round;
             options.geometry.joinType = style::LineJoinType::Round;
             
-            GeometryCoordinates polyline;
-//            {
-//                { 0.5, -0.5},
-//                {-0.5, -0.5},
-//                { 0.0, +0.5},
-//                { 0.0,  0.0},
-//            };
-                
-            // set property values
+            // add polyline with tile coordinates
+            GeometryCollection polyline_tile{
+                {
+                    // ring 1
+                    {static_cast<int16_t>(extent* 0.1f), static_cast<int16_t>(extent* 0.2f)},
+                    {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)},
+                    {static_cast<int16_t>(extent* 0.7f), static_cast<int16_t>(extent* 0.5f)},
+                    {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 1.0f)},
+                    {static_cast<int16_t>(extent* 0.0f), static_cast<int16_t>(extent* 0.5f)},
+                },
+                {
+                    // ring 2
+                    {static_cast<int16_t>(extent* 0.1f), static_cast<int16_t>(extent* 0.25f)},
+                    {static_cast<int16_t>(extent* 0.15f), static_cast<int16_t>(extent* 0.5f)},
+                    {static_cast<int16_t>(extent* 0.25f), static_cast<int16_t>(extent* 0.45f)},
+                },
+            };
+            
+            options.geometry.type = FeatureType::Polygon;
             interface.setLineOptions(options);
-                
-            // add polyline
-            interface.addPolyline(polyline);
+            interface.addPolyline(polyline_tile[0]);
+
+            options.geometry.type = FeatureType::LineString;
+            interface.setLineOptions(options);
+            interface.addPolyline(polyline_tile[1]);
+
+            // add polyline with geographic coordinates
+            options = {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/4.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/{1.0f, 0, 1.0f, .5f} };
+            options.geometry.type = FeatureType::LineString;
+            interface.setLineOptions(options);
+            LineString<double> polyline_geo {
+                {-122.38146223043374, 37.77194168964067},
+                {-122.6813560305925, 37.666084247570964},
+                {-122.26765538866474, 37.65037232584494},
+                {-122.42528413673159, 38.020443518012584},
+                {23.607969724676114, 46.77723172151993}
+            };
+            interface.addPolyline(polyline_geo);
+
+            options = {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/6.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/{0, 0, 1.0f, .7f} };
+            options.geometry.type = FeatureType::Polygon;
+            interface.setLineOptions(options);
+            LineString<double> polyline_geo1 {
+                {-122.38146223043374, 37.77194168964067},
+                {-122.38476465260224, 37.773350946288765},
+                {-122.38680767979824, 37.773294612880306},
+                {-122.3869373450997, 37.774352128895615},
+                {-122.38186800073211, 37.77466003457463}
+            };
+            interface.addPolyline(polyline_geo1);
         }
 
         // finish

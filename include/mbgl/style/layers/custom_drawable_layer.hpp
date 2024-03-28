@@ -112,10 +112,16 @@ public:
     /**
      * @brief Add a polyline
      *
-     * @param coordinates
-     * @param options Polyline options
+     * @param coordinates in tile range
      */
     bool addPolyline(const GeometryCoordinates& coordinates);
+
+    /**
+     * @brief Add a polyline
+     *
+     * @param coordinates Geographic coordinates
+     */
+    bool addPolyline(const LineString<double>& coordinates);
 
     /**
      * @brief Add a multipolygon area fill

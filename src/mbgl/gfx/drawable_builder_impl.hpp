@@ -7,6 +7,7 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/polyline_generator.hpp>
+#include <mbgl/shaders/widevector_ubo.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -23,6 +24,7 @@ public:
     enum class Mode {
         Primitives, ///< building primitive drawables. Not implemented
         Polylines,  ///< building drawables for thick polylines
+        WideVector, ///< building drawables for thick polylines using wide vectors
         Custom      ///< building custom drawables.
     };
     struct LineLayoutVertex {
@@ -39,6 +41,8 @@ public:
     gfx::VertexVector<LineLayoutVertex> polylineVertices;
     gfx::IndexVector<gfx::Triangles> polylineIndexes;
 
+    gfx::VertexVector<shaders::VertexTriWideVecInstance> wideVectorInstanceData;
+    
     std::vector<uint16_t> buildIndexes;
     std::shared_ptr<gfx::IndexVectorBase> sharedIndexes;
     std::vector<std::unique_ptr<Drawable::DrawSegment>> segments;
@@ -46,12 +50,23 @@ public:
     AttributeDataType rawVerticesType = static_cast<AttributeDataType>(-1);
     gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
-
+    
+    // methods
     void addPolyline(gfx::DrawableBuilder& builder,
                      const GeometryCoordinates& coordinates,
                      const gfx::PolylineGeneratorOptions& options);
 
     void setupForPolylines(gfx::Context&, gfx::DrawableBuilder&);
+
+    void addWideVectorPolyline(gfx::DrawableBuilder& builder,
+                               const GeometryCoordinates& coordinates,
+                               const gfx::PolylineGeneratorOptions& options);
+
+    void addWideVectorPolyline(gfx::DrawableBuilder& builder,
+                               const LineString<double>& coordinates,
+                               const gfx::PolylineGeneratorOptions& options);
+
+    void setupForWideVectors(gfx::Context&, gfx::DrawableBuilder&);
 
     bool checkAndSetMode(Mode);
 
@@ -60,7 +75,7 @@ public:
     bool setMode(Mode value) { return mode == value; };
 
     std::size_t vertexCount() const {
-        return std::max(rawVerticesCount, std::max(vertices.elements(), polylineVertices.elements()));
+        return std::max({rawVerticesCount, vertices.elements(), polylineVertices.elements(), wideVectorInstanceData.elements()});
     }
 
     void clear() {

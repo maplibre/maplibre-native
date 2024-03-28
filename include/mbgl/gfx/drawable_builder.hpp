@@ -207,6 +207,12 @@ public:
     /// Add a polyline. If the last point equals the first it will be closed, otherwise open
     void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions&);
 
+    /// Add a polyline in Tile coordinates, using wide vectors.
+    void addWideVectorPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions&);
+
+    /// Add a polyline in geographic coordinates, using wide vectors.
+    void addWideVectorPolyline(const LineString<double>& coordinates, const gfx::PolylineGeneratorOptions&);
+
     /// return the curent vertex count
     std::size_t curVertexCount() const;
 

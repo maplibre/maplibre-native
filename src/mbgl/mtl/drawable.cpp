@@ -369,8 +369,6 @@ void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
         if (binding.has_value()) {
             const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding->vertexBufferResource);
             if (buffer && buffer->get()) {
-                //                assert(binding->vertexStride * impl->vertexCount <=
-                //                getBufferSize(binding->vertexBufferResource));
                 renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
             } else {
                 const auto* shaderMTL = static_cast<const ShaderProgram*>(shader.get());
@@ -607,8 +605,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     // build instance buffer
-    //    const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isDirty()) ||
-    //    (impl->instanceBuffer && !instanceAttributes);
     const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isDirty());
 
     if (buildInstanceBuffer) {

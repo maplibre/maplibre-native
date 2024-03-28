@@ -17,6 +17,7 @@ struct alignas(16) WideVectorUniformsUBO {
 static_assert(sizeof(WideVectorUniformsUBO) % 16 == 0);
 
 struct alignas(16) WideVectorUniformWideVecUBO {
+    std::array<float, 4> color;
     float w2;
     float offset;
     float edge;
@@ -35,6 +36,23 @@ enum {
     idWideVectorUniformWideVecUBO,
     wideVectorUBOCount
 };
+
+struct VertexTriWideVecB {
+    // x, y offset around the center
+    std::array<float, 3> screenPos;
+    std::array<float, 4> color;
+    int index;
+};
+static_assert(sizeof(VertexTriWideVecB) == 32);
+
+struct VertexTriWideVecInstance {
+    std::array<float, 4> center;
+    std::array<float, 4> diff;
+    int32_t prev;
+    int32_t next;
+    int64_t pad_;
+};
+static_assert(sizeof(VertexTriWideVecInstance) == 48);
 
 } // namespace shaders
 } // namespace mbgl

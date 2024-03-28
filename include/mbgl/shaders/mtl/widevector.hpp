@@ -157,6 +157,7 @@ struct UniformDrawStateA {
 
 // Instructions to the wide vector shaders, usually per-drawable
 struct UniformWideVec {
+    simd::float4 color;          // Color
     float w2;                    // Width / 2.0 in screen space
     float offset;                // Offset from center in screen space
     float edge;                  // Edge falloff control
@@ -175,8 +176,8 @@ typedef struct
 {
     // Center of the point on the line
     simd::float3 center;
-    // Color for the whole line
-    simd::float4 color;
+    // Center precision diff
+    simd::float3 diff;
     // Used to track loops and such
     int prev,next; // set to -1 for non-loops
 } VertexTriWideVecInstance;
@@ -303,10 +304,31 @@ float3 viewPos(constant simd::float4x4 &mat, float3 vec) {
     return p.xyz;   // / p.w; ?
 }
 
-float2 screenPos(constant Uniforms &u, float3 viewPos) {
+float2 screenPos1(constant Uniforms &u, float3 viewPos) {
     const float4 p4 = float4(viewPos, 1.0);
     const float4 s = u.pMatrix * (u.mvMatrix * p4 + u.mvMatrixDiff * p4);
     return s.xy / s.w;
+}
+
+float2 screenPos2(constant Uniforms &u, float4 viewPos) {
+    float4 p4 = viewPos;
+    p4 = u.mvMatrix * p4 + u.mvMatrixDiff * p4;
+    const float4 s = u.pMatrix * p4 + u.pMatrixDiff * p4;
+    return s.xy / s.w;
+}
+
+float2 screenPos3(constant Uniforms &u, float3 viewPos, float3 viewPosDiff) {
+    float4 p4 = float4(viewPos, 1.0);
+    p4 = u.mvMatrix * p4 + u.mvMatrixDiff * p4;
+    const float4 s1 = u.pMatrix * p4 + u.pMatrixDiff * p4;
+    // const float2 r1 = s1.xy / s1.w;
+
+    float4 d4 = float4(viewPosDiff, 0.0);
+    d4 = u.mvMatrix * d4 + u.mvMatrixDiff * d4;
+    const float4 s2 = u.pMatrix * d4 + u.pMatrixDiff * d4;
+    // const float2 r2 = s2.xy / s2.w;
+
+    return s1.xy/(s1.w + s2.w) + s2.xy/(s1.w + s2.w);
 }
 
 constant constexpr float wideVecMinTurnThreshold = 1e-5;
@@ -398,7 +420,9 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
         if (!instValid[ii]) {
             continue;
         }
-        centers[ii].screenPos = screenPos(uniforms, inst[ii].center);
+        // centers[ii].screenPos = screenPos1(uniforms, inst[ii].center);
+        // centers[ii].screenPos = screenPos2(uniforms, float4(inst[ii].center, 1.0));
+        centers[ii].screenPos = screenPos3(uniforms, inst[ii].center, inst[ii].diff);
     }
 
     const float2 screenScale(2.0/uniforms.frameSize.x,2.0/uniforms.frameSize.y);    // ~(0.001,0.001)
@@ -512,7 +536,9 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
 
     // Note: We're putting a color in the instance, but then it's hard to change
     //  So we'll pull the color out of the basic drawable
-    float4 color = vert.color;
+    // float4 color = vert.color;
+    // but actually get it from the uniform:
+    float4 color = wideVec.color;
 
     outVert.color = color;
     outVert.w2 = w2;
