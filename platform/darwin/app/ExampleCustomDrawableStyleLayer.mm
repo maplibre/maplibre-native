@@ -54,7 +54,7 @@ public:
             using namespace mbgl;
             
             // set tile
-            interface.setTileID({11, 327, 791});
+            interface.setTileID({11, 327, 792});
             
             constexpr auto numLines = 6;
             Interface::LineOptions options[numLines] {
@@ -66,12 +66,12 @@ public:
                 {/*geometry=*/{},   /*blur=*/24.0f, /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/-5.0f,  /*width=*/24.0f,    /*shaderType=*/{}, /*color=*/Color(1.f, 0, 1.f, 0.2f) },
             };
             for(auto& opt: options) {
-                opt.geometry.beginCap = style::LineCapType::Round;
-                opt.geometry.endCap = style::LineCapType::Round;
-                opt.geometry.joinType = style::LineJoinType::Round;
+                opt.geometry.beginCap = style::LineCapType::Butt;
+                opt.geometry.endCap = style::LineCapType::Butt;
+                opt.geometry.joinType = style::LineJoinType::Miter;
             }
             
-            constexpr auto numPoints = 100;
+            constexpr auto numPoints = 10;
             GeometryCoordinates polyline;
             for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
                 polyline.emplace_back(ipoint * extent / numPoints, std::sin(ipoint * 2 * M_PI / numPoints) * extent / numLines / 2.f);
@@ -90,12 +90,54 @@ public:
             }
         }
 
+        // add wide vector polylines with tile coordinates
+        {
+            using namespace mbgl;
+            
+            // set tile
+            interface.setTileID({11, 327, 792});
+            
+            constexpr auto numLines = 6;
+            Interface::LineOptions options[numLines] {
+                {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/8.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/Color::red() },
+                {/*geometry=*/{},   /*blur=*/4.0f,  /*opacity=*/1.0f, /*gapWidth=*/2.0f, /*offset=*/-1.0f,  /*width=*/4.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/Color::blue() },
+                {/*geometry=*/{},   /*blur=*/16.0f, /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/2.0f,   /*width=*/16.0f,    /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/Color(1.f, 0.5f, 0, 0.5f) },
+                {/*geometry=*/{},   /*blur=*/2.0f,  /*opacity=*/1.0f, /*gapWidth=*/1.0f, /*offset=*/-2.0f,  /*width=*/2.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/Color(1.f, 1.f, 0, 0.3f) },
+                {/*geometry=*/{},   /*blur=*/0.5f,  /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/0.5f,   /*width=*/0.5f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/Color::black() },
+                {/*geometry=*/{},   /*blur=*/24.0f, /*opacity=*/0.5f, /*gapWidth=*/1.0f, /*offset=*/-5.0f,  /*width=*/24.0f,    /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/Color(1.f, 0, 1.f, 0.2f) },
+            };
+            for(auto& opt: options) {
+                opt.geometry.beginCap = style::LineCapType::Butt;
+                opt.geometry.endCap = style::LineCapType::Butt;
+                opt.geometry.joinType = style::LineJoinType::Miter;
+            }
+            
+            constexpr auto numPoints = 10;
+            GeometryCoordinates polyline;
+            for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
+                polyline.emplace_back(ipoint * extent / numPoints, std::sin(ipoint * 2 * M_PI / numPoints) * extent / numLines / 2.f);
+            }
+            
+            for (auto index {0}; index <  numLines; ++index) {
+                for(auto &p : polyline) {
+                    if (0 == index) p.y += 0.25f * extent / numLines;
+                    p.y += extent / numLines;
+                }
+                
+                // set property values
+                interface.setLineOptions(options[index]);
+                
+                // add polyline
+                interface.addPolyline(polyline);
+            }
+        }
+        
         // add fill polygon
         {
             using namespace mbgl;
 
             // set tile
-            interface.setTileID({11, 327, 791});
+            interface.setTileID({11, 327, 790});
 
             GeometryCollection geometry{
                 {
@@ -128,7 +170,7 @@ public:
             using namespace mbgl;
 
             // set tile
-            interface.setTileID({11, 327, 791});
+            interface.setTileID({11, 327, 789});
 
             GeometryCoordinate position {static_cast<int16_t>(extent* 0.5f), static_cast<int16_t>(extent* 0.5f)};
             
@@ -149,7 +191,7 @@ public:
             options.size = {static_cast<uint32_t>(image->size.width * xspan), static_cast<uint32_t>(image->size.height * yspan)};
             options.anchor = {0.5f, 0.95f};
             options.angleDegrees = 45.0f;
-            options.scaleWithMap = false;
+            options.scaleWithMap = true;
             options.pitchWithMap = false;
             interface.setSymbolOptions(options);
 
@@ -157,12 +199,12 @@ public:
             interface.addSymbol(position);
         }
 
-        // add polyline using wide vectors
+        // add polylines using wide vectors
         {
             using namespace mbgl;
             
             // set tile
-            interface.setTileID({11, 327, 791});
+            interface.setTileID({11, 327, 790});
 
             Interface::LineOptions options
             {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/7.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/{1.0f, 0, 0, .5f} };
@@ -191,16 +233,21 @@ public:
             options.geometry.type = FeatureType::Polygon;
             interface.setLineOptions(options);
             interface.addPolyline(polyline_tile[0]);
-
-            options.geometry.type = FeatureType::LineString;
-            interface.setLineOptions(options);
             interface.addPolyline(polyline_tile[1]);
 
             // add polyline with geographic coordinates
-            options = {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/4.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/{1.0f, 0, 1.0f, .5f} };
+            options = {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/12.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/{.0f, .0f, .0f, .5f} };
+            options.geometry.beginCap = style::LineCapType::Square;
+            options.geometry.endCap = style::LineCapType::Square;
+            options.geometry.joinType = style::LineJoinType::Bevel;
             options.geometry.type = FeatureType::LineString;
             interface.setLineOptions(options);
+
             LineString<double> polyline_geo {
+                {-122.38186800073211, 37.77466003457463},
+                {-122.3869373450997, 37.774352128895615},
+                {-122.38680767979824, 37.773294612880306},
+                {-122.38476465260224, 37.773350946288765},
                 {-122.38146223043374, 37.77194168964067},
                 {-122.6813560305925, 37.666084247570964},
                 {-122.26765538866474, 37.65037232584494},
@@ -208,18 +255,6 @@ public:
                 {23.607969724676114, 46.77723172151993}
             };
             interface.addPolyline(polyline_geo);
-
-            options = {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/6.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/{0, 0, 1.0f, .7f} };
-            options.geometry.type = FeatureType::Polygon;
-            interface.setLineOptions(options);
-            LineString<double> polyline_geo1 {
-                {-122.38146223043374, 37.77194168964067},
-                {-122.38476465260224, 37.773350946288765},
-                {-122.38680767979824, 37.773294612880306},
-                {-122.3869373450997, 37.774352128895615},
-                {-122.38186800073211, 37.77466003457463}
-            };
-            interface.addPolyline(polyline_geo1);
         }
 
         // finish
