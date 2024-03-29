@@ -96,7 +96,7 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::Context& context, gfx::Drawab
 
 #pragma mark Wide Vector Polylines
 
-void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& builder,
+void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& /*builder*/,
                                                   const GeometryCoordinates& coordinates,
                                                   const gfx::PolylineGeneratorOptions& options) {
     // add instance data
@@ -104,7 +104,7 @@ void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& builder,
     const int coord_size = static_cast<int>(coordinates.size());
     for (const auto& coord : coordinates) {
         VertexTriWideVecInstance data;
-        data.center = {coord.x, coord.y, 0};
+        data.center = {static_cast<float>(coord.x), static_cast<float>(coord.y), 0};
         data.diff = {0};
 
         if (FeatureType::Polygon == options.type) {
@@ -123,7 +123,7 @@ void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& builder,
     }
 }
 
-void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& builder,
+void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& /*builder*/,
                                                   const LineString<double>& coordinates,
                                                   const gfx::PolylineGeneratorOptions& options) {
     int index = 0;
@@ -131,8 +131,8 @@ void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& builder,
     for (const auto& coord : coordinates) {
         auto merc = Projection::project(LatLng(coord.y, coord.x), /*zoom*/ 0);
         Point<double> pSource{merc.x * mbgl::util::EXTENT, merc.y * mbgl::util::EXTENT};
-        Point<float> pValue{pSource.x, pSource.y};
-        Point<float> pDiff{pSource.x - pValue.x, pSource.y - pValue.y};
+        Point<float> pValue{static_cast<float>(pSource.x), static_cast<float>(pSource.y)};
+        Point<float> pDiff{static_cast<float>(pSource.x - pValue.x), static_cast<float>(pSource.y - pValue.y)};
 
         VertexTriWideVecInstance data;
         data.center = {pValue.x, pValue.y, 0};
@@ -175,9 +175,9 @@ void DrawableBuilder::Impl::setupForWideVectors(gfx::Context& context, gfx::Draw
 
     using VertexVector = gfx::VertexVector<VertexTriWideVecB>;
     const std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
-    VertexVector& vertices = *sharedVertices;
+    VertexVector& vertices_ = *sharedVertices;
     for (const auto& v : wideVectorVertices) {
-        vertices.emplace_back(v);
+        vertices_.emplace_back(v);
     }
 
     // instance data
@@ -258,7 +258,7 @@ void DrawableBuilder::Impl::setupForWideVectors(gfx::Context& context, gfx::Draw
         builder.setInstanceAttributes(std::move(instanceAttributes));
     }
 
-    builder.setRawVertices({}, vertices.elements(), gfx::AttributeDataType::Float2);
+    builder.setRawVertices({}, vertices_.elements(), gfx::AttributeDataType::Float2);
     builder.setSegments(gfx::Triangles(), sharedTriangles, triangleSegments.data(), triangleSegments.size());
 }
 
