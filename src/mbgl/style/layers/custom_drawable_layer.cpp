@@ -171,31 +171,19 @@ public:
             /*pMatrixDiff   */ pMatrixDiff,
             /*frameSize     */ {(float)renderableSize.width, (float)renderableSize.height}};
 
-        enum class WKSVertexLineJoinType {
-            WKSVertexLineJoinMiter = 0,
-            WKSVertexLineJoinMiterClip = 1,
-            WKSVertexLineJoinMiterSimple = 2,
-            WKSVertexLineJoinRound = 3,
-            WKSVertexLineJoinBevel = 4,
-            WKSVertexLineJoinNone = 5,
-        };
-        enum class WKSVertexLineCapType {
-            WKSVertexLineCapButt = 0,
-            WKSVertexLineCapRound = 1,
-            WKSVertexLineCapSquare = 2,
-        };
         shaders::WideVectorUniformWideVecUBO wideVec{
             /*color         */ options.color,
-            /*w2            */ options.width / 2.0f,
-            /*offset        */ 0.0f,
-            /*edge          */ 1.0f,
-            /*texRepeat     */ 0.0f,
-            /*texOffset     */ {},
-            /*miterLimit    */ 1.0f,
-            /*join          */ static_cast<int32_t>(WKSVertexLineJoinType::WKSVertexLineJoinMiter),
-            /*cap           */ static_cast<int32_t>(WKSVertexLineCapType::WKSVertexLineCapButt),
-            /*hasExp        */ false,
-            /*interClipLimit*/ 0.0f};
+            /*w2            */ options.width,
+            /*offset        */ options.offset,
+            /*edge          */ 0.0f,    // TODO: MLN does not provide a value. Analyze impact.
+            /*texRepeat     */ 0.0f,    // N/A
+            /*texOffset     */ {},      // N/A
+            /*miterLimit    */ options.geometry.miterLimit,
+            /*join          */ static_cast<int32_t>(options.geometry.joinType),
+            /*cap           */ static_cast<int32_t>(options.geometry.beginCap), // TODO: MLN option for endCap to be implemented in the shader!
+            /*hasExp        */ false,   // N/A
+            /*interClipLimit*/ 0.0f     // N/A
+        };
 
         auto& uniforms = drawable.mutableUniformBuffers();
         uniforms.createOrUpdate(idWideVectorUniformsUBO, &uniform, parameters.context);
