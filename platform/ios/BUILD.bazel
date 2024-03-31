@@ -175,6 +175,8 @@ _IOS_APPLICATION_RESOURCES = [
     "app/simple_route.json",
     "app/fill_filter_style.json",
     "//platform/darwin:test/amsterdam.geojson",
+    "//platform/darwin:app/wideline.metal",
+    "//platform/darwin:app/wideline.metal.h",
 ] + glob([
     "app/*.lproj/**",
     "app/Assets.xcassets/**",
