@@ -87,10 +87,10 @@ brew install bazelisk
 
 #### Creating `config.bzl`
 
-You need to configure Bazel. Copy the example config from `platform/ios`.
+You may want to configure Bazel, otherwise the default config gets used.
 
 ```
-cp platform/ios/bazel/example_config.bzl platform/ios/bazel/config.bzl
+cp platform/darwin/bazel/example_config.bzl platform/darwin/bazel/config.bzl
 ```
 
 You need to set your `BUNDLE_ID_PREFIX` to be unique (ideally use a domain that you own in reverse domain name notation).
