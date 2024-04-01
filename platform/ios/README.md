@@ -123,9 +123,7 @@ Try to run the example App in the simulator and on a device to confirm your setu
 
 #### Troubleshooting Provisioning Profiles
 
-If no provisioning profile was found, you could try changing the `BUILD_MODE` in `config.bzl` to `"xcode"`. Try the steps in this section again afterwards.
-
-If on the other hand you get a Python `KeyError` when processing provisioning profiles, you probably have some _really_ old or corrupted profiles.
+If you get a Python `KeyError` when processing provisioning profiles, you probably have some _really_ old or corrupted profiles.
 Have a look through `~/Library/MobileDevice/Provisioning\ Profiles` and remove any expired profiles.
 
 #### Using Bazel from the Command Line
