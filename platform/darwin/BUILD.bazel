@@ -272,6 +272,7 @@ objc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
+        "darwin-objc",
         "//:mbgl-core",
         "//platform/default:mbgl-default",
     ],

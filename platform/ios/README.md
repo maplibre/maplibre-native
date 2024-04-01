@@ -87,10 +87,10 @@ brew install bazelisk
 
 #### Creating `config.bzl`
 
-You need to configure Bazel. Copy the example config from `platform/ios`.
+You may want to configure Bazel, otherwise the default config gets used.
 
 ```
-cp platform/ios/bazel/example_config.bzl platform/ios/bazel/config.bzl
+cp platform/darwin/bazel/example_config.bzl platform/darwin/bazel/config.bzl
 ```
 
 You need to set your `BUNDLE_ID_PREFIX` to be unique (ideally use a domain that you own in reverse domain name notation).
@@ -123,9 +123,7 @@ Try to run the example App in the simulator and on a device to confirm your setu
 
 #### Troubleshooting Provisioning Profiles
 
-If no provisioning profile was found, you could try changing the `BUILD_MODE` in `config.bzl` to `"xcode"`. Try the steps in this section again afterwards.
-
-If on the other hand you get a Python `KeyError` when processing provisioning profiles, you probably have some _really_ old or corrupted profiles.
+If you get a Python `KeyError` when processing provisioning profiles, you probably have some _really_ old or corrupted profiles.
 Have a look through `~/Library/MobileDevice/Provisioning\ Profiles` and remove any expired profiles.
 
 #### Using Bazel from the Command Line

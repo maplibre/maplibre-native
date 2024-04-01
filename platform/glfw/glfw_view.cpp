@@ -150,33 +150,37 @@ GLFWView::GLFWView(bool fullscreen_,
     }
 
 #if __APPLE__
-    glfwWindowHint(GLFW_COCOA_GRAPHICS_SWITCHING, GL_TRUE);
+    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GL_TRUE);
 #endif
-
-#if MBGL_WITH_EGL
-    glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
-#endif
-
-#ifdef DEBUG
-    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-#endif
-
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
     if (mbgl::gfx::Backend::GetType() != mbgl::gfx::Backend::Type::OpenGL) {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    } else {
+#if __APPLE__
+        glfwWindowHint(GLFW_COCOA_GRAPHICS_SWITCHING, GL_TRUE);
+#endif
+
+#if MBGL_WITH_EGL
+        glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+#endif
+
+#ifdef DEBUG
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
+
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+
+        glfwWindowHint(GLFW_RED_BITS, 8);
+        glfwWindowHint(GLFW_GREEN_BITS, 8);
+        glfwWindowHint(GLFW_BLUE_BITS, 8);
+        glfwWindowHint(GLFW_ALPHA_BITS, 8);
+        glfwWindowHint(GLFW_STENCIL_BITS, 8);
+        glfwWindowHint(GLFW_DEPTH_BITS, 16);
     }
 
-    glfwWindowHint(GLFW_RED_BITS, 8);
-    glfwWindowHint(GLFW_GREEN_BITS, 8);
-    glfwWindowHint(GLFW_BLUE_BITS, 8);
-    glfwWindowHint(GLFW_ALPHA_BITS, 8);
-    glfwWindowHint(GLFW_STENCIL_BITS, 8);
-    glfwWindowHint(GLFW_DEPTH_BITS, 16);
-
-    window = glfwCreateWindow(width, height, "Mapbox GL", monitor, nullptr);
+    window = glfwCreateWindow(width, height, "MapLibre Native", monitor, nullptr);
     if (!window) {
         glfwTerminate();
         mbgl::Log::Error(mbgl::Event::OpenGL, "failed to initialize window");
@@ -195,6 +199,12 @@ GLFWView::GLFWView(bool fullscreen_,
     glfwGetWindowSize(window, &width, &height);
 
     backend = GLFWBackend::Create(window, benchmark);
+
+#ifdef __APPLE__
+    int fbW, fbH;
+    glfwGetFramebufferSize(window, &fbW, &fbH);
+    backend->setSize({fbW, fbH});
+#endif
 
     pixelRatio = static_cast<float>(backend->getSize().width) / width;
 
@@ -837,6 +847,12 @@ void GLFWView::onWindowResize(GLFWwindow *window, int width, int height) {
     view->width = width;
     view->height = height;
     view->map->setSize({static_cast<uint32_t>(view->width), static_cast<uint32_t>(view->height)});
+
+#ifdef __APPLE__
+    int fbW, fbH;
+    glfwGetFramebufferSize(window, &fbW, &fbH);
+    view->backend->setSize({fbW, fbH});
+#endif
 }
 
 void GLFWView::onFramebufferResize(GLFWwindow *window, int width, int height) {
@@ -1030,7 +1046,7 @@ void GLFWView::setShouldClose() {
 }
 
 void GLFWView::setWindowTitle(const std::string &title) {
-    glfwSetWindowTitle(window, (std::string{"Mapbox GL: "} + title).c_str());
+    glfwSetWindowTitle(window, (std::string{"MapLibre Native (GLFW): "} + title).c_str());
 }
 
 void GLFWView::onDidFinishLoadingStyle() {
