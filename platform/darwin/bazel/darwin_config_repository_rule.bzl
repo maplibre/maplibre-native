@@ -1,5 +1,4 @@
 def _impl(ctx):
-    print("Reading Darwin config")
     config_dir = ctx.workspace_root.get_child("platform", "darwin", "bazel")
     config = config_dir.get_child("confib.bzl")
     example_config = config_dir.get_child("example_config.bzl")
