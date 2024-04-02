@@ -9,7 +9,7 @@ namespace expression {
 
 IndexOf::IndexOf(std::unique_ptr<Expression> keyword_,
                  std::unique_ptr<Expression> input_,
-                 std::unique_ptr<Expression> fromIndex_) noexcept
+                 std::unique_ptr<Expression> fromIndex_)
     : Expression(Kind::IndexOf, type::Number, depsOf(keyword_) | depsOf(input_) | depsOf(fromIndex_)),
       keyword(std::move(keyword_)),
       input(std::move(input_)),

@@ -59,7 +59,7 @@ bool isZoomConstant(const Expression& e) {
     return isGlobalPropertyConstant(e, zoomProperty);
 }
 
-bool isRuntimeConstant(const Expression& expression) noexcept {
+bool isRuntimeConstant(const Expression& expression) {
     if (expression.getKind() == Kind::ImageExpression) {
         return false;
     }

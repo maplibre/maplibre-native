@@ -28,7 +28,7 @@ bool isSearchableRuntimeType(const type::Type& type) noexcept {
 }
 } // namespace
 
-In::In(std::unique_ptr<Expression> needle_, std::unique_ptr<Expression> haystack_) noexcept
+In::In(std::unique_ptr<Expression> needle_, std::unique_ptr<Expression> haystack_)
     : Expression(Kind::In, type::Boolean, depsOf(needle_) | depsOf(haystack_)),
       needle(std::move(needle_)),
       haystack(std::move(haystack_)) {

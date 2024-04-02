@@ -140,9 +140,8 @@ public:
     }
 
     using Expression = expression::Expression;
-    static_assert(std::is_nothrow_invocable_v<decltype(&Expression::operator==), const Expression&, const Expression&>);
 
-    friend bool operator==(const PropertyExpression& lhs, const PropertyExpression& rhs) noexcept {
+    friend bool operator==(const PropertyExpression& lhs, const PropertyExpression& rhs) {
         return *lhs.expression == *rhs.expression;
     }
 

@@ -109,9 +109,7 @@ static CollatorComparison::CompareFunctionType getCollatorComparisonFunction(con
     return nullptr;
 }
 
-BasicComparison::BasicComparison(std::string op_,
-                                 std::unique_ptr<Expression> lhs_,
-                                 std::unique_ptr<Expression> rhs_) noexcept
+BasicComparison::BasicComparison(std::string op_, std::unique_ptr<Expression> lhs_, std::unique_ptr<Expression> rhs_)
     : Expression(Kind::Comparison, type::Boolean, depsOf(lhs_) | depsOf(rhs_)),
       op(std::move(op_)),
       compare(getBasicCompareFunction(op)),
@@ -165,7 +163,7 @@ std::vector<std::optional<Value>> BasicComparison::possibleOutputs() const {
 CollatorComparison::CollatorComparison(std::string op_,
                                        std::unique_ptr<Expression> lhs_,
                                        std::unique_ptr<Expression> rhs_,
-                                       std::unique_ptr<Expression> collator_) noexcept
+                                       std::unique_ptr<Expression> collator_)
     : Expression(Kind::Comparison, type::Boolean, depsOf(lhs_) | depsOf(rhs_) | depsOf(collator_)),
       op(std::move(op_)),
       compare(getCollatorComparisonFunction(op)),
