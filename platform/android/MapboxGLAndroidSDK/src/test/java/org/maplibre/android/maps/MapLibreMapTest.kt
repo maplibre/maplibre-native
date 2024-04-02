@@ -14,6 +14,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.annotations.KAnnotationContainer
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
 import org.robolectric.RobolectricTestRunner
@@ -56,9 +57,11 @@ class MapLibreMapTest {
         )
         every { nativeMapView.isDestroyed } returns false
         every { nativeMapView.nativePtr } returns 5
+        val annotationContainer: KAnnotationContainer = mockk()
+        every { annotationContainer.setStyle(any()) } returns Unit
         maplibreMap.injectLocationComponent(spyk())
         maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
-        maplibreMap.injectAnnotationManager(mockk(relaxed = true), mockk())
+        maplibreMap.injectAnnotationManager(mockk(relaxed = true), annotationContainer, mockk())
         maplibreMap.onFinishLoadingStyle()
     }
 

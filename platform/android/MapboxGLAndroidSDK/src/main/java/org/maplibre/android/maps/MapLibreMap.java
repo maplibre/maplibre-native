@@ -2194,8 +2194,12 @@ public final class MapLibreMap {
     this.locationComponent = locationComponent;
   }
 
-  void injectAnnotationManager(AnnotationManager annotationManager, MapView mapView) {
-    this.annotationContainer = new KAnnotationContainer(this, mapView, style);
+  void injectAnnotationManager(AnnotationManager annotationManager,
+                               KAnnotationContainer annotationContainer,
+                               MapView mapView) {
+    annotationContainer.setStyle(style);
+    this.annotationContainer = annotationContainer;
+
     this.annotationManager = annotationManager.bind(this);
   }
 
