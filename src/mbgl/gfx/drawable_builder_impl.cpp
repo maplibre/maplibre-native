@@ -122,7 +122,6 @@ void DrawableBuilder::Impl::addWideVectorPolylineLocal(gfx::DrawableBuilder& /*b
         wideVectorInstanceData.emplace_back(data);
         ++index;
     }
-    return {0, 0};
 }
 
 mbgl::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::DrawableBuilder& /*builder*/,
