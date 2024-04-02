@@ -238,6 +238,12 @@ public:
     void setLayerTweaker(LayerTweakerPtr tweaker) { layerTweaker = std::move(tweaker); }
     const LayerTweakerPtr& getLayerTweaker() const { return layerTweaker; }
 
+    /// Get origin point
+    const std::optional<mbgl::Point<double>>& getOrigin() const { return origin; }
+
+    /// Set origin point
+    void setOrigin(std::optional<Point<double>> p) { origin = std::move(p); }
+
 protected:
     bool enabled = true;
     bool enableColor = true;
@@ -267,6 +273,7 @@ protected:
     LayerTweakerPtr layerTweaker;
 
     std::size_t type = 0;
+    std::optional<mbgl::Point<double>> origin;
 };
 
 using DrawablePtr = std::shared_ptr<Drawable>;

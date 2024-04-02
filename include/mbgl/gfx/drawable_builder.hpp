@@ -208,10 +208,10 @@ public:
     void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions&);
 
     /// Add a polyline in Tile coordinates, using wide vectors.
-    void addWideVectorPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions&);
+    void addWideVectorPolylineLocal(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions&);
 
     /// Add a polyline in geographic coordinates, using wide vectors.
-    void addWideVectorPolyline(const LineString<double>& coordinates, const gfx::PolylineGeneratorOptions&);
+    void addWideVectorPolylineGlobal(const LineString<double>& coordinates, const gfx::PolylineGeneratorOptions&);
 
     /// return the curent vertex count
     std::size_t curVertexCount() const;
@@ -246,6 +246,7 @@ protected:
     std::vector<DrawableTweakerPtr> tweakers;
     gfx::VertexAttributeArrayPtr vertexAttrs;
     gfx::VertexAttributeArrayPtr instanceAttrs;
+    std::optional<mbgl::Point<double>> origin;
 
     class Impl;
     std::unique_ptr<Impl> impl;

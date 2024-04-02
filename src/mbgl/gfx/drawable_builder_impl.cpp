@@ -96,9 +96,10 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::Context& context, gfx::Drawab
 
 #pragma mark Wide Vector Polylines
 
-void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& /*builder*/,
-                                                  const GeometryCoordinates& coordinates,
-                                                  const gfx::PolylineGeneratorOptions& options) {
+void DrawableBuilder::Impl::addWideVectorPolylineLocal(gfx::DrawableBuilder& /*builder*/,
+                                                       const GeometryCoordinates& coordinates,
+                                                       const gfx::PolylineGeneratorOptions& options) {
+    // TODO: implement appending to existing polyline
     // add instance data
     int index = 0;
     const int coord_size = static_cast<int>(coordinates.size());
@@ -121,16 +122,38 @@ void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& /*builde
         wideVectorInstanceData.emplace_back(data);
         ++index;
     }
+    return {0, 0};
 }
 
-void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& /*builder*/,
-                                                  const LineString<double>& coordinates,
-                                                  const gfx::PolylineGeneratorOptions& options) {
+mbgl::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::DrawableBuilder& /*builder*/,
+                                                                       const LineString<double>& coordinates,
+                                                                       const gfx::PolylineGeneratorOptions& options) {
+    // TODO: implement appending to existing polyline
+
+    constexpr int32_t zoom = 0;
+
+    // get center
+    constexpr double maxd = std::numeric_limits<double>::max();
+    constexpr double mind = std::numeric_limits<double>::min();
+    Point<double> minPoint{maxd, maxd}, maxPoint{mind, mind};
+    for (const auto& coord : coordinates) {
+        auto merc = Projection::project(LatLng(coord.y, coord.x), zoom);
+        Point<double> pSource{merc.x * mbgl::util::EXTENT, merc.y * mbgl::util::EXTENT};
+        minPoint.x = std::min(pSource.x, minPoint.x);
+        minPoint.y = std::min(pSource.y, minPoint.y);
+        maxPoint.x = std::max(pSource.x, maxPoint.x);
+        maxPoint.y = std::max(pSource.y, maxPoint.y);
+    }
+    Point<double> pCenter{(minPoint.x + maxPoint.x) / 2.0, (minPoint.y + maxPoint.y) / 2.0};
+
+    // add centerline instance data
     int index = 0;
     const int coord_size = static_cast<int>(coordinates.size());
     for (const auto& coord : coordinates) {
-        auto merc = Projection::project(LatLng(coord.y, coord.x), /*zoom*/ 0);
+        auto merc = Projection::project(LatLng(coord.y, coord.x), zoom);
         Point<double> pSource{merc.x * mbgl::util::EXTENT, merc.y * mbgl::util::EXTENT};
+        pSource.x -= pCenter.x;
+        pSource.y -= pCenter.y;
         Point<float> pValue{static_cast<float>(pSource.x), static_cast<float>(pSource.y)};
         Point<float> pDiff{static_cast<float>(pSource.x - pValue.x), static_cast<float>(pSource.y - pValue.y)};
 
@@ -152,6 +175,8 @@ void DrawableBuilder::Impl::addWideVectorPolyline(gfx::DrawableBuilder& /*builde
         wideVectorInstanceData.emplace_back(data);
         ++index;
     }
+
+    return pCenter;
 }
 
 void DrawableBuilder::Impl::setupForWideVectors(gfx::Context& context, gfx::DrawableBuilder& builder) {
@@ -274,8 +299,10 @@ bool DrawableBuilder::Impl::checkAndSetMode(Mode target) {
                     return "Mode::Primitives";
                 case Mode::Polylines:
                     return "Mode::Polylines";
-                case Mode::WideVector:
-                    return "Mode::WideVector";
+                case Mode::WideVectorLocal:
+                    return "Mode::WideVectorLocal";
+                case Mode::WideVectorGlobal:
+                    return "Mode::WideVectorGlobal";
                 case Mode::Custom:
                     return "Mode::Custom";
                 default:

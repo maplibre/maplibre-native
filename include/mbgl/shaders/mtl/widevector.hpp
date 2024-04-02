@@ -331,6 +331,16 @@ float2 screenPos3(constant Uniforms &u, float3 viewPos, float3 viewPosDiff) {
     return s1.xy/(s1.w + s2.w) + s2.xy/(s1.w + s2.w);
 }
 
+float2 screenPos4(constant Uniforms &u, float3 viewPos, float3 viewPosDiff) {
+    float4 p4 = float4(viewPos, 1.0);
+    const float4 s1 = u.mvpMatrix * p4 + u.mvpMatrixDiff * p4;
+
+    float4 d4 = float4(viewPosDiff, 0.0);
+    const float4 s2 = u.mvpMatrix * d4 + u.mvpMatrixDiff * d4;
+
+    return s1.xy/(s1.w + s2.w) + s2.xy/(s1.w + s2.w);
+}
+
 constant constexpr float wideVecMinTurnThreshold = 1e-5;
 constant constexpr float wideVecMaxTurnThreshold = 0.99999998476;  // sin(89.99 deg)
 constant constexpr int WideVecPolyStartGeom = 0;
@@ -422,7 +432,8 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
         }
         // centers[ii].screenPos = screenPos1(uniforms, inst[ii].center);
         // centers[ii].screenPos = screenPos2(uniforms, float4(inst[ii].center, 1.0));
-        centers[ii].screenPos = screenPos3(uniforms, inst[ii].center, inst[ii].diff);
+        // centers[ii].screenPos = screenPos3(uniforms, inst[ii].center, inst[ii].diff);
+        centers[ii].screenPos = screenPos4(uniforms, inst[ii].center, inst[ii].diff);
     }
 
     const float2 screenScale(2.0/uniforms.frameSize.x,2.0/uniforms.frameSize.y);    // ~(0.001,0.001)

@@ -28,6 +28,7 @@
 #include <mbgl/shaders/widevector_ubo.hpp>
 #include <mbgl/util/projection.hpp>
 #include <mbgl/util/mat4.hpp>
+#include <mbgl/renderer/render_tile.hpp>
 
 #include <cmath>
 
@@ -91,7 +92,7 @@ public:
     LineDrawableTweaker(const shaders::LinePropertiesUBO& properties)
         : linePropertiesUBO(properties) {}
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override{};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -139,7 +140,7 @@ public:
     WideVectorDrawableTweaker(const CustomDrawableLayerHost::Interface::LineOptions& options)
         : options(options) {}
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override{};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -152,7 +153,6 @@ public:
         parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
 
         mat4 projMatrix = parameters.transformParams.projMatrix;
-
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
@@ -201,7 +201,7 @@ public:
         : color(color_),
           opacity(opacity_) {}
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override{};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -247,7 +247,7 @@ public:
     SymbolDrawableTweaker(const CustomDrawableLayerHost::Interface::SymbolOptions& options_)
         : options(options_) {}
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override{};
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -373,7 +373,7 @@ bool CustomDrawableLayerHost::Interface::addPolyline(const LineString<double>& c
             // geographic coordinates require tile {0, 0, 0}
             setTileID({0, 0, 0});
 
-            builder->addWideVectorPolyline(coordinates, lineOptions.geometry);
+            builder->addWideVectorPolylineGlobal(coordinates, lineOptions.geometry);
 
             // flush current builder drawable
             builder->flush(context);
@@ -396,7 +396,7 @@ bool CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
             if (!updateBuilder(BuilderType::LineWideVector, "custom-lines-widevector", lineShaderWideVector()))
                 return false;
 
-            builder->addWideVectorPolyline(coordinates, lineOptions.geometry);
+            builder->addWideVectorPolylineLocal(coordinates, lineOptions.geometry);
 
             // flush current builder drawable
             builder->flush(context);

@@ -22,10 +22,11 @@ class DrawableBuilder::Impl {
 public:
     using VT = gfx::detail::VertexType<gfx::AttributeType<std::int16_t, 2>>;
     enum class Mode {
-        Primitives, ///< building primitive drawables. Not implemented
-        Polylines,  ///< building drawables for thick polylines
-        WideVector, ///< building drawables for thick polylines using wide vectors
-        Custom      ///< building custom drawables.
+        Primitives,       ///< building primitive drawables. Not implemented
+        Polylines,        ///< building drawables for thick polylines
+        WideVectorLocal,  ///< building drawables for thick polylines using wide vectors in local coordinates
+        WideVectorGlobal, ///< building drawables for thick polylines using wide vectors in global coordinates
+        Custom            ///< building custom drawables.
     };
     struct LineLayoutVertex {
         std::array<int16_t, 2> a1;
@@ -58,13 +59,13 @@ public:
 
     void setupForPolylines(gfx::Context&, gfx::DrawableBuilder&);
 
-    void addWideVectorPolyline(gfx::DrawableBuilder& builder,
-                               const GeometryCoordinates& coordinates,
-                               const gfx::PolylineGeneratorOptions& options);
+    void addWideVectorPolylineLocal(gfx::DrawableBuilder& builder,
+                                    const GeometryCoordinates& coordinates,
+                                    const gfx::PolylineGeneratorOptions& options);
 
-    void addWideVectorPolyline(gfx::DrawableBuilder& builder,
-                               const LineString<double>& coordinates,
-                               const gfx::PolylineGeneratorOptions& options);
+    mbgl::Point<double> addWideVectorPolylineGlobal(gfx::DrawableBuilder& builder,
+                                                    const LineString<double>& coordinates,
+                                                    const gfx::PolylineGeneratorOptions& options);
 
     void setupForWideVectors(gfx::Context&, gfx::DrawableBuilder&);
 

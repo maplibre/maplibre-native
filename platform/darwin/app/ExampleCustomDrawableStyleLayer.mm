@@ -199,7 +199,33 @@ public:
             interface.addSymbol(position);
         }
 
-        // add polylines using wide vectors
+        // add polylines using wide vectors using geographic coordinates
+        {
+            using namespace mbgl;
+
+            // add polyline with geographic coordinates
+            Interface::LineOptions options = {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/12.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/{.0f, .0f, .0f, .5f} };
+            options.geometry.beginCap = style::LineCapType::Square;
+            options.geometry.endCap = style::LineCapType::Square;
+            options.geometry.joinType = style::LineJoinType::Bevel;
+            options.geometry.type = FeatureType::LineString;
+            interface.setLineOptions(options);
+
+            LineString<double> polyline_geo {
+                {-122.38186800073211, 37.77466003457463},
+                {-122.3869373450997, 37.774352128895615},
+                {-122.38680767979824, 37.773294612880306},
+                {-122.38476465260224, 37.773350946288765},
+                {-122.38146223043374, 37.77194168964067},
+                {-122.6813560305925, 37.666084247570964},
+                {-122.26765538866474, 37.65037232584494},
+                {-122.42528413673159, 38.020443518012584},
+                {-122.34927775216809, 47.62050663596438}
+            };
+            interface.addPolyline(polyline_geo);
+        }
+        
+        // add polylines using wide vectors in tile coordinates
         {
             using namespace mbgl;
             
@@ -235,28 +261,8 @@ public:
             interface.addPolyline(polyline_tile[0]);
             interface.addPolyline(polyline_tile[1]);
 
-            // add polyline with geographic coordinates
-            options = {/*geometry=*/{},   /*blur=*/0.0f,  /*opacity=*/1.0f, /*gapWidth=*/0.0f, /*offset=*/0.0f,   /*width=*/12.0f,     /*shaderType=*/Interface::LineShaderType::MetalWideVector, /*color=*/{.0f, .0f, .0f, .5f} };
-            options.geometry.beginCap = style::LineCapType::Square;
-            options.geometry.endCap = style::LineCapType::Square;
-            options.geometry.joinType = style::LineJoinType::Bevel;
-            options.geometry.type = FeatureType::LineString;
-            interface.setLineOptions(options);
-
-            LineString<double> polyline_geo {
-                {-122.38186800073211, 37.77466003457463},
-                {-122.3869373450997, 37.774352128895615},
-                {-122.38680767979824, 37.773294612880306},
-                {-122.38476465260224, 37.773350946288765},
-                {-122.38146223043374, 37.77194168964067},
-                {-122.6813560305925, 37.666084247570964},
-                {-122.26765538866474, 37.65037232584494},
-                {-122.42528413673159, 38.020443518012584},
-                {23.607969724676114, 46.77723172151993}
-            };
-            interface.addPolyline(polyline_geo);
         }
-
+        
         // finish
         interface.finish();
     }
