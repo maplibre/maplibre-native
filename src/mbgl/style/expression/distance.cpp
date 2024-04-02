@@ -687,7 +687,7 @@ double pointsToGeometryDistance(const mapbox::geometry::multi_point<double>& poi
             }
             return dist;
         },
-        [](const auto&) noexcept { return InvalidDistance; });
+        [](const auto&) { return InvalidDistance; });
 }
 
 double lineToGeometryDistance(const mapbox::geometry::line_string<double>& line, const Feature::geometry_type& geoSet) {
@@ -728,7 +728,7 @@ double lineToGeometryDistance(const mapbox::geometry::line_string<double>& line,
             }
             return dist;
         },
-        [](const auto&) noexcept { return InvalidDistance; });
+        [](const auto&) { return InvalidDistance; });
 }
 
 double polygonToGeometryDistance(const mapbox::geometry::polygon<double>& polygon,
@@ -778,7 +778,7 @@ double polygonToGeometryDistance(const mapbox::geometry::polygon<double>& polygo
             }
             return dist;
         },
-        [](const auto&) noexcept { return InvalidDistance; });
+        [](const auto&) { return InvalidDistance; });
 }
 
 double calculateDistance(const GeometryTileFeature& feature,
@@ -820,7 +820,7 @@ double calculateDistance(const GeometryTileFeature& feature,
                 }
                 return dist;
             },
-            [](const auto&) noexcept { return InvalidDistance; });
+            [](const auto&) { return InvalidDistance; });
 }
 
 std::optional<GeoJSON> parseValue(const style::conversion::Convertible& value, style::expression::ParsingContext& ctx) {

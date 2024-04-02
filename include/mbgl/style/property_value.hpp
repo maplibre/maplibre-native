@@ -36,15 +36,15 @@ public:
     bool isExpression() const noexcept { return value.template is<PropertyExpression<T>>(); }
 
     bool isDataDriven() const noexcept {
-        return value.match([](const Undefined&) noexcept { return false; },
-                           [](const T&) noexcept { return false; },
-                           [](const PropertyExpression<T>& fn) noexcept { return !fn.isFeatureConstant(); });
+        return value.match([](const Undefined&) { return false; },
+                           [](const T&) { return false; },
+                           [](const PropertyExpression<T>& fn) { return !fn.isFeatureConstant(); });
     }
 
     bool isZoomConstant() const noexcept {
-        return value.match([](const Undefined&) noexcept { return true; },
-                           [](const T&) noexcept { return true; },
-                           [](const PropertyExpression<T>& fn) noexcept { return fn.isZoomConstant(); });
+        return value.match([](const Undefined&) { return true; },
+                           [](const T&) { return true; },
+                           [](const PropertyExpression<T>& fn) { return fn.isZoomConstant(); });
     }
 
     const T& asConstant() const noexcept { return value.template get<T>(); }
@@ -67,9 +67,9 @@ public:
 
     using Dependency = style::expression::Dependency;
     Dependency getDependencies() const noexcept {
-        return value.match([](const Undefined&) noexcept { return Dependency::None; },
-                           [](const T&) noexcept { return Dependency::None; },
-                           [](const PropertyExpression<T>& ex) noexcept { return ex.getDependencies(); });
+        return value.match([](const Undefined&) { return Dependency::None; },
+                           [](const T&) { return Dependency::None; },
+                           [](const PropertyExpression<T>& ex) { return ex.getDependencies(); });
     }
 };
 

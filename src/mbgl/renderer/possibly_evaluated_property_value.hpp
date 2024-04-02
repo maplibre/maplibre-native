@@ -24,8 +24,7 @@ public:
     bool isConstant() const noexcept { return value.template is<T>(); }
 
     std::optional<T> constant() const {
-        return value.match([&](const T& t) noexcept { return std::optional<T>(t); },
-                           [&](const auto&) noexcept { return std::nullopt; });
+        return value.match([&](const T& t) { return std::optional<T>(t); }, [&](const auto&) { return std::nullopt; });
     }
 
     T constantOr(const T& t) const noexcept { return constant().value_or(t); }
@@ -61,9 +60,8 @@ public:
 
     using Dependency = style::expression::Dependency;
     Dependency getDependencies() const noexcept {
-        return value.match(
-            [](const T&) noexcept { return Dependency::None; },
-            [](const style::PropertyExpression<T>& expression) noexcept { return expression.getDependencies(); });
+        return value.match([](const T&) { return Dependency::None; },
+                           [](const style::PropertyExpression<T>& expression) { return expression.getDependencies(); });
     }
 };
 
@@ -116,9 +114,8 @@ public:
 
     using Dependency = style::expression::Dependency;
     Dependency getDependencies() const noexcept {
-        return value.match(
-            [](const Faded<T>&) noexcept { return Dependency::None; },
-            [](const style::PropertyExpression<T>& expression) noexcept { return expression.getDependencies(); });
+        return value.match([](const Faded<T>&) { return Dependency::None; },
+                           [](const style::PropertyExpression<T>& expression) { return expression.getDependencies(); });
     }
 };
 

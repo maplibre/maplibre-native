@@ -209,10 +209,10 @@ enum class FunctionType {
 };
 
 bool interpolatable(type::Type type) noexcept {
-    return type.match([&](const type::NumberType&) noexcept { return true; },
-                      [&](const type::ColorType&) noexcept { return true; },
-                      [&](const type::Array& array) noexcept { return array.N && array.itemType == type::Number; },
-                      [&](const auto&) noexcept { return false; });
+    return type.match([&](const type::NumberType&) { return true; },
+                      [&](const type::ColorType&) { return true; },
+                      [&](const type::Array& array) { return array.N && array.itemType == type::Number; },
+                      [&](const auto&) { return false; });
 }
 
 std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,

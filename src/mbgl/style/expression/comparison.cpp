@@ -24,33 +24,33 @@ bool neq(const Value& a, const Value& b) noexcept {
     return a != b;
 }
 bool lt(const Value& lhs, const Value& rhs) noexcept {
-    return lhs.match([&](const std::string& a) noexcept { return a < rhs.get<std::string>(); },
-                     [&](double a) noexcept { return a < rhs.get<double>(); },
-                     [&](const auto&) noexcept {
+    return lhs.match([&](const std::string& a) { return a < rhs.get<std::string>(); },
+                     [&](double a) { return a < rhs.get<double>(); },
+                     [&](const auto&) {
                          assert(false);
                          return false;
                      });
 }
 bool gt(const Value& lhs, const Value& rhs) noexcept {
-    return lhs.match([&](const std::string& a) noexcept { return a > rhs.get<std::string>(); },
-                     [&](double a) noexcept { return a > rhs.get<double>(); },
-                     [&](const auto&) noexcept {
+    return lhs.match([&](const std::string& a) { return a > rhs.get<std::string>(); },
+                     [&](double a) { return a > rhs.get<double>(); },
+                     [&](const auto&) {
                          assert(false);
                          return false;
                      });
 }
 bool lteq(const Value& lhs, const Value& rhs) noexcept {
-    return lhs.match([&](const std::string& a) noexcept { return a <= rhs.get<std::string>(); },
-                     [&](double a) noexcept { return a <= rhs.get<double>(); },
-                     [&](const auto&) noexcept {
+    return lhs.match([&](const std::string& a) { return a <= rhs.get<std::string>(); },
+                     [&](double a) { return a <= rhs.get<double>(); },
+                     [&](const auto&) {
                          assert(false);
                          return false;
                      });
 }
 bool gteq(const Value& lhs, const Value& rhs) noexcept {
-    return lhs.match([&](const std::string& a) noexcept { return a >= rhs.get<std::string>(); },
-                     [&](double a) noexcept { return a >= rhs.get<double>(); },
-                     [&](const auto&) noexcept {
+    return lhs.match([&](const std::string& a) { return a >= rhs.get<std::string>(); },
+                     [&](double a) { return a >= rhs.get<double>(); },
+                     [&](const auto&) {
                          assert(false);
                          return false;
                      });

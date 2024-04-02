@@ -132,7 +132,7 @@ std::vector<UnwrappedTileID> tileCover(const Point<double>& tl,
     });
 
     // Erase duplicate tile IDs (they typically occur at the common side of both triangles).
-    t.erase(std::unique(t.begin(), t.end(), [](const ID& a, const ID& b) noexcept { return a.x == b.x && a.y == b.y; }),
+    t.erase(std::unique(t.begin(), t.end(), [](const ID& a, const ID& b) { return a.x == b.x && a.y == b.y; }),
             t.end());
 
     std::vector<UnwrappedTileID> result;
