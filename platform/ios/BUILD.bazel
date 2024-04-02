@@ -3,12 +3,12 @@ load("@build_bazel_rules_apple//apple:apple.bzl", "apple_static_xcframework", "a
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
 load("@build_bazel_rules_apple//apple:versioning.bzl", "apple_bundle_version")
+load("@darwin_config//:config.bzl", "BUNDLE_ID_PREFIX")
 load(
     "@rules_xcodeproj//xcodeproj:defs.bzl",
     "top_level_target",
     "xcodeproj",
 )
-load("//platform/ios/bazel:config.bzl", "BUILD_MODE", "BUNDLE_ID_PREFIX")
 load(
     "//platform/ios/bazel:files.bzl",
     "MLN_IOS_PRIVATE_HEADERS",
@@ -250,7 +250,6 @@ filegroup(
 xcodeproj(
     name = "xcodeproj",
     bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin"},
-    build_mode = BUILD_MODE,
     default_xcode_configuration = "Debug",
     extra_files = [
         ":extra_files",
