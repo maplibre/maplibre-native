@@ -21,7 +21,7 @@ SymbolLayerProperties::SymbolLayerProperties(
 
 SymbolLayerProperties::~SymbolLayerProperties() = default;
 
-unsigned long SymbolLayerProperties::constantsMask() const noexcept {
+unsigned long SymbolLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 

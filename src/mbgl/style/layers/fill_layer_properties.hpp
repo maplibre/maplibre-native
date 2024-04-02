@@ -72,7 +72,7 @@ public:
         FillPaintProperties::PossiblyEvaluated);
     ~FillLayerProperties() override;
 
-    unsigned long constantsMask() const noexcept override;
+    unsigned long constantsMask() const override;
 
     expression::Dependency getDependencies() const noexcept override;
 

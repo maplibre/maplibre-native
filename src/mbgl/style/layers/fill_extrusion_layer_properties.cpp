@@ -23,7 +23,7 @@ FillExtrusionLayerProperties::FillExtrusionLayerProperties(
 
 FillExtrusionLayerProperties::~FillExtrusionLayerProperties() = default;
 
-unsigned long FillExtrusionLayerProperties::constantsMask() const noexcept {
+unsigned long FillExtrusionLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 

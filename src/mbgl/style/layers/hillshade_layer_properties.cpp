@@ -21,7 +21,7 @@ HillshadeLayerProperties::HillshadeLayerProperties(
 
 HillshadeLayerProperties::~HillshadeLayerProperties() = default;
 
-unsigned long HillshadeLayerProperties::constantsMask() const noexcept {
+unsigned long HillshadeLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 

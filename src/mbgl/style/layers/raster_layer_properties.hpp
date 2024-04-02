@@ -67,7 +67,7 @@ public:
         RasterPaintProperties::PossiblyEvaluated);
     ~RasterLayerProperties() override;
 
-    unsigned long constantsMask() const noexcept override;
+    unsigned long constantsMask() const override;
 
     expression::Dependency getDependencies() const noexcept override;
 

@@ -23,7 +23,7 @@ LineLayerProperties::LineLayerProperties(
 
 LineLayerProperties::~LineLayerProperties() = default;
 
-unsigned long LineLayerProperties::constantsMask() const noexcept {
+unsigned long LineLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 

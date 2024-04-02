@@ -23,7 +23,7 @@ BackgroundLayerProperties::BackgroundLayerProperties(
 
 BackgroundLayerProperties::~BackgroundLayerProperties() = default;
 
-unsigned long BackgroundLayerProperties::constantsMask() const noexcept {
+unsigned long BackgroundLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 

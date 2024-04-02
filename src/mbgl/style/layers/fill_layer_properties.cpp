@@ -23,7 +23,7 @@ FillLayerProperties::FillLayerProperties(
 
 FillLayerProperties::~FillLayerProperties() = default;
 
-unsigned long FillLayerProperties::constantsMask() const noexcept {
+unsigned long FillLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 

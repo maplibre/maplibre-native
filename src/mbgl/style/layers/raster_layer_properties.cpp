@@ -21,7 +21,7 @@ RasterLayerProperties::RasterLayerProperties(
 
 RasterLayerProperties::~RasterLayerProperties() = default;
 
-unsigned long RasterLayerProperties::constantsMask() const noexcept {
+unsigned long RasterLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 

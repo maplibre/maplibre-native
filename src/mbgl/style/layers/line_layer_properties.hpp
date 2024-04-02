@@ -121,7 +121,7 @@ public:
         LinePaintProperties::PossiblyEvaluated);
     ~LineLayerProperties() override;
 
-    unsigned long constantsMask() const noexcept override;
+    unsigned long constantsMask() const override;
 
     expression::Dependency getDependencies() const noexcept override;
 

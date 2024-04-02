@@ -21,7 +21,7 @@ CircleLayerProperties::CircleLayerProperties(
 
 CircleLayerProperties::~CircleLayerProperties() = default;
 
-unsigned long CircleLayerProperties::constantsMask() const noexcept {
+unsigned long CircleLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 

@@ -21,7 +21,7 @@ LocationIndicatorLayerProperties::LocationIndicatorLayerProperties(
 
 LocationIndicatorLayerProperties::~LocationIndicatorLayerProperties() = default;
 
-unsigned long LocationIndicatorLayerProperties::constantsMask() const noexcept {
+unsigned long LocationIndicatorLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 

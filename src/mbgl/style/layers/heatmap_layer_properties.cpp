@@ -21,7 +21,7 @@ HeatmapLayerProperties::HeatmapLayerProperties(
 
 HeatmapLayerProperties::~HeatmapLayerProperties() = default;
 
-unsigned long HeatmapLayerProperties::constantsMask() const noexcept {
+unsigned long HeatmapLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 
