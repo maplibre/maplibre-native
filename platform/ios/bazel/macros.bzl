@@ -1,4 +1,4 @@
-load("//platform/ios/bazel:config.bzl", "API_KEY", "SEM_VER")
+load("@darwin_config//:config.bzl", "API_KEY", "SEM_VER")
 
 def info_plist(name, base_info_plist, out, **kwargs):
     native.genrule(

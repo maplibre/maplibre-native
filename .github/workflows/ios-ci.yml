@@ -77,8 +77,6 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
-      - run: cp bazel/example_config.bzl bazel/config.bzl
-
       - name: Check debug symbols
         run: bazel run //platform:check-public-symbols --//:renderer=metal
 

@@ -1,25 +1,34 @@
 # MapLibre Native for macOS
 
-> **Note**  
-> https://github.com/maplibre/maplibre-native/pull/995 introduced OpenGL ES 3.0 shaders which are not supported by macOS without workarounds. That means that while the [Metal backend implementation](https://github.com/maplibre/maplibre-native/blob/main/design-proposals/2022-11-29-metal-port.md) is underway, builds from the `main` branch will not work on macOS. Use the `opengl-2` branch in the meantime.
+[![GitHub Action build status](https://github.com/maplibre/maplibre-native/workflows/macos-ci/badge.svg)](https://github.com/maplibre/maplibre-native/actions/workflows/macos-ci.yml)
 
-[![GitHub Action build status](https://github.com/maplibre/maplibre-native/workflows/macos-ci/badge.svg)](https://github.com/maplibre/maplibre-native/actions/workflows/macos-ci.yml) [![GitHub Action build status](https://github.com/maplibre/maplibre-native/workflows/macos-release/badge.svg)](https://github.com/maplibre/maplibre-native/actions/workflows/macos-release.yml)
+Clone the repo:
 
-Put interactive, scalable world maps into your native Cocoa application with MapLibre Native for macOS.
+```sh
+git clone --recurse-submodules git@github.com:maplibre/maplibre-native.git
+```
 
-* High-performance OpenGL rendering and multitouch gestures keep your users happy.
-* A well-designed, fully documented API helps you stay productive.
-* Develop across [multiple platforms](../../README.md), including [iOS](../ios/README.md), using the same styles and similar APIs.
+Install needed tooling and dependencies with Homebrew. See [macos-ci.yml](https://github.com/maplibre/maplibre-native/blob/main/.github/workflows/macos-ci.yml) for the most up-to-date dependencies.
 
-![](docs/img/screenshot.jpg)
+Optionally configure Bazel:
 
-MapLibre Native for macOS is compatible with macOS 10.10.0 and above for Cocoa applications developed in Objective-C, Swift, Interface Builder, or AppleScript. For hybrid applications, consider [MapLibre GL JS]([https://github.com/mapbox/mapbox-gl-js/](https://github.com/maplibre/maplibre-gl-js)).
+```sh
+cp platform/darwin/bazel/example_config.bzl platform/darwin/bazel/config.bzl
+```
 
-## Contributing
+Create and open Xcode project:
 
-* [Build the MapLibre Native for macOS from source](INSTALL.md)
-* [Contribute to MapLibre Native for macOS](CONTRIBUTING.md)
-* [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/)
-* [Mapbox Vector Tile Specification](https://www.mapbox.com/developers/vector-tiles/)
+```sh
+bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal
+xed platform/macos/MapLibre.xcodeproj
+```
 
-The MapLibre Organization does not officially support the macOS to the same extent as iOS (see [project tiers](https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md)); however, bug reports and pull requests are certainly welcome.
+Build and run AppKit sample app directly from the command line:
+
+```sh
+bazel run //platform/macos/app:macos_app --//:renderer=metal
+```
+
+---
+
+The MapLibre Organization does not officially support the macOS to the same extent as iOS (see [project tiers](https://github.com/maplibre/maplibre/blob/main/PROJECT_TIERS.md)). However, bug reports and pull requests are certainly welcome.
