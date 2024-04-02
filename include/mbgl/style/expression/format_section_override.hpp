@@ -32,8 +32,7 @@ public:
     }
 
     void eachChild(const std::function<void(const Expression&)>& fn) const final {
-        defaultValue.match([&fn](const style::PropertyExpression<T>& e) { fn(e.getExpression()); },
-                           [](const T&) {});
+        defaultValue.match([&fn](const style::PropertyExpression<T>& e) { fn(e.getExpression()); }, [](const T&) {});
     }
 
     bool operator==(const Expression& e) const final {
@@ -48,9 +47,7 @@ public:
             return defaultValue.match(
                 [other](const style::PropertyExpression<T>& thisExpr) {
                     return other->defaultValue.match(
-                        [&thisExpr](const style::PropertyExpression<T>& otherExpr) {
-                            return thisExpr == otherExpr;
-                        },
+                        [&thisExpr](const style::PropertyExpression<T>& otherExpr) { return thisExpr == otherExpr; },
                         [](const T&) { return false; });
                 },
                 [other](const T& thisValue) {

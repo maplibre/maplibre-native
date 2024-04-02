@@ -20,7 +20,6 @@ namespace style {
 namespace expression {
 
 class Distance final : public Expression {
-
 public:
     Distance(GeoJSON geoJSONSource_, Feature::geometry_type geometries_);
     ~Distance() override;

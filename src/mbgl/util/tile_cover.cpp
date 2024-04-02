@@ -267,9 +267,8 @@ std::vector<OverscaledTileID> tileCover(const TransformState& state,
     }
 
     // Sort results by distance
-    std::sort(result.begin(), result.end(), [](const ResultTile& a, const ResultTile& b) {
-        return a.sqrDist < b.sqrDist;
-    });
+    std::sort(
+        result.begin(), result.end(), [](const ResultTile& a, const ResultTile& b) { return a.sqrDist < b.sqrDist; });
 
     std::vector<OverscaledTileID> ids;
     ids.reserve(result.size());
