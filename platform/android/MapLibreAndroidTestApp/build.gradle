@@ -93,7 +93,7 @@ android {
 }
 
 dependencies {
-    implementation project(':MapboxGLAndroidSDK')
+    implementation project(':MapLibreAndroid')
     implementation dependenciesList.mapboxJavaTurf
 
     implementation dependenciesList.supportAppcompatV7
