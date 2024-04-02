@@ -178,7 +178,7 @@ public:
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
-                              const CrossfadeParameters&) override{};
+                              const CrossfadeParameters&) override {};
 
     std::tuple<float> interpolationFactor(float) const override { return std::tuple<float>{0.0f}; }
 
@@ -272,7 +272,7 @@ public:
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
-                              const CrossfadeParameters&) override{};
+                              const CrossfadeParameters&) override {};
     void populateVertexVector(const GeometryTileFeature& feature,
                               std::size_t length,
                               std::size_t index,
@@ -391,7 +391,7 @@ public:
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
-                              const CrossfadeParameters&) override{};
+                              const CrossfadeParameters&) override {};
     void populateVertexVector(const GeometryTileFeature& feature,
                               std::size_t length,
                               std::size_t index,

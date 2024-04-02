@@ -38,8 +38,6 @@ class GeoJSONVTData final : public GeoJSONData {
 
     std::uint8_t getClusterExpansionZoom(std::uint32_t) final { return 0; }
 
-    std::shared_ptr<Scheduler> getScheduler() final { return scheduler; }
-
     friend GeoJSONData;
     GeoJSONVTData(const GeoJSON& geoJSON,
                   const mapbox::geojsonvt::Options& options,
@@ -91,8 +89,8 @@ T evaluateFeature(const mapbox::feature::feature<double>& f,
 
 // static
 std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
-                                                 const Immutable<GeoJSONOptions>& options,
-                                                 std::shared_ptr<Scheduler> scheduler) {
+                                                 std::shared_ptr<Scheduler> scheduler,
+                                                 const Immutable<GeoJSONOptions>& options) {
     constexpr double scale = util::EXTENT / util::tileSize_D;
     if (options->cluster && geoJSON.is<Features>() && !geoJSON.get<Features>().empty()) {
         mapbox::supercluster::Options clusterOptions;
@@ -128,7 +126,6 @@ std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
     vtOptions.buffer = static_cast<uint16_t>(::round(scale * options->buffer));
     vtOptions.tolerance = scale * options->tolerance;
     vtOptions.lineMetrics = options->lineMetrics;
-    if (!scheduler) scheduler = Scheduler::GetSequenced();
     return std::shared_ptr<GeoJSONData>(new GeoJSONVTData(geoJSON, vtOptions, std::move(scheduler)));
 }
 

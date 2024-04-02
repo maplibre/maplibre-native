@@ -245,7 +245,8 @@ void FeatureConverter::convertJson(std::shared_ptr<std::string> json, ActorRef<G
         return;
     }
 
-    callback.invoke(&GeoJSONDataCallback::operator(), style::GeoJSONData::create(*converted, options));
+    callback.invoke(&GeoJSONDataCallback::operator(),
+                    style::GeoJSONData::create(*converted, sequencedScheduler, options));
 }
 
 template <class JNIType>
@@ -257,7 +258,8 @@ void FeatureConverter::convertObject(
     android::UniqueEnv _env = android::AttachEnv();
     // Convert the jni object
     auto geometry = JNIType::convert(*_env, *jObject);
-    callback.invoke(&GeoJSONDataCallback::operator(), style::GeoJSONData::create(geometry, options));
+    callback.invoke(&GeoJSONDataCallback::operator(),
+                    style::GeoJSONData::create(geometry, sequencedScheduler, options));
 }
 
 Update::Update(Converter _converterFn, std::unique_ptr<Actor<GeoJSONDataCallback>> _callback)

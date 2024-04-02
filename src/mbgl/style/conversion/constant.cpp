@@ -51,9 +51,8 @@ std::optional<T> Converter<T, typename std::enable_if_t<std::is_enum_v<T>>>::ope
 }
 
 template <class T>
-auto Converter<std::vector<T>, typename std::enable_if_t<std::is_enum_v<T>>>::operator()(const Convertible& value,
-                                                                                         Error& error) const
-    -> std::optional<std::vector<T>> {
+auto Converter<std::vector<T>, typename std::enable_if_t<std::is_enum_v<T>>>::operator()(
+    const Convertible& value, Error& error) const -> std::optional<std::vector<T>> {
     if (!isArray(value)) {
         error.message = "value must be an array";
         return std::nullopt;
