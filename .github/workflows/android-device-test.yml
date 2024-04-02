@@ -22,8 +22,8 @@ jobs:
           },
           {
             artifactName: benchmarkAPKs,
-            testFile: "MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk",
-            appFile: "MapboxGLAndroidSDKTestApp-drawable-release.apk",
+            testFile: "MapLibreAndroidTestApp-drawable-release-androidTest.apk",
+            appFile: "MapLibreAndroidTestApp-drawable-release.apk",
             name: "Android Benchmark",
             testFilter: "org.maplibre.android.benchmark.Benchmark",
             # top devices, query with `aws list-device-pools --arn <project_arn>`
