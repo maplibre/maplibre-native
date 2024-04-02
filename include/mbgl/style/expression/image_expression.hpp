@@ -10,7 +10,7 @@ class ParsingContext;
 
 class ImageExpression final : public Expression {
 public:
-    explicit ImageExpression(std::unique_ptr<Expression> imageID) noexcept;
+    explicit ImageExpression(std::unique_ptr<Expression> imageID);
 
     EvaluationResult evaluate(const EvaluationContext&) const override;
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);

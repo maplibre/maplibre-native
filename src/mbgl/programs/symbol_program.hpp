@@ -176,7 +176,7 @@ public:
                 expression.evaluate(coveringZoomStops.max, feature, defaultValue)};
     };
 
-    ZoomEvaluatedSize evaluateForZoom(float currentZoom) const noexcept override {
+    ZoomEvaluatedSize evaluateForZoom(float currentZoom) const override {
         float sizeInterpolationT = util::clamp(
             expression.interpolationFactor(coveringZoomStops, currentZoom), 0.0f, 1.0f);
 

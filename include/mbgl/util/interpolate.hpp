@@ -21,18 +21,18 @@ template <class T, class Enabled = void>
 struct Interpolator;
 
 template <typename T>
-T interpolate(const T& a, const T& b, const double t) noexcept {
+T interpolate(const T& a, const T& b, const double t) {
     return Interpolator<T>()(a, b, t);
 }
 
 template <typename T>
-T interpolate(const T& a, const T& b, const float t) noexcept {
+T interpolate(const T& a, const T& b, const float t) {
     return Interpolator<T>()(a, b, t);
 }
 
 template <class T, class Enabled>
 struct Interpolator {
-    T operator()(const T& a, const T& b, const double t) const noexcept { return a * (1.0 - t) + b * t; }
+    T operator()(const T& a, const T& b, const double t) const { return a * (1.0 - t) + b * t; }
 };
 
 template <>
@@ -148,7 +148,7 @@ public:
 
 struct Uninterpolated {
     template <class T>
-    T operator()(const T& a, const T&, const double) const noexcept {
+    T operator()(const T& a, const T&, const double) const {
         return a;
     }
 };

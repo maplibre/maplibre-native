@@ -23,7 +23,7 @@ public:
 
     bool isConstant() const noexcept { return value.template is<T>(); }
 
-    std::optional<T> constant() const noexcept {
+    std::optional<T> constant() const {
         return value.match([&](const T& t) noexcept { return std::optional<T>(t); },
                            [&](const auto&) noexcept { return std::nullopt; });
     }
@@ -37,7 +37,7 @@ public:
 
     template <class Feature>
     T evaluate(const Feature& feature, float zoom, T defaultValue) const {
-        return this->match([&](const T& constant_) noexcept { return constant_; },
+        return this->match([&](const T& constant_) { return constant_; },
                            [&](const style::PropertyExpression<T>& expression) {
                                return expression.evaluate(zoom, feature, defaultValue);
                            });
@@ -45,7 +45,7 @@ public:
 
     template <class Feature>
     T evaluate(const Feature& feature, float zoom, const CanonicalTileID& canonical, T defaultValue) const {
-        return this->match([&](const T& constant_) noexcept { return constant_; },
+        return this->match([&](const T& constant_) { return constant_; },
                            [&](const style::PropertyExpression<T>& expression) {
                                return expression.evaluate(zoom, feature, canonical, defaultValue);
                            });
@@ -53,7 +53,7 @@ public:
 
     template <class Feature>
     T evaluate(const Feature& feature, float zoom, const FeatureState& featureState, T defaultValue) const {
-        return this->match([&](const T& constant_) noexcept { return constant_; },
+        return this->match([&](const T& constant_) { return constant_; },
                            [&](const style::PropertyExpression<T>& expression) {
                                return expression.evaluate(zoom, feature, featureState, defaultValue);
                            });
@@ -82,11 +82,11 @@ public:
     bool isConstant() const noexcept { return value.template is<Faded<T>>(); }
 
     std::optional<Faded<T>> constant() const {
-        return value.match([&](const Faded<T>& t) noexcept { return std::optional<Faded<T>>(t); },
-                           [&](const auto&) noexcept { return std::optional<Faded<T>>(); });
+        return value.match([&](const Faded<T>& t) { return std::optional<Faded<T>>(t); },
+                           [&](const auto&) { return std::optional<Faded<T>>(); });
     }
 
-    Faded<T> constantOr(const Faded<T>& t) const noexcept { return constant().value_or(t); }
+    Faded<T> constantOr(const Faded<T>& t) const { return constant().value_or(t); }
 
     template <class... Ts>
     auto match(Ts&&... ts) const {
@@ -99,7 +99,7 @@ public:
                       const std::set<std::string>& availableImages,
                       const CanonicalTileID& canonical,
                       T defaultValue) const {
-        return this->match([&](const Faded<T>& constant_) noexcept { return constant_; },
+        return this->match([&](const Faded<T>& constant_) { return constant_; },
                            [&](const style::PropertyExpression<T>& expression) {
                                if (!expression.isZoomConstant()) {
                                    const T min = expression.evaluate(

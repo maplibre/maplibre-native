@@ -12,7 +12,7 @@ class IndexOf : public Expression {
 public:
     IndexOf(std::unique_ptr<Expression> keyword_,
             std::unique_ptr<Expression> input_,
-            std::unique_ptr<Expression> fromIndex_) noexcept;
+            std::unique_ptr<Expression> fromIndex_);
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 

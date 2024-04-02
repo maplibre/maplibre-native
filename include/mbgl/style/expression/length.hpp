@@ -13,7 +13,7 @@ namespace expression {
 
 class Length : public Expression {
 public:
-    Length(std::unique_ptr<Expression> input) noexcept;
+    Length(std::unique_ptr<Expression> input);
 
     static ParseResult parse(const mbgl::style::conversion::Convertible& value, ParsingContext& ctx);
 

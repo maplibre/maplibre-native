@@ -55,7 +55,7 @@ bool isFeatureConstant(const Expression& expression) {
 namespace {
 const auto zoomProperty = std::array<std::string_view, 1>{"zoom"};
 }
-bool isZoomConstant(const Expression& e) noexcept {
+bool isZoomConstant(const Expression& e) {
     return isGlobalPropertyConstant(e, zoomProperty);
 }
 

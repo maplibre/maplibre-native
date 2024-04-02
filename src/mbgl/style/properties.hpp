@@ -99,7 +99,7 @@ struct ConstantsMask;
 template <class... Ps>
 struct ConstantsMask<TypeList<Ps...>> {
     template <class Properties>
-    static unsigned long getMask(const Properties& properties) noexcept {
+    static unsigned long getMask(const Properties& properties) {
         const auto result = std::apply(
             [](auto... v) noexcept { return (v | ...); },
             std::make_tuple(

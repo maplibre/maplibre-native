@@ -17,7 +17,7 @@ class BasicComparison : public Expression {
 public:
     using CompareFunctionType = bool (*)(const Value&, const Value&);
 
-    BasicComparison(std::string op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs) noexcept;
+    BasicComparison(std::string op, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs);
 
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
     bool operator==(const Expression&) const noexcept override;
@@ -40,7 +40,7 @@ public:
     CollatorComparison(std::string op,
                        std::unique_ptr<Expression> lhs,
                        std::unique_ptr<Expression> rhs,
-                       std::unique_ptr<Expression> collator) noexcept;
+                       std::unique_ptr<Expression> collator);
 
     void eachChild(const std::function<void(const Expression&)>& visit) const override;
     bool operator==(const Expression&) const noexcept override;

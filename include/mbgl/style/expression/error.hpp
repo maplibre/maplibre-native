@@ -10,7 +10,7 @@ namespace expression {
 
 class Error : public Expression {
 public:
-    Error(std::string message_) noexcept
+    Error(std::string message_)
         : Expression(Kind::Error, type::Error, Dependency::None),
           message(std::move(message_)) {}
 

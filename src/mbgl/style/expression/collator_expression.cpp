@@ -10,7 +10,7 @@ namespace expression {
 
 CollatorExpression::CollatorExpression(std::unique_ptr<Expression> caseSensitive_,
                                        std::unique_ptr<Expression> diacriticSensitive_,
-                                       std::optional<std::unique_ptr<Expression>> locale_) noexcept
+                                       std::optional<std::unique_ptr<Expression>> locale_)
     : Expression(Kind::CollatorExpression,
                  type::Collator,
                  depsOf(caseSensitive_) | depsOf(diacriticSensitive_) | depsOf(locale_)),

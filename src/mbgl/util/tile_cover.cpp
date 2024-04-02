@@ -188,7 +188,7 @@ std::vector<OverscaledTileID> tileCover(const TransformState& state,
     // surrounding the center location
     const double radiusOfMaxLvlLodInTiles = 3;
 
-    const auto newRootTile = [&](int16_t wrap) noexcept -> Node {
+    const auto newRootTile = [&](int16_t wrap) -> Node {
         return {AABB({{wrap * numTiles, 0.0, 0.0}}, {{(wrap + 1) * numTiles, numTiles, 0.0}}),
                 uint8_t(0),
                 uint16_t(0),
@@ -267,7 +267,7 @@ std::vector<OverscaledTileID> tileCover(const TransformState& state,
     }
 
     // Sort results by distance
-    std::sort(result.begin(), result.end(), [](const ResultTile& a, const ResultTile& b) noexcept {
+    std::sort(result.begin(), result.end(), [](const ResultTile& a, const ResultTile& b) {
         return a.sqrDist < b.sqrDist;
     });
 

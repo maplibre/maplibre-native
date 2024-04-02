@@ -159,7 +159,7 @@ public:
         this->Super::clear();
     }
 
-    bool operator==(const TinyUnorderedMap& other) const noexcept {
+    bool operator==(const TinyUnorderedMap& other) const {
         if (size() != other.size()) return false;
         assert(linearSize == other.linearSize);
         if (linearSize) {
@@ -179,7 +179,7 @@ private:
     std::array<std::optional<T>, LinearThreshold> values;
 
     auto makeFindPredicate(const Key& key) const noexcept {
-        return [&, eq = this->Super::key_eq()](const auto& x) noexcept {
+        return [&, eq = this->Super::key_eq()](const auto& x) {
             return eq(key, *x);
         };
     }

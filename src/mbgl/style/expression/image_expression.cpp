@@ -6,7 +6,7 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-ImageExpression::ImageExpression(std::unique_ptr<Expression> imageID_) noexcept
+ImageExpression::ImageExpression(std::unique_ptr<Expression> imageID_)
     : Expression(Kind::ImageExpression, type::Image, depsOf(imageID_) | Dependency::Image),
       imageID(std::move(imageID_)) {
     assert(imageID);

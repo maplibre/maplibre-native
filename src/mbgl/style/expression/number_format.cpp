@@ -15,7 +15,7 @@ NumberFormat::NumberFormat(std::unique_ptr<Expression> number_,
                            std::unique_ptr<Expression> locale_,
                            std::unique_ptr<Expression> currency_,
                            std::unique_ptr<Expression> minFractionDigits_,
-                           std::unique_ptr<Expression> maxFractionDigits_) noexcept
+                           std::unique_ptr<Expression> maxFractionDigits_)
     : Expression(Kind::NumberFormat,
                  type::String,
                  depsOf(number_) | depsOf(locale_) | depsOf(currency_) | depsOf(minFractionDigits_) |

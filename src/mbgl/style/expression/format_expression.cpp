@@ -25,7 +25,7 @@ void FormatExpressionSection::setTextSectionOptions(std::unique_ptr<Expression>&
     }
 }
 
-FormatExpression::FormatExpression(std::vector<FormatExpressionSection> sections_) noexcept
+FormatExpression::FormatExpression(std::vector<FormatExpressionSection> sections_)
     : Expression(Kind::FormatExpression, type::Formatted, collectDependencies(sections_, &depsOfSection)),
       sections(std::move(sections_)) {}
 

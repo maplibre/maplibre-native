@@ -28,15 +28,15 @@ public:
 
         return defaultValue.match(
             [&context](const style::PropertyExpression<T>& e) { return e.getExpression().evaluate(context); },
-            [](const T& t) noexcept -> EvaluationResult { return t; });
+            [](const T& t) -> EvaluationResult { return t; });
     }
 
     void eachChild(const std::function<void(const Expression&)>& fn) const final {
         defaultValue.match([&fn](const style::PropertyExpression<T>& e) { fn(e.getExpression()); },
-                           [](const T&) noexcept {});
+                           [](const T&) {});
     }
 
-    bool operator==(const Expression& e) const noexcept final {
+    bool operator==(const Expression& e) const final {
         if (e.getKind() == Kind::FormatSectionOverride) {
             const auto* other = static_cast<const FormatSectionOverride*>(&e);
 
@@ -48,15 +48,15 @@ public:
             return defaultValue.match(
                 [other](const style::PropertyExpression<T>& thisExpr) {
                     return other->defaultValue.match(
-                        [&thisExpr](const style::PropertyExpression<T>& otherExpr) noexcept {
+                        [&thisExpr](const style::PropertyExpression<T>& otherExpr) {
                             return thisExpr == otherExpr;
                         },
                         [](const T&) { return false; });
                 },
                 [other](const T& thisValue) {
                     return other->defaultValue.match(
-                        [&thisValue](const T& otherValue) noexcept { return thisValue == otherValue; },
-                        [](const style::PropertyExpression<T>&) noexcept { return false; });
+                        [&thisValue](const T& otherValue) { return thisValue == otherValue; },
+                        [](const style::PropertyExpression<T>&) { return false; });
                 });
         }
 

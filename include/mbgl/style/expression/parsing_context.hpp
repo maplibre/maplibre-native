@@ -89,8 +89,8 @@ public:
     ParsingContext(const ParsingContext&) = delete;
     ParsingContext& operator=(const ParsingContext&) = delete;
 
-    const std::string& getKey() const noexcept { return key; }
-    const std::optional<type::Type>& getExpected() const noexcept { return expected; }
+    std::string getKey() const { return key; }
+    std::optional<type::Type> getExpected() const { return expected; }
     const std::vector<ParsingError>& getErrors() const noexcept { return *errors; }
     std::string getCombinedErrors() const;
 

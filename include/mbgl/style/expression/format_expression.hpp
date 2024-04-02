@@ -25,7 +25,7 @@ struct FormatExpressionSection {
 
 class FormatExpression final : public Expression {
 public:
-    explicit FormatExpression(std::vector<FormatExpressionSection> sections) noexcept;
+    explicit FormatExpression(std::vector<FormatExpressionSection> sections);
 
     EvaluationResult evaluate(const EvaluationContext&) const override;
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);

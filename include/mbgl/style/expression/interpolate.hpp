@@ -45,9 +45,9 @@ public:
         return ::mbgl::style::expression::getCoveringStops(stops, lower, upper);
     }
 
-    double interpolationFactor(const Range<double>& inputLevels, const double inputValue) const noexcept {
+    double interpolationFactor(const Range<double>& inputLevels, const double inputValue) const {
         return interpolator.match(
-            [&](const auto& interp) noexcept { return interp.interpolationFactor(inputLevels, inputValue); });
+            [&](const auto& interp) { return interp.interpolationFactor(inputLevels, inputValue); });
     }
 
     bool operator==(const Expression& e) const noexcept override {

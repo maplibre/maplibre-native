@@ -316,7 +316,7 @@ ParseResult parseMatch(const Convertible& value, ParsingContext& ctx) {
             return create<std::string>(
                 std::move(*outputType), std::move(*input), std::move(branches), std::move(*otherwise), ctx);
         },
-        [&](const auto&) noexcept {
+        [&](const auto&) {
             // unreachable: inputType is set by parseInputValue(), which only
             // accepts string and (integer) numeric values.
             assert(false);

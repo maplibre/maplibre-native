@@ -30,7 +30,7 @@ public:
 
 private:
     template <typename T, size_t N>
-    constexpr static bool includes(const T e, const T (&l)[N], const size_t i = 0) noexcept {
+    constexpr static bool includes(const T e, const T (&l)[N], const size_t i = 0) {
         return i < N && (l[i] == e || includes(e, l, i + 1));
     }
 

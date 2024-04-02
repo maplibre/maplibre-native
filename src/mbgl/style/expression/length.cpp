@@ -6,7 +6,7 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
-Length::Length(std::unique_ptr<Expression> input_) noexcept
+Length::Length(std::unique_ptr<Expression> input_)
     : Expression(Kind::Length, type::Number, depsOf(input_)),
       input(std::move(input_)) {}
 
