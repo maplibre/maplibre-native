@@ -34,12 +34,14 @@ const std::array<AttributeInfo, 9> ShaderSource<BuiltIn::LinePatternShader, gfx:
     AttributeInfo{7, gfx::AttributeDataType::UShort4, idLinePatternFromVertexAttribute},
     AttributeInfo{8, gfx::AttributeDataType::UShort4, idLinePatternToVertexAttribute},
 };
-const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{9, true, false, sizeof(LineDynamicUBO), idLinePatternDynamicUBO},
-    UniformBlockInfo{10, true, true, sizeof(LinePatternUBO), idLinePatternUBO},
-    UniformBlockInfo{11, true, true, sizeof(LinePatternPropertiesUBO), idLinePatternPropertiesUBO},
-    UniformBlockInfo{12, true, false, sizeof(LinePatternInterpolationUBO), idLinePatternInterpolationUBO},
-    UniformBlockInfo{13, true, true, sizeof(LinePatternTilePropertiesUBO), idLinePatternTilePropertiesUBO},
+const std::array<UniformBlockInfo, linePatternUBOCount>
+    ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal>::uniforms = {
+        UniformBlockInfo{9, true, true, sizeof(LineDynamicUBO), idLinePatternDynamicUBO},
+        UniformBlockInfo{10, true, true, sizeof(LinePatternUBO), idLinePatternUBO},
+        UniformBlockInfo{11, true, true, sizeof(LinePatternPropertiesUBO), idLinePatternPropertiesUBO},
+        UniformBlockInfo{12, true, false, sizeof(LinePatternInterpolationUBO), idLinePatternInterpolationUBO},
+        UniformBlockInfo{13, true, true, sizeof(LinePatternTilePropertiesUBO), idLinePatternTilePropertiesUBO},
+        UniformBlockInfo{14, true, true, sizeof(LineExpressionUBO), idLinePatternExpressionUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, idLineImageTexture},
@@ -56,11 +58,13 @@ const std::array<AttributeInfo, 9> ShaderSource<BuiltIn::LineSDFShader, gfx::Bac
     AttributeInfo{7, gfx::AttributeDataType::Float2, idLineWidthVertexAttribute},
     AttributeInfo{8, gfx::AttributeDataType::Float2, idLineFloorWidthVertexAttribute},
 };
-const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{9, true, false, sizeof(LineDynamicUBO), idLineSDFDynamicUBO},
-    UniformBlockInfo{10, true, true, sizeof(LineSDFUBO), idLineSDFUBO},
-    UniformBlockInfo{11, true, true, sizeof(LineSDFPropertiesUBO), idLineSDFPropertiesUBO},
-    UniformBlockInfo{12, true, false, sizeof(LineSDFInterpolationUBO), idLineSDFInterpolationUBO},
+const std::array<UniformBlockInfo, lineSDFUBOCount>
+    ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal>::uniforms = {
+        UniformBlockInfo{9, true, true, sizeof(LineDynamicUBO), idLineSDFDynamicUBO},
+        UniformBlockInfo{10, true, true, sizeof(LineSDFUBO), idLineSDFUBO},
+        UniformBlockInfo{11, true, true, sizeof(LineSDFPropertiesUBO), idLineSDFPropertiesUBO},
+        UniformBlockInfo{12, true, false, sizeof(LineSDFInterpolationUBO), idLineSDFInterpolationUBO},
+        UniformBlockInfo{13, true, true, sizeof(LineExpressionUBO), idLineSDFExpressionUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, idLineImageTexture},

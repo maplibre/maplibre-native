@@ -168,7 +168,7 @@ PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expre
 PropertyExpressionBase::PropertyExpressionBase(PropertyExpressionBase&& other)
     : expression(std::move(other.expression)),
       gpuExpression(std::move(other.gpuExpression)),
-      zoomCurve(other.zoomCurve),
+      zoomCurve(std::move(other.zoomCurve)),
       useIntegerZoom_(other.useIntegerZoom_),
       isZoomConstant_(other.isZoomConstant_),
       isFeatureConstant_(other.isFeatureConstant_),

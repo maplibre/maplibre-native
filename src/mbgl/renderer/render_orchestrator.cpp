@@ -902,8 +902,12 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
         transitionOptions.duration.value_or(defDuration),
     };
 
+    const auto& items = renderTree.getLayerRenderItemMap();
+
     std::vector<std::unique_ptr<ChangeRequest>> changes;
-    for (const auto& item : renderTree.getLayerRenderItemMap()) {
+    changes.reserve(items.size() * 3);
+
+    for (const auto& item : items) {
         auto& renderLayer = item.layer.get();
         renderLayer.update(shaders, context, state, updateParameters, renderTree, changes);
     }

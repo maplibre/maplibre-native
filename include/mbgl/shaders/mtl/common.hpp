@@ -197,9 +197,21 @@ enum class LineExpressionMask : uint32_t {
     Blur = 1 << 2,
     Width = 1 << 3,
     GapWidth = 1 << 4,
-    Offset = 1 << 5,
+    FloorWidth = 1 << 5,
+    Offset = 1 << 6,
 };
 bool operator&(LineExpressionMask a, LineExpressionMask b) { return a & b; }
+
+struct alignas(16) LineExpressionUBO {
+    GPUExpression color;
+    GPUExpression blur;
+    GPUExpression opacity;
+    GPUExpression gapwidth;
+    GPUExpression offset;
+    GPUExpression width;
+    GPUExpression floorwidth;
+};
+static_assert(sizeof(LineExpressionUBO) % 16 == 0, "wrong alignment");
 
 struct alignas(16) LineDynamicUBO {
     float2 units_to_pixels;
@@ -243,6 +255,7 @@ struct alignas(16) LineBasicPropertiesUBO {
     float4 color;
     float opacity;
     float width;
+
     float pad1, pad2;
 };
 
@@ -252,7 +265,10 @@ struct alignas(16) LineGradientPropertiesUBO {
     float gapwidth;
     float offset;
     float width;
-    float pad1, pad2, pad3;
+
+    LineExpressionMask expressionMask;
+
+    float pad1, pad2;
 };
 
 struct alignas(16) LineInterpolationUBO {

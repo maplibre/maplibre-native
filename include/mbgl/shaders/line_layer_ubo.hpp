@@ -14,7 +14,8 @@ enum class LineExpressionMask : uint32_t {
     Blur = 1 << 2,
     Width = 1 << 3,
     GapWidth = 1 << 4,
-    Offset = 1 << 5,
+    FloorWidth = 1 << 5,
+    Offset = 1 << 6,
 };
 
 //
@@ -67,6 +68,7 @@ struct alignas(16) LineExpressionUBO {
     style::GPUExpression gapwidth;
     style::GPUExpression offset;
     style::GPUExpression width;
+    style::GPUExpression floorWidth;
 };
 static_assert(sizeof(LineExpressionUBO) % 16 == 0);
 
@@ -92,7 +94,10 @@ struct alignas(16) LineGradientPropertiesUBO {
     float gapwidth;
     float offset;
     float width;
-    float pad1, pad2, pad3;
+
+    LineExpressionMask expressionMask;
+
+    float pad1, pad2;
 };
 static_assert(sizeof(LineGradientPropertiesUBO) % 16 == 0);
 
@@ -111,6 +116,9 @@ enum {
     idLineGradientUBO,
     idLineGradientPropertiesUBO,
     idLineGradientInterpolationUBO,
+#if MLN_RENDER_BACKEND_METAL
+    idLineGradientExpressionUBO,
+#endif // MLN_RENDER_BACKEND_METAL
     lineGradientUBOCount
 };
 
@@ -132,7 +140,10 @@ struct alignas(16) LinePatternPropertiesUBO {
     float offset;
     float gapwidth;
     float width;
-    float pad1, pad2, pad3;
+
+    LineExpressionMask expressionMask;
+
+    float pad1, pad2;
 };
 static_assert(sizeof(LinePatternPropertiesUBO) % 16 == 0);
 
@@ -160,6 +171,9 @@ enum {
     idLinePatternPropertiesUBO,
     idLinePatternInterpolationUBO,
     idLinePatternTilePropertiesUBO,
+#if MLN_RENDER_BACKEND_METAL
+    idLinePatternExpressionUBO,
+#endif // MLN_RENDER_BACKEND_METAL
     linePatternUBOCount
 };
 
@@ -187,7 +201,10 @@ struct alignas(16) LineSDFPropertiesUBO {
     float offset;
     float width;
     float floorwidth;
-    float pad1, pad2;
+
+    LineExpressionMask expressionMask;
+
+    float pad1;
 };
 static_assert(sizeof(LineSDFPropertiesUBO) % 16 == 0);
 
@@ -208,6 +225,9 @@ enum {
     idLineSDFUBO,
     idLineSDFPropertiesUBO,
     idLineSDFInterpolationUBO,
+#if MLN_RENDER_BACKEND_METAL
+    idLineSDFExpressionUBO,
+#endif // MLN_RENDER_BACKEND_METAL
     lineSDFUBOCount
 };
 
