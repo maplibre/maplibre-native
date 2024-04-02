@@ -101,18 +101,10 @@ struct ConstantsMask<TypeList<Ps...>> {
     template <class Properties>
     static unsigned long getMask(const Properties& properties) {
         const auto result = std::apply(
-            [](auto... v) noexcept { return (v | ...); },
+            [](auto... v) { return (v | ...); },
             std::make_tuple(
                 0ul,
                 (((properties.template get<Ps>().isConstant()) ? (1ul << (TypeIndex<Ps, Ps...>::value)) : 0ul))...));
-
-// temporary, for validation
-#if !defined(NDEBUG)
-        std::bitset<sizeof...(Ps)> old_result;
-        util::ignore({old_result.set(TypeIndex<Ps, Ps...>::value, properties.template get<Ps>().isConstant())...});
-        assert(result == old_result.to_ulong());
-#endif
-
         return result;
     }
 };
