@@ -1,5 +1,6 @@
 #import <Cocoa/Cocoa.h>
 #import <CoreLocation/CoreLocation.h>
+#import <QuartzCore/QuartzCore.h>
 
 #import "MLNFoundation.h"
 #import "MLNTypes.h"
