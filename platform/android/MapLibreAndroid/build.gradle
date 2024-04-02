@@ -11,7 +11,7 @@ apply plugin: 'kotlin-android'
 apply from: "${rootDir}/gradle/native-build.gradle"
 
 dependencies {
-    lintChecks project(":MapboxGLAndroidSDKLint")
+    lintChecks project(":MapLibreAndroidLint")
     api dependenciesList.mapboxJavaGeoJSON
     api dependenciesList.mapboxAndroidGestures
 
