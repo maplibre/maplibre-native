@@ -134,17 +134,18 @@ ComputePass::ComputePass(gfx::Context& _context)
     : context(_context) {}
 
 void ComputePass::computeDrawableBuffer(std::vector<SymbolComputeUBO>& computeUBOVector,
-                                        gfx::UniformBufferPtr& computeBuffer,
+                                        [[maybe_unused]] gfx::UniformBufferPtr& computeBuffer,
                                         gfx::UniformBufferPtr& drawableBuffer) {
     std::vector<SymbolDrawableUBO> drawableUBOVector(computeUBOVector.size());
     for(size_t i = 0; i < computeUBOVector.size(); i++) {
         computeDrawableUBOElement(drawableUBOVector, computeUBOVector, i);
     }
-    
-    if (!drawableBuffer || drawableBuffer->getSize() < sizeof(SymbolDrawableUBO) * drawableUBOVector.size()) {
-        drawableBuffer = context.createUniformBuffer(drawableUBOVector.data(), sizeof(SymbolDrawableUBO) * drawableUBOVector.size());
+
+    const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
+    if (!drawableBuffer || drawableBuffer->getSize() < drawableUBOVectorSize) {
+        drawableBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize);
     } else {
-        drawableBuffer->update(drawableUBOVector.data(), sizeof(SymbolDrawableUBO) * drawableUBOVector.size());
+        drawableBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
     }
 }
 
