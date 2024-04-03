@@ -318,14 +318,16 @@ void ComputePass::computeDrawableBuffer(std::vector<SymbolComputeUBO>& computeUB
         computeCommandEncoder = NS::RetainPtr(commandBuffer->computeCommandEncoder());
     }
     
-    if (!computeBuffer || computeBuffer->getSize() < sizeof(SymbolComputeUBO) * computeUBOVector.size()) {
-        computeBuffer = context.createUniformBuffer(computeUBOVector.data(), sizeof(SymbolComputeUBO) * computeUBOVector.size(), true);
+    const size_t computeUBOVectorSize = sizeof(SymbolComputeUBO) * computeUBOVector.size();
+    if (!computeBuffer || computeBuffer->getSize() < computeUBOVectorSize) {
+        computeBuffer = context.createUniformBuffer(computeUBOVector.data(), computeUBOVectorSize, true);
     } else {
-        computeBuffer->update(computeUBOVector.data(), sizeof(SymbolComputeUBO) * computeUBOVector.size());
+        computeBuffer->update(computeUBOVector.data(), computeUBOVectorSize);
     }
     
-    if (!drawableBuffer || drawableBuffer->getSize() < sizeof(SymbolDrawableUBO) * computeUBOVector.size()) {
-        drawableBuffer = context.createUniformBuffer(nullptr, sizeof(SymbolDrawableUBO) * computeUBOVector.size(), true);
+    const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * computeUBOVector.size();
+    if (!drawableBuffer || drawableBuffer->getSize() < drawableUBOVectorSize) {
+        drawableBuffer = context.createUniformBuffer(nullptr, drawableUBOVectorSize, true);
     }
     
     const auto& mtlComputeBuffer = static_cast<const UniformBuffer&>(*computeBuffer);
