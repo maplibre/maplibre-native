@@ -6,7 +6,7 @@ namespace mbgl {
 namespace shaders {
 
 /// Evaluated properties that depend on the tile
-struct alignas(16) SymbolDrawableTilePropsUBO {
+struct alignas(16) SymbolTilePropsUBO {
     /*  0 */ /*bool*/ int is_text;
     /*  4 */ /*bool*/ int is_halo;
     /*  8 */ /*bool*/ int pitch_with_map;
@@ -17,10 +17,10 @@ struct alignas(16) SymbolDrawableTilePropsUBO {
     /* 28 */ float padding;
     /* 32 */
 };
-static_assert(sizeof(SymbolDrawableTilePropsUBO) == 2 * 16);
+static_assert(sizeof(SymbolTilePropsUBO) == 2 * 16);
 
 /// Attribute interpolations
-struct alignas(16) SymbolDrawableInterpolateUBO {
+struct alignas(16) SymbolInterpolateUBO {
     /*  0 */ float fill_color_t;
     /*  4 */ float halo_color_t;
     /*  8 */ float opacity_t;
@@ -29,7 +29,7 @@ struct alignas(16) SymbolDrawableInterpolateUBO {
     /* 20 */ float pad1, pad2, pad3;
     /* 32 */
 };
-static_assert(sizeof(SymbolDrawableInterpolateUBO) == 32);
+static_assert(sizeof(SymbolInterpolateUBO) == 32);
 
 struct alignas(16) SymbolDrawableUBO {
     /*   0 */ std::array<float, 4 * 4> matrix;
@@ -58,7 +58,7 @@ struct alignas(16) SymbolDynamicUBO {
 static_assert(sizeof(SymbolDynamicUBO) == 16);
 
 /// Evaluated properties that do not depend on the tile
-struct alignas(16) SymbolDrawablePaintUBO {
+struct alignas(16) SymbolPaintUBO {
     /*  0 */ Color fill_color;
     /* 16 */ Color halo_color;
     /* 32 */ float opacity;
@@ -67,14 +67,15 @@ struct alignas(16) SymbolDrawablePaintUBO {
     /* 44 */ float padding;
     /* 48 */
 };
-static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16);
+static_assert(sizeof(SymbolPaintUBO) == 3 * 16);
 
 enum {
+    idSymbolUBOIndex,
     idSymbolDrawableUBO,
     idSymbolDynamicUBO,
-    idSymbolDrawablePaintUBO,
-    idSymbolDrawableTilePropsUBO,
-    idSymbolDrawableInterpolateUBO,
+    idSymbolPaintUBO,
+    idSymbolTilePropsUBO,
+    idSymbolInterpolateUBO,
     symbolUBOCount
 };
 

@@ -185,6 +185,11 @@ void Drawable::draw(PaintParameters& parameters) const {
     const auto debugGroup = parameters.encoder->createDebugGroup(debugLabel(*this));
 #endif
 
+    if (uboIndex >= 0) {
+        encoder->setVertexBytes(&uboIndex, sizeof(uboIndex), shaders::idSymbolUBOIndex);
+        encoder->setFragmentBytes(&uboIndex, sizeof(uboIndex), shaders::idSymbolUBOIndex);
+    }
+    
     bindAttributes(renderPass);
     bindUniformBuffers(renderPass);
     bindTextures(renderPass);
@@ -369,7 +374,7 @@ void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
             const auto& pair = getUniformBuffers().getPair(id);
             const auto& uniformBuffer = pair.first;
             const auto offset = pair.second;
-            assert(uniformBuffer && "UBO missing, drawable skipped");
+            //assert(uniformBuffer && "UBO missing, drawable skipped");
             if (uniformBuffer) {
                 const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
                 const auto& resource = buffer.getBufferResource();

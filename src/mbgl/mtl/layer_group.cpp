@@ -7,6 +7,7 @@
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/drawable.hpp>
+#include <mbgl/mtl/render_pass.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/convert.hpp>
@@ -43,6 +44,9 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     const auto debugGroup = parameters.encoder->createDebugGroup(getName() + "-render");
 #endif
 
+    auto& context = static_cast<Context&>(parameters.context);
+    auto& renderPass = static_cast<mtl::RenderPass&>(*parameters.renderPass);
+    
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -52,6 +56,16 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             tweaker->execute(drawable, parameters);
         }
 
+        // bind UBOs
+        for (size_t id = 0; id < uniformBuffers.allocatedSize(); id++) {
+            const auto& uniformBuffer = uniformBuffers.get(id);
+            if (!uniformBuffer) continue;
+            const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
+            const auto& resource = buffer.getBufferResource();
+            renderPass.bindVertex(resource, 0, id);
+            renderPass.bindFragment(resource, 0, id);
+        }
+        
         drawable.draw(parameters);
     });
 }

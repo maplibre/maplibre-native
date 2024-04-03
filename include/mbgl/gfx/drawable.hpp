@@ -227,6 +227,9 @@ public:
 
     /// Get drawable user-defined type
     size_t getType() const { return type; }
+    
+    void setUBOIndex(uint32_t uboIndex_) { uboIndex = uboIndex_; }
+    uint32_t getUBOIndex() const { return uboIndex; }
 
     /// Associate the drawable with a layer tweaker.  This is used to manage the lifetime of the tweaker.
     void setLayerTweaker(LayerTweakerPtr tweaker) { layerTweaker = std::move(tweaker); }
@@ -260,6 +263,7 @@ protected:
     LayerTweakerPtr layerTweaker;
 
     std::size_t type = 0;
+    int32_t uboIndex = -1;
 };
 
 using DrawablePtr = std::shared_ptr<Drawable>;

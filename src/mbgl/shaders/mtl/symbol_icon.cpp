@@ -5,21 +5,21 @@ namespace shaders {
 
 const std::array<AttributeInfo, 6> ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal>::attributes = {
     // always attributes
-    AttributeInfo{0, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::UShort4, idSymbolDataVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Short4, idSymbolPixelOffsetVertexAttribute},
-    AttributeInfo{3, gfx::AttributeDataType::Float3, idSymbolProjectedPosVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::Float, idSymbolFadeOpacityVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Short4, idSymbolPosOffsetVertexAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::UShort4, idSymbolDataVertexAttribute},
+    AttributeInfo{8, gfx::AttributeDataType::Short4, idSymbolPixelOffsetVertexAttribute},
+    AttributeInfo{9, gfx::AttributeDataType::Float3, idSymbolProjectedPosVertexAttribute},
+    AttributeInfo{10, gfx::AttributeDataType::Float, idSymbolFadeOpacityVertexAttribute},
 
     // sometimes uniforms
-    AttributeInfo{5, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
+    AttributeInfo{11, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
 };
 const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{6, true, true, sizeof(SymbolDrawableUBO), idSymbolDrawableUBO},
-    UniformBlockInfo{7, true, false, sizeof(SymbolDynamicUBO), idSymbolDynamicUBO},
-    UniformBlockInfo{8, true, true, sizeof(SymbolDrawablePaintUBO), idSymbolDrawablePaintUBO},
-    UniformBlockInfo{9, true, false, sizeof(SymbolDrawableTilePropsUBO), idSymbolDrawableTilePropsUBO},
-    UniformBlockInfo{10, true, false, sizeof(SymbolDrawableInterpolateUBO), idSymbolDrawableInterpolateUBO},
+    UniformBlockInfo{1, true, true, sizeof(SymbolDrawableUBO), idSymbolDrawableUBO},
+    UniformBlockInfo{2, true, true, sizeof(SymbolDynamicUBO), idSymbolDynamicUBO},
+    UniformBlockInfo{3, true, true, sizeof(SymbolPaintUBO), idSymbolPaintUBO},
+    UniformBlockInfo{4, true, false, sizeof(SymbolTilePropsUBO), idSymbolTilePropsUBO},
+    UniformBlockInfo{5, true, false, sizeof(SymbolInterpolateUBO), idSymbolInterpolateUBO},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, idSymbolImageTexture},

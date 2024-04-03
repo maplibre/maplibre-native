@@ -41,7 +41,7 @@ std::array<float, 2> toArray(const Size& s) {
     return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
 
-SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
+SymbolPaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     return {
         /*.fill_color=*/isText ? constOrDefault<TextColor>(evaluated) : constOrDefault<IconColor>(evaluated),
         /*.halo_color=*/
@@ -156,11 +156,15 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.hasVariablePlacement=*/hasVariablePlacement,
             /*.padding=*/0
         };
-        
+        drawable.setUBOIndex(i);
         i++;
     });
     
     parameters.computePass->computeDrawableBuffer(computeUBOVector, computeBuffer, drawableBuffer);
+    
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
+    layerUniforms.set(idSymbolDrawableUBO, drawableBuffer);
+    layerUniforms.set(idSymbolDynamicUBO, dynamicBuffer);
     
     i = 0;
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -182,10 +186,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             iconPropertiesUpdated = false;
         }
         
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.set(idSymbolDrawableUBO, drawableBuffer, i * sizeof(SymbolDrawableUBO));
-        uniforms.set(idSymbolDynamicUBO, dynamicBuffer);
-        uniforms.set(idSymbolDrawablePaintUBO, isText ? textPaintBuffer : iconPaintBuffer);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        //drawableUniforms.set(idSymbolDrawableUBO, drawableBuffer, i * sizeof(SymbolDrawableUBO));
+        //drawableUniforms.set(idSymbolDynamicUBO, dynamicBuffer);
+        drawableUniforms.set(idSymbolPaintUBO, isText ? textPaintBuffer : iconPaintBuffer);
         
         i++;
     });
