@@ -151,6 +151,9 @@ public:
 
         mat4 tileMatrix;
         parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
+        if (const auto& origin{drawable.getOrigin()}; origin.has_value()) {
+            matrix::translate(tileMatrix, tileMatrix, origin->x, origin->y, 0);
+        }
 
         mat4 projMatrix = parameters.transformParams.projMatrix;
         const auto matrix = LayerTweaker::getTileMatrix(

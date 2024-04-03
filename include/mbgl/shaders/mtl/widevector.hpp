@@ -202,12 +202,71 @@ float3 viewPos(constant simd::float4x4 &mat, float3 vec) {
     return p.xyz;   // / p.w; ?
 }
 
-float2 screenPos(constant Uniforms &u, float3 viewPos) {
-    float4 p4 = float4(viewPos, 1.0);
+float2 screenPos1(constant Uniforms &u, float3 viewPos) {
+    const float4 p4 = float4(viewPos, 1.0);
+    
+    // Use MVP + diff matrixes
     const float4 s = u.mvpMatrix * p4 + u.mvpMatrixDiff * p4;
 
     return s.xy/s.w;
 }
+
+float2 screenPos2(constant Uniforms &u, float3 viewPos) {
+    const float4 p4 = float4(viewPos, 1.0);
+    
+    // Use MVP matrix
+    const float4 s = u.mvpMatrix * p4;
+
+    return s.xy/s.w;
+}
+
+float2 screenPos3(constant Uniforms &u, float3 viewPos) {
+    const float4 p4 = float4(viewPos, 1.0);
+
+    // Use MV + diff and Projection
+    const float4 s = u.pMatrix * (u.mvMatrix * p4 + u.mvMatrixDiff * p4);
+    return s.xy / s.w;
+}
+
+float2 screenPos4(constant Uniforms &u, float3 viewPos) {
+    const float4 p4 = float4(viewPos, 1.0);
+
+    // Cross multiply MV + diff with Projection + diff
+    const simd::float4x4 highResult = u.pMatrix * u.mvMatrix;
+    const simd::float4x4 crossTerm1 = u.pMatrix * u.mvMatrixDiff;
+    const simd::float4x4 crossTerm2 = u.pMatrixDiff * u.mvMatrix;
+    const simd::float4x4 lowResult  = u.pMatrixDiff * u.mvMatrixDiff;
+    const simd::float4x4 matrix = highResult + crossTerm1 + crossTerm2 + lowResult;
+
+    const float4 s = matrix * p4;
+    return s.xy / s.w;
+}
+
+float2 screenPos5(constant Uniforms &u, float3 viewPos) {
+    float4 p4 = float4(viewPos, 1.0);
+
+    // Use MV + diff and Projection + diff
+    p4 = u.mvMatrix * p4 + u.mvMatrixDiff * p4;
+    const float4 s = u.pMatrix * p4 + u.pMatrixDiff * p4;
+    
+    return s.xy / s.w;
+}
+
+float2 screenPos6(constant Uniforms &u, float3 viewPos) {
+    float4 p4 = float4(viewPos, 1.0);
+
+    // Use MV + diff and Projection + diff
+    float4 p4high = u.mvMatrix * p4;
+    float4 p4low  = u.mvMatrixDiff * p4;
+
+    p4high = u.pMatrix * p4high;
+    p4low  = u.pMatrixDiff * p4low;
+
+    const float4 s = p4high + p4low;
+    
+    return s.xy / s.w;
+}
+
 
 constant constexpr float wideVecMinTurnThreshold = 1e-5;
 constant constexpr float wideVecMaxTurnThreshold = 0.99999998476;  // sin(89.99 deg)
@@ -298,7 +357,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
         if (!instValid[ii]) {
             continue;
         }
-        centers[ii].screenPos = screenPos(uniforms, inst[ii].center);
+        centers[ii].screenPos = screenPos2(uniforms, inst[ii].center);
     }
 
     const float2 screenScale(2.0/uniforms.frameSize.x,2.0/uniforms.frameSize.y);    // ~(0.001,0.001)
