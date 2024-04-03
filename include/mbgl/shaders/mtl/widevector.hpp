@@ -37,30 +37,6 @@ namespace WhirlyKitShader
 
 /** Expressions are used to change values like width and opacity over zoom levels. **/
 #define WKSExpStops 8
-
-/** Attributes within the [[stage_in]] for vertex shaders **/
-    
-// Basic vertex attribute positions
-typedef enum {
-    WKSVertexPositionAttribute = 0,
-    WKSVertexColorAttribute = 1,
-    WKSVertexNormalAttribute = 2,
-    WKSVertexTextureBaseAttribute = 3,
-    // Need some space for textures
-    WKSVertexMaskAttribute = 5
-    // And another space for extra mask
-} WKSVertexAttributes;
-    
-// Wide Vector vertex attribute positions
-typedef enum {
-    WKSVertexWideVecTexInfoAttribute = 7,
-    // We don't use these at the same time
-    WKSVertexWideVecInstIndexAttribute = 7,
-    WKSVertexWideVecP1Attribute,
-    WKSVertexWideVecN0Attribute,
-    WKSVertexWideVecC0Attribute,
-    WKSVertexWideVecOffsetAttribute
-} WKSVertexWideVecAttributes;
     
 // Line Joins
 // These are assumed to match WideVectorLineJoinType
@@ -81,78 +57,16 @@ typedef enum {
     WKSVertexLineCapSquare = 2,
 } WKSVertexLineCapType;
 
-// Maximum number of textures we currently support
-#define WKSTextureMax 8
-// Textures passed into the shader start here
-#define WKSTextureEntryLookup 5
-
-// All the buffer entries (other than stage_in) for the vertex shaders
-typedef enum {
-    WKSVertexBuffer = 0,
-    WKSVertUniformArgBuffer,
-    WKSVertLightingArgBuffer,
-    // These are free form with their own subsections
-    WKSVertexArgBuffer,
-    // Textures are optional
-    WKSVertTextureArgBuffer,
-    // Model instances
-    WKSVertModelInstanceArgBuffer,
-    WKSVertCalculationArgBuffer, // Leave some room for more than one of these
-    // If we're using the indirect instancing (can be driven by the GPU) this is
-    //  where the indirect buffer lives
-    WKSVertInstanceIndirectBuffer = WKSVertCalculationArgBuffer + 4,
-    WKSVertMaxBuffer
-} WKSVertexArgumentBuffers;
-
-// All the buffer entries for the fragment shaders
-typedef enum {
-    WKSFragUniformArgBuffer = 0,
-    WKSFragLightingArgBuffer = 1,
-    WKSFragmentArgBuffer = 2,
-    WKSFragTextureArgBuffer = 4,
-    WKSFragMaxBuffer
-} WKSFragArgumentBuffer;
-
-// Entries in the free form argument buffer
-// These must be in order, but you can add new ones at the end
-typedef enum {
-    WKSUniformDrawStateEntry = 0,
-    WKSUniformVecEntryExp = 99,
-    WKSUniformWideVecEntry = 100,
-    WKSUniformWideVecEntryExp = 110,
-    WKSUniformScreenSpaceEntry = 200,
-    WKSUniformScreenSpaceEntryExp = 210,
-    WKSUniformModelInstanceEntry = 300,
-    WKSUniformBillboardEntry = 400,
-    WKSUniformParticleStateEntry = 410
-} WKSArgBufferEntries;
-
-// Uniforms for the basic case.  Nothing fancy.
+// Uniforms for the basic case.
 struct Uniforms
 {
-    // TODO: Diff matrixes can be 0s
     simd::float4x4 mvpMatrix;
     simd::float4x4 mvpMatrixDiff;
     simd::float4x4 mvMatrix;
     simd::float4x4 mvMatrixDiff;
     simd::float4x4 pMatrix;
     simd::float4x4 pMatrixDiff;
-    simd::float2 frameSize;    // Output framebuffer size   // FILL
-};
-
-// Things that change per drawable (like fade)
-struct UniformDrawStateA {
-    simd::float4x4 singleMat; // Individual transform used by model instances
-    simd::float2 screenOrigin; // Used for texture pinning in screen space
-    float interp;              // Used to interpolate between two textures (if appropriate)
-    int outputTexLevel;        // Normally 0, unless we're running a reduce
-    int whichOffsetMatrix;     // Normally 0, unless we're in 2D mode drawing the same stuff multiple times
-    float fadeUp,fadeDown;     // Fading in/out values
-    float minVisible,maxVisible;  // Visibility by height
-    float minVisibleFadeBand,maxVisibleFadeBand;
-    int zoomSlot;              // Used to pass continuous zoom info
-    bool clipCoords;           // If set, the geometry coordinates aren't meant to be transformed
-    bool hasExp;               // Look for a UniformWideVecExp structure for color, opacity, and width
+    simd::float2 frameSize;
 };
 
 // Instructions to the wide vector shaders, usually per-drawable
@@ -226,22 +140,6 @@ struct ProjVertexTriWideVecPerf {
 using namespace metal;
 using namespace WhirlyKitShader;
 
-// Calculate fade based on time
-// (or) based on height.
-float calculateFade(constant Uniforms &uni,
-                    constant UniformDrawStateA &uniA)
-{
-    // Note: Feb 28 Meeting /w Steve
-    return 1;
-}
-
-// Get zoom from appropriate slot
-float ZoomFromSlot(constant Uniforms &uniforms,int zoomSlot)
-{
-    // Note: Feb 28 Meeting /w Steve
-    return 10.0;
-}
-
 struct IntersectInfo {
     bool valid;
     float2 interPt;
@@ -304,41 +202,11 @@ float3 viewPos(constant simd::float4x4 &mat, float3 vec) {
     return p.xyz;   // / p.w; ?
 }
 
-float2 screenPos1(constant Uniforms &u, float3 viewPos) {
-    const float4 p4 = float4(viewPos, 1.0);
-    const float4 s = u.pMatrix * (u.mvMatrix * p4 + u.mvMatrixDiff * p4);
-    return s.xy / s.w;
-}
-
-float2 screenPos2(constant Uniforms &u, float4 viewPos) {
-    float4 p4 = viewPos;
-    p4 = u.mvMatrix * p4 + u.mvMatrixDiff * p4;
-    const float4 s = u.pMatrix * p4 + u.pMatrixDiff * p4;
-    return s.xy / s.w;
-}
-
-float2 screenPos3(constant Uniforms &u, float3 viewPos, float3 viewPosDiff) {
+float2 screenPos(constant Uniforms &u, float3 viewPos) {
     float4 p4 = float4(viewPos, 1.0);
-    p4 = u.mvMatrix * p4 + u.mvMatrixDiff * p4;
-    const float4 s1 = u.pMatrix * p4 + u.pMatrixDiff * p4;
-    // const float2 r1 = s1.xy / s1.w;
+    const float4 s = u.mvpMatrix * p4 + u.mvpMatrixDiff * p4;
 
-    float4 d4 = float4(viewPosDiff, 0.0);
-    d4 = u.mvMatrix * d4 + u.mvMatrixDiff * d4;
-    const float4 s2 = u.pMatrix * d4 + u.pMatrixDiff * d4;
-    // const float2 r2 = s2.xy / s2.w;
-
-    return s1.xy/(s1.w + s2.w) + s2.xy/(s1.w + s2.w);
-}
-
-float2 screenPos4(constant Uniforms &u, float3 viewPos, float3 viewPosDiff) {
-    float4 p4 = float4(viewPos, 1.0);
-    const float4 s1 = u.mvpMatrix * p4 + u.mvpMatrixDiff * p4;
-
-    float4 d4 = float4(viewPosDiff, 0.0);
-    const float4 s2 = u.mvpMatrix * d4 + u.mvpMatrixDiff * d4;
-
-    return s1.xy/(s1.w + s2.w) + s2.xy/(s1.w + s2.w);
+    return s.xy/s.w;
 }
 
 constant constexpr float wideVecMinTurnThreshold = 1e-5;
@@ -430,10 +298,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
         if (!instValid[ii]) {
             continue;
         }
-        // centers[ii].screenPos = screenPos1(uniforms, inst[ii].center);
-        // centers[ii].screenPos = screenPos2(uniforms, float4(inst[ii].center, 1.0));
-        // centers[ii].screenPos = screenPos3(uniforms, inst[ii].center, inst[ii].diff);
-        centers[ii].screenPos = screenPos4(uniforms, inst[ii].center, inst[ii].diff);
+        centers[ii].screenPos = screenPos(uniforms, inst[ii].center);
     }
 
     const float2 screenScale(2.0/uniforms.frameSize.x,2.0/uniforms.frameSize.y);    // ~(0.001,0.001)
@@ -564,12 +429,6 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
     // Current corner is the default result for all points.
     float2 pos = corner;
 
-    // Texture position is based on cumulative distance along the line.
-    // Note that `inst[2].totalLen` wraps to zero at the end, and we don't want that.
-    // Texture coords are used for edge blending, so we need to set them up even if there are no textures.
-    float texY = 0;
-    float texX = 0;
-
     bool discardTri = false;
 
     if (isStartCap || isEndCap) {
@@ -580,7 +439,6 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
             switch (whichVert) {
                 case 0: case 1: case 10: case 11:
                     pos = corner + centers[2].nDir * w2 * screenScale * (isEnd ? 1 : -1);
-//                    texY += w2 / projScale * (isEnd ? 1 : -1);
                     break;
             }
         }
@@ -594,7 +452,6 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
         if (joinType == WKSVertexLineJoinNone || !intersectValid) {
             // Trivial case, just use the corner
             outVert.position = float4(pos, 0, 1);
-//            outVert.texCoord = -wideVec.texOffset + float2(texX, texY * texScale);
             return outVert;
         }
 
@@ -605,16 +462,9 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
         const float2 realOtherEdge = -interSgn * w2 * screenScale;
         const float2 otherCorner = offsetCenter + centers[2].norm * realOtherEdge;
 
-        // Miter is mostly handled above by using the intersect points instead of corners.
-        if (joinType == WKSVertexLineJoinMiter ||
-            joinType == WKSVertexLineJoinMiterSimple) {
-            // Add the difference between the intersection point and the original corner,
-            // accounting for the textures being based on un-projected coordinates.
-//            texY += dot((interPt - corner) / screenScale, centers[2].nDir) / projScale;
-        }
         // For a bevel, use the intersect point for the inside of the turn, but not the outside.
         // Round piggypacks on bevel.
-        else if (joinType == WKSVertexLineJoinBevel || joinType == WKSVertexLineJoinRound) {
+        if (joinType == WKSVertexLineJoinBevel || joinType == WKSVertexLineJoinRound) {
             switch (whichVert) {
                 // Start cap, 0-3-1, 0-2-3
                 case 2: case 10:
@@ -631,8 +481,6 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
                     const float2 c = offsetCenter + centers[2].norm * realEdge * turnSgn;
                     const float2 e = turnSgn * interSgn * w2 * screenScale;
                     pos = (offsetCenter + c + norm * e) / 2;
-                    // We're placing the vertex on the "wrong" side, so fix the texture X.
-                    texX *= turnSgn;
                     break;
                 }
             }
@@ -703,20 +551,11 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
                     pos = isInsideEdge ? interPt : corner;
                     break;
             }
-
-            // Fix texture X-coords for vertices that were placed opposite the usual even/odd side.
-            // todo: fix texture Y-coords around the join.  Might have to pre-compute for that.
-            switch (whichVert) {
-                case 1: case 9: texX = -texX;   // fall through
-                case 0: case 2: case 3: case 8: case 10: case 11: texX *= -turnSgn;
-            }
         }
     }
 
     if (!discardTri) {
         outVert.position = float4(pos, 0, 1);
-        // Opposite values because we're showing back faces.
-//        outVert.texCoord = -wideVec.texOffset + float2(texX, texY * texScale);
     }
 
     return outVert;
