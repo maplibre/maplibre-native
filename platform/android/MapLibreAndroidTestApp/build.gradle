@@ -94,32 +94,32 @@ android {
 
 dependencies {
     implementation project(':MapLibreAndroid')
-    implementation dependenciesList.mapboxJavaTurf
+    implementation libs.maplibreJavaTurf
 
-    implementation dependenciesList.supportAppcompatV7
-    implementation dependenciesList.supportRecyclerView
-    implementation dependenciesList.supportDesign
-    implementation dependenciesList.supportConstraintLayout
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0'
+    implementation libs.supportAppcompatV7
+    implementation libs.supportRecyclerView
+    implementation libs.supportDesign
+    implementation libs.supportConstraintLayout
+    implementation libs.kotlinxSerializationJson
 
-    implementation dependenciesList.multidex
+    implementation libs.multidex
 
-    implementation dependenciesList.timber
+    implementation libs.timber
 
-    implementation dependenciesList.okhttp3
+    implementation libs.okhttp3
 
-    debugImplementation dependenciesList.leakCanary
+    debugImplementation libs.leakCanary
 
-    androidTestImplementation dependenciesList.supportAnnotations
-    androidTestImplementation dependenciesList.testRunner
-    androidTestImplementation dependenciesList.testRules
-    androidTestImplementation dependenciesList.testEspressoCore
-    androidTestImplementation dependenciesList.testEspressoIntents
-    androidTestImplementation dependenciesList.testEspressoContrib
-    androidTestImplementation dependenciesList.testUiAutomator
-    androidTestImplementation dependenciesList.appCenter
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test:core-ktx:1.5.0'
+    androidTestImplementation libs.supportAnnotations
+    androidTestImplementation libs.testRunner
+    androidTestImplementation libs.testRules
+    androidTestImplementation libs.testEspressoCore
+    androidTestImplementation libs.testEspressoIntents
+    androidTestImplementation libs.testEspressoContrib
+    androidTestImplementation libs.testUiAutomator
+    androidTestImplementation libs.appCenter
+    androidTestImplementation libs.androidxTestExtJUnit
+    androidTestImplementation libs.androidxTestCoreKtx
 
 }
 

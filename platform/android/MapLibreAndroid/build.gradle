@@ -12,25 +12,25 @@ apply from: "${rootDir}/gradle/native-build.gradle"
 
 dependencies {
     lintChecks project(":MapLibreAndroidLint")
-    api dependenciesList.mapboxJavaGeoJSON
-    api dependenciesList.mapboxAndroidGestures
+    api libs.maplibreJavaGeoJSON
+    api libs.mapboxAndroidGestures
 
-    implementation dependenciesList.mapboxJavaTurf
-    implementation dependenciesList.supportAnnotations
-    implementation dependenciesList.supportFragmentV4
-    implementation dependenciesList.okhttp3
-    implementation dependenciesList.timber
-    implementation dependenciesList.interpolator
+    implementation libs.maplibreJavaTurf
+    implementation libs.supportAnnotations
+    implementation libs.supportFragmentV4
+    implementation libs.okhttp3
+    implementation libs.timber
+    implementation libs.interpolator
 
-    testImplementation dependenciesList.junit
-    testImplementation dependenciesList.mockito
-    testImplementation dependenciesList.mockk
-    testImplementation dependenciesList.robolectric
-    testImplementation dependenciesList.commonsIO
-    testImplementation dependenciesList.assertjcore
+    testImplementation libs.junit
+    testImplementation libs.mockito
+    testImplementation libs.mockk
+    testImplementation libs.robolectric
+    testImplementation libs.commonsIO
+    testImplementation libs.assertjcore
 
-    androidTestImplementation dependenciesList.testRunner
-    androidTestImplementation dependenciesList.testRules
+    androidTestImplementation libs.testRunner
+    androidTestImplementation libs.testRules
 }
 
 tasks.withType(DokkaTask.class) {

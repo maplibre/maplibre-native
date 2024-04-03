@@ -8,9 +8,9 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.4'
-        classpath dependenciesList.licensesPlugin
+        classpath libs.licensesPlugin
         // classpath dependenciesList.jacocoPlugin
-        classpath dependenciesList.gradleNexus
+        classpath libs.gradleNexus
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.21"
     }
 }
