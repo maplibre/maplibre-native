@@ -76,8 +76,6 @@ void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
                                                        unevaluated.evaluate(parameters, previousProperties->evaluated));
     auto& evaluated = properties->evaluated;
 
-    // const auto y = unevaluated.getGPUExpressions(parameters.now);
-
     if (unevaluated.get<style::FillOutlineColor>().isUndefined()) {
         evaluated.get<style::FillOutlineColor>() = evaluated.get<style::FillColor>();
     }

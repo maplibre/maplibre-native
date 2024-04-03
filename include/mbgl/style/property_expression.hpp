@@ -8,95 +8,19 @@
 #include <mbgl/util/bitmask_operations.hpp>
 #include <mbgl/util/range.hpp>
 
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/gpu_expression.hpp>
+#endif // MLN_DRAWABLE_RENDERER
+
 #include <optional>
 
 namespace mbgl {
-namespace style {
-
-enum class GPUInterpType : std::uint16_t {
-    Step,
-    Linear,
-    Exponential,
-    Bezier
-};
-enum class GPUOutputType : std::uint16_t {
-    Float,
-    Color,
-};
-enum class GPUOptions : std::uint16_t {
-    None = 0,
-    IntegerZoom = 1 << 0,
-    Transitioning = 1 << 1,
-};
-
-struct GPUExpression;
+namespace gfx {
+class GPUExpression;
 using UniqueGPUExpression = std::unique_ptr<const GPUExpression>;
-using MutableUniqueGPUExpression = std::unique_ptr<GPUExpression>;
+} // namespace gfx
 
-struct alignas(16) GPUExpression {
-    static constexpr std::size_t maxStops = 16;
-
-    GPUExpression() = delete;
-    GPUExpression(GPUExpression&&) = default;
-    GPUExpression(const GPUExpression&) = default;
-    GPUExpression(const GPUExpression* ptr)
-        : GPUExpression(ptr ? *ptr : empty) {}
-    GPUExpression& operator=(GPUExpression&&) = delete;
-    GPUExpression& operator=(const GPUExpression&) = delete;
-
-    /* 0 */ const GPUOutputType outputType;
-    /* 2 */ const std::uint16_t stopCount;
-    /* 4 */ GPUOptions options;
-    /* 6 */ GPUInterpType interpolation;
-
-    /* 8 */ union InterpOptions {
-        struct Exponential {
-            float base;
-        } exponential;
-
-        struct Bezier {
-            float x1;
-            float y1;
-            float x2;
-            float y2;
-        } bezier;
-    } interpOptions;
-
-    /* 24 */ float inputs[maxStops];
-
-    /* 24 + (4 * maxStops) = 88 */ union Stops {
-        float floats[maxStops];
-        float colors[2 * maxStops];
-    } stops;
-
-    static MutableUniqueGPUExpression create(GPUOutputType, std::uint16_t stopCount);
-
-    float evaluateFloat(const float zoom) const;
-    Color evaluateColor(const float zoom) const;
-
-    template <typename T>
-    auto evaluate(const float zoom) const;
-
-    Color getColor(std::size_t index) const;
-
-    static const GPUExpression empty;
-
-private:
-    GPUExpression(GPUOutputType type, uint16_t count)
-        : outputType(type),
-          stopCount(count) {}
-};
-static_assert(sizeof(GPUExpression) == 32 + (4 + 8) * GPUExpression::maxStops);
-static_assert(sizeof(GPUExpression) % 16 == 0);
-
-template <>
-inline auto GPUExpression::evaluate<Color>(const float zoom) const {
-    return evaluateColor(zoom);
-}
-template <>
-inline auto GPUExpression::evaluate<float>(const float zoom) const {
-    return evaluateFloat(zoom);
-}
+namespace style {
 
 class PropertyExpressionBase {
 public:
@@ -129,7 +53,7 @@ public:
     std::shared_ptr<const Expression> getSharedExpression() const noexcept;
 
     /// Build a cached GPU representation of the expression, with the same lifetime as this object.
-    const GPUExpression* getGPUExpression(bool intZoom);
+    const gfx::GPUExpression* getGPUExpression(bool intZoom);
 
     Dependency getDependencies() const noexcept { return expression ? expression->dependencies : Dependency::None; }
 
@@ -137,7 +61,9 @@ public:
 
 protected:
     std::shared_ptr<const Expression> expression;
-    UniqueGPUExpression gpuExpression;
+#if MLN_DRAWABLE_RENDERER
+    gfx::UniqueGPUExpression gpuExpression;
+#endif // MLN_DRAWABLE_RENDERER
 
     ZoomCurvePtr zoomCurve;
 

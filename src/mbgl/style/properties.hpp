@@ -338,7 +338,7 @@ public:
             return result;
         }
 
-        using GPUExpressions = std::array<const GPUExpression*, UnevaluatedTypes::TypeCount>;
+        using GPUExpressions = std::array<const gfx::GPUExpression*, UnevaluatedTypes::TypeCount>;
 
         /// Get the GPU expressions, if applicable, for each item in the tuple.
         /// Expression lifetimes match this object.
@@ -362,23 +362,23 @@ public:
         // gather GPU expression representation for each type that can appear in this tuple
 
         template <class P>
-        const GPUExpression* getGPUExpression(TimePoint now) {
+        const gfx::GPUExpression* getGPUExpression(TimePoint now) {
             return getGPUExpression(this->template get<P>(), now, P::EvaluatorType::useIntegerZoom);
         }
 
         template <class P>
-        static const GPUExpression* getGPUExpression(PropertyValue<P>& val, bool transitioning, bool intZoom) {
+        static const gfx::GPUExpression* getGPUExpression(PropertyValue<P>& val, bool transitioning, bool intZoom) {
             return (!transitioning && val.isExpression()) ? val.asExpression().getGPUExpression(intZoom) : nullptr;
         }
 
-        static const GPUExpression* getGPUExpression(const style::ColorRampPropertyValue&,
-                                                     bool /*transitioning*/,
-                                                     bool /*intZoom*/) {
+        static const gfx::GPUExpression* getGPUExpression(const style::ColorRampPropertyValue&,
+                                                          bool /*transitioning*/,
+                                                          bool /*intZoom*/) {
             return nullptr;
         }
 
         template <class P>
-        static const GPUExpression* getGPUExpression(Transitioning<P>& val, TimePoint now, bool intZoom) {
+        static const gfx::GPUExpression* getGPUExpression(Transitioning<P>& val, TimePoint now, bool intZoom) {
             return getGPUExpression(val.getValue(), val.isTransitioning(now), intZoom);
         }
     };

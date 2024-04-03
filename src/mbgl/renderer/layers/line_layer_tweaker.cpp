@@ -40,7 +40,7 @@ std::optional<Result> LineLayerTweaker::gpuEvaluate(const LinePaintProperties::P
                                                     const PaintParameters& parameters,
                                                     const std::size_t index) const {
     if (const auto& gpu = gpuExpressions[index]) {
-        const float effectiveZoom = (gpu->options & GPUOptions::IntegerZoom)
+        const float effectiveZoom = (gpu->options & gfx::GPUOptions::IntegerZoom)
                                         ? parameters.state.getIntegerZoom()
                                         : static_cast<float>(parameters.state.getZoom());
         return gpu->template evaluate<Result>(effectiveZoom);

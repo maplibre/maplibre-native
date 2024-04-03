@@ -77,8 +77,6 @@ void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters)
         unevaluated.evaluate(parameters, previousProperties->evaluated));
     const auto& evaluated = properties->evaluated;
 
-    // const auto y = unevaluated.getGPUExpressions(parameters.now);
-
     passes = ((evaluated.get<style::CircleRadius>().constantOr(1) > 0 ||
                evaluated.get<style::CircleStrokeWidth>().constantOr(1) > 0) &&
               (evaluated.get<style::CircleColor>().constantOr(Color::black()).a > 0 ||

@@ -4,6 +4,10 @@
 #include <mbgl/style/property_expression.hpp>
 #include <mbgl/util/bitmask_operations.hpp>
 
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/gpu_expression.hpp>
+#endif // MLN_DRAWABLE_RENDERER
+
 namespace mbgl {
 namespace shaders {
 
@@ -62,13 +66,13 @@ struct alignas(16) LineInterpolationUBO {
 static_assert(sizeof(LineInterpolationUBO) % 16 == 0);
 
 struct alignas(16) LineExpressionUBO {
-    style::GPUExpression color;
-    style::GPUExpression blur;
-    style::GPUExpression opacity;
-    style::GPUExpression gapwidth;
-    style::GPUExpression offset;
-    style::GPUExpression width;
-    style::GPUExpression floorWidth;
+    gfx::GPUExpression color;
+    gfx::GPUExpression blur;
+    gfx::GPUExpression opacity;
+    gfx::GPUExpression gapwidth;
+    gfx::GPUExpression offset;
+    gfx::GPUExpression width;
+    gfx::GPUExpression floorWidth;
 };
 static_assert(sizeof(LineExpressionUBO) % 16 == 0);
 
