@@ -47,7 +47,7 @@ static_assert(sizeof(VertexTriWideVecB) == 32);
 
 struct VertexTriWideVecInstance {
     std::array<float, 4> center;
-    std::array<float, 4> diff;
+    std::array<float, 4> color;
     int32_t prev;
     int32_t next;
     int64_t pad_;

@@ -106,7 +106,6 @@ void DrawableBuilder::Impl::addWideVectorPolylineLocal(gfx::DrawableBuilder& /*b
     for (const auto& coord : coordinates) {
         VertexTriWideVecInstance data;
         data.center = {static_cast<float>(coord.x), static_cast<float>(coord.y), 0};
-        data.diff = {0};
 
         if (FeatureType::Polygon == options.type) {
             // loop line
@@ -153,12 +152,8 @@ mbgl::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::Draw
         Point<double> pSource{merc.x * mbgl::util::EXTENT, merc.y * mbgl::util::EXTENT};
         pSource.x -= pCenter.x;
         pSource.y -= pCenter.y;
-        Point<float> pValue{static_cast<float>(pSource.x), static_cast<float>(pSource.y)};
-        Point<float> pDiff{static_cast<float>(pSource.x - pValue.x), static_cast<float>(pSource.y - pValue.y)};
-
         VertexTriWideVecInstance data;
-        data.center = {pValue.x, pValue.y, 0};
-        data.diff = {pDiff.x, pDiff.y, 0};
+        data.center = {static_cast<float>(pSource.x), static_cast<float>(pSource.y), 0};
 
         if (FeatureType::Polygon == options.type) {
             // loop line
@@ -260,7 +255,7 @@ void DrawableBuilder::Impl::setupForWideVectors(gfx::Context& context, gfx::Draw
         }
         if (const auto& attr = instanceAttributes->set(idWideVectorInstanceColor)) {
             attr->setSharedRawData(sharedInstanceData,
-                                   offsetof(VertexTriWideVecInstance, diff),
+                                   offsetof(VertexTriWideVecInstance, color),
                                    /*vertexOffset=*/0,
                                    sizeof(VertexTriWideVecInstance),
                                    gfx::AttributeDataType::Float4);

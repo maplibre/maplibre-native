@@ -90,8 +90,8 @@ typedef struct
 {
     // Center of the point on the line
     simd::float3 center;
-    // Center precision diff
-    simd::float3 diff;
+    // Color
+    simd::float4 color;
     // Used to track loops and such
     int prev,next; // set to -1 for non-loops
 } VertexTriWideVecInstance;
