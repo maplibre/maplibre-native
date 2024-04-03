@@ -22,7 +22,9 @@ layout (location = 4) in float a_fade_opacity;
 // [ text-size(lowerZoomStop, feature),
 //   text-size(upperZoomStop, feature) ]
 
-layout (std140) uniform SymbolDrawableUBO {
+uniform highp int u_ubo_index;
+
+struct SymbolDrawableUBO {
     highp mat4 u_matrix;
     highp mat4 u_label_plane_matrix;
     highp mat4 u_coord_matrix;
@@ -35,6 +37,10 @@ layout (std140) uniform SymbolDrawableUBO {
     highp vec2 u_pad1;
 };
 
+layout (std140) uniform SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawableUBO[60];
+};
+
 layout (std140) uniform SymbolDynamicUBO {
     highp float u_fade_change;
     highp float u_camera_to_center_distance;
@@ -42,7 +48,7 @@ layout (std140) uniform SymbolDynamicUBO {
     highp float pad0;
 };
 
-layout (std140) uniform SymbolDrawablePaintUBO {
+layout (std140) uniform SymbolPaintUBO {
     highp vec4 u_fill_color;
     highp vec4 u_halo_color;
     highp float u_opacity;
@@ -51,7 +57,7 @@ layout (std140) uniform SymbolDrawablePaintUBO {
     highp float u_padding;
 };
 
-layout (std140) uniform SymbolDrawableTilePropsUBO {
+layout (std140) uniform SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;
     bool u_pitch_with_map;
@@ -62,7 +68,7 @@ layout (std140) uniform SymbolDrawableTilePropsUBO {
     bool u_pad3;
 };
 
-layout (std140) uniform SymbolDrawableInterpolateUBO {
+layout (std140) uniform SymbolInterpolateUBO {
     highp float u_fill_color_t;
     highp float u_halo_color_t;
     highp float u_opacity_t;
@@ -122,6 +128,12 @@ halo_blur = unpack_mix_vec2(a_halo_blur, u_halo_blur_t);
 lowp float halo_blur = u_halo_blur;
 #endif
 
+    highp mat4 u_matrix = drawableUBO[u_ubo_index].u_matrix;
+    highp mat4 u_label_plane_matrix = drawableUBO[u_ubo_index].u_label_plane_matrix;
+    highp mat4 u_coord_matrix = drawableUBO[u_ubo_index].u_coord_matrix;
+    highp vec2 u_texsize = drawableUBO[u_ubo_index].u_texsize;
+    bool u_rotate_symbol = drawableUBO[u_ubo_index].u_rotate_symbol;
+    
     vec2 a_pos = a_pos_offset.xy;
     vec2 a_offset = a_pos_offset.zw;
 
@@ -193,7 +205,9 @@ lowp float halo_blur = u_halo_blur;
 )";
     static constexpr const char* fragment = R"(#define SDF_PX 8.0
 
-layout (std140) uniform SymbolDrawableUBO {
+uniform highp int u_ubo_index;
+
+struct SymbolDrawableUBO {
     highp mat4 u_matrix;
     highp mat4 u_label_plane_matrix;
     highp mat4 u_coord_matrix;
@@ -206,6 +220,10 @@ layout (std140) uniform SymbolDrawableUBO {
     highp vec2 u_pad1;
 };
 
+layout (std140) uniform SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawableUBO[60];
+};
+
 layout (std140) uniform SymbolDynamicUBO {
     highp float u_fade_change;
     highp float u_camera_to_center_distance;
@@ -213,7 +231,7 @@ layout (std140) uniform SymbolDynamicUBO {
     highp float pad0;
 };
 
-layout (std140) uniform SymbolDrawablePaintUBO {
+layout (std140) uniform SymbolPaintUBO {
     highp vec4 u_fill_color;
     highp vec4 u_halo_color;
     highp float u_opacity;
@@ -222,7 +240,7 @@ layout (std140) uniform SymbolDrawablePaintUBO {
     highp float u_padding;
 };
 
-layout (std140) uniform SymbolDrawableTilePropsUBO {
+layout (std140) uniform SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;
     bool u_pitch_with_map;
@@ -233,7 +251,7 @@ layout (std140) uniform SymbolDrawableTilePropsUBO {
     bool u_pad3;
 };
 
-layout (std140) uniform SymbolDrawableInterpolateUBO {
+layout (std140) uniform SymbolInterpolateUBO {
     highp float u_fill_color_t;
     highp float u_halo_color_t;
     highp float u_opacity_t;
@@ -279,6 +297,8 @@ lowp float halo_width = u_halo_width;
     #ifdef HAS_UNIFORM_u_halo_blur
 lowp float halo_blur = u_halo_blur;
 #endif
+
+    highp float u_gamma_scale = drawableUBO[u_ubo_index].u_gamma_scale;
 
     float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
 

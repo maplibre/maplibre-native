@@ -162,6 +162,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     
     parameters.computePass->computeDrawableBuffer(computeUBOVector, computeBuffer, drawableBuffer);
     
+    if (layerGroup.getDrawableCount() > 60 ) {
+        assert(false);
+    }
+    
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idSymbolDrawableUBO, drawableBuffer);
     layerUniforms.set(idSymbolDynamicUBO, dynamicBuffer);

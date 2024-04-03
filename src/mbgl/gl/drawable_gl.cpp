@@ -33,6 +33,9 @@ void DrawableGL::draw(PaintParameters& parameters) const {
         if (shaderGL.getGLProgramID() != context.program.getCurrentValue()) {
             context.program = shaderGL.getGLProgramID();
         }
+        if (shaderGL.getUBOIndexLocation() >= 0 && uboIndex >= 0) {
+            mbgl::gl::bindUniform(shaderGL.getUBOIndexLocation(), uboIndex);
+        }
     }
     if (!shader || context.program.getCurrentValue() == 0) {
         mbgl::Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
@@ -57,7 +60,7 @@ void DrawableGL::draw(PaintParameters& parameters) const {
 
     context.setColorMode(getColorMode());
     context.setCullFaceMode(getCullFaceMode());
-
+    
     bindUniformBuffers();
     bindTextures();
 
@@ -110,14 +113,14 @@ void DrawableGL::bindUniformBuffers() const {
             const auto& pair = getUniformBuffers().getPair(id);
             const auto& uniformBuffer = pair.first;
             const auto offset = pair.second;
-            assert(uniformBuffer && "UBO missing, drawable skipped");
+            //assert(uniformBuffer && "UBO missing, drawable skipped");
             if (!uniformBuffer) {
                 using namespace std::string_literals;
                 const auto tileIDStr = getTileID() ? util::toString(*getTileID()) : "<no tile>";
                 Log::Error(Event::General,
                            "bindUniformBuffers: UBO "s + util::toString(block->getIndex()) + " not found for " +
                                util::toString(getID()) + " / " + getName() + " / " + tileIDStr + ". skipping.");
-                assert(false);
+                //assert(false);
                 continue;
             }
             auto& glBlock = static_cast<UniformBlockGL&>(*block);

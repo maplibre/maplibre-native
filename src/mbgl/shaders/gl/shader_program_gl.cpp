@@ -90,19 +90,22 @@ ShaderProgramGL::ShaderProgramGL(UniqueProgram&& glProgram_)
 ShaderProgramGL::ShaderProgramGL(UniqueProgram&& program,
                                  UniformBlockArrayGL&& uniformBlocks_,
                                  VertexAttributeArrayGL&& attributes_,
-                                 SamplerLocationArray&& samplerLocations_)
+                                 SamplerLocationArray&& samplerLocations_,
+                                 UniformLocation uboIndexLocation_)
     : ShaderProgramBase(),
       glProgram(std::move(program)),
       uniformBlocks(std::move(uniformBlocks_)),
       vertexAttributes(std::move(attributes_)),
-      samplerLocations(std::move(samplerLocations_)) {}
+      samplerLocations(std::move(samplerLocations_)),
+      uboIndexLocation(uboIndexLocation_) {}
 
 ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
     : ShaderProgramBase(std::forward<ShaderProgramBase&&>(other)),
       glProgram(std::move(other.glProgram)),
       uniformBlocks(std::move(other.uniformBlocks)),
       vertexAttributes(std::move(other.vertexAttributes)),
-      samplerLocations(std::move(other.samplerLocations)) {}
+      samplerLocations(std::move(other.samplerLocations)),
+      uboIndexLocation(other.uboIndexLocation){}
 
 std::optional<size_t> ShaderProgramGL::getSamplerLocation(const size_t id) const {
     return (id < samplerLocations.size()) ? samplerLocations[id] : std::nullopt;
@@ -174,9 +177,11 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         assert(attributesInfo[location].name == std::string_view(name.data()));
         addAttr(attrs, attributesInfo[location].id, location, length, size, glType);
     }
+        
+    auto uboIndexLocation = MBGL_CHECK_ERROR(glGetUniformLocation(program, "u_ubo_index"));
 
     return std::make_shared<ShaderProgramGL>(
-        std::move(program), std::move(uniformBlocks), std::move(attrs), std::move(samplerLocations));
+        std::move(program), std::move(uniformBlocks), std::move(attrs), std::move(samplerLocations), uboIndexLocation);
 }
 
 } // namespace gl

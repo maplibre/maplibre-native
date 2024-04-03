@@ -387,11 +387,11 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::SymbolIconShader, gfx::Back
     AttributeInfo{"a_opacity", idSymbolOpacityVertexAttribute},
 };
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::SymbolIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
+    UniformBlockInfo{"SymbolDrawableUBOVector", idSymbolDrawableUBO},
     UniformBlockInfo{"SymbolDynamicUBO", idSymbolDynamicUBO},
-    UniformBlockInfo{"SymbolDrawablePaintUBO", idSymbolDrawablePaintUBO},
-    UniformBlockInfo{"SymbolDrawableTilePropsUBO", idSymbolDrawableTilePropsUBO},
-    UniformBlockInfo{"SymbolDrawableInterpolateUBO", idSymbolDrawableInterpolateUBO},
+    UniformBlockInfo{"SymbolPaintUBO", idSymbolPaintUBO},
+    UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
+    UniformBlockInfo{"SymbolInterpolateUBO", idSymbolInterpolateUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::SymbolIconShader, gfx::Backend::Type::OpenGL>::textures = {
     TextureInfo{"u_texture", idSymbolImageTexture},
@@ -412,11 +412,11 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::SymbolSDFIconShader, gfx::B
 };
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
+        UniformBlockInfo{"SymbolDrawableUBOVector", idSymbolDrawableUBO},
         UniformBlockInfo{"SymbolDynamicUBO", idSymbolDynamicUBO},
-        UniformBlockInfo{"SymbolDrawablePaintUBO", idSymbolDrawablePaintUBO},
-        UniformBlockInfo{"SymbolDrawableTilePropsUBO", idSymbolDrawableTilePropsUBO},
-        UniformBlockInfo{"SymbolDrawableInterpolateUBO", idSymbolDrawableInterpolateUBO},
+        UniformBlockInfo{"SymbolPaintUBO", idSymbolPaintUBO},
+        UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
+        UniformBlockInfo{"SymbolInterpolateUBO", idSymbolInterpolateUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::OpenGL>::textures = {
     TextureInfo{"u_texture", idSymbolImageTexture},
@@ -437,11 +437,11 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::SymbolTextAndIconShader, gf
 };
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
+        UniformBlockInfo{"SymbolDrawableUBOVector", idSymbolDrawableUBO},
         UniformBlockInfo{"SymbolDynamicUBO", idSymbolDynamicUBO},
-        UniformBlockInfo{"SymbolDrawablePaintUBO", idSymbolDrawablePaintUBO},
-        UniformBlockInfo{"SymbolDrawableTilePropsUBO", idSymbolDrawableTilePropsUBO},
-        UniformBlockInfo{"SymbolDrawableInterpolateUBO", idSymbolDrawableInterpolateUBO},
+        UniformBlockInfo{"SymbolPaintUBO", idSymbolPaintUBO},
+        UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
+        UniformBlockInfo{"SymbolInterpolateUBO", idSymbolInterpolateUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::OpenGL>::textures = {
     TextureInfo{"u_texture", idSymbolImageTexture},

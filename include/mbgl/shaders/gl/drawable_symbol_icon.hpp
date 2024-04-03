@@ -14,7 +14,9 @@ layout (location = 2) in vec4 a_pixeloffset;
 layout (location = 3) in vec3 a_projected_pos;
 layout (location = 4) in float a_fade_opacity;
 
-layout (std140) uniform SymbolDrawableUBO {
+uniform highp int u_ubo_index;
+
+struct SymbolDrawableUBO {
     highp mat4 u_matrix;
     highp mat4 u_label_plane_matrix;
     highp mat4 u_coord_matrix;
@@ -27,6 +29,10 @@ layout (std140) uniform SymbolDrawableUBO {
     highp vec2 u_pad1;
 };
 
+layout (std140) uniform SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawableUBO[60];
+};
+
 layout (std140) uniform SymbolDynamicUBO {
     highp float u_fade_change;
     highp float u_camera_to_center_distance;
@@ -34,7 +40,7 @@ layout (std140) uniform SymbolDynamicUBO {
     highp float pad0;
 };
 
-layout (std140) uniform SymbolDrawablePaintUBO {
+layout (std140) uniform SymbolPaintUBO {
     highp vec4 u_fill_color;
     highp vec4 u_halo_color;
     highp float u_opacity;
@@ -43,7 +49,7 @@ layout (std140) uniform SymbolDrawablePaintUBO {
     highp float u_padding;
 };
 
-layout (std140) uniform SymbolDrawableTilePropsUBO {
+layout (std140) uniform SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;
     bool u_pitch_with_map;
@@ -54,7 +60,7 @@ layout (std140) uniform SymbolDrawableTilePropsUBO {
     bool u_pad3;
 };
 
-layout (std140) uniform SymbolDrawableInterpolateUBO {
+layout (std140) uniform SymbolInterpolateUBO {
     highp float u_fill_color_t;
     highp float u_halo_color_t;
     highp float u_opacity_t;
@@ -77,6 +83,12 @@ opacity = unpack_mix_vec2(a_opacity, u_opacity_t);
 #else
 lowp float opacity = u_opacity;
 #endif
+
+    highp mat4 u_matrix = drawableUBO[u_ubo_index].u_matrix;
+    highp mat4 u_label_plane_matrix = drawableUBO[u_ubo_index].u_label_plane_matrix;
+    highp mat4 u_coord_matrix = drawableUBO[u_ubo_index].u_coord_matrix;
+    highp vec2 u_texsize = drawableUBO[u_ubo_index].u_texsize;
+    bool u_rotate_symbol = drawableUBO[u_ubo_index].u_rotate_symbol;
 
     vec2 a_pos = a_pos_offset.xy;
     vec2 a_offset = a_pos_offset.zw;
@@ -140,7 +152,7 @@ lowp float opacity = u_opacity;
 )";
     static constexpr const char* fragment = R"(uniform sampler2D u_texture;
 
-layout (std140) uniform SymbolDrawablePaintUBO {
+layout (std140) uniform SymbolPaintUBO {
     highp vec4 u_fill_color;
     highp vec4 u_halo_color;
     highp float u_opacity;
@@ -149,7 +161,7 @@ layout (std140) uniform SymbolDrawablePaintUBO {
     highp float u_padding;
 };
 
-layout (std140) uniform SymbolDrawableInterpolateUBO {
+layout (std140) uniform SymbolInterpolateUBO {
     highp float u_fill_color_t;
     highp float u_halo_color_t;
     highp float u_opacity_t;

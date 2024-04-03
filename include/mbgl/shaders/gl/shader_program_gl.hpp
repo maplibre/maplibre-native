@@ -3,6 +3,7 @@
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/uniform_block_gl.hpp>
 #include <mbgl/gl/vertex_attribute_gl.hpp>
+#include <mbgl/gl/types.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/shaders/gl/shader_info.hpp>
@@ -23,7 +24,8 @@ public:
     ShaderProgramGL(UniqueProgram&&,
                     UniformBlockArrayGL&& uniformBlocks,
                     VertexAttributeArrayGL&& attributes,
-                    SamplerLocationArray&& samplerLocations);
+                    SamplerLocationArray&& samplerLocations,
+                    UniformLocation uboIndexLocation);
     ShaderProgramGL(ShaderProgramGL&& other);
     ~ShaderProgramGL() noexcept override = default;
 
@@ -47,6 +49,8 @@ public:
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
 
     ProgramID getGLProgramID() const { return glProgram; }
+    
+    UniformLocation getUBOIndexLocation() const { return uboIndexLocation; }
 
 protected:
     gfx::UniformBlockArray& mutableUniformBlocks() override { return uniformBlocks; }
@@ -57,6 +61,7 @@ protected:
     UniformBlockArrayGL uniformBlocks;
     VertexAttributeArrayGL vertexAttributes;
     SamplerLocationArray samplerLocations;
+    UniformLocation uboIndexLocation;
 };
 
 } // namespace gl
