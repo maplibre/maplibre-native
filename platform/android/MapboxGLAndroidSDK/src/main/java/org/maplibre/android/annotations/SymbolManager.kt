@@ -330,7 +330,7 @@ class SymbolManager @UiThread internal constructor(
     /**
      * Size of the additional area added to dimensions determined by [Property.ICON_TEXT_FIT], in clockwise order: top, right, bottom, left.
      */
-    var iconTextFitPadding: Array<Float?>?
+    var iconTextFitPadding: Array<Float>?
         get() = layer.iconTextFitPadding.value
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconTextFitPadding(value)
@@ -407,7 +407,7 @@ class SymbolManager @UiThread internal constructor(
     /**
      * To increase the chance of placing high-priority labels on the map, you can provide an array of [Property.TEXT_ANCHOR] locations: the render will attempt to place the label at each location, in order, before moving onto the next label. Use `text-justify: auto` to choose justification based on anchor position. To apply an offset, use the [PropertyFactory.textRadialOffset] instead of the two-dimensional [PropertyFactory.textOffset].
      */
-    var textVariableAnchor: Array<String?>?
+    var textVariableAnchor: Array<String>?
         get() = layer.textVariableAnchor.value
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textVariableAnchor(value)
@@ -484,7 +484,7 @@ class SymbolManager @UiThread internal constructor(
     /**
      * Distance that the icon's anchor is moved from its original placement. Positive values indicate right and down, while negative values indicate left and up.
      */
-    var iconTranslate: Array<Float?>?
+    var iconTranslate: Array<Float>?
         get() = layer.iconTranslate.value
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.iconTranslate(value)
@@ -508,7 +508,7 @@ class SymbolManager @UiThread internal constructor(
     /**
      * Distance that the text's anchor is moved from its original placement. Positive values indicate right and down, while negative values indicate left and up.
      */
-    var textTranslate: Array<Float?>?
+    var textTranslate: Array<Float>?
         get() = layer.textTranslate.value
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.textTranslate(value)

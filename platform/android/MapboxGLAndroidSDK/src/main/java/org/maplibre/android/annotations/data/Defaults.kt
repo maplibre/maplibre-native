@@ -2,6 +2,7 @@ package org.maplibre.android.annotations.data
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Paint.Cap
 import android.graphics.PointF
 import androidx.annotation.ColorInt
 import com.google.gson.JsonElement
@@ -32,6 +33,8 @@ class Defaults {
             height = FIT_TEXT_HEIGHT,
             padding = FIT_TEXT_PADDING
         )
+        val ICON_KEEP_UPRIGHT: Boolean = false
+        val ICON_PITCH_ALIGNMENT: Alignment? = null
         val ICON_HALO: Halo? = null
 
         val HALO_BLUR: Float? = null
@@ -49,6 +52,8 @@ class Defaults {
         @ColorInt
         val TEXT_COLOR: Int = Color.BLACK
         val TEXT_HALO: Halo? = null
+        val TEXT_PITCH_ALIGNMENT: Alignment? = null
+        val TEXT_LINE_HEIGHT: Float = 1.2f
 
         val CIRCLE_RADIUS: Float = 5f
         @ColorInt
@@ -56,6 +61,9 @@ class Defaults {
         val CIRCLE_BLUR: Float? = null
         val CIRCLE_OPACITY: Float = 1f
         val CIRCLE_STROKE: Circle.Stroke? = null
+        val CIRCLE_TRANSLATE: Translate? = null
+        val CIRCLE_PITCH_SCALE: Alignment = Alignment.MAP
+        val CIRCLE_PITCH_ALIGNMENT: Alignment = Alignment.VIEWPORT
 
         val CIRCLE_STROKE_COLOR: Int = Color.BLACK
         val CIRCLE_STROKE_OPACITY: Float = 1f
@@ -69,11 +77,16 @@ class Defaults {
         val LINE_OFFSET: Float = 0f
         val LINE_BLUR: Float? = null
         val LINE_PATTERN: Bitmap? = null
+        val LINE_CAP: Cap = Cap.BUTT
+        val LINE_TRANSLATE: Translate? = null
+        val LINE_DASH_ARRAY: List<Float>? = null
 
         val FILL_OPACITY: Float = 1f
         @ColorInt
         val FILL_COLOR: Int = Color.BLACK
         val FILL_OUTLINE_COLOR: Int? = null
         val FILL_PATTERN: Bitmap? = null
+        val FILL_ANTIALIAS: Boolean = true
+        val FILL_TRANSLATE: Translate? = null
     }
 }

@@ -7,6 +7,7 @@ import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.geojson.Polygon
 import org.maplibre.android.annotations.data.Defaults
+import org.maplibre.android.annotations.data.Translate
 import org.maplibre.android.constants.GeometryConstants.MAX_MERCATOR_LATITUDE
 import org.maplibre.android.constants.GeometryConstants.MIN_MERCATOR_LATITUDE
 import org.maplibre.android.geometry.LatLng
@@ -18,7 +19,14 @@ class Fill @JvmOverloads constructor(
     @ColorInt color: Int = Defaults.FILL_COLOR,
     @ColorInt outlineColor: Int? = Defaults.FILL_OUTLINE_COLOR,
     pattern: Bitmap? = Defaults.FILL_PATTERN,
-    // TODO: NDD properties antialias and translate
+    /**
+     * NDD
+     */
+    antialias: Boolean = Defaults.FILL_ANTIALIAS,
+    /**
+     * NDD
+     */
+    translate: Translate? = Defaults.FILL_TRANSLATE
 ) : KAnnotation<Polygon>() {
 
     var paths: List<List<LatLng>> = paths
@@ -46,6 +54,16 @@ class Fill @JvmOverloads constructor(
         set(value) {
             field = value
             updateThis()
+        }
+    var antialias: Boolean = antialias
+        set(value) {
+            field = value
+            updateAll()
+        }
+    var translate: Translate? = translate
+        set(value) {
+            field = value
+            updateAll()
         }
 
     override var clickListener: OnAnnotationClickListener<Fill>? = null

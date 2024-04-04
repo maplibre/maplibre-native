@@ -1,12 +1,14 @@
 package org.maplibre.android.annotations
 
 import android.graphics.Bitmap
+import android.graphics.Paint.Cap
 import androidx.annotation.ColorInt
 import com.mapbox.android.gestures.MoveDistancesObject
 import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.LineString
 import com.mapbox.geojson.Point
 import org.maplibre.android.annotations.data.Defaults
+import org.maplibre.android.annotations.data.Translate
 import org.maplibre.android.constants.GeometryConstants.MAX_MERCATOR_LATITUDE
 import org.maplibre.android.constants.GeometryConstants.MIN_MERCATOR_LATITUDE
 import org.maplibre.android.geometry.LatLng
@@ -22,7 +24,18 @@ class Line @JvmOverloads constructor(
     offset: Float = Defaults.LINE_OFFSET,
     blur: Float? = Defaults.LINE_BLUR,
     pattern: Bitmap? = Defaults.LINE_PATTERN,
-    // TODO: NDD properties cap, translate, dashArray
+    /**
+     * NDD
+     */
+    cap: Cap = Defaults.LINE_CAP,
+    /**
+     * NDD
+     */
+    translate: Translate? = Defaults.LINE_TRANSLATE,
+    /**
+     * NDD
+     */
+    dashArray: List<Float>? = Defaults.LINE_DASH_ARRAY
 ) : KAnnotation<LineString>() {
 
     var path: List<LatLng> = path
@@ -55,16 +68,31 @@ class Line @JvmOverloads constructor(
         }
     var gap: Float? = gap
         set(value) {
+            if (value != null && value <= 0) {
+                throw IllegalArgumentException(
+                    "You tried setting a gap of $gap for a Line object. This means that no line gap is to be used. " +
+                            "Please use `null` to indicate that `gap` is not used."
+                )
+            }
             field = value
             updateThis()
         }
     var offset: Float = offset
         set(value) {
+            if (value > 1f || value < 0f) {
+                throw IllegalArgumentException("Opacity must be between 0 and 1 (inclusive)")
+            }
             field = value
             updateThis()
         }
     var blur: Float? = blur
         set(value) {
+            if (value != null && value <= 0) {
+                throw IllegalArgumentException(
+                    "You tried setting a blur of $blur for a Line object. This means that no blur is to be used. " +
+                            "Please use `null` to indicate that `blur` is not used."
+                )
+            }
             field = value
             updateThis()
         }
@@ -72,6 +100,27 @@ class Line @JvmOverloads constructor(
         set(value) {
             field = value
             updateThis()
+        }
+    var cap: Cap = cap
+        set(value) {
+            field = value
+            updateAll()
+        }
+    var translate: Translate? = translate
+        set(value) {
+            field = value
+            updateAll()
+        }
+    var dashArray: List<Float>? = dashArray
+        set(value) {
+            if (value != null && value.size % 2 != 0) {
+                throw IllegalArgumentException(
+                    "You attempted setting a dash array of the uneven size ${value.size}. Dash arrays " +
+                            "need an even amount of entries."
+                )
+            }
+            field = value
+            updateAll()
         }
 
     override var clickListener: OnAnnotationClickListener<Line>? = null
@@ -130,7 +179,12 @@ class Line @JvmOverloads constructor(
         if (opacity > 1f || opacity < 0f) {
             throw IllegalArgumentException("Opacity must be between 0 and 1 (inclusive)")
         }
-
+        if (dashArray != null && dashArray.size % 2 != 0) {
+            throw IllegalArgumentException(
+                "A dash array of the uneven size ${dashArray.size} has been provided. Dash arrays need an even " +
+                        "amount of entries."
+            )
+        }
     }
 
     enum class Join {

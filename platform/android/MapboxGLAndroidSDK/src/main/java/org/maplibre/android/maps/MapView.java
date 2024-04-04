@@ -26,6 +26,7 @@ import org.maplibre.android.MapLibre;
 import org.maplibre.android.R;
 import org.maplibre.android.WellKnownTileServer;
 import org.maplibre.android.annotations.Annotation;
+import org.maplibre.android.annotations.KAnnotationContainer;
 import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.exceptions.MapLibreConfigurationException;
 import org.maplibre.android.location.LocationComponent;
@@ -169,11 +170,12 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
             annotations, markers, polygons, polylines, shapeAnnotations);
     Transform transform = new Transform(this, nativeMapView, cameraDispatcher);
 
-    // MapboxMap
+    // MapLibreMap
     List<MapLibreMap.OnDeveloperAnimationListener> developerAnimationListeners = new ArrayList<>();
     maplibreMap = new MapLibreMap(nativeMapView, transform, uiSettings, proj, registerTouchListener, cameraDispatcher,
             developerAnimationListeners);
-    maplibreMap.injectAnnotationManager(annotationManager, this);
+    KAnnotationContainer annotationContainer = new KAnnotationContainer(maplibreMap, this, null);
+    maplibreMap.injectAnnotationManager(annotationManager, annotationContainer, this);
 
     // user input
     mapGestureDetector = new MapGestureDetector(context, transform, proj, uiSettings,
