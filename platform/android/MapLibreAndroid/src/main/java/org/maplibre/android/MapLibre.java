@@ -232,6 +232,14 @@ public final class MapLibre {
   }
 
   /**
+   * Set the module provider. Call this as soon as possible.
+   * @param  provider The ModuleProvider instance to set
+   */
+  public static void setModuleProvider(ModuleProvider provider) {
+    moduleProvider = provider;
+  }
+
+  /**
    * Runtime validation of MapLibre creation.
    */
   private static void validateMapbox() {
