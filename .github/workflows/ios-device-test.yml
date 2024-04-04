@@ -42,7 +42,7 @@ jobs:
 
       - name: Check if test files exist (otherwise the parent workflow was skipped)
         id: check_files
-        uses: andstor/file-existence-action@v2.0.0
+        uses: andstor/file-existence-action@v3.0.0
         with:
           files: "${{ matrix.test.xcTestFile }}, ${{ matrix.test.ipaFile }}"
 
