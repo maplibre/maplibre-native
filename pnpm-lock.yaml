@@ -35,8 +35,8 @@ devDependencies:
     specifier: ^2.0.1
     version: 2.0.1
   aws-sdk:
-    specifier: ^2.1318.0
-    version: 2.1318.0
+    specifier: ^2.1552.0
+    version: 2.1552.0
   csscolorparser:
     specifier: ~1.0.2
     version: 1.0.3
@@ -541,8 +541,8 @@ packages:
     resolution: {integrity: sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==}
     engines: {node: '>= 0.4'}
 
-  /aws-sdk@2.1318.0:
-    resolution: {integrity: sha512-xRCKqx4XWXUIpjDCVHmdOSINEVCIC5+yhmgUGR9A6VfxfPs59HbxKyd5LB+CmXhVbwVUM4SRWG5O+agQj+w7Eg==}
+  /aws-sdk@2.1552.0:
+    resolution: {integrity: sha512-sRuzlCeSHXUsdLqsV/E+nPrgBn1EI3BoA38D5qfNMRcPTd9j4G8M4AyMymKyNxLoWOKLqz7xFBa801MHflGwEg==}
     engines: {node: '>= 10.0.0'}
     dependencies:
       buffer: 4.9.2
@@ -554,7 +554,7 @@ packages:
       url: 0.10.3
       util: 0.12.4
       uuid: 8.0.0
-      xml2js: 0.4.19
+      xml2js: 0.6.2
     dev: true
 
   /aws-sign2@0.7.0:
@@ -2609,21 +2609,22 @@ packages:
       uuid: 7.0.3
     dev: true
 
-  /xml2js@0.4.19:
-    resolution: {integrity: sha512-esZnJZJOiJR9wWKMyuvSE1y6Dq5LCuJanqhxslH2bxM6duahNZ+HMpCLhBQGZkbX6xRf8x1Y2eJlgt2q3qo49Q==}
+  /xml2js@0.6.2:
+    resolution: {integrity: sha512-T4rieHaC1EXcES0Kxxj4JWgaUQHDk+qwHcYOCFHfiwKz7tOVPLq7Hjq9dM1WCMhylqMEfP7hMcOIChvotiZegA==}
+    engines: {node: '>=4.0.0'}
     dependencies:
       sax: 1.2.4
-      xmlbuilder: 9.0.7
+      xmlbuilder: 11.0.1
+    dev: true
+
+  /xmlbuilder@11.0.1:
+    resolution: {integrity: sha512-fDlsI/kFEx7gLvbecc0/ohLG50fugQp8ryHzMTuW9vSa1GJ0XYWKnhsUx7oie3G98+r56aTQIUB4kht42R3JvA==}
+    engines: {node: '>=4.0'}
     dev: true
 
   /xmlbuilder@15.1.1:
     resolution: {integrity: sha512-yMqGBqtXyeN1e3TGYvgNgDVZ3j84W4cwkOXQswghol6APgZWaff9lnbvN7MHYJOiXsvGPXtjTYJEiC9J2wv9Eg==}
     engines: {node: '>=8.0'}
-    dev: true
-
-  /xmlbuilder@9.0.7:
-    resolution: {integrity: sha512-7YXTQc3P2l9+0rjaUbLwMKRhtmwg1M1eDf6nag7urC7pIPYLD9W/jmzQ4ptRSUbodw5S0jfoGTflLemQibSpeQ==}
-    engines: {node: '>=4.0'}
     dev: true
 
   /yallist@2.1.2:
