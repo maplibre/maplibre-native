@@ -96,28 +96,31 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::Context& context, gfx::Drawab
 
 #pragma mark Wide Vector Polylines
 
+namespace {
+inline void genInstanceLinks(int32_t& outPrev, int32_t& outNext, const int base, const int coord_size, const int index, bool loop) {
+    if (loop) {
+        // loop line
+        outPrev = base + (index - 1 + coord_size) % coord_size;
+        outNext = base + (index + 1) % coord_size;
+    } else {
+        // line string
+        outPrev = (0 == index) ? -1 : base + index - 1;
+        outNext = (index + 1 >= coord_size) ? -1 : base + index + 1;
+    }
+}
+} // namespace
+
 void DrawableBuilder::Impl::addWideVectorPolylineLocal(gfx::DrawableBuilder& /*builder*/,
                                                        const GeometryCoordinates& coordinates,
                                                        const gfx::PolylineGeneratorOptions& options) {
-    // TODO: implement appending to existing polyline
     // add instance data
-    int index = 0;
+    const int base = static_cast<int>(wideVectorInstanceData.elements());
     const int coord_size = static_cast<int>(coordinates.size());
+    int index = 0;
     for (const auto& coord : coordinates) {
         VertexTriWideVecInstance data;
         data.center = {static_cast<float>(coord.x), static_cast<float>(coord.y), 0};
-
-        if (FeatureType::Polygon == options.type) {
-            // loop line
-            data.prev = (index - 1 + coord_size) % coord_size;
-            data.next = (index + 1) % coord_size;
-        } else {
-            // line string
-            assert(FeatureType::LineString == options.type);
-            data.prev = index - 1;
-            data.next = index + 1 >= coord_size ? -1 : index + 1;
-        }
-
+        genInstanceLinks(data.prev, data.next, base, coord_size, index, FeatureType::Polygon == options.type);
         wideVectorInstanceData.emplace_back(data);
         ++index;
     }
@@ -126,8 +129,6 @@ void DrawableBuilder::Impl::addWideVectorPolylineLocal(gfx::DrawableBuilder& /*b
 mbgl::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::DrawableBuilder& /*builder*/,
                                                                        const LineString<double>& coordinates,
                                                                        const gfx::PolylineGeneratorOptions& options) {
-    // TODO: implement appending to existing polyline
-
     constexpr int32_t zoom = 0;
 
     // get center
@@ -145,8 +146,9 @@ mbgl::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::Draw
     Point<double> pCenter{(minPoint.x + maxPoint.x) / 2.0, (minPoint.y + maxPoint.y) / 2.0};
 
     // add centerline instance data
-    int index = 0;
+    const int base = static_cast<int>(wideVectorInstanceData.elements());
     const int coord_size = static_cast<int>(coordinates.size());
+    int index = 0;
     for (const auto& coord : coordinates) {
         auto merc = Projection::project(LatLng(coord.y, coord.x), zoom);
         Point<double> pSource{merc.x * mbgl::util::EXTENT, merc.y * mbgl::util::EXTENT};
@@ -154,18 +156,7 @@ mbgl::Point<double> DrawableBuilder::Impl::addWideVectorPolylineGlobal(gfx::Draw
         pSource.y -= pCenter.y;
         VertexTriWideVecInstance data;
         data.center = {static_cast<float>(pSource.x), static_cast<float>(pSource.y), 0};
-
-        if (FeatureType::Polygon == options.type) {
-            // loop line
-            data.prev = (index - 1 + coord_size) % coord_size;
-            data.next = (index + 1) % coord_size;
-        } else {
-            // line string
-            assert(FeatureType::LineString == options.type);
-            data.prev = index - 1;
-            data.next = index + 1 >= coord_size ? -1 : index + 1;
-        }
-
+        genInstanceLinks(data.prev, data.next, base, coord_size, index, FeatureType::Polygon == options.type);
         wideVectorInstanceData.emplace_back(data);
         ++index;
     }

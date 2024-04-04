@@ -129,6 +129,15 @@ public:
                 
                 // add polyline
                 interface.addPolyline(polyline);
+                
+                // add clone
+                for(auto &p : polyline) {
+                    p.y += 0.05f * extent / numLines;
+                }
+                interface.addPolyline(polyline);
+                for(auto &p : polyline) {
+                    p.y -= 0.05f * extent / numLines;
+                }
             }
         }
         

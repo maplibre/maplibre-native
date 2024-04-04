@@ -377,9 +377,6 @@ bool CustomDrawableLayerHost::Interface::addPolyline(const LineString<double>& c
             setTileID({0, 0, 0});
 
             builder->addWideVectorPolylineGlobal(coordinates, lineOptions.geometry);
-
-            // flush current builder drawable
-            builder->flush(context);
         } break;
     }
 
@@ -400,9 +397,6 @@ bool CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
                 return false;
 
             builder->addWideVectorPolylineLocal(coordinates, lineOptions.geometry);
-
-            // flush current builder drawable
-            builder->flush(context);
         } break;
     }
 
@@ -517,12 +511,15 @@ bool CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
 
 void CustomDrawableLayerHost::Interface::finish() {
     if (builder && !builder->empty()) {
-        // finish
+        // flush current builder drawable
+        builder->flush(context);
+        
+        // finish function
         const auto finish_ = [this](gfx::DrawableTweakerPtr tweaker) {
             builder->flush(context);
             for (auto& drawable : builder->clearDrawables()) {
                 assert(tileID.has_value());
-                drawable->setTileID(tileID.value()); // TODO: fix usage of tileID
+                drawable->setTileID(tileID.value());
                 if (tweaker) {
                     drawable->addTweaker(tweaker);
                 }
