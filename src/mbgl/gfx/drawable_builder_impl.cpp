@@ -97,7 +97,8 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::Context& context, gfx::Drawab
 #pragma mark Wide Vector Polylines
 
 namespace {
-inline void genInstanceLinks(int32_t& outPrev, int32_t& outNext, const int base, const int coord_size, const int index, bool loop) {
+inline void genInstanceLinks(
+    int32_t& outPrev, int32_t& outNext, const int base, const int coord_size, const int index, bool loop) {
     if (loop) {
         // loop line
         outPrev = base + (index - 1 + coord_size) % coord_size;

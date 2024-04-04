@@ -513,7 +513,7 @@ void CustomDrawableLayerHost::Interface::finish() {
     if (builder && !builder->empty()) {
         // flush current builder drawable
         builder->flush(context);
-        
+
         // finish function
         const auto finish_ = [this](gfx::DrawableTweakerPtr tweaker) {
             builder->flush(context);
