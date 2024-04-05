@@ -2,7 +2,7 @@ package org.maplibre.android.location
 
 import android.graphics.Bitmap
 import com.google.gson.JsonElement
-import com.mapbox.geojson.Feature
+import org.maplibre.geojson.Feature
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.location.MapLibreAnimator.AnimationsValueChangeListener
 import org.maplibre.android.location.modes.RenderMode

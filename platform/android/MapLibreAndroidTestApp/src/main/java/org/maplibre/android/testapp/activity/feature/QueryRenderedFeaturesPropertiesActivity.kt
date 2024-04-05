@@ -8,7 +8,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.geojson.Feature
+import org.maplibre.geojson.Feature
 import org.maplibre.android.annotations.BaseMarkerOptions
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.maps.MapView

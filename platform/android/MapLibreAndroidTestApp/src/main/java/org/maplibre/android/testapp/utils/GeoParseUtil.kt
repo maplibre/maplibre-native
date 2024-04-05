@@ -2,8 +2,8 @@ package org.maplibre.android.testapp.utils
 
 import android.content.Context
 import android.text.TextUtils
-import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.Point
+import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.Point
 import org.maplibre.android.geometry.LatLng
 import java.io.BufferedReader
 import java.io.IOException

@@ -3,8 +3,8 @@ package org.maplibre.android.testapp.camera;
 import androidx.annotation.NonNull;
 import androidx.test.annotation.UiThreadTest;
 
-import com.mapbox.geojson.Point;
-import com.mapbox.geojson.Polygon;
+import org.maplibre.geojson.Point;
+import org.maplibre.geojson.Polygon;
 import org.maplibre.android.camera.CameraPosition;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.geometry.LatLngBounds;

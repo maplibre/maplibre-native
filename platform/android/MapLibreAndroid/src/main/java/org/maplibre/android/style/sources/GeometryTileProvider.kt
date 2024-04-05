@@ -1,7 +1,7 @@
 package org.maplibre.android.style.sources
 
 import androidx.annotation.WorkerThread
-import com.mapbox.geojson.FeatureCollection
+import org.maplibre.geojson.FeatureCollection
 import org.maplibre.android.geometry.LatLngBounds
 
 /**
