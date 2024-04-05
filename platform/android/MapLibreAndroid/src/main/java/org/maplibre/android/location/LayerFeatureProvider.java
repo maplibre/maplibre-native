@@ -3,8 +3,8 @@ package org.maplibre.android.location;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.Point;
+import org.maplibre.geojson.Feature;
+import org.maplibre.geojson.Point;
 
 class LayerFeatureProvider {
 

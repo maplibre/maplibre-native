@@ -12,8 +12,8 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.Geometry;
+import org.maplibre.geojson.Feature;
+import org.maplibre.geojson.Geometry;
 import org.maplibre.android.LibraryLoader;
 import org.maplibre.android.MapStrictMode;
 import org.maplibre.android.annotations.Icon;

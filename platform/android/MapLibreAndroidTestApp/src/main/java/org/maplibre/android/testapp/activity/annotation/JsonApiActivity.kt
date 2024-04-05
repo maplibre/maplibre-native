@@ -6,8 +6,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
-import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.Point
+import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.Point
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.HttpUrl.Companion.toHttpUrl

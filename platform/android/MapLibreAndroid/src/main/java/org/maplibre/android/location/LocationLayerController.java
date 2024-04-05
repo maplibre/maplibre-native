@@ -6,7 +6,7 @@ import android.graphics.PointF;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.mapbox.geojson.Feature;
+import org.maplibre.geojson.Feature;
 import org.maplibre.android.location.modes.RenderMode;
 import org.maplibre.android.log.Logger;
 import org.maplibre.android.maps.MapLibreMap;

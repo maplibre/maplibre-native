@@ -13,9 +13,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.mapbox.geojson.GeoJson;
-import com.mapbox.geojson.Polygon;
-import com.mapbox.geojson.gson.GeometryGeoJson;
+import org.maplibre.geojson.GeoJson;
+import org.maplibre.geojson.Polygon;
+import org.maplibre.geojson.gson.GeometryGeoJson;
 import org.maplibre.android.style.layers.PropertyFactory;
 import org.maplibre.android.style.layers.PropertyValue;
 

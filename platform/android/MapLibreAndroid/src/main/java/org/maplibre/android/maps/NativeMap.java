@@ -8,8 +8,8 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.Geometry;
+import org.maplibre.geojson.Feature;
+import org.maplibre.geojson.Geometry;
 import org.maplibre.android.annotations.Marker;
 import org.maplibre.android.annotations.Polygon;
 import org.maplibre.android.annotations.Polyline;

@@ -6,12 +6,12 @@ import android.graphics.Color;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner;
 
-import com.mapbox.geojson.LineString;
-import com.mapbox.geojson.MultiLineString;
-import com.mapbox.geojson.MultiPoint;
-import com.mapbox.geojson.MultiPolygon;
-import com.mapbox.geojson.Point;
-import com.mapbox.geojson.Polygon;
+import org.maplibre.geojson.LineString;
+import org.maplibre.geojson.MultiLineString;
+import org.maplibre.geojson.MultiPoint;
+import org.maplibre.geojson.MultiPolygon;
+import org.maplibre.geojson.Point;
+import org.maplibre.geojson.Polygon;
 import org.maplibre.android.maps.BaseLayerTest;
 import org.junit.Before;
 import timber.log.Timber;

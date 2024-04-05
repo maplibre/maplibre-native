@@ -4,7 +4,7 @@ import android.net.Uri
 import androidx.annotation.Keep
 import androidx.annotation.Size
 import androidx.annotation.UiThread
-import com.mapbox.geojson.Feature
+import org.maplibre.geojson.Feature
 import org.maplibre.android.style.expressions.Expression
 import java.net.URL
 import java.util.*

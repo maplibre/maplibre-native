@@ -5,7 +5,7 @@ import android.graphics.PointF;
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
 
-import com.mapbox.geojson.Point;
+import org.maplibre.geojson.Point;
 import org.maplibre.android.constants.GeometryConstants;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.geometry.LatLngBounds;

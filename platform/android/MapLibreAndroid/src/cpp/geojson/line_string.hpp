@@ -16,7 +16,7 @@ namespace geojson {
 class LineString {
 public:
     using SuperTag = Geometry;
-    static constexpr auto Name() { return "com/mapbox/geojson/LineString"; };
+    static constexpr auto Name() { return "org/maplibre/geojson/LineString"; };
     static constexpr auto Type() { return "LineString"; };
 
     static jni::Local<jni::Object<LineString>> New(jni::JNIEnv&, const mbgl::LineString<double>&);
