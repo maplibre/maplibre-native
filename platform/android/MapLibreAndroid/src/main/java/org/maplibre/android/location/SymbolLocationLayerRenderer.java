@@ -46,8 +46,8 @@ import androidx.annotation.Nullable;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.Point;
+import org.maplibre.geojson.Feature;
+import org.maplibre.geojson.Point;
 
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.location.modes.RenderMode;

@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Handler
 import android.os.Looper
-import com.mapbox.geojson.Feature
+import org.maplibre.geojson.Feature
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.style.layers.Property

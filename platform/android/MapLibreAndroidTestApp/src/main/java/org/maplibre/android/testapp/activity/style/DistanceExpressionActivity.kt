@@ -4,7 +4,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.os.PersistableBundle
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.geojson.Point
+import org.maplibre.geojson.Point
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
@@ -17,8 +17,8 @@ import org.maplibre.android.style.layers.PropertyFactory.*
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.databinding.ActivityWithinExpressionBinding
-import com.mapbox.turf.TurfConstants
-import com.mapbox.turf.TurfTransformation
+import org.maplibre.turf.TurfConstants
+import org.maplibre.turf.TurfTransformation
 
 /**
  * An Activity that showcases the within expression to filter features outside a geometry

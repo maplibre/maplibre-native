@@ -2,9 +2,9 @@ package org.maplibre.android.style.sources
 
 import androidx.annotation.Keep
 import androidx.annotation.UiThread
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.Geometry
+import org.maplibre.geojson.Feature
+import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.Geometry
 import org.maplibre.android.style.expressions.Expression
 import java.net.URI
 import java.net.URL

@@ -2,7 +2,7 @@ package org.maplibre.android.location;
 
 import androidx.annotation.NonNull;
 
-import com.mapbox.geojson.Feature;
+import org.maplibre.geojson.Feature;
 
 import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.layers.CircleLayer;

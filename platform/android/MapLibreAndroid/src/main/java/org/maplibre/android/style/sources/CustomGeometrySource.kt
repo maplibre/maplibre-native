@@ -3,8 +3,8 @@ package org.maplibre.android.style.sources
 import androidx.annotation.Keep
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.FeatureCollection
+import org.maplibre.geojson.Feature
+import org.maplibre.geojson.FeatureCollection
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.geometry.LatLngBounds.Companion.from
 import org.maplibre.android.style.expressions.Expression

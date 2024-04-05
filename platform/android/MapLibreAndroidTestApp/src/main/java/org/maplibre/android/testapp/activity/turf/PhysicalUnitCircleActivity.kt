@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.geojson.Point
+import org.maplibre.geojson.Point
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.Style
@@ -14,7 +14,7 @@ import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.PropertyFactory.fillColor
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.databinding.ActivityPhysicalCircleBinding
-import com.mapbox.turf.TurfTransformation
+import org.maplibre.turf.TurfTransformation
 
 /**
  * An Activity that showcases how to create a Circle with radius expressed in physical units using a FillLayer.
