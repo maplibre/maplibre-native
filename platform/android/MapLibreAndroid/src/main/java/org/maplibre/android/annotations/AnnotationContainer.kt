@@ -26,10 +26,10 @@ internal class KAnnotationContainer
     private val draggableAnnotationController: DraggableAnnotationController = DraggableAnnotationController.getInstance(
         mapView, mapLibreMap
     ),
-    private val symbolElementProvider: CoreElementProvider<SymbolLayer> = SymbolElementProvider(),
-    private val lineElementProvider: CoreElementProvider<LineLayer> = LineElementProvider(),
-    private val circleElementProvider: CoreElementProvider<CircleLayer> = CircleElementProvider(),
-    private val fillElementProvider: CoreElementProvider<FillLayer> = FillElementProvider()
+    private val symbolElementProviderGenerator: () -> CoreElementProvider<SymbolLayer> = { SymbolElementProvider() },
+    private val lineElementProviderGenerator: () -> CoreElementProvider<LineLayer> = { LineElementProvider() },
+    private val circleElementProviderGenerator: () -> CoreElementProvider<CircleLayer> = { CircleElementProvider() },
+    private val fillElementProviderGenerator: () -> CoreElementProvider<FillLayer> = { FillElementProvider() }
 ) {
 
     private val annotationList: MutableList<KAnnotation<*>> = mutableListOf()
@@ -37,7 +37,7 @@ internal class KAnnotationContainer
     private val bitmapUsers: MutableMap<Bitmap, MutableSet<KAnnotation<*>>> = mutableMapOf()
 
     @JvmName("setStyle")
-    internal fun setStyle(style: Style) {
+    internal fun setStyle(style: Style?) {
         this.style = style
         updateAll()
     }
@@ -145,7 +145,7 @@ internal class KAnnotationContainer
                     style,
                     belowLayerId = below,
                     draggableAnnotationController = draggableAnnotationController,
-                    coreElementProvider = symbolElementProvider
+                    coreElementProvider = symbolElementProviderGenerator()
                 ).apply {
                     // Non-collision group symbols do not interfere with each other
                     textAllowOverlap = true
@@ -185,7 +185,7 @@ internal class KAnnotationContainer
                     style = style,
                     belowLayerId = below,
                     draggableAnnotationController = draggableAnnotationController,
-                    coreElementProvider = lineElementProvider
+                    coreElementProvider = lineElementProviderGenerator()
                 ).apply {
                     lineCap = when (key.cap) {
                         Cap.BUTT -> Property.LINE_CAP_BUTT
@@ -211,7 +211,7 @@ internal class KAnnotationContainer
                     style = style,
                     belowLayerId = below,
                     draggableAnnotationController = draggableAnnotationController,
-                    coreElementProvider = circleElementProvider
+                    coreElementProvider = circleElementProviderGenerator()
                 ).apply {
                     key.translate?.let { translate ->
                         circleTranslate = arrayOf(translate.offset.x, translate.offset.y)
@@ -237,7 +237,7 @@ internal class KAnnotationContainer
                     style = style,
                     belowLayerId = below,
                     draggableAnnotationController = draggableAnnotationController,
-                    coreElementProvider = fillElementProvider
+                    coreElementProvider = fillElementProviderGenerator()
                 ).apply {
                     fillAntialias = key.antialias
 

@@ -92,10 +92,10 @@ class AnnotationContainerTest {
         mapView,
         style,
         draggableAnnotationController,
-        symbolElementProvider,
-        lineElementProvider,
-        circleElementProvider,
-        fillElementProvider
+        { symbolElementProvider },
+        { lineElementProvider },
+        { circleElementProvider },
+        { fillElementProvider }
     )
 
     @Test
