@@ -139,6 +139,9 @@ cc_library(
         "@platforms//os:ios": [
             "//vendor:icu",
         ],
+        "@platforms//os:osx": [
+            "//vendor:icu",
+        ],
         "//conditions:default": [],
     }) + select({
         ":metal_renderer": [
@@ -239,4 +242,14 @@ js_library(
     deps = [
         ":node_modules/ejs",
     ],
+)
+
+cc_library(
+    name = "maplibre_lib",
+    srcs = [],
+    visibility = ["//visibility:public"],
+    deps = select({
+        "@platforms//os:macos": ["//platform:macos-objcpp"],
+        "//conditions:default": [],
+    }),
 )

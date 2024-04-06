@@ -16,7 +16,7 @@ To create a new run configuration:
 * Click on Run -> Edit Configurations...
 * Click on the plus sign and then on "Android Tests"
 * Give a name to the configuration, e.g. `TestAppTests`
-* Choose the `MapboxGLAndroidSDKTestApp` module
+* Choose the `MapLibreAndroidTestApp` module
 * Choose `android.support.test.runner.AndroidJUnitRunner` as the instrumentation runner
 * Click OK to save the new configuration
 
@@ -57,14 +57,14 @@ On a terminal, within `mapbox-gl-native/android/java`,
 run the tests (`cC` stands for `connectedCheck`):
 
 ```
-$ ./gradlew -Pmapbox.abis=all cC -p MapboxGLAndroidSDKTestApp
+$ ./gradlew -Pmapbox.abis=all cC -p MapLibreAndroidTestApp
 ```
 
 Then:
 * Go to your AWS Console and choose Device Farm.
-* Create a new project, e.g. `MapboxGLAndroidSDKTestApp`
-* On step 1, upload the APK in `mapbox-gl-native/android/java/MapboxGLAndroidSDKTestApp/build/outputs/apk/MapboxGLAndroidSDKTestApp-debug-unaligned.apk`
-* On step 2, choose Instrumentation, test filter is `org.maplibre.android.testapp.MainActivityTest` and upload the APK in `mapbox-gl-native/android/java/MapboxGLAndroidSDKTestApp/build/outputs/apk/MapboxGLAndroidSDKTestApp-debug-androidTest-unaligned.apk`
+* Create a new project, e.g. `MapLibreAndroidTestApp`
+* On step 1, upload the APK in `mapbox-gl-native/android/java/MapLibreAndroidTestApp/build/outputs/apk/MapLibreAndroidTestApp-debug-unaligned.apk`
+* On step 2, choose Instrumentation, test filter is `org.maplibre.android.testapp.MainActivityTest` and upload the APK in `mapbox-gl-native/android/java/MapLibreAndroidTestApp/build/outputs/apk/MapLibreAndroidTestApp-debug-androidTest-unaligned.apk`
 * On step 3, choose a device pool. E.g. Top Devices
 * On step 4, customize your device state (if needed)
 * Finally, confirm the configuration and run the tests.
@@ -86,13 +86,13 @@ You can also have a run configuration:
 * Click on "Junit Tests"
 * Give a name to the configuration, e.g. `JUnit tests`
 * As "Test Kind", choose "All in directory"
-* As folder, choose the following folder: `mapbox-gl-native/android/java/MapboxGLAndroidSDKTestApp/src/test/java`
+* As folder, choose the following folder: `mapbox-gl-native/android/java/MapLibreAndroidTestApp/src/test/java`
 * Click OK to save the new configuration
 
 You can also run the tests from the command line with:
 
 ```
-$ ./gradlew -Pmapbox.abis=none test -p MapboxGLAndroidSDKTestApp
+$ ./gradlew -Pmapbox.abis=none test -p MapLibreAndroidTestApp
 ```
 
 ### Running the UI/Application Exerciser Monkey

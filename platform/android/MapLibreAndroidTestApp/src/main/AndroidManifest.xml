@@ -1,0 +1,1251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+
+    <application
+        android:name=".MapLibreApplication"
+        android:allowBackup="true"
+        android:exported="true"
+        android:fullBackupContent="true"
+        android:icon="@drawable/icon"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:name=".activity.FeatureOverviewActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activity.infowindow.InfoWindowActivity"
+            android:description="@string/description_info_window"
+            android:exported="true"
+            android:label="@string/activity_info_window">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_infowindow" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.infowindow.InfoWindowAdapterActivity"
+            android:description="@string/description_info_window_adapter"
+            android:exported="true"
+            android:label="@string/activity_infowindow_adapter">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_infowindow" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.infowindow.DynamicInfoWindowAdapterActivity"
+            android:description="@string/description_dynamic_info_window_adapter"
+            android:exported="true"
+            android:label="@string/activity_dynamic_infowindow_adapter">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_infowindow" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.annotation.BulkMarkerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:description="@string/description_add_bulk_markers"
+            android:exported="true"
+            android:label="@string/activity_add_bulk_markers">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_annotation" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.AnimatedSymbolLayerActivity"
+            android:description="@string/description_animated_symbollayer"
+            android:exported="true"
+            android:label="@string/activity_animated_symbollayer">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.annotation.DynamicMarkerChangeActivity"
+            android:description="@string/description_dynamic_marker"
+            android:exported="true"
+            android:label="@string/activity_dynamic_marker">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_annotation" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.annotation.PressForMarkerActivity"
+            android:description="@string/description_press_for_marker"
+            android:exported="true"
+            android:label="@string/activity_press_for_marker">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_annotation" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.annotation.JsonApiActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:description="@string/description_add_makers_by_json_api"
+            android:exported="true"
+            android:label="@string/activity_json_api">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_annotation" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.camera.CameraAnimationTypeActivity"
+            android:description="@string/description_camera_animation_types"
+            android:exported="true"
+            android:label="@string/activity_camera_animation_types">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_camera" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.camera.CameraAnimatorActivity"
+            android:description="@string/description_camera_animator"
+            android:exported="true"
+            android:label="@string/activity_camera_animator">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_camera" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.camera.CameraPositionActivity"
+            android:description="@string/description_cameraposition"
+            android:exported="true"
+            android:label="@string/activity_camera_position"
+            android:theme="@style/NoActionBar">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_camera" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.camera.LatLngBoundsActivity"
+            android:description="@string/description_visible_bounds"
+            android:exported="true"
+            android:label="@string/activity_visible_coordinate_bounds"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_camera" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.fragment.MapFragmentActivity"
+            android:description="@string/description_map_fragment"
+            android:exported="true"
+            android:label="@string/activity_map_fragment">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_fragment" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.fragment.SupportMapFragmentActivity"
+            android:description="@string/description_map_fragment_support"
+            android:exported="true"
+            android:label="@string/activity_map_fragment_support">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_fragment" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.fragment.FragmentBackStackActivity"
+            android:description="@string/description_map_fragment_backstack"
+            android:exported="true"
+            android:label="@string/activity_map_fragment_backstack"
+            android:launchMode="singleInstance">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_integration" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.fragment.MultiMapActivity"
+            android:description="@string/description_multimap"
+            android:exported="true"
+            android:label="@string/activity_multimap">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_fragment" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.camera.ManualZoomActivity"
+            android:description="@string/description_camera_zoom"
+            android:exported="true"
+            android:label="@string/activity_camera_zoom">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_camera" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.camera.MaxMinZoomActivity"
+            android:description="@string/description_minmax_zoom"
+            android:exported="true"
+            android:label="@string/activity_minmax_zoom">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_camera" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.customlayer.CustomLayerActivity"
+            android:description="@string/description_custom_layer"
+            android:exported="true"
+            android:label="@string/activity_custom_layer">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_custom_layer" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.annotation.PolygonActivity"
+            android:description="@string/description_polygon"
+            android:exported="true"
+            android:label="@string/activity_polygon">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_annotation" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.annotation.PolylineActivity"
+            android:description="@string/description_polyline"
+            android:exported="true"
+            android:label="@string/activity_polyline">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_annotation" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.camera.ScrollByActivity"
+            android:description="@string/description_scroll_by"
+            android:exported="true"
+            android:label="@string/activity_scroll_by"
+            android:theme="@style/NoActionBar">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_camera" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.MapPaddingActivity"
+            android:description="@string/description_map_padding"
+            android:exported="true"
+            android:label="@string/activity_map_padding"
+            android:screenOrientation="portrait">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_maplayout" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.DebugModeActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:description="@string/description_debug_mode"
+            android:exported="true"
+            android:label="@string/activity_debug_mode">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_basic" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.offline.OfflineActivity"
+            android:description="@string/description_offline"
+            android:exported="true"
+            android:label="@string/activity_offline">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_offline" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.offline.UpdateMetadataActivity"
+            android:description="@string/description_update_metadata"
+            android:exported="true"
+            android:label="@string/activity_update_metadata">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_offline" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.offline.DeleteRegionActivity"
+            android:description="@string/description_offline_region_delete"
+            android:exported="true"
+            android:label="@string/activity_offline_region_delete">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_offline" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.offline.ChangeResourcesCachePathActivity"
+            android:description="@string/description_change_resources_cache_path"
+            android:exported="true"
+            android:label="@string/activity_change_resources_cache_path">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_offline" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.imagegenerator.SnapshotActivity"
+            android:description="@string/description_snapshot"
+            android:exported="true"
+            android:label="@string/activity_snapshot">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_imagegenerator" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.snapshot.MapSnapshotterActivity"
+            android:description="@string/description_map_snapshotter"
+            android:exported="true"
+            android:label="@string/activity_map_snapshotter">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_imagegenerator" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.snapshot.MapSnapshotterReuseActivity"
+            android:description="@string/description_map_snapshotter_reuse"
+            android:exported="true"
+            android:label="@string/activity_map_snapshotter_reuse">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_imagegenerator" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.snapshot.MapSnapshotterBitMapOverlayActivity"
+            android:description="@string/description_map_snapshotter_bitmap_overlay"
+            android:exported="true"
+            android:label="@string/activity_map_snapshotter_bitmap_overlay">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_imagegenerator" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.snapshot.MapSnapshotterHeatMapActivity"
+            android:description="@string/description_map_snapshotter_heatmap_layer"
+            android:exported="true"
+            android:label="@string/activity_map_snapshotter_heatmap_layer">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_imagegenerator" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.snapshot.MapSnapshotterLocalStyleActivity"
+            android:description="@string/description_map_snapshotter_local_style"
+            android:exported="true"
+            android:label="@string/activity_map_snapshotter_local_style">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_imagegenerator" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.turf.MapSnapshotterWithinExpression"
+            android:description="@string/description_snapshot_within"
+            android:exported="true"
+            android:label="@string/activity_snapshot_within">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_imagegenerator" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.DoubleMapActivity"
+            android:description="@string/description_doublemap"
+            android:exported="true"
+            android:label="@string/activity_double_map">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_maplayout" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.fragment.ViewPagerActivity"
+            android:description="@string/description_viewpager"
+            android:exported="true"
+            android:label="@string/activity_viewpager">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_integration" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.SimpleMapActivity"
+            android:description="@string/description_simple_map"
+            android:exported="true"
+            android:label="@string/activity_simple_map"
+            android:launchMode="singleInstance">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_basic" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.MapChangeActivity"
+            android:description="@string/description_map_change"
+            android:exported="true"
+            android:label="@string/activity_map_change">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_maplayout" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.VisibilityChangeActivity"
+            android:description="@string/description_visibility_map"
+            android:exported="true"
+            android:label="@string/activity_map_visibility">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_maplayout" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.RuntimeStyleActivity"
+            android:description="@string/description_runtime_style"
+            android:exported="true"
+            android:label="@string/activity_runtime_style">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.DistanceExpressionActivity"
+            android:description="@string/description_distance_style"
+            android:exported="true"
+            android:label="@string/activity_distance_style">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.GradientLineActivity"
+            android:description="@string/description_gradient_line"
+            android:exported="true"
+            android:label="@string/activity_gradient_line">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.DataDrivenStyleActivity"
+            android:description="@string/description_data_driven_style"
+            android:exported="true"
+            android:label="@string/activity_data_driven_style">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.CircleLayerActivity"
+            android:description="@string/description_circle_layer"
+            android:exported="true"
+            android:label="@string/activity_circle_layer">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.CollectionUpdateOnStyleChange"
+            android:description="@string/description_collection_style_change"
+            android:exported="true"
+            android:label="@string/activity_collection_style_change">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.FillExtrusionActivity"
+            android:description="@string/description_fill_extrusion_layer"
+            android:exported="true"
+            android:label="@string/activity_fill_extrusion_layer">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.BuildingFillExtrusionActivity"
+            android:description="@string/description_building_fill_extrusion_layer"
+            android:exported="true"
+            android:label="@string/activity_building_fill_extrusion_layer">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.SymbolLayerActivity"
+            android:description="@string/description_symbol_layer"
+            android:exported="true"
+            android:label="@string/activity_symbol_layer">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.GeoJsonClusteringActivity"
+            android:description="@string/description_geojson_clustering"
+            android:exported="true"
+            android:label="@string/activity_geojson_clustering">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.RealTimeGeoJsonActivity"
+            android:description="@string/description_geojson_realtime"
+            android:exported="true"
+            android:label="@string/activity_geojson_realtime">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.StyleFileActivity"
+            android:description="@string/description_style_file"
+            android:exported="true"
+            android:label="@string/activity_style_file">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.CustomSpriteActivity"
+            android:description="@string/description_custom_sprite"
+            android:exported="true"
+            android:label="@string/activity_add_sprite">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.imagegenerator.PrintActivity"
+            android:description="@string/description_print"
+            android:exported="true"
+            android:label="@string/activity_print">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_imagegenerator" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.AnimatedImageSourceActivity"
+            android:description="@string/description_animated_image_source"
+            android:exported="true"
+            android:label="@string/activity_animated_image_source">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.GridSourceActivity"
+            android:description="@string/description_grid_source"
+            android:exported="true"
+            android:label="@string/activity_grid_source">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.NoStyleActivity"
+            android:description="@string/description_no_style"
+            android:exported="true"
+            android:label="@string/activity_no_style">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <!-- Features -->
+        <activity
+            android:name=".activity.feature.QueryRenderedFeaturesPropertiesActivity"
+            android:description="@string/description_query_rendered_feature_properties_point"
+            android:exported="true"
+            android:label="@string/activity_query_rendered_feature_properties">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_features" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.feature.QueryRenderedFeaturesBoxCountActivity"
+            android:description="@string/description_query_rendered_features_box_count"
+            android:exported="true"
+            android:label="@string/activity_query_rendered_features_box_count"
+            android:launchMode="singleInstance">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_features" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.feature.QueryRenderedFeaturesBoxSymbolCountActivity"
+            android:description="@string/description_query_rendered_features_box_symbol_count"
+            android:exported="true"
+            android:label="@string/activity_query_rendered_features_box_symbol_count">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_features" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.feature.QueryRenderedFeaturesBoxHighlightActivity"
+            android:description="@string/description_query_rendered_features_box_highlight"
+            android:exported="true"
+            android:label="@string/activity_query_rendered_features_box_highlight">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_features" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.feature.QuerySourceFeaturesActivity"
+            android:description="@string/description_query_source_features"
+            android:exported="true"
+            android:label="@string/activity_query_source_features">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_features" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.SymbolGeneratorActivity"
+            android:description="@string/description_symbol_generator"
+            android:exported="true"
+            android:label="@string/activity_symbol_generator">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.ZoomFunctionSymbolLayerActivity"
+            android:description="@string/description_add_remove_markers"
+            android:exported="true"
+            android:label="@string/activity_add_remove_markers">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.MapInDialogActivity"
+            android:description="@string/description_map_in_dialog"
+            android:exported="true"
+            android:label="@string/activity_map_in_dialog">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_maplayout" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.LatLngBoundsForCameraActivity"
+            android:description="@string/description_restricted_bounds"
+            android:exported="true"
+            android:label="@string/activity_restricted_bounds">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_maplayout" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+
+        <!-- Storage -->
+        <activity
+            android:name=".activity.storage.UrlTransformActivity"
+            android:description="@string/description_url_transform"
+            android:exported="true"
+            android:label="@string/activity_url_transform">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_storage" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.storage.CustomHttpRequestImplActivity"
+            android:description="@string/description_custom_http_request_impl"
+            android:exported="true"
+            android:label="@string/activity_custom_http_request_impl">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_storage" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.storage.CacheManagementActivity"
+            android:description="@string/description_cache_management"
+            android:exported="true"
+            android:label="@string/activity_cache_management">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_storage" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.BottomSheetActivity"
+            android:description="@string/description_bottom_sheet"
+            android:exported="true"
+            android:label="@string/activity_bottom_sheet">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_maplayout" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+
+        <!-- TextureView -->
+        <activity
+            android:name=".activity.textureview.TextureViewDebugModeActivity"
+            android:description="@string/description_textureview_debug"
+            android:exported="true"
+            android:label="@string/activity_textureview_debug"
+            android:launchMode="singleInstance">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_basic" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.textureview.TextureViewResizeActivity"
+            android:description="@string/description_textureview_resize"
+            android:exported="true"
+            android:label="@string/activity_textureview_resize">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_textureview" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.textureview.TextureViewTransparentBackgroundActivity"
+            android:description="@string/description_textureview_transparent"
+            android:exported="true"
+            android:label="@string/activity_textureview_transparent">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_textureview" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.textureview.TextureViewAnimationActivity"
+            android:description="@string/description_textureview_animate"
+            android:exported="true"
+            android:label="@string/activity_textureview_animate">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_textureview" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.OverlayMapActivity"
+            android:description="@string/description_overlay"
+            android:exported="true"
+            android:label="@string/activity_overlay">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_maplayout" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.LocalGlyphActivity"
+            android:description="@string/description_local_glyph"
+            android:exported="true"
+            android:label="@string/activity_local_glyph">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_maplayout" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.HillshadeLayerActivity"
+            android:description="@string/description_hillshade"
+            android:exported="true"
+            android:label="@string/activity_hillshade">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.HeatmapLayerActivity"
+            android:description="@string/description_heatmaplayer"
+            android:exported="true"
+            android:label="@string/activity_heatmaplayer">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+
+        <activity
+            android:name=".activity.style.DraggableMarkerActivity"
+            android:description="@string/description_draggable_marker"
+            android:exported="true"
+            android:label="@string/activity_draggable_maker">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.camera.GestureDetectorActivity"
+            android:description="@string/description_gesture_detector"
+            android:exported="true"
+            android:label="@string/activity_gesture_detector">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_camera" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.offline.MergeOfflineRegionsActivity"
+            android:description="@string/description_offline_merge"
+            android:exported="true"
+            android:label="@string/activity_offline_merge">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_offline" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.location.LocationMapChangeActivity"
+            android:description="@string/description_location_map_change"
+            android:exported="true"
+            android:label="@string/activity_location_map_change">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_location" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.location.LocationModesActivity"
+            android:description="@string/description_location_modes"
+            android:exported="true"
+            android:label="@string/activity_location_modes">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_location" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.location.BasicLocationPulsingCircleActivity"
+            android:description="@string/description_location_basic_pulsing_circle"
+            android:label="@string/activity_basic_location_pulsing_circle">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_location" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.location.CustomizedLocationPulsingCircleActivity"
+            android:description="@string/description_location_customized_pulsing_circle"
+            android:label="@string/activity_customized_location_pulsing_circle">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_location" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.location.LocationFragmentActivity"
+            android:description="@string/description_location_fragment"
+            android:exported="true"
+            android:label="@string/activity_location_fragment">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_location" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.location.ManualLocationUpdatesActivity"
+            android:description="@string/description_location_manual"
+            android:exported="true"
+            android:label="@string/activity_location_manual">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_location" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.location.LocationComponentActivationActivity"
+            android:description="@string/description_location_activation_builder"
+            android:exported="true"
+            android:label="@string/activity_location_activation_builder">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_location" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.TextureRecyclerViewActivity"
+            android:description="@string/description_recyclerview_textureview"
+            android:exported="true"
+            android:label="@string/activity_recyclerview_textureview">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_integration" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.maplayout.GLSurfaceRecyclerViewActivity"
+            android:description="@string/description_recyclerview_glsurfaceview"
+            android:exported="true"
+            android:label="@string/activity_recyclerview_glsurfaceview">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_integration" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.fragment.NestedViewPagerActivity"
+            android:description="@string/description_nested_viewpager"
+            android:exported="true"
+            android:label="@string/activity_nested_viewpager">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_integration" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.turf.PhysicalUnitCircleActivity"
+            android:description="@string/description_physical_circle"
+            android:exported="true"
+            android:label="@string/activity_physical_circle">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_turf" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.offline.DownloadRegionActivity"
+            android:description="@string/description_region"
+            android:exported="true"
+            android:label="@string/activity_region">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_offline" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.turf.WithinExpressionActivity"
+            android:description="@string/description_within"
+            android:exported="true"
+            android:label="@string/activity_within">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.StretchableImageActivity"
+            android:description="@string/description_stretchable_image"
+            android:exported="true"
+            android:label="@string/activity_stretchable_image">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <activity
+            android:name=".activity.style.ImageInLabelActivity"
+            android:description="@string/description_image_in_label"
+            android:exported="true"
+            android:label="@string/activity_image_in_label">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_style" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <!-- Benchmark -->
+        <activity
+            android:name=".activity.benchmark.BenchmarkActivity"
+            android:screenOrientation="portrait"
+            android:description="@string/description_world_tour_benchmark"
+            android:exported="true"
+            android:label="@string/activity_benchmark_world_tour"
+            tools:ignore="LockedOrientationActivity">
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_benchmark" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
+        </activity>
+        <!-- For Instrumentation tests -->
+        <activity
+            android:name=".activity.style.RuntimeStyleTimingTestActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.espresso.EspressoTestActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.espresso.PixelTestActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.espresso.DeviceIndependentTestActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.style.FillExtrusionStyleTestActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.render.RenderTestActivity"
+            android:screenOrientation="landscape" />
+        <!-- Configuration Settings -->
+        <meta-data
+            android:name="com.maplibre.TestEventsServer"
+            android:value="api-events-staging.tilestream.net" />
+        <meta-data
+            android:name="com.maplibre.TestEventsAccessToken"
+            android:value="pk.eyJ1IjoiYmxzdGFnaW5nIiwiYSI6ImNpdDF3OHpoaTAwMDcyeXA5Y3Z0Nmk2dzEifQ.0IfB7v5Qbm2MGVYt8Kb8fg" />
+
+        <!-- Comment out this setting to switch to external storage (and disable internal) in your app -->
+        <!-- Alternatively you can rely on FileSource#setResourceCachePath API instead -->
+        <!-- <meta-data -->
+        <!-- android:name="com.maplibre.SetStorageExternal" -->
+        <!-- android:value="true" /> -->
+
+        <!-- Set value to true to have tile loading measurements on -->
+        <meta-data
+            android:name="com.maplibre.MeasureTileDownloadOn"
+            android:value="false" />
+
+    </application>
+
+</manifest>

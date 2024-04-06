@@ -1,5 +1,5 @@
 #import "MLNMapView+Impl.h"
-#import "MLNStyle_Private.h"
+#import <MLNStyle_Private.h>
 #import "NSBundle+MLNAdditions.h"
 
 #if MLN_RENDER_BACKEND_METAL
@@ -12,10 +12,18 @@
 #include <mbgl/style/style.hpp>
 
 std::unique_ptr<MLNMapViewImpl> MLNMapViewImpl::Create(MLNMapView* nativeView) {
+#if MLN_RENDER_BACKEND_METAL
+    return std::make_unique<MLNMapViewMetalImpl>(nativeView);
+#else // MLN_RENDER_BACKEND_OPENGL
     return std::make_unique<MLNMapViewOpenGLImpl>(nativeView);
+#endif
 }
 
 MLNMapViewImpl::MLNMapViewImpl(MLNMapView* nativeView_) : mapView(nativeView_) {
+}
+
+void MLNMapViewImpl::render() {
+    [mapView renderSync];
 }
 
 void MLNMapViewImpl::onCameraWillChange(mbgl::MapObserver::CameraChangeMode mode) {

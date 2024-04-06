@@ -4,9 +4,15 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-## (unreleased)
+## 6.3.1
 
-- Temporary workaround for map display freeze / stutter when using annotation views with Metal backend. [Issue 2117](https://github.com/maplibre/maplibre-native/issues/2117) fixed by [PR 2148](https://github.com/maplibre/maplibre-native/pull/2148)
+- Add debug symbols to releases (see [Releases on GitHub](https://github.com/maplibre/maplibre-native/releases?q=ios&expanded=true)).
+
+## 6.3.0
+
+- Temporary workaround for map display freeze / stutter when using annotation views with Metal backend. [Issue 2117](https://github.com/maplibre/maplibre-native/issues/2117) fixed by [PR 2148](https://github.com/maplibre/maplibre-native/pull/2148).
+- Make setURL method on MLNImageSource public ([#2197](https://github.com/maplibre/maplibre-native/pull/2197)).
+- Make setCoordinates method on MLNImageSource public ([#2198](https://github.com/maplibre/maplibre-native/pull/2198)).
 
 ## 6.2.0
 

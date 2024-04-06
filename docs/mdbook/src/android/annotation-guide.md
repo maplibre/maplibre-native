@@ -41,7 +41,7 @@ Then add markers to the map with GeoJSON:
    It is used to add annotations to the map instance.
 
 ```kotlin
-{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:top}}
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:top}}
 ```
 
 4. Call `mapview.getMapSync()` in order to get a `MapboxMap` object.
@@ -49,14 +49,14 @@ Then add markers to the map with GeoJSON:
    to make a HTTP request and transform data into the map annotations.
 
 ```kotlin
-{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:mapAsync}}
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:mapAsync}}
 ```
 
 5. Define a function `getEarthQuakeDataFromUSGS()` to fetch GeoJSON data from a public API.
    If we successfully get the response, call `addMarkersToMap()` on the UI thread.
 
 ```kotlin
-{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:getEarthquakes}}
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:getEarthquakes}}
 ```
 
 6. Now it is time to add markers into the map.
@@ -66,7 +66,7 @@ Then add markers to the map with GeoJSON:
    - Finally, move the camera to the bounds of the newly added markers
 
 ```kotlin
-{{#include ../../../../platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:addMarkers}}
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:addMarkers}}
 ```
 
 7. Here is the final result. For the full contents of `JsonApiActivity`, please visit source code of [Test APP]
@@ -76,7 +76,7 @@ Then add markers to the map with GeoJSON:
 </div>
 
 [Marker]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-marker/index.html
-[provided image]: https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapboxGLAndroidSDK/src/main/res/drawable-xxxhdpi/maplibre_marker_icon_default.png
+[provided image]: https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroid/src/main/res/drawable-xxxhdpi/maplibre_marker_icon_default.png
 [Polyline]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polyline/index.html
 [Polygon]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polygon/index.html
 [marker image]: https://raw.githubusercontent.com/maplibre/maplibre-native/main/test/fixtures/sprites/default_marker.png
@@ -86,4 +86,4 @@ Then add markers to the map with GeoJSON:
 [mvn]: https://mvnrepository.com/artifact/org.maplibre.gl/android-plugin-annotation-v9
 [Android Developer Documentation]: https://developer.android.com/topic/libraries/architecture/coroutines
 [MarkerOptions]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-marker-options/index.html
-[Test App]: https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapboxGLAndroidSDKTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt
+[Test App]: https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt
