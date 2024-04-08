@@ -86,13 +86,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         const bool enableEval = (parameters.debugOptions & MapDebugOptions::GPUEval);
         if (!expressionUniformBuffer || (gpuExpressionsUpdated && enableEval)) {
             LineExpressionUBO exprUBO = {
-                /* color = */ enableEval ? gpuExpressions[propertyIndex<LineColor>()] : nullptr,
-                /* blur = */ enableEval ? gpuExpressions[propertyIndex<LineBlur>()] : nullptr,
-                /* opacity = */ enableEval ? gpuExpressions[propertyIndex<LineOpacity>()] : nullptr,
-                /* gapwidth = */ enableEval ? gpuExpressions[propertyIndex<LineGapWidth>()] : nullptr,
-                /* offset = */ enableEval ? gpuExpressions[propertyIndex<LineOffset>()] : nullptr,
-                /* width = */ enableEval ? gpuExpressions[propertyIndex<LineWidth>()] : nullptr,
-                /* floorWidth = */ enableEval ? gpuExpressions[propertyIndex<LineFloorWidth>()] : nullptr,
+                /* color = */ enableEval ? gpuExpressions[propertyIndex<LineColor>()].get() : nullptr,
+                /* blur = */ enableEval ? gpuExpressions[propertyIndex<LineBlur>()].get() : nullptr,
+                /* opacity = */ enableEval ? gpuExpressions[propertyIndex<LineOpacity>()].get() : nullptr,
+                /* gapwidth = */ enableEval ? gpuExpressions[propertyIndex<LineGapWidth>()].get() : nullptr,
+                /* offset = */ enableEval ? gpuExpressions[propertyIndex<LineOffset>()].get() : nullptr,
+                /* width = */ enableEval ? gpuExpressions[propertyIndex<LineWidth>()].get() : nullptr,
+                /* floorWidth = */ enableEval ? gpuExpressions[propertyIndex<LineFloorWidth>()].get() : nullptr,
             };
             context.emplaceOrUpdateUniformBuffer(expressionUniformBuffer, &exprUBO);
             gpuExpressionsUpdated = false;
@@ -466,15 +466,15 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 }
 
 #if MLN_RENDER_BACKEND_METAL
-void LineLayerTweaker::setGPUExpressions(Unevaluated::GPUExpressions&& exprs) {
-    if (exprs != gpuExpressions) {
+void LineLayerTweaker::updateGPUExpressions(const Unevaluated& unevaluated, TimePoint now) {
+    if (unevaluated.updateGPUExpressions(gpuExpressions, now)) {
         gpuExpressionsUpdated = true;
 
         // Masks also need to be updated
         propertiesUpdated = true;
     }
-    gpuExpressions = std::move(exprs);
 }
+
 #endif // MLN_RENDER_BACKEND_METAL
 
 } // namespace mbgl

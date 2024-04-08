@@ -338,13 +338,16 @@ public:
             return result;
         }
 
-        using GPUExpressions = std::array<const gfx::GPUExpression*, UnevaluatedTypes::TypeCount>;
+#if MLN_DRAWABLE_RENDERER
+        using GPUExpressions = std::array<gfx::UniqueGPUExpression, UnevaluatedTypes::TypeCount>;
 
-        /// Get the GPU expressions, if applicable, for each item in the tuple.
-        /// Expression lifetimes match this object.
-        GPUExpressions getGPUExpressions(TimePoint now) {
-            return util::to_array(std::make_tuple((getGPUExpression<Ps>(now))...));
+        /// Update the GPU expressions, if applicable, for each item in the tuple.
+        /// @return true if any are updated (including being cleared)
+        bool updateGPUExpressions(Unevaluated::GPUExpressions& exprs, TimePoint now) const {
+            const auto results = util::to_array(std::make_tuple(updateGPUExpression<Ps>(exprs, now)...));
+            return std::any_of(results.begin(), results.end(), [](bool x) { return x; });
         }
+#endif // MLN_DRAWABLE_RENDERER
 
     protected:
         // gather dependencies for each type that can appear in this tuple
@@ -359,28 +362,52 @@ public:
             return v.getValue().getDependencies();
         }
 
-        // gather GPU expression representation for each type that can appear in this tuple
-
-        template <class P>
-        const gfx::GPUExpression* getGPUExpression(TimePoint now) {
-            return getGPUExpression(this->template get<P>(), now, P::EvaluatorType::useIntegerZoom);
+#if MLN_DRAWABLE_RENDERER
+        template <typename P>
+        bool updateGPUExpression(Unevaluated::GPUExpressions& exprs, TimePoint now) const {
+            constexpr auto index = TypeIndex<P, Ps...>::value;
+            constexpr bool forceIntZoom = P::EvaluatorType::useIntegerZoom;
+            return updateGPUExpression(exprs[index], this->template get<P>(), now, forceIntZoom);
         }
 
         template <class P>
-        static const gfx::GPUExpression* getGPUExpression(PropertyValue<P>& val, bool transitioning, bool intZoom) {
-            return (!transitioning && val.isExpression()) ? val.asExpression().getGPUExpression(intZoom) : nullptr;
+        static bool updateGPUExpression(gfx::UniqueGPUExpression& expr,
+                                        const PropertyValue<P>& val,
+                                        TimePoint now,
+                                        bool intZoom) {
+            if (val.isExpression() && val.asExpression().isGPUCapable()) {
+                if (!expr) {
+                    expr = val.asExpression().getGPUExpression(intZoom);
+                    return true;
+                }
+            } else if (expr) {
+                // Previously set and shouldn't be
+                expr.reset();
+                return true;
+            }
+            return false;
         }
-
-        static const gfx::GPUExpression* getGPUExpression(const style::ColorRampPropertyValue&,
-                                                          bool /*transitioning*/,
-                                                          bool /*intZoom*/) {
-            return nullptr;
-        }
-
         template <class P>
-        static const gfx::GPUExpression* getGPUExpression(Transitioning<P>& val, TimePoint now, bool intZoom) {
-            return getGPUExpression(val.getValue(), val.isTransitioning(now), intZoom);
+        static bool updateGPUExpression(gfx::UniqueGPUExpression& expr,
+                                        const Transitioning<P>& val,
+                                        TimePoint now,
+                                        bool intZoom) {
+            if (val.isTransitioning(now)) {
+                if (expr) {
+                    expr.reset();
+                    return true;
+                }
+                return false;
+            }
+            return updateGPUExpression(expr, val.getValue(), now, intZoom);
         }
+        static bool updateGPUExpression(gfx::UniqueGPUExpression&,
+                                        const style::ColorRampPropertyValue&,
+                                        TimePoint,
+                                        bool) {
+            return false;
+        }
+#endif // MLN_DRAWABLE_RENDERER
     };
 
     class Transitionable : public Tuple<TransitionableTypes> {

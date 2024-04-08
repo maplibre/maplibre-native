@@ -17,7 +17,7 @@
 namespace mbgl {
 namespace gfx {
 class GPUExpression;
-using UniqueGPUExpression = std::unique_ptr<const GPUExpression>;
+using UniqueGPUExpression = std::unique_ptr<GPUExpression>;
 } // namespace gfx
 
 namespace style {
@@ -52,8 +52,10 @@ public:
     /// expression. May be removed if a better way of aggregation is found.
     std::shared_ptr<const Expression> getSharedExpression() const noexcept;
 
+#if MLN_DRAWABLE_RENDERER
     /// Build a cached GPU representation of the expression, with the same lifetime as this object.
-    const gfx::GPUExpression* getGPUExpression(bool intZoom);
+    gfx::UniqueGPUExpression getGPUExpression(bool intZoom) const;
+#endif // MLN_DRAWABLE_RENDERER
 
     Dependency getDependencies() const noexcept { return expression ? expression->dependencies : Dependency::None; }
 
@@ -61,9 +63,6 @@ public:
 
 protected:
     std::shared_ptr<const Expression> expression;
-#if MLN_DRAWABLE_RENDERER
-    gfx::UniqueGPUExpression gpuExpression;
-#endif // MLN_DRAWABLE_RENDERER
 
     ZoomCurvePtr zoomCurve;
 

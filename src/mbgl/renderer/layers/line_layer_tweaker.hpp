@@ -34,7 +34,7 @@ public:
 #if MLN_RENDER_BACKEND_METAL
     using LinePaintProperties = style::LinePaintProperties;
     using Unevaluated = LinePaintProperties::Unevaluated;
-    void setGPUExpressions(Unevaluated::GPUExpressions&&);
+    void updateGPUExpressions(const Unevaluated&, TimePoint now);
 
     template <typename T>
     static constexpr std::size_t propertyIndex() {

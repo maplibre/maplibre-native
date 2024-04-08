@@ -35,7 +35,7 @@ inline float getInterpBase(const Interpolator& interp) {
 }
 
 // Produce a function for `eachStop` that extracts a single stop into the target expression
-auto addStop(MutableUniqueGPUExpression& expr, GPUOutputType outType, std::size_t& index) {
+auto addStop(UniqueGPUExpression& expr, GPUOutputType outType, std::size_t& index) {
     return [&, outType](double input, const Expression& output) {
         if (expr) {
             if (const auto result = output.evaluate(EvaluationContext{/*zoom=*/0.0f})) {
@@ -68,23 +68,21 @@ auto addStop(MutableUniqueGPUExpression& expr, GPUOutputType outType, std::size_
 
 const GPUExpression GPUExpression::empty = {GPUOutputType::Float, 0};
 
-MutableUniqueGPUExpression GPUExpression::create(GPUOutputType type, std::uint16_t count) {
+UniqueGPUExpression GPUExpression::create(GPUOutputType type, std::uint16_t count) {
     if (1 < count && count <= maxStops) {
-        return MutableUniqueGPUExpression{new GPUExpression(type, count)};
+        return std::make_unique<GPUExpression>(type, count);
     }
     return {};
 }
 
-MutableUniqueGPUExpression GPUExpression::create(const Expression& expression,
-                                                 const ZoomCurvePtr& zoomCurve,
-                                                 bool intZoom) {
+UniqueGPUExpression GPUExpression::create(const Expression& expression, const ZoomCurvePtr& zoomCurve, bool intZoom) {
     std::size_t index = 0;
     const auto outType = getOutputType(expression);
     const auto options = (intZoom ? GPUOptions::IntegerZoom : GPUOptions::None);
     return zoomCurve.match(
         [&](const Step* step) {
             if (step->getStopCount() > maxStops) {
-                return MutableUniqueGPUExpression{};
+                return UniqueGPUExpression{};
             }
             auto expr = GPUExpression::create(outType, step->getStopCount());
             expr->options = options;
@@ -94,7 +92,7 @@ MutableUniqueGPUExpression GPUExpression::create(const Expression& expression,
         },
         [&](const Interpolate* interp) {
             if (interp->getStopCount() > maxStops) {
-                return MutableUniqueGPUExpression{};
+                return UniqueGPUExpression{};
             }
             auto expr = GPUExpression::create(outType, interp->getStopCount());
             expr->options = options;
@@ -103,7 +101,7 @@ MutableUniqueGPUExpression GPUExpression::create(const Expression& expression,
             interp->eachStop(addStop(expr, outType, index));
             return expr;
         },
-        [](std::nullptr_t) { return MutableUniqueGPUExpression{}; });
+        [](std::nullptr_t) { return UniqueGPUExpression{}; });
 }
 
 float GPUExpression::evaluateFloat(const float zoom) const {

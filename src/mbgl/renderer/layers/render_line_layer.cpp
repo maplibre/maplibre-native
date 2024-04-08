@@ -67,7 +67,7 @@ void RenderLineLayer::transition(const TransitionParameters& parameters) {
 
 #if MLN_RENDER_BACKEND_METAL
     if (auto* tweaker = static_cast<LineLayerTweaker*>(layerTweaker.get())) {
-        tweaker->setGPUExpressions(unevaluated.getGPUExpressions(parameters.now));
+        tweaker->updateGPUExpressions(unevaluated, parameters.now);
     }
 #endif // MLN_RENDER_BACKEND_METAL
 }
@@ -91,7 +91,7 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     if (auto* tweaker = static_cast<LineLayerTweaker*>(layerTweaker.get())) {
         tweaker->updateProperties(evaluatedProperties);
 #if MLN_RENDER_BACKEND_METAL
-        tweaker->setGPUExpressions(unevaluated.getGPUExpressions(parameters.now));
+        tweaker->updateGPUExpressions(unevaluated, parameters.now);
 #endif // MLN_RENDER_BACKEND_METAL
     }
 #endif
@@ -379,7 +379,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     if (!layerTweaker) {
         auto tweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
 #if MLN_RENDER_BACKEND_METAL
-        tweaker->setGPUExpressions(unevaluated.getGPUExpressions(parameters->timePoint));
+        tweaker->updateGPUExpressions(unevaluated, parameters->timePoint);
 #endif // MLN_RENDER_BACKEND_METAL
 
         layerTweaker = std::move(tweaker);

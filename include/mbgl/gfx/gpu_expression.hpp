@@ -35,14 +35,16 @@ enum class GPUOptions : std::uint16_t {
 };
 
 class GPUExpression;
-using UniqueGPUExpression = std::unique_ptr<const GPUExpression>;
-using MutableUniqueGPUExpression = std::unique_ptr<GPUExpression>;
+using UniqueGPUExpression = std::unique_ptr<GPUExpression>;
 
 class alignas(16) GPUExpression {
 public:
     static constexpr std::size_t maxStops = 16;
 
     GPUExpression() = delete;
+    GPUExpression(GPUOutputType type, uint16_t count)
+        : outputType(type),
+          stopCount(count) {}
     GPUExpression(GPUExpression&&) = default;
     GPUExpression(const GPUExpression&) = default;
     GPUExpression(const GPUExpression* ptr)
@@ -75,10 +77,8 @@ public:
         float colors[2 * maxStops];
     } stops;
 
-    static MutableUniqueGPUExpression create(GPUOutputType, std::uint16_t stopCount);
-    static MutableUniqueGPUExpression create(const style::expression::Expression&,
-                                             const style::ZoomCurvePtr&,
-                                             bool intZoom);
+    static UniqueGPUExpression create(GPUOutputType, std::uint16_t stopCount);
+    static UniqueGPUExpression create(const style::expression::Expression&, const style::ZoomCurvePtr&, bool intZoom);
 
     float evaluateFloat(const float zoom) const;
     Color evaluateColor(const float zoom) const;
@@ -89,11 +89,6 @@ public:
     Color getColor(std::size_t index) const;
 
     static const GPUExpression empty;
-
-private:
-    GPUExpression(GPUOutputType type, uint16_t count)
-        : outputType(type),
-          stopCount(count) {}
 };
 static_assert(sizeof(GPUExpression) == 32 + (4 + 8) * GPUExpression::maxStops);
 static_assert(sizeof(GPUExpression) % 16 == 0);
