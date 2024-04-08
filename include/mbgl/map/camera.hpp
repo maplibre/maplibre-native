@@ -139,21 +139,21 @@ struct FreeCameraOptions {
     std::optional<vec4> orientation = std::nullopt;
 
     /** Helper function for setting the mercator position as Lat&Lng and altitude in meters */
-    void setLocation(const LatLngAltitude& location);
+    void setLocation(const LatLngAltitude& location) noexcept;
 
     /** Helper function for converting mercator position into Lat&Lng and
        altitude in meters. This function fails to return a value if `position`
        is invalid or is not set */
-    std::optional<LatLngAltitude> getLocation() const;
+    std::optional<LatLngAltitude> getLocation() const noexcept;
 
     /** Helper function for setting orientation of the camera by defining a
        focus point on the map. Up vector is required in certain scenarios where
        bearing can't be deduced from the viewing direction */
-    void lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector = std::nullopt);
+    void lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector = std::nullopt) noexcept;
 
     /** Helper function for setting the orientation of the camera as a pitch and
        a bearing. Both values are in degrees */
-    void setPitchBearing(double pitch, double bearing);
+    void setPitchBearing(double pitch, double bearing) noexcept;
 };
 
 } // namespace mbgl

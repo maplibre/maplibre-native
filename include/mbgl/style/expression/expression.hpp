@@ -29,23 +29,23 @@ public:
 class EvaluationContext {
 public:
     EvaluationContext() = default;
-    explicit EvaluationContext(float zoom_)
+    explicit EvaluationContext(float zoom_) noexcept
         : zoom(zoom_) {}
-    explicit EvaluationContext(GeometryTileFeature const* feature_)
+    explicit EvaluationContext(GeometryTileFeature const* feature_) noexcept
         : feature(feature_) {}
-    EvaluationContext(float zoom_, GeometryTileFeature const* feature_)
+    EvaluationContext(float zoom_, GeometryTileFeature const* feature_) noexcept
         : zoom(zoom_),
           feature(feature_) {}
-    EvaluationContext(std::optional<mbgl::Value> accumulated_, GeometryTileFeature const* feature_)
+    EvaluationContext(std::optional<mbgl::Value> accumulated_, GeometryTileFeature const* feature_) noexcept(false)
         : accumulated(std::move(accumulated_)),
           feature(feature_) {}
-    EvaluationContext(float zoom_, GeometryTileFeature const* feature_, const FeatureState* state_)
+    EvaluationContext(float zoom_, GeometryTileFeature const* feature_, const FeatureState* state_) noexcept
         : zoom(zoom_),
           feature(feature_),
           featureState(state_) {}
     EvaluationContext(std::optional<float> zoom_,
                       GeometryTileFeature const* feature_,
-                      std::optional<double> colorRampParameter_)
+                      std::optional<double> colorRampParameter_) noexcept
         : zoom(std::move(zoom_)),
           feature(feature_),
           colorRampParameter(std::move(colorRampParameter_)) {}
@@ -86,38 +86,45 @@ class Result : private variant<EvaluationError, T> {
 public:
     using variant<EvaluationError, T>::variant;
     using Value = T;
+    using Variant = variant<EvaluationError, T>;
 
     Result() = default;
 
+    static_assert(std::is_nothrow_constructible_v<Variant>);
+
     template <typename U>
     VARIANT_INLINE Result(U&& val)
-        : variant<EvaluationError, T>(val) {}
+        : Variant(std::forward<U>(val)) {}
 
-    explicit operator bool() const { return this->template is<T>(); }
+    template <typename U>
+    VARIANT_INLINE Result(const U& val)
+        : Variant(val) {}
+
+    explicit operator bool() const noexcept { return this->template is<T>(); }
 
     // optional does some type trait magic for this one, so this might
     // be problematic as is.
-    const T* operator->() const {
+    const T* operator->() const noexcept {
         assert(this->template is<T>());
         return std::addressof(this->template get<T>());
     }
 
-    T* operator->() {
+    T* operator->() noexcept {
         assert(this->template is<T>());
         return std::addressof(this->template get<T>());
     }
 
-    T& operator*() {
+    T& operator*() noexcept {
         assert(this->template is<T>());
         return this->template get<T>();
     }
 
-    const T& operator*() const {
+    const T& operator*() const noexcept {
         assert(this->template is<T>());
         return this->template get<T>();
     }
 
-    const EvaluationError& error() const {
+    const EvaluationError& error() const noexcept {
         assert(this->template is<EvaluationError>());
         return this->template get<EvaluationError>();
     }
@@ -133,7 +140,7 @@ public:
         : Result(toExpressionValue(arr)) {}
 
     // used only for the special (private) "error" expression
-    EvaluationResult(const type::ErrorType&) { assert(false); }
+    EvaluationResult(const type::ErrorType&) noexcept { assert(false); }
 };
 
 /**
@@ -217,11 +224,12 @@ public:
 
     virtual EvaluationResult evaluate(const EvaluationContext& params) const = 0;
     virtual void eachChild(const std::function<void(const Expression&)>&) const = 0;
-    virtual bool operator==(const Expression&) const = 0;
-    bool operator!=(const Expression& rhs) const { return !operator==(rhs); }
 
-    Kind getKind() const { return kind; }
-    const type::Type& getType() const { return type; }
+    virtual bool operator==(const Expression&) const = 0;
+    bool operator!=(const Expression& rhs) const noexcept { return !operator==(rhs); }
+
+    Kind getKind() const noexcept { return kind; };
+    const type::Type& getType() const noexcept { return type; };
 
     EvaluationResult evaluate(std::optional<float> zoom,
                               const Feature& feature,
@@ -258,33 +266,47 @@ public:
 
 protected:
     template <typename T>
-    static bool childrenEqual(const T& lhs, const T& rhs) {
+    static bool childrenEqual(const T& lhs, const T& rhs) noexcept {
         if (lhs.size() != rhs.size()) return false;
         for (auto leftChild = lhs.begin(), rightChild = rhs.begin(); leftChild != lhs.end();
              leftChild++, rightChild++) {
-            if (!Expression::childEqual(*leftChild, *rightChild)) return false;
+            if (!Expression::childEqual(*leftChild, *rightChild)) {
+                return false;
+            }
         }
         return true;
     }
 
-    static bool childEqual(const std::unique_ptr<Expression>& lhs, const std::unique_ptr<Expression>& rhs) {
+    static bool childEqual(const std::unique_ptr<Expression>& lhs, const std::unique_ptr<Expression>& rhs) noexcept {
         return *lhs == *rhs;
     }
 
-    template <typename T>
+    template <typename T, typename = std::enable_if_t<std::is_scalar_v<T>>>
     static bool childEqual(const std::pair<T, std::unique_ptr<Expression>>& lhs,
-                           const std::pair<T, std::unique_ptr<Expression>>& rhs) {
+                           const std::pair<T, std::unique_ptr<Expression>>& rhs) noexcept {
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
 
-    template <typename T>
+    template <typename T, typename = std::enable_if_t<std::is_scalar_v<T>>, typename = void>
     static bool childEqual(const std::pair<T, std::shared_ptr<Expression>>& lhs,
-                           const std::pair<T, std::shared_ptr<Expression>>& rhs) {
+                           const std::pair<T, std::shared_ptr<Expression>>& rhs) noexcept {
+        return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
+    }
+
+    template <typename T, typename = std::enable_if_t<!std::is_scalar_v<T>>>
+    static bool childEqual(const std::pair<T, std::shared_ptr<Expression>>& lhs,
+                           const std::pair<T, std::shared_ptr<Expression>>& rhs) noexcept {
+#if __clang_major__ > 16
+        // On older compilers, this assignment doesn't do overload resolution
+        // in the same way that `lhs==rhs` does and produces ambiguity errors.
+        bool (*equality_method)(const T&, const T&) noexcept = &std::operator==;
+        static_assert(std::is_nothrow_invocable_v<decltype(equality_method), const T&, const T&>);
+#endif
         return lhs.first == rhs.first && *(lhs.second) == *(rhs.second);
     }
 
     static bool childEqual(const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& lhs,
-                           const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& rhs) {
+                           const std::pair<std::unique_ptr<Expression>, std::unique_ptr<Expression>>& rhs) noexcept {
         return *(lhs.first) == *(rhs.first) && *(lhs.second) == *(rhs.second);
     }
 

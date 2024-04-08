@@ -41,7 +41,7 @@ public:
 
     template <class... Us>
     IndexedTuple(Us&&... other)
-        : std::tuple<Ts...>(std::forward<Us>(other)...){};
+        : std::tuple<Ts...>(std::forward<Us>(other)...) {}
 
     template <class... Js, class... Us>
     IndexedTuple<TypeList<Is..., Js...>, TypeList<Ts..., Us...>> concat(
@@ -54,7 +54,9 @@ public:
         return static_cast<const std::tuple<Ts...>&>(*this) == static_cast<const std::tuple<Ts...>&>(other);
     }
 
-    bool operator!=(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const { return !(*this == other); }
+    bool operator!=(const IndexedTuple<TypeList<Is...>, TypeList<Ts...>>& other) const noexcept {
+        return !(*this == other);
+    }
 };
 
 template <class, class T>

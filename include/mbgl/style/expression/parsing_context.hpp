@@ -91,7 +91,7 @@ public:
 
     std::string getKey() const { return key; }
     std::optional<type::Type> getExpected() const { return expected; }
-    const std::vector<ParsingError>& getErrors() const { return *errors; }
+    const std::vector<ParsingError>& getErrors() const noexcept { return *errors; }
     std::string getCombinedErrors() const;
 
     /**
@@ -150,7 +150,7 @@ public:
         ctx.errors->clear();
     }
 
-    void clearErrors() { errors->clear(); }
+    void clearErrors() noexcept { errors->clear(); }
 
 private:
     ParsingContext(std::string key_,
@@ -177,7 +177,7 @@ private:
     std::shared_ptr<std::vector<ParsingError>> errors;
 };
 
-bool isExpression(const std::string&);
+bool isExpression(const std::string&) noexcept;
 
 } // namespace expression
 } // namespace style

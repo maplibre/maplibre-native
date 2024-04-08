@@ -27,7 +27,7 @@ unsigned long BackgroundLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 
-const BackgroundLayer::Impl& BackgroundLayerProperties::layerImpl() const {
+const BackgroundLayer::Impl& BackgroundLayerProperties::layerImpl() const noexcept {
     return static_cast<const BackgroundLayer::Impl&>(*baseImpl);
 }
 
