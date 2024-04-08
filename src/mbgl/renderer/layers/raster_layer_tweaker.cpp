@@ -57,6 +57,20 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
                 const gfx::ImageDrawableData& imageData = static_cast<const gfx::ImageDrawableData&>(*data);
 
                 matrix = imageData.matrix;
+                mat4 projMatrix = parameters.transformParams.alignedProjMatrix;
+
+#if !MLN_RENDER_BACKEND_OPENGL
+                // If this drawable is participating in depth testing, offset the
+                // projection matrix NDC depth range for the drawable's layer and sublayer.
+                if (!drawable.getIs3D() && drawable.getEnableDepth()) {
+                    projMatrix[14] -= ((1 + drawable.getLayerIndex()) * PaintParameters::numSublayers -
+                                       drawable.getSubLayerIndex()) *
+                                      PaintParameters::depthEpsilon;
+                }
+#endif
+
+                matrix::multiply(matrix, projMatrix, matrix);
+
             } else {
                 Log::Error(Event::General, "Invalid raster layer drawable: neither tile id nor image data is set.");
                 return;
