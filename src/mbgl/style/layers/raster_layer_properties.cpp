@@ -25,7 +25,7 @@ unsigned long RasterLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 
-const RasterLayer::Impl& RasterLayerProperties::layerImpl() const {
+const RasterLayer::Impl& RasterLayerProperties::layerImpl() const noexcept {
     return static_cast<const RasterLayer::Impl&>(*baseImpl);
 }
 

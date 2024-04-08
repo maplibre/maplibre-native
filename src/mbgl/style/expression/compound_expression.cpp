@@ -1247,14 +1247,10 @@ EvaluationResult CompoundExpression::evaluate(const EvaluationContext& evaluatio
     return signature.apply(evaluationParams, args);
 }
 
-std::optional<std::size_t> CompoundExpression::getParameterCount() const {
+std::optional<std::size_t> CompoundExpression::getParameterCount() const noexcept {
     return signature.params.match(
-        [&](const VarargsType&) -> std::optional<std::size_t> { return std::nullopt; },
-        [&](const std::vector<type::Type>& p) -> std::optional<std::size_t> { return p.size(); });
-}
-
-std::vector<std::optional<Value>> CompoundExpression::possibleOutputs() const {
-    return {std::nullopt};
+        [&](const VarargsType&) noexcept -> std::optional<std::size_t> { return std::nullopt; },
+        [&](const std::vector<type::Type>& p) noexcept -> std::optional<std::size_t> { return p.size(); });
 }
 
 void CompoundExpression::eachChild(const std::function<void(const Expression&)>& visit) const {
@@ -1263,7 +1259,7 @@ void CompoundExpression::eachChild(const std::function<void(const Expression&)>&
     }
 }
 
-bool CompoundExpression::operator==(const Expression& e) const {
+bool CompoundExpression::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::CompoundExpression) {
         auto rhs = static_cast<const CompoundExpression*>(&e);
         return signature.name == rhs->signature.name && signature.result == rhs->signature.result &&
@@ -1272,7 +1268,7 @@ bool CompoundExpression::operator==(const Expression& e) const {
     return false;
 }
 
-bool CompoundExpression::exists(const std::string& name) {
+bool CompoundExpression::exists(const std::string& name) noexcept {
     return compoundExpressionRegistry.contains(name.c_str());
 }
 

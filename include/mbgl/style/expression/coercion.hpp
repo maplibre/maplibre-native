@@ -21,7 +21,7 @@ public:
 
     mbgl::Value serialize() const override;
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
