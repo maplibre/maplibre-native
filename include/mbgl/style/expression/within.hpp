@@ -10,7 +10,6 @@ namespace style {
 namespace expression {
 
 class Within final : public Expression {
-
 public:
     explicit Within(GeoJSON geojson, Feature::geometry_type geometries_);
 
