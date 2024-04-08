@@ -346,7 +346,7 @@ public:
           opacity(opacity_) {}
     ~OutlineDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override{};
+    void init(gfx::Drawable&) override {};
 
     virtual void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
