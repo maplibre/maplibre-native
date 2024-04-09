@@ -59,6 +59,8 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+      - "package.json"
+      - "package-lock.json"
 
 concurrency:
   # cancel jobs on PRs only
