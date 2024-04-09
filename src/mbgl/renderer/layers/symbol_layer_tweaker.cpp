@@ -85,13 +85,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idSymbolDynamicUBO, &dynamicUBO, context);
 
-    /*if (!dynamicBuffer) {
-        dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
-    } else {
-        dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
-    }
-    layerUniforms.set(idSymbolDynamicUBO, dynamicBuffer);*/
-
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
