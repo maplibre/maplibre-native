@@ -32,6 +32,7 @@ ios:
   - 'BUILD.bazel'
   - '.bazelrc'
   - '.bazelversion'
+  - 'pnpm-lock.yaml'
 android:
   - 'CMakeLists.txt'
   - 'platform/android/**'
