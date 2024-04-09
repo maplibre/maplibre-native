@@ -373,7 +373,7 @@ public:
         template <class P>
         static bool updateGPUExpression(gfx::UniqueGPUExpression& expr,
                                         const PropertyValue<P>& val,
-                                        TimePoint now,
+                                        TimePoint /*now*/,
                                         bool intZoom) {
             if (val.isExpression() && val.asExpression().isGPUCapable()) {
                 if (!expr) {
