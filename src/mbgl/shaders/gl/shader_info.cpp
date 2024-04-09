@@ -299,9 +299,9 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::LineGradientShader, gfx::Ba
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LineGradientShader, gfx::Backend::Type::OpenGL>::uniformBlocks =
     {
         UniformBlockInfo{"LineDynamicUBO", idLineDynamicUBO},
-        UniformBlockInfo{"LineGradientUBO", idLineGradientUBO},
-        UniformBlockInfo{"LineGradientPropertiesUBO", idLineGradientPropertiesUBO},
-        UniformBlockInfo{"LineGradientInterpolationUBO", idLineGradientInterpolationUBO},
+        UniformBlockInfo{"LineGradientUBO", idLineUBO},
+        UniformBlockInfo{"LineGradientPropertiesUBO", idLinePropertiesUBO},
+        UniformBlockInfo{"LineGradientInterpolationUBO", idLineInterpolationUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::LineGradientShader, gfx::Backend::Type::OpenGL>::textures = {
     TextureInfo{"u_image", idLineImageTexture},
@@ -322,10 +322,10 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::LinePatternShader, gfx::Bac
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LinePatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks =
     {
         UniformBlockInfo{"LineDynamicUBO", idLineDynamicUBO},
-        UniformBlockInfo{"LinePatternUBO", idLinePatternUBO},
-        UniformBlockInfo{"LinePatternPropertiesUBO", idLinePatternPropertiesUBO},
-        UniformBlockInfo{"LinePatternInterpolationUBO", idLinePatternInterpolationUBO},
-        UniformBlockInfo{"LinePatternTilePropertiesUBO", idLinePatternTilePropertiesUBO},
+        UniformBlockInfo{"LinePatternUBO", idLineUBO},
+        UniformBlockInfo{"LinePatternPropertiesUBO", idLinePropertiesUBO},
+        UniformBlockInfo{"LinePatternInterpolationUBO", idLineInterpolationUBO},
+        UniformBlockInfo{"LinePatternTilePropertiesUBO", idLineTilePropertiesUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::LinePatternShader, gfx::Backend::Type::OpenGL>::textures = {
     TextureInfo{"u_image", idLineImageTexture},
@@ -345,9 +345,9 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::LineSDFShader, gfx::Backend
 };
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LineSDFShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
     UniformBlockInfo{"LineDynamicUBO", idLineDynamicUBO},
-    UniformBlockInfo{"LineSDFUBO", idLineSDFUBO},
-    UniformBlockInfo{"LineSDFPropertiesUBO", idLineSDFPropertiesUBO},
-    UniformBlockInfo{"LineSDFInterpolationUBO", idLineSDFInterpolationUBO},
+    UniformBlockInfo{"LineSDFUBO", idLineUBO},
+    UniformBlockInfo{"LineSDFPropertiesUBO", idLinePropertiesUBO},
+    UniformBlockInfo{"LineSDFInterpolationUBO", idLineInterpolationUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::LineSDFShader, gfx::Backend::Type::OpenGL>::textures = {
     TextureInfo{"u_image", idLineImageTexture},
