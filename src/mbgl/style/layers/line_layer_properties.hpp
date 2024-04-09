@@ -125,7 +125,7 @@ public:
 
     expression::Dependency getDependencies() const noexcept override;
 
-    const LineLayer::Impl& layerImpl() const;
+    const LineLayer::Impl& layerImpl() const noexcept;
     // Data members.
     CrossfadeParameters crossfade;
     LinePaintProperties::PossiblyEvaluated evaluated;

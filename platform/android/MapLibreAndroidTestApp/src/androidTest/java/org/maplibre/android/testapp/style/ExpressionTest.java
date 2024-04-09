@@ -1,7 +1,7 @@
 package org.maplibre.android.testapp.style;
 
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.Point;
+import org.maplibre.geojson.Feature;
+import org.maplibre.geojson.Point;
 import org.maplibre.android.geometry.LatLng;
 import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.layers.CircleLayer;

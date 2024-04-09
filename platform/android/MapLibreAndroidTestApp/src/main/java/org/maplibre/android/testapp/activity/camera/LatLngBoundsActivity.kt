@@ -5,9 +5,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.FeatureCollection.fromJson
-import com.mapbox.geojson.Point
+import org.maplibre.geojson.FeatureCollection
+import org.maplibre.geojson.FeatureCollection.fromJson
+import org.maplibre.geojson.Point
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.MapLibreMap

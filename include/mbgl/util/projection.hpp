@@ -40,9 +40,9 @@ public:
 class Projection {
 public:
     // Map pixel width at given scale.
-    static double worldSize(double scale) { return scale * util::tileSize_D; }
+    static double worldSize(double scale) noexcept { return scale * util::tileSize_D; }
 
-    static double getMetersPerPixelAtLatitude(double lat, double zoom) {
+    static double getMetersPerPixelAtLatitude(double lat, double zoom) noexcept {
         const double constrainedZoom = util::clamp(zoom, util::MIN_ZOOM, util::MAX_ZOOM);
         const double constrainedScale = std::pow(2.0, constrainedZoom);
         const double constrainedLatitude = util::clamp(lat, -util::LATITUDE_MAX, util::LATITUDE_MAX);
@@ -50,7 +50,7 @@ public:
                worldSize(constrainedScale);
     }
 
-    static ProjectedMeters projectedMetersForLatLng(const LatLng& latLng) {
+    static ProjectedMeters projectedMetersForLatLng(const LatLng& latLng) noexcept {
         const double constrainedLatitude = util::clamp(latLng.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX);
         const double constrainedLongitude = util::clamp(latLng.longitude(), -util::LONGITUDE_MAX, util::LONGITUDE_MAX);
 
@@ -74,10 +74,12 @@ public:
         return {latitude, longitude};
     }
 
-    static Point<double> project(const LatLng& latLng, double scale) { return project_(latLng, worldSize(scale)); }
+    static Point<double> project(const LatLng& latLng, double scale) noexcept {
+        return project_(latLng, worldSize(scale));
+    }
 
     /// Returns point on tile
-    static Point<double> project(const LatLng& latLng, int32_t zoom) { return project_(latLng, 1 << zoom); }
+    static Point<double> project(const LatLng& latLng, int32_t zoom) noexcept { return project_(latLng, 1 << zoom); }
 
     static LatLng unproject(const Point<double>& p, double scale, LatLng::WrapMode wrapMode = LatLng::Unwrapped) {
         auto p2 = p * util::DEGREES_MAX / worldSize(scale);
@@ -87,7 +89,7 @@ public:
     }
 
 private:
-    static Point<double> project_(const LatLng& latLng, double worldSize) {
+    static Point<double> project_(const LatLng& latLng, double worldSize) noexcept {
         const double latitude = util::clamp(latLng.latitude(), -util::LATITUDE_MAX, util::LATITUDE_MAX);
         return Point<double>{util::LONGITUDE_MAX + latLng.longitude(),
                              util::LONGITUDE_MAX -

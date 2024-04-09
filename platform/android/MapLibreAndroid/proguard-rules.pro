@@ -23,7 +23,7 @@
 -dontwarn org.codehaus.**
 
 # config for mapbox-sdk-geojson:3.0.1
--keep class com.mapbox.geojson.** { *; }
+-keep class org.maplibre.geojson.** { *; }
 -dontwarn com.google.auto.value.**
 
 # config for additional notes

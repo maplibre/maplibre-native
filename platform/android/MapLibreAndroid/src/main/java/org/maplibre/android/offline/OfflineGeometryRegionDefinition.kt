@@ -3,9 +3,9 @@ package org.maplibre.android.offline
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.Keep
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.Geometry
-import com.mapbox.turf.TurfMeasurement
+import org.maplibre.geojson.Feature
+import org.maplibre.geojson.Geometry
+import org.maplibre.turf.TurfMeasurement
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.geometry.LatLngBounds.Companion.from
 

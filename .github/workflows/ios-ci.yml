@@ -37,7 +37,7 @@ jobs:
       - name: Get all iOS files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files-yaml
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@v44
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -194,9 +194,23 @@ jobs:
           folder: build/docs
           target-folder: ios/latest/
 
+  ios-release:
+    runs-on: macos-14
+    needs: ios-build
+    if: github.ref == 'refs/heads/main'
+    defaults:
+      run:
+        working-directory: platform/ios
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
       - name: VERSION file changed
         id: version-file-ios-changed
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@v44
         with:
           files: platform/ios/VERSION
 
@@ -204,13 +218,21 @@ jobs:
       - name: Should make release?
         if: |
           github.event.inputs.release == 'full' || github.event.inputs.release == 'pre' ||
-          (github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.version-file-ios-changed.outputs.any_changed == 'true')
+          (github.event_name == 'push' && steps.version-file-ios-changed.outputs.any_changed == 'true')
         run: echo make_release=true >> "$GITHUB_ENV"
 
       - name: Build XCFramework
+        if: env.make_release
         run: |
-          bazel build --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
+          bazel build --compilation_mode=opt --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
+          
+      - name: Create .zip with debug symbols
+        if: env.make_release
+        working-directory: ./bazel-bin/platform/ios/MapLibre.dynamic_dsyms
+        run: |
+          zip MapLibre_ios_device.framework.dSYM.zip MapLibre_ios_device.framework.dSYM/Contents/Resources/DWARF/MapLibre_ios_device MapLibre_ios_device.framework.dSYM/Contents/Info.plist
+          echo debug_symbols_ios="$(realpath MapLibre_ios_device.framework.dSYM.zip)" >> "$GITHUB_ENV"
 
       - name: Get version (release)
         if: github.event.inputs.release == 'full' || steps.version-file-ios-changed.outputs.any_changed == 'true'
@@ -229,6 +251,13 @@ jobs:
         run: |
           awk '/^##/ { p = 0 }; p == 1 { print }; $0 == "${{ env.changelog_version_heading }}" { p = 1 };' CHANGELOG.md > changelog_for_version.md
           cat changelog_for_version.md
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-west-2
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
 
       - name: Upload changelog to S3
         if: env.make_release
@@ -251,10 +280,12 @@ jobs:
       - name: Release (GitHub)
         if: env.make_release
         id: github_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: ios-v${{ env.version }}
-          files: MapLibre.dynamic.xcframework.zip
+          files: |
+            MapLibre.dynamic.xcframework.zip
+            ${{ env.debug_symbols_ios }}
           tag_name: ios-v${{ env.version }}
           prerelease: ${{ !github.event.inputs.release }}
           body_path: platform/ios/changelog_for_version.md

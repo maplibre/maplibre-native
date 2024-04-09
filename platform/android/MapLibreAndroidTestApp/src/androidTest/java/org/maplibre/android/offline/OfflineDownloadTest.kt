@@ -2,7 +2,7 @@ package org.maplibre.android.offline
 
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
-import com.mapbox.geojson.Point
+import org.maplibre.geojson.Point
 import org.maplibre.android.log.Logger
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.activity.FeatureOverviewActivity

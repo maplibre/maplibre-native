@@ -1,8 +1,8 @@
 package com.mapbox.mapboxsdk.style.expressions
 
 import android.graphics.Color
-import com.mapbox.geojson.Point
-import com.mapbox.geojson.Polygon
+import org.maplibre.geojson.Point
+import org.maplibre.geojson.Polygon
 import org.maplibre.android.style.expressions.Expression.FormatOption
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.PropertyValue

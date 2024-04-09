@@ -3,8 +3,8 @@ package org.maplibre.android.testapp.activity.style
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.mapbox.geojson.Point
-import com.mapbox.geojson.Polygon
+import org.maplibre.geojson.Point
+import org.maplibre.geojson.Polygon
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng

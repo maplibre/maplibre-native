@@ -12,7 +12,7 @@ namespace util {
 
 const SimpleIdentity SimpleIdentity::Empty = {emptyID};
 
-SimpleIdentity::SimpleIdentity()
+SimpleIdentity::SimpleIdentity() noexcept
     : uniqueID(nextId++) {}
 
 } // namespace util

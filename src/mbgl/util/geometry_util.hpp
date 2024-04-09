@@ -20,34 +20,34 @@ const GeometryBBox<double> DefaultDistanceBBox = std::array<double, 4>{{std::num
                                                                         -std::numeric_limits<double>::infinity()}};
 
 template <typename T>
-void updateBBox(GeometryBBox<T>& bbox, const Point<T>& p);
+void updateBBox(GeometryBBox<T>& bbox, const Point<T>& p) noexcept;
 
 // check if bbox1 is within bbox2
 template <typename T>
-bool boxWithinBox(const GeometryBBox<T>& bbox1, const GeometryBBox<T>& bbox2);
+bool boxWithinBox(const GeometryBBox<T>& bbox1, const GeometryBBox<T>& bbox2) noexcept;
 
 template <typename T>
-bool segmentIntersectSegment(const Point<T>& a, const Point<T>& b, const Point<T>& c, const Point<T>& d);
+bool segmentIntersectSegment(const Point<T>& a, const Point<T>& b, const Point<T>& c, const Point<T>& d) noexcept;
 
 template <typename T>
-bool rayIntersect(const Point<T>& p, const Point<T>& p1, const Point<T>& p2);
+bool rayIntersect(const Point<T>& p, const Point<T>& p1, const Point<T>& p2) noexcept;
 
 template <typename T>
-bool pointOnBoundary(const Point<T>& p, const Point<T>& p1, const Point<T>& p2);
+bool pointOnBoundary(const Point<T>& p, const Point<T>& p1, const Point<T>& p2) noexcept;
 
 template <typename T>
-bool lineIntersectPolygon(const Point<T>& p1, const Point<T>& p2, const Polygon<T>& polygon);
+bool lineIntersectPolygon(const Point<T>& p1, const Point<T>& p2, const Polygon<T>& polygon) noexcept;
 
 template <typename T>
-bool pointWithinPolygon(const Point<T>& point, const Polygon<T>& polygon, bool trueOnBoundary = false);
+bool pointWithinPolygon(const Point<T>& point, const Polygon<T>& polygon, bool trueOnBoundary = false) noexcept;
 
 template <typename T>
-bool pointWithinPolygons(const Point<T>& point, const MultiPolygon<T>& polygons, bool trueOnBoundary = false);
+bool pointWithinPolygons(const Point<T>& point, const MultiPolygon<T>& polygons, bool trueOnBoundary = false) noexcept;
 
 template <typename T>
-bool lineStringWithinPolygon(const LineString<T>& line, const Polygon<T>& polygon);
+bool lineStringWithinPolygon(const LineString<T>& line, const Polygon<T>& polygon) noexcept;
 
 template <typename T>
-bool lineStringWithinPolygons(const LineString<T>& line, const MultiPolygon<T>& polygons);
+bool lineStringWithinPolygons(const LineString<T>& line, const MultiPolygon<T>& polygons) noexcept;
 
 } // namespace mbgl

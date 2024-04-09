@@ -5,10 +5,10 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.FloatRange
 import androidx.annotation.Keep
-import com.mapbox.geojson.Point
+import org.maplibre.geojson.Point
 import org.maplibre.android.constants.GeometryConstants
-import com.mapbox.turf.TurfConstants
-import com.mapbox.turf.TurfMeasurement
+import org.maplibre.turf.TurfConstants
+import org.maplibre.turf.TurfMeasurement
 import kotlin.math.abs
 
 /**
