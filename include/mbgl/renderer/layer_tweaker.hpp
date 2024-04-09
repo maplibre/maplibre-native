@@ -62,7 +62,10 @@ public:
 protected:
     /// Determine whether this tweaker should apply to the given drawable
     bool checkTweakDrawable(const gfx::Drawable&) const;
-
+    
+    /// Multiplies with the projection matrix (either default, near clipped or aligned) for the given drawable
+    static void multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix, const PaintParameters& parameters, const gfx::Drawable& drawable, bool nearClipped, bool aligned);
+    
     std::string id;
     Immutable<style::LayerProperties> evaluatedProperties;
 
