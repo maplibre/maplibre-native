@@ -22,18 +22,18 @@
 using namespace std::string_literals;
 
 namespace mbgl {
-
-shaders::AttributeInfo::AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_)
-    : index(index_),
-      dataType(dataType_),
-      id(id_) {}
-
+shaders::UniformBlockInfo::UniformBlockInfo(bool vertex, bool fragment, std::size_t size, std::size_t id)
+    : shaders::UniformBlockInfo::UniformBlockInfo(id, vertex, fragment, size, id) {};
 shaders::UniformBlockInfo::UniformBlockInfo(
     std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
     : index(index_),
       vertex(vertex_),
       fragment(fragment_),
       size(size_),
+      id(id_) {}
+shaders::AttributeInfo::AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_)
+    : index(index_),
+      dataType(dataType_),
       id(id_) {}
 
 shaders::TextureInfo::TextureInfo(std::size_t index_, std::size_t id_)
