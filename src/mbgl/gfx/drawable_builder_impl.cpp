@@ -14,7 +14,7 @@ namespace gfx {
 
 using namespace shaders;
 
-#pragma mark Polylines
+// MARK: - Polylines
 
 DrawableBuilder::Impl::LineLayoutVertex DrawableBuilder::Impl::layoutVertex(
     Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar /*= 0*/) {
@@ -94,7 +94,7 @@ void DrawableBuilder::Impl::setupForPolylines(gfx::Context& context, gfx::Drawab
     sharedIndexes = std::make_shared<gfx::IndexVectorBase>(std::move(polylineIndexes));
 }
 
-#pragma mark Wide Vector Polylines
+// MARK: - Wide Vector Polylines
 
 namespace {
 inline void genInstanceLinks(
@@ -273,7 +273,7 @@ void DrawableBuilder::Impl::setupForWideVectors(gfx::Context& context, gfx::Draw
     builder.setSegments(gfx::Triangles(), sharedTriangles, triangleSegments.data(), triangleSegments.size());
 }
 
-#pragma mark Common
+// MARK: - Common
 
 bool DrawableBuilder::Impl::checkAndSetMode(Mode target) {
     if (target != mode && vertexCount()) {
