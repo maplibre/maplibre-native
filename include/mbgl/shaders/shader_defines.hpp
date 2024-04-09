@@ -42,9 +42,6 @@ static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backg
                                                        static_cast<size_t>(hillshadeUBOCount),
                                                        static_cast<size_t>(hillshadePrepareUBOCount),
                                                        static_cast<size_t>(lineUBOCount),
-                                                       static_cast<size_t>(lineGradientUBOCount),
-                                                       static_cast<size_t>(linePatternUBOCount),
-                                                       static_cast<size_t>(lineSDFUBOCount),
                                                        static_cast<size_t>(lineBasicUBOCount),
                                                        static_cast<size_t>(rasterUBOCount),
                                                        static_cast<size_t>(symbolUBOCount)});

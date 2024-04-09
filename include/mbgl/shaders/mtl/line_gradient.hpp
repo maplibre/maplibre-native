@@ -20,13 +20,13 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos_normal [[attribute(0)]];
-    uchar4 data [[attribute(1)]];
-    float2 blur [[attribute(2)]];
-    float2 opacity [[attribute(3)]];
-    float2 gapwidth [[attribute(4)]];
-    float2 offset [[attribute(5)]];
-    float2 width [[attribute(6)]];
+    short2 pos_normal [[attribute(5)]];
+    uchar4 data [[attribute(6)]];
+    float2 blur [[attribute(7)]];
+    float2 opacity [[attribute(8)]];
+    float2 gapwidth [[attribute(9)]];
+    float2 offset [[attribute(10)]];
+    float2 width [[attribute(11)]];
 };
 
 struct FragmentStage {
@@ -45,10 +45,10 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineDynamicUBO& dynamic [[buffer(7)]],
-                                device const LineGradientUBO& line [[buffer(8)]],
-                                device const LineGradientPropertiesUBO& props [[buffer(9)]],
-                                device const LineGradientInterpolationUBO& interp [[buffer(10)]]) {
+                                device const LineDynamicUBO& dynamic [[buffer(0)]],
+                                device const LineGradientUBO& line [[buffer(1)]],
+                                device const LineGradientPropertiesUBO& props [[buffer(2)]],
+                                device const LineGradientInterpolationUBO& interp [[buffer(3)]]) {
 
 #if !defined(HAS_UNIFORM_u_blur)
     const auto blur     = unpack_mix_float(vertx.blur,     interp.blur_t);
@@ -126,8 +126,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineGradientUBO& line [[buffer(8)]],
-                            device const LineGradientPropertiesUBO& props [[buffer(9)]],
+                            device const LineGradientUBO& line [[buffer(1)]],
+                            device const LineGradientPropertiesUBO& props [[buffer(2)]],
                             texture2d<float, access::sample> gradientTexture [[texture(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);

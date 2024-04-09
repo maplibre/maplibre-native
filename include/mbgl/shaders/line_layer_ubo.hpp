@@ -44,14 +44,6 @@ struct alignas(16) LineInterpolationUBO {
 };
 static_assert(sizeof(LineInterpolationUBO) % 16 == 0);
 
-enum {
-    idLineDynamicUBO,
-    idLineUBO,
-    idLinePropertiesUBO,
-    idLineInterpolationUBO,
-    lineUBOCount
-};
-
 //
 // Line gradient
 
@@ -76,14 +68,6 @@ struct alignas(16) LineGradientInterpolationUBO {
     float pad1, pad2, pad3;
 };
 static_assert(sizeof(LineGradientInterpolationUBO) % 16 == 0);
-
-enum {
-    idLineGradientDynamicUBO,
-    idLineGradientUBO,
-    idLineGradientPropertiesUBO,
-    idLineGradientInterpolationUBO,
-    lineGradientUBOCount
-};
 
 //
 // Line pattern
@@ -124,15 +108,6 @@ struct alignas(16) LinePatternTilePropertiesUBO {
     std::array<float, 4> pattern_to;
 };
 static_assert(sizeof(LinePatternTilePropertiesUBO) % 16 == 0);
-
-enum {
-    idLinePatternDynamicUBO,
-    idLinePatternUBO,
-    idLinePatternPropertiesUBO,
-    idLinePatternInterpolationUBO,
-    idLinePatternTilePropertiesUBO,
-    linePatternUBOCount
-};
 
 //
 // Line SDF
@@ -175,11 +150,12 @@ struct alignas(16) LineSDFInterpolationUBO {
 static_assert(sizeof(LineSDFInterpolationUBO) % 16 == 0);
 
 enum {
-    idLineSDFDynamicUBO,
-    idLineSDFUBO,
-    idLineSDFPropertiesUBO,
-    idLineSDFInterpolationUBO,
-    lineSDFUBOCount
+    idLineDynamicUBO,
+    idLineUBO,
+    idLinePropertiesUBO,
+    idLineInterpolationUBO,
+    idLineTilePropertiesUBO,
+    lineUBOCount
 };
 
 //
