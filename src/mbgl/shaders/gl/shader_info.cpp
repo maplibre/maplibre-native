@@ -35,8 +35,8 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::BackgroundPatternShader, gf
 };
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"BackgroundDrawableUBO", idBackgroundDrawableUBO},
-        UniformBlockInfo{"BackgroundLayerUBO", idBackgroundLayerUBO},
+        UniformBlockInfo{"BackgroundPatternDrawableUBO", idBackgroundDrawableUBO},
+        UniformBlockInfo{"BackgroundPatternLayerUBO", idBackgroundLayerUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::OpenGL>::textures = {
     TextureInfo{"u_image", idBackgroundImageTexture},
