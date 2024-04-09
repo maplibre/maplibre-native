@@ -84,7 +84,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idSymbolDynamicUBO, &dynamicUBO, context);
-    
+
     /*if (!dynamicBuffer) {
         dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
     } else {

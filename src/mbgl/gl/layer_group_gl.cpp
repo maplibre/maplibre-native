@@ -94,7 +94,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
 #endif
 
     bindUniformBuffers();
-    
+
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -123,7 +123,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
 
         drawable.draw(parameters);
     });
-    
+
     unbindUniformBuffers();
 }
 
@@ -179,7 +179,7 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
     }
 
     bindUniformBuffers();
-    
+
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -195,7 +195,7 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         drawable.draw(parameters);
     });
-    
+
     unbindUniformBuffers();
 }
 

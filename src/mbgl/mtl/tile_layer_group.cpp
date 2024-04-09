@@ -121,7 +121,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     }
 
     bindUniformBuffers(renderPass);
-    
+
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -141,7 +141,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         drawable.draw(parameters);
     });
-    
+
     unbindUniformBuffers(renderPass);
 }
 

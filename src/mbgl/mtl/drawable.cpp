@@ -367,7 +367,7 @@ void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
             const auto& block = uniformBlocks.get(id);
             if (!block) continue;
             const auto& uniformBuffer = getUniformBuffers().get(id);
-            //assert(uniformBuffer && "UBO missing, drawable skipped");
+            // assert(uniformBuffer && "UBO missing, drawable skipped");
             if (uniformBuffer) {
                 const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
                 const auto& resource = buffer.getBufferResource();

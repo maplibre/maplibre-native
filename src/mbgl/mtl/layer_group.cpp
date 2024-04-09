@@ -47,7 +47,7 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
 
     bindUniformBuffers(renderPass);
-    
+
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -59,7 +59,7 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         drawable.draw(parameters);
     });
-    
+
     unbindUniformBuffers(renderPass);
 }
 

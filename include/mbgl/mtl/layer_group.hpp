@@ -21,15 +21,11 @@ public:
 
     void upload(gfx::UploadPass&) override;
     void render(RenderOrchestrator&, PaintParameters&) override;
-    
-    const gfx::UniformBufferArray& getUniformBuffers() const override {
-        return uniformBuffers;
-    };
 
-    gfx::UniformBufferArray& mutableUniformBuffers() override {
-        return uniformBuffers;
-    };
-    
+    const gfx::UniformBufferArray& getUniformBuffers() const override { return uniformBuffers; };
+
+    gfx::UniformBufferArray& mutableUniformBuffers() override { return uniformBuffers; };
+
     void bindUniformBuffers(RenderPass&) const noexcept;
     void unbindUniformBuffers(RenderPass&) const noexcept {}
 

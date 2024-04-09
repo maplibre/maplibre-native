@@ -106,7 +106,7 @@ public:
 
     /// Get the mutable uniform buffer array attached to this layer group
     virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
-    
+
 protected:
     const Type type;
     bool enabled = true;

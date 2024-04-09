@@ -23,7 +23,7 @@ using namespace std::string_literals;
 
 namespace mbgl {
 shaders::UniformBlockInfo::UniformBlockInfo(bool vertex, bool fragment, std::size_t size, std::size_t id)
-    : shaders::UniformBlockInfo::UniformBlockInfo(id, vertex, fragment, size, id) {};
+    : shaders::UniformBlockInfo::UniformBlockInfo(id, vertex, fragment, size, id){};
 shaders::UniformBlockInfo::UniformBlockInfo(
     std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
     : index(index_),
