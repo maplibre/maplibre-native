@@ -32,17 +32,11 @@ struct FragmentStage {
 
 struct alignas(16) BackgroundDrawableUBO {
     float4x4 matrix;
-    float2 pixel_coord_upper;
-    float2 pixel_coord_lower;
-    float tile_units_to_pixels;
-    float pad1, pad2, pad3;
 };
 struct alignas(16) BackgroundLayerUBO {
     float4 color;
     float opacity;
-    bool overdrawInspector;
-    uint8_t pad1, pad2, pad3;
-    float pad4, pad5;
+    float pad1, pad2, pad3;
 };
 
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],

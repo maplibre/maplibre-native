@@ -29,14 +29,14 @@ struct FragmentStage {
     float2 pos_b;
 };
 
-struct alignas(16) BackgroundDrawableUBO {
+struct alignas(16) BackgroundPatternDrawableUBO {
     float4x4 matrix;
     float2 pixel_coord_upper;
     float2 pixel_coord_lower;
     float tile_units_to_pixels;
     float pad1, pad2, pad3;
 };
-struct alignas(16) BackgroundLayerUBO {
+struct alignas(16) BackgroundPatternLayerUBO {
     float2 pattern_tl_a;
     float2 pattern_br_a;
     float2 pattern_tl_b;
@@ -48,14 +48,12 @@ struct alignas(16) BackgroundLayerUBO {
     float scale_b;
     float mix;
     float opacity;
-    bool overdrawInspector;
-    uint8_t pad1, pad2, pad3;
-    float pad4;
+    float pad1, pad2;
 };
 
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
-                                device const BackgroundDrawableUBO& drawableUBO [[buffer(0)]],
-                                device const BackgroundLayerUBO& layerUBO [[buffer(1)]]) {
+                                device const BackgroundPatternDrawableUBO& drawableUBO [[buffer(0)]],
+                                device const BackgroundPatternLayerUBO& layerUBO [[buffer(1)]]) {
     const float2 pos = float2(in.position);
     const float2 pos_a = get_pattern_pos(drawableUBO.pixel_coord_upper,
                                          drawableUBO.pixel_coord_lower,
@@ -75,7 +73,7 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const BackgroundLayerUBO& layerUBO [[buffer(1)]],
+                            device const BackgroundPatternLayerUBO& layerUBO [[buffer(1)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
