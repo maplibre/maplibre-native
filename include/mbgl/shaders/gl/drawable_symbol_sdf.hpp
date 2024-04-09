@@ -42,7 +42,7 @@ layout (std140) uniform SymbolDynamicUBO {
     highp float pad0;
 };
 
-layout (std140) uniform SymbolDrawablePaintUBO {
+layout (std140) uniform SymbolPaintUBO {
     highp vec4 u_fill_color;
     highp vec4 u_halo_color;
     highp float u_opacity;
@@ -51,7 +51,7 @@ layout (std140) uniform SymbolDrawablePaintUBO {
     highp float u_padding;
 };
 
-layout (std140) uniform SymbolDrawableTilePropsUBO {
+layout (std140) uniform SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;
     bool u_pitch_with_map;
@@ -62,7 +62,7 @@ layout (std140) uniform SymbolDrawableTilePropsUBO {
     bool u_pad3;
 };
 
-layout (std140) uniform SymbolDrawableInterpolateUBO {
+layout (std140) uniform SymbolInterpolateUBO {
     highp float u_fill_color_t;
     highp float u_halo_color_t;
     highp float u_opacity_t;
@@ -213,7 +213,7 @@ layout (std140) uniform SymbolDynamicUBO {
     highp float pad0;
 };
 
-layout (std140) uniform SymbolDrawablePaintUBO {
+layout (std140) uniform SymbolPaintUBO {
     highp vec4 u_fill_color;
     highp vec4 u_halo_color;
     highp float u_opacity;
@@ -222,7 +222,7 @@ layout (std140) uniform SymbolDrawablePaintUBO {
     highp float u_padding;
 };
 
-layout (std140) uniform SymbolDrawableTilePropsUBO {
+layout (std140) uniform SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;
     bool u_pitch_with_map;
@@ -233,7 +233,7 @@ layout (std140) uniform SymbolDrawableTilePropsUBO {
     bool u_pad3;
 };
 
-layout (std140) uniform SymbolDrawableInterpolateUBO {
+layout (std140) uniform SymbolInterpolateUBO {
     highp float u_fill_color_t;
     highp float u_halo_color_t;
     highp float u_opacity_t;

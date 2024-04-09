@@ -108,7 +108,7 @@ void DrawableGL::bindUniformBuffers() const {
             const auto& block = uniformBlocks.get(id);
             if (!block) continue;
             const auto& uniformBuffer = getUniformBuffers().get(id);
-            assert(uniformBuffer && "UBO missing, drawable skipped");
+            /*assert(uniformBuffer && "UBO missing, drawable skipped");
             if (!uniformBuffer) {
                 using namespace std::string_literals;
                 const auto tileIDStr = getTileID() ? util::toString(*getTileID()) : "<no tile>";
@@ -117,8 +117,10 @@ void DrawableGL::bindUniformBuffers() const {
                                util::toString(getID()) + " / " + getName() + " / " + tileIDStr + ". skipping.");
                 assert(false);
                 continue;
+            }*/
+            if (uniformBuffer) {
+                block->bindBuffer(*uniformBuffer);
             }
-            block->bindBuffer(*uniformBuffer);
         }
     }
 }
