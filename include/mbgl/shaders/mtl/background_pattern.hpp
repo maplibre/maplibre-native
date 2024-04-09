@@ -20,7 +20,7 @@ struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>
 using namespace metal;
 
 struct VertexStage {
-    short2 position [[attribute(0)]];
+    short2 position [[attribute(2)]];
 };
 
 struct FragmentStage {
@@ -31,6 +31,10 @@ struct FragmentStage {
 
 struct alignas(16) BackgroundDrawableUBO {
     float4x4 matrix;
+    float2 pixel_coord_upper;
+    float2 pixel_coord_lower;
+    float tile_units_to_pixels;
+    float pad1, pad2, pad3;
 };
 struct alignas(16) BackgroundLayerUBO {
     float2 pattern_tl_a;
@@ -40,30 +44,28 @@ struct alignas(16) BackgroundLayerUBO {
     float2 texsize;
     float2 pattern_size_a;
     float2 pattern_size_b;
-    float2 pixel_coord_upper;
-    float2 pixel_coord_lower;
-    float tile_units_to_pixels;
     float scale_a;
     float scale_b;
     float mix;
     float opacity;
     bool overdrawInspector;
     uint8_t pad1, pad2, pad3;
+    float pad4;
 };
 
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
-                                device const BackgroundDrawableUBO& drawableUBO [[buffer(1)]],
-                                device const BackgroundLayerUBO& layerUBO [[buffer(2)]]) {
+                                device const BackgroundDrawableUBO& drawableUBO [[buffer(0)]],
+                                device const BackgroundLayerUBO& layerUBO [[buffer(1)]]) {
     const float2 pos = float2(in.position);
-    const float2 pos_a = get_pattern_pos(layerUBO.pixel_coord_upper,
-                                         layerUBO.pixel_coord_lower,
+    const float2 pos_a = get_pattern_pos(drawableUBO.pixel_coord_upper,
+                                         drawableUBO.pixel_coord_lower,
                                          layerUBO.scale_a * layerUBO.pattern_size_a,
-                                         layerUBO.tile_units_to_pixels,
+                                         drawableUBO.tile_units_to_pixels,
                                          pos);
-    const float2 pos_b = get_pattern_pos(layerUBO.pixel_coord_upper,
-                                         layerUBO.pixel_coord_lower,
+    const float2 pos_b = get_pattern_pos(drawableUBO.pixel_coord_upper,
+                                         drawableUBO.pixel_coord_lower,
                                          layerUBO.scale_b * layerUBO.pattern_size_b,
-                                         layerUBO.tile_units_to_pixels,
+                                         drawableUBO.tile_units_to_pixels,
                                          pos);
     return {
         .position = drawableUBO.matrix * float4(float2(in.position.xy), 0, 1),
@@ -73,7 +75,7 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const BackgroundLayerUBO& layerUBO [[buffer(2)]],
+                            device const BackgroundLayerUBO& layerUBO [[buffer(1)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)

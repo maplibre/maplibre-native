@@ -23,7 +23,7 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal> {
 using namespace metal;
 
 struct VertexStage {
-    short2 position [[attribute(0)]];
+    short2 position [[attribute(2)]];
 };
 
 struct FragmentStage {
@@ -32,6 +32,10 @@ struct FragmentStage {
 
 struct alignas(16) BackgroundDrawableUBO {
     float4x4 matrix;
+    float2 pixel_coord_upper;
+    float2 pixel_coord_lower;
+    float tile_units_to_pixels;
+    float pad1, pad2, pad3;
 };
 struct alignas(16) BackgroundLayerUBO {
     float4 color;
@@ -42,14 +46,14 @@ struct alignas(16) BackgroundLayerUBO {
 };
 
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
-                                device const BackgroundDrawableUBO& drawableUBO [[buffer(1)]]) {
+                                device const BackgroundDrawableUBO& drawableUBO [[buffer(0)]]) {
     return {
         .position = drawableUBO.matrix * float4(float2(in.position.xy), 0, 1)
     };
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const BackgroundLayerUBO& layerUBO [[buffer(2)]]) {
+                            device const BackgroundLayerUBO& layerUBO [[buffer(1)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
