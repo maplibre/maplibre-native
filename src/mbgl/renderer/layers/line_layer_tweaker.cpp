@@ -111,7 +111,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, context);
-    
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         const auto shader = drawable.getShader();
         if (!drawable.getTileID() || !shader || !checkTweakDrawable(drawable)) {
