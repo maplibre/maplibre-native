@@ -19,7 +19,7 @@ bool checkGPUCapable(const Expression& expression, const ZoomCurvePtr& zoomCurve
 }
 } // namespace
 
-PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expression> expression_) noexcept
+PropertyExpressionBase::PropertyExpressionBase(std::unique_ptr<expression::Expression> expression_)
     : expression(std::move(expression_)),
       zoomCurve(expression->has(Dependency::Zoom) ? expression::findZoomCurveChecked(*expression) : nullptr),
       useIntegerZoom_(false),
