@@ -25,7 +25,7 @@ unsigned long SymbolLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 
-const SymbolLayer::Impl& SymbolLayerProperties::layerImpl() const {
+const SymbolLayer::Impl& SymbolLayerProperties::layerImpl() const noexcept {
     return static_cast<const SymbolLayer::Impl&>(*baseImpl);
 }
 
