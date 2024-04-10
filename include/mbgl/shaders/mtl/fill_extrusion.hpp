@@ -42,7 +42,7 @@ struct alignas(16) FillExtrusionDrawableUBO {
 };
 static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16, "unexpected padding");
 
-struct alignas(16) FillExtrusionDrawablePropsUBO {
+struct alignas(16) FillExtrusionPropsUBO {
     /*  0 */ float4 color;
     /* 16 */ float4 light_color_pad;
     /* 32 */ float4 light_position_base;
@@ -54,20 +54,20 @@ struct alignas(16) FillExtrusionDrawablePropsUBO {
     /* 68 */ float pad2, pad3, pad4;
     /* 80 */
 };
-static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16, "unexpected padding");
+static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "unexpected padding");
 
 struct VertexStage {
-    short2 pos [[attribute(0)]];
-    short4 normal_ed [[attribute(1)]];
+    short2 pos [[attribute(4)]];
+    short4 normal_ed [[attribute(5)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(2)]];
+    float4 color [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(3)]];
+    float base [[attribute(7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(4)]];
+    float height [[attribute(8)]];
 #endif
 };
 
@@ -82,9 +82,9 @@ struct FragmentOutput {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const FillExtrusionDrawableUBO& fill [[buffer(5)]],
-                                device const FillExtrusionDrawablePropsUBO& props [[buffer(6)]],
-                                device const FillExtrusionInterpolateUBO& interp [[buffer(7)]]) {
+                                device const FillExtrusionDrawableUBO& fill [[buffer(0)]],
+                                device const FillExtrusionPropsUBO& props [[buffer(1)]],
+                                device const FillExtrusionInterpolateUBO& interp [[buffer(3)]]) {
 
 #if defined(HAS_UNIFORM_u_base)
     const auto base   = props.light_position_base.w;

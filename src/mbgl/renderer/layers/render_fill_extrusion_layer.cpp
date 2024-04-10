@@ -383,7 +383,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             0,
             0};
 
-        const FillExtrusionDrawableTilePropsUBO tilePropsUBO = {
+        const FillExtrusionTilePropsUBO tilePropsUBO = {
             /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
             /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
         };
@@ -396,7 +396,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(idFillExtrusionDrawableTilePropsUBO, &tilePropsUBO, context);
+            uniforms.createOrUpdate(idFillExtrusionTilePropsUBO, &tilePropsUBO, context);
             uniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
             return true;
         };
@@ -511,7 +511,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setLayerTweaker(layerTweaker);
 
                 auto& uniforms = drawable->mutableUniformBuffers();
-                uniforms.createOrUpdate(idFillExtrusionDrawableTilePropsUBO, &tilePropsUBO, context);
+                uniforms.createOrUpdate(idFillExtrusionTilePropsUBO, &tilePropsUBO, context);
                 uniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
 
                 tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
