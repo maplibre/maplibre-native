@@ -42,7 +42,9 @@ public:
     gfx::VertexVector<LineLayoutVertex> polylineVertices;
     gfx::IndexVector<gfx::Triangles> polylineIndexes;
 
+    std::shared_ptr<gfx::VertexVector<shaders::VertexTriWideVecB>> wideVectorVertices;
     gfx::VertexVector<shaders::VertexTriWideVecInstance> wideVectorInstanceData;
+    std::shared_ptr<gfx::IndexVector<gfx::Triangles>> wideVectorIndexes;
 
     std::vector<uint16_t> buildIndexes;
     std::shared_ptr<gfx::IndexVectorBase> sharedIndexes;
