@@ -82,6 +82,11 @@ jobs:
     env:
       BUILDTYPE: "Release"
 
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
