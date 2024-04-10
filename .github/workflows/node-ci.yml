@@ -32,7 +32,7 @@ on:
 
   pull_request:
     branches:
-      - opengl-2
+      - "*"
     paths:
       - CMakeLists.txt
       - "platform/linux/**"
@@ -82,9 +82,14 @@ jobs:
     env:
       BUILDTYPE: "Release"
 
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -194,7 +199,7 @@ jobs:
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
 
       - name: Cache cmake-node-module deps
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           # downloaded with platform/node/cmake/module.cmake
           path: build/headers
@@ -228,7 +233,7 @@ jobs:
 
       - name: Restore vcpkg cache (Windows)
         if: runner.os == 'Windows'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/platform/windows/vendor/vcpkg
@@ -251,7 +256,7 @@ jobs:
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: |
-          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+          cmake --build build -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)"
 
       - name: Build maplibre-native (Windows)
         if: runner.os == 'Windows'
