@@ -188,8 +188,8 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillExtrusionShader, gfx::B
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
         UniformBlockInfo{"FillExtrusionDrawableUBO", idFillExtrusionDrawableUBO},
-        UniformBlockInfo{"FillExtrusionDrawablePropsUBO", idFillExtrusionDrawablePropsUBO},
-        UniformBlockInfo{"FillExtrusionDrawableTilePropsUBO", idFillExtrusionDrawableTilePropsUBO},
+        UniformBlockInfo{"FillExtrusionPropsUBO", idFillExtrusionPropsUBO},
+        UniformBlockInfo{"FillExtrusionTilePropsUBO", idFillExtrusionTilePropsUBO},
         UniformBlockInfo{"FillExtrusionInterpolateUBO", idFillExtrusionInterpolateUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL>::textures = {};
@@ -207,8 +207,8 @@ const std::vector<AttributeInfo>
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
         UniformBlockInfo{"FillExtrusionDrawableUBO", idFillExtrusionDrawableUBO},
-        UniformBlockInfo{"FillExtrusionDrawablePropsUBO", idFillExtrusionDrawablePropsUBO},
-        UniformBlockInfo{"FillExtrusionDrawableTilePropsUBO", idFillExtrusionDrawableTilePropsUBO},
+        UniformBlockInfo{"FillExtrusionPropsUBO", idFillExtrusionPropsUBO},
+        UniformBlockInfo{"FillExtrusionTilePropsUBO", idFillExtrusionTilePropsUBO},
         UniformBlockInfo{"FillExtrusionInterpolateUBO", idFillExtrusionInterpolateUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::OpenGL>::textures = {

@@ -2,7 +2,7 @@ layout (location = 0) in vec2 a_pos;
 layout (location = 1) in vec4 a_normal_ed;
 out vec4 v_color;
 
-layout (std140) uniform FillExtrusionDrawableTilePropsUBO {
+layout (std140) uniform FillExtrusionTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
 };
@@ -23,7 +23,7 @@ layout (std140) uniform FillExtrusionDrawableUBO {
     highp float u_height_factor;
     highp float u_pad_drawable;
 };
-layout (std140) uniform FillExtrusionDrawablePropsUBO {
+layout (std140) uniform FillExtrusionPropsUBO {
     highp vec4 u_color;
     highp vec3 u_lightcolor;
     highp float u_pad1;
