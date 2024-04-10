@@ -166,8 +166,8 @@ IntersectInfo intersectLines(float2 a0, float2 a1, float2 b0, float2 b1)
         return { .valid = false };
     }
 
-    const float tA = (a0.x * a1.y - a0.y * a1.x);
-    const float tB = (b0.x * b1.y - b0.y * b1.x);
+    const float tA = wedge(a0, a1);
+    const float tB = wedge(b0, b1);
     const float2 inter = float2((tA * dB.x - dA.x * tB), (tA * dB.y - dA.y * tB)) / denom;
 
     return {
