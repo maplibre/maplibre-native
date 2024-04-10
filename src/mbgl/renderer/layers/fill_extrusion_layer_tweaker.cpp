@@ -57,7 +57,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         /* .pad = */ 0,
         0,
         0};
-    
+
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &paramsUBO, context);
 
