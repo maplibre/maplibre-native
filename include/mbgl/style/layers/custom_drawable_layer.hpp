@@ -113,6 +113,7 @@ public:
      * @brief Add a polyline
      *
      * @param coordinates in tile range
+     * @return true if the polyline was added
      */
     bool addPolyline(const GeometryCoordinates& coordinates);
 
@@ -120,6 +121,7 @@ public:
      * @brief Add a polyline
      *
      * @param coordinates Geographic coordinates
+     * @return true if the polyline was added
      */
     bool addPolyline(const LineString<double>& coordinates);
 
@@ -127,6 +129,7 @@ public:
      * @brief Add a multipolygon area fill
      *
      * @param geometry a collection of rings with optional holes
+     * @return true if the fill was added
      */
     bool addFill(const GeometryCollection& geometry);
 
@@ -134,6 +137,7 @@ public:
      * @brief Add a symbol
      *
      * @param point
+     * @return true if the symbol was added
      */
     bool addSymbol(const GeometryCoordinate& point);
 
