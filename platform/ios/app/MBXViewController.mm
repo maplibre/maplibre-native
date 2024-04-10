@@ -13,6 +13,8 @@
 #import "MBXState.h"
 #import "MLNSettings.h"
 
+#import "platform/ios/src/MLNMapView_Private.h"
+
 #import "CustomStyleLayerExample.h"
 
 #if MLN_DRAWABLE_RENDERER
@@ -238,9 +240,20 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     BOOL _isTouringWorld;
     BOOL _contentInsetsEnabled;
     UIEdgeInsets _originalContentInsets;
+
+    NSLayoutConstraint* _firstMapLayout;
+    NSArray<NSLayoutConstraint*>* _secondMapLayout;
 }
 
 // MARK: - Setup & Teardown
+
+- (instancetype)init {
+    if (self = [super init]) {
+        _firstMapLayout = nil;
+        _secondMapLayout = nil;
+    }
+    return self;
+}
 
 - (void)viewDidLoad
 {
@@ -1920,72 +1933,82 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         secondMapView.showsScale = YES;
         secondMapView.translatesAutoresizingMaskIntoConstraints = NO;
         secondMapView.tag = 2;
+
+        // Remove the main map bottom constraint
         for (NSLayoutConstraint *constraint in self.view.constraints)
         {
             if ((constraint.firstItem  == self.mapView && constraint.firstAttribute  == NSLayoutAttributeBottom) ||
                 (constraint.secondItem == self.mapView && constraint.secondAttribute == NSLayoutAttributeBottom))
             {
+                _firstMapLayout = constraint;
                 [self.view removeConstraint:constraint];
                 break;
             }
         }
+
+        // Place the second map in the bottom half of the view
+        _secondMapLayout = @[
+                [NSLayoutConstraint constraintWithItem:self.mapView
+                                             attribute:NSLayoutAttributeBottom
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeCenterY
+                                            multiplier:1
+                                              constant:0],
+                [NSLayoutConstraint constraintWithItem:secondMapView
+                                             attribute:NSLayoutAttributeCenterX
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeCenterX
+                                            multiplier:1
+                                              constant:0],
+                [NSLayoutConstraint constraintWithItem:secondMapView
+                                             attribute:NSLayoutAttributeWidth
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeWidth
+                                            multiplier:1
+                                              constant:0],
+                [NSLayoutConstraint constraintWithItem:secondMapView
+                                             attribute:NSLayoutAttributeTop
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeCenterY
+                                            multiplier:1
+                                              constant:0],
+            [secondMapView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]];
+
         [self.view addSubview:secondMapView];
-        [self.view addConstraints:@[
-            [NSLayoutConstraint constraintWithItem:self.mapView
-                                         attribute:NSLayoutAttributeBottom
-                                         relatedBy:NSLayoutRelationEqual
-                                            toItem:self.view
-                                         attribute:NSLayoutAttributeCenterY
-                                        multiplier:1
-                                          constant:0],
-            [NSLayoutConstraint constraintWithItem:secondMapView
-                                         attribute:NSLayoutAttributeCenterX
-                                         relatedBy:NSLayoutRelationEqual
-                                            toItem:self.view
-                                         attribute:NSLayoutAttributeCenterX
-                                        multiplier:1
-                                          constant:0],
-            [NSLayoutConstraint constraintWithItem:secondMapView
-                                         attribute:NSLayoutAttributeWidth
-                                         relatedBy:NSLayoutRelationEqual
-                                            toItem:self.view
-                                         attribute:NSLayoutAttributeWidth
-                                        multiplier:1
-                                          constant:0],
-            [NSLayoutConstraint constraintWithItem:secondMapView
-                                         attribute:NSLayoutAttributeTop
-                                         relatedBy:NSLayoutRelationEqual
-                                            toItem:self.view
-                                         attribute:NSLayoutAttributeCenterY
-                                        multiplier:1
-                                          constant:0],
-            [NSLayoutConstraint constraintWithItem:secondMapView
-                                         attribute:NSLayoutAttributeBottom
-                                         relatedBy:NSLayoutRelationEqual
-                                            toItem:self.view.safeAreaLayoutGuide.bottomAnchor
-                                         attribute:NSLayoutAttributeBottom
-                                        multiplier:1
-                                          constant:0],
-        ]];
+        [self.view addConstraints:_secondMapLayout];
+
+        secondMapView.styleURL = _mapView.styleURL;
+
+        __weak decltype(_mapView) weakMapView = _mapView;
+        __weak decltype(secondMapView) weakSecondMap = secondMapView;
+        auto moveComplete = ^{
+            weakSecondMap.camera = [_mapView cameraByTiltingToPitch:weakMapView.camera.pitch];
+        };
+
+        // Navigate the new map to the same view as the main one
+        [secondMapView setCenterCoordinate:_mapView.centerCoordinate
+                                 zoomLevel:_mapView.zoomLevel
+                                 direction:_mapView.direction
+                                  animated:YES
+                         completionHandler:moveComplete];
+
+        secondMapView.accessibilityIdentifier = @"Second Map";
+        secondMapView.accessibilityHint = @"Second Map";
+        secondMapView.accessibilityLabel = @"Second Map";
     } else {
-        NSMutableArray *constraintsToRemove = [NSMutableArray array];
         MLNMapView *secondMapView = (MLNMapView *)[self.view viewWithTag:2];
-        for (NSLayoutConstraint *constraint in self.view.constraints)
-        {
-            if (constraint.firstItem == secondMapView || constraint.secondItem == secondMapView)
-            {
-                [constraintsToRemove addObject:constraint];
-            }
-        }
-        [self.view removeConstraints:constraintsToRemove];
+
+        // Reset the layout to the original state
+        [self.view removeConstraints:_secondMapLayout];
+        [self.view addConstraint:_firstMapLayout];
+        _firstMapLayout = nil;
+        _secondMapLayout = nil;
+
         [secondMapView removeFromSuperview];
-        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.mapView
-                                                              attribute:NSLayoutAttributeBottom
-                                                              relatedBy:NSLayoutRelationEqual
-                                                                 toItem:self.view.safeAreaLayoutGuide.bottomAnchor
-                                                              attribute:NSLayoutAttributeTop
-                                                             multiplier:1
-                                                               constant:0]];
     }
 }
 
@@ -2033,24 +2056,71 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 {
     self.styleNames = [NSMutableArray array];
     self.styleURLs = [NSMutableArray array];
-    
+
+//    [self.styleNames addObject:@"LM Light"];
+//    [self.styleURLs addObject:[NSURL URLWithString:@"http://192.168.1.132:8000/LM_light.json"]];
+//
+//    [self.styleNames addObject:@"LM Dark"];
+//    [self.styleURLs addObject:[NSURL URLWithString:@"http://192.168.1.132:8000/LM_dark.json"]];
+//    
+//    [self.styleNames addObject:@"FB Light"];
+//    [self.styleURLs addObject:[NSURL URLWithString:@"https://external.xx.fbcdn.net/maps/vt/style/canterbury_1_0/?locale=en_US"]];
+
+//    [self.styleNames addObject:@"test"];
+//    [self.styleURLs addObject:[NSURL URLWithString:@"http://192.168.1.132:8080/style.json"]];
+
+//    [self.styleNames addObject:@"trangle1"];
+//    [self.styleURLs addObject:[NSURL URLWithString:@"http://192.168.1.132:8002/style.json"]];
+//
+//    [self.styleNames addObject:@"stencil"];
+//    [self.styleURLs addObject:[NSURL URLWithString:@"https://api.maptiler.com/maps/pastel/style.json?key=DK07xna3FmyH5aqaObhc"]];
+
+    //[self.styleNames addObject:@"map-text-depthtest"];
+    //[self.styleURLs addObject:[NSURL URLWithString:@"http://192.168.1.132:8002/style.json"]];
+
+    //[self.styleNames addObject:@"BG"];
+    //[self.styleURLs addObject:[NSURL URLWithString:@"https://gist.github.com/TimSylvester/5c0afbb8b605863f4db590fc4876e495/raw/1638d3793078da1483913c78a276d9d85461b65b/basic-bg-interp.json"]];
+    //[self.styleURLs addObject:[NSURL URLWithString:@"https://gist.github.com/TimSylvester/5c0afbb8b605863f4db590fc4876e495/raw/597e91ffee90e14a6bb937f324c37d4befd8fc4a/basic-bg-interp.json"]];
+    //[self.styleURLs addObject:[NSURL URLWithString:@"https://gist.github.com/TimSylvester/7a9c9767e70137c5837a3b6ed9481940/raw/20dc36445d4c4a9cb27830217d08d9ec2ecee40c/style.json"]];
+
+//    [self.styleNames addObject:@"1"];
+//    [self.styleURLs addObject:[NSURL URLWithString:@"https://gist.github.com/TimSylvester/98bf8a415c3e29215a6f23f151606c3c/raw/9dde21a22cd7af7f6ba0247a5989f92237763695/gistfile1.txt"]];
+//    [self.styleNames addObject:@"2"];
+//    [self.styleURLs addObject:[NSURL URLWithString:@"https://gist.github.com/TimSylvester/4d66b19dd22784028502b973618f9a12/raw/01ec2f83e00b9b652fdb193b98e823b2d8c959b7/gistfile1.txt"]];
+
     /// Style that does not require an `apiKey` nor any further configuration
     [self.styleNames addObject:@"MapLibre Basic"];
     [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
 
+//    [self.styleNames addObject:@"Hillshade"];
+//    [self.styleURLs addObject:[NSURL URLWithString:@"https://api.maptiler.com/maps/b33abf35-1ba5-46cb-b172-fdf3a718a5a7/style.json?key=G4MQXsYbLiUxOu3SV4lh"]];
+//
+//    [self.styleNames addObject:@"Heatmap"];
+//    [self.styleURLs addObject:[NSURL URLWithString:@"https://api.maptiler.com/maps/efd813d5-c532-4157-8953-47899b373eae/style.json?key=G4MQXsYbLiUxOu3SV4lh"]];
+// 
+    [self.styleNames addObject:@"FB Dark"];
+    [self.styleURLs addObject:[NSURL URLWithString:@"https://external.xx.fbcdn.net/maps/vt/style/dark/?locale=en_US"]];
+
+    [self.styleNames addObject:@"FB 3D"];
+    [self.styleURLs addObject:[NSURL URLWithString:@"https://external.xx.fbcdn.net/maps/vt/style/default_3d/?locale=en_US"]];
+
+#if 1
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];
     if (apiKey.length)
     {
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
-            
             for (MLNDefaultStyle* predefinedStyle in [MLNStyle predefinedStyles]){
-                [self.styleNames addObject:predefinedStyle.name];
-                [self.styleURLs addObject:predefinedStyle.url];
+//                if ([predefinedStyle.name isEqualToString:@"Bright"] ||
+//                    [predefinedStyle.name isEqualToString:@"Pastel"]) {
+                    [self.styleNames addObject:predefinedStyle.name];
+                    [self.styleURLs addObject:predefinedStyle.url];
+//                }
             }
         });
     }
+#endif
     
     NSAssert(self.styleNames.count == self.styleURLs.count, @"Style names and URLs don’t match.");
 }
@@ -2484,7 +2554,17 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self presentViewController:alert animated:YES completion:nil];
 }
 
+- (BOOL)isUITesting {
+    NSString* value = NSProcessInfo.processInfo.environment[@"UITesting"];
+    return value && [value isEqual: @"YES"];
+}
+
 - (void)saveCurrentMapState:(__unused NSNotification *)notification {
+
+    // saved changes to the settings can break UI tests, so always start from the defaults when testing
+    if ([self isUITesting]) {
+        return;
+    }
 
     // The following properties can change after the view loads so we need to save their
     // state before exiting the view controller.
@@ -2502,6 +2582,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 - (void)restoreMapState:(__unused NSNotification *)notification {
+    
+    if ([self isUITesting]) {
+        return;
+    }
+
     MBXState *currentState = [MBXStateManager sharedManager].currentState;
 
     self.mapView.camera = currentState.camera;

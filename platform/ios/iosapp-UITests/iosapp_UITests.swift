@@ -14,6 +14,7 @@ class iosapp_UITests: XCTestCase {
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         // UI tests must launch the application that they test.
+        app.launchEnvironment.updateValue("YES", forKey: "UITesting")
         app.launch()
 
         // In UI tests it is usually best to stop immediately when a failure occurs.
@@ -65,7 +66,33 @@ class iosapp_UITests: XCTestCase {
         sleep(1)
         add(screenshot(name: "Null Island, Zoom=0"))
     }
-    
+
+    /// Open and close the secondary map view a few times to ensure that the dynamic layout adjustment doesn't crash
+    func testSecondMap() {
+        let mapSettingsButton = app.navigationBars["MapLibre Basic"].buttons["Map settings"]
+
+        let showTimeout = 1.0
+        let hideTimeout = 10.0
+        let iterations = 3
+
+        let secondMapQuery = app.otherElements["Second Map"]
+        XCTAssert(!secondMapQuery.exists)
+
+        for _ in 0..<iterations {
+            mapSettingsButton.tap()
+            app.tables.staticTexts["Show Second Map"].tap()
+            XCTAssert(secondMapQuery.waitForExistence(timeout: showTimeout))
+
+            sleep(1)
+
+            mapSettingsButton.tap()
+            app.tables.staticTexts["Hide Second Map"].tap()
+
+            expectation(for: NSPredicate(format: "exists == 0"), evaluatedWith: secondMapQuery)
+            waitForExpectations(timeout: hideTimeout, handler: nil)
+        }
+    }
+
     func testRecord() {
         /// Use recording to get started writing UI tests.
         ///   Use `Editor` > `Start Recording UI Test` while your cursor is in this `func`
