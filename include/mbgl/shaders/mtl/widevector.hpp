@@ -412,10 +412,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
         return outVert;
     }
 
-    // Note: We're putting a color in the instance, but then it's hard to change
-    //  So we'll pull the color out of the basic drawable
-    // float4 color = vert.color;
-    // but actually get it from the uniform:
+    // Get the color from the uniform:
     float4 color = wideVec.color;
 
     outVert.color = color;
