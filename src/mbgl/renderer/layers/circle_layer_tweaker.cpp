@@ -40,7 +40,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         /* .padding = */ 0,
         0,
         0};
-    
+
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idCirclePaintParamsUBO, &paintParamsUBO, context);
 
@@ -64,7 +64,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
     }
     layerUniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
-    
+
     propertiesUpdated = false;
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
