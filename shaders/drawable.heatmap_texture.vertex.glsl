@@ -1,7 +1,7 @@
 layout (location = 0) in vec2 a_pos;
 out vec2 v_pos;
 
-layout (std140) uniform HeatmapTextureDrawableUBO {
+layout (std140) uniform HeatmapTexturePropsUBO {
     highp mat4 u_matrix;
     highp vec2 u_world;
     highp float u_opacity;

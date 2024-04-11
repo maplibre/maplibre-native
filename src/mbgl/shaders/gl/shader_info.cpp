@@ -234,7 +234,7 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::HeatmapTextureShader, gfx::
 };
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-        UniformBlockInfo{"HeatmapTextureDrawableUBO", idHeatmapTextureDrawableUBO},
+        UniformBlockInfo{"HeatmapTexturePropsUBO", idHeatmapTexturePropsUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::OpenGL>::textures = {
     TextureInfo{"u_image", idHeatmapImageTexture},

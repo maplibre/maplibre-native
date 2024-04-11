@@ -2,7 +2,7 @@ in vec2 v_pos;
 uniform sampler2D u_image;
 uniform sampler2D u_color_ramp;
 
-layout (std140) uniform HeatmapTextureDrawableUBO {
+layout (std140) uniform HeatmapTexturePropsUBO {
     highp mat4 u_matrix;
     highp vec2 u_world;
     highp float u_opacity;
