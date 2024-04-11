@@ -95,7 +95,7 @@ jobs:
 
       - name: Downgrade cmake version (MacOS)
         if: runner.os == 'MacOS'
-        shell: bash -leo pipefail {0}
+        shell: bash -e {0}
         run: |
           brew uninstall cmake
           mkdir ~/Downloads/CMake
