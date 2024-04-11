@@ -4,6 +4,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.3.2
+
+- Fix potential memory leak ([#2254](https://github.com/maplibre/maplibre-native/pull/2254)).
+
 ## 6.3.1
 
 - Add debug symbols to releases (see [Releases on GitHub](https://github.com/maplibre/maplibre-native/releases?q=ios&expanded=true)).
