@@ -35,7 +35,7 @@ void LayerGroup::upload(gfx::UploadPass& uploadPass) {
 }
 
 void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
-    if (!enabled) {
+    if (!enabled || !getDrawableCount() || !parameters.renderPass) {
         return;
     }
 
