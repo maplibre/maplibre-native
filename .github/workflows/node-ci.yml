@@ -82,6 +82,11 @@ jobs:
     env:
       BUILDTYPE: "Release"
 
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -90,6 +95,7 @@ jobs:
 
       - name: Downgrade cmake version (MacOS)
         if: runner.os == 'MacOS'
+        shell: bash -leo pipefail {0}
         run: |
           brew uninstall cmake
           mkdir ~/Downloads/CMake
@@ -241,7 +247,6 @@ jobs:
 
       - name: Configure maplibre-native (Windows)
         if: runner.os == 'Windows'
-        shell: bash -leo pipefail {0}
         run: |
           cmake . -B build \
             -G Ninja \
