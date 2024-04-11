@@ -93,6 +93,7 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Fixes an issue with cmake version causing 'Configure maplibre-native (MacOS)' step to fail - https://github.com/actions/runner-images/issues/9447#issuecomment-1989718069
       - name: Downgrade cmake version (MacOS)
         if: runner.os == 'MacOS'
         shell: bash -e {0}
