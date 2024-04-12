@@ -1516,6 +1516,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:rasterLayer];
 }
 
+- (NSURL*)radarImageURL:(int)index
+{
+    return [NSURL URLWithString:
+            [NSString stringWithFormat:@"https://maplibre.org/maplibre-gl-js/docs/assets/radar%d.gif", index]];
+}
+
 - (void)styleImageSource
 {
     MLNCoordinateQuad coordinateQuad = {
@@ -1524,7 +1530,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         { 37.936, -71.516 },
         { 46.437, -71.516 } };
 
-    MLNImageSource *imageSource = [[MLNImageSource alloc] initWithIdentifier:@"style-image-source-id" coordinateQuad:coordinateQuad URL:[NSURL URLWithString:@"https://maplibre.org/maplibre-gl-js-docs/assets/radar0.gif"]];
+    MLNImageSource *imageSource = [[MLNImageSource alloc] initWithIdentifier:@"style-image-source-id"
+                                                              coordinateQuad:coordinateQuad
+                                                                         URL:[self radarImageURL:0]];
 
     [self.mapView.style addSource:imageSource];
     
@@ -1536,18 +1544,31 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                                    selector:@selector(updateAnimatedImageSource:)
                                    userInfo:imageSource
                                     repeats:YES];
+
+    const CGFloat maximumPadding = 50;
+    const CGSize frameSize = self.mapView.frame.size;
+    const CGFloat yPadding = (frameSize.height / 5 <= maximumPadding) ? (frameSize.height / 5) : maximumPadding;
+    const CGFloat xPadding = (frameSize.width / 5 <= maximumPadding) ? (frameSize.width / 5) : maximumPadding;
+    [self.mapView setVisibleCoordinateBounds:MLNCoordinateBoundsMake(coordinateQuad.bottomLeft, coordinateQuad.topRight)
+                         edgePadding:UIEdgeInsetsMake(yPadding, xPadding, yPadding, xPadding)
+                            animated:YES
+                   completionHandler:nil];
 }
 
 
 - (void)updateAnimatedImageSource:(NSTimer *)timer
 {
-    static int radarSuffix = 0;
     MLNImageSource *imageSource = (MLNImageSource *)timer.userInfo;
-    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"https://maplibre.org/maplibre-gl-js-docs/assets/radar%d.gif", radarSuffix++]];
-    [imageSource setValue:url forKey:@"URL"];
-    if (radarSuffix > 3) {
-        radarSuffix = 0;
+    if (![self.mapView.style sourceWithIdentifier:imageSource.identifier]) {
+        // the source has been removed, probably by reloading the style, if we try to update
+        // it now, we will crash with 'This source got invalidated after the style change'
+        [timer invalidate];
+        return;
     }
+    
+    static int radarSuffix = 0;
+    [imageSource setValue:[self radarImageURL:radarSuffix] forKey:@"URL"];
+    radarSuffix = (radarSuffix + 1) % 5;
 }
 
 -(void)toggleStyleLabelsLanguage
