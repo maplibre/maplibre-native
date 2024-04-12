@@ -194,25 +194,38 @@ class iosapp_UITests: XCTestCase {
         // These open another view controller that then needs to be closed
 
         app.tables.staticTexts["View Route Simulation"].tap()
-        app.navigationBars["MBXCustomLocationView"].buttons["Back"].tap()
+        XCTAssert(tapBackButton("MBXCustomLocationView", timeout: 5))
 
         mapSettingsButton.tap()
         app.tables.staticTexts["Ornaments Placement"].tap()
-        app.navigationBars["Ornaments"].buttons["Back"].tap()
+        XCTAssert(tapBackButton("Ornaments", timeout: 5))
 
         mapSettingsButton.tap()
         app.tables.staticTexts["Show Snapshots"].tap()
-        app.navigationBars["MBXSnapshotsView"].buttons["Back"].tap()
+        XCTAssert(tapBackButton("MBXSnapshotsView", timeout: 5))
 
         mapSettingsButton.tap()
         app.tables.staticTexts["Embedded Map View"].tap()
-        app.navigationBars["MBXEmbeddedMapView"].buttons["Back"].tap()
+        XCTAssert(tapBackButton("MBXEmbeddedMapView", timeout: 5))
     }
 
     private func staticItemIfExists(_ ident: String) -> XCUIElement? {
-        let item = app.staticTexts["Add Custom Drawable Layer"]
+        let item = app.staticTexts[ident]
         return item.exists ? item : nil
     }
+
+    private func tapBackButton(_ label: String, timeout: TimeInterval) -> Bool {
+        let bar = app.navigationBars[label]
+        if (bar.waitForExistence(timeout: timeout)) {
+            let button = bar.buttons["Back"]
+            if (button.waitForExistence(timeout: 1)) {
+                button.tap()
+                return true
+            }
+        }
+        return false
+    }
+
     func testRecord() {
         /// Use recording to get started writing UI tests.
         ///   Use `Editor` > `Start Recording UI Test` while your cursor is in this `func`
