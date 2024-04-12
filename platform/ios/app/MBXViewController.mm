@@ -1144,34 +1144,59 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
 - (void)styleSymbolLayer
 {
-    MLNSymbolStyleLayer *stateLayer = (MLNSymbolStyleLayer *)[self.mapView.style layerWithIdentifier:@"state-label-lg"];
-    stateLayer.textColor = [NSExpression expressionForConstantValue:[UIColor redColor]];
+    if (auto *stateLayer = (MLNSymbolStyleLayer *)[self.mapView.style layerWithIdentifier:@"state-label-lg"])
+    {
+        stateLayer.textColor = [NSExpression expressionForConstantValue:[UIColor redColor]];
+    }
 }
 
 - (void)styleBuildingLayer
 {
     MLNTransition transition =  { 5,  1 };
     self.mapView.style.transition = transition;
-    MLNFillStyleLayer *buildingLayer = (MLNFillStyleLayer *)[self.mapView.style layerWithIdentifier:@"building"];
-    buildingLayer.fillColor = [NSExpression expressionForConstantValue:[UIColor purpleColor]];
+    if (auto *buildingLayer = (MLNFillStyleLayer *)[self.mapView.style layerWithIdentifier:@"building"])
+    {
+        buildingLayer.fillColor = [NSExpression expressionForConstantValue:[UIColor purpleColor]];
+    }
 }
 
 - (void)styleFerryLayer
 {
-    MLNLineStyleLayer *ferryLineLayer = (MLNLineStyleLayer *)[self.mapView.style layerWithIdentifier:@"ferry"];
-    ferryLineLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor redColor]];
+    if (auto *ferryLineLayer = (MLNLineStyleLayer *)[self.mapView.style layerWithIdentifier:@"ferry"])
+    {
+        ferryLineLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor redColor]];
+    }
 }
 
 - (void)removeParkLayer
 {
-    MLNFillStyleLayer *parkLayer = (MLNFillStyleLayer *)[self.mapView.style layerWithIdentifier:@"park"];
-    [self.mapView.style removeLayer:parkLayer];
+    if (auto *parkLayer = (MLNFillStyleLayer *)[self.mapView.style layerWithIdentifier:@"park"])
+    {
+        [self.mapView.style removeLayer:parkLayer];
+    }
+}
+
+- (BOOL)loadStyleFromBundle:(NSString*)path
+{
+    NSString *resourcePath = [[NSBundle mainBundle] pathForResource:path ofType:@"json"];
+    if (NSURL* url = resourcePath ? [NSURL fileURLWithPath:resourcePath] : nil) {
+        [self.mapView setStyleURL:url];
+        return TRUE;
+    } else {
+        NSString *msg = [NSString stringWithFormat:@"Missing Style %@", path];
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Style File" message:msg preferredStyle:UIAlertControllerStyleAlert];
+        [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleCancel handler:nil]];
+        [self presentViewController:alertController animated:YES completion:nil];
+        return FALSE;
+    }
 }
 
 - (void)styleFilteredFill
 {
     // set style and focus on Texas
-    [self.mapView setStyleURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"fill_filter_style" ofType:@"json"]]];
+    if (![self loadStyleFromBundle:@"fill_filter_style"]) {
+        return;
+    }
     [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(31, -100) zoomLevel:3 animated:NO];
 
     // after slight delay, fill in Texas (atypical use; we want to clearly see the change for test purposes)
@@ -1191,7 +1216,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 - (void)styleFilteredLines
 {
     // set style and focus on lower 48
-    [self.mapView setStyleURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"line_filter_style" ofType:@"json"]]];
+    if (![self loadStyleFromBundle:@"line_filter_style"]) {
+        return;
+    }
     [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(40, -97) zoomLevel:5 animated:NO];
 
     // after slight delay, change styling for all Washington-named counties  (atypical use; we want to clearly see the change for test purposes)
@@ -1212,7 +1239,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 - (void)styleNumericFilteredFills
 {
     // set style and focus on lower 48
-    [self.mapView setStyleURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"numeric_filter_style" ofType:@"json"]]];
+    if (![self loadStyleFromBundle:@"numeric_filter_style"]) {
+        return;
+    }
     [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(40, -97) zoomLevel:5 animated:NO];
 
     // after slight delay, change styling for regions 200-299 (atypical use; we want to clearly see the change for test purposes)
@@ -1494,7 +1523,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 
-- (void)updateAnimatedImageSource:(NSTimer *)timer {
+- (void)updateAnimatedImageSource:(NSTimer *)timer
+{
     static int radarSuffix = 0;
     MLNImageSource *imageSource = (MLNImageSource *)timer.userInfo;
     NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"https://maplibre.org/maplibre-gl-js-docs/assets/radar%d.gif", radarSuffix++]];
@@ -1568,7 +1598,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 #if MLN_DRAWABLE_RENDERER
-- (void)addCustomDrawableLayer {
+- (void)addCustomDrawableLayer
+{
     // Create a CustomLayer that uses the Drawable/Builder toolkit to generate and render geometry
     ExampleCustomDrawableStyleLayer* layer = [[ExampleCustomDrawableStyleLayer alloc] initWithIdentifier:@"custom-drawable-layer"];
 
@@ -1578,14 +1609,18 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 #endif
 
-- (void)removeSource:(NSString*)ident {
-    if (MLNSource *source = [self.mapView.style sourceWithIdentifier:ident]) {
+- (void)removeSource:(NSString*)ident
+{
+    if (MLNSource *source = [self.mapView.style sourceWithIdentifier:ident])
+    {
         [self.mapView.style removeSource:source];
     }
 }
 
-- (void)removeLayer:(NSString*)ident {
-    if (MLNStyleLayer* layer = [self.mapView.style layerWithIdentifier:ident]) {
+- (void)removeLayer:(NSString*)ident
+{
+    if (MLNStyleLayer* layer = [self.mapView.style layerWithIdentifier:ident])
+    {
         [self.mapView.style removeLayer:layer];
     }
 }
