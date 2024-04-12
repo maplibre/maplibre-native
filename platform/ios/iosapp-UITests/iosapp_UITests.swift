@@ -39,7 +39,6 @@ class iosapp_UITests: XCTestCase {
     /// Turn on Debug tile boundaries, tile info and FPS ornaments
     /// Demonstrates how the Tile Boundaries look when rendered
     func testDebugBoundaryTiles() {
-
         app.windows.children(matching: .other).element.children(matching: .other).element.children(matching: .other).element.doubleTap()
         
         let mapSettingsButton = app.navigationBars["MapLibre Basic"].buttons["Map settings"]
@@ -67,10 +66,10 @@ class iosapp_UITests: XCTestCase {
         add(screenshot(name: "Null Island, Zoom=0"))
     }
 
+    var mapSettingsButton: XCUIElement { get { app.navigationBars["MapLibre Basic"].buttons["Map settings"] } }
+
     /// Open and close the secondary map view a few times to ensure that the dynamic layout adjustment doesn't crash
     func testSecondMap() {
-        let mapSettingsButton = app.navigationBars["MapLibre Basic"].buttons["Map settings"]
-
         let showTimeout = 1.0
         let hideTimeout = 10.0
         let iterations = 3
@@ -91,6 +90,130 @@ class iosapp_UITests: XCTestCase {
             expectation(for: NSPredicate(format: "exists == 0"), evaluatedWith: secondMapQuery)
             waitForExpectations(timeout: hideTimeout, handler: nil)
         }
+    }
+
+    func testAll() {
+        let allItems = [
+        "Reset position",
+        "Show tile boundaries",
+        "Hide tile boundaries",
+        "Show tile info",
+        "Hide tile info",
+        "Show tile timestamps",
+        "Hide tile timestamps",
+        "Show collision boxes",
+        "Hide collision boxes",
+        "Show overdraw visualization",
+        "Hide overdraw visualization",
+        "Show zoom level ornament",
+        "Hide zoom level ornament",
+        "Show frame time graph",
+        "Hide frame time graph",
+        "Show reuse queue stats",
+        "Hide reuse queue stats",
+        "Add 100 Views",
+        // These seem to break the test, maybe just take too long
+//        "Add 1,000 Views",
+//        "Add 10,000 Views",
+        "Add 100 Sprites",
+//        "Add 1,000 Sprites",
+//        "Add 10,000 Sprites",
+        "Animate an Annotation View",
+        "Add Test Shapes",
+        "Add 10x Test Shapes",
+        "Add Point With Custom Callout",
+        "Query Annotations",
+        "Enable Custom User Dot",
+        "Disable Custom User Dot",
+        "Remove Annotations",
+        "Select an offscreen point annotation",
+        "Center selected annotation",
+        "Add visible area polyline",
+        "Add Building Extrusions",
+        "Style Water With Function",
+        "Style Roads With Function",
+        "Add Raster & Apply Function",
+        "Add Shapes & Apply Fill",
+        "Style Symbol Color",
+        "Style Building Fill Color",
+        "Style Ferry Line Color",
+        // TODO: crash, only works on styles with park layers?
+        //"Remove Parks",
+        "Style Fill With Filter",
+        // TODO: crash, ?
+        //"Style Lines With Filter",
+        "Style Fill With Numeric Filter",
+        "Query and Style Features",
+        "Style Feature",
+        "Style Dynamic Point Collection",
+        "Update Shape Source: Data",
+        "Update Shape Source: URL",
+        "Update Shape Source: Features",
+        "Style Vector Tile Source",
+        "Style Raster Tile Source",
+        "Style Image Source",
+        "Add Route Line",
+        "Dynamically Style Polygon",
+        "Add Custom Lat/Lon Grid",
+        "Style Route line with gradient",
+        "Start World Tour",
+        "Random Tour",
+        "Show Second Map",
+        "Hide Second Map",
+        "Missing Icon",
+        "Limit Camera Changes",
+        "Unlimit Camera Changes",
+        "Turn On Content Insets",
+        "Turn Off Content Insets",
+        "Lat Long bounds with padding",
+        "Show Labels in Default Language",
+        ]
+
+        for label in allItems {
+            mapSettingsButton.tap()
+            app.tables.staticTexts[label].tap()
+            sleep(1)
+        }
+
+        let customLayerGL = app.tables.staticTexts["Add Custom Triangle Layer (OpenGL)"]
+        let customLayerMetal = app.tables.staticTexts["Add Custom Triangle Layer (Metal)"]
+        let customLayerLegacy = app.tables.staticTexts["Add Custom Drawable Layer"]
+
+        mapSettingsButton.tap()
+        if customLayerGL.exists {
+            customLayerGL.tap()
+        } else if customLayerMetal.exists {
+            customLayerMetal.tap()
+        } else if customLayerLegacy.exists {
+            customLayerLegacy.tap()
+        }
+
+        mapSettingsButton.tap()
+        for loc in [ "ar", "de", "en", "es", "fr", "ja", "ko", "pt", "ru", "zh", "zh-Hans", "zh-Hant" ] {
+            if let name = NSLocale(localeIdentifier: loc).displayName(forKey: .identifier, value: loc) {
+                let item = app.tables.staticTexts["Show Labels in " + name]
+                if item.exists {
+                    item.tap()
+                    mapSettingsButton.tap()
+                }
+            }
+        }
+
+        mapSettingsButton.tap()
+        app.tables.staticTexts["View Route Simulation"].tap()
+        app.navigationBars["MBXCustomLocationView"].buttons["Back"].tap()
+
+        mapSettingsButton.tap()
+        app.tables.staticTexts["Ornaments Placement"].tap()
+        app.navigationBars["Ornaments"].buttons["Back"].tap()
+
+        mapSettingsButton.tap()
+        app.tables.staticTexts["Show Snapshots"].tap()
+        app.navigationBars["MBXSnapshotsView"].buttons["Back"].tap()
+
+        mapSettingsButton.tap()
+        app.tables.staticTexts["Embedded Map View"].tap()
+        app.navigationBars["MBXEmbeddedMapView"].buttons["Back"].tap()
     }
 
     func testRecord() {
