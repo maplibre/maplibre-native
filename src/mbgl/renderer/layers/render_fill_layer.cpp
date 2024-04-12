@@ -453,7 +453,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     std::unique_ptr<gfx::DrawableBuilder> outlinePatternBuilder;
 
     const auto layerPrefix = getID() + "/";
-    constexpr RenderPass renderPass = static_cast<RenderPass>(RenderPass::Translucent | RenderPass::Opaque);
+    constexpr auto renderPass = RenderPass::Translucent;
 
     const auto commonInit = [&](gfx::DrawableBuilder& builder) {
         builder.setCullFaceMode(gfx::CullFaceMode::disabled());
@@ -745,7 +745,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setDepthType(opaque ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
                     builder->setColorMode(opaque ? gfx::ColorMode::unblended() : gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
-                    builder->setRenderPass(opaque ? RenderPass::Opaque : RenderPass::Translucent);
+                    builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);
                 }
             }
@@ -913,7 +913,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (patternBuilder && bucket.sharedTriangles->elements()) {
                 patternBuilder->setShader(fillShader);
-                patternBuilder->setRenderPass(RenderPass::Translucent);
+                patternBuilder->setRenderPass(renderPass);
                 if (doOutline && outlinePatternBuilder) {
                     patternBuilder->setVertexAttributes(vertexAttrs);
                     outlinePatternBuilder->setVertexAttributes(std::move(vertexAttrs));
@@ -936,7 +936,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (doOutline && outlinePatternBuilder && bucket.sharedBasicLineIndexes->elements()) {
                 outlinePatternBuilder->setShader(outlineShader);
-                outlinePatternBuilder->setRenderPass(RenderPass::Translucent);
+                outlinePatternBuilder->setRenderPass(renderPass);
                 outlinePatternBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
                 outlinePatternBuilder->setSegments(gfx::Lines(2),
                                                    bucket.sharedBasicLineIndexes,
