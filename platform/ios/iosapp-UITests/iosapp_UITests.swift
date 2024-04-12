@@ -175,9 +175,15 @@ class iosapp_UITests: XCTestCase {
         // Only one of these will show up, run whichever one is there
         mapSettingsButton.tap()
         if let customLayer = staticItemIfExists("Add Custom Triangle Layer (OpenGL)") ??
-                             staticItemIfExists("Add Custom Triangle Layer (Metal)") ??
-                             staticItemIfExists("Add Custom Drawable Layer") {
+                             staticItemIfExists("Add Custom Triangle Layer (Metal)") {
             customLayer.tap()
+            sleep(1)
+            mapSettingsButton.tap()
+        }
+
+        if let customLayer = staticItemIfExists("Add Custom Drawable Layer") {
+            customLayer.tap()
+            sleep(1)
             mapSettingsButton.tap()
         }
 
@@ -186,6 +192,7 @@ class iosapp_UITests: XCTestCase {
             if let name = NSLocale(localeIdentifier: loc).displayName(forKey: .identifier, value: loc) {
                 if let item = staticItemIfExists("Show Labels in " + name) {
                     item.tap()
+                    sleep(1)
                     mapSettingsButton.tap()
                 }
             }
