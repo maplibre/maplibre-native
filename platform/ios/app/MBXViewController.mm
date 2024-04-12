@@ -1531,7 +1531,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     NSDictionary *sourceOptions = @{ MLNShapeSourceOptionLineDistanceMetrics: @YES };
     
     MLNShapeSource *routeSource = [[MLNShapeSource alloc] initWithIdentifier:@"style-route-source" shape:routeLine options:sourceOptions];
-    [self.mapView.style addSource:routeSource];
 
     MLNLineStyleLayer *baseRouteLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-base-route-layer" source:routeSource];
     baseRouteLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor orangeColor]];
@@ -1539,7 +1538,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     baseRouteLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.95];
     baseRouteLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
     baseRouteLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
-    [self.mapView.style addLayer:baseRouteLayer];
 
     MLNLineStyleLayer *routeLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-route-layer" source:routeSource];
     routeLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor whiteColor]];
@@ -1560,12 +1558,17 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     // (mgl_interpolate:withCurveType:parameters:stops:($lineProgress, 'linear', nil, %@))
     NSExpression *lineGradientExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($lineProgress, 'linear', nil, %@)", stops];
     routeLayer.lineGradient = lineGradientExpression;
+
+    [self removeLayer:baseRouteLayer.identifier];
+    [self removeLayer:routeLayer.identifier];
+    [self removeSource:routeSource.identifier];
+    [self.mapView.style addSource:routeSource];
+    [self.mapView.style addLayer:baseRouteLayer];
     [self.mapView.style addLayer:routeLayer];
 }
 
 #if MLN_DRAWABLE_RENDERER
-- (void)addCustomDrawableLayer
-{
+- (void)addCustomDrawableLayer {
     // Create a CustomLayer that uses the Drawable/Builder toolkit to generate and render geometry
     ExampleCustomDrawableStyleLayer* layer = [[ExampleCustomDrawableStyleLayer alloc] initWithIdentifier:@"custom-drawable-layer"];
 
@@ -1574,6 +1577,18 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     }
 }
 #endif
+
+- (void)removeSource:(NSString*)ident {
+    if (MLNSource *source = [self.mapView.style sourceWithIdentifier:ident]) {
+        [self.mapView.style removeSource:source];
+    }
+}
+
+- (void)removeLayer:(NSString*)ident {
+    if (MLNStyleLayer* layer = [self.mapView.style layerWithIdentifier:ident]) {
+        [self.mapView.style removeLayer:layer];
+    }
+}
 
 - (void)styleRouteLine
 {
@@ -1594,7 +1609,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     MLNPolylineFeature *routeLine = [MLNPolylineFeature polylineWithCoordinates:coords count:count];
 
     MLNShapeSource *routeSource = [[MLNShapeSource alloc] initWithIdentifier:@"style-route-source" shape:routeLine options:nil];
-    [self.mapView.style addSource:routeSource];
 
     MLNLineStyleLayer *baseRouteLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-base-route-layer" source:routeSource];
     baseRouteLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor orangeColor]];
@@ -1602,7 +1616,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     baseRouteLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.5];
     baseRouteLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
     baseRouteLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
-    [self.mapView.style addLayer:baseRouteLayer];
 
     MLNLineStyleLayer *routeLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-route-layer" source:routeSource];
     routeLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor whiteColor]];
@@ -1610,11 +1623,16 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     routeLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.8];
     routeLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
     routeLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
+    
+    [self removeLayer:baseRouteLayer.identifier];
+    [self removeLayer:routeLayer.identifier];
+    [self removeSource:routeSource.identifier];
+    [self.mapView.style addSource:routeSource];
+    [self.mapView.style addLayer:baseRouteLayer];
     [self.mapView.style addLayer:routeLayer];
 }
 
-- (void)styleAddCustomTriangleLayer
-{
+- (void)styleAddCustomTriangleLayer {
     CustomStyleLayerExample *layer = [[CustomStyleLayerExample alloc] initWithIdentifier:@"mbx-custom"];
     [self.mapView.style addLayer:layer];
 }
