@@ -112,12 +112,11 @@ class iosapp_UITests: XCTestCase {
         "Show reuse queue stats",
         "Hide reuse queue stats",
         "Add 100 Views",
-        // These seem to break the test, maybe just take too long
-//        "Add 1,000 Views",
-//        "Add 10,000 Views",
+        //"Add 1,000 Views",    // These cause the test to time out
+        //"Add 10,000 Views",
         "Add 100 Sprites",
-//        "Add 1,000 Sprites",
-//        "Add 10,000 Sprites",
+        //"Add 1,000 Sprites",
+        //"Add 10,000 Sprites",
         "Animate an Annotation View",
         "Add Test Shapes",
         "Add 10x Test Shapes",
@@ -137,11 +136,9 @@ class iosapp_UITests: XCTestCase {
         "Style Symbol Color",
         "Style Building Fill Color",
         "Style Ferry Line Color",
-        // TODO: crash, only works on styles with park layers?
-        //"Remove Parks",
+        "Remove Parks",
         "Style Fill With Filter",
-        // TODO: crash, ?
-        //"Style Lines With Filter",
+        "Style Lines With Filter",
         "Style Fill With Numeric Filter",
         "Query and Style Features",
         "Style Feature",
@@ -175,31 +172,27 @@ class iosapp_UITests: XCTestCase {
             sleep(1)
         }
 
-        let customLayerGL = app.tables.staticTexts["Add Custom Triangle Layer (OpenGL)"]
-        let customLayerMetal = app.tables.staticTexts["Add Custom Triangle Layer (Metal)"]
-        let customLayerLegacy = app.tables.staticTexts["Add Custom Drawable Layer"]
-
+        // Only one of these will show up, run whichever one is there
         mapSettingsButton.tap()
-        if customLayerGL.exists {
-            customLayerGL.tap()
-        } else if customLayerMetal.exists {
-            customLayerMetal.tap()
-        } else if customLayerLegacy.exists {
-            customLayerLegacy.tap()
+        if let customLayer = staticItemIfExists("Add Custom Triangle Layer (OpenGL)") ??
+                             staticItemIfExists("Add Custom Triangle Layer (Metal)") ??
+                             staticItemIfExists("Add Custom Drawable Layer") {
+            customLayer.tap()
+            mapSettingsButton.tap()
         }
 
-        mapSettingsButton.tap()
+        // See `bestLanguageForUser`
         for loc in [ "ar", "de", "en", "es", "fr", "ja", "ko", "pt", "ru", "zh", "zh-Hans", "zh-Hant" ] {
             if let name = NSLocale(localeIdentifier: loc).displayName(forKey: .identifier, value: loc) {
-                let item = app.tables.staticTexts["Show Labels in " + name]
-                if item.exists {
+                if let item = staticItemIfExists("Show Labels in " + name) {
                     item.tap()
                     mapSettingsButton.tap()
                 }
             }
         }
 
-        mapSettingsButton.tap()
+        // These open another view controller that then needs to be closed
+
         app.tables.staticTexts["View Route Simulation"].tap()
         app.navigationBars["MBXCustomLocationView"].buttons["Back"].tap()
 
@@ -216,6 +209,10 @@ class iosapp_UITests: XCTestCase {
         app.navigationBars["MBXEmbeddedMapView"].buttons["Back"].tap()
     }
 
+    private func staticItemIfExists(_ ident: String) -> XCUIElement? {
+        let item = app.staticTexts["Add Custom Drawable Layer"]
+        return item.exists ? item : nil
+    }
     func testRecord() {
         /// Use recording to get started writing UI tests.
         ///   Use `Editor` > `Start Recording UI Test` while your cursor is in this `func`

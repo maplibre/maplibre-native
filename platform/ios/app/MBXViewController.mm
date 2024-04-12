@@ -243,6 +243,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
     NSLayoutConstraint* _firstMapLayout;
     NSArray<NSLayoutConstraint*>* _secondMapLayout;
+    
+    NSDictionary* _pointFeatures;
+    NSLock* _loadLock;
 }
 
 // MARK: - Setup & Teardown
@@ -251,6 +254,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     if (self = [super init]) {
         _firstMapLayout = nil;
         _secondMapLayout = nil;
+        _pointFeatures = nil;
+        _loadLock = [NSLock new];
     }
     return self;
 }
@@ -843,22 +848,32 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
 // MARK: - Debugging Actions
 
+- (NSDictionary*)loadPointFeatures
+{
+    [_loadLock lock];
+    if (!_pointFeatures) {
+        NSData *featuresData = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"points" ofType:@"geojson"]];
+        if (featuresData) {
+            id features = [NSJSONSerialization JSONObjectWithData:featuresData
+                                                          options:0
+                                                            error:nil];
+            if ([features isKindOfClass:[NSDictionary class]])
+            {
+                _pointFeatures = (NSDictionary*)features;
+            }
+        }
+    }
+    [_loadLock unlock];
+    return _pointFeatures;
+}
+
 - (void)parseFeaturesAddingCount:(NSUInteger)featuresCount usingViews:(BOOL)useViews
 {
-    [self.mapView removeAnnotations:self.mapView.annotations];
-
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
     {
-        NSData *featuresData = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"points" ofType:@"geojson"]];
-
-        id features = [NSJSONSerialization JSONObjectWithData:featuresData
-                                                      options:0
-                                                        error:nil];
-
-        if ([features isKindOfClass:[NSDictionary class]])
+        if (auto *features = [self loadPointFeatures])
         {
             NSMutableArray *annotations = [NSMutableArray array];
-
             for (NSDictionary *feature in features[@"features"])
             {
                 CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake([feature[@"geometry"][@"coordinates"][1] doubleValue],
@@ -877,6 +892,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
             dispatch_async(dispatch_get_main_queue(), ^
             {
+                [self.mapView removeAnnotations:self.mapView.annotations];
                 [self.mapView addAnnotations:annotations];
                 [self.mapView showAnnotations:annotations animated:YES];
             });
@@ -1667,12 +1683,15 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:routeLayer];
 }
 
-- (void)styleAddCustomTriangleLayer {
-    CustomStyleLayerExample *layer = [[CustomStyleLayerExample alloc] initWithIdentifier:@"mbx-custom"];
-    [self.mapView.style addLayer:layer];
+- (void)styleAddCustomTriangleLayer
+{
+    if (CustomStyleLayerExample *layer = [[CustomStyleLayerExample alloc] initWithIdentifier:@"mbx-custom"]) {
+        [self.mapView.style addLayer:layer];
+    }
 }
 
-- (void)stylePolygonWithDDS {
+- (void)stylePolygonWithDDS
+{
     CLLocationCoordinate2D leftCoords[] = {
         {37.73081027834234, -122.49412536621094},
         {37.7566013348511, -122.49412536621094},
