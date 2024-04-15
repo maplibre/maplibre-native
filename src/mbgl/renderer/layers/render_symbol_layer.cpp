@@ -838,25 +838,25 @@ void updateTileDrawable(gfx::Drawable& drawable,
     // This property can be set after the initial appearance of the tile, as part of the layout process.
     drawData.bucketVariablePlacement = bucket.hasVariablePlacement;
 
-    auto& uniforms = drawable.mutableUniformBuffers();
+    auto& drawableUniforms = drawable.mutableUniformBuffers();
 
     // Create or update the shared interpolation UBO
     gfx::UniformBufferPtr& interpUBO = isText ? textInterpUBO : iconInterpUBO;
     if (interpUBO) {
-        uniforms.set(idSymbolInterpolateUBO, interpUBO);
+        drawableUniforms.set(idSymbolInterpolateUBO, interpUBO);
     } else {
         const auto ubo = buildInterpUBO(paintProps, isText, currentZoom);
-        interpUBO = uniforms.get(idSymbolInterpolateUBO);
+        interpUBO = drawableUniforms.get(idSymbolInterpolateUBO);
         if (interpUBO) {
             interpUBO->update(&ubo, sizeof(ubo));
         } else {
             interpUBO = context.createUniformBuffer(&ubo, sizeof(ubo));
-            uniforms.set(idSymbolInterpolateUBO, interpUBO);
+            drawableUniforms.set(idSymbolInterpolateUBO, interpUBO);
         }
     }
 
     const auto tileUBO = buildTileUBO(bucket, drawData, currentZoom);
-    uniforms.createOrUpdate(idSymbolTilePropsUBO, &tileUBO, context);
+    drawableUniforms.createOrUpdate(idSymbolTilePropsUBO, &tileUBO, context);
 
     const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
     const auto vertexCount = buffer.vertices().elements();
@@ -1351,9 +1351,9 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                     const auto tileUBO = buildTileUBO(bucket, *drawData, currentZoom);
                     drawable->setData(std::move(drawData));
 
-                    auto& uniforms = drawable->mutableUniformBuffers();
-                    uniforms.createOrUpdate(idSymbolTilePropsUBO, &tileUBO, context);
-                    uniforms.set(idSymbolInterpolateUBO, interpUBO);
+                    auto& drawableUniforms = drawable->mutableUniformBuffers();
+                    drawableUniforms.createOrUpdate(idSymbolTilePropsUBO, &tileUBO, context);
+                    drawableUniforms.set(idSymbolInterpolateUBO, interpUBO);
 
                     tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                     ++stats.drawablesAdded;

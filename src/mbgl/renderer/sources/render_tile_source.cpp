@@ -143,8 +143,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         [&](TileLayerGroup* tileLayerGroup, const OverscaledTileID& tileID, const DebugUBO& debugUBO) -> size_t {
         auto updatedCount = tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             // update existing drawable
-            auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(idDebugUBO, &debugUBO, context);
+            auto& drawableUniforms = drawable.mutableUniformBuffers();
+            drawableUniforms.createOrUpdate(idDebugUBO, &debugUBO, context);
         });
         return updatedCount;
     };
@@ -172,8 +172,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         debugBuilder->flush(context);
         for (auto& drawable : debugBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
-            auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.createOrUpdate(idDebugUBO, &debugUBO, context);
+            auto& drawableUniforms = drawable->mutableUniformBuffers();
+            drawableUniforms.createOrUpdate(idDebugUBO, &debugUBO, context);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
         }
@@ -222,11 +222,11 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                                                          /*width_t =*/0.f,
                                                                          0,
                                                                          0};
-                auto& uniforms = drawable.mutableUniformBuffers();
-                uniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
-                uniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
-                uniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
-                uniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
+                auto& drawableUniforms = drawable.mutableUniformBuffers();
+                drawableUniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
+                drawableUniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
+                drawableUniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
+                drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
             };
 
         private:

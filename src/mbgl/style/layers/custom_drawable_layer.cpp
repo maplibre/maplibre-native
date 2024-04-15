@@ -124,11 +124,11 @@ public:
                                                                  /*width_t =*/0.f,
                                                                  0,
                                                                  0};
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
-        uniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
-        uniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
-        uniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
     };
 
 private:
@@ -189,9 +189,9 @@ public:
             /*interClipLimit*/ 0.0f                                             // N/A
         };
 
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idWideVectorUniformsUBO, &uniform, parameters.context);
-        uniforms.createOrUpdate(idWideVectorUniformWideVecUBO, &wideVec, parameters.context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idWideVectorUniformsUBO, &uniform, parameters.context);
+        drawableUniforms.createOrUpdate(idWideVectorUniformWideVecUBO, &wideVec, parameters.context);
     };
 
 private:
@@ -234,10 +234,10 @@ public:
             0,
             0,
         };
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idFillDrawableUBO, &fillUBO, parameters.context);
-        uniforms.createOrUpdate(idFillEvaluatedPropsUBO, &fillPropertiesUBO, parameters.context);
-        uniforms.createOrUpdate(idFillInterpolateUBO, &fillInterpolateUBO, parameters.context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idFillDrawableUBO, &fillUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idFillEvaluatedPropsUBO, &fillPropertiesUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idFillInterpolateUBO, &fillInterpolateUBO, parameters.context);
     };
 
 private:
