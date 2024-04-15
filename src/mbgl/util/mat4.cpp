@@ -407,6 +407,13 @@ void transformMat4(vec4& out, const vec4& a, const mat4& m) {
     out[3] = m[3] * x + m[7] * y + m[11] * z + m[15] * w;
 }
 
+void diffsplit(matf4& outValue, matf4& outDiff, const mat4& source) {
+    for (auto i = 0; i < 16; ++i) {
+        outValue[i] = static_cast<float>(source[i]);
+        outDiff[i] = source[i] - outValue[i];
+    }
+}
+
 } // namespace matrix
 
 } // namespace mbgl

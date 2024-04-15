@@ -16,6 +16,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
 
     static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 3> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
@@ -102,6 +103,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
 
     static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 3> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
@@ -192,6 +194,7 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
 
     static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 4> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -350,6 +353,7 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
 
     static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 4> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -522,6 +526,7 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
 
     static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(

@@ -102,7 +102,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             fillOutlinePatternUniformBufferUpdated = false;
         }
     };
-    
+
     const auto UpdateFillOutlineTriangulatedUniformBuffers = [&]() {
         if (!fillOutlineTriangulatedUniformBuffer || fillOutlineTriangulatedUniformBufferUpdated) {
             const shaders::FillOutlineTriangulatedPropertiesUBO paramsUBO = {
@@ -110,8 +110,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
                 /* .width = */ 1.f,
                 /* .ratio = */ 0,
-                0
-            };
+                0};
             context.emplaceOrUpdateUniformBuffer(fillOutlineTriangulatedUniformBuffer, &paramsUBO);
             fillOutlineTriangulatedUniformBufferUpdated = false;
         }
@@ -210,17 +209,13 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             }
             case RenderFillLayer::FillVariant::FillOutlineTriangulated: {
                 UpdateFillOutlineTriangulatedUniformBuffers();
-                
+
                 uniforms.set(idFillOutlineTriangulatedPropertiesUBO, fillOutlineTriangulatedUniformBuffer);
-                
-                const auto zoom = parameters.state.getZoom();
-                const auto matrix = LayerTweaker::getTileMatrix(
-                    tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
                 const FillOutlineTriangulatedDrawableUBO drawableUBO{
                     /*matrix = */ util::cast<float>(matrix),
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
-                    /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+                    /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, parameters.state.getZoom()),
                     0};
                 uniforms.createOrUpdate(idFillOutlineTriangulatedDrawableUBO, &drawableUBO, context);
                 break;

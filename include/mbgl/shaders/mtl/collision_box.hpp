@@ -16,6 +16,7 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
 
     static const std::array<UniformBlockInfo, 1> uniforms;
     static const std::array<AttributeInfo, 5> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(

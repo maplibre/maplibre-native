@@ -16,6 +16,7 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
 
     static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 8> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
@@ -180,6 +181,7 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
 
     static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<AttributeInfo, 9> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
@@ -431,6 +433,7 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
 
     static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 9> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(

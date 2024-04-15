@@ -16,6 +16,7 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal> {
 
     static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto source = R"(

@@ -178,15 +178,18 @@ const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillOutlinePatternShader, gfx
 };
 
 // Fill Outline Triangulated
-const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>::attributes = {
-    AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
-    AttributeInfo{"a_data", idLineDataVertexAttribute},
+const std::vector<AttributeInfo>
+    ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>::attributes = {
+        AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
+        AttributeInfo{"a_data", idLineDataVertexAttribute},
 };
-const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"FillOutlineTriangulatedDrawableUBO", idFillOutlineTriangulatedDrawableUBO},
-    UniformBlockInfo{"FillOutlineTriangulatedPropertiesUBO", idFillOutlineTriangulatedPropertiesUBO},
+const std::vector<UniformBlockInfo>
+    ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
+        UniformBlockInfo{"FillOutlineTriangulatedDrawableUBO", idFillOutlineTriangulatedDrawableUBO},
+        UniformBlockInfo{"FillOutlineTriangulatedPropertiesUBO", idFillOutlineTriangulatedPropertiesUBO},
 };
-const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>::textures = {};
+const std::vector<TextureInfo>
+    ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>::textures = {};
 
 // Fill Extrusion
 const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL>::attributes = {
