@@ -21,7 +21,7 @@ android {
     compileSdkVersion androidVersions.compileSdkVersion
 
     defaultConfig {
-        applicationId "org.maplibre.testapp"
+        applicationId "org.maplibre.android.testapp"
         minSdkVersion androidVersions.minSdkVersion
         targetSdkVersion androidVersions.targetSdkVersion
         versionCode 14
@@ -82,7 +82,7 @@ android {
     }
 
     namespace 'org.maplibre.android.testapp'
-    testNamespace 'org.maplibre.testapp.test'
+
     lint {
         abortOnError false
         baseline file('lint-baseline-local.xml')
