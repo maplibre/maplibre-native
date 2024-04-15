@@ -106,7 +106,7 @@ To exercise Monkey on the test app, install the package on the device (e.g. via 
 and then:
 
 ```
-$ adb shell monkey -p org.maplibre.android.testapp -v 500
+$ adb shell monkey -p org.maplibre.testapp -v 500
 ```
 
 
