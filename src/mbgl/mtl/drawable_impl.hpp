@@ -45,6 +45,10 @@ public:
     gfx::AttributeDataType vertexType = gfx::AttributeDataType::Invalid;
 
     std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
+    gfx::AttributeBindingArray attributeBindings;
+
+    std::vector<gfx::UniqueVertexBufferResource> instanceBuffers;
+    gfx::AttributeBindingArray instanceBindings;
 
     UniformBufferArray uniformBuffers;
 
@@ -55,8 +59,6 @@ public:
     std::size_t vertexAttrId = 0;
 
     VertexBufferResource* noBindingBuffer = nullptr;
-
-    gfx::AttributeBindingArray attributeBindings;
 
     MTLRenderPipelineStatePtr pipelineState;
 

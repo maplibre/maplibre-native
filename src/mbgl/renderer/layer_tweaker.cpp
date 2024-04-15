@@ -37,6 +37,9 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
     // from RenderTile::prepare
     mat4 tileMatrix;
     parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
+    if (const auto& origin{drawable.getOrigin()}; origin.has_value()) {
+        matrix::translate(tileMatrix, tileMatrix, origin->x, origin->y, 0);
+    }
     multiplyWithProjectionMatrix(/*in-out*/ tileMatrix, parameters, drawable, nearClipped, aligned);
     return RenderTile::translateVtxMatrix(
         tileID, tileMatrix, translation, anchor, parameters.state, inViewportPixelUnits);
