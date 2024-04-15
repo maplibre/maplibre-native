@@ -21,14 +21,12 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
     static constexpr std::array<AttributeInfo, 3> attributes{
         AttributeInfo{wideVectorUBOCount + 0, gfx::AttributeDataType::Float3, idWideVectorScreenPos},
         AttributeInfo{wideVectorUBOCount + 1, gfx::AttributeDataType::Float4, idWideVectorColor},
-        AttributeInfo{wideVectorUBOCount + 2, gfx::AttributeDataType::Int, idWideVectorIndex}
-    };
+        AttributeInfo{wideVectorUBOCount + 2, gfx::AttributeDataType::Int, idWideVectorIndex}};
     static constexpr std::array<AttributeInfo, 4> instanceAttributes{
         AttributeInfo{5, gfx::AttributeDataType::Float3, idWideVectorInstanceCenter},
         AttributeInfo{5, gfx::AttributeDataType::Float4, idWideVectorInstanceColor},
         AttributeInfo{5, gfx::AttributeDataType::Int, idWideVectorInstancePrevious},
-        AttributeInfo{5, gfx::AttributeDataType::Int, idWideVectorInstanceNext}
-    };
+        AttributeInfo{5, gfx::AttributeDataType::Int, idWideVectorInstanceNext}};
     static constexpr std::array<TextureInfo, 0> textures{};
 
     static constexpr auto source = R"(

@@ -519,11 +519,13 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     break;
                 }
                 case FillVariant::FillOutline: {
-                    drawableUniforms.createOrUpdate(idFillOutlineInterpolateUBO, &getFillOutlineInterpolateUBO(), context);
+                    drawableUniforms.createOrUpdate(
+                        idFillOutlineInterpolateUBO, &getFillOutlineInterpolateUBO(), context);
                     break;
                 }
                 case FillVariant::FillPattern: {
-                    drawableUniforms.createOrUpdate(idFillPatternInterpolateUBO, &getFillPatternInterpolateUBO(), context);
+                    drawableUniforms.createOrUpdate(
+                        idFillPatternInterpolateUBO, &getFillPatternInterpolateUBO(), context);
                     drawableUniforms.createOrUpdate(idFillPatternTilePropsUBO, &getFillPatternTilePropsUBO(), context);
                     break;
                 }
