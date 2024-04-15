@@ -247,4 +247,16 @@ class iosapp_UITests: XCTestCase {
             }
         }
     }
+    
+    /// Make sure the Custom Drawable Layer does not crash
+    func testCustomDrawableLayer() {
+        app.windows.children(matching: .other).element.children(matching: .other).element.children(matching: .other).element.doubleTap()
+        
+        let mapSettingsButton = app.navigationBars["MapLibre Basic"].buttons["Map settings"]
+        mapSettingsButton.tap()
+        
+        let tablesQuery = app.tables
+        tablesQuery.staticTexts["Add Custom Drawable Layer"].tap()
+        sleep(5)
+    }
 }
