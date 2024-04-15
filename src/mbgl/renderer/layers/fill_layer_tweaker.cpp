@@ -109,7 +109,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 /* .color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
                 /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
                 /* .width = */ 1.f,
-                /* .ratio = */ 0,
+                0,
                 0};
             context.emplaceOrUpdateUniformBuffer(fillOutlineTriangulatedUniformBuffer, &paramsUBO);
             fillOutlineTriangulatedUniformBufferUpdated = false;
