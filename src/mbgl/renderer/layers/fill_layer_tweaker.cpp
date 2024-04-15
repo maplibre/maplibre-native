@@ -164,20 +164,20 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             case RenderFillLayer::FillVariant::FillOutline: {
                 UpdateFillOutlineUniformBuffers();
 
-                uniforms.set(idFillOutlineEvaluatedPropsUBO, fillOutlinePropsUniformBuffer);
+                uniforms.set(idFillEvaluatedPropsUBO, fillOutlinePropsUniformBuffer);
 
                 const FillOutlineDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
                     /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
                     /* pad1 */ 0,
                     /* pad2 */ 0};
-                uniforms.createOrUpdate(idFillOutlineDrawableUBO, &drawableUBO, context);
+                uniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
             case RenderFillLayer::FillVariant::FillPattern: {
                 UpdateFillPatternUniformBuffers();
 
-                uniforms.set(idFillPatternEvaluatedPropsUBO, fillPatternPropsUniformBuffer);
+                uniforms.set(idFillEvaluatedPropsUBO, fillPatternPropsUniformBuffer);
 
                 const FillPatternDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
@@ -188,13 +188,13 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     0,
                     0,
                 };
-                uniforms.createOrUpdate(idFillPatternDrawableUBO, &drawableUBO, context);
+                uniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
             case RenderFillLayer::FillVariant::FillOutlinePattern: {
                 UpdateFillOutlinePatternUniformBuffers();
 
-                uniforms.set(idFillOutlinePatternEvaluatedPropsUBO, fillOutlinePatternPropsUniformBuffer);
+                uniforms.set(idFillEvaluatedPropsUBO, fillOutlinePatternPropsUniformBuffer);
 
                 const FillOutlinePatternDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
@@ -204,20 +204,20 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
                     /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
                 };
-                uniforms.createOrUpdate(idFillOutlinePatternDrawableUBO, &drawableUBO, context);
+                uniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
             case RenderFillLayer::FillVariant::FillOutlineTriangulated: {
                 UpdateFillOutlineTriangulatedUniformBuffers();
 
-                uniforms.set(idFillOutlineTriangulatedPropertiesUBO, fillOutlineTriangulatedUniformBuffer);
+                uniforms.set(idFillEvaluatedPropsUBO, fillOutlineTriangulatedUniformBuffer);
 
                 const FillOutlineTriangulatedDrawableUBO drawableUBO{
                     /*matrix = */ util::cast<float>(matrix),
                     /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, parameters.state.getZoom()),
                     0};
-                uniforms.createOrUpdate(idFillOutlineTriangulatedDrawableUBO, &drawableUBO, context);
+                uniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
             default: {

@@ -22,13 +22,13 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 position [[attribute(0)]];
+    short2 position [[attribute(4)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(1)]];
+    float4 color [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(2)]];
+    float2 opacity [[attribute(6)]];
 #endif
 };
 
@@ -58,9 +58,9 @@ struct alignas(16) FillInterpolateUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const FillDrawableUBO& drawable [[buffer(3)]],
-                                device const FillEvaluatedPropsUBO& props [[buffer(4)]],
-                                device const FillInterpolateUBO& interp [[buffer(5)]]) {
+                                device const FillDrawableUBO& drawable [[buffer(0)]],
+                                device const FillEvaluatedPropsUBO& props [[buffer(1)]],
+                                device const FillInterpolateUBO& interp [[buffer(3)]]) {
     return {
         .position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f),
 #if !defined(HAS_UNIFORM_u_color)
@@ -73,7 +73,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillEvaluatedPropsUBO& props [[buffer(4)]]) {
+                            device const FillEvaluatedPropsUBO& props [[buffer(1)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
@@ -108,9 +108,9 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 position [[attribute(0)]];
-    float4 outline_color [[attribute(1)]];
-    float2 opacity [[attribute(2)]];
+    short2 position [[attribute(4)]];
+    float4 outline_color [[attribute(5)]];
+    float2 opacity [[attribute(6)]];
 };
 
 struct FragmentStage {
@@ -141,9 +141,9 @@ struct alignas(16) FillOutlineInterpolateUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const FillOutlineDrawableUBO& drawable [[buffer(3)]],
-                                device const FillOutlineEvaluatedPropsUBO& props [[buffer(4)]],
-                                device const FillOutlineInterpolateUBO& interp [[buffer(5)]]) {
+                                device const FillOutlineDrawableUBO& drawable [[buffer(0)]],
+                                device const FillOutlineEvaluatedPropsUBO& props [[buffer(1)]],
+                                device const FillOutlineInterpolateUBO& interp [[buffer(3)]]) {
     const float4 position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);
     return {
         .position       = position,
@@ -158,7 +158,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillOutlineEvaluatedPropsUBO& props [[buffer(4)]]) {
+                            device const FillOutlineEvaluatedPropsUBO& props [[buffer(1)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
@@ -199,16 +199,16 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 position [[attribute(0)]];
+    short2 position [[attribute(4)]];
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(1)]];
+    ushort4 pattern_from [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(2)]];
+    ushort4 pattern_to [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(3)]];
+    float2 opacity [[attribute(7)]];
 #endif
 };
 
@@ -253,10 +253,10 @@ struct alignas(16) FillPatternInterpolateUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const FillPatternDrawableUBO& drawable [[buffer(4)]],
-                                device const FillPatternTilePropsUBO& tileProps [[buffer(5)]],
-                                device const FillPatternEvaluatedPropsUBO& props [[buffer(6)]],
-                                device const FillPatternInterpolateUBO& interp [[buffer(7)]]) {
+                                device const FillPatternDrawableUBO& drawable [[buffer(0)]],
+                                device const FillPatternEvaluatedPropsUBO& props [[buffer(1)]],
+                                device const FillPatternTilePropsUBO& tileProps [[buffer(2)]],
+                                device const FillPatternInterpolateUBO& interp [[buffer(3)]]) {
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = float4(tileProps.pattern_from);
 #else
@@ -300,9 +300,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillPatternDrawableUBO& drawable [[buffer(4)]],
-                            device const FillPatternTilePropsUBO& tileProps [[buffer(5)]],
-                            device const FillPatternEvaluatedPropsUBO& props [[buffer(6)]],
+                            device const FillPatternDrawableUBO& drawable [[buffer(0)]],
+                            device const FillPatternEvaluatedPropsUBO& props [[buffer(1)]],
+                            device const FillPatternTilePropsUBO& tileProps [[buffer(2)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
@@ -359,16 +359,16 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 position [[attribute(0)]];
+    short2 position [[attribute(4)]];
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(1)]];
+    ushort4 pattern_from [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(2)]];
+    ushort4 pattern_to [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(3)]];
+    float2 opacity [[attribute(7)]];
 #endif
 };
 
@@ -415,10 +415,10 @@ struct alignas(16) FillOutlinePatternInterpolateUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const FillOutlinePatternDrawableUBO& drawable [[buffer(4)]],
-                                device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(5)]],
-                                device const FillOutlinePatternEvaluatedPropsUBO& props [[buffer(6)]],
-                                device const FillOutlinePatternInterpolateUBO& interp [[buffer(7)]]) {
+                                device const FillOutlinePatternDrawableUBO& drawable [[buffer(0)]],
+                                device const FillOutlinePatternEvaluatedPropsUBO& props [[buffer(1)]],
+                                device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(2)]],
+                                device const FillOutlinePatternInterpolateUBO& interp [[buffer(3)]]) {
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = tileProps.pattern_from;
 #else
@@ -469,9 +469,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillOutlinePatternDrawableUBO& drawable [[buffer(4)]],
-                            device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(5)]],
-                            device const FillOutlinePatternEvaluatedPropsUBO& props [[buffer(6)]],
+                            device const FillOutlinePatternDrawableUBO& drawable [[buffer(0)]],
+                            device const FillOutlinePatternEvaluatedPropsUBO& props [[buffer(1)]],
+                            device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(2)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
@@ -531,8 +531,8 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos_normal [[attribute(0)]];
-    uchar4 data [[attribute(1)]];
+    short2 pos_normal [[attribute(4)]];
+    uchar4 data [[attribute(5)]];
 };
 
 struct FragmentStage {
@@ -557,8 +557,8 @@ struct alignas(16) FillOutlineTriangulatedPropertiesUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const FillOutlineTriangulatedDrawableUBO& drawable [[buffer(2)]],
-                                device const FillOutlineTriangulatedPropertiesUBO& props [[buffer(3)]]) {
+                                device const FillOutlineTriangulatedDrawableUBO& drawable [[buffer(0)]],
+                                device const FillOutlineTriangulatedPropertiesUBO& props [[buffer(1)]]) {
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
@@ -595,7 +595,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillOutlineTriangulatedPropertiesUBO& props [[buffer(3)]]) {
+                            device const FillOutlineTriangulatedPropertiesUBO& props [[buffer(1)]]) {
 
     // Calculate the distance of the pixel from the line in pixels.
     const float dist = length(in.normal) * in.width2;

@@ -14,10 +14,8 @@
 namespace mbgl {
 namespace shaders {
 struct UniformBlockInfo {
-    constexpr UniformBlockInfo(bool vertex, bool fragment, std::size_t size, std::size_t id)
-        : UniformBlockInfo(id, vertex, fragment, size, id) {}
-    constexpr UniformBlockInfo(std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
-        : index(index_),
+    constexpr UniformBlockInfo(bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
+        : index(id_),
           vertex(vertex_),
           fragment(fragment_),
           size(size_),
