@@ -132,9 +132,9 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             }
             case RenderFillLayer::FillVariant::FillOutlineTriangulated: {
                 const FillOutlineTriangulatedDrawableUBO drawableUBO = {
-                    /*.matrix=*/ util::cast<float>(matrix),
-                    /*.units_to_pixels=*/ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
-                    /*.ratio=*/ 1.0f / tileID.pixelsToTileUnits(1.0f, parameters.state.getZoom()),
+                    /*.matrix=*/util::cast<float>(matrix),
+                    /*.units_to_pixels=*/{1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
+                    /*.ratio=*/1.0f / tileID.pixelsToTileUnits(1.0f, parameters.state.getZoom()),
                     0};
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
