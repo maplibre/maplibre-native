@@ -47,11 +47,6 @@ struct alignas(16) FillDrawableUBO {
     float4x4 matrix;
 };
 
-struct alignas(16) FillEvaluatedPropsUBO {
-    float4 color;
-    float opacity;
-};
-
 struct alignas(16) FillInterpolateUBO {
     float color_t;
     float opacity_t;
@@ -59,8 +54,8 @@ struct alignas(16) FillInterpolateUBO {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillDrawableUBO& drawable [[buffer(0)]],
-                                device const FillEvaluatedPropsUBO& props [[buffer(1)]],
-                                device const FillInterpolateUBO& interp [[buffer(3)]]) {
+                                device const FillInterpolateUBO& interp [[buffer(2)]],
+                                device const FillEvaluatedPropsUBO& props [[buffer(3)]]) {
     return {
         .position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f),
 #if !defined(HAS_UNIFORM_u_color)
@@ -73,7 +68,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillEvaluatedPropsUBO& props [[buffer(1)]]) {
+                            device const FillEvaluatedPropsUBO& props [[buffer(3)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
@@ -130,11 +125,6 @@ struct alignas(16) FillOutlineDrawableUBO {
     float2 pad1;
 };
 
-struct alignas(16) FillOutlineEvaluatedPropsUBO {
-    float4 outline_color;
-    float opacity;
-};
-
 struct alignas(16) FillOutlineInterpolateUBO {
     float outline_color_t;
     float opacity_t;
@@ -142,8 +132,8 @@ struct alignas(16) FillOutlineInterpolateUBO {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillOutlineDrawableUBO& drawable [[buffer(0)]],
-                                device const FillOutlineEvaluatedPropsUBO& props [[buffer(1)]],
-                                device const FillOutlineInterpolateUBO& interp [[buffer(3)]]) {
+                                device const FillOutlineInterpolateUBO& interp [[buffer(2)]],
+                                device const FillEvaluatedPropsUBO& props [[buffer(3)]]) {
     const float4 position = drawable.matrix * float4(float2(vertx.position), 0.0f, 1.0f);
     return {
         .position       = position,
@@ -158,7 +148,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillOutlineEvaluatedPropsUBO& props [[buffer(1)]]) {
+                            device const FillEvaluatedPropsUBO& props [[buffer(3)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
@@ -236,11 +226,6 @@ struct alignas(16) FillPatternDrawableUBO {
     float2 texsize;
 };
 
-struct alignas(16) FillPatternEvaluatedPropsUBO {
-    float opacity;
-    float fade;
-};
-
 struct alignas(16) FillPatternTilePropsUBO {
     float4 pattern_from;
     float4 pattern_to;
@@ -254,9 +239,9 @@ struct alignas(16) FillPatternInterpolateUBO {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillPatternDrawableUBO& drawable [[buffer(0)]],
-                                device const FillPatternEvaluatedPropsUBO& props [[buffer(1)]],
-                                device const FillPatternTilePropsUBO& tileProps [[buffer(2)]],
-                                device const FillPatternInterpolateUBO& interp [[buffer(3)]]) {
+                                device const FillPatternTilePropsUBO& tileProps [[buffer(1)]],
+                                device const FillPatternInterpolateUBO& interp [[buffer(2)]],
+                                device const FillEvaluatedPropsUBO& props [[buffer(3)]]) {
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = float4(tileProps.pattern_from);
 #else
@@ -301,8 +286,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const FillPatternDrawableUBO& drawable [[buffer(0)]],
-                            device const FillPatternEvaluatedPropsUBO& props [[buffer(1)]],
-                            device const FillPatternTilePropsUBO& tileProps [[buffer(2)]],
+                            device const FillPatternTilePropsUBO& tileProps [[buffer(1)]],
+                            device const FillEvaluatedPropsUBO& props [[buffer(3)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
@@ -398,11 +383,6 @@ struct alignas(16) FillOutlinePatternDrawableUBO {
     float2 texsize;
 };
 
-struct alignas(16) FillOutlinePatternEvaluatedPropsUBO {
-    float opacity;
-    float fade;
-};
-
 struct alignas(16) FillOutlinePatternTilePropsUBO {
     float4 pattern_from;
     float4 pattern_to;
@@ -416,9 +396,9 @@ struct alignas(16) FillOutlinePatternInterpolateUBO {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillOutlinePatternDrawableUBO& drawable [[buffer(0)]],
-                                device const FillOutlinePatternEvaluatedPropsUBO& props [[buffer(1)]],
-                                device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(2)]],
-                                device const FillOutlinePatternInterpolateUBO& interp [[buffer(3)]]) {
+                                device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(1)]],
+                                device const FillOutlinePatternInterpolateUBO& interp [[buffer(2)]],
+                                device const FillEvaluatedPropsUBO& props [[buffer(3)]]) {
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = tileProps.pattern_from;
 #else
@@ -470,8 +450,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const FillOutlinePatternDrawableUBO& drawable [[buffer(0)]],
-                            device const FillOutlinePatternEvaluatedPropsUBO& props [[buffer(1)]],
-                            device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(2)]],
+                            device const FillOutlinePatternTilePropsUBO& tileProps [[buffer(1)]],
+                            device const FillEvaluatedPropsUBO& props [[buffer(3)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
@@ -549,16 +529,9 @@ struct alignas(16) FillOutlineTriangulatedDrawableUBO {
     float pad;
 };
 
-struct alignas(16) FillOutlineTriangulatedPropertiesUBO {
-    float4 color;
-    float opacity;
-    float width;
-    float pad1, pad2;
-};
-
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const FillOutlineTriangulatedDrawableUBO& drawable [[buffer(0)]],
-                                device const FillOutlineTriangulatedPropertiesUBO& props [[buffer(1)]]) {
+                                device const FillEvaluatedPropsUBO& props [[buffer(3)]]) {
 
     // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
@@ -595,7 +568,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const FillOutlineTriangulatedPropertiesUBO& props [[buffer(1)]]) {
+                            device const FillEvaluatedPropsUBO& props [[buffer(3)]]) {
 
     // Calculate the distance of the pixel from the line in pixels.
     const float dist = length(in.normal) * in.width2;
@@ -605,7 +578,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float blur2 = (1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
     const float alpha = clamp(min(dist + blur2, in.width2 - dist) / blur2, 0.0, 1.0);
 
-    return half4(props.color * (alpha * props.opacity));
+    return half4(props.outline_color * (alpha * props.opacity));
 }
 )";
 };

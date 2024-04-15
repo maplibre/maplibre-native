@@ -5,8 +5,8 @@ namespace shaders {
 
 const std::array<UniformBlockInfo, 3> ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{true, false, sizeof(FillDrawableUBO), idFillDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(FillEvaluatedPropsUBO), idFillEvaluatedPropsUBO},
     UniformBlockInfo{true, false, sizeof(FillInterpolateUBO), idFillInterpolateUBO},
+    UniformBlockInfo{true, true, sizeof(FillEvaluatedPropsUBO), idFillEvaluatedPropsUBO},
 };
 const std::array<AttributeInfo, 3> ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Metal>::attributes = {
     AttributeInfo{fillUBOCount + 0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
@@ -17,8 +17,8 @@ const std::array<TextureInfo, 0> ShaderSource<BuiltIn::FillShader, gfx::Backend:
 
 const std::array<UniformBlockInfo, 3> ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{true, false, sizeof(FillOutlineDrawableUBO), idFillDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(FillOutlineEvaluatedPropsUBO), idFillEvaluatedPropsUBO},
     UniformBlockInfo{true, false, sizeof(FillOutlineInterpolateUBO), idFillInterpolateUBO},
+    UniformBlockInfo{true, true, sizeof(FillEvaluatedPropsUBO), idFillEvaluatedPropsUBO},
 };
 const std::array<AttributeInfo, 3> ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Metal>::attributes = {
     AttributeInfo{fillUBOCount + 0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
@@ -29,9 +29,9 @@ const std::array<TextureInfo, 0> ShaderSource<BuiltIn::FillOutlineShader, gfx::B
 
 const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal>::uniforms = {
     UniformBlockInfo{true, true, sizeof(FillPatternDrawableUBO), idFillDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(FillPatternEvaluatedPropsUBO), idFillEvaluatedPropsUBO},
     UniformBlockInfo{true, true, sizeof(FillPatternTilePropsUBO), idFillTilePropsUBO},
     UniformBlockInfo{true, false, sizeof(FillPatternInterpolateUBO), idFillInterpolateUBO},
+    UniformBlockInfo{true, true, sizeof(FillEvaluatedPropsUBO), idFillEvaluatedPropsUBO},
 };
 const std::array<AttributeInfo, 4> ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Metal>::attributes = {
     AttributeInfo{fillUBOCount + 0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},
@@ -46,9 +46,9 @@ const std::array<TextureInfo, 1> ShaderSource<BuiltIn::FillPatternShader, gfx::B
 const std::array<UniformBlockInfo, 4>
     ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>::uniforms = {
         UniformBlockInfo{true, true, sizeof(FillOutlinePatternDrawableUBO), idFillDrawableUBO},
-        UniformBlockInfo{true, true, sizeof(FillOutlinePatternEvaluatedPropsUBO), idFillEvaluatedPropsUBO},
         UniformBlockInfo{true, true, sizeof(FillOutlinePatternTilePropsUBO), idFillTilePropsUBO},
         UniformBlockInfo{true, false, sizeof(FillOutlinePatternInterpolateUBO), idFillInterpolateUBO},
+        UniformBlockInfo{true, true, sizeof(FillEvaluatedPropsUBO), idFillEvaluatedPropsUBO},
 };
 const std::array<AttributeInfo, 4>
     ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>::attributes = {
@@ -65,7 +65,7 @@ const std::array<TextureInfo, 1> ShaderSource<BuiltIn::FillOutlinePatternShader,
 const std::array<UniformBlockInfo, 2>
     ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::Metal>::uniforms = {
         UniformBlockInfo{true, true, sizeof(FillOutlineTriangulatedDrawableUBO), idFillDrawableUBO},
-        UniformBlockInfo{true, true, sizeof(FillOutlineTriangulatedPropertiesUBO), idFillEvaluatedPropsUBO},
+        UniformBlockInfo{true, true, sizeof(FillEvaluatedPropsUBO), idFillEvaluatedPropsUBO},
 };
 const std::array<AttributeInfo, 2>
     ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::Metal>::attributes = {

@@ -54,6 +54,15 @@ float4 unpack_mix_color(const float4 packedColors, const float t) {
                decode_color(float2(packedColors[2], packedColors[3])), t);
 }
 
+struct alignas(16) FillEvaluatedPropsUBO {
+    float4 color;
+    float4 outline_color;
+    float opacity;
+    float fade;
+    float width;
+    float pad1;
+};
+
 struct alignas(16) LineDynamicUBO {
     float2 units_to_pixels;
     float pad1, pad2;

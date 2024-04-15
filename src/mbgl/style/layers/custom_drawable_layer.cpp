@@ -220,24 +220,24 @@ public:
 
         const shaders::FillDrawableUBO fillUBO{/*matrix = */ util::cast<float>(matrix)};
 
-        const shaders::FillEvaluatedPropsUBO fillPropertiesUBO{
-            /* .color = */ color,
-            /* .opacity = */ opacity,
-            0,
-            0,
-            0,
-        };
-
         const shaders::FillInterpolateUBO fillInterpolateUBO{
             /* .color_t = */ 0.f,
             /* .opacity_t = */ 0.f,
             0,
             0,
         };
+        const shaders::FillEvaluatedPropsUBO fillPropertiesUBO{
+            /* .color = */ color,
+            /* .outline_color = */ Color::white(),
+            /* .opacity = */ opacity,
+            /* .fade = */ 0.f,
+            /* .width = */ 0.f,
+            0,
+        };
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idFillDrawableUBO, &fillUBO, parameters.context);
-        drawableUniforms.createOrUpdate(idFillEvaluatedPropsUBO, &fillPropertiesUBO, parameters.context);
         drawableUniforms.createOrUpdate(idFillInterpolateUBO, &fillInterpolateUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idFillEvaluatedPropsUBO, &fillPropertiesUBO, parameters.context);
     };
 
 private:
