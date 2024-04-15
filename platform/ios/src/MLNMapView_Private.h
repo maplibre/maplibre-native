@@ -75,6 +75,8 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 @property (nonatomic, readonly) BOOL enablePresentsWithTransaction;
 @property (nonatomic, assign) BOOL needsDisplayRefresh;
 
+- (MLNMapCamera *_Nullable)cameraByTiltingToPitch:(CGFloat)pitch;
+
 - (BOOL) _opaque;
 
 @end

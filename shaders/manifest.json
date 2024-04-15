@@ -181,6 +181,13 @@
         "glsl_frag": "drawable.custom.symbol_icon.fragment.glsl",
         "uses_ubos": true
     },
+    {
+        "name": "WideVectorShader",
+        "header": "drawable_wide_vector",
+        "glsl_vert": "_empty.glsl",
+        "glsl_frag": "_empty.glsl",
+        "uses_ubos": false
+    },
 
     {
         "name": "Prelude",

@@ -14,13 +14,21 @@
 namespace mbgl {
 namespace shaders {
 struct AttributeInfo {
-    AttributeInfo(std::size_t index, gfx::AttributeDataType dataType, std::size_t id);
+    constexpr AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_)
+        : index(index_),
+          dataType(dataType_),
+          id(id_) {}
     std::size_t index;
     gfx::AttributeDataType dataType;
     std::size_t id;
 };
 struct UniformBlockInfo {
-    UniformBlockInfo(std::size_t index, bool vertex, bool fragment, std::size_t size, std::size_t id);
+    constexpr UniformBlockInfo(std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
+        : index(index_),
+          vertex(vertex_),
+          fragment(fragment_),
+          size(size_),
+          id(id_) {}
     std::size_t index;
     bool vertex;
     bool fragment;
@@ -28,7 +36,9 @@ struct UniformBlockInfo {
     std::size_t id;
 };
 struct TextureInfo {
-    TextureInfo(std::size_t index, std::size_t id);
+    constexpr TextureInfo(std::size_t index_, std::size_t id_)
+        : index(index_),
+          id(id_) {}
     std::size_t index;
     std::size_t id;
 };
@@ -58,10 +68,13 @@ public:
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
 
+    const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
+
     const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
     gfx::UniformBlockArray& mutableUniformBlocks() override { return uniformBlocks; }
 
     void initAttribute(const shaders::AttributeInfo&);
+    void initInstanceAttribute(const shaders::AttributeInfo&);
     void initUniformBlock(const shaders::UniformBlockInfo&);
     void initTexture(const shaders::TextureInfo&);
 
@@ -72,6 +85,7 @@ protected:
     MTLFunctionPtr fragmentFunction;
     UniformBlockArray uniformBlocks;
     VertexAttributeArray vertexAttributes;
+    VertexAttributeArray instanceAttributes;
     std::array<std::optional<size_t>, shaders::maxTextureCountPerShader> textureBindings;
 };
 
