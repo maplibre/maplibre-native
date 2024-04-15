@@ -528,7 +528,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     break;
                 }
                 case FillVariant::FillOutlinePattern: {
-                    drawableUniforms.createOrUpdate(idFillInterpolateUBO, &getFillOutlinePatternInterpolateUBO(), context);
+                    drawableUniforms.createOrUpdate(
+                        idFillInterpolateUBO, &getFillOutlinePatternInterpolateUBO(), context);
                     drawableUniforms.createOrUpdate(idFillTilePropsUBO, &getFillOutlinePatternTilePropsUBO(), context);
                     break;
                 }
@@ -699,10 +700,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                     bucket.sharedBasicLineIndexes,
                                                     bucket.basicLineSegments.data(),
                                                     bucket.basicLineSegments.size());
-                        finish(*outlineBuilder,
-                               idFillInterpolateUBO,
-                               getFillInterpolateUBO(),
-                               FillVariant::FillOutline);
+                        finish(
+                            *outlineBuilder, idFillInterpolateUBO, getFillInterpolateUBO(), FillVariant::FillOutline);
                     }
                 }
             }
