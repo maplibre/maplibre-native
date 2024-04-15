@@ -44,7 +44,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
             return 1 + contrast;
         }
     };
-    
+
     const RasterEvaluatedPropsUBO propsUBO{
         /*.spin_weigths = */ spinWeights(evaluated.get<RasterHueRotate>()),
         /*.tl_parent = */ {{0.0f, 0.0f}},
@@ -60,7 +60,7 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
         0};
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idRasterEvaluatedPropsUBO, &propsUBO, parameters.context);
-    
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!checkTweakDrawable(drawable)) {
             return;
