@@ -177,6 +177,17 @@ const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillOutlinePatternShader, gfx
     TextureInfo{"u_image", idFillImageTexture},
 };
 
+// Fill Outline Triangulated
+const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>::attributes = {
+    AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
+    AttributeInfo{"a_data", idLineDataVertexAttribute},
+};
+const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
+    UniformBlockInfo{"FillOutlineTriangulatedDrawableUBO", idFillOutlineTriangulatedDrawableUBO},
+    UniformBlockInfo{"FillOutlineTriangulatedPropertiesUBO", idFillOutlineTriangulatedPropertiesUBO},
+};
+const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>::textures = {};
+
 // Fill Extrusion
 const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL>::attributes = {
     AttributeInfo{"a_pos", idFillExtrusionPosVertexAttribute},
@@ -352,17 +363,6 @@ const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LineSDFShader, gfx::Back
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::LineSDFShader, gfx::Backend::Type::OpenGL>::textures = {
     TextureInfo{"u_image", idLineImageTexture},
 };
-
-// Line Basic
-const std::vector<AttributeInfo> ShaderInfo<BuiltIn::LineBasicShader, gfx::Backend::Type::OpenGL>::attributes = {
-    AttributeInfo{"a_pos_normal", idLinePosNormalVertexAttribute},
-    AttributeInfo{"a_data", idLineDataVertexAttribute},
-};
-const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::LineBasicShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
-    UniformBlockInfo{"LineBasicUBO", idLineBasicUBO},
-    UniformBlockInfo{"LineBasicPropertiesUBO", idLineBasicPropertiesUBO},
-};
-const std::vector<TextureInfo> ShaderInfo<BuiltIn::LineBasicShader, gfx::Backend::Type::OpenGL>::textures = {};
 
 // Raster
 const std::vector<AttributeInfo> ShaderInfo<BuiltIn::RasterShader, gfx::Backend::Type::OpenGL>::attributes = {
