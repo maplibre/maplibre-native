@@ -43,12 +43,12 @@ const std::array<TextureInfo, 1> ShaderSource<BuiltIn::FillPatternShader, gfx::B
     TextureInfo{0, idFillImageTexture},
 };
 
-const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::FillOutlinePatternShader,
-                                                   gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{true, true, sizeof(FillOutlinePatternDrawableUBO), idFillDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(FillOutlinePatternEvaluatedPropsUBO), idFillEvaluatedPropsUBO},
-    UniformBlockInfo{true, true, sizeof(FillOutlinePatternTilePropsUBO), idFillTilePropsUBO},
-    UniformBlockInfo{true, false, sizeof(FillOutlinePatternInterpolateUBO), idFillInterpolateUBO},
+const std::array<UniformBlockInfo, 4>
+    ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>::uniforms = {
+        UniformBlockInfo{true, true, sizeof(FillOutlinePatternDrawableUBO), idFillDrawableUBO},
+        UniformBlockInfo{true, true, sizeof(FillOutlinePatternEvaluatedPropsUBO), idFillEvaluatedPropsUBO},
+        UniformBlockInfo{true, true, sizeof(FillOutlinePatternTilePropsUBO), idFillTilePropsUBO},
+        UniformBlockInfo{true, false, sizeof(FillOutlinePatternInterpolateUBO), idFillInterpolateUBO},
 };
 const std::array<AttributeInfo, 4>
     ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Metal>::attributes = {
@@ -62,10 +62,10 @@ const std::array<TextureInfo, 1> ShaderSource<BuiltIn::FillOutlinePatternShader,
         TextureInfo{0, idFillImageTexture},
 };
 
-const std::array<UniformBlockInfo, 2> ShaderSource<BuiltIn::FillOutlineTriangulatedShader,
-                                                   gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{true, true, sizeof(FillOutlineTriangulatedDrawableUBO), idFillDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(FillOutlineTriangulatedPropertiesUBO), idFillEvaluatedPropsUBO},
+const std::array<UniformBlockInfo, 2>
+    ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::Metal>::uniforms = {
+        UniformBlockInfo{true, true, sizeof(FillOutlineTriangulatedDrawableUBO), idFillDrawableUBO},
+        UniformBlockInfo{true, true, sizeof(FillOutlineTriangulatedPropertiesUBO), idFillEvaluatedPropsUBO},
 };
 const std::array<AttributeInfo, 2>
     ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::Metal>::attributes = {
