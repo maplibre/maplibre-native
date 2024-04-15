@@ -94,6 +94,7 @@ jobs:
           fetch-depth: 0
 
       - uses: jwlawson/actions-setup-cmake@v2
+        if: runner.environment == 'github-hosted'
         with:
           cmake-version: '3.29.2'
  
