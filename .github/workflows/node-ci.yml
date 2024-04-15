@@ -265,10 +265,10 @@ jobs:
         run: set -o pipefail && ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Upload render test artifacts (MacOS)
-        if: always()
+        if: runner.os == 'MacOS'
         uses: actions/upload-artifact@v4
         with:
-          name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
+          name: render-query-test-results
           path: metrics/macos-xcode11-release-style.html
 
       - name: Test (Linux)
