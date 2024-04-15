@@ -121,8 +121,8 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillShader, gfx::Backend::T
 };
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::FillShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
     UniformBlockInfo{"FillDrawableUBO", idFillDrawableUBO},
-    UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
     UniformBlockInfo{"FillInterpolateUBO", idFillInterpolateUBO},
+    UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillShader, gfx::Backend::Type::OpenGL>::textures = {};
 
@@ -135,8 +135,8 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillOutlineShader, gfx::Bac
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL>::uniformBlocks =
     {
         UniformBlockInfo{"FillOutlineDrawableUBO", idFillDrawableUBO},
-        UniformBlockInfo{"FillOutlineEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
         UniformBlockInfo{"FillOutlineInterpolateUBO", idFillInterpolateUBO},
+        UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillOutlineShader, gfx::Backend::Type::OpenGL>::textures = {};
 
@@ -150,9 +150,9 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillPatternShader, gfx::Bac
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::FillPatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks =
     {
         UniformBlockInfo{"FillPatternDrawableUBO", idFillDrawableUBO},
-        UniformBlockInfo{"FillPatternEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
         UniformBlockInfo{"FillPatternTilePropsUBO", idFillTilePropsUBO},
         UniformBlockInfo{"FillPatternInterpolateUBO", idFillInterpolateUBO},
+        UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillPatternShader, gfx::Backend::Type::OpenGL>::textures = {
     TextureInfo{"u_image", idFillImageTexture},
@@ -169,9 +169,9 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillOutlinePatternShader, g
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
         UniformBlockInfo{"FillOutlinePatternDrawableUBO", idFillDrawableUBO},
-        UniformBlockInfo{"FillOutlinePatternEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
         UniformBlockInfo{"FillOutlinePatternTilePropsUBO", idFillTilePropsUBO},
         UniformBlockInfo{"FillOutlinePatternInterpolateUBO", idFillInterpolateUBO},
+        UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::OpenGL>::textures = {
     TextureInfo{"u_image", idFillImageTexture},
@@ -186,7 +186,7 @@ const std::vector<AttributeInfo>
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
         UniformBlockInfo{"FillOutlineTriangulatedDrawableUBO", idFillDrawableUBO},
-        UniformBlockInfo{"FillOutlineTriangulatedPropertiesUBO", idFillEvaluatedPropsUBO},
+        UniformBlockInfo{"FillEvaluatedPropsUBO", idFillEvaluatedPropsUBO},
 };
 const std::vector<TextureInfo>
     ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL>::textures = {};

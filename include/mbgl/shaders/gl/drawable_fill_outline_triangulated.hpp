@@ -25,12 +25,13 @@ layout (std140) uniform FillOutlineTriangulatedDrawableUBO {
     mediump float u_ratio;
     lowp float pad0;
 };
-
-layout (std140) uniform FillOutlineTriangulatedPropertiesUBO {
+layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
-    lowp float u_opacity;
-    mediump float u_width;
-    highp vec2 pad1;
+    highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_width;
+    highp float padding_props1;
 };
 
 out vec2 v_normal;
@@ -76,11 +77,13 @@ void main() {
     v_width = outset;
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform FillOutlineTriangulatedPropertiesUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
-    lowp float u_opacity;
-    mediump float u_width;
-    highp vec2 pad1;
+    highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_width;
+    highp float padding_props1;
 };
 
 in float v_width;
@@ -97,7 +100,7 @@ void main() {
     float blur2 = (1.0 / DEVICE_PIXEL_RATIO) * v_gamma_scale;
     float alpha = clamp(min(dist + blur2, v_width - dist) / blur2, 0.0, 1.0);
 
-    fragColor = u_color * (alpha * u_opacity);
+    fragColor = u_outline_color * (alpha * u_opacity);
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

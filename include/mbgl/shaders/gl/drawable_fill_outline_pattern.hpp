@@ -16,11 +16,9 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::OpenG
     highp vec2 u_pixel_coord_lower;
     highp vec2 u_texsize;
 };
-layout (std140) uniform FillOutlinePatternEvaluatedPropsUBO {
-    highp float u_opacity;
-    highp float u_fade;
-    highp float padding_props1;
-    highp float padding_props2;
+layout (std140) uniform FillOutlinePatternTilePropsUBO {
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
 };
 layout (std140) uniform FillOutlinePatternInterpolateUBO {
     highp float u_pattern_from_t;
@@ -28,9 +26,13 @@ layout (std140) uniform FillOutlinePatternInterpolateUBO {
     highp float u_opacity_t;
     highp float pad1;
 };
-layout (std140) uniform FillOutlinePatternTilePropsUBO {
-    highp vec4 u_pattern_from;
-    highp vec4 u_pattern_to;
+layout (std140) uniform FillEvaluatedPropsUBO {
+    highp vec4 u_color;
+    highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_width;
+    highp float padding_props1;
 };
 
 layout (location = 0) in vec2 a_pos;
@@ -98,11 +100,9 @@ mediump vec4 pattern_to = u_pattern_to;
     highp vec2 u_pixel_coord_lower;
     highp vec2 u_texsize;
 };
-layout (std140) uniform FillOutlinePatternEvaluatedPropsUBO {
-    highp float u_opacity;
-    highp float u_fade;
-    highp float padding_props1;
-    highp float padding_props2;
+layout (std140) uniform FillOutlinePatternTilePropsUBO {
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
 };
 layout (std140) uniform FillOutlinePatternInterpolateUBO {
     highp float u_pattern_from_t;
@@ -110,9 +110,13 @@ layout (std140) uniform FillOutlinePatternInterpolateUBO {
     highp float u_opacity_t;
     highp float pad1;
 };
-layout (std140) uniform FillOutlinePatternTilePropsUBO {
-    highp vec4 u_pattern_from;
-    highp vec4 u_pattern_to;
+layout (std140) uniform FillEvaluatedPropsUBO {
+    highp vec4 u_color;
+    highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_width;
+    highp float padding_props1;
 };
 
 uniform sampler2D u_image;

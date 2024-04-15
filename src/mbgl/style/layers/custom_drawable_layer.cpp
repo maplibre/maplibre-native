@@ -218,7 +218,7 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-        const shaders::FillDrawableUBO fillUBO{/*matrix = */ util::cast<float>(matrix)};
+        const shaders::FillDrawableUBO fillDrawableUBO{/*matrix = */ util::cast<float>(matrix)};
 
         const shaders::FillInterpolateUBO fillInterpolateUBO{
             /* .color_t = */ 0.f,
@@ -235,7 +235,7 @@ public:
             0,
         };
         auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idFillDrawableUBO, &fillUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idFillDrawableUBO, &fillDrawableUBO, parameters.context);
         drawableUniforms.createOrUpdate(idFillInterpolateUBO, &fillInterpolateUBO, parameters.context);
         drawableUniforms.createOrUpdate(idFillEvaluatedPropsUBO, &fillPropertiesUBO, parameters.context);
     };
