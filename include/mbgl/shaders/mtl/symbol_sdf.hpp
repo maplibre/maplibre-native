@@ -14,8 +14,8 @@ struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 10> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<AttributeInfo, 10> attributes;
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
