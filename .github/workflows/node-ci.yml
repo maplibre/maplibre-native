@@ -165,7 +165,7 @@ jobs:
           "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Setup cmake
-        if: runner.environment == 'github-hosted'
+        if: ${{contains(runner.name, 'GitHub Actions')}}
         uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: '3.29.2'
