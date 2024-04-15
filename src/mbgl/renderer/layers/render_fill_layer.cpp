@@ -715,7 +715,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                             bucket.basicLineSegments.data(),
                                             bucket.basicLineSegments.size());
                 finish(*outlineBuilder,
-                       idFillOutlineInterpolateUBO,
+                       idFillInterpolateUBO,
                        getFillOutlineInterpolateUBO(),
                        FillVariant::FillOutline);
             }
