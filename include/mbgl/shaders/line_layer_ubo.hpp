@@ -158,30 +158,5 @@ enum {
     lineUBOCount
 };
 
-//
-// Line basic
-
-struct alignas(16) LineBasicUBO {
-    std::array<float, 4 * 4> matrix;
-    std::array<float, 2> units_to_pixels;
-    float ratio;
-    float pad;
-};
-static_assert(sizeof(LineBasicUBO) % 16 == 0);
-
-struct alignas(16) LineBasicPropertiesUBO {
-    Color color;
-    float opacity;
-    float width;
-    float pad1, pad2;
-};
-static_assert(sizeof(LineBasicPropertiesUBO) % 16 == 0);
-
-enum {
-    idLineBasicUBO,
-    idLineBasicPropertiesUBO,
-    lineBasicUBOCount
-};
-
 } // namespace shaders
 } // namespace mbgl

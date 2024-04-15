@@ -28,6 +28,7 @@ public:
         FillPattern,
         FillOutline,
         FillOutlinePattern,
+        FillOutlineTriangulated,
         Undefined = 255
     };
 
@@ -44,15 +45,6 @@ public:
                 const RenderTree&,
                 UniqueChangeRequestVec&) override;
 #endif
-
-protected:
-#if MLN_TRIANGULATE_FILL_OUTLINES
-    void markLayerRenderable(bool willRender, UniqueChangeRequestVec&) override;
-    void layerIndexChanged(int32_t newLayerIndex, UniqueChangeRequestVec&) override;
-    void layerRemoved(UniqueChangeRequestVec&) override;
-    std::size_t removeAllDrawables() override;
-    std::size_t removeTile(RenderPass, const OverscaledTileID&) override;
-#endif // MLN_DRAWABLE_RENDERER
 
 private:
     void transition(const TransitionParameters&) override;
@@ -90,7 +82,6 @@ private:
     gfx::ShaderGroupPtr outlinePatternShaderGroup;
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
-    LayerGroupBasePtr outlineLayerGroup;
     gfx::ShaderGroupPtr outlineTriangulatedShaderGroup;
 #endif // MLN_TRIANGULATE_FILL_OUTLINES
 
