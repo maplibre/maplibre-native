@@ -64,15 +64,5 @@ const std::array<TextureInfo, 1> ShaderSource<BuiltIn::LineSDFShader, gfx::Backe
     TextureInfo{0, idLineImageTexture},
 };
 
-const std::array<AttributeInfo, 2> ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, idLinePosNormalVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::UByte4, idLineDataVertexAttribute},
-};
-const std::array<UniformBlockInfo, 2> ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{2, true, true, sizeof(LineBasicUBO), idLineBasicUBO},
-    UniformBlockInfo{3, true, true, sizeof(LineBasicPropertiesUBO), idLineBasicPropertiesUBO},
-};
-const std::array<TextureInfo, 0> ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::Metal>::textures = {};
-
 } // namespace shaders
 } // namespace mbgl
