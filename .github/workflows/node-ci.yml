@@ -4,7 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches:
+      - main
       - opengl-2
+      - topic/drawable
+      - node-*.*.x
     tags:
       - "node-*"
     paths:
@@ -29,6 +32,8 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+      - "package.json"
+      - "package-lock.json"
 
   pull_request:
     branches:
@@ -55,6 +60,8 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+      - "package.json"
+      - "package-lock.json"
 
 concurrency:
   # cancel jobs on PRs only
@@ -93,15 +100,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: jwlawson/actions-setup-cmake@v2
-        if: runner.environment == 'github-hosted'
-        with:
-          cmake-version: '3.29.2'
- 
-      - name: cmake version
-        run: |
-          cmake --version
- 
       - name: Setup submodules
         shell: bash
         run: |
@@ -165,11 +163,15 @@ jobs:
           $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
           "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Setup cmake (Linux)
-        if: runner.os == 'Linux' && matrix.arch != 'arm64'
-        uses: jwlawson/actions-setup-cmake@v1.14
+      - name: Setup cmake
+        if: runner.environment == 'github-hosted'
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: "3.19.x"
+          cmake-version: '3.29.2'
+ 
+      - name: cmake version
+        run: |
+          cmake --version
 
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -263,7 +265,7 @@ jobs:
 
       - name: Upload render test artifacts (MacOS)
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
           path: metrics/macos-xcode11-release-style.html
