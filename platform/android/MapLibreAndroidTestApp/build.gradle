@@ -83,6 +83,7 @@ android {
 
     namespace 'org.maplibre.android.testapp'
     testNamespace 'org.maplibre.android.testapp.test'
+
     lint {
         abortOnError false
         baseline file('lint-baseline-local.xml')
