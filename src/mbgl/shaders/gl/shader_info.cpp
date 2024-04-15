@@ -371,6 +371,7 @@ const std::vector<AttributeInfo> ShaderInfo<BuiltIn::RasterShader, gfx::Backend:
 };
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::RasterShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
     UniformBlockInfo{"RasterDrawableUBO", idRasterDrawableUBO},
+    UniformBlockInfo{"RasterEvaluatedPropsUBO", idRasterEvaluatedPropsUBO},
 };
 const std::vector<TextureInfo> ShaderInfo<BuiltIn::RasterShader, gfx::Backend::Type::OpenGL>::textures = {
     TextureInfo{"u_image0", idRasterImage0Texture},

@@ -1,5 +1,7 @@
 layout (std140) uniform RasterDrawableUBO {
     highp mat4 u_matrix;
+};
+layout (std140) uniform RasterEvaluatedPropsUBO {
     highp vec3 u_spin_weights;
     highp vec2 u_tl_parent;
     highp float u_scale_parent;
