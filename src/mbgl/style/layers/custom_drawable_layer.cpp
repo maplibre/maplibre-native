@@ -221,9 +221,9 @@ public:
             0};
 
         // set UBOs
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idCustomSymbolDrawableUBO, &drawableUBO, parameters.context);
-        uniforms.createOrUpdate(idCustomSymbolParametersUBO, &parametersUBO, parameters.context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idCustomSymbolDrawableUBO, &drawableUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idCustomSymbolParametersUBO, &parametersUBO, parameters.context);
     };
 
 private:

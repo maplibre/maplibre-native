@@ -4,8 +4,8 @@ namespace mbgl {
 namespace shaders {
 
 const std::array<UniformBlockInfo, 2> ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal>::uniforms = {
-    UniformBlockInfo{0, true, false, sizeof(RasterDrawableUBO), idRasterDrawableUBO},
-    UniformBlockInfo{1, true, true, sizeof(RasterEvaluatedPropsUBO), idRasterEvaluatedPropsUBO},
+    UniformBlockInfo{true, false, sizeof(RasterDrawableUBO), idRasterDrawableUBO},
+    UniformBlockInfo{true, true, sizeof(RasterEvaluatedPropsUBO), idRasterEvaluatedPropsUBO},
 };
 const std::array<AttributeInfo, 2> ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal>::attributes = {
     AttributeInfo{rasterUBOCount + 0, gfx::AttributeDataType::Short2, idRasterPosVertexAttribute},

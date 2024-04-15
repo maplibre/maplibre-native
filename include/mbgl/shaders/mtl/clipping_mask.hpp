@@ -37,7 +37,7 @@ struct alignas(16) ClipUBO {
 static_assert(sizeof(ClipUBO) == 5 * 16, "unexpected padding");
 
 struct VertexStage {
-    short2 position [[attribute(0)]];
+    short2 position [[attribute(1)]];
 };
 
 struct FragmentStage {
@@ -50,7 +50,7 @@ struct FragmentResult {
 };
 
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
-                                device const ClipUBO& clipUBO [[buffer(1)]]) {
+                                device const ClipUBO& clipUBO [[buffer(0)]]) {
     return { clipUBO.matrix * float4(float2(in.position.xy), 0, 1) };
 }
 
