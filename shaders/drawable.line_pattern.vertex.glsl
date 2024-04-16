@@ -15,7 +15,7 @@ layout (location = 1) in vec4 a_data;
 
 layout (std140) uniform LineDynamicUBO {
     highp vec2 u_units_to_pixels;
-    lowp float pad0, pad1;
+    lowp float dynamic_pad1, dynamic_pad2;
 };
 
 layout (std140) uniform LinePatternDrawableUBO {
@@ -26,11 +26,6 @@ layout (std140) uniform LinePatternDrawableUBO {
     highp float u_fade;
 };
 
-layout (std140) uniform LinePatternTilePropertiesUBO {
-    lowp vec4 u_pattern_from;
-    lowp vec4 u_pattern_to;
-};
-
 layout (std140) uniform LinePatternInterpolationUBO {
     lowp float u_blur_t;
     lowp float u_opacity_t;
@@ -39,7 +34,12 @@ layout (std140) uniform LinePatternInterpolationUBO {
     lowp float u_width_t;
     lowp float u_pattern_from_t;
     lowp float u_pattern_to_t;
-    highp float pad2;
+    highp float interp_pad1;
+};
+
+layout (std140) uniform LinePatternTilePropertiesUBO {
+    lowp vec4 u_pattern_from;
+    lowp vec4 u_pattern_to;
 };
 
 layout (std140) uniform LineEvaluatedPropsUBO {
@@ -50,8 +50,8 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     lowp float u_offset;
     mediump float u_width;
     lowp float u_floorwidth;
-    highp float pad3;
-    highp float pad4;
+    highp float props_pad1;
+    highp float props_pad2;
 };
 
 out vec2 v_normal;

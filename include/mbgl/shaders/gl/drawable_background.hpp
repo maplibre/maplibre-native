@@ -20,7 +20,7 @@ void main() {
     static constexpr const char* fragment = R"(layout (std140) uniform BackgroundLayerUBO {
     highp vec4 u_color;
     highp float u_opacity;
-    highp float pad1, pad2, pad3;
+    highp float layer_pad1, layer_pad2, layer_pad3;
 };
 
 void main() {

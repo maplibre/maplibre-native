@@ -14,7 +14,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::OpenGL> {
 layout (std140) uniform FillInterpolateUBO {
     highp float u_color_t;
     highp float u_opacity_t;
-    highp float pad_interp_1, pad_interp_2;
+    highp float interp_pad1, interp_pad2;
 };
 layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
@@ -22,7 +22,7 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp float u_opacity;
     highp float u_fade;
     highp float u_width;
-    highp float padding_props1;
+    highp float props_pad1;
 };
 
 layout (location = 0) in vec2 a_pos;
@@ -54,7 +54,7 @@ lowp float opacity = u_opacity;
     static constexpr const char* fragment = R"(layout (std140) uniform FillInterpolateUBO {
     highp float u_color_t;
     highp float u_opacity_t;
-    highp float pad_interp_1, pad_interp_2;
+    highp float interp_pad1, interp_pad2;
 };
 layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
@@ -62,7 +62,7 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp float u_opacity;
     highp float u_fade;
     highp float u_width;
-    highp float padding_props1;
+    highp float props_pad1;
 };
 
 #ifndef HAS_UNIFORM_u_color

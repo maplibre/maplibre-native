@@ -10,7 +10,7 @@ layout (std140) uniform BackgroundPatternLayerUBO {
     highp float u_scale_b;
     highp float u_mix;
     highp float u_opacity;
-    highp float pad4, pad5;
+    highp float layer_pad1, layer_pad2;
 };
 
 uniform sampler2D u_image;

@@ -14,14 +14,14 @@ layout (std140) uniform SymbolDrawableUBO {
 
     highp float u_gamma_scale;
     bool u_rotate_symbol;
-    highp vec2 u_pad1;
+    highp vec2 drawable_pad1;
 };
 
 layout (std140) uniform SymbolDynamicUBO {
     highp float u_fade_change;
     highp float u_camera_to_center_distance;
     highp float u_aspect_ratio;
-    highp float pad0;
+    highp float dynamic_pad1;
 };
 
 layout (std140) uniform SymbolPaintUBO {
@@ -30,7 +30,7 @@ layout (std140) uniform SymbolPaintUBO {
     highp float u_opacity;
     highp float u_halo_width;
     highp float u_halo_blur;
-    highp float u_padding;
+    highp float paint_pad1;
 };
 
 layout (std140) uniform SymbolTilePropsUBO {
@@ -41,7 +41,7 @@ layout (std140) uniform SymbolTilePropsUBO {
     bool u_is_size_feature_constant;
     highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
     highp float u_size; // used when size is both zoom and feature constant
-    bool u_pad3;
+    bool tileprops_pad1;
 };
 
 layout (std140) uniform SymbolInterpolateUBO {
@@ -50,7 +50,7 @@ layout (std140) uniform SymbolInterpolateUBO {
     highp float u_opacity_t;
     highp float u_halo_width_t;
     highp float u_halo_blur_t;
-    highp float u_pad4,u_pad5,u_pad6;
+    highp float interp_pad1, interp_pad2, interp_pad3;
 };
 
 out vec2 v_tex;

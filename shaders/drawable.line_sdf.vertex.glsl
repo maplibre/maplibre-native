@@ -15,7 +15,7 @@ layout (location = 1) in vec4 a_data;
 
 layout (std140) uniform LineDynamicUBO {
     highp vec2 u_units_to_pixels;
-    lowp float pad0, pad1;
+    lowp float dynamic_pad1, dynamic_pad2;
 };
 
 layout (std140) uniform LineSDFDrawableUBO {
@@ -27,7 +27,7 @@ layout (std140) uniform LineSDFDrawableUBO {
     highp float u_tex_y_b;
     highp float u_sdfgamma;
     highp float u_mix;
-    lowp float pad2, pad3, pad4;
+    lowp float drawable_pad1, drawable_pad2, drawable_pad3;
 };
 
 layout (std140) uniform LineSDFInterpolationUBO {
@@ -38,7 +38,7 @@ layout (std140) uniform LineSDFInterpolationUBO {
     lowp float u_offset_t;
     lowp float u_width_t;
     lowp float u_floorwidth_t;
-    highp float pad5;
+    highp float interp_pad1;
 };
 
 layout (std140) uniform LineEvaluatedPropsUBO {
@@ -49,8 +49,8 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     lowp float u_offset;
     mediump float u_width;
     lowp float u_floorwidth;
-    highp float pad6;
-    highp float pad7;
+    highp float props_pad1;
+    highp float props_pad2;
 };
 
 out vec2 v_normal;

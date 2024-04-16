@@ -21,13 +21,13 @@ layout (location = 1) in vec4 a_data;
 
 layout (std140) uniform LineDynamicUBO {
     highp vec2 u_units_to_pixels;
-    lowp float pad0, pad1;
+    lowp float dynamic_pad1, dynamic_pad2;
 };
 
 layout (std140) uniform LineDrawableUBO {
     highp mat4 u_matrix;
     mediump float u_ratio;
-    lowp float pad2, pad3, pad4;
+    lowp float drawable_pad1, drawable_pad2, drawable_pad3;
 };
 
 layout (std140) uniform LineInterpolationUBO {
@@ -37,7 +37,7 @@ layout (std140) uniform LineInterpolationUBO {
     lowp float u_gapwidth_t;
     lowp float u_offset_t;
     lowp float u_width_t;
-    highp vec2 pad5;
+    highp vec2 interp_pad1;
 };
 
 layout (std140) uniform LineEvaluatedPropsUBO {
@@ -48,8 +48,8 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     lowp float u_offset;
     mediump float u_width;
     lowp float u_floorwidth;
-    highp float pad6;
-    highp float pad7;
+    highp float props_pad1;
+    highp float props_pad2;
 };
 
 out vec2 v_normal;
@@ -164,7 +164,7 @@ mediump float width = u_width;
     static constexpr const char* fragment = R"(layout (std140) uniform LineDrawableUBO {
     highp mat4 u_matrix;
     mediump float u_ratio;
-    lowp float pad2, pad3, pad4;
+    lowp float drawable_pad1, drawable_pad2, drawable_pad3;
 };
 
 layout (std140) uniform LineInterpolationUBO {
@@ -174,7 +174,7 @@ layout (std140) uniform LineInterpolationUBO {
     lowp float u_gapwidth_t;
     lowp float u_offset_t;
     lowp float u_width_t;
-    highp vec2 pad5;
+    highp vec2 interp_pad1;
 };
 
 layout (std140) uniform LineEvaluatedPropsUBO {
@@ -185,8 +185,8 @@ layout (std140) uniform LineEvaluatedPropsUBO {
     lowp float u_offset;
     mediump float u_width;
     lowp float u_floorwidth;
-    highp float pad6;
-    highp float pad7;
+    highp float props_pad1;
+    highp float props_pad2;
 };
 
 in vec2 v_width2;

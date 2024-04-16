@@ -6,7 +6,7 @@ layout (std140) uniform SymbolPaintUBO {
     highp float u_opacity;
     highp float u_halo_width;
     highp float u_halo_blur;
-    highp float u_padding;
+    highp float paint_pad1;
 };
 
 layout (std140) uniform SymbolInterpolateUBO {
@@ -15,7 +15,7 @@ layout (std140) uniform SymbolInterpolateUBO {
     highp float u_opacity_t;
     highp float u_halo_width_t;
     highp float u_halo_blur_t;
-    highp float u_pad4,u_pad5,u_pad6;
+    highp float interp_pad1, interp_pad2,interp_pad3;
 };
 
 in vec2 v_tex;
