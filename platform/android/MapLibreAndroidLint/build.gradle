@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jmailen.kotlinter'
+    alias libs.plugins.kotlinter
 }
 
 apply plugin: 'java-library'

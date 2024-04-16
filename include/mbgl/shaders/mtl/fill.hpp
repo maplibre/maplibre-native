@@ -518,5 +518,97 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 )";
 };
 
+template <>
+struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::Metal> {
+    static constexpr auto name = "FillOutlineTriangulatedShader";
+    static constexpr auto vertexMainFunction = "vertexMain";
+    static constexpr auto fragmentMainFunction = "fragmentMain";
+
+    static const std::array<AttributeInfo, 2> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
+    static const std::array<UniformBlockInfo, 2> uniforms;
+    static const std::array<TextureInfo, 0> textures;
+
+    static constexpr auto source = R"(
+struct VertexStage {
+    short2 pos_normal [[attribute(0)]];
+    uchar4 data [[attribute(1)]];
+};
+
+struct FragmentStage {
+    float4 position [[position, invariant]];
+    float width2;
+    float2 normal;
+    half gamma_scale;
+};
+
+struct alignas(16) FillOutlineTriangulatedDrawableUBO {
+    float4x4 matrix;
+    float2 units_to_pixels;
+    float ratio;
+    float pad;
+};
+
+struct alignas(16) FillOutlineTriangulatedPropertiesUBO {
+    float4 color;
+    float opacity;
+    float width;
+    float pad1, pad2;
+};
+
+FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
+                                device const FillOutlineTriangulatedDrawableUBO& drawable [[buffer(2)]],
+                                device const FillOutlineTriangulatedPropertiesUBO& props [[buffer(3)]]) {
+
+    // the distance over which the line edge fades out.
+    // Retina devices need a smaller distance to avoid aliasing.
+    const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
+
+    const float2 a_extrude = float2(vertx.data.xy) - 128.0;
+    const float2 pos = floor(float2(vertx.pos_normal) * 0.5);
+
+    // x is 1 if it's a round cap, 0 otherwise
+    // y is 1 if the normal points up, and -1 if it points down
+    // We store these in the least significant bit of a_pos_normal
+    const float2 normal = float2(vertx.pos_normal) - 2.0 * pos;
+    const float2 v_normal = float2(normal.x, normal.y * 2.0 - 1.0);
+
+    const float halfwidth = props.width / 2.0;
+    const float outset = halfwidth + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
+
+    // Scale the extrusion vector down to a normal and then up by the line width of this vertex.
+    const float2 dist = outset * a_extrude * LINE_NORMAL_SCALE;
+
+    const float4 projected_extrude = drawable.matrix * float4(dist / drawable.ratio, 0.0, 0.0);
+    const float4 position = drawable.matrix * float4(pos, 0.0, 1.0) + projected_extrude;
+
+    // calculate how much the perspective view squishes or stretches the extrude
+    const float extrude_length_without_perspective = length(dist);
+    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * drawable.units_to_pixels);
+
+    return {
+        .position    = position,
+        .width2      = outset,
+        .normal      = v_normal,
+        .gamma_scale = half(extrude_length_without_perspective / extrude_length_with_perspective),
+    };
+}
+
+half4 fragment fragmentMain(FragmentStage in [[stage_in]],
+                            device const FillOutlineTriangulatedPropertiesUBO& props [[buffer(3)]]) {
+
+    // Calculate the distance of the pixel from the line in pixels.
+    const float dist = length(in.normal) * in.width2;
+
+    // Calculate the antialiasing fade factor. This is either when fading in the
+    // line in case of an offset line (`v_width2.y`) or when fading out (`v_width2.x`)
+    const float blur2 = (1.0 / DEVICE_PIXEL_RATIO) * in.gamma_scale;
+    const float alpha = clamp(min(dist + blur2, in.width2 - dist) / blur2, 0.0, 1.0);
+
+    return half4(props.color * (alpha * props.opacity));
+}
+)";
+};
+
 } // namespace shaders
 } // namespace mbgl

@@ -62,5 +62,19 @@ const std::array<TextureInfo, 1> ShaderSource<BuiltIn::FillOutlinePatternShader,
         TextureInfo{0, idFillImageTexture},
 };
 
+const std::array<AttributeInfo, 2>
+    ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::Metal>::attributes = {
+        AttributeInfo{0, gfx::AttributeDataType::Short2, idLinePosNormalVertexAttribute},
+        AttributeInfo{1, gfx::AttributeDataType::UByte4, idLineDataVertexAttribute},
+};
+const std::array<UniformBlockInfo, 2> ShaderSource<BuiltIn::FillOutlineTriangulatedShader,
+                                                   gfx::Backend::Type::Metal>::uniforms = {
+    UniformBlockInfo{2, true, true, sizeof(FillOutlineTriangulatedDrawableUBO), idFillOutlineTriangulatedDrawableUBO},
+    UniformBlockInfo{
+        3, true, true, sizeof(FillOutlineTriangulatedPropertiesUBO), idFillOutlineTriangulatedPropertiesUBO},
+};
+const std::array<TextureInfo, 0>
+    ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::Metal>::textures = {};
+
 } // namespace shaders
 } // namespace mbgl

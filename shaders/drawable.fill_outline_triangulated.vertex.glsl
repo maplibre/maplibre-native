@@ -1,14 +1,4 @@
-// Generated code, do not modify this file!
-#pragma once
-#include <mbgl/shaders/shader_source.hpp>
-
-namespace mbgl {
-namespace shaders {
-
-template <>
-struct ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::OpenGL> {
-    static constexpr const char* name = "LineBasicShader";
-    static constexpr const char* vertex = R"(// floor(127 / 2) == 63.0
+// floor(127 / 2) == 63.0
 // the maximum allowed miter limit is 2.0 at the moment. the extrude normal is
 // stored in a byte (-128..127). we scale regular normals up to length 63, but
 // there are also "special" normals that have a bigger length (of up to 126 in
@@ -19,18 +9,17 @@ struct ShaderSource<BuiltIn::LineBasicShader, gfx::Backend::Type::OpenGL> {
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
-layout (std140) uniform LineBasicUBO {
+layout (std140) uniform FillOutlineTriangulatedDrawableUBO {
     highp mat4 u_matrix;
     highp vec2 u_units_to_pixels;
     mediump float u_ratio;
     lowp float pad0;
 };
 
-layout (std140) uniform LineBasicPropertiesUBO {
+layout (std140) uniform FillOutlineTriangulatedPropertiesUBO {
     highp vec4 u_color;
     lowp float u_opacity;
     mediump float u_width;
-
     highp vec2 pad1;
 };
 
@@ -76,44 +65,3 @@ void main() {
 
     v_width = outset;
 }
-)";
-    static constexpr const char* fragment = R"(layout (std140) uniform LineBasicUBO {
-    highp mat4 u_matrix;
-    highp vec2 u_units_to_pixels;
-    mediump float u_ratio;
-    lowp float pad0;
-};
-
-layout (std140) uniform LineBasicPropertiesUBO {
-    highp vec4 u_color;
-    lowp float u_opacity;
-    mediump float u_width;
-
-    highp vec2 pad1;
-};
-
-in float v_width;
-in vec2 v_normal;
-in float v_gamma_scale;
-
-void main() {
-    // Calculate the distance of the pixel from the line in pixels.
-    float dist = length(v_normal) * v_width;
-
-    // Calculate the antialiasing fade factor. This is either when fading in
-    // the line in case of an offset line (v_width2.t) or when fading out
-    // (v_width2.s)
-    float blur2 = (1.0 / DEVICE_PIXEL_RATIO) * v_gamma_scale;
-    float alpha = clamp(min(dist + blur2, v_width - dist) / blur2, 0.0, 1.0);
-
-    fragColor = u_color * (alpha * u_opacity);
-
-#ifdef OVERDRAW_INSPECTOR
-    fragColor = vec4(1.0);
-#endif
-}
-)";
-};
-
-} // namespace shaders
-} // namespace mbgl

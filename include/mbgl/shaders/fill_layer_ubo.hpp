@@ -151,5 +151,30 @@ enum {
     fillOutlinePatternUBOCount
 };
 
+//
+// Fill outline triangulated
+
+struct alignas(16) FillOutlineTriangulatedDrawableUBO {
+    std::array<float, 4 * 4> matrix;
+    std::array<float, 2> units_to_pixels;
+    float ratio;
+    float pad;
+};
+static_assert(sizeof(FillOutlineTriangulatedDrawableUBO) % 16 == 0);
+
+struct alignas(16) FillOutlineTriangulatedPropertiesUBO {
+    Color color;
+    float opacity;
+    float width;
+    float pad1, pad2;
+};
+static_assert(sizeof(FillOutlineTriangulatedPropertiesUBO) % 16 == 0);
+
+enum {
+    idFillOutlineTriangulatedDrawableUBO,
+    idFillOutlineTriangulatedPropertiesUBO,
+    fillOutlineTriangulatedUBOCount
+};
+
 } // namespace shaders
 } // namespace mbgl
