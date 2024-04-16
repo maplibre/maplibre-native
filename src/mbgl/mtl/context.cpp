@@ -89,13 +89,22 @@ UniqueShaderProgram Context::createProgram(std::string name,
     const auto& programDefines = programParameters.getDefines();
     const auto numDefines = programDefines.size() + additionalDefines.size();
 
-    std::vector<NS::Object*> rawDefines;
+    std::vector<const NS::Object*> rawDefines;
     rawDefines.reserve(2 * numDefines);
     const auto addDefine = [&rawDefines](const auto& pair) {
-        auto* nsKey = NS::String::string(pair.first.data(), NS::UTF8StringEncoding);
-        auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
-        rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size() / 2), nsKey);
-        rawDefines.insert(rawDefines.end(), nsVal);
+        const auto* nsKey = NS::String::string(pair.first.data(), NS::UTF8StringEncoding);
+        const auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
+
+        // This cast suppresses a UBSan error about object alignment that occurs with the implicit cast
+        // or a `static_cast`.  This seems to occur because the ObjC allocation is cast to a C++ object
+        // pointer by `NS::Object::sendMessage`, and the alignment rules are different.  We assume that,
+        // because `NS::Object` does not use virtual methods and only serves as a way for C++ code to
+        // store and pass ObjC `id`s to `objc_msgSend`, this won't cause any real problems.
+        const NS::Object* nsObjKey = reinterpret_cast<const NS::Object*>(nsKey);
+        const NS::Object* nsObjVal = reinterpret_cast<const NS::Object*>(nsVal);
+
+        rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size() / 2), nsObjKey);
+        rawDefines.insert(rawDefines.end(), nsObjVal);
     };
     std::for_each(programDefines.begin(), programDefines.end(), addDefine);
     std::for_each(additionalDefines.begin(), additionalDefines.end(), addDefine);
@@ -135,7 +144,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     }
 
     const auto nsVertName = NS::String::string(vertexName.data(), NS::UTF8StringEncoding);
-    NS::SharedPtr<MTL::Function> vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
+    MTLFunctionPtr vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
         assert(false);
@@ -143,7 +152,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     }
 
     // fragment function is optional
-    NS::SharedPtr<MTL::Function> fragmentFunction;
+    MTLFunctionPtr fragmentFunction;
     if (!fragmentName.empty()) {
         const auto nsFragName = NS::String::string(fragmentName.data(), NS::UTF8StringEncoding);
         fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));

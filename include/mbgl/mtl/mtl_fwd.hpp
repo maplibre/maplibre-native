@@ -3,7 +3,7 @@
 // Forward-declarations for metal-cpp types, allowing
 // references without including any third-party headers
 
-#include <memory>
+#include <cstdint>
 
 namespace CA {
 class MetalDrawable;
@@ -39,26 +39,30 @@ class VertexDescriptor;
 
 namespace mbgl {
 namespace mtl {
-using CAMetalDrawablePtr = NS::SharedPtr<CA::MetalDrawable>;
 
-using MTLBlitCommandEncoderPtr = NS::SharedPtr<MTL::BlitCommandEncoder>;
-using MTLBlitPassDescriptorPtr = NS::SharedPtr<MTL::BlitPassDescriptor>;
-using MTLBufferPtr = NS::SharedPtr<MTL::Buffer>;
-using MTLCaptureScopePtr = NS::SharedPtr<MTL::CaptureScope>;
-using MTLCommandBufferPtr = NS::SharedPtr<MTL::CommandBuffer>;
-using MTLCommandQueuePtr = NS::SharedPtr<MTL::CommandQueue>;
-using MTLDevicePtr = NS::SharedPtr<MTL::Device>;
-using MTLDepthStencilStatePtr = NS::SharedPtr<MTL::DepthStencilState>;
-using MTLFunctionPtr = NS::SharedPtr<MTL::Function>;
-using MTLRenderCommandEncoderPtr = NS::SharedPtr<MTL::RenderCommandEncoder>;
-using MTLRenderPassDescriptorPtr = NS::SharedPtr<MTL::RenderPassDescriptor>;
-using MTLRenderPipelineStatePtr = NS::SharedPtr<MTL::RenderPipelineState>;
-using MTLTexturePtr = NS::SharedPtr<MTL::Texture>;
-using MTLTextureDescriptorPtr = NS::SharedPtr<MTL::TextureDescriptor>;
-using MTLSamplerStatePtr = NS::SharedPtr<MTL::SamplerState>;
-using MTLSamplerDescriptorPtr = NS::SharedPtr<MTL::SamplerDescriptor>;
-using MTLVertexAttributeDescriptorPtr = NS::SharedPtr<MTL::VertexAttributeDescriptor>;
-using MTLVertexBufferLayoutDescriptorPtr = NS::SharedPtr<MTL::VertexBufferLayoutDescriptor>;
-using MTLVertexDescriptorPtr = NS::SharedPtr<MTL::VertexDescriptor>;
+template <typename T>
+class SafeSharedPtr;
+
+using CAMetalDrawablePtr = SafeSharedPtr<CA::MetalDrawable>;
+
+using MTLBlitCommandEncoderPtr = SafeSharedPtr<MTL::BlitCommandEncoder>;
+using MTLBlitPassDescriptorPtr = SafeSharedPtr<MTL::BlitPassDescriptor>;
+using MTLBufferPtr = SafeSharedPtr<MTL::Buffer>;
+using MTLCaptureScopePtr = SafeSharedPtr<MTL::CaptureScope>;
+using MTLCommandBufferPtr = SafeSharedPtr<MTL::CommandBuffer>;
+using MTLCommandQueuePtr = SafeSharedPtr<MTL::CommandQueue>;
+using MTLDevicePtr = SafeSharedPtr<MTL::Device>;
+using MTLDepthStencilStatePtr = SafeSharedPtr<MTL::DepthStencilState>;
+using MTLFunctionPtr = SafeSharedPtr<MTL::Function>;
+using MTLRenderCommandEncoderPtr = SafeSharedPtr<MTL::RenderCommandEncoder>;
+using MTLRenderPassDescriptorPtr = SafeSharedPtr<MTL::RenderPassDescriptor>;
+using MTLRenderPipelineStatePtr = SafeSharedPtr<MTL::RenderPipelineState>;
+using MTLTexturePtr = SafeSharedPtr<MTL::Texture>;
+using MTLTextureDescriptorPtr = SafeSharedPtr<MTL::TextureDescriptor>;
+using MTLSamplerStatePtr = SafeSharedPtr<MTL::SamplerState>;
+using MTLSamplerDescriptorPtr = SafeSharedPtr<MTL::SamplerDescriptor>;
+using MTLVertexAttributeDescriptorPtr = SafeSharedPtr<MTL::VertexAttributeDescriptor>;
+using MTLVertexBufferLayoutDescriptorPtr = SafeSharedPtr<MTL::VertexBufferLayoutDescriptor>;
+using MTLVertexDescriptorPtr = SafeSharedPtr<MTL::VertexDescriptor>;
 } // namespace mtl
 } // namespace mbgl

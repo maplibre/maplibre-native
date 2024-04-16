@@ -6,8 +6,7 @@
 #include <mbgl/gfx/upload_pass.hpp>
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
-
-#include <Foundation/NSSharedPtr.hpp>
+#include <mbgl/mtl/safe_shared_ptr.hpp>
 
 #include <vector>
 

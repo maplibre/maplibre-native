@@ -2,8 +2,8 @@
 
 #include <mbgl/gfx/vertex_buffer.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/mtl/safe_shared_ptr.hpp>
 
-#include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLBuffer.hpp>
 #include <Metal/MTLDevice.hpp>
 

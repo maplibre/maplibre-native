@@ -2,12 +2,14 @@
 #include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/offscreen_texture.hpp>
 #include <mbgl/mtl/context.hpp>
+#include <mbgl/mtl/safe_shared_ptr.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
+
+#include <Metal/Metal.hpp>
 
 #include <cassert>
 #include <stdexcept>
 #include <type_traits>
-#include <Metal/Metal.hpp>
 
 namespace mbgl {
 namespace mtl {

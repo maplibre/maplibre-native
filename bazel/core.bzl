@@ -1093,6 +1093,7 @@ MLN_DRAWABLES_MTL_HEADERS = [
     "include/mbgl/mtl/render_pass.hpp",
     "include/mbgl/mtl/renderer_backend.hpp",
     "include/mbgl/mtl/renderable_resource.hpp",
+    "include/mbgl/mtl/safe_shared_ptr.hpp",
     "include/mbgl/mtl/texture2d.hpp",
     "include/mbgl/mtl/tile_layer_group.hpp",
     "include/mbgl/mtl/uniform_block.hpp",

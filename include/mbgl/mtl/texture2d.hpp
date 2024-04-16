@@ -2,9 +2,9 @@
 
 #include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/mtl/safe_shared_ptr.hpp>
 #include <mbgl/util/image.hpp>
 
-#include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLPixelFormat.hpp>
 #include <Metal/MTLTexture.hpp>
 

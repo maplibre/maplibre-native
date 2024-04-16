@@ -1,9 +1,8 @@
 #pragma once
 
 #include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/mtl/safe_shared_ptr.hpp>
 #include <mbgl/renderer/layer_group.hpp>
-
-#include <Foundation/NSSharedPtr.hpp>
 
 #include <optional>
 
