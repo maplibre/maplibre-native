@@ -1,8 +1,8 @@
 import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
-    id 'org.jmailen.kotlinter'
-    id 'org.jetbrains.dokka' version '1.7.20'
+    alias libs.plugins.kotlinter
+    alias libs.plugins.dokka
 }
 
 apply plugin: 'com.android.library'
