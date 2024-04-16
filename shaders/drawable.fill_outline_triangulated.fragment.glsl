@@ -1,15 +1,7 @@
-layout (std140) uniform LineBasicUBO {
-    highp mat4 u_matrix;
-    highp vec2 u_units_to_pixels;
-    mediump float u_ratio;
-    lowp float pad0;
-};
-
-layout (std140) uniform LineBasicPropertiesUBO {
+layout (std140) uniform FillOutlineTriangulatedPropertiesUBO {
     highp vec4 u_color;
     lowp float u_opacity;
     mediump float u_width;
-
     highp vec2 pad1;
 };
 
