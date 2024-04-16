@@ -37,7 +37,7 @@ on:
 
   pull_request:
     branches:
-      - "*"
+      - opengl-2
     paths:
       - CMakeLists.txt
       - "platform/linux/**"
