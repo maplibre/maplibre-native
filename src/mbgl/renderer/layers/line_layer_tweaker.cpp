@@ -40,8 +40,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
             /*floorwidth =*/evaluated.get<LineFloorWidth>().constantOr(LineFloorWidth::defaultValue()),
             0,
-            0
-        };
+            0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
