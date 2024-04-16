@@ -71,11 +71,11 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const SymbolDrawableUBO& drawable [[buffer(0)]],
-                                device const SymbolDynamicUBO& dynamic [[buffer(1)]],
-                                device const SymbolPaintUBO& paint [[buffer(2)]],
-                                device const SymbolTilePropsUBO& props [[buffer(3)]],
-                                device const SymbolInterpolateUBO& interp [[buffer(4)]]) {
+                                device const SymbolDynamicUBO& dynamic [[buffer(0)]],
+                                device const SymbolDrawableUBO& drawable [[buffer(1)]],
+                                device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
+                                device const SymbolInterpolateUBO& interp [[buffer(3)]],
+                                device const SymbolEvaluatedPropsUBO& props [[buffer(4)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -89,12 +89,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float segment_angle = -vertx.projected_pos[2];
 
     float size;
-    if (!props.is_size_zoom_constant && !props.is_size_feature_constant) {
-        size = mix(a_size_min, a_size[1], props.size_t) / 128.0;
-    } else if (props.is_size_zoom_constant && !props.is_size_feature_constant) {
+    if (!tileprops.is_size_zoom_constant && !tileprops.is_size_feature_constant) {
+        size = mix(a_size_min, a_size[1], tileprops.size_t) / 128.0;
+    } else if (tileprops.is_size_zoom_constant && !tileprops.is_size_feature_constant) {
         size = a_size_min / 128.0;
     } else {
-        size = props.size;
+        size = tileprops.size;
     }
 
     const float4 projectedPoint = drawable.matrix * float4(a_pos, 0, 1);
@@ -105,7 +105,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // If the label isn't pitched with the map, we do layout in viewport space,
     // which makes labels in the distance larger relative to the features around
     // them. We counteract part of that effect by dividing by the perspective ratio.
-    const float distance_ratio = props.pitch_with_map ?
+    const float distance_ratio = tileprops.pitch_with_map ?
         camera_to_anchor_distance / dynamic.camera_to_center_distance :
         dynamic.camera_to_center_distance / camera_to_anchor_distance;
     const float perspective_ratio = clamp(
@@ -115,7 +115,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     size *= perspective_ratio;
 
-    const float fontScale = props.is_text ? size / 24.0 : size;
+    const float fontScale = tileprops.is_text ? size / 24.0 : size;
 
     float symbol_rotation = 0.0;
     if (drawable.rotate_symbol) {
@@ -165,10 +165,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolDrawableUBO& drawable [[buffer(0)]],
-                            device const SymbolDynamicUBO& dynamic [[buffer(1)]],
-                            device const SymbolPaintUBO& paint [[buffer(2)]],
-                            device const SymbolTilePropsUBO& props [[buffer(3)]],
+                            device const SymbolDynamicUBO& dynamic [[buffer(0)]],
+                            device const SymbolDrawableUBO& drawable [[buffer(1)]],
+                            device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
+                            device const SymbolEvaluatedPropsUBO& props [[buffer(4)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
@@ -176,36 +176,36 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #endif
 
 #if defined(HAS_UNIFORM_u_fill_color)
-    const half4 fill_color = half4(paint.fill_color);
+    const half4 fill_color = half4(tileprops.is_text ? props.text_fill_color : props.icon_fill_color);
 #else
     const half4 fill_color = in.fill_color;
 #endif
 #if defined(HAS_UNIFORM_u_halo_color)
-    const half4 halo_color = half4(paint.halo_color);
+    const half4 halo_color = half4(tileprops.is_text ? props.text_halo_color : props.icon_halo_color);
 #else
     const half4 halo_color = in.halo_color;
 #endif
 #if defined(HAS_UNIFORM_u_opacity)
-    const float opacity = paint.opacity;
+    const float opacity = tileprops.is_text ? props.text_opacity : props.icon_opacity;
 #else
     const float opacity = in.opacity;
 #endif
 #if defined(HAS_UNIFORM_u_halo_width)
-    const float halo_width = paint.halo_width;
+    const float halo_width = tileprops.is_text ? props.text_halo_width : props.icon_halo_width;
 #else
     const float halo_width = in.halo_width;
 #endif
 #if defined(HAS_UNIFORM_u_halo_blur)
-    const float halo_blur = paint.halo_blur;
+    const float halo_blur = tileprops.is_text ? props.text_halo_blur : props.icon_halo_blur;
 #else
     const float halo_blur = in.halo_blur;
 #endif
 
     const float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
     const float fontGamma = in.fontScale * drawable.gamma_scale;
-    const half4 color = props.is_halo ? halo_color : fill_color;
-    const float gamma = ((props.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
-    const float buff = props.is_halo ? (6.0 - halo_width / in.fontScale) / SDF_PX : (256.0 - 64.0) / 256.0;
+    const half4 color = tileprops.is_halo ? halo_color : fill_color;
+    const float gamma = ((tileprops.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
+    const float buff = tileprops.is_halo ? (6.0 - halo_width / in.fontScale) / SDF_PX : (256.0 - 64.0) / 256.0;
     const float dist = image.sample(image_sampler, float2(in.tex)).a;
     const float gamma_scaled = gamma * in.gamma_scale;
     const float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);

@@ -20,16 +20,7 @@ public:
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
 private:
-    gfx::UniformBufferPtr textPaintBuffer;
-    gfx::UniformBufferPtr iconPaintBuffer;
-
-    bool textPropertiesUpdated = false;
-    bool iconPropertiesUpdated = false;
-
-#if MLN_RENDER_BACKEND_METAL
-    gfx::UniformBufferPtr permutationUniformBuffer;
-    gfx::UniformBufferPtr expressionUniformBuffer;
-#endif // MLN_RENDER_BACKEND_METAL
+    gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
 };
 
 } // namespace mbgl

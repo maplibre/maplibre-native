@@ -31,7 +31,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
     // Each property UBO is updated at most once if new evaluated properties were set
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
-        const LineEvaluatedPropsUBO propsUBO{
+        const LineEvaluatedPropsUBO propsUBO = {
             /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
             /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
             /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
@@ -40,7 +40,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
             /*floorwidth =*/evaluated.get<LineFloorWidth>().constantOr(LineFloorWidth::defaultValue()),
             0,
-            0};
+            0
+        };
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }

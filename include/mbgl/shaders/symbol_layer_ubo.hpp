@@ -5,6 +5,16 @@
 namespace mbgl {
 namespace shaders {
 
+/// Dynamic UBO
+struct alignas(16) SymbolDynamicUBO {
+    /* 0 */ float fade_change;
+    /* 4 */ float camera_to_center_distance;
+    /* 8 */ float aspect_ratio;
+    /* 12 */ float pad;
+    /* 16 */
+};
+static_assert(sizeof(SymbolDynamicUBO) == 16);
+
 struct alignas(16) SymbolDrawableUBO {
     /*   0 */ std::array<float, 4 * 4> matrix;
     /*  64 */ std::array<float, 4 * 4> label_plane_matrix;
@@ -20,28 +30,6 @@ struct alignas(16) SymbolDrawableUBO {
     /* 224 */
 };
 static_assert(sizeof(SymbolDrawableUBO) == 14 * 16);
-
-/// Dynamic UBO
-struct alignas(16) SymbolDynamicUBO {
-    /* 0 */ float fade_change;
-    /* 4 */ float camera_to_center_distance;
-    /* 8 */ float aspect_ratio;
-    /* 12 */ float pad;
-    /* 16 */
-};
-static_assert(sizeof(SymbolDynamicUBO) == 16);
-
-/// Evaluated properties that do not depend on the tile
-struct alignas(16) SymbolPaintUBO {
-    /*  0 */ Color fill_color;
-    /* 16 */ Color halo_color;
-    /* 32 */ float opacity;
-    /* 36 */ float halo_width;
-    /* 40 */ float halo_blur;
-    /* 44 */ float padding;
-    /* 48 */
-};
-static_assert(sizeof(SymbolPaintUBO) == 3 * 16);
 
 /// Evaluated properties that depend on the tile
 struct alignas(16) SymbolTilePropsUBO {
@@ -69,12 +57,30 @@ struct alignas(16) SymbolInterpolateUBO {
 };
 static_assert(sizeof(SymbolInterpolateUBO) == 32);
 
+/// Evaluated properties that do not depend on the tile
+struct alignas(16) SymbolEvaluatedPropsUBO {
+    /*  0 */ Color text_fill_color;
+    /* 16 */ Color text_halo_color;
+    /* 32 */ float text_opacity;
+    /* 36 */ float text_halo_width;
+    /* 40 */ float text_halo_blur;
+    /* 44 */ float pad1;
+    /* 48 */ Color icon_fill_color;
+    /* 64 */ Color icon_halo_color;
+    /* 80 */ float icon_opacity;
+    /* 84 */ float icon_halo_width;
+    /* 88 */ float icon_halo_blur;
+    /* 92 */ float pad2;
+    /* 96 */
+};
+static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16);
+
 enum {
-    idSymbolDrawableUBO,
     idSymbolDynamicUBO,
-    idSymbolPaintUBO,
+    idSymbolDrawableUBO,
     idSymbolTilePropsUBO,
     idSymbolInterpolateUBO,
+    idSymbolEvaluatedPropsUBO,
     symbolUBOCount
 };
 

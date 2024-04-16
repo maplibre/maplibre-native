@@ -46,11 +46,11 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const SymbolDrawableUBO& drawable [[buffer(0)]],
-                                device const SymbolDynamicUBO& dynamic [[buffer(1)]],
-                                device const SymbolPaintUBO& paint [[buffer(2)]],
-                                device const SymbolTilePropsUBO& props [[buffer(3)]],
-                                device const SymbolInterpolateUBO& interp [[buffer(4)]]) {
+                                device const SymbolDynamicUBO& dynamic [[buffer(0)]],
+                                device const SymbolDrawableUBO& drawable [[buffer(1)]],
+                                device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
+                                device const SymbolInterpolateUBO& interp [[buffer(3)]],
+                                device const SymbolEvaluatedPropsUBO& paint [[buffer(4)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -65,18 +65,18 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float segment_angle = -vertx.projected_pos[2];
 
     float size;
-    if (!props.is_size_zoom_constant && !props.is_size_feature_constant) {
+    if (!tileprops.is_size_zoom_constant && !tileprops.is_size_feature_constant) {
         size = mix(a_size_min, a_size[1], props.size_t) / 128.0;
-    } else if (props.is_size_zoom_constant && !props.is_size_feature_constant) {
+    } else if (tileprops.is_size_zoom_constant && !tileprops.is_size_feature_constant) {
         size = a_size_min / 128.0;
     } else {
-        size = props.size;
+        size = tileprops.size;
     }
 
     const float4 projectedPoint = drawable.matrix * float4(a_pos, 0, 1);
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
-    const float distance_ratio = props.pitch_with_map ?
+    const float distance_ratio = tileprops.pitch_with_map ?
         camera_to_anchor_distance / dynamic.camera_to_center_distance :
         dynamic.camera_to_center_distance / camera_to_anchor_distance;
     const float perspective_ratio = clamp(
@@ -86,7 +86,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     size *= perspective_ratio;
 
-    const float fontScale = props.is_text ? size / 24.0 : size;
+    const float fontScale = tileprops.is_text ? size / 24.0 : size;
 
     float symbol_rotation = 0.0;
     if (drawable.rotate_symbol) {
@@ -123,9 +123,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolDrawableUBO& drawable [[buffer(0)]],
-                            device const SymbolDynamicUBO& dynamic [[buffer(1)]],
-                            device const SymbolPaintUBO& paint [[buffer(2)]],
+                            device const SymbolDynamicUBO& dynamic [[buffer(0)]],
+                            device const SymbolDrawableUBO& drawable [[buffer(1)]],
+                            device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
+                            device const SymbolEvaluatedPropsUBO& props [[buffer(4)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
@@ -133,7 +134,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #endif
 
 #if defined(HAS_UNIFORM_u_opacity)
-    const float opacity = paint.opacity * in.fade_opacity;
+    const float opacity = (tileprops.is_text ? props.text_opacity : props.icon_opacity) * in.fade_opacity;
 #else
     const float opacity = in.opacity; // fade_opacity is baked in for this case
 #endif
