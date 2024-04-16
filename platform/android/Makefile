@@ -265,11 +265,6 @@ android-lint-sdk:
 android-lint-test-app:
 	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroidTestApp:lint
 
-# Generates javadoc from the Android SDK
-.PHONY: android-javadoc
-android-javadoc:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:javadocrelease
-
 # Generates LICENSE.md file based on all Android project dependencies
 .PHONY: android-license
 android-license:
