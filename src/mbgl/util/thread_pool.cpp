@@ -59,27 +59,12 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
             lock.unlock();
 
             if (function) {
-                const auto cleanup = [&](bool locked) {
-                    // destroy the function and release its captures before unblocking `waitForEmpty`
-                    function = {};
-                    pendingItems--;
-                    if (!pendingItems) {
-                        std::unique_lock<std::mutex> inner_lock(mutex, std::defer_lock);
-                        if (!locked) {
-                            inner_lock.lock();
-                        }
-                        if (queue.empty()) {
-                            cvEmpty.notify_all();
-                        }
-                    }
-                };
                 try {
                     function();
 
                     // destroy the function and release its captures before unblocking `waitForEmpty`
                     function = {};
-                    pendingItems--;
-                    if (!pendingItems) {
+                    if (!--pendingItems) {
                         std::unique_lock<std::mutex> inner_lock(mutex);
                         if (queue.empty()) {
                             cvEmpty.notify_all();
@@ -92,8 +77,7 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                     }
 
                     function = {};
-                    pendingItems--;
-                    if (!pendingItems && queue.empty()) {
+                    if (!--pendingItems && queue.empty()) {
                         cvEmpty.notify_all();
                     }
 
