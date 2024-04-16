@@ -59,23 +59,44 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
             lock.unlock();
 
             if (function) {
-                const auto cleanup = [&] {
+                const auto cleanup = [&](bool locked) {
                     // destroy the function and release its captures before unblocking `waitForEmpty`
                     function = {};
                     pendingItems--;
-                    if (queue.empty() && !pendingItems) {
-                        cvEmpty.notify_all();
+                    if (!pendingItems) {
+                        std::unique_lock<std::mutex> inner_lock(mutex, std::defer_lock);
+                        if (!locked) {
+                            inner_lock.lock();
+                        }
+                        if (queue.empty()) {
+                            cvEmpty.notify_all();
+                        }
                     }
                 };
                 try {
                     function();
-                    cleanup();
+
+                    // destroy the function and release its captures before unblocking `waitForEmpty`
+                    function = {};
+                    pendingItems--;
+                    if (!pendingItems) {
+                        std::unique_lock<std::mutex> inner_lock(mutex);
+                        if (queue.empty()) {
+                            cvEmpty.notify_all();
+                        }
+                    }
                 } catch (...) {
-                    lock.lock();
+                    std::unique_lock<std::mutex> inner_lock(mutex);
                     if (handler) {
                         handler(std::current_exception());
                     }
-                    cleanup();
+
+                    function = {};
+                    pendingItems--;
+                    if (!pendingItems && queue.empty()) {
+                        cvEmpty.notify_all();
+                    }
+
                     if (handler) {
                         continue;
                     }
