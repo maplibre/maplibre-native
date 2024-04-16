@@ -14,6 +14,7 @@
 #include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/shaders/raster_layer_ubo.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
+#include <mbgl/shaders/widevector_ubo.hpp>
 
 #include <algorithm>
 
@@ -47,7 +48,8 @@ static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backg
                                                        static_cast<size_t>(lineSDFUBOCount),
                                                        static_cast<size_t>(lineBasicUBOCount),
                                                        static_cast<size_t>(rasterUBOCount),
-                                                       static_cast<size_t>(symbolUBOCount)});
+                                                       static_cast<size_t>(symbolUBOCount),
+                                                       static_cast<size_t>(wideVectorUBOCount)});
 
 // Texture defines
 enum {
@@ -259,20 +261,40 @@ enum {
     symbolVertexAttributeCount
 };
 
-static constexpr auto maxVertexAttributeCountPerShader = std::max(
-    {static_cast<size_t>(backgroundVertexAttributeCount),
-     static_cast<size_t>(circleVertexAttributeCount),
-     static_cast<size_t>(clippingMaskVertexAttributeCount),
-     static_cast<size_t>(collisionVertexAttributeCount),
-     static_cast<size_t>(customSymbolVertexAttributeCount),
-     static_cast<size_t>(debugVertexAttributeCount),
-     static_cast<size_t>(fillVertexAttributeCount),
-     static_cast<size_t>(fillExtrusionVertexAttributeCount),
-     static_cast<size_t>(heatmapVertexAttributeCount),
-     static_cast<size_t>(hillshadeVertexAttributeCount),
-     static_cast<size_t>(lineVertexAttributeCount),
-     static_cast<size_t>(rasterVertexAttributeCount),
-     static_cast<size_t>(symbolVertexAttributeCount)});
+enum {
+    idWideVectorScreenPos,
+    idWideVectorColor,
+    idWideVectorIndex,
+
+    wideVectorAttributeCount
+};
+
+enum {
+    idWideVectorInstanceCenter,
+    idWideVectorInstanceColor,
+    idWideVectorInstancePrevious,
+    idWideVectorInstanceNext,
+
+    wideVectorInstanceAttributeCount
+};
+
+static constexpr auto maxVertexAttributeCountPerShader = std::max({
+    static_cast<size_t>(backgroundVertexAttributeCount),
+    static_cast<size_t>(circleVertexAttributeCount),
+    static_cast<size_t>(clippingMaskVertexAttributeCount),
+    static_cast<size_t>(collisionVertexAttributeCount),
+    static_cast<size_t>(customSymbolVertexAttributeCount),
+    static_cast<size_t>(debugVertexAttributeCount),
+    static_cast<size_t>(fillVertexAttributeCount),
+    static_cast<size_t>(fillExtrusionVertexAttributeCount),
+    static_cast<size_t>(heatmapVertexAttributeCount),
+    static_cast<size_t>(hillshadeVertexAttributeCount),
+    static_cast<size_t>(lineVertexAttributeCount),
+    static_cast<size_t>(rasterVertexAttributeCount),
+    static_cast<size_t>(symbolVertexAttributeCount),
+    static_cast<size_t>(wideVectorAttributeCount),
+    static_cast<size_t>(wideVectorInstanceAttributeCount),
+});
 
 } // namespace shaders
 } // namespace mbgl
