@@ -24,22 +24,10 @@ layout (std140) uniform LineDynamicUBO {
     lowp float pad0, pad1;
 };
 
-layout (std140) uniform LineUBO {
+layout (std140) uniform LineDrawableUBO {
     highp mat4 u_matrix;
     mediump float u_ratio;
     lowp float pad2, pad3, pad4;
-};
-
-layout (std140) uniform LinePropertiesUBO {
-    highp vec4 u_color;
-    lowp float u_blur;
-    lowp float u_opacity;
-    mediump float u_gapwidth;
-    lowp float u_offset;
-    mediump float u_width;
-
-    highp float pad5;
-    highp vec2 pad6;
 };
 
 layout (std140) uniform LineInterpolationUBO {
@@ -49,8 +37,19 @@ layout (std140) uniform LineInterpolationUBO {
     lowp float u_gapwidth_t;
     lowp float u_offset_t;
     lowp float u_width_t;
+    highp vec2 pad5;
+};
 
-    highp vec2 pad7;
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    highp float pad6;
+    highp float pad7;
 };
 
 out vec2 v_normal;
@@ -162,22 +161,10 @@ mediump float width = u_width;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform LineUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform LineDrawableUBO {
     highp mat4 u_matrix;
     mediump float u_ratio;
     lowp float pad2, pad3, pad4;
-};
-
-layout (std140) uniform LinePropertiesUBO {
-    highp vec4 u_color;
-    lowp float u_blur;
-    lowp float u_opacity;
-    mediump float u_gapwidth;
-    lowp float u_offset;
-    mediump float u_width;
-
-    highp float pad5;
-    highp vec2 pad6;
 };
 
 layout (std140) uniform LineInterpolationUBO {
@@ -187,8 +174,19 @@ layout (std140) uniform LineInterpolationUBO {
     lowp float u_gapwidth_t;
     lowp float u_offset_t;
     lowp float u_width_t;
+    highp vec2 pad5;
+};
 
-    highp vec2 pad7;
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    highp float pad6;
+    highp float pad7;
 };
 
 in vec2 v_width2;

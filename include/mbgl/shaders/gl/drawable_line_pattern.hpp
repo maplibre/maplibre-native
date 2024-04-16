@@ -28,23 +28,12 @@ layout (std140) uniform LineDynamicUBO {
     lowp float pad0, pad1;
 };
 
-layout (std140) uniform LinePatternUBO {
+layout (std140) uniform LinePatternDrawableUBO {
     highp mat4 u_matrix;
     mediump vec4 u_scale;
     highp vec2 u_texsize;
     mediump float u_ratio;
     highp float u_fade;
-};
-
-layout (std140) uniform LinePatternPropertiesUBO {
-    lowp float u_blur;
-    lowp float u_opacity;
-    lowp float u_offset;
-    mediump float u_gapwidth;
-    mediump float u_width;
-
-    highp float pad2;
-    highp vec2 pad3;
 };
 
 layout (std140) uniform LinePatternTilePropertiesUBO {
@@ -60,7 +49,18 @@ layout (std140) uniform LinePatternInterpolationUBO {
     lowp float u_width_t;
     lowp float u_pattern_from_t;
     lowp float u_pattern_to_t;
+    highp float pad2;
+};
 
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    highp float pad3;
     highp float pad4;
 };
 
@@ -182,23 +182,12 @@ mediump vec4 pattern_to = u_pattern_to;
     v_width2 = vec2(outset, inset);
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform LinePatternUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform LinePatternDrawableUBO {
     highp mat4 u_matrix;
     mediump vec4 u_scale;
     highp vec2 u_texsize;
     mediump float u_ratio;
     highp float u_fade;
-};
-
-layout (std140) uniform LinePatternPropertiesUBO {
-    lowp float u_blur;
-    lowp float u_opacity;
-    lowp float u_offset;
-    mediump float u_gapwidth;
-    mediump float u_width;
-
-    highp float pad2;
-    highp vec2 pad3;
 };
 
 layout (std140) uniform LinePatternTilePropertiesUBO {
@@ -214,7 +203,18 @@ layout (std140) uniform LinePatternInterpolationUBO {
     lowp float u_width_t;
     lowp float u_pattern_from_t;
     lowp float u_pattern_to_t;
+    highp float pad2;
+};
 
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    highp float pad3;
     highp float pad4;
 };
 
