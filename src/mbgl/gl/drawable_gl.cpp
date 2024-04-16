@@ -130,7 +130,9 @@ void DrawableGL::unbindUniformBuffers() const {
         const auto& uniformBlocks = shader->getUniformBlocks();
         for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
             const auto& block = uniformBlocks.get(id);
-            if (block) {
+            if (!block) continue;
+            const auto& uniformBuffer = getUniformBuffers().get(id);
+            if (uniformBuffer) {
                 block->unbindBuffer();
             }
         }
