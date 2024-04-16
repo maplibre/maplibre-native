@@ -81,7 +81,7 @@ jobs:
             arch: arm64
           - runs-on: macos-12
             arch: x86_64
-          - runs-on: macos-13
+          - runs-on: macos-13-arm64
             arch: arm64
           - runs-on: windows-2022
             arch: x86_64
