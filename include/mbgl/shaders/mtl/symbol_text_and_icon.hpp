@@ -178,7 +178,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const SymbolDynamicUBO& dynamic [[buffer(0)]],
                             device const SymbolDrawableUBO& drawable [[buffer(1)]],
                             device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
-                            device const SymbolEvaluatedPropsUBO& props [[buffer(4)]]
+                            device const SymbolEvaluatedPropsUBO& props [[buffer(4)]],
                             texture2d<float, access::sample> glyph_image [[texture(0)]],
                             texture2d<float, access::sample> icon_image [[texture(1)]],
                             sampler glyph_sampler [[sampler(0)]],
