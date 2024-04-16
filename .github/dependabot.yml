@@ -10,6 +10,6 @@ updates:
     schedule:
       interval: 'daily'
   - package-ecosystem: 'gradle'
-    directory: '/'
+    directory: '/platform/android'
     schedule:
       interval: 'daily'
