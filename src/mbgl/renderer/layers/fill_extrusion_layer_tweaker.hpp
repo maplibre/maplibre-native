@@ -20,12 +20,7 @@ public:
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
 private:
-    gfx::UniformBufferPtr propsBuffer;
-
-#if MLN_RENDER_BACKEND_METAL
-    gfx::UniformBufferPtr permutationUniformBuffer;
-    gfx::UniformBufferPtr expressionUniformBuffer;
-#endif // MLN_RENDER_BACKEND_METAL
+    gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
 };
 
 } // namespace mbgl

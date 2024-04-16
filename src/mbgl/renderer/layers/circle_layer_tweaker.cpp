@@ -62,10 +62,9 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /* .pitch_with_map = */ pitchWithMap,
             /* .padding = */ 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
+        propertiesUpdated = false;
     }
     layerUniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
-
-    propertiesUpdated = false;
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID() || !"Circles only render with tiles");

@@ -137,7 +137,7 @@ struct alignas(16) SymbolEvaluatedPropsUBO {
     float icon_halo_blur;
     float pad2;
 };
-static_assert(sizeof(SymbolPaintUBO) == 6 * 16, "unexpected padding");
+static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16, "unexpected padding");
 
 // unpack pattern position
 inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel_coord_lower,

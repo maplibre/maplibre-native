@@ -66,7 +66,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     float size;
     if (!tileprops.is_size_zoom_constant && !tileprops.is_size_feature_constant) {
-        size = mix(a_size_min, a_size[1], props.size_t) / 128.0;
+        size = mix(a_size_min, a_size[1], tileprops.size_t) / 128.0;
     } else if (tileprops.is_size_zoom_constant && !tileprops.is_size_feature_constant) {
         size = a_size_min / 128.0;
     } else {
