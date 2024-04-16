@@ -21,6 +21,13 @@ layout (location = 3) in float a_fade_opacity;
 // [ text-size(lowerZoomStop, feature),
 //   text-size(upperZoomStop, feature) ]
 
+layout (std140) uniform SymbolDynamicUBO {
+    highp float u_fade_change;
+    highp float u_camera_to_center_distance;
+    highp float u_aspect_ratio;
+    highp float dynamic_pad1;
+};
+
 layout (std140) uniform SymbolDrawableUBO {
     highp mat4 u_matrix;
     highp mat4 u_label_plane_matrix;
@@ -32,22 +39,6 @@ layout (std140) uniform SymbolDrawableUBO {
     highp float u_gamma_scale;
     bool u_rotate_symbol;
     highp vec2 drawable_pad1;
-};
-
-layout (std140) uniform SymbolDynamicUBO {
-    highp float u_fade_change;
-    highp float u_camera_to_center_distance;
-    highp float u_aspect_ratio;
-    highp float dynamic_pad1;
-};
-
-layout (std140) uniform SymbolPaintUBO {
-    highp vec4 u_fill_color;
-    highp vec4 u_halo_color;
-    highp float u_opacity;
-    highp float u_halo_width;
-    highp float u_halo_blur;
-    highp float paint_pad1;
 };
 
 layout (std140) uniform SymbolTilePropsUBO {
@@ -68,6 +59,21 @@ layout (std140) uniform SymbolInterpolateUBO {
     highp float u_halo_width_t;
     highp float u_halo_blur_t;
     highp float interp_pad1, interp_pad2, interp_pad3;
+};
+
+layout (std140) uniform SymbolEvaluatedPropsUBO {
+    highp vec4 u_text_fill_color;
+    highp vec4 u_text_halo_color;
+    highp float u_text_opacity;
+    highp float u_text_halo_width;
+    highp float u_text_halo_blur;
+    highp float props_pad1;
+    highp vec4 u_icon_fill_color;
+    highp vec4 u_icon_halo_color;
+    highp float u_icon_opacity;
+    highp float u_icon_halo_width;
+    highp float u_icon_halo_blur;
+    highp float props_pad2;
 };
 
 out vec4 v_data0;
@@ -95,6 +101,12 @@ out lowp float halo_blur;
 #endif
 
 void main() {
+    highp vec4 u_fill_color = u_is_text ? u_text_fill_color : u_icon_fill_color;
+    highp vec4 u_halo_color = u_is_text ? u_text_halo_color : u_icon_halo_color;
+    highp float u_opacity = u_is_text ? u_text_opacity : u_icon_opacity;
+    highp float u_halo_width = u_is_text ? u_text_halo_width : u_icon_halo_width;
+    highp float u_halo_blur = u_is_text ? u_text_halo_blur : u_icon_halo_blur;
+
     #ifndef HAS_UNIFORM_u_fill_color
 fill_color = unpack_mix_color(a_fill_color, u_fill_color_t);
 #else
@@ -196,6 +208,13 @@ lowp float halo_blur = u_halo_blur;
 #define SDF 1.0
 #define ICON 0.0
 
+layout (std140) uniform SymbolDynamicUBO {
+    highp float u_fade_change;
+    highp float u_camera_to_center_distance;
+    highp float u_aspect_ratio;
+    highp float dynamic_pad1;
+};
+
 layout (std140) uniform SymbolDrawableUBO {
     highp mat4 u_matrix;
     highp mat4 u_label_plane_matrix;
@@ -207,22 +226,6 @@ layout (std140) uniform SymbolDrawableUBO {
     highp float u_gamma_scale;
     bool u_rotate_symbol;
     highp vec2 drawable_pad1;
-};
-
-layout (std140) uniform SymbolDynamicUBO {
-    highp float u_fade_change;
-    highp float u_camera_to_center_distance;
-    highp float u_aspect_ratio;
-    highp float dynamic_pad1;
-};
-
-layout (std140) uniform SymbolPaintUBO {
-    highp vec4 u_fill_color;
-    highp vec4 u_halo_color;
-    highp float u_opacity;
-    highp float u_halo_width;
-    highp float u_halo_blur;
-    highp float paint_pad1;
 };
 
 layout (std140) uniform SymbolTilePropsUBO {
@@ -243,6 +246,21 @@ layout (std140) uniform SymbolInterpolateUBO {
     highp float u_halo_width_t;
     highp float u_halo_blur_t;
     highp float interp_pad1, interp_pad2,interp_pad3;
+};
+
+layout (std140) uniform SymbolEvaluatedPropsUBO {
+    highp vec4 u_text_fill_color;
+    highp vec4 u_text_halo_color;
+    highp float u_text_opacity;
+    highp float u_text_halo_width;
+    highp float u_text_halo_blur;
+    highp float props_pad1;
+    highp vec4 u_icon_fill_color;
+    highp vec4 u_icon_halo_color;
+    highp float u_icon_opacity;
+    highp float u_icon_halo_width;
+    highp float u_icon_halo_blur;
+    highp float props_pad2;
 };
 
 uniform sampler2D u_texture;
@@ -268,6 +286,12 @@ in lowp float halo_blur;
 #endif
 
 void main() {
+    highp vec4 u_fill_color = u_is_text ? u_text_fill_color : u_icon_fill_color;
+    highp vec4 u_halo_color = u_is_text ? u_text_halo_color : u_icon_halo_color;
+    highp float u_opacity = u_is_text ? u_text_opacity : u_icon_opacity;
+    highp float u_halo_width = u_is_text ? u_text_halo_width : u_icon_halo_width;
+    highp float u_halo_blur = u_is_text ? u_text_halo_blur : u_icon_halo_blur;
+
     #ifdef HAS_UNIFORM_u_fill_color
 highp vec4 fill_color = u_fill_color;
 #endif
