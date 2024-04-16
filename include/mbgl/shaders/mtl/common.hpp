@@ -68,54 +68,15 @@ struct alignas(16) LineDynamicUBO {
     float pad1, pad2;
 };
 
-struct alignas(16) LineUBO {
-    float4x4 matrix;
-    float ratio;
-    float pad1, pad2, pad3;
-};
-
-struct alignas(16) LineGradientUBO {
-    float4x4 matrix;
-    float ratio;
-    float pad1, pad2, pad3;
-};
-
-struct alignas(16) LinePropertiesUBO {
+struct alignas(16) LineEvaluatedPropsUBO {
     float4 color;
     float blur;
     float opacity;
     float gapwidth;
     float offset;
     float width;
-    float pad1, pad2, pad3;
-};
-
-struct alignas(16) LineGradientPropertiesUBO {
-    float blur;
-    float opacity;
-    float gapwidth;
-    float offset;
-    float width;
-    float pad1, pad2, pad3;
-};
-
-struct alignas(16) LineInterpolationUBO {
-    float color_t;
-    float blur_t;
-    float opacity_t;
-    float gapwidth_t;
-    float offset_t;
-    float width_t;
+    float floorwidth;
     float pad1, pad2;
-};
-
-struct alignas(16) LineGradientInterpolationUBO {
-    float blur_t;
-    float opacity_t;
-    float gapwidth_t;
-    float offset_t;
-    float width_t;
-    float pad1, pad2, pad3;
 };
 
 struct alignas(16) SymbolDrawableUBO {

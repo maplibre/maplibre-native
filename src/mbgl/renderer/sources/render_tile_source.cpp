@@ -184,7 +184,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     const auto addPolylineDrawable = [&](TileLayerGroup* tileLayerGroup, const RenderTile& tile) {
         class PolylineDrawableTweaker : public gfx::DrawableTweaker {
         public:
-            PolylineDrawableTweaker(const shaders::LinePropertiesUBO& properties)
+            PolylineDrawableTweaker(const shaders::LineEvaluatedPropsUBO& properties)
                 : linePropertiesUBO(properties) {}
             ~PolylineDrawableTweaker() override = default;
 
@@ -208,29 +208,32 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                     0,
                     0};
 
-                const shaders::LineUBO lineUBO{/*matrix = */ util::cast<float>(matrix),
-                                               /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
-                                               0,
-                                               0,
-                                               0};
-
-                const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
-                                                                         /*blur_t =*/0.f,
-                                                                         /*opacity_t =*/0.f,
-                                                                         /*gapwidth_t =*/0.f,
-                                                                         /*offset_t =*/0.f,
-                                                                         /*width_t =*/0.f,
-                                                                         0,
-                                                                         0};
+                const shaders::LineDrawableUBO drawableUBO = {
+                    /*matrix = */ util::cast<float>(matrix),
+                    /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+                    0,
+                    0,
+                    0
+                };
+                const shaders::LineInterpolationUBO lineInterpolationUBO = {
+                    /*color_t =*/0.f,
+                    /*blur_t =*/0.f,
+                    /*opacity_t =*/0.f,
+                    /*gapwidth_t =*/0.f,
+                    /*offset_t =*/0.f,
+                    /*width_t =*/0.f,
+                    0,
+                    0
+                };
                 auto& drawableUniforms = drawable.mutableUniformBuffers();
                 drawableUniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
-                drawableUniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
-                drawableUniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
+                drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
                 drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
+                drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
             };
 
         private:
-            shaders::LinePropertiesUBO linePropertiesUBO;
+            shaders::LineEvaluatedPropsUBO linePropertiesUBO;
         };
 
         GeometryCoordinates coords{{0, 0}, {util::EXTENT, 0}, {util::EXTENT, util::EXTENT}, {0, util::EXTENT}, {0, 0}};
@@ -244,15 +247,17 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         polylineBuilder->addPolyline(coords, options);
 
         // create line tweaker
-        const shaders::LinePropertiesUBO linePropertiesUBO{/*color*/ Color::red(),
-                                                           /*blur*/ 0.f,
-                                                           /*opacity*/ 1.f,
-                                                           /*gapwidth*/ 0.f,
-                                                           /*offset*/ 0.f,
-                                                           /*width*/ 4.f,
-                                                           0,
-                                                           0,
-                                                           0};
+        const shaders::LineEvaluatedPropsUBO linePropertiesUBO = {
+            /*color*/ Color::red(),
+            /*blur*/ 0.f,
+            /*opacity*/ 1.f,
+            /*gapwidth*/ 0.f,
+            /*offset*/ 0.f,
+            /*width*/ 4.f,
+            /*floorwidth*/ 0,
+            0,
+            0
+        };
         auto tweaker = std::make_shared<PolylineDrawableTweaker>(linePropertiesUBO);
 
         // finish

@@ -89,7 +89,7 @@ const LayerTypeInfo* CustomDrawableLayer::Impl::staticTypeInfo() noexcept {
 
 class LineDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    LineDrawableTweaker(const shaders::LinePropertiesUBO& properties)
+    LineDrawableTweaker(const shaders::LineEvaluatedPropsUBO& properties)
         : linePropertiesUBO(properties) {}
 
     void init(gfx::Drawable&) override {};
@@ -110,29 +110,32 @@ public:
         const shaders::LineDynamicUBO dynamicUBO = {
             /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, 0, 0};
 
-        const shaders::LineUBO lineUBO{/*matrix = */ util::cast<float>(matrix),
-                                       /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
-                                       0,
-                                       0,
-                                       0};
-
-        const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
-                                                                 /*blur_t =*/0.f,
-                                                                 /*opacity_t =*/0.f,
-                                                                 /*gapwidth_t =*/0.f,
-                                                                 /*offset_t =*/0.f,
-                                                                 /*width_t =*/0.f,
-                                                                 0,
-                                                                 0};
+        const shaders::LineDrawableUBO drawableUBO = {
+            /*matrix = */ util::cast<float>(matrix),
+            /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+            0,
+            0,
+            0
+        };
+        const shaders::LineInterpolationUBO lineInterpolationUBO{
+            /*color_t =*/0.f,
+            /*blur_t =*/0.f,
+            /*opacity_t =*/0.f,
+            /*gapwidth_t =*/0.f,
+            /*offset_t =*/0.f,
+            /*width_t =*/0.f,
+            0,
+            0
+        };
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
-        drawableUniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
-        drawableUniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
         drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
     };
 
 private:
-    shaders::LinePropertiesUBO linePropertiesUBO;
+    shaders::LineEvaluatedPropsUBO linePropertiesUBO;
 };
 
 class WideVectorDrawableTweaker : public gfx::DrawableTweaker {
@@ -535,15 +538,17 @@ void CustomDrawableLayerHost::Interface::finish() {
                 // finish building classic lines
 
                 // create line tweaker
-                const shaders::LinePropertiesUBO linePropertiesUBO{lineOptions.color,
-                                                                   lineOptions.blur,
-                                                                   lineOptions.opacity,
-                                                                   lineOptions.gapWidth,
-                                                                   lineOptions.offset,
-                                                                   lineOptions.width,
-                                                                   0,
-                                                                   0,
-                                                                   0};
+                const shaders::LineEvaluatedPropsUBO linePropertiesUBO = {
+                    lineOptions.color,
+                    lineOptions.blur,
+                    lineOptions.opacity,
+                    lineOptions.gapWidth,
+                    lineOptions.offset,
+                    lineOptions.width,
+                    0,
+                    0,
+                    0
+                };
                 auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
 
                 // finish drawables
