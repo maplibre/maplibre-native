@@ -208,23 +208,19 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                     0,
                     0};
 
-                const shaders::LineDrawableUBO drawableUBO = {
-                    /*matrix = */ util::cast<float>(matrix),
-                    /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
-                    0,
-                    0,
-                    0
-                };
-                const shaders::LineInterpolationUBO lineInterpolationUBO = {
-                    /*color_t =*/0.f,
-                    /*blur_t =*/0.f,
-                    /*opacity_t =*/0.f,
-                    /*gapwidth_t =*/0.f,
-                    /*offset_t =*/0.f,
-                    /*width_t =*/0.f,
-                    0,
-                    0
-                };
+                const shaders::LineDrawableUBO drawableUBO = {/*matrix = */ util::cast<float>(matrix),
+                                                              /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+                                                              0,
+                                                              0,
+                                                              0};
+                const shaders::LineInterpolationUBO lineInterpolationUBO = {/*color_t =*/0.f,
+                                                                            /*blur_t =*/0.f,
+                                                                            /*opacity_t =*/0.f,
+                                                                            /*gapwidth_t =*/0.f,
+                                                                            /*offset_t =*/0.f,
+                                                                            /*width_t =*/0.f,
+                                                                            0,
+                                                                            0};
                 auto& drawableUniforms = drawable.mutableUniformBuffers();
                 drawableUniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
@@ -247,17 +243,15 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         polylineBuilder->addPolyline(coords, options);
 
         // create line tweaker
-        const shaders::LineEvaluatedPropsUBO linePropertiesUBO = {
-            /*color*/ Color::red(),
-            /*blur*/ 0.f,
-            /*opacity*/ 1.f,
-            /*gapwidth*/ 0.f,
-            /*offset*/ 0.f,
-            /*width*/ 4.f,
-            /*floorwidth*/ 0,
-            0,
-            0
-        };
+        const shaders::LineEvaluatedPropsUBO linePropertiesUBO = {/*color*/ Color::red(),
+                                                                  /*blur*/ 0.f,
+                                                                  /*opacity*/ 1.f,
+                                                                  /*gapwidth*/ 0.f,
+                                                                  /*offset*/ 0.f,
+                                                                  /*width*/ 4.f,
+                                                                  /*floorwidth*/ 0,
+                                                                  0,
+                                                                  0};
         auto tweaker = std::make_shared<PolylineDrawableTweaker>(linePropertiesUBO);
 
         // finish

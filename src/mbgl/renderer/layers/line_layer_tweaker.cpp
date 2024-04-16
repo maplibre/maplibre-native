@@ -76,8 +76,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                     0,
                     0,
-                    0
-                };
+                    0};
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
             } break;
 
@@ -88,7 +87,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     0,
                     0,
                     0};
-                drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);;
+                drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
+                ;
             } break;
 
             case LineType::Pattern: {
