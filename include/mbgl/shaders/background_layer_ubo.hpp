@@ -53,7 +53,7 @@ struct alignas(16) BackgroundPatternLayerUBO {
 static_assert(sizeof(BackgroundPatternLayerUBO) == 80);
 
 enum {
-    idBackgroundDrawableUBO,
+    idBackgroundDrawableUBO = globalUBOCount,
     idBackgroundLayerUBO,
     backgroundUBOCount
 };
