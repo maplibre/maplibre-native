@@ -287,7 +287,7 @@ jobs:
             MapLibre.dynamic.xcframework.zip
             ${{ env.debug_symbols_ios }}
           tag_name: ios-v${{ env.version }}
-          prerelease: ${{ !github.event.inputs.release }}
+          prerelease: ${{ github.event.inputs.release == 'pre' }}
           body_path: platform/ios/changelog_for_version.md
           fail_on_unmatched_files: true
 
