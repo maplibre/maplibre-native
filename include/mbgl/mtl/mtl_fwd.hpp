@@ -7,6 +7,7 @@
 
 namespace CA {
 class MetalDrawable;
+class MetalLayer;
 } // namespace CA
 
 namespace NS {
@@ -44,6 +45,7 @@ template <typename T>
 class SafeSharedPtr;
 
 using CAMetalDrawablePtr = SafeSharedPtr<CA::MetalDrawable>;
+using CAMetalLayerPtr = SafeSharedPtr<CA::MetalLayer>;
 
 using MTLBlitCommandEncoderPtr = SafeSharedPtr<MTL::BlitCommandEncoder>;
 using MTLBlitPassDescriptorPtr = SafeSharedPtr<MTL::BlitPassDescriptor>;
