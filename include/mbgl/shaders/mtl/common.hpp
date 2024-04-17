@@ -63,6 +63,50 @@ struct alignas(16) FillEvaluatedPropsUBO {
     float pad1;
 };
 
+struct alignas(16) FillExtrusionDrawableUBO {
+    /*   0 */ float4x4 matrix;
+    /*  64 */ float4 scale;
+    /*  80 */ float2 texsize;
+    /*  88 */ float2 pixel_coord_upper;
+    /*  96 */ float2 pixel_coord_lower;
+    /* 104 */ float height_factor;
+    /* 108 */ float pad;
+    /* 112 */
+};
+static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16, "unexpected padding");
+
+struct alignas(16) FillExtrusionPropsUBO {
+    /*  0 */ float4 color;
+    /* 16 */ float4 light_color_pad;
+    /* 32 */ float4 light_position_base;
+    /* 48 */ float height;
+    /* 52 */ float light_intensity;
+    /* 56 */ float vertical_gradient;
+    /* 60 */ float opacity;
+    /* 64 */ float fade;
+    /* 68 */ float pad2, pad3, pad4;
+    /* 80 */
+};
+static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "unexpected padding");
+
+struct alignas(16) FillExtrusionTilePropsUBO {
+    /*  0 */ float4 pattern_from;
+    /* 16 */ float4 pattern_to;
+    /* 32 */
+};
+static_assert(sizeof(FillExtrusionTilePropsUBO) == 2 * 16, "unexpected padding");
+
+struct alignas(16) FillExtrusionInterpolateUBO {
+    /*  0 */ float base_t;
+    /*  4 */ float height_t;
+    /*  8 */ float color_t;
+    /* 12 */ float pattern_from_t;
+    /* 16 */ float pattern_to_t;
+    /* 20 */ float pad1, pad2, pad3;
+    /* 32 */
+};
+static_assert(sizeof(FillExtrusionInterpolateUBO) == 2 * 16, "unexpected padding");
+
 struct alignas(16) LineDynamicUBO {
     float2 units_to_pixels;
     float pad1, pad2;

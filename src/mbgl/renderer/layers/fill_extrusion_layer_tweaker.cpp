@@ -43,7 +43,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
 
     // UBO depends on more than just evaluated properties, so we need to update every time,
     // but the resulting buffer can be shared across all the drawables from the layer.
-    const FillExtrusionPropsUBO paramsUBO = {
+    const FillExtrusionPropsUBO propsUBO = {
         /* .color = */ constOrDefault<FillExtrusionColor>(evaluated),
         /* .light_color = */ FillExtrusionProgram::lightColor(parameters.evaluatedLight),
         /* .pad = */ 0,
@@ -56,10 +56,10 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         /* .fade = */ crossfade.t,
         /* .pad = */ 0,
         0,
-        0};
-
+        0
+    };
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &paramsUBO, context);
+    layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &propsUBO, context);
 
     propertiesUpdated = false;
 
