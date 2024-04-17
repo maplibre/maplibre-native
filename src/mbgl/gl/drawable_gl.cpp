@@ -108,16 +108,6 @@ void DrawableGL::bindUniformBuffers() const {
             const auto& block = uniformBlocks.get(id);
             if (!block) continue;
             const auto& uniformBuffer = getUniformBuffers().get(id);
-            /*assert(uniformBuffer && "UBO missing, drawable skipped");
-            if (!uniformBuffer) {
-                using namespace std::string_literals;
-                const auto tileIDStr = getTileID() ? util::toString(*getTileID()) : "<no tile>";
-                Log::Error(Event::General,
-                           "bindUniformBuffers: UBO "s + util::toString(block->getIndex()) + " not found for " +
-                               util::toString(getID()) + " / " + getName() + " / " + tileIDStr + ". skipping.");
-                assert(false);
-                continue;
-            }*/
             if (uniformBuffer) {
                 block->bindBuffer(*uniformBuffer);
             }
