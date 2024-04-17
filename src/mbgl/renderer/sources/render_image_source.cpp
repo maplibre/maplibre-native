@@ -101,7 +101,9 @@ void RenderImageSource::prepare(const SourcePrepareParameters& parameters) {
         mat4& matrix = matrices[i];
         matrix::identity(matrix);
         transformParams.state.matrixFor(matrix, tileIds[i]);
+#if MLN_LEGACY_RENDERER
         matrix::multiply(matrix, transformParams.alignedProjMatrix, matrix);
+#endif
     }
     renderData = std::make_unique<ImageSourceRenderData>(bucket, std::move(matrices), baseImpl->id);
 }
