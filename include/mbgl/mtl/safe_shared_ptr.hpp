@@ -1,8 +1,9 @@
 #pragma once
 
 #include <type_traits>
-
 #include <Foundation/NSSharedPtr.hpp>
+
+#if __has_feature(undefined_behavior_sanitizer)
 
 #include <utility>
 
@@ -94,3 +95,5 @@ inline bool operator!=(const SafeSharedPtr<_ClassLhs>& lhs, const SafeSharedPtr<
 
 } // namespace mtl
 } // namespace mbgl
+
+#endif // __has_feature(undefined_behavior_sanitizer)
