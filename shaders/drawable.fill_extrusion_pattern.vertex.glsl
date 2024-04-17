@@ -5,18 +5,6 @@ out vec2 v_pos_a;
 out vec2 v_pos_b;
 out vec4 v_lighting;
 
-layout (std140) uniform FillExtrusionTilePropsUBO {
-    highp vec4 u_pattern_from;
-    highp vec4 u_pattern_to;
-};
-layout (std140) uniform FillExtrusionInterpolateUBO {
-    highp float u_base_t;
-    highp float u_height_t;
-    highp float u_color_t;
-    highp float u_pattern_from_t;
-    highp float u_pattern_to_t;
-    highp float interp_pad1, interp_pad2, interp_pad3;
-};
 layout (std140) uniform FillExtrusionDrawableUBO {
     highp mat4 u_matrix;
     highp vec4 u_scale;
@@ -38,6 +26,18 @@ layout (std140) uniform FillExtrusionPropsUBO {
     highp float u_opacity;
     highp float u_fade;
     highp float props_pad2, props_pad3, props_pad4;
+};
+layout (std140) uniform FillExtrusionTilePropsUBO {
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
+};
+layout (std140) uniform FillExtrusionInterpolateUBO {
+    highp float u_base_t;
+    highp float u_height_t;
+    highp float u_color_t;
+    highp float u_pattern_from_t;
+    highp float u_pattern_to_t;
+    highp float interp_pad1, interp_pad2, interp_pad3;
 };
 
 #pragma mapbox: define lowp float base
