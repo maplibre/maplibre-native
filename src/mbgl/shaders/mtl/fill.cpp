@@ -64,7 +64,7 @@ const std::array<TextureInfo, 1> ShaderSource<BuiltIn::FillOutlinePatternShader,
 
 const std::array<UniformBlockInfo, 2>
     ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::Metal>::uniforms = {
-        UniformBlockInfo{true, true, sizeof(FillOutlineTriangulatedDrawableUBO), idFillDrawableUBO},
+        UniformBlockInfo{true, false, sizeof(FillOutlineTriangulatedDrawableUBO), idFillDrawableUBO},
         UniformBlockInfo{true, true, sizeof(FillEvaluatedPropsUBO), idFillEvaluatedPropsUBO},
 };
 const std::array<AttributeInfo, 2>
