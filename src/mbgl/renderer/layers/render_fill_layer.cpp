@@ -533,6 +533,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     drawableUniforms.createOrUpdate(idFillTilePropsUBO, &getFillOutlinePatternTilePropsUBO(), context);
                     break;
                 }
+                case FillVariant::FillOutlineTriangulated: {
+                    break;
+                }
                 default: {
 #ifndef NDEBUG
                     mbgl::Log::Error(mbgl::Event::Render, "Invalid fill variant type supplied during drawable update!");
