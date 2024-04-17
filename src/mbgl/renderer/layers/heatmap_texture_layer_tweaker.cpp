@@ -26,7 +26,7 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const Paint
     const auto label = layerGroup.getName() + "-update-uniforms";
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
-    
+
     propertiesUpdated = false;
 
     const auto& size = parameters.staticData.backendSize;

@@ -56,8 +56,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         /* .fade = */ crossfade.t,
         /* .pad = */ 0,
         0,
-        0
-    };
+        0};
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &propsUBO, context);
 

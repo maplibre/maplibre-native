@@ -32,9 +32,9 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
     const auto label = layerGroup.getName() + "-update-uniforms";
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
-    
+
     propertiesUpdated = false;
-    
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData() || !checkTweakDrawable(drawable)) {
             return;
