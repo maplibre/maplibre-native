@@ -37,6 +37,9 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
     // from RenderTile::prepare
     mat4 tileMatrix;
     parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
+    if (const auto& origin{drawable.getOrigin()}; origin.has_value()) {
+        matrix::translate(tileMatrix, tileMatrix, origin->x, origin->y, 0);
+    }
 
     // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
     auto projMatrix = aligned ? parameters.transformParams.alignedProjMatrix

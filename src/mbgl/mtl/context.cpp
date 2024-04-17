@@ -126,7 +126,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);
 
     const auto& device = backend.getDevice();
-    MTL::Library* library = device->newLibrary(nsSource, options.get(), &error);
+    auto library = NS::TransferPtr(device->newLibrary(nsSource, options.get(), &error));
     if (!library || error) {
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
         const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();
@@ -136,7 +136,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     }
 
     const auto nsVertName = NS::String::string(vertexName.data(), NS::UTF8StringEncoding);
-    NS::SharedPtr<MTL::Function> vertexFunction = NS::RetainPtr(library->newFunction(nsVertName));
+    NS::SharedPtr<MTL::Function> vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
         assert(false);
@@ -147,7 +147,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     NS::SharedPtr<MTL::Function> fragmentFunction;
     if (!fragmentName.empty()) {
         const auto nsFragName = NS::String::string(fragmentName.data(), NS::UTF8StringEncoding);
-        fragmentFunction = NS::RetainPtr(library->newFunction(nsFragName));
+        fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
         if (!fragmentFunction) {
             Log::Error(Event::Shader, name + " missing fragment function " + fragmentName.data());
             assert(false);

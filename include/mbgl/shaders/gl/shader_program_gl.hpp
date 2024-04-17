@@ -48,6 +48,8 @@ public:
 
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
 
+    const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
+
     ProgramID getGLProgramID() const { return glProgram; }
     
     UniformLocation getUBOIndexLocation() const { return uboIndexLocation; }
@@ -60,6 +62,7 @@ protected:
 
     UniformBlockArrayGL uniformBlocks;
     VertexAttributeArrayGL vertexAttributes;
+    VertexAttributeArrayGL instanceAttributes;
     SamplerLocationArray samplerLocations;
     UniformLocation uboIndexLocation;
 };

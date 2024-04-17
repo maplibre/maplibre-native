@@ -191,6 +191,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
     
     bindAttributes(renderPass);
+    bindInstanceAttributes(renderPass);
     bindUniformBuffers(renderPass);
     bindTextures(renderPass);
 
@@ -261,7 +262,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             const auto primitiveType = getPrimitiveType(mode.type);
             constexpr auto indexType = MTL::IndexType::IndexTypeUInt16;
             constexpr auto indexSize = sizeof(std::uint16_t);
-            constexpr NS::UInteger instanceCount = 1;
+            const NS::UInteger instanceCount = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
             constexpr NS::UInteger baseInstance = 0;
             const NS::UInteger indexOffset = static_cast<NS::UInteger>(indexSize *
                                                                        mlSegment.indexOffset); // in bytes, not indexes
@@ -360,6 +361,25 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
             const auto* shaderMTL = static_cast<const ShaderProgram*>(shader.get());
             auto& context = renderPass.getCommandEncoder().getContext();
             renderPass.bindVertex(context.getEmptyBuffer(), /*offset=*/0, attributeIndex);
+        }
+        attributeIndex += 1;
+    }
+}
+
+void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
+    const auto& encoder = renderPass.getMetalEncoder();
+
+    NS::UInteger attributeIndex = 0;
+    for (const auto& binding : impl->instanceBindings) {
+        if (binding.has_value()) {
+            const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding->vertexBufferResource);
+            if (buffer && buffer->get()) {
+                renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
+            } else {
+                const auto* shaderMTL = static_cast<const ShaderProgram*>(shader.get());
+                auto& context = renderPass.getCommandEncoder().getContext();
+                renderPass.bindVertex(context.getEmptyBuffer(), /*offset=*/0, attributeIndex);
+            }
         }
         attributeIndex += 1;
     }
@@ -588,6 +608,30 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
             impl->vertexDesc = std::move(vertDesc);
             impl->pipelineState.reset();
+        }
+    }
+
+    // build instance buffer
+    const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isDirty());
+
+    if (buildInstanceBuffer) {
+        // Build instance attribute buffers
+        std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
+        auto instanceBindings_ = uploadPass.buildAttributeBindings(instanceAttributes->getMaxCount(),
+                                                                   /*vertexType*/ gfx::AttributeDataType::Byte,
+                                                                   /*vertexAttributeIndex=*/-1,
+                                                                   /*vertexData=*/{},
+                                                                   shader->getInstanceAttributes(),
+                                                                   *instanceAttributes,
+                                                                   usage,
+                                                                   instanceBuffers);
+        impl->instanceBuffers = std::move(instanceBuffers);
+
+        // clear dirty flag
+        instanceAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
+
+        if (impl->instanceBindings != instanceBindings_) {
+            impl->instanceBindings = std::move(instanceBindings_);
         }
     }
 
