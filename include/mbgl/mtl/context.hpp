@@ -9,9 +9,10 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/mtl/buffer_resource.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
-#include <mbgl/mtl/safe_shared_ptr.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/containers.hpp>
+
+#include <Foundation/NSSharedPtr.hpp>
 
 #include <memory>
 #include <optional>

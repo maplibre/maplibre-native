@@ -2,11 +2,11 @@
 
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
-#include <mbgl/mtl/safe_shared_ptr.hpp>
 #include <mbgl/util/image.hpp>
 #include <mbgl/util/size.hpp>
 #include <mbgl/util/util.hpp>
 
+#include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLDevice.hpp>
 #include <Metal/MTLCommandQueue.hpp>
 

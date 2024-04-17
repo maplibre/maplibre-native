@@ -2,9 +2,10 @@
 
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
-#include <mbgl/mtl/safe_shared_ptr.hpp>
 #include <mbgl/mtl/uniform_block.hpp>
 #include <mbgl/mtl/vertex_attribute.hpp>
+
+#include <Foundation/NSSharedPtr.hpp>
 
 #include <optional>
 #include <string>

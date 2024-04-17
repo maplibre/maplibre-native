@@ -2,9 +2,9 @@
 
 #include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
-#include <mbgl/mtl/safe_shared_ptr.hpp>
 
 #include <Foundation/Foundation.hpp>
+#include <Foundation/NSSharedPtr.hpp>
 #include <Metal/Metal.hpp>
 
 #include <memory>
