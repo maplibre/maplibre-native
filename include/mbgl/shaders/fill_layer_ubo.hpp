@@ -13,26 +13,12 @@ struct alignas(16) FillDrawableUBO {
 };
 static_assert(sizeof(FillDrawableUBO) == 4 * 16);
 
-struct alignas(16) FillEvaluatedPropsUBO {
-    Color color;
-    float opacity;
-    float pad1, pad2, pad3;
-};
-static_assert(sizeof(FillEvaluatedPropsUBO) == 2 * 16);
-
 struct alignas(16) FillInterpolateUBO {
     float color_t;
     float opacity_t;
     float pad1, pad2;
 };
 static_assert(sizeof(FillInterpolateUBO) % 16 == 0);
-
-enum {
-    idFillDrawableUBO,
-    idFillEvaluatedPropsUBO,
-    idFillInterpolateUBO,
-    fillUBOCount
-};
 
 //
 // Fill outline
@@ -45,26 +31,12 @@ struct alignas(16) FillOutlineDrawableUBO {
 };
 static_assert(sizeof(FillOutlineDrawableUBO) == 5 * 16);
 
-struct alignas(16) FillOutlineEvaluatedPropsUBO {
-    Color outline_color;
-    float opacity;
-    float pad1, pad2, pad3;
-};
-static_assert(sizeof(FillOutlineEvaluatedPropsUBO) == 2 * 16);
-
 struct alignas(16) FillOutlineInterpolateUBO {
     float outline_color_t;
     float opacity_t;
     float pad1, pad2;
 };
 static_assert(sizeof(FillOutlineInterpolateUBO) == 1 * 16);
-
-enum {
-    idFillOutlineDrawableUBO,
-    idFillOutlineEvaluatedPropsUBO,
-    idFillOutlineInterpolateUBO,
-    fillOutlineUBOCount
-};
 
 //
 // Fill Pattern
@@ -80,13 +52,6 @@ struct alignas(16) FillPatternDrawableUBO {
 };
 static_assert(sizeof(FillPatternDrawableUBO) == 7 * 16);
 
-struct alignas(16) FillPatternEvaluatedPropsUBO {
-    float opacity;
-    float fade;
-    float pad1, pad2;
-};
-static_assert(sizeof(FillPatternEvaluatedPropsUBO) == 1 * 16);
-
 struct alignas(16) FillPatternTilePropsUBO {
     std::array<float, 4> pattern_from;
     std::array<float, 4> pattern_to;
@@ -101,14 +66,6 @@ struct alignas(16) FillPatternInterpolateUBO {
 };
 static_assert(sizeof(FillPatternInterpolateUBO) == 1 * 16);
 
-enum {
-    idFillPatternDrawableUBO,
-    idFillPatternTilePropsUBO,
-    idFillPatternEvaluatedPropsUBO,
-    idFillPatternInterpolateUBO,
-    fillPatternUBOCount
-};
-
 //
 // Fill pattern outline
 
@@ -121,13 +78,6 @@ struct alignas(16) FillOutlinePatternDrawableUBO {
     /* 104 */ std::array<float, 2> texsize;
 };
 static_assert(sizeof(FillOutlinePatternDrawableUBO) == 7 * 16);
-
-struct alignas(16) FillOutlinePatternEvaluatedPropsUBO {
-    float opacity;
-    float fade;
-    float pad1, pad2;
-};
-static_assert(sizeof(FillOutlinePatternEvaluatedPropsUBO) == 16);
 
 struct alignas(16) FillOutlinePatternTilePropsUBO {
     std::array<float, 4> pattern_from;
@@ -143,14 +93,6 @@ struct alignas(16) FillOutlinePatternInterpolateUBO {
 };
 static_assert(sizeof(FillOutlinePatternInterpolateUBO) == 1 * 16);
 
-enum {
-    idFillOutlinePatternDrawableUBO,
-    idFillOutlinePatternTilePropsUBO,
-    idFillOutlinePatternEvaluatedPropsUBO,
-    idFillOutlinePatternInterpolateUBO,
-    fillOutlinePatternUBOCount
-};
-
 //
 // Fill outline triangulated
 
@@ -162,18 +104,25 @@ struct alignas(16) FillOutlineTriangulatedDrawableUBO {
 };
 static_assert(sizeof(FillOutlineTriangulatedDrawableUBO) % 16 == 0);
 
-struct alignas(16) FillOutlineTriangulatedPropertiesUBO {
+//
+// Fill evaluated properties
+
+struct alignas(16) FillEvaluatedPropsUBO {
     Color color;
+    Color outline_color;
     float opacity;
+    float fade;
     float width;
-    float pad1, pad2;
+    float pad1;
 };
-static_assert(sizeof(FillOutlineTriangulatedPropertiesUBO) % 16 == 0);
+static_assert(sizeof(FillEvaluatedPropsUBO) == 3 * 16);
 
 enum {
-    idFillOutlineTriangulatedDrawableUBO,
-    idFillOutlineTriangulatedPropertiesUBO,
-    fillOutlineTriangulatedUBOCount
+    idFillDrawableUBO,
+    idFillTilePropsUBO,
+    idFillInterpolateUBO,
+    idFillEvaluatedPropsUBO,
+    fillUBOCount
 };
 
 } // namespace shaders

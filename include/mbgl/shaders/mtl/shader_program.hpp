@@ -13,18 +13,9 @@
 
 namespace mbgl {
 namespace shaders {
-struct AttributeInfo {
-    constexpr AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_)
-        : index(index_),
-          dataType(dataType_),
-          id(id_) {}
-    std::size_t index;
-    gfx::AttributeDataType dataType;
-    std::size_t id;
-};
 struct UniformBlockInfo {
-    constexpr UniformBlockInfo(std::size_t index_, bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
-        : index(index_),
+    constexpr UniformBlockInfo(bool vertex_, bool fragment_, std::size_t size_, std::size_t id_)
+        : index(id_),
           vertex(vertex_),
           fragment(fragment_),
           size(size_),
@@ -33,6 +24,15 @@ struct UniformBlockInfo {
     bool vertex;
     bool fragment;
     std::size_t size;
+    std::size_t id;
+};
+struct AttributeInfo {
+    constexpr AttributeInfo(std::size_t index_, gfx::AttributeDataType dataType_, std::size_t id_)
+        : index(index_),
+          dataType(dataType_),
+          id(id_) {}
+    std::size_t index;
+    gfx::AttributeDataType dataType;
     std::size_t id;
 };
 struct TextureInfo {

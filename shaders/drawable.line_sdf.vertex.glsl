@@ -15,10 +15,10 @@ layout (location = 1) in vec4 a_data;
 
 layout (std140) uniform LineDynamicUBO {
     highp vec2 u_units_to_pixels;
-    lowp float pad0, pad1;
+    lowp float dynamic_pad1, dynamic_pad2;
 };
 
-layout (std140) uniform LineSDFUBO {
+layout (std140) uniform LineSDFDrawableUBO {
     highp mat4 u_matrix;
     highp vec2 u_patternscale_a;
     highp vec2 u_patternscale_b;
@@ -27,19 +27,7 @@ layout (std140) uniform LineSDFUBO {
     highp float u_tex_y_b;
     highp float u_sdfgamma;
     highp float u_mix;
-    lowp float pad2, pad3, pad4;
-};
-
-layout (std140) uniform LineSDFPropertiesUBO {
-    highp vec4 u_color;
-    lowp float u_blur;
-    lowp float u_opacity;
-    mediump float u_gapwidth;
-    lowp float u_offset;
-    mediump float u_width;
-    lowp float u_floorwidth;
-
-    highp vec2 pad5;
+    lowp float drawable_pad1, drawable_pad2, drawable_pad3;
 };
 
 layout (std140) uniform LineSDFInterpolationUBO {
@@ -50,8 +38,19 @@ layout (std140) uniform LineSDFInterpolationUBO {
     lowp float u_offset_t;
     lowp float u_width_t;
     lowp float u_floorwidth_t;
+    highp float interp_pad1;
+};
 
-    highp float pad6;
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    highp float props_pad1;
+    highp float props_pad2;
 };
 
 out vec2 v_normal;

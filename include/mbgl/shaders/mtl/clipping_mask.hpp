@@ -20,9 +20,9 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
+    static const std::array<UniformBlockInfo, 1> uniforms;
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static const std::array<UniformBlockInfo, 1> uniforms;
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
@@ -38,7 +38,7 @@ struct alignas(16) ClipUBO {
 static_assert(sizeof(ClipUBO) == 5 * 16, "unexpected padding");
 
 struct VertexStage {
-    short2 position [[attribute(0)]];
+    short2 position [[attribute(1)]];
 };
 
 struct FragmentStage {
@@ -51,7 +51,7 @@ struct FragmentResult {
 };
 
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
-                                device const ClipUBO& clipUBO [[buffer(1)]]) {
+                                device const ClipUBO& clipUBO [[buffer(0)]]) {
     return { clipUBO.matrix * float4(float2(in.position.xy), 0, 1) };
 }
 

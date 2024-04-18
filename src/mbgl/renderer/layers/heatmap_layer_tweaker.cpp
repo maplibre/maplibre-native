@@ -33,18 +33,17 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    const auto getPropsBuffer = [&]() -> auto& {
-        if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
-            const HeatmapEvaluatedPropsUBO evaluatedPropsUBO = {
-                /* .weight = */ evaluated.get<HeatmapWeight>().constantOr(HeatmapWeight::defaultValue()),
-                /* .radius = */ evaluated.get<HeatmapRadius>().constantOr(HeatmapRadius::defaultValue()),
-                /* .intensity = */ evaluated.get<HeatmapIntensity>(),
-                /* .padding = */ 0};
-            parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
-            propertiesUpdated = false;
-        }
-        return evaluatedPropsUniformBuffer;
-    };
+    if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
+        const HeatmapEvaluatedPropsUBO evaluatedPropsUBO = {
+            /* .weight = */ evaluated.get<HeatmapWeight>().constantOr(HeatmapWeight::defaultValue()),
+            /* .radius = */ evaluated.get<HeatmapRadius>().constantOr(HeatmapRadius::defaultValue()),
+            /* .intensity = */ evaluated.get<HeatmapIntensity>(),
+            /* .padding = */ 0};
+        parameters.context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
+        propertiesUpdated = false;
+    }
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
+    layerUniforms.set(idHeatmapEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
@@ -52,9 +51,6 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.set(idHeatmapEvaluatedPropsUBO, getPropsBuffer());
 
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false;
@@ -65,7 +61,8 @@ void HeatmapLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamet
             /* .extrude_scale = */ tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
             /* .padding = */ {0}};
 
-        uniforms.createOrUpdate(idHeatmapDrawableUBO, &drawableUBO, context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idHeatmapDrawableUBO, &drawableUBO, context);
     });
 }
 

@@ -7,6 +7,10 @@ namespace shaders {
 
 struct alignas(16) RasterDrawableUBO {
     std::array<float, 4 * 4> matrix;
+};
+static_assert(sizeof(RasterDrawableUBO) == 64);
+
+struct alignas(16) RasterEvaluatedPropsUBO {
     std::array<float, 4> spin_weights;
     std::array<float, 2> tl_parent;
     float scale_parent;
@@ -19,11 +23,11 @@ struct alignas(16) RasterDrawableUBO {
     float contrast_factor;
     float pad1, pad2;
 };
-static_assert(sizeof(RasterDrawableUBO) == 128);
-static_assert(sizeof(RasterDrawableUBO) % 16 == 0);
+static_assert(sizeof(RasterEvaluatedPropsUBO) == 64);
 
 enum {
     idRasterDrawableUBO,
+    idRasterEvaluatedPropsUBO,
     rasterUBOCount
 };
 

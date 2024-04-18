@@ -1,14 +1,15 @@
-layout (std140) uniform FillEvaluatedPropsUBO {
-    highp vec4 u_color;
-    highp float u_opacity;
-    highp float padding_props1;
-    highp float padding_props2;
-    highp float padding_props3;
-};
 layout (std140) uniform FillInterpolateUBO {
     highp float u_color_t;
     highp float u_opacity_t;
-    highp float pad_interp_1, pad_interp_2;
+    highp float interp_pad1, interp_pad2;
+};
+layout (std140) uniform FillEvaluatedPropsUBO {
+    highp vec4 u_color;
+    highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_width;
+    highp float props_pad1;
 };
 
 #pragma mapbox: define highp vec4 color

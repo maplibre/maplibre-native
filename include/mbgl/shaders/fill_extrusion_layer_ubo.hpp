@@ -20,7 +20,7 @@ struct alignas(16) FillExtrusionDrawableUBO {
 static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16);
 
 /// Evaluated properties that do not depend on the tile
-struct alignas(16) FillExtrusionDrawablePropsUBO {
+struct alignas(16) FillExtrusionPropsUBO {
     /*  0 */ Color color;
     /* 16 */ std::array<float, 3> light_color;
     /* 28 */ float pad1;
@@ -34,15 +34,15 @@ struct alignas(16) FillExtrusionDrawablePropsUBO {
     /* 68 */ float pad2, pad3, pad4;
     /* 80 */
 };
-static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16);
+static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16);
 
 /// Evaluated properties that depend on the tile
-struct alignas(16) FillExtrusionDrawableTilePropsUBO {
+struct alignas(16) FillExtrusionTilePropsUBO {
     /*  0 */ std::array<float, 4> pattern_from;
     /* 16 */ std::array<float, 4> pattern_to;
     /* 32 */
 };
-static_assert(sizeof(FillExtrusionDrawableTilePropsUBO) == 2 * 16);
+static_assert(sizeof(FillExtrusionTilePropsUBO) == 2 * 16);
 
 /// Attribute interpolations
 struct alignas(16) FillExtrusionInterpolateUBO {
@@ -58,8 +58,8 @@ static_assert(sizeof(FillExtrusionInterpolateUBO) == 2 * 16);
 
 enum {
     idFillExtrusionDrawableUBO,
-    idFillExtrusionDrawablePropsUBO,
-    idFillExtrusionDrawableTilePropsUBO,
+    idFillExtrusionPropsUBO,
+    idFillExtrusionTilePropsUBO,
     idFillExtrusionInterpolateUBO,
     fillExtrusionUBOCount
 };
