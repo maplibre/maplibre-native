@@ -16,6 +16,11 @@ swift_library(
 ios_ui_test(
     name = "uitest",
     size = "large",
+    env = {
+        "ASAN_OPTIONS": "print_stacktrace=1,abort_on_error=1,report_error_type=1,verbosity=1,debug=1",
+        "TSAN_OPTIONS": "print_stacktrace=1,abort_on_error=1,report_error_type=1,verbosity=1,debug=1",
+        "UBSAN_OPTIONS": "print_stacktrace=1,abort_on_error=1,report_error_type=1,verbosity=1,debug=1",
+    },
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     test_host = "//platform/ios:App",
