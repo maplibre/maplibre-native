@@ -53,29 +53,30 @@ enum {
 };
 
 #ifdef GLOBAL_STATE_UBO
-//Background
+// Background
 const Size atlasSize = parameters.patternAtlas.getPixelSize();
 /* .texsize = */ {static_cast<float>(atlasSize.width), static_cast<float>(atlasSize.height)},
 
-//Collision
-/*.camera_to_center_distance*/ parameters.state.getCameraToCenterDistance(),
+    // Collision
+    /*.camera_to_center_distance*/ parameters.state.getCameraToCenterDistance(),
 
-//Fill
-/*.units_to_pixels=*/{1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
+    // Fill
+    /*.units_to_pixels=*/{1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
 
-//Heatmap texture
-const auto& size = parameters.staticData.backendSize;
+    // Heatmap texture
+    const auto& size = parameters.staticData.backendSize;
 /* .matrix = */ util::cast<float>(viewportMat),
-/* .world = */ {static_cast<float>(size.width), static_cast<float>(size.height)},
+    /* .world = */ {static_cast<float>(size.width), static_cast<float>(size.height)},
 
-//Line
-/*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, 0, 0};
+    // Line
+    /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, 0, 0
+};
 
-//Symbol
+// Symbol
 const auto camDist = state.getCameraToCenterDistance();
 /*.fade_change=*/parameters.symbolFadeChange,
-/*.camera_to_center_distance=*/camDist,
-/*.aspect_ratio=*/state.getSize().aspectRatio(),
+    /*.camera_to_center_distance=*/camDist,
+    /*.aspect_ratio=*/state.getSize().aspectRatio(),
 #endif
 
 } // namespace shaders
