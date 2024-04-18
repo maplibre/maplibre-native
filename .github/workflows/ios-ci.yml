@@ -90,7 +90,7 @@ jobs:
         run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=tsan
 
       - name: Running iOS UI tests (Address+UB Sanitizer)
-        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=ubsan --features=asan # --copt=-fsanitize-ignorelist=scripts/metal-cpp-ignores.txt
+        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=ubsan --features=asan
 
       # render test
 

@@ -65,7 +65,7 @@ cc_library(
 # ditto, but for private headers (under the src/ path)
 cc_library(
     name = "mbgl-core-generated-private-artifacts",
-    hdrs = [":generated_style_code"] + MLN_PRIVATE_GENERATED_STYLE_HEADERS,
+    hdrs = [":generated_style_code"] + MLN_PRIVATE_GENERATED_STYLE_HEADERS + ["scripts/metal-cpp-ignores.txt"],
     visibility = ["//visibility:private"],
 )
 
@@ -88,7 +88,7 @@ cc_library(
     }),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS +
             select({
-                ":metal_renderer": [],  #["-fsanitize-ignorelist=scripts/metal-cpp-ignores.txt"],
+                ":metal_renderer": ["-fsanitize-ignorelist=scripts/metal-cpp-ignores.txt"],  # TODO: test for '--feature=ubsan'?
                 "//conditions:default": [],
             }),
     defines = select({
@@ -202,7 +202,6 @@ exports_files(
     [
         "LICENSE.md",
         "scripts/style-spec-reference/v8.json",
-        "scripts/metal-cpp-ignores.txt",
     ],
     visibility = ["//visibility:public"],
 )
