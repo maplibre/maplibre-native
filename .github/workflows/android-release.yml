@@ -142,6 +142,16 @@ jobs:
           asset_name: MapLibreAndroid-release.aar
           asset_content_type: application/zip
 
+      - name: Upload debug symbols
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: platform/android/build/debug-symbols.tar.gz
+          asset_name: debug-symbols.tar.gz
+          asset_content_type: application/gzip
+
       - name: Clean release
         run: |
           rm -f ${{ steps.prepare_release.outputs.release_notes }}
