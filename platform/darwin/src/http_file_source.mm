@@ -90,7 +90,12 @@ public:
             NSURLSessionConfiguration *sessionConfig = MLNNativeNetworkManager.sharedManager.sessionConfiguration;
             session = [NSURLSession sessionWithConfiguration:sessionConfig];
 
-            userAgent = getUserAgent();
+            if (sessionConfig.HTTPAdditionalHeaders[@"User-Agent"] == nil) {
+                userAgent = getUserAgent();
+            } else {
+                userAgent = sessionConfig.HTTPAdditionalHeaders[@"User-Agent"];
+            }
+            
         }
     }
 
