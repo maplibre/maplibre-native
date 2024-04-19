@@ -629,7 +629,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
                     commonInit(*builder);
                     builder->setDepthType(opaque ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
-                    builder->setColorMode(opaque ? gfx::ColorMode::unblended() : gfx::ColorMode::alphaBlended());
+                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
                     builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);
