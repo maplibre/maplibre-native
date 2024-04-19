@@ -8,7 +8,6 @@ GCC_CLANG_COMMON_FLAGS = [
     "-Wall",
     "-Werror",
     "-Wextra",
-    "-Wpedantic",
     "-Wno-unused-parameter",
     "-Wno-unused-variable",
     "-Wno-variadic-macros",
