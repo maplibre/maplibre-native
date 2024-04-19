@@ -350,7 +350,7 @@ void SymbolLayout::finalizeSymbols(HBShapeResults& results) {
             feature.formattedText = shapedString;
 
         } // feature.formattedText
-    }     // for (auto & feature : features ..
+    } // for (auto & feature : features ..
 
     needfinalizeSymbolsVal = false;
 } // SymbolLayout::finalizeSymbols
