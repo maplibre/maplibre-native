@@ -10,7 +10,7 @@ namespace expression {
 using namespace mbgl::style::conversion;
 
 Assertion::Assertion(type::Type type_, std::vector<std::unique_ptr<Expression>> inputs_)
-    : Expression(Kind::Assertion, std::move(type_)),
+    : Expression(Kind::Assertion, std::move(type_), collectDependencies(inputs_)),
       inputs(std::move(inputs_)) {
     assert(!inputs.empty());
 }
@@ -76,7 +76,7 @@ ParseResult Assertion::parse(const Convertible& value, ParsingContext& ctx) {
         parsed.push_back(std::move(*input));
     }
 
-    return ParseResult(std::make_unique<Assertion>(type, std::move(parsed)));
+    return ParseResult(std::make_unique<Assertion>(std::move(type), std::move(parsed)));
 }
 
 std::string Assertion::getOperator() const {
@@ -105,7 +105,7 @@ void Assertion::eachChild(const std::function<void(const Expression&)>& visit) c
     }
 };
 
-bool Assertion::operator==(const Expression& e) const {
+bool Assertion::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Assertion) {
         auto rhs = static_cast<const Assertion*>(&e);
         return getType() == rhs->getType() && Expression::childrenEqual(inputs, rhs->inputs);

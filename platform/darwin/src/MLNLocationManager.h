@@ -155,10 +155,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)startUpdatingHeading;
 
+#if TARGET_OS_IPHONE
 /**
  Stops the generation of heading updates.
  */
 - (void)stopUpdatingHeading;
+#endif
 
 /**
  Dissmisses immediately the heading calibration view from screen.

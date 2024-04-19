@@ -28,7 +28,7 @@ jobs:
       - name: Get all Android files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@v44
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -106,7 +106,7 @@ jobs:
       - name: Run Android unit tests
         run: make run-android-unit-test
 
-      - name: Build libmapbox-gl.so for arm-v8
+      - name: Build libmaplibre.so for arm-v8
         run: make android-lib-arm-v8
 
       - name: Copy developer config with API key for UI tests
@@ -114,27 +114,25 @@ jobs:
         run: |
           MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
           if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
-            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
+            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapLibreAndroidTestApp/src/main/res/values/developer-config.xml
           else
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, not copying..."
           fi
 
       - name: Build Benchmark, copy to platform/android
-        if: github.ref != 'refs/heads/main'
         run: |
           ./gradlew assembleDrawableRelease assembleDrawableReleaseAndroidTest -PtestBuildType=release
-          cp MapboxGLAndroidSDKTestApp/build/outputs/apk/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release.apk .
-          cp MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/drawable/release/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk .
+          cp MapLibreAndroidTestApp/build/outputs/apk/drawable/release/MapLibreAndroidTestApp-drawable-release.apk .
+          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/drawable/release/MapLibreAndroidTestApp-drawable-release-androidTest.apk .
 
       - name: Create artifact for benchmark APKs 
         uses: actions/upload-artifact@v4
-        if: github.ref != 'refs/heads/main'
         with:
           if-no-files-found: error
           name: benchmarkAPKs
           path: |
-            platform/android/MapboxGLAndroidSDKTestApp-drawable-release.apk
-            platform/android/MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk
+            platform/android/MapLibreAndroidTestApp-drawable-release.apk
+            platform/android/MapLibreAndroidTestApp-drawable-release-androidTest.apk
 
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
@@ -161,7 +159,7 @@ jobs:
         id: upload-android-app
         with:
           project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
-          name: MapboxGLAndroidSDKTestApp-debug.apk
+          name: MapLibreAndroidTestApp-debug.apk
           type: ANDROID_APP
 
       - name: Create upload
@@ -170,14 +168,14 @@ jobs:
         id: upload-android-test
         with:
           project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
-          name: MapboxGLAndroidSDKTestApp-debug-androidTest.apk
+          name: MapLibreAndroidTestApp-debug-androidTest.apk
           type: INSTRUMENTATION_TEST_PACKAGE
 
       - name: Upload Android UI test
         if: github.ref == 'refs/heads/main'
         run: |
-          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/legacy/debug/MapboxGLAndroidSDKTestApp-legacy-debug.apk '${{ steps.upload-android-app.outputs.url }}'
-          curl -T MapboxGLAndroidSDKTestApp/build/outputs/apk/androidTest/legacy/debug/MapboxGLAndroidSDKTestApp-legacy-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
+          curl -T MapLibreAndroidTestApp/build/outputs/apk/legacy/debug/MapLibreAndroidTestApp-legacy-debug.apk '${{ steps.upload-android-app.outputs.url }}'
+          curl -T MapLibreAndroidTestApp/build/outputs/apk/androidTest/legacy/debug/MapLibreAndroidTestApp-legacy-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
 
       - name: Write uploads.env
         if: github.ref == 'refs/heads/main'
@@ -198,13 +196,13 @@ jobs:
         with:
           name: debug-artifacts
           path: |
-            MapboxGLAndroidSDKTestApp/build/outputs/apk/debug
-            MapboxGLAndroidSDK/build/reports/lint-results.html
-            MapboxGLAndroidSDK/lint-baseline.xml
-            MapboxGLAndroidSDKTestApp/build/reports/lint-results.html
-            MapboxGLAndroidSDKTestApp/build/reports/lint-results.xml
-            MapboxGLAndroidSDKTestApp/lint-baseline.xml
-            MapboxGLAndroidSDK/build/intermediates/cmake/debug/obj
+            MapLibreAndroidTestApp/build/outputs/apk/debug
+            MapLibreAndroid/build/reports/lint-results.html
+            MapLibreAndroid/lint-baseline.xml
+            MapLibreAndroidTestApp/build/reports/lint-results.html
+            MapLibreAndroidTestApp/build/reports/lint-results.xml
+            MapLibreAndroidTestApp/lint-baseline.xml
+            MapLibreAndroid/build/intermediates/cmake/debug/obj
 
   android-build-render-test:
     runs-on: ubuntu-latest

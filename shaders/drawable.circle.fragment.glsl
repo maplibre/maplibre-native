@@ -10,7 +10,7 @@ layout (std140) uniform CircleEvaluatedPropsUBO {
     lowp float u_stroke_opacity;
     bool u_scale_with_map;
     bool u_pitch_with_map;
-    lowp float pad0_;
+    lowp float props_pad1;
 };
 
 #pragma mapbox: define highp vec4 color

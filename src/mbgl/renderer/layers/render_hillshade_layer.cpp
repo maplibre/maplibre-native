@@ -43,7 +43,9 @@ inline const HillshadeLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>
 
 RenderHillshadeLayer::RenderHillshadeLayer(Immutable<style::HillshadeLayer::Impl> _impl)
     : RenderLayer(makeMutable<HillshadeLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {}
+      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+    styleDependencies = unevaluated.getDependencies();
+}
 
 RenderHillshadeLayer::~RenderHillshadeLayer() = default;
 

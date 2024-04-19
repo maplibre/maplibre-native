@@ -1,7 +1,6 @@
 #include <mbgl/mtl/tile_layer_group.hpp>
 
 #include <mbgl/gfx/drawable_tweaker.hpp>
-#include <mbgl/gfx/render_pass.hpp>
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/upload_pass.hpp>
@@ -43,7 +42,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     }
 
     auto& context = static_cast<Context&>(parameters.context);
-    auto& renderPass = static_cast<mtl::RenderPass&>(*parameters.renderPass);
+    auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
     const auto& encoder = renderPass.getMetalEncoder();
     const auto& renderable = renderPass.getDescriptor().renderable;
 
@@ -121,6 +120,8 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         parameters.renderTileClippingMasks(stencilTiles);
     }
 
+    bindUniformBuffers(renderPass);
+
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -140,6 +141,19 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 
         drawable.draw(parameters);
     });
+
+    unbindUniformBuffers(renderPass);
+}
+
+void TileLayerGroup::bindUniformBuffers(RenderPass& renderPass) const noexcept {
+    for (size_t id = 0; id < uniformBuffers.allocatedSize(); id++) {
+        const auto& uniformBuffer = uniformBuffers.get(id);
+        if (!uniformBuffer) continue;
+        const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
+        const auto& resource = buffer.getBufferResource();
+        renderPass.bindVertex(resource, 0, id);
+        renderPass.bindFragment(resource, 0, id);
+    }
 }
 
 } // namespace mtl

@@ -25,8 +25,12 @@ unsigned long CircleLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 
-const CircleLayer::Impl& CircleLayerProperties::layerImpl() const {
+const CircleLayer::Impl& CircleLayerProperties::layerImpl() const noexcept {
     return static_cast<const CircleLayer::Impl&>(*baseImpl);
+}
+
+expression::Dependency CircleLayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies() | layerImpl().layout.getDependencies();
 }
 
 } // namespace style

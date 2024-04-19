@@ -36,8 +36,12 @@ unsigned long <%- camelize(type) %>LayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 
-const <%- camelize(type) %>Layer::Impl& <%- camelize(type) %>LayerProperties::layerImpl() const {
+const <%- camelize(type) %>Layer::Impl& <%- camelize(type) %>LayerProperties::layerImpl() const noexcept {
     return static_cast<const <%- camelize(type) %>Layer::Impl&>(*baseImpl);
+}
+
+expression::Dependency <%- camelize(type) %>LayerProperties::getDependencies() const noexcept {
+    return layerImpl().paint.getDependencies()<% if (layoutProperties.length) { -%> | layerImpl().layout.getDependencies()<% } -%>;
 }
 
 } // namespace style

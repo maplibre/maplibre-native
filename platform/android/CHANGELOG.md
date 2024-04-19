@@ -10,6 +10,8 @@
 
 ### ✨ Features and improvements
 
+- Add support for custom `ModuleProvider` implementations (#[2231](https://github.com/maplibre/maplibre-native/pull/2231))
+- Allow setting padding when camera is tracking (#[2165](https://github.com/maplibre/maplibre-native/pull/2165)).
 - Add support for the [`slice` expression](https://maplibre.org/maplibre-style-spec/expressions/#slice) ([#1113](https://github.com/maplibre/maplibre-native/pull/1133))
 - Add support for the [`index-of` expression](https://maplibre.org/maplibre-style-spec/expressions/#index-of) ([#1113](https://github.com/maplibre/maplibre-native/pull/1113))
 - Add support for [multi sprites](https://github.com/maplibre/maplibre-native/pull/1858). More information on this feature can be found in the [Style Spec Documentation](https://maplibre.org/maplibre-style-spec/sprite/#multiple-sprite-sources).
@@ -95,9 +97,9 @@ This version is identical to 10.0.2.
 - 💥 Breaking: the `LocationEngine` implemented with Google Location Services has been removed to make MapLibre Native for Android fully FLOSS ([#379](https://github.com/maplibre/maplibre-native/issues/379)).
 
   > To migrate:  
-  > Include the source code of the removed [`GoogleLocationEngineImpl`](https://github.com/maplibre/maplibre-native/blob/4a34caab7593f4f1b6d8c09c06a5e25d7c6cfc43/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/GoogleLocationEngineImpl.java) in your source tree.
+  > Include the source code of the removed [`GoogleLocationEngineImpl`](https://github.com/maplibre/maplibre-native/blob/4a34caab7593f4f1b6d8c09c06a5e25d7c6cfc43/platform/android/MapLibreAndroid/src/main/java/com/mapbox/mapboxsdk/location/engine/GoogleLocationEngineImpl.java) in your source tree.
   >
-  > Pass an instance of `LocationEngine` based on `GoogleLocationEngineImpl` to `LocationComponentActivationOptions.Builder.locationEngine` (this was done in a now removed [`LocationEngineProvider`](https://github.com/maplibre/maplibre-native/blob/68d58d6f6f453d5c6cc0fa92fcc6c6cfe0cf967f/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/LocationEngineProvider.java#L59) class):
+  > Pass an instance of `LocationEngine` based on `GoogleLocationEngineImpl` to `LocationComponentActivationOptions.Builder.locationEngine` (this was done in a now removed [`LocationEngineProvider`](https://github.com/maplibre/maplibre-native/blob/68d58d6f6f453d5c6cc0fa92fcc6c6cfe0cf967f/platform/android/MapLibreAndroid/src/main/java/com/mapbox/mapboxsdk/location/engine/LocationEngineProvider.java#L59) class):
   >
   > ```kotlin
   > val locationEngine = LocationEngineProxy<Any>(GoogleLocationEngineImpl(context))
@@ -107,7 +109,7 @@ This version is identical to 10.0.2.
 
 - 💥 Breaking: The static `LocationEngineResult.extractResult` can no longer extract a `LocationEngineResult` from a Google Play intent.
 
-  > To migrate, include and use the [previous implementation](https://github.com/maplibre/maplibre-native/blob/ea234edf67bb3aec75f077e15c1c30c99756b926/platform/android/MapboxGLAndroidSDK/src/main/java/com/mapbox/mapboxsdk/location/engine/LocationEngineResult.java#L97) in your source tree.
+  > To migrate, include and use the [previous implementation](https://github.com/maplibre/maplibre-native/blob/ea234edf67bb3aec75f077e15c1c30c99756b926/platform/android/MapLibreAndroid/src/main/java/com/mapbox/mapboxsdk/location/engine/LocationEngineResult.java#L97) in your source tree.
 
 - Improve Kotlinification of LatLng ([#742](https://github.com/maplibre/maplibre-native/issues))
 - Increment minSdkVersion from 14 to 21, as it covers 99.2%% of the newer devices since 2014 and lessens the backward compatibility burden ([#630](https://github.com/maplibre/maplibre-native/pull/630))

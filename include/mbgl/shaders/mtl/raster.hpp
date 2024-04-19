@@ -14,15 +14,16 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
+    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 2> attributes;
-    static const std::array<UniformBlockInfo, 1> uniforms;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(0)]];
-    short2 texture_pos [[attribute(1)]];
+    short2 pos [[attribute(2)]];
+    short2 texture_pos [[attribute(3)]];
 };
 
 struct FragmentStage {
@@ -33,6 +34,9 @@ struct FragmentStage {
 
 struct alignas(16) RasterDrawableUBO {
     float4x4 matrix;
+};
+
+struct alignas(16) RasterEvaluatedPropsUBO {
     float3 spin_weights;
     float2 tl_parent;
     float scale_parent;
@@ -49,7 +53,8 @@ struct alignas(16) RasterDrawableUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const RasterDrawableUBO& drawable [[buffer(2)]]) {
+                                device const RasterDrawableUBO& drawable [[buffer(0)]],
+                                device const RasterEvaluatedPropsUBO& props [[buffer(1)]]) {
 
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
 
@@ -58,8 +63,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // as an arbitrarily high number to preserve adequate precision when rendering.
     // This is also the same value as the EXTENT we are using for our tile buffer pos coordinates,
     // so math for modifying either is consistent.
-    const float2 pos0 = (((float2(vertx.texture_pos) / 8192.0) - 0.5) / drawable.buffer_scale ) + 0.5;
-    const float2 pos1 = (pos0 * drawable.scale_parent) + drawable.tl_parent;
+    const float2 pos0 = (((float2(vertx.texture_pos) / 8192.0) - 0.5) / props.buffer_scale ) + 0.5;
+    const float2 pos1 = (pos0 * props.scale_parent) + props.tl_parent;
 
     return {
         .position    = position,
@@ -69,7 +74,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const RasterDrawableUBO& drawable [[buffer(2)]],
+                            device const RasterEvaluatedPropsUBO& props [[buffer(1)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             texture2d<float, access::sample> image1 [[texture(1)]],
                             sampler image0_sampler [[sampler(0)]],
@@ -87,26 +92,26 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     if (color1.a > 0.0) {
         color1.rgb = color1.rgb / color1.a;
     }
-    float4 color = mix(color0, color1, drawable.fade_t);
-    color.a *= drawable.opacity;
+    float4 color = mix(color0, color1, props.fade_t);
+    color.a *= props.opacity;
     float3 rgb = color.rgb;
 
     // spin
     rgb = float3(
-        dot(rgb, drawable.spin_weights.xyz),
-        dot(rgb, drawable.spin_weights.zxy),
-        dot(rgb, drawable.spin_weights.yzx));
+        dot(rgb, props.spin_weights.xyz),
+        dot(rgb, props.spin_weights.zxy),
+        dot(rgb, props.spin_weights.yzx));
 
     // saturation
     float average = (color.r + color.g + color.b) / 3.0;
-    rgb += (average - rgb) * drawable.saturation_factor;
+    rgb += (average - rgb) * props.saturation_factor;
 
     // contrast
-    rgb = (rgb - 0.5) * drawable.contrast_factor + 0.5;
+    rgb = (rgb - 0.5) * props.contrast_factor + 0.5;
 
     // brightness
-    float3 high_vec = float3(drawable.brightness_low, drawable.brightness_low, drawable.brightness_low);
-    float3 low_vec = float3(drawable.brightness_high, drawable.brightness_high, drawable.brightness_high);
+    float3 high_vec = float3(props.brightness_low, props.brightness_low, props.brightness_low);
+    float3 low_vec = float3(props.brightness_high, props.brightness_high, props.brightness_high);
 
     return half4(half3(mix(high_vec, low_vec, rgb) * color.a), color.a);
 }

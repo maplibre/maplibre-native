@@ -89,9 +89,9 @@ jobs:
           RELEASE_VERSION="$( git describe --tags --match=android-v*.*.* --abbrev=0 | sed 's/^android-v//' )"
           echo "Latest version from tag: $RELEASE_VERSION"
           if [ -n "$RELEASE_VERSION" ]; then
-            sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${RELEASE_VERSION}/" MapboxGLAndroidSDK/gradle.properties
-            echo "MapboxGLAndroidSDK/gradle.properties:"
-            cat MapboxGLAndroidSDK/gradle.properties
+            sed -i -e "s/^VERSION_NAME=.*/VERSION_NAME=${RELEASE_VERSION}/" MapLibreAndroid/gradle.properties
+            echo "MapLibreAndroid/gradle.properties:"
+            cat MapLibreAndroid/gradle.properties
           fi
         shell: bash
 
@@ -102,7 +102,7 @@ jobs:
         run: |
           MAPLIBRE_DEVELOPER_CONFIG_XML='${{ secrets.MAPLIBRE_DEVELOPER_CONFIG_XML }}'
           if [ -n "${MAPLIBRE_DEVELOPER_CONFIG_XML}" ]; then
-            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml
+            echo "${MAPLIBRE_DEVELOPER_CONFIG_XML}" > MapLibreAndroidTestApp/src/main/res/values/developer-config.xml
             make android
           else
             echo "No secrets.MAPLIBRE_DEVELOPER_CONFIG_XML variable set, skipping apk build..."
@@ -138,9 +138,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapboxGLAndroidSDK/build/outputs/aar/MapboxGLAndroidSDK-drawable-release.aar
-          asset_name: MapboxGLAndroidSDK-release.aar
+          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-release.aar
+          asset_name: MapLibreAndroid-release.aar
           asset_content_type: application/zip
+
+      - name: Upload debug symbols
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: platform/android/build/debug-symbols.tar.gz
+          asset_name: debug-symbols.tar.gz
+          asset_content_type: application/gzip
 
       - name: Clean release
         run: |

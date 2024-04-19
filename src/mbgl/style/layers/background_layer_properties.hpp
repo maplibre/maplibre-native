@@ -45,7 +45,9 @@ public:
 
     unsigned long constantsMask() const override;
 
-    const BackgroundLayer::Impl& layerImpl() const;
+    expression::Dependency getDependencies() const noexcept override;
+
+    const BackgroundLayer::Impl& layerImpl() const noexcept;
     // Data members.
     CrossfadeParameters crossfade;
     BackgroundPaintProperties::PossiblyEvaluated evaluated;

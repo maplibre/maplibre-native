@@ -19,10 +19,10 @@ public:
     EvaluationResult evaluate(const EvaluationContext& params) const override;
     void eachChild(const std::function<void(const Expression&)>&) const override;
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
-    std::string getOperator() const override;
+    std::string getOperator() const override { return "slice"; }
 
 private:
     EvaluationResult evaluateForStringInput(const std::string& input, int fromIndexValue, int toIndexValue) const;

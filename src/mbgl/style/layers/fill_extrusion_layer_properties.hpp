@@ -70,7 +70,9 @@ public:
 
     unsigned long constantsMask() const override;
 
-    const FillExtrusionLayer::Impl& layerImpl() const;
+    expression::Dependency getDependencies() const noexcept override;
+
+    const FillExtrusionLayer::Impl& layerImpl() const noexcept;
     // Data members.
     CrossfadeParameters crossfade;
     FillExtrusionPaintProperties::PossiblyEvaluated evaluated;

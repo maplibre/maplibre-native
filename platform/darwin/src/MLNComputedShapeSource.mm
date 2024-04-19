@@ -144,8 +144,12 @@ mbgl::style::CustomGeometrySource::Options MBGLCustomGeometrySourceOptionsFromDi
             featureCollection.push_back(geoJsonObject);
         }
         const auto geojson = mbgl::GeoJSON{featureCollection};
-        if(![self isCancelled] && self.rawSource) {
-            self.rawSource->setTileData(mbgl::CanonicalTileID(self.z, self.x, self.y), geojson);
+
+        // Note: potential race condition with `cancel`
+        if(![self isCancelled]) {
+            if (auto *rawSource = self.rawSource) {
+                rawSource->setTileData(mbgl::CanonicalTileID(self.z, self.x, self.y), geojson);
+            }
         }
     }
 }

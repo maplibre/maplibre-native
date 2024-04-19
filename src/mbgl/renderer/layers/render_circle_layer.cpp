@@ -62,7 +62,9 @@ inline const style::CircleLayer::Impl& impl_cast(const Immutable<style::Layer::I
 
 RenderCircleLayer::RenderCircleLayer(Immutable<style::CircleLayer::Impl> _impl)
     : RenderLayer(makeMutable<CircleLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {}
+      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+    styleDependencies = unevaluated.getDependencies();
+}
 
 void RenderCircleLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
@@ -355,8 +357,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                 return false;
             }
 
-            auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(idCircleInterpolateUBO, &interpolateUBO, context);
+            auto& drawableUniforms = drawable.mutableUniformBuffers();
+            drawableUniforms.createOrUpdate(idCircleInterpolateUBO, &interpolateUBO, context);
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
@@ -410,8 +412,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setTileID(tileID);
             drawable->setLayerTweaker(layerTweaker);
 
-            auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.set(idCircleInterpolateUBO, interpBuffer);
+            auto& drawableUniforms = drawable->mutableUniformBuffers();
+            drawableUniforms.set(idCircleInterpolateUBO, interpBuffer);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;

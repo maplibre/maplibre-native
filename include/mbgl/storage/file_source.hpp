@@ -80,7 +80,7 @@ public:
     virtual void resume() {}
 
     /// Generic setter method
-    virtual void setProperty(const std::string&, const mapbox::base::Value&){};
+    virtual void setProperty(const std::string&, const mapbox::base::Value&) {};
     /// Generic getter method
     virtual mapbox::base::Value getProperty(const std::string&) const { return {}; };
 

@@ -19,7 +19,6 @@ public:
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
 protected:
-    gfx::UniformBufferPtr paintParamsUniformBuffer;
     gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
 };
 

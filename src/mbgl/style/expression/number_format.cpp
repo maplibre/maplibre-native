@@ -16,7 +16,10 @@ NumberFormat::NumberFormat(std::unique_ptr<Expression> number_,
                            std::unique_ptr<Expression> currency_,
                            std::unique_ptr<Expression> minFractionDigits_,
                            std::unique_ptr<Expression> maxFractionDigits_)
-    : Expression(Kind::NumberFormat, type::String),
+    : Expression(Kind::NumberFormat,
+                 type::String,
+                 depsOf(number_) | depsOf(locale_) | depsOf(currency_) | depsOf(minFractionDigits_) |
+                     depsOf(maxFractionDigits_)),
       number(std::move(number_)),
       locale(std::move(locale_)),
       currency(std::move(currency_)),
@@ -82,7 +85,7 @@ void NumberFormat::eachChild(const std::function<void(const Expression&)>& visit
     if (maxFractionDigits) visit(*maxFractionDigits);
 }
 
-bool NumberFormat::operator==(const Expression& e) const {
+bool NumberFormat::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::NumberFormat) {
         auto rhs = static_cast<const NumberFormat*>(&e);
         if ((locale && (!rhs->locale || *locale != *rhs->locale)) || (!locale && rhs->locale)) {

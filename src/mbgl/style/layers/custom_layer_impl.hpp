@@ -28,6 +28,8 @@ class CustomLayerProperties final : public LayerProperties {
 public:
     explicit CustomLayerProperties(Immutable<CustomLayer::Impl> impl)
         : LayerProperties(std::move(impl)) {}
+
+    expression::Dependency getDependencies() const noexcept override { return expression::Dependency::None; }
 };
 
 } // namespace style

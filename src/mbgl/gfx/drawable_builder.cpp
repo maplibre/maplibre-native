@@ -44,6 +44,9 @@ void DrawableBuilder::flush(gfx::Context& context) {
         if (Impl::Mode::Polylines == impl->getMode()) {
             // setup for polylines
             impl->setupForPolylines(context, *this);
+        } else if (Impl::Mode::WideVectorLocal == impl->getMode() || Impl::Mode::WideVectorGlobal == impl->getMode()) {
+            // setup for wide vectors
+            impl->setupForWideVectors(context, *this);
         }
 
         const auto& draw = getCurrentDrawable(/*createIfNone=*/true);
@@ -62,6 +65,7 @@ void DrawableBuilder::flush(gfx::Context& context) {
         draw->setShader(shader);
         draw->setTextures(textures);
         draw->setTweakers(tweakers);
+        draw->setOrigin(origin);
 
         if (vertexAttrs) {
             draw->setVertexAttributes(vertexAttrs);
@@ -69,10 +73,17 @@ void DrawableBuilder::flush(gfx::Context& context) {
             draw->setVertexAttributes(context.createVertexAttributeArray());
         }
 
+        if (instanceAttrs) {
+            draw->setInstanceAttributes(instanceAttrs);
+        }
+
         init();
 
         // reset mode
         impl->setMode(Impl::Mode::Custom);
+
+        // reset origin
+        origin.reset();
     }
     if (currentDrawable) {
         drawables.emplace_back(std::move(currentDrawable));
@@ -278,6 +289,24 @@ void DrawableBuilder::addPolyline(const GeometryCoordinates& coordinates,
 
     // append polyline
     impl->addPolyline(*this, coordinates, options);
+}
+
+void DrawableBuilder::addWideVectorPolylineLocal(const GeometryCoordinates& coordinates,
+                                                 const gfx::PolylineGeneratorOptions& options) {
+    // mark the current mode
+    if (!impl->checkAndSetMode(Impl::Mode::WideVectorLocal)) return;
+
+    // append polyline
+    impl->addWideVectorPolylineLocal(*this, coordinates, options);
+}
+
+void DrawableBuilder::addWideVectorPolylineGlobal(const LineString<double>& coordinates,
+                                                  const gfx::PolylineGeneratorOptions& options) {
+    // mark the current mode
+    if (!impl->checkAndSetMode(Impl::Mode::WideVectorGlobal)) return;
+
+    // append polyline
+    origin = impl->addWideVectorPolylineGlobal(*this, coordinates, options);
 }
 
 } // namespace gfx

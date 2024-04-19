@@ -27,7 +27,7 @@ public:
                               bool,
                               const CanonicalTileID&) = 0;
 
-    virtual void prepareSymbols(const GlyphMap&, const GlyphPositions&, const ImageMap&, const ImagePositions&){};
+    virtual void prepareSymbols(const GlyphMap&, const GlyphPositions&, const ImageMap&, const ImagePositions&) {};
 
     virtual void finalizeSymbols(HBShapeResults&) {}
 

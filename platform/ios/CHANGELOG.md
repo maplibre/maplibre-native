@@ -4,6 +4,29 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.3.3
+
+- Fix memory leak in Metal shader compilation ([#2257](https://github.com/maplibre/maplibre-native/pull/2257)).
+- Improved iOS UI tests ([#2258](https://github.com/maplibre/maplibre-native/pull/2258))
+- Add wide vector shader option to Custom Drawable Layer ([#2183](https://github.com/maplibre/maplibre-native/pull/2183))
+- Guard against potential crash when the Metal drawable is now unavailable ([#2272](https://github.com/maplibre/maplibre-native/pull/2272))
+- Eliminate spurious log output when using triangulated fill outlines ([#2279](https://github.com/maplibre/maplibre-native/pull/2279))
+- Fix projection matrix for raster image drawables ([#2242](https://github.com/maplibre/maplibre-native/pull/2242))
+
+## 6.3.2
+
+- Fix potential memory leak ([#2254](https://github.com/maplibre/maplibre-native/pull/2254)).
+
+## 6.3.1
+
+- Add debug symbols to releases (see [Releases on GitHub](https://github.com/maplibre/maplibre-native/releases?q=ios&expanded=true)).
+
+## 6.3.0
+
+- Temporary workaround for map display freeze / stutter when using annotation views with Metal backend. [Issue 2117](https://github.com/maplibre/maplibre-native/issues/2117) fixed by [PR 2148](https://github.com/maplibre/maplibre-native/pull/2148).
+- Make setURL method on MLNImageSource public ([#2197](https://github.com/maplibre/maplibre-native/pull/2197)).
+- Make setCoordinates method on MLNImageSource public ([#2198](https://github.com/maplibre/maplibre-native/pull/2198)).
+
 ## 6.2.0
 
 - Add support for [multi sprites](https://github.com/maplibre/maplibre-native/pull/1858). More information on this feature can be found in the [Style Spec Documentation](https://maplibre.org/maplibre-style-spec/sprite/#multiple-sprite-sources).

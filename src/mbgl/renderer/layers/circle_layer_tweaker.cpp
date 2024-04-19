@@ -40,7 +40,9 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         /* .padding = */ 0,
         0,
         0};
-    context.emplaceOrUpdateUniformBuffer(paintParamsUniformBuffer, &paintParamsUBO);
+
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
+    layerUniforms.createOrUpdate(idCirclePaintParamsUBO, &paintParamsUBO, context);
 
     const auto zoom = parameters.state.getZoom();
     const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
@@ -60,8 +62,9 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /* .pitch_with_map = */ pitchWithMap,
             /* .padding = */ 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
+        propertiesUpdated = false;
     }
-    propertiesUpdated = false;
+    layerUniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         assert(drawable.getTileID() || !"Circles only render with tiles");
@@ -69,10 +72,6 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             return;
         }
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.set(idCirclePaintParamsUBO, paintParamsUniformBuffer);
-        uniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
         const auto& translation = evaluated.get<CircleTranslate>();
         const auto anchor = evaluated.get<CircleTranslateAnchor>();
@@ -90,7 +89,8 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                /* .extrude_scale = */ extrudeScale,
                                                /* .padding = */ 0};
 
-        uniforms.createOrUpdate(idCircleDrawableUBO, &drawableUBO, context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idCircleDrawableUBO, &drawableUBO, context);
     });
 }
 

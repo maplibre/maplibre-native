@@ -1,4 +1,4 @@
-layout (std140) uniform BackgroundLayerUBO {
+layout (std140) uniform BackgroundPatternLayerUBO {
     highp vec2 u_pattern_tl_a;
     highp vec2 u_pattern_br_a;
     highp vec2 u_pattern_tl_b;
@@ -6,14 +6,11 @@ layout (std140) uniform BackgroundLayerUBO {
     highp vec2 u_texsize;
     highp vec2 u_pattern_size_a;
     highp vec2 u_pattern_size_b;
-    highp vec2 u_pixel_coord_upper;
-    highp vec2 u_pixel_coord_lower;
-    highp float u_tile_units_to_pixels;
     highp float u_scale_a;
     highp float u_scale_b;
     highp float u_mix;
     highp float u_opacity;
-    highp float pad;
+    highp float layer_pad1, layer_pad2;
 };
 
 uniform sampler2D u_image;

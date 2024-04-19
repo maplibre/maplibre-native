@@ -35,9 +35,9 @@ void Coalesce::eachChild(const std::function<void(const Expression&)>& visit) co
     }
 }
 
-bool Coalesce::operator==(const Expression& e) const {
+bool Coalesce::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Coalesce) {
-        auto rhs = static_cast<const Coalesce*>(&e);
+        const auto* rhs = static_cast<const Coalesce*>(&e);
         return Expression::childrenEqual(args, rhs->args);
     }
     return false;
@@ -91,7 +91,8 @@ ParseResult Coalesce::parse(const Convertible& value, ParsingContext& ctx) {
                                return type::checkSubtype(*expectedType, arg->getType());
                            });
 
-    return ParseResult(std::make_unique<Coalesce>(needsAnnotation ? type::Value : *outputType, std::move(args)));
+    return ParseResult(
+        std::make_unique<Coalesce>(needsAnnotation ? type::Value : std::move(*outputType), std::move(args)));
 }
 
 } // namespace expression

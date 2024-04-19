@@ -7,18 +7,17 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.1.4'
-        classpath dependenciesList.licensesPlugin
-        // classpath dependenciesList.jacocoPlugin
-        classpath dependenciesList.gradleNexus
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.21"
+        classpath libs.androidGradlePlugin
+        classpath libs.licensesPlugin
+        classpath libs.gradleNexus
+        classpath libs.kotlinPlugin
     }
 }
 
 plugins {
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
-    id("org.jmailen.kotlinter") version "3.13.0" apply false
-    id 'org.jetbrains.kotlin.android' version '1.9.21' apply false
+    alias libs.plugins.nexusPublishPlugin
+    alias libs.plugins.kotlinter apply false
+    alias libs.plugins.kotlinAndroid apply false
 }
 
 allprojects {
