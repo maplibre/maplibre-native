@@ -112,7 +112,7 @@ _These instructions are for XCode 14.3.1_
 
 
 ```
-bazel run //platform/ios:xcodeproj
+bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
 xed platform/ios/MapLibre.xcodeproj
 ```
 
@@ -135,6 +135,8 @@ It is also possible to build and run the test application in a simulator from th
 ```
 bazel run //platform/ios:App
 ```
+
+If you want to build your own XCFramework, see the 'Build XCFramework' step in the [iOS CI workflow](../../.github/workflows/ios-ci.yml).
 
 ### Render Tests
 
