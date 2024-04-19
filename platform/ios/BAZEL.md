@@ -10,25 +10,23 @@ From there you can use the script in platform/ios/platform/ios/scripts/package-b
 
 ## There are 4 options:
 
-`cd platform/ios/platform/ios/scripts`
-
 Static xcframework compiled for release (this is default if no parameters are provided):
-`./bazel-package.sh --static --release`
+`platform/ios/scripts/bazel-package.sh --static --release`
 
 Static xcframework compiled for debug:
-`./bazel-package.sh --static --debug`
+`platform/ios/scripts/bazel-package.sh --static --debug`
 
 Dynamic xcframework compiled for release:
-`./bazel-package.sh --dynamic --release`
+`platform/ios/scripts/bazel-package.sh --dynamic --release`
 
 Dynamic xcframework compiled for debug:
-`./bazel-package.sh --dynamic --debug`
+`platform/ios/scripts/bazel-package.sh --dynamic --debug`
 
 All compiled frameworks will end up in the `bazel-bin/platform/ios/` path from the root of the repo.
 
 Also you can use the link option to ensure that the framework is able to link.
 
-`./bazel-package.sh --link`
+`platform/ios/scripts/bazel-package.sh --link`
 
 #### Bazel build files are placed in a few places throughout the project:
 
