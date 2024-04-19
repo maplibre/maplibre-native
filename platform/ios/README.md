@@ -77,7 +77,9 @@ cd maplibre-native
 
 ### Bazel
 
-[Bazel](https://bazel.build/) together with [rules_xcodeproj](https://github.com/MobileNativeFoundation/rules_xcodeproj) is the preferred build system. Please [share your experiences](https://github.com/maplibre/maplibre-native/discussions/1145).
+[Bazel](https://bazel.build/) can be used to build the project.
+
+You can generate an Xcode project thanks to [rules_xcodeproj](https://github.com/MobileNativeFoundation/rules_xcodeproj) intergration. 
 
 You need to install bazelisk, which is a wrapper around Bazel which ensures that the version specified in `.bazelversion` is used.
 
