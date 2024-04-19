@@ -77,12 +77,24 @@ BufferResource Context::createBuffer(
     return {const_cast<Context&>(*this), data, size, MTL::ResourceStorageModeShared, isIndexBuffer, persistent};
 }
 
-UniqueShaderProgram Context::createProgram(std::string name,
-                                           const std::string_view source,
-                                           const std::string_view vertexName,
-                                           const std::string_view fragmentName,
-                                           const ProgramParameters& programParameters,
-                                           const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
+// If enabled, ubsan flags the implicit cast from assigning `NS::String*` to `NS::Object*` here
+// as an alignment error.  The ObjC NSString allocations are cast to a C++ object pointer by
+// `NS::Object::sendMessage`, and the alignment rules are different.  We assume that, because
+// `NS::Object` does not use virtual methods and only serves as a way for C++ code to store
+// and pass ObjC `id`s to `objc_msgSend`, this won't cause any real problems.
+#if defined(__clang__)
+#if __has_feature(undefined_behavior_sanitizer)
+#pragma clang diagnostic ignored "-Wunknown-sanitizers"
+__attribute__((no_sanitize("misaligned-pointer-use")))
+#endif
+#endif
+UniqueShaderProgram
+Context::createProgram(std::string name,
+                       const std::string_view source,
+                       const std::string_view vertexName,
+                       const std::string_view fragmentName,
+                       const ProgramParameters& programParameters,
+                       const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
     const auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
     // No NSMutableDictionary?
@@ -94,17 +106,8 @@ UniqueShaderProgram Context::createProgram(std::string name,
     const auto addDefine = [&rawDefines](const auto& pair) {
         const auto* nsKey = NS::String::string(pair.first.data(), NS::UTF8StringEncoding);
         const auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
-
-        // This cast suppresses a UBSan error about object alignment that occurs with the implicit cast
-        // or a `static_cast`.  This seems to occur because the ObjC allocation is cast to a C++ object
-        // pointer by `NS::Object::sendMessage`, and the alignment rules are different.  We assume that,
-        // because `NS::Object` does not use virtual methods and only serves as a way for C++ code to
-        // store and pass ObjC `id`s to `objc_msgSend`, this won't cause any real problems.
-        const NS::Object* nsObjKey = reinterpret_cast<const NS::Object*>(nsKey);
-        const NS::Object* nsObjVal = reinterpret_cast<const NS::Object*>(nsVal);
-
-        rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size() / 2), nsObjKey);
-        rawDefines.insert(rawDefines.end(), nsObjVal);
+        rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size() / 2), nsKey);
+        rawDefines.insert(rawDefines.end(), nsVal);
     };
     std::for_each(programDefines.begin(), programDefines.end(), addDefine);
     std::for_each(additionalDefines.begin(), additionalDefines.end(), addDefine);

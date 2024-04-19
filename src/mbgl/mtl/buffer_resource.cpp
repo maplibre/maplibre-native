@@ -3,7 +3,6 @@
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/mtl/renderer_backend.hpp>
 
-#include <Foundation/NSSharedPtr.hpp>
 #include <Metal/MTLDevice.hpp>
 #include <Metal/MTLRenderCommandEncoder.hpp>
 

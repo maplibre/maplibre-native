@@ -4,7 +4,6 @@
 #include <mbgl/mtl/context.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 
-#include <Foundation/NSSharedPtr.hpp>
 #include <Metal/Metal.hpp>
 
 #include <cassert>

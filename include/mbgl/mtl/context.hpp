@@ -12,8 +12,6 @@
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/containers.hpp>
 
-#include <Foundation/NSSharedPtr.hpp>
-
 #include <memory>
 #include <optional>
 #include <unordered_map>

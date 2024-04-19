@@ -5,7 +5,6 @@
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <Foundation/Foundation.hpp>
-#include <Foundation/NSSharedPtr.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
 #include <memory>

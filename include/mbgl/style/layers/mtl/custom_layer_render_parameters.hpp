@@ -4,7 +4,6 @@
 #include <mbgl/mtl/mtl_fwd.hpp>
 
 #include <Foundation/Foundation.hpp>
-#include <Foundation/NSSharedPtr.hpp>
 #include <Metal/Metal.hpp>
 
 #include <memory>
