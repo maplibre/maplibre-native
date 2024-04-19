@@ -50,8 +50,11 @@ public:
      * @param up whether the line normal points up or down
      * @param dir direction of the line cap (-1/0/1)
      */
-    static LayoutVertex layoutVertex(
-        Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar = 0) {
+#if __has_feature(undefined_behavior_sanitizer) || defined(__SANITIZE_UNDEFINED_BEHAVIOR__)
+    __attribute__((no_sanitize("float-cast-overflow")))
+#endif
+    static LayoutVertex
+    layoutVertex(Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar = 0) {
         return LayoutVertex{
             {{static_cast<int16_t>((p.x * 2) | (round ? 1 : 0)), static_cast<int16_t>((p.y * 2) | (up ? 1 : 0))}},
             {{// add 128 to store a byte in an unsigned byte
