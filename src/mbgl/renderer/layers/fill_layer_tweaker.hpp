@@ -20,18 +20,7 @@ public:
     void execute(LayerGroupBase&, const PaintParameters&) override;
 
 private:
-    gfx::UniformBufferPtr fillPropsUniformBuffer;
-    gfx::UniformBufferPtr fillOutlinePropsUniformBuffer;
-    gfx::UniformBufferPtr fillPatternPropsUniformBuffer;
-    gfx::UniformBufferPtr fillOutlinePatternPropsUniformBuffer;
-    gfx::UniformBufferPtr fillOutlineTriangulatedUniformBuffer;
-
-    // Only run each update function once per property update
-    bool fillUniformBufferUpdated = true;
-    bool fillOutlineUniformBufferUpdated = true;
-    bool fillPatternUniformBufferUpdated = true;
-    bool fillOutlinePatternUniformBufferUpdated = true;
-    bool fillOutlineTriangulatedUniformBufferUpdated = true;
+    gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
 };
 
 } // namespace mbgl

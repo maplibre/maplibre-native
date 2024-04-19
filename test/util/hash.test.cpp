@@ -25,7 +25,6 @@
 #include <mbgl/shaders/mtl/hillshade.hpp>
 #include <mbgl/shaders/mtl/hillshade_prepare.hpp>
 #include <mbgl/shaders/mtl/line.hpp>
-#include <mbgl/shaders/mtl/line_gradient.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/mtl/raster.hpp>
 #include <mbgl/shaders/mtl/symbol_icon.hpp>

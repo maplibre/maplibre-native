@@ -13,14 +13,15 @@ layout (std140) uniform FillOutlineTriangulatedDrawableUBO {
     highp mat4 u_matrix;
     highp vec2 u_units_to_pixels;
     mediump float u_ratio;
-    lowp float pad0;
+    lowp float drawable_pad1;
 };
-
-layout (std140) uniform FillOutlineTriangulatedPropertiesUBO {
+layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
-    lowp float u_opacity;
-    mediump float u_width;
-    highp vec2 pad1;
+    highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_width;
+    highp float props_pad1;
 };
 
 out vec2 v_normal;

@@ -89,7 +89,7 @@ const LayerTypeInfo* CustomDrawableLayer::Impl::staticTypeInfo() noexcept {
 
 class LineDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    LineDrawableTweaker(const shaders::LinePropertiesUBO& properties)
+    LineDrawableTweaker(const shaders::LineEvaluatedPropsUBO& properties)
         : linePropertiesUBO(properties) {}
 
     void init(gfx::Drawable&) override {};
@@ -110,12 +110,11 @@ public:
         const shaders::LineDynamicUBO dynamicUBO = {
             /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, 0, 0};
 
-        const shaders::LineUBO lineUBO{/*matrix = */ util::cast<float>(matrix),
-                                       /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
-                                       0,
-                                       0,
-                                       0};
-
+        const shaders::LineDrawableUBO drawableUBO = {/*matrix = */ util::cast<float>(matrix),
+                                                      /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+                                                      0,
+                                                      0,
+                                                      0};
         const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
                                                                  /*blur_t =*/0.f,
                                                                  /*opacity_t =*/0.f,
@@ -124,15 +123,15 @@ public:
                                                                  /*width_t =*/0.f,
                                                                  0,
                                                                  0};
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
-        uniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
-        uniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
-        uniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
     };
 
 private:
-    shaders::LinePropertiesUBO linePropertiesUBO;
+    shaders::LineEvaluatedPropsUBO linePropertiesUBO;
 };
 
 class WideVectorDrawableTweaker : public gfx::DrawableTweaker {
@@ -189,9 +188,9 @@ public:
             /*interClipLimit*/ 0.0f                                             // N/A
         };
 
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idWideVectorUniformsUBO, &uniform, parameters.context);
-        uniforms.createOrUpdate(idWideVectorUniformWideVecUBO, &wideVec, parameters.context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idWideVectorUniformsUBO, &uniform, parameters.context);
+        drawableUniforms.createOrUpdate(idWideVectorUniformWideVecUBO, &wideVec, parameters.context);
     };
 
 private:
@@ -218,15 +217,7 @@ public:
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-        const shaders::FillDrawableUBO fillUBO{/*matrix = */ util::cast<float>(matrix)};
-
-        const shaders::FillEvaluatedPropsUBO fillPropertiesUBO{
-            /* .color = */ color,
-            /* .opacity = */ opacity,
-            0,
-            0,
-            0,
-        };
+        const shaders::FillDrawableUBO fillDrawableUBO{/*matrix = */ util::cast<float>(matrix)};
 
         const shaders::FillInterpolateUBO fillInterpolateUBO{
             /* .color_t = */ 0.f,
@@ -234,10 +225,18 @@ public:
             0,
             0,
         };
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idFillDrawableUBO, &fillUBO, parameters.context);
-        uniforms.createOrUpdate(idFillEvaluatedPropsUBO, &fillPropertiesUBO, parameters.context);
-        uniforms.createOrUpdate(idFillInterpolateUBO, &fillInterpolateUBO, parameters.context);
+        const shaders::FillEvaluatedPropsUBO fillPropertiesUBO{
+            /* .color = */ color,
+            /* .outline_color = */ Color::white(),
+            /* .opacity = */ opacity,
+            /* .fade = */ 0.f,
+            /* .width = */ 0.f,
+            0,
+        };
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idFillDrawableUBO, &fillDrawableUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idFillInterpolateUBO, &fillInterpolateUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idFillEvaluatedPropsUBO, &fillPropertiesUBO, parameters.context);
     };
 
 private:
@@ -288,9 +287,9 @@ public:
             0};
 
         // set UBOs
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idCustomSymbolDrawableUBO, &drawableUBO, parameters.context);
-        uniforms.createOrUpdate(idCustomSymbolParametersUBO, &parametersUBO, parameters.context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idCustomSymbolDrawableUBO, &drawableUBO, parameters.context);
+        drawableUniforms.createOrUpdate(idCustomSymbolParametersUBO, &parametersUBO, parameters.context);
     };
 
 private:
@@ -535,15 +534,15 @@ void CustomDrawableLayerHost::Interface::finish() {
                 // finish building classic lines
 
                 // create line tweaker
-                const shaders::LinePropertiesUBO linePropertiesUBO{lineOptions.color,
-                                                                   lineOptions.blur,
-                                                                   lineOptions.opacity,
-                                                                   lineOptions.gapWidth,
-                                                                   lineOptions.offset,
-                                                                   lineOptions.width,
-                                                                   0,
-                                                                   0,
-                                                                   0};
+                const shaders::LineEvaluatedPropsUBO linePropertiesUBO = {lineOptions.color,
+                                                                          lineOptions.blur,
+                                                                          lineOptions.opacity,
+                                                                          lineOptions.gapWidth,
+                                                                          lineOptions.offset,
+                                                                          lineOptions.width,
+                                                                          0,
+                                                                          0,
+                                                                          0};
                 auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
 
                 // finish drawables

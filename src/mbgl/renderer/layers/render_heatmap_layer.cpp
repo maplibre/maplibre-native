@@ -393,10 +393,10 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             // We assume vertex attributes don't change, and so don't update them to avoid re-uploading
             // drawable.setVertexAttributes(heatmapVertexAttrs);
 
-            auto& uniforms = drawable.mutableUniformBuffers();
+            auto& drawableUniforms = drawable.mutableUniformBuffers();
 
             if (auto buffer = getInterpolateBuffer()) {
-                uniforms.set(idHeatmapInterpolateUBO, std::move(buffer));
+                drawableUniforms.set(idHeatmapInterpolateUBO, std::move(buffer));
             }
         });
 
@@ -459,10 +459,10 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setTileID(tileID);
             drawable->setLayerTweaker(layerTweaker);
 
-            auto& uniforms = drawable->mutableUniformBuffers();
+            auto& drawableUniforms = drawable->mutableUniformBuffers();
 
             if (auto buffer = getInterpolateBuffer()) {
-                uniforms.set(idHeatmapInterpolateUBO, std::move(buffer));
+                drawableUniforms.set(idHeatmapInterpolateUBO, std::move(buffer));
             }
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));

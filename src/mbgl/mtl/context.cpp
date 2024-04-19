@@ -359,8 +359,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         layoutDesc->setStride(static_cast<NS::UInteger>(vertexSize));
         layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);
         layoutDesc->setStepRate(1);
-        vertDesc->attributes()->setObject(attribDesc.get(), 0);
-        vertDesc->layouts()->setObject(layoutDesc.get(), 0);
+        vertDesc->attributes()->setObject(attribDesc.get(), ShaderClass::attributes[0].index);
+        vertDesc->layouts()->setObject(layoutDesc.get(), ShaderClass::attributes[0].index);
 
         // Create a render pipeline state, telling Metal how to render the primitives
         const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
