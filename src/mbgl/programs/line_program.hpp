@@ -50,8 +50,10 @@ public:
      * @param up whether the line normal points up or down
      * @param dir direction of the line cap (-1/0/1)
      */
-#if __has_feature(undefined_behavior_sanitizer) || defined(__SANITIZE_UNDEFINED_BEHAVIOR__)
+#if defined(__clang__)
+#if __has_feature(undefined_behavior_sanitizer)
     __attribute__((no_sanitize("float-cast-overflow")))
+#endif
 #endif
     static LayoutVertex
     layoutVertex(Point<int16_t> p, Point<double> e, bool round, bool up, int8_t dir, int32_t linesofar = 0) {
