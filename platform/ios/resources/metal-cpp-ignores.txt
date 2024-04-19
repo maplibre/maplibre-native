@@ -1,0 +1,2 @@
+# metal-cpp uses calls through null pointers
+null:vendor/metal-cpp/*

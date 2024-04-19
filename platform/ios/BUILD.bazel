@@ -123,6 +123,7 @@ apple_xcframework(
     data = glob([
         "resources/*.lproj/**",
         "resources/*.xcassets/**",
+        "resources/metal-cpp-ignores.txt",
     ]),
     infoplists = ["info_plist"],
     ios = {
@@ -159,6 +160,7 @@ apple_resource_bundle(
     resources = glob([
         "resources/*.lproj/**",
         "resources/*.xcassets/**",
+        "resources/metal-cpp-ignores.txt",
     ]),
     visibility = ["//visibility:public"],
 )
