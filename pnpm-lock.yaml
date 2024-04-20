@@ -37,6 +37,9 @@ devDependencies:
   '@octokit/rest':
     specifier: ^20.1.0
     version: 20.1.0
+  '@types/node':
+    specifier: ^20.12.7
+    version: 20.12.7
   argparse:
     specifier: ^2.0.1
     version: 2.0.1
@@ -97,6 +100,9 @@ devDependencies:
   tape:
     specifier: ^5.7.5
     version: 5.7.5
+  typescript:
+    specifier: ^5.4.5
+    version: 5.4.5
   xcode:
     specifier: ^3.0.1
     version: 3.0.1
@@ -1623,6 +1629,12 @@ packages:
       '@smithy/abort-controller': 2.2.0
       '@smithy/types': 2.12.0
       tslib: 2.6.2
+    dev: true
+
+  /@types/node@20.12.7:
+    resolution: {integrity: sha512-wq0cICSkRLVaf3UGLMGItu/PtdY7oaXaI/RVU+xliKVOtRna3PRY57ZDfztpDL0n11vfymMUnXv8QwYCO7L1wg==}
+    dependencies:
+      undici-types: 5.26.5
     dev: true
 
   /@xmldom/xmldom@0.8.10:
@@ -3842,6 +3854,12 @@ packages:
       is-typed-array: 1.1.13
       possible-typed-array-names: 1.0.0
 
+  /typescript@5.4.5:
+    resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+    dev: true
+
   /unbox-primitive@1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}
     dependencies:
@@ -3849,6 +3867,10 @@ packages:
       has-bigints: 1.0.2
       has-symbols: 1.0.3
       which-boxed-primitive: 1.0.2
+
+  /undici-types@5.26.5:
+    resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
+    dev: true
 
   /universal-user-agent@6.0.1:
     resolution: {integrity: sha512-yCzhz6FN2wU1NiiQRogkTQszlQSlpWaw8SvVegAc+bDxbzHgh1vX8uIe8OYyMH6DwH+sdTJsgMl36+mSMdRJIQ==}
