@@ -46,6 +46,7 @@ inputs:
 outputs:
   runArn:
     description: ARN of run
+    value: ${{ steps.schedule_run.outputs.runArn }}
 runs:
   using: "composite"
   steps:
