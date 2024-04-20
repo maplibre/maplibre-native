@@ -1,0 +1,14 @@
+name: typecheck-scripts
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  typecheck-scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          npm install --ignore-scripts
+          npx tsc -p scripts/jsconfig.json
