@@ -7,6 +7,7 @@ import kotlin.properties.Delegates
 
 class CollisionGroup(
     symbols: List<Symbol> = emptyList(),
+    val zLayer: Int = Defaults.Z_LAYER,
     symbolSpacing: Float = Defaults.COLLISION_GROUP_SYMBOL_SPACING,
     symbolAvoidEdges: Boolean = Defaults.COLLISION_GROUP_SYMBOL_AVOID_EDGES,
     iconAllowOverlap: Boolean = Defaults.COLLISION_GROUP_ICON_ALLOW_OVERLAP,

@@ -65,7 +65,7 @@ internal fun KAnnotation<*>.key() = when (this) {
 }
 
 internal fun CollisionGroup.key(): CollisionGroupKey = CollisionGroupKey(
-    Defaults.Z_LAYER, // TODO: if (this.symbols.isNotEmpty()) this.symbols[0].zLayer else …,
+    this.zLayer,
     this
 )
 
