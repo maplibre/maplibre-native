@@ -128,7 +128,7 @@ class LineManager @UiThread internal constructor(
      * The display of line endings.
      */
     var lineCap: String?
-        get() = layer.lineCap.value
+        get() = layer.lineCap?.value
         set(value) {
             val propertyValue: PropertyValue<*> = PropertyFactory.lineCap(value)
             constantPropertyUsageMap[PROPERTY_LINE_CAP] = propertyValue

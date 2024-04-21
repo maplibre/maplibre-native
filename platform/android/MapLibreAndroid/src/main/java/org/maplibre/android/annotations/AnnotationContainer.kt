@@ -36,6 +36,8 @@ internal class KAnnotationContainer
     private val managers: MutableMap<Key, AnnotationManager<*, *>> = mutableMapOf()
     private val bitmapUsers: MutableMap<Bitmap, MutableSet<KAnnotation<*>>> = mutableMapOf()
 
+    private val collisionGroups: MutableSet<CollisionGroup> = mutableSetOf()
+
     @JvmName("setStyle")
     internal fun setStyle(style: Style?) {
         this.style = style
@@ -49,6 +51,25 @@ internal class KAnnotationContainer
         addToManager(annotation)
     }
 
+    @UiThread
+    fun add(collisionGroup: CollisionGroup) {
+
+        collisionGroups.add(collisionGroup)
+        collisionGroup.symbols.forEach {
+            it.icon()?.add(forAnnotation = it)
+        }
+
+        collisionGroup.key().let { key ->
+            (managers.getOrCreate(key) as SymbolManager).apply {
+
+                deleteAll()
+                addAll(collisionGroup.symbols)
+
+                collisionGroup.manager = this
+            }
+        }
+    }
+
     fun KAnnotation<*>.icon(): Bitmap? = when (this) {
         is Symbol -> icon?.image
         is Line -> pattern
@@ -59,6 +80,14 @@ internal class KAnnotationContainer
     fun Bitmap.add(forAnnotation: KAnnotation<*>) {
         style?.addImage(toString(), this)
         bitmapUsers.getOrPut(this) { mutableSetOf() }.add(forAnnotation)
+    }
+
+    fun Bitmap.remove(forAnnotation: KAnnotation<*>) {
+        bitmapUsers[this]?.remove(forAnnotation)
+        if (bitmapUsers[this]?.isEmpty() == true) {
+            style?.removeImage(this.toString())
+            bitmapUsers.remove(this)
+        }
     }
 
     @UiThread
@@ -91,6 +120,21 @@ internal class KAnnotationContainer
         }
 
     @UiThread
+    fun remove(collisionGroup: CollisionGroup) {
+        if (collisionGroups.remove(collisionGroup)) {
+
+            managers.keys.filter { it is CollisionGroupKey && it.collisionGroup == collisionGroup }.forEach {
+                managers[it]?.onDestroy()
+                managers.remove(it)
+            }
+
+            collisionGroup.symbols.forEach {
+                it.icon()?.remove(forAnnotation = it)
+            }
+        }
+    }
+
+    @UiThread
     fun remove(annotation: KAnnotation<*>) {
 
         if (annotationList.remove(annotation)) {
@@ -106,13 +150,7 @@ internal class KAnnotationContainer
             }
 
             // Remove any icon if no other annotations are using it
-            annotation.icon()?.let {
-                bitmapUsers[it]?.remove(annotation)
-                if (bitmapUsers[it]?.isEmpty() == true) {
-                    style?.removeImage(it.toString())
-                    bitmapUsers.remove(it)
-                }
-            }
+            annotation.icon()?.remove(annotation)
 
             // Destroy manager if no more annotations with same key remain
             if (!groupAnnotations().containsKey(annotation.key())) {
@@ -123,6 +161,10 @@ internal class KAnnotationContainer
 
     @UiThread
     fun clear() {
+        collisionGroups.forEach {
+            it.manager = null
+        }
+        collisionGroups.clear()
         managers.values.forEach {
             it.onDestroy()
         }
@@ -139,7 +181,7 @@ internal class KAnnotationContainer
             val below = managers.keys.firstOrNull { it.z > key.z }?.let { managers[it] }?.layerId
 
             when (key) {
-                is SymbolKey -> SymbolManager(
+                is SymbolKey, is CollisionGroupKey -> SymbolManager(
                     mapView,
                     mapLibreMap,
                     style,
@@ -147,35 +189,64 @@ internal class KAnnotationContainer
                     draggableAnnotationController = draggableAnnotationController,
                     coreElementProvider = symbolElementProviderGenerator()
                 ).apply {
-                    // Non-collision group symbols do not interfere with each other
-                    textAllowOverlap = true
-                    iconAllowOverlap = true
 
-                    // Apply NDD properties from key
+                    if (key is CollisionGroupKey) {
+                        symbolSpacing = key.collisionGroup.symbolSpacing
+                        symbolAvoidEdges = key.collisionGroup.symbolAvoidEdges
+                        iconAllowOverlap = key.collisionGroup.iconAllowOverlap
+                        iconIgnorePlacement = key.collisionGroup.iconIgnorePlacement
+                        iconOptional = key.collisionGroup.iconOptional
+                        iconPadding = key.collisionGroup.iconPadding
+                        textPadding = key.collisionGroup.textPadding
+                        textAllowOverlap = key.collisionGroup.textAllowOverlap
+                        textIgnorePlacement = key.collisionGroup.textIgnorePlacement
+                        textOptional = key.collisionGroup.textOptional
+                        key.collisionGroup.textVariableAnchor?.map {
+                            it.toString()
+                        }?.toTypedArray().let {
+                            textVariableAnchor = it
+                        }
+                    } else {
+                        // Non-collision group symbols do not interfere with each other
+                        // Collision group properties are handled in their `addOrUpdate` method
+                        textAllowOverlap = true
+                        iconAllowOverlap = true
+                    }
 
-                    iconTextFit = key.iconFitText.let { fitText ->
+                    // Apply NDD properties from symbol key
+                    val symbolKey = when (key) {
+                        is CollisionGroupKey -> {
+                            if (key.collisionGroup.symbols.isEmpty()) return@apply
+
+                            key.collisionGroup.symbols[0].key() as SymbolKey
+                        }
+                        is SymbolKey -> key
+                        else -> throw IllegalStateException()
+                    }
+
+                    iconTextFit = symbolKey.iconFitText.let { fitText ->
                         if (fitText.width && fitText.height) Property.ICON_TEXT_FIT_BOTH
                         else if (fitText.width) Property.ICON_TEXT_FIT_WIDTH
                         else if (fitText.height) Property.ICON_TEXT_FIT_HEIGHT
                         else Property.ICON_TEXT_FIT_NONE
                     }
-                    iconTextFitPadding = key.iconFitText.padding.let { padding ->
+                    iconTextFitPadding = symbolKey.iconFitText.padding.let { padding ->
                         arrayOf(padding.top, padding.right, padding.bottom, padding.left)
                     }
 
-                    iconKeepUpright = key.iconKeepUpright
-                    iconPitchAlignment = when (key.iconPitchAlignment) {
+                    iconKeepUpright = symbolKey.iconKeepUpright
+                    iconPitchAlignment = when (symbolKey.iconPitchAlignment) {
                         Alignment.MAP -> Property.ICON_PITCH_ALIGNMENT_MAP
                         Alignment.VIEWPORT -> Property.ICON_PITCH_ALIGNMENT_VIEWPORT
                         null -> Property.ICON_PITCH_ALIGNMENT_AUTO
                     }
 
-                    textPitchAlignment = when (key.textPitchAlignment) {
+                    textPitchAlignment = when (symbolKey.textPitchAlignment) {
                         Alignment.MAP -> Property.TEXT_PITCH_ALIGNMENT_MAP
                         Alignment.VIEWPORT -> Property.TEXT_PITCH_ALIGNMENT_VIEWPORT
                         null -> Property.TEXT_PITCH_ALIGNMENT_AUTO
                     }
-                    textLineHeight = key.textLineHeight
+                    textLineHeight = symbolKey.textLineHeight
 
                 }
 
@@ -253,7 +324,7 @@ internal class KAnnotationContainer
         }?.also { put(key, it) }
 
     @VisibleForTesting
-    internal val size get() = annotationList.size
+    internal val size get() = annotationList.size + collisionGroups.sumOf { it.symbols.size }
 
     @VisibleForTesting
     internal val managerCount get() = managers.size

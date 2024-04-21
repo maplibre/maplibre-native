@@ -93,6 +93,13 @@ sealed class KAnnotation<T : Geometry>(
         }
     }
 
+    internal fun detachFromManager() {
+        if (attachedToManager != null) {
+            attachedToManager = null
+            id = 0L
+        }
+    }
+
     /**
      * Applies the given offset to the internal geometry, and applies this new Geometry to the annotation
      * itself. Afterwards, the annotation updates.

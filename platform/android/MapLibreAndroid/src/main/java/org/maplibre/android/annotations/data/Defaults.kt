@@ -88,5 +88,17 @@ class Defaults {
         val FILL_PATTERN: Bitmap? = null
         val FILL_ANTIALIAS: Boolean = true
         val FILL_TRANSLATE: Translate? = null
+
+        val COLLISION_GROUP_SYMBOL_SPACING: Float = 250f
+        val COLLISION_GROUP_SYMBOL_AVOID_EDGES: Boolean = false
+        val COLLISION_GROUP_ICON_ALLOW_OVERLAP: Boolean = false
+        val COLLISION_GROUP_ICON_IGNORE_PLACEMENT: Boolean = false
+        val COLLISION_GROUP_ICON_OPTIONAL: Boolean = false
+        val COLLISION_GROUP_ICON_PADDING: Float = 2f
+        val COLLISION_GROUP_TEXT_PADDING: Float = 2f
+        val COLLISION_GROUP_TEXT_ALLOW_OVERLAP: Boolean = false
+        val COLLISION_GROUP_TEXT_IGNORE_PLACEMENT: Boolean = false
+        val COLLISION_GROUP_TEXT_OPTIONAL: Boolean = false
+        val COLLISION_GROUP_TEXT_VARIABLE_ANCHOR: Array<Anchor>? = null
     }
 }

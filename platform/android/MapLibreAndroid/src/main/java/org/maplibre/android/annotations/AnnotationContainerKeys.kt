@@ -38,6 +38,11 @@ internal data class CircleKey(
     val pitchAlignment: Alignment
 ) : Key
 
+data class CollisionGroupKey(
+    override val z: Int,
+    val collisionGroup: CollisionGroup
+) : Key
+
 internal fun KAnnotation<*>.key() = when (this) {
     is Symbol -> SymbolKey(
         zLayer,
@@ -57,3 +62,7 @@ internal fun KAnnotation<*>.key() = when (this) {
         zLayer, translate, pitchScale, pitchAlignment
     )
 }
+
+internal fun CollisionGroup.key(): CollisionGroupKey = CollisionGroupKey(
+    if (this.symbols.isNotEmpty()) this.symbols[0].zLayer else Defaults.Z_LAYER, this
+)
