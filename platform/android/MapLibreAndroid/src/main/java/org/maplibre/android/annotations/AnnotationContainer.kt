@@ -214,7 +214,7 @@ internal class KAnnotationContainer
                     }
 
                     // Apply NDD properties from symbol key
-                    val symbolKey = when (key) {
+                    when (key) {
                         is CollisionGroupKey -> {
                             if (key.collisionGroup.symbols.isEmpty()) return@apply
 
@@ -222,31 +222,8 @@ internal class KAnnotationContainer
                         }
                         is SymbolKey -> key
                         else -> throw IllegalStateException()
-                    }
+                    }.applyProperties(this)
 
-                    iconTextFit = symbolKey.iconFitText.let { fitText ->
-                        if (fitText.width && fitText.height) Property.ICON_TEXT_FIT_BOTH
-                        else if (fitText.width) Property.ICON_TEXT_FIT_WIDTH
-                        else if (fitText.height) Property.ICON_TEXT_FIT_HEIGHT
-                        else Property.ICON_TEXT_FIT_NONE
-                    }
-                    iconTextFitPadding = symbolKey.iconFitText.padding.let { padding ->
-                        arrayOf(padding.top, padding.right, padding.bottom, padding.left)
-                    }
-
-                    iconKeepUpright = symbolKey.iconKeepUpright
-                    iconPitchAlignment = when (symbolKey.iconPitchAlignment) {
-                        Alignment.MAP -> Property.ICON_PITCH_ALIGNMENT_MAP
-                        Alignment.VIEWPORT -> Property.ICON_PITCH_ALIGNMENT_VIEWPORT
-                        null -> Property.ICON_PITCH_ALIGNMENT_AUTO
-                    }
-
-                    textPitchAlignment = when (symbolKey.textPitchAlignment) {
-                        Alignment.MAP -> Property.TEXT_PITCH_ALIGNMENT_MAP
-                        Alignment.VIEWPORT -> Property.TEXT_PITCH_ALIGNMENT_VIEWPORT
-                        null -> Property.TEXT_PITCH_ALIGNMENT_AUTO
-                    }
-                    textLineHeight = symbolKey.textLineHeight
 
                 }
 

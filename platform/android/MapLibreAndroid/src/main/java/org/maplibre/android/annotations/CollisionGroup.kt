@@ -26,7 +26,10 @@ class CollisionGroup(
             testDistinctSymbolKeys()
             manager?.apply {
                 deleteAll()
-                addAll(new)
+                if (new.isNotEmpty()) {
+                    addAll(new)
+                    (new[0].key() as SymbolKey).applyProperties(this)
+                }
             }
         }
     )
@@ -92,17 +95,24 @@ class CollisionGroup(
 
     init {
         testDistinctSymbolKeys()
+
+        if (textVariableAnchor?.isEmpty() == true) {
+            throw IllegalArgumentException(
+                "An empty array has been provided as a text variable anchor. Please use `null` " +
+                        "instead of an empty array to indicate that no alternative anchors are provided."
+            )
+        }
     }
 
     private fun testDistinctSymbolKeys() {
-        symbols.distinctBy {
+        symbols.map {
             it.key()
-        }.let {
+        }.distinct().let {
             if (it.size > 1) {
                 throw IllegalArgumentException(
                     "You have added symbols with conflicting Non-Data Driven (NDD) properties " +
-                            "to this cluster group. Namely, the following sets of properties" +
-                            "were found: ${it.joinToString("; ")}"
+                            "to this cluster group. Namely, the following sets of properties " +
+                            "were found:\n${it.joinToString("; \n")}"
                 )
             }
         }

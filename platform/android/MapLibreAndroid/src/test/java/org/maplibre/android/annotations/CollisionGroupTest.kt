@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.maplibre.android.annotations.data.Alignment
 import org.maplibre.android.annotations.data.Text
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
@@ -149,6 +150,24 @@ class CollisionGroupTest {
         collisionGroup.textOptional = true
 
         Mockito.verify(symbolLayer).setProperties(PropertyFactory.textOptional(true))
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `throws on adding values with inconsistent NDD properties`() {
+        CollisionGroup(
+            listOf(
+                Symbol(LatLng(0.0, 0.0), text = Text("hello", pitchAlignment = Alignment.MAP)),
+                Symbol(LatLng(0.0, 0.0), text = Text("world", pitchAlignment = Alignment.VIEWPORT))
+            )
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun `throws on adding empty text-variable-anchor array`() {
+        CollisionGroup(
+            emptyList(),
+            textVariableAnchor = emptyArray()
+        )
     }
 
 }
