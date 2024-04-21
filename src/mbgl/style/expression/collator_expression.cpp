@@ -75,7 +75,7 @@ void CollatorExpression::eachChild(const std::function<void(const Expression&)>&
     }
 }
 
-bool CollatorExpression::operator==(const Expression& e) const {
+bool CollatorExpression::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::CollatorExpression) {
         const auto* rhs = static_cast<const CollatorExpression*>(&e);
         const bool lLocSet = locale && *locale;
@@ -108,7 +108,7 @@ EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) c
         return diacriticSensitiveResult.error();
     }
 
-    if (locale) {
+    if (locale && *locale) {
         if (auto localeResult = (*locale)->evaluate(params)) {
             return Collator(caseSensitiveResult->get<bool>(),
                             diacriticSensitiveResult->get<bool>(),

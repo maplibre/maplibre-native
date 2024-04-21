@@ -35,9 +35,9 @@ void ImageExpression::eachChild(const std::function<void(const Expression&)>& fn
     fn(*imageID);
 }
 
-bool ImageExpression::operator==(const Expression& e) const {
+bool ImageExpression::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::ImageExpression) {
-        auto rhs = static_cast<const ImageExpression*>(&e);
+        const auto* rhs = static_cast<const ImageExpression*>(&e);
         return *imageID == *rhs->imageID;
     }
     return false;

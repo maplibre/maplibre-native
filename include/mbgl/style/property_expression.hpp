@@ -14,7 +14,7 @@ namespace style {
 
 class PropertyExpressionBase {
 public:
-    explicit PropertyExpressionBase(std::unique_ptr<expression::Expression>);
+    explicit PropertyExpressionBase(std::unique_ptr<expression::Expression>) noexcept;
 
     bool isZoomConstant() const noexcept { return isZoomConstant_; }
     bool isFeatureConstant() const noexcept { return isFeatureConstant_; }
@@ -48,10 +48,12 @@ protected:
 
 template <class T>
 class PropertyExpression final : public PropertyExpressionBase {
+    static_assert(std::is_nothrow_move_constructible_v<T>);
+
 public:
     // Second parameter to be used only for conversions from legacy functions.
     PropertyExpression(std::unique_ptr<expression::Expression> expression_,
-                       std::optional<T> defaultValue_ = std::nullopt)
+                       std::optional<T> defaultValue_ = std::nullopt) noexcept
         : PropertyExpressionBase(std::move(expression_)),
           defaultValue(std::move(defaultValue_)) {}
 
@@ -136,6 +138,8 @@ public:
     std::vector<std::optional<T>> possibleOutputs() const {
         return expression::fromExpressionValues<T>(expression->possibleOutputs());
     }
+
+    using Expression = expression::Expression;
 
     friend bool operator==(const PropertyExpression& lhs, const PropertyExpression& rhs) {
         return *lhs.expression == *rhs.expression;

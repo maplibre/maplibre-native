@@ -14,14 +14,15 @@ struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 1> attributes;
     static const std::array<UniformBlockInfo, 1> uniforms;
+    static const std::array<AttributeInfo, 1> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(0)]];
+    short2 pos [[attribute(1)]];
 };
 
 struct FragmentStage {
@@ -37,7 +38,7 @@ struct alignas(16) DebugUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const DebugUBO& debugUBO [[buffer(1)]]) {
+                                device const DebugUBO& debugUBO [[buffer(0)]]) {
 
     const float4 position = debugUBO.matrix * float4(float2(vertx.pos) * debugUBO.overlay_scale, 0, 1);
 
@@ -52,7 +53,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const DebugUBO& debugUBO [[buffer(1)]],
+                            device const DebugUBO& debugUBO [[buffer(0)]],
                             texture2d<float, access::sample> overlay [[texture(0)]],
                             sampler overlay_sampler [[sampler(0)]]) {
 

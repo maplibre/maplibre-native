@@ -4,6 +4,23 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.4.0
+
+- User-Agent in network requests can now be changed via `MLNNativeNetworkManager.sharedManager.sessionConfiguration` ([#2293](https://github.com/maplibre/maplibre-native/pull/2293)).
+
+## 6.3.3
+
+- Fix memory leak in Metal shader compilation ([#2257](https://github.com/maplibre/maplibre-native/pull/2257)).
+- Improved iOS UI tests ([#2258](https://github.com/maplibre/maplibre-native/pull/2258))
+- Add wide vector shader option to Custom Drawable Layer ([#2183](https://github.com/maplibre/maplibre-native/pull/2183))
+- Guard against potential crash when the Metal drawable is now unavailable ([#2272](https://github.com/maplibre/maplibre-native/pull/2272))
+- Eliminate spurious log output when using triangulated fill outlines ([#2279](https://github.com/maplibre/maplibre-native/pull/2279))
+- Fix projection matrix for raster image drawables ([#2242](https://github.com/maplibre/maplibre-native/pull/2242))
+
+## 6.3.2
+
+- Fix potential memory leak ([#2254](https://github.com/maplibre/maplibre-native/pull/2254)).
+
 ## 6.3.1
 
 - Add debug symbols to releases (see [Releases on GitHub](https://github.com/maplibre/maplibre-native/releases?q=ios&expanded=true)).

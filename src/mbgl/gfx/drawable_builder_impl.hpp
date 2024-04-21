@@ -7,6 +7,7 @@
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/polyline_generator.hpp>
+#include <mbgl/shaders/widevector_ubo.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -21,9 +22,11 @@ class DrawableBuilder::Impl {
 public:
     using VT = gfx::detail::VertexType<gfx::AttributeType<std::int16_t, 2>>;
     enum class Mode {
-        Primitives, ///< building primitive drawables. Not implemented
-        Polylines,  ///< building drawables for thick polylines
-        Custom      ///< building custom drawables.
+        Primitives,       ///< building primitive drawables. Not implemented
+        Polylines,        ///< building drawables for thick polylines
+        WideVectorLocal,  ///< building drawables for thick polylines using wide vectors in local coordinates
+        WideVectorGlobal, ///< building drawables for thick polylines using wide vectors in global coordinates
+        Custom            ///< building custom drawables.
     };
     struct LineLayoutVertex {
         std::array<int16_t, 2> a1;
@@ -39,6 +42,10 @@ public:
     gfx::VertexVector<LineLayoutVertex> polylineVertices;
     gfx::IndexVector<gfx::Triangles> polylineIndexes;
 
+    std::shared_ptr<gfx::VertexVector<shaders::VertexTriWideVecB>> wideVectorVertices;
+    gfx::VertexVector<shaders::VertexTriWideVecInstance> wideVectorInstanceData;
+    std::shared_ptr<gfx::IndexVector<gfx::Triangles>> wideVectorIndexes;
+
     std::vector<uint16_t> buildIndexes;
     std::shared_ptr<gfx::IndexVectorBase> sharedIndexes;
     std::vector<std::unique_ptr<Drawable::DrawSegment>> segments;
@@ -47,11 +54,22 @@ public:
     gfx::ColorMode colorMode = gfx::ColorMode::disabled();
     gfx::CullFaceMode cullFaceMode = gfx::CullFaceMode::disabled();
 
+    // methods
     void addPolyline(gfx::DrawableBuilder& builder,
                      const GeometryCoordinates& coordinates,
                      const gfx::PolylineGeneratorOptions& options);
 
     void setupForPolylines(gfx::Context&, gfx::DrawableBuilder&);
+
+    void addWideVectorPolylineLocal(gfx::DrawableBuilder& builder,
+                                    const GeometryCoordinates& coordinates,
+                                    const gfx::PolylineGeneratorOptions& options);
+
+    mbgl::Point<double> addWideVectorPolylineGlobal(gfx::DrawableBuilder& builder,
+                                                    const LineString<double>& coordinates,
+                                                    const gfx::PolylineGeneratorOptions& options);
+
+    void setupForWideVectors(gfx::Context&, gfx::DrawableBuilder&);
 
     bool checkAndSetMode(Mode);
 
@@ -60,7 +78,8 @@ public:
     bool setMode(Mode value) { return mode == value; };
 
     std::size_t vertexCount() const {
-        return std::max(rawVerticesCount, std::max(vertices.elements(), polylineVertices.elements()));
+        return std::max(
+            {rawVerticesCount, vertices.elements(), polylineVertices.elements(), wideVectorInstanceData.elements()});
     }
 
     void clear() {

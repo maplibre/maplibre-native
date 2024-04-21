@@ -43,6 +43,10 @@ inputs:
   testSpecArn:
     description: "ARN of test spec"
     required: false
+outputs:
+  runArn:
+    description: ARN of run
+    value: ${{ steps.schedule_run.outputs.runArn }}
 runs:
   using: "composite"
   steps:
@@ -107,6 +111,7 @@ runs:
           done
 
       - name: Schedule test run
+        id: schedule_run
         shell: bash
         run: |
           arn="$(aws devicefarm schedule-run \
@@ -117,6 +122,8 @@ runs:
             --test type=${{ inputs.testType }},testPackageArn=${{ env.test_package_arn }}${{ inputs.testFilter && ',filter=' }}${{ inputs.testFilter }}${{ inputs.testSpecArn && ',testSpecArn=' }}${{ inputs.testSpecArn }} \
             ${{ inputs.externalData && '--configuration extraDataPackageArn=' }}${{ inputs.externalData }} \
             --output text --query "run.arn")"
+          
+          echo "runArn=$arn" >> "$GITHUB_OUTPUT"
           
           # wait until result is not PENDING
           # https://awscli.amazonaws.com/v2/documentation/api/latest/reference/devicefarm/get-run.html#output

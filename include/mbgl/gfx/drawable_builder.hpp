@@ -160,6 +160,13 @@ public:
     /// A set of attribute values to be added for each vertex
     void setVertexAttributes(VertexAttributeArrayPtr attrs) { vertexAttrs = std::move(attrs); }
 
+    /// Get the instance attributes that override default values in the shader program
+    VertexAttributeArrayPtr& getInstanceAttributes() { return instanceAttrs; }
+    const VertexAttributeArrayPtr& getInstanceAttributes() const { return instanceAttrs; }
+
+    /// A set of attribute values to be added for each instance
+    void setInstanceAttributes(VertexAttributeArrayPtr attrs) { instanceAttrs = std::move(attrs); }
+
     /// Add some vertex elements, returns the index of the first one added
     std::size_t addVertices(const std::vector<std::array<int16_t, 2>>& vertices,
                             std::size_t vertexOffset,
@@ -200,6 +207,12 @@ public:
     /// Add a polyline. If the last point equals the first it will be closed, otherwise open
     void addPolyline(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions&);
 
+    /// Add a polyline in Tile coordinates, using wide vectors.
+    void addWideVectorPolylineLocal(const GeometryCoordinates& coordinates, const gfx::PolylineGeneratorOptions&);
+
+    /// Add a polyline in geographic coordinates, using wide vectors.
+    void addWideVectorPolylineGlobal(const LineString<double>& coordinates, const gfx::PolylineGeneratorOptions&);
+
     /// return the curent vertex count
     std::size_t curVertexCount() const;
 
@@ -232,6 +245,8 @@ protected:
     gfx::Drawable::Textures textures;
     std::vector<DrawableTweakerPtr> tweakers;
     gfx::VertexAttributeArrayPtr vertexAttrs;
+    gfx::VertexAttributeArrayPtr instanceAttrs;
+    std::optional<mbgl::Point<double>> origin;
 
     class Impl;
     std::unique_ptr<Impl> impl;

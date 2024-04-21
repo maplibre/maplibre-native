@@ -14,69 +14,27 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 6> attributes;
     static const std::array<UniformBlockInfo, 4> uniforms;
+    static const std::array<AttributeInfo, 6> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
-struct alignas(16) FillExtrusionDrawableTilePropsUBO {
-    /*  0 */ float4 pattern_from;
-    /* 16 */ float4 pattern_to;
-    /* 32 */
-};
-
-struct alignas(16) FillExtrusionInterpolateUBO {
-    /*  0 */ float base_t;
-    /*  4 */ float height_t;
-    /*  8 */ float color_t;
-    /* 12 */ float pattern_from_t;
-    /* 16 */ float pattern_to_t;
-    /* 20 */ float pad1, pad2, pad3;
-    /* 32 */
-};
-static_assert(sizeof(FillExtrusionInterpolateUBO) == 2 * 16, "unexpected padding");
-
-struct alignas(16) FillExtrusionDrawableUBO {
-    /*   0 */ float4x4 matrix;
-    /*  64 */ float4 scale;
-    /*  80 */ float2 texsize;
-    /*  88 */ float2 pixel_coord_upper;
-    /*  96 */ float2 pixel_coord_lower;
-    /* 104 */ float height_factor;
-    /* 108 */ float pad;
-    /* 112 */
-};
-static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16, "unexpected padding");
-
-struct alignas(16) FillExtrusionDrawablePropsUBO {
-    /*  0 */ float4 color;
-    /* 16 */ float4 light_color_pad;
-    /* 32 */ float4 light_position_base;
-    /* 48 */ float height;
-    /* 52 */ float light_intensity;
-    /* 56 */ float vertical_gradient;
-    /* 60 */ float opacity;
-    /* 64 */ float fade;
-    /* 68 */ float pad2, pad3, pad4;
-    /* 80 */
-};
-static_assert(sizeof(FillExtrusionDrawablePropsUBO) == 5 * 16, "unexpected padding");
-
 struct VertexStage {
-    short2 pos [[attribute(0)]];
-    short4 normal_ed [[attribute(1)]];
+    short2 pos [[attribute(4)]];
+    short4 normal_ed [[attribute(5)]];
 
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(2)]];
+    float base [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(3)]];
+    float height [[attribute(7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(4)]];
+    ushort4 pattern_from [[attribute(8)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(5)]];
+    ushort4 pattern_to [[attribute(9)]];
 #endif
 };
 
@@ -100,10 +58,10 @@ struct FragmentOutput {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const FillExtrusionDrawableUBO& fill [[buffer(6)]],
-                                device const FillExtrusionDrawablePropsUBO& props [[buffer(7)]],
-                                device const FillExtrusionDrawableTilePropsUBO& tileProps [[buffer(8)]],
-                                device const FillExtrusionInterpolateUBO& interp [[buffer(9)]]) {
+                                device const FillExtrusionDrawableUBO& fill [[buffer(0)]],
+                                device const FillExtrusionPropsUBO& props [[buffer(1)]],
+                                device const FillExtrusionTilePropsUBO& tileProps [[buffer(2)]],
+                                device const FillExtrusionInterpolateUBO& interp [[buffer(3)]]) {
 
 #if defined(HAS_UNIFORM_u_base)
     const auto base   = props.light_position_base.w;
@@ -191,9 +149,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
-                                    device const FillExtrusionDrawableUBO& fill [[buffer(6)]],
-                                    device const FillExtrusionDrawablePropsUBO& props [[buffer(7)]],
-                                    device const FillExtrusionDrawableTilePropsUBO& tileProps [[buffer(8)]],
+                                    device const FillExtrusionDrawableUBO& fill [[buffer(0)]],
+                                    device const FillExtrusionPropsUBO& props [[buffer(1)]],
+                                    device const FillExtrusionTilePropsUBO& tileProps [[buffer(2)]],
                                     texture2d<float, access::sample> image0 [[texture(0)]],
                                     sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)

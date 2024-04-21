@@ -25,7 +25,7 @@ void Length::eachChild(const std::function<void(const Expression&)>& visit) cons
     visit(*input);
 }
 
-bool Length::operator==(const Expression& e) const {
+bool Length::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Length) {
         auto eq = static_cast<const Length*>(&e);
         return *eq->input == *input;

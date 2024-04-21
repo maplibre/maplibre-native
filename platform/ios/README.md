@@ -77,7 +77,9 @@ cd maplibre-native
 
 ### Bazel
 
-[Bazel](https://bazel.build/) together with [rules_xcodeproj](https://github.com/MobileNativeFoundation/rules_xcodeproj) is the preferred build system. Please [share your experiences](https://github.com/maplibre/maplibre-native/discussions/1145).
+[Bazel](https://bazel.build/) can be used to build the project.
+
+You can generate an Xcode project thanks to [rules_xcodeproj](https://github.com/MobileNativeFoundation/rules_xcodeproj) intergration. 
 
 You need to install bazelisk, which is a wrapper around Bazel which ensures that the version specified in `.bazelversion` is used.
 
@@ -110,7 +112,7 @@ _These instructions are for XCode 14.3.1_
 
 
 ```
-bazel run //platform/ios:xcodeproj
+bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
 xed platform/ios/MapLibre.xcodeproj
 ```
 
@@ -133,6 +135,8 @@ It is also possible to build and run the test application in a simulator from th
 ```
 bazel run //platform/ios:App
 ```
+
+If you want to build your own XCFramework, see the 'Build XCFramework' step in the [iOS CI workflow](../../.github/workflows/ios-ci.yml).
 
 ### Render Tests
 

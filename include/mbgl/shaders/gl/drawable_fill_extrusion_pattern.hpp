@@ -15,7 +15,29 @@ out vec2 v_pos_a;
 out vec2 v_pos_b;
 out vec4 v_lighting;
 
-layout (std140) uniform FillExtrusionDrawableTilePropsUBO {
+layout (std140) uniform FillExtrusionDrawableUBO {
+    highp mat4 u_matrix;
+    highp vec4 u_scale;
+    highp vec2 u_texsize;
+    highp vec2 u_pixel_coord_upper;
+    highp vec2 u_pixel_coord_lower;
+    highp float u_height_factor;
+    highp float drawable_pad1;
+};
+layout (std140) uniform FillExtrusionPropsUBO {
+    highp vec4 u_color;
+    highp vec3 u_lightcolor;
+    highp float props_pad1;
+    highp vec3 u_lightpos;
+    highp float u_base;
+    highp float u_height;
+    highp float u_lightintensity;
+    highp float u_vertical_gradient;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float props_pad2, props_pad3, props_pad4;
+};
+layout (std140) uniform FillExtrusionTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
 };
@@ -25,29 +47,7 @@ layout (std140) uniform FillExtrusionInterpolateUBO {
     highp float u_color_t;
     highp float u_pattern_from_t;
     highp float u_pattern_to_t;
-    highp float u_pad_interp1, u_pad_interp2, u_pad_interp3;
-};
-layout (std140) uniform FillExtrusionDrawableUBO {
-    highp mat4 u_matrix;
-    highp vec4 u_scale;
-    highp vec2 u_texsize;
-    highp vec2 u_pixel_coord_upper;
-    highp vec2 u_pixel_coord_lower;
-    highp float u_height_factor;
-    highp float u_pad_drawable;
-};
-layout (std140) uniform FillExtrusionDrawablePropsUBO {
-    highp vec4 u_color;
-    highp vec3 u_lightcolor;
-    highp float u_pad1;
-    highp vec3 u_lightpos;
-    highp float u_base;
-    highp float u_height;
-    highp float u_lightintensity;
-    highp float u_vertical_gradient;
-    highp float u_opacity;
-    highp float u_fade;
-    highp float u_pad_props2, u_pad_props3, u_pad_props4;
+    highp float interp_pad1, interp_pad2, interp_pad3;
 };
 
 #ifndef HAS_UNIFORM_u_base
@@ -140,7 +140,29 @@ mediump vec4 pattern_to = u_pattern_to;
 in vec2 v_pos_b;
 in vec4 v_lighting;
 
-layout (std140) uniform FillExtrusionDrawableTilePropsUBO {
+layout (std140) uniform FillExtrusionDrawableUBO {
+    highp mat4 u_matrix;
+    highp vec4 u_scale;
+    highp vec2 u_texsize;
+    highp vec2 u_pixel_coord_upper;
+    highp vec2 u_pixel_coord_lower;
+    highp float u_height_factor;
+    highp float drawable_pad1;
+};
+layout (std140) uniform FillExtrusionPropsUBO {
+    highp vec4 u_color;
+    highp vec3 u_lightcolor;
+    highp float props_pad1;
+    highp vec3 u_lightpos;
+    highp float u_base;
+    highp float u_height;
+    highp float u_lightintensity;
+    highp float u_vertical_gradient;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float props_pad2, props_pad3, props_pad4;
+};
+layout (std140) uniform FillExtrusionTilePropsUBO {
     highp vec4 u_pattern_from;
     highp vec4 u_pattern_to;
 };
@@ -150,29 +172,7 @@ layout (std140) uniform FillExtrusionInterpolateUBO {
     highp float u_color_t;
     highp float u_pattern_from_t;
     highp float u_pattern_to_t;
-    highp float u_pad_interp1, u_pad_interp2, u_pad_interp3;
-};
-layout (std140) uniform FillExtrusionDrawableUBO {
-    highp mat4 u_matrix;
-    highp vec4 u_scale;
-    highp vec2 u_texsize;
-    highp vec2 u_pixel_coord_upper;
-    highp vec2 u_pixel_coord_lower;
-    highp float u_height_factor;
-    highp float u_pad_drawable;
-};
-layout (std140) uniform FillExtrusionDrawablePropsUBO {
-    highp vec4 u_color;
-    highp vec3 u_lightcolor;
-    highp float u_pad1;
-    highp vec3 u_lightpos;
-    highp float u_base;
-    highp float u_height;
-    highp float u_lightintensity;
-    highp float u_vertical_gradient;
-    highp float u_opacity;
-    highp float u_fade;
-    highp float u_pad_props2, u_pad_props3, u_pad_props4;
+    highp float interp_pad1, interp_pad2, interp_pad3;
 };
 
 uniform sampler2D u_image;

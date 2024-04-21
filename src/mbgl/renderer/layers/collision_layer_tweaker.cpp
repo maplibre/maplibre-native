@@ -33,6 +33,8 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
+    propertiesUpdated = false;
+
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData() || !checkTweakDrawable(drawable)) {
             return;
@@ -62,8 +64,8 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
             /*.camera_to_center_distance*/ parameters.state.getCameraToCenterDistance(),
             /*.overscale_factor*/ static_cast<float>(drawable.getTileID()->overscaleFactor())};
 
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.createOrUpdate(idCollisionUBO, &drawableUBO, context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idCollisionUBO, &drawableUBO, context);
     });
 }
 

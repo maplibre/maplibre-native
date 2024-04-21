@@ -1,8 +1,8 @@
 import org.jetbrains.dokka.gradle.DokkaTask
 
 plugins {
-    id 'org.jmailen.kotlinter'
-    id 'org.jetbrains.dokka' version '1.7.20'
+    alias libs.plugins.kotlinter
+    alias libs.plugins.dokka
 }
 
 apply plugin: 'com.android.library'
@@ -158,7 +158,6 @@ configurations {
     all*.exclude group: 'commons-collections', module: 'commons-collections'
 }
 
-apply from: "${rootDir}/gradle/gradle-javadoc.gradle"
 apply from: "${rootDir}/gradle/gradle-checkstyle.gradle"
 apply from: "${rootDir}/gradle/gradle-dependencies-graph.gradle"
 apply from: "${rootDir}/gradle/gradle-update-vendor-modules.gradle"

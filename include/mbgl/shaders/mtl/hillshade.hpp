@@ -14,15 +14,16 @@ struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 2> attributes;
     static const std::array<UniformBlockInfo, 2> uniforms;
+    static const std::array<AttributeInfo, 2> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(0)]];
-    short2 texture_pos [[attribute(1)]];
+    short2 pos [[attribute(2)]];
+    short2 texture_pos [[attribute(3)]];
 };
 
 struct FragmentStage {
@@ -43,7 +44,7 @@ struct alignas(16) HillshadeEvaluatedPropsUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const HillshadeDrawableUBO& drawable [[buffer(2)]]) {
+                                device const HillshadeDrawableUBO& drawable [[buffer(0)]]) {
     
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
     float2 pos = float2(vertx.texture_pos) / 8192.0;
@@ -56,8 +57,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const HillshadeDrawableUBO& drawable [[buffer(2)]],
-                            device const HillshadeEvaluatedPropsUBO& props [[buffer(3)]],
+                            device const HillshadeDrawableUBO& drawable [[buffer(0)]],
+                            device const HillshadeEvaluatedPropsUBO& props [[buffer(1)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
