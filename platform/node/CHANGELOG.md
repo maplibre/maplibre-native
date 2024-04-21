@@ -1,7 +1,7 @@
 
 ## main
 
-## 5.4.0-pre.0
+## 5.4.0
 
 * [Note] This is a OpenGL-2 release. It does not include metal support.
 * Add support for [multi sprites](https://github.com/maplibre/maplibre-native/pull/1858). More information on this feature can be found in the [Style Spec Documentation](https://maplibre.org/maplibre-style-spec/sprite/#multiple-sprite-sources).
