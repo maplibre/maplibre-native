@@ -107,7 +107,7 @@ class CollisionGroupTest {
         container.add(collisionGroup)
 
         collisionGroup.symbols = listOf(
-            Symbol(LatLng(0.0, 0.0))
+            Symbol(LatLng(0.0, 0.0), text = Text("test", lineHeight = 2f))
         )
 
         assertEquals(1, collisionGroup.symbols.size)
@@ -116,6 +116,7 @@ class CollisionGroupTest {
 
         assertTrue(collisionGroup.manager is SymbolManager)
         assertEquals(1, (collisionGroup.manager as SymbolManager).annotations.size)
+        Mockito.verify(symbolLayer).setProperties(PropertyFactory.textLineHeight(2f))
     }
 
     @Test
