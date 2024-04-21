@@ -152,8 +152,9 @@ abstract class AnnotationManager<L : Layer, T : KAnnotation<*>> @UiThread intern
      */
     @UiThread
     fun deleteAll() {
-        annotations.forEach {
-            draggableAnnotationController.onAnnotationDeleted(it.value)
+        annotations.values.forEach {
+            draggableAnnotationController.onAnnotationDeleted(it)
+            it.detachFromManager()
         }
         annotations.clear()
         updateSource()

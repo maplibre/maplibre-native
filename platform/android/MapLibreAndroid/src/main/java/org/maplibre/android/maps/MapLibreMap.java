@@ -20,6 +20,8 @@ import com.mapbox.android.gestures.MoveGestureDetector;
 import com.mapbox.android.gestures.RotateGestureDetector;
 import com.mapbox.android.gestures.ShoveGestureDetector;
 import com.mapbox.android.gestures.StandardScaleGestureDetector;
+
+import org.maplibre.android.annotations.CollisionGroup;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Geometry;
 import org.maplibre.android.MapStrictMode;
@@ -1054,6 +1056,10 @@ public final class MapLibreMap {
     }
   }
 
+  public void addCollisionGroup(@NonNull CollisionGroup collisionGroup) {
+    annotationContainer.add(collisionGroup);
+  }
+
   /**
    * Forces redraw of annotations. Annotations are automatically redrawn if any of their properties
    * are changed, or if a new map style is applied.
@@ -1088,6 +1094,10 @@ public final class MapLibreMap {
     for (KAnnotation annotation : annotations) {
       annotationContainer.remove(annotation);
     }
+  }
+
+  public void removeCollisionGroup(@NonNull CollisionGroup collisionGroup) {
+    annotationContainer.remove(collisionGroup);
   }
 
   /**
