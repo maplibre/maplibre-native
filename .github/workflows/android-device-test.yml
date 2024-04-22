@@ -138,7 +138,7 @@ jobs:
           testSpecArn: ${{ matrix.test.testSpecArn }}
 
       - name: Upload benchmark results to S3
-        if: env.run_device_test == 'true' && matrix.test.name == 'Android Benchmark'
+        if: always() && env.run_device_test == 'true' && matrix.test.name == 'Android Benchmark'
         run: |
           npm install --ignore-scripts
           node scripts/aws-device-farm/download-benchmark-results.mjs ${{ steps.aws_device_farm_run.outputs.runArn }}
