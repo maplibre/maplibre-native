@@ -82,19 +82,12 @@ BufferResource Context::createBuffer(
 // `NS::Object::sendMessage`, and the alignment rules are different.  We assume that, because
 // `NS::Object` does not use virtual methods and only serves as a way for C++ code to store
 // and pass ObjC `id`s to `objc_msgSend`, this won't cause any real problems.
-#if defined(__clang__)
-#if __has_feature(undefined_behavior_sanitizer)
-#pragma clang diagnostic ignored "-Wunknown-sanitizers"
-__attribute__((no_sanitize("misaligned-pointer-use")))
-#endif
-#endif
-UniqueShaderProgram
-Context::createProgram(std::string name,
-                       const std::string_view source,
-                       const std::string_view vertexName,
-                       const std::string_view fragmentName,
-                       const ProgramParameters& programParameters,
-                       const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
+UniqueShaderProgram Context::createProgram(std::string name,
+                                           const std::string_view source,
+                                           const std::string_view vertexName,
+                                           const std::string_view fragmentName,
+                                           const ProgramParameters& programParameters,
+                                           const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
     const auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
     // No NSMutableDictionary?
