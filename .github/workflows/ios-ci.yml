@@ -224,7 +224,8 @@ jobs:
       - name: Build XCFramework
         if: env.make_release
         run: |
-          bazel build --compilation_mode=opt --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
+          bazel build --compilation_mode=opt --features=dead_strip --objc_enable_binary_stripping \
+            --apple_generate_dsym --output_groups=+dsyms --//:renderer=metal //platform/ios:MapLibre.dynamic --embed_label=maplibre_ios_"$(cat VERSION)"
           echo xcframework="$(bazel info execution_root)"/"$(bazel cquery --output=files --compilation_mode=opt --//:renderer=metal //platform/ios:MapLibre.dynamic)" >> "$GITHUB_ENV"
           
       - name: Create .zip with debug symbols
@@ -287,7 +288,7 @@ jobs:
             MapLibre.dynamic.xcframework.zip
             ${{ env.debug_symbols_ios }}
           tag_name: ios-v${{ env.version }}
-          prerelease: ${{ !github.event.inputs.release }}
+          prerelease: ${{ github.event.inputs.release == 'pre' }}
           body_path: platform/ios/changelog_for_version.md
           fail_on_unmatched_files: true
 
