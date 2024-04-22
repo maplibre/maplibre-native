@@ -37,7 +37,7 @@ struct alignas(16) RasterDrawableUBO {
 };
 
 struct alignas(16) RasterEvaluatedPropsUBO {
-    float3 spin_weights;
+    float4 spin_weights;
     float2 tl_parent;
     float scale_parent;
     float buffer_scale;
@@ -47,9 +47,7 @@ struct alignas(16) RasterEvaluatedPropsUBO {
     float brightness_high;
     float saturation_factor;
     float contrast_factor;
-    bool overdrawInspector;
-    uint8_t pad1, pad2, pad3;
-    float pad4;
+    float pad1, pad2;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],

@@ -38,17 +38,18 @@ struct FragmentStage {
 struct alignas(16) CollisionBoxUBO {
     float4x4 matrix;
     float2 extrude_scale;
-    float camera_to_center_distance;
+    float overscale_factor;
     float pad1;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
                                 device const CollisionBoxUBO& drawable [[buffer(1)]]) {
 
     float4 projectedPoint = drawable.matrix * float4(float2(vertx.anchor_pos), 0, 1);
     float camera_to_anchor_distance = projectedPoint.w;
     float collision_perspective_ratio = clamp(
-        0.5 + 0.5 * (drawable.camera_to_center_distance / camera_to_anchor_distance),
+        0.5 + 0.5 * (paintParams.camera_to_center_distance / camera_to_anchor_distance),
         0.0, // Prevents oversized near-field boxes in pitched/overzoomed tiles
         4.0);
 

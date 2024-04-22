@@ -48,7 +48,6 @@ static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
 
 enum {
     idCircleDrawableUBO = globalUBOCount,
-    idCirclePaintParamsUBO,
     idCircleEvaluatedPropsUBO,
     idCircleInterpolateUBO,
     circleUBOCount

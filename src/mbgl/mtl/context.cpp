@@ -54,6 +54,10 @@ Context::~Context() noexcept {
         clipMaskPipelineState.reset();
         clipMaskUniformsBuffer.reset();
         stencilStateRenderable = nullptr;
+        
+        for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
+            globalUniformBuffers.set(i, nullptr);
+        }
 
 #if !defined(NDEBUG)
         Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
@@ -605,6 +609,18 @@ MTLDepthStencilStatePtr Context::makeDepthStencilState(const gfx::DepthMode& dep
     }
 
     return NS::TransferPtr(device->newDepthStencilState(depthStencilDescriptor.get()));
+}
+
+void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
+    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
+        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
+        if (!globalUniformBuffer) continue;
+        const auto& buffer = static_cast<UniformBuffer&>(*globalUniformBuffer.get());
+        const auto& resource = buffer.getBufferResource();
+        auto& mtlRenderPass = static_cast<RenderPass&>(renderPass);
+        mtlRenderPass.bindVertex(resource, 0, id);
+        mtlRenderPass.bindFragment(resource, 0, id);
+    }
 }
 
 } // namespace mtl

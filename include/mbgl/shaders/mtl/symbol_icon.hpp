@@ -14,21 +14,21 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
 struct VertexStage {
-    float4 pos_offset [[attribute(6)]];
-    float4 data [[attribute(7)]];
-    float4 pixeloffset [[attribute(8)]];
-    float3 projected_pos [[attribute(9)]];
-    float fade_opacity [[attribute(10)]];
+    float4 pos_offset [[attribute(5)]];
+    float4 data [[attribute(6)]];
+    float4 pixeloffset [[attribute(7)]];
+    float3 projected_pos [[attribute(8)]];
+    float fade_opacity [[attribute(9)]];
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(11)]];
+    float opacity [[attribute(10)]];
 #endif
 };
 
@@ -46,11 +46,11 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const SymbolDynamicUBO& dynamic [[buffer(1)]],
-                                device const SymbolDrawableUBO& drawable [[buffer(2)]],
-                                device const SymbolTilePropsUBO& tileprops [[buffer(3)]],
-                                device const SymbolInterpolateUBO& interp [[buffer(4)]],
-                                device const SymbolEvaluatedPropsUBO& paint [[buffer(5)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
+                                device const SymbolDrawableUBO& drawable [[buffer(1)]],
+                                device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
+                                device const SymbolInterpolateUBO& interp [[buffer(3)]],
+                                device const SymbolEvaluatedPropsUBO& paint [[buffer(4)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -77,8 +77,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     const float distance_ratio = tileprops.pitch_with_map ?
-        camera_to_anchor_distance / dynamic.camera_to_center_distance :
-        dynamic.camera_to_center_distance / camera_to_anchor_distance;
+        camera_to_anchor_distance / paintParams.camera_to_center_distance :
+        paintParams.camera_to_center_distance / camera_to_anchor_distance;
     const float perspective_ratio = clamp(
             0.5 + 0.5 * distance_ratio,
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
@@ -95,7 +95,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
-        symbol_rotation = atan2((b.y - a.y) / dynamic.aspect_ratio, b.x - a.x);
+        symbol_rotation = atan2((b.y - a.y) / paintParams.aspect_ratio, b.x - a.x);
     }
 
     const float angle_sin = sin(segment_angle + symbol_rotation);
@@ -108,7 +108,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
 
     const float2 raw_fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = raw_fade_opacity[1] > 0.5 ? dynamic.fade_change : -dynamic.fade_change;
+    const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
     const float fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
 
     return {
@@ -123,10 +123,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolDynamicUBO& dynamic [[buffer(1)]],
-                            device const SymbolDrawableUBO& drawable [[buffer(2)]],
-                            device const SymbolTilePropsUBO& tileprops [[buffer(3)]],
-                            device const SymbolEvaluatedPropsUBO& props [[buffer(5)]],
+                            device const SymbolDrawableUBO& drawable [[buffer(1)]],
+                            device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
+                            device const SymbolEvaluatedPropsUBO& props [[buffer(4)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)

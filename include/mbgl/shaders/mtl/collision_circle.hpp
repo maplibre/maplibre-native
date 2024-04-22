@@ -40,17 +40,18 @@ struct FragmentStage {
 struct alignas(16) CollisionCircleUBO {
     float4x4 matrix;
     float2 extrude_scale;
-    float camera_to_center_distance;
     float overscale_factor;
+    float pad1;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
                                 device const CollisionCircleUBO& drawable [[buffer(1)]]) {
 
     float4 projectedPoint = drawable.matrix * float4(float2(vertx.anchor_pos), 0, 1);
     float camera_to_anchor_distance = projectedPoint.w;
     float collision_perspective_ratio = clamp(
-        0.5 + 0.5 * (drawable.camera_to_center_distance / camera_to_anchor_distance),
+        0.5 + 0.5 * (paintParams.camera_to_center_distance / camera_to_anchor_distance),
         0.0, // Prevents oversized near-field circles in pitched/overzoomed tiles
         4.0);
 
@@ -64,7 +65,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float radius = abs(float(vertx.extrude.y)); // We don't pitch the circles, so both units of the extrusion vector are equal in magnitude to the radius
 
     float2 extrude = float2(vertx.extrude) * padding_factor;
-    float2 extrude_scale = drawable.extrude_scale * drawable.camera_to_center_distance * collision_perspective_ratio;
+    float2 extrude_scale = drawable.extrude_scale * paintParams.camera_to_center_distance * collision_perspective_ratio;
 
     return {
         .position       = position,

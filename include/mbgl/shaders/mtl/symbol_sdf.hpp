@@ -14,33 +14,33 @@ struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<UniformBlockInfo, 4> uniforms;
     static const std::array<AttributeInfo, 10> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
 struct VertexStage {
-    float4 pos_offset [[attribute(6)]];
-    float4 data [[attribute(7)]];
-    float4 pixeloffset [[attribute(8)]];
-    float3 projected_pos [[attribute(9)]];
-    float fade_opacity [[attribute(10)]];
+    float4 pos_offset [[attribute(5)]];
+    float4 data [[attribute(6)]];
+    float4 pixeloffset [[attribute(7)]];
+    float3 projected_pos [[attribute(8)]];
+    float fade_opacity [[attribute(9)]];
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-    float4 fill_color [[attribute(11)]];
+    float4 fill_color [[attribute(10)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    float4 halo_color [[attribute(12)]];
+    float4 halo_color [[attribute(11)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(13)]];
+    float opacity [[attribute(12)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    float halo_width [[attribute(14)]];
+    float halo_width [[attribute(13)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    float halo_blur [[attribute(15)]];
+    float halo_blur [[attribute(14)]];
 #endif
 };
 
@@ -71,11 +71,11 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const SymbolDynamicUBO& dynamic [[buffer(1)]],
-                                device const SymbolDrawableUBO& drawable [[buffer(2)]],
-                                device const SymbolTilePropsUBO& tileprops [[buffer(3)]],
-                                device const SymbolInterpolateUBO& interp [[buffer(4)]],
-                                device const SymbolEvaluatedPropsUBO& props [[buffer(5)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
+                                device const SymbolDrawableUBO& drawable [[buffer(1)]],
+                                device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
+                                device const SymbolInterpolateUBO& interp [[buffer(3)]],
+                                device const SymbolEvaluatedPropsUBO& props [[buffer(4)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -106,8 +106,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // which makes labels in the distance larger relative to the features around
     // them. We counteract part of that effect by dividing by the perspective ratio.
     const float distance_ratio = tileprops.pitch_with_map ?
-        camera_to_anchor_distance / dynamic.camera_to_center_distance :
-        dynamic.camera_to_center_distance / camera_to_anchor_distance;
+        camera_to_anchor_distance / paintParams.camera_to_center_distance :
+        paintParams.camera_to_center_distance / camera_to_anchor_distance;
     const float perspective_ratio = clamp(
         0.5 + 0.5 * distance_ratio,
         0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
@@ -127,7 +127,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
 
-        symbol_rotation = atan2((b.y - a.y) / dynamic.aspect_ratio, b.x - a.x);
+        symbol_rotation = atan2((b.y - a.y) / paintParams.aspect_ratio, b.x - a.x);
     }
 
     const float angle_sin = sin(segment_angle + symbol_rotation);
@@ -138,7 +138,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     const float4 position = drawable.coord_matrix * float4(pos0, 0.0, 1.0);
     const float2 fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = (fade_opacity[1] > 0.5) ? dynamic.fade_change : -dynamic.fade_change;
+    const float fade_change = (fade_opacity[1] > 0.5) ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
 
     return {
         .position     = position,
@@ -165,10 +165,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolDynamicUBO& dynamic [[buffer(1)]],
-                            device const SymbolDrawableUBO& drawable [[buffer(2)]],
-                            device const SymbolTilePropsUBO& tileprops [[buffer(3)]],
-                            device const SymbolEvaluatedPropsUBO& props [[buffer(5)]],
+                            device const SymbolDrawableUBO& drawable [[buffer(1)]],
+                            device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
+                            device const SymbolEvaluatedPropsUBO& props [[buffer(4)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)

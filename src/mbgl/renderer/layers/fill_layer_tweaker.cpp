@@ -46,8 +46,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
             /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
             /* .fade = */ crossfade.t,
-            /* .width = */ 1.f,
-            0,
+            /* .from_scale = */ crossfade.fromScale,
+            /* .to_scale = */ crossfade.toScale,
         };
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
@@ -58,7 +58,6 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     const auto& translation = evaluated.get<FillTranslate>();
     const auto anchor = evaluated.get<FillTranslateAnchor>();
 
-    const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
     const auto intZoom = parameters.state.getIntegerZoom();
     const auto pixelRatio = parameters.pixelRatio;
 
@@ -92,27 +91,26 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         switch (static_cast<RenderFillLayer::FillVariant>(drawable.getType())) {
             case RenderFillLayer::FillVariant::Fill: {
-                const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
+                const FillDrawableUBO drawableUBO = {
+                    /*.matrix=*/util::cast<float>(matrix)
+                };
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
             case RenderFillLayer::FillVariant::FillOutline: {
                 const FillOutlineDrawableUBO drawableUBO = {
-                    /*.matrix=*/util::cast<float>(matrix),
-                    /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
-                    /* pad1 */ 0,
-                    /* pad2 */ 0};
+                    /*.matrix=*/util::cast<float>(matrix)
+                };
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
             case RenderFillLayer::FillVariant::FillPattern: {
                 const FillPatternDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
-                    /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
                     /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
                     /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
                     /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                    0,
+                    /*.tile_ratio = */ tileRatio,
                     0,
                 };
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
@@ -121,11 +119,11 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             case RenderFillLayer::FillVariant::FillOutlinePattern: {
                 const FillOutlinePatternDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
-                    /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
-                    /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
                     /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
                     /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
                     /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
+                    /*.tile_ratio = */ tileRatio,
+                    0
                 };
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
@@ -133,9 +131,8 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             case RenderFillLayer::FillVariant::FillOutlineTriangulated: {
                 const FillOutlineTriangulatedDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
-                    /*.units_to_pixels=*/{1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
                     /*.ratio=*/1.0f / tileID.pixelsToTileUnits(1.0f, parameters.state.getZoom()),
-                    0};
+                    0, 0, 0};
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
