@@ -29,9 +29,3 @@ compileTestKotlin {
         jvmTarget = "17"
     }
 }
-
-jar {
-    manifest {
-        attributes("Lint-Registry-v2": "com.mapbox.mapboxsdk.lint.MapboxIssueRegistry")
-    }
-}
