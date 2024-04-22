@@ -8,15 +8,15 @@ namespace util {
 template <typename T>
 struct SuppressCopies {
     SuppressCopies() = default;
-    SuppressCopies(SuppressCopies const&) {}
+    SuppressCopies(SuppressCopies const&) noexcept {}
     SuppressCopies(SuppressCopies&& other)
-        : value(std::forward<T>(other.value)) {}
-    SuppressCopies& operator=(SuppressCopies o) {
+        : value(std::forward<T>(other.value)) noexcept {}
+    SuppressCopies& operator=(SuppressCopies o) noexcept {
         std::swap(value, o.value);
         return *this;
     }
-    operator T&() { return value; }
-    T& get() { return value; }
+    operator T&() noexcept { return value; }
+    T& get() noexcept { return value; }
 
 private:
     T value;

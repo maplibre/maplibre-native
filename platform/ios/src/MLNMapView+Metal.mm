@@ -79,7 +79,9 @@ public:
 
     void swap() override {
         id<CAMetalDrawable> currentDrawable = [mtlView currentDrawable];
-        [commandBuffer presentDrawable:currentDrawable];
+        if (currentDrawable) {
+            [commandBuffer presentDrawable:currentDrawable];
+        }
         [commandBuffer commit];
 
         // Un-comment for synchronous, which can help troubleshoot rendering problems,

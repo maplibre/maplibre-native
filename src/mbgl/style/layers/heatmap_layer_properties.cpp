@@ -25,7 +25,7 @@ unsigned long HeatmapLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 
-const HeatmapLayer::Impl& HeatmapLayerProperties::layerImpl() const {
+const HeatmapLayer::Impl& HeatmapLayerProperties::layerImpl() const noexcept {
     return static_cast<const HeatmapLayer::Impl&>(*baseImpl);
 }
 

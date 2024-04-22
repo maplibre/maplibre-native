@@ -10,14 +10,8 @@
 #include <cstring>
 #include <stdexcept>
 
-#if defined(__GNUC__)
-#define MBGL_UNUSED __attribute__((unused))
-#else
-#define MBGL_UNUSED
-#endif
-
 // Check zlib library version.
-const static bool zlibVersionCheck MBGL_UNUSED = []() {
+[[maybe_unused]] const static bool zlibVersionCheck = []() {
     const char *const version = zlibVersion();
     if (version[0] != ZLIB_VERSION[0]) {
         char message[96];
@@ -107,7 +101,7 @@ std::string decompress(const std::string &raw, int windowBits) {
     return result;
 }
 
-std::uint32_t crc32(const void *raw, size_t size) {
+std::uint32_t crc32(const void *raw, size_t size) noexcept {
     auto hash = ::crc32(0L, Z_NULL, 0);
     if (raw) {
         const auto *p = static_cast<const Bytef *>(raw);

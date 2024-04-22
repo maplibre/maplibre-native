@@ -8,17 +8,17 @@
 namespace mbgl {
 namespace shaders {
 
-struct AttributeInfo {
-    AttributeInfo(std::string_view name, std::size_t id);
-    std::string_view name;
-    std::size_t id;
-};
-
 struct UniformBlockInfo {
     UniformBlockInfo(std::string_view name, std::size_t id);
     std::string_view name;
     std::size_t id;
     std::size_t binding;
+};
+
+struct AttributeInfo {
+    AttributeInfo(std::string_view name, std::size_t id);
+    std::string_view name;
+    std::size_t id;
 };
 
 struct TextureInfo {
@@ -108,6 +108,13 @@ struct ShaderInfo<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::OpenGL>
 };
 
 template <>
+struct ShaderInfo<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::OpenGL> {
+    static const std::vector<AttributeInfo> attributes;
+    static const std::vector<UniformBlockInfo> uniformBlocks;
+    static const std::vector<TextureInfo> textures;
+};
+
+template <>
 struct ShaderInfo<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL> {
     static const std::vector<AttributeInfo> attributes;
     static const std::vector<UniformBlockInfo> uniformBlocks;
@@ -172,13 +179,6 @@ struct ShaderInfo<BuiltIn::LineSDFShader, gfx::Backend::Type::OpenGL> {
 
 template <>
 struct ShaderInfo<BuiltIn::LineShader, gfx::Backend::Type::OpenGL> {
-    static const std::vector<AttributeInfo> attributes;
-    static const std::vector<UniformBlockInfo> uniformBlocks;
-    static const std::vector<TextureInfo> textures;
-};
-
-template <>
-struct ShaderInfo<BuiltIn::LineBasicShader, gfx::Backend::Type::OpenGL> {
     static const std::vector<AttributeInfo> attributes;
     static const std::vector<UniformBlockInfo> uniformBlocks;
     static const std::vector<TextureInfo> textures;

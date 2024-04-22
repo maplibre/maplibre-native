@@ -9,6 +9,7 @@ on:
 jobs:
   android-device-test:
     strategy:
+      fail-fast: false
       max-parallel: 2
       matrix:
         test: [
@@ -22,8 +23,8 @@ jobs:
           },
           {
             artifactName: benchmarkAPKs,
-            testFile: "MapboxGLAndroidSDKTestApp-drawable-release-androidTest.apk",
-            appFile: "MapboxGLAndroidSDKTestApp-drawable-release.apk",
+            testFile: "MapLibreAndroidTestApp-drawable-release-androidTest.apk",
+            appFile: "MapLibreAndroidTestApp-drawable-release.apk",
             name: "Android Benchmark",
             testFilter: "org.maplibre.android.benchmark.Benchmark",
             # top devices, query with `aws list-device-pools --arn <project_arn>`
@@ -110,6 +111,7 @@ jobs:
           echo external_data_arn="$upload_arn" >> "$GITHUB_ENV"
 
       - uses: ./.github/actions/aws-device-farm-run
+        id: aws_device_farm_run
         if: env.run_device_test == 'true'
         with:
           name: ${{ matrix.test.name }}
@@ -126,6 +128,12 @@ jobs:
           AWS_DEVICE_FARM_DEVICE_POOL_ARN: ${{ matrix.test.devicePool }}
           externalData: ${{ env.external_data_arn }}
           testSpecArn: ${{ matrix.test.testSpecArn }}
+
+      - name: Upload benchmark results to S3
+        if: env.run_device_test == 'true' && matrix.test.name == 'Android Benchmark'
+        run: |
+          npm install --ignore-scripts
+          node scripts/aws-device-farm/download-benchmark-results.mjs ${{ steps.aws_device_farm_run.outputs.runArn }}
 
       - uses: LouisBrunner/checks-action@v2.0.0
         if: always() && (env.run_device_test == 'true' || matrix.test.name == 'Android Render Tests')

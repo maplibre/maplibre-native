@@ -27,7 +27,7 @@ unsigned long FillLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 
-const FillLayer::Impl& FillLayerProperties::layerImpl() const {
+const FillLayer::Impl& FillLayerProperties::layerImpl() const noexcept {
     return static_cast<const FillLayer::Impl&>(*baseImpl);
 }
 

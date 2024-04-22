@@ -19,14 +19,14 @@ public:
 
     static ParseResult parse(const mbgl::style::conversion::Convertible&, ParsingContext&);
 
-    void eachChild(const std::function<void(const Expression&)>&) const override {}
+    void eachChild(const std::function<void(const Expression&)>&) const noexcept override {}
 
-    bool operator==(const Expression& e) const override;
+    bool operator==(const Expression& e) const noexcept override;
 
     std::vector<std::optional<Value>> possibleOutputs() const override;
 
     mbgl::Value serialize() const override;
-    std::string getOperator() const override;
+    std::string getOperator() const override { return "within"; }
 
 private:
     GeoJSON geoJSONSource;

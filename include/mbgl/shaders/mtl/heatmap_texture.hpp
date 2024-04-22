@@ -14,14 +14,15 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 1> attributes;
     static const std::array<UniformBlockInfo, 1> uniforms;
+    static const std::array<AttributeInfo, 1> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
 
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(0)]];
+    short2 pos [[attribute(1)]];
 };
 
 struct FragmentStage {
@@ -29,7 +30,7 @@ struct FragmentStage {
     float2 pos;
 };
 
-struct alignas(16) HeatmapTextureDrawableUBO {
+struct alignas(16) HeatmapTexturePropsUBO {
     float4x4 matrix;
     float2 world;
     float opacity;
@@ -38,10 +39,10 @@ struct alignas(16) HeatmapTextureDrawableUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const HeatmapTextureDrawableUBO& drawable [[buffer(1)]]) {
+                                device const HeatmapTexturePropsUBO& props [[buffer(0)]]) {
 
     const float2 pos = float2(vertx.pos);
-    const float4 position = drawable.matrix * float4(pos * drawable.world, 0, 1);
+    const float4 position = props.matrix * float4(pos * props.world, 0, 1);
 
     return {
         .position    = position,
@@ -50,7 +51,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const HeatmapTextureDrawableUBO& drawable [[buffer(1)]],
+                            device const HeatmapTexturePropsUBO& props [[buffer(0)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             texture2d<float, access::sample> color_ramp [[texture(1)]],
                             sampler image_sampler [[sampler(0)]],
@@ -62,7 +63,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 
     float t = image.sample(image_sampler, in.pos).r;
     float4 color = color_ramp.sample(color_ramp_sampler, float2(t, 0.5));
-    return half4(color * drawable.opacity);
+    return half4(color * props.opacity);
 }
 )";
 };

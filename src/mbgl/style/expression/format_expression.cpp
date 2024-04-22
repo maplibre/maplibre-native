@@ -110,9 +110,9 @@ void FormatExpression::eachChild(const std::function<void(const Expression&)>& f
     }
 }
 
-bool FormatExpression::operator==(const Expression& e) const {
+bool FormatExpression::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::FormatExpression) {
-        auto rhs = static_cast<const FormatExpression*>(&e);
+        const auto* rhs = static_cast<const FormatExpression*>(&e);
         if (sections.size() != rhs->sections.size()) {
             return false;
         }

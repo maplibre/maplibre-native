@@ -14,18 +14,19 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 5> attributes;
     static const std::array<UniformBlockInfo, 1> uniforms;
+    static const std::array<AttributeInfo, 5> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(0)]];
-    short2 anchor_pos [[attribute(1)]];
-    short2 extrude [[attribute(2)]];
-    ushort2 placed [[attribute(3)]];
-    float2 shift [[attribute(4)]];
+    short2 pos [[attribute(1)]];
+    short2 anchor_pos [[attribute(2)]];
+    short2 extrude [[attribute(3)]];
+    ushort2 placed [[attribute(4)]];
+    float2 shift [[attribute(5)]];
 };
 
 struct FragmentStage {
@@ -42,7 +43,7 @@ struct alignas(16) CollisionBoxUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const CollisionBoxUBO& drawable [[buffer(5)]]) {
+                                device const CollisionBoxUBO& drawable [[buffer(0)]]) {
 
     float4 projectedPoint = drawable.matrix * float4(float2(vertx.anchor_pos), 0, 1);
     float camera_to_anchor_distance = projectedPoint.w;
@@ -65,7 +66,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const CollisionBoxUBO& drawable [[buffer(5)]]) {
+                            device const CollisionBoxUBO& drawable [[buffer(0)]]) {
 
     float alpha = 0.5;
 

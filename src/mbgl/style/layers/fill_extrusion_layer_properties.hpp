@@ -72,7 +72,7 @@ public:
 
     expression::Dependency getDependencies() const noexcept override;
 
-    const FillExtrusionLayer::Impl& layerImpl() const;
+    const FillExtrusionLayer::Impl& layerImpl() const noexcept;
     // Data members.
     CrossfadeParameters crossfade;
     FillExtrusionPaintProperties::PossiblyEvaluated evaluated;

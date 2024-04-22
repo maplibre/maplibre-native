@@ -22,7 +22,9 @@ namespace conversion {
 using namespace expression;
 using namespace expression::dsl;
 
-const static std::string tokenReservedChars = "{}";
+namespace {
+const std::string_view tokenReservedChars = "{}";
+}
 
 bool hasTokens(const std::string& source) {
     auto pos = source.begin();
@@ -31,8 +33,7 @@ bool hasTokens(const std::string& source) {
     while (pos != end) {
         auto brace = std::find(pos, end, '{');
         if (brace == end) return false;
-        for (brace++; brace != end && tokenReservedChars.find(*brace) == std::string::npos; brace++)
-            ;
+        for (brace++; brace != end && tokenReservedChars.find(*brace) == std::string::npos; brace++);
         if (brace != end && *brace == '}') {
             return true;
         }
@@ -65,8 +66,7 @@ std::unique_ptr<Expression> convertTokenStringToExpression(const std::string& so
         }
         pos = brace;
         if (pos != end) {
-            for (brace++; brace != end && tokenReservedChars.find(*brace) == std::string::npos; brace++)
-                ;
+            for (brace++; brace != end && tokenReservedChars.find(*brace) == std::string::npos; brace++);
             if (brace != end && *brace == '}') {
                 inputs.push_back(get(literal(std::string(pos + 1, brace))));
                 pos = brace + 1;
@@ -196,6 +196,8 @@ struct Converter<int64_t> {
     }
 };
 
+namespace {
+
 enum class FunctionType {
     Interval,
     Exponential,
@@ -204,17 +206,17 @@ enum class FunctionType {
     Invalid
 };
 
-static bool interpolatable(type::Type type) {
+bool interpolatable(type::Type type) noexcept {
     return type.match([&](const type::NumberType&) { return true; },
                       [&](const type::ColorType&) { return true; },
                       [&](const type::Array& array) { return array.N && array.itemType == type::Number; },
                       [&](const auto&) { return false; });
 }
 
-static std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,
-                                                                 const Convertible& value,
-                                                                 Error& error,
-                                                                 bool convertTokens = false) {
+std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,
+                                                          const Convertible& value,
+                                                          Error& error,
+                                                          bool convertTokens = false) {
     return type.match(
         [&](const type::NumberType&) -> std::optional<std::unique_ptr<Expression>> {
             auto result = convert<float>(value, error);
@@ -322,10 +324,10 @@ static std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type
         });
 }
 
-static std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const type::Type& type,
-                                                                                 const Convertible& value,
-                                                                                 Error& error,
-                                                                                 bool convertTokens) {
+std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops(const type::Type& type,
+                                                                          const Convertible& value,
+                                                                          Error& error,
+                                                                          bool convertTokens) {
     auto stopsValue = objectMember(value, "stops");
     if (!stopsValue) {
         error.message = "function value must specify stops";
@@ -373,7 +375,7 @@ static std::optional<std::map<double, std::unique_ptr<Expression>>> convertStops
     return {std::move(stops)};
 }
 
-static void omitFirstStop(std::map<double, std::unique_ptr<Expression>>& stops) {
+void omitFirstStop(std::map<double, std::unique_ptr<Expression>>& stops) {
     double min = std::numeric_limits<double>::max();
     for (auto& s : stops) {
         if (s.first < min) {
@@ -434,7 +436,7 @@ std::optional<std::map<T, std::unique_ptr<Expression>>> convertBranches(const ty
     return {std::move(stops)};
 }
 
-static std::optional<double> convertBase(const Convertible& value, Error& error) {
+std::optional<double> convertBase(const Convertible& value, Error& error) {
     auto baseValue = objectMember(value, "base");
 
     if (!baseValue) {
@@ -450,16 +452,16 @@ static std::optional<double> convertBase(const Convertible& value, Error& error)
     return *base;
 }
 
-static std::unique_ptr<Expression> step(const type::Type& type,
-                                        std::unique_ptr<Expression> input,
-                                        std::map<double, std::unique_ptr<Expression>> stops) {
-    return std::make_unique<Step>(type, std::move(input), std::move(stops));
+std::unique_ptr<Expression> step(type::Type type,
+                                 std::unique_ptr<Expression> input,
+                                 std::map<double, std::unique_ptr<Expression>> stops) {
+    return std::make_unique<Step>(std::move(type), std::move(input), std::move(stops));
 }
 
-static std::unique_ptr<Expression> interpolate(type::Type type,
-                                               Interpolator interpolator,
-                                               std::unique_ptr<Expression> input,
-                                               std::map<double, std::unique_ptr<Expression>> stops) {
+std::unique_ptr<Expression> interpolate(type::Type type,
+                                        Interpolator interpolator,
+                                        std::unique_ptr<Expression> input,
+                                        std::map<double, std::unique_ptr<Expression>> stops) {
     ParsingContext ctx;
     auto result = createInterpolate(std::move(type), std::move(interpolator), std::move(input), std::move(stops), ctx);
     if (!result) {
@@ -470,22 +472,23 @@ static std::unique_ptr<Expression> interpolate(type::Type type,
 }
 
 template <class T>
-std::unique_ptr<Expression> categorical(const type::Type& type,
+std::unique_ptr<Expression> categorical(type::Type type,
                                         const std::string& property,
                                         std::map<T, std::unique_ptr<Expression>> branches,
                                         std::unique_ptr<Expression> def) {
     std::unordered_map<T, std::shared_ptr<Expression>> convertedBranches;
+    convertedBranches.reserve(branches.size());
     for (auto& b : branches) {
         convertedBranches[b.first] = std::move(b.second);
     }
-    return std::make_unique<Match<T>>(type,
+    return std::make_unique<Match<T>>(std::move(type),
                                       get(literal(property)),
                                       std::move(convertedBranches),
                                       def ? std::move(def) : error("replaced with default"));
 }
 
 template <>
-std::unique_ptr<Expression> categorical<bool>(const type::Type& type,
+std::unique_ptr<Expression> categorical<bool>(type::Type type,
                                               const std::string& property,
                                               std::map<bool, std::unique_ptr<Expression>> branches,
                                               std::unique_ptr<Expression> def) {
@@ -498,28 +501,29 @@ std::unique_ptr<Expression> categorical<bool>(const type::Type& type,
                                                                  : std::move(it->second);
 
     std::vector<typename Case::Branch> convertedBranches;
+    convertedBranches.reserve(2);
     convertedBranches.emplace_back(eq(get(literal(property)), literal(Value(true))), std::move(trueCase));
     convertedBranches.emplace_back(eq(get(literal(property)), literal(Value(false))), std::move(falseCase));
 
     return std::make_unique<Case>(
-        type, std::move(convertedBranches), def ? std::move(def) : error("replaced with default"));
+        std::move(type), std::move(convertedBranches), def ? std::move(def) : error("replaced with default"));
 }
 
-static std::unique_ptr<Expression> numberOrDefault(const type::Type& type,
-                                                   std::unique_ptr<Expression> get,
-                                                   std::unique_ptr<Expression> expr,
-                                                   std::unique_ptr<Expression> def) {
+std::unique_ptr<Expression> numberOrDefault(type::Type type,
+                                            std::unique_ptr<Expression> get,
+                                            std::unique_ptr<Expression> expr,
+                                            std::unique_ptr<Expression> def) {
     if (!def) {
         return expr;
     }
 
     std::vector<Case::Branch> branches;
     branches.emplace_back(eq(compound("typeof", std::move(get)), literal("number")), std::move(expr));
-    return std::make_unique<Case>(type, std::move(branches), std::move(def));
+    return std::make_unique<Case>(std::move(type), std::move(branches), std::move(def));
 }
 
-static std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
-    const type::Type& type,
+std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
+    type::Type type,
     const Convertible& value,
     Error& error,
     const std::function<std::unique_ptr<Expression>(bool)>& makeInput,
@@ -531,11 +535,12 @@ static std::optional<std::unique_ptr<Expression>> convertIntervalFunction(
     }
     omitFirstStop(*stops);
 
-    return numberOrDefault(type, makeInput(false), step(type, makeInput(true), std::move(*stops)), std::move(def));
+    auto expr = step(type, makeInput(true), std::move(*stops));
+    return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
-static std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
-    const type::Type& type,
+std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
+    type::Type type,
     const Convertible& value,
     Error& error,
     const std::function<std::unique_ptr<Expression>(bool)>& makeInput,
@@ -550,17 +555,15 @@ static std::optional<std::unique_ptr<Expression>> convertExponentialFunction(
         return std::nullopt;
     }
 
-    return numberOrDefault(type,
-                           makeInput(false),
-                           interpolate(type, exponential(*base), makeInput(true), std::move(*stops)),
-                           std::move(def));
+    auto expr = interpolate(type, exponential(*base), makeInput(true), std::move(*stops));
+    return numberOrDefault(std::move(type), makeInput(false), std::move(expr), std::move(def));
 }
 
-static std::optional<std::unique_ptr<Expression>> convertCategoricalFunction(const type::Type& type,
-                                                                             const Convertible& value,
-                                                                             Error& err,
-                                                                             const std::string& property,
-                                                                             std::unique_ptr<Expression> def) {
+std::optional<std::unique_ptr<Expression>> convertCategoricalFunction(type::Type type,
+                                                                      const Convertible& value,
+                                                                      Error& err,
+                                                                      const std::string& property,
+                                                                      std::unique_ptr<Expression> def) {
     auto stopsValue = objectMember(value, "stops");
     if (!stopsValue) {
         err.message = "function value must specify stops";
@@ -594,7 +597,7 @@ static std::optional<std::unique_ptr<Expression>> convertCategoricalFunction(con
         if (!branches) {
             return std::nullopt;
         }
-        return categorical(type, property, std::move(*branches), std::move(def));
+        return categorical(std::move(type), property, std::move(*branches), std::move(def));
     }
 
     if (toNumber(arrayMember(first, 0))) {
@@ -602,7 +605,7 @@ static std::optional<std::unique_ptr<Expression>> convertCategoricalFunction(con
         if (!branches) {
             return std::nullopt;
         }
-        return categorical(type, property, std::move(*branches), std::move(def));
+        return categorical(std::move(type), property, std::move(*branches), std::move(def));
     }
 
     if (toString(arrayMember(first, 0))) {
@@ -610,7 +613,7 @@ static std::optional<std::unique_ptr<Expression>> convertCategoricalFunction(con
         if (!branches) {
             return std::nullopt;
         }
-        return categorical(type, property, std::move(*branches), std::move(def));
+        return categorical(std::move(type), property, std::move(*branches), std::move(def));
     }
 
     err.message = "stop domain value must be a number, string, or boolean";
@@ -692,11 +695,13 @@ std::optional<std::unique_ptr<Expression>> composite(type::Type type,
     }
 
     if (interpolatable(type)) {
-        return interpolate(type, linear(), zoom(), std::move(stops));
+        return interpolate(std::move(type), linear(), zoom(), std::move(stops));
     } else {
-        return step(type, zoom(), std::move(stops));
+        return step(std::move(type), zoom(), std::move(stops));
     }
 }
+
+} // namespace
 
 std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Type type,
                                                                        const Convertible& value,

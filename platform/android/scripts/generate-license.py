@@ -21,7 +21,7 @@ with open(path + "/LICENSE.md", 'w') as licenseFile:
     "NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY "
     "OF SUCH DAMAGE.")
     licenseFile.write("\n\n===========================================================================\n\n")
-    with open(path + "/MapboxGLAndroidSDK/build/reports/licenses/licenseReleaseReport.json", 'r') as dataFile:
+    with open(path + "/MapLibreAndroid/build/reports/licenses/licenseReleaseReport.json", 'r') as dataFile:
         data = json.load(dataFile)
 
         gradleLicensePlugin ="""

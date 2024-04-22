@@ -27,7 +27,7 @@ unsigned long LineLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 
-const LineLayer::Impl& LineLayerProperties::layerImpl() const {
+const LineLayer::Impl& LineLayerProperties::layerImpl() const noexcept {
     return static_cast<const LineLayer::Impl&>(*baseImpl);
 }
 

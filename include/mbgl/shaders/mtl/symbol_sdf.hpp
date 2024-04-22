@@ -14,32 +14,33 @@ struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 10> attributes;
     static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<AttributeInfo, 10> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
 struct VertexStage {
-    float4 pos_offset [[attribute(0)]];
-    float4 data [[attribute(1)]];
-    float4 pixeloffset [[attribute(2)]];
-    float3 projected_pos [[attribute(3)]];
-    float fade_opacity [[attribute(4)]];
+    float4 pos_offset [[attribute(5)]];
+    float4 data [[attribute(6)]];
+    float4 pixeloffset [[attribute(7)]];
+    float3 projected_pos [[attribute(8)]];
+    float fade_opacity [[attribute(9)]];
 
 #if !defined(HAS_UNIFORM_u_fill_color)
-    float4 fill_color [[attribute(5)]];
+    float4 fill_color [[attribute(10)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    float4 halo_color [[attribute(6)]];
+    float4 halo_color [[attribute(11)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(7)]];
+    float opacity [[attribute(12)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    float halo_width [[attribute(8)]];
+    float halo_width [[attribute(13)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    float halo_blur [[attribute(9)]];
+    float halo_blur [[attribute(14)]];
 #endif
 };
 
@@ -70,11 +71,11 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const SymbolDrawableUBO& drawable [[buffer(10)]],
-                                device const SymbolDynamicUBO& dynamic [[buffer(11)]],
-                                device const SymbolDrawablePaintUBO& paint [[buffer(12)]],
-                                device const SymbolDrawableTilePropsUBO& props [[buffer(13)]],
-                                device const SymbolDrawableInterpolateUBO& interp [[buffer(14)]]) {
+                                device const SymbolDynamicUBO& dynamic [[buffer(0)]],
+                                device const SymbolDrawableUBO& drawable [[buffer(1)]],
+                                device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
+                                device const SymbolInterpolateUBO& interp [[buffer(3)]],
+                                device const SymbolEvaluatedPropsUBO& props [[buffer(4)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -88,12 +89,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float segment_angle = -vertx.projected_pos[2];
 
     float size;
-    if (!props.is_size_zoom_constant && !props.is_size_feature_constant) {
-        size = mix(a_size_min, a_size[1], props.size_t) / 128.0;
-    } else if (props.is_size_zoom_constant && !props.is_size_feature_constant) {
+    if (!tileprops.is_size_zoom_constant && !tileprops.is_size_feature_constant) {
+        size = mix(a_size_min, a_size[1], tileprops.size_t) / 128.0;
+    } else if (tileprops.is_size_zoom_constant && !tileprops.is_size_feature_constant) {
         size = a_size_min / 128.0;
     } else {
-        size = props.size;
+        size = tileprops.size;
     }
 
     const float4 projectedPoint = drawable.matrix * float4(a_pos, 0, 1);
@@ -104,7 +105,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // If the label isn't pitched with the map, we do layout in viewport space,
     // which makes labels in the distance larger relative to the features around
     // them. We counteract part of that effect by dividing by the perspective ratio.
-    const float distance_ratio = props.pitch_with_map ?
+    const float distance_ratio = tileprops.pitch_with_map ?
         camera_to_anchor_distance / dynamic.camera_to_center_distance :
         dynamic.camera_to_center_distance / camera_to_anchor_distance;
     const float perspective_ratio = clamp(
@@ -114,7 +115,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     size *= perspective_ratio;
 
-    const float fontScale = props.is_text ? size / 24.0 : size;
+    const float fontScale = tileprops.is_text ? size / 24.0 : size;
 
     float symbol_rotation = 0.0;
     if (drawable.rotate_symbol) {
@@ -164,10 +165,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolDrawableUBO& drawable [[buffer(10)]],
-                            device const SymbolDynamicUBO& dynamic [[buffer(11)]],
-                            device const SymbolDrawablePaintUBO& paint [[buffer(12)]],
-                            device const SymbolDrawableTilePropsUBO& props [[buffer(13)]],
+                            device const SymbolDynamicUBO& dynamic [[buffer(0)]],
+                            device const SymbolDrawableUBO& drawable [[buffer(1)]],
+                            device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
+                            device const SymbolEvaluatedPropsUBO& props [[buffer(4)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
@@ -175,36 +176,36 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #endif
 
 #if defined(HAS_UNIFORM_u_fill_color)
-    const half4 fill_color = half4(paint.fill_color);
+    const half4 fill_color = half4(tileprops.is_text ? props.text_fill_color : props.icon_fill_color);
 #else
     const half4 fill_color = in.fill_color;
 #endif
 #if defined(HAS_UNIFORM_u_halo_color)
-    const half4 halo_color = half4(paint.halo_color);
+    const half4 halo_color = half4(tileprops.is_text ? props.text_halo_color : props.icon_halo_color);
 #else
     const half4 halo_color = in.halo_color;
 #endif
 #if defined(HAS_UNIFORM_u_opacity)
-    const float opacity = paint.opacity;
+    const float opacity = tileprops.is_text ? props.text_opacity : props.icon_opacity;
 #else
     const float opacity = in.opacity;
 #endif
 #if defined(HAS_UNIFORM_u_halo_width)
-    const float halo_width = paint.halo_width;
+    const float halo_width = tileprops.is_text ? props.text_halo_width : props.icon_halo_width;
 #else
     const float halo_width = in.halo_width;
 #endif
 #if defined(HAS_UNIFORM_u_halo_blur)
-    const float halo_blur = paint.halo_blur;
+    const float halo_blur = tileprops.is_text ? props.text_halo_blur : props.icon_halo_blur;
 #else
     const float halo_blur = in.halo_blur;
 #endif
 
     const float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
     const float fontGamma = in.fontScale * drawable.gamma_scale;
-    const half4 color = props.is_halo ? halo_color : fill_color;
-    const float gamma = ((props.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
-    const float buff = props.is_halo ? (6.0 - halo_width / in.fontScale) / SDF_PX : (256.0 - 64.0) / 256.0;
+    const half4 color = tileprops.is_halo ? halo_color : fill_color;
+    const float gamma = ((tileprops.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
+    const float buff = tileprops.is_halo ? (6.0 - halo_width / in.fontScale) / SDF_PX : (256.0 - 64.0) / 256.0;
     const float dist = image.sample(image_sampler, float2(in.tex)).a;
     const float gamma_scaled = gamma * in.gamma_scale;
     const float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);

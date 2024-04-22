@@ -1,0 +1,40 @@
+plugins {
+    alias libs.plugins.kotlinter
+}
+
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    compileOnly libs.lint
+    compileOnly libs.lintApi
+    compileOnly libs.lintChecks
+    compileOnly libs.supportAnnotations
+
+    testImplementation libs.junit
+    testImplementation libs.robolectric
+    testImplementation libs.lintTests
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+jar {
+    manifest {
+        attributes("Lint-Registry-v2": "com.mapbox.mapboxsdk.lint.MapboxIssueRegistry")
+    }
+}

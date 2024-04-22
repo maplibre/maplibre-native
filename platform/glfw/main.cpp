@@ -36,7 +36,7 @@ void quit_handler(int) {
 }
 
 int main(int argc, char* argv[]) {
-    args::ArgumentParser argumentParser("Mapbox GL GLFW example");
+    args::ArgumentParser argumentParser("MapLibre Native GLFW example");
     args::HelpFlag helpFlag(argumentParser, "help", "Display this help menu", {'h', "help"});
 
     args::Flag fullscreenFlag(argumentParser, "fullscreen", "Toggle fullscreen", {'f', "fullscreen"});
@@ -206,7 +206,7 @@ int main(int argc, char* argv[]) {
 
     // Load style
     if (style.empty()) {
-        const char* url = getenv("MAPBOX_STYLE_URL");
+        const char* url = getenv("MLN_STYLE_URL");
         if (url == nullptr) {
             mbgl::util::DefaultStyle newStyle = orderedStyles[0];
             style = newStyle.getUrl();

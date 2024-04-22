@@ -54,96 +54,82 @@ float4 unpack_mix_color(const float4 packedColors, const float t) {
                decode_color(float2(packedColors[2], packedColors[3])), t);
 }
 
+struct alignas(16) FillEvaluatedPropsUBO {
+    float4 color;
+    float4 outline_color;
+    float opacity;
+    float fade;
+    float width;
+    float pad1;
+};
+
+struct alignas(16) FillExtrusionDrawableUBO {
+    /*   0 */ float4x4 matrix;
+    /*  64 */ float4 scale;
+    /*  80 */ float2 texsize;
+    /*  88 */ float2 pixel_coord_upper;
+    /*  96 */ float2 pixel_coord_lower;
+    /* 104 */ float height_factor;
+    /* 108 */ float pad;
+    /* 112 */
+};
+static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16, "unexpected padding");
+
+struct alignas(16) FillExtrusionPropsUBO {
+    /*  0 */ float4 color;
+    /* 16 */ float4 light_color_pad;
+    /* 32 */ float4 light_position_base;
+    /* 48 */ float height;
+    /* 52 */ float light_intensity;
+    /* 56 */ float vertical_gradient;
+    /* 60 */ float opacity;
+    /* 64 */ float fade;
+    /* 68 */ float pad2, pad3, pad4;
+    /* 80 */
+};
+static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16, "unexpected padding");
+
+struct alignas(16) FillExtrusionTilePropsUBO {
+    /*  0 */ float4 pattern_from;
+    /* 16 */ float4 pattern_to;
+    /* 32 */
+};
+static_assert(sizeof(FillExtrusionTilePropsUBO) == 2 * 16, "unexpected padding");
+
+struct alignas(16) FillExtrusionInterpolateUBO {
+    /*  0 */ float base_t;
+    /*  4 */ float height_t;
+    /*  8 */ float color_t;
+    /* 12 */ float pattern_from_t;
+    /* 16 */ float pattern_to_t;
+    /* 20 */ float pad1, pad2, pad3;
+    /* 32 */
+};
+static_assert(sizeof(FillExtrusionInterpolateUBO) == 2 * 16, "unexpected padding");
+
 struct alignas(16) LineDynamicUBO {
     float2 units_to_pixels;
     float pad1, pad2;
 };
 
-struct alignas(16) LineUBO {
-    float4x4 matrix;
-    float ratio;
-    float pad1, pad2, pad3;
+struct alignas(16) LineEvaluatedPropsUBO {
+    float4 color;
+    float blur;
+    float opacity;
+    float gapwidth;
+    float offset;
+    float width;
+    float floorwidth;
+    float pad1, pad2;
 };
 
-struct alignas(16) LineBasicUBO {
-    float4x4 matrix;
-    float2 units_to_pixels;
-    float ratio;
+struct alignas(16) SymbolDynamicUBO {
+    float fade_change;
+    float camera_to_center_distance;
+    float aspect_ratio;
     float pad;
 };
-
-struct alignas(16) LineGradientUBO {
-    float4x4 matrix;
-    float ratio;
-    float pad1, pad2, pad3;
-};
-
-struct alignas(16) LinePropertiesUBO {
-    float4 color;
-    float blur;
-    float opacity;
-    float gapwidth;
-    float offset;
-    float width;
-    float pad1, pad2, pad3;
-};
-
-struct alignas(16) LineBasicPropertiesUBO {
-    float4 color;
-    float opacity;
-    float width;
-    float pad1, pad2;
-};
-
-struct alignas(16) LineGradientPropertiesUBO {
-    float blur;
-    float opacity;
-    float gapwidth;
-    float offset;
-    float width;
-    float pad1, pad2, pad3;
-};
-
-struct alignas(16) LineInterpolationUBO {
-    float color_t;
-    float blur_t;
-    float opacity_t;
-    float gapwidth_t;
-    float offset_t;
-    float width_t;
-    float pad1, pad2;
-};
-
-struct alignas(16) LineGradientInterpolationUBO {
-    float blur_t;
-    float opacity_t;
-    float gapwidth_t;
-    float offset_t;
-    float width_t;
-    float pad1, pad2, pad3;
-};
-
-struct alignas(16) SymbolDrawableTilePropsUBO {
-    /*bool*/ int is_text;
-    /*bool*/ int is_halo;
-    /*bool*/ int pitch_with_map;
-    /*bool*/ int is_size_zoom_constant;
-    /*bool*/ int is_size_feature_constant;
-    float size_t;
-    float size;
-    float padding;
-};
-static_assert(sizeof(SymbolDrawableTilePropsUBO) == 2 * 16, "unexpected padding");
-
-struct alignas(16) SymbolDrawableInterpolateUBO {
-    float fill_color_t;
-    float halo_color_t;
-    float opacity_t;
-    float halo_width_t;
-    float halo_blur_t;
-    float pad1, pad2, pad3;
-};
-static_assert(sizeof(SymbolDrawableInterpolateUBO) == 32, "unexpected padding");
+static_assert(sizeof(SymbolDynamicUBO) == 16, "unexpected padding");
 
 struct alignas(16) SymbolDrawableUBO {
     float4x4 matrix;
@@ -159,23 +145,43 @@ struct alignas(16) SymbolDrawableUBO {
 };
 static_assert(sizeof(SymbolDrawableUBO) == 14 * 16, "unexpected padding");
 
-struct alignas(16) SymbolDynamicUBO {
-    float fade_change;
-    float camera_to_center_distance;
-    float aspect_ratio;
-    float pad;
-};
-static_assert(sizeof(SymbolDynamicUBO) == 16, "unexpected padding");
-
-struct alignas(16) SymbolDrawablePaintUBO {
-    float4 fill_color;
-    float4 halo_color;
-    float opacity;
-    float halo_width;
-    float halo_blur;
+struct alignas(16) SymbolTilePropsUBO {
+    /*bool*/ int is_text;
+    /*bool*/ int is_halo;
+    /*bool*/ int pitch_with_map;
+    /*bool*/ int is_size_zoom_constant;
+    /*bool*/ int is_size_feature_constant;
+    float size_t;
+    float size;
     float padding;
 };
-static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16, "unexpected padding");
+static_assert(sizeof(SymbolTilePropsUBO) == 2 * 16, "unexpected padding");
+
+struct alignas(16) SymbolInterpolateUBO {
+    float fill_color_t;
+    float halo_color_t;
+    float opacity_t;
+    float halo_width_t;
+    float halo_blur_t;
+    float pad1, pad2, pad3;
+};
+static_assert(sizeof(SymbolInterpolateUBO) == 32, "unexpected padding");
+
+struct alignas(16) SymbolEvaluatedPropsUBO {
+    float4 text_fill_color;
+    float4 text_halo_color;
+    float text_opacity;
+    float text_halo_width;
+    float text_halo_blur;
+    float pad1;
+    float4 icon_fill_color;
+    float4 icon_halo_color;
+    float icon_opacity;
+    float icon_halo_width;
+    float icon_halo_blur;
+    float pad2;
+};
+static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16, "unexpected padding");
 
 // unpack pattern position
 inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel_coord_lower,

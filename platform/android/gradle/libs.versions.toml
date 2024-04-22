@@ -1,0 +1,92 @@
+[versions]
+mapLibreServices = "6.0.0"
+mapboxGestures = "0.7.0"
+appCompat = "1.5.1"
+constraintLayout = "2.1.4"
+interpolator = "1.0.0"
+recyclerView = "1.2.1"
+material = "1.7.0"
+uiAutomator = "2.2.0"
+espresso = "3.5.1"
+testRunner = "1.1.4"
+testRules = "1.5.0"
+fragment = "1.5.5"
+annotation = "1.5.0"
+leakCanary = "2.10"
+junit = "4.13.2"
+mockito = "4.10.0"
+mockk = "1.13.3"
+robolectric = "4.9.1"
+timber = "5.0.1"
+okhttp = "4.11.0"
+kotlin = "1.9.21"
+licenses = "0.8.80"
+lint = "30.3.1"
+appcenter = "1.5"
+commonsIO = "2.11.0"
+assertj = "3.25.3"
+gradleNexus = "1.1.0"
+multidex = "2.0.1"
+
+androidxTestExtJUnit = "1.1.5"
+androidxTestCoreKtx = "1.5.0"
+kotlinxSerializationJson = "1.6.0"
+
+androidGradlePlugin = "8.1.4"
+
+[libraries]
+maplibreJavaGeoJSON = { group = "org.maplibre.gl", name = "android-sdk-geojson", version.ref = "mapLibreServices" }
+mapboxAndroidGestures = { group = "com.mapbox.mapboxsdk", name = "mapbox-android-gestures", version.ref = "mapboxGestures" }
+maplibreJavaTurf = { group = "org.maplibre.gl", name = "android-sdk-turf", version.ref = "mapLibreServices" }
+
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+amdroidxJunit = { group = "androidx.test.ext", name = "junit", version.ref = "testRunner" }
+mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+assertjcore = { group = "org.assertj", name = "assertj-core", version.ref = "assertj" }
+
+testRunner = { group = "androidx.test.ext", name = "junit", version.ref = "testRunner" }
+testRules = { group = "androidx.test", name = "rules", version.ref = "testRules" }
+testEspressoCore = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
+testEspressoIntents = { group = "androidx.test.espresso", name = "espresso-intents", version.ref = "espresso" }
+testEspressoContrib = { group = "androidx.test.espresso", name = "espresso-contrib", version.ref = "espresso" }
+testUiAutomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiAutomator" }
+supportAnnotations = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
+supportAppcompatV7 = { group = "androidx.appcompat", name = "appcompat", version.ref = "appCompat" }
+supportFragmentV4 = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
+supportRecyclerView = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerView" }
+supportConstraintLayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintLayout" }
+interpolator = { group = "androidx.interpolator", name = "interpolator", version.ref = "interpolator" }
+supportDesign = { group = "com.google.android.material", name = "material", version.ref = "material" }
+multidex = { group = "androidx.multidex", name = "multidex", version.ref = "multidex" }
+
+appCenter = { group = "com.microsoft.appcenter", name = "espresso-test-extension", version.ref = "appcenter" }
+commonsIO = { group = "commons-io", name = "commons-io", version.ref = "commonsIO" }
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+leakCanary = { group = "com.squareup.leakcanary", name = "leakcanary-android", version.ref = "leakCanary" }
+
+kotlinPlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+licensesPlugin = { group = "com.jaredsburrows", name = "gradle-license-plugin", version.ref = "licenses" }
+
+lint = { group = "com.android.tools.lint", name = "lint", version.ref = "lint" }
+lintApi = { group = "com.android.tools.lint", name = "lint-api", version.ref = "lint" }
+lintChecks = { group = "com.android.tools.lint", name = "lint-checks", version.ref = "lint" }
+lintTests = { group = "com.android.tools.lint", name = "lint-tests", version.ref = "lint" }
+
+gradleNexus = { group = "io.github.gradle-nexus", name = "publish-plugin", version.ref = "gradleNexus" }
+
+androidxTestExtJUnit = { group = "androidx.test.ext", name = "junit", version = "1.1.5" }
+androidxTestCoreKtx = { group = "androidx.test", name = "core-ktx", version = "1.5.0" }
+kotlinxSerializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.6.0" }
+
+androidGradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin"}
+
+
+[plugins]
+nexusPublishPlugin = { id = "io.github.gradle-nexus.publish-plugin", version = "1.1.0" }
+kotlinter = { id = "org.jmailen.kotlinter", version = "3.13.0" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version = "1.9.21" }
+dokka = { id = "org.jetbrains.dokka", version = "1.7.20" }
+kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "1.9.21" }

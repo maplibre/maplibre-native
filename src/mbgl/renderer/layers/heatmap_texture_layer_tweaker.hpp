@@ -16,9 +16,6 @@ public:
     ~HeatmapTextureLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
-
-protected:
-    gfx::UniformBufferPtr drawableBuffer;
 };
 
 } // namespace mbgl

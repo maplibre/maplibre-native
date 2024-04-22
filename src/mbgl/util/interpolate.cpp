@@ -5,7 +5,7 @@
 namespace mbgl {
 namespace util {
 
-float interpolationFactor(float base, Range<float> range, float z) {
+float interpolationFactor(float base, Range<float> range, float z) noexcept {
     const float zoomDiff = range.max - range.min;
     const float zoomProgress = z - range.min;
     if (zoomDiff == 0) {

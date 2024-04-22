@@ -1,5 +1,4 @@
 ext {
-
     androidVersions = [
             minSdkVersion    : 21,
             targetSdkVersion : 33,
@@ -10,83 +9,5 @@ ext {
             buildToolsVersion: '33.0.1',
             ndkVersion       : '25.1.8937393',
             cmakeVersion     : '3.18.1+',
-    ]
-
-    versions = [
-            mapLibreServices: '5.9.0',
-            mapboxCore      : '2.0.1',
-            mapboxGestures  : '0.7.0',
-            appCompat       : '1.5.1',
-            constraintLayout: '2.1.4',
-            interpolator     : '1.0.0',
-            recyclerView    : '1.2.1',
-            material        : '1.7.0',
-            uiAutomator     : '2.2.0',
-            espresso        : '3.5.0',
-            testRunner      : '1.1.4',
-            testRules       : '1.5.0',
-            fragment        : '1.5.5',
-            annotation      : '1.5.0',
-            leakCanary      : '2.10',
-            junit           : '4.13.2',
-            mockito         : '4.10.0',
-            mockk           : '1.13.3',
-            robolectric     : '4.9.1',
-            timber          : '5.0.1',
-            okhttp          : '4.11.0',
-            kotlin          : '1.9.21',
-            licenses        : '0.8.80',
-            lint            : '30.3.1',
-            //        jacoco           : '0.8.5',
-            appcenter       : '1.5',
-            commonsIO       : '2.11.0',
-            assertj         : '3.23.1',
-            gradleNexus     : "1.1.0",
-            multidex        : "2.0.1"
-    ]
-    
-    dependenciesList = [
-            mapboxJavaGeoJSON      : "org.maplibre.gl:android-sdk-geojson:${versions.mapLibreServices}",
-            mapboxAndroidGestures  : "com.mapbox.mapboxsdk:mapbox-android-gestures:${versions.mapboxGestures}",
-            mapboxJavaTurf         : "org.maplibre.gl:android-sdk-turf:${versions.mapLibreServices}",
-
-            junit                  : "junit:junit:${versions.junit}",
-            amdroidxJunit          : "androidx.test.ext:junit:1.1.4",
-            mockito                : "org.mockito:mockito-core:${versions.mockito}",
-            mockk                  : "io.mockk:mockk:${versions.mockk}",
-            robolectric            : "org.robolectric:robolectric:${versions.robolectric}",
-            assertjcore            : "org.assertj:assertj-core:${versions.assertj}",
-
-            testRunner             : "androidx.test.ext:junit:${versions.testRunner}",
-            testRules              : "androidx.test:rules:${versions.testRules}",
-            testEspressoCore       : "androidx.test.espresso:espresso-core:${versions.espresso}",
-            testEspressoIntents    : "androidx.test.espresso:espresso-intents:${versions.espresso}",
-            testEspressoContrib    : "androidx.test.espresso:espresso-contrib:${versions.espresso}",
-            testUiAutomator        : "androidx.test.uiautomator:uiautomator:${versions.uiAutomator}",
-            supportAnnotations     : "androidx.annotation:annotation:${versions.annotation}",
-            supportAppcompatV7     : "androidx.appcompat:appcompat:${versions.appCompat}",
-            supportFragmentV4      : "androidx.fragment:fragment:${versions.fragment}",
-            supportRecyclerView    : "androidx.recyclerview:recyclerview:${versions.recyclerView}",
-            supportConstraintLayout: "androidx.constraintlayout:constraintlayout:${versions.constraintLayout}",
-            interpolator           : "androidx.interpolator:interpolator:${versions.interpolator}",
-            supportDesign          : "com.google.android.material:material:${versions.material}",
-            multidex               : "androidx.multidex:multidex:${versions.multidex}",
-
-            appCenter              : "com.microsoft.appcenter:espresso-test-extension:${versions.appcenter}",
-            commonsIO              : "commons-io:commons-io:${versions.commonsIO}",
-            timber                 : "com.jakewharton.timber:timber:${versions.timber}",
-            okhttp3                : "com.squareup.okhttp3:okhttp:${versions.okhttp}",
-            leakCanary             : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanary}",
-
-            kotlinPlugin           : "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}",
-            licensesPlugin         : "com.jaredsburrows:gradle-license-plugin:${versions.licenses}",
-            //        jacocoPlugin           : "org.jacoco:org.jacoco.core:${versions.jacoco}",
-
-            lint                   : "com.android.tools.lint:lint:${versions.lint}",
-            lintApi                : "com.android.tools.lint:lint-api:${versions.lint}",
-            lintChecks             : "com.android.tools.lint:lint-checks:${versions.lint}",
-            lintTests              : "com.android.tools.lint:lint-tests:${versions.lint}",
-
-            gradleNexus            : "io.github.gradle-nexus:publish-plugin:${versions.gradleNexus}"
     ]
 }

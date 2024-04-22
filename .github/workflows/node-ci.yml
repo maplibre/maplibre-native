@@ -31,6 +31,8 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+      - "package.json"
+      - "package-lock.json"
 
   pull_request:
     branches:
@@ -57,6 +59,8 @@ on:
       - "vendor/**"
       - ".gitmodules"
       - "!**/*.md"
+      - "package.json"
+      - "package-lock.json"
 
 concurrency:
   # cancel jobs on PRs only
@@ -78,7 +82,7 @@ jobs:
           # A release for macOS can be made from the opengl-2 branch
           # - runs-on: macos-12
           #   arch: x86_64
-          # - runs-on: [self-hosted, macOS, ARM64]
+          # - runs-on: macos-13-xlarge
           #   arch: arm64
           - runs-on: windows-2022
             arch: x86_64
@@ -114,7 +118,6 @@ jobs:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
-          brew list cmake || brew install cmake
           brew list ccache || brew install ccache
           brew list ninja || brew install ninja
           brew list pkg-config || brew install pkg-config
@@ -161,11 +164,15 @@ jobs:
           $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
           "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
 
-      - name: Setup cmake (Linux)
-        if: runner.os == 'Linux' && matrix.arch != 'arm64'
-        uses: jwlawson/actions-setup-cmake@v1.14
+      - name: Setup cmake
+        if: ${{contains(runner.name, 'GitHub Actions')}}
+        uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: "3.19.x"
+          cmake-version: '3.29.2'
+ 
+      - name: cmake version
+        run: |
+          cmake --version
 
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'

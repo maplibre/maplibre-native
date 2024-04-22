@@ -25,7 +25,6 @@
 #include <mbgl/shaders/mtl/hillshade.hpp>
 #include <mbgl/shaders/mtl/hillshade_prepare.hpp>
 #include <mbgl/shaders/mtl/line.hpp>
-#include <mbgl/shaders/mtl/line_gradient.hpp>
 #include <mbgl/shaders/mtl/fill.hpp>
 #include <mbgl/shaders/mtl/raster.hpp>
 #include <mbgl/shaders/mtl/symbol_icon.hpp>
@@ -137,19 +136,19 @@ TEST(OrderIndependentHash, Shaders) {
                       BuiltIn::DebugShader,
                       BuiltIn::FillShader,
                       BuiltIn::FillOutlineShader,
-                      BuiltIn::LineGradientShader,
-                      BuiltIn::LinePatternShader,
-                      BuiltIn::LineSDFShader,
-                      BuiltIn::LineShader,
-                      BuiltIn::LineBasicShader,
                       BuiltIn::FillPatternShader,
                       BuiltIn::FillOutlinePatternShader,
+                      BuiltIn::FillOutlineTriangulatedShader,
                       BuiltIn::FillExtrusionShader,
                       BuiltIn::FillExtrusionPatternShader,
                       BuiltIn::HeatmapShader,
                       BuiltIn::HeatmapTextureShader,
                       BuiltIn::HillshadePrepareShader,
                       BuiltIn::HillshadeShader,
+                      BuiltIn::LineShader,
+                      BuiltIn::LineGradientShader,
+                      BuiltIn::LinePatternShader,
+                      BuiltIn::LineSDFShader,
                       BuiltIn::RasterShader,
                       BuiltIn::SymbolIconShader,
                       BuiltIn::SymbolSDFIconShader,

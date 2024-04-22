@@ -41,8 +41,8 @@ public:
     using TileFeatures = mapbox::feature::feature_collection<int16_t>;
     using Features = mapbox::feature::feature_collection<double>;
     static std::shared_ptr<GeoJSONData> create(const GeoJSON&,
-                                               const Immutable<GeoJSONOptions>& = GeoJSONOptions::defaultOptions(),
-                                               std::shared_ptr<Scheduler> scheduler = nullptr);
+                                               std::shared_ptr<Scheduler> scheduler,
+                                               const Immutable<GeoJSONOptions>& = GeoJSONOptions::defaultOptions());
 
     virtual ~GeoJSONData() = default;
     virtual void getTile(const CanonicalTileID&, const std::function<void(TileFeatures)>&) = 0;
@@ -51,8 +51,6 @@ public:
     virtual Features getChildren(std::uint32_t) = 0;
     virtual Features getLeaves(std::uint32_t, std::uint32_t limit, std::uint32_t offset) = 0;
     virtual std::uint8_t getClusterExpansionZoom(std::uint32_t) = 0;
-
-    virtual std::shared_ptr<Scheduler> getScheduler() { return nullptr; }
 };
 
 class GeoJSONSource final : public Source {
@@ -83,6 +81,7 @@ private:
     std::optional<std::string> url;
     std::unique_ptr<AsyncRequest> req;
     std::shared_ptr<Scheduler> threadPool;
+    std::shared_ptr<Scheduler> sequencedScheduler;
     mapbox::base::WeakPtrFactory<Source> weakFactory{this};
 };
 
