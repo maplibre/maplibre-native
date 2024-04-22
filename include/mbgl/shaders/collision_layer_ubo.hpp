@@ -15,7 +15,7 @@ static_assert(sizeof(CollisionUBO) % 16 == 0);
 static_assert(sizeof(CollisionUBO) == 80);
 
 enum {
-    idCollisionUBO,
+    idCollisionUBO = globalUBOCount,
     collisionUBOCount
 };
 

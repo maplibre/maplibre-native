@@ -23,7 +23,7 @@ namespace shaders {
 
 // UBO defines
 enum {
-    idClippingMaskUBO,
+    idClippingMaskUBO = globalUBOCount,
     clippingMaskUBOCount
 };
 

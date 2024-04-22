@@ -21,26 +21,26 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos_normal [[attribute(5)]];
-    uchar4 data [[attribute(6)]];
+    short2 pos_normal [[attribute(6)]];
+    uchar4 data [[attribute(7)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(7)]];
+    float4 color [[attribute(8)]];
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(8)]];
+    float2 blur [[attribute(9)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(9)]];
+    float2 opacity [[attribute(10)]];
 #endif
 #if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(10)]];
+    float2 gapwidth [[attribute(11)]];
 #endif
 #if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(11)]];
+    float2 offset [[attribute(12)]];
 #endif
 #if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(12)]];
+    float2 width [[attribute(13)]];
 #endif
 };
 
@@ -78,10 +78,10 @@ struct alignas(16) LineInterpolationUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineDynamicUBO& dynamic [[buffer(0)]],
-                                device const LineDrawableUBO& drawable [[buffer(1)]],
-                                device const LineInterpolationUBO& interp [[buffer(2)]],
-                                device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const LineDynamicUBO& dynamic [[buffer(1)]],
+                                device const LineDrawableUBO& drawable [[buffer(2)]],
+                                device const LineInterpolationUBO& interp [[buffer(3)]],
+                                device const LineEvaluatedPropsUBO& props [[buffer(5)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth = props.gapwidth / 2;
@@ -154,7 +154,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
+                            device const LineEvaluatedPropsUBO& props [[buffer(5)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
@@ -201,13 +201,13 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos_normal [[attribute(5)]];
-    uchar4 data [[attribute(6)]];
-    float2 blur [[attribute(7)]];
-    float2 opacity [[attribute(8)]];
-    float2 gapwidth [[attribute(9)]];
-    float2 offset [[attribute(10)]];
-    float2 width [[attribute(11)]];
+    short2 pos_normal [[attribute(6)]];
+    uchar4 data [[attribute(7)]];
+    float2 blur [[attribute(8)]];
+    float2 opacity [[attribute(9)]];
+    float2 gapwidth [[attribute(10)]];
+    float2 offset [[attribute(11)]];
+    float2 width [[attribute(12)]];
 };
 
 struct FragmentStage {
@@ -241,10 +241,10 @@ struct alignas(16) LineGradientInterpolationUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineDynamicUBO& dynamic [[buffer(0)]],
-                                device const LineGradientDrawableUBO& drawable [[buffer(1)]],
-                                device const LineGradientInterpolationUBO& interp [[buffer(2)]],
-                                device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const LineDynamicUBO& dynamic [[buffer(1)]],
+                                device const LineGradientDrawableUBO& drawable [[buffer(2)]],
+                                device const LineGradientInterpolationUBO& interp [[buffer(3)]],
+                                device const LineEvaluatedPropsUBO& props [[buffer(5)]]) {
 
 #if !defined(HAS_UNIFORM_u_blur)
     const auto blur     = unpack_mix_float(vertx.blur,     interp.blur_t);
@@ -322,7 +322,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineEvaluatedPropsUBO& props [[buffer(4)]],
+                            device const LineEvaluatedPropsUBO& props [[buffer(5)]],
                             texture2d<float, access::sample> gradientTexture [[texture(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
@@ -370,29 +370,29 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos_normal [[attribute(5)]];
-    uchar4 data [[attribute(6)]];
+    short2 pos_normal [[attribute(6)]];
+    uchar4 data [[attribute(7)]];
 
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(7)]];
+    float2 blur [[attribute(8)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(8)]];
+    float2 opacity [[attribute(9)]];
 #endif
 #if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(9)]];
+    float2 gapwidth [[attribute(10)]];
 #endif
 #if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(10)]];
+    float2 offset [[attribute(11)]];
 #endif
 #if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(11)]];
+    float2 width [[attribute(12)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(12)]];
+    ushort4 pattern_from [[attribute(13)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(13)]];
+    ushort4 pattern_to [[attribute(14)]];
 #endif
 };
 
@@ -442,11 +442,11 @@ struct alignas(16) LinePatternTilePropertiesUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineDynamicUBO& dynamic [[buffer(0)]],
-                                device const LinePatternDrawableUBO& drawable [[buffer(1)]],
-                                device const LinePatternInterpolationUBO& interp [[buffer(2)]],
-                                device const LinePatternTilePropertiesUBO& tileProps [[buffer(3)]],
-                                device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const LineDynamicUBO& dynamic [[buffer(1)]],
+                                device const LinePatternDrawableUBO& drawable [[buffer(2)]],
+                                device const LinePatternInterpolationUBO& interp [[buffer(3)]],
+                                device const LinePatternTilePropertiesUBO& tileProps [[buffer(4)]],
+                                device const LineEvaluatedPropsUBO& props [[buffer(5)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth = props.gapwidth / 2;
@@ -525,9 +525,9 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LinePatternDrawableUBO& drawable [[buffer(1)]],
-                            device const LinePatternTilePropertiesUBO& tileProps [[buffer(3)]],
-                            device const LineEvaluatedPropsUBO& props [[buffer(4)]],
+                            device const LinePatternDrawableUBO& drawable [[buffer(2)]],
+                            device const LinePatternTilePropertiesUBO& tileProps [[buffer(4)]],
+                            device const LineEvaluatedPropsUBO& props [[buffer(5)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
@@ -613,29 +613,29 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos_normal [[attribute(5)]];
-    uchar4 data [[attribute(6)]];
+    short2 pos_normal [[attribute(6)]];
+    uchar4 data [[attribute(7)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(7)]];
+    float4 color [[attribute(8)]];
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(8)]];
+    float2 blur [[attribute(9)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(9)]];
+    float2 opacity [[attribute(10)]];
 #endif
 #if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(10)]];
+    float2 gapwidth [[attribute(11)]];
 #endif
 #if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(11)]];
+    float2 offset [[attribute(12)]];
 #endif
 #if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(12)]];
+    float2 width [[attribute(13)]];
 #endif
 #if !defined(HAS_UNIFORM_u_floorwidth)
-    float2 floorwidth [[attribute(13)]];
+    float2 floorwidth [[attribute(14)]];
 #endif
 };
 
@@ -685,10 +685,10 @@ struct alignas(16) LineSDFInterpolationUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineDynamicUBO& dynamic [[buffer(0)]],
-                                device const LineSDFDrawableUBO& drawable [[buffer(1)]],
-                                device const LineSDFInterpolationUBO& interp [[buffer(2)]],
-                                device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const LineDynamicUBO& dynamic [[buffer(1)]],
+                                device const LineSDFDrawableUBO& drawable [[buffer(2)]],
+                                device const LineSDFInterpolationUBO& interp [[buffer(3)]],
+                                device const LineEvaluatedPropsUBO& props [[buffer(5)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
     const auto gapwidth   = props.gapwidth / 2;
@@ -773,8 +773,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineSDFDrawableUBO& drawable [[buffer(1)]],
-                            device const LineEvaluatedPropsUBO& props [[buffer(4)]],
+                            device const LineSDFDrawableUBO& drawable [[buffer(2)]],
+                            device const LineEvaluatedPropsUBO& props [[buffer(5)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)

@@ -21,7 +21,7 @@ struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>
 using namespace metal;
 
 struct VertexStage {
-    short2 position [[attribute(2)]];
+    short2 position [[attribute(3)]];
 };
 
 struct FragmentStage {
@@ -53,8 +53,8 @@ struct alignas(16) BackgroundPatternLayerUBO {
 };
 
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
-                                device const BackgroundPatternDrawableUBO& drawableUBO [[buffer(0)]],
-                                device const BackgroundPatternLayerUBO& layerUBO [[buffer(1)]]) {
+                                device const BackgroundPatternDrawableUBO& drawableUBO [[buffer(1)]],
+                                device const BackgroundPatternLayerUBO& layerUBO [[buffer(2)]]) {
     const float2 pos = float2(in.position);
     const float2 pos_a = get_pattern_pos(drawableUBO.pixel_coord_upper,
                                          drawableUBO.pixel_coord_lower,
@@ -74,7 +74,7 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const BackgroundPatternLayerUBO& layerUBO [[buffer(1)]],
+                            device const BackgroundPatternLayerUBO& layerUBO [[buffer(2)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)

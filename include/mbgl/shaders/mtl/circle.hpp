@@ -21,28 +21,28 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 position [[attribute(4)]];
+    short2 position [[attribute(5)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(5)]];
+    float4 color [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_radius)
-    float2 radius [[attribute(6)]];
+    float2 radius [[attribute(7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(7)]];
+    float2 blur [[attribute(8)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(8)]];
+    float2 opacity [[attribute(9)]];
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_color)
-    float4 stroke_color [[attribute(9)]];
+    float4 stroke_color [[attribute(10)]];
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_width)
-    float2 stroke_width [[attribute(10)]];
+    float2 stroke_width [[attribute(11)]];
 #endif
 #if !defined(HAS_UNIFORM_u_stroke_opacity)
-    float2 stroke_opacity [[attribute(11)]];
+    float2 stroke_opacity [[attribute(12)]];
 #endif
 };
 
@@ -108,10 +108,10 @@ struct alignas(16) CircleInterpolateUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const CircleDrawableUBO& drawable [[buffer(0)]],
-                                device const CirclePaintParamsUBO& params [[buffer(1)]],
-                                device const CircleEvaluatedPropsUBO& props [[buffer(2)]],
-                                device const CircleInterpolateUBO& interp [[buffer(3)]]) {
+                                device const CircleDrawableUBO& drawable [[buffer(1)]],
+                                device const CirclePaintParamsUBO& params [[buffer(2)]],
+                                device const CircleEvaluatedPropsUBO& props [[buffer(3)]],
+                                device const CircleInterpolateUBO& interp [[buffer(4)]]) {
 
 #if defined(HAS_UNIFORM_u_radius)
     const auto radius       = props.radius;
@@ -189,8 +189,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const CirclePaintParamsUBO& params [[buffer(1)]],
-                            device const CircleEvaluatedPropsUBO& props [[buffer(2)]]) {
+                            device const CirclePaintParamsUBO& params [[buffer(2)]],
+                            device const CircleEvaluatedPropsUBO& props [[buffer(3)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif

@@ -122,7 +122,7 @@ struct alignas(16) LineEvaluatedPropsUBO {
 static_assert(sizeof(LineEvaluatedPropsUBO) % 16 == 0);
 
 enum {
-    idLineDynamicUBO,
+    idLineDynamicUBO = globalUBOCount,
     idLineDrawableUBO,
     idLineInterpolationUBO,
     idLineTilePropertiesUBO,

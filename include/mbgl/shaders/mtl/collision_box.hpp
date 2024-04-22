@@ -22,11 +22,11 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(1)]];
-    short2 anchor_pos [[attribute(2)]];
-    short2 extrude [[attribute(3)]];
-    ushort2 placed [[attribute(4)]];
-    float2 shift [[attribute(5)]];
+    short2 pos [[attribute(2)]];
+    short2 anchor_pos [[attribute(3)]];
+    short2 extrude [[attribute(4)]];
+    ushort2 placed [[attribute(5)]];
+    float2 shift [[attribute(6)]];
 };
 
 struct FragmentStage {
@@ -43,7 +43,7 @@ struct alignas(16) CollisionBoxUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const CollisionBoxUBO& drawable [[buffer(0)]]) {
+                                device const CollisionBoxUBO& drawable [[buffer(1)]]) {
 
     float4 projectedPoint = drawable.matrix * float4(float2(vertx.anchor_pos), 0, 1);
     float camera_to_anchor_distance = projectedPoint.w;
@@ -66,7 +66,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const CollisionBoxUBO& drawable [[buffer(0)]]) {
+                            device const CollisionBoxUBO& drawable [[buffer(1)]]) {
 
     float alpha = 0.5;
 

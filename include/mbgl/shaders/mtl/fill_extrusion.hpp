@@ -21,17 +21,17 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos [[attribute(4)]];
-    short4 normal_ed [[attribute(5)]];
+    short2 pos [[attribute(5)]];
+    short4 normal_ed [[attribute(6)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(6)]];
+    float4 color [[attribute(7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(7)]];
+    float base [[attribute(8)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(8)]];
+    float height [[attribute(9)]];
 #endif
 };
 
@@ -46,9 +46,9 @@ struct FragmentOutput {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const FillExtrusionDrawableUBO& fill [[buffer(0)]],
-                                device const FillExtrusionPropsUBO& props [[buffer(1)]],
-                                device const FillExtrusionInterpolateUBO& interp [[buffer(3)]]) {
+                                device const FillExtrusionDrawableUBO& fill [[buffer(1)]],
+                                device const FillExtrusionPropsUBO& props [[buffer(2)]],
+                                device const FillExtrusionInterpolateUBO& interp [[buffer(4)]]) {
 
 #if defined(HAS_UNIFORM_u_base)
     const auto base   = props.light_position_base.w;

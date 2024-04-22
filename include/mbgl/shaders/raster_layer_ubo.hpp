@@ -26,7 +26,7 @@ struct alignas(16) RasterEvaluatedPropsUBO {
 static_assert(sizeof(RasterEvaluatedPropsUBO) == 64);
 
 enum {
-    idRasterDrawableUBO,
+    idRasterDrawableUBO = globalUBOCount,
     idRasterEvaluatedPropsUBO,
     rasterUBOCount
 };

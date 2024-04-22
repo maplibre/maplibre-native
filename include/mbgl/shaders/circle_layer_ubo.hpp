@@ -47,7 +47,7 @@ struct alignas(16) CircleInterpolateUBO {
 static_assert(sizeof(CircleInterpolateUBO) % 16 == 0);
 
 enum {
-    idCircleDrawableUBO,
+    idCircleDrawableUBO = globalUBOCount,
     idCirclePaintParamsUBO,
     idCircleEvaluatedPropsUBO,
     idCircleInterpolateUBO,

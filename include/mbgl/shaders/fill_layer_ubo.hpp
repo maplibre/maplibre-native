@@ -118,7 +118,7 @@ struct alignas(16) FillEvaluatedPropsUBO {
 static_assert(sizeof(FillEvaluatedPropsUBO) == 3 * 16);
 
 enum {
-    idFillDrawableUBO,
+    idFillDrawableUBO = globalUBOCount,
     idFillTilePropsUBO,
     idFillInterpolateUBO,
     idFillEvaluatedPropsUBO,
