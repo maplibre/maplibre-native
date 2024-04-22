@@ -121,6 +121,7 @@ runs:
             --device-pool-arn ${{ inputs.AWS_DEVICE_FARM_DEVICE_POOL_ARN }} \
             --test type=${{ inputs.testType }},testPackageArn=${{ env.test_package_arn }}${{ inputs.testFilter && ',filter=' }}${{ inputs.testFilter }}${{ inputs.testSpecArn && ',testSpecArn=' }}${{ inputs.testSpecArn }} \
             ${{ inputs.externalData && '--configuration extraDataPackageArn=' }}${{ inputs.externalData }} \
+            --execution-configuration videoCapture=false \
             --output text --query "run.arn")"
           
           echo "runArn=$arn" >> "$GITHUB_OUTPUT"
