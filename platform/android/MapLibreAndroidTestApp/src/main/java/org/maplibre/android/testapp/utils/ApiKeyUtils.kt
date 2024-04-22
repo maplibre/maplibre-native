@@ -1,8 +1,25 @@
 package org.maplibre.android.testapp.utils
 
 import android.content.Context
+import android.os.Build
+import android.os.Environment
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.maplibre.android.MapLibre
 import java.lang.Exception
+import java.io.File
+
+fun readFromJSON(): String? {
+    val jsonFile = File("${Environment.getExternalStorageDirectory()}/instrumentation-test-input.json")
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager() && jsonFile.isFile) {
+        val jsonFileContents = jsonFile.readText()
+        val jsonElement = Json.parseToJsonElement(jsonFileContents)
+        return jsonElement.jsonObject["apiKey"]?.jsonPrimitive?.contentOrNull
+    }
+    return null
+}
 
 object ApiKeyUtils {
     /**
@@ -18,6 +35,10 @@ object ApiKeyUtils {
      * @return The api key or null if not found.
      */
     fun getApiKey(context: Context): String? {
+
+        val fromJSON = readFromJSON()
+        if (fromJSON !== null) return fromJSON
+
         return try {
             // Read out AndroidManifest
             val apiKey = MapLibre.getApiKey()
