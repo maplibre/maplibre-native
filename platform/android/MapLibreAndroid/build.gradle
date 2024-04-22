@@ -47,7 +47,7 @@ tasks.withType(DokkaTask.class) {
 android {
     defaultConfig {
         compileSdk 34
-        minSdkVersion 14
+        minSdkVersion 21
         targetSdkVersion 33
         buildConfigField "String", "GIT_REVISION_SHORT", String.format("\"%s\"", getGitRevision())
         buildConfigField "String", "GIT_REVISION", String.format("\"%s\"", getGitRevision(false))
