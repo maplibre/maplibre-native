@@ -153,10 +153,10 @@ public:
 
     /// Bind the global uniform buffers
     void bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override;
-    
+
     /// Unbind the global uniform buffers
     void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override {}
-    
+
 private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
@@ -173,7 +173,7 @@ private:
     std::optional<BufferResource> clipMaskUniformsBuffer;
     bool clipMaskUniformsBufferUsed = false;
     const gfx::Renderable* stencilStateRenderable = nullptr;
-    
+
     UniformBufferArray globalUniformBuffers;
 };
 

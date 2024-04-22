@@ -247,7 +247,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Upload the Debug layer group
         orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
     }
-    
+
     const Size atlasSize = parameters.patternAtlas.getPixelSize();
     const auto& worldSize = parameters.staticData.backendSize;
     const shaders::GlobalPaintParamsUBO globalPaintParamsUBO = {

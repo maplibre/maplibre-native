@@ -163,7 +163,7 @@ public:
 
     /// Bind the global uniform buffers
     virtual void bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept = 0;
-    
+
     /// Unbind the global uniform buffers
     virtual void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept = 0;
 #endif

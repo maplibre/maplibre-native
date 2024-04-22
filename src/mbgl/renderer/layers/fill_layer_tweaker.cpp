@@ -91,16 +91,12 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         switch (static_cast<RenderFillLayer::FillVariant>(drawable.getType())) {
             case RenderFillLayer::FillVariant::Fill: {
-                const FillDrawableUBO drawableUBO = {
-                    /*.matrix=*/util::cast<float>(matrix)
-                };
+                const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
             case RenderFillLayer::FillVariant::FillOutline: {
-                const FillOutlineDrawableUBO drawableUBO = {
-                    /*.matrix=*/util::cast<float>(matrix)
-                };
+                const FillOutlineDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
@@ -123,8 +119,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
                     /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
                     /*.tile_ratio = */ tileRatio,
-                    0
-                };
+                    0};
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
@@ -132,7 +127,9 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                 const FillOutlineTriangulatedDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
                     /*.ratio=*/1.0f / tileID.pixelsToTileUnits(1.0f, parameters.state.getZoom()),
-                    0, 0, 0};
+                    0,
+                    0,
+                    0};
                 drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }

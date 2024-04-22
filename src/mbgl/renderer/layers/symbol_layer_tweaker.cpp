@@ -74,7 +74,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idSymbolEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
-    
+
     const auto camDist = state.getCameraToCenterDistance();
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {

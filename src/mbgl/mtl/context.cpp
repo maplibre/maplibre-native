@@ -54,7 +54,7 @@ Context::~Context() noexcept {
         clipMaskPipelineState.reset();
         clipMaskUniformsBuffer.reset();
         stencilStateRenderable = nullptr;
-        
+
         for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
             globalUniformBuffers.set(i, nullptr);
         }
