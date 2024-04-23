@@ -135,7 +135,7 @@ public:
                                       const void* data,
                                       std::size_t size,
                                       bool persistent) override;
-    
+
     /// Get the global uniform buffers
     const gfx::UniformBufferArray& getGlobalUniformBuffers() const override { return globalUniformBuffers; };
 
