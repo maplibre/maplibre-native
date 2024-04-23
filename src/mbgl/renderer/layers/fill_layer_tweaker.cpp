@@ -57,9 +57,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
     const auto& translation = evaluated.get<FillTranslate>();
     const auto anchor = evaluated.get<FillTranslateAnchor>();
-
     const auto intZoom = parameters.state.getIntegerZoom();
-    const auto pixelRatio = parameters.pixelRatio;
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
