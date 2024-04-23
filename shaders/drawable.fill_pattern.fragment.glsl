@@ -1,11 +1,10 @@
 layout (std140) uniform FillPatternDrawableUBO {
     highp mat4 u_matrix;
-    highp vec4 u_scale;
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp vec2 u_texsize;
+    highp float u_tile_ratio;
     highp float drawable_pad1;
-    highp float drawable_pad2;
 };
 layout (std140) uniform FillPatternTilePropsUBO {
     highp vec4 u_pattern_from;
@@ -22,8 +21,8 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_outline_color;
     highp float u_opacity;
     highp float u_fade;
-    highp float u_width;
-    highp float props_pad1;
+    highp float u_from_scale;
+    highp float u_to_scale;
 };
 
 uniform sampler2D u_image;
