@@ -21,7 +21,7 @@ public:
 
 private:
     NodeExpression(std::unique_ptr<mbgl::style::expression::Expression> expression_)
-        : expression(std::move(expression_)){};
+        : expression(std::move(expression_)) {};
 
     static void New(const Nan::FunctionCallbackInfo<v8::Value>&);
     static void Parse(const Nan::FunctionCallbackInfo<v8::Value>&);

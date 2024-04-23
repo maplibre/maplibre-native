@@ -6,7 +6,7 @@ namespace mbgl {
 template <typename Func>
 struct Scoped {
     Scoped(Func&& fn)
-        : cb(std::move(fn)){};
+        : cb(std::move(fn)) {};
     ~Scoped() { cb(); }
 
     Scoped(const Scoped&) = delete;
