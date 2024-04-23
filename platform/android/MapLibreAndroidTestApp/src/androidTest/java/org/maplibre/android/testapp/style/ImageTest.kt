@@ -25,21 +25,21 @@ class ImageTest : EspressoTest() {
     @Test
     fun testAddGetImage() {
         validateTestSetup()
-        MapLibreMapAction.invoke(maplibreMap) { uiController, mapboxMap ->
+        MapLibreMapAction.invoke(maplibreMap) { uiController, maplibreMap ->
             val drawable = rule.activity.resources.getDrawable(R.drawable.ic_launcher_round)
             assertTrue(drawable is BitmapDrawable)
 
             val bitmapSet = (drawable as BitmapDrawable).bitmap
-            mapboxMap.style!!.addImage(IMAGE_ID, bitmapSet)
+            maplibreMap.style!!.addImage(IMAGE_ID, bitmapSet)
 
             // adding an image requires converting the image with an asynctask
             uiController.loopMainThreadForAtLeast(200)
 
-            val bitmapGet = mapboxMap.style!!.getImage(IMAGE_ID)
+            val bitmapGet = maplibreMap.style!!.getImage(IMAGE_ID)
             assertTrue(bitmapGet!!.similarTo(bitmapSet))
 
-            mapboxMap.style!!.removeImage(IMAGE_ID)
-            assertNull(mapboxMap.style!!.getImage(IMAGE_ID))
+            maplibreMap.style!!.removeImage(IMAGE_ID)
+            assertNull(maplibreMap.style!!.getImage(IMAGE_ID))
         }
     }
 }

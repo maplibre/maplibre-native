@@ -45,7 +45,7 @@ Then add markers to the map with GeoJSON:
 ```
 
 4. Call `mapview.getMapSync()` in order to get a `MapboxMap` object.
-   After `mapboxMap` is assigned, call the `getEarthQuakeDataFromUSGS()` method
+   After `maplibreMap` is assigned, call the `getEarthQuakeDataFromUSGS()` method
    to make a HTTP request and transform data into the map annotations.
 
 ```kotlin

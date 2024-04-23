@@ -70,18 +70,18 @@ public abstract class Annotation implements Comparable<Annotation> {
   /**
    * Do not use this method, used internally by the SDK.
    *
-   * @param maplibreMap the hosting mapbox map
+   * @param maplibreMap the hosting MapLibreMap
    */
-  public void setMapboxMap(MapLibreMap maplibreMap) {
+  public void setMapLibreMap(MapLibreMap maplibreMap) {
     this.maplibreMap = maplibreMap;
   }
 
   /**
-   * Gets the hosting mapbox map.
+   * Gets the hosting MapLibreMap.
    *
-   * @return the MapboxMap
+   * @return the MapLibreMap
    */
-  protected MapLibreMap getMapboxMap() {
+  protected MapLibreMap getMapLibreMap() {
     return maplibreMap;
   }
 

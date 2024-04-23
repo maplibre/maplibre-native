@@ -18,7 +18,7 @@ public class CustomLayer extends Layer {
   /**
    * Triggers map re-paint.
    *
-   * @deprecated Use {@link MapboxMap#triggerRepaint()} instead.
+   * @deprecated Use {@link MapLibreMap#triggerRepaint()} instead.
    */
   @Deprecated
   @Keep

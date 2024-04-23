@@ -190,9 +190,9 @@ public class MapLibreConstants {
   public static final float ZOOM_RATE = 0.65f;
 
   /**
-   * Fragment Argument Key for MapboxMapOptions
+   * Fragment Argument Key for MapLibreMapOptions
    */
-  public static final String FRAG_ARG_MAPLIBREMAPOPTIONS = "MapboxMapOptions";
+  public static final String FRAG_ARG_MAPLIBREMAPOPTIONS = "MapLibreMapOptions";
 
   /**
    * Layer Id of annotations layer

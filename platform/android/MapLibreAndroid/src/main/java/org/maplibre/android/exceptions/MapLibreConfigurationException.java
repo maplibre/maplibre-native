@@ -19,7 +19,7 @@ import androidx.annotation.NonNull;
 public class MapLibreConfigurationException extends RuntimeException {
 
   /**
-   * Creates a MapLibre configuration exception thrown by MapboxMap when the SDK hasn't been properly initialised.
+   * Creates a MapLibre configuration exception thrown by MapLibreMap when the SDK hasn't been properly initialised.
    */
   public MapLibreConfigurationException() {
     super("\nUsing MapView requires calling MapLibre.getInstance(Context context, String apiKey, "
@@ -27,7 +27,7 @@ public class MapLibreConfigurationException extends RuntimeException {
   }
 
   /**
-   * Creates a MapLibre configuration exception thrown by MapboxMap when the SDK hasn't been properly initialised.
+   * Creates a MapLibre configuration exception thrown by MapLibreMap when the SDK hasn't been properly initialised.
    */
   public MapLibreConfigurationException(@NonNull String message) {
     super(message);
