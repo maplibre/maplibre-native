@@ -146,7 +146,10 @@ class BenchmarkActivity : AppCompatActivity() {
 
     private fun getBenchmarkInputData(): BenchmarkInputData {
         // read input for benchmark from JSON file (on CI)
-        val jsonFile = File("${Environment.getExternalStorageDirectory()}/instrumentation-test-input")
+        val jsonFile = File("${Environment.getExternalStorageDirectory()}/instrumentation-test-input.json")
+        Logger.i(TAG, "Environment.getExternalStorageDirectory() = ${Environment.getExternalStorageDirectory()}")
+        Logger.i(TAG, "jsonFile.isFile = ${jsonFile.isFile}")
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager() && jsonFile.isFile) {
             val jsonFileContents = jsonFile.readText()
             val jsonElement = Json.parseToJsonElement(jsonFileContents)

@@ -1,8 +1,6 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 33
-
     sourceSets {
         test {
             assets.srcDirs += ['../../../metrics']
@@ -11,6 +9,7 @@ android {
 
     defaultConfig {
         applicationId = 'org.maplibre.render_test_runner'
+        compileSdk 34
         minSdkVersion 21
         targetSdkVersion 33
         def abi = 'all'
