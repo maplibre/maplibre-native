@@ -100,7 +100,7 @@ jobs:
           expect-files: "${{ matrix.test.testFile }}, ${{ matrix.test.appFile }}"
 
       - name: Configure AWS Credentials
-        if: env.run_device_test == 'true' && matrix.test.name == 'Android Benchmark'
+        if: env.run_device_test == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
