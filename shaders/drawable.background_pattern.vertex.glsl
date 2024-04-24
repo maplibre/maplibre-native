@@ -10,14 +10,12 @@ layout (std140) uniform BackgroundPatternLayerUBO {
     highp vec2 u_pattern_br_a;
     highp vec2 u_pattern_tl_b;
     highp vec2 u_pattern_br_b;
-    highp vec2 u_texsize;
     highp vec2 u_pattern_size_a;
     highp vec2 u_pattern_size_b;
     highp float u_scale_a;
     highp float u_scale_b;
     highp float u_mix;
     highp float u_opacity;
-    highp float layer_pad1, layer_pad2;
 };
 
 layout (location = 0) in vec2 a_pos;

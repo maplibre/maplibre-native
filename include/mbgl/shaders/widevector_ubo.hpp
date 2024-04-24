@@ -32,7 +32,7 @@ struct alignas(16) WideVectorUniformWideVecUBO {
 static_assert(sizeof(WideVectorUniformWideVecUBO) % 16 == 0);
 
 enum {
-    idWideVectorUniformsUBO,
+    idWideVectorUniformsUBO = globalUBOCount,
     idWideVectorUniformWideVecUBO,
     wideVectorUBOCount
 };

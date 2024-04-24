@@ -22,8 +22,8 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(2)]];
-    short2 texture_pos [[attribute(3)]];
+    short2 pos [[attribute(3)]];
+    short2 texture_pos [[attribute(4)]];
 };
 
 struct FragmentStage {
@@ -37,7 +37,7 @@ struct alignas(16) RasterDrawableUBO {
 };
 
 struct alignas(16) RasterEvaluatedPropsUBO {
-    float3 spin_weights;
+    float4 spin_weights;
     float2 tl_parent;
     float scale_parent;
     float buffer_scale;
@@ -47,14 +47,12 @@ struct alignas(16) RasterEvaluatedPropsUBO {
     float brightness_high;
     float saturation_factor;
     float contrast_factor;
-    bool overdrawInspector;
-    uint8_t pad1, pad2, pad3;
-    float pad4;
+    float pad1, pad2;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const RasterDrawableUBO& drawable [[buffer(0)]],
-                                device const RasterEvaluatedPropsUBO& props [[buffer(1)]]) {
+                                device const RasterDrawableUBO& drawable [[buffer(1)]],
+                                device const RasterEvaluatedPropsUBO& props [[buffer(2)]]) {
 
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
 
@@ -74,7 +72,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const RasterEvaluatedPropsUBO& props [[buffer(1)]],
+                            device const RasterEvaluatedPropsUBO& props [[buffer(2)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             texture2d<float, access::sample> image1 [[texture(1)]],
                             sampler image0_sampler [[sampler(0)]],

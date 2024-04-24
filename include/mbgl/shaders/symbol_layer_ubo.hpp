@@ -5,16 +5,6 @@
 namespace mbgl {
 namespace shaders {
 
-/// Dynamic UBO
-struct alignas(16) SymbolDynamicUBO {
-    /* 0 */ float fade_change;
-    /* 4 */ float camera_to_center_distance;
-    /* 8 */ float aspect_ratio;
-    /* 12 */ float pad;
-    /* 16 */
-};
-static_assert(sizeof(SymbolDynamicUBO) == 16);
-
 struct alignas(16) SymbolDrawableUBO {
     /*   0 */ std::array<float, 4 * 4> matrix;
     /*  64 */ std::array<float, 4 * 4> label_plane_matrix;
@@ -76,8 +66,7 @@ struct alignas(16) SymbolEvaluatedPropsUBO {
 static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16);
 
 enum {
-    idSymbolDynamicUBO,
-    idSymbolDrawableUBO,
+    idSymbolDrawableUBO = globalUBOCount,
     idSymbolTilePropsUBO,
     idSymbolInterpolateUBO,
     idSymbolEvaluatedPropsUBO,

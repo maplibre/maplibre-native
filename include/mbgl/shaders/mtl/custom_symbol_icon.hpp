@@ -36,8 +36,8 @@ struct alignas(16) CustomSymbolIconParametersUBO {
 };
 
 struct VertexStage {
-    float2 a_pos [[attribute(2)]];
-    float2 a_tex [[attribute(3)]];
+    float2 a_pos [[attribute(3)]];
+    float2 a_tex [[attribute(4)]];
 };
 
 struct FragmentStage {
@@ -59,8 +59,8 @@ float2 ellipseRotateVec2(float2 v, float angle, float radiusRatio /* A/B */) {
 }
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const CustomSymbolIconDrawableUBO& drawable [[buffer(0)]],
-                                device const CustomSymbolIconParametersUBO& parameters [[buffer(1)]]) {
+                                device const CustomSymbolIconDrawableUBO& drawable [[buffer(1)]],
+                                device const CustomSymbolIconParametersUBO& parameters [[buffer(2)]]) {
 
     const float2 extrude = glMod(float2(vertx.a_pos), 2.0) * 2.0 - 1.0;
     const float2 anchor = (parameters.anchor - float2(0.5, 0.5)) * 2.0;

@@ -22,13 +22,13 @@ struct ShaderSource<BuiltIn::HeatmapShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(3)]];
+    short2 pos [[attribute(4)]];
 
 #if !defined(HAS_UNIFORM_u_weight)
-    float2 weight [[attribute(4)]];
+    float2 weight [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_radius)
-    float2 radius [[attribute(5)]];
+    float2 radius [[attribute(6)]];
 #endif
 };
 
@@ -67,9 +67,9 @@ constant const float ZERO = 1.0 / 255.0 / 16.0;
 #define GAUSS_COEF 0.3989422804014327
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const HeatmapDrawableUBO& drawable [[buffer(0)]],
-                                device const HeatmapEvaluatedPropsUBO& props [[buffer(1)]],
-                                device const HeatmapInterpolateUBO& interp [[buffer(2)]]) {
+                                device const HeatmapDrawableUBO& drawable [[buffer(1)]],
+                                device const HeatmapEvaluatedPropsUBO& props [[buffer(2)]],
+                                device const HeatmapInterpolateUBO& interp [[buffer(3)]]) {
 
 #if defined(HAS_UNIFORM_u_weight)
     const auto weight = props.weight;
@@ -117,7 +117,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const HeatmapEvaluatedPropsUBO& props [[buffer(1)]]) {
+                            device const HeatmapEvaluatedPropsUBO& props [[buffer(2)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif

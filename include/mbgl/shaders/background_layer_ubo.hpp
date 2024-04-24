@@ -40,20 +40,18 @@ struct alignas(16) BackgroundPatternLayerUBO {
     /*  8 */ std::array<float, 2> pattern_br_a;
     /* 16 */ std::array<float, 2> pattern_tl_b;
     /* 24 */ std::array<float, 2> pattern_br_b;
-    /* 32 */ std::array<float, 2> texsize;
-    /* 40 */ std::array<float, 2> pattern_size_a;
-    /* 48 */ std::array<float, 2> pattern_size_b;
-    /* 56 */ float scale_a;
-    /* 60 */ float scale_b;
-    /* 64 */ float mix;
-    /* 68 */ float opacity;
-    /* 72 */ float pad1, pad2;
-    /* 80 */
+    /* 32 */ std::array<float, 2> pattern_size_a;
+    /* 40 */ std::array<float, 2> pattern_size_b;
+    /* 48 */ float scale_a;
+    /* 52 */ float scale_b;
+    /* 56 */ float mix;
+    /* 60 */ float opacity;
+    /* 64 */
 };
-static_assert(sizeof(BackgroundPatternLayerUBO) == 80);
+static_assert(sizeof(BackgroundPatternLayerUBO) == 64);
 
 enum {
-    idBackgroundDrawableUBO,
+    idBackgroundDrawableUBO = globalUBOCount,
     idBackgroundLayerUBO,
     backgroundUBOCount
 };

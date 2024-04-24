@@ -1,12 +1,5 @@
 #define SDF_PX 8.0
 
-layout (std140) uniform SymbolDynamicUBO {
-    highp float u_fade_change;
-    highp float u_camera_to_center_distance;
-    highp float u_aspect_ratio;
-    highp float dynamic_pad1;
-};
-
 layout (std140) uniform SymbolDrawableUBO {
     highp mat4 u_matrix;
     highp mat4 u_label_plane_matrix;

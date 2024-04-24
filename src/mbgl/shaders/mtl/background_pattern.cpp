@@ -4,8 +4,9 @@
 namespace mbgl {
 namespace shaders {
 
-const std::array<UniformBlockInfo, 2>
+const std::array<UniformBlockInfo, 3>
     ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>::uniforms = {
+        UniformBlockInfo{false, true, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
         UniformBlockInfo{true, false, sizeof(BackgroundPatternDrawableUBO), idBackgroundDrawableUBO},
         UniformBlockInfo{true, true, sizeof(BackgroundPatternLayerUBO), idBackgroundLayerUBO},
 };

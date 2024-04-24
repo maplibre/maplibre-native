@@ -203,11 +203,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 const auto matrix = LayerTweaker::getTileMatrix(
                     tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-                const shaders::LineDynamicUBO dynamicUBO = {
-                    /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
-                    0,
-                    0};
-
                 const shaders::LineDrawableUBO drawableUBO = {/*matrix = */ util::cast<float>(matrix),
                                                               /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
                                                               0,
@@ -222,7 +217,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                                                             0,
                                                                             0};
                 auto& drawableUniforms = drawable.mutableUniformBuffers();
-                drawableUniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
                 drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
                 drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);

@@ -11,7 +11,7 @@ struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 2> uniforms;
+    static const std::array<UniformBlockInfo, 3> uniforms;
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
@@ -21,7 +21,7 @@ struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Metal>
 using namespace metal;
 
 struct VertexStage {
-    short2 position [[attribute(2)]];
+    short2 position [[attribute(3)]];
 };
 
 struct FragmentStage {
@@ -42,19 +42,17 @@ struct alignas(16) BackgroundPatternLayerUBO {
     float2 pattern_br_a;
     float2 pattern_tl_b;
     float2 pattern_br_b;
-    float2 texsize;
     float2 pattern_size_a;
     float2 pattern_size_b;
     float scale_a;
     float scale_b;
     float mix;
     float opacity;
-    float pad1, pad2;
 };
 
 FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
-                                device const BackgroundPatternDrawableUBO& drawableUBO [[buffer(0)]],
-                                device const BackgroundPatternLayerUBO& layerUBO [[buffer(1)]]) {
+                                device const BackgroundPatternDrawableUBO& drawableUBO [[buffer(1)]],
+                                device const BackgroundPatternLayerUBO& layerUBO [[buffer(2)]]) {
     const float2 pos = float2(in.position);
     const float2 pos_a = get_pattern_pos(drawableUBO.pixel_coord_upper,
                                          drawableUBO.pixel_coord_lower,
@@ -74,18 +72,20 @@ FragmentStage vertex vertexMain(VertexStage in [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const BackgroundPatternLayerUBO& layerUBO [[buffer(1)]],
+                            device const GlobalPaintParamsUBO& paintParamsUBO [[buffer(0)]],
+                            device const BackgroundPatternLayerUBO& layerUBO [[buffer(2)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
 
+    const float2 texsize = paintParamsUBO.pattern_atlas_texsize;
     const float2 imagecoord = glMod(float2(in.pos_a), 1.0);
-    const float2 pos = mix(layerUBO.pattern_tl_a / layerUBO.texsize, layerUBO.pattern_br_a / layerUBO.texsize, imagecoord);
+    const float2 pos = mix(layerUBO.pattern_tl_a / texsize, layerUBO.pattern_br_a / texsize, imagecoord);
     const float4 color1 = image.sample(image_sampler, pos);
     const float2 imagecoord_b = glMod(float2(in.pos_b), 1.0);
-    const float2 pos2 = mix(layerUBO.pattern_tl_b / layerUBO.texsize, layerUBO.pattern_br_b / layerUBO.texsize, imagecoord_b);
+    const float2 pos2 = mix(layerUBO.pattern_tl_b / texsize, layerUBO.pattern_br_b / texsize, imagecoord_b);
     const float4 color2 = image.sample(image_sampler, pos2);
 
     return half4(mix(color1, color2, layerUBO.mix) * layerUBO.opacity);

@@ -8,13 +8,6 @@ namespace shaders {
 //
 // Line
 
-struct alignas(16) LineDynamicUBO {
-    /* 0 */ std::array<float, 2> units_to_pixels;
-    /* 8 */ float pad1, pad2;
-    /* 16 */
-};
-static_assert(sizeof(LineDynamicUBO) == 16);
-
 struct alignas(16) LineDrawableUBO {
     std::array<float, 4 * 4> matrix;
     float ratio;
@@ -122,8 +115,7 @@ struct alignas(16) LineEvaluatedPropsUBO {
 static_assert(sizeof(LineEvaluatedPropsUBO) % 16 == 0);
 
 enum {
-    idLineDynamicUBO,
-    idLineDrawableUBO,
+    idLineDrawableUBO = globalUBOCount,
     idLineInterpolationUBO,
     idLineTilePropertiesUBO,
     idLineEvaluatedPropsUBO,
