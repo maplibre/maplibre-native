@@ -30,6 +30,10 @@ struct SymbolDrawableUBO {
     highp vec2 drawable_pad1;
 };
 
+layout (std140) uniform SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawableUBO[60];
+};
+
 layout (std140) uniform SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;

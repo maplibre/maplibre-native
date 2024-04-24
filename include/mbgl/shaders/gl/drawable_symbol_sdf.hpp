@@ -22,7 +22,6 @@ layout (location = 4) in float a_fade_opacity;
 // [ text-size(lowerZoomStop, feature),
 //   text-size(upperZoomStop, feature) ]
 
-
 layout (std140) uniform GlobalPaintParamsUBO {
     highp vec2 u_pattern_atlas_texsize;
     highp vec2 u_units_to_pixels;
