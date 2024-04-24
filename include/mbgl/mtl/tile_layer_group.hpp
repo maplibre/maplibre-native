@@ -27,7 +27,6 @@ public:
 protected:
     std::optional<MTLDepthStencilStatePtr> stateNone;
     std::optional<MTLDepthStencilStatePtr> stateDepth;
-    UniformBufferArray uniformBuffers;
 };
 
 } // namespace mtl

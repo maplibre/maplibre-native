@@ -22,10 +22,6 @@ void UniformBlockGL::bindBuffer(const gfx::UniformBuffer& uniformBuffer) {
                                        uniformBufferGL.getSize()));
 }
 
-void UniformBlockGL::bindBuffer(const gfx::UniformBuffer& uniformBuffer) {
-    bindBuffer(uniformBuffer, 0);
-}
-
 void UniformBlockGL::unbindBuffer() {
     GLint binding = index;
     MBGL_CHECK_ERROR(glBindBufferBase(GL_UNIFORM_BUFFER, binding, 0));

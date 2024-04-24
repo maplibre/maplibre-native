@@ -28,6 +28,7 @@ struct VertexStage {
     float4 data [[attribute(1)]];
     float3 projected_pos [[attribute(2)]];
     float fade_opacity [[attribute(3)]];
+
 #if !defined(HAS_UNIFORM_u_fill_color)
     float4 fill_color [[attribute(4)]];
 #endif
