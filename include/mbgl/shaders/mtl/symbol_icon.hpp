@@ -126,8 +126,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const uint32_t& uboIndex [[buffer(1)]],
-                            device const SymbolDrawableUBO* drawableVector [[buffer(2)]],
                             device const SymbolTilePropsUBO& tileprops [[buffer(3)]],
                             device const SymbolEvaluatedPropsUBO& props [[buffer(5)]],
                             texture2d<float, access::sample> image [[texture(0)]],
@@ -135,8 +133,6 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
-
-    device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_opacity)
     const float opacity = (tileprops.is_text ? props.text_opacity : props.icon_opacity) * in.fade_opacity;
