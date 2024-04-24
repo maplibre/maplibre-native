@@ -20,7 +20,7 @@ import org.maplibre.android.testapp.utils.IconUtils
 import java.util.*
 
 /**
- * Test activity showcasing how to dynamically update InfoWindow when Using an MapboxMap.InfoWindowAdapter.
+ * Test activity showcasing how to dynamically update InfoWindow when Using an MapLibreMap.InfoWindowAdapter.
  */
 class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var maplibreMap: MapLibreMap

@@ -101,6 +101,12 @@ public:
 
     void runTweakers(const RenderTree&, PaintParameters&);
 
+    /// Get the uniform buffers attached to this layer group
+    virtual const gfx::UniformBufferArray& getUniformBuffers() const = 0;
+
+    /// Get the mutable uniform buffer array attached to this layer group
+    virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
+
 protected:
     const Type type;
     bool enabled = true;

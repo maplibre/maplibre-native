@@ -27,28 +27,19 @@ void HeatmapTextureLayerTweaker::execute(LayerGroupBase& layerGroup, const Paint
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    const auto getDrawableUBO = [&]() -> auto& {
-        if (!drawableBuffer) {
-            const auto& size = parameters.staticData.backendSize;
-            mat4 viewportMat;
-            matrix::ortho(viewportMat, 0, size.width, size.height, 0, -1, 1);
-            const HeatmapTextureDrawableUBO drawableUBO = {
-                /* .matrix = */ util::cast<float>(viewportMat),
-                /* .world = */ {static_cast<float>(size.width), static_cast<float>(size.height)},
-                /* .opacity = */ evaluated.get<HeatmapOpacity>(),
-                /* .pad1 = */ 0,
-            };
-            parameters.context.emplaceOrUpdateUniformBuffer(drawableBuffer, &drawableUBO);
-        }
-        return drawableBuffer;
-    };
+    propertiesUpdated = false;
 
-    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
-        if (!checkTweakDrawable(drawable)) {
-            return;
-        }
-        drawable.mutableUniformBuffers().set(idHeatmapTextureDrawableUBO, getDrawableUBO());
-    });
+    mat4 matrix;
+    const auto& size = parameters.staticData.backendSize;
+    matrix::ortho(matrix, 0, size.width, size.height, 0, -1, 1);
+
+    const HeatmapTexturePropsUBO propsUBO = {/* .matrix = */ util::cast<float>(matrix),
+                                             /* .opacity = */ evaluated.get<HeatmapOpacity>(),
+                                             /* .pad1,2,3 = */ 0,
+                                             0,
+                                             0};
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
+    layerUniforms.createOrUpdate(idHeatmapTexturePropsUBO, &propsUBO, parameters.context);
 }
 
 } // namespace mbgl

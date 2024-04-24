@@ -19,18 +19,28 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
 layout (location = 0) in vec2 a_pos_normal;
 layout (location = 1) in vec4 a_data;
 
+layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float global_pad1, global_pad2;
+};
 layout (std140) uniform FillOutlineTriangulatedDrawableUBO {
     highp mat4 u_matrix;
-    highp vec2 u_units_to_pixels;
     mediump float u_ratio;
-    lowp float pad0;
+    lowp float drawable_pad1, drawable_pad2, drawable_pad3;
 };
-
-layout (std140) uniform FillOutlineTriangulatedPropertiesUBO {
+layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
-    lowp float u_opacity;
-    mediump float u_width;
-    highp vec2 pad1;
+    highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_from_scale;
+    highp float u_to_scale;
 };
 
 out vec2 v_normal;
@@ -76,11 +86,13 @@ void main() {
     v_width = outset;
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform FillOutlineTriangulatedPropertiesUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_color;
-    lowp float u_opacity;
-    mediump float u_width;
-    highp vec2 pad1;
+    highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_from_scale;
+    highp float u_to_scale;
 };
 
 in float v_width;
@@ -97,7 +109,7 @@ void main() {
     float blur2 = (1.0 / DEVICE_PIXEL_RATIO) * v_gamma_scale;
     float alpha = clamp(min(dist + blur2, v_width - dist) / blur2, 0.0, 1.0);
 
-    fragColor = u_color * (alpha * u_opacity);
+    fragColor = u_outline_color * (alpha * u_opacity);
 
 #ifdef OVERDRAW_INSPECTOR
     fragColor = vec4(1.0);

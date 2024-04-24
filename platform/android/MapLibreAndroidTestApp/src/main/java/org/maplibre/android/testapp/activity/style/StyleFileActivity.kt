@@ -21,7 +21,7 @@ import java.io.FileWriter
 import java.lang.ref.WeakReference
 
 /**
- * Test activity showcasing how to use a file:// resource for the style.json and how to use MapboxMap#setStyleJson.
+ * Test activity showcasing how to use a file:// resource for the style.json and how to use MapLibreMap#setStyleJson.
  */
 class StyleFileActivity : AppCompatActivity() {
     private lateinit var maplibreMap: MapLibreMap
@@ -83,8 +83,8 @@ class StyleFileActivity : AppCompatActivity() {
         override fun onPostExecute(json: String) {
             super.onPostExecute(json)
             Timber.d("Read json, %s", json)
-            val mapboxMap = maplibreMap.get()
-            mapboxMap?.setStyle(Style.Builder().fromJson(json))
+            val maplibreMap = maplibreMap.get()
+            maplibreMap?.setStyle(Style.Builder().fromJson(json))
         }
 
         init {
@@ -127,8 +127,8 @@ class StyleFileActivity : AppCompatActivity() {
 
         override fun onPostExecute(result: Long) {
             // Actual file:// usage
-            val mapboxMap = maplibreMap.get()
-            mapboxMap?.setStyle(
+            val maplibreMap = maplibreMap.get()
+            maplibreMap?.setStyle(
                 Style.Builder().fromUri("file://" + cacheStyleFile!!.absolutePath)
             )
         }

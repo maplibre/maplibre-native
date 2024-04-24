@@ -123,7 +123,7 @@ public class Marker extends Annotation {
    */
   public void setPosition(LatLng position) {
     this.position = position;
-    MapLibreMap map = getMapboxMap();
+    MapLibreMap map = getMapLibreMap();
     if (map != null) {
       map.updateMarker(this);
     }
@@ -148,7 +148,7 @@ public class Marker extends Annotation {
   public void setIcon(@Nullable Icon icon) {
     this.icon = icon;
     this.iconId = icon != null ? icon.getId() : null;
-    MapLibreMap map = getMapboxMap();
+    MapLibreMap map = getMapLibreMap();
     if (map != null) {
       map.updateMarker(this);
     }
@@ -196,7 +196,7 @@ public class Marker extends Annotation {
       if (mapView.getContext() != null) {
         infoWindow.adaptDefaultMarker(this, maplibreMap, mapView);
       }
-      MapLibreMap map = getMapboxMap();
+      MapLibreMap map = getMapLibreMap();
       if (map != null) {
         map.updateMarker(this);
       }
@@ -208,15 +208,15 @@ public class Marker extends Annotation {
    * Do not use this method, used internally by the SDK. Use {@link MapLibreMap#selectMarker(Marker)}
    * if you want to programmatically display the markers info window.
    *
-   * @param maplibreMap The hosting mapbox map.
+   * @param maplibreMap The hosting MapLibreMap.
    * @param mapView   The hosting map view.
    * @return The info window that was shown.
    */
   @Nullable
   public InfoWindow showInfoWindow(@NonNull MapLibreMap maplibreMap, @NonNull MapView mapView) {
-    setMapboxMap(maplibreMap);
+    setMapLibreMap(maplibreMap);
     setMapView(mapView);
-    MapLibreMap.InfoWindowAdapter infoWindowAdapter = getMapboxMap().getInfoWindowAdapter();
+    MapLibreMap.InfoWindowAdapter infoWindowAdapter = getMapLibreMap().getInfoWindowAdapter();
     if (infoWindowAdapter != null) {
       // end developer is using a custom InfoWindowAdapter
       View content = infoWindowAdapter.getInfoWindow(this);
@@ -244,7 +244,7 @@ public class Marker extends Annotation {
   @Nullable
   private InfoWindow getInfoWindow(@NonNull MapView mapView) {
     if (infoWindow == null && mapView.getContext() != null) {
-      infoWindow = new InfoWindow(mapView, R.layout.maplibre_infowindow_content, getMapboxMap());
+      infoWindow = new InfoWindow(mapView, R.layout.maplibre_infowindow_content, getMapLibreMap());
     }
     return infoWindow;
   }

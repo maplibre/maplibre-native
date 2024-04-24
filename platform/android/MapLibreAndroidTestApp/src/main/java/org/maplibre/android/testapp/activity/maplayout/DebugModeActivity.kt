@@ -56,8 +56,8 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
     }
 
     private fun setupMapView(savedInstanceState: Bundle?) {
-        val mapboxMapOptions = setupMapboxMapOptions()
-        mapView = MapView(this, mapboxMapOptions)
+        val maplibreMapOptions = setupMapLibreMapOptions()
+        mapView = MapView(this, maplibreMapOptions)
         (findViewById<View>(R.id.coordinator_layout) as ViewGroup).addView(mapView, 0)
         mapView.addOnDidFinishLoadingStyleListener {
             if (maplibreMap != null) {
@@ -70,7 +70,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         mapView.addOnDidFinishLoadingStyleListener { Timber.d("Style loaded") }
     }
 
-    protected open fun setupMapboxMapOptions(): MapLibreMapOptions {
+    protected open fun setupMapLibreMapOptions(): MapLibreMapOptions {
         return MapLibreMapOptions.createFromAttributes(this, null)
     }
 

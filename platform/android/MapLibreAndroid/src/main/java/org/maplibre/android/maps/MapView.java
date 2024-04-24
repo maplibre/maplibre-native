@@ -122,7 +122,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   @UiThread
   public MapView(@NonNull Context context, @Nullable MapLibreMapOptions options) {
     super(context);
-    Timber.d("MapView constructed with context and MapboxMapOptions");
+    Timber.d("MapView constructed with context and MapLibreMapOptions");
     initialize(context, options == null ? MapLibreMapOptions.createFromAttributes(context) : options);
   }
 
@@ -155,7 +155,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     // callback for focal point invalidation
     focalInvalidator.addListener(createFocalPointChangeListener());
 
-    // setup components for MapboxMap creation
+    // setup components for MapLibreMap creation
     Projection proj = new Projection(nativeMapView, this);
     UiSettings uiSettings = new UiSettings(proj, focalInvalidator, getPixelRatio(), this);
     LongSparseArray<Annotation> annotationsArray = new LongSparseArray<>();
@@ -169,7 +169,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
             annotations, markers, polygons, polylines, shapeAnnotations);
     Transform transform = new Transform(this, nativeMapView, cameraDispatcher);
 
-    // MapboxMap
+    // MapLibreMap
     List<MapLibreMap.OnDeveloperAnimationListener> developerAnimationListeners = new ArrayList<>();
     maplibreMap = new MapLibreMap(nativeMapView, transform, uiSettings, proj, registerTouchListener, cameraDispatcher,
             developerAnimationListeners);
@@ -193,7 +193,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     // notify Map object about current connectivity state
     nativeMapView.setReachability(MapLibre.isConnected());
 
-    // initialise MapboxMap
+    // initialise MapLibreMap
     if (savedInstanceState == null) {
       maplibreMap.initialise(context, maplibreMapOptions);
     } else {
@@ -226,7 +226,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     attrView.setFocusable(true);
     attrView.setContentDescription(getResources().getString(R.string.maplibre_attributionsIconContentDescription));
     attrView.setImageDrawable(BitmapUtils.getDrawableFromRes(getContext(), R.drawable.maplibre_info_bg_selector));
-    // inject widgets with MapboxMap
+    // inject widgets with MapLibreMap
     attrView.setOnClickListener(attributionClickListener = new AttributionClickListener(getContext(), maplibreMap));
     return attrView;
   }
@@ -1147,11 +1147,11 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   @Nullable
-  MapLibreMap getMapboxMap() {
+  MapLibreMap getMapLibreMap() {
     return maplibreMap;
   }
 
-  void setMapboxMap(MapLibreMap maplibreMap) {
+  void setMapLibreMap(MapLibreMap maplibreMap) {
     this.maplibreMap = maplibreMap;
   }
 

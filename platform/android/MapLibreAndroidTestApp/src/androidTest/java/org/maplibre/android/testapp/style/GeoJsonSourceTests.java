@@ -38,44 +38,44 @@ public class GeoJsonSourceTests extends EspressoTest {
   @Test
   public void testFeatureCollection() {
     validateTestSetup();
-    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
       GeoJsonSource source = null;
       source = new GeoJsonSource("source", FeatureCollection
               .fromJson(ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_collection)));
-      mapboxMap.getStyle().addSource(source);
-      mapboxMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
+      maplibreMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
     });
   }
 
   @Test
   public void testPointGeometry() {
     validateTestSetup();
-    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
       GeoJsonSource source = new GeoJsonSource("source", Point.fromLngLat(0d, 0d));
-      mapboxMap.getStyle().addSource(source);
-      mapboxMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
+      maplibreMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
     });
   }
 
   @Test
   public void testFeatureProperties() {
     validateTestSetup();
-    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
       GeoJsonSource source = null;
       source = new GeoJsonSource("source",
               ResourceUtils.readRawResource(rule.getActivity(), R.raw.test_feature_properties));
-      mapboxMap.getStyle().addSource(source);
-      mapboxMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
+      maplibreMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
     });
   }
 
   @Test
   public void testUpdateCoalescing() {
     validateTestSetup();
-    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
       GeoJsonSource source = new GeoJsonSource("source");
-      mapboxMap.getStyle().addSource(source);
-      mapboxMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
+      maplibreMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addLayer(new CircleLayer("layer", source.getId()));
 
       source.setGeoJson(Point.fromLngLat(0, 0));
       source.setGeoJson(Point.fromLngLat(-25, -25));
@@ -83,8 +83,8 @@ public class GeoJsonSourceTests extends EspressoTest {
 
       source.setGeoJson(Point.fromLngLat(20, 55));
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
-      assertEquals(1, mapboxMap.queryRenderedFeatures(
-              mapboxMap.getProjection().toScreenLocation(
+      assertEquals(1, maplibreMap.queryRenderedFeatures(
+              maplibreMap.getProjection().toScreenLocation(
                       new LatLng(55, 20)), "layer").size());
     });
   }
@@ -93,13 +93,13 @@ public class GeoJsonSourceTests extends EspressoTest {
   public void testClearCollectionDuringConversion() {
     // https://github.com/mapbox/mapbox-gl-native/issues/14565
     validateTestSetup();
-    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
       for (int j = 0; j < 1000; j++) {
         List<Feature> features = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
           features.add(Feature.fromGeometry(Point.fromLngLat(0, 0)));
         }
-        mapboxMap.getStyle().addSource(new GeoJsonSource("source" + j, FeatureCollection.fromFeatures(features)));
+        maplibreMap.getStyle().addSource(new GeoJsonSource("source" + j, FeatureCollection.fromFeatures(features)));
         features.clear();
       }
     });
@@ -142,16 +142,16 @@ public class GeoJsonSourceTests extends EspressoTest {
 
   protected void testFeatureFromResource(final @RawRes int resource) {
     validateTestSetup();
-    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
       GeoJsonSource source = new GeoJsonSource("source");
-      mapboxMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addSource(source);
       Layer layer = new CircleLayer("layer", source.getId());
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       source.setGeoJson(Feature.fromJson(ResourceUtils.readRawResource(rule.getActivity(), resource)));
 
-      mapboxMap.getStyle().removeLayer(layer);
-      mapboxMap.getStyle().removeSource(source);
+      maplibreMap.getStyle().removeLayer(layer);
+      maplibreMap.getStyle().removeSource(source);
     });
   }
 

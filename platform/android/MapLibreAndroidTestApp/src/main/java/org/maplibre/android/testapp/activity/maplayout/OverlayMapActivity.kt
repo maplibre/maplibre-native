@@ -70,10 +70,10 @@ class OverlayMapActivity : AppCompatActivity() {
         private lateinit var paint: Paint
 
         @SuppressLint("DrawAllocation") // only happens once
-        override fun onDraw(canvas: Canvas?) {
+        override fun onDraw(canvas: Canvas) {
             super.onDraw(canvas)
 
-            canvas?.let {
+            canvas.let {
                 if (!::paint.isInitialized) {
                     paint = Paint()
                     paint.color = Color.BLACK

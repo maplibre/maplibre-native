@@ -103,7 +103,7 @@ public final class Polygon extends BasePointCollection {
 
   @Override
   void update() {
-    MapLibreMap maplibreMap = getMapboxMap();
+    MapLibreMap maplibreMap = getMapLibreMap();
     if (maplibreMap != null) {
       maplibreMap.updatePolygon(this);
     }

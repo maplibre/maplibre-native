@@ -41,19 +41,6 @@ std::array<float, 2> toArray(const Size& s) {
     return util::cast<float>(std::array<uint32_t, 2>{s.width, s.height});
 }
 
-SymbolDrawablePaintUBO buildPaintUBO(bool isText, const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
-    return {
-        /*.fill_color=*/isText ? constOrDefault<TextColor>(evaluated) : constOrDefault<IconColor>(evaluated),
-        /*.halo_color=*/
-        isText ? constOrDefault<TextHaloColor>(evaluated) : constOrDefault<IconHaloColor>(evaluated),
-        /*.opacity=*/isText ? constOrDefault<TextOpacity>(evaluated) : constOrDefault<IconOpacity>(evaluated),
-        /*.halo_width=*/
-        isText ? constOrDefault<TextHaloWidth>(evaluated) : constOrDefault<IconHaloWidth>(evaluated),
-        /*.halo_blur=*/isText ? constOrDefault<TextHaloBlur>(evaluated) : constOrDefault<IconHaloBlur>(evaluated),
-        /*.padding=*/0,
-    };
-}
-
 } // namespace
 
 void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) {
@@ -70,24 +57,24 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    if (propertiesUpdated) {
-        textPropertiesUpdated = true;
-        iconPropertiesUpdated = true;
+    if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
+        const SymbolEvaluatedPropsUBO propsUBO = {/*.text_fill_color=*/constOrDefault<TextColor>(evaluated),
+                                                  /*.text_halo_color=*/constOrDefault<TextHaloColor>(evaluated),
+                                                  /*.text_opacity=*/constOrDefault<TextOpacity>(evaluated),
+                                                  /*.text_halo_width=*/constOrDefault<TextHaloWidth>(evaluated),
+                                                  /*.text_halo_blur=*/constOrDefault<TextHaloBlur>(evaluated),
+                                                  0,
+                                                  /*.icon_fill_color=*/constOrDefault<IconColor>(evaluated),
+                                                  /*.icon_halo_color=*/constOrDefault<IconHaloColor>(evaluated),
+                                                  /*.icon_opacity=*/constOrDefault<IconOpacity>(evaluated),
+                                                  /*.icon_halo_width=*/constOrDefault<IconHaloWidth>(evaluated),
+                                                  /*.icon_halo_blur=*/constOrDefault<IconHaloBlur>(evaluated),
+                                                  0};
+        context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
-
-    const auto camDist = state.getCameraToCenterDistance();
-
-    const SymbolDynamicUBO dynamicUBO = {/*.fade_change=*/parameters.symbolFadeChange,
-                                         /*.camera_to_center_distance=*/camDist,
-                                         /*.aspect_ratio=*/state.getSize().aspectRatio(),
-                                         0};
-
-    if (!dynamicBuffer) {
-        dynamicBuffer = parameters.context.createUniformBuffer(&dynamicUBO, sizeof(dynamicUBO));
-    } else {
-        dynamicBuffer->update(&dynamicUBO, sizeof(dynamicUBO));
-    }
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
+    layerUniforms.set(idSymbolEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
     int i = 0;
     std::vector<SymbolComputeUBO> computeUBOVector(layerGroup.getDrawableCount());
@@ -95,6 +82,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     constexpr bool aligned = false;
     constexpr bool nearClipped = false;
     constexpr bool inViewportPixelUnits = false;
+    const auto camDist = state.getCameraToCenterDistance();
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
             return;
@@ -165,38 +153,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     if (layerGroup.getDrawableCount() > 60 ) {
         assert(false);
     }
-    
-    auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idSymbolDrawableUBO, drawableBuffer);
-    layerUniforms.set(idSymbolDynamicUBO, dynamicBuffer);
-    
-    i = 0;
-    visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
-        if (!drawable.getTileID() || !drawable.getData()) {
-            return;
-        }
-
-        const auto tileID = drawable.getTileID()->toUnwrapped();
-        const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
-        const auto isText = (symbolData.symbolType == SymbolType::Text);
-
-        if (isText && (!textPaintBuffer || textPropertiesUpdated)) {
-            const auto props = buildPaintUBO(true, evaluated);
-            textPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
-            textPropertiesUpdated = false;
-        } else if (!isText && (!iconPaintBuffer || iconPropertiesUpdated)) {
-            const auto props = buildPaintUBO(false, evaluated);
-            iconPaintBuffer = parameters.context.createUniformBuffer(&props, sizeof(props));
-            iconPropertiesUpdated = false;
-        }
-        
-        auto& drawableUniforms = drawable.mutableUniformBuffers();
-        //drawableUniforms.set(idSymbolDrawableUBO, drawableBuffer, i * sizeof(SymbolDrawableUBO));
-        //drawableUniforms.set(idSymbolDynamicUBO, dynamicBuffer);
-        drawableUniforms.set(idSymbolPaintUBO, isText ? textPaintBuffer : iconPaintBuffer);
-        
-        i++;
-    });
 }
 
 } // namespace mbgl

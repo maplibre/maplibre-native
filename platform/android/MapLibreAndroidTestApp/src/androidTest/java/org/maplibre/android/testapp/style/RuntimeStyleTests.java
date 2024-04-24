@@ -183,35 +183,35 @@ public class RuntimeStyleTests extends EspressoTest {
   @Test
   public void testAddRemoveSource() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
-      mapboxMap.getStyle().addSource(new VectorSource("my-source", "maptiler://sources/hillshades"));
-      mapboxMap.getStyle().removeSource("my-source");
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
+      maplibreMap.getStyle().addSource(new VectorSource("my-source", "maptiler://sources/hillshades"));
+      maplibreMap.getStyle().removeSource("my-source");
 
       // Add initial source
-      mapboxMap.getStyle().addSource(new VectorSource("my-source", "maptiler://sources/hillshades"));
+      maplibreMap.getStyle().addSource(new VectorSource("my-source", "maptiler://sources/hillshades"));
 
       // Remove
-      boolean removeOk = mapboxMap.getStyle().removeSource("my-source");
+      boolean removeOk = maplibreMap.getStyle().removeSource("my-source");
       assertTrue(removeOk);
-      assertNull(mapboxMap.getStyle().getLayer("my-source"));
+      assertNull(maplibreMap.getStyle().getLayer("my-source"));
 
       // Add
       Source source = new VectorSource("my-source", "maptiler://sources/hillshades");
-      mapboxMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addSource(source);
 
       // Remove, preserving the reference
-      mapboxMap.getStyle().removeSource(source);
+      maplibreMap.getStyle().removeSource(source);
 
       // Re-add the reference...
-      mapboxMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addSource(source);
 
       // Ensure it's there
-      Assert.assertNotNull(mapboxMap.getStyle().getSource(source.getId()));
+      Assert.assertNotNull(maplibreMap.getStyle().getSource(source.getId()));
 
       // Test adding a duplicate source
       try {
         Source source2 = new VectorSource("my-source", "maptiler://sources/hillshades");
-        mapboxMap.getStyle().addSource(source2);
+        maplibreMap.getStyle().addSource(source2);
         fail("Should not have been allowed to add a source with a duplicate id");
       } catch (CannotAddSourceException cannotAddSourceException) {
         // OK
@@ -223,9 +223,9 @@ public class RuntimeStyleTests extends EspressoTest {
   @Test
   public void testVectorSourceUrlGetter() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       VectorSource source = new VectorSource("my-source", "maptiler://sources/hillshades");
-      mapboxMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addSource(source);
       assertEquals("maptiler://sources/hillshades", source.getUri());
     });
   }
@@ -233,9 +233,9 @@ public class RuntimeStyleTests extends EspressoTest {
   @Test
   public void testRasterSourceUrlGetter() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       RasterSource source = new RasterSource("my-source", "maptiler://sources/hillshades");
-      mapboxMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addSource(source);
       assertEquals("maptiler://sources/hillshades", source.getUri());
     });
   }
@@ -243,9 +243,9 @@ public class RuntimeStyleTests extends EspressoTest {
   @Test
   public void testGeoJsonSourceUrlGetter() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       GeoJsonSource source = new GeoJsonSource("my-source");
-      mapboxMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addSource(source);
       assertNull(source.getUri());
       source.setUri("http://mapbox.com/my-file.json");
       assertEquals("http://mapbox.com/my-file.json", source.getUri());
@@ -271,28 +271,28 @@ public class RuntimeStyleTests extends EspressoTest {
 
   @Test
   public void testRemoveNonExistingSource() {
-    invoke(maplibreMap, (uiController, mapboxMap) -> mapboxMap.getStyle().removeSource("source"));
+    invoke(maplibreMap, (uiController, maplibreMap) -> maplibreMap.getStyle().removeSource("source"));
   }
 
   @Test
   public void testRemoveNonExistingLayer() {
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
-      assertFalse(mapboxMap.getStyle().removeLayer("layer"));
-      assertFalse(mapboxMap.getStyle().removeLayerAt(mapboxMap.getStyle().getLayers().size() + 1));
-      assertFalse(mapboxMap.getStyle().removeLayerAt(-1));
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
+      assertFalse(maplibreMap.getStyle().removeLayer("layer"));
+      assertFalse(maplibreMap.getStyle().removeLayerAt(maplibreMap.getStyle().getLayers().size() + 1));
+      assertFalse(maplibreMap.getStyle().removeLayerAt(-1));
     });
   }
 
   @Test
   public void testRemoveExistingLayer() {
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
-      Layer firstLayer = mapboxMap.getStyle().getLayers().get(0);
-      assertTrue(mapboxMap.getStyle().removeLayer(firstLayer));
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
+      Layer firstLayer = maplibreMap.getStyle().getLayers().get(0);
+      assertTrue(maplibreMap.getStyle().removeLayer(firstLayer));
 
-      firstLayer = mapboxMap.getStyle().getLayers().get(0);
-      assertTrue(mapboxMap.getStyle().removeLayer(firstLayer.getId()));
+      firstLayer = maplibreMap.getStyle().getLayers().get(0);
+      assertTrue(maplibreMap.getStyle().removeLayer(firstLayer.getId()));
 
-      assertTrue(mapboxMap.getStyle().removeLayerAt(0));
+      assertTrue(maplibreMap.getStyle().removeLayerAt(0));
     });
   }
 

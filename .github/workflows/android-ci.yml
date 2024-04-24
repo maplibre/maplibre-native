@@ -137,72 +137,20 @@ jobs:
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
 
-      - name: Build UI tests
-        if: github.ref == 'refs/heads/main'
+      - name: Build Instrumentation Tests, copy to platform/android
         run: |
           ./gradlew assembleLegacyDebug assembleLegacyDebugAndroidTest -PtestBuildType=debug
+          cp MapLibreAndroidTestApp/build/outputs/apk/legacy/debug/MapLibreAndroidTestApp-legacy-debug.apk InstrumentationTestApp.apk
+          cp MapLibreAndroidTestApp/build/outputs/apk/androidTest/legacy/debug/MapLibreAndroidTestApp-legacy-debug-androidTest.apk InstrumentationTests.apk
 
-      - name: Configure AWS Credentials
-        if: github.ref == 'refs/heads/main'
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-2
-          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 21600
-          role-session-name: MySessionName
-
-      - name: Create upload
-        if: github.ref == 'refs/heads/main'
-        uses: realm/aws-devicefarm/create-upload@master
-        id: upload-android-app
-        with:
-          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
-          name: MapLibreAndroidTestApp-debug.apk
-          type: ANDROID_APP
-
-      - name: Create upload
-        if: github.ref == 'refs/heads/main'
-        uses: realm/aws-devicefarm/create-upload@master
-        id: upload-android-test
-        with:
-          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
-          name: MapLibreAndroidTestApp-debug-androidTest.apk
-          type: INSTRUMENTATION_TEST_PACKAGE
-
-      - name: Upload Android UI test
-        if: github.ref == 'refs/heads/main'
-        run: |
-          curl -T MapLibreAndroidTestApp/build/outputs/apk/legacy/debug/MapLibreAndroidTestApp-legacy-debug.apk '${{ steps.upload-android-app.outputs.url }}'
-          curl -T MapLibreAndroidTestApp/build/outputs/apk/androidTest/legacy/debug/MapLibreAndroidTestApp-legacy-debug-androidTest.apk '${{ steps.upload-android-test.outputs.url }}'
-
-      - name: Write uploads.env
-        if: github.ref == 'refs/heads/main'
-        working-directory: .
-        run: |
-          echo "ANDROID_APP_ARN=${{ steps.upload-android-app.outputs.arn }}" >> uploads.env
-          echo "ANDROID_TEST_ARN=${{ steps.upload-android-test.outputs.arn }}" >> uploads.env
-
-      - uses: actions/upload-artifact@v4
-        if: github.ref == 'refs/heads/main'
-        with:
-          if-no-files-found: error
-          name: uploadsEnv
-          path: uploads.env
-
-      - name: Store debug artifacts
+      - name: Upload android-ui-test
         uses: actions/upload-artifact@v4
         with:
-          name: debug-artifacts
+          if-no-files-found: error
+          name: android-ui-test
           path: |
-            MapLibreAndroidTestApp/build/outputs/apk/debug
-            MapLibreAndroid/build/reports/lint-results.html
-            MapLibreAndroid/lint-baseline.xml
-            MapLibreAndroidTestApp/build/reports/lint-results.html
-            MapLibreAndroidTestApp/build/reports/lint-results.xml
-            MapLibreAndroidTestApp/lint-baseline.xml
-            MapLibreAndroid/build/intermediates/cmake/debug/obj
+            platform/android/InstrumentationTestApp.apk
+            platform/android/InstrumentationTests.apk
 
   android-build-render-test:
     runs-on: ubuntu-latest
@@ -239,42 +187,6 @@ jobs:
           path: |
             ./render-test/android/RenderTestsApp.apk
             ./render-test/android/RenderTests.apk
-
-  android-instrumentation-test:
-    needs: android-build
-
-    runs-on: ubuntu-latest
-    if: github.repository_owner == 'maplibre' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/android-annotations')
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: uploadsEnv
-
-      - name: Read uploads.env
-        run: cat uploads.env >> "$GITHUB_ENV"
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-2
-          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 21600
-          role-session-name: MySessionName
-
-      - name: Schedule test run
-        uses: realm/aws-devicefarm/test-application@master
-        with:
-          name: MapLibre Native Android Instrumentation Test
-          project_arn: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
-          device_pool_arn: ${{ vars.AWS_DEVICE_FARM_DEVICE_POOL_ARN }}
-          app_arn: ${{ env.ANDROID_APP_ARN }}
-          test_spec_arn: ${{ vars.AWS_DEVICE_FARM_TEST_SPEC_ARN_ANDROID_UI_TESTS }}
-          app_type: ANDROID_APP
-          test_type: INSTRUMENTATION
-          test_package_arn: ${{ env.ANDROID_TEST_ARN }}
-          timeout: 28800
 
   android-ci-result:
     runs-on: ubuntu-latest

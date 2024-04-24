@@ -8,17 +8,17 @@
 namespace mbgl {
 namespace shaders {
 
-struct AttributeInfo {
-    AttributeInfo(std::string_view name, std::size_t id);
-    std::string_view name;
-    std::size_t id;
-};
-
 struct UniformBlockInfo {
     UniformBlockInfo(std::string_view name, std::size_t id);
     std::string_view name;
     std::size_t id;
     std::size_t binding;
+};
+
+struct AttributeInfo {
+    AttributeInfo(std::string_view name, std::size_t id);
+    std::string_view name;
+    std::size_t id;
 };
 
 struct TextureInfo {

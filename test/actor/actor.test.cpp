@@ -27,7 +27,7 @@ TEST(Actor, Construction) {
 TEST(Actor, Destruction) {
     struct TestActor {
         TestActor(ActorRef<TestActor>, bool& destructed_)
-            : destructed(destructed_){};
+            : destructed(destructed_) {};
         ~TestActor() { destructed = true; }
 
         bool& destructed;
@@ -136,7 +136,7 @@ TEST(Actor, DestructionAllowedInReceiveOnSameThread) {
     // allows for self-closing actors
 
     struct TestActor {
-        TestActor(ActorRef<TestActor>){};
+        TestActor(ActorRef<TestActor>) {};
 
         void callMeBack(std::function<void()> callback) { callback(); }
     };
@@ -162,7 +162,7 @@ TEST(Actor, SelfDestructionDoesntCrashWaitingReceivingThreads) {
     // callback
 
     struct TestActor {
-        TestActor(ActorRef<TestActor>){};
+        TestActor(ActorRef<TestActor>) {};
 
         void callMeBack(std::function<void()> callback) { callback(); }
     };
@@ -334,7 +334,7 @@ TEST(Actor, TwoPhaseConstruction) {
 
     struct TestActor {
         TestActor(ActorRef<TestActor>, std::shared_ptr<bool> destroyed_)
-            : destroyed(std::move(destroyed_)){};
+            : destroyed(std::move(destroyed_)) {};
 
         ~TestActor() { *destroyed = true; }
 

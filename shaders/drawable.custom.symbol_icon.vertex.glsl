@@ -13,7 +13,7 @@ layout(std140) uniform CustomSymbolIconParametersUBO {
     bool u_pitch_with_map;
     highp float u_camera_to_center_distance;
     highp float u_aspect_ratio;
-    highp float pad0, pad1, pad3;
+    highp float params_pad1, params_pad2, params_pad3;
 };
 
 out vec2 v_tex;

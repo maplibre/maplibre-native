@@ -365,54 +365,6 @@ object CameraUpdateFactory {
         }
     }
 
-    /* This class 1. Does not seem to be used 2. The code that calculates targetPoint seems to be a bit suspicious.
-        commenting out for now.
-     */
-    /*
-    internal class CameraMoveUpdate(private val x: Float, private val y: Float) : CameraUpdate {
-        override fun getCameraPosition(mapboxMap: MapboxMap): CameraPosition {
-            val uiSettings = mapboxMap.uiSettings
-            val projection = mapboxMap.projection
-            // Calculate the new center point
-            val viewPortWidth = uiSettings.width
-            val viewPortHeight = uiSettings.height
-            val padding = mapboxMap.cameraPosition.padding!!
-
-             // we inverse the map padding, is reapplied when using moveTo/easeTo or animateTo
-            val targetPoint = PointF((viewPortWidth - padding[0].toFloat() + padding[1].toFloat()) / 2 + x,
-                (viewPortHeight + padding[1].toFloat() - padding[3].toFloat()) / 2 + y)
-            val latLng = projection.fromScreenLocation(targetPoint)
-            val previousPosition = mapboxMap.cameraPosition
-            return CameraPosition.Builder().target(latLng).zoom(previousPosition.zoom).tilt(previousPosition.tilt).bearing(previousPosition.bearing).build()
-        }
-
-        override fun equals(other: Any?): Boolean {
-            if (this === other) {
-                return true
-            }
-            if (other == null || javaClass != other.javaClass) {
-                return false
-            }
-            val that = other as CameraMoveUpdate
-            return if (java.lang.Float.compare(that.x, x) != 0) {
-                false
-            } else {
-                that.y.compareTo(y) == 0
-            }
-        }
-
-        override fun hashCode(): Int {
-            var result = if (x != +0.0f) java.lang.Float.floatToIntBits(x) else 0
-            result = 31 * result + if (y != +0.0f) java.lang.Float.floatToIntBits(y) else 0
-            return result
-        }
-
-        override fun toString(): String {
-            return ("CameraMoveUpdate{" + "x=" + x + ", y=" + y + '}')
-        }
-    }
-     */
-
     class ZoomUpdate : CameraUpdate {
         @IntDef(ZOOM_IN, ZOOM_OUT, ZOOM_BY, ZOOM_TO, ZOOM_TO_POINT)
         @Retention(AnnotationRetention.SOURCE)

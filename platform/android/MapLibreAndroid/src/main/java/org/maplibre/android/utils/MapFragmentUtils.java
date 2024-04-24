@@ -21,9 +21,9 @@ import org.maplibre.android.maps.MapLibreMapOptions;
 public class MapFragmentUtils {
 
   /**
-   * Convert MapboxMapOptions to a bundle of fragment arguments.
+   * Convert MapLibreMapOptions to a bundle of fragment arguments.
    *
-   * @param options The MapboxMapOptions to convert
+   * @param options The MapLibreMapOptions to convert
    * @return a bundle of converted fragment arguments
    */
   @NonNull
@@ -34,11 +34,11 @@ public class MapFragmentUtils {
   }
 
   /**
-   * Convert a bundle of fragment arguments to MapboxMapOptions.
+   * Convert a bundle of fragment arguments to MapLibreMapOptions.
    *
    * @param context The context of the activity hosting the fragment
    * @param args    The fragment arguments
-   * @return converted MapboxMapOptions
+   * @return converted MapLibreMapOptions
    */
   @Nullable
   public static MapLibreMapOptions resolveArgs(@NonNull Context context, @Nullable Bundle args) {

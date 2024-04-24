@@ -1,7 +1,6 @@
 ext.nativeBuild = { nativeTargets ->
     android {
         ndkVersion androidSdkVersions.ndkVersion
-        buildToolsVersion androidSdkVersions.buildToolsVersion
 
         // We sometimes want to invoke Gradle without building a native dependency, e.g. when we just want
         // to invoke the Java tests. When we explicitly specify an ABI of 'none', no native dependencies are
