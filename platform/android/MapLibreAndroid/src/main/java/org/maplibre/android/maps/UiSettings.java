@@ -29,7 +29,7 @@ import org.maplibre.android.utils.BitmapUtils;
 import org.maplibre.android.utils.ColorUtils;
 
 /**
- * Settings for the user interface of a MapboxMap. To obtain this interface, call getUiSettings().
+ * Settings for the user interface of a MapLibreMap. To obtain this interface, call getUiSettings().
  */
 public final class UiSettings {
 

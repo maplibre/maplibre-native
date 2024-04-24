@@ -31,7 +31,7 @@ class AnnotationTest {
     @Test
     fun testRemove() {
         annotation!!.id = 1
-        annotation!!.setMapboxMap(maplibreMap)
+        annotation!!.setMapLibreMap(maplibreMap)
         annotation!!.remove()
         Mockito.verify(maplibreMap, Mockito.times(1)).removeAnnotation(
             annotation!!
@@ -39,7 +39,7 @@ class AnnotationTest {
     }
 
     @Test
-    fun testRemoveUnboundMapboxMap() {
+    fun testRemoveUnboundMapLibreMap() {
         annotation!!.id = 1
         annotation!!.remove()
         Mockito.verify(maplibreMap, Mockito.times(0)).removeAnnotation(

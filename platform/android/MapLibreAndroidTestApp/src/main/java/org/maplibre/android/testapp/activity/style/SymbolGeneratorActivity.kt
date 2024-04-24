@@ -139,7 +139,7 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
      * Utility class to generate Bitmaps for Symbol.
      *
      *
-     * Bitmaps can be added to the map with [com.mapbox.mapboxsdk.maps.MapboxMap.addImage]
+     * Bitmaps can be added to the map with [org.maplibre.android.maps.Style.addImage]
      *
      */
     private object SymbolGenerator {

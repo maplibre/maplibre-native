@@ -29,9 +29,9 @@ import java.util.Arrays;
 /**
  * Defines configuration MapLibreMapOptions for a MapLibreMap. These options can be used when adding a
  * map to your application programmatically (as opposed to via XML). If you are using a MapFragment,
- * you can pass these options in using the static factory method newInstance(MapboxMapOptions).
+ * you can pass these options in using the static factory method newInstance(MapLibreMapOptions).
  * If you are using a MapView, you can pass these options in using the constructor
- * MapView(Context, MapboxMapOptions). If you add a map using XML, then you can apply these options
+ * MapView(Context, MapLibreMapOptions). If you add a map using XML, then you can apply these options
  * using custom XML tags.
  */
 public class MapLibreMapOptions implements Parcelable {
@@ -95,7 +95,7 @@ public class MapLibreMapOptions implements Parcelable {
   private boolean crossSourceCollisions = true;
 
   /**
-   * Creates a new MapboxMapOptions object.
+   * Creates a new MapLibreMapOptions object.
    *
    * @deprecated Use {@link #createFromAttributes(Context, AttributeSet)} instead.
    */
@@ -154,10 +154,10 @@ public class MapLibreMapOptions implements Parcelable {
   }
 
   /**
-   * Creates a default MapboxMapsOptions from a given context.
+   * Creates a default MapLibreMapsOptions from a given context.
    *
    * @param context Context related to a map view.
-   * @return the MapboxMapOptions created from attributes
+   * @return the MapLibreMapOptions created from attributes
    */
   @NonNull
   public static MapLibreMapOptions createFromAttributes(@NonNull Context context) {
@@ -165,11 +165,11 @@ public class MapLibreMapOptions implements Parcelable {
   }
 
   /**
-   * Creates a MapboxMapsOptions from the attribute set.
+   * Creates a MapLibreMapsOptions from the attribute set.
    *
    * @param context Context related to a map view.
    * @param attrs   Attributeset containing configuration
-   * @return the MapboxMapOptions created from attributes
+   * @return the MapLibreMapOptions created from attributes
    */
   @NonNull
   public static MapLibreMapOptions createFromAttributes(@NonNull Context context, @Nullable AttributeSet attrs) {
@@ -701,7 +701,7 @@ public class MapLibreMapOptions implements Parcelable {
    * Set the tile pre-fetching zoom delta. Pre-fetching makes sure that a low-resolution
    * tile at the (current_zoom_level - delta) is rendered as soon as possible at the
    * expense of a little bandwidth.
-   * Note: This operation will override the MapboxMapOptions#setPrefetchesTiles(boolean)
+   * Note: This operation will override the MapLibreMapOptions#setPrefetchesTiles(boolean)
    * Setting zoom delta to 0 will disable pre-fetching.
    * Default zoom delta is 4.
    *

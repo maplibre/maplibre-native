@@ -78,7 +78,7 @@ public class ExpressionTest extends EspressoTest {
     setupStyle();
     Timber.i("camera function");
 
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       // create color expression
       Expression inputExpression = rgba(255.0f, 0.0f, 0.0f, 1.0f);
 
@@ -101,7 +101,7 @@ public class ExpressionTest extends EspressoTest {
     setupStyle();
     Timber.i("camera function");
 
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       // create get expression
       Expression inputExpression = get("fill");
 
@@ -127,7 +127,7 @@ public class ExpressionTest extends EspressoTest {
     setupStyle();
     Timber.i("camera function");
 
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       // create camera function expression
       Expression inputExpression = interpolate(
               exponential(0.5f), zoom(),
@@ -155,7 +155,7 @@ public class ExpressionTest extends EspressoTest {
     setupStyle();
     Timber.i("camera function");
 
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       // create camera function expression
       Expression inputExpression = toColor(get("fill"));
 
@@ -178,7 +178,7 @@ public class ExpressionTest extends EspressoTest {
     setupStyle();
     Timber.i("camera function");
 
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       // create camera function expression
       Expression inputExpression = step(zoom(),
               rgba(255.0f, 255.0f, 255.0f, 1.0f),
@@ -211,7 +211,7 @@ public class ExpressionTest extends EspressoTest {
   public void testLiteralProperty() {
     validateTestSetup();
     setupStyle();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       layer.setProperties(
               fillColor(literal("#4286f4"))
       );
@@ -222,7 +222,7 @@ public class ExpressionTest extends EspressoTest {
   public void testLiteralMatchExpression() {
     validateTestSetup();
     setupStyle();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       Expression expression = match(literal("something"), literal(0f),
               stop("1", get("1")),
               stop("2", get("2")),
@@ -240,7 +240,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testCollatorExpression() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
 
       Expression expression1 = eq(literal("Łukasz"), literal("lukasz"), collator(true, true));
@@ -249,7 +249,7 @@ public class ExpressionTest extends EspressoTest {
       Expression expression3 = eq(literal("Łukasz"), literal("lukasz"), collator(literal(false), eq(literal(2),
               literal(1))));
 
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       Layer layer = new CircleLayer("layer", "source")
               .withProperties(circleColor(
@@ -258,9 +258,9 @@ public class ExpressionTest extends EspressoTest {
                               literal(ColorUtils.colorToRgbaString(Color.RED))
                       )
               ));
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
-      assertFalse(mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer")
+      assertFalse(maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer")
               .isEmpty());
 
       layer.setProperties(circleColor(
@@ -270,7 +270,7 @@ public class ExpressionTest extends EspressoTest {
               )
       ));
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
-      assertFalse(mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer")
+      assertFalse(maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer")
               .isEmpty());
 
       layer.setProperties(circleColor(
@@ -280,7 +280,7 @@ public class ExpressionTest extends EspressoTest {
               )
       ));
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
-      assertFalse(mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer")
+      assertFalse(maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer")
               .isEmpty());
     });
   }
@@ -288,12 +288,12 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testConstFormatExpression() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       Expression expression = format(
               formatEntry("test")
@@ -301,7 +301,7 @@ public class ExpressionTest extends EspressoTest {
       layer.setProperties(textField(expression));
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertFalse(mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer")
+      assertFalse(maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer")
               .isEmpty());
       assertNull(layer.getTextField().getExpression());
       assertEquals(new Formatted(new FormattedSection("test")), layer.getTextField().getValue());
@@ -311,12 +311,12 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testConstFormatExpressionFontScaleParam() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       Expression expression = format(
               formatEntry("test", formatFontScale(1.75))
@@ -324,7 +324,7 @@ public class ExpressionTest extends EspressoTest {
       layer.setProperties(textField(expression));
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertFalse(mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer")
+      assertFalse(maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer")
               .isEmpty());
       assertNull(layer.getTextField().getExpression());
       assertEquals(new Formatted(new FormattedSection("test", 1.75)), layer.getTextField().getValue());
@@ -334,12 +334,12 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testConstFormatExpressionTextFontParam() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       Expression expression = format(
               formatEntry(
@@ -351,7 +351,7 @@ public class ExpressionTest extends EspressoTest {
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
       assertFalse(
-              mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
+              maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
       );
       assertNull(layer.getTextField().getExpression());
       assertEquals(new Formatted(
@@ -364,12 +364,12 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testConstFormatExpressionTextColorParam() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       Expression expression = format(
               formatEntry(
@@ -381,7 +381,7 @@ public class ExpressionTest extends EspressoTest {
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
       assertFalse(
-              mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
+              maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
       );
       assertNull(layer.getTextField().getExpression());
       assertEquals(new Formatted(
@@ -393,12 +393,12 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testConstFormatExpressionAllParams() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       Expression expression = format(
               formatEntry(
@@ -412,7 +412,7 @@ public class ExpressionTest extends EspressoTest {
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
       assertFalse(
-              mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
+              maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
       );
       assertNull(layer.getTextField().getExpression());
       assertEquals(new Formatted(
@@ -427,12 +427,12 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testConstFormatExpressionMultipleInputs() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       Expression expression = format(
               formatEntry(
@@ -448,7 +448,7 @@ public class ExpressionTest extends EspressoTest {
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
       assertFalse(
-              mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer")
+              maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer")
                       .isEmpty()
       );
       assertNull(layer.getTextField().getExpression());
@@ -464,15 +464,15 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testVariableFormatExpression() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
       Feature feature = Feature.fromGeometry(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()));
       feature.addStringProperty("test_property", "test");
       feature.addNumberProperty("test_property_number", 1.5);
       feature.addStringProperty("test_property_color", "green");
-      mapboxMap.getStyle().addSource(new GeoJsonSource("source", feature));
+      maplibreMap.getStyle().addSource(new GeoJsonSource("source", feature));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       Expression expression = format(
               formatEntry(
@@ -485,7 +485,7 @@ public class ExpressionTest extends EspressoTest {
       layer.setProperties(textField(expression));
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertFalse(mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer")
+      assertFalse(maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer")
               .isEmpty());
       assertEquals(expression, layer.getTextField().getExpression());
       assertNull(layer.getTextField().getValue());
@@ -495,15 +495,15 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testVariableFormatExpressionMultipleInputs() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
       Feature feature = Feature.fromGeometry(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()));
       feature.addStringProperty("test_property", "test");
       feature.addNumberProperty("test_property_number", 1.5);
       feature.addStringProperty("test_property_color", "rgba(0, 255, 0, 1)");
-      mapboxMap.getStyle().addSource(new GeoJsonSource("source", feature));
+      maplibreMap.getStyle().addSource(new GeoJsonSource("source", feature));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       Expression expression = format(
               formatEntry(
@@ -517,7 +517,7 @@ public class ExpressionTest extends EspressoTest {
       layer.setProperties(textField(expression), textColor("rgba(128, 0, 0, 1)"));
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertFalse(mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer")
+      assertFalse(maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer")
               .isEmpty());
       assertEquals(expression, layer.getTextField().getExpression());
       assertNull(layer.getTextField().getValue());
@@ -527,17 +527,17 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testFormatExpressionPlainTextCoercion() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       layer.setProperties(textField("test"));
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertFalse(mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer")
+      assertFalse(maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer")
               .isEmpty());
       assertNull(layer.getTextField().getExpression());
       assertEquals(new Formatted(
@@ -548,12 +548,12 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testTextFieldFormattedArgument() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       Formatted formatted = new Formatted(
               new FormattedSection("test", 1.5),
@@ -564,7 +564,7 @@ public class ExpressionTest extends EspressoTest {
       layer.setProperties(textField(formatted), textColor("rgba(128,0,0,1)"));
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertFalse(mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng), "layer")
+      assertFalse(maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng), "layer")
               .isEmpty());
       assertNull(layer.getTextField().getExpression());
       assertEquals(formatted, layer.getTextField().getValue());
@@ -574,12 +574,12 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testNumberFormatCurrencyExpression() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       layer.setProperties(
               textField(
@@ -588,8 +588,8 @@ public class ExpressionTest extends EspressoTest {
       );
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertFalse(mapboxMap.queryRenderedFeatures(
-              mapboxMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
+      assertFalse(maplibreMap.queryRenderedFeatures(
+              maplibreMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
       );
       assertNull(layer.getTextField().getExpression());
       assertEquals("$12.35", layer.getTextField().getValue().getFormattedSections()[0].getText());
@@ -599,12 +599,12 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testNumberFormatMaxExpression() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       layer.setProperties(
               textField(
@@ -613,8 +613,8 @@ public class ExpressionTest extends EspressoTest {
       );
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertFalse(mapboxMap.queryRenderedFeatures(
-              mapboxMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
+      assertFalse(maplibreMap.queryRenderedFeatures(
+              maplibreMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
       );
       assertNull(layer.getTextField().getExpression());
       assertEquals("12.34568", layer.getTextField().getValue().getFormattedSections()[0].getText());
@@ -624,12 +624,12 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testNumberFormatMinExpression() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       layer.setProperties(
               textField(
@@ -638,8 +638,8 @@ public class ExpressionTest extends EspressoTest {
       );
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertFalse(mapboxMap.queryRenderedFeatures(
-              mapboxMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
+      assertFalse(maplibreMap.queryRenderedFeatures(
+              maplibreMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
       );
       assertNull(layer.getTextField().getExpression());
       assertEquals("12", layer.getTextField().getValue().getFormattedSections()[0].getText());
@@ -649,12 +649,12 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testNumberFormatLocaleExpression() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle()
+      maplibreMap.getStyle()
               .addSource(new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude())));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       layer.setProperties(
               textField(
@@ -664,8 +664,8 @@ public class ExpressionTest extends EspressoTest {
       );
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertFalse(mapboxMap.queryRenderedFeatures(
-              mapboxMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
+      assertFalse(maplibreMap.queryRenderedFeatures(
+              maplibreMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
       );
       assertNull(layer.getTextField().getExpression());
       assertEquals("12,0", layer.getTextField().getValue().getFormattedSections()[0].getText());
@@ -675,7 +675,7 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testNumberFormatNonConstantExpression() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
       Feature feature = Feature.fromGeometry(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()));
       feature.addNumberProperty("number_value", 12.345678);
@@ -684,9 +684,9 @@ public class ExpressionTest extends EspressoTest {
       feature.addNumberProperty("min_value", 1);
 
 
-      mapboxMap.getStyle().addSource(new GeoJsonSource("source", feature));
+      maplibreMap.getStyle().addSource(new GeoJsonSource("source", feature));
       SymbolLayer layer = new SymbolLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       Expression numberFormatExpression = numberFormat(
               number(number(get("number_value"))),
@@ -698,8 +698,8 @@ public class ExpressionTest extends EspressoTest {
       layer.setProperties(textField(numberFormatExpression));
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertFalse(mapboxMap.queryRenderedFeatures(
-              mapboxMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
+      assertFalse(maplibreMap.queryRenderedFeatures(
+              maplibreMap.getProjection().toScreenLocation(latLng), "layer").isEmpty()
       );
 
       assertNotNull(layer.getTextField().getExpression());
@@ -741,14 +741,14 @@ public class ExpressionTest extends EspressoTest {
   @Test
   public void testDoubleConversion() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLng = new LatLng(51, 17);
-      mapboxMap.getStyle().addSource(
+      maplibreMap.getStyle().addSource(
               new GeoJsonSource("source", Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()))
       );
 
       CircleLayer layer = new CircleLayer("layer", "source");
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       Expression input = interpolate(
               exponential(0.5f), zoom(),
@@ -764,15 +764,15 @@ public class ExpressionTest extends EspressoTest {
   }
 
   private void setupStyle() {
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       // Add a source
       Source source;
       source = new GeoJsonSource("amsterdam-parks-source",
               ResourceUtils.readRawResource(rule.getActivity(), R.raw.amsterdam));
-      mapboxMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addSource(source);
 
       // Add a fill layer
-      mapboxMap.getStyle().addLayer(layer = new FillLayer("amsterdam-parks-layer", source.getId())
+      maplibreMap.getStyle().addLayer(layer = new FillLayer("amsterdam-parks-layer", source.getId())
               .withProperties(
                       fillColor(rgba(0.0f, 0.0f, 0.0f, 0.5f)),
                       fillOutlineColor(rgb(0, 0, 255)),

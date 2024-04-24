@@ -123,7 +123,7 @@ public class GeoJsonConversionTest extends EspressoTest {
   @Test
   public void testNegativeNumberPropertyConversion() {
     validateTestSetup();
-    onView(isRoot()).perform(new MapLibreMapAction((uiController, mapboxMap) -> {
+    onView(isRoot()).perform(new MapLibreMapAction((uiController, maplibreMap) -> {
       LatLng latLng = new LatLng();
       Feature feature = Feature.fromGeometry(Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()));
 
@@ -133,18 +133,18 @@ public class GeoJsonConversionTest extends EspressoTest {
       feature.addProperty("property", foregroundJsonArray);
 
       GeoJsonSource source = new GeoJsonSource("source", feature);
-      mapboxMap.getStyle().addSource(source);
+      maplibreMap.getStyle().addSource(source);
 
       SymbolLayer layer = new SymbolLayer("layer", "source")
         .withProperties(
           PropertyFactory.iconOffset(Expression.get("property")),
           PropertyFactory.iconImage("zoo-15")
         );
-      mapboxMap.getStyle().addLayer(layer);
+      maplibreMap.getStyle().addLayer(layer);
 
       TestingAsyncUtils.INSTANCE.waitForLayer(uiController, mapView);
 
-      assertFalse(mapboxMap.queryRenderedFeatures(mapboxMap.getProjection().toScreenLocation(latLng)).isEmpty());
+      assertFalse(maplibreMap.queryRenderedFeatures(maplibreMap.getProjection().toScreenLocation(latLng)).isEmpty());
     }, maplibreMap));
   }
 }

@@ -75,8 +75,8 @@ class AnnotationManager {
     this.shapeAnnotations = shapeAnnotations;
   }
 
-  // TODO refactor MapboxMap out for Projection and Transform
-  // Requires removing MapboxMap from Annotations by using Peer model from #6912
+  // TODO refactor MapLibreMap out for Projection and Transform
+  // Requires removing MapLibreMap from Annotations by using Peer model from #6912
   @NonNull
   AnnotationManager bind(MapLibreMap maplibreMap) {
     this.maplibreMap = maplibreMap;
