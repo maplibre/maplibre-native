@@ -143,10 +143,18 @@ jobs:
           npm install --ignore-scripts
           node scripts/aws-device-farm/download-benchmark-results.mjs ${{ steps.aws_device_farm_run.outputs.runArn }}
 
-      - uses: LouisBrunner/checks-action@v2.0.0
-        if: always() && (env.run_device_test == 'true' || matrix.test.name == 'Android Render Tests')
+      - name: Generate another token (previous one could have expired)
+        if: always() && env.run_device_test == 'true'
+        id: generate_token_2
+        uses: tibdex/github-app-token@v2
         with:
-          token: ${{ steps.generate_token.outputs.token }}
+          app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+
+      - uses: LouisBrunner/checks-action@v2.0.0
+        if: always() && env.run_device_test == 'true'
+        with:
+          token: ${{ steps.generate_token_2.outputs.token }}
           check_id: ${{ steps.create_check.outputs.check_id }}
           conclusion: ${{ job.status }}
           sha: ${{ github.event.workflow_run.sha }}
