@@ -128,7 +128,7 @@ public final class MapLibre {
    */
   @Nullable
   public static String getApiKey() {
-    validateMapbox();
+    validateMapLibre();
     return INSTANCE.apiKey;
   }
 
@@ -136,7 +136,7 @@ public final class MapLibre {
    * Set the current active apiKey.
    */
   public static void setApiKey(String apiKey) {
-    validateMapbox();
+    validateMapLibre();
     throwIfApiKeyInvalid(apiKey);
     INSTANCE.apiKey = apiKey;
     FileSource.getInstance(getApplicationContext()).setApiKey(apiKey);
@@ -147,18 +147,18 @@ public final class MapLibre {
    */
   @Nullable
   public static TileServerOptions getTileServerOptions() {
-    validateMapbox();
+    validateMapLibre();
     return INSTANCE.tileServerOptions;
   }
 
   /**
    * Get all pre-defined styles
    *
-   * @return List of predefined styles
+   * @return Array of predefined styles
    */
   @Nullable
   public static DefaultStyle[] getPredefinedStyles() {
-    validateMapbox();
+    validateMapLibre();
     if (INSTANCE.tileServerOptions != null) {
       return INSTANCE.tileServerOptions.getDefaultStyles();
     }
@@ -172,7 +172,7 @@ public final class MapLibre {
    */
   @Nullable
   public static DefaultStyle getPredefinedStyle(String name) {
-    validateMapbox();
+    validateMapLibre();
     if (INSTANCE.tileServerOptions != null) {
       DefaultStyle[] styles = INSTANCE.tileServerOptions.getDefaultStyles();
       for (DefaultStyle style : styles) {
@@ -191,7 +191,7 @@ public final class MapLibre {
    */
   @NonNull
   public static Context getApplicationContext() {
-    validateMapbox();
+    validateMapLibre();
     return INSTANCE.context;
   }
 
@@ -203,7 +203,7 @@ public final class MapLibre {
    *                  disconnected, and null for ConnectivityManager to determine.
    */
   public static synchronized void setConnected(Boolean connected) {
-    validateMapbox();
+    validateMapLibre();
     ConnectivityReceiver.instance(INSTANCE.context).setConnected(connected);
   }
 
@@ -214,7 +214,7 @@ public final class MapLibre {
    * @return true if there is an internet connection, false otherwise
    */
   public static synchronized Boolean isConnected() {
-    validateMapbox();
+    validateMapLibre();
     return ConnectivityReceiver.instance(INSTANCE.context).isConnected();
   }
 
@@ -242,7 +242,7 @@ public final class MapLibre {
   /**
    * Runtime validation of MapLibre creation.
    */
-  private static void validateMapbox() {
+  private static void validateMapLibre() {
     if (INSTANCE == null) {
       throw new MapLibreConfigurationException();
     }
@@ -260,7 +260,7 @@ public final class MapLibre {
     }
 
     apiKey = apiKey.trim().toLowerCase(MapLibreConstants.MAPLIBRE_LOCALE);
-    return apiKey.length() != 0;
+    return !apiKey.isEmpty();
   }
 
   /**
