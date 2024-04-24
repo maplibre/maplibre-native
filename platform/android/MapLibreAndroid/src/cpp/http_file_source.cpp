@@ -20,7 +20,7 @@ class HTTPFileSource::Impl {
 public:
     Impl(const ResourceOptions resourceOptions_, const ClientOptions clientOptions_)
         : resourceOptions(resourceOptions_.clone()),
-          clientOptions(clientOptions_.clone()){};
+          clientOptions(clientOptions_.clone()) {};
 
     android::UniqueEnv env{android::AttachEnv()};
 

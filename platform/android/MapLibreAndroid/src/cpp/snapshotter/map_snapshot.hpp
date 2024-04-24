@@ -30,7 +30,7 @@ public:
                                                     PointForFn pointForFn,
                                                     LatLngForFn latLngForFn);
 
-    MapSnapshot(jni::JNIEnv&){};
+    MapSnapshot(jni::JNIEnv&) {};
     MapSnapshot(float pixelRatio, PointForFn, LatLngForFn);
     ~MapSnapshot();
 
