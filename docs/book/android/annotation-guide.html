@@ -216,12 +216,12 @@ It is used to add annotations to the map instance.</p>
     // Declare a variable for MapView
     private lateinit var mapView: MapView
 
-    // Declare a variable for MapboxMap
+    // Declare a variable for MapLibreMap
     private lateinit var maplibreMap: MapLibreMap
 </code></pre>
 <ol start="4">
 <li>Call <code>mapview.getMapSync()</code> in order to get a <code>MapboxMap</code> object.
-After <code>mapboxMap</code> is assigned, call the <code>getEarthQuakeDataFromUSGS()</code> method
+After <code>maplibreMap</code> is assigned, call the <code>getEarthQuakeDataFromUSGS()</code> method
 to make a HTTP request and transform data into the map annotations.</li>
 </ol>
 <pre><code class="language-kotlin">        mapView.getMapAsync { map -&gt;
