@@ -26,7 +26,8 @@ class PixelTestActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+        val styleURL = Style.getPredefinedStyles()[0].url
+        maplibreMap.setStyle(styleURL)
     }
 
     public override fun onResume() {

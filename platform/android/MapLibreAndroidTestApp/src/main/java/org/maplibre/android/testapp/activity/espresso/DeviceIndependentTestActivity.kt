@@ -25,7 +25,7 @@ class DeviceIndependentTestActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+        maplibreMap.setStyle(Style.getPredefinedStyles()[0].url)
     }
 
     public override fun onResume() {
