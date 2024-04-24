@@ -391,7 +391,7 @@ const std::vector<TextureInfo> ShaderInfo<BuiltIn::RasterShader, gfx::Backend::T
 // Symbol Icon
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::SymbolIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-    UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
+    UniformBlockInfo{"SymbolDrawableUBOVector", idSymbolDrawableUBO},
     UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
     UniformBlockInfo{"SymbolInterpolateUBO", idSymbolInterpolateUBO},
     UniformBlockInfo{"SymbolEvaluatedPropsUBO", idSymbolEvaluatedPropsUBO},
@@ -412,7 +412,7 @@ const std::vector<TextureInfo> ShaderInfo<BuiltIn::SymbolIconShader, gfx::Backen
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
         UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
+        UniformBlockInfo{"SymbolDrawableUBOVector", idSymbolDrawableUBO},
         UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
         UniformBlockInfo{"SymbolInterpolateUBO", idSymbolInterpolateUBO},
         UniformBlockInfo{"SymbolEvaluatedPropsUBO", idSymbolEvaluatedPropsUBO},
@@ -437,7 +437,7 @@ const std::vector<TextureInfo> ShaderInfo<BuiltIn::SymbolSDFIconShader, gfx::Bac
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
         UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
-        UniformBlockInfo{"SymbolDrawableUBO", idSymbolDrawableUBO},
+        UniformBlockInfo{"SymbolDrawableUBOVector", idSymbolDrawableUBO},
         UniformBlockInfo{"SymbolTilePropsUBO", idSymbolTilePropsUBO},
         UniformBlockInfo{"SymbolInterpolateUBO", idSymbolInterpolateUBO},
         UniformBlockInfo{"SymbolEvaluatedPropsUBO", idSymbolEvaluatedPropsUBO},
