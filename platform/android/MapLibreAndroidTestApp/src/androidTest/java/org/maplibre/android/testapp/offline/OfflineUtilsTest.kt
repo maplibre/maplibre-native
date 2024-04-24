@@ -5,11 +5,13 @@ import org.maplibre.android.AppCenter
 import org.maplibre.android.testapp.activity.offline.OfflineActivity
 import org.maplibre.android.testapp.utils.OfflineUtils.convertRegionName
 import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.UnsupportedEncodingException
 import java.util.*
 
+@Ignore("https://github.com/maplibre/maplibre-native/issues/2320")
 @RunWith(AndroidJUnit4ClassRunner::class)
 class OfflineUtilsTest : AppCenter() {
     @Test
