@@ -24,25 +24,24 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>
 #define ICON 0.0
 
 struct VertexStage {
-    float4 pos_offset [[attribute(6)]];
-    float4 data [[attribute(7)]];
-    float3 projected_pos [[attribute(8)]];
-    float fade_opacity [[attribute(9)]];
-
+    float4 pos_offset [[attribute(0)]];
+    float4 data [[attribute(1)]];
+    float3 projected_pos [[attribute(2)]];
+    float fade_opacity [[attribute(3)]];
 #if !defined(HAS_UNIFORM_u_fill_color)
-    float4 fill_color [[attribute(10)]];
+    float4 fill_color [[attribute(4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_color)
-    float4 halo_color [[attribute(11)]];
+    float4 halo_color [[attribute(5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(12)]];
+    float opacity [[attribute(6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_width)
-    float halo_width [[attribute(13)]];
+    float halo_width [[attribute(7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_halo_blur)
-    float halo_blur [[attribute(14)]];
+    float halo_blur [[attribute(8)]];
 #endif
 };
 
@@ -76,11 +75,11 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(0)]],
-                                device const SymbolDrawableUBO* drawableVector [[buffer(1)]],
-                                device const SymbolDynamicUBO& dynamic [[buffer(2)]],
-                                device const SymbolPaintUBO& paint [[buffer(3)]],
-                                device const SymbolTilePropsUBO& props [[buffer(4)]],
-                                device const SymbolInterpolateUBO& interp [[buffer(5)]]) {
+                                device const SymbolDrawableUBO* drawableVector [[buffer(9)]],
+                                device const SymbolDynamicUBO& dynamic [[buffer(10)]],
+                                device const SymbolDrawablePaintUBO& paint [[buffer(11)]],
+                                device const SymbolDrawableTilePropsUBO& props [[buffer(12)]],
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(13)]]) {
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
 
@@ -179,10 +178,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const uint32_t& uboIndex [[buffer(0)]],
-                            device const SymbolDrawableUBO* drawableVector [[buffer(1)]],
-                            device const SymbolDynamicUBO& dynamic [[buffer(2)]],
-                            device const SymbolPaintUBO& paint [[buffer(3)]],
-                            device const SymbolTilePropsUBO& props [[buffer(4)]],
+                            device const SymbolDrawableUBO* drawableVector [[buffer(9)]],
+                            device const SymbolDynamicUBO& dynamic [[buffer(10)]],
+                            device const SymbolDrawablePaintUBO& paint [[buffer(11)]],
+                            device const SymbolDrawableTilePropsUBO& props [[buffer(12)]],
                             texture2d<float, access::sample> glyph_image [[texture(0)]],
                             texture2d<float, access::sample> icon_image [[texture(1)]],
                             sampler glyph_sampler [[sampler(0)]],

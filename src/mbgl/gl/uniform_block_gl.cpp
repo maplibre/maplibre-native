@@ -11,15 +11,15 @@ namespace gl {
 
 using namespace platform;
 
-void UniformBlockGL::bindBuffer(const gfx::UniformBuffer& uniformBuffer, const std::size_t offset) {
-    //assert(size == uniformBuffer.getSize());
+void UniformBlockGL::bindBuffer(const gfx::UniformBuffer& uniformBuffer) {
+    assert(size == uniformBuffer.getSize());
     GLint binding = index;
     const auto& uniformBufferGL = static_cast<const UniformBufferGL&>(uniformBuffer);
     MBGL_CHECK_ERROR(glBindBufferRange(GL_UNIFORM_BUFFER,
                                        binding,
                                        uniformBufferGL.getID(),
-                                       uniformBufferGL.getManagedBuffer().getBindingOffset() + offset,
-                                       uniformBufferGL.getSize() - offset));
+                                       uniformBufferGL.getManagedBuffer().getBindingOffset(),
+                                       uniformBufferGL.getSize()));
 }
 
 void UniformBlockGL::bindBuffer(const gfx::UniformBuffer& uniformBuffer) {

@@ -21,14 +21,13 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 struct VertexStage {
-    float4 pos_offset [[attribute(6)]];
-    float4 data [[attribute(7)]];
-    float4 pixeloffset [[attribute(8)]];
-    float3 projected_pos [[attribute(9)]];
-    float fade_opacity [[attribute(10)]];
-
+    float4 pos_offset [[attribute(0)]];
+    float4 data [[attribute(1)]];
+    float4 pixeloffset [[attribute(2)]];
+    float3 projected_pos [[attribute(3)]];
+    float fade_opacity [[attribute(4)]];
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(11)]];
+    float opacity [[attribute(5)]];
 #endif
 };
 
@@ -47,11 +46,11 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(0)]],
-                                device const SymbolDrawableUBO* drawableVector [[buffer(1)]],
-                                device const SymbolDynamicUBO& dynamic [[buffer(2)]],
-                                device const SymbolPaintUBO& paint [[buffer(3)]],
-                                device const SymbolTilePropsUBO& props [[buffer(4)]],
-                                device const SymbolInterpolateUBO& interp [[buffer(5)]]) {
+                                device const SymbolDrawableUBO* drawableVector [[buffer(6)]],
+                                device const SymbolDynamicUBO& dynamic [[buffer(7)]],
+                                device const SymbolDrawablePaintUBO& paint [[buffer(8)]],
+                                device const SymbolDrawableTilePropsUBO& props [[buffer(9)]],
+                                device const SymbolDrawableInterpolateUBO& interp [[buffer(10)]]) {
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
 
@@ -127,9 +126,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const uint32_t& uboIndex [[buffer(0)]],
-                            device const SymbolDrawableUBO* drawableVector [[buffer(1)]],
-                            device const SymbolDynamicUBO& dynamic [[buffer(2)]],
-                            device const SymbolPaintUBO& paint [[buffer(3)]],
+                            device const SymbolDrawableUBO* drawableVector [[buffer(6)]],
+                            device const SymbolDrawablePaintUBO& paint [[buffer(8)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)

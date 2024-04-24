@@ -109,7 +109,7 @@ struct alignas(16) LineGradientInterpolationUBO {
     float pad1, pad2, pad3;
 };
 
-struct alignas(16) SymbolTilePropsUBO {
+struct alignas(16) SymbolDrawableTilePropsUBO {
     /*bool*/ int is_text;
     /*bool*/ int is_halo;
     /*bool*/ int pitch_with_map;
@@ -119,9 +119,9 @@ struct alignas(16) SymbolTilePropsUBO {
     float size;
     float padding;
 };
-static_assert(sizeof(SymbolTilePropsUBO) == 2 * 16, "unexpected padding");
+static_assert(sizeof(SymbolDrawableTilePropsUBO) == 2 * 16, "unexpected padding");
 
-struct alignas(16) SymbolInterpolateUBO {
+struct alignas(16) SymbolDrawableInterpolateUBO {
     float fill_color_t;
     float halo_color_t;
     float opacity_t;
@@ -129,7 +129,7 @@ struct alignas(16) SymbolInterpolateUBO {
     float halo_blur_t;
     float pad1, pad2, pad3;
 };
-static_assert(sizeof(SymbolInterpolateUBO) == 32, "unexpected padding");
+static_assert(sizeof(SymbolDrawableInterpolateUBO) == 32, "unexpected padding");
 
 struct alignas(16) SymbolDrawableUBO {
     float4x4 matrix;
@@ -153,7 +153,7 @@ struct alignas(16) SymbolDynamicUBO {
 };
 static_assert(sizeof(SymbolDynamicUBO) == 16, "unexpected padding");
 
-struct alignas(16) SymbolPaintUBO {
+struct alignas(16) SymbolDrawablePaintUBO {
     float4 fill_color;
     float4 halo_color;
     float opacity;
@@ -161,7 +161,7 @@ struct alignas(16) SymbolPaintUBO {
     float halo_blur;
     float padding;
 };
-static_assert(sizeof(SymbolPaintUBO) == 3 * 16, "unexpected padding");
+static_assert(sizeof(SymbolDrawablePaintUBO) == 3 * 16, "unexpected padding");
 
 // unpack pattern position
 inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel_coord_lower,

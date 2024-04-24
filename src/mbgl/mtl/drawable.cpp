@@ -391,20 +391,18 @@ void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
         for (size_t id = 0; id < uniformBlocks.allocatedSize(); id++) {
             const auto& block = uniformBlocks.get(id);
             if (!block) continue;
-            const auto& pair = getUniformBuffers().getPair(id);
-            const auto& uniformBuffer = pair.first;
-            const auto offset = pair.second;
-            //assert(uniformBuffer && "UBO missing, drawable skipped");
+            const auto& uniformBuffer = getUniformBuffers().get(id);
+            assert(uniformBuffer && "UBO missing, drawable skipped");
             if (uniformBuffer) {
                 const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
                 const auto& resource = buffer.getBufferResource();
                 const auto& mtlBlock = static_cast<const UniformBlock&>(*block);
 
                 if (mtlBlock.getBindVertex()) {
-                    renderPass.bindVertex(resource, offset, block->getIndex());
+                    renderPass.bindVertex(resource, /*offset=*/0, block->getIndex());
                 }
                 if (mtlBlock.getBindFragment()) {
-                    renderPass.bindFragment(resource, offset, block->getIndex());
+                    renderPass.bindFragment(resource, /*offset=*/0, block->getIndex());
                 }
             }
         }

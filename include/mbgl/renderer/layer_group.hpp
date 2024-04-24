@@ -100,12 +100,6 @@ public:
     void addLayerTweaker(const LayerTweakerPtr& tweaker) { layerTweakers.emplace_back(tweaker); }
 
     void runTweakers(const RenderTree&, PaintParameters&);
-    
-    /// Get the uniform buffers attached to this drawable
-    virtual const gfx::UniformBufferArray& getUniformBuffers() const = 0;
-
-    /// Get the mutable uniform buffer array
-    virtual gfx::UniformBufferArray& mutableUniformBuffers() = 0;
 
 protected:
     const Type type;

@@ -2,7 +2,6 @@
 
 #include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/mtl/uniform_buffer.hpp>
 
 #include <Foundation/NSSharedPtr.hpp>
 
@@ -24,14 +23,6 @@ public:
 
     void upload(gfx::UploadPass&) override;
     void render(RenderOrchestrator&, PaintParameters&) override;
-    
-    virtual const gfx::UniformBufferArray& getUniformBuffers() const override {
-        return uniformBuffers;
-    };
-
-    virtual gfx::UniformBufferArray& mutableUniformBuffers() override {
-        return uniformBuffers;
-    };
 
 protected:
     std::optional<MTLDepthStencilStatePtr> stateNone;

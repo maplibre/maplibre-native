@@ -1,6 +1,6 @@
 uniform sampler2D u_texture;
 
-layout (std140) uniform SymbolPaintUBO {
+layout (std140) uniform SymbolDrawablePaintUBO {
     highp vec4 u_fill_color;
     highp vec4 u_halo_color;
     highp float u_opacity;
@@ -9,7 +9,7 @@ layout (std140) uniform SymbolPaintUBO {
     highp float u_padding;
 };
 
-layout (std140) uniform SymbolInterpolateUBO {
+layout (std140) uniform SymbolDrawableInterpolateUBO {
     highp float u_fill_color_t;
     highp float u_halo_color_t;
     highp float u_opacity_t;

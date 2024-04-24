@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/gl/uniform_buffer_gl.hpp>
 
 namespace mbgl {
 
@@ -20,16 +19,7 @@ public:
     void upload(gfx::UploadPass&) override;
     void render(RenderOrchestrator&, PaintParameters&) override;
 
-    virtual const gfx::UniformBufferArray& getUniformBuffers() const override {
-        return uniformBuffers;
-    };
-
-    virtual gfx::UniformBufferArray& mutableUniformBuffers() override {
-        return uniformBuffers;
-    };
-    
 protected:
-    UniformBufferArrayGL uniformBuffers;
 };
 
 /**
@@ -43,16 +33,7 @@ public:
     void upload(gfx::UploadPass&) override;
     void render(RenderOrchestrator&, PaintParameters&) override;
 
-    virtual const gfx::UniformBufferArray& getUniformBuffers() const override {
-        return uniformBuffers;
-    };
-
-    virtual gfx::UniformBufferArray& mutableUniformBuffers() override {
-        return uniformBuffers;
-    };
-    
 protected:
-    UniformBufferArrayGL uniformBuffers;
 };
 
 } // namespace gl
