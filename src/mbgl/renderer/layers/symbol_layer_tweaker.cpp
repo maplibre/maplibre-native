@@ -129,10 +129,10 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.tileIdWrap=*/tileID.wrap,
             /*.camDist=*/camDist,
             
-            /*.scale=*/state.getScale(),
-            /*.bearing=*/state.getBearing(),
-            /*.zoom=*/state.getZoom(),
-            /*.pitch=*/state.getPitch(),
+            /*.scale=*/static_cast<float>(state.getScale()),
+            /*.bearing=*/static_cast<float>(state.getBearing()),
+            /*.zoom=*/static_cast<float>(state.getZoom()),
+            /*.pitch=*/static_cast<float>(state.getPitch()),
             
             /*.translation=*/translate,
 
