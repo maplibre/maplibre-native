@@ -66,8 +66,7 @@ struct alignas(16) SymbolEvaluatedPropsUBO {
 static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16);
 
 enum {
-    idSymbolUBOIndex = globalUBOCount,
-    idSymbolDrawableUBO,
+    idSymbolDrawableUBO = globalUBOCountWithIndex,
     idSymbolTilePropsUBO,
     idSymbolInterpolateUBO,
     idSymbolEvaluatedPropsUBO,

@@ -235,7 +235,7 @@ public:
     size_t getType() const { return type; }
     
     void setUBOIndex(uint32_t uboIndex_) { uboIndex = uboIndex_; }
-    uint32_t getUBOIndex() const { return uboIndex; }
+    int32_t getUBOIndex() const { return uboIndex; }
 
     /// Associate the drawable with a layer tweaker.  This is used to manage the lifetime of the tweaker.
     void setLayerTweaker(LayerTweakerPtr tweaker) { layerTweaker = std::move(tweaker); }

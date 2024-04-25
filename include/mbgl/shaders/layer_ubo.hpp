@@ -50,7 +50,9 @@ static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16);
 
 enum {
     idGlobalPaintParamsUBO,
-    globalUBOCount
+    globalUBOCount,
+    idGlobalUBOIndex = globalUBOCount,
+    globalUBOCountWithIndex,
 };
 
 } // namespace shaders

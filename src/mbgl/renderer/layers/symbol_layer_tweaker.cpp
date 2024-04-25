@@ -15,7 +15,6 @@
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/util/convert.hpp>
-#include <mbgl/util/math.hpp>
 #include <mbgl/util/std.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
@@ -79,9 +78,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     int i = 0;
     std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
     
-    constexpr bool aligned = false;
-    constexpr bool nearClipped = false;
-    constexpr bool inViewportPixelUnits = false;
     const auto camDist = state.getCameraToCenterDistance();
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
