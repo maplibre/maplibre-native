@@ -77,7 +77,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     layerUniforms.set(idSymbolEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
     int i = 0;
-    std::vector<SymbolComputeUBO> computeUBOVector(layerGroup.getDrawableCount());
+    std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
     
     constexpr bool aligned = false;
     constexpr bool nearClipped = false;
@@ -94,64 +94,62 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
-        const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>() : evaluated.get<style::IconTranslateAnchor>();
+        const auto anchor = isText ? evaluated.get<style::TextTranslateAnchor>()
+                                   : evaluated.get<style::IconTranslateAnchor>();
+        constexpr bool nearClipped = false;
+        constexpr bool inViewportPixelUnits = false;
+        const auto matrix = getTileMatrix(
+            tileID, parameters, translate, anchor, nearClipped, inViewportPixelUnits, drawable);
+
+        // from symbol_program, makeValues
+        const auto currentZoom = static_cast<float>(parameters.state.getZoom());
+        const float pixelsToTileUnits = tileID.pixelsToTileUnits(1.f, currentZoom);
         const bool pitchWithMap = symbolData.pitchAlignment == style::AlignmentType::Map;
         const bool rotateWithMap = symbolData.rotationAlignment == style::AlignmentType::Map;
-        const bool alongLine = symbolData.placement != SymbolPlacementType::Point && symbolData.rotationAlignment == AlignmentType::Map;
-        const bool hasVariablePlacement = symbolData.bucketVariablePlacement && (isText || symbolData.textFit != IconTextFitType::None);
-        
-        int32_t layerIndex = -1;
-        int32_t subLayerIndex = 0;
-        if (!drawable.getIs3D() && drawable.getEnableDepth()) {
-            layerIndex = drawable.getLayerIndex();
-            subLayerIndex = drawable.getSubLayerIndex();
-        }
-        
-        // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
-        auto& projMatrix = aligned ? parameters.transformParams.alignedProjMatrix
-                                   : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
-                                                  : parameters.transformParams.projMatrix);
-        
-        computeUBOVector[i] = {
-            /*.projMatrix=*/util::cast<float>(projMatrix),
+        const bool alongLine = symbolData.placement != SymbolPlacementType::Point &&
+                               symbolData.rotationAlignment == AlignmentType::Map;
+        const bool hasVariablePlacement = symbolData.bucketVariablePlacement &&
+                                          (isText || symbolData.textFit != IconTextFitType::None);
+        const mat4 labelPlaneMatrix = (alongLine || hasVariablePlacement)
+                                          ? matrix::identity4()
+                                          : getLabelPlaneMatrix(
+                                                matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
+        const mat4 glCoordMatrix = getGlCoordMatrix(matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
 
-            /*.layerIndex=*/layerIndex,
-            /*.subLayerIndex=*/subLayerIndex,
-            /*.width=*/state.getSize().width,
-            /*.height=*/state.getSize().height,
-            
+        const float gammaScale = (symbolData.pitchAlignment == AlignmentType::Map
+                                      ? static_cast<float>(std::cos(state.getPitch())) * camDist
+                                      : 1.0f);
+
+        // Line label rotation happens in `updateLineLabels`/`reprojectLineLabels``
+        // Pitched point labels are automatically rotated by the labelPlaneMatrix projection
+        // Unpitched point labels need to have their rotation applied after projection
+        const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
+
+        drawableUBOVector[i] = {
+            /*.matrix=*/util::cast<float>(matrix),
+            /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
+            /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
+
             /*.texsize=*/toArray(getTexSize(drawable, idSymbolImageTexture)),
             /*.texsize_icon=*/toArray(getTexSize(drawable, idSymbolImageIconTexture)),
-            
-            /*.tileIdCanonicalX=*/tileID.canonical.x,
-            /*.tileIdCanonicalY=*/tileID.canonical.y,
-            /*.tileIdCanonicalZ=*/tileID.canonical.z,
-            /*.tileIdWrap=*/tileID.wrap,
-            /*.camDist=*/camDist,
-            
-            /*.scale=*/static_cast<float>(state.getScale()),
-            /*.bearing=*/static_cast<float>(state.getBearing()),
-            /*.zoom=*/static_cast<float>(state.getZoom()),
-            /*.pitch=*/static_cast<float>(state.getPitch()),
-            
-            /*.translation=*/translate,
 
-            /*.isAnchorMap=*/(anchor == TranslateAnchorType::Map),
-            /*.inViewportPixelUnits=*/inViewportPixelUnits,
-            /*.pitchWithMap=*/pitchWithMap,
-            /*.rotateWithMap=*/rotateWithMap,
-            /*.alongLine=*/alongLine,
-            /*.hasVariablePlacement=*/hasVariablePlacement,
-            /*.padding=*/0
+            /*.gamma_scale=*/gammaScale,
+            /*.rotate_symbol=*/rotateInShader,
+            /*.pad=*/{0},
         };
         drawable.setUBOIndex(i);
         i++;
     });
     
-    parameters.computePass->computeDrawableBuffer(computeUBOVector, computeBuffer, drawableBuffer);
-    
-    if (layerGroup.getDrawableCount() > 60 ) {
+    /*if (layerGroup.getDrawableCount() > 60 ) {
         assert(false);
+    }*/
+    
+    const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
+    if (!drawableBuffer || drawableBuffer->getSize() < drawableUBOVectorSize) {
+        drawableBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize);
+    } else {
+        drawableBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
     }
     layerUniforms.set(idSymbolDrawableUBO, drawableBuffer);
 }
