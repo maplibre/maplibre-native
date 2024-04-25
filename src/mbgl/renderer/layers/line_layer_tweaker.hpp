@@ -19,8 +19,8 @@ class LineLayerTweaker : public LayerTweaker {
 public:
     enum class LineType {
         Simple,
-        Pattern,
         Gradient,
+        Pattern,
         SDF
     };
 
@@ -54,25 +54,12 @@ private:
 #endif // MLN_RENDER_BACKEND_METAL
 
 protected:
-    gfx::UniformBufferPtr linePropertiesBuffer;
-    gfx::UniformBufferPtr lineGradientPropertiesBuffer;
-    gfx::UniformBufferPtr linePatternPropertiesBuffer;
-    gfx::UniformBufferPtr lineSDFPropertiesBuffer;
-    gfx::UniformBufferPtr dynamicBuffer;
+    gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
 
-#if MLN_RENDER_BACKEND_METAL
-    gfx::UniformBufferPtr permutationUniformBuffer;
-    gfx::UniformBufferPtr expressionUniformBuffer;
-
-    Unevaluated::GPUExpressions gpuExpressions;
-#endif // MLN_RENDER_BACKEND_METAL
-
-    bool simplePropertiesUpdated = true;
-    bool gradientPropertiesUpdated = true;
-    bool patternPropertiesUpdated = true;
-    bool sdfPropertiesUpdated = true;
-
-    bool gpuExpressionsUpdated = true;
+//#if MLN_RENDER_BACKEND_METAL
+//    gfx::UniformBufferPtr expressionUniformBuffer;
+//    Unevaluated::GPUExpressions gpuExpressions;
+//#endif // MLN_RENDER_BACKEND_METAL
 };
 
 } // namespace mbgl

@@ -15,7 +15,7 @@ class TransformTest : EspressoTest() {
     }
 
     @Test
-    fun mapboxMapScrollByWithPadding() {
+    fun maplibreMapScrollByWithPadding() {
         validateTestSetup()
         invoke(maplibreMap) { _: UiController, maplibreMap: MapLibreMap ->
             maplibreMap.moveCamera(initialCameraUpdate)

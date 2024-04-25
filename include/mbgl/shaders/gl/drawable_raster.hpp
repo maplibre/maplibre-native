@@ -10,6 +10,8 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::OpenGL> {
     static constexpr const char* name = "RasterShader";
     static constexpr const char* vertex = R"(layout (std140) uniform RasterDrawableUBO {
     highp mat4 u_matrix;
+};
+layout (std140) uniform RasterEvaluatedPropsUBO {
     highp vec3 u_spin_weights;
     highp vec2 u_tl_parent;
     highp float u_scale_parent;
@@ -20,8 +22,8 @@ struct ShaderSource<BuiltIn::RasterShader, gfx::Backend::Type::OpenGL> {
     highp float u_brightness_high;
     highp float u_saturation_factor;
     highp float u_contrast_factor;
-    highp float pad1;
-    highp float pad2;
+    highp float props_pad1;
+    highp float props_pad2;
 };
 
 layout (location = 0) in vec2 a_pos;
@@ -41,8 +43,7 @@ void main() {
     v_pos1 = (v_pos0 * u_scale_parent) + u_tl_parent;
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform RasterDrawableUBO {
-    highp mat4 u_matrix;
+    static constexpr const char* fragment = R"(layout (std140) uniform RasterEvaluatedPropsUBO {
     highp vec3 u_spin_weights;
     highp vec2 u_tl_parent;
     highp float u_scale_parent;
@@ -53,8 +54,8 @@ void main() {
     highp float u_brightness_high;
     highp float u_saturation_factor;
     highp float u_contrast_factor;
-    highp float pad1;
-    highp float pad2;
+    highp float props_pad1;
+    highp float props_pad2;
 };
 uniform sampler2D u_image0;
 uniform sampler2D u_image1;

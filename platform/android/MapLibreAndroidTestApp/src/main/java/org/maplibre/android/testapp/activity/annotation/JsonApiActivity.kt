@@ -33,7 +33,7 @@ class JsonApiActivity : AppCompatActivity() {
     // Declare a variable for MapView
     private lateinit var mapView: MapView
 
-    // Declare a variable for MapboxMap
+    // Declare a variable for MapLibreMap
     private lateinit var maplibreMap: MapLibreMap
     /* ANCHOR_END: top */
 

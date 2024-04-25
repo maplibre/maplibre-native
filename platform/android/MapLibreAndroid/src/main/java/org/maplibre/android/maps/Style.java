@@ -31,7 +31,7 @@ import java.util.Map;
  * The proxy object for current map style.
  * <p>
  * To create new instances of this object, create a new instance using a {@link Builder} and load the style with
- * MapboxMap. This object is returned from {@link MapLibreMap#getStyle()} once the style
+ * MapLibreMap. This object is returned from {@link MapLibreMap#getStyle()} once the style
  * has been loaded by underlying map.
  * </p>
  */
@@ -814,7 +814,7 @@ public class Style {
      * <p>
      * This method is asynchronous and will return before the style finishes loading.
      * If you wish to wait for the map to finish loading, listen to the {@link MapView.OnDidFinishLoadingStyleListener}
-     * callback or provide an {@link OnStyleLoaded} callback when setting the style on MapboxMap.
+     * callback or provide an {@link OnStyleLoaded} callback when setting the style on MapLibreMap.
      * </p>
      * If the style fails to load or an invalid style URL is set, the map view will become blank.
      * An error message will be logged in the Android logcat and {@link MapView.OnDidFailLoadingMapListener} callback

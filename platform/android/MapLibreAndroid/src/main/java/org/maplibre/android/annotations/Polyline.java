@@ -64,7 +64,7 @@ public final class Polyline extends BasePointCollection {
 
   @Override
   void update() {
-    MapLibreMap maplibreMap = getMapboxMap();
+    MapLibreMap maplibreMap = getMapLibreMap();
     if (maplibreMap != null) {
       maplibreMap.updatePolyline(this);
     }

@@ -146,7 +146,10 @@ class BenchmarkActivity : AppCompatActivity() {
 
     private fun getBenchmarkInputData(): BenchmarkInputData {
         // read input for benchmark from JSON file (on CI)
-        val jsonFile = File("${Environment.getExternalStorageDirectory()}/benchmark-input.json")
+        val jsonFile = File("${Environment.getExternalStorageDirectory()}/instrumentation-test-input.json")
+        Logger.i(TAG, "Environment.getExternalStorageDirectory() = ${Environment.getExternalStorageDirectory()}")
+        Logger.i(TAG, "jsonFile.isFile = ${jsonFile.isFile}")
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager() && jsonFile.isFile) {
             val jsonFileContents = jsonFile.readText()
             val jsonElement = Json.parseToJsonElement(jsonFileContents)
@@ -192,7 +195,7 @@ class BenchmarkActivity : AppCompatActivity() {
         handler = Handler(mainLooper)
         setupToolbar()
         inputData = getBenchmarkInputData()
-        setupMapView(savedInstanceState)
+        setupMapView()
     }
 
     private fun setupToolbar() {
@@ -203,10 +206,10 @@ class BenchmarkActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupMapView(savedInstanceState: Bundle?) {
+    private fun setupMapView() {
         mapView = findViewById<View>(R.id.mapView) as MapView
         if (measureFrameTime) {
-            mapView.addOnDidFinishRenderingFrameListener { fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double ->
+            mapView.addOnDidFinishRenderingFrameListener { _: Boolean, frameEncodingTime: Double, frameRenderingTime: Double ->
                 encodingTimeStore.add(frameEncodingTime * 1e3)
                 renderingTimeStore.add(frameRenderingTime * 1e3)
             }

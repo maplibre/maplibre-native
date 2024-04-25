@@ -206,7 +206,7 @@ public class SupportMapFragment extends Fragment implements OnMapReadyCallback {
   }
 
   /**
-   * Sets a callback object which will be triggered when the MapboxMap instance is ready to be used.
+   * Sets a callback object which will be triggered when the MapLibreMap instance is ready to be used.
    *
    * @param onMapReadyCallback The callback to be invoked.
    */

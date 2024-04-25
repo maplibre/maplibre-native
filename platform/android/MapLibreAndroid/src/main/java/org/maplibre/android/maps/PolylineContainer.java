@@ -29,7 +29,7 @@ class PolylineContainer implements Polylines {
     Polyline polyline = polylineOptions.getPolyline();
     if (!polyline.getPoints().isEmpty()) {
       long id = nativeMap != null ? nativeMap.addPolyline(polyline) : 0;
-      polyline.setMapboxMap(maplibreMap);
+      polyline.setMapLibreMap(maplibreMap);
       polyline.setId(id);
       annotations.put(id, polyline);
     }
@@ -53,7 +53,7 @@ class PolylineContainer implements Polylines {
       long[] ids = nativeMap.addPolylines(polylines);
       for (int i = 0; i < ids.length; i++) {
         Polyline polylineCreated = polylines.get(i);
-        polylineCreated.setMapboxMap(maplibreMap);
+        polylineCreated.setMapLibreMap(maplibreMap);
         polylineCreated.setId(ids[i]);
         annotations.put(ids[i], polylineCreated);
       }

@@ -20,7 +20,7 @@ struct alignas(16) HillshadeEvaluatedPropsUBO {
 static_assert(sizeof(HillshadeEvaluatedPropsUBO) % 16 == 0);
 
 enum {
-    idHillshadeDrawableUBO,
+    idHillshadeDrawableUBO = globalUBOCount,
     idHillshadeEvaluatedPropsUBO,
     hillshadeUBOCount
 };

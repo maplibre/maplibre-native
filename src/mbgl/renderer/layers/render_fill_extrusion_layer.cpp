@@ -385,7 +385,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
             0,
             0};
 
-        const FillExtrusionDrawableTilePropsUBO tilePropsUBO = {
+        const FillExtrusionTilePropsUBO tilePropsUBO = {
             /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
             /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
         };
@@ -397,9 +397,9 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 return false;
             }
 
-            auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(idFillExtrusionDrawableTilePropsUBO, &tilePropsUBO, context);
-            uniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
+            auto& drawableUniforms = drawable.mutableUniformBuffers();
+            drawableUniforms.createOrUpdate(idFillExtrusionTilePropsUBO, &tilePropsUBO, context);
+            drawableUniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
             return true;
         };
         if (updateTile(drawPass, tileID, std::move(updateExisting))) {
@@ -512,9 +512,9 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setTileID(tileID);
                 drawable->setLayerTweaker(layerTweaker);
 
-                auto& uniforms = drawable->mutableUniformBuffers();
-                uniforms.createOrUpdate(idFillExtrusionDrawableTilePropsUBO, &tilePropsUBO, context);
-                uniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
+                auto& drawableUniforms = drawable->mutableUniformBuffers();
+                drawableUniforms.createOrUpdate(idFillExtrusionTilePropsUBO, &tilePropsUBO, context);
+                drawableUniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
 
                 tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;

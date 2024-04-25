@@ -38,24 +38,24 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToCameraPositionTarget() throws InterruptedException {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       float zoom = 1.0f;
       LatLng moveTarget = new LatLng(1, 1);
       CameraPosition initialPosition = new CameraPosition.Builder().target(
         new LatLng()).zoom(zoom).bearing(0).tilt(0).padding(new double[4]).build();
-      CameraPosition cameraPosition = mapboxMap.getCameraPosition();
+      CameraPosition cameraPosition = maplibreMap.getCameraPosition();
       assertEquals("Default camera position should match default", cameraPosition, initialPosition);
 
       executeCameraMovement(CameraUpdateFactory.newLatLng(moveTarget), new MapLibreMap.CancelableCallback() {
         @Override
         public void onCancel() {
-          verifyCameraPosition(mapboxMap, moveTarget, zoom, 0, 0, new double[4]);
+          verifyCameraPosition(maplibreMap, moveTarget, zoom, 0, 0, new double[4]);
           latch.countDown();
         }
 
         @Override
         public void onFinish() {
-          verifyCameraPosition(mapboxMap, moveTarget, zoom, 0, 0, new double[4]);
+          verifyCameraPosition(maplibreMap, moveTarget, zoom, 0, 0, new double[4]);
           latch.countDown();
         }
       });
@@ -69,7 +69,7 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToCameraPositionTargetZoom() throws InterruptedException {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       final float moveZoom = 15.5f;
       final LatLng moveTarget = new LatLng(1.0000000001, 1.0000000003);
 
@@ -77,13 +77,13 @@ public abstract class CameraTest extends BaseTest {
         new MapLibreMap.CancelableCallback() {
           @Override
           public void onCancel() {
-            verifyCameraPosition(mapboxMap, moveTarget, moveZoom, 0, 0, new double[4]);
+            verifyCameraPosition(maplibreMap, moveTarget, moveZoom, 0, 0, new double[4]);
             latch.countDown();
           }
 
           @Override
           public void onFinish() {
-            verifyCameraPosition(mapboxMap, moveTarget, moveZoom, 0, 0, new double[4]);
+            verifyCameraPosition(maplibreMap, moveTarget, moveZoom, 0, 0, new double[4]);
             latch.countDown();
           }
         });
@@ -97,7 +97,7 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToCameraPosition() throws InterruptedException {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       final LatLng moveTarget = new LatLng(1.0000000001, 1.0000000003);
       final float moveZoom = 15.5f;
       final float moveTilt = 45.5f;
@@ -115,13 +115,13 @@ public abstract class CameraTest extends BaseTest {
         new MapLibreMap.CancelableCallback() {
           @Override
           public void onCancel() {
-            verifyCameraPosition(mapboxMap, moveTarget, moveZoom, moveBearing, moveTilt, movePadding);
+            verifyCameraPosition(maplibreMap, moveTarget, moveZoom, moveBearing, moveTilt, movePadding);
             latch.countDown();
           }
 
           @Override
           public void onFinish() {
-            verifyCameraPosition(mapboxMap, moveTarget, moveZoom, moveBearing, moveTilt, movePadding);
+            verifyCameraPosition(maplibreMap, moveTarget, moveZoom, moveBearing, moveTilt, movePadding);
             latch.countDown();
           }
         });
@@ -135,7 +135,7 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToBounds() throws InterruptedException {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       final LatLng centerBounds = new LatLng(1, 1);
       LatLng cornerOne = new LatLng();
       LatLng cornerTwo = new LatLng(2, 2);
@@ -147,13 +147,13 @@ public abstract class CameraTest extends BaseTest {
         new MapLibreMap.CancelableCallback() {
           @Override
           public void onCancel() {
-            verifyCameraPosition(mapboxMap, centerBounds, mapboxMap.getCameraPosition().zoom, 0, 0, new double[4]);
+            verifyCameraPosition(maplibreMap, centerBounds, maplibreMap.getCameraPosition().zoom, 0, 0, new double[4]);
             latch.countDown();
           }
 
           @Override
           public void onFinish() {
-            verifyCameraPosition(mapboxMap, centerBounds, mapboxMap.getCameraPosition().zoom, 0, 0, new double[4]);
+            verifyCameraPosition(maplibreMap, centerBounds, maplibreMap.getCameraPosition().zoom, 0, 0, new double[4]);
             latch.countDown();
           }
         });
@@ -167,19 +167,19 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToZoomIn() throws InterruptedException {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       float zoom = 1.0f;
 
       executeCameraMovement(CameraUpdateFactory.zoomIn(), new MapLibreMap.CancelableCallback() {
         @Override
         public void onCancel() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom + 1, 0, 0, new double[4]);
+          verifyCameraPosition(maplibreMap, maplibreMap.getCameraPosition().target, zoom + 1, 0, 0, new double[4]);
           latch.countDown();
         }
 
         @Override
         public void onFinish() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom + 1, 0, 0, new double[4]);
+          verifyCameraPosition(maplibreMap, maplibreMap.getCameraPosition().target, zoom + 1, 0, 0, new double[4]);
           latch.countDown();
         }
       });
@@ -194,18 +194,18 @@ public abstract class CameraTest extends BaseTest {
   public void testToZoomOut() throws InterruptedException {
     float zoom = 10.0f;
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) ->
+    invoke(maplibreMap, (uiController, maplibreMap) ->
       executeCameraMovement(CameraUpdateFactory.newLatLngZoom(new LatLng(), zoom),
         new MapLibreMap.CancelableCallback() {
           @Override
           public void onCancel() {
-            verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom, 0, 0, new double[4]);
+            verifyCameraPosition(maplibreMap, maplibreMap.getCameraPosition().target, zoom, 0, 0, new double[4]);
             latch.countDown();
           }
 
           @Override
           public void onFinish() {
-            verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom, 0, 0, new double[4]);
+            verifyCameraPosition(maplibreMap, maplibreMap.getCameraPosition().target, zoom, 0, 0, new double[4]);
             latch.countDown();
           }
         })
@@ -217,17 +217,17 @@ public abstract class CameraTest extends BaseTest {
 
     latch = new CountDownLatch(1);
 
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       executeCameraMovement(CameraUpdateFactory.zoomOut(), new MapLibreMap.CancelableCallback() {
         @Override
         public void onCancel() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom - 1, 0, 0, new double[4]);
+          verifyCameraPosition(maplibreMap, maplibreMap.getCameraPosition().target, zoom - 1, 0, 0, new double[4]);
           latch.countDown();
         }
 
         @Override
         public void onFinish() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom - 1, 0, 0, new double[4]);
+          verifyCameraPosition(maplibreMap, maplibreMap.getCameraPosition().target, zoom - 1, 0, 0, new double[4]);
           latch.countDown();
         }
       });
@@ -241,20 +241,20 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToZoomBy() throws InterruptedException {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       float zoom = 1.0f;
       final float zoomBy = 2.45f;
 
       executeCameraMovement(CameraUpdateFactory.zoomBy(zoomBy), new MapLibreMap.CancelableCallback() {
         @Override
         public void onCancel() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom + zoomBy, 0, 0, new double[4]);
+          verifyCameraPosition(maplibreMap, maplibreMap.getCameraPosition().target, zoom + zoomBy, 0, 0, new double[4]);
           latch.countDown();
         }
 
         @Override
         public void onFinish() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoom + zoomBy, 0, 0, new double[4]);
+          verifyCameraPosition(maplibreMap, maplibreMap.getCameraPosition().target, zoom + zoomBy, 0, 0, new double[4]);
           latch.countDown();
         }
       });
@@ -268,19 +268,19 @@ public abstract class CameraTest extends BaseTest {
   @Test
   public void testToZoomTo() throws InterruptedException {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       final float zoomTo = 2.45f;
 
       executeCameraMovement(CameraUpdateFactory.zoomTo(zoomTo), new MapLibreMap.CancelableCallback() {
         @Override
         public void onCancel() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoomTo, 0, 0, new double[4]);
+          verifyCameraPosition(maplibreMap, maplibreMap.getCameraPosition().target, zoomTo, 0, 0, new double[4]);
           latch.countDown();
         }
 
         @Override
         public void onFinish() {
-          verifyCameraPosition(mapboxMap, mapboxMap.getCameraPosition().target, zoomTo, 0, 0, new double[4]);
+          verifyCameraPosition(maplibreMap, maplibreMap.getCameraPosition().target, zoomTo, 0, 0, new double[4]);
           latch.countDown();
         }
       });

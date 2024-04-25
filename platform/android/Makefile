@@ -215,11 +215,13 @@ run-android-unit-test:
 run-android-unit-test-%:
 	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:testLegacyDebugUnitTest --info --tests "$*"
 
-# Builds a release package of the Android SDK
+# Builds a release package and .tar.gz with debug symbols of the Android SDK
 .PHONY: apackage
 apackage: 
 	make android-lib-arm-v7 && make android-lib-arm-v8 && make android-lib-x86 && make android-lib-x86-64
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=all assemble$(BUILDTYPE)
+	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=all assembleDrawable$(BUILDTYPE)
+	mkdir -p build
+	tar -czvf build/debug-symbols.tar.gz -C MapLibreAndroid/build/intermediates/library_jni/drawableRelease/jni .
 
 # Build test app instrumentation tests apk and test app apk for all abi's
 .PHONY: android-ui-test
@@ -264,11 +266,6 @@ android-lint-sdk:
 .PHONY: android-lint-test-app
 android-lint-test-app:
 	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroidTestApp:lint
-
-# Generates javadoc from the Android SDK
-.PHONY: android-javadoc
-android-javadoc:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:javadocrelease
 
 # Generates LICENSE.md file based on all Android project dependencies
 .PHONY: android-license

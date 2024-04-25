@@ -28,7 +28,7 @@ import org.maplibre.android.testapp.activity.EspressoTest
  * This test is responsible for testing the public API.
  *
  *
- * Methods executed on MapboxMap are called from a ViewAction to ensure correct synchronisation
+ * Methods executed on MapLibreMap are called from a ViewAction to ensure correct synchronisation
  * with the application UI-thread.
  *
  */

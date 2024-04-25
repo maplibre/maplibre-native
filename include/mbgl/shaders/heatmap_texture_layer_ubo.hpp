@@ -5,16 +5,15 @@
 namespace mbgl {
 namespace shaders {
 
-struct alignas(16) HeatmapTextureDrawableUBO {
+struct alignas(16) HeatmapTexturePropsUBO {
     std::array<float, 4 * 4> matrix;
-    std::array<float, 2> world;
     float opacity;
-    float pad1;
+    float pad1, pad2, pad3;
 };
-static_assert(sizeof(HeatmapTextureDrawableUBO) % 16 == 0);
+static_assert(sizeof(HeatmapTexturePropsUBO) % 16 == 0);
 
 enum {
-    idHeatmapTextureDrawableUBO,
+    idHeatmapTexturePropsUBO = globalUBOCount,
     heatmapTextureUBOCount
 };
 

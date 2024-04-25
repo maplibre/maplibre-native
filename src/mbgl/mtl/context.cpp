@@ -55,6 +55,10 @@ Context::~Context() noexcept {
         clipMaskUniformsBuffer.reset();
         stencilStateRenderable = nullptr;
 
+        for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
+            globalUniformBuffers.set(i, nullptr);
+        }
+
 #if !defined(NDEBUG)
         Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
 #endif
@@ -125,7 +129,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     NS::String* nsSource = NS::String::string(source.data(), NS::UTF8StringEncoding);
 
     const auto& device = backend.getDevice();
-    MTL::Library* library = device->newLibrary(nsSource, options.get(), &error);
+    auto library = NS::TransferPtr(device->newLibrary(nsSource, options.get(), &error));
     if (!library || error) {
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
         const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();
@@ -135,7 +139,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     }
 
     const auto nsVertName = NS::String::string(vertexName.data(), NS::UTF8StringEncoding);
-    NS::SharedPtr<MTL::Function> vertexFunction = NS::RetainPtr(library->newFunction(nsVertName));
+    NS::SharedPtr<MTL::Function> vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
         assert(false);
@@ -146,7 +150,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     NS::SharedPtr<MTL::Function> fragmentFunction;
     if (!fragmentName.empty()) {
         const auto nsFragName = NS::String::string(fragmentName.data(), NS::UTF8StringEncoding);
-        fragmentFunction = NS::RetainPtr(library->newFunction(nsFragName));
+        fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
         if (!fragmentFunction) {
             Log::Error(Event::Shader, name + " missing fragment function " + fragmentName.data());
             assert(false);
@@ -347,8 +351,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         layoutDesc->setStride(static_cast<NS::UInteger>(vertexSize));
         layoutDesc->setStepFunction(MTL::VertexStepFunctionPerVertex);
         layoutDesc->setStepRate(1);
-        vertDesc->attributes()->setObject(attribDesc.get(), 0);
-        vertDesc->layouts()->setObject(layoutDesc.get(), 0);
+        vertDesc->attributes()->setObject(attribDesc.get(), ShaderClass::attributes[0].index);
+        vertDesc->layouts()->setObject(layoutDesc.get(), ShaderClass::attributes[0].index);
 
         // Create a render pipeline state, telling Metal how to render the primitives
         const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
@@ -605,6 +609,18 @@ MTLDepthStencilStatePtr Context::makeDepthStencilState(const gfx::DepthMode& dep
     }
 
     return NS::TransferPtr(device->newDepthStencilState(depthStencilDescriptor.get()));
+}
+
+void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
+    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
+        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
+        if (!globalUniformBuffer) continue;
+        const auto& buffer = static_cast<UniformBuffer&>(*globalUniformBuffer.get());
+        const auto& resource = buffer.getBufferResource();
+        auto& mtlRenderPass = static_cast<RenderPass&>(renderPass);
+        mtlRenderPass.bindVertex(resource, 0, id);
+        mtlRenderPass.bindFragment(resource, 0, id);
+    }
 }
 
 } // namespace mtl

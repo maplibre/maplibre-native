@@ -40,7 +40,7 @@ public:
           zoomRange(zoomRange_),
           attribution(std::move(attribution_)),
           scheme(scheme_),
-          encoding(encoding_){};
+          encoding(encoding_) {};
 
     // TileJSON also includes center and zoom but they are not used by mbgl.
 

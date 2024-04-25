@@ -40,74 +40,24 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    if (propertiesUpdated) {
-        fillUniformBufferUpdated = true;
-        fillOutlineUniformBufferUpdated = true;
-        fillPatternUniformBufferUpdated = true;
-        fillOutlinePatternUniformBufferUpdated = true;
+    if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
+        const FillEvaluatedPropsUBO propsUBO = {
+            /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
+            /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
+            /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
+            /* .fade = */ crossfade.t,
+            /* .from_scale = */ crossfade.fromScale,
+            /* .to_scale = */ crossfade.toScale,
+        };
+        context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
-
-    const auto UpdateFillUniformBuffers = [&]() {
-        if (!fillPropsUniformBuffer || fillUniformBufferUpdated) {
-            const FillEvaluatedPropsUBO paramsUBO = {
-                /* .color = */ evaluated.get<FillColor>().constantOr(FillColor::defaultValue()),
-                /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
-                0,
-                0,
-                0,
-            };
-            context.emplaceOrUpdateUniformBuffer(fillPropsUniformBuffer, &paramsUBO);
-            fillUniformBufferUpdated = false;
-        }
-    };
-
-    const auto UpdateFillOutlineUniformBuffers = [&]() {
-        if (!fillOutlinePropsUniformBuffer || fillOutlineUniformBufferUpdated) {
-            const FillOutlineEvaluatedPropsUBO paramsUBO = {
-                /* .outline_color = */ evaluated.get<FillOutlineColor>().constantOr(FillOutlineColor::defaultValue()),
-                /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
-                0,
-                0,
-                0,
-            };
-            context.emplaceOrUpdateUniformBuffer(fillOutlinePropsUniformBuffer, &paramsUBO);
-            fillOutlineUniformBufferUpdated = false;
-        }
-    };
-
-    const auto UpdateFillPatternUniformBuffers = [&]() {
-        if (!fillPatternPropsUniformBuffer || fillPatternUniformBufferUpdated) {
-            const FillPatternEvaluatedPropsUBO paramsUBO = {
-                /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
-                /* .fade = */ crossfade.t,
-                0,
-                0,
-            };
-            context.emplaceOrUpdateUniformBuffer(fillPatternPropsUniformBuffer, &paramsUBO);
-            fillPatternUniformBufferUpdated = false;
-        }
-    };
-
-    const auto UpdateFillOutlinePatternUniformBuffers = [&]() {
-        if (!fillOutlinePatternPropsUniformBuffer || fillOutlinePatternUniformBufferUpdated) {
-            const FillOutlinePatternEvaluatedPropsUBO paramsUBO = {
-                /* .opacity = */ evaluated.get<FillOpacity>().constantOr(FillOpacity::defaultValue()),
-                /* .fade = */ crossfade.t,
-                0,
-                0,
-            };
-            context.emplaceOrUpdateUniformBuffer(fillOutlinePatternPropsUniformBuffer, &paramsUBO);
-            fillOutlinePatternUniformBufferUpdated = false;
-        }
-    };
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
+    layerUniforms.set(idFillEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
     const auto& translation = evaluated.get<FillTranslate>();
     const auto anchor = evaluated.get<FillTranslateAnchor>();
-
-    const auto renderableSize = parameters.backend.getDefaultRenderable().getSize();
     const auto intZoom = parameters.state.getIntegerZoom();
-    const auto pixelRatio = parameters.pixelRatio;
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !checkTweakDrawable(drawable)) {
@@ -136,61 +86,49 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
             textureSize = tex->getSize();
         }
 
-        auto& uniforms = drawable.mutableUniformBuffers();
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
         switch (static_cast<RenderFillLayer::FillVariant>(drawable.getType())) {
             case RenderFillLayer::FillVariant::Fill: {
-                UpdateFillUniformBuffers();
-
-                uniforms.set(idFillEvaluatedPropsUBO, fillPropsUniformBuffer);
-
                 const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
-                uniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
             case RenderFillLayer::FillVariant::FillOutline: {
-                UpdateFillOutlineUniformBuffers();
-
-                uniforms.set(idFillOutlineEvaluatedPropsUBO, fillOutlinePropsUniformBuffer);
-
-                const FillOutlineDrawableUBO drawableUBO = {
-                    /*.matrix=*/util::cast<float>(matrix),
-                    /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
-                    /* pad1 */ 0,
-                    /* pad2 */ 0};
-                uniforms.createOrUpdate(idFillOutlineDrawableUBO, &drawableUBO, context);
+                const FillOutlineDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
             case RenderFillLayer::FillVariant::FillPattern: {
-                UpdateFillPatternUniformBuffers();
-
-                uniforms.set(idFillPatternEvaluatedPropsUBO, fillPatternPropsUniformBuffer);
-
                 const FillPatternDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
-                    /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
                     /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
                     /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
                     /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                    0,
+                    /*.tile_ratio = */ tileRatio,
                     0,
                 };
-                uniforms.createOrUpdate(idFillPatternDrawableUBO, &drawableUBO, context);
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
             case RenderFillLayer::FillVariant::FillOutlinePattern: {
-                UpdateFillOutlinePatternUniformBuffers();
-
-                uniforms.set(idFillOutlinePatternEvaluatedPropsUBO, fillOutlinePatternPropsUniformBuffer);
-
                 const FillOutlinePatternDrawableUBO drawableUBO = {
                     /*.matrix=*/util::cast<float>(matrix),
-                    /*.scale=*/{pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
-                    /*.world=*/{(float)renderableSize.width, (float)renderableSize.height},
                     /*.pixel_coord_upper=*/{static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
                     /*.pixel_coord_lower=*/{static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
                     /*.texsize=*/{static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
-                };
-                uniforms.createOrUpdate(idFillOutlinePatternDrawableUBO, &drawableUBO, context);
+                    /*.tile_ratio = */ tileRatio,
+                    0};
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
+                break;
+            }
+            case RenderFillLayer::FillVariant::FillOutlineTriangulated: {
+                const FillOutlineTriangulatedDrawableUBO drawableUBO = {
+                    /*.matrix=*/util::cast<float>(matrix),
+                    /*.ratio=*/1.0f / tileID.pixelsToTileUnits(1.0f, parameters.state.getZoom()),
+                    0,
+                    0,
+                    0};
+                drawableUniforms.createOrUpdate(idFillDrawableUBO, &drawableUBO, context);
                 break;
             }
             default: {

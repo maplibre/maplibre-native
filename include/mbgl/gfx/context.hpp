@@ -155,6 +155,17 @@ public:
         return emplaceOrUpdateUniformBuffer(ptr, data, sizeof(T), persistent);
     }
 
+    /// Get the global uniform buffers
+    virtual const gfx::UniformBufferArray& getGlobalUniformBuffers() const = 0;
+
+    /// Get the mutable global uniform buffer array
+    virtual gfx::UniformBufferArray& mutableGlobalUniformBuffers() = 0;
+
+    /// Bind the global uniform buffers
+    virtual void bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept = 0;
+
+    /// Unbind the global uniform buffers
+    virtual void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept = 0;
 #endif
 
 protected:

@@ -1,3 +1,4 @@
+#include <mbgl/style/expression/collator_expression.hpp>
 #include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/expression/format_section_override.hpp>
 #include <mbgl/style/layers/custom_layer_impl.hpp>
@@ -84,18 +85,7 @@ TEST(ExpressionDependencies, CustomLayer) {
     EXPECT_EQ(Dependency::None, CustomLayerProperties{std::move(impl)}.getDependencies());
 }
 
-TEST(ExpressionDependencies, Format) {
-    for (size_t i = 0; i < underlying_type(Dependency::MaskCount); ++i) {
-        const auto mask = Dependency{1u << i};
-        std::ostringstream ss;
-        ss << mask;
-        EXPECT_EQ(ss.str(), util::toString(mask));
-    }
-}
-
-TEST(ExpressionDependencies, MaskTests) {
-    EXPECT_FALSE(Dependency::Feature & Dependency::None);
-    EXPECT_TRUE(Dependency::Feature & Dependency::Feature);
-    EXPECT_TRUE(Dependency::Feature & (Dependency::Feature | Dependency::Zoom));
-    EXPECT_TRUE((Dependency::Feature | Dependency::Zoom) & Dependency::Feature);
+TEST(ExpressionDependencies, Collation) {
+    auto collator = CollatorExpression(gt(literal(1.), zoom()), literal(true), literal("en-us"));
+    EXPECT_EQ(Dependency::Feature | Dependency::Zoom, collator.dependencies);
 }

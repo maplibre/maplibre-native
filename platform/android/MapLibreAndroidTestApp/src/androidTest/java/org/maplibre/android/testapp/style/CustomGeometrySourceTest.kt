@@ -40,10 +40,10 @@ class CustomGeometrySourceTest : BaseTest() {
     @Test
     fun threadsShutdownWhenSourceRemovedTest() {
         validateTestSetup()
-        invoke(maplibreMap) { uiController, mapboxMap ->
-            mapboxMap.style!!.removeLayer(ID_GRID_LAYER)
+        invoke(maplibreMap) { uiController, maplibreMap ->
+            maplibreMap.style!!.removeLayer(ID_GRID_LAYER)
             TestingAsyncUtils.waitForLayer(uiController, mapView)
-            mapboxMap.style!!.removeSource(ID_GRID_SOURCE)
+            maplibreMap.style!!.removeSource(ID_GRID_SOURCE)
             TestingAsyncUtils.waitForLayer(uiController, mapView)
             Assert.assertTrue(
                 "There should be no threads running when the source is removed.",
@@ -57,13 +57,13 @@ class CustomGeometrySourceTest : BaseTest() {
     @Test
     fun threadsRestartedWhenSourceReAddedTest() {
         validateTestSetup()
-        invoke(maplibreMap) { uiController, mapboxMap ->
-            mapboxMap.style!!.removeLayer((rule.activity as GridSourceActivity).layer!!)
+        invoke(maplibreMap) { uiController, maplibreMap ->
+            maplibreMap.style!!.removeLayer((rule.activity as GridSourceActivity).layer!!)
             TestingAsyncUtils.waitForLayer(uiController, mapView)
-            mapboxMap.style!!.removeSource(ID_GRID_SOURCE)
+            maplibreMap.style!!.removeSource(ID_GRID_SOURCE)
             TestingAsyncUtils.waitForLayer(uiController, mapView)
-            mapboxMap.style!!.addSource((rule.activity as GridSourceActivity).source!!)
-            mapboxMap.style!!.addLayer((rule.activity as GridSourceActivity).layer!!)
+            maplibreMap.style!!.addSource((rule.activity as GridSourceActivity).source!!)
+            maplibreMap.style!!.addLayer((rule.activity as GridSourceActivity).layer!!)
             TestingAsyncUtils.waitForLayer(uiController, mapView)
             Assert.assertTrue(
                 "Threads should be restarted when the source is re-added to the map.",
@@ -77,9 +77,9 @@ class CustomGeometrySourceTest : BaseTest() {
     @Test
     fun sourceZoomDeltaTest() {
         validateTestSetup()
-        invoke(maplibreMap) { uiController, mapboxMap ->
-            mapboxMap.prefetchZoomDelta = 3
-            mapboxMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
+        invoke(maplibreMap) { uiController, maplibreMap ->
+            maplibreMap.prefetchZoomDelta = 3
+            maplibreMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
                 assertNull(it.prefetchZoomDelta)
                 it.prefetchZoomDelta = 5
                 assertNotNull(it.prefetchZoomDelta)
@@ -93,8 +93,8 @@ class CustomGeometrySourceTest : BaseTest() {
     @Test
     fun isVolatileTest() {
         validateTestSetup()
-        invoke(maplibreMap) { uiController, mapboxMap ->
-            mapboxMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
+        invoke(maplibreMap) { uiController, maplibreMap ->
+            maplibreMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
                 assertFalse(it.isVolatile)
                 it.isVolatile = true
                 assertTrue(it.isVolatile)
@@ -105,8 +105,8 @@ class CustomGeometrySourceTest : BaseTest() {
     @Test
     fun minimumTileUpdateIntervalTest() {
         validateTestSetup()
-        invoke(maplibreMap) { uiController, mapboxMap ->
-            mapboxMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
+        invoke(maplibreMap) { uiController, maplibreMap ->
+            maplibreMap.style!!.getSource(ID_GRID_SOURCE)!!.let {
                 assertEquals(0, it.minimumTileUpdateInterval)
                 it.minimumTileUpdateInterval = 1000
                 assertEquals(1000, it.minimumTileUpdateInterval)

@@ -13,6 +13,8 @@
 #import "MBXState.h"
 #import "MLNSettings.h"
 
+#import "platform/ios/src/MLNMapView_Private.h"
+
 #import "CustomStyleLayerExample.h"
 
 #if MLN_DRAWABLE_RENDERER
@@ -238,9 +240,25 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     BOOL _isTouringWorld;
     BOOL _contentInsetsEnabled;
     UIEdgeInsets _originalContentInsets;
+
+    NSLayoutConstraint* _firstMapLayout;
+    NSArray<NSLayoutConstraint*>* _secondMapLayout;
+    
+    NSDictionary* _pointFeatures;
+    NSLock* _loadLock;
 }
 
 // MARK: - Setup & Teardown
+
+- (instancetype)init {
+    if (self = [super init]) {
+        _firstMapLayout = nil;
+        _secondMapLayout = nil;
+        _pointFeatures = nil;
+        _loadLock = [NSLock new];
+    }
+    return self;
+}
 
 - (void)viewDidLoad
 {
@@ -830,22 +848,32 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
 // MARK: - Debugging Actions
 
+- (NSDictionary*)loadPointFeatures
+{
+    [_loadLock lock];
+    if (!_pointFeatures) {
+        NSData *featuresData = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"points" ofType:@"geojson"]];
+        if (featuresData) {
+            id features = [NSJSONSerialization JSONObjectWithData:featuresData
+                                                          options:0
+                                                            error:nil];
+            if ([features isKindOfClass:[NSDictionary class]])
+            {
+                _pointFeatures = (NSDictionary*)features;
+            }
+        }
+    }
+    [_loadLock unlock];
+    return _pointFeatures;
+}
+
 - (void)parseFeaturesAddingCount:(NSUInteger)featuresCount usingViews:(BOOL)useViews
 {
-    [self.mapView removeAnnotations:self.mapView.annotations];
-
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^
     {
-        NSData *featuresData = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"points" ofType:@"geojson"]];
-
-        id features = [NSJSONSerialization JSONObjectWithData:featuresData
-                                                      options:0
-                                                        error:nil];
-
-        if ([features isKindOfClass:[NSDictionary class]])
+        if (auto *features = [self loadPointFeatures])
         {
             NSMutableArray *annotations = [NSMutableArray array];
-
             for (NSDictionary *feature in features[@"features"])
             {
                 CLLocationCoordinate2D coordinate = CLLocationCoordinate2DMake([feature[@"geometry"][@"coordinates"][1] doubleValue],
@@ -864,6 +892,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
             dispatch_async(dispatch_get_main_queue(), ^
             {
+                [self.mapView removeAnnotations:self.mapView.annotations];
                 [self.mapView addAnnotations:annotations];
                 [self.mapView showAnnotations:annotations animated:YES];
             });
@@ -1131,34 +1160,59 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
 - (void)styleSymbolLayer
 {
-    MLNSymbolStyleLayer *stateLayer = (MLNSymbolStyleLayer *)[self.mapView.style layerWithIdentifier:@"state-label-lg"];
-    stateLayer.textColor = [NSExpression expressionForConstantValue:[UIColor redColor]];
+    if (auto *stateLayer = (MLNSymbolStyleLayer *)[self.mapView.style layerWithIdentifier:@"state-label-lg"])
+    {
+        stateLayer.textColor = [NSExpression expressionForConstantValue:[UIColor redColor]];
+    }
 }
 
 - (void)styleBuildingLayer
 {
     MLNTransition transition =  { 5,  1 };
     self.mapView.style.transition = transition;
-    MLNFillStyleLayer *buildingLayer = (MLNFillStyleLayer *)[self.mapView.style layerWithIdentifier:@"building"];
-    buildingLayer.fillColor = [NSExpression expressionForConstantValue:[UIColor purpleColor]];
+    if (auto *buildingLayer = (MLNFillStyleLayer *)[self.mapView.style layerWithIdentifier:@"building"])
+    {
+        buildingLayer.fillColor = [NSExpression expressionForConstantValue:[UIColor purpleColor]];
+    }
 }
 
 - (void)styleFerryLayer
 {
-    MLNLineStyleLayer *ferryLineLayer = (MLNLineStyleLayer *)[self.mapView.style layerWithIdentifier:@"ferry"];
-    ferryLineLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor redColor]];
+    if (auto *ferryLineLayer = (MLNLineStyleLayer *)[self.mapView.style layerWithIdentifier:@"ferry"])
+    {
+        ferryLineLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor redColor]];
+    }
 }
 
 - (void)removeParkLayer
 {
-    MLNFillStyleLayer *parkLayer = (MLNFillStyleLayer *)[self.mapView.style layerWithIdentifier:@"park"];
-    [self.mapView.style removeLayer:parkLayer];
+    if (auto *parkLayer = (MLNFillStyleLayer *)[self.mapView.style layerWithIdentifier:@"park"])
+    {
+        [self.mapView.style removeLayer:parkLayer];
+    }
+}
+
+- (BOOL)loadStyleFromBundle:(NSString*)path
+{
+    NSString *resourcePath = [[NSBundle mainBundle] pathForResource:path ofType:@"json"];
+    if (NSURL* url = resourcePath ? [NSURL fileURLWithPath:resourcePath] : nil) {
+        [self.mapView setStyleURL:url];
+        return TRUE;
+    } else {
+        NSString *msg = [NSString stringWithFormat:@"Missing Style %@", path];
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Style File" message:msg preferredStyle:UIAlertControllerStyleAlert];
+        [alertController addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleCancel handler:nil]];
+        [self presentViewController:alertController animated:YES completion:nil];
+        return FALSE;
+    }
 }
 
 - (void)styleFilteredFill
 {
     // set style and focus on Texas
-    [self.mapView setStyleURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"fill_filter_style" ofType:@"json"]]];
+    if (![self loadStyleFromBundle:@"fill_filter_style"]) {
+        return;
+    }
     [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(31, -100) zoomLevel:3 animated:NO];
 
     // after slight delay, fill in Texas (atypical use; we want to clearly see the change for test purposes)
@@ -1178,7 +1232,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 - (void)styleFilteredLines
 {
     // set style and focus on lower 48
-    [self.mapView setStyleURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"line_filter_style" ofType:@"json"]]];
+    if (![self loadStyleFromBundle:@"line_filter_style"]) {
+        return;
+    }
     [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(40, -97) zoomLevel:5 animated:NO];
 
     // after slight delay, change styling for all Washington-named counties  (atypical use; we want to clearly see the change for test purposes)
@@ -1199,7 +1255,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 - (void)styleNumericFilteredFills
 {
     // set style and focus on lower 48
-    [self.mapView setStyleURL:[NSURL fileURLWithPath:[[NSBundle mainBundle] pathForResource:@"numeric_filter_style" ofType:@"json"]]];
+    if (![self loadStyleFromBundle:@"numeric_filter_style"]) {
+        return;
+    }
     [self.mapView setCenterCoordinate:CLLocationCoordinate2DMake(40, -97) zoomLevel:5 animated:NO];
 
     // after slight delay, change styling for regions 200-299 (atypical use; we want to clearly see the change for test purposes)
@@ -1458,6 +1516,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.mapView.style addLayer:rasterLayer];
 }
 
+- (NSURL*)radarImageURL:(int)index
+{
+    return [NSURL URLWithString:
+            [NSString stringWithFormat:@"https://maplibre.org/maplibre-gl-js/docs/assets/radar%d.gif", index]];
+}
+
 - (void)styleImageSource
 {
     MLNCoordinateQuad coordinateQuad = {
@@ -1466,7 +1530,9 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         { 37.936, -71.516 },
         { 46.437, -71.516 } };
 
-    MLNImageSource *imageSource = [[MLNImageSource alloc] initWithIdentifier:@"style-image-source-id" coordinateQuad:coordinateQuad URL:[NSURL URLWithString:@"https://maplibre.org/maplibre-gl-js-docs/assets/radar0.gif"]];
+    MLNImageSource *imageSource = [[MLNImageSource alloc] initWithIdentifier:@"style-image-source-id"
+                                                              coordinateQuad:coordinateQuad
+                                                                         URL:[self radarImageURL:0]];
 
     [self.mapView.style addSource:imageSource];
     
@@ -1478,17 +1544,31 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
                                    selector:@selector(updateAnimatedImageSource:)
                                    userInfo:imageSource
                                     repeats:YES];
+
+    const CGFloat maximumPadding = 50;
+    const CGSize frameSize = self.mapView.frame.size;
+    const CGFloat yPadding = (frameSize.height / 5 <= maximumPadding) ? (frameSize.height / 5) : maximumPadding;
+    const CGFloat xPadding = (frameSize.width / 5 <= maximumPadding) ? (frameSize.width / 5) : maximumPadding;
+    [self.mapView setVisibleCoordinateBounds:MLNCoordinateBoundsMake(coordinateQuad.bottomLeft, coordinateQuad.topRight)
+                         edgePadding:UIEdgeInsetsMake(yPadding, xPadding, yPadding, xPadding)
+                            animated:YES
+                   completionHandler:nil];
 }
 
 
-- (void)updateAnimatedImageSource:(NSTimer *)timer {
-    static int radarSuffix = 0;
+- (void)updateAnimatedImageSource:(NSTimer *)timer
+{
     MLNImageSource *imageSource = (MLNImageSource *)timer.userInfo;
-    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"https://maplibre.org/maplibre-gl-js-docs/assets/radar%d.gif", radarSuffix++]];
-    [imageSource setValue:url forKey:@"URL"];
-    if (radarSuffix > 3) {
-        radarSuffix = 0;
+    if (![self.mapView.style sourceWithIdentifier:imageSource.identifier]) {
+        // the source has been removed, probably by reloading the style, if we try to update
+        // it now, we will crash with 'This source got invalidated after the style change'
+        [timer invalidate];
+        return;
     }
+    
+    static int radarSuffix = 0;
+    [imageSource setValue:[self radarImageURL:radarSuffix] forKey:@"URL"];
+    radarSuffix = (radarSuffix + 1) % 5;
 }
 
 -(void)toggleStyleLabelsLanguage
@@ -1518,7 +1598,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     NSDictionary *sourceOptions = @{ MLNShapeSourceOptionLineDistanceMetrics: @YES };
     
     MLNShapeSource *routeSource = [[MLNShapeSource alloc] initWithIdentifier:@"style-route-source" shape:routeLine options:sourceOptions];
-    [self.mapView.style addSource:routeSource];
 
     MLNLineStyleLayer *baseRouteLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-base-route-layer" source:routeSource];
     baseRouteLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor orangeColor]];
@@ -1526,7 +1605,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     baseRouteLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.95];
     baseRouteLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
     baseRouteLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
-    [self.mapView.style addLayer:baseRouteLayer];
 
     MLNLineStyleLayer *routeLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-route-layer" source:routeSource];
     routeLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor whiteColor]];
@@ -1547,6 +1625,12 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     // (mgl_interpolate:withCurveType:parameters:stops:($lineProgress, 'linear', nil, %@))
     NSExpression *lineGradientExpression = [NSExpression expressionWithFormat:@"mgl_interpolate:withCurveType:parameters:stops:($lineProgress, 'linear', nil, %@)", stops];
     routeLayer.lineGradient = lineGradientExpression;
+
+    [self removeLayer:baseRouteLayer.identifier];
+    [self removeLayer:routeLayer.identifier];
+    [self removeSource:routeSource.identifier];
+    [self.mapView.style addSource:routeSource];
+    [self.mapView.style addLayer:baseRouteLayer];
     [self.mapView.style addLayer:routeLayer];
 }
 
@@ -1561,6 +1645,22 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     }
 }
 #endif
+
+- (void)removeSource:(NSString*)ident
+{
+    if (MLNSource *source = [self.mapView.style sourceWithIdentifier:ident])
+    {
+        [self.mapView.style removeSource:source];
+    }
+}
+
+- (void)removeLayer:(NSString*)ident
+{
+    if (MLNStyleLayer* layer = [self.mapView.style layerWithIdentifier:ident])
+    {
+        [self.mapView.style removeLayer:layer];
+    }
+}
 
 - (void)styleRouteLine
 {
@@ -1581,7 +1681,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     MLNPolylineFeature *routeLine = [MLNPolylineFeature polylineWithCoordinates:coords count:count];
 
     MLNShapeSource *routeSource = [[MLNShapeSource alloc] initWithIdentifier:@"style-route-source" shape:routeLine options:nil];
-    [self.mapView.style addSource:routeSource];
 
     MLNLineStyleLayer *baseRouteLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-base-route-layer" source:routeSource];
     baseRouteLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor orangeColor]];
@@ -1589,7 +1688,6 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     baseRouteLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.5];
     baseRouteLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
     baseRouteLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
-    [self.mapView.style addLayer:baseRouteLayer];
 
     MLNLineStyleLayer *routeLayer = [[MLNLineStyleLayer alloc] initWithIdentifier:@"style-route-layer" source:routeSource];
     routeLayer.lineColor = [NSExpression expressionForConstantValue:[UIColor whiteColor]];
@@ -1597,16 +1695,24 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     routeLayer.lineOpacity = [NSExpression expressionForConstantValue:@0.8];
     routeLayer.lineCap = [NSExpression expressionForConstantValue:@"round"];
     routeLayer.lineJoin = [NSExpression expressionForConstantValue:@"round"];
+    
+    [self removeLayer:baseRouteLayer.identifier];
+    [self removeLayer:routeLayer.identifier];
+    [self removeSource:routeSource.identifier];
+    [self.mapView.style addSource:routeSource];
+    [self.mapView.style addLayer:baseRouteLayer];
     [self.mapView.style addLayer:routeLayer];
 }
 
 - (void)styleAddCustomTriangleLayer
 {
-    CustomStyleLayerExample *layer = [[CustomStyleLayerExample alloc] initWithIdentifier:@"mbx-custom"];
-    [self.mapView.style addLayer:layer];
+    if (CustomStyleLayerExample *layer = [[CustomStyleLayerExample alloc] initWithIdentifier:@"mbx-custom"]) {
+        [self.mapView.style addLayer:layer];
+    }
 }
 
-- (void)stylePolygonWithDDS {
+- (void)stylePolygonWithDDS
+{
     CLLocationCoordinate2D leftCoords[] = {
         {37.73081027834234, -122.49412536621094},
         {37.7566013348511, -122.49412536621094},
@@ -1920,72 +2026,80 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
         secondMapView.showsScale = YES;
         secondMapView.translatesAutoresizingMaskIntoConstraints = NO;
         secondMapView.tag = 2;
+
+        // Remove the main map bottom constraint
         for (NSLayoutConstraint *constraint in self.view.constraints)
         {
             if ((constraint.firstItem  == self.mapView && constraint.firstAttribute  == NSLayoutAttributeBottom) ||
                 (constraint.secondItem == self.mapView && constraint.secondAttribute == NSLayoutAttributeBottom))
             {
+                _firstMapLayout = constraint;
                 [self.view removeConstraint:constraint];
                 break;
             }
         }
+
+        // Place the second map in the bottom half of the view
+        _secondMapLayout = @[
+                [NSLayoutConstraint constraintWithItem:self.mapView
+                                             attribute:NSLayoutAttributeBottom
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeCenterY
+                                            multiplier:1
+                                              constant:0],
+                [NSLayoutConstraint constraintWithItem:secondMapView
+                                             attribute:NSLayoutAttributeCenterX
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeCenterX
+                                            multiplier:1
+                                              constant:0],
+                [NSLayoutConstraint constraintWithItem:secondMapView
+                                             attribute:NSLayoutAttributeWidth
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeWidth
+                                            multiplier:1
+                                              constant:0],
+                [NSLayoutConstraint constraintWithItem:secondMapView
+                                             attribute:NSLayoutAttributeTop
+                                             relatedBy:NSLayoutRelationEqual
+                                                toItem:self.view
+                                             attribute:NSLayoutAttributeCenterY
+                                            multiplier:1
+                                              constant:0],
+            [secondMapView.bottomAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.bottomAnchor]];
+
         [self.view addSubview:secondMapView];
-        [self.view addConstraints:@[
-            [NSLayoutConstraint constraintWithItem:self.mapView
-                                         attribute:NSLayoutAttributeBottom
-                                         relatedBy:NSLayoutRelationEqual
-                                            toItem:self.view
-                                         attribute:NSLayoutAttributeCenterY
-                                        multiplier:1
-                                          constant:0],
-            [NSLayoutConstraint constraintWithItem:secondMapView
-                                         attribute:NSLayoutAttributeCenterX
-                                         relatedBy:NSLayoutRelationEqual
-                                            toItem:self.view
-                                         attribute:NSLayoutAttributeCenterX
-                                        multiplier:1
-                                          constant:0],
-            [NSLayoutConstraint constraintWithItem:secondMapView
-                                         attribute:NSLayoutAttributeWidth
-                                         relatedBy:NSLayoutRelationEqual
-                                            toItem:self.view
-                                         attribute:NSLayoutAttributeWidth
-                                        multiplier:1
-                                          constant:0],
-            [NSLayoutConstraint constraintWithItem:secondMapView
-                                         attribute:NSLayoutAttributeTop
-                                         relatedBy:NSLayoutRelationEqual
-                                            toItem:self.view
-                                         attribute:NSLayoutAttributeCenterY
-                                        multiplier:1
-                                          constant:0],
-            [NSLayoutConstraint constraintWithItem:secondMapView
-                                         attribute:NSLayoutAttributeBottom
-                                         relatedBy:NSLayoutRelationEqual
-                                            toItem:self.view.safeAreaLayoutGuide.bottomAnchor
-                                         attribute:NSLayoutAttributeBottom
-                                        multiplier:1
-                                          constant:0],
-        ]];
+        [self.view addConstraints:_secondMapLayout];
+
+        secondMapView.styleURL = _mapView.styleURL;
+
+        __weak decltype(_mapView) weakMapView = _mapView;
+        __weak decltype(secondMapView) weakSecondMap = secondMapView;
+        auto moveComplete = ^{
+            weakSecondMap.camera = [_mapView cameraByTiltingToPitch:weakMapView.camera.pitch];
+        };
+
+        // Navigate the new map to the same view as the main one
+        [secondMapView setCenterCoordinate:_mapView.centerCoordinate
+                                 zoomLevel:_mapView.zoomLevel
+                                 direction:_mapView.direction
+                                  animated:YES
+                         completionHandler:moveComplete];
+
+        secondMapView.accessibilityIdentifier = @"Second Map";
     } else {
-        NSMutableArray *constraintsToRemove = [NSMutableArray array];
         MLNMapView *secondMapView = (MLNMapView *)[self.view viewWithTag:2];
-        for (NSLayoutConstraint *constraint in self.view.constraints)
-        {
-            if (constraint.firstItem == secondMapView || constraint.secondItem == secondMapView)
-            {
-                [constraintsToRemove addObject:constraint];
-            }
-        }
-        [self.view removeConstraints:constraintsToRemove];
+
+        // Reset the layout to the original state
+        [self.view removeConstraints:_secondMapLayout];
+        [self.view addConstraint:_firstMapLayout];
+        _firstMapLayout = nil;
+        _secondMapLayout = nil;
+
         [secondMapView removeFromSuperview];
-        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.mapView
-                                                              attribute:NSLayoutAttributeBottom
-                                                              relatedBy:NSLayoutRelationEqual
-                                                                 toItem:self.view.safeAreaLayoutGuide.bottomAnchor
-                                                              attribute:NSLayoutAttributeTop
-                                                             multiplier:1
-                                                               constant:0]];
     }
 }
 
@@ -2484,7 +2598,17 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self presentViewController:alert animated:YES completion:nil];
 }
 
+- (BOOL)isUITesting {
+    NSString* value = NSProcessInfo.processInfo.environment[@"UITesting"];
+    return value && [value isEqual: @"YES"];
+}
+
 - (void)saveCurrentMapState:(__unused NSNotification *)notification {
+
+    // saved changes to the settings can break UI tests, so always start from the defaults when testing
+    if ([self isUITesting]) {
+        return;
+    }
 
     // The following properties can change after the view loads so we need to save their
     // state before exiting the view controller.
@@ -2502,6 +2626,11 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 }
 
 - (void)restoreMapState:(__unused NSNotification *)notification {
+    
+    if ([self isUITesting]) {
+        return;
+    }
+
     MBXState *currentState = [MBXStateManager sharedManager].currentState;
 
     self.mapView.camera = currentState.camera;

@@ -9,6 +9,7 @@
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/mtl/buffer_resource.hpp>
 #include <mbgl/mtl/mtl_fwd.hpp>
+#include <mbgl/mtl/uniform_buffer.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/containers.hpp>
 
@@ -144,6 +145,18 @@ public:
                                  RenderStaticData& staticData,
                                  const std::vector<shaders::ClipUBO>& tileUBOs);
 
+    /// Get the global uniform buffers
+    const gfx::UniformBufferArray& getGlobalUniformBuffers() const override { return globalUniformBuffers; };
+
+    /// Get the mutable global uniform buffer array
+    gfx::UniformBufferArray& mutableGlobalUniformBuffers() override { return globalUniformBuffers; };
+
+    /// Bind the global uniform buffers
+    void bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override;
+
+    /// Unbind the global uniform buffers
+    void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override {}
+
 private:
     RendererBackend& backend;
     bool cleanupOnDestruction = true;
@@ -160,6 +173,8 @@ private:
     std::optional<BufferResource> clipMaskUniformsBuffer;
     bool clipMaskUniformsBufferUsed = false;
     const gfx::Renderable* stencilStateRenderable = nullptr;
+
+    UniformBufferArray globalUniformBuffers;
 };
 
 } // namespace mtl

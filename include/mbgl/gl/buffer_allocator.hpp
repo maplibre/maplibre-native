@@ -38,7 +38,7 @@ private:
 /// @brief IBufferAllocator hides the underlying implementation of the buffer allocator scheme used.
 class IBufferAllocator {
 public:
-    virtual ~IBufferAllocator(){};
+    virtual ~IBufferAllocator() {};
 
     /// @brief Write data into a buffer managed by the allocator
     /// @param data Pointer to data to write into the buffer

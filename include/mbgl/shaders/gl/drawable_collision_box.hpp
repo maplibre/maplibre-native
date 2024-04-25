@@ -14,10 +14,21 @@ layout (location = 2) in vec2 a_extrude;
 layout (location = 3) in vec2 a_placed;
 layout (location = 4) in vec2 a_shift;
 
-layout (std140) uniform CollisionBoxUBO {
+layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float global_pad1, global_pad2;
+};
+
+layout (std140) uniform CollisionUBO {
     highp mat4 u_matrix;
     highp vec2 u_extrude_scale;
-    highp float u_camera_to_center_distance;
+    highp float u_overscale_factor;
     highp float pad1;
 };
 
@@ -39,10 +50,10 @@ void main() {
     v_notUsed = a_placed.y;
 }
 )";
-    static constexpr const char* fragment = R"(layout (std140) uniform CollisionBoxUBO {
+    static constexpr const char* fragment = R"(layout (std140) uniform CollisionUBO {
     highp mat4 u_matrix;
     highp vec2 u_extrude_scale;
-    highp float u_camera_to_center_distance;
+    highp float u_overscale_factor;
     highp float pad1;
 };
 
