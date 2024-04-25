@@ -21,8 +21,8 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_outline_color;
     highp float u_opacity;
     highp float u_fade;
-    highp float u_width;
-    highp float props_pad1;
+    highp float u_from_scale;
+    highp float u_to_scale;
 };
 
 layout (location = 0) in vec2 a_pos;
@@ -61,8 +61,8 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_outline_color;
     highp float u_opacity;
     highp float u_fade;
-    highp float u_width;
-    highp float props_pad1;
+    highp float u_from_scale;
+    highp float u_to_scale;
 };
 
 #ifndef HAS_UNIFORM_u_color

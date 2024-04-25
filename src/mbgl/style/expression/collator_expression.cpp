@@ -13,7 +13,9 @@ CollatorExpression::CollatorExpression(std::unique_ptr<Expression> caseSensitive
                                        std::optional<std::unique_ptr<Expression>> locale_)
     : Expression(Kind::CollatorExpression,
                  type::Collator,
-                 depsOf(caseSensitive_) | depsOf(diacriticSensitive_) | depsOf(locale_)),
+                 depsOf(caseSensitive_) | depsOf(diacriticSensitive_) | depsOf(locale_) |
+                     // Collations are treated as feature-dependent. See `style::expression::isFeatureConstant`
+                     Dependency::Feature),
       caseSensitive(std::move(caseSensitive_)),
       diacriticSensitive(std::move(diacriticSensitive_)),
       locale(std::move(locale_)) {}

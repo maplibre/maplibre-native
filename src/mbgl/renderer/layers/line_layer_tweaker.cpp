@@ -44,12 +44,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
-
-    const LineDynamicUBO dynamicUBO = {
-        /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, 0, 0};
-
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, context);
     layerUniforms.set(idLineEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {

@@ -22,7 +22,7 @@ struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(1)]];
+    short2 pos [[attribute(2)]];
 };
 
 struct FragmentStage {
@@ -38,9 +38,9 @@ struct alignas(16) DebugUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const DebugUBO& debugUBO [[buffer(0)]]) {
+                                device const DebugUBO& debug [[buffer(1)]]) {
 
-    const float4 position = debugUBO.matrix * float4(float2(vertx.pos) * debugUBO.overlay_scale, 0, 1);
+    const float4 position = debug.matrix * float4(float2(vertx.pos) * debug.overlay_scale, 0, 1);
 
     // This vertex shader expects a EXTENT x EXTENT quad,
     // The UV co-ordinates for the overlay texture can be calculated using that knowledge
@@ -53,12 +53,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const DebugUBO& debugUBO [[buffer(0)]],
+                            device const DebugUBO& debug [[buffer(1)]],
                             texture2d<float, access::sample> overlay [[texture(0)]],
                             sampler overlay_sampler [[sampler(0)]]) {
 
     float4 overlay_color = overlay.sample(overlay_sampler, in.uv);
-    float4 color = mix(debugUBO.color, overlay_color, overlay_color.a);
+    float4 color = mix(debug.color, overlay_color, overlay_color.a);
     return half4(color);
 }
 )";

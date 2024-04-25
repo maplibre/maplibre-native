@@ -78,7 +78,7 @@ struct alignas(16) LineInterpolationUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineDynamicUBO& dynamic [[buffer(0)]],
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
                                 device const LineDrawableUBO& drawable [[buffer(1)]],
                                 device const LineInterpolationUBO& interp [[buffer(2)]],
                                 device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
@@ -133,7 +133,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
-    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * dynamic.units_to_pixels);
+    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
 
     return {
         .position    = position,
@@ -241,7 +241,7 @@ struct alignas(16) LineGradientInterpolationUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineDynamicUBO& dynamic [[buffer(0)]],
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
                                 device const LineGradientDrawableUBO& drawable [[buffer(1)]],
                                 device const LineGradientInterpolationUBO& interp [[buffer(2)]],
                                 device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
@@ -303,7 +303,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
-    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * dynamic.units_to_pixels);
+    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
 
     return {
         .position     = position,
@@ -442,7 +442,7 @@ struct alignas(16) LinePatternTilePropertiesUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineDynamicUBO& dynamic [[buffer(0)]],
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
                                 device const LinePatternDrawableUBO& drawable [[buffer(1)]],
                                 device const LinePatternInterpolationUBO& interp [[buffer(2)]],
                                 device const LinePatternTilePropertiesUBO& tileProps [[buffer(3)]],
@@ -500,7 +500,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
-    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * dynamic.units_to_pixels);
+    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
 
     return {
         .position     = position,
@@ -685,7 +685,7 @@ struct alignas(16) LineSDFInterpolationUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const LineDynamicUBO& dynamic [[buffer(0)]],
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
                                 device const LineSDFDrawableUBO& drawable [[buffer(1)]],
                                 device const LineSDFInterpolationUBO& interp [[buffer(2)]],
                                 device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
@@ -747,7 +747,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     // calculate how much the perspective view squishes or stretches the extrude
     const float extrude_length_without_perspective = length(dist);
-    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * dynamic.units_to_pixels);
+    const float extrude_length_with_perspective = length(projected_extrude.xy / position.w * paintParams.units_to_pixels);
 
     return {
         .position     = position,

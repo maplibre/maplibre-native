@@ -34,16 +34,6 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     const auto debugGroup = parameters.encoder->createDebugGroup(label.c_str());
 #endif
 
-    // Updated every frame, but shared across drawables
-    const CirclePaintParamsUBO paintParamsUBO = {
-        /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
-        /* .padding = */ 0,
-        0,
-        0};
-
-    auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    layerUniforms.createOrUpdate(idCirclePaintParamsUBO, &paintParamsUBO, context);
-
     const auto zoom = parameters.state.getZoom();
     const bool pitchWithMap = evaluated.get<CirclePitchAlignment>() == AlignmentType::Map;
     const bool scaleWithMap = evaluated.get<CirclePitchScale>() == CirclePitchScaleType::Map;
@@ -64,6 +54,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &evaluatedPropsUBO);
         propertiesUpdated = false;
     }
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idCircleEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {

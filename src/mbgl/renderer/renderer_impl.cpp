@@ -247,6 +247,21 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Upload the Debug layer group
         orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
     }
+
+    const Size atlasSize = parameters.patternAtlas.getPixelSize();
+    const auto& worldSize = parameters.staticData.backendSize;
+    const shaders::GlobalPaintParamsUBO globalPaintParamsUBO = {
+        /* .pattern_atlas_texsize = */ {static_cast<float>(atlasSize.width), static_cast<float>(atlasSize.height)},
+        /* .units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
+        /* .world_size = */ {static_cast<float>(worldSize.width), static_cast<float>(worldSize.height)},
+        /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
+        /* .symbol_fade_change = */ parameters.symbolFadeChange,
+        /* .aspect_ratio = */ parameters.state.getSize().aspectRatio(),
+        /* .pixel_ratio = */ parameters.pixelRatio,
+        /* .pad1/2 = */ 0,
+        0};
+    auto& globalUniforms = context.mutableGlobalUniformBuffers();
+    globalUniforms.createOrUpdate(shaders::idGlobalPaintParamsUBO, &globalPaintParamsUBO, context);
 #endif
 
     // - 3D PASS
@@ -446,6 +461,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
     drawableTargetsPass();
     commonClearPass();
+    context.bindGlobalUniformBuffers(*parameters.renderPass);
     drawableOpaquePass();
     drawableTranslucentPass();
     drawableDebugOverlays();
@@ -465,6 +481,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if MLN_DRAWABLE_RENDERER
     // Give the layers a chance to do cleanup
     orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
+    context.unbindGlobalUniformBuffers(*parameters.renderPass);
 #endif
 
     // Ends the RenderPass

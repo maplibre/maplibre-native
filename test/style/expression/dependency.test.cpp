@@ -1,3 +1,4 @@
+#include <mbgl/style/expression/collator_expression.hpp>
 #include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/expression/format_section_override.hpp>
 #include <mbgl/style/layers/custom_layer_impl.hpp>
@@ -76,4 +77,9 @@ TEST(ExpressionDependencies, Distance) {
 TEST(ExpressionDependencies, CustomLayer) {
     auto impl = makeMutable<CustomLayer::Impl>("", nullptr);
     EXPECT_EQ(Dependency::None, CustomLayerProperties{std::move(impl)}.getDependencies());
+}
+
+TEST(ExpressionDependencies, Collation) {
+    auto collator = CollatorExpression(gt(literal(1.), zoom()), literal(true), literal("en-us"));
+    EXPECT_EQ(Dependency::Feature | Dependency::Zoom, collator.dependencies);
 }

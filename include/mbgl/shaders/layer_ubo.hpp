@@ -33,5 +33,25 @@ struct Attribute {
 };
 static_assert(sizeof(Attribute) == 8);
 
+//
+// Global UBOs
+
+struct alignas(16) GlobalPaintParamsUBO {
+    std::array<float, 2> pattern_atlas_texsize;
+    std::array<float, 2> units_to_pixels;
+    std::array<float, 2> world_size;
+    float camera_to_center_distance;
+    float symbol_fade_change;
+    float aspect_ratio;
+    float pixel_ratio;
+    float pad1, pad2;
+};
+static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16);
+
+enum {
+    idGlobalPaintParamsUBO,
+    globalUBOCount
+};
+
 } // namespace shaders
 } // namespace mbgl

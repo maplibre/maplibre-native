@@ -14,7 +14,7 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 1> uniforms;
+    static const std::array<UniformBlockInfo, 2> uniforms;
     static const std::array<AttributeInfo, 1> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 2> textures;
@@ -22,7 +22,7 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal> {
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(1)]];
+    short2 pos [[attribute(2)]];
 };
 
 struct FragmentStage {
@@ -32,17 +32,16 @@ struct FragmentStage {
 
 struct alignas(16) HeatmapTexturePropsUBO {
     float4x4 matrix;
-    float2 world;
     float opacity;
-    bool overdrawInspector;
-    uint8_t pad1, pad2, pad3;
+    float pad1, pad2, pad3;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const HeatmapTexturePropsUBO& props [[buffer(0)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
+                                device const HeatmapTexturePropsUBO& props [[buffer(1)]]) {
 
     const float2 pos = float2(vertx.pos);
-    const float4 position = props.matrix * float4(pos * props.world, 0, 1);
+    const float4 position = props.matrix * float4(pos * paintParams.world_size, 0, 1);
 
     return {
         .position    = position,
@@ -51,7 +50,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const HeatmapTexturePropsUBO& props [[buffer(0)]],
+                            device const HeatmapTexturePropsUBO& props [[buffer(1)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             texture2d<float, access::sample> color_ramp [[texture(1)]],
                             sampler image_sampler [[sampler(0)]],
