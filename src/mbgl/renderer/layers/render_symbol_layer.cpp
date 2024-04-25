@@ -1079,8 +1079,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         auto addCollisionDrawables = [&](const bool isText, const bool hasCollisionBox, const bool hasCollisionCircle) {
             if (!hasCollisionBox && !hasCollisionCircle) return;
 
-            const auto& group = getCollisionTileLayerGroup();
-            if (!group) {
+            const auto& collisionGroup = getCollisionTileLayerGroup();
+            if (!collisionGroup) {
                 return;
             }
 
@@ -1132,7 +1132,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                 auto drawData = std::make_unique<gfx::CollisionDrawableData>(values.translate, values.translateAnchor);
                 drawable->setData(std::move(drawData));
-                group->addDrawable(passes, tileID, std::move(drawable));
+                collisionGroup->addDrawable(passes, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
         };
