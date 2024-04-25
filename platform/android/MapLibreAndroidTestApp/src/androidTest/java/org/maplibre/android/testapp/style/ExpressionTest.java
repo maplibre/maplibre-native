@@ -1,6 +1,5 @@
 package org.maplibre.android.testapp.style;
 
-import org.junit.Ignore;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Point;
 import org.maplibre.android.geometry.LatLng;
@@ -69,7 +68,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-@Ignore("https://github.com/maplibre/maplibre-native/issues/2315")
 @RunWith(AndroidJUnit4ClassRunner.class)
 public class ExpressionTest extends EspressoTest {
   private FillLayer layer;
