@@ -50,11 +50,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(1)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(2)]],
                                 device const SymbolTilePropsUBO* tilePropsVector [[buffer(3)]],
-                                device const SymbolInterpolateUBO& interp [[buffer(4)]],
+                                device const SymbolInterpolateUBO* interpVector [[buffer(4)]],
                                 device const SymbolEvaluatedPropsUBO& paint [[buffer(5)]]) {
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
     device const SymbolTilePropsUBO& tileprops = tilePropsVector[uboIndex];
+    device const SymbolInterpolateUBO& interp = interpVector[uboIndex];
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;

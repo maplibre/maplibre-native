@@ -822,10 +822,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
                         gfx::Context& context,
                         const SymbolBucket& bucket,
                         const SymbolBucket::PaintProperties& paintProps,
-                        const SymbolPaintProperties::PossiblyEvaluated& evaluated,
-                        const TransformState& state,
-                        gfx::UniformBufferPtr& textInterpUBO,
-                        gfx::UniformBufferPtr& iconInterpUBO) {
+                        const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
     if (!drawable.getData()) {
         return;
     }
@@ -833,28 +830,10 @@ void updateTileDrawable(gfx::Drawable& drawable,
     auto& drawData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
     const auto isText = (drawData.symbolType == SymbolType::Text);
     const auto sdfIcons = (drawData.symbolType == SymbolType::IconSDF);
-    const auto currentZoom = static_cast<float>(state.getZoom());
 
     // This property can be set after the initial appearance of the tile, as part of the layout process.
     drawData.bucketVariablePlacement = bucket.hasVariablePlacement;
     drawData.bucket = &bucket;
-
-    auto& drawableUniforms = drawable.mutableUniformBuffers();
-
-    // Create or update the shared interpolation UBO
-    gfx::UniformBufferPtr& interpUBO = isText ? textInterpUBO : iconInterpUBO;
-    if (interpUBO) {
-        drawableUniforms.set(idSymbolInterpolateUBO, interpUBO);
-    } else {
-        const auto ubo = buildInterpUBO(paintProps, isText, currentZoom);
-        interpUBO = drawableUniforms.get(idSymbolInterpolateUBO);
-        if (interpUBO) {
-            interpUBO->update(&ubo, sizeof(ubo));
-        } else {
-            interpUBO = context.createUniformBuffer(&ubo, sizeof(ubo));
-            drawableUniforms.set(idSymbolInterpolateUBO, interpUBO);
-        }
-    }
 
     const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
     const auto vertexCount = buffer.vertices().elements();
@@ -1137,7 +1116,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         // If we already have drawables for this tile, update them.
         // Just update the drawables we already created
-        gfx::UniformBufferPtr textInterpUBO, iconInterpUBO;
         auto updateExisting = [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
@@ -1148,8 +1126,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             propertiesAsUniforms.second.clear();
 
             const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-            updateTileDrawable(
-                drawable, context, bucket, bucketPaintProperties, evaluated, state, textInterpUBO, iconInterpUBO);
+            updateTileDrawable(drawable, context, bucket, bucketPaintProperties, evaluated);
             return true;
         };
         if (updateTile(passes, tileID, std::move(updateExisting))) {
@@ -1208,7 +1185,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     struct TileInfo {
         RawVertexVec textVertices, iconVertices;
         gfx::DrawableTweakerPtr textTweaker, iconTweaker;
-        gfx::UniformBufferPtr textInterp, iconInterp;
     };
     std::unordered_map<UnwrappedTileID, TileInfo> tileCache;
 
@@ -1257,13 +1233,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto iconHalo = evaluated.get<style::IconHaloColor>().constantOr(Color::black()).a > 0.0f &&
                               evaluated.get<style::IconHaloWidth>().constantOr(1);
         const auto iconFill = evaluated.get<style::IconColor>().constantOr(Color::black()).a > 0.0f;
-
-        // Share interpolation UBOs across all the elements of the same type in each tile
-        auto& interpUBO = isText ? tileInfo.textInterp : tileInfo.iconInterp;
-        if (!interpUBO) {
-            const auto interpolateBuf = buildInterpUBO(bucketPaintProperties, isText, currentZoom);
-            interpUBO = context.createUniformBuffer(&interpolateBuf, sizeof(interpolateBuf));
-        }
 
         if (builder) {
             builder->clearTweakers();
@@ -1349,9 +1318,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                     drawable->setData(std::move(drawData));
 
-                    auto& drawableUniforms = drawable->mutableUniformBuffers();
-                    drawableUniforms.set(idSymbolInterpolateUBO, interpUBO);
-
                     tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
                     ++stats.drawablesAdded;
                 }
@@ -1390,25 +1356,41 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
     
+    // Set UBOs
     int i = 0;
     std::vector<SymbolTilePropsUBO> tilePropsUBOVector(tileLayerGroup->getDrawableCount());
+    std::vector<SymbolInterpolateUBO> interpolateUBOVector(tileLayerGroup->getDrawableCount());
     tileLayerGroup->visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getData()) {
             return;
         }
-        const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
-        tilePropsUBOVector[i++] = buildTileUBO(*symbolData.bucket, symbolData, currentZoom);
+        auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
+        const auto& bucketPaintProperties = symbolData.bucket->paintProperties.at(getID());
+        const bool isText = (symbolData.symbolType == SymbolType::Text);
+        
+        tilePropsUBOVector[i] = buildTileUBO(*symbolData.bucket, symbolData, currentZoom);
+        interpolateUBOVector[i++] = buildInterpUBO(bucketPaintProperties, isText, currentZoom);
+        symbolData.bucket = nullptr;
     });
         
-    if (tilePropsUBOVector.size() > 0) {
+    if (i > 0) {
         const size_t tilePropsUBOVectorSize = sizeof(SymbolTilePropsUBO) * tilePropsUBOVector.size();
         if (!tilePropsBuffer || tilePropsBuffer->getSize() < tilePropsUBOVectorSize) {
             tilePropsBuffer = context.createUniformBuffer(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
         } else {
             tilePropsBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
         }
+        
+        const size_t interpolateUBOVectorSize = sizeof(SymbolInterpolateUBO) * interpolateUBOVector.size();
+        if (!interpolateBuffer || interpolateBuffer->getSize() < interpolateUBOVectorSize) {
+            interpolateBuffer = context.createUniformBuffer(interpolateUBOVector.data(), interpolateUBOVectorSize);
+        } else {
+            interpolateBuffer->update(interpolateUBOVector.data(), interpolateUBOVectorSize);
+        }
+        
         auto& layerUniforms = tileLayerGroup->mutableUniformBuffers();
         layerUniforms.set(idSymbolTilePropsUBO, tilePropsBuffer);
+        layerUniforms.set(idSymbolInterpolateUBO, interpolateBuffer);
     }
 }
 
