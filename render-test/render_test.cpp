@@ -197,9 +197,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
             }
         }
 
-        if (!getenv("GPU_EVAL") || strcmp("0", getenv("GPU_EVAL"))) {
-            metadata.debug |= MapDebugOptions::GPUEval;
-        }
+        metadata.debug |= MapDebugOptions::GPUEval;
 
         if (metadata.document.ObjectEmpty()) {
             metadata.metricsErrored++;

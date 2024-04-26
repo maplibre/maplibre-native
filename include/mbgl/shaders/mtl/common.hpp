@@ -105,6 +105,8 @@ enum class GPUOptions : uint16_t {
     IntegerZoom = 1 << 0,
     Transitioning = 1 << 1,
 };
+bool operator&(GPUOptions a, GPUOptions b) { return (uint16_t)a & (uint16_t)b; }
+
 constant const int maxExprStops = 16;
 struct alignas(16) GPUExpression {
     GPUOutputType outputType;
@@ -165,16 +167,19 @@ struct alignas(16) GPUExpression {
             return getColor(stopCount - 1);
         }
         switch (interpolation) {
-            case GPUInterpType::Step: return getColor(index - 1);
-            default: assert(false);
+            case GPUInterpType::Step:
+                return getColor(index - 1);
+            default:
+                assert(false);
                 [[fallthrough]];
-            case GPUInterpType::Linear: assert(interpOptions.exponential.base == 1.0f);
+            case GPUInterpType::Linear:
+                assert(interpOptions.exponential.base == 1.0f);
                 [[fallthrough]];
             case GPUInterpType::Exponential: {
                 const float rangeBeg = inputs[index - 1];
                 const float rangeEnd = inputs[index];
                 const auto t = interpolationFactor(interpOptions.exponential.base, rangeBeg, rangeEnd, zoom);
-                return mix(getColor(index - 1), getColor(index), t);
+                return mix(getColor(index - 1), getColor(index), clamp(t, 0.0, 1.0));
             }
             case GPUInterpType::Bezier:
                 assert(false);
@@ -184,7 +189,8 @@ struct alignas(16) GPUExpression {
 
     /// Get the index of the entry to use from the zoom level
     size_t find(float zoom) device const {
-        return upper_bound(&inputs[0], &inputs[stopCount], zoom) - &inputs[0];
+        const auto z = (options & GPUOptions::IntegerZoom) ? floor(zoom) : zoom;
+        return upper_bound(&inputs[0], &inputs[stopCount], z) - &inputs[0];
     }
 
     float4 getColor(size_t index) device const { return decode_color(stops.colors[index]); }
