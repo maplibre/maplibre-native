@@ -78,8 +78,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
                                 device const SymbolDrawableUBO& drawable [[buffer(1)]],
                                 device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
-                                device const SymbolInterpolateUBO& interp [[buffer(3)]],
-                                device const SymbolEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const SymbolInterpolateUBO& interp [[buffer(3)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;

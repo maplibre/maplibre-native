@@ -9,7 +9,7 @@ const std::array<UniformBlockInfo, 5>
         UniformBlockInfo{true, true, sizeof(SymbolDrawableUBO), idSymbolDrawableUBO},
         UniformBlockInfo{true, true, sizeof(SymbolTilePropsUBO), idSymbolTilePropsUBO},
         UniformBlockInfo{true, false, sizeof(SymbolInterpolateUBO), idSymbolInterpolateUBO},
-        UniformBlockInfo{true, true, sizeof(SymbolEvaluatedPropsUBO), idSymbolEvaluatedPropsUBO},
+        UniformBlockInfo{false, true, sizeof(SymbolEvaluatedPropsUBO), idSymbolEvaluatedPropsUBO},
 };
 const std::array<AttributeInfo, 9>
     ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Metal>::attributes = {
