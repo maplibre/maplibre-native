@@ -837,6 +837,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
 
     // This property can be set after the initial appearance of the tile, as part of the layout process.
     drawData.bucketVariablePlacement = bucket.hasVariablePlacement;
+    drawData.bucket = &bucket;
 
     auto& drawableUniforms = drawable.mutableUniformBuffers();
 
@@ -854,9 +855,6 @@ void updateTileDrawable(gfx::Drawable& drawable,
             drawableUniforms.set(idSymbolInterpolateUBO, interpUBO);
         }
     }
-
-    const auto tileUBO = buildTileUBO(bucket, drawData, currentZoom);
-    drawableUniforms.createOrUpdate(idSymbolTilePropsUBO, &tileUBO, context);
 
     const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
     const auto vertexCount = buffer.vertices().elements();
@@ -1346,13 +1344,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                         /*.pitchAlignment=*/values.pitchAlignment,
                         /*.rotationAlignment=*/values.rotationAlignment,
                         /*.placement=*/layout.get<SymbolPlacement>(),
-                        /*.textFit=*/layout.get<IconTextFit>());
+                        /*.textFit=*/layout.get<IconTextFit>(),
+                        /*.bucket=*/&bucket);
 
-                    const auto tileUBO = buildTileUBO(bucket, *drawData, currentZoom);
                     drawable->setData(std::move(drawData));
 
                     auto& drawableUniforms = drawable->mutableUniformBuffers();
-                    drawableUniforms.createOrUpdate(idSymbolTilePropsUBO, &tileUBO, context);
                     drawableUniforms.set(idSymbolInterpolateUBO, interpUBO);
 
                     tileLayerGroup->addDrawable(passes, tileID, std::move(drawable));
@@ -1391,6 +1388,27 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                 draw(symbolIconGroup, /* isHalo = */ false, "icon");
             }
         }
+    }
+    
+    int i = 0;
+    std::vector<SymbolTilePropsUBO> tilePropsUBOVector(tileLayerGroup->getDrawableCount());
+    tileLayerGroup->visitDrawables([&](gfx::Drawable& drawable) {
+        if (!drawable.getData()) {
+            return;
+        }
+        const auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
+        tilePropsUBOVector[i++] = buildTileUBO(*symbolData.bucket, symbolData, currentZoom);
+    });
+        
+    if (tilePropsUBOVector.size() > 0) {
+        const size_t tilePropsUBOVectorSize = sizeof(SymbolTilePropsUBO) * tilePropsUBOVector.size();
+        if (!tilePropsBuffer || tilePropsBuffer->getSize() < tilePropsUBOVectorSize) {
+            tilePropsBuffer = context.createUniformBuffer(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
+        } else {
+            tilePropsBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
+        }
+        auto& layerUniforms = tileLayerGroup->mutableUniformBuffers();
+        layerUniforms.set(idSymbolTilePropsUBO, tilePropsBuffer);
     }
 }
 

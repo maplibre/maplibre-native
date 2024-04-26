@@ -186,11 +186,10 @@ void Drawable::draw(PaintParameters& parameters) const {
 #endif
 
     if (uboIndex >= 0) {
-        BufferResource buffer{context, &uboIndex, sizeof(uboIndex), MTL::ResourceStorageModeShared, false, false};
-        renderPass.bindVertex(buffer, 0, shaders::idGlobalUBOIndex);
-        renderPass.bindFragment(buffer, 0, shaders::idGlobalUBOIndex);
-        //encoder->setVertexBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
-        //encoder->setFragmentBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
+        renderPass.unbindVertex(shaders::idGlobalUBOIndex);
+        renderPass.unbindFragment(shaders::idGlobalUBOIndex);
+        encoder->setVertexBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
+        encoder->setFragmentBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
     }
     
     bindAttributes(renderPass);

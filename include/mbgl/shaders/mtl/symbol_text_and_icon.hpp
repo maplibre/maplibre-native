@@ -78,11 +78,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
                                 device const uint32_t& uboIndex [[buffer(1)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(2)]],
-                                device const SymbolTilePropsUBO& tileprops [[buffer(3)]],
+                                device const SymbolTilePropsUBO* tilePropsVector [[buffer(3)]],
                                 device const SymbolInterpolateUBO& interp [[buffer(4)]],
                                 device const SymbolEvaluatedPropsUBO& props [[buffer(5)]]) {
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+    device const SymbolTilePropsUBO& tileprops = tilePropsVector[uboIndex];
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -180,7 +181,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
                             device const uint32_t& uboIndex [[buffer(1)]],
                             device const SymbolDrawableUBO* drawableVector [[buffer(2)]],
-                            device const SymbolTilePropsUBO& tileprops [[buffer(3)]],
+                            device const SymbolTilePropsUBO* tilePropsVector [[buffer(3)]],
                             device const SymbolEvaluatedPropsUBO& props [[buffer(5)]],
                             texture2d<float, access::sample> glyph_image [[texture(0)]],
                             texture2d<float, access::sample> icon_image [[texture(1)]],
@@ -191,6 +192,7 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #endif
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+    device const SymbolTilePropsUBO& tileprops = tilePropsVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_fill_color)
     const half4 fill_color = half4(tileprops.is_text ? props.text_fill_color : props.icon_fill_color);

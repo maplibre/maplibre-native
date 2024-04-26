@@ -49,11 +49,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
                                 device const uint32_t& uboIndex [[buffer(1)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(2)]],
-                                device const SymbolTilePropsUBO& tileprops [[buffer(3)]],
+                                device const SymbolTilePropsUBO* tilePropsVector [[buffer(3)]],
                                 device const SymbolInterpolateUBO& interp [[buffer(4)]],
                                 device const SymbolEvaluatedPropsUBO& paint [[buffer(5)]]) {
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+    device const SymbolTilePropsUBO& tileprops = tilePropsVector[uboIndex];
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -126,13 +127,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolTilePropsUBO& tileprops [[buffer(3)]],
+                            device const uint32_t& uboIndex [[buffer(1)]],
+                            device const SymbolTilePropsUBO* tilePropsVector [[buffer(3)]],
                             device const SymbolEvaluatedPropsUBO& props [[buffer(5)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
+
+    device const SymbolTilePropsUBO& tileprops = tilePropsVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_opacity)
     const float opacity = (tileprops.is_text ? props.text_opacity : props.icon_opacity) * in.fade_opacity;
