@@ -59,4 +59,4 @@ target_link_libraries(
     PUBLIC mbgl-core
 )
 
-set_property(TARGET mbgl-render-test PROPERTY FOLDER Core)
+set_property(TARGET mbgl-render-test PROPERTY FOLDER MapLibre)

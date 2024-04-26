@@ -60,4 +60,4 @@ target_link_libraries(
     PUBLIC mbgl-core
 )
 
-set_property(TARGET mbgl-benchmark PROPERTY FOLDER Core)
+set_property(TARGET mbgl-benchmark PROPERTY FOLDER MapLibre)
