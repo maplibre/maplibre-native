@@ -216,7 +216,7 @@ enum class LineExpressionMask : uint32_t {
     FloorWidth = 1 << 5,
     Offset = 1 << 6,
 };
-bool operator&(LineExpressionMask a, LineExpressionMask b) { return a & b; }
+bool operator&(LineExpressionMask a, LineExpressionMask b) { return (uint32_t)a & (uint32_t)b; }
 
 struct alignas(16) LineExpressionUBO {
     GPUExpression color;
