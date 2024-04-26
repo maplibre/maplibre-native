@@ -1,14 +1,5 @@
 uniform sampler2D u_texture;
 
-layout (std140) uniform SymbolInterpolateUBO {
-    highp float u_fill_color_t;
-    highp float u_halo_color_t;
-    highp float u_opacity_t;
-    highp float u_halo_width_t;
-    highp float u_halo_blur_t;
-    highp float interp_pad1, interp_pad2,interp_pad3;
-};
-
 layout (std140) uniform SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;
