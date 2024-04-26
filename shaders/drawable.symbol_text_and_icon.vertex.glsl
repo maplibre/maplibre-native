@@ -41,7 +41,7 @@ layout (std140) uniform SymbolDrawableUBOVector {
     SymbolDrawableUBO drawableUBO[60];
 };
 
-layout (std140) uniform SymbolTilePropsUBO {
+struct SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;
     bool u_pitch_with_map;
@@ -52,13 +52,21 @@ layout (std140) uniform SymbolTilePropsUBO {
     bool tileprops_pad1;
 };
 
-layout (std140) uniform SymbolInterpolateUBO {
+layout (std140) uniform SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tilepropsUBO[60];
+};
+
+struct SymbolInterpolateUBO {
     highp float u_fill_color_t;
     highp float u_halo_color_t;
     highp float u_opacity_t;
     highp float u_halo_width_t;
     highp float u_halo_blur_t;
     highp float interp_pad1, interp_pad2, interp_pad3;
+};
+
+layout (std140) uniform SymbolInterpolateUBOVector {
+    SymbolInterpolateUBO interpolateUBO[60];
 };
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {
@@ -86,6 +94,26 @@ out vec4 v_data1;
 #pragma mapbox: define lowp float halo_blur
 
 void main() {
+    highp mat4 u_matrix = drawableUBO[u_ubo_index].u_matrix;
+    highp mat4 u_label_plane_matrix = drawableUBO[u_ubo_index].u_label_plane_matrix;
+    highp mat4 u_coord_matrix = drawableUBO[u_ubo_index].u_coord_matrix;
+    highp vec2 u_texsize = drawableUBO[u_ubo_index].u_texsize;
+    highp vec2 u_texsize_icon = drawableUBO[u_ubo_index].u_texsize_icon;
+    bool u_rotate_symbol = drawableUBO[u_ubo_index].u_rotate_symbol;
+
+    bool u_is_text = tilepropsUBO[u_ubo_index].u_is_text;
+    bool u_pitch_with_map = tilepropsUBO[u_ubo_index].u_pitch_with_map;
+    bool u_is_size_zoom_constant = tilepropsUBO[u_ubo_index].u_is_size_zoom_constant;
+    bool u_is_size_feature_constant = tilepropsUBO[u_ubo_index].u_is_size_feature_constant;
+    highp float u_size_t = tilepropsUBO[u_ubo_index].u_size_t;
+    highp float u_size = tilepropsUBO[u_ubo_index].u_size;
+
+    highp float u_fill_color_t = interpolateUBO[u_ubo_index].u_fill_color_t;
+    highp float u_halo_color_t = interpolateUBO[u_ubo_index].u_halo_color_t;
+    highp float u_opacity_t = interpolateUBO[u_ubo_index].u_opacity_t;
+    highp float u_halo_width_t = interpolateUBO[u_ubo_index].u_halo_width_t;
+    highp float u_halo_blur_t = interpolateUBO[u_ubo_index].u_halo_blur_t;
+
     highp vec4 u_fill_color = u_is_text ? u_text_fill_color : u_icon_fill_color;
     highp vec4 u_halo_color = u_is_text ? u_text_halo_color : u_icon_halo_color;
     highp float u_opacity = u_is_text ? u_text_opacity : u_icon_opacity;
@@ -97,13 +125,6 @@ void main() {
     #pragma mapbox: initialize lowp float opacity
     #pragma mapbox: initialize lowp float halo_width
     #pragma mapbox: initialize lowp float halo_blur
-
-    highp mat4 u_matrix = drawableUBO[u_ubo_index].u_matrix;
-    highp mat4 u_label_plane_matrix = drawableUBO[u_ubo_index].u_label_plane_matrix;
-    highp mat4 u_coord_matrix = drawableUBO[u_ubo_index].u_coord_matrix;
-    highp vec2 u_texsize = drawableUBO[u_ubo_index].u_texsize;
-    highp vec2 u_texsize_icon = drawableUBO[u_ubo_index].u_texsize_icon;
-    bool u_rotate_symbol = drawableUBO[u_ubo_index].u_rotate_symbol;
 
     vec2 a_pos = a_pos_offset.xy;
     vec2 a_offset = a_pos_offset.zw;

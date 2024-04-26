@@ -137,9 +137,9 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         i++;
     });
     
-    /*if (layerGroup.getDrawableCount() > 60 ) {
+    if (layerGroup.getDrawableCount() > 60 ) {
         assert(false);
-    }*/
+    }
     
     const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
     if (!drawableBuffer || drawableBuffer->getSize() < drawableUBOVectorSize) {
