@@ -819,7 +819,6 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
 }
 
 void updateTileDrawable(gfx::Drawable& drawable,
-                        gfx::Context& context,
                         const SymbolBucket& bucket,
                         const SymbolBucket::PaintProperties& paintProps,
                         const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
@@ -1126,7 +1125,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             propertiesAsUniforms.second.clear();
 
             const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-            updateTileDrawable(drawable, context, bucket, bucketPaintProperties, evaluated);
+            updateTileDrawable(drawable, bucket, bucketPaintProperties, evaluated);
             return true;
         };
         if (updateTile(passes, tileID, std::move(updateExisting))) {
