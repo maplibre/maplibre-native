@@ -85,7 +85,7 @@ void UniformBufferGL::update(const void* data_, std::size_t size_) {
     }*/
 
     if (isManagedAllocation) {
-        managedBuffer.allocate(data_, size);
+        managedBuffer.allocate(data_, size_);
     } else {
         MBGL_CHECK_ERROR(glBindBuffer(GL_UNIFORM_BUFFER, localID));
         MBGL_CHECK_ERROR(glBufferSubData(GL_UNIFORM_BUFFER, 0, size_, data_));
