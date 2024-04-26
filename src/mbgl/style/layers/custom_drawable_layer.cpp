@@ -126,11 +126,8 @@ public:
         drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
         drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
 
-//#if MLN_RENDER_BACKEND_METAL
-//        const auto expressionUBO = shaders::LineExpressionUBO{
-//            nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-//        uniforms.createOrUpdate(idLineExpressionUBO, &expressionUBO, parameters.context);
-//#endif // MLN_RENDER_BACKEND_METAL
+        // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
+        assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
     };
 
 private:
@@ -142,7 +139,7 @@ public:
     WideVectorDrawableTweaker(const CustomDrawableLayerHost::Interface::LineOptions& options)
         : options(options) {}
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override {}
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -545,8 +542,8 @@ void CustomDrawableLayerHost::Interface::finish() {
                                                                           lineOptions.gapWidth,
                                                                           lineOptions.offset,
                                                                           lineOptions.width,
-                                                               LineExpressionMask::None,
-                                                                          0,
+                                                                          /*floorwidth=*/0,
+                                                                          LineExpressionMask::None,
                                                                           0};
                 auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
 

@@ -191,6 +191,21 @@ static_assert(sizeof(GPUExpression) == 32 + (4 + 8) * maxExprStops, "wrong align
 static_assert(sizeof(GPUExpression) % 16 == 0, "wrong alignment");
 
 
+enum {
+    idGlobalPaintParamsUBO,
+    globalUBOCount
+};
+
+enum {
+    idLineDrawableUBO = globalUBOCount,
+    idLineInterpolationUBO,
+    idLineTilePropertiesUBO,
+    idLineEvaluatedPropsUBO,
+    idLineExpressionUBO,
+    lineUBOCount
+};
+
+
 enum class LineExpressionMask : uint32_t {
     None = 0,
     Color = 1 << 0,
@@ -223,7 +238,8 @@ struct alignas(16) GlobalPaintParamsUBO {
     /* 28 */ float symbol_fade_change;
     /* 32 */ float aspect_ratio;
     /* 36 */ float pixel_ratio;
-    /* 40 */ float pad1, pad2;
+    /* 40 */ float zoom;
+    /* 44 */ float pad1;
     /* 48 */
 };
 static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16, "unexpected padding");
@@ -284,15 +300,14 @@ static_assert(sizeof(FillExtrusionInterpolateUBO) == 2 * 16, "unexpected padding
 
 struct alignas(16) LineEvaluatedPropsUBO {
     float4 color;
-
     float blur;
     float opacity;
     float gapwidth;
     float offset;
     float width;
-
     float floorwidth;
-    float pad1, pad2;
+    LineExpressionMask expressionMask;
+    float pad1;
 };
 
 struct alignas(16) SymbolDrawableUBO {

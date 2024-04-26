@@ -32,10 +32,6 @@ struct alignas(16) LineDrawableUBO {
 };
 static_assert(sizeof(LineDrawableUBO) % 16 == 0);
 
-//struct alignas(16) LinePropertiesUBO {
-//    LineExpressionMask expressionMask;  ??
-
-
 struct alignas(16) LineInterpolationUBO {
     float color_t;
     float blur_t;
@@ -58,24 +54,10 @@ struct alignas(16) LineExpressionUBO {
 };
 static_assert(sizeof(LineExpressionUBO) % 16 == 0);
 
-//enum {
-//    idLineDynamicUBO,
-//    idLineUBO,
-//    idLinePropertiesUBO,
-//    idLineInterpolationUBO,
-//#if MLN_RENDER_BACKEND_METAL
-//    idLineExpressionUBO,
-//#endif // MLN_RENDER_BACKEND_METAL
-//    lineUBOCount
-//};
 //
 // Line gradient
 
 using LineGradientDrawableUBO = LineDrawableUBO;
-
-//struct alignas(16) LineGradientPropertiesUBO {
-    // LineExpressionMask expressionMask; ??
-
 
 struct alignas(16) LineGradientInterpolationUBO {
     float blur_t;
@@ -87,9 +69,6 @@ struct alignas(16) LineGradientInterpolationUBO {
 };
 static_assert(sizeof(LineGradientInterpolationUBO) % 16 == 0);
 
-//#if MLN_RENDER_BACKEND_METAL
-//    idLineGradientExpressionUBO,
-//#endif // MLN_RENDER_BACKEND_METAL
 //
 // Line pattern
 
@@ -101,8 +80,6 @@ struct alignas(16) LinePatternDrawableUBO {
     float fade;
 };
 static_assert(sizeof(LinePatternDrawableUBO) % 16 == 0);
-//struct alignas(16) LinePatternPropertiesUBO {
-//    LineExpressionMask expressionMask;
 
 struct alignas(16) LinePatternInterpolationUBO {
     float blur_t;
@@ -122,9 +99,6 @@ struct alignas(16) LinePatternTilePropertiesUBO {
 };
 static_assert(sizeof(LinePatternTilePropertiesUBO) % 16 == 0);
 
-//#if MLN_RENDER_BACKEND_METAL
-//    idLinePatternExpressionUBO,
-//#endif // MLN_RENDER_BACKEND_METAL
 //
 // Line SDF
 
@@ -140,8 +114,6 @@ struct alignas(16) LineSDFDrawableUBO {
     float pad1, pad2, pad3;
 };
 static_assert(sizeof(LineSDFDrawableUBO) % 16 == 0);
-//struct alignas(16) LineSDFPropertiesUBO {
-//    LineExpressionMask expressionMask;
 
 struct alignas(16) LineSDFInterpolationUBO {
     float color_t;
@@ -155,9 +127,6 @@ struct alignas(16) LineSDFInterpolationUBO {
 };
 static_assert(sizeof(LineSDFInterpolationUBO) % 16 == 0);
 
-//#if MLN_RENDER_BACKEND_METAL
-//    idLineSDFExpressionUBO,
-//#endif // MLN_RENDER_BACKEND_METAL
 //
 // Line evaluated properties
 
@@ -169,7 +138,8 @@ struct alignas(16) LineEvaluatedPropsUBO {
     float offset;
     float width;
     float floorwidth;
-    float pad1, pad2;
+    LineExpressionMask expressionMask;
+    float pad1;
 };
 static_assert(sizeof(LineEvaluatedPropsUBO) % 16 == 0);
 
@@ -178,6 +148,7 @@ enum {
     idLineInterpolationUBO,
     idLineTilePropertiesUBO,
     idLineEvaluatedPropsUBO,
+    idLineExpressionUBO,
     lineUBOCount
 };
 

@@ -3,7 +3,11 @@
 #include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/style/layers/line_layer_properties.hpp>
 
-#include <string_view>
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/shaders/line_layer_ubo.hpp>
+#endif // MLN_RENDER_BACKEND_METAL
+
+#include <string>
 
 namespace mbgl {
 
@@ -56,10 +60,12 @@ private:
 protected:
     gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
 
-//#if MLN_RENDER_BACKEND_METAL
-//    gfx::UniformBufferPtr expressionUniformBuffer;
-//    Unevaluated::GPUExpressions gpuExpressions;
-//#endif // MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL
+    gfx::UniformBufferPtr expressionUniformBuffer;
+    Unevaluated::GPUExpressions gpuExpressions;
+    shaders::LineExpressionMask expressionMask = shaders::LineExpressionMask::None;
+    bool gpuExpressionsUpdated = true;
+#endif // MLN_RENDER_BACKEND_METAL
 };
 
 } // namespace mbgl

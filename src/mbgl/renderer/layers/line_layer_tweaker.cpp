@@ -71,17 +71,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     const auto zoom = static_cast<float>(parameters.state.getZoom());
     const auto intZoom = parameters.state.getIntegerZoom();
 
-    // Each property UBO is updated at most once if new evaluated properties were set
-
-
-
-
-
-
-
-#if 0
-
-
 #if MLN_RENDER_BACKEND_METAL
     const auto getExpressionBuffer = [&]() {
         const bool enableEval = (parameters.debugOptions & MapDebugOptions::GPUEval);
@@ -102,237 +91,56 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     };
 #endif // MLN_RENDER_BACKEND_METAL
 
-    const auto getLinePropsBuffer = [&]() {
-        if (!linePropertiesBuffer || simplePropertiesUpdated) {
-#if MLN_RENDER_BACKEND_METAL
-            const bool enableEval = (parameters.debugOptions & MapDebugOptions::GPUEval);
-            const LineExpressionMask expressionMask =
-                !enableEval ? LineExpressionMask::None
-                            : ((gpuExpressions[propertyIndex<LineColor>()] ? LineExpressionMask::Color
-                                                                           : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineBlur>()] ? LineExpressionMask::Blur
-                                                                          : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineOpacity>()] ? LineExpressionMask::Opacity
-                                                                             : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineGapWidth>()] ? LineExpressionMask::GapWidth
-                                                                              : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineOffset>()] ? LineExpressionMask::Offset
-                                                                            : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineWidth>()] ? LineExpressionMask::Width
-                                                                           : LineExpressionMask::None));
-            const LinePropertiesUBO linePropertiesUBO{
-                /*color =*/(expressionMask & LineExpressionMask::Color) ? LineColor::defaultValue()
-                                                                        : evaluate<LineColor>(parameters),
-                /*blur =*/
-                (expressionMask & LineExpressionMask::Blur) ? LineBlur::defaultValue() : evaluate<LineBlur>(parameters),
-                /*opacity =*/
-                (expressionMask & LineExpressionMask::Opacity) ? LineOpacity::defaultValue()
-                                                               : evaluate<LineOpacity>(parameters),
-                /*gapwidth =*/
-                (expressionMask & LineExpressionMask::GapWidth) ? LineGapWidth::defaultValue()
-                                                                : evaluate<LineGapWidth>(parameters),
-                /*offset =*/
-                (expressionMask & LineExpressionMask::Offset) ? LineOffset::defaultValue()
-                                                              : evaluate<LineOffset>(parameters),
-                /*width =*/
-                (expressionMask & LineExpressionMask::Width) ? LineWidth::defaultValue()
-                                                             : evaluate<LineWidth>(parameters),
-                expressionMask,
-                0,
-                0};
-#else
-            const LinePropertiesUBO linePropertiesUBO{/*color =*/evaluate<LineColor>(parameters),
-                                                      /*blur =*/evaluate<LineBlur>(parameters),
-                                                      /*opacity =*/evaluate<LineOpacity>(parameters),
-                                                      /*gapwidth =*/evaluate<LineGapWidth>(parameters),
-                                                      /*offset =*/evaluate<LineOffset>(parameters),
-                                                      /*width =*/evaluate<LineWidth>(parameters),
-                                                      LineExpressionMask::None,
-                                                      0,
-                                                      0};
-#endif // MLN_RENDER_BACKEND_METAL
-            context.emplaceOrUpdateUniformBuffer(linePropertiesBuffer, &linePropertiesUBO);
-            simplePropertiesUpdated = false;
-        }
-        return linePropertiesBuffer;
-    };
-    const auto getLineGradientPropsBuffer = [&]() {
-        if (!lineGradientPropertiesBuffer || gradientPropertiesUpdated) {
-#if MLN_RENDER_BACKEND_METAL
-            const bool enableEval = (parameters.debugOptions & MapDebugOptions::GPUEval);
-            const LineExpressionMask expressionMask =
-                !enableEval ? LineExpressionMask::None
-                            : ((gpuExpressions[propertyIndex<LineBlur>()] ? LineExpressionMask::Blur
-                                                                          : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineOpacity>()] ? LineExpressionMask::Opacity
-                                                                             : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineGapWidth>()] ? LineExpressionMask::GapWidth
-                                                                              : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineOffset>()] ? LineExpressionMask::Offset
-                                                                            : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineWidth>()] ? LineExpressionMask::Width
-                                                                           : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineFloorWidth>()] ? LineExpressionMask::FloorWidth
-                                                                                : LineExpressionMask::None));
-            const LineGradientPropertiesUBO lineGradientPropertiesUBO{
-                /*blur =*/(expressionMask & LineExpressionMask::Blur) ? LineBlur::defaultValue()
-                                                                      : evaluate<LineBlur>(parameters),
-                /*opacity =*/
-                (expressionMask & LineExpressionMask::Opacity) ? LineOpacity::defaultValue()
-                                                               : evaluate<LineOpacity>(parameters),
-                /*gapwidth =*/
-                (expressionMask & LineExpressionMask::GapWidth) ? LineGapWidth::defaultValue()
-                                                                : evaluate<LineGapWidth>(parameters),
-                /*offset =*/
-                (expressionMask & LineExpressionMask::Offset) ? LineOffset::defaultValue()
-                                                              : evaluate<LineOffset>(parameters),
-                /*width =*/
-                (expressionMask & LineExpressionMask::Width) ? LineWidth::defaultValue()
-                                                             : evaluate<LineWidth>(parameters),
-                expressionMask,
-                0,
-                0};
-#else
-            const LineGradientPropertiesUBO lineGradientPropertiesUBO{/*blur =*/evaluate<LineBlur>(parameters),
-                                                                      /*opacity =*/evaluate<LineOpacity>(parameters),
-                                                                      /*gapwidth =*/evaluate<LineGapWidth>(parameters),
-                                                                      /*offset =*/evaluate<LineOffset>(parameters),
-                                                                      /*width =*/evaluate<LineWidth>(parameters),
-                                                                      LineExpressionMask::None,
-                                                                      0,
-                                                                      0};
-#endif
-            context.emplaceOrUpdateUniformBuffer(lineGradientPropertiesBuffer, &lineGradientPropertiesUBO);
-            gradientPropertiesUpdated = false;
-        }
-        return lineGradientPropertiesBuffer;
-    };
-    const auto getLinePatternPropsBuffer = [&]() {
-        if (!linePatternPropertiesBuffer || patternPropertiesUpdated) {
-#if MLN_RENDER_BACKEND_METAL
-            const bool enableEval = (parameters.debugOptions & MapDebugOptions::GPUEval);
-            const LineExpressionMask expressionMask =
-                !enableEval ? LineExpressionMask::None
-                            : ((gpuExpressions[propertyIndex<LineBlur>()] ? LineExpressionMask::Blur
-                                                                          : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineOpacity>()] ? LineExpressionMask::Opacity
-                                                                             : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineGapWidth>()] ? LineExpressionMask::GapWidth
-                                                                              : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineOffset>()] ? LineExpressionMask::Offset
-                                                                            : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineWidth>()] ? LineExpressionMask::Width
-                                                                           : LineExpressionMask::None));
-            const LinePatternPropertiesUBO linePatternPropertiesUBO{
-                /*blur =*/(expressionMask & LineExpressionMask::Blur) ? LineBlur::defaultValue()
-                                                                      : evaluate<LineBlur>(parameters),
-                /*opacity =*/
-                (expressionMask & LineExpressionMask::Opacity) ? LineOpacity::defaultValue()
-                                                               : evaluate<LineOpacity>(parameters),
-                /*offset =*/
-                (expressionMask & LineExpressionMask::Offset) ? LineOffset::defaultValue()
-                                                              : evaluate<LineOffset>(parameters),
-                /*gapwidth =*/
-                (expressionMask & LineExpressionMask::GapWidth) ? LineGapWidth::defaultValue()
-                                                                : evaluate<LineGapWidth>(parameters),
-                /*width =*/
-                (expressionMask & LineExpressionMask::Width) ? LineWidth::defaultValue()
-                                                             : evaluate<LineWidth>(parameters),
-                expressionMask,
-                0,
-                0};
-#else
-            const LinePatternPropertiesUBO linePatternPropertiesUBO{/*blur =*/evaluate<LineBlur>(parameters),
-                                                                    /*opacity =*/evaluate<LineOpacity>(parameters),
-                                                                    /*offset =*/evaluate<LineOffset>(parameters),
-                                                                    /*gapwidth =*/evaluate<LineGapWidth>(parameters),
-                                                                    /*width =*/evaluate<LineWidth>(parameters),
-                                                                    LineExpressionMask::None,
-                                                                    0,
-                                                                    0};
-#endif // MLN_RENDER_BACKEND_METAL
-            context.emplaceOrUpdateUniformBuffer(linePatternPropertiesBuffer, &linePatternPropertiesUBO);
-            patternPropertiesUpdated = false;
-        }
-        return linePatternPropertiesBuffer;
-    };
-    const auto getLineSDFPropsBuffer = [&]() {
-        if (!lineSDFPropertiesBuffer || sdfPropertiesUpdated) {
-#if MLN_RENDER_BACKEND_METAL
-            const bool enableEval = (parameters.debugOptions & MapDebugOptions::GPUEval);
-            const LineExpressionMask expressionMask =
-                !enableEval ? LineExpressionMask::None
-                            : ((gpuExpressions[propertyIndex<LineBlur>()] ? LineExpressionMask::Blur
-                                                                          : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineColor>()] ? LineExpressionMask::Color
-                                                                           : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineOpacity>()] ? LineExpressionMask::Opacity
-                                                                             : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineGapWidth>()] ? LineExpressionMask::GapWidth
-                                                                              : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineOffset>()] ? LineExpressionMask::Offset
-                                                                            : LineExpressionMask::None) |
-                               (gpuExpressions[propertyIndex<LineWidth>()] ? LineExpressionMask::Width
-                                                                           : LineExpressionMask::None));
-            const LineSDFPropertiesUBO lineSDFPropertiesUBO{
-                /*color =*/(expressionMask & LineExpressionMask::Color) ? LineColor::defaultValue()
-                                                                        : evaluate<LineColor>(parameters),
-                /*blur =*/
-                (expressionMask & LineExpressionMask::Blur) ? LineBlur::defaultValue() : evaluate<LineBlur>(parameters),
-                /*opacity =*/
-                (expressionMask & LineExpressionMask::Opacity) ? LineOpacity::defaultValue()
-                                                               : evaluate<LineOpacity>(parameters),
-                /*gapwidth =*/
-                (expressionMask & LineExpressionMask::GapWidth) ? LineGapWidth::defaultValue()
-                                                                : evaluate<LineGapWidth>(parameters),
-                /*offset =*/
-                (expressionMask & LineExpressionMask::Offset) ? LineOffset::defaultValue()
-                                                              : evaluate<LineOffset>(parameters),
-                /*width =*/
-                (expressionMask & LineExpressionMask::Width) ? LineWidth::defaultValue()
-                                                             : evaluate<LineWidth>(parameters),
-                /*floorWidth =*/
-                (expressionMask & LineExpressionMask::FloorWidth) ? LineFloorWidth::defaultValue()
-                                                                  : evaluate<LineFloorWidth>(parameters),
-                expressionMask,
-                0};
-#else
-            const LineSDFPropertiesUBO lineSDFPropertiesUBO{/*color =*/evaluate<LineColor>(parameters),
-                                                            /*blur =*/evaluate<LineBlur>(parameters),
-                                                            /*opacity =*/evaluate<LineOpacity>(parameters),
-                                                            /*gapwidth =*/evaluate<LineGapWidth>(parameters),
-                                                            /*offset =*/evaluate<LineOffset>(parameters),
-                                                            /*width =*/evaluate<LineWidth>(parameters),
-                                                            /*floorwidth =*/evaluate<LineFloorWidth>(parameters),
-                                                            LineExpressionMask::None,
-                                                            0};
-#endif
-            context.emplaceOrUpdateUniformBuffer(lineSDFPropertiesBuffer, &lineSDFPropertiesUBO);
-            sdfPropertiesUpdated = false;
-        }
-        return lineSDFPropertiesBuffer;
-
-
-
-#endif
-
-
-
-
-
-
-
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
-        const LineEvaluatedPropsUBO propsUBO = {
-            /*color =*/evaluated.get<LineColor>().constantOr(LineColor::defaultValue()),
-            /*blur =*/evaluated.get<LineBlur>().constantOr(LineBlur::defaultValue()),
-            /*opacity =*/evaluated.get<LineOpacity>().constantOr(LineOpacity::defaultValue()),
-            /*gapwidth =*/evaluated.get<LineGapWidth>().constantOr(LineGapWidth::defaultValue()),
-            /*offset =*/evaluated.get<LineOffset>().constantOr(LineOffset::defaultValue()),
-            /*width =*/evaluated.get<LineWidth>().constantOr(LineWidth::defaultValue()),
-            /*floorwidth =*/evaluated.get<LineFloorWidth>().constantOr(LineFloorWidth::defaultValue()),
-            0,
+#if MLN_RENDER_BACKEND_METAL
+        const bool enableEval = (parameters.debugOptions & MapDebugOptions::GPUEval);
+        expressionMask =
+            !enableEval
+                ? LineExpressionMask::None
+                : ((gpuExpressions[propertyIndex<LineColor>()] ? LineExpressionMask::Color : LineExpressionMask::None) |
+                   (gpuExpressions[propertyIndex<LineBlur>()] ? LineExpressionMask::Blur : LineExpressionMask::None) |
+                   (gpuExpressions[propertyIndex<LineOpacity>()] ? LineExpressionMask::Opacity
+                                                                 : LineExpressionMask::None) |
+                   (gpuExpressions[propertyIndex<LineGapWidth>()] ? LineExpressionMask::GapWidth
+                                                                  : LineExpressionMask::None) |
+                   (gpuExpressions[propertyIndex<LineOffset>()] ? LineExpressionMask::Offset
+                                                                : LineExpressionMask::None) |
+                   (gpuExpressions[propertyIndex<LineWidth>()] ? LineExpressionMask::Width : LineExpressionMask::None) |
+                   (gpuExpressions[propertyIndex<LineFloorWidth>()] ? LineExpressionMask::FloorWidth
+                                                                    : LineExpressionMask::None));
+        const LineEvaluatedPropsUBO propsUBO{
+            /*color =*/(expressionMask & LineExpressionMask::Color) ? LineColor::defaultValue()
+                                                                    : evaluate<LineColor>(parameters),
+            /*blur =*/
+            (expressionMask & LineExpressionMask::Blur) ? LineBlur::defaultValue() : evaluate<LineBlur>(parameters),
+            /*opacity =*/
+            (expressionMask & LineExpressionMask::Opacity) ? LineOpacity::defaultValue()
+                                                           : evaluate<LineOpacity>(parameters),
+            /*gapwidth =*/
+            (expressionMask & LineExpressionMask::GapWidth) ? LineGapWidth::defaultValue()
+                                                            : evaluate<LineGapWidth>(parameters),
+            /*offset =*/
+            (expressionMask & LineExpressionMask::Offset) ? LineOffset::defaultValue()
+                                                          : evaluate<LineOffset>(parameters),
+            /*width =*/
+            (expressionMask & LineExpressionMask::Width) ? LineWidth::defaultValue() : evaluate<LineWidth>(parameters),
+            /*floorwidth =*/
+            (expressionMask & LineExpressionMask::FloorWidth) ? LineFloorWidth::defaultValue()
+                                                              : evaluate<LineFloorWidth>(parameters),
+            expressionMask,
             0};
+#else
+        const LineEvaluatedPropsUBO propsUBO{/*color =*/evaluate<LineColor>(parameters),
+                                             /*blur =*/evaluate<LineBlur>(parameters),
+                                             /*opacity =*/evaluate<LineOpacity>(parameters),
+                                             /*gapwidth =*/evaluate<LineGapWidth>(parameters),
+                                             /*offset =*/evaluate<LineOffset>(parameters),
+                                             /*width =*/evaluate<LineWidth>(parameters),
+                                             /*floorwidth =*/evaluate<LineFloorWidth>(parameters),
+                                             LineExpressionMask::None,
+                                             0};
+#endif // MLN_RENDER_BACKEND_METAL
+
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
@@ -366,30 +174,16 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     0,
                     0};
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
-
-//#if MLN_RENDER_BACKEND_METAL
-//                // GPU Expressions
-//                uniforms.set(idLineExpressionUBO, getExpressionBuffer());
-//#endif // MLN_RENDER_BACKEND_METAL
-
-
             } break;
 
             case LineType::Gradient: {
                 const LineGradientDrawableUBO drawableUBO = {
                     /*matrix = */ util::cast<float>(matrix),
                     /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
-                                                      0,
-                                                      0,
-                                                      0};
+                    0,
+                    0,
+                    0};
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
-                ;
-
-//#if MLN_RENDER_BACKEND_METAL
-//                // GPU Expressions
-//                uniforms.set(idLineGradientExpressionUBO, getExpressionBuffer());
-//#endif // MLN_RENDER_BACKEND_METAL
-
             } break;
 
             case LineType::Pattern: {
@@ -408,12 +202,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /*ratio =*/1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                     /*fade =*/crossfade.t};
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
-
-//#if MLN_RENDER_BACKEND_METAL
-//                // GPU Expressions
-//                uniforms.set(idLinePatternExpressionUBO, getExpressionBuffer());
-//#endif // MLN_RENDER_BACKEND_METAL
-
             } break;
 
             case LineType::SDF: {
@@ -453,12 +241,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         0,
                         0};
                     drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
-
-//#if MLN_RENDER_BACKEND_METAL
-//                    // GPU Expressions
-//                    uniforms.set(idLineSDFExpressionUBO, getExpressionBuffer());
-//#endif // MLN_RENDER_BACKEND_METAL
-
                 }
             } break;
 
@@ -468,6 +250,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                            "LineLayerTweaker: unknown line type: "s + std::to_string(mbgl::underlying_type(type)));
             } break;
         }
+
+#if MLN_RENDER_BACKEND_METAL
+        // GPU Expressions
+        if (expressionMask != LineExpressionMask::None) {
+            drawableUniforms.set(idLineExpressionUBO, getExpressionBuffer());
+        }
+#endif // MLN_RENDER_BACKEND_METAL
     });
 }
 
