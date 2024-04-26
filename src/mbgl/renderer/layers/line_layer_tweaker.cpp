@@ -145,8 +145,14 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         propertiesUpdated = false;
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
-    // TODO: Update only on zoom change?
+
+    // TODO: Consider dependencies, update only when necessary
     layerUniforms.set(idLineEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
+
+#if MLN_RENDER_BACKEND_METAL
+    // GPU Expressions
+    layerUniforms.set(idLineExpressionUBO, getExpressionBuffer());
+#endif // MLN_RENDER_BACKEND_METAL
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         const auto shader = drawable.getShader();
@@ -250,13 +256,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                            "LineLayerTweaker: unknown line type: "s + std::to_string(mbgl::underlying_type(type)));
             } break;
         }
-
-#if MLN_RENDER_BACKEND_METAL
-        // GPU Expressions
-        if (expressionMask != LineExpressionMask::None) {
-            drawableUniforms.set(idLineExpressionUBO, getExpressionBuffer());
-        }
-#endif // MLN_RENDER_BACKEND_METAL
     });
 }
 

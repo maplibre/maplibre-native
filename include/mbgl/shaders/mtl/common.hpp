@@ -146,8 +146,8 @@ struct alignas(16) GPUExpression {
             case GPUInterpType::Linear: assert(interpOptions.exponential.base == 1.0f);
                 [[fallthrough]];
             case GPUInterpType::Exponential: {
-                const float rangeBeg = stops.floats[index - 1];
-                const float rangeEnd = stops.floats[index];
+                const float rangeBeg = inputs[index - 1];
+                const float rangeEnd = inputs[index];
                 const auto t = interpolationFactor(interpOptions.exponential.base, rangeBeg, rangeEnd, zoom);
                 return mix(stops.floats[index - 1], stops.floats[index], t);
             }
@@ -171,7 +171,9 @@ struct alignas(16) GPUExpression {
             case GPUInterpType::Linear: assert(interpOptions.exponential.base == 1.0f);
                 [[fallthrough]];
             case GPUInterpType::Exponential: {
-                const auto t = interpolationFactor(interpOptions.exponential.base, inputs[index - 1], inputs[index], zoom);
+                const float rangeBeg = inputs[index - 1];
+                const float rangeEnd = inputs[index];
+                const auto t = interpolationFactor(interpOptions.exponential.base, rangeBeg, rangeEnd, zoom);
                 return mix(getColor(index - 1), getColor(index), t);
             }
             case GPUInterpType::Bezier:

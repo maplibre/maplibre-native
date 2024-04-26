@@ -93,7 +93,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
-    const auto offset   = exprOffset ? expr.offset.eval(paintParams.zoom) : props.offset * -1;
+    const auto offset   = (exprOffset ? expr.offset.eval(paintParams.zoom) : props.offset) * -1;
 #else
     const auto offset   = unpack_mix_float(vertx.offset, interp.offset_t) * -1;
 #endif
@@ -277,12 +277,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto opacity  = unpack_mix_float(vertx.opacity,  interp.opacity_t);
 #endif
 #if defined(HAS_UNIFORM_u_gapwidth)
-    const auto gapwidth = props.gapwidth;
+    const auto gapwidth = props.gapwidth / 2;
 #else
     const auto gapwidth = unpack_mix_float(vertx.gapwidth, interp.gapwidth_t) / 2;
 #endif
 #if defined(HAS_UNIFORM_u_offset)
-    const auto offset   = props.offset;
+    const auto offset   = props.offset * -1;
 #else
     const auto offset   = unpack_mix_float(vertx.offset,   interp.offset_t) * -1;
 #endif
@@ -483,7 +483,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
-    const auto offset   = exprOffset ? expr.offset.eval(paintParams.zoom) : props.offset * -1;
+    const auto offset   = (exprOffset ? expr.offset.eval(paintParams.zoom) : props.offset) * -1;
 #else
     const auto offset   = unpack_mix_float(vertx.offset, interp.offset_t) * -1;
 #endif
@@ -738,7 +738,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
 #if defined(HAS_UNIFORM_u_offset)
     const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
-    const auto offset   = exprOffset ? expr.offset.eval(paintParams.zoom) : props.offset * -1;
+    const auto offset   = (exprOffset ? expr.offset.eval(paintParams.zoom) : props.offset) * -1;
 #else
     const auto offset   = unpack_mix_float(vertx.offset, interp.offset_t) * -1;
 #endif
