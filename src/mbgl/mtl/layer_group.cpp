@@ -46,7 +46,6 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     auto& context = static_cast<Context&>(parameters.context);
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
 
-    
     bool bindUBOs = false;
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
@@ -56,7 +55,7 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         for (const auto& tweaker : drawable.getTweakers()) {
             tweaker->execute(drawable, parameters);
         }
-        
+
         if (!bindUBOs) {
             bindUniformBuffers(renderPass);
             bindUBOs = true;

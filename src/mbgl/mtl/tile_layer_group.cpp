@@ -142,7 +142,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             bindUniformBuffers(renderPass);
             bindUBOs = true;
         }
-        
+
         drawable.draw(parameters);
     });
 

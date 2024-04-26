@@ -124,7 +124,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
             bindUniformBuffers();
             bindUBOs = true;
         }
-        
+
         drawable.draw(parameters);
     });
 
@@ -202,7 +202,7 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
             bindUniformBuffers();
             bindUBOs = true;
         }
-        
+
         drawable.draw(parameters);
     });
 
