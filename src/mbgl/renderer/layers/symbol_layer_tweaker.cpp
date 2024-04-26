@@ -77,7 +77,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     int i = 0;
     std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
-    
+
     const auto camDist = state.getCameraToCenterDistance();
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
@@ -136,11 +136,11 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         drawable.setUBOIndex(i);
         i++;
     });
-    
-    if (layerGroup.getDrawableCount() > 60 ) {
+
+    if (layerGroup.getDrawableCount() > 60) {
         assert(false);
     }
-    
+
     const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
     if (!drawableBuffer || drawableBuffer->getSize() < drawableUBOVectorSize) {
         drawableBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize);

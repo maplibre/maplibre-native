@@ -1355,7 +1355,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
     }
-    
+
     // Set UBOs
     int i = 0;
     std::vector<SymbolTilePropsUBO> tilePropsUBOVector(tileLayerGroup->getDrawableCount());
@@ -1367,12 +1367,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         auto& symbolData = static_cast<gfx::SymbolDrawableData&>(*drawable.getData());
         const auto& bucketPaintProperties = symbolData.bucket->paintProperties.at(getID());
         const bool isText = (symbolData.symbolType == SymbolType::Text);
-        
+
         tilePropsUBOVector[i] = buildTileUBO(*symbolData.bucket, symbolData, currentZoom);
         interpolateUBOVector[i++] = buildInterpUBO(bucketPaintProperties, isText, currentZoom);
         symbolData.bucket = nullptr;
     });
-        
+
     if (i > 0) {
         const size_t tilePropsUBOVectorSize = sizeof(SymbolTilePropsUBO) * tilePropsUBOVector.size();
         if (!tilePropsBuffer || tilePropsBuffer->getSize() < tilePropsUBOVectorSize) {
@@ -1380,14 +1380,14 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         } else {
             tilePropsBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
         }
-        
+
         const size_t interpolateUBOVectorSize = sizeof(SymbolInterpolateUBO) * interpolateUBOVector.size();
         if (!interpolateBuffer || interpolateBuffer->getSize() < interpolateUBOVectorSize) {
             interpolateBuffer = context.createUniformBuffer(interpolateUBOVector.data(), interpolateUBOVectorSize);
         } else {
             interpolateBuffer->update(interpolateUBOVector.data(), interpolateUBOVectorSize);
         }
-        
+
         auto& layerUniforms = tileLayerGroup->mutableUniformBuffers();
         layerUniforms.set(idSymbolTilePropsUBO, tilePropsBuffer);
         layerUniforms.set(idSymbolInterpolateUBO, interpolateBuffer);

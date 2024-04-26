@@ -29,7 +29,7 @@ struct SymbolDrawableData : public DrawableData {
           rotationAlignment(rotationAlignment_),
           placement(placement_),
           textFit(textFit_),
-          bucket(bucket_)  {}
+          bucket(bucket_) {}
     ~SymbolDrawableData() override = default;
 
     const bool isHalo;

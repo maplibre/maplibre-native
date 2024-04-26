@@ -51,7 +51,7 @@ public:
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
 
     ProgramID getGLProgramID() const { return glProgram; }
-    
+
     UniformLocation getUBOIndexLocation() const { return uboIndexLocation; }
 
 protected:

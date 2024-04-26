@@ -160,7 +160,7 @@ private:
     std::shared_ptr<TileLayerGroup> collisionTileLayerGroup;
 
     LayerTweakerPtr collisionLayerTweaker;
-    
+
     gfx::UniformBufferPtr tilePropsBuffer;
     gfx::UniformBufferPtr interpolateBuffer;
 #endif // MLN_DRAWABLE_RENDERER

@@ -105,7 +105,7 @@ ShaderProgramGL::ShaderProgramGL(ShaderProgramGL&& other)
       uniformBlocks(std::move(other.uniformBlocks)),
       vertexAttributes(std::move(other.vertexAttributes)),
       samplerLocations(std::move(other.samplerLocations)),
-      uboIndexLocation(other.uboIndexLocation){}
+      uboIndexLocation(other.uboIndexLocation) {}
 
 std::optional<size_t> ShaderProgramGL::getSamplerLocation(const size_t id) const {
     return (id < samplerLocations.size()) ? samplerLocations[id] : std::nullopt;
@@ -177,7 +177,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         assert(attributesInfo[location].name == std::string_view(name.data()));
         addAttr(attrs, attributesInfo[location].id, location, length, size, glType);
     }
-        
+
     auto uboIndexLocation = MBGL_CHECK_ERROR(glGetUniformLocation(program, "u_ubo_index"));
 
     return std::make_shared<ShaderProgramGL>(

@@ -233,7 +233,7 @@ public:
 
     /// Get drawable user-defined type
     size_t getType() const { return type; }
-    
+
     void setUBOIndex(uint32_t uboIndex_) { uboIndex = uboIndex_; }
     int32_t getUBOIndex() const { return uboIndex; }
 

@@ -191,7 +191,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         encoder->setVertexBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
         encoder->setFragmentBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
     }
-    
+
     bindAttributes(renderPass);
     bindInstanceAttributes(renderPass);
     bindUniformBuffers(renderPass);
