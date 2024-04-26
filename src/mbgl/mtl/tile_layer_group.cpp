@@ -120,8 +120,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         parameters.renderTileClippingMasks(stencilTiles);
     }
 
-    bindUniformBuffers(renderPass);
-
+    bool bindUBOs = false;
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -139,10 +138,17 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             renderPass.setDepthStencilState(state);
         }
 
+        if (!bindUBOs) {
+            bindUniformBuffers(renderPass);
+            bindUBOs = true;
+        }
+
         drawable.draw(parameters);
     });
 
-    unbindUniformBuffers(renderPass);
+    if (bindUBOs) {
+        unbindUniformBuffers(renderPass);
+    }
 }
 
 void TileLayerGroup::bindUniformBuffers(RenderPass& renderPass) const noexcept {

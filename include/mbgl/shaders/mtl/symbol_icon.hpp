@@ -56,7 +56,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     device const SymbolTilePropsUBO& tileprops = tilePropsVector[uboIndex];
     device const SymbolInterpolateUBO& interp = interpVector[uboIndex];
 
-
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
 
