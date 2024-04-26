@@ -75,8 +75,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const uint32_t& uboIndex [[buffer(1)]],
                                 device const SymbolDrawableUBO* drawableVector [[buffer(2)]],
                                 device const SymbolTilePropsUBO* tilePropsVector [[buffer(3)]],
-                                device const SymbolInterpolateUBO* interpVector [[buffer(4)]],
-                                device const SymbolEvaluatedPropsUBO& props [[buffer(5)]]) {
+                                device const SymbolInterpolateUBO* interpVector [[buffer(4)]]) {
 
     device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
     device const SymbolTilePropsUBO& tileprops = tilePropsVector[uboIndex];
