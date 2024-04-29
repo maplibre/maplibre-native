@@ -100,7 +100,7 @@ class GridSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         )
         map.setStyle(
             Style.Builder()
-                .fromUri(Style.getPredefinedStyle("Streets"))
+                .fromUri(Style.getPredefinedStyles()[0].url)
                 .withLayer(layer!!)
                 .withSource(source!!)
         )

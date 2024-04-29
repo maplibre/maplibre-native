@@ -233,15 +233,6 @@ layout (std140) uniform SymbolTilePropsUBO {
     bool tileprops_pad1;
 };
 
-layout (std140) uniform SymbolInterpolateUBO {
-    highp float u_fill_color_t;
-    highp float u_halo_color_t;
-    highp float u_opacity_t;
-    highp float u_halo_width_t;
-    highp float u_halo_blur_t;
-    highp float interp_pad1, interp_pad2, interp_pad3;
-};
-
 layout (std140) uniform SymbolEvaluatedPropsUBO {
     highp vec4 u_text_fill_color;
     highp vec4 u_text_halo_color;

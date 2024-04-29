@@ -132,8 +132,8 @@ private:
 
 class WideVectorDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    WideVectorDrawableTweaker(const CustomDrawableLayerHost::Interface::LineOptions& options)
-        : options(options) {}
+    WideVectorDrawableTweaker(const CustomDrawableLayerHost::Interface::LineOptions& options_)
+        : options(options_) {}
 
     void init(gfx::Drawable&) override {};
 
