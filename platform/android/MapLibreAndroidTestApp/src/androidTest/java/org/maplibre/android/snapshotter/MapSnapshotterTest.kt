@@ -10,6 +10,7 @@ import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.testapp.activity.FeatureOverviewActivity
 import org.junit.Assert
 import org.junit.Assert.assertNotNull
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeoutException
 /**
  * Integration test that validates if a snapshotter creation
  */
+@Ignore("https://github.com/maplibre/maplibre-native/issues/2317")
 @RunWith(AndroidJUnit4ClassRunner::class)
 class MapSnapshotterTest {
 

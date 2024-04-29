@@ -81,6 +81,11 @@ BufferResource Context::createBuffer(
     return {const_cast<Context&>(*this), data, size, MTL::ResourceStorageModeShared, isIndexBuffer, persistent};
 }
 
+// If enabled, ubsan flags the implicit cast from assigning `NS::String*` to `NS::Object*` here
+// as an alignment error.  The ObjC NSString allocations are cast to a C++ object pointer by
+// `NS::Object::sendMessage`, and the alignment rules are different.  We assume that, because
+// `NS::Object` does not use virtual methods and only serves as a way for C++ code to store
+// and pass ObjC `id`s to `objc_msgSend`, this won't cause any real problems.
 UniqueShaderProgram Context::createProgram(std::string name,
                                            const std::string_view source,
                                            const std::string_view vertexName,
@@ -93,11 +98,11 @@ UniqueShaderProgram Context::createProgram(std::string name,
     const auto& programDefines = programParameters.getDefines();
     const auto numDefines = programDefines.size() + additionalDefines.size();
 
-    std::vector<NS::Object*> rawDefines;
+    std::vector<const NS::Object*> rawDefines;
     rawDefines.reserve(2 * numDefines);
     const auto addDefine = [&rawDefines](const auto& pair) {
-        auto* nsKey = NS::String::string(pair.first.data(), NS::UTF8StringEncoding);
-        auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
+        const auto* nsKey = NS::String::string(pair.first.data(), NS::UTF8StringEncoding);
+        const auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
         rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size() / 2), nsKey);
         rawDefines.insert(rawDefines.end(), nsVal);
     };
@@ -139,7 +144,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     }
 
     const auto nsVertName = NS::String::string(vertexName.data(), NS::UTF8StringEncoding);
-    NS::SharedPtr<MTL::Function> vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
+    MTLFunctionPtr vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
         assert(false);
@@ -147,7 +152,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     }
 
     // fragment function is optional
-    NS::SharedPtr<MTL::Function> fragmentFunction;
+    MTLFunctionPtr fragmentFunction;
     if (!fragmentName.empty()) {
         const auto nsFragName = NS::String::string(fragmentName.data(), NS::UTF8StringEncoding);
         fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));

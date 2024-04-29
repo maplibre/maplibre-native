@@ -84,9 +84,15 @@ public:
         }
         [commandBuffer commit];
 
-        // Un-comment for synchronous, which can help troubleshoot rendering problems,
+        // Synchronous rendering can help troubleshoot rendering problems,
         // particularly those related to resource tracking and multiple queued buffers.
-        //[commandBuffer waitUntilCompleted];
+        // The conditional logic for synchronous rendering is commanded from MLNMapView.updateAnnotationViews:
+        // `_mbglView->setSynchronous(haveVisibleAnnotationViews);`
+        // and fixes the desynchronization of UIView annotation when the map is rendered on the Metal backend
+        // Issue: https://github.com/maplibre/maplibre-native/issues/2053
+        if (backend.getSynchronous()) {
+            [commandBuffer waitUntilCompleted];
+        }
 
         commandBuffer = nil;
         commandBufferPtr.reset();

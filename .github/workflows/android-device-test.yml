@@ -6,6 +6,9 @@ on:
     types:
       - completed
 
+permissions:
+  id-token: write         # needed for AWS
+
 jobs:
   android-device-test:
     strategy:
@@ -61,6 +64,7 @@ jobs:
         id: generate_token
         uses: tibdex/github-app-token@v2
         with:
+          revoke: false  # revoking will fail for long running workflows, because the token will already have expired
           app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
           private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
@@ -103,12 +107,9 @@ jobs:
         if: env.run_device_test == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
-          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 21600
-          role-session-name: MySessionName
+          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ github.run_id }}
 
       - name: Upload external data
         if: env.run_device_test == 'true'
@@ -143,10 +144,24 @@ jobs:
           npm install --ignore-scripts
           node scripts/aws-device-farm/download-benchmark-results.mjs ${{ steps.aws_device_farm_run.outputs.runArn }}
 
-      - uses: LouisBrunner/checks-action@v2.0.0
-        if: always() && (env.run_device_test == 'true' || matrix.test.name == 'Android Render Tests')
+      - name: Log Test Spec Output
+        if: failure() && env.run_device_test == 'true'
+        run: |
+          npm install --ignore-scripts
+          node scripts/aws-device-farm/log-test-spec-output.mjs ${{ steps.aws_device_farm_run.outputs.runArn }}
+
+      - name: Generate another token (previous one could have expired)
+        if: always() && env.run_device_test == 'true'
+        id: generate_token_2
+        uses: tibdex/github-app-token@v2
         with:
-          token: ${{ steps.generate_token.outputs.token }}
+          app_id: ${{ secrets.MAPLIBRE_NATIVE_BOT_APP_ID }}
+          private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
+
+      - uses: LouisBrunner/checks-action@v2.0.0
+        if: always() && env.run_device_test == 'true'
+        with:
+          token: ${{ steps.generate_token_2.outputs.token }}
           check_id: ${{ steps.create_check.outputs.check_id }}
           conclusion: ${{ job.status }}
           sha: ${{ github.event.workflow_run.sha }}

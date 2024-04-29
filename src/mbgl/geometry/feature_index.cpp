@@ -69,8 +69,8 @@ void FeatureIndex::query(std::unordered_map<std::string, std::vector<Feature>>& 
 
     // Determine query radius
     const auto pixelsToTileUnits = static_cast<float>(util::EXTENT / tileSize / scale);
-    const int16_t additionalPadding = std::min<int16_t>(
-        util::EXTENT, static_cast<int16_t>(additionalQueryPadding * pixelsToTileUnits));
+    const int16_t additionalPadding = static_cast<int16_t>(
+        std::min(static_cast<float>(util::EXTENT), additionalQueryPadding * pixelsToTileUnits));
 
     // Query the grid index
     mapbox::geometry::box<int16_t> box = mapbox::geometry::envelope(queryGeometry);

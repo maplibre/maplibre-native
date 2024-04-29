@@ -50,6 +50,9 @@ public:
     MLNBackendResource getObject() override;
     // End implementation of MLNMapViewImpl
 
+    void setSynchronous(bool value) override { synchronousFrame = value; };
+    bool getSynchronous() const override { return synchronousFrame; };
 private:
     bool presentsWithTransaction = false;
+    bool synchronousFrame = false;
 };
