@@ -2,6 +2,7 @@ package org.maplibre.android.offline
 
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
+import org.junit.Ignore
 import org.maplibre.geojson.Point
 import org.maplibre.android.log.Logger
 import org.maplibre.android.maps.Style
@@ -16,6 +17,7 @@ import java.util.concurrent.TimeoutException
 /**
  * Integration test that validates downloading an offline region from a point geometry at zoomlevel 17
  */
+@Ignore("https://github.com/maplibre/maplibre-native/issues/2318")
 @RunWith(AndroidJUnit4ClassRunner::class)
 class OfflineDownloadTest : OfflineRegion.OfflineRegionObserver {
 

@@ -45,6 +45,8 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
     private var downloadRegion: Button? = null
     private var listRegions: Button? = null
     private var isEndNotified = false
+    val STYLE_URL: String
+        get() = Style.getPredefinedStyle("Streets")
 
     /*
    * Offline objects
@@ -312,8 +314,5 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
         // JSON encoding/decoding
         val JSON_CHARSET = Charsets.UTF_8
         const val JSON_FIELD_REGION_NAME = "FIELD_REGION_NAME"
-
-        // Style URL
-        val STYLE_URL = Style.getPredefinedStyle("Streets")
     }
 }
