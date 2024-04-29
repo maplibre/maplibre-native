@@ -11,10 +11,10 @@
   },
   "files": [
     "lib",
-    "platform/node/index.d.ts"
+    "index.d.ts"
   ],
-  "main": "platform/node/index.js",
-  "types": "platform/node/index.d.ts",
+  "main": "index.js",
+  "types": "index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/maplibre/maplibre-native.git"
@@ -62,11 +62,11 @@
   },
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build=false",
-    "test": "tape platform/node/test/js/**/*.test.js",
-    "test-memory": "node --expose-gc platform/node/test/memory.test.js",
-    "test-expressions": "node -r esm platform/node/test/expression.test.js",
-    "test-render": "node -r esm platform/node/test/render.test.js",
-    "test-query": "node -r esm platform/node/test/query.test.js"
+    "test": "tape test/js/**/*.test.js",
+    "test-memory": "node --expose-gc test/memory.test.js",
+    "test-expressions": "node -r esm test/expression.test.js",
+    "test-render": "node -r esm test/render.test.js",
+    "test-query": "node -r esm test/query.test.js"
   },
   "gypfile": true,
   "binary": {
