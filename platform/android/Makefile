@@ -233,11 +233,12 @@ run-android-unit-test-%: gradle/configuration.gradle
 #android-parse-and-send-jacoco-report:
 #	python scripts/parse-jacoco-report.py
 
-# Builds a release package of the Android SDK
+# Builds a release package and .tar.gz with debug symbols of the Android SDK
 .PHONY: apackage
 apackage: gradle/configuration.gradle
 	make android-lib-arm-v7 && make android-lib-arm-v8 && make android-lib-x86 && make android-lib-x86-64
 	$(MBGL_ANDROID_GRADLE) -Pmapbox.abis=all assemble$(BUILDTYPE)
+	tar -czvf build/debug-symbols.tar.gz -C MapboxGLAndroidSDK/build/intermediates/library_jni/release/jni .
 
 # Build test app instrumentation tests apk and test app apk for all abi's
 .PHONY: android-ui-test
