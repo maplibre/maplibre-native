@@ -57,6 +57,10 @@ public:
     void render();
 
     virtual MLNBackendResource getObject() = 0;
+    
+    virtual void setSynchronous(bool value) {};
+    virtual bool getSynchronous() const { return false; };
+
 
     // mbgl::MapObserver implementation
     void onCameraWillChange(mbgl::MapObserver::CameraChangeMode) override;
