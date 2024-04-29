@@ -13,8 +13,8 @@ std::atomic<bool> success{false};
 std::once_flag done;
 ALooper* looper = NULL;
 
-void runner() {
-    std::vector<std::string> arguments = {"mbgl-test-runner", "--gtest_output=xml:/sdcard/test/results/results.xml"};
+void runner(const std::string& outputPath) {
+    std::vector<std::string> arguments = {"mbgl-test-runner", "--gtest_output=xml:" + outputPath};
     std::vector<char*> argv;
     for (const auto& arg : arguments) {
         argv.push_back((char*)arg.data());
@@ -44,8 +44,8 @@ void android_main(struct android_app* app) {
             mbgl::Log::Error(mbgl::Event::General, "Failed to change the directory to /sdcard");
             changeState(env, app, success);
         } else {
-            unZipFile(env, zipFile, "/sdcard/");
-            runnerThread = std::thread(runner);
+            unZipFile(env, zipFile, storagePath);
+            runnerThread = std::thread(runner, storagePath + "/results.xml");
         }
     } else {
         mbgl::Log::Error(mbgl::Event::General, "Failed to copy zip file '" + zipFile + "' to external storage");

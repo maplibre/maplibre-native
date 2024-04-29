@@ -158,9 +158,9 @@ add_custom_command(
         -E
         tar
         "chf"
-        "test/android/app/src/main/assets/data.zip"
+        "platform/android/MapLibreCppTestApp/src/main/assets/data.zip"
         --format=zip
-        --files-from=test/android/app/src/main/assets/to_zip.txt
+        --files-from=platform/android/MapLibreCppTestApp/src/main/assets/to_zip.txt
     COMMAND
         ${CMAKE_COMMAND}
         -E
