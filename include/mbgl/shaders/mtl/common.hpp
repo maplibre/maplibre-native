@@ -135,7 +135,8 @@ struct alignas(16) GPUExpression {
     } stops;
     
     float eval(float zoom) device const {
-        const auto index = find(zoom);
+        const auto effectiveZoom = (options & GPUOptions::IntegerZoom) ? floor(zoom) : zoom;
+        const auto index = find(effectiveZoom);
         if (index == 0) {
             return stops.floats[0];
         } else if (index == stopCount) {
@@ -150,7 +151,7 @@ struct alignas(16) GPUExpression {
             case GPUInterpType::Exponential: {
                 const float rangeBeg = inputs[index - 1];
                 const float rangeEnd = inputs[index];
-                const auto t = interpolationFactor(interpOptions.exponential.base, rangeBeg, rangeEnd, zoom);
+                const auto t = interpolationFactor(interpOptions.exponential.base, rangeBeg, rangeEnd, effectiveZoom);
                 return mix(stops.floats[index - 1], stops.floats[index], t);
             }
             case GPUInterpType::Bezier:
@@ -160,7 +161,8 @@ struct alignas(16) GPUExpression {
     }
 
     float4 evalColor(float zoom) device const {
-        const auto index = find(zoom);
+        const auto effectiveZoom = (options & GPUOptions::IntegerZoom) ? floor(zoom) : zoom;
+        const auto index = find(effectiveZoom);
         if (index == 0) {
             return getColor(0);
         } else if (index == stopCount) {
@@ -178,7 +180,7 @@ struct alignas(16) GPUExpression {
             case GPUInterpType::Exponential: {
                 const float rangeBeg = inputs[index - 1];
                 const float rangeEnd = inputs[index];
-                const auto t = interpolationFactor(interpOptions.exponential.base, rangeBeg, rangeEnd, zoom);
+                const auto t = interpolationFactor(interpOptions.exponential.base, rangeBeg, rangeEnd, effectiveZoom);
                 return mix(getColor(index - 1), getColor(index), clamp(t, 0.0, 1.0));
             }
             case GPUInterpType::Bezier:
@@ -189,8 +191,7 @@ struct alignas(16) GPUExpression {
 
     /// Get the index of the entry to use from the zoom level
     size_t find(float zoom) device const {
-        const auto z = (options & GPUOptions::IntegerZoom) ? floor(zoom) : zoom;
-        return upper_bound(&inputs[0], &inputs[stopCount], z) - &inputs[0];
+        return upper_bound(&inputs[0], &inputs[stopCount], zoom) - &inputs[0];
     }
 
     float4 getColor(size_t index) device const { return decode_color(stops.colors[index]); }
