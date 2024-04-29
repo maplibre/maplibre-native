@@ -1,0 +1,7 @@
+# metal-cpp uses calls through null pointers
+# Note that the code must be compiled with `-fsanitize-recover=null` for this to work.
+null:vendor/metal-cpp/*
+
+# `NS::String*` implicit cast to `NS::Object*` in Context::createProgram
+alignment:src/mbgl/mtl/context.cpp
+

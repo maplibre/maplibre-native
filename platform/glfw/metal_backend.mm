@@ -1,10 +1,14 @@
 #include "metal_backend.h"
 
+#include <mbgl/mtl/mtl_fwd.hpp>
 #include <mbgl/mtl/renderable_resource.hpp>
+
 #include <Metal/Metal.hpp>
 #include <QuartzCore/CAMetalLayer.hpp>
 
 namespace mbgl {
+
+using namespace mtl;
 
 class MetalRenderableResource final: public mtl::RenderableResource {
 public:
@@ -92,17 +96,17 @@ public:
         return renderPassDescriptor;
     }
     
-    NS::SharedPtr<CA::MetalLayer> getSwapchain() {
+    const CAMetalLayerPtr& getSwapchain() const {
         return swapchain;
     }
     
 private:
     MetalBackend &rendererBackend;
-    NS::SharedPtr<MTL::CommandQueue> commandQueue;
-    NS::SharedPtr<MTL::CommandBuffer> commandBuffer;
-    NS::SharedPtr<MTL::RenderPassDescriptor> renderPassDescriptor;
-    NS::SharedPtr<CA::MetalDrawable> surface;
-    NS::SharedPtr<CA::MetalLayer> swapchain;
+    MTLCommandQueuePtr commandQueue;
+    MTLCommandBufferPtr commandBuffer;
+    MTLRenderPassDescriptorPtr renderPassDescriptor;
+    CAMetalDrawablePtr surface;
+    CAMetalLayerPtr swapchain;
     gfx::Texture2DPtr depthTexture;
     gfx::Texture2DPtr stencilTexture;
     mbgl::Size size;
