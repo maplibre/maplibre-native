@@ -6,11 +6,12 @@ import https from "node:https";
 import readline from "node:readline";
 
 import {
-  DeviceFarmClient,
   ListJobsCommand,
   ListArtifactsCommand,
 } from "@aws-sdk/client-device-farm";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getDeviceFarmClient } from "./device-farm-client.mjs";
+import { getS3Client } from "./s3-client.mjs";
 
 /**
  * Retrieves a log file and looks for the line that includes the benchmark results.
@@ -46,7 +47,7 @@ function usage() {
   process.exit(1);
 }
 
-const deviceFarmClient = new DeviceFarmClient({ region: "us-west-2" });
+const deviceFarmClient = getDeviceFarmClient();
 
 if (process.argv.length !== 3) usage();
 
@@ -103,9 +104,7 @@ const benchmarkResults = benchmarkResultLogLines
   .filter((line) => !!line)
   .map((jsonVal) => JSON.parse(jsonVal));
 
-const s3Client = new S3Client({
-  region: "eu-central-1",
-});
+const s3Client = getS3Client();
 
 // store benchmark results as JSON files on S3
 await Promise.all(
