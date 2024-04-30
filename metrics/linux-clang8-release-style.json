@@ -9,6 +9,7 @@
     ],
     "metric_path": "linux-clang8-release",
     "probes": [
+        "probeGFX",
         "probeNetwork"
     ]
 }

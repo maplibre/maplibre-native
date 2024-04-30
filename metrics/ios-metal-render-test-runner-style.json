@@ -13,6 +13,7 @@
     ],
     "metric_path": "ios-render-test-runner",
     "probes": [
+        "probeGFX",
         "probeNetwork"
     ]
 }

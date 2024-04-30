@@ -11,6 +11,7 @@
     ],
     "metric_path": "android-render-test-runner",
     "probes": [
+        "probeGFX",
         "probeNetwork"
     ]
 }

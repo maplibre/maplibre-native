@@ -9,6 +9,8 @@
     ],
     "metric_path": "macos-xcode11-release",
     "probes": [
+        "probeGFX",
+        "probeMemory",
         "probeNetwork"
     ]
 }
