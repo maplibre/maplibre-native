@@ -8,6 +8,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### 🐞 Bug fixes
 
+## 10.3.1
+
+This release includes [debug symbols](https://github.com/maplibre/maplibre-native/releases?q=android&expanded=true) on GitHub.
+
 ## 10.3.0
 
 ### ✨ Features and improvements
