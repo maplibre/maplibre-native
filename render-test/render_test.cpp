@@ -197,7 +197,10 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
             }
         }
 
+#if MLN_RENDER_BACKEND_METAL
+        printf(ANSI_COLOR_YELLOW "Using GPU Expression Evaluation" ANSI_COLOR_RESET "\n");
         metadata.debug |= MapDebugOptions::GPUEval;
+#endif // MLN_RENDER_BACKEND_METAL
 
         if (metadata.document.ObjectEmpty()) {
             metadata.metricsErrored++;
