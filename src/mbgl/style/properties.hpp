@@ -307,17 +307,13 @@ public:
         /// Evaluate the property if necessary, or produce a copy of the previous value if appropriate
         template <class P>
         auto maybeEvaluate(const PropertyEvaluationParameters& parameters,
-                           [[maybe_unused]] const typename P::EvaluatorType::ResultType& oldResult) const {
+                           const typename P::EvaluatorType::ResultType& oldResult) const {
             using Evaluator = typename P::EvaluatorType;
             const auto& property = this->template get<P>();
-#if MLN_RENDER_BACKEND_METAL
             const bool needEvaluate = parameters.layerChanged || parameters.hasCrossfade || property.hasTransition() ||
                                       (parameters.zoomChanged && (getDependencies(property) & Dependency::Zoom));
             return needEvaluate ? property.evaluate(Evaluator(parameters, P::defaultValue()), parameters.now)
                                 : oldResult;
-#else
-            return property.evaluate(Evaluator(parameters, P::defaultValue()), parameters.now);
-#endif // MLN_RENDER_BACKEND_METAL
         }
 
         /// Optionally evaluate each property or produce a copy of the previous value, if appropriate.
