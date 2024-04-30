@@ -9,7 +9,6 @@
     ],
     "metric_path": "linux-gcc8-release",
     "probes": [
-        "probeGFX",
         "probeNetwork"
     ]
 }
