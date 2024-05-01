@@ -145,7 +145,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     }
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
 
-    // TODO: Consider dependencies, update only when necessary
     layerUniforms.set(idLineEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
 #if MLN_RENDER_BACKEND_METAL

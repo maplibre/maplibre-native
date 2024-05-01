@@ -105,7 +105,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto width    = unpack_mix_float(vertx.width, interp.width_t);
 #endif
 
-    // the distance over which the line edge fades out.e
+    // the distance over which the line edge fades out.
     // Retina devices need a smaller distance to avoid aliasing.
     const float ANTIALIASING = 1.0 / DEVICE_PIXEL_RATIO / 2.0;
 
