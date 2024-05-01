@@ -33,7 +33,7 @@ constexpr bool diff(Color actual, Color expected, float e = 1.0e-6) {
 }
 #endif // MLN_RENDER_BACKEND_METAL
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL && !defined(NDEBUG)
 template <typename Result>
 std::optional<Result> LineLayerTweaker::gpuEvaluate(const LinePaintProperties::PossiblyEvaluated& evaluated,
                                                     const PaintParameters& parameters,
@@ -52,7 +52,7 @@ template <typename Property>
 auto LineLayerTweaker::evaluate([[maybe_unused]] const PaintParameters& parameters) const {
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL && !defined(NDEBUG)
     constexpr auto index = propertyIndex<Property>();
     if (auto gpuValue = gpuEvaluate<typename Property::Type>(evaluated, parameters, index)) {
         assert(!diff(*gpuValue, evaluated.get<Property>().constantOr(Property::defaultValue())));
@@ -73,7 +73,7 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
 #if MLN_RENDER_BACKEND_METAL
     const auto getExpressionBuffer = [&]() {
-        const bool enableEval = (parameters.debugOptions & MapDebugOptions::GPUEval);
+        const bool enableEval = gfx::Backend::getEnableGPUExpressionEval();
         if (!expressionUniformBuffer || (gpuExpressionsUpdated && enableEval)) {
             LineExpressionUBO exprUBO = {
                 /* color = */ enableEval ? gpuExpressions[propertyIndex<LineColor>()].get() : nullptr,
@@ -93,9 +93,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
     if (!evaluatedPropsUniformBuffer || propertiesUpdated) {
 #if MLN_RENDER_BACKEND_METAL
-        const bool enableEval = (parameters.debugOptions & MapDebugOptions::GPUEval);
         expressionMask =
-            !enableEval
+            !gfx::Backend::getEnableGPUExpressionEval()
                 ? LineExpressionMask::None
                 : ((gpuExpressions[propertyIndex<LineColor>()] ? LineExpressionMask::Color : LineExpressionMask::None) |
                    (gpuExpressions[propertyIndex<LineBlur>()] ? LineExpressionMask::Blur : LineExpressionMask::None) |
@@ -261,11 +260,13 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
 
 #if MLN_RENDER_BACKEND_METAL
 void LineLayerTweaker::updateGPUExpressions(const Unevaluated& unevaluated, TimePoint now) {
-    if (unevaluated.updateGPUExpressions(gpuExpressions, now)) {
-        gpuExpressionsUpdated = true;
+    if (gfx::Backend::getEnableGPUExpressionEval()) {
+        if (unevaluated.updateGPUExpressions(gpuExpressions, now)) {
+            gpuExpressionsUpdated = true;
 
-        // Masks also need to be updated
-        propertiesUpdated = true;
+            // Masks also need to be updated
+            propertiesUpdated = true;
+        }
     }
 }
 

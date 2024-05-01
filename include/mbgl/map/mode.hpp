@@ -43,7 +43,6 @@ enum class MapDebugOptions : EnumType {
     Overdraw = 1 << 5,
     StencilClip = 1 << 6,
     DepthBuffer = 1 << 7,
-    GPUEval = 1 << 8,
 };
 
 constexpr MapDebugOptions operator|(MapDebugOptions lhs, MapDebugOptions rhs) {
