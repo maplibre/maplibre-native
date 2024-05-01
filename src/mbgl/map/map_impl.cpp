@@ -32,7 +32,9 @@ void logStyleDependencies(EventSeverity severity, Event event, const style::Styl
     ss << "Style '" << style.getName() << "' has " << layers.size() << " layers:\n";
     ss << "  " << Dependency::None << ": " << counts[0] << "\n";
     for (size_t i = 0; i < maskCount; ++i) {
-        ss << "  " << Dependency{1u << i} << ": " << counts[i + 1] << "\n";
+        if (counts[i + 1]) {
+            ss << "  " << Dependency{1u << i} << ": " << counts[i + 1] << "\n";
+        }
     }
     Log::Record(severity, event, ss.str());
 }
