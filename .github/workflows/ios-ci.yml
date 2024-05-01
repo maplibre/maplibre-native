@@ -77,9 +77,6 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
-      - name: Ensure Bazel Idle
-        run: timeout -k 10 60 bazel shutdown || killall -vqz bazel
-
       - name: Check debug symbols
         run: bazel run //platform:check-public-symbols --//:renderer=metal
 
