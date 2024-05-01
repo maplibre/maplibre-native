@@ -24,6 +24,7 @@ jobs:
 
       - name: Check if version is published
         id: check
+        working-directory: platform/node
         run: |
           currentVersion="$( node -e "console.log(require('./package.json').version)" )"
           isPublished="$( npm view @maplibre/maplibre-gl-native versions --json | jq -c --arg cv "$currentVersion" 'any(. == $cv)' )"
@@ -119,6 +120,7 @@ jobs:
           node-version-file: '.nvmrc'
 
       - name: npm ci
+        working-directory: platform/node
         run: npm ci --ignore-scripts
 
       - name: Set up msvc dev cmd (Windows)
@@ -231,21 +233,23 @@ jobs:
 
       - name: Publish X64 Release to Github
         if: matrix.arch == 'x86_64'
+        working-directory: platform/node
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
           NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./platform/node/scripts/publish.sh
+          ./scripts/publish.sh
 
       - name: Publish ARM Release to Github
         if: matrix.arch == 'arm64'
+        working-directory: platform/node
         env:
           PUBLISH: true
           BUILDTYPE: RelWithDebInfo
           NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./platform/node/scripts/publish.sh --target_arch=arm64
+          ./scripts/publish.sh --target_arch=arm64
 
   publish_npm:
     runs-on: ubuntu-latest
@@ -271,6 +275,7 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@v1.3.1
 
       - name: npm ci
+        working-directory: platform/node
         run: npm ci --ignore-scripts
 
       - name: Prepare release
@@ -303,6 +308,7 @@ jobs:
 
       - name: Publish to NPM (release)
         if: ${{ steps.prepare_release.outputs.prerelease == 'false' }}
+        working-directory: platform/node
         run: |
           npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --access public
@@ -311,6 +317,7 @@ jobs:
 
       - name: Publish to NPM (prerelease)
         if: ${{ steps.prepare_release.outputs.prerelease == 'true' }}
+        working-directory: platform/node
         run: |
           npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --tag next --access public
