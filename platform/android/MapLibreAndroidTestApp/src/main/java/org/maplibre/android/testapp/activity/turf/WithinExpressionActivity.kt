@@ -240,6 +240,7 @@ class WithinExpressionActivity : AppCompatActivity() {
     )
     
     private fun bufferLineStringGeometry(coordinates: List<Point>): Polygon {
+        // TODO replace static data by Turf#Buffer: mapbox-java/issues/987
         return Polygon.fromLngLats(listOf(coordinates))
     }
 
