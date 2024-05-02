@@ -2,7 +2,6 @@ package org.maplibre.android.testapp.activity.turf
 
 import android.graphics.Color
 import android.os.*
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
 import org.maplibre.geojson.*
@@ -118,7 +117,9 @@ class WithinExpressionActivity : AppCompatActivity() {
                         mapView.addOnDidBecomeIdleListener(object : MapView.OnDidBecomeIdleListener {
                             override fun onDidBecomeIdle() {
                                 handler.postDelayed(Runnable {
-                                    val shuffledGeometry = bufferLineStringGeometry(outlineCoordinates.shuffled())
+                                    // Duplicate each point and then shuffle to allow for degenerate cases
+                                    val points = outlineCoordinates.flatMap { listOf(it,it,it) }.shuffled()
+                                    val shuffledGeometry = bufferLineStringGeometry(points)
                                     val features = FeatureCollection.fromFeature(Feature.fromGeometry(shuffledGeometry))
                                     bufferedLineSource?.setGeoJson(features)
                                     symbolLayer?.setFilter(within(shuffledGeometry))
