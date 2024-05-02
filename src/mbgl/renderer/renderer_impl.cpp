@@ -377,8 +377,9 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
         for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
             parameters.currentLayer = i;
-            if (it->hasRenderPass(parameters.pass)) {
-                it->render(parameters);
+            const RenderItem& item = *it;
+            if (item.hasRenderPass(parameters.pass)) {
+                item.render(parameters);
             }
         }
     };
