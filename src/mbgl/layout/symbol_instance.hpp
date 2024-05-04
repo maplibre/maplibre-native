@@ -66,7 +66,7 @@ public:
                    float iconBoxScale,
                    float iconPadding,
                    const std::array<float, 2>& iconOffset,
-                   const IndexedSubfeature& indexedFeature,
+                   const RefIndexedSubfeature& indexedFeature,
                    std::size_t layoutFeatureIndex,
                    std::size_t dataFeatureIndex,
                    std::u16string key,

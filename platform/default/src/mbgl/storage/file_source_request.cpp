@@ -24,7 +24,7 @@ void FileSourceRequest::onCancel(std::function<void()>&& callback) {
 void FileSourceRequest::setResponse(const Response& response) {
     // Copy, because calling the callback will sometimes self
     // destroy this object. We cannot move because this method
-    // can be called more than one.
+    // can be called more than once.
     auto callback = responseCallback;
     callback(response);
 }

@@ -142,7 +142,7 @@ void GridIndex<T>::insert(T&& t, const BBox& bbox) {
         }
     }
 
-    boxElements.emplace_back(t, bbox);
+    boxElements.emplace_back(std::move(t), bbox);
 }
 
 template <class T>
@@ -165,7 +165,7 @@ void GridIndex<T>::insert(T&& t, const BCircle& bcircle) {
         }
     }
 
-    circleElements.emplace_back(t, bcircle);
+    circleElements.emplace_back(std::move(t), bcircle);
 }
 
 template <class T>

@@ -10,7 +10,7 @@ SymbolInstance makeSymbolInstance(float x, float y, std::u16string key) {
     ImageMap imageMap;
     const ShapedTextOrientations shaping{};
     style::SymbolLayoutProperties::Evaluated layout_;
-    IndexedSubfeature subfeature(0, "", "", 0);
+    IndexedSubfeature subfeature(0, {}, {}, 0);
     Anchor anchor(x, y, 0, 0);
     std::array<float, 2> textOffset{{0.0f, 0.0f}};
     std::array<float, 2> iconOffset{{0.0f, 0.0f}};
