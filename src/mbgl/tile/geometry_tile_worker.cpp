@@ -441,10 +441,9 @@ void GeometryTileWorker::parse() {
     requestNewImages(imageDependencies);
 
     MBGL_TIMING_FINISH(watch,
-                       " Action: "
-                           << "Parsing,"
-                           << " SourceID: " << sourceID.c_str() << " Canonical: " << static_cast<int>(id.canonical.z)
-                           << "/" << id.canonical.x << "/" << id.canonical.y << " Time");
+                       " Action: " << "SymbolLayout," << " SourceID: " << sourceID.c_str()
+                                   << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
+                                   << id.canonical.y << " Time");
     finalizeLayout();
 }
 
