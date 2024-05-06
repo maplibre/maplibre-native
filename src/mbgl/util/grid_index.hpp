@@ -103,9 +103,8 @@ private:
     std::vector<std::pair<T, BBox>> boxElements;
     std::vector<std::pair<T, BCircle>> circleElements;
 
-    using uid_t = uint32_t;
-    std::vector<std::vector<uid_t>> boxCells;
-    std::vector<std::vector<uid_t>> circleCells;
+    std::vector<std::vector<uint32_t>> boxCells;
+    std::vector<std::vector<uint32_t>> circleCells;
 };
 
 template <class T>
@@ -124,8 +123,8 @@ GridIndex<T>::GridIndex(const float width_, const float height_, const uint32_t 
 
 template <class T>
 void GridIndex<T>::insert(T&& t, const BBox& bbox) {
-    assert(boxElements.size() < std::numeric_limits<uid_t>::max());
-    const auto uid = static_cast<uid_t>(boxElements.size());
+    assert(boxElements.size() < std::numeric_limits<uint32_t>::max());
+    const auto uid = static_cast<uint32_t>(boxElements.size());
 
     const auto cx1 = convertToXCellCoord(bbox.min.x);
     const auto cy1 = convertToYCellCoord(bbox.min.y);
@@ -147,8 +146,8 @@ void GridIndex<T>::insert(T&& t, const BBox& bbox) {
 
 template <class T>
 void GridIndex<T>::insert(T&& t, const BCircle& bcircle) {
-    assert(circleElements.size() < std::numeric_limits<uid_t>::max());
-    const auto uid = static_cast<uid_t>(circleElements.size());
+    assert(circleElements.size() < std::numeric_limits<uint32_t>::max());
+    const auto uid = static_cast<uint32_t>(circleElements.size());
 
     const auto cx1 = convertToXCellCoord(bcircle.center.x - bcircle.radius);
     const auto cy1 = convertToYCellCoord(bcircle.center.y - bcircle.radius);
@@ -234,8 +233,8 @@ typename GridIndex<T>::BBox GridIndex<T>::convertToBox(const BCircle& circle) co
 
 template <class T>
 void GridIndex<T>::query(const BBox& queryBBox, std::function<bool(const T&, const BBox&)> resultFn) const {
-    std::unordered_set<uid_t> seenBoxes;
-    std::unordered_set<uid_t> seenCircles;
+    std::unordered_set<uint32_t> seenBoxes;
+    std::unordered_set<uint32_t> seenCircles;
 
     if (noIntersection(queryBBox)) {
         return;
