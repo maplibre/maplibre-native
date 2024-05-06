@@ -369,6 +369,19 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
             layerGroup.render(orchestrator, parameters);
         });
+
+        // Finally, render any legacy layers which have not been converted to drawables.
+        // Note that they may be out of order, this is just a temporary fix for `RenderLocationIndicatorLayer` (#2216)
+        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * PaintParameters::numSublayers *
+                                            PaintParameters::depthEpsilon;
+        int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
+        for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
+            parameters.currentLayer = i;
+            const RenderItem& item = *it;
+            if (item.hasRenderPass(parameters.pass)) {
+                item.render(parameters);
+            }
+        }
     };
 #endif
 
