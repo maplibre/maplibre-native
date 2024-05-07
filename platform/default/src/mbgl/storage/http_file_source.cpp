@@ -204,6 +204,12 @@ int HTTPFileSource::Impl::handleSocket(
                 static_cast<int>(s), util::RunLoop::Event::Write, std::bind(&Impl::perform, context, _1, _2));
             break;
         }
+        case CURL_POLL_INOUT: {
+            using namespace std::placeholders;
+            util::RunLoop::Get()->addWatch(
+                static_cast<int>(s), util::RunLoop::Event::ReadWrite, std::bind(&Impl::perform, context, _1, _2));
+            break;
+        }
         case CURL_POLL_REMOVE:
             util::RunLoop::Get()->removeWatch(static_cast<int>(s));
             break;
