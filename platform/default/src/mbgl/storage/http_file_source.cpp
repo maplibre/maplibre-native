@@ -297,7 +297,7 @@ HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, Fil
 #else
     handleError(curl_easy_setopt(handle, CURLOPT_ENCODING, "gzip, deflate"));
 #endif
-    handleError(curl_easy_setopt(handle, CURLOPT_USERAGENT, "MapboxGL/1.0"));
+    handleError(curl_easy_setopt(handle, CURLOPT_USERAGENT, "MapLibreNative/1.0"));
     handleError(curl_easy_setopt(handle, CURLOPT_SHARE, context->share));
 
     // Start requesting the information.

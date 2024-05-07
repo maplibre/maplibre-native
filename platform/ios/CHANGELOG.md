@@ -4,6 +4,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+- Update user agent from Mapbox to MapLibreNative.
+
 ## 6.4.0
 
 - User-Agent in network requests can now be changed via `MLNNativeNetworkManager.sharedManager.sessionConfiguration` ([#2293](https://github.com/maplibre/maplibre-native/pull/2293)).
