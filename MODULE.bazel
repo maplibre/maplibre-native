@@ -12,7 +12,6 @@ npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
 npm.npm_translate_lock(
     name = "npm",
     data = ["package.json"],
-    npm_package_lock = "//:package-lock.json",
     pnpm_lock = "//:pnpm-lock.yaml",
     update_pnpm_lock = True,
 )

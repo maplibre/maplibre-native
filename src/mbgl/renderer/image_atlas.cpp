@@ -46,15 +46,18 @@ namespace {
 void populateImagePatches(ImagePositions& imagePositions,
                           const ImageManager& imageManager,
                           std::vector<ImagePatch>& /*out*/ patches) {
+    if (imagePositions.empty()) {
+        imagePositions.reserve(imageManager.updatedImageVersions.size());
+    }
     for (auto& updatedImageVersion : imageManager.updatedImageVersions) {
         const std::string& name = updatedImageVersion.first;
         const uint32_t version = updatedImageVersion.second;
-        auto it = imagePositions.find(updatedImageVersion.first);
+        const auto it = imagePositions.find(updatedImageVersion.first);
         if (it != imagePositions.end()) {
             auto& position = it->second;
             if (position.version == version) continue;
 
-            auto updatedImage = imageManager.getSharedImage(name);
+            const auto updatedImage = imageManager.getSharedImage(name);
             if (updatedImage == nullptr) continue;
 
             patches.emplace_back(*updatedImage, position.paddedRect);
@@ -72,28 +75,30 @@ std::vector<ImagePatch> ImageAtlas::getImagePatchesAndUpdateVersions(const Image
     return imagePatches;
 }
 
-ImageAtlas makeImageAtlas(const ImageMap& icons,
-                          const ImageMap& patterns,
-                          const std::unordered_map<std::string, uint32_t>& versionMap) {
+ImageAtlas makeImageAtlas(const ImageMap& icons, const ImageMap& patterns, const ImageVersionMap& versionMap) {
     ImageAtlas result;
 
     mapbox::ShelfPack::ShelfPackOptions options;
     options.autoResize = true;
     mapbox::ShelfPack pack(0, 0, options);
 
+    result.iconPositions.reserve(icons.size());
+
     for (const auto& entry : icons) {
         const style::Image::Impl& image = *entry.second;
         const mapbox::Bin& bin = _packImage(pack, image, result, ImageType::Icon);
-        auto it = versionMap.find(entry.first);
-        auto version = it != versionMap.end() ? it->second : 0;
+        const auto it = versionMap.find(entry.first);
+        const auto version = it != versionMap.end() ? it->second : 0;
         result.iconPositions.emplace(image.id, ImagePosition{bin, image, version});
     }
+
+    result.patternPositions.reserve(patterns.size());
 
     for (const auto& entry : patterns) {
         const style::Image::Impl& image = *entry.second;
         const mapbox::Bin& bin = _packImage(pack, image, result, ImageType::Pattern);
-        auto it = versionMap.find(entry.first);
-        auto version = it != versionMap.end() ? it->second : 0;
+        const auto it = versionMap.find(entry.first);
+        const auto version = it != versionMap.end() ? it->second : 0;
         result.patternPositions.emplace(image.id, ImagePosition{bin, image, version});
     }
 

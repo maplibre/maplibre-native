@@ -45,6 +45,8 @@ public:
 
     bool isReleased() const { return released; }
 
+    void reserve(std::size_t count) { v.reserve(count); }
+
     void extend(std::size_t n, const uint16_t val) {
         assert(!released);
         v.resize(v.size() + n, val);

@@ -5,6 +5,7 @@
 
 #include <map>
 #include <mutex>
+#include <set>
 #include <string>
 
 namespace mbgl {

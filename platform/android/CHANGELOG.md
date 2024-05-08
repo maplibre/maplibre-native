@@ -4,6 +4,8 @@
 
 ### ✨ Features and improvements
 
+- Update user agent from Mapbox to MapLibreNative.
+
 ### 🐞 Bug fixes
 
 ## 11.0.0
