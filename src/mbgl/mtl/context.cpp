@@ -303,7 +303,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         return false;
     }
 
-    const auto& mtlShader = static_cast<const mtl::ShaderProgram&>(*clipMaskShader);
+    auto& mtlShader = static_cast<mtl::ShaderProgram&>(*clipMaskShader);
     auto& mtlRenderPass = static_cast<mtl::RenderPass&>(renderPass);
     const auto& encoder = mtlRenderPass.getMetalEncoder();
     const auto colorMode = gfx::ColorMode::disabled();
