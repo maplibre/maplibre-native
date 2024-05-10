@@ -63,19 +63,22 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float segment_angle = -vertx.projected_pos[2];
 
-    float size;
-    if (!tileprops.is_size_zoom_constant && !tileprops.is_size_feature_constant) {
+    const bool isText = (tileprops.flags & SymbolTileFlags::IsText);
+    const bool pitchWithMap = (tileprops.flags & SymbolTileFlags::PitchWithMap);
+    const bool isSizeZoomConstant = (tileprops.flags & SymbolTileFlags::IsSizeZoomConstant);
+    const bool isSizeFeatureConstant = (tileprops.flags & SymbolTileFlags::IsSizeFeatureConstant);
+
+    float size = tileprops.size;
+    if (!isSizeZoomConstant && !isSizeFeatureConstant) {
         size = mix(a_size_min, a_size[1], tileprops.size_t) / 128.0;
-    } else if (tileprops.is_size_zoom_constant && !tileprops.is_size_feature_constant) {
+    } else if (isSizeZoomConstant && !isSizeFeatureConstant) {
         size = a_size_min / 128.0;
-    } else {
-        size = tileprops.size;
     }
 
     const float4 projectedPoint = drawable.matrix * float4(a_pos, 0, 1);
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
-    const float distance_ratio = tileprops.pitch_with_map ?
+    const float distance_ratio = pitchWithMap ?
         camera_to_anchor_distance / paintParams.camera_to_center_distance :
         paintParams.camera_to_center_distance / camera_to_anchor_distance;
     const float perspective_ratio = clamp(
@@ -85,7 +88,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     size *= perspective_ratio;
 
-    const float fontScale = tileprops.is_text ? size / 24.0 : size;
+    const float fontScale = isText ? size / 24.0 : size;
 
     float symbol_rotation = 0.0;
     if (drawable.rotate_symbol) {
@@ -131,7 +134,8 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #endif
 
 #if defined(HAS_UNIFORM_u_opacity)
-    const float opacity = (tileprops.is_text ? props.text_opacity : props.icon_opacity) * in.fade_opacity;
+    const bool isText = (tileprops.flags & SymbolTileFlags::IsText);
+    const float opacity = (isText ? props.text_opacity : props.icon_opacity) * in.fade_opacity;
 #else
     const float opacity = in.opacity; // fade_opacity is baked in for this case
 #endif

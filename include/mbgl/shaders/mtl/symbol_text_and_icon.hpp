@@ -91,10 +91,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
     const float segment_angle = -vertx.projected_pos[2];
 
+    const bool pitchWithMap = (tileprops.flags & SymbolTileFlags::PitchWithMap);
+    const bool isSizeZoomConstant = (tileprops.flags & SymbolTileFlags::IsSizeZoomConstant);
+    const bool isSizeFeatureConstant = (tileprops.flags & SymbolTileFlags::IsSizeFeatureConstant);
+
     float size;
-    if (!tileprops.is_size_zoom_constant && !tileprops.is_size_feature_constant) {
+    if (!isSizeZoomConstant && !isSizeFeatureConstant) {
         size = mix(a_size_min, a_size[1], tileprops.size_t) / 128.0;
-    } else if (tileprops.is_size_zoom_constant && !tileprops.is_size_feature_constant) {
+    } else if (isSizeZoomConstant && !isSizeFeatureConstant) {
         size = a_size_min / 128.0;
     } else {
         size = tileprops.size;
@@ -108,7 +112,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     // If the label isn't pitched with the map, we do layout in viewport space,
     // which makes labels in the distance larger relative to the features around
     // them. We counteract part of that effect by dividing by the perspective ratio.
-    const float distance_ratio = tileprops.pitch_with_map ?
+    const float distance_ratio = pitchWithMap ?
         camera_to_anchor_distance / paintParams.camera_to_center_distance :
         paintParams.camera_to_center_distance / camera_to_anchor_distance;
     const float perspective_ratio = clamp(
@@ -185,28 +189,32 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     return half4(1.0);
 #endif
 
+    const bool isText = (tileprops.flags & SymbolTileFlags::IsText);
+    const bool doFill = (tileprops.flags & SymbolTileFlags::DoFill);
+    const bool doHalo = (tileprops.flags & SymbolTileFlags::DoHalo);
+
 #if defined(HAS_UNIFORM_u_fill_color)
-    const half4 fill_color = half4(tileprops.is_text ? props.text_fill_color : props.icon_fill_color);
+    const half4 fill_color = half4(isText ? props.text_fill_color : props.icon_fill_color);
 #else
     const half4 fill_color = in.fill_color;
 #endif
 #if defined(HAS_UNIFORM_u_halo_color)
-    const half4 halo_color = half4(tileprops.is_text ? props.text_halo_color : props.icon_halo_color);
+    const half4 halo_color = half4(isText ? props.text_halo_color : props.icon_halo_color);
 #else
     const half4 halo_color = in.halo_color;
 #endif
 #if defined(HAS_UNIFORM_u_opacity)
-    const half opacity = half(tileprops.is_text ? props.text_opacity : props.icon_opacity);
+    const half opacity = half(isText ? props.text_opacity : props.icon_opacity);
 #else
     const half opacity = in.opacity;
 #endif
 #if defined(HAS_UNIFORM_u_halo_width)
-    const half halo_width = half(tileprops.is_text ? props.text_halo_width : props.icon_halo_width);
+    const half halo_width = half(isText ? props.text_halo_width : props.icon_halo_width);
 #else
     const half halo_width = in.halo_width;
 #endif
 #if defined(HAS_UNIFORM_u_halo_blur)
-    const half halo_blur = half(tileprops.is_text ? props.text_halo_blur : props.icon_halo_blur);
+    const half halo_blur = half(isText ? props.text_halo_blur : props.icon_halo_blur);
 #else
     const half halo_blur = in.halo_blur;
 #endif
@@ -217,15 +225,27 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     }
 
     const float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
-    const half4 color = tileprops.is_halo ? halo_color : fill_color;
     const float fontGamma = in.fontScale * drawable.gamma_scale;
-    const float gamma = ((tileprops.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
-    const float buff = tileprops.is_halo ? (6.0 - halo_width / in.fontScale) / SDF_PX : (256.0 - 64.0) / 256.0;
-    const float dist = glyph_image.sample(glyph_sampler, float2(in.tex)).a;
-    const float gamma_scaled = gamma * in.gamma_scale;
-    const float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
 
-    return half4(color * (alpha * opacity * in.fade_opacity));
+    const float fillGamma = in.gamma_scale * EDGE_GAMMA / fontGamma;
+    const float haloGamma = in.gamma_scale * ((halo_blur * 1.19 / SDF_PX) + EDGE_GAMMA) / fontGamma;
+
+    const float fillBuff = (256.0 - 64.0) / 256.0;
+    const float haloBuff = (6.0 - halo_width / in.fontScale) / SDF_PX;
+
+    const float dist = glyph_image.sample(glyph_sampler, float2(in.tex)).a;
+
+    const float fillAlpha = doFill ? smoothstep(fillBuff - fillGamma, fillBuff + fillGamma, dist) * opacity * in.fade_opacity : 0.0;
+    const float haloAlpha = doHalo ? smoothstep(haloBuff - haloGamma, haloBuff + haloGamma, dist) * opacity * in.fade_opacity : 0.0;
+
+    const bool reallyFill = doFill && fillAlpha > 0;
+    const bool reallyHalo = doHalo && haloAlpha > 0 && fillAlpha < 1;
+
+    return (reallyFill && reallyHalo) ?
+        composite_color(halo_color, haloAlpha, fill_color, fillAlpha) :
+        reallyFill ? fill_color * fillAlpha :
+        reallyHalo ? halo_color * haloAlpha :
+        half4(0);
 }
 )";
 };

@@ -146,17 +146,26 @@ struct alignas(16) SymbolDrawableUBO {
 };
 static_assert(sizeof(SymbolDrawableUBO) == 14 * 16, "unexpected padding");
 
-struct alignas(16) SymbolTilePropsUBO {
-    /*bool*/ int is_text;
-    /*bool*/ int is_halo;
-    /*bool*/ int pitch_with_map;
-    /*bool*/ int is_size_zoom_constant;
-    /*bool*/ int is_size_feature_constant;
-    float size_t;
-    float size;
-    float padding;
+enum class SymbolTileFlags : uint32_t {
+    None = 0,
+    IsText = 1 << 0,
+    DoFill = 1 << 1,
+    DoHalo = 1 << 2,
+    PitchWithMap = 1 << 3,
+    IsSizeZoomConstant = 1 << 4,
+    IsSizeFeatureConstant = 1 << 5,
 };
-static_assert(sizeof(SymbolTilePropsUBO) == 2 * 16, "unexpected padding");
+bool operator&(SymbolTileFlags a, SymbolTileFlags b) { return (uint32_t)a & (uint32_t)b; }
+
+/// Evaluated properties that depend on the tile
+struct alignas(16) SymbolTilePropsUBO {
+    /*  0 */ SymbolTileFlags flags;
+    /*  4 */ float size_t;
+    /*  8 */ float size;
+    /* 12 */ float padding;
+    /* 16 */
+};
+static_assert(sizeof(SymbolTilePropsUBO) == 1 * 16, "unexpected padding");
 
 struct alignas(16) SymbolInterpolateUBO {
     float fill_color_t;
@@ -189,6 +198,19 @@ inline float2 get_pattern_pos(const float2 pixel_coord_upper, const float2 pixel
                      const float2 pattern_size, const float tile_units_to_pixels, const float2 pos) {
     const float2 offset = glMod(glMod(glMod(pixel_coord_upper, pattern_size) * 256.0, pattern_size) * 256.0 + pixel_coord_lower, pattern_size);
     return (tile_units_to_pixels * pos + offset) / pattern_size;
+}
+
+// Approximate the result of rendering `base` and then `overlay` with a single value
+float4 composite_color(float4 base, float baseAlpha, float4 overlay, float overlayAlpha) {
+    const float4 color = mix(base * baseAlpha, overlay, overlayAlpha) / (1 - (1 - baseAlpha) * (1 - overlayAlpha));
+    const float alpha = 1 - (1 - baseAlpha) * (1 - overlayAlpha);
+    return color * alpha;
+}
+
+half4 composite_color(half4 base, half baseAlpha, half4 overlay, half overlayAlpha) {
+    const half4 color = mix(base * baseAlpha, overlay, overlayAlpha) / (1 - (1 - baseAlpha) * (1 - overlayAlpha));
+    const half alpha = 1 - (1 - baseAlpha) * (1 - overlayAlpha);
+    return color * alpha;
 }
 
 )";

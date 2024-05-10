@@ -21,19 +21,25 @@ struct alignas(16) SymbolDrawableUBO {
 };
 static_assert(sizeof(SymbolDrawableUBO) == 14 * 16);
 
+enum class SymbolTileFlags : uint32_t {
+    None = 0,
+    IsText = 1 << 0,
+    DoFill = 1 << 1,
+    DoHalo = 1 << 2,
+    PitchWithMap = 1 << 3,
+    IsSizeZoomConstant = 1 << 4,
+    IsSizeFeatureConstant = 1 << 5,
+};
+
 /// Evaluated properties that depend on the tile
 struct alignas(16) SymbolTilePropsUBO {
-    /*  0 */ /*bool*/ int is_text;
-    /*  4 */ /*bool*/ int is_halo;
-    /*  8 */ /*bool*/ int pitch_with_map;
-    /* 12 */ /*bool*/ int is_size_zoom_constant;
-    /* 16 */ /*bool*/ int is_size_feature_constant;
-    /* 20 */ float size_t;
-    /* 24 */ float size;
-    /* 28 */ float padding;
-    /* 32 */
+    /*  0 */ SymbolTileFlags flags;
+    /*  4 */ float size_t;
+    /*  8 */ float size;
+    /* 12 */ float padding;
+    /* 16 */
 };
-static_assert(sizeof(SymbolTilePropsUBO) == 2 * 16);
+static_assert(sizeof(SymbolTilePropsUBO) == 1 * 16);
 
 /// Attribute interpolations
 struct alignas(16) SymbolInterpolateUBO {
