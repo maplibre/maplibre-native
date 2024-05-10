@@ -21,8 +21,8 @@ struct SymbolDrawableData : public DrawableData {
                        const style::AlignmentType rotationAlignment_,
                        const style::SymbolPlacementType placement_,
                        const style::IconTextFitType textFit_)
-        : doHalo(doHalo_),
-          doFill(doFill_),
+        : doFill(doFill_),
+          doHalo(doHalo_),
           bucketVariablePlacement(bucketVariablePlacement_),
           symbolType(symbolType_),
           pitchAlignment(pitchAlignment_),
