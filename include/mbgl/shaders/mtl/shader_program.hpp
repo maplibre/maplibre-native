@@ -87,7 +87,7 @@ protected:
     VertexAttributeArray vertexAttributes;
     VertexAttributeArray instanceAttributes;
     std::array<std::optional<size_t>, shaders::maxTextureCountPerShader> textureBindings;
-    
+
     MTLRenderPipelineStatePtr renderPipelineStateCache;
 };
 
