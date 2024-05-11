@@ -46,19 +46,11 @@ jobs:
         run: |
           echo "One or more iOS file(s) has changed."
           echo "List of changes: ${{ steps.changed-files-yaml.outputs.ios_all_changed_files }}"
-      
+
   ios-build:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
     runs-on: [self-hosted, macOS, ARM64]
-    concurrency:
-      # cancel jobs on PRs only
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
-    env:
-      BUILDTYPE: Debug
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      HOMEBREW_NO_INSTALL_CLEANUP: 1
     defaults:
       run:
         working-directory: platform/ios
@@ -85,6 +77,48 @@ jobs:
 
       - name: Running iOS tests
         run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=metal
+
+      - name: Build DocC documentation
+        working-directory: .
+        run: |
+          HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
+
+      - name: Deploy DocC documentation (main) 🚀
+        if: github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4.6.0
+        with:
+          branch: gh-pages
+          folder: build/docs
+          target-folder: ios/latest/
+
+  ios-self-hosted-build:
+    needs: pre_job
+    if: needs.pre_job.outputs.should_skip != 'true'
+    runs-on: [self-hosted, macOS, ARM64]
+    concurrency:
+      # cancel jobs on PRs only
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+    defaults:
+      run:
+        working-directory: platform/ios
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Cache Bazel
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+          path: ~/.cache/bazel
 
       # tsan run fails with 'Interceptors are not working. This may be because ThreadSanitizer is loaded too late...'
       #- name: Running iOS UI tests (Thread Sanitizer)
@@ -185,22 +219,11 @@ jobs:
       - if: github.event_name == 'pull_request'
         uses: ./.github/actions/save-pr-number
 
-      - name: Build DocC documentation
-        working-directory: .
-        run: |
-          HOSTING_BASE_PATH="maplibre-native/ios/latest" platform/ios/scripts/docc.sh
-
-      - name: Deploy DocC documentation (main) 🚀
-        if: github.ref == 'refs/heads/main'
-        uses: JamesIves/github-pages-deploy-action@v4.6.0
-        with:
-          branch: gh-pages
-          folder: build/docs
-          target-folder: ios/latest/
-
   ios-release:
     runs-on: macos-14
-    needs: ios-build
+    needs:
+      - ios-build
+      - ios-self-hosted-build
     if: github.ref == 'refs/heads/main'
     defaults:
       run:
