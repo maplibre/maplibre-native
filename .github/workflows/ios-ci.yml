@@ -50,7 +50,7 @@ jobs:
   ios-build:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
-    runs-on: [self-hosted, macOS, ARM64]
+    runs-on: macos-14
     defaults:
       run:
         working-directory: platform/ios
