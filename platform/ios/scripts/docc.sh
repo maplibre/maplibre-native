@@ -4,7 +4,7 @@
 # https://github.com/bazelbuild/rules_apple/issues/2241
 # To use this script, make sure the XCFramework is built with Bazel (see ios-ci.yml).
 # Then to start a local preview, run:
-# $ platform/ios/scripts/docc.sh bazel
+# $ platform/ios/scripts/docc.sh preview
 # You can also build the documentation locally
 # $ platform/ios/scripts/docc.sh
 # Then go to build/MapLibre.doccarchive and run
@@ -30,6 +30,23 @@ mkdir -p "$build_dir"/symbol-graphs
 mkdir -p "$build_dir"/headers
 
 bazel build --//:renderer=metal //platform/darwin:generated_style_public_hdrs
+
+# download resources from S3
+
+resources=(
+  "AddPackageDependencies@2x.png"
+  "DemotilesScreenshot@2x.png"
+)
+
+destination_dir="platform/ios/MapLibre.docc/Resources"
+
+for file in "${resources[@]}"; do
+  if [[ ! -f "$destination_dir/$file" ]]; then
+    aws s3 cp --no-sign-request "s3://maplibre-native/ios-documentation-resources/$file" "$destination_dir"
+  else
+    echo "Skipped: $file already exists in the destination directory"
+  fi
+done
 
 public_headers=$(bazel query 'kind("source file", deps(//platform:ios-sdk, 2))' --output location | grep ".h$" | sed -r 's#.*/([^:]+).*#\1#')
 style_headers=$(bazel cquery --//:renderer=metal //platform/darwin:generated_style_public_hdrs --output=files)
