@@ -10,15 +10,15 @@ You need to have [aws-cli](https://github.com/aws/aws-cli) installed to download
 
 ## Resources
 
-Resources like images should not be checked in but should be uploaded to the [S3 Bucket](https://eu-central-1.console.aws.amazon.com/s3/buckets/maplibre-native?region=eu-central-1&bucketType=general&prefix=ios-documentation-resources/&showversions=false). Log in as the `maplibre` IAM User. Enter the following details:
+Resources like images should not be checked in but should be uploaded to the [S3 Bucket](https://s3.eu-central-1.amazonaws.com/maplibre-native/index.html#ios-documentation-resources/). You can share a `.zip` with all files that should be added in the PR.
 
-| Field          | Value    |
-|----------------|----------|
-| Account ID     | maplibre |
-| IAM user name  | maplibre |
-| Password       | maplibre |
+If you want to get direct access you need an AWS account to get permissions to upload files. Create an account and authenticate with aws-cli. Share account's ARN that you can get with
 
-Upload the needed resources and add the filenames to the `resources` array in `platform/ios/scripts/docc.sh`.
+```
+aws sts get-caller-identity
+```
+
+When the needed resources are uploaded the filenames need to be added to the `resources` array in `platform/ios/scripts/docc.sh`.
 
 ```bash
 resources=(

@@ -42,7 +42,7 @@ destination_dir="platform/ios/MapLibre.docc/Resources"
 
 for file in "${resources[@]}"; do
   if [[ ! -f "$destination_dir/$file" ]]; then
-    aws s3 cp "s3://maplibre-native/ios-documentation-resources/$file" "$destination_dir"
+    aws s3 cp --no-sign-request "s3://maplibre-native/ios-documentation-resources/$file" "$destination_dir"
   else
     echo "Skipped: $file already exists in the destination directory"
   fi
