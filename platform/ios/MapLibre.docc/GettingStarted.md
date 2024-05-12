@@ -30,25 +30,28 @@ import MapLibre
 
 To use MapLibre with SwiftUI we need to create a wrapper for the UIKit view that MapLibre provides (using UIViewRepresentable. The simplest way to implement this protocol is as follows:
 
-```swift
-struct MapLibreMapView: UIViewRepresentable {
+<!-- include-example(SimpleMapView) -->
 
-    func makeUIView(context: Context) -> MLNMapView {
+```swift
+struct SimpleMapView: UIViewRepresentable {
+    func makeUIView(context _: Context) -> MLNMapView {
         let mapView = MLNMapView()
         return mapView
     }
-    
-    func updateUIView(_ mapView: MLNMapView, context: Context) {
-    }
+
+    func updateUIView(_: MLNMapView, context _: Context) {}
 }
 ```
 
 You can use this view directly in a SwiftUI View hierarcy, for example:
 
 ```swift
-struct ContentView: View {
-    var body: some View {
-        MapLibreMapView()
+struct MyApp: App {
+
+    var body: some Scene {
+        WindowGroup {
+            MapLibreMapView().edgesIgnoringSafeArea(.all)
+        }
     }
 }
 ```

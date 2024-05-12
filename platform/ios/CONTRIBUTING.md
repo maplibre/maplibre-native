@@ -27,3 +27,33 @@ resources=(
   # add here
 )
 ```
+
+## Examples
+
+The code samples in the documentation should ideally be compiled on CI so they do not go out of date.
+
+Fence your example code with
+
+```swift
+// #-example-code(LineTapMapView)
+...
+// #-end-example-code
+```
+
+Prefix your documentation code block with
+
+````md
+<!-- include-example(LineTapMapView) -->
+
+```swift
+...
+```
+````
+
+Then the code block will be updated when you run:
+
+```sh
+node scripts/update-ios-examples.mjs
+```
+
+You need to add the relevant example paths and documentation paths to that file.
