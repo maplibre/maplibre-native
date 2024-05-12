@@ -19,6 +19,11 @@ repos:
   hooks:
     - id: actionlint
       additional_dependencies: [shellcheck-py]
+- repo: https://github.com/nicklockwood/SwiftFormat
+  rev: "0.53.8"
+  hooks:
+    - id: swiftformat
+      args: [--swiftversion, "5.8"]
 ci:
   # sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
   skip: [buildifier]

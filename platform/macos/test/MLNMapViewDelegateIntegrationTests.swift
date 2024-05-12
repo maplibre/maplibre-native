@@ -1,65 +1,62 @@
-import XCTest
 import Mapbox
+import XCTest
 
 class MLNMapViewDelegateIntegrationTests: XCTestCase {
-
     func testCoverage() {
         MLNSDKTestHelpers.checkTestsContainAllMethods(testClass: MLNMapViewDelegateIntegrationTests.self, in: MLNMapViewDelegate.self)
     }
-
 }
 
 extension MLNMapViewDelegateIntegrationTests: MLNMapViewDelegate {
+    func mapView(_: MLNMapView, shouldChangeFrom _: MLNMapCamera, to _: MLNMapCamera) -> Bool { false }
 
-    func mapView(_ mapView: MLNMapView, shouldChangeFrom oldCamera: MLNMapCamera, to newCamera: MLNMapCamera) -> Bool { return false }
+    func mapView(_: MLNMapView, lineWidthForPolylineAnnotation _: MLNPolyline) -> CGFloat { 0 }
 
-    func mapView(_ mapView: MLNMapView, lineWidthForPolylineAnnotation annotation: MLNPolyline) -> CGFloat { return 0 }
+    func mapView(_: MLNMapView, annotationCanShowCallout _: MLNAnnotation) -> Bool { false }
 
-    func mapView(_ mapView: MLNMapView, annotationCanShowCallout annotation: MLNAnnotation) -> Bool { return false }
+    func mapView(_: MLNMapView, imageFor _: MLNAnnotation) -> MLNAnnotationImage? { nil }
 
-    func mapView(_ mapView: MLNMapView, imageFor annotation: MLNAnnotation) -> MLNAnnotationImage? { return nil }
+    func mapView(_: MLNMapView, alphaForShapeAnnotation _: MLNShape) -> CGFloat { 0 }
 
-    func mapView(_ mapView: MLNMapView, alphaForShapeAnnotation annotation: MLNShape) -> CGFloat { return 0 }
+    func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool) {}
 
-    func mapViewDidFinishRenderingFrame(_ mapView: MLNMapView, fullyRendered: Bool) {}
+    func mapViewDidFinishRenderingFrame(_: MLNMapView, fullyRendered _: Bool, frameTime _: Double) {}
 
-    func mapViewDidFinishRenderingFrame(_ mapView: MLNMapView, fullyRendered: Bool, frameTime: Double) {}
+    func mapViewDidFinishRenderingMap(_: MLNMapView, fullyRendered _: Bool) {}
 
-    func mapViewDidFinishRenderingMap(_ mapView: MLNMapView, fullyRendered: Bool) {}
-    
-    func mapViewDidBecomeIdle(_ mapView: MLNMapView) {}
+    func mapViewDidBecomeIdle(_: MLNMapView) {}
 
-    func mapViewDidFailLoadingMap(_ mapView: MLNMapView, withError error: Error) {}
+    func mapViewDidFailLoadingMap(_: MLNMapView, withError _: Error) {}
 
-    func mapView(_ mapView: MLNMapView, didFailToLoadImage imageName: String) -> NSImage? { return nil }
-    
-    func mapView(_ mapView: MLNMapView, shapeAnnotationIsEnabled annotation: MLNShape) -> Bool { return false }
+    func mapView(_: MLNMapView, didFailToLoadImage _: String) -> NSImage? { nil }
 
-    func mapView(_ mapView: MLNMapView, didDeselect annotation: MLNAnnotation) {}
+    func mapView(_: MLNMapView, shapeAnnotationIsEnabled _: MLNShape) -> Bool { false }
 
-    func mapView(_ mapView: MLNMapView, didSelect annotation: MLNAnnotation) {}
+    func mapView(_: MLNMapView, didDeselect _: MLNAnnotation) {}
 
-    func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {}
+    func mapView(_: MLNMapView, didSelect _: MLNAnnotation) {}
 
-    func mapViewWillStartRenderingFrame(_ mapView: MLNMapView) {}
+    func mapView(_: MLNMapView, didFinishLoading _: MLNStyle) {}
 
-    func mapViewWillStartRenderingMap(_ mapView: MLNMapView) {}
+    func mapViewWillStartRenderingFrame(_: MLNMapView) {}
 
-    func mapViewWillStartLoadingMap(_ mapView: MLNMapView) {}
+    func mapViewWillStartRenderingMap(_: MLNMapView) {}
 
-    func mapViewDidFinishLoadingMap(_ mapView: MLNMapView) {}
+    func mapViewWillStartLoadingMap(_: MLNMapView) {}
 
-    func mapViewCameraIsChanging(_ mapView: MLNMapView) {}
+    func mapViewDidFinishLoadingMap(_: MLNMapView) {}
 
-    func mapView(_ mapView: MLNMapView, cameraDidChangeAnimated animated: Bool) {}
+    func mapViewCameraIsChanging(_: MLNMapView) {}
 
-    func mapView(_ mapView: MLNMapView, cameraWillChangeAnimated animated: Bool) {}
+    func mapView(_: MLNMapView, cameraDidChangeAnimated _: Bool) {}
 
-    func mapView(_ mapView: MLNMapView, strokeColorForShapeAnnotation annotation: MLNShape) -> NSColor { return .black }
+    func mapView(_: MLNMapView, cameraWillChangeAnimated _: Bool) {}
 
-    func mapView(_ mapView: MLNMapView, fillColorForPolygonAnnotation annotation: MLNPolygon) -> NSColor { return .black }
+    func mapView(_: MLNMapView, strokeColorForShapeAnnotation _: MLNShape) -> NSColor { .black }
 
-    func mapView(_ mapView: MLNMapView, calloutViewControllerFor annotation: MLNAnnotation) -> NSViewController? { return nil }
+    func mapView(_: MLNMapView, fillColorForPolygonAnnotation _: MLNPolygon) -> NSColor { .black }
 
-    func mapView(_ mapView: MLNMapView, shouldRemoveStyleImage imageName: String) -> Bool { return false }
+    func mapView(_: MLNMapView, calloutViewControllerFor _: MLNAnnotation) -> NSViewController? { nil }
+
+    func mapView(_: MLNMapView, shouldRemoveStyleImage _: String) -> Bool { false }
 }
