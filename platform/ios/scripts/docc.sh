@@ -33,20 +33,7 @@ bazel build --//:renderer=metal //platform/darwin:generated_style_public_hdrs
 
 # download resources from S3
 
-resources=(
-  "AddPackageDependencies@2x.png"
-  "DemotilesScreenshot@2x.png"
-)
-
-destination_dir="platform/ios/MapLibre.docc/Resources"
-
-for file in "${resources[@]}"; do
-  if [[ ! -f "$destination_dir/$file" ]]; then
-    aws s3 cp --no-sign-request "s3://maplibre-native/ios-documentation-resources/$file" "$destination_dir"
-  else
-    echo "Skipped: $file already exists in the destination directory"
-  fi
-done
+aws s3 sync --no-sign-request "s3://maplibre-native/ios-documentation-resources" "platform/ios/MapLibre.docc/Resources"
 
 public_headers=$(bazel query 'kind("source file", deps(//platform:ios-sdk, 2))' --output location | grep ".h$" | sed -r 's#.*/([^:]+).*#\1#')
 style_headers=$(bazel cquery --//:renderer=metal //platform/darwin:generated_style_public_hdrs --output=files)
