@@ -77,6 +77,9 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
+      - name: Build Example (Swift) App
+        run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
+
       - name: Check debug symbols
         run: bazel run //platform:check-public-symbols --//:renderer=metal
 
