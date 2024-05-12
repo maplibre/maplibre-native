@@ -32,13 +32,13 @@ To use MapLibre with SwiftUI we need to create a wrapper for the UIKit view that
 
 ```swift
 struct MapLibreMapView: UIViewRepresentable {
-    private let mapView = MLNMapView()
-    
-    func makeUIView(context: Context) -> some UIView {
+
+    func makeUIView(context: Context) -> MLNMapView {
+        let mapView = MLNMapView()
         return mapView
     }
     
-    func updateUIView(_ uiView: UIViewType, context: Context) {
+    func updateUIView(_ mapView: MLNMapView, context: Context) {
     }
 }
 ```

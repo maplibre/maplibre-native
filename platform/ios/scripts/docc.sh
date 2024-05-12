@@ -36,6 +36,7 @@ bazel build --//:renderer=metal //platform/darwin:generated_style_public_hdrs
 resources=(
   "AddPackageDependencies@2x.png"
   "DemotilesScreenshot@2x.png"
+  "polyline@2x.png"
 )
 
 destination_dir="platform/ios/MapLibre.docc/Resources"
