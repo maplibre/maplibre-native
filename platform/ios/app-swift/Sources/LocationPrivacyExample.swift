@@ -10,6 +10,7 @@ enum LocationAccuracyState {
 }
 
 class MapViewModel: NSObject, ObservableObject {
+    //Weak because the coordinator has a strong reference to the view model
     weak var mapCoordinater: MapLibreRepresentableCoordinator?
     @MainActor @Published var locationAccuracy: LocationAccuracyState = .unknown
     
@@ -28,6 +29,7 @@ class MapViewModel: NSObject, ObservableObject {
 
 class MapLibreRepresentableCoordinator: NSObject, MLNMapViewDelegate {
     private var mapViewModel: MapViewModel
+    //Weak reference because SwiftUI owns the strong reference
     private(set) weak var mapView: MLNMapView?
     private var pannedToUserLocation = false
     
