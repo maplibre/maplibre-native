@@ -8,7 +8,6 @@
 import XCTest
 
 class iosapp_UITests: XCTestCase {
-    
     let app = XCUIApplication()
 
     override func setUpWithError() throws {
@@ -31,42 +30,42 @@ class iosapp_UITests: XCTestCase {
     func test_iosappScheme() throws {
         /// Launch and take a screenshot
         app.navigationBars["MapLibre Basic"].buttons["Map settings"].tap()
-        app.tables/*@START_MENU_TOKEN@*/.staticTexts["Reset position"]/*[[".cells.staticTexts[\"Reset position\"]",".staticTexts[\"Reset position\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        app.tables/*@START_MENU_TOKEN@*/ .staticTexts["Reset position"]/*[[".cells.staticTexts[\"Reset position\"]",".staticTexts[\"Reset position\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
         sleep(1)
         add(screenshot())
     }
-    
+
     /// Turn on Debug tile boundaries, tile info and FPS ornaments
     /// Demonstrates how the Tile Boundaries look when rendered
     func testDebugBoundaryTiles() {
         app.windows.children(matching: .other).element.children(matching: .other).element.children(matching: .other).element.doubleTap()
-        
+
         let mapSettingsButton = app.navigationBars["MapLibre Basic"].buttons["Map settings"]
         mapSettingsButton.tap()
-        
+
         /// setup initial conditions for position (0,0) and debug settings
         let tablesQuery = app.tables
-        tablesQuery/*@START_MENU_TOKEN@*/.staticTexts["Show zoom level ornament"]/*[[".cells.staticTexts[\"Show zoom level ornament\"]",".staticTexts[\"Show zoom level ornament\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        tablesQuery/*@START_MENU_TOKEN@*/ .staticTexts["Show zoom level ornament"]/*[[".cells.staticTexts[\"Show zoom level ornament\"]",".staticTexts[\"Show zoom level ornament\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
         mapSettingsButton.tap()
-        tablesQuery/*@START_MENU_TOKEN@*/.staticTexts["Show tile boundaries"]/*[[".cells.staticTexts[\"Show tile boundaries\"]",".staticTexts[\"Show tile boundaries\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        tablesQuery/*@START_MENU_TOKEN@*/ .staticTexts["Show tile boundaries"]/*[[".cells.staticTexts[\"Show tile boundaries\"]",".staticTexts[\"Show tile boundaries\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
         mapSettingsButton.tap()
-        tablesQuery/*@START_MENU_TOKEN@*/.staticTexts["Show tile info"]/*[[".cells.staticTexts[\"Show tile info\"]",".staticTexts[\"Show tile info\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        tablesQuery/*@START_MENU_TOKEN@*/ .staticTexts["Show tile info"]/*[[".cells.staticTexts[\"Show tile info\"]",".staticTexts[\"Show tile info\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
         mapSettingsButton.tap()
-        tablesQuery/*@START_MENU_TOKEN@*/.staticTexts["Show tile timestamps"]/*[[".cells.staticTexts[\"Show tile timestamps\"]",".staticTexts[\"Show tile timestamps\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/.tap()
+        tablesQuery/*@START_MENU_TOKEN@*/ .staticTexts["Show tile timestamps"]/*[[".cells.staticTexts[\"Show tile timestamps\"]",".staticTexts[\"Show tile timestamps\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/ .tap()
         mapSettingsButton.tap()
         tablesQuery.staticTexts["Add Test Shapes"].tap()
-        
+
         sleep(1)
         add(screenshot(name: "Add Test Shapes"))
 
         mapSettingsButton.tap()
         tablesQuery.staticTexts["Reset position"].tap()
-        
+
         sleep(1)
         add(screenshot(name: "Null Island, Zoom=0"))
     }
 
-    var mapSettingsButton: XCUIElement { get { app.navigationBars["MapLibre Basic"].buttons["Map settings"] } }
+    var mapSettingsButton: XCUIElement { app.navigationBars["MapLibre Basic"].buttons["Map settings"] }
 
     /// Open and close the secondary map view a few times to ensure that the dynamic layout adjustment doesn't crash
     func testSecondMap() {
@@ -77,7 +76,7 @@ class iosapp_UITests: XCTestCase {
         let secondMapQuery = app.otherElements["Second Map"]
         XCTAssert(!secondMapQuery.exists)
 
-        for _ in 0..<iterations {
+        for _ in 0 ..< iterations {
             mapSettingsButton.tap()
             app.tables.staticTexts["Show Second Map"].tap()
             XCTAssert(secondMapQuery.waitForExistence(timeout: showTimeout))
@@ -94,76 +93,76 @@ class iosapp_UITests: XCTestCase {
 
     func testAll() {
         let allItems = [
-        "Reset position",
-        "Show tile boundaries",
-        "Hide tile boundaries",
-        "Show tile info",
-        "Hide tile info",
-        "Show tile timestamps",
-        "Hide tile timestamps",
-        "Show collision boxes",
-        "Hide collision boxes",
-        "Show overdraw visualization",
-        "Hide overdraw visualization",
-        "Show zoom level ornament",
-        "Hide zoom level ornament",
-        "Show frame time graph",
-        "Hide frame time graph",
-        "Show reuse queue stats",
-        "Hide reuse queue stats",
-        "Add 100 Views",
-        //"Add 1,000 Views",    // These cause the test to time out
-        //"Add 10,000 Views",
-        "Add 100 Sprites",
-        //"Add 1,000 Sprites",
-        //"Add 10,000 Sprites",
-        "Animate an Annotation View",
-        "Add Test Shapes",
-        "Add 10x Test Shapes",
-        "Add Point With Custom Callout",
-        "Query Annotations",
-        "Enable Custom User Dot",
-        "Disable Custom User Dot",
-        "Remove Annotations",
-        "Select an offscreen point annotation",
-        "Center selected annotation",
-        "Add visible area polyline",
-        "Add Building Extrusions",
-        "Style Water With Function",
-        "Style Roads With Function",
-        "Add Raster & Apply Function",
-        "Add Shapes & Apply Fill",
-        "Style Symbol Color",
-        "Style Building Fill Color",
-        "Style Ferry Line Color",
-        "Remove Parks",
-        "Style Fill With Filter",
-        "Style Lines With Filter",
-        "Style Fill With Numeric Filter",
-        "Query and Style Features",
-        "Style Feature",
-        "Style Dynamic Point Collection",
-        "Update Shape Source: Data",
-        "Update Shape Source: URL",
-        "Update Shape Source: Features",
-        "Style Vector Tile Source",
-        "Style Raster Tile Source",
-        "Style Image Source",
-        "Add Route Line",
-        "Dynamically Style Polygon",
-        "Add Custom Lat/Lon Grid",
-        "Style Route line with gradient",
-        "Start World Tour",
-        "Random Tour",
-        "Show Second Map",
-        "Hide Second Map",
-        "Missing Icon",
-        "Limit Camera Changes",
-        "Unlimit Camera Changes",
-        "Turn On Content Insets",
-        "Turn Off Content Insets",
-        "Lat Long bounds with padding",
-        "Show Labels in Default Language",
+            "Reset position",
+            "Show tile boundaries",
+            "Hide tile boundaries",
+            "Show tile info",
+            "Hide tile info",
+            "Show tile timestamps",
+            "Hide tile timestamps",
+            "Show collision boxes",
+            "Hide collision boxes",
+            "Show overdraw visualization",
+            "Hide overdraw visualization",
+            "Show zoom level ornament",
+            "Hide zoom level ornament",
+            "Show frame time graph",
+            "Hide frame time graph",
+            "Show reuse queue stats",
+            "Hide reuse queue stats",
+            "Add 100 Views",
+            // "Add 1,000 Views",    // These cause the test to time out
+            // "Add 10,000 Views",
+            "Add 100 Sprites",
+            // "Add 1,000 Sprites",
+            // "Add 10,000 Sprites",
+            "Animate an Annotation View",
+            "Add Test Shapes",
+            "Add 10x Test Shapes",
+            "Add Point With Custom Callout",
+            "Query Annotations",
+            "Enable Custom User Dot",
+            "Disable Custom User Dot",
+            "Remove Annotations",
+            "Select an offscreen point annotation",
+            "Center selected annotation",
+            "Add visible area polyline",
+            "Add Building Extrusions",
+            "Style Water With Function",
+            "Style Roads With Function",
+            "Add Raster & Apply Function",
+            "Add Shapes & Apply Fill",
+            "Style Symbol Color",
+            "Style Building Fill Color",
+            "Style Ferry Line Color",
+            "Remove Parks",
+            "Style Fill With Filter",
+            "Style Lines With Filter",
+            "Style Fill With Numeric Filter",
+            "Query and Style Features",
+            "Style Feature",
+            "Style Dynamic Point Collection",
+            "Update Shape Source: Data",
+            "Update Shape Source: URL",
+            "Update Shape Source: Features",
+            "Style Vector Tile Source",
+            "Style Raster Tile Source",
+            "Style Image Source",
+            "Add Route Line",
+            "Dynamically Style Polygon",
+            "Add Custom Lat/Lon Grid",
+            "Style Route line with gradient",
+            "Start World Tour",
+            "Random Tour",
+            "Show Second Map",
+            "Hide Second Map",
+            "Missing Icon",
+            "Limit Camera Changes",
+            "Unlimit Camera Changes",
+            "Turn On Content Insets",
+            "Turn Off Content Insets",
+            "Lat Long bounds with padding",
+            "Show Labels in Default Language",
         ]
 
         for label in allItems {
@@ -175,7 +174,8 @@ class iosapp_UITests: XCTestCase {
         // Only one of these will show up, run whichever one is there
         mapSettingsButton.tap()
         if let customLayer = staticItemIfExists("Add Custom Triangle Layer (OpenGL)") ??
-                             staticItemIfExists("Add Custom Triangle Layer (Metal)") {
+            staticItemIfExists("Add Custom Triangle Layer (Metal)")
+        {
             customLayer.tap()
             sleep(1)
             mapSettingsButton.tap()
@@ -188,7 +188,7 @@ class iosapp_UITests: XCTestCase {
         }
 
         // See `bestLanguageForUser`
-        for loc in [ "ar", "de", "en", "es", "fr", "ja", "ko", "pt", "ru", "zh", "zh-Hans", "zh-Hant" ] {
+        for loc in ["ar", "de", "en", "es", "fr", "ja", "ko", "pt", "ru", "zh", "zh-Hans", "zh-Hant"] {
             if let name = NSLocale(localeIdentifier: loc).displayName(forKey: .identifier, value: loc) {
                 if let item = staticItemIfExists("Show Labels in " + name) {
                     item.tap()
@@ -223,9 +223,9 @@ class iosapp_UITests: XCTestCase {
 
     private func tapBackButton(_ label: String, timeout: TimeInterval) -> Bool {
         let bar = app.navigationBars[label]
-        if (bar.waitForExistence(timeout: timeout)) {
+        if bar.waitForExistence(timeout: timeout) {
             let button = bar.buttons["Back"]
-            if (button.waitForExistence(timeout: 1)) {
+            if button.waitForExistence(timeout: 1) {
                 button.tap()
                 return true
             }
@@ -247,14 +247,14 @@ class iosapp_UITests: XCTestCase {
             }
         }
     }
-    
+
     /// Make sure the Custom Drawable Layer does not crash
     func testCustomDrawableLayer() {
         app.windows.children(matching: .other).element.children(matching: .other).element.children(matching: .other).element.doubleTap()
-        
+
         let mapSettingsButton = app.navigationBars["MapLibre Basic"].buttons["Map settings"]
         mapSettingsButton.tap()
-        
+
         let tablesQuery = app.tables
         tablesQuery.staticTexts["Add Custom Drawable Layer"].tap()
         sleep(5)

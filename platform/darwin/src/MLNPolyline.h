@@ -52,7 +52,10 @@ NS_ASSUME_NONNULL_BEGIN
  geometry in GeoJSON.
  
  #### Related examples
- TODO: Annotation models, learn how to add an `MLNPolyine` object to your map.
+
+ - <doc:LineOnUserTap>
+
+   TODO: Annotation models, learn how to add an `MLNPolyine` object to your map.
  */
 MLN_EXPORT
 @interface MLNPolyline : MLNMultiPoint <MLNOverlay>
