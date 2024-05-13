@@ -43,7 +43,6 @@ class Coordinator: NSObject, MLNMapViewDelegate {
             print("User location is currently not available.")
             return
         }
-        mapView.setCenter(userLocation.coordinate, zoomLevel: 8, animated: true)
         mapView.fly(to: MLNMapCamera(lookingAtCenter: userLocation.coordinate, altitude: 100_000, pitch: 0, heading: 0))
     }
 }
