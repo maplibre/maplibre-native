@@ -10,13 +10,13 @@ enum LocationAccuracyState {
 }
 
 class MapViewModel: NSObject, ObservableObject {
-    //Weak because the coordinator has a strong reference to the view model
+    // Weak because the coordinator has a strong reference to the view model
     weak var mapCoordinater: MapLibreRepresentableCoordinator?
     @MainActor @Published var locationAccuracy: LocationAccuracyState = .unknown
-    
+
     @MainActor func requestTemporaryLocationAuthorization() {
         print("Requesting precice location")
-        
+
         switch locationAccuracy {
         case .reducedAccuracy:
             let purposeKey = "MLNAccuracyAuthorizationDescription"
@@ -29,21 +29,21 @@ class MapViewModel: NSObject, ObservableObject {
 
 class MapLibreRepresentableCoordinator: NSObject, MLNMapViewDelegate {
     private var mapViewModel: MapViewModel
-    //Weak reference because SwiftUI owns the strong reference
+    // Weak reference because SwiftUI owns the strong reference
     private(set) weak var mapView: MLNMapView?
     private var pannedToUserLocation = false
-    
+
     init(mapViewModel: MapViewModel) {
         self.mapViewModel = mapViewModel
         super.init()
         self.mapViewModel.mapCoordinater = self
     }
-    
+
     @MainActor func mapView(_: MLNMapView, didChangeLocationManagerAuthorization manager: MLNLocationManager) {
         guard let accuracySetting = manager.accuracyAuthorization else {
             return
         }
-        
+
         switch accuracySetting() {
         case .fullAccuracy:
             mapViewModel.locationAccuracy = .fullAccuracy
@@ -64,21 +64,21 @@ class MapLibreRepresentableCoordinator: NSObject, MLNMapViewDelegate {
         mapView.fly(to: MLNMapCamera(lookingAtCenter: userLocation.coordinate, altitude: 100_000, pitch: 0, heading: 0))
         pannedToUserLocation = true
     }
-    
-    func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
+
+    func mapView(_ mapView: MLNMapView, didFinishLoading _: MLNStyle) {
         if self.mapView != mapView {
             self.mapView = mapView
         }
     }
-    
+
     func mapViewDidFinishLoadingMap(_ mapView: MLNMapView) {
         if self.mapView != mapView {
             self.mapView = mapView
         }
     }
-    
+
     deinit {
-        //Ensure the coordinator is deallocated if MapLibreViewRepresentable.dismantleUIView was called
+        // Ensure the coordinator is deallocated if MapLibreViewRepresentable.dismantleUIView was called
     }
 }
 
@@ -91,25 +91,24 @@ struct MapLibreViewRepresentable: UIViewRepresentable {
 
     func makeUIView(context: Context) -> MLNMapView {
         let mapView = MLNMapView()
-        //Set delegate first, otherwise delegate callbacks can be missed. For example, setting showsUserLocation calls mapView:didUpdate:userLocation
+        // Set delegate first, otherwise delegate callbacks can be missed. For example, setting showsUserLocation calls mapView:didUpdate:userLocation
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = true
         return mapView
     }
 
     func updateUIView(_: MLNMapView, context _: Context) {
-        //Be careful with doing any real work in updateUIView, this is called a lot.
+        // Be careful with doing any real work in updateUIView, this is called a lot.
     }
-    
-    static func dismantleUIView(_ uiView: MLNMapView, coordinator: Coordinator) {
-        //Verify that dismantleUIView is called when MLNMapView is out of the view hierarchy and deallocated.
+
+    static func dismantleUIView(_: MLNMapView, coordinator _: Coordinator) {
+        // Verify that dismantleUIView is called when MLNMapView is out of the view hierarchy and deallocated.
     }
 }
 
-
 struct LocationPrivacyExampleView: View {
     @StateObject private var mapViewModel = MapViewModel()
-    
+
     var body: some View {
         VStack {
             MapLibreViewRepresentable(mapViewModel: mapViewModel)
