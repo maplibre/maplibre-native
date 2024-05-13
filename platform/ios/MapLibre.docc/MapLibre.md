@@ -15,6 +15,7 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 
 - <doc:GettingStarted>
 - <doc:LineOnUserTap>
+- <doc:LocationPrivacyExample>
 
 ## Topics
 

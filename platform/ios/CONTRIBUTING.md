@@ -35,7 +35,7 @@ The code samples in the documentation should ideally be compiled on CI so they d
 Fence your example code with
 
 ```swift
-// #-example-code(LineTapMapView)
+// #-example-code(LineTapMap)
 ...
 // #-end-example-code
 ```
@@ -43,7 +43,7 @@ Fence your example code with
 Prefix your documentation code block with
 
 ````md
-<!-- include-example(LineTapMapView) -->
+<!-- include-example(LineTapMap) -->
 
 ```swift
 ...

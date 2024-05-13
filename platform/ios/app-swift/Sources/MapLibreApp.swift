@@ -6,7 +6,7 @@ import UIKit
 struct MapLibreApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MapLibreNavigationView()
         }
     }
 }

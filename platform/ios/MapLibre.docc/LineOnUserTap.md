@@ -6,10 +6,10 @@ Demonstrating adding ``MLNPolyline`` annotations and responding to user input.
 
 This example draws a line from the tapped location to the center of the map. Handling the tap is done by the `Coordinator` class. It converts the location on the view to a geographic coordinate. It removes existing annotations before adding the new line.
 
-<!-- include-example(LineTapMapView) -->
+<!-- include-example(LineTapMap) -->
 
 ```swift
-struct LineTapMapView: UIViewRepresentable {
+struct LineTapMap: UIViewRepresentable {
     func makeUIView(context: Context) -> MLNMapView {
         let mapView = MLNMapView()
 
@@ -32,9 +32,9 @@ struct LineTapMapView: UIViewRepresentable {
     }
 
     class Coordinator: NSObject {
-        var parent: LineTapMapView
+        var parent: LineTapMap
 
-        init(_ parent: LineTapMapView) {
+        init(_ parent: LineTapMap) {
             self.parent = parent
         }
 

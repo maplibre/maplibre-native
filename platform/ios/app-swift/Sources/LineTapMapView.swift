@@ -2,8 +2,8 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(LineTapMapView)
-struct LineTapMapView: UIViewRepresentable {
+// #-example-code(LineTapMap)
+struct LineTapMap: UIViewRepresentable {
     func makeUIView(context: Context) -> MLNMapView {
         let mapView = MLNMapView()
 
@@ -26,9 +26,9 @@ struct LineTapMapView: UIViewRepresentable {
     }
 
     class Coordinator: NSObject {
-        var parent: LineTapMapView
+        var parent: LineTapMap
 
-        init(_ parent: LineTapMapView) {
+        init(_ parent: LineTapMap) {
             self.parent = parent
         }
 

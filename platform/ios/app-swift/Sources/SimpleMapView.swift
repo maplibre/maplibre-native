@@ -2,8 +2,8 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(SimpleMapView)
-struct SimpleMapView: UIViewRepresentable {
+// #-example-code(SimpleMap)
+struct SimpleMap: UIViewRepresentable {
     func makeUIView(context _: Context) -> MLNMapView {
         let mapView = MLNMapView()
         return mapView
@@ -13,9 +13,3 @@ struct SimpleMapView: UIViewRepresentable {
 }
 
 // #-end-example-code
-
-struct ContentView: View {
-    var body: some View {
-        SimpleMapView().edgesIgnoringSafeArea(.all)
-    }
-}
