@@ -4,20 +4,23 @@
  */
 
 import fs from "fs/promises";
+import { join } from "path";
 
-/** documentation files that will be updated */
-const documentationPaths = [
-  "platform/ios/MapLibre.docc/GettingStarted.md",
-  "platform/ios/MapLibre.docc/LineOnUserTap.md",
-  "platform/ios/MapLibre.docc/LocationPrivacyExample.md",
-];
+/**
+ * @param {string} baseDir 
+ * @param {(path: string) => boolean} predicate 
+ * @returns paths
+ */
+async function getFilePaths(baseDir, predicate) {
+  const entries = (await fs.readdir(baseDir, { withFileTypes: true }))
+  return entries.map((entry) => join(entry.path, entry.name)).filter(predicate);
+}
 
-/** source files that contain examples */
-const examplePaths = [
-  "platform/ios/app-swift/Sources/SimpleMapView.swift",
-  "platform/ios/app-swift/Sources/LineTapMapView.swift",
-  "platform/ios/app-swift/Sources/LocationPrivacyExample.swift",
-];
+// documentation files that will be updated and source files that contain examples
+const [documentationPaths, examplePaths] = await Promise.all([
+  getFilePaths("platform/ios/MapLibre.docc", path => path.endsWith(".md")),
+  getFilePaths("platform/ios/app-swift/Sources", path => path.endsWith(".swift"))
+]);
 
 /**
  * Parses a source file and looks for examples fenced in
@@ -69,7 +72,8 @@ async function loadExamples() {
   for (const examplePath of examplePaths) {
     const newExamples = await parseExampleCode(examplePath);
     if (Object.keys(newExamples).length === 0) {
-      throw new Error(`File '${examplePath}' does not contain any examples`);
+      // no examples found
+      continue;
     }
     examples = {...newExamples, ...examples};
   }
