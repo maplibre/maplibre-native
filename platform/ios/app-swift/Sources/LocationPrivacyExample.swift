@@ -128,11 +128,4 @@ struct LocationPrivacyExampleView: View {
     }
 }
 
-#if DEBUG
-#Preview {
-    LocationPrivacyExampleView()
-}
-#endif
-
-
 // #-end-example-code
