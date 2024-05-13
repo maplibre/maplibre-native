@@ -9,75 +9,113 @@ enum LocationAccuracyState {
     case fullAccuracy
 }
 
-class Coordinator: NSObject, MLNMapViewDelegate {
-    @Binding var mapView: MLNMapView
-    @Binding var locationAccuracy: LocationAccuracyState
-    var pannedToUserLocation = false
-
-    init(mapView: Binding<MLNMapView>, locationAccuracy: Binding<LocationAccuracyState>) {
-        _mapView = mapView
-        _locationAccuracy = locationAccuracy
+class MapViewModel: NSObject, ObservableObject {
+    weak var mapCoordinater: MapLibreRepresentableCoordinator?
+    @MainActor @Published var locationAccuracy: LocationAccuracyState = .unknown
+    
+    @MainActor func requestTemporaryLocationAuthorization() {
+        print("Requesting precice location")
+        
+        switch locationAccuracy {
+        case .reducedAccuracy:
+            let purposeKey = "MLNAccuracyAuthorizationDescription"
+            mapCoordinater?.mapView?.locationManager.requestTemporaryFullAccuracyAuthorization!(withPurposeKey: purposeKey)
+        default:
+            break
+        }
     }
+}
 
-    func mapView(_: MLNMapView, didChangeLocationManagerAuthorization manager: MLNLocationManager) {
+class MapLibreRepresentableCoordinator: NSObject, MLNMapViewDelegate {
+    private var mapViewModel: MapViewModel
+    private(set) weak var mapView: MLNMapView?
+    private var pannedToUserLocation = false
+    
+    init(mapViewModel: MapViewModel) {
+        self.mapViewModel = mapViewModel
+        super.init()
+        self.mapViewModel.mapCoordinater = self
+    }
+    
+    @MainActor func mapView(_: MLNMapView, didChangeLocationManagerAuthorization manager: MLNLocationManager) {
         guard let accuracySetting = manager.accuracyAuthorization else {
             return
         }
-
+        
         switch accuracySetting() {
         case .fullAccuracy:
-            locationAccuracy = .fullAccuracy
+            mapViewModel.locationAccuracy = .fullAccuracy
         case .reducedAccuracy:
-            locationAccuracy = .reducedAccuracy
+            mapViewModel.locationAccuracy = .reducedAccuracy
         @unknown default:
-            locationAccuracy = .unknown
+            mapViewModel.locationAccuracy = .unknown
         }
     }
 
     // when a location is available for the first time, we fly to it
     func mapView(_ mapView: MLNMapView, didUpdate _: MLNUserLocation?) {
-        if pannedToUserLocation {
-            return
-        }
+        guard !pannedToUserLocation else { return }
         guard let userLocation = mapView.userLocation else {
             print("User location is currently not available.")
             return
         }
         mapView.fly(to: MLNMapCamera(lookingAtCenter: userLocation.coordinate, altitude: 100_000, pitch: 0, heading: 0))
+        pannedToUserLocation = true
+    }
+    
+    func mapView(_ mapView: MLNMapView, didFinishLoading style: MLNStyle) {
+        if self.mapView != mapView {
+            self.mapView = mapView
+        }
+    }
+    
+    func mapViewDidFinishLoadingMap(_ mapView: MLNMapView) {
+        if self.mapView != mapView {
+            self.mapView = mapView
+        }
+    }
+    
+    deinit {
+        //Ensure the coordinator is deallocated if MapLibreViewRepresentable.dismantleUIView was called
     }
 }
 
-struct LocationPrivacyExample: UIViewRepresentable {
-    @Binding var mapView: MLNMapView
-    @Binding var locationAccuracy: LocationAccuracyState
+struct MapLibreViewRepresentable: UIViewRepresentable {
+    let mapViewModel: MapViewModel
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(mapView: $mapView, locationAccuracy: $locationAccuracy)
+    func makeCoordinator() -> MapLibreRepresentableCoordinator {
+        MapLibreRepresentableCoordinator(mapViewModel: mapViewModel)
     }
 
     func makeUIView(context: Context) -> MLNMapView {
         let mapView = MLNMapView()
-        mapView.showsUserLocation = true
+        //Set delegate first, otherwise delegate callbacks can be missed. For example, setting showsUserLocation calls mapView:didUpdate:userLocation
         mapView.delegate = context.coordinator
-
+        mapView.showsUserLocation = true
         return mapView
     }
 
-    func updateUIView(_: MLNMapView, context _: Context) {}
+    func updateUIView(_: MLNMapView, context _: Context) {
+        //Be careful with doing any real work in updateUIView, this is called a lot.
+    }
+    
+    static func dismantleUIView(_ uiView: MLNMapView, coordinator: Coordinator) {
+        //Verify that dismantleUIView is called when MLNMapView is out of the view hierarchy and deallocated.
+    }
 }
 
-struct LocationPrivacyExampleView: View {
-    @State private var mapView = MLNMapView()
-    @State var locationAccuracy: LocationAccuracyState = .unknown
 
+struct LocationPrivacyExampleView: View {
+    @StateObject private var mapViewModel = MapViewModel()
+    
     var body: some View {
         VStack {
-            LocationPrivacyExample(mapView: $mapView, locationAccuracy: $locationAccuracy)
+            MapLibreViewRepresentable(mapViewModel: mapViewModel)
                 .edgesIgnoringSafeArea(.all)
 
-            if locationAccuracy == LocationAccuracyState.reducedAccuracy {
+            if mapViewModel.locationAccuracy == LocationAccuracyState.reducedAccuracy {
                 Button("Request Precise Location") {
-                    handleButtonPress(mapView: mapView)
+                    mapViewModel.requestTemporaryLocationAuthorization()
                 }
                 .padding()
                 .background(Color.blue)
@@ -86,17 +124,13 @@ struct LocationPrivacyExampleView: View {
             }
         }
     }
-
-    private func handleButtonPress(mapView: MLNMapView) {
-        print("Requesting precice location")
-        switch locationAccuracy {
-        case .reducedAccuracy:
-            let purposeKey = "MLNAccuracyAuthorizationDescription"
-            mapView.locationManager.requestTemporaryFullAccuracyAuthorization!(withPurposeKey: purposeKey)
-        default:
-            break
-        }
-    }
 }
+
+#if DEBUG
+#Preview {
+    LocationPrivacyExampleView()
+}
+#endif
+
 
 // #-end-example-code
