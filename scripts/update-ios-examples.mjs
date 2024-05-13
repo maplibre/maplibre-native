@@ -9,12 +9,14 @@ import fs from "fs/promises";
 const documentationPaths = [
   "platform/ios/MapLibre.docc/GettingStarted.md",
   "platform/ios/MapLibre.docc/LineOnUserTap.md",
+  "platform/ios/MapLibre.docc/LocationPrivacyExample.md",
 ];
 
 /** source files that contain examples */
 const examplePaths = [
   "platform/ios/app-swift/Sources/SimpleMapView.swift",
-  "platform/ios/app-swift/Sources/LineTapMapView.swift"
+  "platform/ios/app-swift/Sources/LineTapMapView.swift",
+  "platform/ios/app-swift/Sources/LocationPrivacyExample.swift",
 ];
 
 /**
