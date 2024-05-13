@@ -83,7 +83,7 @@ ShaderProgram::~ShaderProgram() noexcept = default;
 
 MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Renderable& renderable,
                                                                 const MTLVertexDescriptorPtr& vertexDescriptor,
-                                                                const gfx::ColorMode& colorMode) {
+                                                                const gfx::ColorMode& colorMode) const {
     if (renderPipelineStateCache) return renderPipelineStateCache;
 
     auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
