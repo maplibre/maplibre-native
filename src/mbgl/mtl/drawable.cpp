@@ -18,6 +18,7 @@
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/variant.hpp>
+#include <mbgl/util/hash.hpp>
 
 #include <Metal/Metal.hpp>
 
@@ -210,7 +211,7 @@ void Drawable::draw(PaintParameters& parameters) const {
     encoder->setFrontFacingWinding(mapWindingMode(cullMode.winding));
 
     if (!impl->pipelineState) {
-        impl->pipelineState = shaderMTL.getRenderPipelineState(renderable, impl->vertexDesc, getColorMode());
+        impl->pipelineState = shaderMTL.getRenderPipelineState(renderable, impl->vertexDesc, getColorMode(), mbgl::util::hash(getColorMode().hash(), impl->vertexDescHash));
     }
     if (impl->pipelineState) {
         encoder->setRenderPipelineState(impl->pipelineState.get());
@@ -562,6 +563,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
         if (impl->attributeBindings != attributeBindings_) {
             impl->attributeBindings = std::move(attributeBindings_);
+            
+            // hash
+            std::size_t hash {0};
 
             // Create a layout descriptor for each attribute
             auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
@@ -573,7 +577,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                     index += 1;
                     continue;
                 }
-
+                
                 if (!binding->vertexBufferResource && !impl->noBindingBuffer) {
                     if (const auto& buf = context.getEmptyVertexBuffer()) {
                         impl->noBindingBuffer = buf.get();
@@ -595,10 +599,13 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                 vertDesc->attributes()->setObject(attribDesc.get(), index);
                 vertDesc->layouts()->setObject(layoutDesc.get(), index);
 
+                mbgl::util::hash_combine(hash, mbgl::util::hash(index, binding->attribute.offset, binding->attribute.dataType, binding->vertexStride, static_cast<bool>(binding->vertexBufferResource)));
+
                 index += 1;
             }
 
             impl->vertexDesc = std::move(vertDesc);
+            impl->vertexDescHash = hash;
             impl->pipelineState.reset();
         }
     }

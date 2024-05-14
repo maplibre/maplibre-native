@@ -361,7 +361,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
         // Create a render pipeline state, telling Metal how to render the primitives
         const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
-        if (auto state = mtlShader.getRenderPipelineState(renderable, vertDesc, colorMode)) {
+        if (auto state = mtlShader.getRenderPipelineState(renderable, vertDesc, colorMode, {})) {
             clipMaskPipelineState = std::move(state);
         }
     }

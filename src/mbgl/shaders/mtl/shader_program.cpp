@@ -83,8 +83,13 @@ ShaderProgram::~ShaderProgram() noexcept = default;
 
 MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Renderable& renderable,
                                                                 const MTLVertexDescriptorPtr& vertexDescriptor,
-                                                                const gfx::ColorMode& colorMode) const {
-    if (renderPipelineStateCache) return renderPipelineStateCache;
+                                                                const gfx::ColorMode& colorMode,
+                                                                const std::optional<std::size_t> reuseHash) const {
+    if (reuseHash.has_value()) {
+        // we'd like to reuse a previous value
+        if (auto it = renderPipelineStateCache.find(reuseHash.value()); it != renderPipelineStateCache.end())
+            return it->second;
+    }
 
     auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
@@ -167,7 +172,11 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
         assert(false);
     }
 
-    renderPipelineStateCache = rps;
+    if (reuseHash.has_value()) {
+        // store the value for future reuse
+        renderPipelineStateCache[reuseHash.value()] = rps;
+    }
+    
     return rps;
 }
 

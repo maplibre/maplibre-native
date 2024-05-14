@@ -62,7 +62,8 @@ public:
 
     MTLRenderPipelineStatePtr getRenderPipelineState(const gfx::Renderable&,
                                                      const MTLVertexDescriptorPtr&,
-                                                     const gfx::ColorMode& colorMode) const;
+                                                     const gfx::ColorMode& colorMode,
+                                                     const std::optional<std::size_t> reuseHash) const;
 
     std::optional<size_t> getSamplerLocation(const size_t id) const override;
 
@@ -88,7 +89,7 @@ protected:
     VertexAttributeArray instanceAttributes;
     std::array<std::optional<size_t>, shaders::maxTextureCountPerShader> textureBindings;
 
-    mutable MTLRenderPipelineStatePtr renderPipelineStateCache;
+    mutable mbgl::unordered_map<std::size_t, MTLRenderPipelineStatePtr> renderPipelineStateCache;
 };
 
 } // namespace mtl
