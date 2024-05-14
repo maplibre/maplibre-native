@@ -227,17 +227,33 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
     const float EDGE_GAMMA = 0.105 / DEVICE_PIXEL_RATIO;
     const float fontGamma = in.fontScale * drawable.gamma_scale;
 
-    const float fillGamma = in.gamma_scale * EDGE_GAMMA / fontGamma;
-    const float haloGamma = in.gamma_scale * ((halo_blur * 1.19 / SDF_PX) + EDGE_GAMMA) / fontGamma;
+    const float fillGamma = EDGE_GAMMA / fontGamma;
+    const float haloGamma = (halo_blur * 1.19 / SDF_PX + EDGE_GAMMA) / fontGamma;
 
-    const float fillBuff = (256.0 - 64.0) / 256.0;
-    const float haloBuff = (6.0 - halo_width / in.fontScale) / SDF_PX;
+    const float fillInnerEdge = (256.0 - 64.0) / 256.0;
+    const float haloEdge = (6.0 - halo_width / in.fontScale) / SDF_PX;
+    const float haloInnerEdge = fillInnerEdge + haloGamma * in.gamma_scale;
 
     const float dist = glyph_image.sample(glyph_sampler, float2(in.tex)).a;
 
-    const float fillAlpha = doFill ? smoothstep(fillBuff - fillGamma, fillBuff + fillGamma, dist) * opacity * in.fade_opacity : 0.0;
-    const float haloAlpha = doHalo ? smoothstep(haloBuff - haloGamma, haloBuff + haloGamma, dist) * opacity * in.fade_opacity : 0.0;
+    const float fillAlpha = doFill ?
+            smoothstep(fillInnerEdge - fillGamma,
+                       fillInnerEdge + fillGamma,
+                       dist) *
+            opacity * in.fade_opacity : 0.0;
 
+    // When drawing halos, we want the inside of the halo to be
+    // transparent as well in case the text fill is transparent.
+    const float haloAlpha = doHalo ?
+            min(smoothstep(haloEdge - haloGamma * in.gamma_scale,
+                           haloEdge + haloGamma * in.gamma_scale,
+                           dist),
+                1 - smoothstep(haloInnerEdge - haloGamma * in.gamma_scale,
+                               haloInnerEdge + haloGamma * in.gamma_scale,
+                               dist)) *
+            opacity * in.fade_opacity : 0.0;
+
+    // Only apply the halo if the fill is less than opaque here
     const bool reallyFill = doFill && fillAlpha > 0;
     const bool reallyHalo = doHalo && haloAlpha > 0 && fillAlpha < 1;
 
