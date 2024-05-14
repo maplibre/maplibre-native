@@ -362,8 +362,14 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
         // Create a render pipeline state, telling Metal how to render the primitives
         const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
-        const std::size_t hash = mbgl::util::hash(ShaderClass::attributes[0].index, 0, MTL::VertexFormatShort2, vertexSize, MTL::VertexStepFunctionPerVertex, 1);
-        if (auto state = mtlShader.getRenderPipelineState(renderable, vertDesc, colorMode, mbgl::util::hash(colorMode.hash(), hash))) {
+        const std::size_t hash = mbgl::util::hash(ShaderClass::attributes[0].index,
+                                                  0,
+                                                  MTL::VertexFormatShort2,
+                                                  vertexSize,
+                                                  MTL::VertexStepFunctionPerVertex,
+                                                  1);
+        if (auto state = mtlShader.getRenderPipelineState(
+                renderable, vertDesc, colorMode, mbgl::util::hash(colorMode.hash(), hash))) {
             clipMaskPipelineState = std::move(state);
         }
     }
