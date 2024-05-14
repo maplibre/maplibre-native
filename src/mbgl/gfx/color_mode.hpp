@@ -59,9 +59,17 @@ public:
     static ColorMode additive() {
         return {Add{ColorBlendFactorType::One, ColorBlendFactorType::One}, {}, {true, true, true, true}};
     }
-    
+
     std::size_t hash() const {
-        return mbgl::util::hash(blendFunction.which(), blendColor.r, blendColor.g, blendColor.b, blendColor.a, mask.r, mask.g, mask.b, mask.a);
+        return mbgl::util::hash(blendFunction.which(),
+                                blendColor.r,
+                                blendColor.g,
+                                blendColor.b,
+                                blendColor.a,
+                                mask.r,
+                                mask.g,
+                                mask.b,
+                                mask.a);
     }
 };
 

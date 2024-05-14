@@ -176,7 +176,7 @@ MTLRenderPipelineStatePtr ShaderProgram::getRenderPipelineState(const gfx::Rende
         // store the value for future reuse
         renderPipelineStateCache[reuseHash.value()] = rps;
     }
-    
+
     return rps;
 }
 

@@ -36,7 +36,7 @@ public:
     std::vector<UniqueDrawSegment> segments;
 
     MTLVertexDescriptorPtr vertexDesc;
-    std::size_t vertexDescHash {0};
+    std::size_t vertexDescHash{0};
 
     /*
         std::vector<TextureID> textures;
