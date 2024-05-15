@@ -6,14 +6,16 @@ let package = Package(
     products: [
         .library(
             name: "Mapbox",
-            targets: ["Mapbox"])
+            targets: ["Mapbox"]
+        ),
     ],
     dependencies: [
-    ],    
+    ],
     targets: [
         .binaryTarget(
             name: "Mapbox",
             url: "MAPLIBRE_PACKAGE_URL",
-            checksum: "MAPLIBRE_PACKAGE_CHECKSUM")
+            checksum: "MAPLIBRE_PACKAGE_CHECKSUM"
+        ),
     ]
 )

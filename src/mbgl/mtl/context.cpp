@@ -23,6 +23,7 @@
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/thread_pool.hpp>
+#include <mbgl/util/hash.hpp>
 
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
@@ -361,7 +362,14 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
         // Create a render pipeline state, telling Metal how to render the primitives
         const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
-        if (auto state = mtlShader.getRenderPipelineState(renderable, vertDesc, colorMode)) {
+        const std::size_t hash = mbgl::util::hash(ShaderClass::attributes[0].index,
+                                                  0,
+                                                  MTL::VertexFormatShort2,
+                                                  vertexSize,
+                                                  MTL::VertexStepFunctionPerVertex,
+                                                  1);
+        if (auto state = mtlShader.getRenderPipelineState(
+                renderable, vertDesc, colorMode, mbgl::util::hash(colorMode.hash(), hash))) {
             clipMaskPipelineState = std::move(state);
         }
     }
