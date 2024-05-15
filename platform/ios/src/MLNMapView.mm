@@ -6955,6 +6955,7 @@ static void *windowScreenContext = &windowScreenContext;
 
         if (annotationView)
         {
+            annotationView.center = CGPointZero;
             annotationView.center = MLNPointRounded([self convertCoordinate:annotationContext.annotation.coordinate toPointToView:self]);
             haveVisibleAnnotationViews = true;
         }
