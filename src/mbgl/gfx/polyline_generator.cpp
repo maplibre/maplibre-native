@@ -138,6 +138,16 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
     const std::size_t startVertex = vertices.elements();
     std::vector<TriangleElement> triangleStore;
 
+    // Pre-allocate for triangles based on measuring benchmark execution
+    constexpr auto approxTrianglesPerSegment = 6;
+    triangleStore.reserve((len - first) * approxTrianglesPerSegment);
+
+    // Vertex count depends on length rather than segment count, and two elements often generates
+    // thousands of vertices, so we allocate some extra memory to skip the next 10 allocations.
+    if (vertices.empty()) {
+        vertices.reserve(1 << 10);
+    }
+
     for (std::size_t i = first; i < len; ++i) {
         if (options.type == FeatureType::Polygon && i == len - 1) {
             // if the line is closed, we treat the last vertex like the first
@@ -533,6 +543,9 @@ void PolylineGenerator<PLV, PS>::generate(const GeometryCoordinates& coordinates
     assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
     const uint16_t index = static_cast<uint16_t>(segment.vertexLength);
 
+    if (indexes.empty()) {
+        indexes.reserve(triangleStore.size() * 3);
+    }
     for (const auto& triangle : triangleStore) {
         indexes.emplace_back(index + triangle.a, index + triangle.b, index + triangle.c);
     }
@@ -552,7 +565,7 @@ void PolylineGenerator<PLV, PS>::addCurrentVertex(const GeometryCoordinate& curr
                                                   std::vector<TriangleElement>& triangleStore,
                                                   std::optional<PolylineGeneratorDistances> lineDistances) {
     Point<double> extrude = normal;
-    double scaledDistance = lineDistances ? lineDistances->scaleToMaxLineDistance(distance) : distance;
+    const double scaledDistance = lineDistances ? lineDistances->scaleToMaxLineDistance(distance) : distance;
 
     if (endLeft) extrude = extrude - (util::perp(normal) * endLeft);
     vertices.emplace_back(layoutVertex(currentCoordinate,
