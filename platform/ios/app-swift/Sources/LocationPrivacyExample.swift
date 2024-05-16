@@ -18,17 +18,17 @@ class MapViewModel: NSObject, ObservableObject {
 class MapLibreRepresentableCoordinator: NSObject, MLNMapViewDelegate {
     @ObservedObject private var mapViewModel: MapViewModel
     private var pannedToUserLocation = false
-    
+
     init(mapViewModel: MapViewModel) {
         self.mapViewModel = mapViewModel
         super.init()
     }
-    
+
     @MainActor func mapView(_: MLNMapView, didChangeLocationManagerAuthorization manager: MLNLocationManager) {
         guard let accuracySetting = manager.accuracyAuthorization else {
             return
         }
-        
+
         switch accuracySetting() {
         case .fullAccuracy:
             mapViewModel.locationAccuracy = .fullAccuracy
@@ -53,7 +53,7 @@ class MapLibreRepresentableCoordinator: NSObject, MLNMapViewDelegate {
 
 struct MapLibreViewRepresentable: UIViewRepresentable {
     @ObservedObject var mapViewModel: MapViewModel
-    
+
     func makeCoordinator() -> MapLibreRepresentableCoordinator {
         MapLibreRepresentableCoordinator(mapViewModel: mapViewModel)
     }
@@ -75,7 +75,7 @@ struct MapLibreViewRepresentable: UIViewRepresentable {
 
 struct LocationPrivacyExampleView: View {
     @StateObject private var mapViewModel = MapViewModel()
-    
+
     var body: some View {
         VStack {
             MapLibreViewRepresentable(mapViewModel: mapViewModel)
