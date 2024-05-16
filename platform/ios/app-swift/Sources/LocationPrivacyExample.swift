@@ -18,17 +18,17 @@ class PrivacyExampleViewModel: NSObject, ObservableObject {
 class PrivacyExampleCoordinator: NSObject, MLNMapViewDelegate {
     @ObservedObject private var mapViewModel: PrivacyExampleViewModel
     private var pannedToUserLocation = false
-    
+
     init(mapViewModel: PrivacyExampleViewModel) {
         self.mapViewModel = mapViewModel
         super.init()
     }
-    
+
     @MainActor func mapView(_: MLNMapView, didChangeLocationManagerAuthorization manager: MLNLocationManager) {
         guard let accuracySetting = manager.accuracyAuthorization else {
             return
         }
-        
+
         switch accuracySetting() {
         case .fullAccuracy:
             mapViewModel.locationAccuracy = .fullAccuracy
@@ -53,7 +53,7 @@ class PrivacyExampleCoordinator: NSObject, MLNMapViewDelegate {
 
 struct PrivacyExampleRepresentable: UIViewRepresentable {
     @ObservedObject var mapViewModel: PrivacyExampleViewModel
-    
+
     func makeCoordinator() -> PrivacyExampleCoordinator {
         PrivacyExampleCoordinator(mapViewModel: mapViewModel)
     }
@@ -75,7 +75,7 @@ struct PrivacyExampleRepresentable: UIViewRepresentable {
 
 struct LocationPrivacyExampleView: View {
     @StateObject private var viewModel = PrivacyExampleViewModel()
-    
+
     var body: some View {
         VStack {
             PrivacyExampleRepresentable(mapViewModel: viewModel)
