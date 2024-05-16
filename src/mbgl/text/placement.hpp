@@ -77,7 +77,7 @@ struct RetainedQueryData {
 
 class CollisionGroups {
 public:
-    using Predicate = std::function<bool(const IndexedSubfeature&)>;
+    using Predicate = std::function<bool(const RefIndexedSubfeature&)>;
     using CollisionGroup = std::pair<uint16_t, std::optional<Predicate>>;
 
     CollisionGroups(const bool crossSourceCollisions_)

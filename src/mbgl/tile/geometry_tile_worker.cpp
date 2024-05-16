@@ -363,7 +363,9 @@ void GeometryTileWorker::parse() {
     ImageDependencies imageDependencies;
 
     // Create render layers and group by layout
-    std::unordered_map<std::string, std::vector<Immutable<style::LayerProperties>>> groupMap;
+    mbgl::unordered_map<std::string, std::vector<Immutable<style::LayerProperties>>> groupMap;
+    groupMap.reserve(layers->size());
+
     for (auto layer : *layers) {
         groupMap[layoutKey(*layer->baseImpl)].push_back(std::move(layer));
     }
