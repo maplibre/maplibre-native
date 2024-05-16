@@ -10,25 +10,25 @@ enum LocationAccuracyState {
 }
 
 @MainActor
-class MapViewModel: NSObject, ObservableObject {
+class PrivacyExampleViewModel: NSObject, ObservableObject {
     @Published var locationAccuracy: LocationAccuracyState = .unknown
     @Published var showTemporaryLocationAuthorization = false
 }
 
-class MapLibreRepresentableCoordinator: NSObject, MLNMapViewDelegate {
-    @ObservedObject private var mapViewModel: MapViewModel
+class PrivacyExampleCoordinator: NSObject, MLNMapViewDelegate {
+    @ObservedObject private var mapViewModel: PrivacyExampleViewModel
     private var pannedToUserLocation = false
-
-    init(mapViewModel: MapViewModel) {
+    
+    init(mapViewModel: PrivacyExampleViewModel) {
         self.mapViewModel = mapViewModel
         super.init()
     }
-
+    
     @MainActor func mapView(_: MLNMapView, didChangeLocationManagerAuthorization manager: MLNLocationManager) {
         guard let accuracySetting = manager.accuracyAuthorization else {
             return
         }
-
+        
         switch accuracySetting() {
         case .fullAccuracy:
             mapViewModel.locationAccuracy = .fullAccuracy
@@ -51,11 +51,11 @@ class MapLibreRepresentableCoordinator: NSObject, MLNMapViewDelegate {
     }
 }
 
-struct MapLibreViewRepresentable: UIViewRepresentable {
-    @ObservedObject var mapViewModel: MapViewModel
-
-    func makeCoordinator() -> MapLibreRepresentableCoordinator {
-        MapLibreRepresentableCoordinator(mapViewModel: mapViewModel)
+struct PrivacyExampleRepresentable: UIViewRepresentable {
+    @ObservedObject var mapViewModel: PrivacyExampleViewModel
+    
+    func makeCoordinator() -> PrivacyExampleCoordinator {
+        PrivacyExampleCoordinator(mapViewModel: mapViewModel)
     }
 
     func makeUIView(context: Context) -> MLNMapView {
@@ -74,16 +74,16 @@ struct MapLibreViewRepresentable: UIViewRepresentable {
 }
 
 struct LocationPrivacyExampleView: View {
-    @StateObject private var mapViewModel = MapViewModel()
-
+    @StateObject private var viewModel = PrivacyExampleViewModel()
+    
     var body: some View {
         VStack {
-            MapLibreViewRepresentable(mapViewModel: mapViewModel)
+            PrivacyExampleRepresentable(mapViewModel: viewModel)
                 .edgesIgnoringSafeArea(.all)
 
-            if mapViewModel.locationAccuracy == LocationAccuracyState.reducedAccuracy {
+            if viewModel.locationAccuracy == LocationAccuracyState.reducedAccuracy {
                 Button("Request Precise Location") {
-                    mapViewModel.showTemporaryLocationAuthorization.toggle()
+                    viewModel.showTemporaryLocationAuthorization.toggle()
                 }
                 .padding()
                 .background(Color.blue)
