@@ -18,17 +18,17 @@ class PrivacyExampleViewModel: NSObject, ObservableObject {
 class PrivacyExampleCoordinator: NSObject, MLNMapViewDelegate {
     @ObservedObject private var mapViewModel: PrivacyExampleViewModel
     private var pannedToUserLocation = false
-
+    
     init(mapViewModel: PrivacyExampleViewModel) {
         self.mapViewModel = mapViewModel
         super.init()
     }
-
+    
     @MainActor func mapView(_: MLNMapView, didChangeLocationManagerAuthorization manager: MLNLocationManager) {
         guard let accuracySetting = manager.accuracyAuthorization else {
             return
         }
-
+        
         switch accuracySetting() {
         case .fullAccuracy:
             mapViewModel.locationAccuracy = .fullAccuracy
@@ -53,13 +53,14 @@ class PrivacyExampleCoordinator: NSObject, MLNMapViewDelegate {
 
 struct PrivacyExampleRepresentable: UIViewRepresentable {
     @ObservedObject var mapViewModel: PrivacyExampleViewModel
-
+    
     func makeCoordinator() -> PrivacyExampleCoordinator {
         PrivacyExampleCoordinator(mapViewModel: mapViewModel)
     }
 
     func makeUIView(context: Context) -> MLNMapView {
         let mapView = MLNMapView()
+        
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = true
         return mapView
@@ -69,13 +70,16 @@ struct PrivacyExampleRepresentable: UIViewRepresentable {
         if mapViewModel.showTemporaryLocationAuthorization {
             let purposeKey = "MLNAccuracyAuthorizationDescription"
             mapView.locationManager.requestTemporaryFullAccuracyAuthorization?(withPurposeKey: purposeKey)
+            DispatchQueue.main.async {
+                mapViewModel.showTemporaryLocationAuthorization = false
+            }
         }
     }
 }
 
 struct LocationPrivacyExampleView: View {
     @StateObject private var viewModel = PrivacyExampleViewModel()
-
+    
     var body: some View {
         VStack {
             PrivacyExampleRepresentable(mapViewModel: viewModel)
