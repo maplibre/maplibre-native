@@ -7,6 +7,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 ## 6.4.2
 
 - Fix Metal frame glitch on older devices ([#2379](https://github.com/maplibre/maplibre-native/pull/2379)).
+- Fix style switching delay fix when annotations are visible ([#2395](https://github.com/maplibre/maplibre-native/pull/2395)).
 - Small performance and memory usage optimizations.
 
 ## 6.4.1
