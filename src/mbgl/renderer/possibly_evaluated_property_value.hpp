@@ -34,6 +34,11 @@ public:
         return value.match(std::forward<Ts>(ts)...);
     }
 
+    T evaluate(float zoom) const {
+        return this->match([&](const T& constant_) { return constant_; },
+                           [&](const style::PropertyExpression<T>& expression) { return expression.evaluate(zoom); });
+    }
+
     template <class Feature>
     T evaluate(const Feature& feature, float zoom, T defaultValue) const {
         return this->match([&](const T& constant_) { return constant_; },

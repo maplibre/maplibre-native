@@ -188,7 +188,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 : linePropertiesUBO(properties) {}
             ~PolylineDrawableTweaker() override = default;
 
-            void init(gfx::Drawable&) override {};
+            void init(gfx::Drawable&) override {}
 
             void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
                 if (!drawable.getTileID().has_value()) {
@@ -220,6 +220,9 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
                 drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
                 drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
+
+                // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
+                assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
             };
 
         private:
@@ -244,7 +247,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                                                   /*offset*/ 0.f,
                                                                   /*width*/ 4.f,
                                                                   /*floorwidth*/ 0,
-                                                                  0,
+                                                                  LineExpressionMask::None,
                                                                   0};
         auto tweaker = std::make_shared<PolylineDrawableTweaker>(linePropertiesUBO);
 

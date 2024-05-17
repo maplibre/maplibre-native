@@ -9,6 +9,7 @@ template <class... Ts>
 struct TypeList {
     template <template <class...> class T, class... Ps>
     using ExpandInto = T<Ps..., Ts...>;
+    static constexpr std::size_t TypeCount = sizeof...(Ts);
 };
 
 namespace detail {

@@ -87,7 +87,7 @@ public:
                      const float boxScale,
                      const float padding,
                      const style::SymbolPlacementType placement,
-                     const IndexedSubfeature& indexedFeature_,
+                     const RefIndexedSubfeature& indexedFeature_,
                      const float overscaling,
                      const float rotate)
         : CollisionFeature(line,
@@ -117,7 +117,7 @@ public:
                      std::optional<PositionedIcon> shapedIcon,
                      const float boxScale,
                      const float padding,
-                     const IndexedSubfeature& indexedFeature_,
+                     const RefIndexedSubfeature& indexedFeature_,
                      const float rotate)
         : CollisionFeature(line,
                            anchor,
