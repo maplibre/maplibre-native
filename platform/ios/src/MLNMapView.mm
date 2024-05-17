@@ -6955,6 +6955,13 @@ static void *windowScreenContext = &windowScreenContext;
 
         if (annotationView)
         {
+            // Reset the center to zero in order to force the annotation view to redraw even when is not moving.
+            // This will force somehow the map view to display the rendered drawable for older devices.
+            // This is a fix for the following issues:
+            // https://github.com/maplibre/maplibre-native/issues/2337
+            // https://github.com/maplibre/maplibre-native/issues/2380
+            annotationView.center = CGPointZero;
+            
             annotationView.center = MLNPointRounded([self convertCoordinate:annotationContext.annotation.coordinate toPointToView:self]);
             haveVisibleAnnotationViews = true;
         }
