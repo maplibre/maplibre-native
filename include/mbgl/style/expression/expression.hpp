@@ -4,6 +4,7 @@
 #include <mbgl/style/expression/type.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/tile/tile_id.hpp>
+#include <mbgl/util/bitmask_operations.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/variant.hpp>
@@ -202,17 +203,14 @@ enum class Dependency : uint32_t {
     Var = 1 << 5,      // Use variable binding
     Override = 1 << 6, // Property override
     MaskCount = 7,
+    All = (1 << MaskCount) - 1,
 };
-inline constexpr static Dependency operator|(Dependency x, Dependency y) noexcept {
-    return Dependency{mbgl::underlying_type(x) | mbgl::underlying_type(y)};
-}
-inline constexpr static Dependency operator&(Dependency x, Dependency y) noexcept {
-    return Dependency{mbgl::underlying_type(x) & mbgl::underlying_type(y)};
-}
-inline static Dependency& operator|=(Dependency& target, Dependency source) noexcept {
-    target = target | source;
-    return target;
-}
+
+class Interpolate;
+class Step;
+
+using ZoomCurveOrError = std::optional<variant<const Interpolate*, const Step*, ParsingError>>;
+using ZoomCurvePtr = variant<std::nullptr_t, const Interpolate*, const Step*>;
 
 class Expression {
 public:
@@ -263,6 +261,9 @@ public:
     virtual std::string getOperator() const = 0;
 
     const Dependency dependencies;
+
+    /// Test the expression's dependencies for any of one or more values
+    bool has(Dependency dep) const { return (dependencies & dep); }
 
 protected:
     template <typename T>

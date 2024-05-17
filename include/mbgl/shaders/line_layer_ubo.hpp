@@ -1,9 +1,26 @@
 #pragma once
 
 #include <mbgl/shaders/layer_ubo.hpp>
+#include <mbgl/style/property_expression.hpp>
+#include <mbgl/util/bitmask_operations.hpp>
+
+#if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/gpu_expression.hpp>
+#endif // MLN_DRAWABLE_RENDERER
 
 namespace mbgl {
 namespace shaders {
+
+enum class LineExpressionMask : uint32_t {
+    None = 0,
+    Color = 1 << 0,
+    Opacity = 1 << 1,
+    Blur = 1 << 2,
+    Width = 1 << 3,
+    GapWidth = 1 << 4,
+    FloorWidth = 1 << 5,
+    Offset = 1 << 6,
+};
 
 //
 // Line
@@ -25,6 +42,17 @@ struct alignas(16) LineInterpolationUBO {
     float pad1, pad2;
 };
 static_assert(sizeof(LineInterpolationUBO) % 16 == 0);
+
+struct alignas(16) LineExpressionUBO {
+    gfx::GPUExpression color;
+    gfx::GPUExpression blur;
+    gfx::GPUExpression opacity;
+    gfx::GPUExpression gapwidth;
+    gfx::GPUExpression offset;
+    gfx::GPUExpression width;
+    gfx::GPUExpression floorWidth;
+};
+static_assert(sizeof(LineExpressionUBO) % 16 == 0);
 
 //
 // Line gradient
@@ -110,7 +138,8 @@ struct alignas(16) LineEvaluatedPropsUBO {
     float offset;
     float width;
     float floorwidth;
-    float pad1, pad2;
+    LineExpressionMask expressionMask;
+    float pad1;
 };
 static_assert(sizeof(LineEvaluatedPropsUBO) % 16 == 0);
 
@@ -119,6 +148,7 @@ enum {
     idLineInterpolationUBO,
     idLineTilePropertiesUBO,
     idLineEvaluatedPropsUBO,
+    idLineExpressionUBO,
     lineUBOCount
 };
 

@@ -64,12 +64,19 @@ RenderLineLayer::~RenderLineLayer() = default;
 void RenderLineLayer::transition(const TransitionParameters& parameters) {
     unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     updateColorRamp();
+
+#if MLN_RENDER_BACKEND_METAL
+    if (auto* tweaker = static_cast<LineLayerTweaker*>(layerTweaker.get())) {
+        tweaker->updateGPUExpressions(unevaluated, parameters.now);
+    }
+#endif // MLN_RENDER_BACKEND_METAL
 }
 
 void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    const auto previousProperties = staticImmutableCast<LineLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<LineLayerProperties>(staticImmutableCast<LineLayer::Impl>(baseImpl),
                                                        parameters.getCrossfadeParameters(),
-                                                       unevaluated.evaluate(parameters));
+                                                       unevaluated.evaluate(parameters, previousProperties->evaluated));
     auto& evaluated = properties->evaluated;
 
     passes = (evaluated.get<style::LineOpacity>().constantOr(1.0) > 0 &&
@@ -81,8 +88,11 @@ void RenderLineLayer::evaluate(const PropertyEvaluationParameters& parameters) {
     evaluatedProperties = std::move(properties);
 
 #if MLN_DRAWABLE_RENDERER
-    if (layerTweaker) {
-        layerTweaker->updateProperties(evaluatedProperties);
+    if (auto* tweaker = static_cast<LineLayerTweaker*>(layerTweaker.get())) {
+        tweaker->updateProperties(evaluatedProperties);
+#if MLN_RENDER_BACKEND_METAL
+        tweaker->updateGPUExpressions(unevaluated, parameters.now);
+#endif // MLN_RENDER_BACKEND_METAL
     }
 #endif
 }
@@ -348,7 +358,7 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState& state,
-                             const std::shared_ptr<UpdateParameters>&,
+                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& parameters,
                              [[maybe_unused]] const RenderTree& renderTree,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {
@@ -367,7 +377,12 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     if (!layerTweaker) {
-        layerTweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
+        auto tweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
+#if MLN_RENDER_BACKEND_METAL
+        tweaker->updateGPUExpressions(unevaluated, parameters->timePoint);
+#endif // MLN_RENDER_BACKEND_METAL
+
+        layerTweaker = std::move(tweaker);
         layerGroup->addLayerTweaker(layerTweaker);
     }
 

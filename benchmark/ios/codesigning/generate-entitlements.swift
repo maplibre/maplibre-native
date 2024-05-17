@@ -1,8 +1,9 @@
 #!/usr/bin/swift
 
+import Foundation
+
 /// Generates Entitlement files .xcent for codesigning, containing the correct team id
 import Swift
-import Foundation
 
 let fileManager = FileManager.default
 
@@ -16,12 +17,11 @@ guard let rawTeamIdEnv = getenv("IOS_DEVELOPMENT_TEAM") else {
 let teamId2 = String(utf8String: rawTeamIdEnv)
 
 for file in contentsOfCurrentWorkingDirectory {
-    if (file.pathExtension == "template") {
+    if file.pathExtension == "template" {
         var content = ""
         do {
             content = try String(contentsOf: file, encoding: .utf8)
-        }
-        catch {
+        } catch {
             print("Error reading xcent file: \(error).")
         }
 
@@ -32,8 +32,7 @@ for file in contentsOfCurrentWorkingDirectory {
         do {
             try content.write(to: targetFile, atomically: false, encoding: .utf8)
             print("Entitlement " + targetFile.absoluteString + " generated.")
-        }
-        catch {
+        } catch {
             print("Error writing xcent file: \(error).")
         }
     }

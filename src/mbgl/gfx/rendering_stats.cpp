@@ -57,23 +57,44 @@ RenderingStats& RenderingStats::operator+=(const RenderingStats& r) {
 }
 
 #if !defined(NDEBUG)
+template <typename T>
+std::ostream& optionalStatLine(std::ostream& stream, T value, std::string_view label, std::string_view sep) {
+    if (value) {
+        stream << label << " = " << value << sep;
+    }
+    return stream;
+}
 std::string RenderingStats::toString(std::string_view sep) const {
     std::stringstream ss;
-    ss << "numFrames = " << numFrames << sep << "numDrawCalls = " << numDrawCalls << sep
-       << "totalDrawCalls = " << totalDrawCalls << sep << "numCreatedTextures = " << numCreatedTextures << sep
-       << "numActiveTextures = " << numActiveTextures << sep << "numTextureBindings = " << numTextureBindings << sep
-       << "numTextureUpdates = " << numTextureUpdates << sep << "textureUpdateBytes = " << textureUpdateBytes << sep
-       << "totalBuffers = " << totalBuffers << sep << "totalBufferObjs = " << totalBufferObjs << sep
-       << "bufferUpdates = " << bufferUpdates << sep << "bufferObjUpdates = " << bufferObjUpdates << sep
-       << "bufferUpdateBytes = " << bufferUpdateBytes << sep << "numBuffers = " << numBuffers << sep
-       << "numFrameBuffers = " << numFrameBuffers << sep << "numIndexBuffers = " << numIndexBuffers << sep
-       << "indexUpdateBytes = " << indexUpdateBytes << sep << "numVertexBuffers = " << numVertexBuffers << sep
-       << "vertexUpdateBytes = " << vertexUpdateBytes << sep << "numUniformBuffers = " << numUniformBuffers << sep
-       << "numUniformUpdates = " << numUniformUpdates << sep << "uniformUpdateBytes = " << uniformUpdateBytes << sep
-       << "memTextures = " << memTextures << sep << "memBuffers = " << memBuffers << sep
-       << "memIndexBuffers = " << memIndexBuffers << sep << "memVertexBuffers = " << memVertexBuffers << sep
-       << "memUniformBuffers = " << memUniformBuffers << sep << "stencilClears = " << stencilClears << sep
-       << "stencilUpdates = " << stencilUpdates << sep;
+    optionalStatLine(ss, numFrames, "numFrames", sep);
+    optionalStatLine(ss, numDrawCalls, "numDrawCalls", sep);
+    optionalStatLine(ss, totalDrawCalls, "totalDrawCalls", sep);
+    optionalStatLine(ss, numCreatedTextures, "numCreatedTextures", sep);
+    optionalStatLine(ss, numActiveTextures, "numActiveTextures", sep);
+    optionalStatLine(ss, numTextureBindings, "numTextureBindings", sep);
+    optionalStatLine(ss, numTextureUpdates, "numTextureUpdates", sep);
+    optionalStatLine(ss, textureUpdateBytes, "textureUpdateBytes", sep);
+    optionalStatLine(ss, totalBuffers, "totalBuffers", sep);
+    optionalStatLine(ss, totalBufferObjs, "totalBufferObjs", sep);
+    optionalStatLine(ss, bufferUpdates, "bufferUpdates", sep);
+    optionalStatLine(ss, bufferObjUpdates, "bufferObjUpdates", sep);
+    optionalStatLine(ss, bufferUpdateBytes, "bufferUpdateBytes", sep);
+    optionalStatLine(ss, numBuffers, "numBuffers", sep);
+    optionalStatLine(ss, numFrameBuffers, "numFrameBuffers", sep);
+    optionalStatLine(ss, numIndexBuffers, "numIndexBuffers", sep);
+    optionalStatLine(ss, indexUpdateBytes, "indexUpdateBytes", sep);
+    optionalStatLine(ss, numVertexBuffers, "numVertexBuffers", sep);
+    optionalStatLine(ss, vertexUpdateBytes, "vertexUpdateBytes", sep);
+    optionalStatLine(ss, numUniformBuffers, "numUniformBuffers", sep);
+    optionalStatLine(ss, numUniformUpdates, "numUniformUpdates", sep);
+    optionalStatLine(ss, uniformUpdateBytes, "uniformUpdateBytes", sep);
+    optionalStatLine(ss, memTextures, "memTextures", sep);
+    optionalStatLine(ss, memBuffers, "memBuffers", sep);
+    optionalStatLine(ss, memIndexBuffers, "memIndexBuffers", sep);
+    optionalStatLine(ss, memVertexBuffers, "memVertexBuffers", sep);
+    optionalStatLine(ss, memUniformBuffers, "memUniformBuffers", sep);
+    optionalStatLine(ss, stencilClears, "stencilClears", sep);
+    optionalStatLine(ss, stencilUpdates, "stencilUpdates", sep);
     return ss.str();
 }
 #endif

@@ -31,6 +31,9 @@ public:
 
     static Type GetType() { return Value(DefaultType); }
 
+    static bool getEnableGPUExpressionEval() { return enableGPUExpressionEval; }
+    static void setEnableGPUExpressionEval(bool value) { enableGPUExpressionEval = value; }
+
     template <typename T, typename... Args>
     static std::unique_ptr<T> Create(Args... args) {
 #if MLN_RENDER_BACKEND_METAL
@@ -48,6 +51,8 @@ private:
         static const Type type = value;
         return type;
     }
+
+    static bool enableGPUExpressionEval;
 };
 
 } // namespace gfx

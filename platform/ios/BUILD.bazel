@@ -229,7 +229,10 @@ ios_application(
     infoplists = ["//platform/ios/benchmark:info_benchmark_plist"],
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
-    resources = ["//platform/ios/benchmark:bundle_resources"],
+    resources = [
+        "//platform/ios/benchmark:bundle_resources",
+        "//platform/ios/benchmark/assets:benchmark_assets",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         "//platform:ios-benchapp",
@@ -262,6 +265,13 @@ xcodeproj(
     top_level_targets = [
         top_level_target(
             "App",
+            target_environments = [
+                "simulator",
+                "device",
+            ],
+        ),
+        top_level_target(
+            "//platform/ios/app-swift:MapLibreApp",
             target_environments = [
                 "simulator",
                 "device",

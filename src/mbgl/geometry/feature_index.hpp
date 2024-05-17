@@ -21,32 +21,67 @@ class SourceFeatureState;
 
 class CollisionIndex;
 
-class IndexedSubfeature {
+/// An indexed element within a feature index.
+/// This version holds a reference to the strings within the index itself to avoid making tens of thousands of
+/// unnecessary copies of them. As a result, its lifetime cannot exceed that of the index.
+class RefIndexedSubfeature {
 public:
-    IndexedSubfeature() = delete;
-    IndexedSubfeature(std::size_t index_, std::string sourceLayerName_, std::string bucketName_, size_t sortIndex_)
-        : index(index_),
-          sourceLayerName(std::move(sourceLayerName_)),
-          bucketLeaderID(std::move(bucketName_)),
-          sortIndex(sortIndex_),
-          bucketInstanceId(0),
-          collisionGroupId(0) {}
+    RefIndexedSubfeature() = delete;
+    RefIndexedSubfeature(RefIndexedSubfeature&&) = default;
+    RefIndexedSubfeature(const RefIndexedSubfeature&) = default;
+    RefIndexedSubfeature(std::size_t index_,
+                         const std::string& sourceLayerName_,
+                         const std::string& bucketName_,
+                         size_t sortIndex_,
+                         uint32_t bucketInstanceId_ = 0,
+                         uint16_t collisionGroupId_ = 0);
 
-    IndexedSubfeature(const IndexedSubfeature& other, uint32_t bucketInstanceId_, uint16_t collisionGroupId_)
-        : index(other.index),
-          sourceLayerName(other.sourceLayerName),
-          bucketLeaderID(other.bucketLeaderID),
-          sortIndex(other.sortIndex),
-          bucketInstanceId(bucketInstanceId_),
-          collisionGroupId(collisionGroupId_) {}
+    RefIndexedSubfeature& operator=(const RefIndexedSubfeature&) = default;
+    RefIndexedSubfeature& operator=(RefIndexedSubfeature&&) = default;
+
+    size_t getIndex() const { return index; }
+    size_t getSortIndex() const { return sortIndex; }
+
+    const std::string& getSourceLayerName() const { return sourceLayerName.get(); }
+    const std::string& getBucketLeaderID() const { return bucketLeaderID.get(); }
+
+    uint32_t getBucketInstanceId() const { return bucketInstanceId; }
+    uint16_t getCollisionGroupId() const { return collisionGroupId; }
+
+protected:
     size_t index;
-    std::string sourceLayerName;
-    std::string bucketLeaderID;
     size_t sortIndex;
+
+    std::reference_wrapper<const std::string> sourceLayerName;
+    std::reference_wrapper<const std::string> bucketLeaderID;
 
     // Only used for symbol features
     uint32_t bucketInstanceId;
     uint16_t collisionGroupId;
+};
+
+/// This version of an indexed feature has copies of the necessary strings, so that it can be used outside the index.
+class IndexedSubfeature : public RefIndexedSubfeature {
+public:
+    IndexedSubfeature(const RefIndexedSubfeature&);
+    IndexedSubfeature(const RefIndexedSubfeature&, uint32_t bucketInstanceId_, uint16_t collisionGroupId_);
+
+    IndexedSubfeature(const IndexedSubfeature&);
+    IndexedSubfeature(IndexedSubfeature&&);
+
+    IndexedSubfeature(std::size_t index_,
+                      std::string sourceLayerName_,
+                      std::string bucketName_,
+                      size_t sortIndex_,
+                      uint32_t bucketInstanceId_ = 0,
+                      uint16_t collisionGroupId_ = 0);
+
+    IndexedSubfeature& operator=(const IndexedSubfeature&);
+    IndexedSubfeature& operator=(IndexedSubfeature&&);
+
+private:
+    std::string sourceLayerNameCopy;
+    std::string bucketLeaderIDCopy;
 };
 
 using FeatureSortOrder = std::shared_ptr<const std::vector<size_t>>;
@@ -112,7 +147,7 @@ public:
 
 private:
     void addFeature(std::unordered_map<std::string, std::vector<Feature>>& result,
-                    const IndexedSubfeature&,
+                    const RefIndexedSubfeature&,
                     const RenderedQueryOptions& options,
                     const CanonicalTileID&,
                     const std::unordered_map<std::string, const RenderLayer*>&,
@@ -122,10 +157,15 @@ private:
                     const mat4& posMatrix,
                     const SourceFeatureState* sourceFeatureState) const;
 
-    GridIndex<IndexedSubfeature> grid;
+    GridIndex<RefIndexedSubfeature> grid;
     unsigned int sortIndex = 0;
 
+    // mbgl::unordered_* cannot be used here, as we rely on holding references to elements:
+    //     22.2.7 Unordered associative containers [unord.req]
+    //     The insert and emplace members shall not affect the validity of references to
+    //     container elements, but may invalidate all iterators to the container.
     std::unordered_map<std::string, std::vector<std::string>> bucketLayerIDs;
+    std::unordered_set<std::string> uniqueLayerIDs;
     std::unique_ptr<const GeometryTileData> tileData;
 };
 } // namespace mbgl

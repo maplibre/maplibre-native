@@ -371,8 +371,11 @@ void RenderSymbolLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<SymbolLayerProperties>(staticImmutableCast<SymbolLayer::Impl>(baseImpl),
-                                                         unevaluated.evaluate(parameters));
+    const auto previousProperties = staticImmutableCast<SymbolLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<SymbolLayerProperties>(
+        staticImmutableCast<SymbolLayer::Impl>(baseImpl),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
+
     auto& evaluated = properties->evaluated;
     const auto& layout = impl_cast(baseImpl).layout;
 
@@ -1180,12 +1183,14 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
     // We'll be processing renderables across tiles, potentially out-of-order, so keep
     // track of some things by tile ID so we don't have to re-build them multiple times.
-    using RawVertexVec = std::vector<std::uint8_t>; // <int16_t, 4>
+    using RawVertexVec = std::vector<std::uint8_t>; // raw buffer for vertexes of <int16_t, 4>
     struct TileInfo {
         RawVertexVec textVertices, iconVertices;
         gfx::DrawableTweakerPtr textTweaker, iconTweaker;
     };
+
     std::unordered_map<UnwrappedTileID, TileInfo> tileCache;
+    tileCache.reserve(renderTiles->size());
 
     for (auto& group : renderableSegments) {
         const auto& renderable = group.renderable;
