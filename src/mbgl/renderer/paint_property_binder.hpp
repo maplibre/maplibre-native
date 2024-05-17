@@ -476,7 +476,7 @@ public:
 #endif // MLN_LEGACY_RENDERER
 
     std::tuple<float> interpolationFactor(float currentZoom) const override {
-        const float possiblyRoundedZoom = expression.useIntegerZoom ? std::floor(currentZoom) : currentZoom;
+        const float possiblyRoundedZoom = expression.getUseIntegerZoom() ? std::floor(currentZoom) : currentZoom;
 
         return std::tuple<float>{
             std::fmax(0.0f, std::fmin(1.0f, expression.interpolationFactor(zoomRange, possiblyRoundedZoom)))};

@@ -14,6 +14,10 @@
 #include "parser.hpp"
 #include "runner.hpp"
 
+#if MLN_RENDER_BACKEND_METAL
+#include <mbgl/gfx/backend.hpp>
+#endif // MLN_RENDER_BACKEND_METAL
+
 #ifdef SHOW_ANSI_COLORS
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
@@ -158,6 +162,11 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
     }
 
     NetworkStatus::Set(online ? NetworkStatus::Status::Online : NetworkStatus::Status::Offline);
+
+#if MLN_RENDER_BACKEND_METAL
+    printf(ANSI_COLOR_YELLOW "Using GPU Expression Evaluation" ANSI_COLOR_RESET "\n");
+    mbgl::gfx::Backend::setEnableGPUExpressionEval(true);
+#endif // MLN_RENDER_BACKEND_METAL
 
     const auto& manifest = runner.getManifest();
     const auto& ignores = manifest.getIgnores();

@@ -71,8 +71,10 @@ void RenderCircleLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<CircleLayerProperties>(staticImmutableCast<CircleLayer::Impl>(baseImpl),
-                                                         unevaluated.evaluate(parameters));
+    const auto previousProperties = staticImmutableCast<CircleLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<CircleLayerProperties>(
+        staticImmutableCast<CircleLayer::Impl>(baseImpl),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
     const auto& evaluated = properties->evaluated;
 
     passes = ((evaluated.get<style::CircleRadius>().constantOr(1) > 0 ||

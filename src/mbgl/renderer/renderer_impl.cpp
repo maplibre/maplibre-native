@@ -258,8 +258,9 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         /* .symbol_fade_change = */ parameters.symbolFadeChange,
         /* .aspect_ratio = */ parameters.state.getSize().aspectRatio(),
         /* .pixel_ratio = */ parameters.pixelRatio,
-        /* .pad1/2 = */ 0,
-        0};
+        /* .zoom = */ static_cast<float>(parameters.state.getZoom()),
+        /* .pad1 = */ 0,
+    };
     auto& globalUniforms = context.mutableGlobalUniformBuffers();
     globalUniforms.createOrUpdate(shaders::idGlobalPaintParamsUBO, &globalPaintParamsUBO, context);
 #endif

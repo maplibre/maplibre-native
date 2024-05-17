@@ -39,7 +39,15 @@ TEST(ExpressionDependencies, Convert) {
     EXPECT_EQ(Dependency::Feature, toString(number(string(get("color"))))->dependencies);
     EXPECT_EQ(Dependency::Feature, boolean(string(get("color")))->dependencies);
     EXPECT_EQ(Dependency::Feature, toFormatted(toColor(string(get("color"))))->dependencies);
-    EXPECT_EQ(Dependency::Feature | Dependency::Image, toImage(string(get("color")))->dependencies);
+
+    /// See `coercion.cpp`, `extraDependency`
+    EXPECT_EQ(Dependency::Feature, toImage(string(get("color")))->dependencies);
+
+    /// See `collator_expression.cpp`, `extraDependency`
+    EXPECT_EQ(Dependency::Feature,
+              createExpression(R"(["resolved-locale",["collator",{"locale": "de"}]])")->dependencies);
+    EXPECT_EQ(Dependency::Feature | Dependency::Zoom,
+              CollatorExpression(gt(literal(1.), zoom()), literal(true), literal("en-us")).dependencies);
 }
 
 TEST(ExpressionDependencies, Compare) {
@@ -77,9 +85,4 @@ TEST(ExpressionDependencies, Distance) {
 TEST(ExpressionDependencies, CustomLayer) {
     auto impl = makeMutable<CustomLayer::Impl>("", nullptr);
     EXPECT_EQ(Dependency::None, CustomLayerProperties{std::move(impl)}.getDependencies());
-}
-
-TEST(ExpressionDependencies, Collation) {
-    auto collator = CollatorExpression(gt(literal(1.), zoom()), literal(true), literal("en-us"));
-    EXPECT_EQ(Dependency::Feature | Dependency::Zoom, collator.dependencies);
 }
