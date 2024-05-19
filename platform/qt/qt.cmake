@@ -31,7 +31,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     endif()
 endif()
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
+if("${QT_VERSION_MAJOR}" STREQUAL "")
+    find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
+else()
+    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
+endif()
 find_package(Qt${QT_VERSION_MAJOR}
              COMPONENTS Gui
                         Network
