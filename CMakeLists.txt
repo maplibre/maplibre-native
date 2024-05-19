@@ -36,7 +36,7 @@ endif()
 project("Mapbox GL Native" LANGUAGES CXX C)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER Core)
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)
 
 set(
     MEMORYCHECK_COMMAND_OPTIONS
@@ -1112,7 +1112,7 @@ set_target_properties(
         INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.md
 )
 
-set_property(TARGET mbgl-core PROPERTY FOLDER Core)
+set_property(TARGET mbgl-core PROPERTY FOLDER MapLibre)
 
 add_library(
     Mapbox::Map ALIAS mbgl-core
