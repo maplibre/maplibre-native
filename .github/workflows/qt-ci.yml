@@ -72,7 +72,7 @@ jobs:
             qt_target: desktop
             compiler: ""
           - name: Linux_GCC13
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             build_type: RelWithDebInfo
             qt_version: 6.5.3
             qt_target: desktop
@@ -156,7 +156,7 @@ jobs:
             libxcb-render-util0 \
             libxcb-xinerama0 \
             libxcb-xfixes0 \
-            libegl1-mesa \
+            libegl1 \
             fonts-noto-cjk
 
       - name: Install compiler
