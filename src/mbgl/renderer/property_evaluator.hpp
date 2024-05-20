@@ -9,6 +9,7 @@ template <typename T>
 class PropertyEvaluator {
 public:
     using ResultType = T;
+    static constexpr bool useIntegerZoom = false;
 
     PropertyEvaluator(const PropertyEvaluationParameters& parameters_, T defaultValue_)
         : parameters(parameters_),

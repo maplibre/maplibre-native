@@ -57,7 +57,7 @@ void GlyphManager::getGlyphs(GlyphRequestor& requestor, GlyphDependencies glyphD
 
     // If the shared dependencies pointer is already unique, then all dependent
     // glyph ranges have already been loaded. Send a notification immediately.
-    if (dependencies.unique()) {
+    if (dependencies.use_count() == 1) {
         notify(requestor, *dependencies);
     }
 }
@@ -121,7 +121,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
         for (auto& pair : request.requestors) {
             GlyphRequestor& requestor = *pair.first;
             const std::shared_ptr<GlyphDependencies>& dependencies = pair.second;
-            if (dependencies.unique()) {
+            if (dependencies.use_count() == 1) {
                 notify(requestor, *dependencies);
             }
         }

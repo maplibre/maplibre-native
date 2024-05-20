@@ -14,33 +14,33 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
+    static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<AttributeInfo, 8> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos_normal [[attribute(5)]];
-    uchar4 data [[attribute(6)]];
+    short2 pos_normal [[attribute(lineUBOCount + 0)]];
+    uchar4 data [[attribute(lineUBOCount + 1)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(7)]];
+    float4 color [[attribute(lineUBOCount + 2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(8)]];
+    float2 blur [[attribute(lineUBOCount + 3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(9)]];
+    float2 opacity [[attribute(lineUBOCount + 4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(10)]];
+    float2 gapwidth [[attribute(lineUBOCount + 5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(11)]];
+    float2 offset [[attribute(lineUBOCount + 6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(12)]];
+    float2 width [[attribute(lineUBOCount + 7)]];
 #endif
 };
 
@@ -78,23 +78,29 @@ struct alignas(16) LineInterpolationUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
-                                device const LineDrawableUBO& drawable [[buffer(1)]],
-                                device const LineInterpolationUBO& interp [[buffer(2)]],
-                                device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
+                                device const LineDrawableUBO& drawable [[buffer(idLineDrawableUBO)]],
+                                device const LineInterpolationUBO& interp [[buffer(idLineInterpolationUBO)]],
+                                device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
+                                device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
-    const auto gapwidth = props.gapwidth / 2;
+    const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
+    const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.zoom) : props.gapwidth) / 2;
 #else
     const auto gapwidth = unpack_mix_float(vertx.gapwidth, interp.gapwidth_t) / 2;
 #endif
+
 #if defined(HAS_UNIFORM_u_offset)
-    const auto offset   = props.offset * -1;
+    const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
+    const auto offset   = (exprOffset ? expr.offset.eval(paintParams.zoom) : props.offset) * -1;
 #else
     const auto offset   = unpack_mix_float(vertx.offset, interp.offset_t) * -1;
 #endif
+
 #if defined(HAS_UNIFORM_u_width)
-    const auto width    = props.width;
+    const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
+    const auto width    = exprWidth ? expr.width.eval(paintParams.zoom) : props.width;
 #else
     const auto width    = unpack_mix_float(vertx.width, interp.width_t);
 #endif
@@ -154,23 +160,30 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
+                            device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
+                            device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
+                            device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
-    const float4 color = props.color;
+    const auto exprColor = (props.expressionMask & LineExpressionMask::Color);
+    const auto color     = exprColor ? expr.color.evalColor(paintParams.zoom) : props.color;
 #else
     const float4 color = in.color;
 #endif
+
 #if defined(HAS_UNIFORM_u_blur)
-    const float blur = props.blur;
+    const auto exprBlur = (props.expressionMask & LineExpressionMask::Blur);
+    const float blur = exprBlur ? expr.blur.eval(paintParams.zoom) : props.blur;
 #else
     const float blur = in.blur;
 #endif
+
 #if defined(HAS_UNIFORM_u_opacity)
-    const float opacity = props.opacity;
+    const auto exprOpacity = (props.expressionMask & LineExpressionMask::Opacity);
+    const float opacity = exprOpacity ? expr.opacity.eval(paintParams.zoom) : props.opacity;
 #else
     const float opacity = in.opacity;
 #endif
@@ -201,13 +214,23 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos_normal [[attribute(5)]];
-    uchar4 data [[attribute(6)]];
-    float2 blur [[attribute(7)]];
-    float2 opacity [[attribute(8)]];
-    float2 gapwidth [[attribute(9)]];
-    float2 offset [[attribute(10)]];
-    float2 width [[attribute(11)]];
+    short2 pos_normal [[attribute(lineUBOCount + 0)]];
+    uchar4 data [[attribute(lineUBOCount + 1)]];
+#if !defined(HAS_UNIFORM_u_blur)
+    float2 blur [[attribute(lineUBOCount + 2)]];
+#endif
+#if !defined(HAS_UNIFORM_u_opacity)
+    float2 opacity [[attribute(lineUBOCount + 3)]];
+#endif
+#if !defined(HAS_UNIFORM_u_gapwidth)
+    float2 gapwidth [[attribute(lineUBOCount + 4)]];
+#endif
+#if !defined(HAS_UNIFORM_u_offset)
+    float2 offset [[attribute(lineUBOCount + 5)]];
+#endif
+#if !defined(HAS_UNIFORM_u_width)
+    float2 width [[attribute(lineUBOCount + 6)]];
+#endif
 };
 
 struct FragmentStage {
@@ -241,10 +264,11 @@ struct alignas(16) LineGradientInterpolationUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
-                                device const LineGradientDrawableUBO& drawable [[buffer(1)]],
-                                device const LineGradientInterpolationUBO& interp [[buffer(2)]],
-                                device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
+                                device const LineGradientDrawableUBO& drawable [[buffer(idLineDrawableUBO)]],
+                                device const LineGradientInterpolationUBO& interp [[buffer(idLineInterpolationUBO)]],
+                                device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
+                                device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
 #if !defined(HAS_UNIFORM_u_blur)
     const auto blur     = unpack_mix_float(vertx.blur,     interp.blur_t);
@@ -253,12 +277,12 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const auto opacity  = unpack_mix_float(vertx.opacity,  interp.opacity_t);
 #endif
 #if defined(HAS_UNIFORM_u_gapwidth)
-    const auto gapwidth = props.gapwidth;
+    const auto gapwidth = props.gapwidth / 2;
 #else
     const auto gapwidth = unpack_mix_float(vertx.gapwidth, interp.gapwidth_t) / 2;
 #endif
 #if defined(HAS_UNIFORM_u_offset)
-    const auto offset   = props.offset;
+    const auto offset   = props.offset * -1;
 #else
     const auto offset   = unpack_mix_float(vertx.offset,   interp.offset_t) * -1;
 #endif
@@ -322,7 +346,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineEvaluatedPropsUBO& props [[buffer(4)]],
+                            device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
+                            device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]],
                             texture2d<float, access::sample> gradientTexture [[texture(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
@@ -363,36 +388,36 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 5> uniforms;
+    static const std::array<UniformBlockInfo, 6> uniforms;
     static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos_normal [[attribute(5)]];
-    uchar4 data [[attribute(6)]];
+    short2 pos_normal [[attribute(lineUBOCount + 0)]];
+    uchar4 data [[attribute(lineUBOCount + 1)]];
 
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(7)]];
+    float2 blur [[attribute(lineUBOCount + 2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(8)]];
+    float2 opacity [[attribute(lineUBOCount + 3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(9)]];
+    float2 gapwidth [[attribute(lineUBOCount + 4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(10)]];
+    float2 offset [[attribute(lineUBOCount + 5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(11)]];
+    float2 width [[attribute(lineUBOCount + 6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(12)]];
+    ushort4 pattern_from [[attribute(lineUBOCount + 7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(13)]];
+    ushort4 pattern_to [[attribute(lineUBOCount + 8)]];
 #endif
 };
 
@@ -442,26 +467,32 @@ struct alignas(16) LinePatternTilePropertiesUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
-                                device const LinePatternDrawableUBO& drawable [[buffer(1)]],
-                                device const LinePatternInterpolationUBO& interp [[buffer(2)]],
-                                device const LinePatternTilePropertiesUBO& tileProps [[buffer(3)]],
-                                device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
+                                device const LinePatternDrawableUBO& drawable [[buffer(idLineDrawableUBO)]],
+                                device const LinePatternInterpolationUBO& interp [[buffer(idLineInterpolationUBO)]],
+                                device const LinePatternTilePropertiesUBO& tileProps [[buffer(idLineTilePropertiesUBO)]],
+                                device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
+                                device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
-    const auto gapwidth = props.gapwidth / 2;
+    const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
+    const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.zoom) : props.gapwidth) / 2;
 #else
     const auto gapwidth = unpack_mix_float(vertx.gapwidth, interp.gapwidth_t) / 2;
 #endif
+
 #if defined(HAS_UNIFORM_u_offset)
-    const auto offset   = props.offset * -1;
+    const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
+    const auto offset   = (exprOffset ? expr.offset.eval(paintParams.zoom) : props.offset) * -1;
 #else
-    const auto offset   = unpack_mix_float(vertx.offset,   interp.offset_t) * -1;
+    const auto offset   = unpack_mix_float(vertx.offset, interp.offset_t) * -1;
 #endif
+
 #if defined(HAS_UNIFORM_u_width)
-    const auto width    = props.width;
+    const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
+    const auto width    = exprWidth ? expr.width.eval(paintParams.zoom) : props.width;
 #else
-    const auto width    = unpack_mix_float(vertx.width,    interp.width_t);
+    const auto width    = unpack_mix_float(vertx.width, interp.width_t);
 #endif
 
     // the distance over which the line edge fades out.
@@ -525,9 +556,11 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LinePatternDrawableUBO& drawable [[buffer(1)]],
-                            device const LinePatternTilePropertiesUBO& tileProps [[buffer(3)]],
-                            device const LineEvaluatedPropsUBO& props [[buffer(4)]],
+                            device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
+                            device const LinePatternDrawableUBO& drawable [[buffer(idLineDrawableUBO)]],
+                            device const LinePatternTilePropertiesUBO& tileProps [[buffer(idLineTilePropertiesUBO)]],
+                            device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
+                            device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
@@ -535,20 +568,25 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #endif
 
 #if defined(HAS_UNIFORM_u_blur)
-    const half blur         = props.blur;
+    const auto exprBlur = (props.expressionMask & LineExpressionMask::Blur);
+    const float blur = exprBlur ? expr.blur.eval(paintParams.zoom) : props.blur;
 #else
-    const half blur         = in.blur;
+    const float blur = in.blur;
 #endif
+
 #if defined(HAS_UNIFORM_u_opacity)
-    const half opacity      = props.opacity;
+    const auto exprOpacity = (props.expressionMask & LineExpressionMask::Opacity);
+    const float opacity = exprOpacity ? expr.opacity.eval(paintParams.zoom) : props.opacity;
 #else
-    const half opacity      = in.opacity;
+    const float opacity = in.opacity;
 #endif
+
 #if defined(HAS_UNIFORM_u_pattern_from)
     const auto pattern_from = float4(tileProps.pattern_from);
 #else
     const auto pattern_from = float4(in.pattern_from);
 #endif
+
 #if defined(HAS_UNIFORM_u_pattern_to)
     const auto pattern_to   = float4(tileProps.pattern_to);
 #else
@@ -606,36 +644,36 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
+    static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<AttributeInfo, 9> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos_normal [[attribute(5)]];
-    uchar4 data [[attribute(6)]];
+    short2 pos_normal [[attribute(lineUBOCount + 0)]];
+    uchar4 data [[attribute(lineUBOCount + 1)]];
 
 #if !defined(HAS_UNIFORM_u_color)
-    float4 color [[attribute(7)]];
+    float4 color [[attribute(lineUBOCount + 2)]];
 #endif
 #if !defined(HAS_UNIFORM_u_blur)
-    float2 blur [[attribute(8)]];
+    float2 blur [[attribute(lineUBOCount + 3)]];
 #endif
 #if !defined(HAS_UNIFORM_u_opacity)
-    float2 opacity [[attribute(9)]];
+    float2 opacity [[attribute(lineUBOCount + 4)]];
 #endif
 #if !defined(HAS_UNIFORM_u_gapwidth)
-    float2 gapwidth [[attribute(10)]];
+    float2 gapwidth [[attribute(lineUBOCount + 5)]];
 #endif
 #if !defined(HAS_UNIFORM_u_offset)
-    float2 offset [[attribute(11)]];
+    float2 offset [[attribute(lineUBOCount + 6)]];
 #endif
 #if !defined(HAS_UNIFORM_u_width)
-    float2 width [[attribute(12)]];
+    float2 width [[attribute(lineUBOCount + 7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_floorwidth)
-    float2 floorwidth [[attribute(13)]];
+    float2 floorwidth [[attribute(lineUBOCount + 8)]];
 #endif
 };
 
@@ -685,28 +723,36 @@ struct alignas(16) LineSDFInterpolationUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
-                                device const LineSDFDrawableUBO& drawable [[buffer(1)]],
-                                device const LineSDFInterpolationUBO& interp [[buffer(2)]],
-                                device const LineEvaluatedPropsUBO& props [[buffer(4)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
+                                device const LineSDFDrawableUBO& drawable [[buffer(idLineDrawableUBO)]],
+                                device const LineSDFInterpolationUBO& interp [[buffer(idLineInterpolationUBO)]],
+                                device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
+                                device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]]) {
 
 #if defined(HAS_UNIFORM_u_gapwidth)
-    const auto gapwidth   = props.gapwidth / 2;
+    const auto exprGapWidth = (props.expressionMask & LineExpressionMask::GapWidth);
+    const auto gapwidth = (exprGapWidth ? expr.gapwidth.eval(paintParams.zoom) : props.gapwidth) / 2;
 #else
-    const auto gapwidth   = unpack_mix_float(vertx.gapwidth,   interp.gapwidth_t) / 2;
+    const auto gapwidth = unpack_mix_float(vertx.gapwidth, interp.gapwidth_t) / 2;
 #endif
+
 #if defined(HAS_UNIFORM_u_offset)
-    const auto offset     = props.offset * -1;
+    const auto exprOffset = (props.expressionMask & LineExpressionMask::Offset);
+    const auto offset   = (exprOffset ? expr.offset.eval(paintParams.zoom) : props.offset) * -1;
 #else
-    const auto offset     = unpack_mix_float(vertx.offset,     interp.offset_t) * -1;
+    const auto offset   = unpack_mix_float(vertx.offset, interp.offset_t) * -1;
 #endif
+
 #if defined(HAS_UNIFORM_u_width)
-    const auto width      = props.width;
+    const auto exprWidth = (props.expressionMask & LineExpressionMask::Width);
+    const auto width    = exprWidth ? expr.width.eval(paintParams.zoom) : props.width;
 #else
-    const auto width      = unpack_mix_float(vertx.width,      interp.width_t);
+    const auto width    = unpack_mix_float(vertx.width, interp.width_t);
 #endif
+
 #if defined(HAS_UNIFORM_u_floorwidth)
-    const auto floorwidth = props.floorwidth;
+    const auto exprFloorWidth = (props.expressionMask & LineExpressionMask::FloorWidth);
+    const auto floorwidth = exprFloorWidth ? expr.floorwidth.eval(paintParams.zoom) : props.floorwidth;
 #else
     const auto floorwidth = unpack_mix_float(vertx.floorwidth, interp.floorwidth_t);
 #endif
@@ -773,8 +819,10 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const LineSDFDrawableUBO& drawable [[buffer(1)]],
-                            device const LineEvaluatedPropsUBO& props [[buffer(4)]],
+                            device const GlobalPaintParamsUBO& paintParams [[buffer(idGlobalPaintParamsUBO)]],
+                            device const LineSDFDrawableUBO& drawable [[buffer(idLineDrawableUBO)]],
+                            device const LineEvaluatedPropsUBO& props [[buffer(idLineEvaluatedPropsUBO)]],
+                            device const LineExpressionUBO& expr [[buffer(idLineExpressionUBO)]],
                             texture2d<float, access::sample> image0 [[texture(0)]],
                             sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
@@ -782,24 +830,31 @@ half4 fragment fragmentMain(FragmentStage in [[stage_in]],
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
-    const float4 color = props.color;
+    const auto exprColor = (props.expressionMask & LineExpressionMask::Color);
+    const auto color     = exprColor ? expr.color.evalColor(paintParams.zoom) : props.color;
 #else
     const float4 color = in.color;
 #endif
+
 #if defined(HAS_UNIFORM_u_blur)
-    const float blur = props.blur;
+    const auto exprBlur = (props.expressionMask & LineExpressionMask::Blur);
+    const float blur = exprBlur ? expr.blur.eval(paintParams.zoom) : props.blur;
 #else
     const float blur = in.blur;
 #endif
+
 #if defined(HAS_UNIFORM_u_opacity)
-    const float opacity = props.opacity;
+    const auto exprOpacity = (props.expressionMask & LineExpressionMask::Opacity);
+    const float opacity = exprOpacity ? expr.opacity.eval(paintParams.zoom) : props.opacity;
 #else
     const float opacity = in.opacity;
 #endif
+
 #if defined(HAS_UNIFORM_u_floorwidth)
-    const float floorwidth = props.floorwidth;
+    const auto exprFloorWidth = (props.expressionMask & LineExpressionMask::FloorWidth);
+    const auto floorwidth = exprFloorWidth ? expr.floorwidth.eval(paintParams.zoom) : props.floorwidth;
 #else
-    const float floorwidth = in.floorwidth;
+    const auto floorwidth = in.floorwidth;
 #endif
 
     // Calculate the antialiasing fade factor. This is either when fading in the

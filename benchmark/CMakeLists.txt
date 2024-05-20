@@ -60,7 +60,7 @@ target_link_libraries(
     PUBLIC mbgl-core
 )
 
-set_property(TARGET mbgl-benchmark PROPERTY FOLDER Core)
+set_property(TARGET mbgl-benchmark PROPERTY FOLDER MapLibre)
 
 if(MLN_WITH_OPENGL)
     target_compile_definitions(mbgl-benchmark PRIVATE "MLN_RENDER_BACKEND_OPENGL=1")

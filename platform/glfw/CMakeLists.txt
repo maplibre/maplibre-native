@@ -101,6 +101,6 @@ if(NOT WIN32 AND MLN_WITH_OPENGL)
     )
 endif()
 
-set_property(TARGET mbgl-glfw PROPERTY FOLDER Executables)
+set_property(TARGET mbgl-glfw PROPERTY FOLDER MapLibre)
 
 install(TARGETS mbgl-glfw RUNTIME DESTINATION bin)
