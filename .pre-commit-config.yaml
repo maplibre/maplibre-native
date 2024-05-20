@@ -15,12 +15,12 @@ repos:
   hooks:
     - id: buildifier
 - repo: https://github.com/Mateusz-Grzelinski/actionlint-py
-  rev: v1.6.27.13
+  rev: v1.7.0.14
   hooks:
     - id: actionlint
       additional_dependencies: [shellcheck-py]
 - repo: https://github.com/nicklockwood/SwiftFormat
-  rev: "0.53.9"
+  rev: "0.53.10"
   hooks:
     - id: swiftformat
       args: [--swiftversion, "5.8"]
