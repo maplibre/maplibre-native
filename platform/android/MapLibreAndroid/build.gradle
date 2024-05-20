@@ -34,12 +34,11 @@ dependencies {
 }
 
 tasks.withType(DokkaTask.class) {
-    moduleName.set("MapLibre Native for Android")
+    moduleName.set("MapLibre Native Android")
 
     dokkaSourceSets {
-
         configureEach {
-            includes.from("README.md")
+            includes.from("Module.md")
         }
     } 
 }
