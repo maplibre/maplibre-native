@@ -21,9 +21,21 @@ jobs:
       - name: Generate documentation
         run: ./gradlew dokkaHtml
 
-      - name: Deploy 🚀
+      - name: Get version
+        run: echo version="$(git describe --tags --match='android-v*.*.*' --abbrev=0 | cut -c 10-)" >> "$GITHUB_ENV"
+
+      - name: Deploy (latest) 🚀
         uses: JamesIves/github-pages-deploy-action@v4.6.0
         with:
           branch: gh-pages
           folder: platform/android/MapLibreAndroid/build/dokka/html
-          target-folder: android/api/
+          target-folder: android/api/latest/
+
+      - name: Deploy (${{ env.app_url }}) 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.6.0
+        with:
+          branch: gh-pages
+          folder: platform/android/MapLibreAndroid/build/dokka/html
+          target-folder: android/api/${{ env.version }}/
+
+      
