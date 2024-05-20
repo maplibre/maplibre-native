@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>CircleLayer</title>
+    <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">
+    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async="async"></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer="defer"></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async="async"></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer="defer"></script>
+</head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+                    <a class="library-name--link" href="../../../index.html">
+                            MapLibre Native Android
+                    </a>
+            </div>
+            <div class="library-version">
+11.0.0            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":MapLibreAndroid:dokkaHtml/release">androidJvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageIds="MapLibre Native Android::org.maplibre.android.style.layers/CircleLayer///PointingToDeclaration//324203667">
+  <div class="breadcrumbs"><a href="../../../index.html">MapLibre Native Android</a><span class="delimiter">/</span><a href="../index.html">org.maplibre.android.style.layers</a><span class="delimiter">/</span><span class="current">CircleLayer</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Circle</span><wbr></wbr><span><span>Layer</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/UiThread.html"><span class="token annotation builtin">UiThread</span></a></div></div><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">CircleLayer</a> : <a href="../-layer/index.html">Layer</a></div><p class="paragraph">A filled circle.</p><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><span><span>&lt;a</span></span> <span>href=&quot;https://maplibre.</span><wbr></wbr><span><span>org/maplibre-style-spec/#layers-circle&quot;&gt;The</span></span> <span><span>online</span></span> <span><span>documentation&lt;/a&gt;</span></span></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="-908050324%2FConstructors%2F324203667" anchor-label="CircleLayer" id="-908050324%2FConstructors%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-circle-layer.html"><span>Circle</span><wbr></wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-908050324%2FConstructors%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">layerId<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">sourceId<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Creates a CircleLayer.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-1426548979%2FProperties%2F324203667" anchor-label="nativePtr" id="-1426548979%2FProperties%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-layer/native-ptr.html"><span>native</span><wbr></wbr><span><span>Ptr</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1426548979%2FProperties%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">val </span><a href="../-layer/native-ptr.html">nativePtr</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="2063083655%2FFunctions%2F324203667" anchor-label="getCircleBlur" id="2063083655%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-blur.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span><span>Blur</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2063083655%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-blur.html"><span class="token function">getCircleBlur</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the CircleBlur property</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-181270478%2FFunctions%2F324203667" anchor-label="getCircleBlurTransition" id="-181270478%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-blur-transition.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Blur</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-181270478%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-blur-transition.html"><span class="token function">getCircleBlurTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the CircleBlur property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1730240375%2FFunctions%2F324203667" anchor-label="getCircleColor" id="-1730240375%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-color.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span><span>Color</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1730240375%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-color.html"><span class="token function">getCircleColor</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token operator">&gt;</span></div><div class="brief ">Get the CircleColor property</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-577767724%2FFunctions%2F324203667" anchor-label="getCircleColorAsInt" id="-577767724%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-color-as-int.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Color</span><wbr></wbr><span>As</span><wbr></wbr><span><span>Int</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-577767724%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-color-as-int.html"><span class="token function">getCircleColorAsInt</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div><div class="brief ">The fill color of the circle.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-919870028%2FFunctions%2F324203667" anchor-label="getCircleColorTransition" id="-919870028%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-color-transition.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Color</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-919870028%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-color-transition.html"><span class="token function">getCircleColorTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the CircleColor property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-735122143%2FFunctions%2F324203667" anchor-label="getCircleOpacity" id="-735122143%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-opacity.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span><span>Opacity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-735122143%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-opacity.html"><span class="token function">getCircleOpacity</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the CircleOpacity property</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1834439756%2FFunctions%2F324203667" anchor-label="getCircleOpacityTransition" id="1834439756%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-opacity-transition.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Opacity</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1834439756%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-opacity-transition.html"><span class="token function">getCircleOpacityTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the CircleOpacity property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-152872789%2FFunctions%2F324203667" anchor-label="getCirclePitchAlignment" id="-152872789%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-pitch-alignment.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Pitch</span><wbr></wbr><span><span>Alignment</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-152872789%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-pitch-alignment.html"><span class="token function">getCirclePitchAlignment</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token operator">&gt;</span></div><div class="brief ">Get the CirclePitchAlignment property</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-543775836%2FFunctions%2F324203667" anchor-label="getCirclePitchScale" id="-543775836%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-pitch-scale.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Pitch</span><wbr></wbr><span><span>Scale</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-543775836%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-pitch-scale.html"><span class="token function">getCirclePitchScale</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token operator">&gt;</span></div><div class="brief ">Get the CirclePitchScale property</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-854535556%2FFunctions%2F324203667" anchor-label="getCircleRadius" id="-854535556%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-radius.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span><span>Radius</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-854535556%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-radius.html"><span class="token function">getCircleRadius</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the CircleRadius property</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="36340711%2FFunctions%2F324203667" anchor-label="getCircleRadiusTransition" id="36340711%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-radius-transition.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Radius</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="36340711%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-radius-transition.html"><span class="token function">getCircleRadiusTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the CircleRadius property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="361618955%2FFunctions%2F324203667" anchor-label="getCircleSortKey" id="361618955%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-sort-key.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Sort</span><wbr></wbr><span><span>Key</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="361618955%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-sort-key.html"><span class="token function">getCircleSortKey</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the CircleSortKey property</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="495802785%2FFunctions%2F324203667" anchor-label="getCircleStrokeColor" id="495802785%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-stroke-color.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Stroke</span><wbr></wbr><span><span>Color</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="495802785%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-stroke-color.html"><span class="token function">getCircleStrokeColor</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token operator">&gt;</span></div><div class="brief ">Get the CircleStrokeColor property</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-283038532%2FFunctions%2F324203667" anchor-label="getCircleStrokeColorAsInt" id="-283038532%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-stroke-color-as-int.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Stroke</span><wbr></wbr><span>Color</span><wbr></wbr><span>As</span><wbr></wbr><span><span>Int</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-283038532%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/ColorInt.html"><span class="token annotation builtin">ColorInt</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-stroke-color-as-int.html"><span class="token function">getCircleStrokeColorAsInt</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></div><div class="brief ">The stroke color of the circle.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="116924620%2FFunctions%2F324203667" anchor-label="getCircleStrokeColorTransition" id="116924620%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-stroke-color-transition.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Stroke</span><wbr></wbr><span>Color</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="116924620%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-stroke-color-transition.html"><span class="token function">getCircleStrokeColorTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the CircleStrokeColor property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-401358791%2FFunctions%2F324203667" anchor-label="getCircleStrokeOpacity" id="-401358791%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-stroke-opacity.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Stroke</span><wbr></wbr><span><span>Opacity</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-401358791%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-stroke-opacity.html"><span class="token function">getCircleStrokeOpacity</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the CircleStrokeOpacity property</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1761683812%2FFunctions%2F324203667" anchor-label="getCircleStrokeOpacityTransition" id="1761683812%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-stroke-opacity-transition.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Stroke</span><wbr></wbr><span>Opacity</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1761683812%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-stroke-opacity-transition.html"><span class="token function">getCircleStrokeOpacityTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the CircleStrokeOpacity property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1195687778%2FFunctions%2F324203667" anchor-label="getCircleStrokeWidth" id="-1195687778%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-stroke-width.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Stroke</span><wbr></wbr><span><span>Width</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1195687778%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-stroke-width.html"><span class="token function">getCircleStrokeWidth</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span></div><div class="brief ">Get the CircleStrokeWidth property</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-326946935%2FFunctions%2F324203667" anchor-label="getCircleStrokeWidthTransition" id="-326946935%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-stroke-width-transition.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Stroke</span><wbr></wbr><span>Width</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-326946935%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-stroke-width-transition.html"><span class="token function">getCircleStrokeWidthTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the CircleStrokeWidth property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1963897474%2FFunctions%2F324203667" anchor-label="getCircleTranslate" id="-1963897474%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-translate.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span><span>Translate</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1963897474%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-translate.html"><span class="token function">getCircleTranslate</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/Float.html">Float</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief ">Get the CircleTranslate property</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2014612599%2FFunctions%2F324203667" anchor-label="getCircleTranslateAnchor" id="-2014612599%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-translate-anchor.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Translate</span><wbr></wbr><span><span>Anchor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2014612599%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-translate-anchor.html"><span class="token function">getCircleTranslateAnchor</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token operator">&gt;</span></div><div class="brief ">Get the CircleTranslateAnchor property</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-206134167%2FFunctions%2F324203667" anchor-label="getCircleTranslateTransition" id="-206134167%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-circle-translate-transition.html"><span>get</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Translate</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-206134167%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-circle-translate-transition.html"><span class="token function">getCircleTranslateTransition</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></div><div class="brief ">Get the CircleTranslate property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1074260474%2FFunctions%2F324203667" anchor-label="getFilter" id="-1074260474%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-filter.html"><span>get</span><wbr></wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1074260474%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/Nullable.html"><span class="token annotation builtin">Nullable</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-filter.html"><span class="token function">getFilter</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../org.maplibre.android.style.expressions/-expression/index.html">Expression</a></div><div class="brief ">Get a single expression filter.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="153230355%2FFunctions%2F324203667" anchor-label="getId" id="153230355%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-layer/get-id.html"><span>get</span><wbr></wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="153230355%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../-layer/get-id.html"><span class="token function">getId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-663275051%2FFunctions%2F324203667" anchor-label="getMaxZoom" id="-663275051%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-layer/get-max-zoom.html"><span>get</span><wbr></wbr><span>Max</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-663275051%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../-layer/get-max-zoom.html"><span class="token function">getMaxZoom</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2029963175%2FFunctions%2F324203667" anchor-label="getMinZoom" id="2029963175%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-layer/get-min-zoom.html"><span>get</span><wbr></wbr><span>Min</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2029963175%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../-layer/get-min-zoom.html"><span class="token function">getMinZoom</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1923777432%2FFunctions%2F324203667" anchor-label="getSourceId" id="-1923777432%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-source-id.html"><span>get</span><wbr></wbr><span>Source</span><wbr></wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1923777432%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-source-id.html"><span class="token function">getSourceId</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="brief ">Get the source id.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1415444582%2FFunctions%2F324203667" anchor-label="getSourceLayer" id="1415444582%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-source-layer.html"><span>get</span><wbr></wbr><span>Source</span><wbr></wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1415444582%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="get-source-layer.html"><span class="token function">getSourceLayer</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></div><div class="brief ">Get the source layer.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="609155324%2FFunctions%2F324203667" anchor-label="getVisibility" id="609155324%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-layer/get-visibility.html"><span>get</span><wbr></wbr><span><span>Visibility</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="609155324%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../-layer/get-visibility.html"><span class="token function">getVisibility</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="939844250%2FFunctions%2F324203667" anchor-label="isDetached" id="939844250%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-layer/is-detached.html"><span>is</span><wbr></wbr><span><span>Detached</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="939844250%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../-layer/is-detached.html"><span class="token function">isDetached</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-62063621%2FFunctions%2F324203667" anchor-label="setCircleBlurTransition" id="-62063621%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-circle-blur-transition.html"><span>set</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Blur</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-62063621%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="set-circle-blur-transition.html"><span class="token function">setCircleBlurTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the CircleBlur property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-355153247%2FFunctions%2F324203667" anchor-label="setCircleColorTransition" id="-355153247%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-circle-color-transition.html"><span>set</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Color</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-355153247%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="set-circle-color-transition.html"><span class="token function">setCircleColorTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the CircleColor property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1114966007%2FFunctions%2F324203667" anchor-label="setCircleOpacityTransition" id="-1114966007%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-circle-opacity-transition.html"><span>set</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Opacity</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1114966007%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="set-circle-opacity-transition.html"><span class="token function">setCircleOpacityTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the CircleOpacity property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="879932198%2FFunctions%2F324203667" anchor-label="setCircleRadiusTransition" id="879932198%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-circle-radius-transition.html"><span>set</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Radius</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="879932198%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="set-circle-radius-transition.html"><span class="token function">setCircleRadiusTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the CircleRadius property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1139474825%2FFunctions%2F324203667" anchor-label="setCircleStrokeColorTransition" id="1139474825%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-circle-stroke-color-transition.html"><span>set</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Stroke</span><wbr></wbr><span>Color</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1139474825%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="set-circle-stroke-color-transition.html"><span class="token function">setCircleStrokeColorTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the CircleStrokeColor property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="703534321%2FFunctions%2F324203667" anchor-label="setCircleStrokeOpacityTransition" id="703534321%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-circle-stroke-opacity-transition.html"><span>set</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Stroke</span><wbr></wbr><span>Opacity</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="703534321%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="set-circle-stroke-opacity-transition.html"><span class="token function">setCircleStrokeOpacityTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the CircleStrokeOpacity property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1042601044%2FFunctions%2F324203667" anchor-label="setCircleStrokeWidthTransition" id="-1042601044%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-circle-stroke-width-transition.html"><span>set</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Stroke</span><wbr></wbr><span>Width</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1042601044%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="set-circle-stroke-width-transition.html"><span class="token function">setCircleStrokeWidthTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the CircleStrokeWidth property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="788731852%2FFunctions%2F324203667" anchor-label="setCircleTranslateTransition" id="788731852%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-circle-translate-transition.html"><span>set</span><wbr></wbr><span>Circle</span><wbr></wbr><span>Translate</span><wbr></wbr><span><span>Transition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="788731852%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="set-circle-translate-transition.html"><span class="token function">setCircleTranslateTransition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>options<span class="token operator">: </span><a href="../-transition-options/index.html">TransitionOptions</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the CircleTranslate property transition options</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="4747600%2FFunctions%2F324203667" anchor-label="setDetached" id="4747600%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-layer/set-detached.html"><span>set</span><wbr></wbr><span><span>Detached</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="4747600%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../-layer/set-detached.html"><span class="token function">setDetached</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="38706105%2FFunctions%2F324203667" anchor-label="setFilter" id="38706105%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-filter.html"><span>set</span><wbr></wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="38706105%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="set-filter.html"><span class="token function">setFilter</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>filter<span class="token operator">: </span><a href="../../org.maplibre.android.style.expressions/-expression/index.html">Expression</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set a single expression filter.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1373277851%2FFunctions%2F324203667" anchor-label="setMaxZoom" id="-1373277851%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-layer/set-max-zoom.html"><span>set</span><wbr></wbr><span>Max</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1373277851%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../-layer/set-max-zoom.html"><span class="token function">setMaxZoom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">zoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1269282515%2FFunctions%2F324203667" anchor-label="setMinZoom" id="1269282515%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-layer/set-min-zoom.html"><span>set</span><wbr></wbr><span>Min</span><wbr></wbr><span><span>Zoom</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1269282515%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../-layer/set-min-zoom.html"><span class="token function">setMinZoom</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">zoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-float/index.html">Float</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="673138124%2FFunctions%2F324203667" anchor-label="setProperties" id="673138124%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-layer/set-properties.html"><span>set</span><wbr></wbr><span><span>Properties</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="673138124%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="../-layer/set-properties.html"><span class="token function">setProperties</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>properties<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1434774163%2FFunctions%2F324203667" anchor-label="setSourceLayer" id="-1434774163%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="set-source-layer.html"><span>set</span><wbr></wbr><span>Source</span><wbr></wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1434774163%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">fun </span><a href="set-source-layer.html"><span class="token function">setSourceLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceLayer<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief ">Set the source layer.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-972855957%2FFunctions%2F324203667" anchor-label="withFilter" id="-972855957%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="with-filter.html"><span>with</span><wbr></wbr><span><span>Filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-972855957%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="with-filter.html"><span class="token function">withFilter</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>filter<span class="token operator">: </span><a href="../../org.maplibre.android.style.expressions/-expression/index.html">Expression</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">CircleLayer</a></div><div class="brief ">Set a single expression filter.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="275946830%2FFunctions%2F324203667" anchor-label="withProperties" id="275946830%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="with-properties.html"><span>with</span><wbr></wbr><span><span>Properties</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="275946830%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="with-properties.html"><span class="token function">withProperties</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a> </span>properties<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-array/index.html">Array</a><span class="token operator">&lt;</span><a href="../-property-value/index.html">PropertyValue</a><span class="token operator">&lt;</span><span class="token keyword">out </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">CircleLayer</a></div><div class="brief ">Set a property or properties.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1743847905%2FFunctions%2F324203667" anchor-label="withSourceLayer" id="-1743847905%2FFunctions%2F324203667" data-filterable-set=":MapLibreAndroid:dokkaHtml/release"></a>
+          <div class="table-row" data-filterable-current=":MapLibreAndroid:dokkaHtml/release" data-filterable-set=":MapLibreAndroid:dokkaHtml/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="with-source-layer.html"><span>with</span><wbr></wbr><span>Source</span><wbr></wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1743847905%2FFunctions%2F324203667"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":MapLibreAndroid:dokkaHtml/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/NonNull.html"><span class="token annotation builtin">NonNull</span></a></div></div><span class="token keyword">open </span><span class="token keyword">fun </span><a href="with-source-layer.html"><span class="token function">withSourceLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sourceLayer<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/lang/String.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">CircleLayer</a></div><div class="brief ">Set the source Layer.</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span
+                class="pull-right"><span>Generated by </span><a
+                href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
