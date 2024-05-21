@@ -76,3 +76,11 @@ To format all Kotlin source files, use:
 ```
 $ ./gradlew formatKotlin
 ```
+
+## Benchmarks in Pull Request
+
+To run the benchmarks (for Android) include the following line on a PR comment:
+
+```
+!benchmark android
+```
