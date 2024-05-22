@@ -246,31 +246,33 @@ void SymbolBucket::sortFeatures(const float angle) {
     // The index array buffer is rewritten to reference the (unchanged) vertices in the
     // sorted order.
     for (const SymbolInstance& symbolInstance : getSortedSymbols(angle)) {
-        symbolsSortOrder->push_back(symbolInstance.dataFeatureIndex);
+        if (!symbolInstance.check("sortFeatures")) continue;
+        if (!symbolInstance.checkIndexes(text.placedSymbols.size(), icon.placedSymbols.size(), sdfIcon.placedSymbols.size(), "sortFeatures")) continue;
+        symbolsSortOrder->push_back(symbolInstance.getDataFeatureIndex());
 
-        if (symbolInstance.placedRightTextIndex) {
-            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.placedRightTextIndex]);
+        if (symbolInstance.getPlacedRightTextIndex()) {
+            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.getPlacedRightTextIndex()]);
         }
 
-        if (symbolInstance.placedCenterTextIndex && !symbolInstance.singleLine) {
-            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.placedCenterTextIndex]);
+        if (symbolInstance.getPlacedCenterTextIndex() && !symbolInstance.getSingleLine()) {
+            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.getPlacedCenterTextIndex()]);
         }
 
-        if (symbolInstance.placedLeftTextIndex && !symbolInstance.singleLine) {
-            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.placedLeftTextIndex]);
+        if (symbolInstance.getPlacedLeftTextIndex() && !symbolInstance.getSingleLine()) {
+            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.getPlacedLeftTextIndex()]);
         }
 
-        if (symbolInstance.placedVerticalTextIndex) {
-            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.placedVerticalTextIndex]);
+        if (symbolInstance.getPlacedVerticalTextIndex()) {
+            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.getPlacedVerticalTextIndex()]);
         }
 
         auto& iconBuffer = symbolInstance.hasSdfIcon() ? sdfIcon : icon;
-        if (symbolInstance.placedIconIndex) {
-            addPlacedSymbol(iconBuffer.triangles, iconBuffer.placedSymbols[*symbolInstance.placedIconIndex]);
+        if (symbolInstance.getPlacedIconIndex()) {
+            addPlacedSymbol(iconBuffer.triangles, iconBuffer.placedSymbols[*symbolInstance.getPlacedIconIndex()]);
         }
 
-        if (symbolInstance.placedVerticalIconIndex) {
-            addPlacedSymbol(iconBuffer.triangles, iconBuffer.placedSymbols[*symbolInstance.placedVerticalIconIndex]);
+        if (symbolInstance.getPlacedVerticalIconIndex()) {
+            addPlacedSymbol(iconBuffer.triangles, iconBuffer.placedSymbols[*symbolInstance.getPlacedVerticalIconIndex()]);
         }
     }
 
@@ -283,12 +285,12 @@ SymbolInstanceReferences SymbolBucket::getSortedSymbols(const float angle) const
     const float cos = std::cos(angle);
 
     std::sort(result.begin(), result.end(), [sin, cos](const SymbolInstance& a, const SymbolInstance& b) {
-        const auto aRotated = std::lround(sin * a.anchor.point.x + cos * a.anchor.point.y);
-        const auto bRotated = std::lround(sin * b.anchor.point.x + cos * b.anchor.point.y);
+        const auto aRotated = std::lround(sin * a.getAnchor().point.x + cos * a.getAnchor().point.y);
+        const auto bRotated = std::lround(sin * b.getAnchor().point.x + cos * b.getAnchor().point.y);
         if (aRotated != bRotated) {
             return aRotated < bRotated;
         }
-        return a.dataFeatureIndex > b.dataFeatureIndex;  // aRotated == bRotated
+        return a.getDataFeatureIndex() > b.getDataFeatureIndex();  // aRotated == bRotated
     });
 
     return result;

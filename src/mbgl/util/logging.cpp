@@ -44,6 +44,10 @@ Log* Log::get() noexcept {
     return &instance;
 }
 
+bool Log::useLogThread() {
+    return useThread;
+}
+
 void Log::useLogThread(bool enable) {
     useThread = enable;
 }

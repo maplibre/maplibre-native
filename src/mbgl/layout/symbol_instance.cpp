@@ -1,5 +1,7 @@
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
+#include <mbgl/util/logging.hpp>
+
 #include <utility>
 
 namespace mbgl {
@@ -199,4 +201,72 @@ optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex() const {
     if (placedLeftTextIndex) return placedLeftTextIndex;
     return nullopt;
 }
+
+namespace {
+    void logFailure(std::string msg) {
+        // Log some info about where we found unexpected values, forcing it to happen
+        // in the current thread to avoid the entry being lost if we are about to crash.
+        const bool saveUseThread = Log::useLogThread();
+        Log::useLogThread(false);
+        Log::Error(Event::Crash, msg);
+        Log::useLogThread(saveUseThread);
+    }
+}
+bool SymbolInstance::check(std::size_t v, int n, std::string_view source) const {
+    if (!isFailed && v != checkVal) {
+        isFailed = true;
+        logFailure("SymbolInstance corrupted at " + util::toString(n) + " with value " + util::toString(v) + " from '" + std::string(source) + "'");
+    }
+    return !isFailed;
+}
+
+bool SymbolInstance::checkKey() const {
+    if (!isFailed && key.size() > 1000) {   // largest observed value=62
+        isFailed = true;
+        logFailure("SymbolInstance key corrupted with size=" + util::toString(key.size()));
+    }
+    return !isFailed;
+}
+
+bool SymbolInstance::checkIndex(const optional<std::size_t>& index, std::size_t size, std::string_view source) const {
+    if (index.has_value() && *index >= size) {
+        isFailed = true;
+        logFailure("SymbolInstance index corrupted with value=" + util::toString(*index) + " size=" + util::toString(size) + " from '" + std::string(source) + "'");
+    }
+    return !isFailed;
+}
+
+// this is just to avoid warnings about the values never being set
+void SymbolInstance::forceFail() {
+    check01 =
+    check02 =
+    check03 =
+    check04 =
+    check05 =
+    check06 =
+    check07 =
+    check08 =
+    check09 =
+    check10 =
+    check11 =
+    check12 =
+    check13 =
+    check14 =
+    check15 =
+    check16 =
+    check17 =
+    check18 =
+    check19 =
+    check20 =
+    check21 =
+    check22 =
+    check23 =
+    check24 =
+    check25 =
+    check26 =
+    check27 =
+    check28 =
+    check29 = 0;
+}
+
 } // namespace mbgl

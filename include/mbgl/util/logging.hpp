@@ -40,6 +40,7 @@ public:
     Log();
     ~Log();
 
+    static bool useLogThread();
     static void useLogThread(bool enable);
 
     template <typename ...Args>
