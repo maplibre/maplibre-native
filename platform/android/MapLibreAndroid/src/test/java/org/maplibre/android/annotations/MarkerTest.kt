@@ -59,7 +59,7 @@ class MarkerTest {
 
     @Test
     fun testIcon() {
-        val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_4444)
+        val bitmap = Mockito.mock(Bitmap::class.java)
         val icon = IconFactory.recreate("test", bitmap)
         val markerOptions = MarkerOptions().position(LatLng()).icon(icon)
         val marker = markerOptions.marker

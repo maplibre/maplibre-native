@@ -91,8 +91,9 @@ class LineDrawableTweaker : public gfx::DrawableTweaker {
 public:
     LineDrawableTweaker(const shaders::LineEvaluatedPropsUBO& properties)
         : linePropertiesUBO(properties) {}
+    ~LineDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override {}
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -106,9 +107,6 @@ public:
 
         const auto matrix = LayerTweaker::getTileMatrix(
             tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
-
-        const shaders::LineDynamicUBO dynamicUBO = {
-            /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]}, 0, 0};
 
         const shaders::LineDrawableUBO drawableUBO = {/*matrix = */ util::cast<float>(matrix),
                                                       /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
@@ -124,10 +122,12 @@ public:
                                                                  0,
                                                                  0};
         auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
         drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
         drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
         drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
+
+        // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
+        assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
     };
 
 private:
@@ -136,10 +136,10 @@ private:
 
 class WideVectorDrawableTweaker : public gfx::DrawableTweaker {
 public:
-    WideVectorDrawableTweaker(const CustomDrawableLayerHost::Interface::LineOptions& options)
-        : options(options) {}
+    WideVectorDrawableTweaker(const CustomDrawableLayerHost::Interface::LineOptions& options_)
+        : options(options_) {}
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override {}
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -202,8 +202,9 @@ public:
     FillDrawableTweaker(const Color& color_, float opacity_)
         : color(color_),
           opacity(opacity_) {}
+    ~FillDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override {}
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -230,8 +231,8 @@ public:
             /* .outline_color = */ Color::white(),
             /* .opacity = */ opacity,
             /* .fade = */ 0.f,
-            /* .width = */ 0.f,
-            0,
+            /* .from_scale = */ 0.f,
+            /* .to_scale = */ 0.f,
         };
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idFillDrawableUBO, &fillDrawableUBO, parameters.context);
@@ -248,8 +249,9 @@ class SymbolDrawableTweaker : public gfx::DrawableTweaker {
 public:
     SymbolDrawableTweaker(const CustomDrawableLayerHost::Interface::SymbolOptions& options_)
         : options(options_) {}
+    ~SymbolDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override {}
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -540,8 +542,8 @@ void CustomDrawableLayerHost::Interface::finish() {
                                                                           lineOptions.gapWidth,
                                                                           lineOptions.offset,
                                                                           lineOptions.width,
-                                                                          0,
-                                                                          0,
+                                                                          /*floorwidth=*/0,
+                                                                          LineExpressionMask::None,
                                                                           0};
                 auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
 

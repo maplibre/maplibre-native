@@ -9,10 +9,10 @@ import org.maplibre.android.testapp.utils.NavUtils
  * Test activity showcasing the different debug modes and allows to cycle between the default map styles.
  */
 class TextureViewDebugModeActivity : DebugModeActivity(), OnMapReadyCallback {
-    override fun setupMapboxMapOptions(): MapLibreMapOptions {
-        val mapboxMapOptions = super.setupMapboxMapOptions()
-        mapboxMapOptions.textureMode(true)
-        return mapboxMapOptions
+    override fun setupMapLibreMapOptions(): MapLibreMapOptions {
+        val maplibreMapOptions = super.setupMapLibreMapOptions()
+        maplibreMapOptions.textureMode(true)
+        return maplibreMapOptions
     }
 
     override fun onBackPressed() {

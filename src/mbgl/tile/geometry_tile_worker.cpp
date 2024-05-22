@@ -402,7 +402,9 @@ void GeometryTileWorker::parse() {
     ImageDependencies imageDependencies;
 
     // Create render layers and group by layout
-    std::unordered_map<std::string, std::vector<Immutable<style::LayerProperties>>> groupMap;
+    mbgl::unordered_map<std::string, std::vector<Immutable<style::LayerProperties>>> groupMap;
+    groupMap.reserve(layers->size());
+
     for (auto layer : *layers) {
         groupMap[layoutKey(*layer->baseImpl)].push_back(std::move(layer));
     }
@@ -480,9 +482,10 @@ void GeometryTileWorker::parse() {
     requestNewImages(imageDependencies);
 
     MBGL_TIMING_FINISH(watch,
-                       " Action: " << "Parsing," << " SourceID: " << sourceID.c_str()
-                                   << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
-                                   << id.canonical.y << " Time");
+                       " Action: "
+                           << "Parsing,"
+                           << " SourceID: " << sourceID.c_str() << " Canonical: " << static_cast<int>(id.canonical.z)
+                           << "/" << id.canonical.x << "/" << id.canonical.y << " Time");
     finalizeLayout();
 }
 
@@ -537,9 +540,10 @@ void GeometryTileWorker::finalizeLayout() {
     firstLoad = false;
 
     MBGL_TIMING_FINISH(watch,
-                       " Action: " << "SymbolLayout," << " SourceID: " << sourceID.c_str()
-                                   << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
-                                   << id.canonical.y << " Time");
+                       " Action: "
+                           << "SymbolLayout,"
+                           << " SourceID: " << sourceID.c_str() << " Canonical: " << static_cast<int>(id.canonical.z)
+                           << "/" << id.canonical.x << "/" << id.canonical.y << " Time");
 
     parent.invoke(&GeometryTile::onLayout,
                   std::make_shared<GeometryTile::LayoutResult>(

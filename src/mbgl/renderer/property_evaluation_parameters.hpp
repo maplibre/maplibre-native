@@ -41,6 +41,10 @@ public:
     TimePoint now;
     ZoomHistory zoomHistory;
     Duration defaultFadeDuration;
+
+    bool zoomChanged = true;
+    bool layerChanged = false;
+    bool hasCrossfade = true;
 };
 
 } // namespace mbgl

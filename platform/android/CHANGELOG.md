@@ -8,14 +8,15 @@
 
 ## 11.0.0
 
+The rendering internals of MapLibre Native have undergone major changes. We've had an extensive period of [pre-releases](https://github.com/maplibre/maplibre-native/issues/1608) leading up to this official release. While we've worked hard to minimize potential issues, it's possible that there may still be regressions. Therefore, it's important to conduct your own testing and report any encountered issues on GitHub.
+
+This release utilizes **OpenGL ES 3.0**. As a result, some older devices are no longer supported. If you require compatibility with devices that do not support OpenGL ES 3.0, it's recommended to continue using the 10.x.x release series.
+
 ### ✨ Features and improvements
 
 - Add support for custom `ModuleProvider` implementations (#[2231](https://github.com/maplibre/maplibre-native/pull/2231))
 - Allow setting padding when camera is tracking (#[2165](https://github.com/maplibre/maplibre-native/pull/2165)).
-- Add support for the [`slice` expression](https://maplibre.org/maplibre-style-spec/expressions/#slice) ([#1113](https://github.com/maplibre/maplibre-native/pull/1133))
-- Add support for the [`index-of` expression](https://maplibre.org/maplibre-style-spec/expressions/#index-of) ([#1113](https://github.com/maplibre/maplibre-native/pull/1113))
-- Add support for [multi sprites](https://github.com/maplibre/maplibre-native/pull/1858). More information on this feature can be found in the [Style Spec Documentation](https://maplibre.org/maplibre-style-spec/sprite/#multiple-sprite-sources).
-- Change to a more natural fling animation and allow setting `flingThreshold` and `flingAnimationBaseTime` in `UiSettings` ([#963](https://github.com/maplibre/maplibre-native/pull/963))
+- Update user agent from Mapbox to MapLibreNative.
 
 - 💥 Breaking: Change package of all classes from `com.mapbox.mapboxsdk` to `org.maplibre.android` ([#1201](https://github.com/maplibre/maplibre-native/pull/1201)). This means you will need to fix your imports.
 
@@ -38,6 +39,24 @@
 ### 🐞 Bug fixes
 
 - Fix "... has unresolved theme attributes" error in BitMapUtils ([#1274](https://github.com/maplibre/maplibre-native/issues/1274)).
+
+## 10.3.1
+
+This release includes [debug symbols](https://github.com/maplibre/maplibre-native/releases?q=android&expanded=true) on GitHub.
+
+## 10.3.0
+
+### ✨ Features and improvements
+
+* Add support for the [`slice` expression](https://maplibre.org/maplibre-style-spec/expressions/#slice) ([#1133](https://github.com/maplibre/maplibre-native/pull/1133))
+* Add support for [index-of expression](https://maplibre.org/maplibre-style-spec/expressions/#index-of) ([#1113](https://github.com/maplibre/maplibre-native/pull/1113))
+* Change to a more natural fling animation and allow setting `flingThreshold` and `flingAnimationBaseTime` in `UiSettings` ([#963](https://github.com/maplibre/maplibre-native/pull/963))
+* Add setting padding when camera is tracking ([#2165](https://github.com/maplibre/maplibre-native/pull/2165)).
+
+### 🐞 Bug fixes
+
+* Fix regression in CameraUpdateFactory#zoomOut ([#1035](https://github.com/maplibre/maplibre-native/pull/1035))
+* `AndroidLocationEngineImpl` made public to create custom `LocationEngineProvider`([#850](https://github.com/maplibre/maplibre-native/pull/850))
 
 ## 10.2.0
 

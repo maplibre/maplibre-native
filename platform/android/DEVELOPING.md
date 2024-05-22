@@ -55,7 +55,7 @@ The instrumentation tests are running on AWS Device Farm. To see the results and
 
 https://us-west-2.console.aws.amazon.com/devicefarm/home?region=us-east-1#/mobile/projects/20687d72-0e46-403e-8f03-0941850665bc/runs
 
-You can log with the `maplibre` alias, with `maplibre` as username and `maplibre` as password (this is a read-only account).
+You can log in with the `maplibre` alias, with `maplibre` as username and `maplibre` as password (this is a read-only account).
 
 ## Kotlin
 
@@ -75,4 +75,12 @@ To format all Kotlin source files, use:
 
 ```
 $ ./gradlew formatKotlin
+```
+
+## Benchmarks in Pull Request
+
+To run the benchmarks (for Android) include the following line on a PR comment:
+
+```
+!benchmark android
 ```

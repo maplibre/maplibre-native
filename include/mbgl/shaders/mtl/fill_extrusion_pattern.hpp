@@ -14,27 +14,27 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Met
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<UniformBlockInfo, 4> uniforms;
+    static const std::array<UniformBlockInfo, 5> uniforms;
     static const std::array<AttributeInfo, 6> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 1> textures;
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos [[attribute(4)]];
-    short4 normal_ed [[attribute(5)]];
+    short2 pos [[attribute(5)]];
+    short4 normal_ed [[attribute(6)]];
 
 #if !defined(HAS_UNIFORM_u_base)
-    float base [[attribute(6)]];
+    float base [[attribute(7)]];
 #endif
 #if !defined(HAS_UNIFORM_u_height)
-    float height [[attribute(7)]];
+    float height [[attribute(8)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_from)
-    ushort4 pattern_from [[attribute(8)]];
+    ushort4 pattern_from [[attribute(9)]];
 #endif
 #if !defined(HAS_UNIFORM_u_pattern_to)
-    ushort4 pattern_to [[attribute(9)]];
+    ushort4 pattern_to [[attribute(10)]];
 #endif
 };
 
@@ -58,10 +58,11 @@ struct FragmentOutput {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const FillExtrusionDrawableUBO& fill [[buffer(0)]],
-                                device const FillExtrusionPropsUBO& props [[buffer(1)]],
-                                device const FillExtrusionTilePropsUBO& tileProps [[buffer(2)]],
-                                device const FillExtrusionInterpolateUBO& interp [[buffer(3)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
+                                device const FillExtrusionDrawableUBO& drawable [[buffer(1)]],
+                                device const FillExtrusionPropsUBO& props [[buffer(2)]],
+                                device const FillExtrusionTilePropsUBO& tileProps [[buffer(3)]],
+                                device const FillExtrusionInterpolateUBO& interp [[buffer(4)]]) {
 
 #if defined(HAS_UNIFORM_u_base)
     const auto base   = props.light_position_base.w;
@@ -78,7 +79,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float edgedistance = vertx.normal_ed.w;
     const float t = glMod(normal.x, 2.0);
     const float z = (t != 0.0) ? height : base;     // TODO: This would come out wrong on GL for negative values, check it...
-    const float4 position = fill.matrix * float4(float2(vertx.pos), z, 1);
+    const float4 position = drawable.matrix * float4(float2(vertx.pos), z, 1);
 
 #if defined(OVERDRAW_INSPECTOR)
     return {
@@ -107,17 +108,17 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float2 pattern_tl_b = pattern_to.xy;
     const float2 pattern_br_b = pattern_to.zw;
 
-    const float pixelRatio = fill.scale.x;
-    const float tileZoomRatio = fill.scale.y;
-    const float fromScale = fill.scale.z;
-    const float toScale = fill.scale.w;
+    const float pixelRatio = paintParams.pixel_ratio;
+    const float tileZoomRatio = drawable.tile_ratio;
+    const float fromScale = props.from_scale;
+    const float toScale = props.to_scale;
 
     const float2 display_size_a = float2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     const float2 display_size_b = float2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
 
     const float2 pos = normal.x == 1.0 && normal.y == 0.0 && normal.z == 16384.0
         ? float2(vertx.pos) // extrusion top
-        : float2(edgedistance, z * fill.height_factor); // extrusion side
+        : float2(edgedistance, z * drawable.height_factor); // extrusion side
     
     float4 lighting = float4(0.0, 0.0, 0.0, 1.0);
     float directional = clamp(dot(normal / 16383.0, props.light_position_base.xyz), 0.0, 1.0);
@@ -143,15 +144,15 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 #if !defined(HAS_UNIFORM_u_pattern_from)
         .pattern_to     = half4(pattern_to),
 #endif
-        .pos_a          = get_pattern_pos(fill.pixel_coord_upper, fill.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, pos),
-        .pos_b          = get_pattern_pos(fill.pixel_coord_upper, fill.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, pos),
+        .pos_a          = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, pos),
+        .pos_b          = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, pos),
     };
 }
 
 fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
-                                    device const FillExtrusionDrawableUBO& fill [[buffer(0)]],
-                                    device const FillExtrusionPropsUBO& props [[buffer(1)]],
-                                    device const FillExtrusionTilePropsUBO& tileProps [[buffer(2)]],
+                                    device const FillExtrusionDrawableUBO& drawable [[buffer(1)]],
+                                    device const FillExtrusionPropsUBO& props [[buffer(2)]],
+                                    device const FillExtrusionTilePropsUBO& tileProps [[buffer(3)]],
                                     texture2d<float, access::sample> image0 [[texture(0)]],
                                     sampler image0_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
@@ -175,11 +176,11 @@ fragment FragmentOutput fragmentMain(FragmentStage in [[stage_in]],
     const float2 pattern_br_b = pattern_to.zw;
 
     const float2 imagecoord = glMod(in.pos_a, 1.0);
-    const float2 pos = mix(pattern_tl_a / fill.texsize, pattern_br_a / fill.texsize, imagecoord);
+    const float2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);
     const float4 color1 = image0.sample(image0_sampler, pos);
 
     const float2 imagecoord_b = glMod(in.pos_b, 1.0);
-    const float2 pos2 = mix(pattern_tl_b / fill.texsize, pattern_br_b / fill.texsize, imagecoord_b);
+    const float2 pos2 = mix(pattern_tl_b / drawable.texsize, pattern_br_b / drawable.texsize, imagecoord_b);
     const float4 color2 = image0.sample(image0_sampler, pos2);
 
     return {half4(mix(color1, color2, props.fade) * in.lighting)/*, in.position.z*/};

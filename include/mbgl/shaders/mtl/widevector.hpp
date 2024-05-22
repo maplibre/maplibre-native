@@ -23,10 +23,10 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
         AttributeInfo{wideVectorUBOCount + 1, gfx::AttributeDataType::Float4, idWideVectorColor},
         AttributeInfo{wideVectorUBOCount + 2, gfx::AttributeDataType::Int, idWideVectorIndex}};
     static constexpr std::array<AttributeInfo, 4> instanceAttributes{
-        AttributeInfo{5, gfx::AttributeDataType::Float3, idWideVectorInstanceCenter},
-        AttributeInfo{5, gfx::AttributeDataType::Float4, idWideVectorInstanceColor},
-        AttributeInfo{5, gfx::AttributeDataType::Int, idWideVectorInstancePrevious},
-        AttributeInfo{5, gfx::AttributeDataType::Int, idWideVectorInstanceNext}};
+        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Float3, idWideVectorInstanceCenter},
+        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Float4, idWideVectorInstanceColor},
+        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Int, idWideVectorInstancePrevious},
+        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Int, idWideVectorInstanceNext}};
     static constexpr std::array<TextureInfo, 0> textures{};
 
     static constexpr auto source = R"(
@@ -112,9 +112,9 @@ typedef struct
 struct VertexTriWideVecB
 {
     // x, y offset around the center
-    float3 screenPos [[attribute(2)]];
-    float4 color [[attribute(3)]];
-    int index [[attribute(4)]];
+    float3 screenPos [[attribute(3)]];
+    float4 color [[attribute(4)]];
+    int index [[attribute(5)]];
 };
 
 // Wide vector vertex passed to fragment shader (new version)
@@ -221,10 +221,10 @@ constant constexpr float4 discardPt(0,0,-1e6,NAN);
 // Performance version of wide vector shader
 vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
           thread const VertexTriWideVecB vert [[ stage_in ]],
-          constant Uniforms &uniforms [[ buffer(0) ]],
-          constant UniformWideVec &wideVec [[ buffer(1) ]],
+          constant Uniforms &uniforms [[ buffer(1) ]],
+          constant UniformWideVec &wideVec [[ buffer(2) ]],
           uint instanceID [[ instance_id ]],
-          constant VertexTriWideVecInstance *wideVecInsts   [[ buffer(5) ]])
+          constant VertexTriWideVecInstance *wideVecInsts   [[ buffer(6) ]])
 {
     ProjVertexTriWideVecPerf outVert = {
         .position = discardPt,
@@ -563,7 +563,7 @@ vertex ProjVertexTriWideVecPerf vertexTri_wideVecPerf(
 // Fragment shader that takes the back of the globe into account
 fragment float4 fragmentTri_wideVecPerf(
             ProjVertexTriWideVecPerf vert [[stage_in]],
-            constant Uniforms &uniforms [[ buffer(0) ]])
+            constant Uniforms &uniforms [[ buffer(1) ]])
 {
     float patternAlpha = 1.0;
 

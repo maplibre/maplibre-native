@@ -371,8 +371,11 @@ void RenderSymbolLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<SymbolLayerProperties>(staticImmutableCast<SymbolLayer::Impl>(baseImpl),
-                                                         unevaluated.evaluate(parameters));
+    const auto previousProperties = staticImmutableCast<SymbolLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<SymbolLayerProperties>(
+        staticImmutableCast<SymbolLayer::Impl>(baseImpl),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
+
     auto& evaluated = properties->evaluated;
     const auto& layout = impl_cast(baseImpl).layout;
 
@@ -1079,8 +1082,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         auto addCollisionDrawables = [&](const bool isText, const bool hasCollisionBox, const bool hasCollisionCircle) {
             if (!hasCollisionBox && !hasCollisionCircle) return;
 
-            const auto& group = getCollisionTileLayerGroup();
-            if (!group) {
+            const auto& collisionGroup = getCollisionTileLayerGroup();
+            if (!collisionGroup) {
                 return;
             }
 
@@ -1132,7 +1135,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                 auto drawData = std::make_unique<gfx::CollisionDrawableData>(values.translate, values.translateAnchor);
                 drawable->setData(std::move(drawData));
-                group->addDrawable(passes, tileID, std::move(drawable));
+                collisionGroup->addDrawable(passes, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
         };
@@ -1206,13 +1209,15 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
     // We'll be processing renderables across tiles, potentially out-of-order, so keep
     // track of some things by tile ID so we don't have to re-build them multiple times.
-    using RawVertexVec = std::vector<std::uint8_t>; // <int16_t, 4>
+    using RawVertexVec = std::vector<std::uint8_t>; // raw buffer for vertexes of <int16_t, 4>
     struct TileInfo {
         RawVertexVec textVertices, iconVertices;
         gfx::DrawableTweakerPtr textTweaker, iconTweaker;
         gfx::UniformBufferPtr textInterp, iconInterp;
     };
+
     std::unordered_map<UnwrappedTileID, TileInfo> tileCache;
+    tileCache.reserve(renderTiles->size());
 
     for (auto& group : renderableSegments) {
         const auto& renderable = group.renderable;

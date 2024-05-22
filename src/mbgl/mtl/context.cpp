@@ -23,6 +23,7 @@
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/thread_pool.hpp>
+#include <mbgl/util/hash.hpp>
 
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
@@ -55,6 +56,10 @@ Context::~Context() noexcept {
         clipMaskUniformsBuffer.reset();
         stencilStateRenderable = nullptr;
 
+        for (size_t i = 0; i < globalUniformBuffers.allocatedSize(); i++) {
+            globalUniformBuffers.set(i, nullptr);
+        }
+
 #if !defined(NDEBUG)
         Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
 #endif
@@ -77,6 +82,11 @@ BufferResource Context::createBuffer(
     return {const_cast<Context&>(*this), data, size, MTL::ResourceStorageModeShared, isIndexBuffer, persistent};
 }
 
+// If enabled, ubsan flags the implicit cast from assigning `NS::String*` to `NS::Object*` here
+// as an alignment error.  The ObjC NSString allocations are cast to a C++ object pointer by
+// `NS::Object::sendMessage`, and the alignment rules are different.  We assume that, because
+// `NS::Object` does not use virtual methods and only serves as a way for C++ code to store
+// and pass ObjC `id`s to `objc_msgSend`, this won't cause any real problems.
 UniqueShaderProgram Context::createProgram(std::string name,
                                            const std::string_view source,
                                            const std::string_view vertexName,
@@ -89,11 +99,11 @@ UniqueShaderProgram Context::createProgram(std::string name,
     const auto& programDefines = programParameters.getDefines();
     const auto numDefines = programDefines.size() + additionalDefines.size();
 
-    std::vector<NS::Object*> rawDefines;
+    std::vector<const NS::Object*> rawDefines;
     rawDefines.reserve(2 * numDefines);
     const auto addDefine = [&rawDefines](const auto& pair) {
-        auto* nsKey = NS::String::string(pair.first.data(), NS::UTF8StringEncoding);
-        auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
+        const auto* nsKey = NS::String::string(pair.first.data(), NS::UTF8StringEncoding);
+        const auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
         rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size() / 2), nsKey);
         rawDefines.insert(rawDefines.end(), nsVal);
     };
@@ -135,7 +145,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     }
 
     const auto nsVertName = NS::String::string(vertexName.data(), NS::UTF8StringEncoding);
-    NS::SharedPtr<MTL::Function> vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
+    MTLFunctionPtr vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
         assert(false);
@@ -143,7 +153,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     }
 
     // fragment function is optional
-    NS::SharedPtr<MTL::Function> fragmentFunction;
+    MTLFunctionPtr fragmentFunction;
     if (!fragmentName.empty()) {
         const auto nsFragName = NS::String::string(fragmentName.data(), NS::UTF8StringEncoding);
         fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
@@ -352,7 +362,14 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
         // Create a render pipeline state, telling Metal how to render the primitives
         const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
-        if (auto state = mtlShader.getRenderPipelineState(renderable, vertDesc, colorMode)) {
+        const std::size_t hash = mbgl::util::hash(ShaderClass::attributes[0].index,
+                                                  0,
+                                                  MTL::VertexFormatShort2,
+                                                  vertexSize,
+                                                  MTL::VertexStepFunctionPerVertex,
+                                                  1);
+        if (auto state = mtlShader.getRenderPipelineState(
+                renderable, vertDesc, colorMode, mbgl::util::hash(colorMode.hash(), hash))) {
             clipMaskPipelineState = std::move(state);
         }
     }
@@ -605,6 +622,18 @@ MTLDepthStencilStatePtr Context::makeDepthStencilState(const gfx::DepthMode& dep
     }
 
     return NS::TransferPtr(device->newDepthStencilState(depthStencilDescriptor.get()));
+}
+
+void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
+    for (size_t id = 0; id < globalUniformBuffers.allocatedSize(); id++) {
+        const auto& globalUniformBuffer = globalUniformBuffers.get(id);
+        if (!globalUniformBuffer) continue;
+        const auto& buffer = static_cast<UniformBuffer&>(*globalUniformBuffer.get());
+        const auto& resource = buffer.getBufferResource();
+        auto& mtlRenderPass = static_cast<RenderPass&>(renderPass);
+        mtlRenderPass.bindVertex(resource, 0, id);
+        mtlRenderPass.bindFragment(resource, 0, id);
+    }
 }
 
 } // namespace mtl

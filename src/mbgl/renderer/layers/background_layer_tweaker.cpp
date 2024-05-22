@@ -53,22 +53,16 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
 
     if (hasPattern) {
-        const Size atlasSize = parameters.patternAtlas.getPixelSize();
-
-        const BackgroundPatternLayerUBO layerUBO = {
-            /* .pattern_tl_a = */ util::cast<float>(imagePosA->tl()),
-            /* .pattern_br_a = */ util::cast<float>(imagePosA->br()),
-            /* .pattern_tl_b = */ util::cast<float>(imagePosB->tl()),
-            /* .pattern_br_b = */ util::cast<float>(imagePosB->br()),
-            /* .texsize = */ {static_cast<float>(atlasSize.width), static_cast<float>(atlasSize.height)},
-            /* .pattern_size_a = */ imagePosA->displaySize(),
-            /* .pattern_size_b = */ imagePosB->displaySize(),
-            /* .scale_a = */ crossfade.fromScale,
-            /* .scale_b = */ crossfade.toScale,
-            /* .mix = */ crossfade.t,
-            /* .opacity = */ evaluated.get<BackgroundOpacity>(),
-            /* .pad1/2 = */ 0,
-            0};
+        const BackgroundPatternLayerUBO layerUBO = {/* .pattern_tl_a = */ util::cast<float>(imagePosA->tl()),
+                                                    /* .pattern_br_a = */ util::cast<float>(imagePosA->br()),
+                                                    /* .pattern_tl_b = */ util::cast<float>(imagePosB->tl()),
+                                                    /* .pattern_br_b = */ util::cast<float>(imagePosB->br()),
+                                                    /* .pattern_size_a = */ imagePosA->displaySize(),
+                                                    /* .pattern_size_b = */ imagePosB->displaySize(),
+                                                    /* .scale_a = */ crossfade.fromScale,
+                                                    /* .scale_b = */ crossfade.toScale,
+                                                    /* .mix = */ crossfade.t,
+                                                    /* .opacity = */ evaluated.get<BackgroundOpacity>()};
         layerUniforms.createOrUpdate(idBackgroundLayerUBO, &layerUBO, context);
     } else {
         const BackgroundLayerUBO layerUBO = {/* .color = */ evaluated.get<BackgroundColor>(),

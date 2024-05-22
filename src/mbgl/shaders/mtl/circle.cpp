@@ -4,8 +4,8 @@ namespace mbgl {
 namespace shaders {
 
 const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Metal>::uniforms = {
+    UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
     UniformBlockInfo{true, false, sizeof(CircleDrawableUBO), idCircleDrawableUBO},
-    UniformBlockInfo{true, true, sizeof(CirclePaintParamsUBO), idCirclePaintParamsUBO},
     UniformBlockInfo{true, true, sizeof(CircleEvaluatedPropsUBO), idCircleEvaluatedPropsUBO},
     UniformBlockInfo{true, false, sizeof(CircleInterpolateUBO), idCircleInterpolateUBO},
 };

@@ -1,3 +1,4 @@
+#include <mbgl/style/expression/collator_expression.hpp>
 #include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/expression/format_section_override.hpp>
 #include <mbgl/style/layers/custom_layer_impl.hpp>
@@ -38,7 +39,15 @@ TEST(ExpressionDependencies, Convert) {
     EXPECT_EQ(Dependency::Feature, toString(number(string(get("color"))))->dependencies);
     EXPECT_EQ(Dependency::Feature, boolean(string(get("color")))->dependencies);
     EXPECT_EQ(Dependency::Feature, toFormatted(toColor(string(get("color"))))->dependencies);
-    EXPECT_EQ(Dependency::Feature | Dependency::Image, toImage(string(get("color")))->dependencies);
+
+    /// See `coercion.cpp`, `extraDependency`
+    EXPECT_EQ(Dependency::Feature, toImage(string(get("color")))->dependencies);
+
+    /// See `collator_expression.cpp`, `extraDependency`
+    EXPECT_EQ(Dependency::Feature,
+              createExpression(R"(["resolved-locale",["collator",{"locale": "de"}]])")->dependencies);
+    EXPECT_EQ(Dependency::Feature | Dependency::Zoom,
+              CollatorExpression(gt(literal(1.), zoom()), literal(true), literal("en-us")).dependencies);
 }
 
 TEST(ExpressionDependencies, Compare) {

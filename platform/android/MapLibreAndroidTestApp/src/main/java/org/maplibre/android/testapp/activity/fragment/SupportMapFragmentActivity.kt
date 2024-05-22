@@ -14,7 +14,7 @@ import org.maplibre.android.testapp.R
  * Test activity showcasing using the MapFragment API using Support Library Fragments.
  *
  *
- * Uses MapboxMapOptions to initialise the Fragment.
+ * Uses MapLibreMapOptions to initialise the Fragment.
  *
  */
 class SupportMapFragmentActivity :

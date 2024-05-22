@@ -108,8 +108,8 @@ struct alignas(16) CircleInterpolateUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const CircleDrawableUBO& drawable [[buffer(0)]],
-                                device const CirclePaintParamsUBO& params [[buffer(1)]],
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
+                                device const CircleDrawableUBO& drawable [[buffer(1)]],
                                 device const CircleEvaluatedPropsUBO& props [[buffer(2)]],
                                 device const CircleInterpolateUBO& interp [[buffer(3)]]) {
 
@@ -143,14 +143,14 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
             // whole circle based on the pitch scaling effect at its central point
             const float4 projected_center = drawable.matrix * float4(circle_center, 0, 1);
             corner_position += scaled_extrude * (radius + stroke_width) *
-                               (projected_center.w / params.camera_to_center_distance);
+                               (projected_center.w / paintParams.camera_to_center_distance);
         }
 
         position = drawable.matrix * float4(corner_position, 0, 1);
     } else {
         position = drawable.matrix * float4(circle_center, 0, 1);
 
-        const float factor = props.scale_with_map ? params.camera_to_center_distance : position.w;
+        const float factor = props.scale_with_map ? paintParams.camera_to_center_distance : position.w;
         position.xy += scaled_extrude * (radius + stroke_width) * factor;
     }
 
@@ -189,7 +189,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const CirclePaintParamsUBO& params [[buffer(1)]],
                             device const CircleEvaluatedPropsUBO& props [[buffer(2)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);

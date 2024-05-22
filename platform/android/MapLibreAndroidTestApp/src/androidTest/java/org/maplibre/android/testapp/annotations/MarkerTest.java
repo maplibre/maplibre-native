@@ -25,22 +25,22 @@ public class MarkerTest extends EspressoTest {
   @Ignore
   public void addMarkerTest() {
     validateTestSetup();
-    MapLibreMapAction.invoke(maplibreMap, (uiController, mapboxMap) -> {
-      assertEquals("Markers should be empty", 0, mapboxMap.getMarkers().size());
+    MapLibreMapAction.invoke(maplibreMap, (uiController, maplibreMap) -> {
+      assertEquals("Markers should be empty", 0, maplibreMap.getMarkers().size());
 
       MarkerOptions options = new MarkerOptions();
       options.setPosition(new LatLng());
       options.setSnippet(TestConstants.TEXT_MARKER_SNIPPET);
       options.setTitle(TestConstants.TEXT_MARKER_TITLE);
-      marker = mapboxMap.addMarker(options);
+      marker = maplibreMap.addMarker(options);
 
-      assertEquals("Markers size should be 1, ", 1, mapboxMap.getMarkers().size());
+      assertEquals("Markers size should be 1, ", 1, maplibreMap.getMarkers().size());
       assertEquals("Marker id should be 0", 0, marker.getId());
       assertEquals("Marker target should match", new LatLng(), marker.getPosition());
       assertEquals("Marker snippet should match", TestConstants.TEXT_MARKER_SNIPPET, marker.getSnippet());
       assertEquals("Marker target should match", TestConstants.TEXT_MARKER_TITLE, marker.getTitle());
-      mapboxMap.clear();
-      assertEquals("Markers should be empty", 0, mapboxMap.getMarkers().size());
+      maplibreMap.clear();
+      assertEquals("Markers should be empty", 0, maplibreMap.getMarkers().size());
     });
   }
 
@@ -48,13 +48,13 @@ public class MarkerTest extends EspressoTest {
   @Ignore
   public void showInfoWindowTest() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       final MarkerOptions options = new MarkerOptions();
       options.setPosition(new LatLng());
       options.setSnippet(TestConstants.TEXT_MARKER_SNIPPET);
       options.setTitle(TestConstants.TEXT_MARKER_TITLE);
-      marker = mapboxMap.addMarker(options);
-      mapboxMap.selectMarker(marker);
+      marker = maplibreMap.addMarker(options);
+      maplibreMap.selectMarker(marker);
     });
     onView(withText(TestConstants.TEXT_MARKER_TITLE)).check(matches(isDisplayed()));
     onView(withText(TestConstants.TEXT_MARKER_SNIPPET)).check(matches(isDisplayed()));

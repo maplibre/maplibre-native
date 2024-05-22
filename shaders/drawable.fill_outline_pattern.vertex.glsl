@@ -1,10 +1,20 @@
+layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float global_pad1, global_pad2;
+};
 layout (std140) uniform FillOutlinePatternDrawableUBO {
     highp mat4 u_matrix;
-    highp vec4 u_scale;
-    highp vec2 u_world;
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp vec2 u_texsize;
+    highp float u_tile_ratio;
+    highp float drawable_pad1;
 };
 layout (std140) uniform FillOutlinePatternTilePropsUBO {
     highp vec4 u_pattern_from;
@@ -21,8 +31,8 @@ layout (std140) uniform FillEvaluatedPropsUBO {
     highp vec4 u_outline_color;
     highp float u_opacity;
     highp float u_fade;
-    highp float u_width;
-    highp float props_pad1;
+    highp float u_from_scale;
+    highp float u_to_scale;
 };
 
 layout (location = 0) in vec2 a_pos;
@@ -45,10 +55,10 @@ void main() {
     vec2 pattern_tl_b = pattern_to.xy;
     vec2 pattern_br_b = pattern_to.zw;
 
-    float pixelRatio = u_scale.x;
-    float tileRatio = u_scale.y;
-    float fromScale = u_scale.z;
-    float toScale = u_scale.w;
+    float pixelRatio = u_pixel_ratio;
+    float tileRatio = u_tile_ratio;
+    float fromScale = u_from_scale;
+    float toScale = u_to_scale;
 
     gl_Position = u_matrix * vec4(a_pos, 0, 1);
 
@@ -58,5 +68,5 @@ void main() {
     v_pos_a = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, fromScale * display_size_a, tileRatio, a_pos);
     v_pos_b = get_pattern_pos(u_pixel_coord_upper, u_pixel_coord_lower, toScale * display_size_b, tileRatio, a_pos);
 
-    v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world;
+    v_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * u_world_size;
 }

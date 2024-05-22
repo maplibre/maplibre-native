@@ -3,13 +3,6 @@
 #define SDF 1.0
 #define ICON 0.0
 
-layout (std140) uniform SymbolDynamicUBO {
-    highp float u_fade_change;
-    highp float u_camera_to_center_distance;
-    highp float u_aspect_ratio;
-    highp float dynamic_pad1;
-};
-
 layout (std140) uniform SymbolDrawableUBO {
     highp mat4 u_matrix;
     highp mat4 u_label_plane_matrix;
@@ -32,15 +25,6 @@ layout (std140) uniform SymbolTilePropsUBO {
     highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
     highp float u_size; // used when size is both zoom and feature constant
     bool tileprops_pad1;
-};
-
-layout (std140) uniform SymbolInterpolateUBO {
-    highp float u_fill_color_t;
-    highp float u_halo_color_t;
-    highp float u_opacity_t;
-    highp float u_halo_width_t;
-    highp float u_halo_blur_t;
-    highp float interp_pad1, interp_pad2,interp_pad3;
 };
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {

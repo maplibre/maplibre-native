@@ -18,12 +18,11 @@ def obtainTestBuildType() {
 }
 
 android {
-    compileSdkVersion androidVersions.compileSdkVersion
-
     defaultConfig {
         applicationId "org.maplibre.android.testapp"
-        minSdkVersion androidVersions.minSdkVersion
-        targetSdkVersion androidVersions.targetSdkVersion
+        compileSdk 34
+        minSdkVersion 21
+        targetSdkVersion 33
         versionCode 14
         versionName "6.0.1"
         testInstrumentationRunner "org.maplibre.android.InstrumentationRunner"

@@ -37,7 +37,7 @@ const std::string AnnotationManager::PointLayerID = "com.mapbox.annotations.poin
 const std::string AnnotationManager::ShapeLayerID = "com.mapbox.annotations.shape.";
 
 AnnotationManager::AnnotationManager(Style& style_)
-    : style(style_){};
+    : style(style_) {};
 
 AnnotationManager::~AnnotationManager() = default;
 

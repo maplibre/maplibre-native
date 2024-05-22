@@ -19,6 +19,7 @@
 #include <mbgl/gl/fence.hpp>
 #include <mbgl/gl/buffer_allocator.hpp>
 #include <mbgl/gfx/texture2d.hpp>
+#include <mbgl/gl/uniform_buffer_gl.hpp>
 #endif
 
 #include <array>
@@ -134,6 +135,18 @@ public:
                                       const void* data,
                                       std::size_t size,
                                       bool persistent) override;
+
+    /// Get the global uniform buffers
+    const gfx::UniformBufferArray& getGlobalUniformBuffers() const override { return globalUniformBuffers; };
+
+    /// Get the mutable global uniform buffer array
+    gfx::UniformBufferArray& mutableGlobalUniformBuffers() override { return globalUniformBuffers; };
+
+    /// Bind the global uniform buffers
+    void bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override;
+
+    /// Unbind the global uniform buffers
+    void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override;
 #endif
 
     void setDirtyState() override;
@@ -147,6 +160,7 @@ private:
     std::shared_ptr<gl::Fence> frameInFlightFence;
     std::unique_ptr<gl::UniformBufferAllocator> uboAllocator;
     size_t frameNum = 0;
+    UniformBufferArrayGL globalUniformBuffers;
 #endif
 
 public:

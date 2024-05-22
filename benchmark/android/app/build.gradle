@@ -1,12 +1,13 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
-    compileSdkVersion androidVersions.compileSdkVersion
     ndkVersion androidSdkVersions.ndkVersion
-    buildToolsVersion androidSdkVersions.buildToolsVersion
 
     defaultConfig {
         applicationId = 'com.mapbox.mapboxsdk.maps.benchmark_runner'
+        compileSdk 34
         minSdkVersion 21
         targetSdkVersion 33
         def abi = 'all'

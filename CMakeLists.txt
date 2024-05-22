@@ -41,7 +41,7 @@ endif()
 project("Mapbox GL Native" LANGUAGES CXX C)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER Core)
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)
 
 set(
     MEMORYCHECK_COMMAND_OPTIONS
@@ -94,6 +94,7 @@ target_compile_options(
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=return-type>
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=unknown-pragmas>
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=pragmas>
+        $<$<CXX_COMPILER_ID:GNU>:-Wno-psabi>
         $<$<CXX_COMPILER_ID:AppleClang>:-Wno-unknown-warning-option>
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MLN_WITH_QT}>>>:-Wno-error=deprecated-declarations>
         $<$<AND:$<CXX_COMPILER_ID:AppleClang>,$<NOT:$<BOOL:${MLN_WITH_QT}>>>:-Wno-error=unused-parameter>
@@ -151,6 +152,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_atlases_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_custom_layer_host_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/gpu_expression.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_block.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_buffer.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/vertex_attribute.hpp
@@ -179,6 +181,7 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_builder_impl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_atlases_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable_custom_layer_host_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/gpu_expression.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/hillshade_prepare_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/image_drawable_data.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/line_drawable_data.hpp
@@ -1489,7 +1492,7 @@ set_target_properties(
         INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.md
 )
 
-set_property(TARGET mbgl-core PROPERTY FOLDER Core)
+set_property(TARGET mbgl-core PROPERTY FOLDER MapLibre)
 
 add_library(
     Mapbox::Map ALIAS mbgl-core

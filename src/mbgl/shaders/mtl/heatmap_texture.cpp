@@ -3,8 +3,9 @@
 namespace mbgl {
 namespace shaders {
 
-const std::array<UniformBlockInfo, 1> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal>::uniforms =
+const std::array<UniformBlockInfo, 2> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal>::uniforms =
     {
+        UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
         UniformBlockInfo{true, true, sizeof(HeatmapTexturePropsUBO), idHeatmapTexturePropsUBO},
 };
 const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Metal>::attributes =

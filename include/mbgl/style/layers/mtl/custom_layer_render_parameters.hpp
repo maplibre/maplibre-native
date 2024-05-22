@@ -1,8 +1,8 @@
 #pragma once
 
 #include <mbgl/style/layers/custom_layer_render_parameters.hpp>
-
 #include <mbgl/mtl/mtl_fwd.hpp>
+
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
 

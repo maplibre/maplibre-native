@@ -22,11 +22,15 @@ layout (location = 4) in float a_fade_opacity;
 // [ text-size(lowerZoomStop, feature),
 //   text-size(upperZoomStop, feature) ]
 
-layout (std140) uniform SymbolDynamicUBO {
-    highp float u_fade_change;
+layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_world_size;
     highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
     highp float u_aspect_ratio;
-    highp float dynamic_pad1;
+    highp float u_pixel_ratio;
+    highp float global_pad1, global_pad2;
 };
 
 layout (std140) uniform SymbolDrawableUBO {
@@ -196,7 +200,7 @@ lowp float halo_blur = u_halo_blur;
     float gamma_scale = gl_Position.w;
 
     vec2 fade_opacity = unpack_opacity(a_fade_opacity);
-    float fade_change = fade_opacity[1] > 0.5 ? u_fade_change : -u_fade_change;
+    float fade_change = fade_opacity[1] > 0.5 ? u_symbol_fade_change : -u_symbol_fade_change;
     float interpolated_fade_opacity = max(0.0, min(1.0, fade_opacity[0] + fade_change));
 
     v_data0 = a_tex / u_texsize;
@@ -204,13 +208,6 @@ lowp float halo_blur = u_halo_blur;
 }
 )";
     static constexpr const char* fragment = R"(#define SDF_PX 8.0
-
-layout (std140) uniform SymbolDynamicUBO {
-    highp float u_fade_change;
-    highp float u_camera_to_center_distance;
-    highp float u_aspect_ratio;
-    highp float dynamic_pad1;
-};
 
 layout (std140) uniform SymbolDrawableUBO {
     highp mat4 u_matrix;
@@ -234,15 +231,6 @@ layout (std140) uniform SymbolTilePropsUBO {
     highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
     highp float u_size; // used when size is both zoom and feature constant
     bool tileprops_pad1;
-};
-
-layout (std140) uniform SymbolInterpolateUBO {
-    highp float u_fill_color_t;
-    highp float u_halo_color_t;
-    highp float u_opacity_t;
-    highp float u_halo_width_t;
-    highp float u_halo_blur_t;
-    highp float interp_pad1, interp_pad2, interp_pad3;
 };
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {

@@ -52,13 +52,13 @@ import java.util.List;
  * you must obtain one from the getMapAsync() method on a MapFragment or MapView that you have
  * added to your application.
  * <p>
- * Note: Similar to a View object, a MapboxMap should only be read and modified from the main thread.
+ * Note: Similar to a View object, a MapLibreMap should only be read and modified from the main thread.
  * </p>
  */
 @UiThread
 public final class MapLibreMap {
 
-  private static final String TAG = "Mbgl-MapboxMap";
+  private static final String TAG = "Mbgl-MapLibreMap";
 
   private final NativeMap nativeMapView;
   private final UiSettings uiSettings;
@@ -303,7 +303,7 @@ public final class MapLibreMap {
    * Set the tile pre-fetching zoom delta. Pre-fetching makes sure that a low-resolution
    * tile at the (current_zoom_level - delta) is rendered as soon as possible at the
    * expense of a little bandwidth.
-   * Note: This operation will override the MapboxMapOptions#setPrefetchesTiles(boolean)
+   * Note: This operation will override the MapLibreMapOptions#setPrefetchesTiles(boolean)
    *       Setting zoom delta to 0 will disable pre-fetching.
    * Default zoom delta is 4.
    *

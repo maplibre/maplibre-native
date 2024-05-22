@@ -3,15 +3,14 @@ package org.maplibre.android.testapp.activity.espresso
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import timber.log.Timber
 
-class DeviceIndependentTestActivity : AppCompatActivity(), OnMapReadyCallback {
+class DeviceIndependentTestActivity : AppCompatActivity() {
+    private val TAG = "DeviceIndependentTestActivity"
+
     lateinit var mapView: MapView
-    lateinit var maplibreMap: MapLibreMap
-        protected set
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,12 +19,10 @@ class DeviceIndependentTestActivity : AppCompatActivity(), OnMapReadyCallback {
         // Initialize map as normal
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(this)
-    }
-
-    override fun onMapReady(map: MapLibreMap) {
-        maplibreMap = map
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+        mapView.getMapAsync {
+            Timber.i(TAG, "Setting style")
+            it.setStyle(Style.getPredefinedStyles()[0].url)
+        }
     }
 
     public override fun onResume() {

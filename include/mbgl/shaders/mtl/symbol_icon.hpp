@@ -46,11 +46,10 @@ struct FragmentStage {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const SymbolDynamicUBO& dynamic [[buffer(0)]],
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
                                 device const SymbolDrawableUBO& drawable [[buffer(1)]],
                                 device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
-                                device const SymbolInterpolateUBO& interp [[buffer(3)]],
-                                device const SymbolEvaluatedPropsUBO& paint [[buffer(4)]]) {
+                                device const SymbolInterpolateUBO& interp [[buffer(3)]]) {
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -77,8 +76,8 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float camera_to_anchor_distance = projectedPoint.w;
     // See comments in symbol_sdf.vertex
     const float distance_ratio = tileprops.pitch_with_map ?
-        camera_to_anchor_distance / dynamic.camera_to_center_distance :
-        dynamic.camera_to_center_distance / camera_to_anchor_distance;
+        camera_to_anchor_distance / paintParams.camera_to_center_distance :
+        paintParams.camera_to_center_distance / camera_to_anchor_distance;
     const float perspective_ratio = clamp(
             0.5 + 0.5 * distance_ratio,
             0.0, // Prevents oversized near-field symbols in pitched/overzoomed tiles
@@ -95,7 +94,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 
         const float2 a = projectedPoint.xy / projectedPoint.w;
         const float2 b = offsetProjectedPoint.xy / offsetProjectedPoint.w;
-        symbol_rotation = atan2((b.y - a.y) / dynamic.aspect_ratio, b.x - a.x);
+        symbol_rotation = atan2((b.y - a.y) / paintParams.aspect_ratio, b.x - a.x);
     }
 
     const float angle_sin = sin(segment_angle + symbol_rotation);
@@ -108,7 +107,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     const float4 position = drawable.coord_matrix * float4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
 
     const float2 raw_fade_opacity = unpack_opacity(vertx.fade_opacity);
-    const float fade_change = raw_fade_opacity[1] > 0.5 ? dynamic.fade_change : -dynamic.fade_change;
+    const float fade_change = raw_fade_opacity[1] > 0.5 ? paintParams.symbol_fade_change : -paintParams.symbol_fade_change;
     const float fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
 
     return {
@@ -123,8 +122,6 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolDynamicUBO& dynamic [[buffer(0)]],
-                            device const SymbolDrawableUBO& drawable [[buffer(1)]],
                             device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
                             device const SymbolEvaluatedPropsUBO& props [[buffer(4)]],
                             texture2d<float, access::sample> image [[texture(0)]],

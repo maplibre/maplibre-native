@@ -19,12 +19,12 @@ public class PolygonTest extends EspressoTest {
   @Ignore
   public void addPolygonTest() {
     validateTestSetup();
-    invoke(maplibreMap, (uiController, mapboxMap) -> {
+    invoke(maplibreMap, (uiController, maplibreMap) -> {
       LatLng latLngOne = new LatLng();
       LatLng latLngTwo = new LatLng(1, 0);
       LatLng latLngThree = new LatLng(1, 1);
 
-      assertEquals("Polygons should be empty", 0, mapboxMap.getPolygons().size());
+      assertEquals("Polygons should be empty", 0, maplibreMap.getPolygons().size());
 
       final PolygonOptions options = new PolygonOptions();
       options.strokeColor(Color.BLUE);
@@ -32,15 +32,15 @@ public class PolygonTest extends EspressoTest {
       options.add(latLngOne);
       options.add(latLngTwo);
       options.add(latLngThree);
-      Polygon polygon = mapboxMap.addPolygon(options);
+      Polygon polygon = maplibreMap.addPolygon(options);
 
-      assertEquals("Polygons should be 1", 1, mapboxMap.getPolygons().size());
+      assertEquals("Polygons should be 1", 1, maplibreMap.getPolygons().size());
       assertEquals("Polygon id should be 0", 0, polygon.getId());
       assertEquals("Polygon points size should match", 3, polygon.getPoints().size());
       assertEquals("Polygon stroke color should match", Color.BLUE, polygon.getStrokeColor());
       assertEquals("Polygon target should match", Color.RED, polygon.getFillColor());
-      mapboxMap.clear();
-      assertEquals("Polygons should be empty", 0, mapboxMap.getPolygons().size());
+      maplibreMap.clear();
+      assertEquals("Polygons should be empty", 0, maplibreMap.getPolygons().size());
     });
   }
 }

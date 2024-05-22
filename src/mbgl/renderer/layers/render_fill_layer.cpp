@@ -69,9 +69,10 @@ void RenderFillLayer::transition(const TransitionParameters& parameters) {
 }
 
 void RenderFillLayer::evaluate(const PropertyEvaluationParameters& parameters) {
+    const auto previousProperties = staticImmutableCast<FillLayerProperties>(evaluatedProperties);
     auto properties = makeMutable<FillLayerProperties>(staticImmutableCast<FillLayer::Impl>(baseImpl),
                                                        parameters.getCrossfadeParameters(),
-                                                       unevaluated.evaluate(parameters));
+                                                       unevaluated.evaluate(parameters, previousProperties->evaluated));
     auto& evaluated = properties->evaluated;
 
     if (unevaluated.get<style::FillOutlineColor>().isUndefined()) {
@@ -629,7 +630,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
                     commonInit(*builder);
                     builder->setDepthType(opaque ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
-                    builder->setColorMode(opaque ? gfx::ColorMode::unblended() : gfx::ColorMode::alphaBlended());
+                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
                     builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);

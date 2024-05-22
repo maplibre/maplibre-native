@@ -3008,7 +3008,7 @@ public class Expression {
    * </p>
    * <pre>
    * {@code
-   * mapboxMap.getStyle().addLayer(new SymbolLayer("layer-id", "source-id")
+   * maplibreMap.getStyle().addLayer(new SymbolLayer("layer-id", "source-id")
    *   .withProperties(
    *     textField(
    *       switchCase(
@@ -3039,7 +3039,7 @@ public class Expression {
    * </p>
    * <pre>
    * {@code
-   * mapboxMap.getStyle().addLayer(new SymbolLayer("layer-id", "source-id")
+   * maplibreMap.getStyle().addLayer(new SymbolLayer("layer-id", "source-id")
    * .withProperties(
    *   textField(
    *     switchCase(

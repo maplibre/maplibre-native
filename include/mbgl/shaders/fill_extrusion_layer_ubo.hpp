@@ -8,16 +8,15 @@ namespace mbgl {
 namespace shaders {
 
 struct alignas(16) FillExtrusionDrawableUBO {
-    /*   0 */ std::array<float, 4 * 4> matrix;
-    /*  64 */ std::array<float, 4> scale;
-    /*  80 */ std::array<float, 2> texsize;
-    /*  88 */ std::array<float, 2> pixel_coord_upper;
-    /*  96 */ std::array<float, 2> pixel_coord_lower;
-    /* 104 */ float height_factor;
-    /* 108 */ float pad;
-    /* 112 */
+    /*  0 */ std::array<float, 4 * 4> matrix;
+    /* 64 */ std::array<float, 2> texsize;
+    /* 72 */ std::array<float, 2> pixel_coord_upper;
+    /* 80 */ std::array<float, 2> pixel_coord_lower;
+    /* 88 */ float height_factor;
+    /* 92 */ float tile_ratio;
+    /* 96 */
 };
-static_assert(sizeof(FillExtrusionDrawableUBO) == 7 * 16);
+static_assert(sizeof(FillExtrusionDrawableUBO) == 6 * 16);
 
 /// Evaluated properties that do not depend on the tile
 struct alignas(16) FillExtrusionPropsUBO {
@@ -31,7 +30,9 @@ struct alignas(16) FillExtrusionPropsUBO {
     /* 56 */ float vertical_gradient;
     /* 60 */ float opacity;
     /* 64 */ float fade;
-    /* 68 */ float pad2, pad3, pad4;
+    /* 68 */ float from_scale;
+    /* 72 */ float to_scale;
+    /* 76 */ float pad2;
     /* 80 */
 };
 static_assert(sizeof(FillExtrusionPropsUBO) == 5 * 16);
@@ -57,7 +58,7 @@ struct alignas(16) FillExtrusionInterpolateUBO {
 static_assert(sizeof(FillExtrusionInterpolateUBO) == 2 * 16);
 
 enum {
-    idFillExtrusionDrawableUBO,
+    idFillExtrusionDrawableUBO = globalUBOCount,
     idFillExtrusionPropsUBO,
     idFillExtrusionTilePropsUBO,
     idFillExtrusionInterpolateUBO,

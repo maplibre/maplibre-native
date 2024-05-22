@@ -21,8 +21,8 @@ struct ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Metal> 
 
     static constexpr auto source = R"(
 struct VertexStage {
-    short2 pos [[attribute(1)]];
-    short2 texture_pos [[attribute(2)]];
+    short2 pos [[attribute(2)]];
+    short2 texture_pos [[attribute(3)]];
 };
 
 struct FragmentStage {
@@ -39,7 +39,7 @@ struct alignas(16) HillshadePrepareDrawableUBO {
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const HillshadePrepareDrawableUBO& drawable [[buffer(0)]]) {
+                                device const HillshadePrepareDrawableUBO& drawable [[buffer(1)]]) {
 
     const float4 position = drawable.matrix * float4(float2(vertx.pos), 0, 1);
 
@@ -61,7 +61,7 @@ float getElevation(float2 coord, float bias, texture2d<float, access::sample> im
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const HillshadePrepareDrawableUBO& drawable [[buffer(0)]],
+                            device const HillshadePrepareDrawableUBO& drawable [[buffer(1)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)

@@ -1,8 +1,24 @@
-# Changelog for MapLibre Native for iOS 
+# Changelog for MapLibre Native for iOS
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-native/blob/master/CONTRIBUTING.md) to get started.
 
 ## main
+
+## 6.4.2
+
+- Fix Metal frame glitch on older devices ([#2379](https://github.com/maplibre/maplibre-native/pull/2379)).
+- Fix style switching delay fix when annotations are visible ([#2395](https://github.com/maplibre/maplibre-native/pull/2395)).
+- Small performance and memory usage optimizations.
+
+## 6.4.1
+
+- Update user agent from Mapbox to MapLibreNative ([#2367](https://github.com/maplibre/maplibre-native/pull/2367)).
+- Synchronous rendering on Metal when annotation views are visible ([#2334](https://github.com/maplibre/maplibre-native/pull/2334)).
+- Various performance optimizations.
+
+## 6.4.0
+
+- User-Agent in network requests can now be changed via `MLNNativeNetworkManager.sharedManager.sessionConfiguration` ([#2293](https://github.com/maplibre/maplibre-native/pull/2293)).
 
 ## 6.3.3
 

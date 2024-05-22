@@ -66,10 +66,10 @@ class DraggableMarkerActivity : AppCompatActivity() {
 
         mapView = binding.mapView
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync { mapboxMap ->
-            this.maplibreMap = mapboxMap
+        mapView.getMapAsync { maplibreMap ->
+            this.maplibreMap = maplibreMap
 
-            mapboxMap.setStyle(
+            maplibreMap.setStyle(
                 Style.Builder()
                     .fromUri(Style.getPredefinedStyle("Streets"))
                     .withImage(markerImageId, IconFactory.getInstance(this).defaultMarker().bitmap)
@@ -83,16 +83,16 @@ class DraggableMarkerActivity : AppCompatActivity() {
             addMarker(LatLng(51.514886, -0.112589))
 
             // Initial camera position
-            mapboxMap.moveCamera(
+            maplibreMap.moveCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(45.0, 8.0),
                     3.0
                 )
             )
 
-            mapboxMap.addOnMapClickListener {
+            maplibreMap.addOnMapClickListener {
                 // Adding a marker on map click
-                val features = mapboxMap.queryRenderedSymbols(it, layerId)
+                val features = maplibreMap.queryRenderedSymbols(it, layerId)
                 if (features.isEmpty()) {
                     addMarker(it)
                 } else {
@@ -110,7 +110,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
 
             draggableSymbolsManager = DraggableSymbolsManager(
                 mapView,
-                mapboxMap,
+                maplibreMap,
                 featureCollection,
                 source,
                 layerId,
@@ -175,7 +175,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
      * we still need to listen for move gesture events which map won't be able to provide anymore.
      *
      * @param mapView the mapView
-     * @param maplibreMap the mapboxMap
+     * @param maplibreMap the maplibreMap
      * @param symbolsCollection the collection that contains all the symbols that we want to be draggable
      * @param symbolsSource the source that contains the [symbolsCollection]
      * @param symbolsLayerId the ID of the layer that the symbols are displayed on

@@ -93,8 +93,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
     const auto debugGroupRender = parameters.encoder->createDebugGroup(label_render.c_str());
 #endif
 
-    bindUniformBuffers();
-
+    bool bindUBOs = false;
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -121,10 +120,17 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
             context.setStencilMode(drawable.getEnableStencil() ? stencilMode3d : gfx::StencilMode::disabled());
         }
 
+        if (!bindUBOs) {
+            bindUniformBuffers();
+            bindUBOs = true;
+        }
+
         drawable.draw(parameters);
     });
 
-    unbindUniformBuffers();
+    if (bindUBOs) {
+        unbindUniformBuffers();
+    }
 }
 
 void TileLayerGroupGL::bindUniformBuffers() const {
@@ -178,8 +184,7 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
         return;
     }
 
-    bindUniformBuffers();
-
+    bool bindUBOs = false;
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled() || !drawable.hasRenderPass(parameters.pass)) {
             return;
@@ -193,10 +198,17 @@ void LayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) {
             tweaker->execute(drawable, parameters);
         }
 
+        if (!bindUBOs) {
+            bindUniformBuffers();
+            bindUBOs = true;
+        }
+
         drawable.draw(parameters);
     });
 
-    unbindUniformBuffers();
+    if (bindUBOs) {
+        unbindUniformBuffers();
+    }
 }
 
 void LayerGroupGL::bindUniformBuffers() const {

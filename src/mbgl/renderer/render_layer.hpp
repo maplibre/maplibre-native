@@ -132,10 +132,9 @@ public:
     bool supportsZoom(float zoom) const;
 
     virtual void upload(gfx::UploadPass&) {}
-    virtual void render(PaintParameters&) {};
+    virtual void render(PaintParameters&) {}
 
-    // Check wether the given geometry intersects
-    // with the feature
+    // Check whether the given geometry intersects with the feature
     virtual bool queryIntersectsFeature(const GeometryCoordinates&,
                                         const GeometryTileFeature&,
                                         const float,

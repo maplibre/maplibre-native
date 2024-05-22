@@ -220,6 +220,7 @@ run-android-unit-test-%:
 apackage: 
 	make android-lib-arm-v7 && make android-lib-arm-v8 && make android-lib-x86 && make android-lib-x86-64
 	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=all assembleDrawable$(BUILDTYPE)
+	mkdir -p build
 	tar -czvf build/debug-symbols.tar.gz -C MapLibreAndroid/build/intermediates/library_jni/drawableRelease/jni .
 
 # Build test app instrumentation tests apk and test app apk for all abi's
