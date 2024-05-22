@@ -13,4 +13,4 @@ mv sqlite3.h include
 mv sqlite3.c src
 file_list include src -name "*.h" -o -name "*.c"
 
-git apply scripts/vendor/sqlite-ndk.patch
+git apply $PWD/../../scripts/vendor/sqlite-ndk.patch
