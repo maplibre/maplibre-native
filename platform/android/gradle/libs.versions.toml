@@ -32,7 +32,7 @@ androidxTestExtJUnit = "1.1.5"
 androidxTestCoreKtx = "1.5.0"
 kotlinxSerializationJson = "1.6.0"
 
-androidGradlePlugin = "8.1.4"
+androidGradlePlugin = "8.4.1"
 
 [libraries]
 maplibreJavaGeoJSON = { group = "org.maplibre.gl", name = "android-sdk-geojson", version.ref = "mapLibreServices" }
