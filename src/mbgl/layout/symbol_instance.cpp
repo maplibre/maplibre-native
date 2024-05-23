@@ -202,20 +202,10 @@ optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex() const {
     return nullopt;
 }
 
-namespace {
-    void logFailure(std::string msg) {
-        // Log some info about where we found unexpected values, forcing it to happen
-        // in the current thread to avoid the entry being lost if we are about to crash.
-        const bool saveUseThread = Log::useLogThread();
-        Log::useLogThread(false);
-        Log::Error(Event::Crash, msg);
-        Log::useLogThread(saveUseThread);
-    }
-}
 bool SymbolInstance::check(std::size_t v, int n, std::string_view source) const {
     if (!isFailed && v != checkVal) {
         isFailed = true;
-        logFailure("SymbolInstance corrupted at " + util::toString(n) + " with value " + util::toString(v) + " from '" + std::string(source) + "'");
+        Log::Error(Event::Crash, "SymbolInstance corrupted at " + util::toString(n) + " with value " + util::toString(v) + " from '" + std::string(source) + "'");
     }
     return !isFailed;
 }
@@ -223,7 +213,7 @@ bool SymbolInstance::check(std::size_t v, int n, std::string_view source) const 
 bool SymbolInstance::checkKey() const {
     if (!isFailed && key.size() > 1000) {   // largest observed value=62
         isFailed = true;
-        logFailure("SymbolInstance key corrupted with size=" + util::toString(key.size()));
+        Log::Error(Event::Crash, "SymbolInstance key corrupted with size=" + util::toString(key.size()));
     }
     return !isFailed;
 }
@@ -231,7 +221,7 @@ bool SymbolInstance::checkKey() const {
 bool SymbolInstance::checkIndex(const optional<std::size_t>& index, std::size_t size, std::string_view source) const {
     if (index.has_value() && *index >= size) {
         isFailed = true;
-        logFailure("SymbolInstance index corrupted with value=" + util::toString(*index) + " size=" + util::toString(size) + " from '" + std::string(source) + "'");
+        Log::Error(Event::Crash, "SymbolInstance index corrupted with value=" + util::toString(*index) + " size=" + util::toString(size) + " from '" + std::string(source) + "'");
     }
     return !isFailed;
 }

@@ -9,6 +9,7 @@ enum class EventSeverity : uint8_t {
     Info,
     Warning,
     Error,
+    SeverityCount
 };
 
 enum class Event : uint8_t {

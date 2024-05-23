@@ -40,8 +40,7 @@ public:
     Log();
     ~Log();
 
-    static bool useLogThread();
-    static void useLogThread(bool enable);
+    static void useLogThread(bool enable, optional<EventSeverity> = {});
 
     template <typename ...Args>
     static void Debug(Event event, Args&& ...args) {
