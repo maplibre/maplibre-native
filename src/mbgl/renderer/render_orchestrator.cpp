@@ -142,7 +142,7 @@ RenderOrchestrator::~RenderOrchestrator() {
     // Wait for any deferred cleanup tasks to complete before releasing and potentially
     // destroying the scheduler.  Those cleanup tasks must not hold the final reference
     // to the scheduler because it cannot be destroyed from one of its own pool threads.
-    constexpr auto deferredCleanupTimeout = Milliseconds{1000};
+    constexpr auto deferredCleanupTimeout = Milliseconds{10000};
     [[maybe_unused]] const auto remaining = threadPool->waitForEmpty(deferredCleanupTimeout);
     assert(remaining == 0);
 }
