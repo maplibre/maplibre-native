@@ -28,14 +28,13 @@ Scheduler* Scheduler::GetCurrent() {
 
 // static
 std::shared_ptr<Scheduler> Scheduler::GetBackground() {
-    static std::weak_ptr<Scheduler> weak;
+    static std::shared_ptr<Scheduler> scheduler;
     static std::mutex mtx;
 
     std::lock_guard<std::mutex> lock(mtx);
-    std::shared_ptr<Scheduler> scheduler = weak.lock();
 
     if (!scheduler) {
-        weak = scheduler = std::make_shared<ThreadPool>();
+        scheduler = std::make_shared<ThreadPool>();
     }
 
     return scheduler;
