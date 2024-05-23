@@ -9,92 +9,91 @@ enum LocationAccuracyState {
     case fullAccuracy
 }
 
-class Coordinator: NSObject, MLNMapViewDelegate {
-    @Binding var mapView: MLNMapView
-    @Binding var locationAccuracy: LocationAccuracyState
-    var pannedToUserLocation = false
+@MainActor
+class PrivacyExampleViewModel: NSObject, ObservableObject {
+    @Published var locationAccuracy: LocationAccuracyState = .unknown
+    @Published var showTemporaryLocationAuthorization = false
+}
 
-    init(mapView: Binding<MLNMapView>, locationAccuracy: Binding<LocationAccuracyState>) {
-        _mapView = mapView
-        _locationAccuracy = locationAccuracy
+class PrivacyExampleCoordinator: NSObject, MLNMapViewDelegate {
+    @ObservedObject private var mapViewModel: PrivacyExampleViewModel
+    private var pannedToUserLocation = false
+
+    init(mapViewModel: PrivacyExampleViewModel) {
+        self.mapViewModel = mapViewModel
+        super.init()
     }
 
-    func mapView(_: MLNMapView, didChangeLocationManagerAuthorization manager: MLNLocationManager) {
+    @MainActor func mapView(_: MLNMapView, didChangeLocationManagerAuthorization manager: MLNLocationManager) {
         guard let accuracySetting = manager.accuracyAuthorization else {
             return
         }
 
         switch accuracySetting() {
         case .fullAccuracy:
-            locationAccuracy = .fullAccuracy
+            mapViewModel.locationAccuracy = .fullAccuracy
         case .reducedAccuracy:
-            locationAccuracy = .reducedAccuracy
+            mapViewModel.locationAccuracy = .reducedAccuracy
         @unknown default:
-            locationAccuracy = .unknown
+            mapViewModel.locationAccuracy = .unknown
         }
     }
 
     // when a location is available for the first time, we fly to it
     func mapView(_ mapView: MLNMapView, didUpdate _: MLNUserLocation?) {
-        if pannedToUserLocation {
-            return
-        }
+        guard !pannedToUserLocation else { return }
         guard let userLocation = mapView.userLocation else {
             print("User location is currently not available.")
             return
         }
         mapView.fly(to: MLNMapCamera(lookingAtCenter: userLocation.coordinate, altitude: 100_000, pitch: 0, heading: 0))
+        pannedToUserLocation = true
     }
 }
 
-struct LocationPrivacyExample: UIViewRepresentable {
-    @Binding var mapView: MLNMapView
-    @Binding var locationAccuracy: LocationAccuracyState
+struct PrivacyExampleRepresentable: UIViewRepresentable {
+    @ObservedObject var mapViewModel: PrivacyExampleViewModel
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(mapView: $mapView, locationAccuracy: $locationAccuracy)
+    func makeCoordinator() -> PrivacyExampleCoordinator {
+        PrivacyExampleCoordinator(mapViewModel: mapViewModel)
     }
 
     func makeUIView(context: Context) -> MLNMapView {
         let mapView = MLNMapView()
-        mapView.showsUserLocation = true
-        mapView.delegate = context.coordinator
 
+        mapView.delegate = context.coordinator
+        mapView.showsUserLocation = true
         return mapView
     }
 
-    func updateUIView(_: MLNMapView, context _: Context) {}
+    func updateUIView(_ mapView: MLNMapView, context _: Context) {
+        if mapViewModel.showTemporaryLocationAuthorization {
+            let purposeKey = "MLNAccuracyAuthorizationDescription"
+            mapView.locationManager.requestTemporaryFullAccuracyAuthorization?(withPurposeKey: purposeKey)
+            DispatchQueue.main.async {
+                mapViewModel.showTemporaryLocationAuthorization = false
+            }
+        }
+    }
 }
 
 struct LocationPrivacyExampleView: View {
-    @State private var mapView = MLNMapView()
-    @State var locationAccuracy: LocationAccuracyState = .unknown
+    @StateObject private var viewModel = PrivacyExampleViewModel()
 
     var body: some View {
         VStack {
-            LocationPrivacyExample(mapView: $mapView, locationAccuracy: $locationAccuracy)
+            PrivacyExampleRepresentable(mapViewModel: viewModel)
                 .edgesIgnoringSafeArea(.all)
 
-            if locationAccuracy == LocationAccuracyState.reducedAccuracy {
+            if viewModel.locationAccuracy == LocationAccuracyState.reducedAccuracy {
                 Button("Request Precise Location") {
-                    handleButtonPress(mapView: mapView)
+                    viewModel.showTemporaryLocationAuthorization.toggle()
                 }
                 .padding()
                 .background(Color.blue)
                 .foregroundColor(.white)
                 .cornerRadius(8)
             }
-        }
-    }
-
-    private func handleButtonPress(mapView: MLNMapView) {
-        print("Requesting precice location")
-        switch locationAccuracy {
-        case .reducedAccuracy:
-            let purposeKey = "MLNAccuracyAuthorizationDescription"
-            mapView.locationManager.requestTemporaryFullAccuracyAuthorization!(withPurposeKey: purposeKey)
-        default:
-            break
         }
     }
 }

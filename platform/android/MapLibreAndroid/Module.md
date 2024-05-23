@@ -1,4 +1,4 @@
-# MapLibre Native for Android
+# Module MapLibre Native Android
 
 This is the API documentation for the Android API of [MapLibre Native](https://github.com/maplibre/maplibre-native).
 

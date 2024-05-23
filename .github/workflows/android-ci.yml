@@ -109,6 +109,9 @@ jobs:
       - name: Build libmaplibre.so for arm-v8
         run: make android-lib-arm-v8
 
+      - name: Build documentation
+        run: ./gradlew dokkaHtml
+
       - name: Copy developer config with API key for UI tests
         if: github.ref == 'refs/heads/main'
         run: |
