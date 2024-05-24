@@ -4,8 +4,6 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-## 6.4.3-pre
-
 - Workaround for potential crash during map shutdown
 
 ## 6.4.2
