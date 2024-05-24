@@ -12,5 +12,5 @@ jobs:
       - uses: actions/checkout@v4
 
       - run: |
-          npm install --ignore-scripts
+          npm install
           npx tsc -p scripts/jsconfig.json

@@ -272,16 +272,19 @@ jobs:
           path: metrics/macos-xcode11-release-style.html
 
       - name: Test (Linux)
+        working-directory: platform/node
         if: runner.os == 'Linux'
         run: xvfb-run --auto-servernum npm test
 
       - name: Test (MacOS)
         if: runner.os == 'MacOS'
+        working-directory: platform/node
         run: npm test
 
       - name: Test (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
+        working-directory: platform/node
         env:
           LIBGL_ALWAYS_SOFTWARE: true
           GALLIUM_DRIVER: softpipe
@@ -292,5 +295,6 @@ jobs:
 
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
+        working-directory: platform/node
         run: |
-          npm pack --dry-run
+          npm pack  --dry-run

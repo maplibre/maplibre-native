@@ -43,7 +43,7 @@ jobs:
             ${{ runner.os }}-
 
       - name: npm install
-        run: npm install --ignore-scripts          
+        run: npm install
 
       - name: Prepare ccache
         run: ccache --clear       

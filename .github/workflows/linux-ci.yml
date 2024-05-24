@@ -203,7 +203,7 @@ jobs:
 
       - name: Start server
         run: |
-          npm install --ignore-scripts
+          npm install
           node test/storage/server.js &
 
       - name: Generate coverage report
