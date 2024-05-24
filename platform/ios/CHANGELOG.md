@@ -4,6 +4,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.4.3-pre
+
+- Workaround for potential crash during map shutdown
+
 ## 6.4.2
 
 - Fix Metal frame glitch on older devices ([#2379](https://github.com/maplibre/maplibre-native/pull/2379)).
