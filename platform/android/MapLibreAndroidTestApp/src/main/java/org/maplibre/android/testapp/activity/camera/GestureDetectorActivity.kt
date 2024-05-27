@@ -3,6 +3,7 @@ package org.maplibre.android.testapp.activity.camera
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.*
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -306,7 +307,7 @@ class GestureDetectorActivity : AppCompatActivity() {
 
     private class GestureAlertsAdapter : RecyclerView.Adapter<GestureAlertsAdapter.ViewHolder>() {
         private var isUpdating = false
-        private val updateHandler = Handler()
+        private val updateHandler = Handler(Looper.getMainLooper())
         private val alerts: MutableList<GestureAlert> = ArrayList()
 
         class ViewHolder internal constructor(view: View) : RecyclerView.ViewHolder(view) {

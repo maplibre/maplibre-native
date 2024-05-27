@@ -33,7 +33,7 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
         container.viewTreeObserver
             .addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
-                    container.viewTreeObserver.removeGlobalOnLayoutListener(this)
+                    container.viewTreeObserver.removeOnGlobalLayoutListener(this)
                     Timber.i("Starting snapshot")
                     val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Outdoor"))
                         .withSource(earthquakeSource!!)
