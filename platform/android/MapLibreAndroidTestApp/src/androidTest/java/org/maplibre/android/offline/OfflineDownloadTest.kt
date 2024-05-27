@@ -10,6 +10,7 @@ import org.maplibre.android.testapp.activity.FeatureOverviewActivity
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.testapp.styles.Styles
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -71,7 +72,7 @@ class OfflineDownloadTest : OfflineRegion.OfflineRegionObserver {
 
     private fun createTestRegionDefinition(): OfflineRegionDefinition {
         return OfflineGeometryRegionDefinition(
-            Style.getPredefinedStyle("Streets"),
+            Styles.getPredefinedStyleWithFallback("Streets"),
             Point.fromLngLat(50.847857, 4.360137),
             17.0,
             17.0,

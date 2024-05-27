@@ -3,6 +3,7 @@ package org.maplibre.android.integration
 import androidx.test.filters.LargeTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
+import org.junit.Ignore
 import org.maplibre.android.testapp.activity.maplayout.TextureRecyclerViewActivity
 import org.junit.Rule
 import org.junit.Test
@@ -19,6 +20,7 @@ class TextureViewReuseTest : BaseIntegrationTest() {
 
     @Test
     @LargeTest
+    @Ignore("https://github.com/maplibre/maplibre-native/issues/2187")
     fun scrollRecyclerView() {
         device.waitForIdle()
         device.scrollRecyclerViewTo("Twenty-one")

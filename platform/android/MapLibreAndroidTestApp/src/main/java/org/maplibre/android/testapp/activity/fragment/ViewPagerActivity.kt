@@ -9,6 +9,7 @@ import org.maplibre.android.maps.MapLibreMapOptions
 import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.SupportMapFragment
 import org.maplibre.android.testapp.databinding.ActivityViewpagerBinding
+import org.maplibre.android.testapp.styles.Styles
 
 /**
  * Test activity showcasing using the Android SDK ViewPager API to show MapFragments.
@@ -91,11 +92,11 @@ fun SupportMapFragment.getMapAsync(index: Int) {
     this.getMapAsync {
         it.setStyle(
             when (index) {
-                0 -> Style.getPredefinedStyle("Streets")
-                1 -> Style.getPredefinedStyle("Pastel")
-                2 -> Style.getPredefinedStyle("Satellite Hybrid")
-                3 -> Style.getPredefinedStyle("Bright")
-                else -> Style.getPredefinedStyle("Streets")
+                0 -> Styles.getPredefinedStyleWithFallback("Streets")
+                1 -> Styles.getPredefinedStyleWithFallback("Pastel")
+                2 -> Styles.getPredefinedStyleWithFallback("Satellite Hybrid")
+                3 -> Styles.getPredefinedStyleWithFallback("Bright")
+                else -> Styles.getPredefinedStyleWithFallback("Streets")
             }
         )
     }

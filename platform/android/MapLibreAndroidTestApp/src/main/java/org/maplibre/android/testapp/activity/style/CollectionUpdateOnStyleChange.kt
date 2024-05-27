@@ -19,6 +19,7 @@ import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityCollectionUpdateOnStyleChangeBinding
+import org.maplibre.android.testapp.styles.Styles
 import java.util.*
 
 /**
@@ -114,7 +115,13 @@ class CollectionUpdateOnStyleChange : AppCompatActivity(), OnMapReadyCallback, S
 
     companion object {
 
-        private val STYLES = arrayOf(Style.getPredefinedStyle("Streets"), Style.getPredefinedStyle("Outdoor"), Style.getPredefinedStyle("Bright"), Style.getPredefinedStyle("Pastel"), Style.getPredefinedStyle("Satellite Hybrid"), Style.getPredefinedStyle("Satellite Hybrid"))
+        private val STYLES = arrayOf(
+            Styles.getPredefinedStyleWithFallback("Streets"),
+            Styles.getPredefinedStyleWithFallback("Outdoor"),
+            Styles.getPredefinedStyleWithFallback("Bright"),
+            Styles.getPredefinedStyleWithFallback("Pastel"),
+            Styles.getPredefinedStyleWithFallback("Satellite Hybrid"),
+            Styles.getPredefinedStyleWithFallback("Satellite Hybrid"))
 
         private val featureCollection: FeatureCollection
 

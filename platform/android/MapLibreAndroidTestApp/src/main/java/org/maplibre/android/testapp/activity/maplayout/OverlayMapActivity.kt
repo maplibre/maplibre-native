@@ -9,6 +9,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.databinding.ActivityOverlayBinding
+import org.maplibre.android.testapp.styles.Styles
 
 /**
  * Test overlaying a Map with a View that uses a radial gradient shader.
@@ -24,7 +25,7 @@ class OverlayMapActivity : AppCompatActivity() {
         binding.mapView.onCreate(savedInstanceState)
         binding.parentView.addView(OverlayView(this))
         binding.mapView.getMapAsync {
-            it.setStyle(Style.getPredefinedStyle("Streets"))
+            it.setStyle(Styles.getPredefinedStyleWithFallback("Streets"))
         }
     }
 

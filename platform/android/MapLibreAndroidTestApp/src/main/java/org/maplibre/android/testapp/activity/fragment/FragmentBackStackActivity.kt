@@ -7,6 +7,7 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.SupportMapFragment
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityBackstackFragmentBinding
+import org.maplibre.android.testapp.styles.Styles
 import org.maplibre.android.testapp.utils.NavUtils
 
 /**
@@ -45,8 +46,13 @@ class FragmentBackStackActivity : AppCompatActivity() {
     }
 
     private fun initMap(maplibreMap: MapLibreMap) {
-        maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid")) {
-            maplibreMap.setPadding(300, 300, 300, 300)
+        try {
+            val style = Styles.getPredefinedStyleWithFallback("Satellite Hybrid")
+            maplibreMap.setStyle(style) {
+                maplibreMap.setPadding(300, 300, 300, 300)
+            }
+        } catch (e: IllegalArgumentException) {
+            // ignore style unavailable
         }
     }
 

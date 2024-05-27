@@ -20,6 +20,7 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityLocationLayerFragmentBinding
+import org.maplibre.android.testapp.styles.Styles
 
 class LocationFragmentActivity : AppCompatActivity() {
 
@@ -107,7 +108,7 @@ class LocationFragmentActivity : AppCompatActivity() {
             mapView.onCreate(savedInstanceState)
             mapView.getMapAsync {
                 maplibreMap = it
-                it.setStyle(Style.getPredefinedStyle("Streets")) { style ->
+                it.setStyle(Styles.getPredefinedStyleWithFallback("Streets")) { style ->
                     val component = maplibreMap.locationComponent
 
                     component.activateLocationComponent(

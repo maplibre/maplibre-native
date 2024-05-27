@@ -11,6 +11,7 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.snapshotter.MapSnapshot
 import org.maplibre.android.snapshotter.MapSnapshotter
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.Styles
 import java.util.*
 
 /**
@@ -89,12 +90,12 @@ class MapSnapshotterReuseActivity : AppCompatActivity(), MapSnapshotter.Snapshot
             .build()
     val randomStyle: String
         get() = when (random.nextInt(5)) {
-            0 -> Style.getPredefinedStyle("Pastel")
-            1 -> Style.getPredefinedStyle("Bright")
-            2 -> Style.getPredefinedStyle("Streets")
-            3 -> Style.getPredefinedStyle("Outdoor")
-            4 -> Style.getPredefinedStyle("Satellite Hybrid")
-            else -> Style.getPredefinedStyle("Streets")
+            0 -> Styles.getPredefinedStyleWithFallback("Pastel")
+            1 -> Styles.getPredefinedStyleWithFallback("Bright")
+            2 -> Styles.getPredefinedStyleWithFallback("Streets")
+            3 -> Styles.getPredefinedStyleWithFallback("Outdoor")
+            4 -> Styles.getPredefinedStyleWithFallback("Satellite Hybrid")
+            else -> Styles.getPredefinedStyleWithFallback("Streets")
         }
 
     companion object {

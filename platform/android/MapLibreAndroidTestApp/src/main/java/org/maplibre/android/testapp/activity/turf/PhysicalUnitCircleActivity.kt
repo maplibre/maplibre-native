@@ -14,6 +14,7 @@ import org.maplibre.android.style.layers.FillLayer
 import org.maplibre.android.style.layers.PropertyFactory.fillColor
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.databinding.ActivityPhysicalCircleBinding
+import org.maplibre.android.testapp.styles.Styles
 import org.maplibre.turf.TurfTransformation
 
 /**
@@ -61,7 +62,7 @@ class PhysicalUnitCircleActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeL
 
             maplibreMap.setStyle(
                 Style.Builder()
-                    .fromUri(Style.getPredefinedStyle("Satellite Hybrid"))
+                    .fromUri(Styles.getPredefinedStyleWithFallback("Satellite Hybrid"))
                     .withLayer(
                         FillLayer(LAYER_ID, SOURCE_ID).withProperties(
                             fillColor(

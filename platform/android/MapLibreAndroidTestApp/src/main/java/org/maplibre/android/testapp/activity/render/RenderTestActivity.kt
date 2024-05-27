@@ -44,9 +44,7 @@ class RenderTestActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        if (mapSnapshotter != null) {
-            mapSnapshotter!!.cancel()
-        }
+        mapSnapshotter.cancel()
     }
 
     //

@@ -14,6 +14,7 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.Styles
 import org.maplibre.android.testapp.utils.IconUtils
 
 /**
@@ -31,7 +32,7 @@ class DynamicMarkerChangeActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
             OnMapReadyCallback { maplibreMap: MapLibreMap ->
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+                maplibreMap.setStyle(Styles.getPredefinedStyleWithFallback("Streets"))
                 this@DynamicMarkerChangeActivity.maplibreMap = maplibreMap
                 // Create marker
                 val markerOptions = MarkerOptions()

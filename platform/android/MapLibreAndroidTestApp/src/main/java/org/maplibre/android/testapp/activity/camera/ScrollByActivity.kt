@@ -16,6 +16,7 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.Styles
 
 /**
  * Test activity showcasing using the scrollBy Camera API by moving x,y pixels above Grenada, Spain.
@@ -53,7 +54,7 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        maplibreMap.setStyle(Style.getPredefinedStyle("Pastel"))
+        maplibreMap.setStyle(Styles.getPredefinedStyleWithFallback("Pastel"))
         val uiSettings = maplibreMap.uiSettings
         uiSettings.isLogoEnabled = false
         uiSettings.isAttributionEnabled = false

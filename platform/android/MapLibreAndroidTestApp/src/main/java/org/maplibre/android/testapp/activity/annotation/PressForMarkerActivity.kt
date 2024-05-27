@@ -11,6 +11,7 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.Styles
 import java.text.DecimalFormat
 import java.util.ArrayList
 
@@ -43,7 +44,7 @@ class PressForMarkerActivity : AppCompatActivity() {
                 addMarker(point)
                 false
             }
-            maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+            maplibreMap.setStyle(Styles.getPredefinedStyleWithFallback("Streets"))
             if (savedInstanceState != null) {
                 markerList = savedInstanceState.getParcelableArrayList(STATE_MARKER_LIST)
                 if (markerList != null) {

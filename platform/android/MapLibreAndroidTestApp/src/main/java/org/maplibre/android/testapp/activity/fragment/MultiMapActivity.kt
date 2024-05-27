@@ -8,6 +8,7 @@ import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.SupportMapFragment
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.Styles
 
 /**
  * Test Activity showcasing using multiple static map fragments in one layout.
@@ -17,10 +18,10 @@ class MultiMapActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_multi_map)
         val fragmentManager = supportFragmentManager
-        initFragmentStyle(fragmentManager, R.id.map1, Style.getPredefinedStyle("Streets"))
-        initFragmentStyle(fragmentManager, R.id.map2, Style.getPredefinedStyle("Bright"))
-        initFragmentStyle(fragmentManager, R.id.map3, Style.getPredefinedStyle("Satellite Hybrid"))
-        initFragmentStyle(fragmentManager, R.id.map4, Style.getPredefinedStyle("Pastel"))
+        initFragmentStyle(fragmentManager, R.id.map1, Styles.getPredefinedStyleWithFallback("Streets"))
+        initFragmentStyle(fragmentManager, R.id.map2, Styles.getPredefinedStyleWithFallback("Bright"))
+        initFragmentStyle(fragmentManager, R.id.map3, Styles.getPredefinedStyleWithFallback("Satellite Hybrid"))
+        initFragmentStyle(fragmentManager, R.id.map4, Styles.getPredefinedStyleWithFallback("Pastel"))
     }
 
     private fun initFragmentStyle(
