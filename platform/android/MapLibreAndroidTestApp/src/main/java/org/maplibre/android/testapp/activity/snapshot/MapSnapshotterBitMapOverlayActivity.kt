@@ -40,7 +40,7 @@ class MapSnapshotterBitMapOverlayActivity :
         container.viewTreeObserver
             .addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
-                    container.viewTreeObserver.removeGlobalOnLayoutListener(this)
+                    container.viewTreeObserver.removeOnGlobalLayoutListener(this)
                     Timber.i("Starting snapshot")
                     mapSnapshotter = MapSnapshotter(
                         applicationContext,
