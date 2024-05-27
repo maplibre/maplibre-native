@@ -20,7 +20,6 @@ class TextureViewReuseTest : BaseIntegrationTest() {
 
     @Test
     @LargeTest
-    @Ignore("https://github.com/maplibre/maplibre-native/issues/2187")
     fun scrollRecyclerView() {
         device.waitForIdle()
         device.scrollRecyclerViewTo("Twenty-one")
