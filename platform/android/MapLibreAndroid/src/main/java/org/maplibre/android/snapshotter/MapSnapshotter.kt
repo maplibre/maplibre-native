@@ -141,10 +141,8 @@ open class MapSnapshotter(context: Context, options: Options) {
         /**
          * @return The base of our API endpoint
          */
-        @get:Deprecated("use {@link #getApiBaseUri()} instead")
         var apiBaseUri: String? = null
             private set
-            get() = field
 
         var builder: Style.Builder? = null
             private set
