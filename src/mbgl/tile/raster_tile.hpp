@@ -35,6 +35,8 @@ public:
     void onParsed(std::unique_ptr<RasterBucket> result, uint64_t correlationID);
     void onError(std::exception_ptr, uint64_t correlationID);
 
+    void cancel() override;
+
 private:
     TileLoader<RasterTile> loader;
 

@@ -86,6 +86,8 @@ public:
     void onParsed(std::unique_ptr<HillshadeBucket> result, uint64_t correlationID);
     void onError(std::exception_ptr, uint64_t correlationID);
 
+    void cancel() override;
+
 private:
     TileLoader<RasterDEMTile> loader;
 

@@ -78,4 +78,8 @@ void RasterTile::setUpdateParameters(const TileUpdateParameters& params) {
     loader.setUpdateParameters(params);
 }
 
+void RasterTile::cancel() {
+    mailbox->abandon();
+}
+
 } // namespace mbgl

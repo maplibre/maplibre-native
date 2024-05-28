@@ -125,4 +125,8 @@ void RasterDEMTile::setUpdateParameters(const TileUpdateParameters& params) {
     loader.setUpdateParameters(params);
 }
 
+void RasterDEMTile::cancel() {
+    mailbox->abandon();
+}
+
 } // namespace mbgl
