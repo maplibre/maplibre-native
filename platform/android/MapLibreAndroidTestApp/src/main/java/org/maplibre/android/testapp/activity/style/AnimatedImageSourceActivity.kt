@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.MapLibre
 import org.maplibre.android.geometry.LatLng
@@ -27,7 +28,7 @@ import org.maplibre.android.utils.BitmapUtils
  */
 class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
     private var runnable: Runnable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

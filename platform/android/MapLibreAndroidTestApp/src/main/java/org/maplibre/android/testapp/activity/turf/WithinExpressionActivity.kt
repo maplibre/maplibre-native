@@ -3,6 +3,7 @@ package org.maplibre.android.testapp.activity.turf
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.os.PersistableBundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.geojson.*
@@ -32,7 +33,7 @@ class WithinExpressionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityWithinExpressionBinding
     private lateinit var mapView: MapView
 
-    private val handler: Handler = Handler()
+    private val handler: Handler = Handler(Looper.getMainLooper())
     private val runnable: Runnable = Runnable {
         optimizeStyle()
     }
