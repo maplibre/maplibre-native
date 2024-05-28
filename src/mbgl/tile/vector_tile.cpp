@@ -27,6 +27,10 @@ void VectorTile::setMetadata(std::optional<Timestamp> modified_, std::optional<T
 }
 
 void VectorTile::setData(const std::shared_ptr<const std::string>& data_) {
+    if (obsolete) {
+        return;
+    }
+
     GeometryTile::setData(data_ ? std::make_unique<VectorTileData>(data_) : nullptr);
 }
 

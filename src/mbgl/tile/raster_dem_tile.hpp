@@ -89,6 +89,8 @@ public:
     void cancel() override;
 
 private:
+    void markObsolete();
+
     TileLoader<RasterDEMTile> loader;
 
     std::shared_ptr<Mailbox> mailbox;
@@ -100,6 +102,8 @@ private:
     // Contains the Bucket object for the tile. Buckets are render
     // objects and they get added by tile parsing operations.
     std::shared_ptr<HillshadeBucket> bucket;
+
+    bool obsolete = false;
 };
 
 } // namespace mbgl

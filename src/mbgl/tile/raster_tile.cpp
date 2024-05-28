@@ -20,7 +20,9 @@ RasterTile::RasterTile(const OverscaledTileID& id_, const TileParameters& parame
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
       worker(Scheduler::GetBackground(), ActorRef<RasterTile>(*this, mailbox)) {}
 
-RasterTile::~RasterTile() = default;
+RasterTile::~RasterTile() {
+    markObsolete();
+}
 
 std::unique_ptr<TileRenderData> RasterTile::createRenderData() {
     return std::make_unique<SharedBucketTileRenderData<RasterBucket>>(bucket);
@@ -37,19 +39,23 @@ void RasterTile::setMetadata(std::optional<Timestamp> modified_, std::optional<T
 }
 
 void RasterTile::setData(const std::shared_ptr<const std::string>& data) {
-    pending = true;
-    ++correlationID;
-    worker.self().invoke(&RasterTileWorker::parse, data, correlationID);
+    if (!obsolete) {
+        pending = true;
+        ++correlationID;
+        worker.self().invoke(&RasterTileWorker::parse, data, correlationID);
+    }
 }
 
 void RasterTile::onParsed(std::unique_ptr<RasterBucket> result, const uint64_t resultCorrelationID) {
-    bucket = std::move(result);
-    loaded = true;
-    if (resultCorrelationID == correlationID) {
-        pending = false;
+    if (!obsolete) {
+        bucket = std::move(result);
+        loaded = true;
+        if (resultCorrelationID == correlationID) {
+            pending = false;
+        }
+        renderable = static_cast<bool>(bucket);
+        observer->onTileChanged(*this);
     }
-    renderable = static_cast<bool>(bucket);
-    observer->onTileChanged(*this);
 }
 
 void RasterTile::onError(std::exception_ptr err, const uint64_t resultCorrelationID) {
@@ -79,6 +85,12 @@ void RasterTile::setUpdateParameters(const TileUpdateParameters& params) {
 }
 
 void RasterTile::cancel() {
+    markObsolete();
+}
+
+void RasterTile::markObsolete() {
+    obsolete = true;
+    pending = false;
     mailbox->abandon();
 }
 

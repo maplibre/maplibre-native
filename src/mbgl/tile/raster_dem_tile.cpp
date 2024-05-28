@@ -31,7 +31,9 @@ RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_, const TileParameters& 
     }
 }
 
-RasterDEMTile::~RasterDEMTile() = default;
+RasterDEMTile::~RasterDEMTile() {
+    markObsolete();
+}
 
 std::unique_ptr<TileRenderData> RasterDEMTile::createRenderData() {
     return std::make_unique<SharedBucketTileRenderData<HillshadeBucket>>(bucket);
@@ -48,19 +50,23 @@ void RasterDEMTile::setMetadata(std::optional<Timestamp> modified_, std::optiona
 }
 
 void RasterDEMTile::setData(const std::shared_ptr<const std::string>& data) {
-    pending = true;
-    ++correlationID;
-    worker.self().invoke(&RasterDEMTileWorker::parse, data, correlationID, encoding);
+    if (!obsolete) {
+        pending = true;
+        ++correlationID;
+        worker.self().invoke(&RasterDEMTileWorker::parse, data, correlationID, encoding);
+    }
 }
 
 void RasterDEMTile::onParsed(std::unique_ptr<HillshadeBucket> result, const uint64_t resultCorrelationID) {
-    bucket = std::move(result);
-    loaded = true;
-    if (resultCorrelationID == correlationID) {
-        pending = false;
+    if (!obsolete) {
+        bucket = std::move(result);
+        loaded = true;
+        if (resultCorrelationID == correlationID) {
+            pending = false;
+        }
+        renderable = static_cast<bool>(bucket);
+        observer->onTileChanged(*this);
     }
-    renderable = static_cast<bool>(bucket);
-    observer->onTileChanged(*this);
 }
 
 void RasterDEMTile::onError(std::exception_ptr err, const uint64_t resultCorrelationID) {
@@ -126,6 +132,12 @@ void RasterDEMTile::setUpdateParameters(const TileUpdateParameters& params) {
 }
 
 void RasterDEMTile::cancel() {
+    markObsolete();
+}
+
+void RasterDEMTile::markObsolete() {
+    obsolete = true;
+    pending = false;
     mailbox->abandon();
 }
 
