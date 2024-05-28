@@ -42,7 +42,6 @@ public:
     void setOpaque(bool) override;
     void display() override;
     void setPresentsWithTransaction(bool) override;
-    bool getPresentsWithTransaction() override { return presentsWithTransaction; };
     void createView() override;
     UIView* getView() override;
     void deleteView() override;
@@ -50,7 +49,4 @@ public:
     void layoutChanged() override;
     MLNBackendResource getObject() override;
     // End implementation of MLNMapViewImpl
-
-private:
-    bool presentsWithTransaction = false;
 };

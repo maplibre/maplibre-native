@@ -33,7 +33,6 @@ public:
     // We update the transaction mode when the user adds annotation views that need to be layered on
     // top of the view.
     virtual void setPresentsWithTransaction(bool) = 0;
-    virtual bool getPresentsWithTransaction() = 0;
 
     // Called when initially creating the rendering view, and when resuming rendering after returning
     // from the background.
