@@ -33,6 +33,7 @@ public:
     // We update the transaction mode when the user adds annotation views that need to be layered on
     // top of the view.
     virtual void setPresentsWithTransaction(bool) = 0;
+    virtual bool getPresentsWithTransaction() = 0;
 
     // Called when initially creating the rendering view, and when resuming rendering after returning
     // from the background.
@@ -57,10 +58,6 @@ public:
     void render();
 
     virtual MLNBackendResource getObject() = 0;
-    
-    virtual void setSynchronous(bool value) {};
-    virtual bool getSynchronous() const { return false; };
-
 
     // mbgl::MapObserver implementation
     void onCameraWillChange(mbgl::MapObserver::CameraChangeMode) override;

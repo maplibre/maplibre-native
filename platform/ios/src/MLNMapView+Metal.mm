@@ -80,18 +80,14 @@ public:
     void swap() override {
         id<CAMetalDrawable> currentDrawable = [mtlView currentDrawable];
         if (currentDrawable) {
-            [commandBuffer presentDrawable:currentDrawable];
-        }
-        [commandBuffer commit];
-
-        // Synchronous rendering can help troubleshoot rendering problems,
-        // particularly those related to resource tracking and multiple queued buffers.
-        // The conditional logic for synchronous rendering is commanded from MLNMapView.updateAnnotationViews:
-        // `_mbglView->setSynchronous(haveVisibleAnnotationViews);`
-        // and fixes the desynchronization of UIView annotation when the map is rendered on the Metal backend
-        // Issue: https://github.com/maplibre/maplibre-native/issues/2053
-        if (backend.getSynchronous()) {
-            [commandBuffer waitUntilCompleted];
+            if (backend.getPresentsWithTransaction()) {
+                [commandBuffer commit];
+                [commandBuffer waitUntilCompleted];
+                [currentDrawable present];
+            } else {
+                [commandBuffer presentDrawable:currentDrawable];
+                [commandBuffer commit];
+            }
         }
 
         commandBuffer = nil;

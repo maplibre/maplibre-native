@@ -42,6 +42,7 @@ public:
     void setOpaque(bool) override;
     void display() override;
     void setPresentsWithTransaction(bool) override;
+    bool getPresentsWithTransaction() override { return presentsWithTransaction; };
     void createView() override;
     UIView* getView() override;
     void deleteView() override;
@@ -50,9 +51,6 @@ public:
     MLNBackendResource getObject() override;
     // End implementation of MLNMapViewImpl
 
-    void setSynchronous(bool value) override { synchronousFrame = value; };
-    bool getSynchronous() const override { return synchronousFrame; };
 private:
     bool presentsWithTransaction = false;
-    bool synchronousFrame = false;
 };
