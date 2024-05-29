@@ -4,7 +4,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-- Workaround for potential crash during map shutdown
+- Workaround for potential crash during map shutdown.
+- Fixed memory usage high in some cases ([#2442](https://github.com/maplibre/maplibre-native/pull/2442)).
 
 ## 6.4.2
 
