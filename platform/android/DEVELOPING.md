@@ -41,13 +41,9 @@ More information on working on the render tests can be found [in the wiki](https
 
 ## Instrumentation Tests
 
-To run the instrumentatin tests, find the `MapLibreAndroidTestApp` project in the sidebar, go to `src > androidTest`, right click and select "Run 'All Tests'".
-
-<img width="246" alt="image" src="https://github.com/maplibre/maplibre-native/assets/649392/d9daf630-cb7f-4035-b426-fc496081fed9">
+To run the instrumentation tests, choose the "Instrumentation Tests" run configuration.
 
 Your device needs remain unlocked for the duration of the tests.
-
-The instrumentation tests take a long time to run (depending on the device, about an hour). You can modify the run configuration in Android Studio and add the regex `^(?!.*org\.maplibre\.android\.benchmark).*$` to exclude the benchmark.
 
 ### AWS Device Farm
 
