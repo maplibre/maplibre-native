@@ -6917,9 +6917,6 @@ static void *windowScreenContext = &windowScreenContext;
     NSMutableArray *offscreenAnnotations = [self.annotations mutableCopy];
     [offscreenAnnotations removeObjectsInArray:visibleAnnotations];
 
-    // Dynamic flag used to drive the backend's synchronous frame rendering (see comment below)
-    bool haveVisibleAnnotationViews = false;
-
     // Update the center of visible annotation views
     for (id<MLNAnnotation> annotation in visibleAnnotations)
     {
@@ -6955,15 +6952,7 @@ static void *windowScreenContext = &windowScreenContext;
 
         if (annotationView)
         {
-            // Reset the center to zero in order to force the annotation view to redraw even when is not moving.
-            // This will force somehow the map view to display the rendered drawable for older devices.
-            // This is a fix for the following issues:
-            // https://github.com/maplibre/maplibre-native/issues/2337
-            // https://github.com/maplibre/maplibre-native/issues/2380
-            annotationView.center = CGPointZero;
-            
             annotationView.center = MLNPointRounded([self convertCoordinate:annotationContext.annotation.coordinate toPointToView:self]);
-            haveVisibleAnnotationViews = true;
         }
     }
 
@@ -7011,14 +7000,6 @@ static void *windowScreenContext = &windowScreenContext;
             }
         }
     }
-    
-    // Switch synchronous frame rendering on if we have visible annotation views.
-    // Only implemented on Metal, just a stub on OpenGL.
-    // This logic is needed to fix the desynchronization of UIView annotations when the map is rendered on the Metal backend with asynchronous frames.
-    // Root cause: the Map transform is updated immediately and the annotations are positioned on the screen using it,
-    // while the map rendered surface catches up when the frame is complete.
-    // Issue: https://github.com/maplibre/maplibre-native/issues/2053
-    _mbglView->setSynchronous(haveVisibleAnnotationViews);
 }
 
 - (BOOL)hasAnAnchoredAnnotationCalloutView
