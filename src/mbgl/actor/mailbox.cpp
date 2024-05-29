@@ -20,11 +20,11 @@ void Mailbox::open(Scheduler& scheduler_) {
     std::lock_guard<std::recursive_mutex> receivingLock(receivingMutex);
     std::lock_guard<std::mutex> pushingLock(pushingMutex);
 
-    weakScheduler = scheduler_.makeWeakPtr();
-
     if (closed) {
         return;
     }
+
+    weakScheduler = scheduler_.makeWeakPtr();
 
     if (!queue.empty()) {
         auto guard = weakScheduler.lock();
@@ -45,6 +45,8 @@ void Mailbox::close() {
     std::lock_guard<std::mutex> pushingLock(pushingMutex);
 
     closed = true;
+
+    weakScheduler = {};
 }
 
 void Mailbox::abandon() {
@@ -57,7 +59,7 @@ void Mailbox::abandon() {
 }
 
 bool Mailbox::isOpen() const {
-    return bool(weakScheduler);
+    return bool(weakScheduler) && !closed;
 }
 
 void Mailbox::push(std::unique_ptr<Message> message) {

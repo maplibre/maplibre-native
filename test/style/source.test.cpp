@@ -772,7 +772,7 @@ public:
 
     std::unique_ptr<TileRenderData> createRenderData() override { return nullptr; }
 
-    void cancel() override { }
+    void cancel() override {}
 
 private:
     FakeTileSource& source;

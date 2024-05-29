@@ -13,6 +13,12 @@ VectorTile::VectorTile(const OverscaledTileID& id_,
     : GeometryTile(id_, std::move(sourceID_), parameters),
       loader(*this, id_, parameters, tileset) {}
 
+VectorTile::~VectorTile() {
+    // Don't rely on `~TileLoader` to close, it's not safe to call there.
+    // We're still calling a virtual method from a destructor, so any overrides will not be called.
+    GeometryTile::cancel();
+}
+
 void VectorTile::setNecessity(TileNecessity necessity) {
     loader.setNecessity(necessity);
 }
