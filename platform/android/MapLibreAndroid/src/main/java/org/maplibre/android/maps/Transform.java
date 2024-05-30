@@ -2,6 +2,7 @@ package org.maplibre.android.maps;
 
 import android.graphics.PointF;
 import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,7 +32,7 @@ public final class Transform implements MapView.OnCameraDidChangeListener {
 
   private final NativeMap nativeMap;
   private final MapView mapView;
-  private final Handler handler = new Handler();
+  private final Handler handler = new Handler(Looper.getMainLooper());
 
   @Nullable
   private CameraPosition cameraPosition;

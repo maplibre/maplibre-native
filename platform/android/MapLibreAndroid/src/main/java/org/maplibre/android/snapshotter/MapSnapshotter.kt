@@ -3,6 +3,7 @@ package org.maplibre.android.snapshotter
 import android.content.Context
 import android.graphics.*
 import android.os.Handler
+import android.os.Looper
 import android.text.Html
 import android.text.TextUtils
 import android.view.View
@@ -141,10 +142,8 @@ open class MapSnapshotter(context: Context, options: Options) {
         /**
          * @return The base of our API endpoint
          */
-        @get:Deprecated("use {@link #getApiBaseUri()} instead")
         var apiBaseUri: String? = null
             private set
-            get() = field
 
         var builder: Style.Builder? = null
             private set
@@ -611,7 +610,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     @Keep
     protected fun onSnapshotReady(snapshot: MapSnapshot) {
-        Handler().post {
+        Handler(Looper.getMainLooper()).post {
             if (callback != null) {
                 addOverlay(snapshot)
                 callback!!.onSnapshotReady(snapshot)
@@ -627,7 +626,7 @@ open class MapSnapshotter(context: Context, options: Options) {
      */
     @Keep
     protected fun onSnapshotFailed(reason: String) {
-        Handler().post {
+        Handler(Looper.getMainLooper()).post {
             if (errorHandler != null) {
                 errorHandler!!.onError(reason)
                 reset()

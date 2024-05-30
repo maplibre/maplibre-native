@@ -11,6 +11,10 @@ on:
           - pre
           - no
         description: Whether to make a release, choose full release (uses platform/ios/VERSION) or pre-release
+      pre_release_version:
+        type: string
+        default: ''
+        description: Version (only for pre-releases)
   push:
     branches:
       - main
@@ -204,7 +208,7 @@ jobs:
   ios-release:
     runs-on: macos-14
     needs: ios-build
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.event.inputs.release == 'pre'
     defaults:
       run:
         working-directory: platform/ios
@@ -251,7 +255,11 @@ jobs:
       - name: Get version (pre-release)
         if: github.event.inputs.release == 'pre'
         run: |
-          echo version="$(head VERSION)"-pre${{ github.sha }} >> "$GITHUB_ENV"
+          version="${{ github.event.inputs.pre_release_version }}"
+          if [[ -z "$version" ]]; then
+            version="$(head VERSION)"-pre${{ github.sha }}
+          fi
+          echo version="$version" >> "$GITHUB_ENV"
           echo changelog_version_heading="## main" >> "$GITHUB_ENV"
 
       - name: Extract changelog for version

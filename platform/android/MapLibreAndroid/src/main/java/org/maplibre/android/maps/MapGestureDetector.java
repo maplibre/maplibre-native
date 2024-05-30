@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PointF;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.animation.DecelerateInterpolator;
@@ -96,7 +97,7 @@ final class MapGestureDetector {
    * {@link MapLibreConstants#SCHEDULED_ANIMATION_TIMEOUT}
    */
   @NonNull
-  private Handler animationsTimeoutHandler = new Handler();
+  private Handler animationsTimeoutHandler = new Handler(Looper.getMainLooper());
 
   private boolean doubleTapRegistered;
 

@@ -49,7 +49,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
         grid.getViewTreeObserver()
             .addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
-                    grid.getViewTreeObserver().removeGlobalOnLayoutListener(this)
+                    grid.getViewTreeObserver().removeOnGlobalLayoutListener(this)
                     addSnapshots()
                 }
             })

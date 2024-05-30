@@ -3,6 +3,7 @@ package org.maplibre.android.testapp.activity.offline
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.SeekBar
@@ -29,7 +30,7 @@ class DownloadRegionActivity : AppCompatActivity(), OfflineRegion.OfflineRegionO
         const val STATUS_UPDATE_TIMEOUT_MS = 10_000L
     }
 
-    private val handler: Handler = Handler()
+    private val handler: Handler = Handler(Looper.getMainLooper())
     private lateinit var offlineManager: OfflineManager
     private lateinit var binding: ActivityRegionDownloadBinding
     private var offlineRegion: OfflineRegion? = null
