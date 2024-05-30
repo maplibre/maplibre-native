@@ -4,6 +4,12 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+- Workaround for potential crash during map shutdown.
+- Reduced memory utilization for annotations
+- Location services authorization can be suppressed with `shouldRequestAuthorizationToUseLocationServices`
+- Fix a potential crash when rendering raster or DEM tiles
+- Fix a potential crash when tearing down a map instance
+
 ## 6.4.2
 
 - Fix Metal frame glitch on older devices ([#2379](https://github.com/maplibre/maplibre-native/pull/2379)).
