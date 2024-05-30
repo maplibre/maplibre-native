@@ -859,6 +859,8 @@ public:
     _pendingLatitude = NAN;
     _pendingLongitude = NAN;
     _targetCoordinate = kCLLocationCoordinate2DInvalid;
+    
+    _shouldRequestAuthorizationToUseLocationServices = YES;
 }
 
 - (mbgl::Size)size
@@ -5812,7 +5814,7 @@ static void *windowScreenContext = &windowScreenContext;
 
     if (shouldEnableLocationServices)
     {
-        if (self.locationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
+        if (self.shouldRequestAuthorizationToUseLocationServices && self.locationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
             BOOL hasWhenInUseUsageDescription = !![[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"];
 
             if (@available(iOS 11.0, *)) {
