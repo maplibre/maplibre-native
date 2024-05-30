@@ -59,11 +59,20 @@ TileLoader<T>::TileLoader(T& tile_,
 
 template <typename T>
 TileLoader<T>::~TileLoader() {
-    std::unique_lock<std::shared_mutex> lock(shared->requestLock);
-    shared->aborted = true;
-    tile.cancel();
+    // Tasks may outlive this object, make sure that they are not
+    // currently running and do not run if they are still pending.
+    {
+        std::unique_lock<std::shared_mutex> lock(shared->requestLock);
+        shared->aborted = true;
+    }
+
+    // Don't touch `tile` here, we may be called from its destructor
+    // tile.cancel();
+
     request.reset();
-};
+    fileSource.reset();
+    shared.reset();
+}
 
 template <typename T>
 void TileLoader<T>::setNecessity(TileNecessity newNecessity) {
