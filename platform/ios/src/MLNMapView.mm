@@ -295,7 +295,7 @@ static NSString * const MLNInvisibleStyleMarkerSymbolName = @"invisible_marker";
 
 /// Prefix that denotes a sprite installed by MLNMapView, to avoid collisions
 /// with style-defined sprites.
-NSString * const MLNAnnotationSpritePrefix = @"com.mapbox.sprites.";
+NSString * const MLNAnnotationSpritePrefix = @"org.maplibre.sprites.";
 
 /// Slop area around the hit testing point, allowing for imprecise annotation selection.
 const CGFloat MLNAnnotationImagePaddingForHitTest = 5;
