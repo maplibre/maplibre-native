@@ -93,6 +93,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
     };
 
+    const auto polyLineDrawableName = "debug-polyline-" + name;
     std::unique_ptr<gfx::DrawableBuilder> polylineBuilder;
     const auto createPolylineBuilder = [&](gfx::ShaderPtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder("debug-polyline-builder");
@@ -102,19 +103,21 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrId(idLinePosNormalVertexAttribute);
+        builder->setDrawableName(polyLineDrawableName);
 
         return builder;
     };
 #endif
 
     // add or get the layer group for a debug type
-    const auto addOrGetLayerGroupForType = [&debugLayerGroups, &context](
-                                               DebugType type,
-                                               const std::string&& layerName) -> DebugLayerGroupMap::const_iterator {
+    const auto addOrGetLayerGroupForType =
+        [&debugLayerGroups, &context](DebugType type, std::string&& layerName) -> DebugLayerGroupMap::const_iterator {
         auto it = debugLayerGroups.find(type);
         if (it == debugLayerGroups.end()) {
-            auto inserted = debugLayerGroups.insert(std::make_pair(
-                type, context.createTileLayerGroup(static_cast<int32_t>(type), /*initialCapacity=*/64, layerName)));
+            auto inserted = debugLayerGroups.insert(
+                std::make_pair(type,
+                               context.createTileLayerGroup(
+                                   static_cast<int32_t>(type), /*initialCapacity=*/64, std::move(layerName))));
             assert(inserted.second);
             it = inserted.first;
         }
@@ -223,6 +226,17 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
                 // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
                 assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
+
+                const LineExpressionUBO exprUBO = {
+                    /* color = */ nullptr,
+                    /* blur = */ nullptr,
+                    /* opacity = */ nullptr,
+                    /* gapwidth = */ nullptr,
+                    /* offset = */ nullptr,
+                    /* width = */ nullptr,
+                    /* floorWidth = */ nullptr,
+                };
+                drawableUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, parameters.context);
             };
 
         private:
@@ -326,6 +340,11 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
         // erase drawables that are not in the current tile set
         tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
+            // Only remove drawables from this same source
+            // TODO: This should apply to the other debug layers as well
+            if (drawable.getName() != polyLineDrawableName) {
+                return false;
+            }
             return !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
         });
 
