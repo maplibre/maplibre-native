@@ -65,6 +65,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     if (!debugShader) {
         return;
     }
+
+    const auto drawableName = "debug-" + name;
     std::unique_ptr<gfx::DrawableBuilder> debugBuilder = [&]() -> std::unique_ptr<gfx::DrawableBuilder> {
         auto builder = context.createDrawableBuilder("debug-builder");
         builder->setShader(debugShader);
@@ -73,6 +75,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setColorMode(gfx::ColorMode::unblended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrId(idDebugPosVertexAttribute);
+        builder->setDrawableName(drawableName);
 
         return builder;
     }();
@@ -93,7 +96,6 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         return shaderGroup->getOrCreateShader(context, propertiesAsUniforms);
     };
 
-    const auto polyLineDrawableName = "debug-polyline-" + name;
     std::unique_ptr<gfx::DrawableBuilder> polylineBuilder;
     const auto createPolylineBuilder = [&](gfx::ShaderPtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder("debug-polyline-builder");
@@ -103,7 +105,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrId(idLinePosNormalVertexAttribute);
-        builder->setDrawableName(polyLineDrawableName);
+        builder->setDrawableName(drawableName);
 
         return builder;
     };
@@ -285,7 +287,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         // erase drawables that are not in the current tile set
         for (auto& lg : {outlineLayerGroup, textLayerGroup}) {
             lg->removeDrawablesIf([&](gfx::Drawable& drawable) {
-                return !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+                return drawable.getName() == drawableName &&
+                       !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
             });
         }
 
@@ -340,12 +343,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
         // erase drawables that are not in the current tile set
         tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
-            // Only remove drawables from this same source
-            // TODO: This should apply to the other debug layers as well
-            if (drawable.getName() != polyLineDrawableName) {
-                return false;
-            }
-            return !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+            return drawable.getName() == drawableName &&
+                   !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
         });
 
         // add new drawables and update existing ones
