@@ -65,7 +65,7 @@
 
 - (void)testSources {
     NSSet<MLNSource *> *initialSources = self.style.sources;
-    if ([initialSources.anyObject.identifier isEqualToString:@"com.mapbox.annotations"]) {
+    if ([initialSources.anyObject.identifier isEqualToString:@"org.maplibre.annotations"]) {
         XCTAssertEqual(self.style.sources.count, 1UL);
     } else {
         XCTAssertEqual(self.style.sources.count, 0UL);
@@ -175,7 +175,7 @@
 
 - (void)testLayers {
     NSArray<MLNStyleLayer *> *initialLayers = self.style.layers;
-    if ([initialLayers.firstObject.identifier isEqualToString:@"com.mapbox.annotations.points"]) {
+    if ([initialLayers.firstObject.identifier isEqualToString:@"org.maplibre.annotations.points"]) {
         XCTAssertEqual(self.style.layers.count, 1UL);
     } else {
         XCTAssertEqual(self.style.layers.count, 0UL);
@@ -346,7 +346,7 @@
 
     NSArray<MLNStyleLayer *> *layers = [self.style layers];
     NSUInteger startIndex = 0;
-    if ([layers.firstObject.identifier isEqualToString:@"com.mapbox.annotations.points"]) {
+    if ([layers.firstObject.identifier isEqualToString:@"org.maplibre.annotations.points"]) {
         startIndex++;
     }
 
