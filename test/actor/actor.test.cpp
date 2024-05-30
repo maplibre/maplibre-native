@@ -15,7 +15,7 @@ using namespace std::chrono_literals;
 
 TEST(Actor, Construction) {
     struct TestActor {
-        TestActor(ActorRef<TestActor>, bool& constructed) { constructed = true; };
+        TestActor(ActorRef<TestActor>, bool& constructed) { constructed = true; }
     };
 
     bool constructed = false;
@@ -27,7 +27,7 @@ TEST(Actor, Construction) {
 TEST(Actor, Destruction) {
     struct TestActor {
         TestActor(ActorRef<TestActor>, bool& destructed_)
-            : destructed(destructed_) {};
+            : destructed(destructed_) {}
         ~TestActor() { destructed = true; }
 
         bool& destructed;
@@ -136,7 +136,7 @@ TEST(Actor, DestructionAllowedInReceiveOnSameThread) {
     // allows for self-closing actors
 
     struct TestActor {
-        TestActor(ActorRef<TestActor>) {};
+        TestActor(ActorRef<TestActor>) {}
 
         void callMeBack(std::function<void()> callback) { callback(); }
     };
@@ -162,7 +162,7 @@ TEST(Actor, SelfDestructionDoesntCrashWaitingReceivingThreads) {
     // callback
 
     struct TestActor {
-        TestActor(ActorRef<TestActor>) {};
+        TestActor(ActorRef<TestActor>) {}
 
         void callMeBack(std::function<void()> callback) { callback(); }
     };
@@ -179,10 +179,8 @@ TEST(Actor, SelfDestructionDoesntCrashWaitingReceivingThreads) {
         // Queue up another message from another thread
         std::promise<void> messageQueuedPromise;
         waitingActor->self().invoke(&TestActor::callMeBack, [&]() {
-            // This will be waiting on the mutex in
-            // Mailbox::receive(), holding a lock
-            // on the weak_ptr so the mailbox is not
-            // destroyed
+            // This will be waiting on the mutex in Mailbox::receive(),
+            // holding a lock on the weak_ptr so the mailbox is not destroyed
             closingActor->self().invoke(&TestActor::callMeBack, [&]() { waitingMessageProcessed.store(true); });
             messageQueuedPromise.set_value();
         });
@@ -334,7 +332,7 @@ TEST(Actor, TwoPhaseConstruction) {
 
     struct TestActor {
         TestActor(ActorRef<TestActor>, std::shared_ptr<bool> destroyed_)
-            : destroyed(std::move(destroyed_)) {};
+            : destroyed(std::move(destroyed_)) {}
 
         ~TestActor() { *destroyed = true; }
 

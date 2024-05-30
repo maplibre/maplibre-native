@@ -12,7 +12,7 @@
     MLNNetworkConfiguration *configuration = [[MLNNetworkConfiguration alloc] init];
     
     // Concurrent
-    dispatch_queue_t queue = dispatch_queue_create("com.mapbox.testAccessingEventsFromMultipleThreads", DISPATCH_QUEUE_CONCURRENT);
+    dispatch_queue_t queue = dispatch_queue_create("org.maplibre.testAccessingEventsFromMultipleThreads", DISPATCH_QUEUE_CONCURRENT);
     
     NSUInteger numberOfConcurrentBlocks = 20;
     
