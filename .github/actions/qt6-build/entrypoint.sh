@@ -6,7 +6,7 @@ set -e
 set -x
 
 export CCACHE_DIR="$GITHUB_WORKSPACE/.ccache"
-export PATH="$Qt6_DIR/bin:$PATH"
+export PATH="$QT_ROOT_DIR/bin:$PATH"
 
 mkdir build && cd build
 qt-cmake ../source/ \

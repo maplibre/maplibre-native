@@ -319,7 +319,7 @@ public:
 
     /// Do something with each attribute
     template <typename Func /* void(VertexAttribute&) */>
-    void visitAttributes(Func f) {
+    void visitAttributes(Func f) const {
         std::for_each(attrs.begin(), attrs.end(), [&](const auto& attr) {
             if (attr) {
                 f(*attr);
@@ -389,7 +389,11 @@ public:
 
 protected:
     template <typename DataDrivenPaintProperty, typename Evaluated>
-    static bool isConstant(const Evaluated& evaluated) {
+    static bool isConstant(const Evaluated& evaluated) noexcept {
+        using PropType = decltype(evaluated.template get<DataDrivenPaintProperty>());
+        using MethodType = decltype(&std::remove_reference_t<PropType>::isConstant);
+        static_assert(std::is_nothrow_invocable_v<MethodType, PropType>, "isConstant() must be noexcept");
+
         return evaluated.template get<DataDrivenPaintProperty>().isConstant();
     }
 

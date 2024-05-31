@@ -159,7 +159,7 @@ std::pair<bool, bool> CollisionIndex::placeFeature(
     const bool pitchWithMap,
     const bool collisionDebug,
     const std::optional<CollisionBoundaries>& avoidEdges,
-    const std::optional<std::function<bool(const IndexedSubfeature&)>>& collisionGroupPredicate,
+    const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
     std::vector<ProjectedCollisionBox>& projectedBoxes) {
     assert(projectedBoxes.empty());
     if (!feature.alongLine) {
@@ -202,7 +202,7 @@ std::pair<bool, bool> CollisionIndex::placeLineFeature(
     const bool pitchWithMap,
     const bool collisionDebug,
     const std::optional<CollisionBoundaries>& avoidEdges,
-    const std::optional<std::function<bool(const IndexedSubfeature&)>>& collisionGroupPredicate,
+    const std::optional<std::function<bool(const RefIndexedSubfeature&)>>& collisionGroupPredicate,
     std::vector<ProjectedCollisionBox>& projectedBoxes) {
     assert(feature.alongLine);
     assert(projectedBoxes.empty());
@@ -340,10 +340,10 @@ void CollisionIndex::insertFeature(const CollisionFeature& feature,
             }
 
             if (ignorePlacement) {
-                ignoredGrid.insert(IndexedSubfeature(feature.indexedFeature, bucketInstanceId, collisionGroupId),
+                ignoredGrid.insert(IndexedSubfeature{feature.indexedFeature, bucketInstanceId, collisionGroupId},
                                    circle.circle());
             } else {
-                collisionGrid.insert(IndexedSubfeature(feature.indexedFeature, bucketInstanceId, collisionGroupId),
+                collisionGrid.insert(IndexedSubfeature{feature.indexedFeature, bucketInstanceId, collisionGroupId},
                                      circle.circle());
             }
         }
@@ -352,10 +352,10 @@ void CollisionIndex::insertFeature(const CollisionFeature& feature,
         auto& box = projectedBoxes[0];
         assert(box.isBox());
         if (ignorePlacement) {
-            ignoredGrid.insert(IndexedSubfeature(feature.indexedFeature, bucketInstanceId, collisionGroupId),
+            ignoredGrid.insert(IndexedSubfeature{feature.indexedFeature, bucketInstanceId, collisionGroupId},
                                box.box());
         } else {
-            collisionGrid.insert(IndexedSubfeature(feature.indexedFeature, bucketInstanceId, collisionGroupId),
+            collisionGrid.insert(IndexedSubfeature{feature.indexedFeature, bucketInstanceId, collisionGroupId},
                                  box.box());
         }
     }
@@ -398,23 +398,25 @@ std::unordered_map<uint32_t, std::vector<IndexedSubfeature>> CollisionIndex::que
 
     std::vector<QueryResult> features = collisionGrid.queryWithBoxes(envelope);
     std::vector<QueryResult> ignoredFeatures = ignoredGrid.queryWithBoxes(envelope);
-    features.insert(features.end(), ignoredFeatures.begin(), ignoredFeatures.end());
+    features.insert(features.end(),
+                    std::make_move_iterator(ignoredFeatures.begin()),
+                    std::make_move_iterator(ignoredFeatures.end()));
 
-    std::unordered_map<uint32_t, std::unordered_set<size_t>> seenBuckets;
+    mbgl::unordered_map<uint32_t, mbgl::unordered_set<size_t>> seenBuckets;
     for (auto& queryResult : features) {
         auto& feature = queryResult.first;
         auto& bbox = queryResult.second;
 
         // Skip already seen features.
-        auto& seenFeatures = seenBuckets[feature.bucketInstanceId];
-        if (seenFeatures.find(feature.index) != seenFeatures.end()) continue;
+        auto& seenFeatures = seenBuckets[feature.getBucketInstanceId()];
+        if (seenFeatures.find(feature.getIndex()) != seenFeatures.end()) continue;
 
         if (!polygonIntersectsBox(gridQuery, bbox)) {
             continue;
         }
 
-        seenFeatures.insert(feature.index);
-        result[feature.bucketInstanceId].push_back(feature);
+        seenFeatures.insert(feature.getIndex());
+        result[feature.getBucketInstanceId()].push_back(feature);
     }
 
     return result;

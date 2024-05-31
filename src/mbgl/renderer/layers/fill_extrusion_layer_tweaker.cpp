@@ -43,7 +43,7 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
 
     // UBO depends on more than just evaluated properties, so we need to update every time,
     // but the resulting buffer can be shared across all the drawables from the layer.
-    const FillExtrusionDrawablePropsUBO paramsUBO = {
+    const FillExtrusionPropsUBO propsUBO = {
         /* .color = */ constOrDefault<FillExtrusionColor>(evaluated),
         /* .light_color = */ FillExtrusionProgram::lightColor(parameters.evaluatedLight),
         /* .pad = */ 0,
@@ -54,10 +54,12 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         /* .vertical_gradient = */ evaluated.get<FillExtrusionVerticalGradient>() ? 1.0f : 0.0f,
         /* .opacity = */ evaluated.get<FillExtrusionOpacity>(),
         /* .fade = */ crossfade.t,
-        /* .pad = */ 0,
-        0,
-        0};
-    context.emplaceOrUpdateUniformBuffer(propsBuffer, &paramsUBO);
+        /* .from_scale = */ crossfade.fromScale,
+        /* .to_scale = */ crossfade.toScale,
+        /* .pad = */ 0};
+    auto& layerUniforms = layerGroup.mutableUniformBuffers();
+    layerUniforms.createOrUpdate(idFillExtrusionPropsUBO, &propsUBO, context);
+
     propertiesUpdated = false;
 
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -66,10 +68,6 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
-
-        auto& uniforms = drawable.mutableUniformBuffers();
-        uniforms.set(idFillExtrusionDrawablePropsUBO, propsBuffer);
-
         const auto& translation = evaluated.get<FillExtrusionTranslate>();
         const auto anchor = evaluated.get<FillExtrusionTranslateAnchor>();
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
@@ -84,7 +82,6 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
         const auto pixelX = static_cast<int32_t>(tileSizeAtNearestZoom *
                                                  (tileID.canonical.x + tileID.wrap * zoomScale));
         const auto pixelY = static_cast<int32_t>(tileSizeAtNearestZoom * tileID.canonical.y);
-        const auto pixelRatio = parameters.pixelRatio;
         const auto numTiles = std::pow(2, tileID.canonical.z);
         const auto heightFactor = static_cast<float>(-numTiles / util::tileSize_D / 8.0);
 
@@ -95,14 +92,14 @@ void FillExtrusionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintP
 
         const FillExtrusionDrawableUBO drawableUBO = {
             /* .matrix = */ util::cast<float>(matrix),
-            /* .scale = */ {pixelRatio, tileRatio, crossfade.fromScale, crossfade.toScale},
             /* .texsize = */ {static_cast<float>(textureSize.width), static_cast<float>(textureSize.height)},
             /* .pixel_coord_upper = */ {static_cast<float>(pixelX >> 16), static_cast<float>(pixelY >> 16)},
             /* .pixel_coord_lower = */ {static_cast<float>(pixelX & 0xFFFF), static_cast<float>(pixelY & 0xFFFF)},
             /* .height_factor = */ heightFactor,
-            /* .pad = */ 0};
+            /* .tile_ratio = */ tileRatio};
 
-        uniforms.createOrUpdate(idFillExtrusionDrawableUBO, &drawableUBO, context);
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        drawableUniforms.createOrUpdate(idFillExtrusionDrawableUBO, &drawableUBO, context);
     });
 }
 

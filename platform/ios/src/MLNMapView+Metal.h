@@ -49,7 +49,4 @@ public:
     void layoutChanged() override;
     MLNBackendResource getObject() override;
     // End implementation of MLNMapViewImpl
-
-private:
-    bool presentsWithTransaction = false;
 };

@@ -11,48 +11,48 @@
 namespace mbgl {
 
 namespace {
-double vec2Len(const vec2& v) {
+double vec2Len(const vec2& v) noexcept {
     return std::sqrt(v[0] * v[0] + v[1] * v[1]);
 };
 
-double vec2Dot(const vec2& a, const vec2& b) {
+double vec2Dot(const vec2& a, const vec2& b) noexcept {
     return a[0] * b[0] + a[1] * b[1];
 };
 
-vec2 vec2Scale(const vec2& v, double s) {
+vec2 vec2Scale(const vec2& v, double s) noexcept {
     return vec2{{v[0] * s, v[1] * s}};
 };
 } // namespace
 
 namespace util {
 
-static double mercatorXfromLng(double lng) {
+static double mercatorXfromLng(double lng) noexcept {
     return (180.0 + lng) / 360.0;
 }
 
-static double mercatorYfromLat(double lat) {
+static double mercatorYfromLat(double lat) noexcept {
     return (180.0 - (180.0 / M_PI * std::log(std::tan(M_PI_4 + lat * M_PI / 360.0)))) / 360.0;
 }
 
-static double latFromMercatorY(double y) {
+static double latFromMercatorY(double y) noexcept {
     return util::rad2deg(2.0 * std::atan(std::exp(M_PI - y * util::M2PI)) - M_PI_2);
 }
 
-static double lngFromMercatorX(double x) {
+static double lngFromMercatorX(double x) noexcept {
     return x * 360.0 - 180.0;
 }
 
-static double* getColumn(mat4& matrix, int col) {
+static double* getColumn(mat4& matrix, int col) noexcept {
     assert(col >= 0 && col < 4);
     return &matrix[col * 4];
 }
 
-static const double* getColumn(const mat4& matrix, int col) {
+static const double* getColumn(const mat4& matrix, int col) noexcept {
     assert(col >= 0 && col < 4);
     return &matrix[col * 4];
 }
 
-static vec3 toMercator(const LatLng& location, double altitudeMeters) {
+static vec3 toMercator(const LatLng& location, double altitudeMeters) noexcept {
     const double pixelsPerMeter = 1.0 / Projection::getMetersPerPixelAtLatitude(location.latitude(), 0.0);
     const double worldSize = Projection::worldSize(std::pow(2.0, 0.0));
 
@@ -61,15 +61,15 @@ static vec3 toMercator(const LatLng& location, double altitudeMeters) {
              altitudeMeters * pixelsPerMeter / worldSize}};
 }
 
-static Quaternion orientationFromPitchBearing(double pitch, double bearing) {
+static Quaternion orientationFromPitchBearing(double pitch, double bearing) noexcept {
     // Both angles have to be negated to achieve CW rotation around the axis of rotation
-    Quaternion rotBearing = Quaternion::fromAxisAngle({{0.0, 0.0, 1.0}}, -bearing);
-    Quaternion rotPitch = Quaternion::fromAxisAngle({{1.0, 0.0, 0.0}}, -pitch);
+    const Quaternion rotBearing = Quaternion::fromAxisAngle({{0.0, 0.0, 1.0}}, -bearing);
+    const Quaternion rotPitch = Quaternion::fromAxisAngle({{1.0, 0.0, 0.0}}, -pitch);
 
     return rotBearing.multiply(rotPitch);
 }
 
-static void updateTransform(mat4& transform, const Quaternion& orientation) {
+static void updateTransform(mat4& transform, const Quaternion& orientation) noexcept {
     // Construct rotation matrix from orientation
     mat4 m = orientation.toRotationMatrix();
 
@@ -89,23 +89,23 @@ static void updateTransform(mat4& transform, const vec3& position) {
     getColumn(transform, 3)[2] = position[2];
 }
 
-Camera::Camera()
+Camera::Camera() noexcept
     : orientation(Quaternion::identity) {
     matrix::identity(transform);
 }
 
-vec3 Camera::getPosition() const {
+vec3 Camera::getPosition() const noexcept {
     const double* p = getColumn(transform, 3);
     return {{p[0], p[1], p[2]}};
 }
 
-mat4 Camera::getCameraToWorld(double scale, bool flippedY) const {
+mat4 Camera::getCameraToWorld(double scale, bool flippedY) const noexcept {
     mat4 cameraToWorld;
     matrix::invert(cameraToWorld, getWorldToCamera(scale, flippedY));
     return cameraToWorld;
 }
 
-mat4 Camera::getWorldToCamera(double scale, bool flippedY) const {
+mat4 Camera::getWorldToCamera(double scale, bool flippedY) const noexcept {
     // transformation chain from world space to camera space:
     // 1. Height value (z) of renderables is in meters. Scale z coordinate by pixelsPerMeter
     // 2. Transform from pixel coordinates to camera space with cameraMatrix^-1
@@ -140,30 +140,30 @@ mat4 Camera::getWorldToCamera(double scale, bool flippedY) const {
     return result;
 }
 
-mat4 Camera::getCameraToClipPerspective(double fovy, double aspectRatio, double nearZ, double farZ) const {
+mat4 Camera::getCameraToClipPerspective(double fovy, double aspectRatio, double nearZ, double farZ) const noexcept {
     mat4 projection;
     matrix::perspective(projection, fovy, aspectRatio, nearZ, farZ);
     return projection;
 }
 
-vec3 Camera::forward() const {
+vec3 Camera::forward() const noexcept {
     const double* column = getColumn(transform, 2);
     // The forward direction is towards the map, [0, 0, -1]
     return {{-column[0], -column[1], -column[2]}};
 }
 
-vec3 Camera::right() const {
+vec3 Camera::right() const noexcept {
     const double* column = getColumn(transform, 0);
     return {{column[0], column[1], column[2]}};
 }
 
-vec3 Camera::up() const {
+vec3 Camera::up() const noexcept {
     const double* column = getColumn(transform, 1);
     // Up direction has to be flipped due to y-axis pointing towards south
     return {{-column[0], -column[1], -column[2]}};
 }
 
-void Camera::getOrientation(double& pitch, double& bearing) const {
+void Camera::getOrientation(double& pitch, double& bearing) const noexcept {
     const vec3 f = forward();
     const vec3 r = right();
 
@@ -171,24 +171,24 @@ void Camera::getOrientation(double& pitch, double& bearing) const {
     pitch = std::atan2(std::sqrt(f[0] * f[0] + f[1] * f[1]), -f[2]);
 }
 
-void Camera::setOrientation(double pitch, double bearing) {
+void Camera::setOrientation(double pitch, double bearing) noexcept {
     orientation = orientationFromPitchBearing(pitch, bearing);
     updateTransform(transform, orientation);
 }
 
-void Camera::setOrientation(const Quaternion& orientation_) {
+void Camera::setOrientation(const Quaternion& orientation_) noexcept {
     orientation = orientation_;
     updateTransform(transform, orientation);
 }
 
-void Camera::setPosition(const vec3& position) {
+void Camera::setPosition(const vec3& position) noexcept {
     updateTransform(transform, position);
 }
 
-std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, const vec3& up) {
+std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, const vec3& up) noexcept {
     vec3 upVector = up;
 
-    vec2 xyForward = {{forward[0], forward[1]}};
+    const vec2 xyForward = {{forward[0], forward[1]}};
     vec2 xyUp = {{up[0], up[1]}};
     const double epsilon = 1e-15;
 
@@ -215,11 +215,11 @@ std::optional<Quaternion> Camera::orientationFromFrame(const vec3& forward, cons
 }
 } // namespace util
 
-void FreeCameraOptions::setLocation(const LatLngAltitude& location) {
+void FreeCameraOptions::setLocation(const LatLngAltitude& location) noexcept {
     position = util::toMercator(location.location, location.altitude);
 }
 
-std::optional<LatLngAltitude> FreeCameraOptions::getLocation() const {
+std::optional<LatLngAltitude> FreeCameraOptions::getLocation() const noexcept {
     if (!position) {
         return std::nullopt;
     }
@@ -238,7 +238,7 @@ std::optional<LatLngAltitude> FreeCameraOptions::getLocation() const {
     return LatLngAltitude{location, altitude};
 }
 
-void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector) {
+void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<vec3>& upVector) noexcept {
     orientation = std::nullopt;
     if (!position) {
         return;
@@ -257,7 +257,7 @@ void FreeCameraOptions::lookAtPoint(const LatLng& location, const std::optional<
     }
 }
 
-void FreeCameraOptions::setPitchBearing(double pitch, double bearing) {
+void FreeCameraOptions::setPitchBearing(double pitch, double bearing) noexcept {
     orientation = util::orientationFromPitchBearing(util::deg2rad(pitch), util::deg2rad(bearing)).m;
 }
 

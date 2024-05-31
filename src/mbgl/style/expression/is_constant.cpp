@@ -52,8 +52,11 @@ bool isFeatureConstant(const Expression& expression) {
     return featureConstant;
 }
 
+namespace {
+const auto zoomProperty = std::array<std::string_view, 1>{"zoom"};
+}
 bool isZoomConstant(const Expression& e) {
-    return isGlobalPropertyConstant(e, std::array<std::string, 1>{{"zoom"}});
+    return isGlobalPropertyConstant(e, zoomProperty);
 }
 
 bool isRuntimeConstant(const Expression& expression) {

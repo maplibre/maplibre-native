@@ -32,29 +32,15 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
                                  style::TranslateAnchorType anchor,
                                  bool nearClipped,
                                  bool inViewportPixelUnits,
-                                 [[maybe_unused]] const gfx::Drawable& drawable,
+                                 const gfx::Drawable& drawable,
                                  bool aligned) {
     // from RenderTile::prepare
     mat4 tileMatrix;
     parameters.state.matrixFor(/*out*/ tileMatrix, tileID);
-
-    // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
-    auto projMatrix = aligned ? parameters.transformParams.alignedProjMatrix
-                              : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
-                                             : parameters.transformParams.projMatrix);
-
-#if !MLN_RENDER_BACKEND_OPENGL
-    // If this drawable is participating in depth testing, offset the
-    // projection matrix NDC depth range for the drawable's layer and sublayer.
-    if (!drawable.getIs3D() && drawable.getEnableDepth()) {
-        projMatrix[14] -= ((1 + drawable.getLayerIndex()) * PaintParameters::numSublayers -
-                           drawable.getSubLayerIndex()) *
-                          PaintParameters::depthEpsilon;
+    if (const auto& origin{drawable.getOrigin()}; origin.has_value()) {
+        matrix::translate(tileMatrix, tileMatrix, origin->x, origin->y, 0);
     }
-#endif
-
-    matrix::multiply(tileMatrix, projMatrix, tileMatrix);
-
+    multiplyWithProjectionMatrix(/*in-out*/ tileMatrix, parameters, drawable, nearClipped, aligned);
     return RenderTile::translateVtxMatrix(
         tileID, tileMatrix, translation, anchor, parameters.state, inViewportPixelUnits);
 }
@@ -62,6 +48,33 @@ mat4 LayerTweaker::getTileMatrix(const UnwrappedTileID& tileID,
 void LayerTweaker::updateProperties(Immutable<style::LayerProperties> newProps) {
     evaluatedProperties = std::move(newProps);
     propertiesUpdated = true;
+}
+
+void LayerTweaker::multiplyWithProjectionMatrix(/*in-out*/ mat4& matrix,
+                                                const PaintParameters& parameters,
+                                                [[maybe_unused]] const gfx::Drawable& drawable,
+                                                bool nearClipped,
+                                                bool aligned) {
+    // nearClippedMatrix has near plane moved further, to enhance depth buffer precision
+    const auto& projMatrixRef = aligned ? parameters.transformParams.alignedProjMatrix
+                                        : (nearClipped ? parameters.transformParams.nearClippedProjMatrix
+                                                       : parameters.transformParams.projMatrix);
+#if !MLN_RENDER_BACKEND_OPENGL
+    // If this drawable is participating in depth testing, offset the
+    // projection matrix NDC depth range for the drawable's layer and sublayer.
+    if (!drawable.getIs3D() && drawable.getEnableDepth()) {
+        // copy and adjust the projection matrix
+        mat4 projMatrix = projMatrixRef;
+        projMatrix[14] -= ((1 + drawable.getLayerIndex()) * PaintParameters::numSublayers -
+                           drawable.getSubLayerIndex()) *
+                          PaintParameters::depthEpsilon;
+        // multiply with the copy
+        matrix::multiply(matrix, projMatrix, matrix);
+        // early return
+        return;
+    }
+#endif
+    matrix::multiply(matrix, projMatrixRef, matrix);
 }
 
 } // namespace mbgl

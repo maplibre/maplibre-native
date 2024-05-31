@@ -65,6 +65,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     if (!debugShader) {
         return;
     }
+
+    const auto drawableName = "debug-" + name;
     std::unique_ptr<gfx::DrawableBuilder> debugBuilder = [&]() -> std::unique_ptr<gfx::DrawableBuilder> {
         auto builder = context.createDrawableBuilder("debug-builder");
         builder->setShader(debugShader);
@@ -73,6 +75,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setColorMode(gfx::ColorMode::unblended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrId(idDebugPosVertexAttribute);
+        builder->setDrawableName(drawableName);
 
         return builder;
     }();
@@ -102,19 +105,21 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrId(idLinePosNormalVertexAttribute);
+        builder->setDrawableName(drawableName);
 
         return builder;
     };
 #endif
 
     // add or get the layer group for a debug type
-    const auto addOrGetLayerGroupForType = [&debugLayerGroups, &context](
-                                               DebugType type,
-                                               const std::string&& layerName) -> DebugLayerGroupMap::const_iterator {
+    const auto addOrGetLayerGroupForType =
+        [&debugLayerGroups, &context](DebugType type, std::string&& layerName) -> DebugLayerGroupMap::const_iterator {
         auto it = debugLayerGroups.find(type);
         if (it == debugLayerGroups.end()) {
-            auto inserted = debugLayerGroups.insert(std::make_pair(
-                type, context.createTileLayerGroup(static_cast<int32_t>(type), /*initialCapacity=*/64, layerName)));
+            auto inserted = debugLayerGroups.insert(
+                std::make_pair(type,
+                               context.createTileLayerGroup(
+                                   static_cast<int32_t>(type), /*initialCapacity=*/64, std::move(layerName))));
             assert(inserted.second);
             it = inserted.first;
         }
@@ -143,8 +148,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         [&](TileLayerGroup* tileLayerGroup, const OverscaledTileID& tileID, const DebugUBO& debugUBO) -> size_t {
         auto updatedCount = tileLayerGroup->visitDrawables(renderPass, tileID, [&](gfx::Drawable& drawable) {
             // update existing drawable
-            auto& uniforms = drawable.mutableUniformBuffers();
-            uniforms.createOrUpdate(idDebugUBO, &debugUBO, context);
+            auto& drawableUniforms = drawable.mutableUniformBuffers();
+            drawableUniforms.createOrUpdate(idDebugUBO, &debugUBO, context);
         });
         return updatedCount;
     };
@@ -172,8 +177,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         debugBuilder->flush(context);
         for (auto& drawable : debugBuilder->clearDrawables()) {
             drawable->setTileID(tileID);
-            auto& uniforms = drawable->mutableUniformBuffers();
-            uniforms.createOrUpdate(idDebugUBO, &debugUBO, context);
+            auto& drawableUniforms = drawable->mutableUniformBuffers();
+            drawableUniforms.createOrUpdate(idDebugUBO, &debugUBO, context);
 
             tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
         }
@@ -184,11 +189,11 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     const auto addPolylineDrawable = [&](TileLayerGroup* tileLayerGroup, const RenderTile& tile) {
         class PolylineDrawableTweaker : public gfx::DrawableTweaker {
         public:
-            PolylineDrawableTweaker(const shaders::LinePropertiesUBO& properties)
+            PolylineDrawableTweaker(const shaders::LineEvaluatedPropsUBO& properties)
                 : linePropertiesUBO(properties) {}
             ~PolylineDrawableTweaker() override = default;
 
-            void init(gfx::Drawable&) override {};
+            void init(gfx::Drawable&) override {}
 
             void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
                 if (!drawable.getTileID().has_value()) {
@@ -203,34 +208,41 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 const auto matrix = LayerTweaker::getTileMatrix(
                     tileID, parameters, {{0, 0}}, style::TranslateAnchorType::Viewport, false, false, drawable, false);
 
-                const shaders::LineDynamicUBO dynamicUBO = {
-                    /*units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
-                    0,
-                    0};
+                const shaders::LineDrawableUBO drawableUBO = {/*matrix = */ util::cast<float>(matrix),
+                                                              /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
+                                                              0,
+                                                              0,
+                                                              0};
+                const shaders::LineInterpolationUBO lineInterpolationUBO = {/*color_t =*/0.f,
+                                                                            /*blur_t =*/0.f,
+                                                                            /*opacity_t =*/0.f,
+                                                                            /*gapwidth_t =*/0.f,
+                                                                            /*offset_t =*/0.f,
+                                                                            /*width_t =*/0.f,
+                                                                            0,
+                                                                            0};
+                auto& drawableUniforms = drawable.mutableUniformBuffers();
+                drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
+                drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
+                drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
 
-                const shaders::LineUBO lineUBO{/*matrix = */ util::cast<float>(matrix),
-                                               /*ratio = */ 1.0f / tileID.pixelsToTileUnits(1.0f, zoom),
-                                               0,
-                                               0,
-                                               0};
+                // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
+                assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
 
-                const shaders::LineInterpolationUBO lineInterpolationUBO{/*color_t =*/0.f,
-                                                                         /*blur_t =*/0.f,
-                                                                         /*opacity_t =*/0.f,
-                                                                         /*gapwidth_t =*/0.f,
-                                                                         /*offset_t =*/0.f,
-                                                                         /*width_t =*/0.f,
-                                                                         0,
-                                                                         0};
-                auto& uniforms = drawable.mutableUniformBuffers();
-                uniforms.createOrUpdate(idLineDynamicUBO, &dynamicUBO, parameters.context);
-                uniforms.createOrUpdate(idLineUBO, &lineUBO, parameters.context);
-                uniforms.createOrUpdate(idLinePropertiesUBO, &linePropertiesUBO, parameters.context);
-                uniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
+                const LineExpressionUBO exprUBO = {
+                    /* color = */ nullptr,
+                    /* blur = */ nullptr,
+                    /* opacity = */ nullptr,
+                    /* gapwidth = */ nullptr,
+                    /* offset = */ nullptr,
+                    /* width = */ nullptr,
+                    /* floorWidth = */ nullptr,
+                };
+                drawableUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, parameters.context);
             };
 
         private:
-            shaders::LinePropertiesUBO linePropertiesUBO;
+            shaders::LineEvaluatedPropsUBO linePropertiesUBO;
         };
 
         GeometryCoordinates coords{{0, 0}, {util::EXTENT, 0}, {util::EXTENT, util::EXTENT}, {0, util::EXTENT}, {0, 0}};
@@ -244,15 +256,15 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         polylineBuilder->addPolyline(coords, options);
 
         // create line tweaker
-        const shaders::LinePropertiesUBO linePropertiesUBO{/*color*/ Color::red(),
-                                                           /*blur*/ 0.f,
-                                                           /*opacity*/ 1.f,
-                                                           /*gapwidth*/ 0.f,
-                                                           /*offset*/ 0.f,
-                                                           /*width*/ 4.f,
-                                                           0,
-                                                           0,
-                                                           0};
+        const shaders::LineEvaluatedPropsUBO linePropertiesUBO = {/*color*/ Color::red(),
+                                                                  /*blur*/ 0.f,
+                                                                  /*opacity*/ 1.f,
+                                                                  /*gapwidth*/ 0.f,
+                                                                  /*offset*/ 0.f,
+                                                                  /*width*/ 4.f,
+                                                                  /*floorwidth*/ 0,
+                                                                  LineExpressionMask::None,
+                                                                  0};
         auto tweaker = std::make_shared<PolylineDrawableTweaker>(linePropertiesUBO);
 
         // finish
@@ -275,7 +287,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         // erase drawables that are not in the current tile set
         for (auto& lg : {outlineLayerGroup, textLayerGroup}) {
             lg->removeDrawablesIf([&](gfx::Drawable& drawable) {
-                return !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+                return drawable.getName() == drawableName &&
+                       !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
             });
         }
 
@@ -330,7 +343,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
         // erase drawables that are not in the current tile set
         tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
-            return !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+            return drawable.getName() == drawableName &&
+                   !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
         });
 
         // add new drawables and update existing ones

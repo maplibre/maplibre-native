@@ -218,7 +218,7 @@ void Parser::parseLayers(const JSValue& value) {
             continue;
         }
 
-        const JSValue& id = layerValue["id"];
+        const JSValue& id = layerValue.FindMember("id")->value;
         if (!id.IsString()) {
             Log::Warning(Event::ParseStyle, "layer id must be a string");
             continue;

@@ -52,7 +52,7 @@ public:
     }
 };
 
-using ImagePositions = std::map<std::string, ImagePosition>;
+using ImagePositions = mbgl::unordered_map<std::string, ImagePosition>;
 
 class ImagePatch {
 public:
@@ -73,8 +73,6 @@ public:
     std::vector<ImagePatch> getImagePatchesAndUpdateVersions(const ImageManager&);
 };
 
-ImageAtlas makeImageAtlas(const ImageMap&,
-                          const ImageMap&,
-                          const std::unordered_map<std::string, uint32_t>& versionMap);
+ImageAtlas makeImageAtlas(const ImageMap&, const ImageMap&, const ImageVersionMap& versionMap);
 
 } // namespace mbgl

@@ -8,12 +8,17 @@ namespace mbgl {
 namespace style {
 namespace expression {
 
+namespace {
+/// Collators are considered feature-dependent, see `isFeatureConstant`
+constexpr auto extraDependency = Dependency::Feature;
+} // namespace
+
 CollatorExpression::CollatorExpression(std::unique_ptr<Expression> caseSensitive_,
                                        std::unique_ptr<Expression> diacriticSensitive_,
                                        std::optional<std::unique_ptr<Expression>> locale_)
     : Expression(Kind::CollatorExpression,
                  type::Collator,
-                 depsOf(caseSensitive_) | depsOf(diacriticSensitive_) | depsOf(locale_)),
+                 depsOf(caseSensitive_) | depsOf(diacriticSensitive_) | depsOf(locale_) | extraDependency),
       caseSensitive(std::move(caseSensitive_)),
       diacriticSensitive(std::move(diacriticSensitive_)),
       locale(std::move(locale_)) {}
@@ -75,7 +80,7 @@ void CollatorExpression::eachChild(const std::function<void(const Expression&)>&
     }
 }
 
-bool CollatorExpression::operator==(const Expression& e) const {
+bool CollatorExpression::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::CollatorExpression) {
         const auto* rhs = static_cast<const CollatorExpression*>(&e);
         const bool lLocSet = locale && *locale;
@@ -108,7 +113,7 @@ EvaluationResult CollatorExpression::evaluate(const EvaluationContext& params) c
         return diacriticSensitiveResult.error();
     }
 
-    if (locale) {
+    if (locale && *locale) {
         if (auto localeResult = (*locale)->evaluate(params)) {
             return Collator(caseSensitiveResult->get<bool>(),
                             diacriticSensitiveResult->get<bool>(),

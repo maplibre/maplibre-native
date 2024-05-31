@@ -77,6 +77,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {
         const auto& mtlBackend = static_cast<mtl::RendererBackend&>(backend);
+
         const auto& mtlDevice = mtlBackend.getDevice();
 
         if (!commandCaptureScope) {
@@ -246,6 +247,22 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Upload the Debug layer group
         orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
     }
+
+    const Size atlasSize = parameters.patternAtlas.getPixelSize();
+    const auto& worldSize = parameters.staticData.backendSize;
+    const shaders::GlobalPaintParamsUBO globalPaintParamsUBO = {
+        /* .pattern_atlas_texsize = */ {static_cast<float>(atlasSize.width), static_cast<float>(atlasSize.height)},
+        /* .units_to_pixels = */ {1.0f / parameters.pixelsToGLUnits[0], 1.0f / parameters.pixelsToGLUnits[1]},
+        /* .world_size = */ {static_cast<float>(worldSize.width), static_cast<float>(worldSize.height)},
+        /* .camera_to_center_distance = */ parameters.state.getCameraToCenterDistance(),
+        /* .symbol_fade_change = */ parameters.symbolFadeChange,
+        /* .aspect_ratio = */ parameters.state.getSize().aspectRatio(),
+        /* .pixel_ratio = */ parameters.pixelRatio,
+        /* .zoom = */ static_cast<float>(parameters.state.getZoom()),
+        /* .pad1 = */ 0,
+    };
+    auto& globalUniforms = context.mutableGlobalUniformBuffers();
+    globalUniforms.createOrUpdate(shaders::idGlobalPaintParamsUBO, &globalPaintParamsUBO, context);
 #endif
 
     // - 3D PASS
@@ -353,6 +370,19 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
             layerGroup.render(orchestrator, parameters);
         });
+
+        // Finally, render any legacy layers which have not been converted to drawables.
+        // Note that they may be out of order, this is just a temporary fix for `RenderLocationIndicatorLayer` (#2216)
+        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * PaintParameters::numSublayers *
+                                            PaintParameters::depthEpsilon;
+        int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
+        for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
+            parameters.currentLayer = i;
+            const RenderItem& item = *it;
+            if (item.hasRenderPass(parameters.pass)) {
+                item.render(parameters);
+            }
+        }
     };
 #endif
 
@@ -445,6 +475,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
     drawableTargetsPass();
     commonClearPass();
+    context.bindGlobalUniformBuffers(*parameters.renderPass);
     drawableOpaquePass();
     drawableTranslucentPass();
     drawableDebugOverlays();
@@ -464,6 +495,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if MLN_DRAWABLE_RENDERER
     // Give the layers a chance to do cleanup
     orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.postRender(orchestrator, parameters); });
+    context.unbindGlobalUniformBuffers(*parameters.renderPass);
 #endif
 
     // Ends the RenderPass

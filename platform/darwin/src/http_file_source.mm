@@ -90,7 +90,12 @@ public:
             NSURLSessionConfiguration *sessionConfig = MLNNativeNetworkManager.sharedManager.sessionConfiguration;
             session = [NSURLSession sessionWithConfiguration:sessionConfig];
 
-            userAgent = getUserAgent();
+            if (sessionConfig.HTTPAdditionalHeaders[@"User-Agent"] == nil) {
+                userAgent = getUserAgent();
+            } else {
+                userAgent = sessionConfig.HTTPAdditionalHeaders[@"User-Agent"];
+            }
+            
         }
     }
 
@@ -153,7 +158,7 @@ NSString *HTTPFileSource::Impl::getUserAgent() const {
 
     // Avoid %s here because it inserts hidden bidirectional markers on macOS when the system
     // language is set to a right-to-left language.
-    [userAgentComponents addObject:[NSString stringWithFormat:@"MapboxGL/0.0.0 (%@)",
+    [userAgentComponents addObject:[NSString stringWithFormat:@"MapLibreNative/0.0.0 (%@)",
                                     @(mbgl::version::revision)]];
 
     NSString *systemName = @"Darwin";

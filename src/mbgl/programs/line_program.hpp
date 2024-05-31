@@ -4,9 +4,10 @@
 #include <mbgl/programs/attributes.hpp>
 #include <mbgl/programs/uniforms.hpp>
 #include <mbgl/programs/textures.hpp>
-#include <mbgl/util/geometry.hpp>
 #include <mbgl/renderer/layers/render_line_layer.hpp>
 #include <mbgl/renderer/cross_faded_property_evaluator.hpp>
+#include <mbgl/util/geometry.hpp>
+
 #include <cmath>
 
 namespace mbgl {
@@ -55,8 +56,8 @@ public:
         return LayoutVertex{
             {{static_cast<int16_t>((p.x * 2) | (round ? 1 : 0)), static_cast<int16_t>((p.y * 2) | (up ? 1 : 0))}},
             {{// add 128 to store a byte in an unsigned byte
-              static_cast<uint8_t>(::round(extrudeScale * e.x) + 128),
-              static_cast<uint8_t>(::round(extrudeScale * e.y) + 128),
+              static_cast<uint8_t>(util::clamp(::round(extrudeScale * e.x) + 128, 0., 255.)),
+              static_cast<uint8_t>(util::clamp(::round(extrudeScale * e.y) + 128, 0., 255.)),
 
               // Encode the -1/0/1 direction value into the first two bits of .z
               // of a_data. Combine it with the lower 6 bits of `linesofar`

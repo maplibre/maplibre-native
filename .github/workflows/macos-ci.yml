@@ -21,7 +21,7 @@ jobs:
     runs-on: [macos-14]
     defaults:
       run:
-        working-directory: platform/ios
+        working-directory: platform/macos
         shell: bash
 
     steps:
@@ -29,10 +29,24 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Cache Bazel
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+          path: ~/.cache/bazel
+            
+      - name: Install dependencies
+        run: |
+          brew install bazelisk webp libuv webp icu4c jpeg-turbo glfw
+          brew link icu4c --force
       
-      - name: Setup Bazel
-        run: cp platform/macos/bazel/example_config.bzl platform/macos/bazel/config.bzl
+      - name: Build AppKit app, GLFW app, cache tool, render tool for macOS
+        run: bazel build //platform/macos/app:macos_app //platform/glfw:glfw_app //bin:cache_tool //bin:render_tool --//:renderer=metal
       
-      - name: Build app for macOS
-        run: bazel build //platform/macos/app:macos_app --//:renderer=metal
-      
+      - name: Generate Xcode project for macOS
+        run: bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
+        
+        

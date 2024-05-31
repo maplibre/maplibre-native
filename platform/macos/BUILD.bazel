@@ -5,7 +5,7 @@ load(
     "top_level_target",
     "xcodeproj",
 )
-load("//platform/macos:bazel/config.bzl", "BUILD_MODE")
+
 load(
     "bazel/files.bzl",
     "MLN_MACOS_PRIVATE_HEADERS",
@@ -51,7 +51,6 @@ macos_command_line_application(
 xcodeproj(
     name = "xcodeproj",
     bazel_env = {"PATH": "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin"},
-    build_mode = BUILD_MODE,
     default_xcode_configuration = "Debug",
     minimum_xcode_version = "14",
     project_name = "MapLibre",
@@ -65,6 +64,9 @@ xcodeproj(
         ),
         top_level_target(
             "//platform/macos/app:macos_app",
+        ),
+        top_level_target(
+            "//platform/glfw:glfw_app",
         ),
     ],
     xcode_configurations = {

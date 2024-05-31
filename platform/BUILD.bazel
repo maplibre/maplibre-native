@@ -1,10 +1,6 @@
 load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 
-# MacOS targets
-# darwin_objcpp -> macos_public
-# darwin_objcpp -> macos_private
-
 objc_library(
     name = "macos-objcpp",
     srcs = [
@@ -33,11 +29,13 @@ objc_library(
     ],
     module_name = "MapLibre",
     sdk_frameworks = [
+        "Metal",
         "MetalKit",
         "QuartzCore",
         "CoreGraphics",
         "CoreLocation",
         "AppKit",
+        "SystemConfiguration",
     ],
     visibility = ["//visibility:public"],
     deps = [

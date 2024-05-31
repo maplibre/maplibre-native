@@ -24,8 +24,8 @@ public:
                 std::unique_ptr<Expression> input_,
                 std::map<double, std::unique_ptr<Expression>> stops_);
 
-    const std::unique_ptr<Expression>& getInput() const { return input; }
-    const Interpolator& getInterpolator() const { return interpolator; }
+    const std::unique_ptr<Expression>& getInput() const noexcept { return input; }
+    const Interpolator& getInterpolator() const noexcept { return interpolator; }
 
     void eachChild(const std::function<void(const Expression&)>& visit) const override {
         visit(*input);
@@ -34,6 +34,8 @@ public:
         }
     }
 
+    std::size_t getStopCount() const { return stops.size(); }
+
     void eachStop(const std::function<void(double, const Expression&)>& visit) const {
         for (const auto& stop : stops) {
             visit(stop.first, *stop.second);
@@ -41,7 +43,7 @@ public:
     }
 
     // Return the smallest range of stops that covers the interval [lower, upper]
-    Range<float> getCoveringStops(const double lower, const double upper) const {
+    Range<float> getCoveringStops(const double lower, const double upper) const noexcept {
         return ::mbgl::style::expression::getCoveringStops(stops, lower, upper);
     }
 
@@ -50,9 +52,9 @@ public:
             [&](const auto& interp) { return interp.interpolationFactor(inputLevels, inputValue); });
     }
 
-    bool operator==(const Expression& e) const override {
+    bool operator==(const Expression& e) const noexcept override {
         if (e.getKind() == Kind::Interpolate) {
-            auto rhs = static_cast<const Interpolate*>(&e);
+            const auto* rhs = static_cast<const Interpolate*>(&e);
             if (interpolator != rhs->interpolator || *input != *(rhs->input) || stops.size() != rhs->stops.size()) {
                 return false;
             }

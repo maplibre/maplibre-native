@@ -18,20 +18,25 @@ private:
 
 public:
     PossiblyEvaluatedPropertyValue() = default;
-    PossiblyEvaluatedPropertyValue(Value v)
+    PossiblyEvaluatedPropertyValue(Value v) noexcept
         : value(std::move(v)) {}
 
-    bool isConstant() const { return value.template is<T>(); }
+    bool isConstant() const noexcept { return value.template is<T>(); }
 
     std::optional<T> constant() const {
         return value.match([&](const T& t) { return std::optional<T>(t); }, [&](const auto&) { return std::nullopt; });
     }
 
-    T constantOr(const T& t) const { return constant().value_or(t); }
+    T constantOr(const T& t) const noexcept { return constant().value_or(t); }
 
     template <class... Ts>
     auto match(Ts&&... ts) const {
         return value.match(std::forward<Ts>(ts)...);
+    }
+
+    T evaluate(float zoom) const {
+        return this->match([&](const T& constant_) { return constant_; },
+                           [&](const style::PropertyExpression<T>& expression) { return expression.evaluate(zoom); });
     }
 
     template <class Feature>
@@ -60,9 +65,8 @@ public:
 
     using Dependency = style::expression::Dependency;
     Dependency getDependencies() const noexcept {
-        return value.match(
-            [](const T&) noexcept { return Dependency::None; },
-            [](const style::PropertyExpression<T>& expression) noexcept { return expression.getDependencies(); });
+        return value.match([](const T&) { return Dependency::None; },
+                           [](const style::PropertyExpression<T>& expression) { return expression.getDependencies(); });
     }
 };
 
@@ -75,10 +79,10 @@ private:
 
 public:
     PossiblyEvaluatedPropertyValue() = default;
-    PossiblyEvaluatedPropertyValue(Value v)
+    PossiblyEvaluatedPropertyValue(Value v) noexcept
         : value(std::move(v)) {}
 
-    bool isConstant() const { return value.template is<Faded<T>>(); }
+    bool isConstant() const noexcept { return value.template is<Faded<T>>(); }
 
     std::optional<Faded<T>> constant() const {
         return value.match([&](const Faded<T>& t) { return std::optional<Faded<T>>(t); },
@@ -115,9 +119,8 @@ public:
 
     using Dependency = style::expression::Dependency;
     Dependency getDependencies() const noexcept {
-        return value.match(
-            [](const Faded<T>&) noexcept { return Dependency::None; },
-            [](const style::PropertyExpression<T>& expression) noexcept { return expression.getDependencies(); });
+        return value.match([](const Faded<T>&) { return Dependency::None; },
+                           [](const style::PropertyExpression<T>& expression) { return expression.getDependencies(); });
     }
 };
 
@@ -127,7 +130,7 @@ template <typename T>
 struct Interpolator<PossiblyEvaluatedPropertyValue<T>> {
     PossiblyEvaluatedPropertyValue<T> operator()(const PossiblyEvaluatedPropertyValue<T>& a,
                                                  const PossiblyEvaluatedPropertyValue<T>& b,
-                                                 const double t) const {
+                                                 const double t) const noexcept {
         if (a.isConstant() && b.isConstant()) {
             return {interpolate(*a.constant(), *b.constant(), t)};
         } else {
@@ -137,7 +140,7 @@ struct Interpolator<PossiblyEvaluatedPropertyValue<T>> {
 
     PossiblyEvaluatedPropertyValue<T> operator()(const PossiblyEvaluatedPropertyValue<T>& a,
                                                  const PossiblyEvaluatedPropertyValue<T>& b,
-                                                 const float t) const {
+                                                 const float t) const noexcept {
         if (a.isConstant() && b.isConstant()) {
             return {interpolate(*a.constant(), *b.constant(), t)};
         } else {

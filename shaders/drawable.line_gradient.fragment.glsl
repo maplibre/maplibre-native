@@ -1,18 +1,7 @@
-layout (std140) uniform LineGradientUBO {
+layout (std140) uniform LineGradientDrawableUBO {
     highp mat4 u_matrix;
     mediump float u_ratio;
-    lowp float pad2, pad3, pad4;
-};
-
-layout (std140) uniform LineGradientPropertiesUBO {
-    lowp float u_blur;
-    lowp float u_opacity;
-    mediump float u_gapwidth;
-    lowp float u_offset;
-    mediump float u_width;
-
-    highp float pad5;
-    highp vec2 pad6;
+    lowp float drawable_pad1, drawable_pad2, drawable_pad3;
 };
 
 layout (std140) uniform LineGradientInterpolationUBO {
@@ -21,9 +10,20 @@ layout (std140) uniform LineGradientInterpolationUBO {
     lowp float u_gapwidth_t;
     lowp float u_offset_t;
     lowp float u_width_t;
+    highp float interp_pad1;
+    highp vec2 interp_pad2;
+};
 
-    highp float pad7;
-    highp vec2 pad8;
+layout (std140) uniform LineEvaluatedPropsUBO {
+    highp vec4 u_color;
+    lowp float u_blur;
+    lowp float u_opacity;
+    mediump float u_gapwidth;
+    lowp float u_offset;
+    mediump float u_width;
+    lowp float u_floorwidth;
+    highp float props_pad1;
+    highp float props_pad2;
 };
 
 uniform sampler2D u_image;

@@ -18,6 +18,7 @@
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/variant.hpp>
+#include <mbgl/util/hash.hpp>
 
 #include <Metal/Metal.hpp>
 
@@ -186,6 +187,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 #endif
 
     bindAttributes(renderPass);
+    bindInstanceAttributes(renderPass);
     bindUniformBuffers(renderPass);
     bindTextures(renderPass);
 
@@ -209,7 +211,11 @@ void Drawable::draw(PaintParameters& parameters) const {
     encoder->setFrontFacingWinding(mapWindingMode(cullMode.winding));
 
     if (!impl->pipelineState) {
-        impl->pipelineState = shaderMTL.getRenderPipelineState(renderable, impl->vertexDesc, getColorMode());
+        impl->pipelineState = shaderMTL.getRenderPipelineState(
+            renderable,
+            impl->vertexDesc,
+            getColorMode(),
+            mbgl::util::hash(getColorMode().hash(), impl->vertexDescHash));
     }
     if (impl->pipelineState) {
         encoder->setRenderPipelineState(impl->pipelineState.get());
@@ -256,7 +262,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             const auto primitiveType = getPrimitiveType(mode.type);
             constexpr auto indexType = MTL::IndexType::IndexTypeUInt16;
             constexpr auto indexSize = sizeof(std::uint16_t);
-            constexpr NS::UInteger instanceCount = 1;
+            const NS::UInteger instanceCount = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
             constexpr NS::UInteger baseInstance = 0;
             const NS::UInteger indexOffset = static_cast<NS::UInteger>(indexSize *
                                                                        mlSegment.indexOffset); // in bytes, not indexes
@@ -360,6 +366,25 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
     }
 }
 
+void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
+    const auto& encoder = renderPass.getMetalEncoder();
+
+    NS::UInteger attributeIndex = 0;
+    for (const auto& binding : impl->instanceBindings) {
+        if (binding.has_value()) {
+            const auto* buffer = static_cast<const mtl::VertexBufferResource*>(binding->vertexBufferResource);
+            if (buffer && buffer->get()) {
+                renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
+            } else {
+                const auto* shaderMTL = static_cast<const ShaderProgram*>(shader.get());
+                auto& context = renderPass.getCommandEncoder().getContext();
+                renderPass.bindVertex(context.getEmptyBuffer(), /*offset=*/0, attributeIndex);
+            }
+        }
+        attributeIndex += 1;
+    }
+}
+
 void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
     if (shader) {
         const auto& uniformBlocks = shader->getUniformBlocks();
@@ -367,7 +392,6 @@ void Drawable::bindUniformBuffers(RenderPass& renderPass) const noexcept {
             const auto& block = uniformBlocks.get(id);
             if (!block) continue;
             const auto& uniformBuffer = getUniformBuffers().get(id);
-            assert(uniformBuffer && "UBO missing, drawable skipped");
             if (uniformBuffer) {
                 const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer.get());
                 const auto& resource = buffer.getBufferResource();
@@ -544,6 +568,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         if (impl->attributeBindings != attributeBindings_) {
             impl->attributeBindings = std::move(attributeBindings_);
 
+            // hash
+            std::size_t hash{0};
+
             // Create a layout descriptor for each attribute
             auto vertDesc = NS::RetainPtr(MTL::VertexDescriptor::vertexDescriptor());
 
@@ -576,11 +603,43 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                 vertDesc->attributes()->setObject(attribDesc.get(), index);
                 vertDesc->layouts()->setObject(layoutDesc.get(), index);
 
+                mbgl::util::hash_combine(hash,
+                                         mbgl::util::hash(index,
+                                                          binding->attribute.offset,
+                                                          binding->attribute.dataType,
+                                                          binding->vertexStride,
+                                                          static_cast<bool>(binding->vertexBufferResource)));
+
                 index += 1;
             }
 
             impl->vertexDesc = std::move(vertDesc);
+            impl->vertexDescHash = hash;
             impl->pipelineState.reset();
+        }
+    }
+
+    // build instance buffer
+    const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isDirty());
+
+    if (buildInstanceBuffer) {
+        // Build instance attribute buffers
+        std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
+        auto instanceBindings_ = uploadPass.buildAttributeBindings(instanceAttributes->getMaxCount(),
+                                                                   /*vertexType*/ gfx::AttributeDataType::Byte,
+                                                                   /*vertexAttributeIndex=*/-1,
+                                                                   /*vertexData=*/{},
+                                                                   shader->getInstanceAttributes(),
+                                                                   *instanceAttributes,
+                                                                   usage,
+                                                                   instanceBuffers);
+        impl->instanceBuffers = std::move(instanceBuffers);
+
+        // clear dirty flag
+        instanceAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
+
+        if (impl->instanceBindings != instanceBindings_) {
+            impl->instanceBindings = std::move(instanceBindings_);
         }
     }
 

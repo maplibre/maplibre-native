@@ -16,6 +16,7 @@ public:
     virtual ~LayerProperties() = default;
     /// Returns constants mask for the data-driven properties.
     virtual unsigned long constantsMask() const { return 0u; }
+
     Immutable<Layer::Impl> baseImpl;
     /// Contains render passes used by the renderer, see `mbgl::RenderPass`.
     uint8_t renderPasses = 0u;
@@ -23,7 +24,7 @@ public:
     virtual expression::Dependency getDependencies() const noexcept = 0;
 
 protected:
-    LayerProperties(Immutable<Layer::Impl> impl)
+    LayerProperties(Immutable<Layer::Impl> impl) noexcept
         : baseImpl(std::move(impl)) {}
 };
 

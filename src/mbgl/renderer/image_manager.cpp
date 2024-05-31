@@ -10,7 +10,9 @@
 
 namespace mbgl {
 
-static ImageManagerObserver nullObserver;
+namespace {
+ImageManagerObserver nullObserver;
+} // namespace
 
 ImageManager::ImageManager() = default;
 
@@ -284,6 +286,10 @@ void ImageManager::notify(ImageRequestor& requestor, const ImageRequestPair& pai
     ImageMap iconMap;
     ImageMap patternMap;
     ImageVersionMap versionMap;
+
+    iconMap.reserve(pair.first.size());
+    patternMap.reserve(pair.first.size());
+    versionMap.reserve(pair.first.size());
 
     for (const auto& dependency : pair.first) {
         auto it = images.find(dependency.first);

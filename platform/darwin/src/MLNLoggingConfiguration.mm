@@ -77,7 +77,7 @@ public:
 }
 
 - (MLNLoggingBlockHandler)defaultBlockHandler {
-    MLNLoggingBlockHandler mapboxHandler = ^(MLNLoggingLevel level, NSString *fileName, NSUInteger line, NSString *message) {
+    MLNLoggingBlockHandler maplibreHandler = ^(MLNLoggingLevel level, NSString *fileName, NSUInteger line, NSString *message) {
         
         if (@available(iOS 10.0, macOS 10.12.0, *)) {
             static dispatch_once_t once;
@@ -94,31 +94,32 @@ public:
 #endif
                                                     OS_LOG_TYPE_ERROR,
                                                     OS_LOG_TYPE_FAULT };
+            constexpr const char* const subsystem = "org.maplibre.Native";
             dispatch_once(&once, ^ {
-                info_log = os_log_create("com.mapbox.Mapbox", "INFO");
+                info_log = os_log_create(subsystem, "INFO");
 #if MLN_LOGGING_ENABLE_DEBUG
-                debug_log = os_log_create("com.mapbox.Mapbox", "DEBUG");
+                debug_log = os_log_create(subsystem, "DEBUG");
 #endif
-                error_log = os_log_create("com.mapbox.Mapbox", "ERROR");
-                fault_log = os_log_create("com.mapbox.Mapbox", "FAULT");
+                error_log = os_log_create(subsystem, "ERROR");
+                fault_log = os_log_create(subsystem, "FAULT");
             });
             
-            os_log_t mapbox_log;
+            os_log_t maplibre_log;
             switch (level) {
                 case MLNLoggingLevelInfo:
                 case MLNLoggingLevelWarning:
-                    mapbox_log = info_log;
+                    maplibre_log = info_log;
                     break;
 #if MLN_LOGGING_ENABLE_DEBUG
                 case MLNLoggingLevelDebug:
-                    mapbox_log = debug_log;
+                    maplibre_log = debug_log;
                     break;
 #endif
                 case MLNLoggingLevelError:
-                    mapbox_log = error_log;
+                    maplibre_log = error_log;
                     break;
                 case MLNLoggingLevelFault:
-                    mapbox_log = fault_log;
+                    maplibre_log = fault_log;
                     break;
                 case MLNLoggingLevelNone:
                 default:
@@ -126,7 +127,7 @@ public:
             }
 
             os_log_type_t logType = log_types[level];
-            os_log_with_type(mapbox_log, logType, "%@ - %lu: %@", fileName, (unsigned long)line, message);
+            os_log_with_type(maplibre_log, logType, "%@ - %lu: %@", fileName, (unsigned long)line, message);
         } else {
             NSString *category;
             switch (level) {
@@ -154,7 +155,7 @@ public:
         }
     };
     
-    return mapboxHandler;
+    return maplibreHandler;
 }
 
 @end

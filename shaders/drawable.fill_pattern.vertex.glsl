@@ -1,27 +1,38 @@
+layout (std140) uniform GlobalPaintParamsUBO {
+    highp vec2 u_pattern_atlas_texsize;
+    highp vec2 u_units_to_pixels;
+    highp vec2 u_world_size;
+    highp float u_camera_to_center_distance;
+    highp float u_symbol_fade_change;
+    highp float u_aspect_ratio;
+    highp float u_pixel_ratio;
+    highp float global_pad1, global_pad2;
+};
 layout (std140) uniform FillPatternDrawableUBO {
     highp mat4 u_matrix;
-    highp vec4 u_scale;
     highp vec2 u_pixel_coord_upper;
     highp vec2 u_pixel_coord_lower;
     highp vec2 u_texsize;
-    highp float pad1;
-    highp float pad2;
+    highp float u_tile_ratio;
+    highp float drawable_pad1;
 };
-layout (std140) uniform FillPatternEvaluatedPropsUBO {
-    highp float u_opacity;
-    highp float u_fade;
-    highp float padding_props1;
-    highp float padding_props2;
+layout (std140) uniform FillPatternTilePropsUBO {
+    highp vec4 u_pattern_from;
+    highp vec4 u_pattern_to;
 };
 layout (std140) uniform FillPatternInterpolateUBO {
     highp float u_pattern_from_t;
     highp float u_pattern_to_t;
     highp float u_opacity_t;
-    highp float u_padding_interp1;
+    highp float interp_pad1;
 };
-layout (std140) uniform FillPatternTilePropsUBO {
-    highp vec4 u_pattern_from;
-    highp vec4 u_pattern_to;
+layout (std140) uniform FillEvaluatedPropsUBO {
+    highp vec4 u_color;
+    highp vec4 u_outline_color;
+    highp float u_opacity;
+    highp float u_fade;
+    highp float u_from_scale;
+    highp float u_to_scale;
 };
 
 layout (location = 0) in vec2 a_pos;
@@ -43,10 +54,10 @@ void main() {
     vec2 pattern_tl_b = pattern_to.xy;
     vec2 pattern_br_b = pattern_to.zw;
 
-    float pixelRatio = u_scale.x;
-    float tileZoomRatio = u_scale.y;
-    float fromScale = u_scale.z;
-    float toScale = u_scale.w;
+    float pixelRatio = u_pixel_ratio;
+    float tileZoomRatio = u_tile_ratio;
+    float fromScale = u_from_scale;
+    float toScale = u_to_scale;
 
     vec2 display_size_a = vec2((pattern_br_a.x - pattern_tl_a.x) / pixelRatio, (pattern_br_a.y - pattern_tl_a.y) / pixelRatio);
     vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);

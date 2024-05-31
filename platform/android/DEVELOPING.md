@@ -23,11 +23,11 @@ Open the `platform/android` directory to get started.
 
 _The test application (used for development purposes) uses MapTiler vector tiles, which require a MapTiler account and API key._
 
-With the first Gradle invocation, Gradle will take the value of the `MLN_API_KEY` environment variable and save it to `MapboxGLAndroidSDKTestApp/src/main/res/values/developer-config.xml`. If the environment variable wasn't set, you can edit `developer-config.xml` manually and add your API key to the `api_key` resource.  
+With the first Gradle invocation, Gradle will take the value of the `MLN_API_KEY` environment variable and save it to `MapLibreAndroidTestApp/src/main/res/values/developer-config.xml`. If the environment variable wasn't set, you can edit `developer-config.xml` manually and add your API key to the `api_key` resource.  
 
 ## Running the TestApp
 
-Run the configuration for the `MapboxGLAndroidSDKTestApp` module and select a device or emulator to deploy on.
+Run the configuration for the `MapLibreAndroidTestApp` module and select a device or emulator to deploy on.
 
 <p align="left">
   <img src="https://github.com/maplibre/maplibre-native/assets/649392/5494925e-8cbb-4d5d-8033-8a2f141ede3c" alt="Android TestApp menu" width="15%">   <img src="https://github.com/maplibre/maplibre-native/assets/649392/f169db51-615d-4fca-b297-ac6197bec674" alt="Android TestApp showing Demotiles" width="15%">
@@ -41,13 +41,9 @@ More information on working on the render tests can be found [in the wiki](https
 
 ## Instrumentation Tests
 
-To run the instrumentatin tests, find the `MapboxGLAndroidSDKTestApp` project in the sidebar, go to `src > androidTest`, right click and select "Run 'All Tests'".
-
-<img width="246" alt="image" src="https://github.com/maplibre/maplibre-native/assets/649392/d9daf630-cb7f-4035-b426-fc496081fed9">
+To run the instrumentation tests, choose the "Instrumentation Tests" run configuration.
 
 Your device needs remain unlocked for the duration of the tests.
-
-The instrumentation tests take a long time to run (depending on the device, about an hour). You can modify the run configuration in Android Studio and add the regex `^(?!.*org\.maplibre\.android\.benchmark).*$` to exclude the benchmark.
 
 ### AWS Device Farm
 
@@ -55,7 +51,7 @@ The instrumentation tests are running on AWS Device Farm. To see the results and
 
 https://us-west-2.console.aws.amazon.com/devicefarm/home?region=us-east-1#/mobile/projects/20687d72-0e46-403e-8f03-0941850665bc/runs
 
-You can log with the `maplibre` alias, with `maplibre` as username and `maplibre` as password (this is a read-only account).
+You can log in with the `maplibre` alias, with `maplibre` as username and `maplibre` as password (this is a read-only account).
 
 ## Kotlin
 
@@ -75,4 +71,12 @@ To format all Kotlin source files, use:
 
 ```
 $ ./gradlew formatKotlin
+```
+
+## Benchmarks in Pull Request
+
+To run the benchmarks (for Android) include the following line on a PR comment:
+
+```
+!benchmark android
 ```

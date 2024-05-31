@@ -44,8 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
  `oldCamera` or change to `newCamera`.
 
  #### Related examples
- TODO: Restrict map panning to an area, learn how to use this method
- and `MLNMapCamera` objects to restrict a users ability to pan your map.
+ - <doc:BlockingGesturesExample>
  */
 - (BOOL)mapView:(MLNMapView *)mapView shouldChangeFromCamera:(MLNMapCamera *)oldCamera toCamera:(MLNMapCamera *)newCamera;
 

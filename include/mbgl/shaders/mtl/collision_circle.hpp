@@ -14,17 +14,18 @@ struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Metal> {
     static constexpr auto vertexMainFunction = "vertexMain";
     static constexpr auto fragmentMainFunction = "fragmentMain";
 
-    static const std::array<AttributeInfo, 4> attributes;
     static const std::array<UniformBlockInfo, 1> uniforms;
+    static const std::array<AttributeInfo, 4> attributes;
+    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static const std::array<TextureInfo, 0> textures;
 
     static constexpr auto source = R"(
 
 struct VertexStage {
-    short2 pos [[attribute(0)]];
-    short2 anchor_pos [[attribute(1)]];
-    short2 extrude [[attribute(2)]];
-    ushort2 placed [[attribute(3)]];
+    short2 pos [[attribute(2)]];
+    short2 anchor_pos [[attribute(3)]];
+    short2 extrude [[attribute(4)]];
+    ushort2 placed [[attribute(5)]];
 };
 
 struct FragmentStage {
@@ -39,17 +40,18 @@ struct FragmentStage {
 struct alignas(16) CollisionCircleUBO {
     float4x4 matrix;
     float2 extrude_scale;
-    float camera_to_center_distance;
     float overscale_factor;
+    float pad1;
 };
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
-                                device const CollisionCircleUBO& drawable [[buffer(4)]]) {
+                                device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
+                                device const CollisionCircleUBO& drawable [[buffer(1)]]) {
 
     float4 projectedPoint = drawable.matrix * float4(float2(vertx.anchor_pos), 0, 1);
     float camera_to_anchor_distance = projectedPoint.w;
     float collision_perspective_ratio = clamp(
-        0.5 + 0.5 * (drawable.camera_to_center_distance / camera_to_anchor_distance),
+        0.5 + 0.5 * (paintParams.camera_to_center_distance / camera_to_anchor_distance),
         0.0, // Prevents oversized near-field circles in pitched/overzoomed tiles
         4.0);
 
@@ -63,7 +65,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
     float radius = abs(float(vertx.extrude.y)); // We don't pitch the circles, so both units of the extrusion vector are equal in magnitude to the radius
 
     float2 extrude = float2(vertx.extrude) * padding_factor;
-    float2 extrude_scale = drawable.extrude_scale * drawable.camera_to_center_distance * collision_perspective_ratio;
+    float2 extrude_scale = drawable.extrude_scale * paintParams.camera_to_center_distance * collision_perspective_ratio;
 
     return {
         .position       = position,
@@ -76,7 +78,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const CollisionCircleUBO& drawable [[buffer(4)]]) {
+                            device const CollisionCircleUBO& drawable [[buffer(1)]]) {
 
     float alpha = 0.5;
 

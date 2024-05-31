@@ -25,7 +25,7 @@ unsigned long LocationIndicatorLayerProperties::constantsMask() const {
     return evaluated.constantsMask();
 }
 
-const LocationIndicatorLayer::Impl& LocationIndicatorLayerProperties::layerImpl() const {
+const LocationIndicatorLayer::Impl& LocationIndicatorLayerProperties::layerImpl() const noexcept {
     return static_cast<const LocationIndicatorLayer::Impl&>(*baseImpl);
 }
 

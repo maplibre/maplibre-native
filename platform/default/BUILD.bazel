@@ -74,6 +74,11 @@ cc_library(
             "src/mbgl/util/timer.cpp",
             "src/mbgl/util/webp_reader.cpp",
         ],
+        "@platforms//os:osx": [
+            "src/mbgl/util/async_task.cpp",
+            "src/mbgl/util/run_loop.cpp",
+            "src/mbgl/util/timer.cpp",
+        ],
         "//conditions:default": [],
     }),
     hdrs = [
@@ -131,6 +136,7 @@ cc_library(
         "@platforms//os:osx": [
             ":default-collator",
             "//platform/darwin:darwin-loop",
+            "@libuv",
         ],
     }),
 )

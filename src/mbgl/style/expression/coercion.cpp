@@ -12,7 +12,7 @@ using CoerceFunction = EvaluationResult (*)(const Value&);
 
 namespace {
 
-EvaluationResult toBoolean(const Value& v) {
+EvaluationResult toBoolean(const Value& v) noexcept {
     return v.match([&](double f) { return static_cast<bool>(f); },
                    [&](const std::string& s) { return s.length() > 0; },
                    [&](bool b) { return b; },
@@ -50,7 +50,7 @@ EvaluationResult toColor(const Value& colorValue) {
             }
         },
         [&colorValue](const std::vector<Value>& components) -> EvaluationResult {
-            std::size_t len = components.size();
+            const std::size_t len = components.size();
             bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) -> bool {
                 return item.template is<double>();
             });
@@ -102,8 +102,9 @@ CoerceFunction getCoerceFunction(const type::Type& t) {
     return toStringValue;
 }
 
-Dependency extraDependency(const type::Type& t) {
-    return t.is<type::ImageType>() ? Dependency::Image : Dependency::None;
+/// `isRuntimeConstant` does not consider values coerced to `Type` image to be of `Kind` image, so we don't either.
+constexpr Dependency extraDependency(const type::Type& /*t*/) {
+    return /*t.is<type::ImageType>() ? Dependency::Image :*/ Dependency::None;
 }
 
 } // namespace
@@ -132,14 +133,15 @@ mbgl::Value Coercion::serialize() const {
 };
 
 std::string Coercion::getOperator() const {
-    return getType().match([](const type::BooleanType&) { return "to-boolean"; },
-                           [](const type::ColorType&) { return "to-color"; },
-                           [](const type::NumberType&) { return "to-number"; },
-                           [](const type::StringType&) { return "to-string"; },
-                           [](const auto&) {
-                               assert(false);
-                               return "";
-                           });
+    auto s = getType().match([](const type::BooleanType&) -> std::string_view { return "to-boolean"; },
+                             [](const type::ColorType&) -> std::string_view { return "to-color"; },
+                             [](const type::NumberType&) -> std::string_view { return "to-number"; },
+                             [](const type::StringType&) -> std::string_view { return "to-string"; },
+                             [](const auto&) noexcept -> std::string_view {
+                                 assert(false);
+                                 return "";
+                             });
+    return std::string(s);
 }
 
 using namespace mbgl::style::conversion;
@@ -203,9 +205,9 @@ void Coercion::eachChild(const std::function<void(const Expression&)>& visit) co
     }
 };
 
-bool Coercion::operator==(const Expression& e) const {
+bool Coercion::operator==(const Expression& e) const noexcept {
     if (e.getKind() == Kind::Coercion) {
-        auto rhs = static_cast<const Coercion*>(&e);
+        const auto* rhs = static_cast<const Coercion*>(&e);
         return getType() == rhs->getType() && Expression::childrenEqual(inputs, rhs->inputs);
     }
     return false;
