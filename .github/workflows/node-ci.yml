@@ -76,6 +76,8 @@ jobs:
         include:
           - runs-on: ubuntu-22.04
             arch: x86_64
+          - runs-on: [self-hosted, linux, ARM64]
+            arch: arm64
           - runs-on: macos-12
             arch: x86_64
           - runs-on: macos-13
@@ -86,26 +88,16 @@ jobs:
     env:
       BUILDTYPE: "Release"
 
+    defaults:
+      run:
+        working-directory: ./
+        shell: bash
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Downgrade cmake version (MacOS)
-        if: runner.os == 'MacOS'
-        run: |
-          brew uninstall cmake
-          mkdir ~/Downloads/CMake
-          curl --silent --location --retry 3 "https://github.com/Kitware/CMake/releases/download/v3.28.1/cmake-3.28.1-macos-universal.dmg" --output ~/Downloads/CMake/cmake-Darwin-x86_64.dmg
-          yes | PAGER=cat hdiutil attach -quiet -mountpoint /Volumes/cmake-Darwin-x86_64 ~/Downloads/CMake/cmake-Darwin-x86_64.dmg
-          cp -R /Volumes/cmake-Darwin-x86_64/CMake.app /Applications/
-          hdiutil detach /Volumes/cmake-Darwin-x86_64
-          sudo "/Applications/CMake.app/Contents/bin/cmake-gui" --install=/usr/local/bin
- 
-      - name: cmake version
-        run: |
-          cmake --version
  
       - name: Setup submodules
         shell: bash
