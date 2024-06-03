@@ -418,7 +418,7 @@ constexpr uint8_t toUint8(T t) noexcept {
     return uint8_t(mbgl::underlying_type(t));
 }
 
-MAPBOX_ETERNAL_CONSTEXPR const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
+constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
     {{"accuracy-radius", toUint8(Property::AccuracyRadius)},
      {"accuracy-radius-border-color", toUint8(Property::AccuracyRadiusBorderColor)},
      {"accuracy-radius-color", toUint8(Property::AccuracyRadiusColor)},
