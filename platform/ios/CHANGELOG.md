@@ -4,6 +4,9 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+- Fixes crash that happened with some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)). 
+
+
 ## 6.4.2
 
 - Fix Metal frame glitch on older devices ([#2379](https://github.com/maplibre/maplibre-native/pull/2379)).
