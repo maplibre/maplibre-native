@@ -68,7 +68,7 @@ public:
     virtual void setUpdateParameters(const TileUpdateParameters&) {}
 
     // Mark this tile as no longer needed and cancel any pending work.
-    virtual void cancel();
+    virtual void cancel() = 0;
 
     // Notifies this tile of the updated layer properties.
     //

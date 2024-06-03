@@ -450,6 +450,16 @@ MLN_EXPORT
 @property (nonatomic, assign) BOOL showsUserLocation;
 
 /**
+ A Boolean value indicating whether the map may request authorization to use location services.
+
+ Setting this property to `YES` causes the map view to use the Core Location
+ framework to request authorization when authorizationStatus == kCLAuthorizationStatusNotDetermined.
+ 
+ The default value of this property is `YES`.
+ */
+@property (nonatomic, assign) BOOL shouldRequestAuthorizationToUseLocationServices;
+
+/**
  A Boolean value indicating whether the device’s current location is visible in
  the map view.
 
