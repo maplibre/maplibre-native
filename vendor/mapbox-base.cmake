@@ -77,15 +77,6 @@ set_target_properties(
 )
 
 set_target_properties(
-    mapbox-base-optional
-    PROPERTIES
-        INTERFACE_MAPBOX_NAME "Optional"
-        INTERFACE_MAPBOX_URL "https://github.com/akrzemi1/Optional"
-        INTERFACE_MAPBOX_AUTHOR "Andrzej Krzemienski"
-        INTERFACE_MAPBOX_LICENSE ${CMAKE_CURRENT_LIST_DIR}/mapbox-base/deps/optional/LICENSE
-)
-
-set_target_properties(
     mapbox-base
     PROPERTIES
         INTERFACE_MAPBOX_NAME "mapbox-base"
