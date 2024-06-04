@@ -23,7 +23,7 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.databinding.ActivityMapsnapshotterWithinExpressionBinding
-import org.maplibre.android.testapp.styles.Styles.getPredefinedStyleWithFallback
+import org.maplibre.android.testapp.styles.TestStyles.getPredefinedStyleWithFallback
 
 /**
  * An Activity that showcases the use of MapSnapshotter with 'within' expression

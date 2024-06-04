@@ -13,7 +13,7 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.utils.MapFragmentUtils
 
 /**
@@ -65,7 +65,7 @@ class DoubleMapActivity : AppCompatActivity() {
             mapView.onCreate(savedInstanceState)
             mapView.getMapAsync { maplibreMap: MapLibreMap ->
                 maplibreMap.setStyle(
-                    Styles.getPredefinedStyleWithFallback(
+                    TestStyles.getPredefinedStyleWithFallback(
                         "Streets"
                     )
                 )
@@ -84,7 +84,7 @@ class DoubleMapActivity : AppCompatActivity() {
                                 .build()
                         )
                     )
-                    maplibreMap.setStyle(Style.Builder().fromUri(Styles.getPredefinedStyleWithFallback("Bright")))
+                    maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Bright")))
                     val uiSettings = maplibreMap.uiSettings
                     uiSettings.setAllGesturesEnabled(false)
                     uiSettings.isCompassEnabled = false

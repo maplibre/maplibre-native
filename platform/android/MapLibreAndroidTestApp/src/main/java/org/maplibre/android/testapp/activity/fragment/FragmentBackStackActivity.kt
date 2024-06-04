@@ -3,11 +3,10 @@ package org.maplibre.android.testapp.activity.fragment
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.SupportMapFragment
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityBackstackFragmentBinding
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.NavUtils
 
 /**
@@ -47,7 +46,7 @@ class FragmentBackStackActivity : AppCompatActivity() {
 
     private fun initMap(maplibreMap: MapLibreMap) {
         try {
-            val style = Styles.getPredefinedStyleWithFallback("Satellite Hybrid")
+            val style = TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
             maplibreMap.setStyle(style) {
                 maplibreMap.setPadding(300, 300, 300, 300)
             }

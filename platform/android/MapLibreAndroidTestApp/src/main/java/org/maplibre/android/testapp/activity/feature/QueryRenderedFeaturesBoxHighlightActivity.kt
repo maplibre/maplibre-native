@@ -16,7 +16,7 @@ import org.maplibre.android.style.layers.Layer
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 
 /**
@@ -71,7 +71,7 @@ class QueryRenderedFeaturesBoxHighlightActivity : AppCompatActivity() {
             }
             maplibreMap.setStyle(
                 Style.Builder()
-                    .fromUri(Styles.getPredefinedStyleWithFallback("Streets"))
+                    .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
                     .withSource(source)
                     .withLayer(layer)
             )

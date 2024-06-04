@@ -10,7 +10,7 @@ import org.maplibre.android.offline.OfflineManager
 import org.maplibre.android.offline.OfflineRegion
 import org.maplibre.android.storage.FileSource
 import org.maplibre.android.testapp.databinding.ActivityMergeOfflineRegionsBinding
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.FileUtils
 
 class MergeOfflineRegionsActivity : AppCompatActivity() {
@@ -20,7 +20,7 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
     companion object {
         private const val LOG_TAG = "Mbgl-MergeOfflineRegionsActivity"
         private const val TEST_DB_FILE_NAME = "offline_test.db"
-        private var TEST_STYLE = Styles.getPredefinedStyleWithFallback("Satellite Hybrid")
+        private var TEST_STYLE = TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
     }
 
     private val onFileCopiedListener = object : FileUtils.OnFileCopiedFromAssetsListener {

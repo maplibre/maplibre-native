@@ -2,8 +2,7 @@ package org.maplibre.android.testapp.activity.location
 
 import android.location.Location
 import org.maplibre.android.geometry.LatLngBounds
-import org.maplibre.android.maps.Style
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 import java.util.*
 
@@ -12,11 +11,11 @@ import java.util.*
  */
 object Utils {
     private val STYLES = arrayOf(
-        Styles.getPredefinedStyleWithFallback("Streets"),
-        Styles.getPredefinedStyleWithFallback("Outdoor"),
-        Styles.getPredefinedStyleWithFallback("Bright"),
-        Styles.getPredefinedStyleWithFallback("Pastel"),
-        Styles.getPredefinedStyleWithFallback("Satellite Hybrid")
+        TestStyles.getPredefinedStyleWithFallback("Streets"),
+        TestStyles.getPredefinedStyleWithFallback("Outdoor"),
+        TestStyles.getPredefinedStyleWithFallback("Bright"),
+        TestStyles.getPredefinedStyleWithFallback("Pastel"),
+        TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
     )
     private var index = 0
 

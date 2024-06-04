@@ -10,7 +10,7 @@ import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.*
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 import java.net.URI
 import java.net.URISyntaxException
@@ -34,7 +34,7 @@ class HeatmapLayerActivity : AppCompatActivity() {
                 try {
                     maplibreMap.setStyle(
                         Style.Builder()
-                            .fromUri(Styles.getPredefinedStyleWithFallback("Pastel"))
+                            .fromUri(TestStyles.getPredefinedStyleWithFallback("Pastel"))
                             .withSource(createEarthquakeSource())
                             .withLayerAbove(createHeatmapLayer(), "country_label")
                             .withLayerBelow(createCircleLayer(), HEATMAP_LAYER_ID)

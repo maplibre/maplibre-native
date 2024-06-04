@@ -23,7 +23,7 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.databinding.ActivityWithinExpressionBinding
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * An Activity that showcases the within expression to filter features outside a geometry
@@ -99,7 +99,7 @@ class WithinExpressionActivity : AppCompatActivity() {
         // using streets as a base style
         maplibreMap.setStyle(
             Style.Builder()
-                .fromUri(Styles.getPredefinedStyleWithFallback("Streets"))
+                .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
                 .withSources(
                     GeoJsonSource(
                         POINT_ID,

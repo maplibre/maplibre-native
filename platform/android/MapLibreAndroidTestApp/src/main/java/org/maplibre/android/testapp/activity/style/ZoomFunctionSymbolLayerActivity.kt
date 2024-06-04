@@ -19,7 +19,7 @@ import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 
 /**
@@ -55,7 +55,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
         mapView.getMapAsync(
             OnMapReadyCallback { map: MapLibreMap ->
                 maplibreMap = map
-                map.setStyle(Styles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
+                map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
                     updateSource(style)
                     addLayer(style)
                     map.addOnMapClickListener(mapClickListener)

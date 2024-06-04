@@ -14,7 +14,7 @@ import org.maplibre.android.maps.MapLibreMap.OnCameraIdleListener
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 
 /**
@@ -65,7 +65,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        maplibreMap.setStyle(Style.Builder().fromUri(Styles.getPredefinedStyleWithFallback("Streets")))
+        maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets")))
         maplibreMap.uiSettings.isAttributionEnabled = false
         maplibreMap.uiSettings.isLogoEnabled = false
         maplibreMap.addOnCameraIdleListener(cameraIdleListener)

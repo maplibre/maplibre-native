@@ -12,7 +12,7 @@ import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.* // ktlint-disable no-wildcard-imports
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import java.util.ArrayList
 
 /**
@@ -56,7 +56,7 @@ class PolygonActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        map.setStyle(Styles.getPredefinedStyleWithFallback("Streets"))
+        map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
         map.setOnPolygonClickListener { polygon: Polygon ->
             Toast.makeText(
                 this@PolygonActivity,

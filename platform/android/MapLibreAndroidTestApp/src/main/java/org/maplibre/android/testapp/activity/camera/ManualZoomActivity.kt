@@ -11,7 +11,7 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing the zoom Camera API.
@@ -29,7 +29,7 @@ class ManualZoomActivity : AppCompatActivity() {
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@ManualZoomActivity.maplibreMap = maplibreMap
             maplibreMap.setStyle(
-                Style.Builder().fromUri(Styles.getPredefinedStyleWithFallback("Satellite Hybrid"))
+                Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
             )
             val uiSettings = this@ManualZoomActivity.maplibreMap.uiSettings
             uiSettings.setAllGesturesEnabled(false)

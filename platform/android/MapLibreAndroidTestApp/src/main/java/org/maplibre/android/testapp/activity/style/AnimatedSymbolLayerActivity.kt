@@ -25,7 +25,7 @@ import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.turf.TurfMeasurement
 import java.util.*
 
@@ -51,7 +51,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         mapView.getMapAsync(
             OnMapReadyCallback { map: MapLibreMap ->
                 maplibreMap = map
-                map.setStyle(Styles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
+                map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
                     this.style = style
                     setupCars()
                     animateRandomRoutes()

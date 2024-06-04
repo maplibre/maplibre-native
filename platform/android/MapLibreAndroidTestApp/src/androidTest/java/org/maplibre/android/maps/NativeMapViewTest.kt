@@ -21,7 +21,7 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class NativeMapViewTest : AppCenter() {
@@ -62,7 +62,7 @@ class NativeMapViewTest : AppCenter() {
     @Test
     @UiThreadTest
     fun testSetStyleUrl() {
-        val expected = Styles.getPredefinedStyleWithFallback("Pastel")
+        val expected = TestStyles.getPredefinedStyleWithFallback("Pastel")
         nativeMapView.styleUri = expected
         val actual = nativeMapView.styleUri
         assertEquals("Style URL should match", expected, actual)

@@ -7,7 +7,7 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity that displays the city of Suzhou with a mixture of server-generated
@@ -22,7 +22,7 @@ class LocalGlyphActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
             OnMapReadyCallback { maplibreMap: MapLibreMap ->
-                maplibreMap.setStyle(Styles.getPredefinedStyleWithFallback("Streets"))
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
                 // Set initial position to Suzhou
                 maplibreMap.moveCamera(
                     CameraUpdateFactory.newCameraPosition(

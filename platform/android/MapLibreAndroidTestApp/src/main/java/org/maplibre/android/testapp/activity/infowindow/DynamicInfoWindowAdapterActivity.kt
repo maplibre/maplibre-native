@@ -14,9 +14,8 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.InfoWindowAdapter
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
 import org.maplibre.android.maps.OnMapReadyCallback
-import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.IconUtils
 import java.util.*
 
@@ -59,7 +58,7 @@ class DynamicInfoWindowAdapterActivity : AppCompatActivity(), OnMapReadyCallback
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        map.setStyle(Styles.getPredefinedStyleWithFallback("Streets"))
+        map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
 
         // Add info window adapter
         addCustomInfoWindowAdapter(maplibreMap!!)

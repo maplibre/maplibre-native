@@ -4,7 +4,7 @@ import androidx.annotation.UiThread
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.activity.espresso.EspressoTestActivity
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Base class for all tests using EspressoTestActivity as wrapper.
@@ -20,7 +20,7 @@ open class EspressoTest : BaseTest() {
 
     @UiThread
     override fun initMap(maplibreMap: MapLibreMap) {
-        maplibreMap.setStyle(Style.Builder().fromUri(Styles.VERSATILES))
+        maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.VERSATILES))
         super.initMap(maplibreMap)
     }
 }

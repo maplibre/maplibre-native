@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing showing a Map inside of a DialogFragment.
@@ -43,7 +43,7 @@ class MapInDialogActivity : AppCompatActivity() {
             mapView.getMapAsync(
                 OnMapReadyCallback { maplibreMap: MapLibreMap ->
                     maplibreMap.setStyle(
-                        Styles.getPredefinedStyleWithFallback("Outdoor")
+                        TestStyles.getPredefinedStyleWithFallback("Outdoor")
                     )
                 }
             )

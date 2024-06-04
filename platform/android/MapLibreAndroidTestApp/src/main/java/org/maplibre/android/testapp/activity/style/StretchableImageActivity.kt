@@ -11,7 +11,7 @@ import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.*
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.GeoParseUtil
 import org.maplibre.android.utils.BitmapUtils
 import timber.log.Timber
@@ -35,7 +35,7 @@ class StretchableImageActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        maplibreMap.setStyle(Styles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
             val popup = BitmapUtils.getBitmapFromDrawable(
                 resources.getDrawable(R.drawable.popup)
             )

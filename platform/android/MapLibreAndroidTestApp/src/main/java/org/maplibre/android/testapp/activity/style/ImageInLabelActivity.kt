@@ -16,7 +16,7 @@ import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.utils.BitmapUtils
 
 /**
@@ -33,7 +33,7 @@ class ImageInLabelActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onMapReady(maplibreMap: MapLibreMap) {
-        maplibreMap.setStyle(Styles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
             val us = BitmapUtils.getBitmapFromDrawable(
                 resources.getDrawable(R.drawable.ic_us)
             )

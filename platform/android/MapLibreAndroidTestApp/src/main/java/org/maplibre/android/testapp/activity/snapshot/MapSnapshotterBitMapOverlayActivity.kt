@@ -18,7 +18,7 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.snapshotter.MapSnapshot
 import org.maplibre.android.snapshotter.MapSnapshotter
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 
 /**
@@ -50,7 +50,7 @@ class MapSnapshotterBitMapOverlayActivity :
                             Math.min(container.measuredHeight, 1024)
                         )
                             .withStyleBuilder(
-                                Style.Builder().fromUri(Styles.getPredefinedStyleWithFallback("Outdoor"))
+                                Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Outdoor"))
                             )
                             .withCameraPosition(
                                 CameraPosition.Builder().target(LatLng(52.090737, 5.121420))

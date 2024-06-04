@@ -10,7 +10,7 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.geometry.LatLngBounds
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing restricting user gestures to a bounds around Iceland, almost worldview and IDL.
@@ -28,7 +28,7 @@ class LatLngBoundsForCameraActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        maplibreMap.setStyle(Styles.getPredefinedStyleWithFallback("Satellite Hybrid"))
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
         maplibreMap.setMinZoomPreference(2.0)
         maplibreMap.uiSettings.isFlingVelocityAnimationEnabled = false
         showCrosshair()

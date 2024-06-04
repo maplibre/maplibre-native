@@ -2,7 +2,7 @@ package org.maplibre.android.testapp.styles
 
 import org.maplibre.android.maps.Style
 
-object Styles {
+object TestStyles {
     val VERSATILES = "https://tiles.versatiles.org/assets/styles/colorful.json"
 
     val AMERICANA = "https://zelonewolf.github.io/openstreetmap-americana/style.json"

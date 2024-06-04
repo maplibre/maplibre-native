@@ -6,10 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMapOptions
-import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.SupportMapFragment
 import org.maplibre.android.testapp.databinding.ActivityViewpagerBinding
-import org.maplibre.android.testapp.styles.Styles
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing using the Android SDK ViewPager API to show MapFragments.
@@ -92,11 +91,11 @@ fun SupportMapFragment.getMapAsync(index: Int) {
     this.getMapAsync {
         it.setStyle(
             when (index) {
-                0 -> Styles.getPredefinedStyleWithFallback("Streets")
-                1 -> Styles.getPredefinedStyleWithFallback("Pastel")
-                2 -> Styles.getPredefinedStyleWithFallback("Satellite Hybrid")
-                3 -> Styles.getPredefinedStyleWithFallback("Bright")
-                else -> Styles.getPredefinedStyleWithFallback("Streets")
+                0 -> TestStyles.getPredefinedStyleWithFallback("Streets")
+                1 -> TestStyles.getPredefinedStyleWithFallback("Pastel")
+                2 -> TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
+                3 -> TestStyles.getPredefinedStyleWithFallback("Bright")
+                else -> TestStyles.getPredefinedStyleWithFallback("Streets")
             }
         )
     }
