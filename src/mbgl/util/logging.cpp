@@ -3,6 +3,7 @@
 #include <mbgl/util/enum.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
+#include <mbgl/util/traits.hpp>
 
 #include <cstdio>
 #include <cstdarg>
@@ -14,7 +15,8 @@ namespace mbgl {
 namespace {
 
 std::unique_ptr<Log::Observer> currentObserver;
-std::atomic<bool> useThread(true);
+static constexpr auto SeverityCount = underlying_type(EventSeverity::SeverityCount);
+std::atomic<bool> useThread[SeverityCount] = {true, true, true, false};
 std::mutex mutex;
 
 } // namespace
@@ -25,7 +27,7 @@ public:
         : scheduler(Scheduler::GetSequenced()) {}
 
     void record(EventSeverity severity, Event event, int64_t code, const std::string& msg) try {
-        if (useThread) {
+        if (useThread[underlying_type(severity)]) {
             auto threadName = platform::getCurrentThreadName();
             scheduler->schedule([=]() { Log::record(severity, event, code, msg, threadName); });
         } else {
@@ -54,8 +56,23 @@ Log* Log::get() noexcept {
     return &instance;
 }
 
+bool Log::useLogThread(EventSeverity severity) noexcept {
+    const auto index = underlying_type(severity);
+    return 0 <= index && index < SeverityCount && useThread[index];
+}
+
 void Log::useLogThread(bool enable) noexcept {
-    useThread = enable;
+    useLogThread(enable, EventSeverity::Debug);
+    useLogThread(enable, EventSeverity::Info);
+    useLogThread(enable, EventSeverity::Warning);
+    useLogThread(enable, EventSeverity::Error);
+}
+
+void Log::useLogThread(bool enable, EventSeverity severity) noexcept {
+    const auto index = underlying_type(severity);
+    if (0 <= index && index < SeverityCount) {
+        useThread[index] = enable;
+    }
 }
 
 void Log::setObserver(std::unique_ptr<Observer> observer) {

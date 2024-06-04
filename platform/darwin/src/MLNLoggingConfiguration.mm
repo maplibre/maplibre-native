@@ -29,6 +29,9 @@ public:
             case EventSeverity::Error:
                 MLNLogError(message);
                 break;
+            default:
+                assert(false);
+                return false;
         }
         return true;
     }

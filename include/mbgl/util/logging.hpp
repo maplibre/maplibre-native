@@ -38,7 +38,9 @@ public:
     Log();
     ~Log();
 
+    static bool useLogThread(EventSeverity) noexcept;
     static void useLogThread(bool enable) noexcept;
+    static void useLogThread(bool enable, EventSeverity) noexcept;
 
     template <typename... Args>
     static void Debug(Event event, Args&&... args) noexcept {
