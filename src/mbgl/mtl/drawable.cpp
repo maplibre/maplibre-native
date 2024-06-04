@@ -303,7 +303,8 @@ void Drawable::draw(PaintParameters& parameters) const {
                                                baseInstance);
             } else {
                 if (instanceCount == 1) {
-                    encoder->drawIndexedPrimitives(primitiveType, mlSegment.indexLength, indexType, indexBuffer, indexOffset);
+                    encoder->drawIndexedPrimitives(
+                        primitiveType, mlSegment.indexLength, indexType, indexBuffer, indexOffset);
                 } else {
                     assert(!"Base Vertex Instance Drawing is only supported on MTLGPUFamilyApple3 and later.");
                 }
