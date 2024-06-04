@@ -59,9 +59,8 @@ FeatureExtensionValue getClusterExpansionZoom(std::shared_ptr<style::GeoJSONData
     return Value{static_cast<uint64_t>(clusterData->getClusterExpansionZoom(clusterID))};
 }
 
-MAPBOX_ETERNAL_CONSTEXPR const auto extensionGetters =
-    mapbox::eternal::hash_map<mapbox::eternal::string, FeatureExtensionGetterPtr>(
-        {{"children", &getChildren}, {"leaves", &getLeaves}, {"expansion-zoom", &getClusterExpansionZoom}});
+constexpr const auto extensionGetters = mapbox::eternal::hash_map<mapbox::eternal::string, FeatureExtensionGetterPtr>(
+    {{"children", &getChildren}, {"leaves", &getLeaves}, {"expansion-zoom", &getClusterExpansionZoom}});
 
 } // namespace
 

@@ -988,7 +988,7 @@ const auto& filterInCompoundExpression() {
 }
 
 using ParseCompoundFunction = const std::unique_ptr<detail::SignatureBase>& (*)();
-MAPBOX_ETERNAL_CONSTEXPR const auto compoundExpressionRegistry =
+constexpr const auto compoundExpressionRegistry =
     mapbox::eternal::hash_map<mapbox::eternal::string, ParseCompoundFunction>({
         {"e", eCompoundExpression},
         {"pi", piCompoundExpression},
