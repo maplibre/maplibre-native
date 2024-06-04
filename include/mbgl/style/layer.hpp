@@ -165,6 +165,11 @@ public:
     /// Collect dependencies
     expression::Dependency getDependencies() const noexcept;
 
+private:
+    std::optional<conversion::Error> setVisibility(const conversion::Convertible& value);
+    std::optional<conversion::Error> setMinZoom(const conversion::Convertible& value);
+    std::optional<conversion::Error> setMaxZoom(const conversion::Convertible& value);
+
 protected:
     virtual Mutable<Impl> mutableBaseImpl() const = 0;
     void serializeProperty(Value&, const StyleProperty&, const char* propertyName, bool isPaint) const;
@@ -172,11 +177,7 @@ protected:
                                                                  const conversion::Convertible& value) = 0;
     LayerObserver* observer;
     mapbox::base::WeakPtrFactory<Layer> weakFactory{this};
-
-private:
-    std::optional<conversion::Error> setVisibility(const conversion::Convertible& value);
-    std::optional<conversion::Error> setMinZoom(const conversion::Convertible& value);
-    std::optional<conversion::Error> setMaxZoom(const conversion::Convertible& value);
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace style

@@ -77,7 +77,7 @@ afterEvaluate {
 afterEvaluate { project ->
     android.libraryVariants.all { variant ->
         tasks.androidJavadocs.doFirst {
-            classpath += files(variant.javaCompile.classpath.files)
+            classpath += files(variant.javaCompileProvider.get().classpath.files)
         }
     }
 }

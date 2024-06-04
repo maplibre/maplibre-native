@@ -9,7 +9,6 @@
         android:id="@id/mapView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
         app:maplibre_cameraBearing="220"
         app:maplibre_cameraTargetLat="50.871062"
         app:maplibre_cameraTargetLng="1.583210"

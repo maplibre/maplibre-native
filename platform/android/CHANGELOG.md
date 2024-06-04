@@ -6,6 +6,8 @@
 
 ### 🐞 Bug fixes
 
+- Fixes crash that happened with some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)). 
+
 ## 11.0.0
 
 The rendering internals of MapLibre Native have undergone major changes. We've had an extensive period of [pre-releases](https://github.com/maplibre/maplibre-native/issues/1608) leading up to this official release. While we've worked hard to minimize potential issues, it's possible that there may still be regressions. Therefore, it's important to conduct your own testing and report any encountered issues on GitHub.

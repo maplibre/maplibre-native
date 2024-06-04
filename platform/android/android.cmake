@@ -110,7 +110,6 @@ target_link_libraries(
     PRIVATE
         GLESv3
         Mapbox::Base
-        Mapbox::Base::optional
         log
         mbgl-compiler-options
 )
