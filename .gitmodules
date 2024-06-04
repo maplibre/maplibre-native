@@ -9,7 +9,7 @@
 	url = https://github.com/mapbox/protozero.git
 [submodule "vendor/vector-tile"]
 	path = vendor/vector-tile
-	url = https://github.com/mapbox/vector-tile.git
+	url = https://github.com/maplibre/mvt-cpp.git
 [submodule "vendor/wagyu"]
 	path = vendor/wagyu
 	url = https://github.com/mapbox/wagyu.git

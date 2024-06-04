@@ -24,6 +24,7 @@ public:
 private:
     std::shared_ptr<style::GeoJSONData> data;
     mapbox::base::WeakPtrFactory<GeoJSONTile> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace mbgl

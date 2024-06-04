@@ -57,6 +57,7 @@ private:
     std::shared_ptr<ThreadPool> threadPool;
     std::unique_ptr<Actor<CustomTileLoader>> loader;
     mapbox::base::WeakPtrFactory<Source> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 template <>

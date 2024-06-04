@@ -20,15 +20,17 @@ void Mailbox::open(Scheduler& scheduler_) {
     std::lock_guard<std::recursive_mutex> receivingLock(receivingMutex);
     std::lock_guard<std::mutex> pushingLock(pushingMutex);
 
-    weakScheduler = scheduler_.makeWeakPtr();
-
     if (closed) {
         return;
     }
 
+    weakScheduler = scheduler_.makeWeakPtr();
+
     if (!queue.empty()) {
         auto guard = weakScheduler.lock();
-        if (weakScheduler) weakScheduler->schedule(makeClosure(shared_from_this()));
+        if (weakScheduler) {
+            weakScheduler->schedule(makeClosure(shared_from_this()));
+        }
     }
 }
 
@@ -45,6 +47,8 @@ void Mailbox::close() {
     std::lock_guard<std::mutex> pushingLock(pushingMutex);
 
     closed = true;
+
+    weakScheduler = {};
 }
 
 void Mailbox::abandon() {
@@ -57,7 +61,7 @@ void Mailbox::abandon() {
 }
 
 bool Mailbox::isOpen() const {
-    return bool(weakScheduler);
+    return bool(weakScheduler) && !closed;
 }
 
 void Mailbox::push(std::unique_ptr<Message> message) {
@@ -105,9 +109,6 @@ void Mailbox::receive() {
     }};
     std::lock_guard<std::recursive_mutex> receivingLock(receivingMutex);
 
-    auto guard = weakScheduler.lock();
-    assert(weakScheduler);
-
     if (closed) {
         state = State::Abandoned;
         return;
@@ -126,8 +127,13 @@ void Mailbox::receive() {
 
     (*message)();
 
+    // If there are more messages in the queue and the scheduler
+    // is still active, create a new task to handle the next one
     if (!wasEmpty) {
-        weakScheduler->schedule(makeClosure(shared_from_this()));
+        auto guard = weakScheduler.lock();
+        if (weakScheduler) {
+            weakScheduler->schedule(makeClosure(shared_from_this()));
+        }
     }
 }
 

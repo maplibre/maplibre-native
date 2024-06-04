@@ -27,7 +27,7 @@ NSString * const kMLNDownloadPerformanceEvent = @"mobile.performance_trace";
     if (self = [super init]) {
         self.sessionConfiguration = nil;
         _events = [NSMutableDictionary dictionary];
-        _eventsQueue = dispatch_queue_create("com.mapbox.network-configuration", DISPATCH_QUEUE_CONCURRENT);
+        _eventsQueue = dispatch_queue_create("org.maplibre.network-configuration", DISPATCH_QUEUE_CONCURRENT);
     }
     
     return self;

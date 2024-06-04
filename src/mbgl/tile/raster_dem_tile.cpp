@@ -17,6 +17,7 @@ namespace mbgl {
 RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_, const TileParameters& parameters, const Tileset& tileset)
     : Tile(Kind::RasterDEM, id_),
       loader(*this, id_, parameters, tileset),
+      threadPool(Scheduler::GetBackground()),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
       worker(Scheduler::GetBackground(), ActorRef<RasterDEMTile>(*this, mailbox)) {
     encoding = tileset.encoding;
@@ -31,7 +32,14 @@ RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_, const TileParameters& 
     }
 }
 
-RasterDEMTile::~RasterDEMTile() = default;
+RasterDEMTile::~RasterDEMTile() {
+    markObsolete();
+
+    // The bucket has resources that need to be released on the render thread.
+    if (bucket) {
+        threadPool->runOnRenderThread([bucket_{std::move(bucket)}]() {});
+    }
+}
 
 std::unique_ptr<TileRenderData> RasterDEMTile::createRenderData() {
     return std::make_unique<SharedBucketTileRenderData<HillshadeBucket>>(bucket);
@@ -48,19 +56,23 @@ void RasterDEMTile::setMetadata(std::optional<Timestamp> modified_, std::optiona
 }
 
 void RasterDEMTile::setData(const std::shared_ptr<const std::string>& data) {
-    pending = true;
-    ++correlationID;
-    worker.self().invoke(&RasterDEMTileWorker::parse, data, correlationID, encoding);
+    if (!obsolete) {
+        pending = true;
+        ++correlationID;
+        worker.self().invoke(&RasterDEMTileWorker::parse, data, correlationID, encoding);
+    }
 }
 
 void RasterDEMTile::onParsed(std::unique_ptr<HillshadeBucket> result, const uint64_t resultCorrelationID) {
-    bucket = std::move(result);
-    loaded = true;
-    if (resultCorrelationID == correlationID) {
-        pending = false;
+    if (!obsolete) {
+        bucket = std::move(result);
+        loaded = true;
+        if (resultCorrelationID == correlationID) {
+            pending = false;
+        }
+        renderable = static_cast<bool>(bucket);
+        observer->onTileChanged(*this);
     }
-    renderable = static_cast<bool>(bucket);
-    observer->onTileChanged(*this);
 }
 
 void RasterDEMTile::onError(std::exception_ptr err, const uint64_t resultCorrelationID) {
@@ -123,6 +135,16 @@ void RasterDEMTile::setNecessity(TileNecessity necessity) {
 
 void RasterDEMTile::setUpdateParameters(const TileUpdateParameters& params) {
     loader.setUpdateParameters(params);
+}
+
+void RasterDEMTile::cancel() {
+    markObsolete();
+}
+
+void RasterDEMTile::markObsolete() {
+    obsolete = true;
+    pending = false;
+    mailbox->abandon();
 }
 
 } // namespace mbgl

@@ -295,7 +295,7 @@ static NSString * const MLNInvisibleStyleMarkerSymbolName = @"invisible_marker";
 
 /// Prefix that denotes a sprite installed by MLNMapView, to avoid collisions
 /// with style-defined sprites.
-NSString * const MLNAnnotationSpritePrefix = @"com.mapbox.sprites.";
+NSString * const MLNAnnotationSpritePrefix = @"org.maplibre.sprites.";
 
 /// Slop area around the hit testing point, allowing for imprecise annotation selection.
 const CGFloat MLNAnnotationImagePaddingForHitTest = 5;
@@ -859,6 +859,8 @@ public:
     _pendingLatitude = NAN;
     _pendingLongitude = NAN;
     _targetCoordinate = kCLLocationCoordinate2DInvalid;
+    
+    _shouldRequestAuthorizationToUseLocationServices = YES;
 }
 
 - (mbgl::Size)size
@@ -5812,7 +5814,7 @@ static void *windowScreenContext = &windowScreenContext;
 
     if (shouldEnableLocationServices)
     {
-        if (self.locationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
+        if (self.shouldRequestAuthorizationToUseLocationServices && self.locationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
             BOOL hasWhenInUseUsageDescription = !![[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"];
 
             if (@available(iOS 11.0, *)) {
@@ -6974,14 +6976,18 @@ static void *windowScreenContext = &windowScreenContext;
 
         if (annotationView)
         {
-            annotationView.center = MLNPointRounded([self convertCoordinate:annotationContext.annotation.coordinate toPointToView:self]);
+            CLLocationCoordinate2D coordinate = annotation.coordinate;
 
             // Every so often (1 out of 1000 frames?) the mbgl query mechanism fails. This logic spot checks the
             // offscreenAnnotations values -- if they are actually still on screen then the view center is
             // moved and the enqueue operation is avoided. This allows us to keep the performance benefit of
             // using the mbgl query result. It also forces views that have just gone offscreen to be cleared
             // fully from view.
-            if (!MLNCoordinateInCoordinateBounds(annotation.coordinate, coordinateBounds))
+            if (MLNCoordinateInCoordinateBounds(coordinate, coordinateBounds))
+            {
+                annotationView.center = [self convertCoordinate:annotationContext.annotation.coordinate toPointToView:self];
+            }
+            else
             {
                 if (annotationView.layer.animationKeys.count > 0) {
                     continue;
@@ -6991,12 +6997,8 @@ static void *windowScreenContext = &windowScreenContext;
                 CGPoint adjustedCenter = annotationView.center;
                 adjustedCenter.x = -CGRectGetWidth(self.frame) * 10.0;
                 annotationView.center = adjustedCenter;
-
-                // Disable the offscreen annotation view recycling on Metal because of issue https://github.com/maplibre/maplibre-native/issues/2117
-                // TLDR: Metal view rendering stutter / freeze
-#if !MLN_RENDER_BACKEND_METAL
-                 [self enqueueAnnotationViewForAnnotationContext:annotationContext];
-#endif
+                
+                [self enqueueAnnotationViewForAnnotationContext:annotationContext];
             }
         }
     }

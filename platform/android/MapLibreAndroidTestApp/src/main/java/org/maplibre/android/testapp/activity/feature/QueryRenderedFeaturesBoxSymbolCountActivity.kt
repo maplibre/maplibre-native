@@ -26,7 +26,7 @@ class QueryRenderedFeaturesBoxSymbolCountActivity : AppCompatActivity() {
     lateinit var mapView: MapView
     lateinit var maplibreMap: MapLibreMap
         private set
-    private lateinit var toast: Toast
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_query_features_box)
@@ -80,15 +80,11 @@ class QueryRenderedFeaturesBoxSymbolCountActivity : AppCompatActivity() {
                 val features = maplibreMap.queryRenderedFeatures(box, "symbols-layer")
 
                 // Show count
-                if (toast != null) {
-                    toast!!.cancel()
-                }
-                toast = Toast.makeText(
+                 Toast.makeText(
                     this@QueryRenderedFeaturesBoxSymbolCountActivity,
-                    String.format("%s features in box", features.size),
+                    "${features.size} feature${if (features.size == 1) "" else "s"} in box",
                     Toast.LENGTH_SHORT
-                )
-                toast.show()
+                ).show()
             }
         }
     }

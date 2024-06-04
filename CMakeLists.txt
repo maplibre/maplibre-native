@@ -1392,7 +1392,6 @@ export(TARGETS
     mapbox-base-geojson.hpp
     mapbox-base-geometry.hpp
     mapbox-base-jni.hpp
-    mapbox-base-optional
     mapbox-base-pixelmatch-cpp
     mapbox-base-shelf-pack-cpp
     mapbox-base-supercluster.hpp
