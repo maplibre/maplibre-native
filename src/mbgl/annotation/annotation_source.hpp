@@ -20,6 +20,7 @@ private:
     bool supportsLayerType(const mbgl::style::LayerTypeInfo*) const override;
     mapbox::base::WeakPtr<Source> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
     mapbox::base::WeakPtrFactory<Source> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 class AnnotationSource::Impl : public style::Source::Impl {
