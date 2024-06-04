@@ -57,7 +57,7 @@ class MapLibreMapTest {
         every { nativeMapView.isDestroyed } returns false
         every { nativeMapView.nativePtr } returns 5
         maplibreMap.injectLocationComponent(spyk())
-        maplibreMap.setStyle(Styles.getPredefinedStyleWithFallback("Streets"))
+        maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
         maplibreMap.onFinishLoadingStyle()
     }
 
