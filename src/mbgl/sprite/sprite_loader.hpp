@@ -41,6 +41,7 @@ private:
     SpriteLoaderObserver* observer = nullptr;
     std::shared_ptr<Scheduler> threadPool;
     mapbox::base::WeakPtrFactory<SpriteLoader> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace mbgl

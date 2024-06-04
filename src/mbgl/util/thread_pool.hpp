@@ -94,10 +94,12 @@ public:
 
 private:
     std::vector<std::thread> threads;
-    mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
 
     std::queue<std::function<void()>> renderThreadQueue;
     std::mutex renderMutex;
+
+    mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 class SequencedScheduler : public ThreadedScheduler {
