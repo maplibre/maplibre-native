@@ -11,6 +11,7 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 * Add support for [index-of expression](https://maplibre.org/maplibre-style-spec/expressions/#index-of) ([#1113](https://github.com/maplibre/maplibre-native/pull/1113))
 
 ### 🐞 Bug fixes
+- Fixes crash that happened with some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)).
 
 ### ⛵ Dependencies
 
