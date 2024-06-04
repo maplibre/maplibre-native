@@ -292,7 +292,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             assert(static_cast<std::size_t>(maxIndex) < mlSegment.vertexLength);
 #endif
 
-            if (context.getBackend().getDevice()->supportsFamily(MTL::GPUFamilyApple3)) {
+            if (context.getBackend().isInstanceDrawingSupported()) {
                 encoder->drawIndexedPrimitives(primitiveType,
                                                mlSegment.indexLength,
                                                indexType,

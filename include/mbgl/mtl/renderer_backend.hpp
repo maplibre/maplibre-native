@@ -32,6 +32,7 @@ public:
 
     const MTLDevicePtr& getDevice() const { return device; }
     const MTLCommandQueuePtr& getCommandQueue() const { return commandQueue; }
+    const bool isInstanceDrawingSupported() const { return instanceDrawingSupported; }
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;
@@ -61,6 +62,7 @@ public:
 protected:
     MTLDevicePtr device;
     MTLCommandQueuePtr commandQueue;
+    bool instanceDrawingSupported = false;
 };
 
 } // namespace mtl
