@@ -239,7 +239,7 @@ private:
     std::size_t check28 = checkVal;
     uint32_t crossTileID = 0;
     std::size_t check29 = checkVal;
-    mutable bool isFailed;
+    mutable bool isFailed = false;
 };
 
 using SymbolInstanceReferences = std::vector<std::reference_wrapper<const SymbolInstance>>;
