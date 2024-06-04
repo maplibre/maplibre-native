@@ -292,14 +292,23 @@ void Drawable::draw(PaintParameters& parameters) const {
             assert(static_cast<std::size_t>(maxIndex) < mlSegment.vertexLength);
 #endif
 
-            encoder->drawIndexedPrimitives(primitiveType,
-                                           mlSegment.indexLength,
-                                           indexType,
-                                           indexBuffer,
-                                           indexOffset,
-                                           instanceCount,
-                                           baseVertex,
-                                           baseInstance);
+            if (instanceCount > 1 ) {
+                encoder->drawIndexedPrimitives(primitiveType,
+                                               mlSegment.indexLength,
+                                               indexType,
+                                               indexBuffer,
+                                               indexOffset,
+                                               instanceCount,
+                                               baseVertex,
+                                               baseInstance);
+            } else {
+                encoder->drawIndexedPrimitives(primitiveType,
+                                               mlSegment.indexLength,
+                                               indexType,
+                                               indexBuffer,
+                                               indexOffset);
+            }
+
             context.renderingStats().numDrawCalls++;
         }
     }

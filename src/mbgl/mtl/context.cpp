@@ -428,10 +428,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                        indexCount,
                                        MTL::IndexType::IndexTypeUInt16,
                                        indexRes->getMetalBuffer().get(),
-                                       /*indexOffset=*/0,
-                                       /*instanceCount=*/1,
-                                       /*baseVertex=*/0,
-                                       /*baseInstance=*/0);
+                                       /*indexOffset=*/0);
     }
 #endif
 
