@@ -416,9 +416,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                    MTL::IndexType::IndexTypeUInt16,
                                    indexRes->getMetalBuffer().get(),
                                    /*indexOffset=*/0,
-                                   /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()),
-                                   /*baseVertex=*/0,
-                                   /*baseInstance=*/0);
+                                   /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()));
 #else
     const auto uboIndex = ShaderClass::uniforms[0].index;
     for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
@@ -428,7 +426,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                        indexCount,
                                        MTL::IndexType::IndexTypeUInt16,
                                        indexRes->getMetalBuffer().get(),
-                                       /*indexOffset=*/0);
+                                       /*indexOffset=*/0,
+                                       /*instanceCount=*/1);
     }
 #endif
 

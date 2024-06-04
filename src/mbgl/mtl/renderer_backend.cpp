@@ -46,7 +46,7 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
       commandQueue(NS::TransferPtr(device->newCommandQueue())) {
     assert(device);
     assert(commandQueue);
-    instanceDrawingSupported = device->supportsFamily(MTL::GPUFamilyApple3);
+    baseVertexInstanceDrawingSupported = device->supportsFamily(MTL::GPUFamilyApple3);
 }
 
 RendererBackend::~RendererBackend() = default;

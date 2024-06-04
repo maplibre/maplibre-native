@@ -292,7 +292,7 @@ void Drawable::draw(PaintParameters& parameters) const {
             assert(static_cast<std::size_t>(maxIndex) < mlSegment.vertexLength);
 #endif
 
-            if (context.getBackend().isInstanceDrawingSupported()) {
+            if (context.getBackend().isBaseVertexInstanceDrawingSupported()) {
                 encoder->drawIndexedPrimitives(primitiveType,
                                                mlSegment.indexLength,
                                                indexType,
@@ -302,12 +302,13 @@ void Drawable::draw(PaintParameters& parameters) const {
                                                baseVertex,
                                                baseInstance);
             } else {
-                if (instanceCount == 1) {
-                    encoder->drawIndexedPrimitives(
-                        primitiveType, mlSegment.indexLength, indexType, indexBuffer, indexOffset);
-                } else {
-                    assert(!"Base Vertex Instance Drawing is only supported on MTLGPUFamilyApple3 and later.");
-                }
+                encoder->drawIndexedPrimitives(primitiveType,
+                                               mlSegment.indexLength,
+                                               indexType,
+                                               indexBuffer,
+                                               indexOffset, 
+                                               instanceCount);
+
             }
 
             context.renderingStats().numDrawCalls++;
