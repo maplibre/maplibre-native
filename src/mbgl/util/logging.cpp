@@ -65,7 +65,7 @@ void Log::useLogThread(bool enable) noexcept {
 
 void Log::useLogThread(bool enable, EventSeverity severity) noexcept {
     const auto index = underlying_type(severity);
-    if (0 <= index && index < SeverityCount) {
+    if (index < SeverityCount) {
         useThread[index] = enable;
     }
 }
