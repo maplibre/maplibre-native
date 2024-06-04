@@ -302,13 +302,8 @@ void Drawable::draw(PaintParameters& parameters) const {
                                                baseVertex,
                                                baseInstance);
             } else {
-                encoder->drawIndexedPrimitives(primitiveType,
-                                               mlSegment.indexLength,
-                                               indexType,
-                                               indexBuffer,
-                                               indexOffset, 
-                                               instanceCount);
-
+                encoder->drawIndexedPrimitives(
+                    primitiveType, mlSegment.indexLength, indexType, indexBuffer, indexOffset, instanceCount);
             }
 
             context.renderingStats().numDrawCalls++;
