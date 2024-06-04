@@ -31,7 +31,6 @@ public:
                 break;
             default:
                 assert(false);
-                return false;
         }
         return true;
     }

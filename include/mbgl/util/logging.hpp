@@ -38,7 +38,6 @@ public:
     Log();
     ~Log();
 
-    static bool useLogThread(EventSeverity) noexcept;
     static void useLogThread(bool enable) noexcept;
     static void useLogThread(bool enable, EventSeverity) noexcept;
 

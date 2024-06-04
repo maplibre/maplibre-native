@@ -56,11 +56,6 @@ Log* Log::get() noexcept {
     return &instance;
 }
 
-bool Log::useLogThread(EventSeverity severity) noexcept {
-    const auto index = underlying_type(severity);
-    return 0 <= index && index < SeverityCount && useThread[index];
-}
-
 void Log::useLogThread(bool enable) noexcept {
     useLogThread(enable, EventSeverity::Debug);
     useLogThread(enable, EventSeverity::Info);
