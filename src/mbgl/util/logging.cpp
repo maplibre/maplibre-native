@@ -15,7 +15,7 @@ namespace mbgl {
 namespace {
 
 std::unique_ptr<Log::Observer> currentObserver;
-static constexpr auto SeverityCount = underlying_type(EventSeverity::SeverityCount);
+constexpr auto SeverityCount = underlying_type(EventSeverity::SeverityCount);
 std::atomic<bool> useThread[SeverityCount] = {true, true, true, false};
 std::mutex mutex;
 
