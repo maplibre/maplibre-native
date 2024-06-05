@@ -4,8 +4,15 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-- Fixes crash that happened with some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)). 
+## 6.5.0
 
+- Allow uses to handle authorization for location services ([#2453](https://github.com/maplibre/maplibre-native/pull/2453)). See [`MLNMapview.shouldRequestAuthorizationToUseLocationServices`](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/mlnmapview/shouldrequestauthorizationtouselocationservices).
+- Fixed memory usage high in some cases ([#2442](https://github.com/maplibre/maplibre-native/pull/2442)).
+- Avoid processing raster tiles after destruction mailbox ([#2443](https://github.com/maplibre/maplibre-native/pull/2443)).
+- Annotation view recycling re-enabled ([#2454](https://github.com/maplibre/maplibre-native/pull/2454)). Fixes some issues with Annotations.
+- Increase the deferred cleanup timeout ([#2455](https://github.com/maplibre/maplibre-native/pull/2455)). Workaround for rare crash.
+- Fixes crash that happened with some PBF files ([#795](https://github.com/maplibre/maplibre-native/issues/795), [#2460](https://github.com/maplibre/maplibre-native/pull/2460)).
+- Allow using MapLibre Native on iPad Air 2. Note: tests your styles! iPad Air 2 has one of the oldest GPUs that support Metal ([#2470](https://github.com/maplibre/maplibre-native/pull/2470)).
 
 ## 6.4.2
 
