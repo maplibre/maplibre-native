@@ -7,7 +7,7 @@ namespace mbgl {
 
 class RenderAnnotationSource final : public RenderTileSource {
 public:
-    explicit RenderAnnotationSource(Immutable<AnnotationSource::Impl>, std::shared_ptr<Scheduler>);
+    explicit RenderAnnotationSource(Immutable<AnnotationSource::Impl>, const TaggedScheduler&);
 
     void update(Immutable<style::Source::Impl>,
                 const std::vector<Immutable<style::LayerProperties>>&,

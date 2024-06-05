@@ -109,7 +109,7 @@ public:
             GeometryCoordinates polyline;
             for (auto ipoint{0}; ipoint < numPoints; ++ipoint) {
                 polyline.emplace_back(ipoint * util::EXTENT / numPoints,
-                                      std::sin(ipoint * 2 * M_PI / numPoints) * util::EXTENT / numLines / 2.f);
+                                      static_cast<int16_t>(std::sin(ipoint * 2 * M_PI / numPoints) * util::EXTENT / numLines / 2.f));
             }
 
             for (auto index{0}; index < numLines; ++index) {

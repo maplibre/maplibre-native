@@ -90,10 +90,7 @@ TEST(Actor, DestructionBlocksOnSend) {
 
         ~TestScheduler() override { EXPECT_TRUE(waited.load()); }
 
-        std::size_t waitForEmpty(Milliseconds) override {
-            assert(false);
-            return 0;
-        }
+        void waitForEmpty(const void*) override { assert(false); }
 
         void schedule(std::function<void()>&&) final {
             promise.set_value();
@@ -101,6 +98,9 @@ TEST(Actor, DestructionBlocksOnSend) {
             std::this_thread::sleep_for(1ms);
             waited = true;
         }
+
+        void schedule(const void*, std::function<void()>&& fn) final { schedule(std::move(fn)); }
+
         mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
         mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};

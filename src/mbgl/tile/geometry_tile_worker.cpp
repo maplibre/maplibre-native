@@ -30,6 +30,7 @@ using namespace style;
 
 GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        ActorRef<GeometryTile> parent_,
+                                       const TaggedScheduler& scheduler_,
                                        OverscaledTileID id_,
                                        std::string sourceID_,
                                        const std::atomic<bool>& obsolete_,
@@ -38,6 +39,7 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        const bool showCollisionBoxes_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
+      scheduler(scheduler_),
       id(id_),
       sourceID(std::move(sourceID_)),
       obsolete(obsolete_),
@@ -46,7 +48,7 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
       showCollisionBoxes(showCollisionBoxes_) {}
 
 GeometryTileWorker::~GeometryTileWorker() {
-    Scheduler::GetBackground()->runOnRenderThread([renderData_{std::move(renderData)}]() {});
+    scheduler.runOnRenderThread([renderData_{std::move(renderData)}]() {});
 }
 
 /*

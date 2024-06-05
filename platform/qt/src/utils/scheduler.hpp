@@ -22,7 +22,7 @@ public:
     // mbgl::Scheduler implementation.
     void schedule(std::function<void()>&& function) final;
 
-    std::size_t waitForEmpty(std::chrono::milliseconds timeout) override;
+    void waitForEmpty(const void* tag = nullptr) override;
 
     mapbox::base::WeakPtr<mbgl::Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 

@@ -104,8 +104,8 @@ TEST(AsyncTask, RequestCoalescingMultithreaded) {
     unsigned count = 0, numThreads = 25;
     AsyncTask async([&count] { ++count; });
 
-    std::shared_ptr<Scheduler> retainer = Scheduler::GetBackground();
-    auto mailbox = std::make_shared<Mailbox>(*retainer);
+    TaggedScheduler retainer = {Scheduler::GetBackground(), &loop};
+    auto mailbox = std::make_shared<Mailbox>(retainer);
 
     TestWorker worker(&async);
     ActorRef<TestWorker> workerRef(worker, mailbox);
@@ -133,8 +133,8 @@ TEST(AsyncTask, ThreadSafety) {
 
     AsyncTask async([&count] { ++count; });
 
-    std::shared_ptr<Scheduler> retainer = Scheduler::GetBackground();
-    auto mailbox = std::make_shared<Mailbox>(*retainer);
+    TaggedScheduler retainer = {Scheduler::GetBackground(), &loop};
+    auto mailbox = std::make_shared<Mailbox>(retainer);
 
     TestWorker worker(&async);
     ActorRef<TestWorker> workerRef(worker, mailbox);

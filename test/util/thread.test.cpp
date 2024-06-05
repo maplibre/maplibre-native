@@ -343,7 +343,7 @@ TEST(Thread, PoolWait) {
         pool->schedule([&] { std::this_thread::sleep_for(Milliseconds(100)); });
     }
 
-    EXPECT_EQ(0, pool->waitForEmpty());
+    pool->waitForEmpty();
 }
 
 TEST(Thread, PoolWaitRecursiveAdd) {
@@ -358,7 +358,7 @@ TEST(Thread, PoolWaitRecursiveAdd) {
         std::this_thread::sleep_for(Milliseconds(10));
     });
 
-    EXPECT_EQ(0, pool->waitForEmpty());
+    pool->waitForEmpty();
 }
 
 TEST(Thread, PoolWaitAdd) {
@@ -385,25 +385,10 @@ TEST(Thread, PoolWaitAdd) {
     // more items would be added by the sequential task if not blocked
     pool->schedule([&] { std::this_thread::sleep_for(Milliseconds(100)); });
 
-    EXPECT_EQ(0, pool->waitForEmpty());
+    pool->waitForEmpty();
 
     addActive = false;
-    EXPECT_EQ(0, pool->waitForEmpty());
-}
-
-TEST(Thread, PoolWaitTimeout) {
-    auto pool = Scheduler::GetBackground();
-
-    std::mutex mutex;
-    {
-        std::lock_guard<std::mutex> outerLock(mutex);
-        pool->schedule([&] { std::lock_guard<std::mutex> innerLock(mutex); });
-
-        // should always time out
-        EXPECT_EQ(1, pool->waitForEmpty(Milliseconds(100)));
-    }
-
-    EXPECT_EQ(0, pool->waitForEmpty());
+    pool->waitForEmpty();
 }
 
 TEST(Thread, PoolWaitException) {
@@ -425,7 +410,7 @@ TEST(Thread, PoolWaitException) {
     }
 
     // Exceptions shouldn't cause deadlocks by, e.g., abandoning locks.
-    EXPECT_EQ(0, pool->waitForEmpty());
+    pool->waitForEmpty();
     EXPECT_EQ(threadCount, caught);
 }
 
@@ -434,8 +419,8 @@ TEST(Thread, WrongThread) {
     auto pool = Scheduler::GetBackground();
 
     // Asserts in debug builds, silently ignored in release.
-    pool->schedule([&] { EXPECT_EQ(0, pool->waitForEmpty()); });
+    pool->schedule([&] { pool->waitForEmpty(); });
 
-    EXPECT_EQ(0, pool->waitForEmpty());
+    pool->waitForEmpty();
 }
 #endif

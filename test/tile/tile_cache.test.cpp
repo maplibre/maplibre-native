@@ -45,7 +45,8 @@ public:
 
 TEST(TileCache, Smoke) {
     VectorTileTest test;
-    TileCache cache(Scheduler::GetBackground(), 1);
+    TaggedScheduler scheduler(Scheduler::GetBackground(), &test);
+    TileCache cache(scheduler, 1);
     const OverscaledTileID id(0, 0, 0);
     auto tile = std::make_unique<VectorTileMock>(id, "source", test.tileParameters, test.tileset);
 

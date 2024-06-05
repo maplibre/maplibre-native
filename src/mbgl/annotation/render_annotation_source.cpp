@@ -10,8 +10,8 @@ namespace mbgl {
 using namespace style;
 
 RenderAnnotationSource::RenderAnnotationSource(Immutable<AnnotationSource::Impl> impl_,
-                                               std::shared_ptr<Scheduler> threadPool_)
-    : RenderTileSource(std::move(impl_), std::move(threadPool_)) {
+                                               const TaggedScheduler& threadPool_)
+    : RenderTileSource(std::move(impl_), threadPool_) {
     assert(LayerManager::annotationsEnabled);
     tilePyramid.setObserver(this);
 }

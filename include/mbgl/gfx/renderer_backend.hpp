@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/util/util.hpp>
 
 #include <memory>
@@ -8,6 +9,7 @@
 namespace mbgl {
 
 class ProgramParameters;
+class Map;
 
 namespace gfx {
 
@@ -30,6 +32,9 @@ public:
     virtual ~RendererBackend();
     RendererBackend(const RendererBackend&) = delete;
     RendererBackend& operator=(const RendererBackend&) = delete;
+
+    // Return the background thread pool assigned to this backend
+    TaggedScheduler& getThreadPool() noexcept { return threadPool; }
 
     /// Returns the device's context.
     Context& getContext();
@@ -70,6 +75,7 @@ protected:
     std::unique_ptr<Context> context;
     const ContextMode contextMode;
     std::once_flag initialized;
+    TaggedScheduler threadPool;
 
     friend class BackendScope;
 };

@@ -21,7 +21,7 @@ using FramebufferID = uint32_t;
 
 class RendererBackend : public gfx::RendererBackend {
 public:
-    RendererBackend(gfx::ContextMode);
+    RendererBackend(gfx::ContextMode, mbgl::Map*);
     ~RendererBackend() override;
 
     /// Called prior to rendering to update the internally assumed MetalMetal  state.

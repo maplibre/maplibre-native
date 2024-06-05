@@ -67,11 +67,12 @@ public:
     // From Scheduler. Schedules by using callbacks to the
     // JVM to process the mailbox on the right thread.
     void schedule(std::function<void()>&& scheduled) override;
+    void schedule(const void*, std::function<void()>&& fn) override { schedule(std::move(fn)); };
+
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
     // Wait for the queue to be empty
-    // A timeout of zero results in an unbounded wait
-    std::size_t waitForEmpty(Milliseconds timeout) override;
+    void waitForEmpty(const void*) override;
 
     void requestRender();
 

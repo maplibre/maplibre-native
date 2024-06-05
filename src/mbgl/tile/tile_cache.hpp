@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/tile/tile.hpp>
 
@@ -9,12 +10,10 @@
 
 namespace mbgl {
 
-class Scheduler;
-
 class TileCache {
 public:
-    TileCache(std::shared_ptr<Scheduler> threadPool_, size_t size_ = 0)
-        : threadPool(std::move(threadPool_)),
+    TileCache(const TaggedScheduler& threadPool_, size_t size_ = 0)
+        : threadPool(threadPool_),
           size(size_) {}
 
     /// Change the maximum size of the cache.
@@ -38,7 +37,7 @@ public:
 private:
     std::map<OverscaledTileID, std::unique_ptr<Tile>> tiles;
     std::list<OverscaledTileID> orderedKeys;
-    std::shared_ptr<Scheduler> threadPool;
+    TaggedScheduler threadPool;
 
     size_t size;
 };

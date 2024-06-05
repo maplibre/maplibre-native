@@ -40,8 +40,8 @@
 namespace mbgl {
 namespace mtl {
 
-RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
-    : gfx::RendererBackend(contextMode_),
+RendererBackend::RendererBackend(const gfx::ContextMode contextMode_, mbgl::Map* map)
+    : gfx::RendererBackend(contextMode_, map),
       device(NS::TransferPtr(MTL::CreateSystemDefaultDevice())),
       commandQueue(NS::TransferPtr(device->newCommandQueue())) {
     assert(device);
@@ -52,7 +52,8 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
 RendererBackend::~RendererBackend() = default;
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
-    return std::make_unique<mtl::Context>(*this);
+    return std::make_unique<mtl::Context>(*this,
+        TaggedScheduler{Scheduler::GetBackground(), static_cast<const void*>(owner)});
 }
 
 PremultipliedImage RendererBackend::readFramebuffer(const Size& size) {

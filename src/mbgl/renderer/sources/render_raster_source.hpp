@@ -7,7 +7,7 @@ namespace mbgl {
 
 class RenderRasterSource final : public RenderTileSetSource {
 public:
-    explicit RenderRasterSource(Immutable<style::RasterSource::Impl>, std::shared_ptr<Scheduler>);
+    explicit RenderRasterSource(Immutable<style::RasterSource::Impl>, const TaggedScheduler&);
 
 private:
     void prepare(const SourcePrepareParameters&) final;

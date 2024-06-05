@@ -49,7 +49,7 @@ void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
     std::function<void()> func{[tile_{CaptureWrapper<Tile>{std::move(tile)}}]() {
     }};
 
-    threadPool->schedule(std::move(func));
+    threadPool.schedule(std::move(func));
 }
 
 void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {

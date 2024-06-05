@@ -111,7 +111,7 @@ public:
 
 } // namespace
 
-RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_, const std::optional<std::string>& localFontFamily_)
+RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_, TaggedScheduler& threadPool_, const std::optional<std::string>& localFontFamily_)
     : observer(&nullObserver()),
       glyphManager(std::make_unique<GlyphManager>(std::make_unique<LocalGlyphRasterizer>(localFontFamily_))),
       imageManager(std::make_unique<ImageManager>()),
@@ -122,7 +122,7 @@ RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_, const std::
       layerImpls(makeMutable<std::vector<Immutable<style::Layer::Impl>>>()),
       renderLight(makeMutable<Light::Impl>()),
       backgroundLayerAsColor(backgroundLayerAsColor_),
-      threadPool(Scheduler::GetBackground()) {
+      threadPool(threadPool_) {
     glyphManager->setObserver(this);
     imageManager->setObserver(this);
 }
@@ -142,9 +142,7 @@ RenderOrchestrator::~RenderOrchestrator() {
     // Wait for any deferred cleanup tasks to complete before releasing and potentially
     // destroying the scheduler.  Those cleanup tasks must not hold the final reference
     // to the scheduler because it cannot be destroyed from one of its own pool threads.
-    constexpr auto deferredCleanupTimeout = Milliseconds{10000};
-    [[maybe_unused]] const auto remaining = threadPool->waitForEmpty(deferredCleanupTimeout);
-    assert(remaining == 0);
+    threadPool.waitForEmpty();
 }
 
 void RenderOrchestrator::setObserver(RendererObserver* observer_) {
@@ -189,7 +187,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                         updateParameters->annotationManager,
                                         imageManager,
                                         glyphManager,
-                                        updateParameters->prefetchZoomDelta};
+                                        updateParameters->prefetchZoomDelta,
+                                        threadPool};
 
     glyphManager->setURL(updateParameters->glyphURL);
 

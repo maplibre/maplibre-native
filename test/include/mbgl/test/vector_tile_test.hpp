@@ -27,7 +27,7 @@ public:
 
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
 
-    const std::shared_ptr<Scheduler> threadPool = Scheduler::GetBackground();
+    TaggedScheduler threadPool;
 
     TileParameters tileParameters{1.0,
                                   MapDebugOptions(),
@@ -39,10 +39,13 @@ public:
                                   glyphManager,
                                   0};
 
+    VectorTileTest()
+        : threadPool(Scheduler::GetBackground(), this) {}
+
     ~VectorTileTest() {
         // Ensure that deferred releases are complete before cleaning up
-        EXPECT_EQ(0, loop.waitForEmpty(Milliseconds::zero()));
-        EXPECT_EQ(0, threadPool->waitForEmpty());
+        loop.waitForEmpty();
+        threadPool.waitForEmpty();
     }
 };
 
