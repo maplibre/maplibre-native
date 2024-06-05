@@ -765,7 +765,7 @@ void TransformState::constrain(double& scale_, double& x_, double& y_) const {
 }
 
 void TransformState::constrainCameraAndZoomToBounds(CameraOptions& camera, double& zoom) const {
-    if (getLatLngBounds() == LatLngBounds()){
+    if (getLatLngBounds() == LatLngBounds()) {
         return;
     }
 
@@ -774,7 +774,7 @@ void TransformState::constrainCameraAndZoomToBounds(CameraOptions& camera, doubl
     if (camera.center) {
         centerLatLng = camera.center.value();
     }
-    
+
     Point<double> anchorOffset{0, 0};
     double currentScale = getScale();
     double requestedScale = zoomScale(zoom);
@@ -786,10 +786,10 @@ void TransformState::constrainCameraAndZoomToBounds(CameraOptions& camera, doubl
         anchor.y = getSize().height - anchor.y;
         LatLng anchorLatLng = screenCoordinateToLatLng(anchor);
 
-        // The screenCoordinateToLatLng function requires the matrices inside the state to reflect 
+        // The screenCoordinateToLatLng function requires the matrices inside the state to reflect
         // the requested scale. So we create a copy and set the requested zoom before the conversion
         // This will give us the same result as the transition calculations
-        TransformState state{*this};        
+        TransformState state{*this};
         state.setLatLngZoom(getLatLng(), scaleZoom(requestedScale));
         LatLng screenLatLng = state.screenCoordinateToLatLng(anchor);
 
@@ -856,7 +856,7 @@ void TransformState::constrainCameraAndZoomToBounds(CameraOptions& camera, doubl
 
             // Since we changed the scale, we might display something outside the bounds.
             // When checking we need to take into consideration that we just changed the scale,
-            // since the resultX and minX were calculated with the requested scale, and not the scale we 
+            // since the resultX and minX were calculated with the requested scale, and not the scale we
             // just calculated to make sure we stay inside the bounds.
             if (resultX * maxScale - w2 < minX * maxScale) {
                 resultX = minX * maxScale + w2;

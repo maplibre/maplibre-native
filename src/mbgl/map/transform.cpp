@@ -93,14 +93,14 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
         return flyTo(camera, animation, true);
     }
 
-    double zoom = camera.zoom.value_or(getZoom());    
+    double zoom = camera.zoom.value_or(getZoom());
     state.constrainCameraAndZoomToBounds(camera, zoom);
 
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     LatLng startLatLng = getLatLng(LatLng::Unwrapped);
     const LatLng& unwrappedLatLng = camera.center.value_or(startLatLng);
     const LatLng& latLng = state.getLatLngBounds() != LatLngBounds() ? unwrappedLatLng : unwrappedLatLng.wrapped();
-    
+
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
 
@@ -180,7 +180,9 @@ void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions&
 
     Where applicable, local variable documentation begins with the associated
     variable or function in van Wijk (2003). */
-void Transform::flyTo(const CameraOptions& inputCamera, const AnimationOptions& animation, bool linearZoomInterpolation) {
+void Transform::flyTo(const CameraOptions& inputCamera,
+                      const AnimationOptions& animation,
+                      bool linearZoomInterpolation) {
     CameraOptions camera = inputCamera;
 
     double zoom = camera.zoom.value_or(getZoom());
@@ -188,7 +190,7 @@ void Transform::flyTo(const CameraOptions& inputCamera, const AnimationOptions& 
 
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     const LatLng& latLng = camera.center.value_or(getLatLng(LatLng::Unwrapped)).wrapped();
-    
+
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
 
