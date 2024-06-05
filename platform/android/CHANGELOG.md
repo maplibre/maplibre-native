@@ -6,7 +6,11 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### ✨ Features and improvements
 
-## 10.3.2-pre0
+## 10.3.2-pre2
+
+A minor fix for a bug introduced in 10.3.2-pre1 which caused symbols to disappear randomly.
+
+## 10.3.2-pre1
 
 A special release for a particular user experiencing rare crashes in the field only. See [#2423](https://github.com/maplibre/maplibre-native/pull/2423) for more information
 
