@@ -53,7 +53,7 @@ RendererBackend::~RendererBackend() = default;
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
     return std::make_unique<mtl::Context>(*this,
-        TaggedScheduler{Scheduler::GetBackground(), static_cast<const void*>(owner)});
+                                          TaggedScheduler{Scheduler::GetBackground(), static_cast<const void*>(owner)});
 }
 
 PremultipliedImage RendererBackend::readFramebuffer(const Size& size) {

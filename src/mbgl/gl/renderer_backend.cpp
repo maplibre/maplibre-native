@@ -19,7 +19,8 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_) {}
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
-    auto result = std::make_unique<gl::Context>(*this); // Tagged background thread pool will be owned by the RendererBackend
+    auto result = std::make_unique<gl::Context>(
+        *this); // Tagged background thread pool will be owned by the RendererBackend
     result->enableDebugging();
     result->initializeExtensions(std::bind(&RendererBackend::getExtensionFunctionPointer, this, std::placeholders::_1));
     return result;

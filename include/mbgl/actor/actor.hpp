@@ -62,7 +62,7 @@ public:
     template <class... Args>
     Actor(Scheduler& scheduler, Args&&... args)
         : target(scheduler, parent, std::forward<Args>(args)...) {}
-    
+
     template <class... Args>
     Actor(const TaggedScheduler& scheduler, Args&&... args)
         : retainer(scheduler.get()),

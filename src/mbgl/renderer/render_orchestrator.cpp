@@ -111,7 +111,9 @@ public:
 
 } // namespace
 
-RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_, TaggedScheduler& threadPool_, const std::optional<std::string>& localFontFamily_)
+RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_,
+                                       TaggedScheduler& threadPool_,
+                                       const std::optional<std::string>& localFontFamily_)
     : observer(&nullObserver()),
       glyphManager(std::make_unique<GlyphManager>(std::make_unique<LocalGlyphRasterizer>(localFontFamily_))),
       imageManager(std::make_unique<ImageManager>()),

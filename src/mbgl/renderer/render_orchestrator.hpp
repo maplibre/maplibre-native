@@ -56,7 +56,9 @@ using ImmutableLayer = Immutable<style::Layer::Impl>;
 
 class RenderOrchestrator final : public GlyphManagerObserver, public ImageManagerObserver, public RenderSourceObserver {
 public:
-    RenderOrchestrator(bool backgroundLayerAsColor_, TaggedScheduler& threadPool_, const std::optional<std::string>& localFontFamily_);
+    RenderOrchestrator(bool backgroundLayerAsColor_,
+                       TaggedScheduler& threadPool_,
+                       const std::optional<std::string>& localFontFamily_);
     ~RenderOrchestrator() override;
 
     void markContextLost() { contextLost = true; };

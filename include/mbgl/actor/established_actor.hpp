@@ -33,7 +33,7 @@ public:
               class... Args,
               typename std::enable_if_t<std::is_constructible_v<U, Args...> ||
                                         std::is_constructible_v<U, ActorRef<U>, Args...>>* = nullptr>
-        EstablishedActor(Scheduler& scheduler, AspiringActor<Object>& parent_, Args&&... args)
+    EstablishedActor(Scheduler& scheduler, AspiringActor<Object>& parent_, Args&&... args)
         : parent(parent_) {
         emplaceObject(std::forward<Args>(args)...);
         parent.mailbox->open(scheduler);
