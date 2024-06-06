@@ -29,18 +29,20 @@ public:
 
     TaggedScheduler threadPool;
 
-    TileParameters tileParameters{1.0,
-                                  MapDebugOptions(),
-                                  transformState,
-                                  fileSource,
-                                  MapMode::Continuous,
-                                  annotationManager.makeWeakPtr(),
-                                  imageManager,
-                                  glyphManager,
-                                  0};
+    TileParameters tileParameters;
 
     VectorTileTest()
-        : threadPool(Scheduler::GetBackground(), this) {}
+        : threadPool(Scheduler::GetBackground(), this),
+          tileParameters{1.0,
+                         MapDebugOptions(),
+                         transformState,
+                         fileSource,
+                         MapMode::Continuous,
+                         annotationManager.makeWeakPtr(),
+                         imageManager,
+                         glyphManager,
+                         0,
+                         threadPool} {}
 
     ~VectorTileTest() {
         // Ensure that deferred releases are complete before cleaning up
