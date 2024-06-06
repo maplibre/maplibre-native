@@ -42,7 +42,7 @@ private:
 
     TileLoader<RasterTile> loader;
 
-    const std::shared_ptr<Scheduler> threadPool;
+    TaggedScheduler threadPool;
     std::shared_ptr<Mailbox> mailbox;
     Actor<RasterTileWorker> worker;
 
