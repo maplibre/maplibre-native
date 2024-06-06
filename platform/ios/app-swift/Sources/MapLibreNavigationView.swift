@@ -18,7 +18,7 @@ struct MapLibreNavigationView: View {
                     BlockingGesturesExample()
                 }
                 NavigationLink("MaximumBoundsExample") {
-                    BlockingGesturesExample()
+                    MaximumBoundsExample()
                 }
             }
         }
