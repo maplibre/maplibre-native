@@ -6,7 +6,8 @@
 
 ### 🐞 Bug fixes
 
-- Fixes crash that happened with some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)). 
+- Fixes crash that happened with some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)).
+- Fix blinking issue caused by `flyTo` transition when start and end zoom are the same ([#2477](https://github.com/maplibre/maplibre-native/issues/2477)).
 
 ## 11.0.0
 
