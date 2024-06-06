@@ -29,16 +29,19 @@ public:
     AnnotationManager annotationManager{style};
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
+    TileParameters tileParameters;
 
-    TileParameters tileParameters{1.0,
-                                  MapDebugOptions(),
-                                  transformState,
-                                  fileSource,
-                                  MapMode::Continuous,
-                                  annotationManager.makeWeakPtr(),
-                                  imageManager,
-                                  glyphManager,
-                                  0};
+    CustomTileTest()
+        : tileParameters{1.0,
+                         MapDebugOptions(),
+                         transformState,
+                         fileSource,
+                         MapMode::Continuous,
+                         annotationManager.makeWeakPtr(),
+                         imageManager,
+                         glyphManager,
+                         0,
+                         {Scheduler::GetBackground(), static_cast<const void*>(this)}} {}
 };
 
 TEST(CustomGeometryTile, InvokeFetchTile) {
