@@ -764,25 +764,24 @@ void TransformState::constrain(double& scale_, double& x_, double& y_) const {
     }
 }
 
-void TransformState::constrainCameraAndZoomToBounds(CameraOptions& camera, double& zoom) const {
+void TransformState::constrainCameraAndZoomToBounds(CameraOptions& requestedCamera, double& requestedZoom) const {
     if (getLatLngBounds() == LatLngBounds()) {
         return;
     }
 
     LatLng centerLatLng = getLatLng();
 
-    if (camera.center) {
-        centerLatLng = camera.center.value();
+    if (requestedCamera.center) {
+        centerLatLng = requestedCamera.center.value();
     }
 
     Point<double> anchorOffset{0, 0};
-    double currentScale = getScale();
-    double requestedScale = zoomScale(zoom);
+    double requestedScale = zoomScale(requestedZoom);
 
     // Since the transition calculations will include any specified anchor in the result
     // we need to do the same when testing if the requested center and zoom is outside the bounds or not
-    if (camera.anchor) {
-        ScreenCoordinate anchor = camera.anchor.value();
+    if (requestedCamera.anchor) {
+        ScreenCoordinate anchor = requestedCamera.anchor.value();
         anchor.y = getSize().height - anchor.y;
         LatLng anchorLatLng = screenCoordinateToLatLng(anchor);
 
@@ -798,9 +797,9 @@ void TransformState::constrainCameraAndZoomToBounds(CameraOptions& camera, doubl
         anchorOffset = latLngCoord - anchorCoord;
     }
 
-    mbgl::LatLngBounds bounds = getLatLngBounds();
-    mbgl::ScreenCoordinate neBounds = Projection::project(bounds.northeast(), requestedScale);
-    mbgl::ScreenCoordinate swBounds = Projection::project(bounds.southwest(), requestedScale);
+    mbgl::LatLngBounds currentBounds = getLatLngBounds();
+    mbgl::ScreenCoordinate neBounds = Projection::project(currentBounds.northeast(), requestedScale);
+    mbgl::ScreenCoordinate swBounds = Projection::project(currentBounds.southwest(), requestedScale);
     mbgl::ScreenCoordinate center = Projection::project(centerLatLng, requestedScale);
     mbgl::ScreenCoordinate currentCenter = Projection::project(getLatLng(), requestedScale);
 
@@ -847,8 +846,8 @@ void TransformState::constrainCameraAndZoomToBounds(CameraOptions& camera, doubl
     }
 
     double maxScale = scaleX > scaleY ? scaleX : scaleY;
-    if (maxScale > 1 && camera.anchor) {
-        zoom += scaleZoom(maxScale);
+    if (maxScale > 1 && requestedCamera.anchor) {
+        requestedZoom += scaleZoom(maxScale);
 
         if (scaleY > scaleX) {
             // If we scaled the y direction we want the x position to be the same as the current x position
@@ -879,8 +878,8 @@ void TransformState::constrainCameraAndZoomToBounds(CameraOptions& camera, doubl
 
     if (resultX != startX || resultY != startY) {
         // If we made any changes just drop any anchor point
-        camera.anchor.reset();
-        camera.center = std::optional(Projection::unproject({resultX, resultY}, requestedScale));
+        requestedCamera.anchor.reset();
+        requestedCamera.center = std::optional(Projection::unproject({resultX, resultY}, requestedScale));
     }
 }
 
