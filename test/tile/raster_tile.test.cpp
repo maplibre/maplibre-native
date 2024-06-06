@@ -24,16 +24,19 @@ public:
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
+    TileParameters tileParameters;
 
-    TileParameters tileParameters{1.0,
-                                  MapDebugOptions(),
-                                  transformState,
-                                  fileSource,
-                                  MapMode::Continuous,
-                                  annotationManager.makeWeakPtr(),
-                                  imageManager,
-                                  glyphManager,
-                                  0};
+    RasterTileTest()
+        : tileParameters{1.0,
+                         MapDebugOptions(),
+                         transformState,
+                         fileSource,
+                         MapMode::Continuous,
+                         annotationManager.makeWeakPtr(),
+                         imageManager,
+                         glyphManager,
+                         0,
+                         {Scheduler::GetBackground(), static_cast<const void*>(this)}} {}
 };
 
 TEST(RasterTile, setError) {
