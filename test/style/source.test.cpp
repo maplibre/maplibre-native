@@ -66,7 +66,7 @@ public:
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     TaggedScheduler threadPool;
 
-    TileParameters tileParameters(const void* tag, MapMode mapMode = MapMode::Continuous) {
+    TileParameters tileParameters(MapMode mapMode = MapMode::Continuous) {
         return {1.0,
                 MapDebugOptions(),
                 transformState,
