@@ -3858,6 +3858,7 @@ static void *windowScreenContext = &windowScreenContext;
     mbgl::BoundOptions newBounds = mbgl::BoundOptions().withLatLngBounds(mbgl::LatLngBounds::hull(sw, ne));
 
     self.mbglMap.setBounds(newBounds);
+    self.mbglMap.setConstrainMode(mbgl::ConstrainMode::CameraAndZoomToBounds);
 }
 
 - (MLNCoordinateBounds)maximumBounds
