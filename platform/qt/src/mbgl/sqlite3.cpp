@@ -116,7 +116,7 @@ Database Database::open(const std::string& filename, int flags) {
     if (std::holds_alternative<Exception>(result)) {
         throw std::get<Exception>(result);
     } else {
-        return std::move(result.get<Database>());
+        return std::move(std::get<Database>(result));
     }
 }
 
