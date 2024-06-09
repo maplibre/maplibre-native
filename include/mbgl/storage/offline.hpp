@@ -3,13 +3,13 @@
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/util/range.hpp>
-#include <mbgl/util/variant.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/storage/response.hpp>
 
 #include <string>
 #include <vector>
 #include <functional>
+#include <variant>
 
 namespace mbgl {
 
@@ -71,7 +71,7 @@ public:
 /*
  * The offline region definition types supported
  */
-using OfflineRegionDefinition = variant<OfflineTilePyramidRegionDefinition, OfflineGeometryRegionDefinition>;
+using OfflineRegionDefinition = std::variant<OfflineTilePyramidRegionDefinition, OfflineGeometryRegionDefinition>;
 
 /*
  * The encoded format is private.
