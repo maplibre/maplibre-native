@@ -181,7 +181,7 @@ public class BitmapUtils {
   @Nullable
   public static Drawable getDrawableFromRes(@NonNull Context context, @DrawableRes int drawableRes,
                                             @Nullable @ColorInt Integer tintColor) {
-    Drawable drawable = ContextCompat.getDrawable(context,drawableRes);
+    Drawable drawable = ContextCompat.getDrawable(context, drawableRes);
     if (drawable == null) {
       return null;
     }
