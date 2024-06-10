@@ -15,6 +15,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
+import androidx.core.content.ContextCompat;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -180,7 +181,7 @@ public class BitmapUtils {
   @Nullable
   public static Drawable getDrawableFromRes(@NonNull Context context, @DrawableRes int drawableRes,
                                             @Nullable @ColorInt Integer tintColor) {
-    Drawable drawable = context.getDrawable(drawableRes);
+    Drawable drawable = ContextCompat.getDrawable(context,drawableRes);
     if (drawable == null) {
       return null;
     }
@@ -189,12 +190,8 @@ public class BitmapUtils {
       return drawable;
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       drawable.setTint(tintColor);
-    } else {
-      drawable.mutate().setColorFilter(tintColor, PorterDuff.Mode.SRC_IN);
-    }
-    return drawable;
+      return drawable;
   }
 
   /**
