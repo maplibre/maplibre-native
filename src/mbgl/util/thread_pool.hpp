@@ -48,6 +48,7 @@ protected:
     std::mutex workerMutex;
     std::mutex taggedQueueLock;
     util::ThreadLocal<ThreadedSchedulerBase> owningThreadPool;
+    std::atomic<size_t> taskCount{0};
     bool terminated{false};
 
     // Task queues bucketed by tag address

@@ -33,10 +33,9 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
 
         owningThreadPool.set(this);
 
-        bool didWork = true;
         while (true) {
             std::unique_lock<std::mutex> conditionLock(workerMutex);
-            if (!terminated && !didWork) {
+            if (!terminated && taskCount == 0) {
                 cvAvailable.wait(conditionLock);
             }
 
@@ -48,7 +47,6 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
             // Let other threads run
             conditionLock.unlock();
 
-            didWork = false;
             std::vector<std::shared_ptr<Queue>> pending;
             {
                 // 1. Gather buckets for us to visit this iteration
@@ -70,13 +68,11 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                     if (!tasklet) continue;
                 }
 
+                assert(taskCount > 0);
                 q->runningCount++;
+                taskCount--;
 
                 try {
-                    // Indicate some processing was done this iteration. We'll try and do more work
-                    // on the following loop until we run out of work, at which point we wait.
-                    didWork = true;
-
                     tasklet();
                     tasklet = {}; // destroy the function and release its captures before unblocking `waitForEmpty`
 
@@ -131,6 +127,7 @@ void ThreadedSchedulerBase::schedule(const void* tag, std::function<void()>&& fn
     {
         std::lock_guard<std::mutex> lock(q->lock);
         q->queue.push(std::move(fn));
+        taskCount++;
     }
 
     cvAvailable.notify_one();
