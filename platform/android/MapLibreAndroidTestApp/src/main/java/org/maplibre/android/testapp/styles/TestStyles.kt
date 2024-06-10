@@ -12,7 +12,7 @@ object TestStyles {
             val style = Style.getPredefinedStyle(name)
             return style
         } catch (e: Exception) {
-            return AMERICANA
+            return VERSATILES
         }
     }
 }
