@@ -22,21 +22,21 @@ struct LayerWrapper {
  This macro should be used at the beginning of any public-facing instance method
  of `MLNStyleLayer` and its subclasses. For private methods, an assertion is more appropriate.
  */
-#define MLNAssertStyleLayerIsValid()                                                              \
-  do {                                                                                            \
-    if (!self.rawLayer) {                                                                         \
-      [NSException raise:MLNInvalidStyleLayerException                                            \
-                  format:@"Either this layer got invalidated after the style change or "          \
-                         @"-[MLNStyle removeLayer:] has been called "                             \
-                         @"with this instance but another style layer instance was added with "   \
-                         @"the same identifer. It is an "                                         \
-                         @"error to send any message to this layer since it cannot be recovered " \
-                         @"after removal due to the "                                             \
-                         @"identifier collision. Use unique identifiers for all layer instances " \
-                         @"including layers of "                                                  \
-                         @"different types."];                                                    \
-    }                                                                                             \
-  } while (NO);
+#define MLNAssertStyleLayerIsValid()                                                           \
+  do {                                                                                         \
+    if (!self.rawLayer) {                                                                      \
+      [NSException raise:MLNInvalidStyleLayerException                                         \
+                  format:@"Either this layer got invalidated after the style change or "       \
+                         @"-[MLNStyle removeLayer:] has been called with this instance but "   \
+                         @"another style layer instance was added with the same identifer. "   \
+                         @"It is an error to send any message to this layer since  it cannot " \
+                         @"be recovered after removal due to the identifier collision. "       \
+                         @"Use unique identifiers for all layer instances including layers "   \
+                         @"of different types."];                                              \
+    }
+}
+}
+while (NO);
 
 @class MLNStyle;
 
