@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 
-#include <mbgl/util/color.hpp>
 #include <mbgl/style/property_value.hpp>
+#include <mbgl/util/color.hpp>
 
 @interface UIColor (MLNAdditions)
 

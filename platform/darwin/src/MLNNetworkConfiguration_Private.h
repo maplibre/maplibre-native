@@ -1,20 +1,21 @@
-#import "MLNNetworkConfiguration.h"
 #include <mbgl/interface/native_apple_interface.h>
+#import "MLNNetworkConfiguration.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @class MLNNetworkConfiguration;
 @protocol MLNNetworkConfigurationMetricsDelegate <NSObject>
 
-- (void)networkConfiguration:(MLNNetworkConfiguration *)networkConfiguration didGenerateMetricEvent:(NSDictionary *)metricEvent;
+- (void)networkConfiguration:(MLNNetworkConfiguration *)networkConfiguration
+      didGenerateMetricEvent:(NSDictionary *)metricEvent;
 
 @end
 
-extern NSString * const kMLNDownloadPerformanceEvent;
+extern NSString *const kMLNDownloadPerformanceEvent;
 
 @interface MLNNetworkConfiguration (Private)
 
-@property (nonatomic, strong) NSMutableDictionary<NSString*, NSDictionary*> *events;
+@property (nonatomic, strong) NSMutableDictionary<NSString *, NSDictionary *> *events;
 @property (nonatomic, weak) id<MLNNetworkConfigurationMetricsDelegate> metricsDelegate;
 
 - (void)resetNativeNetworkManagerDelegate;

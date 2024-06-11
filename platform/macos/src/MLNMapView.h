@@ -3,9 +3,9 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import "MLNFoundation.h"
-#import "MLNTypes.h"
 #import "MLNGeometry.h"
 #import "MLNStyle.h"
+#import "MLNTypes.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -50,9 +50,9 @@ NS_ASSUME_NONNULL_BEGIN
  Adding your own gesture recognizer to `MLNMapView` will block the corresponding
  gesture recognizer built into `MLNMapView`. To avoid conflicts, define which
  gesture recognizer takes precedence. For example, you can subclass
- `NSClickGestureRecognizer` and override `-[NSGestureRecognizer shouldRequireFailureOfGestureRecognizer:]`,
- so that your subclass will be invoked only if the default `MLNMapView` click
- gesture recognizer fails:
+ `NSClickGestureRecognizer` and override `-[NSGestureRecognizer
+ shouldRequireFailureOfGestureRecognizer:]`, so that your subclass will be invoked only if the
+ default `MLNMapView` click gesture recognizer fails:
 
  ```swift
  class MapClickGestureRecognizer: NSClickGestureRecognizer {
@@ -65,8 +65,7 @@ NS_ASSUME_NONNULL_BEGIN
  @note You are responsible for getting permission to use the map data and for
     ensuring that your use adheres to the relevant terms of use.
  */
-MLN_EXPORT IB_DESIGNABLE
-@interface MLNMapView : NSView <MLNStylable>
+MLN_EXPORT IB_DESIGNABLE @interface MLNMapView : NSView<MLNStylable>
 
 // MARK: Creating Instances
 
@@ -101,7 +100,7 @@ MLN_EXPORT IB_DESIGNABLE
  annotations displayed on the map, such as the styles to apply to individual
  annotations.
  */
-@property (nonatomic, weak, nullable) IBOutlet id <MLNMapViewDelegate> delegate;
+@property (nonatomic, weak, nullable) IBOutlet id<MLNMapViewDelegate> delegate;
 
 // MARK: Configuring the Map’s Appearance
 
@@ -189,16 +188,15 @@ MLN_EXPORT IB_DESIGNABLE
 
 /**
  A Boolean value indicating whether the map should prefetch tiles.
- 
+
  When this property is set to `YES`, the map view prefetches tiles designed for
  a low zoom level and displays them until receiving more detailed tiles for the
  current zoom level. The prefetched tiles typically contain simplified versions
  of each shape, improving the map view’s perceived performance.
- 
+
  The default value of this property is `YES`.
  */
 @property (nonatomic, assign) BOOL prefetchesTiles;
-
 
 // MARK: Manipulating the Viewpoint
 
@@ -356,26 +354,32 @@ MLN_EXPORT IB_DESIGNABLE
     is `0`, this parameter is ignored.
  @param completion The block to execute after the animation finishes.
  */
-- (void)setCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function completionHandler:(nullable void (^)(void))completion;
+- (void)setCamera:(MLNMapCamera *)camera
+               withDuration:(NSTimeInterval)duration
+    animationTimingFunction:(nullable CAMediaTimingFunction *)function
+          completionHandler:(nullable void (^)(void))completion;
 
- /**
- Moves the viewpoint to a different location with respect to the map with an
- optional transition duration and timing function, and optionally some additional
- padding on each side.
- 
- @param camera The new viewpoint.
- @param duration The amount of time, measured in seconds, that the transition
- animation should take. Specify `0` to jump to the new viewpoint
- instantaneously.
- @param function A timing function used for the animation. Set this parameter to
- `nil` for a transition that matches most system animations. If the duration
- is `0`, this parameter is ignored.
- @param edgePadding The minimum padding (in screen points) that would be visible
- around the returned camera object if it were set as the receiver’s camera.
-  @param completion The block to execute after the animation finishes.
- */
-- (void)setCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration animationTimingFunction:(nullable CAMediaTimingFunction *)function edgePadding:(NSEdgeInsets)edgePadding completionHandler:(nullable void (^)(void))completion;
+/**
+Moves the viewpoint to a different location with respect to the map with an
+optional transition duration and timing function, and optionally some additional
+padding on each side.
 
+@param camera The new viewpoint.
+@param duration The amount of time, measured in seconds, that the transition
+animation should take. Specify `0` to jump to the new viewpoint
+instantaneously.
+@param function A timing function used for the animation. Set this parameter to
+`nil` for a transition that matches most system animations. If the duration
+is `0`, this parameter is ignored.
+@param edgePadding The minimum padding (in screen points) that would be visible
+around the returned camera object if it were set as the receiver’s camera.
+ @param completion The block to execute after the animation finishes.
+*/
+- (void)setCamera:(MLNMapCamera *)camera
+               withDuration:(NSTimeInterval)duration
+    animationTimingFunction:(nullable CAMediaTimingFunction *)function
+                edgePadding:(NSEdgeInsets)edgePadding
+          completionHandler:(nullable void (^)(void))completion;
 
 /**
  Moves the viewpoint to a different location using a transition animation that
@@ -404,7 +408,9 @@ MLN_EXPORT IB_DESIGNABLE
     is based on the length of the flight path.
  @param completion The block to execute after the animation finishes.
  */
-- (void)flyToCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion;
+- (void)flyToCamera:(MLNMapCamera *)camera
+         withDuration:(NSTimeInterval)duration
+    completionHandler:(nullable void (^)(void))completion;
 
 /**
  Moves the viewpoint to a different location using a transition animation that
@@ -424,7 +430,10 @@ MLN_EXPORT IB_DESIGNABLE
     `-setCamera:animated:` would have a midpoint at a higher altitude.
  @param completion The block to execute after the animation finishes.
  */
-- (void)flyToCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration peakAltitude:(CLLocationDistance)peakAltitude completionHandler:(nullable void (^)(void))completion;
+- (void)flyToCamera:(MLNMapCamera *)camera
+         withDuration:(NSTimeInterval)duration
+         peakAltitude:(CLLocationDistance)peakAltitude
+    completionHandler:(nullable void (^)(void))completion;
 
 /**
  The geographic coordinate bounds visible in the receiver’s viewport.
@@ -432,7 +441,7 @@ MLN_EXPORT IB_DESIGNABLE
  Changing the value of this property updates the receiver immediately. If you
  want to animate the change, use the `-setVisibleCoordinateBounds:animated:`
  method instead.
- 
+
  If a longitude is less than −180 degrees or greater than 180 degrees, the
  visible bounds straddles the antimeridian or international date line. For
  example, if both Tokyo and San Francisco are visible, the visible bounds might
@@ -443,7 +452,7 @@ MLN_EXPORT IB_DESIGNABLE
 /**
  Changes the receiver’s viewport to fit the given coordinate bounds, optionally
  animating the change.
- 
+
  To bring both sides of the antimeridian or international date line into view,
  specify some longitudes less than −180 degrees or greater than 180 degrees. For
  example, to show both Tokyo and San Francisco simultaneously, you could set the
@@ -463,7 +472,7 @@ MLN_EXPORT IB_DESIGNABLE
  specify some longitudes less than −180 degrees or greater than 180 degrees. For
  example, to show both Tokyo and San Francisco simultaneously, you could set the
  visible bounds to extend from (35.68476, −220.24257) to (37.78428, −122.41310).
- 
+
  To specify a completion handler to execute after the animation finishes, use
  the `-setVisibleCoordinateBounds:edgePadding:animated:completionHandler:` method.
 
@@ -473,7 +482,9 @@ MLN_EXPORT IB_DESIGNABLE
  @param animated Specify `YES` to animate the change by smoothly scrolling and
     zooming or `NO` to immediately display the given bounds.
  */
-- (void)setVisibleCoordinateBounds:(MLNCoordinateBounds)bounds edgePadding:(NSEdgeInsets)insets animated:(BOOL)animated;
+- (void)setVisibleCoordinateBounds:(MLNCoordinateBounds)bounds
+                       edgePadding:(NSEdgeInsets)insets
+                          animated:(BOOL)animated;
 
 /**
  Changes the receiver’s viewport to fit the given coordinate bounds with some
@@ -491,7 +502,10 @@ MLN_EXPORT IB_DESIGNABLE
     zooming or `NO` to immediately display the given bounds.
  @param completion The block executed after the animation finishes.
  */
-- (void)setVisibleCoordinateBounds:(MLNCoordinateBounds)bounds edgePadding:(NSEdgeInsets)insets animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
+- (void)setVisibleCoordinateBounds:(MLNCoordinateBounds)bounds
+                       edgePadding:(NSEdgeInsets)insets
+                          animated:(BOOL)animated
+                 completionHandler:(nullable void (^)(void))completion;
 
 /**
  Sets the visible region so that the map displays the specified annotations.
@@ -505,7 +519,7 @@ MLN_EXPORT IB_DESIGNABLE
  @param animated `YES` if you want the map region change to be animated, or `NO`
  if you want the map to display the new region immediately without animations.
  */
-- (void)showAnnotations:(NSArray<id <MLNAnnotation>> *)annotations animated:(BOOL)animated;
+- (void)showAnnotations:(NSArray<id<MLNAnnotation>> *)annotations animated:(BOOL)animated;
 
 /**
  Sets the visible region so that the map displays the specified annotations with
@@ -513,7 +527,7 @@ MLN_EXPORT IB_DESIGNABLE
 
  Calling this method updates the value in the `visibleCoordinateBounds` property
  and potentially other properties to reflect the new map region.
- 
+
  To specify a completion handler to execute after the animation finishes, use
  the `-showAnnotations:edgePadding:animated:completionHandler:` method.
 
@@ -523,7 +537,9 @@ MLN_EXPORT IB_DESIGNABLE
  @param animated `YES` if you want the map region change to be animated, or `NO`
  if you want the map to display the new region immediately without animations.
  */
-- (void)showAnnotations:(NSArray<id <MLNAnnotation>> *)annotations edgePadding:(NSEdgeInsets)insets animated:(BOOL)animated;
+- (void)showAnnotations:(NSArray<id<MLNAnnotation>> *)annotations
+            edgePadding:(NSEdgeInsets)insets
+               animated:(BOOL)animated;
 
 /**
  Sets the visible region so that the map displays the specified annotations with
@@ -540,7 +556,10 @@ MLN_EXPORT IB_DESIGNABLE
     if you want the map to display the new region immediately without animations.
  @param completion The block executed after the animation finishes.
  */
-- (void)showAnnotations:(NSArray<id <MLNAnnotation>> *)annotations edgePadding:(NSEdgeInsets)insets animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
+- (void)showAnnotations:(NSArray<id<MLNAnnotation>> *)annotations
+            edgePadding:(NSEdgeInsets)insets
+               animated:(BOOL)animated
+      completionHandler:(nullable void (^)(void))completion;
 
 /**
  Returns the camera that best fits the given coordinate bounds.
@@ -565,13 +584,14 @@ MLN_EXPORT IB_DESIGNABLE
     including the entire coordinate bounds. The camera object uses the current
     direction and pitch.
  */
-- (MLNMapCamera *)cameraThatFitsCoordinateBounds:(MLNCoordinateBounds)bounds edgePadding:(NSEdgeInsets)insets;
+- (MLNMapCamera *)cameraThatFitsCoordinateBounds:(MLNCoordinateBounds)bounds
+                                     edgePadding:(NSEdgeInsets)insets;
 
 /**
  Returns the camera that best fits the given coordinate bounds with some
  additional padding on each side, matching an existing camera as much as
  possible.
- 
+
  @param camera The camera that the return camera should adhere to. All values
     on this camera will be manipulated except for pitch and direction.
  @param bounds The coordinate bounds to fit to the receiver’s viewport.
@@ -582,12 +602,14 @@ MLN_EXPORT IB_DESIGNABLE
     including the entire coordinate bounds. The initial camera's pitch and
     direction will be honored.
  */
-- (MLNMapCamera *)camera:(MLNMapCamera *)camera fittingCoordinateBounds:(MLNCoordinateBounds)bounds edgePadding:(NSEdgeInsets)insets;
+- (MLNMapCamera *)camera:(MLNMapCamera *)camera
+    fittingCoordinateBounds:(MLNCoordinateBounds)bounds
+                edgePadding:(NSEdgeInsets)insets;
 
 /**
  Returns the camera that best fits the given shape with some additional padding
  on each side, matching an existing camera as much as possible.
- 
+
  @param camera The camera that the return camera should adhere to. All values
     on this camera will be manipulated except for pitch and direction.
  @param shape The shape to fit to the receiver’s viewport.
@@ -597,7 +619,9 @@ MLN_EXPORT IB_DESIGNABLE
     (close to the ground) as possible while still including the entire shape.
     The initial camera's pitch and direction will be honored.
  */
-- (MLNMapCamera *)camera:(MLNMapCamera *)camera fittingShape:(MLNShape *)shape edgePadding:(NSEdgeInsets)insets;
+- (MLNMapCamera *)camera:(MLNMapCamera *)camera
+            fittingShape:(MLNShape *)shape
+             edgePadding:(NSEdgeInsets)insets;
 
 /**
  Returns the camera that best fits the given shape with some additional padding
@@ -612,7 +636,9 @@ MLN_EXPORT IB_DESIGNABLE
     (close to the ground) as possible while still including the entire shape.
     The camera object uses the current pitch.
  */
-- (MLNMapCamera *)cameraThatFitsShape:(MLNShape *)shape direction:(CLLocationDirection)direction edgePadding:(NSEdgeInsets)insets;
+- (MLNMapCamera *)cameraThatFitsShape:(MLNShape *)shape
+                            direction:(CLLocationDirection)direction
+                          edgePadding:(NSEdgeInsets)insets;
 
 /**
  A Boolean value indicating whether the receiver automatically adjusts its
@@ -659,7 +685,7 @@ MLN_EXPORT IB_DESIGNABLE
 
  When the value of the `automaticallyAdjustsContentInsets` property is `YES`,
  the value of this property may be overridden at any time.
- 
+
  To specify a completion handler to execute after the animation finishes, use
  the `-setContentInsets:animated:completionHandler:` method.
 
@@ -668,13 +694,15 @@ MLN_EXPORT IB_DESIGNABLE
     the content insets or `NO` if you want the map to inset the content
     immediately.
  */
-- (void)setContentInsets:(NSEdgeInsets)contentInsets animated:(BOOL)animated __attribute__((deprecated("Use `-setContentInsets:animated:completionHandler:` instead.")));
+- (void)setContentInsets:(NSEdgeInsets)contentInsets
+                animated:(BOOL)animated
+    __attribute__((deprecated("Use `-setContentInsets:animated:completionHandler:` instead.")));
 
 /**
  Sets the distance from the edges of the map view’s frame to the edges of the
  map view’s logical viewport with an optional transition animation and
  completion handler.
- 
+
  When the value of this property is equal to `NSEdgeInsetsZero`, viewport
  properties such as `centerCoordinate` assume a viewport that matches the map
  view’s frame. Otherwise, those properties are inset, excluding part of the
@@ -683,14 +711,16 @@ MLN_EXPORT IB_DESIGNABLE
 
  When the value of the `automaticallyAdjustsContentInsets` property is `YES`,
  the value of this property may be overridden at any time.
- 
+
  @param contentInsets The new values to inset the content by.
  @param animated Specify `YES` if you want the map view to animate the change to
     the content insets or `NO` if you want the map to inset the content
     immediately.
  @param completion The block executed after the animation finishes.
  */
-- (void)setContentInsets:(NSEdgeInsets)contentInsets animated:(BOOL)animated completionHandler:(nullable void (^)(void))completion;
+- (void)setContentInsets:(NSEdgeInsets)contentInsets
+                animated:(BOOL)animated
+       completionHandler:(nullable void (^)(void))completion;
 
 // MARK: Configuring How the User Interacts with the Map
 
@@ -761,7 +791,7 @@ MLN_EXPORT IB_DESIGNABLE
  annotations are associated with the map view, the value of this property is
  `nil`.
  */
-@property (nonatomic, readonly, nullable) NSArray<id <MLNAnnotation>> *annotations;
+@property (nonatomic, readonly, nullable) NSArray<id<MLNAnnotation>> *annotations;
 
 /**
  Adds an annotation to the map view.
@@ -776,7 +806,7 @@ MLN_EXPORT IB_DESIGNABLE
     must conform to the `MLNAnnotation` protocol. The map view retains the
     annotation object.
  */
-- (void)addAnnotation:(id <MLNAnnotation>)annotation;
+- (void)addAnnotation:(id<MLNAnnotation>)annotation;
 
 /**
  Adds an array of annotations to the map view.
@@ -791,7 +821,7 @@ MLN_EXPORT IB_DESIGNABLE
     must conform to the `MLNAnnotation` protocol. The map view retains each
     individual annotation object.
  */
-- (void)addAnnotations:(NSArray<id <MLNAnnotation>> *)annotations;
+- (void)addAnnotations:(NSArray<id<MLNAnnotation>> *)annotations;
 
 /**
  The complete list of annotations associated with the receiver that are
@@ -801,7 +831,7 @@ MLN_EXPORT IB_DESIGNABLE
  annotations are associated with the map view or if no annotations associated
  with the map view are currently visible, the value of this property is `nil`.
  */
-@property (nonatomic, readonly, nullable) NSArray<id <MLNAnnotation>> *visibleAnnotations;
+@property (nonatomic, readonly, nullable) NSArray<id<MLNAnnotation>> *visibleAnnotations;
 
 /**
  Removes an annotation from the map view, deselecting it if it is selected.
@@ -813,7 +843,7 @@ MLN_EXPORT IB_DESIGNABLE
  @param annotation The annotation object to remove. This object must conform to
     the `MLNAnnotation` protocol.
  */
-- (void)removeAnnotation:(id <MLNAnnotation>)annotation;
+- (void)removeAnnotation:(id<MLNAnnotation>)annotation;
 
 /**
  Removes an array of annotations from the map view, deselecting any selected
@@ -826,7 +856,7 @@ MLN_EXPORT IB_DESIGNABLE
  @param annotations The array of annotation objects to remove. Objects in the
     array must conform to the `MLNAnnotation` protocol.
  */
-- (void)removeAnnotations:(NSArray<id <MLNAnnotation>> *)annotations;
+- (void)removeAnnotations:(NSArray<id<MLNAnnotation>> *)annotations;
 
 /**
  Returns a reusable annotation image object associated with its identifier.
@@ -841,7 +871,8 @@ MLN_EXPORT IB_DESIGNABLE
  @return An annotation image object with the given identifier, or `nil` if no
     such object exists in the reuse queue.
  */
-- (nullable MLNAnnotationImage *)dequeueReusableAnnotationImageWithIdentifier:(NSString *)identifier;
+- (nullable MLNAnnotationImage *)dequeueReusableAnnotationImageWithIdentifier:
+    (NSString *)identifier;
 
 /**
  Returns the list of annotations associated with the receiver that intersect with
@@ -852,7 +883,7 @@ MLN_EXPORT IB_DESIGNABLE
  no annotations associated with the map view are currently visible in the
  rectangle.
  */
-- (nullable NSArray<id <MLNAnnotation>> *)visibleAnnotationsInRect:(CGRect)rect;
+- (nullable NSArray<id<MLNAnnotation>> *)visibleAnnotationsInRect:(CGRect)rect;
 
 // MARK: Managing Annotation Selections
 
@@ -869,7 +900,7 @@ MLN_EXPORT IB_DESIGNABLE
  @note In versions prior to `4.0.0` if the annotation was offscreen it was not
  selected.
  */
-@property (nonatomic, copy) NSArray<id <MLNAnnotation>> *selectedAnnotations;
+@property (nonatomic, copy) NSArray<id<MLNAnnotation>> *selectedAnnotations;
 
 /**
  Selects an annotation and displays a callout popover for it.
@@ -880,14 +911,14 @@ MLN_EXPORT IB_DESIGNABLE
 
  @param annotation The annotation object to select.
  */
-- (void)selectAnnotation:(id <MLNAnnotation>)annotation;
+- (void)selectAnnotation:(id<MLNAnnotation>)annotation;
 
 /**
  Deselects an annotation and hides its callout popover.
 
  @param annotation The annotation object to deselect.
  */
-- (void)deselectAnnotation:(nullable id <MLNAnnotation>)annotation;
+- (void)deselectAnnotation:(nullable id<MLNAnnotation>)annotation;
 
 /**
  A common view controller for managing a callout popover’s content view.
@@ -917,7 +948,7 @@ MLN_EXPORT IB_DESIGNABLE
     multiple point annotations coincide with the point, the return value is the
     annotation that would be selected if the user clicks at this point.
  */
-- (id <MLNAnnotation>)annotationAtPoint:(NSPoint)point;
+- (id<MLNAnnotation>)annotationAtPoint:(NSPoint)point;
 
 // MARK: Overlaying the Map
 
@@ -928,7 +959,7 @@ MLN_EXPORT IB_DESIGNABLE
  overlays are associated with the map view, the value of this property is
  empty array.
  */
-@property (nonatomic, readonly, nonnull) NSArray<id <MLNOverlay>> *overlays;
+@property (nonatomic, readonly, nonnull) NSArray<id<MLNOverlay>> *overlays;
 
 /**
  Adds a single overlay to the map.
@@ -938,7 +969,7 @@ MLN_EXPORT IB_DESIGNABLE
  @param overlay The overlay object to add. This object must conform to the
      `MLNOverlay` protocol.
  */
-- (void)addOverlay:(id <MLNOverlay>)overlay;
+- (void)addOverlay:(id<MLNOverlay>)overlay;
 
 /**
  Adds an array of overlays to the map.
@@ -948,7 +979,7 @@ MLN_EXPORT IB_DESIGNABLE
  @param overlays An array of objects, each of which must conform to the
      `MLNOverlay` protocol.
  */
-- (void)addOverlays:(NSArray<id <MLNOverlay>> *)overlays;
+- (void)addOverlays:(NSArray<id<MLNOverlay>> *)overlays;
 
 /**
  Removes a single overlay from the map.
@@ -958,7 +989,7 @@ MLN_EXPORT IB_DESIGNABLE
 
  @param overlay The overlay object to remove.
  */
-- (void)removeOverlay:(id <MLNOverlay>)overlay;
+- (void)removeOverlay:(id<MLNOverlay>)overlay;
 
 /**
  Removes an array of overlays from the map.
@@ -968,7 +999,7 @@ MLN_EXPORT IB_DESIGNABLE
  @param overlays An array of objects, each of which conforms to the `MLNOverlay`
      protocol.
  */
-- (void)removeOverlays:(NSArray<id <MLNOverlay>> *)overlays;
+- (void)removeOverlays:(NSArray<id<MLNOverlay>> *)overlays;
 
 // MARK: Accessing the Underlying Map Data
 
@@ -984,7 +1015,8 @@ MLN_EXPORT IB_DESIGNABLE
  @return An array of objects conforming to the `MLNFeature` protocol that
     represent features in the sources used by the current style.
  */
-- (NSArray<id <MLNFeature>> *)visibleFeaturesAtPoint:(NSPoint)point NS_SWIFT_NAME(visibleFeatures(at:));
+- (NSArray<id<MLNFeature>> *)visibleFeaturesAtPoint:(NSPoint)point
+    NS_SWIFT_NAME(visibleFeatures(at:));
 
 /**
  Returns an array of rendered map features that intersect with a given point,
@@ -1003,12 +1035,15 @@ MLN_EXPORT IB_DESIGNABLE
  @return An array of objects conforming to the `MLNFeature` protocol that
     represent features in the sources used by the current style.
  */
-- (NSArray<id <MLNFeature>> *)visibleFeaturesAtPoint:(NSPoint)point inStyleLayersWithIdentifiers:(nullable NSSet<NSString *> *)styleLayerIdentifiers NS_SWIFT_NAME(visibleFeatures(at:styleLayerIdentifiers:));
+- (NSArray<id<MLNFeature>> *)visibleFeaturesAtPoint:(NSPoint)point
+                       inStyleLayersWithIdentifiers:
+                           (nullable NSSet<NSString *> *)styleLayerIdentifiers
+    NS_SWIFT_NAME(visibleFeatures(at:styleLayerIdentifiers:));
 
 /**
  Returns an array of rendered map features that intersect with a given point,
  restricted to the given style layers and filtered by the given predicate.
- 
+
  Each object in the returned array represents a feature rendered by the
  current style and provides access to attributes specified by the relevant map
  content sources. The returned array includes features loaded by
@@ -1043,7 +1078,7 @@ MLN_EXPORT IB_DESIGNABLE
 
  To find out the layer names in a particular style, view the style in
  <a href="https://www.mapbox.com/studio/">Mapbox Studio</a>.
- 
+
  Only visible features are returned. To obtain features regardless of
  visibility, use the
  `-[MLNVectorTileSource featuresInSourceLayersWithIdentifiers:predicate:]` and
@@ -1056,7 +1091,7 @@ MLN_EXPORT IB_DESIGNABLE
     inspectable in Interface Builder, or a manually constructed `NSURL`. This
     approach also avoids layer identifer name changes that will occur in the
     default style’s layers over time.
- 
+
  @param point A point expressed in the map view’s coordinate system.
  @param styleLayerIdentifiers A set of strings that correspond to the names of
     layers defined in the current style. Only the features contained in these
@@ -1065,7 +1100,11 @@ MLN_EXPORT IB_DESIGNABLE
  @return An array of objects conforming to the `MLNFeature` protocol that
     represent features in the sources used by the current style.
  */
-- (NSArray<id <MLNFeature>> *)visibleFeaturesAtPoint:(NSPoint)point inStyleLayersWithIdentifiers:(nullable NSSet<NSString *> *)styleLayerIdentifiers predicate:(nullable NSPredicate *)predicate NS_SWIFT_NAME(visibleFeatures(at:styleLayerIdentifiers:predicate:));
+- (NSArray<id<MLNFeature>> *)visibleFeaturesAtPoint:(NSPoint)point
+                       inStyleLayersWithIdentifiers:
+                           (nullable NSSet<NSString *> *)styleLayerIdentifiers
+                                          predicate:(nullable NSPredicate *)predicate
+    NS_SWIFT_NAME(visibleFeatures(at:styleLayerIdentifiers:predicate:));
 
 /**
  Returns an array of rendered map features that intersect with the given
@@ -1080,12 +1119,12 @@ MLN_EXPORT IB_DESIGNABLE
  @return An array of objects conforming to the `MLNFeature` protocol that
     represent features in the sources used by the current style.
  */
-- (NSArray<id <MLNFeature>> *)visibleFeaturesInRect:(NSRect)rect NS_SWIFT_NAME(visibleFeatures(in:));
+- (NSArray<id<MLNFeature>> *)visibleFeaturesInRect:(NSRect)rect NS_SWIFT_NAME(visibleFeatures(in:));
 
 /**
  Returns an array of rendered map features that intersect with the given
  rectangle, restricted to the given style layers.
- 
+
  This method returns all the intersecting features from the specified layers. To
  filter the returned features, use the
  `-visibleFeaturesAtPoint:inStyleLayersWithIdentifiers:predicate:` method. For
@@ -1099,13 +1138,16 @@ MLN_EXPORT IB_DESIGNABLE
  @return An array of objects conforming to the `MLNFeature` protocol that
     represent features in the sources used by the current style.
  */
-- (NSArray<id <MLNFeature>> *)visibleFeaturesInRect:(NSRect)rect inStyleLayersWithIdentifiers:(nullable NSSet<NSString *> *)styleLayerIdentifiers NS_SWIFT_NAME(visibleFeatures(at:styleLayerIdentifiers:));
+- (NSArray<id<MLNFeature>> *)visibleFeaturesInRect:(NSRect)rect
+                      inStyleLayersWithIdentifiers:
+                          (nullable NSSet<NSString *> *)styleLayerIdentifiers
+    NS_SWIFT_NAME(visibleFeatures(at:styleLayerIdentifiers:));
 
 /**
  Returns an array of rendered map features that intersect with the given
  rectangle, restricted to the given style layers and filtered by the given
  predicate.
- 
+
  Each object in the returned array represents a feature rendered by the
  current style and provides access to attributes specified by the relevant map
  content sources. The returned array includes features loaded by
@@ -1141,7 +1183,7 @@ MLN_EXPORT IB_DESIGNABLE
 
  To find out the layer names in a particular style, view the style in
  <a href="https://www.mapbox.com/studio/">Mapbox Studio</a>.
- 
+
  Only visible features are returned. To obtain features regardless of
  visibility, use the
  `-[MLNVectorTileSource featuresInSourceLayersWithIdentifiers:predicate:]` and
@@ -1154,7 +1196,7 @@ MLN_EXPORT IB_DESIGNABLE
     inspectable in Interface Builder, or a manually constructed `NSURL`. This
     approach also avoids layer identifer name changes that will occur in the
     default style’s layers over time.
- 
+
  @param rect A rectangle expressed in the map view’s coordinate system.
  @param styleLayerIdentifiers A set of strings that correspond to the names of
     layers defined in the current style. Only the features contained in these
@@ -1163,7 +1205,11 @@ MLN_EXPORT IB_DESIGNABLE
  @return An array of objects conforming to the `MLNFeature` protocol that
     represent features in the sources used by the current style.
  */
-- (NSArray<id <MLNFeature>> *)visibleFeaturesInRect:(NSRect)rect inStyleLayersWithIdentifiers:(nullable NSSet<NSString *> *)styleLayerIdentifiers predicate:(nullable NSPredicate *)predicate NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
+- (NSArray<id<MLNFeature>> *)visibleFeaturesInRect:(NSRect)rect
+                      inStyleLayersWithIdentifiers:
+                          (nullable NSSet<NSString *> *)styleLayerIdentifiers
+                                         predicate:(nullable NSPredicate *)predicate
+    NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
 
 // MARK: Converting Geographic Coordinates
 
@@ -1179,7 +1225,8 @@ MLN_EXPORT IB_DESIGNABLE
  @return The point (in the appropriate view or window coordinate system)
     corresponding to the given geographic coordinate.
  */
-- (NSPoint)convertCoordinate:(CLLocationCoordinate2D)coordinate toPointToView:(nullable NSView *)view;
+- (NSPoint)convertCoordinate:(CLLocationCoordinate2D)coordinate
+               toPointToView:(nullable NSView *)view;
 
 /**
  Converts a point in the given view’s coordinate system to a geographic
@@ -1194,7 +1241,7 @@ MLN_EXPORT IB_DESIGNABLE
 /**
  Converts a geographic bounding box to a rectangle in the given view’s
  coordinate system.
- 
+
  To bring both sides of the antimeridian or international date line into view,
  specify some longitudes less than −180 degrees or greater than 180 degrees. For
  example, to show both Tokyo and San Francisco simultaneously, you could set the
@@ -1211,7 +1258,7 @@ MLN_EXPORT IB_DESIGNABLE
 /**
  Converts a rectangle in the given view’s coordinate system to a geographic
  bounding box.
- 
+
  If a longitude is less than −180 degrees or greater than 180 degrees, the
  bounding box straddles the antimeridian or international date line.
 

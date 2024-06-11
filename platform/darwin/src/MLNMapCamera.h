@@ -1,6 +1,6 @@
-#import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
 
@@ -9,7 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  An `MLNMapCamera` object represents a viewpoint from which the user observes
  some point on an `MLNMapView`.
- 
+
  #### Related examples
  TODO: Camera animation, learn how to create a camera that rotates
  around a central point.
@@ -34,10 +34,10 @@ MLN_EXPORT
 /**
  The altitude (measured in meters) above the map at which the camera is
  situated.
- 
+
  The altitude is the distance from the viewpoint to the map, perpendicular to
  the map plane. This property does not account for physical elevation.
- 
+
  This property’s value may be less than that of the `viewingDistance` property.
  Setting this property automatically updates the `viewingDistance` property
  based on the `pitch` property’s current value.
@@ -46,7 +46,7 @@ MLN_EXPORT
 
 /**
  The straight-line distance from the viewpoint to the `centerCoordinate`.
- 
+
  Setting this property automatically updates the `altitude` property based on
  the `pitch` property’s current value.
  */
@@ -73,11 +73,11 @@ MLN_EXPORT
 
 /**
  Returns a new camera with the given distance, pitch, and heading.
- 
+
  This method interprets the distance as a straight-line distance from the
  viewpoint to the center coordinate. To specify the altitude of the viewpoint,
  use the `-cameraLookingAtCenterCoordinate:altitude:pitch:heading:` method.
- 
+
  @param centerCoordinate The geographic coordinate on which the map should be
     centered.
  @param distance The straight-line distance from the viewpoint to the
@@ -128,17 +128,17 @@ MLN_EXPORT
                                    fromDistance:(CLLocationDistance)distance
                                           pitch:(CGFloat)pitch
                                         heading:(CLLocationDirection)heading
-__attribute__((deprecated("Use -cameraLookingAtCenterCoordinate:acrossDistance:pitch:heading: "
-                          "or -cameraLookingAtCenterCoordinate:altitude:pitch:heading:.")));
+    __attribute__((deprecated("Use -cameraLookingAtCenterCoordinate:acrossDistance:pitch:heading: "
+                              "or -cameraLookingAtCenterCoordinate:altitude:pitch:heading:.")));
 
 /**
  Returns a Boolean value indicating whether the given camera is functionally
  equivalent to the receiver.
- 
+
  Unlike `-isEqual:`, this method returns `YES` if the difference between the
  coordinates, altitudes, pitches, or headings of the two camera objects is
  negligible.
- 
+
  @param otherCamera The camera with which to compare the receiver.
  @return A Boolean value indicating whether the two cameras are functionally
     equivalent.

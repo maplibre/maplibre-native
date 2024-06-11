@@ -1,8 +1,8 @@
 #import "MLNShape.h"
 
+#import <mbgl/util/geo.hpp>
 #import <mbgl/util/geojson.hpp>
 #import <mbgl/util/geometry.hpp>
-#import <mbgl/util/geo.hpp>
 
 bool operator==(const CLLocationCoordinate2D lhs, const CLLocationCoordinate2D rhs);
 

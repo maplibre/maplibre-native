@@ -20,7 +20,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNInvalidStyleLayerExceptio
  `MLNForegroundStyleLayer` in order to use `MLNStyleLayer`'s properties and methods.
  You do not create instances of `MLNStyleLayer` directly, and do not
  create your own subclasses of this class.
- 
+
  Do not add `MLNStyleLayer` objects to the `style` property of a `MLNMapView` before
  `-mapView:didFinishLoadingStyle:` is called.
  */
@@ -29,7 +29,8 @@ MLN_EXPORT
 
 // MARK: Initializing a Style Layer
 
-- (instancetype)init __attribute__((unavailable("Use -init methods of concrete subclasses instead.")));
+- (instancetype)init
+    __attribute__((unavailable("Use -init methods of concrete subclasses instead.")));
 
 // MARK: Identifying a Style Layer
 
@@ -43,7 +44,7 @@ MLN_EXPORT
 
 /**
  Whether this layer is displayed. A value of `NO` hides the layer.
- 
+
  #### Related examples
  TODO: Show and hide a layer, learn how to toggle an `MLNStyleLayer`
  object's visibility.
@@ -51,12 +52,14 @@ MLN_EXPORT
 @property (nonatomic, assign, getter=isVisible) BOOL visible;
 
 /**
- The maximum zoom level at which the layer gets parsed and appears. This value is a floating-point number.
+ The maximum zoom level at which the layer gets parsed and appears. This value is a floating-point
+ number.
  */
 @property (nonatomic, assign) float maximumZoomLevel;
 
 /**
- The minimum zoom level at which the layer gets parsed and appears. This value is a floating-point number.
+ The minimum zoom level at which the layer gets parsed and appears. This value is a floating-point
+ number.
  */
 @property (nonatomic, assign) float minimumZoomLevel;
 

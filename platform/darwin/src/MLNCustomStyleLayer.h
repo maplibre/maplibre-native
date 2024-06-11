@@ -1,11 +1,11 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 #import <QuartzCore/QuartzCore.h>
 
 #import "MLNFoundation.h"
-#import "MLNStyleValue.h"
-#import "MLNStyleLayer.h"
 #import "MLNGeometry.h"
+#import "MLNStyleLayer.h"
+#import "MLNStyleValue.h"
 
 #if MLN_RENDER_BACKEND_METAL
 #import <MetalKit/MetalKit.h>
@@ -17,13 +17,13 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNStyle;
 
 typedef struct MLNStyleLayerDrawingContext {
-    CGSize size;
-    CLLocationCoordinate2D centerCoordinate;
-    double zoomLevel;
-    CLLocationDirection direction;
-    CGFloat pitch;
-    CGFloat fieldOfView;
-    MLNMatrix4 projectionMatrix;
+  CGSize size;
+  CLLocationCoordinate2D centerCoordinate;
+  double zoomLevel;
+  CLLocationDirection direction;
+  CGFloat pitch;
+  CGFloat fieldOfView;
+  MLNMatrix4 projectionMatrix;
 } MLNStyleLayerDrawingContext;
 
 MLN_EXPORT
