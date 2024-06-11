@@ -270,8 +270,8 @@ android-lint-test-app:
 # Generates LICENSE.md file based on all Android project dependencies
 .PHONY: android-license
 android-license:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:licenseReleaseReport
-	python scripts/generate-license.py
+	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:licenseDrawableReleaseReport
+	python3 scripts/generate-license.py
 
 # Symbolicate ndk stack traces for the arm-v7 abi
 .PHONY: android-ndk-stack
