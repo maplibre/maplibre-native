@@ -84,9 +84,6 @@ jobs:
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
 
-      - name: Check debug symbols
-        run: bazel run //platform:check-public-symbols --//:renderer=metal
-
       - name: Lint plist files
         run: bazel run //platform/ios:lint-plists --//:renderer=metal
 

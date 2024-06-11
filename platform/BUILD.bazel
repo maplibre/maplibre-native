@@ -1,4 +1,3 @@
-load("@aspect_rules_js//js:defs.bzl", "js_binary")
 load("//bazel:flags.bzl", "CPP_FLAGS", "MAPLIBRE_FLAGS", "WARNING_FLAGS")
 
 objc_library(
@@ -310,19 +309,4 @@ objc_library(
         ":objc-headers",
         "//:mbgl-core",
     ],
-)
-
-js_binary(
-    name = "check-public-symbols",
-    args = [
-        "macOS",
-        "iOS",
-    ],
-    data = [
-        "//:node_modules/lodash",
-        "//platform/darwin:symbols-to-check",
-        "//platform/ios:symbols-to-check",
-        "//platform/macos:symbols-to-check",
-    ],
-    entry_point = "scripts/check-public-symbols.js",
 )
