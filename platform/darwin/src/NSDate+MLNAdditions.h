@@ -1,10 +1,9 @@
 #import <Foundation/Foundation.h>
 
-#import "MLNFoundation.h"
 #include <mbgl/util/chrono.hpp>
+#import "MLNFoundation.h"
 
 NS_ASSUME_NONNULL_BEGIN
-
 
 /// Converts from a duration in seconds to a duration object usable in mbgl.
 MLN_EXPORT

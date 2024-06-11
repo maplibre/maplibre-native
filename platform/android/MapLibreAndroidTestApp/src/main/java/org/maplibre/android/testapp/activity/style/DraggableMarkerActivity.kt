@@ -22,6 +22,7 @@ import org.maplibre.android.style.layers.PropertyFactory.*
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.databinding.ActivityDraggableMarkerBinding
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * An Activity that showcases how to make symbols draggable.
@@ -71,7 +72,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
 
             maplibreMap.setStyle(
                 Style.Builder()
-                    .fromUri(Style.getPredefinedStyle("Streets"))
+                    .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
                     .withImage(markerImageId, IconFactory.getInstance(this).defaultMarker().bitmap)
                     .withSource(source)
                     .withLayer(layer)

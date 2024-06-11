@@ -14,7 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
  A vector tile source is added to an `MLNStyle` object along with one or more
  `MLNVectorStyleLayer` objects. A vector style layer defines the appearance of
  any content supplied by the vector tile source.
- 
+
  `MLNVectorTileSource` is optimized for data sets that are too large to fit
  completely in memory, such as vector tile sets or data sets managed in
  <a href="https://www.mapbox.com/studio/">Mapbox Studio</a>. For
@@ -34,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
  (<var>extent</var>&nbsp;×&nbsp;2)&nbsp;−&nbsp;1, inclusive. Any vector style
  layer initialized with a vector tile source must have a non-`nil` value in its
  `sourceLayerIdentifier` property.
- 
+
  Commonly used vector tile sources include
  <a href="https://www.mapbox.com/vector-tiles/mapbox-streets/">Mapbox Streets</a>,
  <a href="https://www.mapbox.com/vector-tiles/mapbox-terrain/">Mapbox Terrain</a>,
@@ -44,16 +44,17 @@ NS_ASSUME_NONNULL_BEGIN
  ### Example
 
  ```swift
- let source = MLNVectorTileSource(identifier: "pois", tileURLTemplates: ["https://example.com/vector-tiles/{z}/{x}/{y}.mvt"], options: [
-     .minimumZoomLevel: 9,
+ let source = MLNVectorTileSource(identifier: "pois", tileURLTemplates:
+ ["https://example.com/vector-tiles/{z}/{x}/{y}.mvt"], options: [ .minimumZoomLevel: 9,
      .maximumZoomLevel: 16,
      .attributionInfos: [
-         MLNAttributionInfo(title: NSAttributedString(string: "© Mapbox"), url: URL(string: "https://mapbox.com"))
+         MLNAttributionInfo(title: NSAttributedString(string: "© Mapbox"), url: URL(string:
+ "https://mapbox.com"))
      ]
  ])
  mapView.style?.addSource(source)
  ```
- 
+
  #### Related examples
  TODO: Data-driven circles, learn how to add data to your map using
  an `MLNVectorTileSource` object.
@@ -80,7 +81,8 @@ MLN_EXPORT
     source’s contents and other metadata.
  @return An initialized vector tile source.
  */
-- (instancetype)initWithIdentifier:(NSString *)identifier configurationURL:(NSURL *)configurationURL NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithIdentifier:(NSString *)identifier
+                  configurationURL:(NSURL *)configurationURL NS_DESIGNATED_INITIALIZER;
 
 /**
  Returns a vector tile source initialized an identifier, tile URL templates, and
@@ -102,7 +104,10 @@ MLN_EXPORT
     the default values.
  @return An initialized tile source.
  */
-- (instancetype)initWithIdentifier:(NSString *)identifier tileURLTemplates:(NSArray<NSString *> *)tileURLTemplates options:(nullable NSDictionary<MLNTileSourceOption, id> *)options NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithIdentifier:(NSString *)identifier
+                  tileURLTemplates:(NSArray<NSString *> *)tileURLTemplates
+                           options:(nullable NSDictionary<MLNTileSourceOption, id> *)options
+    NS_DESIGNATED_INITIALIZER;
 
 // MARK: Accessing a Source’s Content
 
@@ -123,7 +128,7 @@ MLN_EXPORT
  includes those parts of the road that lie within the map tiles that the source
  has loaded, even if the road extends into other tiles. The portion of the road
  within each map tile is included individually.
- 
+
  Returned features may not necessarily be visible to the user at the time they
  are loaded: the style may contain a layer that forces the source’s tiles to
  load but filters out the features in question, preventing them from being
@@ -141,7 +146,10 @@ MLN_EXPORT
  @return An array of objects conforming to the `MLNFeature` protocol that
     represent features loaded by the source that match the predicate.
  */
-- (NSArray<id <MLNFeature>> *)featuresInSourceLayersWithIdentifiers:(NSSet<NSString *> *)sourceLayerIdentifiers predicate:(nullable NSPredicate *)predicate NS_SWIFT_NAME(features(sourceLayerIdentifiers:predicate:));
+- (NSArray<id<MLNFeature>> *)featuresInSourceLayersWithIdentifiers:
+                                 (NSSet<NSString *> *)sourceLayerIdentifiers
+                                                         predicate:(nullable NSPredicate *)predicate
+    NS_SWIFT_NAME(features(sourceLayerIdentifiers:predicate:));
 
 @end
 

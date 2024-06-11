@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import "MLNAnnotation.h"
 #import "MLNGeometry.h"
@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
  This property contains the smallest rectangle that completely encompasses the
  overlay. Implementers of this protocol must set this area when implementing
  their overlay class, and after setting it, you must not change it.
- 
+
  If this overlay spans the antimeridian, its bounds may extend west of −180 degrees
  longitude or east of 180 degrees longitude. For example, an overlay covering the
  Pacific Ocean from Tokyo to San Francisco might have a bounds extending

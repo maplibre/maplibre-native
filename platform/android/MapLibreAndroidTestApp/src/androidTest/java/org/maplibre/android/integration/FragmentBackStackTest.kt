@@ -4,6 +4,7 @@ import androidx.test.filters.LargeTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import androidx.test.uiautomator.UiSelector
+import org.junit.Ignore
 import org.maplibre.android.testapp.activity.fragment.FragmentBackStackActivity
 import org.junit.Rule
 import org.junit.Test
@@ -19,6 +20,7 @@ class FragmentBackStackTest : BaseIntegrationTest() {
     var activityRule: ActivityTestRule<FragmentBackStackActivity> = ActivityTestRule(FragmentBackStackActivity::class.java)
 
     @Test
+    @Ignore("https://github.com/maplibre/maplibre-native/issues/2469")
     @LargeTest
     fun backPressedOnBackStackResumed() {
         device.waitForIdle()

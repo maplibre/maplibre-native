@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
 #import "MLNMultiPoint.h"
@@ -34,11 +34,11 @@ NS_ASSUME_NONNULL_BEGIN
  `MLNPolygon` object. To group multiple polylines together in one shape, use an
  `MLNMultiPolyline` or `MLNShapeCollection` object.
 
- To make the polyline go across the antimeridian or international date line, 
+ To make the polyline go across the antimeridian or international date line,
  specify some longitudes less than −180 degrees or greater than 180 degrees.
  For example, a polyline that stretches from Tokyo to San Francisco would have
  coordinates of (35.68476, -220.24257) and (37.78428, -122.41310).
- 
+
  ```swift
  let coordinates = [
      CLLocationCoordinate2D(latitude: 35.68476, longitude: -220.24257),
@@ -50,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
  A polyline is known as a
  <a href="https://tools.ietf.org/html/rfc7946#section-3.1.4">LineString</a>
  geometry in GeoJSON.
- 
+
  #### Related examples
 
  - <doc:LineOnUserTap>
@@ -69,7 +69,8 @@ MLN_EXPORT
  @param count The number of items in the `coords` array.
  @return A new polyline object.
  */
-+ (instancetype)polylineWithCoordinates:(const CLLocationCoordinate2D *)coords count:(NSUInteger)count;
++ (instancetype)polylineWithCoordinates:(const CLLocationCoordinate2D *)coords
+                                  count:(NSUInteger)count;
 
 @end
 

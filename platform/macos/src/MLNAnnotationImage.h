@@ -24,7 +24,8 @@ MLN_EXPORT
  @return The initialized annotation image object or `nil` if there was a problem
     initializing the object.
  */
-+ (instancetype)annotationImageWithImage:(NSImage *)image reuseIdentifier:(NSString *)reuseIdentifier;
++ (instancetype)annotationImageWithImage:(NSImage *)image
+                         reuseIdentifier:(NSString *)reuseIdentifier;
 
 // MARK: Getting and Setting Attributes
 

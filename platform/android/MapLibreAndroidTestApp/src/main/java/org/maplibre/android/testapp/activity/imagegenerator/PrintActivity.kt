@@ -8,8 +8,8 @@ import androidx.print.PrintHelper
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
-import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing using the Snaphot API to print a Map.
@@ -33,7 +33,7 @@ class PrintActivity : AppCompatActivity(), MapLibreMap.SnapshotReadyCallback {
 
     private fun initMap(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
     }
 
     override fun onSnapshotReady(snapshot: Bitmap) {

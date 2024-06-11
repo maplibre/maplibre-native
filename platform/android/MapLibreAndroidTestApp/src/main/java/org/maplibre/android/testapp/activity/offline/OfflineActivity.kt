@@ -24,6 +24,7 @@ import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.model.other.OfflineDownloadRegionDialog
 import org.maplibre.android.testapp.model.other.OfflineDownloadRegionDialog.DownloadRegionDialogListener
 import org.maplibre.android.testapp.model.other.OfflineListRegionsDialog
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.OfflineUtils
 import timber.log.Timber
 import java.util.ArrayList
@@ -46,7 +47,7 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
     private var listRegions: Button? = null
     private var isEndNotified = false
     val STYLE_URL: String
-        get() = Style.getPredefinedStyle("Streets")
+        get() = TestStyles.getPredefinedStyleWithFallback("Streets")
 
     /*
    * Offline objects

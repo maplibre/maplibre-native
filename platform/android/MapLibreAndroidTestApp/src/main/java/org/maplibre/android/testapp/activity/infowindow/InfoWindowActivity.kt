@@ -18,6 +18,7 @@ import org.maplibre.android.maps.MapLibreMap.OnMapLongClickListener
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import java.text.DecimalFormat
 
 /**
@@ -66,7 +67,7 @@ class InfoWindowActivity :
 
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
             addMarkers()
             addInfoWindowListeners()
         }

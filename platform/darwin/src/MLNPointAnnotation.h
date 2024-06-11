@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
 #import "MLNShape.h"
@@ -34,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
  A point shape is known as a
  <a href="https://tools.ietf.org/html/rfc7946#section-3.1.2">Point</a> geometry
  in GeoJSON.
- 
+
  #### Related examples
  TODO: Mark a place on the map with an annotation
  TODO: Mark a place on the map with an image

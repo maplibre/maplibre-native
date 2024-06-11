@@ -17,6 +17,7 @@ import org.maplibre.android.style.layers.PropertyFactory.*
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.databinding.ActivityWithinExpressionBinding
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.turf.TurfConstants
 import org.maplibre.turf.TurfTransformation
 
@@ -56,7 +57,7 @@ class DistanceExpressionActivity : AppCompatActivity() {
         // using Streets as a base style
         maplibreMap.setStyle(
             Style.Builder()
-                .fromUri(Style.getPredefinedStyle("Streets"))
+                .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
                 .withSources(
                     GeoJsonSource(
                         POINT_ID,
