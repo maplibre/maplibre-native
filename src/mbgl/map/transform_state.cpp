@@ -846,7 +846,7 @@ void TransformState::constrainCameraAndZoomToBounds(CameraOptions& requestedCame
     }
 
     double maxScale = scaleX > scaleY ? scaleX : scaleY;
-    if (maxScale > 1 && requestedCamera.anchor) {
+    if (maxScale > 1.000001) {
         requestedZoom += scaleZoom(maxScale);
 
         if (scaleY > scaleX) {

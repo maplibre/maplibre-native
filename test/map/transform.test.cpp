@@ -800,6 +800,60 @@ TEST(Transform, LatLngBounds) {
     ASSERT_DOUBLE_EQ(transform.getLatLng().longitude(), 120.0);
 }
 
+TEST(Transform, ConstrainCameraAndZoomToBounds) {
+    Transform transform;
+
+    transform.resize({500, 500});
+    transform.setLatLngBounds(LatLngBounds::hull({40.0, -10.0}, {70.0, 40.0}));
+    transform.setConstrainMode(ConstrainMode::CameraAndZoomToBounds);
+
+    // Request impossible zoom
+    transform.easeTo(CameraOptions().withCenter(LatLng{56, 11}).withZoom(1));
+    ASSERT_NEAR(transform.getZoom(), 2.81378, 1e-4);
+
+    // Request impossible center left
+    transform.easeTo(CameraOptions().withCenter(LatLng{56, -65}).withZoom(4));
+    ASSERT_NEAR(transform.getLatLng().longitude(), 0.98632, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
+
+    // Request impossible center top
+    transform.easeTo(CameraOptions().withCenter(LatLng{80, 11}).withZoom(4));
+    ASSERT_NEAR(transform.getLatLng().longitude(), 11.0, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 65.88603, 1e-4);
+
+    // Request impossible center right
+    transform.easeTo(CameraOptions().withCenter(LatLng{56, 50}).withZoom(4));
+    ASSERT_NEAR(transform.getLatLng().longitude(), 29.01367, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
+
+    // Request impossible center bottom
+    transform.easeTo(CameraOptions().withCenter(LatLng{30, 11}).withZoom(4));
+    ASSERT_NEAR(transform.getLatLng().longitude(), 11.0, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 47.89217, 1e-4);
+
+    // Request impossible center with anchor
+    transform.easeTo(CameraOptions().withAnchor(ScreenCoordinate{250, 250}).withCenter(LatLng{56, -65}).withZoom(4));
+    ASSERT_NEAR(transform.getLatLng().longitude(), 0.98632, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
+    
+    // Request impossible center (anchor)    
+    transform.easeTo(CameraOptions().withAnchor(ScreenCoordinate{250, 250}).withZoom(4));
+    ASSERT_NEAR(transform.getLatLng().longitude(), 0.98632, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
+
+    // Fly to impossible center
+    transform.flyTo(CameraOptions().withCenter(LatLng{56, -65}).withZoom(4));
+    ASSERT_NEAR(transform.getZoom(), 4.0, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().longitude(), 0.98632, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
+
+    // Fly to impossible center and zoom
+    transform.flyTo(CameraOptions().withCenter(LatLng{56, -65}).withZoom(2));
+    ASSERT_NEAR(transform.getZoom(), 4.0, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().longitude(), 0.98632, 1e-4);
+    ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
+}
+
 TEST(Transform, InvalidPitch) {
     Transform transform;
     transform.resize({1, 1});
