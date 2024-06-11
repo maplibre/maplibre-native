@@ -4,6 +4,7 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/style/image_impl.hpp>
 #include <mbgl/text/glyph.hpp>
+#include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/actor/actor_ref.hpp>
 #include <mbgl/util/immutable.hpp>
 #include <mbgl/style/layer_properties.hpp>
@@ -35,7 +36,8 @@ public:
                        const std::atomic<bool>&,
                        MapMode,
                        float pixelRatio,
-                       bool showCollisionBoxes_);
+                       bool showCollisionBoxes_,
+                       std::shared_ptr<FontFaces> fontFaces);
     ~GeometryTileWorker();
 
     void setLayers(std::vector<Immutable<style::LayerProperties>>,
@@ -47,7 +49,8 @@ public:
     void reset(uint64_t correlationID_);
     void setShowCollisionBoxes(bool showCollisionBoxes_, uint64_t correlationID_);
 
-    void onGlyphsAvailable(GlyphMap newGlyphMap);
+    void onGlyphsAvailable(GlyphMap glyphs, HBShapeResults requests);
+
     void onImagesAvailable(ImageMap newIconMap,
                            ImageMap newPatternMap,
                            ImageVersionMap versionMap,
@@ -80,6 +83,7 @@ private:
 
     std::unique_ptr<FeatureIndex> featureIndex;
     mbgl::unordered_map<std::string, LayerRenderData> renderData;
+    std::shared_ptr<FontFaces> fontFaces;
 
     enum State {
         Idle,
