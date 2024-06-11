@@ -9,8 +9,10 @@
 #include <mbgl/util/string.hpp>
 
 #include <mbgl/storage/sqlite3.hpp>
+#include <mbgl/util/variant.hpp>
 #include <thread>
 #include <random>
+#include <variant>
 
 using namespace std::literals::string_literals;
 using namespace mbgl;
@@ -437,16 +439,18 @@ TEST(OfflineDatabase, CreateRegion) {
 
     EXPECT_EQ(0u, log.uncheckedCount());
 
-    region->getDefinition().match(
-        [&](OfflineTilePyramidRegionDefinition& def) {
-            EXPECT_EQ(definition.styleURL, def.styleURL);
-            EXPECT_EQ(definition.bounds, def.bounds);
-            EXPECT_EQ(definition.minZoom, def.minZoom);
-            EXPECT_EQ(definition.maxZoom, def.maxZoom);
-            EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
-            EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
-        },
-        [](auto&) { EXPECT_FALSE(false); });
+    std::visit(overloaded{[&](OfflineTilePyramidRegionDefinition& def) {
+                              EXPECT_EQ(definition.styleURL, def.styleURL);
+                              EXPECT_EQ(definition.bounds, def.bounds);
+                              EXPECT_EQ(definition.minZoom, def.minZoom);
+                              EXPECT_EQ(definition.maxZoom, def.maxZoom);
+                              EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
+                              EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
+                          },
+                          [](auto&) {
+                              EXPECT_FALSE(false);
+                          }},
+               region->getDefinition());
     EXPECT_EQ(metadata, region->getMetadata());
 }
 
@@ -481,16 +485,18 @@ TEST(OfflineDatabase, ListRegions) {
     ASSERT_EQ(1u, regions.size());
 
     EXPECT_EQ(region->getID(), regions.at(0).getID());
-    regions.at(0).getDefinition().match(
-        [&](OfflineTilePyramidRegionDefinition& def) {
-            EXPECT_EQ(definition.styleURL, def.styleURL);
-            EXPECT_EQ(definition.bounds, def.bounds);
-            EXPECT_EQ(definition.minZoom, def.minZoom);
-            EXPECT_EQ(definition.maxZoom, def.maxZoom);
-            EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
-            EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
-        },
-        [&](auto&) { EXPECT_FALSE(false); });
+    std::visit(overloaded{[&](OfflineTilePyramidRegionDefinition& def) {
+                              EXPECT_EQ(definition.styleURL, def.styleURL);
+                              EXPECT_EQ(definition.bounds, def.bounds);
+                              EXPECT_EQ(definition.minZoom, def.minZoom);
+                              EXPECT_EQ(definition.maxZoom, def.maxZoom);
+                              EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
+                              EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
+                          },
+                          [&](auto&) {
+                              EXPECT_FALSE(false);
+                          }},
+               regions.at(0).getDefinition());
     EXPECT_EQ(metadata, regions.at(0).getMetadata());
 
     EXPECT_EQ(0u, log.uncheckedCount());
@@ -506,17 +512,20 @@ TEST(OfflineDatabase, GetRegionDefinition) {
     EXPECT_EQ(0u, log.uncheckedCount());
 
     auto region = db.createRegion(definition, metadata);
-    db.getRegionDefinition(region->getID())
-        ->match(
-            [&](OfflineTilePyramidRegionDefinition& result) {
-                EXPECT_EQ(definition.styleURL, result.styleURL);
-                EXPECT_EQ(definition.bounds, result.bounds);
-                EXPECT_EQ(definition.minZoom, result.minZoom);
-                EXPECT_EQ(definition.maxZoom, result.maxZoom);
-                EXPECT_EQ(definition.pixelRatio, result.pixelRatio);
-                EXPECT_EQ(definition.includeIdeographs, result.includeIdeographs);
-            },
-            [&](auto&) { EXPECT_FALSE(false); });
+    auto regionDefinition = db.getRegionDefinition(region->getID()).value();
+
+    std::visit(overloaded{[&](OfflineTilePyramidRegionDefinition& result) {
+                              EXPECT_EQ(definition.styleURL, result.styleURL);
+                              EXPECT_EQ(definition.bounds, result.bounds);
+                              EXPECT_EQ(definition.minZoom, result.minZoom);
+                              EXPECT_EQ(definition.maxZoom, result.maxZoom);
+                              EXPECT_EQ(definition.pixelRatio, result.pixelRatio);
+                              EXPECT_EQ(definition.includeIdeographs, result.includeIdeographs);
+                          },
+                          [&](auto&) {
+                              EXPECT_FALSE(false);
+                          }},
+               regionDefinition);
 }
 
 // Disabled due to flakiness: https://github.com/mapbox/mapbox-gl-native/issues/14966
@@ -1016,10 +1025,12 @@ TEST(OfflineDatabase, CreateRegionInfiniteMaxZoom) {
 
     EXPECT_EQ(0u, log.uncheckedCount());
 
-    region->getDefinition().match([&](auto& def) {
-        EXPECT_EQ(0, def.minZoom);
-        EXPECT_EQ(INFINITY, def.maxZoom);
-    });
+    std::visit(
+        [&](auto& def) {
+            EXPECT_EQ(0, def.minZoom);
+            EXPECT_EQ(INFINITY, def.maxZoom);
+        },
+        region->getDefinition());
 }
 
 #ifndef __QT__ // Qt doesn't support concurrent access to the same database.
