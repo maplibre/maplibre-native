@@ -67,6 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                               ("URL: [%s](%s)  \n" % (projectUrl, projectUrl) if projectUrl is not None else "") +
                               "License: [%s](%s)" % (licenseName, licenseUrl) +
                               "\n\n===========================================================================\n\n")
-    with open(path + "/../../LICENSES.md", 'r') as licensesFile:
+    with open(path + "/../../LICENSES.core.md", 'r') as licensesFile:
         licensesContent = licensesFile.read()
         licenseFile.write(licensesContent)
