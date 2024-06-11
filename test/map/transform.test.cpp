@@ -835,8 +835,8 @@ TEST(Transform, ConstrainCameraAndZoomToBounds) {
     transform.easeTo(CameraOptions().withAnchor(ScreenCoordinate{250, 250}).withCenter(LatLng{56, -65}).withZoom(4));
     ASSERT_NEAR(transform.getLatLng().longitude(), 0.98632, 1e-4);
     ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
-    
-    // Request impossible center (anchor)    
+
+    // Request impossible center (anchor)
     transform.easeTo(CameraOptions().withAnchor(ScreenCoordinate{250, 250}).withZoom(4));
     ASSERT_NEAR(transform.getLatLng().longitude(), 0.98632, 1e-4);
     ASSERT_NEAR(transform.getLatLng().latitude(), 56.0, 1e-4);
