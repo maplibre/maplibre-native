@@ -33,10 +33,8 @@ struct LayerWrapper {
                          @"be recovered after removal due to the identifier collision. "       \
                          @"Use unique identifiers for all layer instances including layers "   \
                          @"of different types."];                                              \
-    }
-}
-}
-while (NO);
+    }                                                                                          \
+  } while (NO);
 
 @class MLNStyle;
 
