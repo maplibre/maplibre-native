@@ -18,6 +18,7 @@ import org.maplibre.android.testapp.R
 import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.OkHttpClient.Builder
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 import java.util.*
 
@@ -39,7 +40,7 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
         mapView.getMapAsync(
             OnMapReadyCallback { maplibreMap: MapLibreMap ->
                 maplibreMap.setStyle(
-                    Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
+                    Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
                 )
             }
         )

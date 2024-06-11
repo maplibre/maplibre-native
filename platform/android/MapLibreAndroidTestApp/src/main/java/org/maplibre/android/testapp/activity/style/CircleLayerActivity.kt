@@ -19,6 +19,7 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 import java.net.URI
 import java.net.URISyntaxException
@@ -49,7 +50,7 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
                 if (map != null) {
                     maplibreMap = map
                 }
-                maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
                 mapView.addOnDidFinishLoadingStyleListener(
                     OnDidFinishLoadingStyleListener {
                         val style = maplibreMap.style
@@ -276,12 +277,12 @@ class CircleLayerActivity : AppCompatActivity(), View.OnClickListener {
 
     private object Data {
         val STYLES = arrayOf(
-            Style.getPredefinedStyle("Streets"),
-            Style.getPredefinedStyle("Outdoor"),
-            Style.getPredefinedStyle("Bright"),
-            Style.getPredefinedStyle("Pastel"),
-            Style.getPredefinedStyle("Satellite Hybrid"),
-            Style.getPredefinedStyle("Satellite Hybrid")
+            TestStyles.getPredefinedStyleWithFallback("Streets"),
+            TestStyles.getPredefinedStyleWithFallback("Outdoor"),
+            TestStyles.getPredefinedStyleWithFallback("Bright"),
+            TestStyles.getPredefinedStyleWithFallback("Pastel"),
+            TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
+            TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
         )
     }
 

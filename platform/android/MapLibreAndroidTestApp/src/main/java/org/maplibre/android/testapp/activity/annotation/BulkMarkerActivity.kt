@@ -16,8 +16,8 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
-import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.GeoParseUtil
 import timber.log.Timber
 import java.io.IOException
@@ -43,7 +43,7 @@ class BulkMarkerActivity : AppCompatActivity(), OnItemSelectedListener {
 
     private fun initMap(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

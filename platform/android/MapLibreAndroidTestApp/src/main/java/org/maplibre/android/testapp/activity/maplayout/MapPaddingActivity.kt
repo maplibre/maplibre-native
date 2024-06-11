@@ -10,6 +10,7 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing using the map padding API.
@@ -26,7 +27,7 @@ class MapPaddingActivity : AppCompatActivity() {
         mapView.getMapAsync(
             OnMapReadyCallback { maplibreMap: MapLibreMap ->
                 this@MapPaddingActivity.maplibreMap = maplibreMap
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
                 val paddingLeft = resources.getDimension(R.dimen.map_padding_left).toInt()
                 val paddingBottom = resources.getDimension(R.dimen.map_padding_bottom).toInt()
                 val paddingRight = resources.getDimension(R.dimen.map_padding_right).toInt()

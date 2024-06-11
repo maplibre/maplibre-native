@@ -5,11 +5,11 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Style
 import org.maplibre.android.storage.FileSource
 import org.maplibre.android.storage.FileSource.ResourceTransformCallback
 import org.maplibre.android.storage.Resource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 
 /**
@@ -44,7 +44,7 @@ class UrlTransformActivity : AppCompatActivity() {
         FileSource.getInstance(this@UrlTransformActivity).setResourceTransform(Transform())
         mapView.getMapAsync { map: MapLibreMap ->
             Timber.i("Map loaded")
-            map.setStyle(Style.getPredefinedStyle("Streets"))
+            map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
         }
     }
 
