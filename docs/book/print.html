@@ -1607,7 +1607,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 <pre><code class="language-kotlin">    @SuppressLint("MissingPermission")
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style -&gt;
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style -&gt;
             locationComponent = maplibreMap.locationComponent
             val locationComponentOptions =
                 LocationComponentOptions.builder(this@BasicLocationPulsingCircleActivity)
