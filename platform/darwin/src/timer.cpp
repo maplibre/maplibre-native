@@ -18,14 +18,9 @@ public:
     Impl(Duration timeout, Duration repeat, std::function<void()>&& fn)
         : task(std::move(fn)),
           loop(CFRunLoopGetCurrent()) {
-        CFRunLoopTimerContext context = {
-            0,
-            this,
-            nullptr,
-            nullptr,
-            nullptr
-        };
-        timer = CFRunLoopTimerCreate(kCFAllocatorDefault, toCFAbsoluteTime(timeout), toCFTimeInterval(repeat), 0, 0, perform, &context);
+        CFRunLoopTimerContext context = {0, this, nullptr, nullptr, nullptr};
+        timer = CFRunLoopTimerCreate(
+            kCFAllocatorDefault, toCFAbsoluteTime(timeout), toCFTimeInterval(repeat), 0, 0, perform, &context);
         CFRunLoopAddTimer(loop, timer, kCFRunLoopDefaultMode);
     }
 
@@ -35,9 +30,7 @@ public:
     }
 
 private:
-    static void perform(CFRunLoopTimerRef, void* info) {
-        reinterpret_cast<Impl*>(info)->task();
-    }
+    static void perform(CFRunLoopTimerRef, void* info) { reinterpret_cast<Impl*>(info)->task(); }
 
     std::function<void()> task;
 

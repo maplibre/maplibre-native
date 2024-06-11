@@ -1,12 +1,12 @@
 #import <Foundation/Foundation.h>
 
+#import "MLNCluster.h"
 #import "MLNFoundation.h"
-#import "MLNPolyline.h"
-#import "MLNPolygon.h"
 #import "MLNPointAnnotation.h"
 #import "MLNPointCollection.h"
+#import "MLNPolygon.h"
+#import "MLNPolyline.h"
 #import "MLNShapeCollection.h"
-#import "MLNCluster.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -50,7 +50,8 @@ NS_ASSUME_NONNULL_BEGIN
 
  In vector tiles loaded by `MLNVectorTileSource` objects, the identifier
  corresponds to the
- <a href="https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features">feature identifier</a>
+ <a href="https://github.com/mapbox/vector-tile-spec/tree/master/2.1#42-features">feature
+ identifier</a>
  (`id`). If the source does not specify the feature’s identifier, the value of
  this property is `nil`. If specified, the identifier may be an integer,
  floating-point number, or string. These data types are mapped to instances of
@@ -61,9 +62,10 @@ NS_ASSUME_NONNULL_BEGIN
  <tr><th>In the tile source</th><th>This property</th></tr>
  </thead>
  <tbody>
- <tr><td>Integer</td>               <td><code>NSNumber</code> (use the <code>unsignedLongLongValue</code> or <code>longLongValue</code> property)</td></tr>
- <tr><td>Floating-point number</td> <td><code>NSNumber</code> (use the <code>doubleValue</code> property)</td></tr>
- <tr><td>String</td>                <td><code>NSString</code></td></tr>
+ <tr><td>Integer</td>               <td><code>NSNumber</code> (use the
+ <code>unsignedLongLongValue</code> or <code>longLongValue</code> property)</td></tr>
+ <tr><td>Floating-point number</td> <td><code>NSNumber</code> (use the <code>doubleValue</code>
+ property)</td></tr> <tr><td>String</td>                <td><code>NSString</code></td></tr>
  </tbody>
  </table>
 
@@ -98,7 +100,7 @@ NS_ASSUME_NONNULL_BEGIN
  `MLNShapeSource` using an `MLNCircleStyleLayer`, you can assign a `halfway`
  attribute to each of the source’s features, then set
  `MLNCircleStyleLayer.circleRadius` to an expression for the key path `halfway`.
- 
+
  The `MLNSymbolStyleLayer.text` and `MLNSymbolStyleLayer.iconImageName`
  properties allow you to use attributes yet another way. For example, to label
  features in an `MLNShapeSource` object by their names, you can assign a `name`
@@ -120,10 +122,11 @@ NS_ASSUME_NONNULL_BEGIN
  </thead>
  <tbody>
  <tr><td>Null</td>                  <td><code>NSNull</code></td></tr>
- <tr><td>Boolean</td>               <td><code>NSNumber</code> (use the <code>boolValue</code> property)</td></tr>
- <tr><td>Integer</td>               <td><code>NSNumber</code> (use the <code>unsignedLongLongValue</code> or <code>longLongValue</code> property)</td></tr>
- <tr><td>Floating-point number</td> <td><code>NSNumber</code> (use the <code>doubleValue</code> property)</td></tr>
- <tr><td>String</td>                <td><code>NSString</code></td></tr>
+ <tr><td>Boolean</td>               <td><code>NSNumber</code> (use the <code>boolValue</code>
+ property)</td></tr> <tr><td>Integer</td>               <td><code>NSNumber</code> (use the
+ <code>unsignedLongLongValue</code> or <code>longLongValue</code> property)</td></tr>
+ <tr><td>Floating-point number</td> <td><code>NSNumber</code> (use the <code>doubleValue</code>
+ property)</td></tr> <tr><td>String</td>                <td><code>NSString</code></td></tr>
  </tbody>
  </table>
 
@@ -133,7 +136,7 @@ NS_ASSUME_NONNULL_BEGIN
  and
  <a href="https://www.mapbox.com/vector-tiles/mapbox-terrain/">Mapbox Terrain</a>
  layer references.
- 
+
  When adding a feature to an `MLNShapeSource`, use the same Foundation types
  listed above for each attribute value. In addition to the Foundation types, you
  may also set an attribute to an `NSColor` (macOS) or `UIColor` (iOS), which
@@ -183,7 +186,7 @@ MLN_EXPORT
 /**
  An `MLNPointFeature` object associates a point shape with an optional
  identifier and attributes.
- 
+
  #### Related examples
  TODO: Dynamically style interactive points, learn how to initialize
  `MLNPointFeature` objects and add them to your map.
@@ -195,9 +198,9 @@ MLN_EXPORT
 /**
  An `MLNPointFeatureCluster` object associates a point shape (with an optional
  identifier and attributes) and represents a point cluster.
- 
+
  @see `MLNCluster`
- 
+
  #### Related examples
  TODO: Clustering point data, learn how to initialize
  clusters and add them to your map.
@@ -213,7 +216,7 @@ MLN_EXPORT
  A polyline feature is known as a
  <a href="https://tools.ietf.org/html/rfc7946#section-3.1.4">LineString</a>
  feature in GeoJSON.
- 
+
  #### Related examples
  TODO: Add a line annotation from GeoJSON, learn how to initialize an
  `MLNPolylineFeature` and add it to an `MLNMapView` object.
@@ -268,7 +271,7 @@ MLN_EXPORT
 /**
  An `MLNShapeCollectionFeature` object associates a shape collection with an
  optional identifier and attributes.
- 
+
  `MLNShapeCollectionFeature` is most commonly used to add multiple shapes to a
  single `MLNShapeSource`. Configure the appearance of an `MLNSource`’s shape
  collection collectively using an `MLNSymbolStyleLayer` object, or use multiple
@@ -279,7 +282,7 @@ MLN_EXPORT
  A shape collection feature is known as a
  <a href="https://tools.ietf.org/html/rfc7946#section-3.3">feature collection</a>
  in GeoJSON.
- 
+
  #### Related examples
  TODO: Add multiple shapes from a single shape source, learn how to
  add shape data to your map using an `MLNShapeCollectionFeature` object.

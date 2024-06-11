@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 #if TARGET_OS_IPHONE
-    #import <UIKit/UIKit.h>
+#import <UIKit/UIKit.h>
 #else
-    #import <Cocoa/Cocoa.h>
+#import <Cocoa/Cocoa.h>
 #endif
 
 #import "NSExpression+MLNAdditions.h"
@@ -14,7 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface NSObject (MLNExpressionAdditions)
 
 - (nullable NSNumber *)mgl_number;
-- (nullable NSNumber *)mgl_numberWithFallbackValues:(id)fallbackValue, ... NS_REQUIRES_NIL_TERMINATION;
+- (nullable NSNumber *)mgl_numberWithFallbackValues:(id)fallbackValue,
+                                                    ... NS_REQUIRES_NIL_TERMINATION;
 
 @end
 
@@ -43,7 +44,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NSNumber (MLNExpressionAdditions)
 
-- (id)mgl_interpolateWithCurveType:(NSString *)curveType parameters:(NSArray *)parameters stops:(NSDictionary<NSNumber *, id> *)stops;
+- (id)mgl_interpolateWithCurveType:(NSString *)curveType
+                        parameters:(NSArray *)parameters
+                             stops:(NSDictionary<NSNumber *, id> *)stops;
 - (id)mgl_stepWithMinimum:(id)minimum stops:(NSDictionary<NSNumber *, id> *)stops;
 
 @property (nonatomic, readonly) id mgl_jsonExpressionObject;
@@ -73,7 +76,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface NSExpression (MLNExpressionAdditions)
 
 - (NSExpression *)mgl_expressionWithContext:(NSDictionary<NSString *, NSExpression *> *)context;
-
 
 - (id)mgl_has:(id)element;
 

@@ -3,9 +3,9 @@
 #include <mbgl/util/size.hpp>
 
 namespace mbgl {
-    class Map;
-    class Renderer;
-}
+class Map;
+class Renderer;
+}  // namespace mbgl
 
 @class MLNSource;
 

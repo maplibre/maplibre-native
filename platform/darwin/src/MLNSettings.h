@@ -9,18 +9,18 @@ NS_ASSUME_NONNULL_BEGIN
  Well-known tile servers
  */
 typedef NS_ENUM(NSUInteger, MLNWellKnownTileServer) {
-    /**
-     Maptiler
-     */
-    MLNMapTiler,
-    /**
-     MapLibre
-     */
-    MLNMapLibre,
-    /**
-     Mapbox
-     */
-    MLNMapbox
+  /**
+   Maptiler
+   */
+  MLNMapTiler,
+  /**
+   MapLibre
+   */
+  MLNMapLibre,
+  /**
+   Mapbox
+   */
+  MLNMapbox
 };
 
 /**
@@ -50,7 +50,7 @@ MLN_EXPORT
     and the type `String`. Alternatively, you may call this method from your
     application delegate’s `-applicationDidFinishLaunching:` method.
  */
-@property (class, copy, nullable) NSString *apiKey;
+@property (class, copy, nullable) NSString* apiKey;
 
 /**
  Instructs the SDk to use the give tile server

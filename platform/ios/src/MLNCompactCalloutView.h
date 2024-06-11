@@ -1,5 +1,5 @@
-#import "SMCalloutView.h"
 #import "MLNCalloutView.h"
+#import "SMCalloutView.h"
 
 /**
  A concrete implementation of `MLNCalloutView` based on
