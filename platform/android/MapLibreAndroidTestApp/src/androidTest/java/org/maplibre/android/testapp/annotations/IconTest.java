@@ -53,7 +53,7 @@ public class IconTest extends EspressoTest {
   @UiThreadTest
   public void testAddDifferentIconMarker() {
     validateTestSetup();
-    Icon icon = IconFactory.getInstance(rule.getActivity()).fromResource(R.drawable.maplibre_logo_icon);
+    Icon icon = IconFactory.getInstance(rule.getActivity()).fromResource(R.drawable.maplibre_compass_icon);
     maplibreMap.addMarker(new MarkerOptions().icon(icon).position(new LatLng()));
     maplibreMap.addMarker(new MarkerOptions().position(new LatLng(1, 1)));
     assertEquals(iconMap.size(), 2);
@@ -65,7 +65,7 @@ public class IconTest extends EspressoTest {
   @UiThreadTest
   public void testAddRemoveIconMarker() {
     validateTestSetup();
-    Icon icon = IconFactory.getInstance(rule.getActivity()).fromResource(R.drawable.maplibre_logo_icon);
+    Icon icon = IconFactory.getInstance(rule.getActivity()).fromResource(R.drawable.maplibre_compass_icon);
     Marker marker = maplibreMap.addMarker(new MarkerOptions().icon(icon).position(new LatLng()));
     maplibreMap.addMarker(new MarkerOptions().position(new LatLng(1, 1)));
     assertEquals(iconMap.size(), 2);
@@ -104,7 +104,7 @@ public class IconTest extends EspressoTest {
 
     // add 4 unique icon markers
     maplibreMap.addMarker(new MarkerOptions()
-      .icon(iconFactory.fromResource(R.drawable.maplibre_logo_icon))
+      .icon(iconFactory.fromResource(R.drawable.maplibre_mylocation_icon_default))
       .position(new LatLng(3, 1))
     );
     maplibreMap.addMarker(new MarkerOptions()
