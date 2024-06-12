@@ -122,11 +122,11 @@ NSString * const kMLNDownloadPerformanceEvent = @"mobile.performance_trace";
 }
 
 - (void)debugLog:(NSString *)message {
-    MLNLogDebug(message);
+    MLNLogDebugMessage(message);
 }
 
 - (void)errorLog:(NSString *)message {
-    MLNLogError(message);
+    MLNLogErrorMessage(message);
 }
 
 // MARK: - Event management
