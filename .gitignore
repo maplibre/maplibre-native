@@ -5,10 +5,10 @@
 /platform/android/gradle/configuration.gradle
 /platform/android/arm64-v8a
 /platform/android/armeabi-v7a
-/platform/android/MapLibreAndroid/.cxx
+.cxx
 /platform/android/MapLibreAndroid/build
-/platform/android/MapLibreAndroidTestApp/.cxx
 /platform/android/MapLibreAndroidTestApp/build
+/platform/android/MapLibreAndroidCppTestApp/build
 /platform/android/.gradle
 /platform/android/x86
 /platform/android/x86_64

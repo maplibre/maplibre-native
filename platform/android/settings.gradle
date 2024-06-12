@@ -1,5 +1,7 @@
 include ':MapLibreAndroid', ':MapLibreAndroidTestApp', ':MapLibreAndroidLint'
 
+include ':MapLibreCppTestApp'
+
 rootProject.name = "MapLibre Native for Android"
 
 def renderTestProjectDir = new File(rootDir, '../../render-test/android')
