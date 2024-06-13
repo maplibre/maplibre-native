@@ -87,6 +87,7 @@ GCC_CLANG_CPP_FLAGS = [
     "-fno-rtti",
     "-ftemplate-depth=1024",
     "-std=c++17",
+    "-fvisibility=hidden",
 ]
 
 MSVC_CPP_FLAGS = [
