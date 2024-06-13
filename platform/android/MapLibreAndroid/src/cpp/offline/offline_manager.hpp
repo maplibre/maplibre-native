@@ -32,6 +32,22 @@ public:
                            const jni::Object<OfflineManager::ListOfflineRegionsCallback>&,
                            mbgl::OfflineRegions&);
     };
+    class GetOfflineRegionCallback {
+    public:
+        static constexpr auto Name() {
+            return "org/maplibre/android/offline/"
+                   "OfflineManager$GetOfflineRegionCallback";
+        }
+
+        static void onError(jni::JNIEnv&,
+                            const jni::Object<OfflineManager::GetOfflineRegionCallback>&,
+                            std::exception_ptr);
+
+        static void onRegion(jni::JNIEnv&,
+                           const jni::Object<FileSource>&,
+                           const jni::Object<OfflineManager::GetOfflineRegionCallback>&,
+                           mbgl::OfflineRegion&);
+    };
 
     class CreateOfflineRegionCallback {
     public:
@@ -90,6 +106,11 @@ public:
     void listOfflineRegions(jni::JNIEnv&,
                             const jni::Object<FileSource>&,
                             const jni::Object<ListOfflineRegionsCallback>& callback);
+
+    void getOfflineRegion(jni::JNIEnv&,
+                          const jni::Object<FileSource>&,
+                          const int64_t regionID,
+                          const jni::Object<GetOfflineRegionCallback>& callback);
 
     void createOfflineRegion(jni::JNIEnv&,
                              const jni::Object<FileSource>& jFileSource_,
