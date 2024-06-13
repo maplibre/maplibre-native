@@ -47,6 +47,25 @@ if(MLN_WITH_EGL)
     )
 endif()
 
+if(MLN_WITH_VULKAN)
+    find_package(VulkanHeaders REQUIRED)
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+            Vulkan::Headers
+    )
+
+    target_sources(
+        mbgl-glfw
+        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_vulkan_backend.cpp
+    )
+    
+    target_compile_definitions(
+        mbgl-glfw
+        PRIVATE MLN_RENDER_BACKEND_VULKAN=1
+    )
+endif()
+
 target_include_directories(
     mbgl-glfw
     PRIVATE

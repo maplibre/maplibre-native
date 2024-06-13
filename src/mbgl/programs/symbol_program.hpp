@@ -18,7 +18,7 @@
 #include <array>
 
 #include <mbgl/shaders/shader_manifest.hpp>
-#if !MLN_RENDER_BACKEND_METAL
+#if !MLN_RENDER_BACKEND_METAL && !MLN_RENDER_BACKEND_VULKAN
 #include <mbgl/gl/program.hpp>
 #endif
 

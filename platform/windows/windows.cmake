@@ -2,6 +2,8 @@ if(MLN_WITH_EGL)
     set(_RENDERER EGL)
 elseif(MLN_WITH_OSMESA)
     set(_RENDERER OSMesa)
+elseif(MLN_WITH_VULKAN)
+    set(_RENDERER Vulkan)
 else()
     set(_RENDERER OpenGL)
 endif()
@@ -119,6 +121,18 @@ elseif(MLN_WITH_OSMESA)
         PRIVATE
             OSMesa::osmesa
             OSMesa::libGLESv2
+    )
+elseif(MLN_WITH_VULKAN)
+    find_package(Vulkan REQUIRED)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+    )
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+            Vulkan::Headers
     )
 else()
     find_package(OpenGL REQUIRED)

@@ -229,6 +229,12 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_buffer_gl.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_attribute_gl.cpp
     )
+
+    target_compile_definitions(
+        mbgl-core
+        PUBLIC
+            "MLN_DRAWABLE_RENDERER=$<BOOL:${MLN_DRAWABLE_RENDERER}>"
+    )
 endif()
 
 list(APPEND INCLUDE_FILES
@@ -1281,6 +1287,71 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_sdf.cpp
             ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_text_and_icon.cpp
     ]
+    )
+endif()
+
+if(MLN_WITH_VULKAN)
+    find_package(VulkanHeaders REQUIRED)
+    find_package(VulkanMemoryAllocator REQUIRED)
+    message(STATUS "Configuring Vulkan renderer backend")
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE
+            MLN_RENDER_BACKEND_VULKAN=1
+    )
+
+    target_link_libraries(
+        mbgl-core
+        PRIVATE
+            Vulkan::Headers
+            GPUOpen::VulkanMemoryAllocator
+    )
+
+    list(APPEND 
+        INCLUDE_FILES
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/command_encoder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/context.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/layer_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/offscreen_texture.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/renderer_backend.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/render_pass.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/renderable_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/texture2d.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/tile_layer_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/uniform_buffer.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/upload_pass.hpp
+    )
+
+    list(APPEND 
+        SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/buffer_resource.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/command_encoder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/context.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_impl.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/layer_group.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/offscreen_texture.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/render_pass.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/texture2d.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/tile_layer_group.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/uniform_buffer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/upload_pass.cpp
+    )
+
+    #TODO merge with MLN_DRAWABLE_RENDERER? These are added only for GL path otherwise
+    list(APPEND 
+        SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_drawable_layer_factory.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.hpp
     )
 endif()
 

@@ -45,6 +45,10 @@
 #define GLFW_INCLUDE_ES3
 #endif
 
+#if MLN_RENDER_BACKEND_VULKAN
+#define GLFW_INCLUDE_VULKAN
+#endif
+
 #define GL_GLEXT_PROTOTYPES
 #include <GLFW/glfw3.h>
 

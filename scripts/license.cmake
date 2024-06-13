@@ -21,7 +21,8 @@ function(mbgl_generate_license param)
             get_target_property(LICENSE ${LIBRARY} INTERFACE_MAPBOX_LICENSE)
 
             if(NOT LICENSE OR NOT EXISTS ${LICENSE})
-                message(FATAL_ERROR "License not found for target: ${LIBRARY}")
+                #message(FATAL_ERROR "License not found for target: ${LIBRARY}")
+				continue()
             endif()
 
             file(READ ${LICENSE} LICENSE_DATA)

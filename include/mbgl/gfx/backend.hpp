@@ -13,12 +13,15 @@ public:
     enum class Type : uint8_t {
         OpenGL,   ///< The OpenGL API backend
         Metal,    ///< The Metal API backend
+        Vulkan,   ///< The Vulkan API backend
         TYPE_MAX, ///< Not a valid backend type, used to determine the number
                   ///< of available backends (ie for array allocation).
     };
 
 #if MLN_RENDER_BACKEND_METAL
     static constexpr Type DefaultType = Type::Metal;
+#elif MLN_RENDER_BACKEND_VULKAN
+    static constexpr Type DefaultType = Type::Vulkan;
 #else // assume MLN_RENDER_BACKEND_OPENGL
     static constexpr Type DefaultType = Type::OpenGL;
 #endif
@@ -38,6 +41,8 @@ public:
     static std::unique_ptr<T> Create(Args... args) {
 #if MLN_RENDER_BACKEND_METAL
         return Create<Type::Metal, T, Args...>(std::forward<Args>(args)...);
+#elif MLN_RENDER_BACKEND_VULKAN
+        return Create<Type::Vulkan, T, Args...>(std::forward<Args>(args)...);
 #else // assume MLN_RENDER_BACKEND_OPENGL
         return Create<Type::OpenGL, T, Args...>(std::forward<Args>(args)...);
 #endif

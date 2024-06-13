@@ -198,6 +198,8 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         mtlContext.renderingStats().stencilUpdates++;
     }
 
+#elif MLN_RENDER_BACKEND_VULKAN
+
 #else  // !MLN_RENDER_BACKEND_METAL
     auto program = staticData.shaders->getLegacyGroup().get<ClippingMaskProgram>();
 
