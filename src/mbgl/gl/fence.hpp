@@ -12,7 +12,7 @@ public:
     ~Fence();
 
     void insert() noexcept;
-    bool isSignaled() const noexcept;
+    bool isSignaled() const;
 
 private:
     platform::GLsync fence{nullptr};
