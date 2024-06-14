@@ -904,7 +904,7 @@ MLN_EXPORT
  *
  * @param MLNCoordinateBounds the bounds to constrain the map with.
  */
-@property(nonatomic) MLNCoordinateBounds maximumBounds;
+@property (nonatomic) MLNCoordinateBounds maximumBounds;
 
 /**
  The heading of the map, measured in degrees clockwise from true north.
