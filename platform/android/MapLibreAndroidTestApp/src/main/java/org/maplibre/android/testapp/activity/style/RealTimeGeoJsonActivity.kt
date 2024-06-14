@@ -9,6 +9,7 @@ import org.maplibre.android.maps.*
 import org.maplibre.android.style.layers.*
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 import java.net.URI
 import java.net.URISyntaxException
@@ -35,7 +36,7 @@ class RealTimeGeoJsonActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style -> // add source
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style -> // add source
             try {
                 style.addSource(GeoJsonSource(ID_GEOJSON_SOURCE, URI(URL_GEOJSON_SOURCE)))
             } catch (malformedUriException: URISyntaxException) {

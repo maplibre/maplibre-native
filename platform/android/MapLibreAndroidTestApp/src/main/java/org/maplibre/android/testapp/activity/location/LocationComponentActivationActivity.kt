@@ -16,6 +16,7 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 class LocationComponentActivationActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
@@ -62,7 +63,7 @@ class LocationComponentActivationActivity : AppCompatActivity(), OnMapReadyCallb
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
         maplibreMap.setStyle(
-            Style.getPredefinedStyle("Bright")
+            TestStyles.getPredefinedStyleWithFallback("Bright")
         ) { style: Style -> activateLocationComponent(style) }
     }
 

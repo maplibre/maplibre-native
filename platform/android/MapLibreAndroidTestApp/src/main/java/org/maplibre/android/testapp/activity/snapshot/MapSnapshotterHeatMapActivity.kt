@@ -17,6 +17,7 @@ import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.style.sources.Source
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 import java.net.URI
 import java.net.URISyntaxException
@@ -35,7 +36,7 @@ class MapSnapshotterHeatMapActivity : AppCompatActivity(), MapSnapshotter.Snapsh
                 override fun onGlobalLayout() {
                     container.viewTreeObserver.removeOnGlobalLayoutListener(this)
                     Timber.i("Starting snapshot")
-                    val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Outdoor"))
+                    val builder = Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Outdoor"))
                         .withSource(earthquakeSource!!)
                         .withLayerAbove(heatmapLayer, "water_intermittent")
                     mapSnapshotter = MapSnapshotter(

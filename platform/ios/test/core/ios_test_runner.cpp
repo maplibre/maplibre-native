@@ -1,10 +1,8 @@
-#include <ios_test_runner.hpp>
-
-#include <mbgl/test.hpp>
-
-#include <mbgl/util/logging.hpp>
-
 #include <unistd.h>
+
+#include <ios_test_runner.hpp>
+#include <mbgl/test.hpp>
+#include <mbgl/util/logging.hpp>
 #include <vector>
 
 #define EXPORT __attribute__((visibility("default")))

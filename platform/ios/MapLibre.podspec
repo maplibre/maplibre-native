@@ -15,5 +15,7 @@ Pod::Spec.new do |s|
     s.social_media_url  = 'https://mastodon.social/@maplibre'
     s.ios.deployment_target = '12.0'
     s.ios.vendored_frameworks = "MapLibre.xcframework"
+    s.resource_bundle = {
+        "MapLibre_Privacy" => "PrivacyInfo.xcprivacy"
+    }
 end
-

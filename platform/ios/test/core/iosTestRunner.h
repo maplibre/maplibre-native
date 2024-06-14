@@ -2,10 +2,10 @@
 
 #import <Foundation/Foundation.h>
 
-__attribute__((visibility ("default")))
+__attribute__((visibility("default")))
 @interface IosTestRunner : NSObject
 
-- (NSString*) getResultPath;
-- (BOOL) getTestStatus;
+- (NSString*)getResultPath;
+- (BOOL)getTestStatus;
 
 @end

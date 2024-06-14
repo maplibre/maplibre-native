@@ -1,29 +1,29 @@
 #import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
-#import "MLNOfflineRegion.h"
 #import "MLNGeometry.h"
+#import "MLNOfflineRegion.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
  An offline region defined by a style URL, geographic coordinate bounds, and
  range of zoom levels.
- 
+
  To minimize the resources required by an irregularly shaped offline region,
  use the MLNShapeOfflineRegion class instead.
- 
+
  ### Example
  ```swift
  let northeast = CLLocationCoordinate2D(latitude: 40.989329, longitude: -102.062592)
  let southwest = CLLocationCoordinate2D(latitude: 36.986207, longitude: -109.049896)
  let bbox = MLNCoordinateBounds(sw: southwest, ne: northeast)
- 
- let region = MLNTilePyramidOfflineRegion(styleURL: MLNStyle.lightStyleURL, bounds: bbox, fromZoomLevel: 11, toZoomLevel: 14)
- let context = "Tile Pyramid Region".data(using: .utf8)
+
+ let region = MLNTilePyramidOfflineRegion(styleURL: MLNStyle.lightStyleURL, bounds: bbox,
+ fromZoomLevel: 11, toZoomLevel: 14) let context = "Tile Pyramid Region".data(using: .utf8)
  MLNOfflineStorage.shared.addPack(for: region, withContext: context!)
  ```
-  
+
  #### Related examples
  TODO: Download an offline map, learn how to define an offline region
  to be downloaded to a user's device.
@@ -80,7 +80,10 @@ MLN_EXPORT
     level, the download covers zoom levels up to the tile source’s maximum zoom
     level.
  */
-- (instancetype)initWithStyleURL:(nullable NSURL *)styleURL bounds:(MLNCoordinateBounds)bounds fromZoomLevel:(double)minimumZoomLevel toZoomLevel:(double)maximumZoomLevel NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithStyleURL:(nullable NSURL *)styleURL
+                          bounds:(MLNCoordinateBounds)bounds
+                   fromZoomLevel:(double)minimumZoomLevel
+                     toZoomLevel:(double)maximumZoomLevel NS_DESIGNATED_INITIALIZER;
 
 @end
 

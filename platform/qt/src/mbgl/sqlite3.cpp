@@ -14,6 +14,7 @@
 #include <chrono>
 #include <limits>
 #include <optional>
+#include <variant>
 
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/logging.hpp>
@@ -77,7 +78,7 @@ public:
     int64_t changes = 0;
 };
 
-mapbox::util::variant<Database, Exception> Database::tryOpen(const std::string& filename, int flags) {
+std::variant<Database, Exception> Database::tryOpen(const std::string& filename, int flags) {
     if (!QSqlDatabase::drivers().contains("QSQLITE")) {
         return Exception{ResultCode::CantOpen, "SQLite driver not found."};
     }
@@ -112,10 +113,10 @@ mapbox::util::variant<Database, Exception> Database::tryOpen(const std::string& 
 
 Database Database::open(const std::string& filename, int flags) {
     auto result = tryOpen(filename, flags);
-    if (result.is<Exception>()) {
-        throw result.get<Exception>();
+    if (std::holds_alternative<Exception>(result)) {
+        throw std::get<Exception>(result);
     } else {
-        return std::move(result.get<Database>());
+        return std::move(std::get<Database>(result));
     }
 }
 

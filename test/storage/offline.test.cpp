@@ -11,7 +11,7 @@ TEST(OfflineTilePyramidRegionDefinition, EncodeDecode) {
         "maptiler://style", LatLngBounds::hull({37.6609, -122.5744}, {37.8271, -122.3204}), 0, 20, 1.0, true);
 
     auto encoded = encodeOfflineRegionDefinition(region);
-    auto decoded = decodeOfflineRegionDefinition(encoded).get<OfflineTilePyramidRegionDefinition>();
+    auto decoded = std::get<OfflineTilePyramidRegionDefinition>(decodeOfflineRegionDefinition(encoded));
 
     EXPECT_EQ(decoded.styleURL, region.styleURL);
     EXPECT_EQ(decoded.minZoom, region.minZoom);
@@ -26,7 +26,7 @@ TEST(OfflineGeometryRegionDefinition, EncodeDecode) {
     OfflineGeometryRegionDefinition region("maptiler://style", Point<double>(-122.5744, 37.6609), 0, 2, 1.0, false);
 
     auto encoded = encodeOfflineRegionDefinition(region);
-    auto decoded = decodeOfflineRegionDefinition(encoded).get<OfflineGeometryRegionDefinition>();
+    auto decoded = std::get<OfflineGeometryRegionDefinition>(decodeOfflineRegionDefinition(encoded));
 
     EXPECT_EQ(decoded.styleURL, region.styleURL);
     EXPECT_EQ(decoded.minZoom, region.minZoom);

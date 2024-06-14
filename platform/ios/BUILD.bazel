@@ -124,7 +124,7 @@ apple_xcframework(
         "resources/*.lproj/**",
         "resources/*.xcassets/**",
         "resources/metal-cpp-ignores.txt",
-    ]),
+    ]) + ["PrivacyInfo.xcprivacy"],
     infoplists = ["info_plist"],
     ios = {
         "simulator": [
@@ -245,6 +245,7 @@ filegroup(
     srcs = [
         "BAZEL.md",
         "MapLibre.podspec",
+        "PrivacyInfo.xcprivacy",
         "README.md",
         "RELEASE.md",
         "VERSION",

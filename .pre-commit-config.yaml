@@ -5,11 +5,11 @@ repos:
     -   id: check-yaml
         args: [--allow-multiple-documents]
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v18.1.5
+  rev: v18.1.6
   hooks:
   - id: clang-format
     files: '.*\.(hpp|cpp|h)'
-    exclude: '(vendor/.*|platform/(ios|darwin|macos)/.*|test/ios/.*|render-test/ios/.*|benchmark/ios/.*)'
+    exclude: '(vendor/.*|darwin/include/mbgl/storage/reachability.h)'
 - repo: https://github.com/keith/pre-commit-buildifier
   rev: 6.4.0
   hooks:

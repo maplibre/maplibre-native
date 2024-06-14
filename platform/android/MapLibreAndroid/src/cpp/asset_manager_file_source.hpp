@@ -35,7 +35,7 @@ public:
 private:
     class Impl;
 
-    jni::Global<jni::Object<android::AssetManager>> assetManager;
+    jni::Global<jni::Object<android::AssetManager>, jni::EnvAttachingDeleter> assetManager;
     std::unique_ptr<util::Thread<Impl>> impl;
 };
 

@@ -4,7 +4,8 @@
 
 @interface MLNUserLocationHeadingBeamLayer : CALayer <MLNUserLocationHeadingIndicator>
 
-- (MLNUserLocationHeadingBeamLayer *)initWithUserLocationAnnotationView:(MLNUserLocationAnnotationView *)userLocationView;
+- (MLNUserLocationHeadingBeamLayer *)initWithUserLocationAnnotationView:
+    (MLNUserLocationAnnotationView *)userLocationView;
 - (void)updateHeadingAccuracy:(CLLocationDirection)accuracy;
 - (void)updateTintColor:(CGColorRef)color;
 

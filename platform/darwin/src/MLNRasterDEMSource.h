@@ -6,9 +6,9 @@
  An `NSNumber` object containing an unsigned integer that specifies the encoding
  formula for raster-dem tilesets. The integer corresponds to one of
  the constants described in `MLNDEMEncoding`.
- 
+
  The default value for this option is `MLNDEMEncodingMapbox`.
- 
+
  This option cannot be represented in a TileJSON or style JSON file. It is used
  with the `MLNRasterDEMSource` class and is ignored when creating an
  `MLNRasterTileSource` or `MLNVectorTileSource` object.
@@ -32,9 +32,11 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionDEMEnc
  `MLNRasterDEMSource` object that you can use to initialize new style layers.
  You can also add and remove sources dynamically using methods such as
  `-[MLNStyle addSource:]` and `-[MLNStyle sourceWithIdentifier:]`.
- 
+
  Currently, raster DEM sources only support the format used by
- <a href="https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb">Mapbox Terrain-RGB</a>.
+ <a
+ href="https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb">Mapbox
+ Terrain-RGB</a>.
 
  ### Example
 

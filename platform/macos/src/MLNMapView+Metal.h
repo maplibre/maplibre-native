@@ -8,39 +8,35 @@
 
 /// Adapter responsible for bridging calls from mbgl to MLNMapView and Cocoa.
 class MLNMapViewMetalImpl final : public MLNMapViewImpl,
-                                   public mbgl::mtl::RendererBackend,
-                                   public mbgl::gfx::Renderable {
-public:
-    MLNMapViewMetalImpl(MLNMapView*);
-    ~MLNMapViewMetalImpl() override;
+                                  public mbgl::mtl::RendererBackend,
+                                  public mbgl::gfx::Renderable {
+ public:
+  MLNMapViewMetalImpl(MLNMapView*);
+  ~MLNMapViewMetalImpl() override;
 
-public:
-    void restoreFramebufferBinding();
+ public:
+  void restoreFramebufferBinding();
 
-    // Implementation of mbgl::gfx::RendererBackend
-public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override {
-        return *this;
-    }
+  // Implementation of mbgl::gfx::RendererBackend
+ public:
+  mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
 
-private:
-    void activate() override;
-    void deactivate() override;
-    // End implementation of mbgl::gfx::RendererBackend
+ private:
+  void activate() override;
+  void deactivate() override;
+  // End implementation of mbgl::gfx::RendererBackend
 
-    // Implementation of mbgl::gl::RendererBackend
-public:
-    void updateAssumedState() override;
-    // End implementation of mbgl::gl::Rendererbackend
+  // Implementation of mbgl::gl::RendererBackend
+ public:
+  void updateAssumedState() override;
+  // End implementation of mbgl::gl::Rendererbackend
 
-    // Implementation of MLNMapViewImpl
-public:
-    mbgl::gfx::RendererBackend& getRendererBackend() override {
-        return *this;
-    }
+  // Implementation of MLNMapViewImpl
+ public:
+  mbgl::gfx::RendererBackend& getRendererBackend() override { return *this; }
 
-    mbgl::PremultipliedImage readStillImage() override;
+  mbgl::PremultipliedImage readStillImage() override;
 
-private:
-    bool presentsWithTransaction = false;
+ private:
+  bool presentsWithTransaction = false;
 };
