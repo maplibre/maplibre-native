@@ -307,13 +307,13 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
 
             // Calculate the current point and zoom level along the flight path.
             Point<double> framePoint = util::interpolate(startPoint, endPoint, us);
-            double frameZoom = linearZoomInterpolation ? util::interpolate(startZoom, zoom, k)
-                                                       : startZoom + state.scaleZoom(1 / w(s));
 
             // Zoom can be NaN if size is empty.
-            if (std::isnan(frameZoom)) {
-                frameZoom = zoom;
-            }
+            // also do not interpolate if start and end zoom are the same
+            // (https://github.com/maplibre/maplibre-native/issues/2477)
+            double frameZoom = std::isnan(zoom) || zoom == startZoom ? zoom
+                               : linearZoomInterpolation             ? util::interpolate(startZoom, zoom, k)
+                                                                     : startZoom + state.scaleZoom(1 / w(s));
 
             // Convert to geographic coordinates and set the new viewpoint.
             LatLng frameLatLng = Projection::unproject(framePoint, startScale);
