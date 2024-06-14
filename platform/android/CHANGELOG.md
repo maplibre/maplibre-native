@@ -15,7 +15,7 @@
 
 ### 🐞 Bug fixes
 
-- Fixes crash that happened with some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)).
+- Fixes crash that happened when parsing some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)).
 - Shut down the mailbox on raster tiles as with GeometryTile to avoid processing messages after it's queued for destruction ([#2443](https://github.com/maplibre/maplibre-native/pull/2443)).
 - Increase the deferred cleanup timeout ([#2455](https://github.com/maplibre/maplibre-native/pull/2455)).
 - Fix crash caused `DefaultRefDeleter`, reported by Komoot ([#2487](https://github.com/maplibre/maplibre-native/pull/2487)).
