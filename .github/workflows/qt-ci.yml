@@ -207,7 +207,7 @@ jobs:
           toolset: ${{ matrix.compiler_version }}
 
       - name: Setup ninja
-        uses: seanmiddleditch/gha-setup-ninja@v4
+        uses: seanmiddleditch/gha-setup-ninja@v5
 
       - name: Download Qt
         uses: jurplel/install-qt-action@v4
