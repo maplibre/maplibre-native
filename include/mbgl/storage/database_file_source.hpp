@@ -19,6 +19,7 @@ public:
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
     void forward(const Resource&, const Response&, std::function<void()> callback) override;
     bool canRequest(const Resource&) const override;
+    bool canRequestNow(const Resource&) const override;
     void setProperty(const std::string&, const mapbox::base::Value&) override;
     void pause() override;
     void resume() override;

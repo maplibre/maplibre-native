@@ -316,6 +316,10 @@ bool MBTilesFileSource::canRequest(const Resource &resource) const {
     return acceptsURL(resource.url);
 }
 
+bool MBTilesFileSource::canRequestNow(const Resource &resource) const {
+    return canRequest(resource);
+}
+
 MBTilesFileSource::~MBTilesFileSource() = default;
 
 void MBTilesFileSource::setResourceOptions(ResourceOptions options) {

@@ -14,6 +14,7 @@ public:
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
     bool canRequest(const Resource&) const override { return true; }
+    bool canRequestResource(const Resource& resource) const override { return canRequest(resource) }
 
     /**
      * @brief Flag to change the networking mode of the file source.

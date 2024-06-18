@@ -17,6 +17,9 @@ public:
     bool canRequest(const Resource& resource) const override {
         return resource.hasLoadingMethod(Resource::LoadingMethod::Network);
     }
+    bool canRequestNow(const Resource& resource) const override {
+        return canRequest(resource);
+    }
 
     void setResourceOptions(ResourceOptions) override;
     ResourceOptions getResourceOptions() override;

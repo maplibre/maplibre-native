@@ -362,7 +362,10 @@ public:
         return cachedClientOptions.clone();
     }
 
-    void setOnlineStatus(bool status) { thread->actor().invoke(&OnlineFileSourceThread::setOnlineStatus, status); }
+    void setOnlineStatus(bool status) {
+        online = status;
+        thread->actor().invoke(&OnlineFileSourceThread::setOnlineStatus, status);
+    }
 
     void setMaximumConcurrentRequests(const mapbox::base::Value& value) {
         if (auto* maximumConcurrentRequests = value.getUint()) {
@@ -418,6 +421,10 @@ public:
         return cachedResourceOptions.tileServerOptions().baseURL();
     }
 
+    bool isOnline() {
+        return online;
+    }
+
 private:
     mutable std::mutex resourceOptionsMutex;
     mutable std::mutex clientOptionsMutex;
@@ -427,6 +434,7 @@ private:
     mutable std::mutex maximumConcurrentRequestsMutex;
     uint32_t cachedMaximumConcurrentRequests = util::DEFAULT_MAXIMUM_CONCURRENT_REQUESTS;
     const std::unique_ptr<util::Thread<OnlineFileSourceThread>> thread;
+    bool online = false;
 };
 
 OnlineFileRequest::OnlineFileRequest(Resource resource_, Callback callback_, OnlineFileSourceThread& impl_)
@@ -657,6 +665,10 @@ bool OnlineFileSource::canRequest(const Resource& resource) const {
     return resource.hasLoadingMethod(Resource::LoadingMethod::Network) &&
            resource.url.rfind(mbgl::util::ASSET_PROTOCOL, 0) == std::string::npos &&
            resource.url.rfind(mbgl::util::FILE_PROTOCOL, 0) == std::string::npos;
+}
+
+bool OnlineFileSource::canRequestNow(const Resource& resource) const {
+    return impl->isOnline() && canRequest(resource);
 }
 
 void OnlineFileSource::pause() {

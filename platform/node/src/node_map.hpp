@@ -105,6 +105,7 @@ struct NodeFileSource : public mbgl::FileSource {
     ~NodeFileSource() override = default;
     std::unique_ptr<mbgl::AsyncRequest> request(const mbgl::Resource&, mbgl::FileSource::Callback) final;
     bool canRequest(const mbgl::Resource&) const override;
+    bool canRequestNow(const mbgl::Resource&) const override;
     void setResourceOptions(mbgl::ResourceOptions) override;
     mbgl::ResourceOptions getResourceOptions() override;
     void setClientOptions(mbgl::ClientOptions) override;

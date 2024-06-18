@@ -90,6 +90,11 @@ public:
                             // Set the priority of existing resource to low if it's expired but usable.
                             res.setPriority(Resource::Priority::Low);
                         } else {
+                            if (!onlineFileSource->canRequestNow(res)) {
+                                // use the old data because we can't provide anything better without a connection
+                                callback(response);
+                            }
+
                             // Set prior data only if it was not returned to
                             // the requester. Once we get 304 response from
                             // the network, we will forward response to the
@@ -179,6 +184,10 @@ public:
                (mbtilesFileSource && mbtilesFileSource->canRequest(resource));
     }
 
+    bool canRequestNow(const Resource& resource) const {
+        return canRequest(resource);
+    }
+
     bool supportsCacheOnlyRequests() const { return supportsCacheOnlyRequests_; }
 
     void pause() { thread->pause(); }
@@ -251,6 +260,10 @@ std::unique_ptr<AsyncRequest> MainResourceLoader::request(const Resource& resour
 
 bool MainResourceLoader::canRequest(const Resource& resource) const {
     return impl->canRequest(resource);
+}
+
+bool MainResourceLoader::canRequestNow(const Resource& resource) const {
+    return impl->canRequestNow(resource);
 }
 
 void MainResourceLoader::pause() {

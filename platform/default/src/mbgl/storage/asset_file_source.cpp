@@ -89,6 +89,10 @@ bool AssetFileSource::canRequest(const Resource& resource) const {
     return acceptsURL(resource.url);
 }
 
+bool AssetFileSource::canRequestNow(const Resource& resource) const {
+    return canRequest(resource);
+}
+
 void AssetFileSource::pause() {
     impl->pause();
 }

@@ -82,6 +82,10 @@ bool AssetManagerFileSource::canRequest(const Resource& resource) const {
     return 0 == resource.url.rfind(mbgl::util::ASSET_PROTOCOL, 0);
 }
 
+bool AssetManagerFileSource::canRequestNow(const Resource& resource) const {
+    return canRequest(resource);
+}
+
 void AssetManagerFileSource::setResourceOptions(ResourceOptions options) {
     impl->actor().invoke(&Impl::setResourceOptions, options.clone());
 }
