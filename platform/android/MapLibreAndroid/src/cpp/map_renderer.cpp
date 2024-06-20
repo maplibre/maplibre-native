@@ -84,7 +84,7 @@ void MapRenderer::schedule(std::function<void()>&& scheduled) {
     }
 }
 
-void MapRenderer::waitForEmpty([[maybe_unused]] const void* tag) {
+void MapRenderer::waitForEmpty([[maybe_unused]] const util::SimpleIdentity tag) {
     try {
         android::UniqueEnv _env = android::AttachEnv();
         static auto& javaClass = jni::Class<MapRenderer>::Singleton(*_env);

@@ -254,7 +254,7 @@ void RunLoop::wake() {
     impl->wake();
 }
 
-void RunLoop::waitForEmpty([[maybe_unused]] const void* tag) {
+void RunLoop::waitForEmpty([[maybe_unused]] const SimpleIdentity tag) {
     impl->waitForEmpty();
 }
 

@@ -47,7 +47,7 @@ void RunLoop::stop() {
     invoke([&] { CFRunLoopStop(CFRunLoopGetCurrent()); });
 }
 
-void RunLoop::waitForEmpty([[maybe_unused]] const void* tag) {
+void RunLoop::waitForEmpty([[maybe_unused]] const SimpleIdentity tag) {
     while (true) {
         std::size_t remaining;
         {

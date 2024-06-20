@@ -90,7 +90,7 @@ TEST(Actor, DestructionBlocksOnSend) {
 
         ~TestScheduler() override { EXPECT_TRUE(waited.load()); }
 
-        void waitForEmpty(const void*) override { assert(false); }
+        void waitForEmpty(const util::SimpleIdentity) override { assert(false); }
 
         void schedule(std::function<void()>&&) final {
             promise.set_value();

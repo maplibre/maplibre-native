@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/util/chrono.hpp>
+#include <mbgl/util/identity.hpp>
 
 #include <mapbox/std/weak.hpp>
 
@@ -39,15 +40,17 @@ public:
 
     /// Enqueues a function for execution.
     virtual void schedule(std::function<void()>&&) = 0;
-    virtual void schedule(const void*, std::function<void()>&&) = 0;
+    virtual void schedule(const util::SimpleIdentity, std::function<void()>&&) = 0;
 
     /// Makes a weak pointer to this Scheduler.
     virtual mapbox::base::WeakPtr<Scheduler> makeWeakPtr() = 0;
     /// Enqueues a function for execution on the render thread owned by the given tag.
-    virtual void runOnRenderThread(const void*, std::function<void()>&&) {}
-    /// Run render thread jobs for the given tag address
+    virtual void runOnRenderThread(const util::SimpleIdentity, std::function<void()>&&) {}
+    /// Run render thread jobs for the given tag
+    /// @param tag Tag of owner
     /// @param closeQueue Runs all render jobs and then removes the internal queue.
-    virtual void runRenderJobs(const void*, [[maybe_unused]] bool closeQueue = false) {}
+    virtual void runRenderJobs([[maybe_unused]] const util::SimpleIdentity tag,
+                               [[maybe_unused]] bool closeQueue = false) {}
     /// Returns a closure wrapping the given one.
     ///
     /// When the returned closure is invoked for the first time, it schedules
@@ -72,7 +75,7 @@ public:
 
     /// Wait until there's nothing pending or in process
     /// Must not be called from a task provided to this scheduler.
-    virtual void waitForEmpty(const void* tag = nullptr) = 0;
+    virtual void waitForEmpty(const util::SimpleIdentity = util::SimpleIdentity::Empty) = 0;
 
     /// Set/Get the current Scheduler for this thread
     static Scheduler* GetCurrent();
@@ -118,30 +121,30 @@ protected:
     std::function<void(const std::exception_ptr)> handler;
 };
 
-/// @brief A TaggedScheduler pairs a scheduler with a memory address. Tasklets submitted via a TaggedScheduler
-/// are bucketed with the tag address to enable queries on tasks related to that tag. This allows multiple map
+/// @brief A TaggedScheduler pairs a scheduler with an identifier. Tasklets submitted via a TaggedScheduler
+/// are bucketed with the tag to enable queries on tasks related to that tag. This allows multiple map
 /// instances to all use the same scheduler and await processing of all their tasks prior to map deletion.
 class TaggedScheduler {
 public:
     TaggedScheduler() = delete;
-    TaggedScheduler(std::shared_ptr<Scheduler> scheduler_, const void* tagAddr_)
-        : scheduler(std::move(scheduler_)),
-          tagAddr(tagAddr_) {}
+    TaggedScheduler(std::shared_ptr<Scheduler> scheduler_, const util::SimpleIdentity tag_)
+        : tag(tag_),
+          scheduler(std::move(scheduler_)) {}
     TaggedScheduler(const TaggedScheduler&) = default;
 
     /// @brief Get the wrapped scheduler
     /// @return
     const std::shared_ptr<Scheduler>& get() const noexcept { return scheduler; }
-    const void* tag() const noexcept { return tagAddr; }
 
-    void schedule(std::function<void()>&& fn) { scheduler->schedule(tagAddr, std::move(fn)); }
-    void runOnRenderThread(std::function<void()>&& fn) { scheduler->runOnRenderThread(tagAddr, std::move(fn)); }
-    void runRenderJobs(bool closeQueue = false) { scheduler->runRenderJobs(tagAddr, closeQueue); }
-    void waitForEmpty() const noexcept { scheduler->waitForEmpty(tagAddr); }
+    void schedule(std::function<void()>&& fn) { scheduler->schedule(tag, std::move(fn)); }
+    void runOnRenderThread(std::function<void()>&& fn) { scheduler->runOnRenderThread(tag, std::move(fn)); }
+    void runRenderJobs(bool closeQueue = false) { scheduler->runRenderJobs(tag, closeQueue); }
+    void waitForEmpty() const noexcept { scheduler->waitForEmpty(tag); }
+
+    const mbgl::util::SimpleIdentity tag;
 
 private:
     std::shared_ptr<Scheduler> scheduler;
-    const void* tagAddr;
 };
 
 } // namespace mbgl

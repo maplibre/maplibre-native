@@ -4,6 +4,7 @@
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/util/thread_local.hpp>
 #include <mbgl/util/containers.hpp>
+#include <mbgl/util/identity.hpp>
 
 #include <algorithm>
 #include <condition_variable>
@@ -23,9 +24,10 @@ public:
     void schedule(std::function<void()>&& fn) override;
 
     /// @brief Schedule a task assigned to the given owner `tag`.
-    /// @param tag Address of any object used to identify ownership of `fn`
+    /// @param tag Identifier object to indicate ownership of `fn`
     /// @param fn Task to run
-    void schedule(const void* tag, std::function<void()>&& fn) override;
+    void schedule(const util::SimpleIdentity tag, std::function<void()>&& fn) override;
+    const util::SimpleIdentity uniqueID;
 
 protected:
     ThreadedSchedulerBase() = default;
@@ -36,9 +38,9 @@ protected:
 
     /// @brief Wait until there's nothing pending or in process
     /// Must not be called from a task provided to this scheduler.
-    /// @param tag Address of the owner identifying the collection of tasks to
-    // wait for. Waiting on nullptr waits on tasks owned by the scheduler.
-    void waitForEmpty(const void* tag = nullptr) override;
+    /// @param tag Tag of the owner to identify the collection of tasks to
+    // wait for. Not providing a tag waits on tasks owned by the scheduler.
+    void waitForEmpty(const util::SimpleIdentity = util::SimpleIdentity::Empty) override;
 
     /// Returns true if called from a thread managed by the scheduler
     bool thisThreadIsOwned() const { return owningThreadPool.get() == this; }
@@ -58,7 +60,7 @@ protected:
         std::mutex lock;                         /* lock */
         std::queue<std::function<void()>> queue; /* pending task queue */
     };
-    mbgl::unordered_map<const void*, std::shared_ptr<Queue>> taggedQueue;
+    mbgl::unordered_map<util::SimpleIdentity, std::shared_ptr<Queue>> taggedQueue;
 };
 
 /**
@@ -87,7 +89,7 @@ public:
         }
     }
 
-    void runOnRenderThread(const void* tag, std::function<void()>&& fn) override {
+    void runOnRenderThread(const util::SimpleIdentity tag, std::function<void()>&& fn) override {
         std::shared_ptr<RenderQueue> queue;
         {
             std::lock_guard<std::mutex> lock(taggedRenderQueueLock);
@@ -104,7 +106,7 @@ public:
         queue->queue.push(std::move(fn));
     }
 
-    void runRenderJobs(const void* tag, bool closeQueue = false) override {
+    void runRenderJobs(const util::SimpleIdentity tag, bool closeQueue = false) override {
         std::shared_ptr<RenderQueue> queue;
         std::unique_lock<std::mutex> lock(taggedRenderQueueLock);
 
@@ -147,7 +149,7 @@ private:
         std::queue<std::function<void()>> queue;
         std::mutex mutex;
     };
-    mbgl::unordered_map<const void*, std::shared_ptr<RenderQueue>> taggedRenderQueue;
+    mbgl::unordered_map<util::SimpleIdentity, std::shared_ptr<RenderQueue>> taggedRenderQueue;
     std::mutex taggedRenderQueueLock;
 
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};

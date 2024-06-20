@@ -79,10 +79,10 @@ public:
     }
 
     void schedule(std::function<void()>&& fn) override { invoke(std::move(fn)); }
-    void schedule(const void*, std::function<void()>&& fn) override { schedule(std::move(fn)); }
+    void schedule(const util::SimpleIdentity, std::function<void()>&& fn) override { schedule(std::move(fn)); }
     ::mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
-    void waitForEmpty(const void* tag = nullptr) override;
+    void waitForEmpty(const util::SimpleIdentity = util::SimpleIdentity::Empty) override;
 
     class Impl;
 

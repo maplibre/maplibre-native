@@ -49,7 +49,7 @@ private:
         Abandoned
     };
 
-    const void* schedulerTag{nullptr};
+    util::SimpleIdentity schedulerTag = util::SimpleIdentity::Empty;
     mapbox::base::WeakPtr<Scheduler> weakScheduler;
 
     std::recursive_mutex receivingMutex;

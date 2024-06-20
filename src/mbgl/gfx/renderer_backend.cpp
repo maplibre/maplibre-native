@@ -7,7 +7,7 @@ namespace gfx {
 
 RendererBackend::RendererBackend(const ContextMode contextMode_)
     : contextMode(contextMode_),
-      threadPool(Scheduler::GetBackground(), static_cast<const void*>(this)) {}
+      threadPool(Scheduler::GetBackground(), uniqueID) {}
 RendererBackend::~RendererBackend() = default;
 
 gfx::Context& RendererBackend::getContext() {

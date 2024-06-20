@@ -13,12 +13,12 @@ Mailbox::Mailbox(Scheduler& scheduler_)
     : weakScheduler(scheduler_.makeWeakPtr()) {}
 
 Mailbox::Mailbox(const TaggedScheduler& scheduler_)
-    : schedulerTag(scheduler_.tag()),
+    : schedulerTag(scheduler_.tag),
       weakScheduler(scheduler_.get()->makeWeakPtr()) {}
 
 void Mailbox::open(const TaggedScheduler& scheduler_) {
     assert(!weakScheduler);
-    schedulerTag = scheduler_.tag();
+    schedulerTag = scheduler_.tag;
     return open(*scheduler_.get());
 }
 

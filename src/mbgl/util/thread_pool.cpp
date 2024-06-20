@@ -105,10 +105,10 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
 }
 
 void ThreadedSchedulerBase::schedule(std::function<void()>&& fn) {
-    schedule(static_cast<const void*>(this), std::move(fn));
+    schedule(uniqueID, std::move(fn));
 }
 
-void ThreadedSchedulerBase::schedule(const void* tag, std::function<void()>&& fn) {
+void ThreadedSchedulerBase::schedule(const util::SimpleIdentity tag, std::function<void()>&& fn) {
     assert(fn);
     if (!fn) return;
 
@@ -133,18 +133,16 @@ void ThreadedSchedulerBase::schedule(const void* tag, std::function<void()>&& fn
     cvAvailable.notify_one();
 }
 
-void ThreadedSchedulerBase::waitForEmpty(const void* tag) {
+void ThreadedSchedulerBase::waitForEmpty(const util::SimpleIdentity tag) {
     // Must not be called from a thread in our pool, or we would deadlock
     assert(!thisThreadIsOwned());
     if (!thisThreadIsOwned()) {
-        if (!tag) {
-            tag = static_cast<const void*>(this);
-        }
+        auto tagToFind = tag.isEmpty() ? uniqueID : tag;
 
         std::shared_ptr<Queue> q;
         {
             std::lock_guard<std::mutex> lock(taggedQueueLock);
-            auto it = taggedQueue.find(tag);
+            auto it = taggedQueue.find(tagToFind);
             if (it == taggedQueue.end()) {
                 return;
             }
@@ -159,7 +157,7 @@ void ThreadedSchedulerBase::waitForEmpty(const void* tag) {
         // After waiting for the queue to empty, go ahead and erase it from the map.
         {
             std::lock_guard<std::mutex> lock(taggedQueueLock);
-            taggedQueue.erase(tag);
+            taggedQueue.erase(tagToFind);
         }
     }
 }

@@ -53,6 +53,7 @@ public:
     /// One-time shader initialization
     virtual void initShaders(gfx::ShaderRegistry&, const ProgramParameters&) = 0;
 #endif
+    const mbgl::util::SimpleIdentity uniqueID;
 
 protected:
     virtual std::unique_ptr<Context> createContext() = 0;
