@@ -469,20 +469,31 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
     auto workRequestsIt = requests.insert(requests.begin(), nullptr);
     *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=]() {
         requests.erase(workRequestsIt);
-        const auto resourceKind = resource.kind;
+        auto res = resource;
+        const auto resourceKind = res.kind;
         auto getResourceSizeInDatabase = [&]() -> std::optional<int64_t> {
-            std::optional<int64_t> result;
-            if (!callback) {
-                result = offlineDatabase.hasRegionResource(resource);
-            } else {
-                std::optional<std::pair<Response, uint64_t>> response = offlineDatabase.getRegionResource(resource);
-                if (response) {
+            std::optional<int64_t> result = std::nullopt;
+            std::optional<std::pair<Response, uint64_t>> response = offlineDatabase.getRegionResource(resource);
+
+            bool isUsable = response && response->first.isUsable();
+
+            if (isUsable) {
+                if (callback) {
                     callback(response->first);
-                    result = response->second;
+                }
+                result = response->second;
+                if (result) resourcesToBeMarkedAsUsed.emplace_back(res);
+            }
+            else {
+                if (response) {
+                    auto resp = response->first;
+                    res.priorEtag = resp.etag;
+                    res.priorData = resp.data;
+                    res.priorExpires = resp.expires;
+                    res.priorModified = resp.modified;
                 }
             }
 
-            if (result) resourcesToBeMarkedAsUsed.emplace_back(resource);
             return result;
         };
 
@@ -501,13 +512,13 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
             return;
         }
 
-        if (offlineDatabase.exceedsOfflineMapboxTileCountLimit(resource)) {
+        if (offlineDatabase.exceedsOfflineMapboxTileCountLimit(res)) {
             onMapboxTileCountLimitExceeded();
             return;
         }
 
         auto fileRequestsIt = requests.insert(requests.begin(), nullptr);
-        *fileRequestsIt = onlineFileSource.request(resource, [=](const Response& onlineResponse) {
+        *fileRequestsIt = onlineFileSource.request(res, [=](const Response& onlineResponse) {
             if (onlineResponse.error) {
                 observer->responseError(*onlineResponse.error);
                 if (onlineResponse.error->reason == Response::Error::Reason::NotFound) {
