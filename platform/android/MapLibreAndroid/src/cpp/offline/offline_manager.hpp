@@ -44,9 +44,9 @@ public:
                             std::exception_ptr);
 
         static void onRegion(jni::JNIEnv&,
-                           const jni::Object<FileSource>&,
-                           const jni::Object<OfflineManager::GetOfflineRegionCallback>&,
-                           mbgl::OfflineRegion&);
+                             const jni::Object<FileSource>&,
+                             const jni::Object<OfflineManager::GetOfflineRegionCallback>&,
+                             mbgl::OfflineRegion&);
     };
 
     class CreateOfflineRegionCallback {
