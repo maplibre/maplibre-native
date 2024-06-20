@@ -835,7 +835,6 @@ expected<OfflineRegions, std::exception_ptr> OfflineDatabase::listRegions() try 
     return unexpected<std::exception_ptr>(std::current_exception());
 }
 
-
 expected<std::optional<OfflineRegion>, std::exception_ptr> OfflineDatabase::getRegion(const int64_t regionID) try {
     mapbox::sqlite::Query query{getStatement("SELECT definition, description FROM regions WHERE id = ?1")};
     query.bind(1, regionID);

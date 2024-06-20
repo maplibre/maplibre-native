@@ -64,9 +64,9 @@ void OfflineManager::listOfflineRegions(jni::JNIEnv& env_,
         });
 }
 void OfflineManager::getOfflineRegion(jni::JNIEnv& env_,
-                                        const jni::Object<FileSource>& jFileSource_,
-                                        const int64_t regionID,
-                                        const jni::Object<GetOfflineRegionCallback>& callback_) {
+                                      const jni::Object<FileSource>& jFileSource_,
+                                      const int64_t regionID,
+                                      const jni::Object<GetOfflineRegionCallback>& callback_) {
     auto globalCallback = jni::NewGlobal<jni::EnvAttachingDeleter>(env_, callback_);
     auto globalFilesource = jni::NewGlobal<jni::EnvAttachingDeleter>(env_, jFileSource_);
 
@@ -301,9 +301,7 @@ void OfflineManager::ListOfflineRegionsCallback::onList(
 // OfflineManager::GetOfflineRegionCallback //
 
 void OfflineManager::GetOfflineRegionCallback::onError(
-    jni::JNIEnv& env,
-    const jni::Object<OfflineManager::GetOfflineRegionCallback>& callback,
-    std::exception_ptr error) {
+    jni::JNIEnv& env, const jni::Object<OfflineManager::GetOfflineRegionCallback>& callback, std::exception_ptr error) {
     static auto& javaClass = jni::Class<OfflineManager::GetOfflineRegionCallback>::Singleton(env);
     static auto method = javaClass.GetMethod<void(jni::String)>(env, "onError");
 
