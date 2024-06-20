@@ -836,20 +836,23 @@ expected<OfflineRegions, std::exception_ptr> OfflineDatabase::listRegions() try 
 }
 
 
-expected<OfflineRegion, std::exception_ptr> OfflineDatabase::getRegion(const int64_t regionID) try {
+expected<std::optional<OfflineRegion>, std::exception_ptr> OfflineDatabase::getRegion(const int64_t regionID) try {
     mapbox::sqlite::Query query{getStatement("SELECT definition, description FROM regions WHERE id = ?1")};
     query.bind(1, regionID);
-    query.run();
+    if (query.run()) {
 
-    const auto definition = query.get<std::string>(0);
-    const auto description = query.get<std::vector<uint8_t>>(1);
+        const auto definition = query.get<std::string>(0);
+        const auto description = query.get<std::vector<uint8_t>>(1);
 
-    if (definition.empty() and description.empty()) {
-        throw std::runtime_error("Region " + std::to_string(regionID) + " not found in database");
+        if (definition.empty() && description.empty()) {
+            throw std::runtime_error(
+                    "Region " + std::to_string(regionID) + " not found in database");
+        }
+
+        OfflineRegion result(regionID, decodeOfflineRegionDefinition(definition), description);
+        return {std::move(result)};
     }
-
-    OfflineRegion result(regionID, decodeOfflineRegionDefinition(definition), description);
-    return {std::move(result)};
+    return std::nullopt;
 } catch (...) {
     handleError("get region");
     return unexpected<std::exception_ptr>(std::current_exception());

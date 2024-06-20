@@ -64,7 +64,7 @@ public:
 
     expected<OfflineRegions, std::exception_ptr> listRegions();
 
-    expected<OfflineRegion, std::exception_ptr> getRegion(const int64_t regionID);
+    expected<std::optional<OfflineRegion>, std::exception_ptr> getRegion(const int64_t regionID);
 
     expected<OfflineRegion, std::exception_ptr> createRegion(const OfflineRegionDefinition&,
                                                              const OfflineRegionMetadata&);

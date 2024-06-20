@@ -43,6 +43,10 @@ public:
                             const jni::Object<OfflineManager::GetOfflineRegionCallback>&,
                             std::exception_ptr);
 
+        static void onRegionNotFound(jni::JNIEnv&,
+                                     const jni::Object<FileSource>&,
+                                     const jni::Object<OfflineManager::GetOfflineRegionCallback>&);
+
         static void onRegion(jni::JNIEnv&,
                            const jni::Object<FileSource>&,
                            const jni::Object<OfflineManager::GetOfflineRegionCallback>&,

@@ -69,9 +69,14 @@ class OfflineManager private constructor(context: Context) {
         /**
          * Receives the offline region.
          *
-         * @param offlineRegion the offline region
+         * @param offlineRegion the offline region if it exists
          */
         fun onRegion(offlineRegion: OfflineRegion)
+
+        /**
+         * Receives notice if the requested regionId is not in the database
+         */
+        fun onRegionNotFound()
 
         /**
          * Receives the error message.
@@ -185,6 +190,13 @@ class OfflineManager private constructor(context: Context) {
                     handler.post {
                         fileSource.deactivate()
                         callback.onRegion(offlineRegion)
+                    }
+                }
+
+                override fun onRegionNotFound() {
+                    handler.post {
+                        fileSource.deactivate()
+                        callback.onRegionNotFound()
                     }
                 }
 

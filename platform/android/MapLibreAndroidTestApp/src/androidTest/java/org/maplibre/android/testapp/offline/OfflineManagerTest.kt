@@ -117,16 +117,20 @@ class OfflineManagerTest : AppCenter() {
                 regionID,
                 object: OfflineManager.GetOfflineRegionCallback {
                     override fun onRegion(offlineRegion: OfflineRegion) {
-                        Assert.assertEquals(regionID, offlineRegion.id)
+                        Assert.assertNotNull(offlineRegion)
+                        Assert.assertEquals(regionID, offlineRegion!!.id)
                         Assert.assertNotNull(offlineRegion.definition)
                         latch3.countDown()
+                    }
+
+                    override fun onRegionNotFound() {
+                        throw RuntimeException("Region should be in database")
                     }
 
                     override fun onError(error: String) {
                         throw RuntimeException("Unable to get region in offline database. $error")
                     }
                 }
-
             )
         }
         latch3.await()
@@ -184,12 +188,15 @@ class OfflineManagerTest : AppCenter() {
                 regionID,
                 object: OfflineManager.GetOfflineRegionCallback {
                     override fun onRegion(offlineRegion: OfflineRegion) {
-                        throw RuntimeException("Region should no longer exist in database")
+                        throw RuntimeException("Region should not be in database")
+                    }
+
+                    override fun onRegionNotFound() {
+                        latch6.countDown()
                     }
 
                     override fun onError(error: String) {
-                        Assert.assertEquals("Region $regionID not found in database", error)
-                        latch6.countDown()
+                        throw RuntimeException("Unable to get offline region from db. $error")
                     }
                 }
             )

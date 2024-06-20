@@ -76,7 +76,7 @@ public:
         callback(db->listRegions());
     }
 
-    void getRegion(const int64_t regionID, const std::function<void(expected<OfflineRegion, std::exception_ptr>)>& callback) {
+    void getRegion(const int64_t regionID, const std::function<void(expected<std::optional<OfflineRegion>, std::exception_ptr>)>& callback) {
         callback(db->getRegion(regionID));
     }
 
@@ -271,7 +271,7 @@ void DatabaseFileSource::listOfflineRegions(
 
 void DatabaseFileSource::getOfflineRegion(
     const int64_t regionID,
-    std::function<void(expected<OfflineRegion, std::exception_ptr>)> callback) {
+    std::function<void(expected<std::optional<OfflineRegion>, std::exception_ptr>)> callback) {
     impl->actor().invoke(&DatabaseFileSourceThread::getRegion, regionID, std::move(callback));
 }
 
