@@ -16,6 +16,7 @@ namespace mbgl {
 
 class VectorTileTest {
 public:
+    util::SimpleIdentity uniqueID;
     std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>();
     TransformState transformState;
     util::RunLoop loop;
@@ -32,7 +33,7 @@ public:
     TileParameters tileParameters;
 
     VectorTileTest()
-        : threadPool(Scheduler::GetBackground(), this),
+        : threadPool(Scheduler::GetBackground(), uniqueID),
           tileParameters{1.0,
                          MapDebugOptions(),
                          transformState,

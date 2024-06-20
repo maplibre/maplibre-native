@@ -54,6 +54,7 @@ using SourceType = mbgl::style::SourceType;
 
 class SourceTest {
 public:
+    util::SimpleIdentity uniqueID;
     util::RunLoop loop;
     std::shared_ptr<StubFileSource> fileSource = std::make_shared<StubFileSource>();
     StubStyleObserver styleObserver;
@@ -80,7 +81,7 @@ public:
     };
 
     SourceTest()
-        : threadPool(Scheduler::GetBackground(), static_cast<const void*>(this)) {
+        : threadPool(Scheduler::GetBackground(), uniqueID) {
         // Squelch logging.
         Log::setObserver(std::make_unique<Log::NullObserver>());
 

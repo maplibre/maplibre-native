@@ -22,6 +22,7 @@ using namespace mbgl::style;
 
 class GeoJSONTileTest {
 public:
+    util::SimpleIdentity uniqueID;
     std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>();
     TransformState transformState;
     util::RunLoop loop;
@@ -42,7 +43,7 @@ public:
                          imageManager,
                          glyphManager,
                          0,
-                         {Scheduler::GetBackground(), static_cast<const void*>(this)}} {}
+                         {Scheduler::GetBackground(), uniqueID}} {}
 };
 
 namespace {

@@ -99,7 +99,9 @@ TEST(Actor, DestructionBlocksOnSend) {
             waited = true;
         }
 
-        void schedule(const void*, std::function<void()>&& fn) final { schedule(std::move(fn)); }
+        void schedule(const util::SimpleIdentity, std::function<void()>&& fn) override final {
+            schedule(std::move(fn));
+        }
 
         mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 

@@ -100,11 +100,12 @@ TEST(AsyncTask, DestroyAfterSignaling) {
 
 TEST(AsyncTask, RequestCoalescingMultithreaded) {
     RunLoop loop;
+    util::SimpleIdentity id;
 
     unsigned count = 0, numThreads = 25;
     AsyncTask async([&count] { ++count; });
 
-    TaggedScheduler retainer = {Scheduler::GetBackground(), &loop};
+    TaggedScheduler retainer = {Scheduler::GetBackground(), id};
     auto mailbox = std::make_shared<Mailbox>(retainer);
 
     TestWorker worker(&async);
@@ -127,13 +128,14 @@ TEST(AsyncTask, RequestCoalescingMultithreaded) {
 
 TEST(AsyncTask, ThreadSafety) {
     RunLoop loop;
+    mbgl::util::SimpleIdentity id;
 
     unsigned count = 0, numThreads = 25;
     std::atomic_uint completed(numThreads);
 
     AsyncTask async([&count] { ++count; });
 
-    TaggedScheduler retainer = {Scheduler::GetBackground(), &loop};
+    TaggedScheduler retainer = {Scheduler::GetBackground(), id};
     auto mailbox = std::make_shared<Mailbox>(retainer);
 
     TestWorker worker(&async);
