@@ -42,7 +42,7 @@ void Scheduler::processEvents() {
     cvEmpty.notify_all();
 }
 
-void Scheduler::waitForEmpty([[maybe_unused]] const void* tag) {
+void Scheduler::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {
     MBGL_VERIFY_THREAD(tid);
 
     std::unique_lock<std::mutex> lock(m_taskQueueMutex);

@@ -22,7 +22,7 @@ public:
     // mbgl::Scheduler implementation.
     void schedule(std::function<void()>&& function) final;
 
-    void waitForEmpty(const void* tag = nullptr) override;
+    void waitForEmpty(const mbgl::util::SimpleIdentity tag = mbgl::util::SimpleIdentity::Empty) override;
 
     mapbox::base::WeakPtr<mbgl::Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 

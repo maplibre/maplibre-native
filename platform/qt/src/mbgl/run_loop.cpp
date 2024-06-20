@@ -91,7 +91,7 @@ void RunLoop::runOnce() {
     }
 }
 
-void RunLoop::waitForEmpty([[maybe_unused]] const void* tag) {
+void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {
     while (true) {
         std::size_t remaining;
         {
