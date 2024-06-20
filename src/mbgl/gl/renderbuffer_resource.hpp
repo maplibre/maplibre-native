@@ -11,7 +11,7 @@ public:
     explicit RenderbufferResource(UniqueRenderbuffer renderbuffer_)
         : renderbuffer(std::move(renderbuffer_)) {}
 
-    ~RenderbufferResource() noexcept override = default;
+    ~RenderbufferResource() noexcept override;
 
     UniqueRenderbuffer renderbuffer;
 };

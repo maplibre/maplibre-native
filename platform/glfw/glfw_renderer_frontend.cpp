@@ -2,6 +2,7 @@
 
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 GLFWRendererFrontend::GLFWRendererFrontend(std::unique_ptr<mbgl::Renderer> renderer_, GLFWView& glfwView_)
     : glfwView(glfwView_),
@@ -27,6 +28,8 @@ void GLFWRendererFrontend::update(std::shared_ptr<mbgl::UpdateParameters> params
 }
 
 void GLFWRendererFrontend::render() {
+    MLN_TRACE_FUNC();
+
     assert(renderer);
 
     if (!updateParameters) return;
