@@ -14,6 +14,7 @@ option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" ON)
 option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" OFF)
 option(MLN_USE_UNORDERED_DENSE "Use ankerl dense containers for performance" ON)
+option(MLN_USE_TRACY "Enable Tracy instrumentation" OFF)
 
 if (MLN_WITH_CLANG_TIDY)
     find_program(CLANG_TIDY_COMMAND NAMES clang-tidy)
@@ -409,6 +410,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/image.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/immutable.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/indexed_tuple.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/instrumentation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/interpolate.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/logging.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/noncopyable.hpp
@@ -1105,6 +1107,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_pass.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderbuffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderbuffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/state.hpp
@@ -1112,6 +1115,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture_resource.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/timestamp_query_extension.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/timestamp_query_extension.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/types.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform.hpp
@@ -1337,6 +1342,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/mapbox-base.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/parsedate.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/polylabel.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/protozero.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/tracy.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
@@ -1377,6 +1383,7 @@ target_link_libraries(
         Mapbox::Base::geojson.hpp
         Mapbox::Base::geometry.hpp
         Mapbox::Base::variant
+        TracyClient
         unordered_dense
 )
 
@@ -1407,6 +1414,7 @@ export(TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
+    TracyClient
     unordered_dense
 
     FILE MapboxCoreTargets.cmake
