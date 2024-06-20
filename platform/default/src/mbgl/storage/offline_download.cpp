@@ -483,8 +483,7 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
                 }
                 result = response->second;
                 if (result) resourcesToBeMarkedAsUsed.emplace_back(res);
-            }
-            else {
+            } else {
                 if (response) {
                     auto resp = response->first;
                     res.priorEtag = resp.etag;

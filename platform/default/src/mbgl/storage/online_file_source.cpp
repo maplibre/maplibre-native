@@ -421,9 +421,7 @@ public:
         return cachedResourceOptions.tileServerOptions().baseURL();
     }
 
-    bool isOnline() {
-        return online;
-    }
+    bool isOnline() { return online; }
 
 private:
     mutable std::mutex resourceOptionsMutex;

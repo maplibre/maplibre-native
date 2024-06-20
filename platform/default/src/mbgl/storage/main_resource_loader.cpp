@@ -184,9 +184,7 @@ public:
                (mbtilesFileSource && mbtilesFileSource->canRequest(resource));
     }
 
-    bool canRequestNow(const Resource& resource) const {
-        return canRequest(resource);
-    }
+    bool canRequestNow(const Resource& resource) const { return canRequest(resource); }
 
     bool supportsCacheOnlyRequests() const { return supportsCacheOnlyRequests_; }
 
