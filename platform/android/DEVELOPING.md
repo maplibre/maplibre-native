@@ -80,3 +80,7 @@ To run the benchmarks (for Android) include the following line on a PR comment:
 ```
 !benchmark android
 ```
+
+## Profiling
+
+[maplibre-native/docs/mdbook](https://maplibre.org/maplibre-native/docs/book/) describes how Tracy can be used for profiling.
