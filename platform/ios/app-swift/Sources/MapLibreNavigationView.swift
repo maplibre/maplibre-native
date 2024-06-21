@@ -19,7 +19,7 @@ struct MapLibreNavigationView: View {
                 }
                 NavigationLink("MaximumBoundsExample") {
                     MaximumBoundsExample()
-                }  
+                }
                 NavigationLink("LineStyleLayerExample") {
                     LineStyleLayerExampleUIViewControllerRepresentable()
                 }
