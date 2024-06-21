@@ -108,16 +108,6 @@ If you want to get direct access you need an AWS account to get permissions to u
 aws sts get-caller-identity
 ```
 
-When the needed resources are uploaded the filenames need to be added to the `resources` array in `platform/ios/scripts/docc.sh`.
-
-```bash
-resources=(
-  "AddPackageDependencies@2x.png"
-  # ...
-  # add here
-)
-```
-
 ### Examples
 
 The code samples in the documentation should ideally be compiled on CI so they do not go out of date.
