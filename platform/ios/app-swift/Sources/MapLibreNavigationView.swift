@@ -20,8 +20,14 @@ struct MapLibreNavigationView: View {
                 NavigationLink("LineStyleLayerExample") {
                     LineStyleLayerExampleUIViewControllerRepresentable()
                 }
-                NavigationLink("WebAPIDataExampleUIKit") {
+                NavigationLink("WebAPIDataExample") {
                     WebAPIDataExampleUIViewControllerRepresentable()
+                }
+                NavigationLink("AddMarkerExample") {
+                    AddMarkerSymbolExampleUIViewControllerRepresentable()
+                }
+                NavigationLink("AnimatedLineExample") {
+                    AnimatedLineExampleUIViewControllerRepresentable()
                 }
             }
         }

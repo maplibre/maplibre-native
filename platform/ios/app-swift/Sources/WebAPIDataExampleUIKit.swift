@@ -3,8 +3,8 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(WebAPIDataExampleUIKit)
-class WebAPIDataExampleUIKit: UIViewController, MLNMapViewDelegate {
+// #-example-code(WebAPIDataExample)
+class WebAPIDataExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 
     override func viewDidLoad() {
@@ -220,11 +220,11 @@ class WebAPIDataExampleUIKit: UIViewController, MLNMapViewDelegate {
 // #-end-example-code
 
 struct WebAPIDataExampleUIViewControllerRepresentable: UIViewControllerRepresentable {
-    typealias UIViewControllerType = WebAPIDataExampleUIKit
+    typealias UIViewControllerType = WebAPIDataExample
 
-    func makeUIViewController(context _: Context) -> WebAPIDataExampleUIKit {
-        WebAPIDataExampleUIKit()
+    func makeUIViewController(context _: Context) -> WebAPIDataExample {
+        WebAPIDataExample()
     }
 
-    func updateUIViewController(_: WebAPIDataExampleUIKit, context _: Context) {}
+    func updateUIViewController(_: WebAPIDataExample, context _: Context) {}
 }

@@ -12,6 +12,7 @@ swift_library(
     srcs = glob(["Sources/*.swift"]),
     data = glob([
         "Data/*",
+        "Assets.xcassets/*",
     ]),
     module_name = "Sources",
     tags = ["manual"],
