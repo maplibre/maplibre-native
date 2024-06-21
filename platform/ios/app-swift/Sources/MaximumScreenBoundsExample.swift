@@ -11,12 +11,11 @@ private let colorado = MLNCoordinateBounds(
     ne: CLLocationCoordinate2D(latitude: 40.989329, longitude: -102.062592)
 )
 
-struct MaximumBoundsExample: UIViewRepresentable {
+struct MaximumScreenBoundsExample: UIViewRepresentable {
     func makeUIView(context _: Context) -> MLNMapView {
         let mapView = MLNMapView(frame: .zero, styleURL: VERSATILES_COLORFUL_STYLE)
         mapView.setCenter(center, zoomLevel: 10, direction: 0, animated: false)
-//        mapView.delegate = context.coordinator
-        mapView.maximumBounds = MLNCoordinateBounds(sw: colorado.sw, ne: colorado.ne)
+        mapView.maximumScreenBounds = MLNCoordinateBounds(sw: colorado.sw, ne: colorado.ne)
 
         return mapView
     }

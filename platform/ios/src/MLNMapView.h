@@ -900,11 +900,11 @@ MLN_EXPORT
 @property (nonatomic) double maximumZoomLevel;
 
 /**
- * The maximum bounds of the map that can be shown.
+ * The maximum bounds of the map that can be shown on screen.
  *
- * @param MLNCoordinateBounds the bounds to constrain the map with.
+ * @param MLNCoordinateBounds the bounds to constrain the screen to.
  */
-@property (nonatomic) MLNCoordinateBounds maximumBounds;
+@property (nonatomic) MLNCoordinateBounds maximumScreenBounds;
 
 /**
  The heading of the map, measured in degrees clockwise from true north.
