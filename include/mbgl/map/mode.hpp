@@ -20,12 +20,12 @@ enum class MapMode : EnumType {
 };
 
 /// We can choose to constrain the map both horizontally or vertically, only
-/// vertically e.g. while panning, or camera and zoom to the specified bounds.
+/// vertically e.g. while panning, or screen to the specified bounds.
 enum class ConstrainMode : EnumType {
     None,
     HeightOnly,
     WidthAndHeight,
-    CameraAndZoomToBounds,
+    Screen,
 };
 
 /// Satisfies embedding platforms that requires the viewport coordinate systems

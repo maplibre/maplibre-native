@@ -800,12 +800,12 @@ TEST(Transform, LatLngBounds) {
     ASSERT_DOUBLE_EQ(transform.getLatLng().longitude(), 120.0);
 }
 
-TEST(Transform, ConstrainCameraAndZoomToBounds) {
+TEST(Transform, ConstrainScreenToBounds) {
     Transform transform;
 
     transform.resize({500, 500});
     transform.setLatLngBounds(LatLngBounds::hull({40.0, -10.0}, {70.0, 40.0}));
-    transform.setConstrainMode(ConstrainMode::CameraAndZoomToBounds);
+    transform.setConstrainMode(ConstrainMode::Screen);
 
     // Request impossible zoom
     transform.easeTo(CameraOptions().withCenter(LatLng{56, 11}).withZoom(1));

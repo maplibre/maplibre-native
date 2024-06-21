@@ -745,7 +745,7 @@ bool TransformState::rotatedNorth() const {
 }
 
 void TransformState::constrain(double& scale_, double& x_, double& y_) const {
-    if (constrainMode == ConstrainMode::None || constrainMode == ConstrainMode::CameraAndZoomToBounds) {
+    if (constrainMode == ConstrainMode::None || constrainMode == ConstrainMode::Screen) {
         return;
     }
 
@@ -765,7 +765,7 @@ void TransformState::constrain(double& scale_, double& x_, double& y_) const {
 }
 
 void TransformState::constrainCameraAndZoomToBounds(CameraOptions& requestedCamera, double& requestedZoom) const {
-    if (constrainMode != ConstrainMode::CameraAndZoomToBounds || getLatLngBounds() == LatLngBounds()) {
+    if (constrainMode != ConstrainMode::Screen || getLatLngBounds() == LatLngBounds()) {
         return;
     }
 
