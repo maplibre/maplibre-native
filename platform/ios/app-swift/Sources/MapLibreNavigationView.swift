@@ -17,6 +17,9 @@ struct MapLibreNavigationView: View {
                 NavigationLink("BlockingGesturesExample") {
                     BlockingGesturesExample()
                 }
+                NavigationLink("LineStyleLayerExample") {
+                    LineStyleLayerExampleUIViewControllerRepresentable()
+                }
             }
         }
     }
