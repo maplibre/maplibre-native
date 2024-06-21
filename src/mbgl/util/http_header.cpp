@@ -2,6 +2,7 @@
 
 #include <mbgl/util/chrono.hpp>
 #include <mbgl/util/string.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -20,6 +21,8 @@ namespace mbgl {
 namespace http {
 
 CacheControl CacheControl::parse(const std::string& value) {
+    MLN_TRACE_FUNC();
+
     namespace qi = boost::spirit::qi;
     namespace phoenix = boost::phoenix;
 
@@ -40,6 +43,8 @@ std::optional<Timestamp> CacheControl::toTimePoint() const {
 
 std::optional<Timestamp> parseRetryHeaders(const std::optional<std::string>& retryAfter,
                                            const std::optional<std::string>& xRateLimitReset) {
+    MLN_TRACE_FUNC();
+
     if (retryAfter) {
         try {
             auto secs = std::chrono::seconds(std::stoi(*retryAfter));

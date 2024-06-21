@@ -14,3 +14,6 @@
     - [Quickstart](./android/getting-started-guide.md)
     - [Annotation: Marker](./android/annotation-guide.md)
     - [Location Component](./android/location-component-guide.md)
+
+- [Profiling applications that use MapLibre Native](./profiling/README.md)
+    - [Tracy profiling](./profiling/tracy-profiling.md)

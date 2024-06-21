@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 // strips out the two underscores for display.
 @property (nonatomic, nullable) IBInspectable NSString *styleURL__;
 
-#endif // TARGET_INTERFACE_BUILDER
+#endif  // TARGET_INTERFACE_BUILDER
 
 // Convenience properties related to the initial viewport. These properties
 // are not meant to be used outside of Interface Builder. latitude and longitude

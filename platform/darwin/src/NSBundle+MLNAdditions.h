@@ -17,15 +17,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 #undef NSLocalizedString
 #define NSLocalizedString(key, comment) \
-    [[NSBundle mgl_frameworkBundle] localizedStringForKey:(key) value:@"" table:nil]
+  [[NSBundle mgl_frameworkBundle] localizedStringForKey:(key) value:@"" table:nil]
 
 #undef NSLocalizedStringFromTable
 #define NSLocalizedStringFromTable(key, tbl, comment) \
-    [[NSBundle mgl_frameworkBundle] localizedStringForKey:(key) value:@"" table:(tbl)]
+  [[NSBundle mgl_frameworkBundle] localizedStringForKey:(key) value:@"" table:(tbl)]
 
 #undef NSLocalizedStringWithDefaultValue
 #define NSLocalizedStringWithDefaultValue(key, tbl, bundle, val, comment) \
-    [[NSBundle mgl_frameworkBundle] localizedStringForKey:(key) value:(val) table:(tbl)]
+  [[NSBundle mgl_frameworkBundle] localizedStringForKey:(key) value:(val)table:(tbl)]
 
 FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNBundleNotFoundException;
 

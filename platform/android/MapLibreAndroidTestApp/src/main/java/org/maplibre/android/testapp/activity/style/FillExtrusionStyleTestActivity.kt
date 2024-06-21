@@ -7,6 +7,7 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity used for instrumentation tests of fill extrusion.
@@ -25,7 +26,7 @@ class FillExtrusionStyleTestActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             maplibreMap.setStyle(
-                Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
+                Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
             ) { style: Style? -> this@FillExtrusionStyleTestActivity.maplibreMap = maplibreMap }
         }
     }

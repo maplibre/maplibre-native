@@ -17,9 +17,9 @@ import org.maplibre.android.location.permissions.PermissionsListener
 import org.maplibre.android.location.permissions.PermissionsManager
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityLocationLayerFragmentBinding
+import org.maplibre.android.testapp.styles.TestStyles
 
 class LocationFragmentActivity : AppCompatActivity() {
 
@@ -107,7 +107,7 @@ class LocationFragmentActivity : AppCompatActivity() {
             mapView.onCreate(savedInstanceState)
             mapView.getMapAsync {
                 maplibreMap = it
-                it.setStyle(Style.getPredefinedStyle("Streets")) { style ->
+                it.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style ->
                     val component = maplibreMap.locationComponent
 
                     component.activateLocationComponent(

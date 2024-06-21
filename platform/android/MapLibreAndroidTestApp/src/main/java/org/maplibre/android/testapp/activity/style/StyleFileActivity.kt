@@ -13,6 +13,7 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.ResourceUtils
 import timber.log.Timber
 import java.io.BufferedWriter
@@ -36,7 +37,7 @@ class StyleFileActivity : AppCompatActivity() {
                 if (map != null) {
                     maplibreMap = map
                 }
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
                     val fab = findViewById<FloatingActionButton>(R.id.fab_file)
                     fab.setColorFilter(ContextCompat.getColor(this@StyleFileActivity, R.color.primary))
                     fab.setOnClickListener { view: View ->

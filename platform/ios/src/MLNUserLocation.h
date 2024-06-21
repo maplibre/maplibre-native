@@ -1,8 +1,8 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
-#import "MLNFoundation.h"
 #import "MLNAnnotation.h"
+#import "MLNFoundation.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -11,7 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
  the user’s current location. You do not create instances of this class
  directly. Instead, you retrieve an existing `MLNUserLocation` object from the
  `userLocation` property of the map view displayed in your application.
- 
+
  #### Related examples
  TODO: Customize the user location annotation,learn how to overide the
  default user location annotation.

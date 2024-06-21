@@ -22,8 +22,8 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.*
 import org.maplibre.android.maps.OnMapReadyCallback
-import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.FontCache
 import org.maplibre.android.testapp.utils.ResourceUtils
 import java.lang.annotation.Retention
@@ -46,7 +46,7 @@ class GestureDetectorActivity : AppCompatActivity() {
         mapView.getMapAsync(
             OnMapReadyCallback { maplibreMap: MapLibreMap ->
                 this@GestureDetectorActivity.maplibreMap = maplibreMap
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
                 initializeMap()
             }
         )
