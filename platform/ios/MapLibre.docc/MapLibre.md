@@ -25,6 +25,7 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 - <doc:WebAPIDataExample>
 - <doc:AnimatedLineExample>
 - <doc:AnnotationViewExample>
+- <doc:BuildingLightExample>
 
 ## Topics
 

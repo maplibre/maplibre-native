@@ -32,6 +32,9 @@ struct MapLibreNavigationView: View {
                 NavigationLink("AnnotationViewExample") {
                     AnnotationViewExampleUIViewControllerRepresentable()
                 }
+                NavigationLink("BuildingLightExample") {
+                    BuildingLightExampleUIViewControllerRepresentable()
+                }
             }
         }
     }
