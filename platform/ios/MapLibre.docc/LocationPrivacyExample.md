@@ -2,7 +2,7 @@
 
 Requesting precise location with ``MLNLocationManager``.
 
-## Overview
+> Note: This example uses SwiftUI.
 
 This example shows how to request a precise location with ``MLNLocationManager``.
 

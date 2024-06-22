@@ -1,11 +1,13 @@
-# Using GeoJSON with a line style layer (UIKit)
+# Using GeoJSON with a line style layer
+
+> Note: This example uses UIKit.
 
 Adding an ``MLNLineStyleLayer`` to the map using a GeoJSON file.
 
-<!-- include-example(LineStyleLayerExampleUIKit) -->
+<!-- include-example(LineStyleLayerExample) -->
 
 ```swift
-class LineStyleLayerExampleUIKit: UIViewController, MLNMapViewDelegate {
+class LineStyleLayerExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 
     override func viewDidLoad() {

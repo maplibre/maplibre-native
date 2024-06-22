@@ -1,9 +1,14 @@
+# Showing data from an API
 
-import MapLibre
-import SwiftUI
-import UIKit
+> Note: This example uses UIKit.
 
-// #-example-code(WebAPIDataExample)
+Showing data from an API with custom styling and interaction
+
+This example loads lighthouses in the United States from [WikiData](http://tinyurl.com/zrl2jc4). It adds points to the map and applies dynamic styling to these points. When zooming in the dots become larger circles with a custom icon and the name of the lighthouse shown next to it. When tapping a callout is shown with the name of the lighthouse that was tapped on.
+
+<!-- include-example(WebAPIDataExample) -->
+
+```swift
 class WebAPIDataExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 
@@ -216,15 +221,6 @@ class WebAPIDataExample: UIViewController, MLNMapViewDelegate {
         return features
     }
 }
+```
 
-// #-end-example-code
-
-struct WebAPIDataExampleUIViewControllerRepresentable: UIViewControllerRepresentable {
-    typealias UIViewControllerType = WebAPIDataExample
-
-    func makeUIViewController(context _: Context) -> WebAPIDataExample {
-        WebAPIDataExample()
-    }
-
-    func updateUIViewController(_: WebAPIDataExample, context _: Context) {}
-}
+![](WebAPIDataExample.png)

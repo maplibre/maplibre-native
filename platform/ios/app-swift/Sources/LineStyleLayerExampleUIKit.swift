@@ -2,8 +2,8 @@ import MapLibre
 import SwiftUI
 import UIKit
 
-// #-example-code(LineStyleLayerExampleUIKit)
-class LineStyleLayerExampleUIKit: UIViewController, MLNMapViewDelegate {
+// #-example-code(LineStyleLayerExample)
+class LineStyleLayerExample: UIViewController, MLNMapViewDelegate {
     var mapView: MLNMapView!
 
     override func viewDidLoad() {
@@ -102,11 +102,11 @@ class LineStyleLayerExampleUIKit: UIViewController, MLNMapViewDelegate {
 // #-end-example-code
 
 struct LineStyleLayerExampleUIViewControllerRepresentable: UIViewControllerRepresentable {
-    typealias UIViewControllerType = LineStyleLayerExampleUIKit
+    typealias UIViewControllerType = LineStyleLayerExample
 
-    func makeUIViewController(context _: Context) -> LineStyleLayerExampleUIKit {
-        LineStyleLayerExampleUIKit()
+    func makeUIViewController(context _: Context) -> LineStyleLayerExample {
+        LineStyleLayerExample()
     }
 
-    func updateUIViewController(_: LineStyleLayerExampleUIKit, context _: Context) {}
+    func updateUIViewController(_: LineStyleLayerExample, context _: Context) {}
 }
