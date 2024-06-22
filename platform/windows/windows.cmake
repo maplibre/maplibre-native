@@ -123,16 +123,16 @@ elseif(MLN_WITH_OSMESA)
             OSMesa::libGLESv2
     )
 elseif(MLN_WITH_VULKAN)
-    find_package(Vulkan REQUIRED)
+    target_include_directories(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/vendor/Vulkan-Headers/include
+    )
+
     target_sources(
         mbgl-core
         PRIVATE
             ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
-    )
-    target_link_libraries(
-        mbgl-core
-        PRIVATE
-            Vulkan::Headers
     )
 else()
     find_package(OpenGL REQUIRED)

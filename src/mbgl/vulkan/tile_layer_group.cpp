@@ -29,7 +29,7 @@ void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
     visitDrawables([&](gfx::Drawable& drawable_) {
         if (drawable_.getEnabled()) {
             auto& drawable = static_cast<Drawable&>(drawable_);
-            //drawable.upload(uploadPass);
+            drawable.upload(uploadPass);
         }
     });
 }

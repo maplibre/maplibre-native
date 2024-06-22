@@ -1,10 +1,11 @@
 #pragma once
 
+#include <mbgl/vulkan/renderer_backend.hpp>
+
 #include <cstddef>
 #include <cstdint>
 #include <vector>
 
-// TODO merge this with the metal one. Use a common enum for usage flags
 namespace mbgl {
 namespace vulkan {
 
@@ -32,6 +33,7 @@ public:
     const void* contents() const noexcept { return (raw.empty() ? nullptr : raw.data()); }
 
     Context& getContext() const noexcept { return context; }
+    const VkBuffer& getVulkanBuffer() const noexcept { return bufferAllocation->buffer; }
 
     bool isValid() const noexcept { return !raw.empty(); }
     operator bool() const noexcept { return isValid(); }
@@ -49,6 +51,8 @@ protected:
     std::uint32_t usage;
     std::uint16_t version = 0;
     bool persistent;
+
+    UniqueBufferAllocation bufferAllocation;
 };
 
 } // namespace vulkan

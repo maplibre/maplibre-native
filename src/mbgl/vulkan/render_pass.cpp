@@ -28,6 +28,8 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
         .setRenderArea({ {0, 0}, resource.extent })
         .setClearValues(clearValues);
 
+    pushDebugGroup(name);
+
     commandEncoder.getCommandBuffer()->beginRenderPass(renderPassBeginInfo, vk::SubpassContents::eInline);
 
     commandEncoder.context.performCleanup();
@@ -35,25 +37,26 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
 
 RenderPass::~RenderPass() {
     endEncoding();
+
+    popDebugGroup();
 }
 
 void RenderPass::endEncoding() {
-
     commandEncoder.getCommandBuffer()->endRenderPass();
-
-    debugGroups.clear();
 }
 
 void RenderPass::pushDebugGroup(const char* name) {
-
+    commandEncoder.pushDebugGroup(name);
 }
 
 void RenderPass::popDebugGroup() {
-
+    commandEncoder.popDebugGroup();
 }
 
 void RenderPass::addDebugSignpost(const char* name) {
-
+    commandEncoder.getCommandBuffer()->insertDebugUtilsLabelEXT(vk::DebugUtilsLabelEXT()
+        .setPLabelName(name)
+    );
 }
 
 void RenderPass::bindVertex(const BufferResource& buf, std::size_t offset, std::size_t index, std::size_t size) {

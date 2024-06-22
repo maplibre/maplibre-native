@@ -3,6 +3,9 @@
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/vulkan/command_encoder.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/vulkan/vertex_attribute.hpp>
+#include <mbgl/vulkan/vertex_buffer_resource.hpp>
+#include <mbgl/vulkan/index_buffer_resource.hpp>
 
 #include <algorithm>
 
@@ -32,7 +35,8 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
                                                                                   const std::size_t size,
                                                                                   const gfx::BufferUsageType usage,
                                                                                   bool persistent) {
-    return nullptr;
+    return std::make_unique<VertexBufferResource>(
+        commandEncoder.context.createBuffer(data, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, persistent));
 }
 
 void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {
@@ -43,7 +47,8 @@ std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
                                                                                 const std::size_t size,
                                                                                 const gfx::BufferUsageType usage,
                                                                                 bool persistent) {
-    return nullptr;
+    return std::make_unique<IndexBufferResource>(
+        commandEncoder.context.createBuffer(data, size, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, persistent));
 }
 
 void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, const void* data, std::size_t size) {
@@ -83,6 +88,37 @@ struct VertexBuffer : public gfx::VertexBufferBase {
 
     std::unique_ptr<gfx::VertexBufferResource> resource;
 };
+
+const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec,
+                                                             const gfx::BufferUsageType usage) {
+    if (vec) {
+        const auto* rawBufPtr = vec->getRawData();
+        const auto rawBufSize = vec->getRawCount() * vec->getRawSize();
+
+        // If we already have a buffer...
+        if (auto* rawData = static_cast<VertexBuffer*>(vec->getBuffer()); rawData && rawData->resource) {
+            auto& resource = static_cast<VertexBufferResource&>(*rawData->resource);
+
+            // If it's changed, update it
+            if (rawBufSize <= resource.getSizeInBytes()) {
+                if (vec->getDirty()) {
+                    updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
+                    vec->setDirty(false);
+                }
+                return rawData->resource;
+            }
+        }
+        // Otherwise, create a new one
+        if (rawBufSize > 0) {
+            auto buffer = std::make_unique<VertexBuffer>();
+            buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
+            vec->setBuffer(std::move(buffer));
+            vec->setDirty(false);
+            return static_cast<VertexBuffer*>(vec->getBuffer())->resource;
+        }
+    }
+    return noBuffer;
+}
 
 gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const std::size_t vertexCount,
@@ -151,15 +187,17 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         assert(false);
     };
 
+    defaults.resolve(overrides, resolveAttr);
+
     return bindings;
 }
 
 void UploadPass::pushDebugGroup(const char* name) {
-   
+    commandEncoder.pushDebugGroup(name);
 }
 
 void UploadPass::popDebugGroup() {
-   
+    commandEncoder.popDebugGroup();
 }
 
 gfx::Context& UploadPass::getContext() {

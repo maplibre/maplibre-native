@@ -17,7 +17,7 @@ class UploadPass;
 
 class CommandEncoder final : public gfx::CommandEncoder {
 public:
-    explicit CommandEncoder(Context& context_, vk::UniqueCommandBuffer& buffer_);
+    explicit CommandEncoder(Context& context_, const vk::UniqueCommandBuffer& buffer_);
     ~CommandEncoder() override;
 
     vulkan::Context& getContext() { return context; }
@@ -31,15 +31,16 @@ public:
 
 private:
 
-    void pushDebugGroup(const char* name) override {}
-    void popDebugGroup() override {}
+    void pushDebugGroup(const char* name) override;
+    void pushDebugGroup(const char* name, const std::array<float, 4>& color);
+    void popDebugGroup() override;
 
 private:
     friend class RenderPass;
     friend class UploadPass;
 
     vulkan::Context& context;
-    vk::UniqueCommandBuffer& commandBuffer;
+    const vk::UniqueCommandBuffer& commandBuffer;
 };
 
 } // namespace vulkan

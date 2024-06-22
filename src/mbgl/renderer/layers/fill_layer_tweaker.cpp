@@ -87,6 +87,14 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         }
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
+
+#ifdef MLN_RENDER_BACKEND_VULKAN
+        for (int i = 0; i < layerUniforms.allocatedSize(); ++i) {
+            if (layerUniforms.get(i))   
+                drawableUniforms.set(i, layerUniforms.get(i));
+        }
+#endif
+
         switch (static_cast<RenderFillLayer::FillVariant>(drawable.getType())) {
             case RenderFillLayer::FillVariant::Fill: {
                 const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};

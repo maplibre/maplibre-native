@@ -17,6 +17,7 @@ public:
     RenderPass(CommandEncoder&, const char* name, const gfx::RenderPassDescriptor&);
     ~RenderPass() override;
 
+    vulkan::CommandEncoder& getEncoder() { return commandEncoder; }
     void endEncoding();
 
     void addDebugSignpost(const char* name) override;
@@ -33,7 +34,6 @@ private:
     gfx::RenderPassDescriptor descriptor;
     vulkan::CommandEncoder& commandEncoder;
     int32_t currentStencilReferenceValue = 0;
-    std::vector<gfx::DebugGroup<gfx::RenderPass>> debugGroups;
 };
 
 } // namespace vulkan

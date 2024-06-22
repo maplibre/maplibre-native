@@ -31,6 +31,10 @@ public:
     RenderbufferResource() = default;
 };
 
+namespace {
+const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
+}
+
 class UploadPass final : public gfx::UploadPass {
 public:
     UploadPass(gfx::Renderable&, CommandEncoder&, const char* name);
@@ -51,7 +55,7 @@ public:
                                                                         bool persistent) override;
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
 
-    void updateResource(BufferResource&, const void* data, std::size_t size);
+    const gfx::UniqueVertexBufferResource& getBuffer(const gfx::VertexVectorBasePtr&, gfx::BufferUsageType);
 
     gfx::AttributeBindingArray buildAttributeBindings(
         const std::size_t vertexCount,

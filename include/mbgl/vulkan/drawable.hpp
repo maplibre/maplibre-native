@@ -34,37 +34,29 @@ public:
     Drawable(std::string name);
     ~Drawable() override;
 
+    void upload(gfx::UploadPass&);
     void draw(PaintParameters&) const override;
 
-    struct DrawSegment;
     void setIndexData(gfx::IndexVectorBasePtr, std::vector<UniqueDrawSegment> segments) override;
-
     void setVertices(std::vector<uint8_t>&&, std::size_t, gfx::AttributeDataType) override;
 
     const gfx::UniformBufferArray& getUniformBuffers() const override;
     gfx::UniformBufferArray& mutableUniformBuffers() override;
 
-    void setColorMode(const gfx::ColorMode&) override;
+    void setEnableColor(bool value) override;
+    void setColorMode(const gfx::ColorMode& value) override;
+    void setEnableDepth(bool value) override;
+    void setDepthType(gfx::DepthMaskType value) override;
+    void setEnableStencil(bool value) override;
 
-    void setShader(gfx::ShaderProgramBasePtr) override;
-
-    void setEnableStencil(bool) override;
-    void setEnableDepth(bool) override;
-    void setSubLayerIndex(int32_t) override;
-    void setDepthType(gfx::DepthMaskType) override;
+    void setLineWidth(int32_t value) override;
+    void setCullFaceMode(const gfx::CullFaceMode&) override;
 
 protected:
 
-    void bindAttributes(RenderPass&) const noexcept;
-    void unbindAttributes(RenderPass&) const noexcept {}
-
-    void bindInstanceAttributes(RenderPass&) const noexcept;
-
-    void bindUniformBuffers(RenderPass&) const noexcept;
-    void unbindUniformBuffers(RenderPass&) const noexcept {}
-
-    void bindTextures(RenderPass&) const noexcept;
-    void unbindTextures(RenderPass&) const noexcept;
+    void bindAttributes(CommandEncoder&) const noexcept;
+    void bindUniformBuffers(CommandEncoder&) const noexcept;
+    void bindTextures(CommandEncoder&) const noexcept;
 
     void uploadTextures(UploadPass&) const noexcept;
 

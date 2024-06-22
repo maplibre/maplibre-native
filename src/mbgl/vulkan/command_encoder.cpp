@@ -9,7 +9,7 @@
 namespace mbgl {
 namespace vulkan {
 
-CommandEncoder::CommandEncoder(Context& context_, vk::UniqueCommandBuffer& buffer_)
+CommandEncoder::CommandEncoder(Context& context_, const vk::UniqueCommandBuffer& buffer_)
     : context(context_),
       commandBuffer(buffer_) {
 
@@ -30,6 +30,25 @@ std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(const char* na
 
 void CommandEncoder::present(gfx::Renderable& renderable) {
     renderable.getResource<RenderableResource>().swap();
+}
+
+void CommandEncoder::pushDebugGroup(const char* name) {
+    pushDebugGroup(name, {});
+}
+
+void CommandEncoder::pushDebugGroup(const char* name, const std::array<float, 4>& color) {
+#ifndef NDEBUG
+    commandBuffer->beginDebugUtilsLabelEXT(vk::DebugUtilsLabelEXT()
+        .setPLabelName(name)
+        .setColor(color)
+    );
+#endif
+}
+
+void CommandEncoder::popDebugGroup() {
+#ifndef NDEBUG
+    commandBuffer->endDebugUtilsLabelEXT();
+#endif
 }
 
 } // namespace vulkan

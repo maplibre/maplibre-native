@@ -4,14 +4,20 @@
 
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/gfx/shader_registry.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/util/logging.hpp>
+
+#include <mbgl/shaders/vulkan/shader_group.hpp>
+#include <mbgl/shaders/vulkan/circle.hpp>
+#include <mbgl/shaders/vulkan/fill.hpp>
 
 #include <cassert>
 #include <string>
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
+
+#define VMA_IMPLEMENTATION
+#include "vk_mem_alloc.h"
 
 namespace mbgl {
 namespace vulkan {
@@ -22,7 +28,7 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
 }
 
 RendererBackend::~RendererBackend() {
-
+    destroyResources();
 }
 
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
@@ -50,7 +56,7 @@ std::vector<const char*> RendererBackend::getDeviceExtensions() {
 }
 
 template <typename T, typename F>
-bool checkAvailability(const std::vector<T>& availableValues,
+static bool checkAvailability(const std::vector<T>& availableValues,
                        const std::vector<const char*>& requiredValues,
                        const F& getter) {
     for (const auto& requiredValue : requiredValues) {
@@ -67,6 +73,17 @@ bool checkAvailability(const std::vector<T>& availableValues,
     }
 
     return true;
+}
+
+static bool hasMemoryType(const vk::PhysicalDevice& physicalDevice, const vk::MemoryPropertyFlagBits& type) {
+    const auto& memoryProps = physicalDevice.getMemoryProperties();
+    for (uint32_t i = 0; i < memoryProps.memoryTypeCount; ++i) {
+        if (memoryProps.memoryTypes[i].propertyFlags & type) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -98,7 +115,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugCallback(VkDebugUtilsMessageSeverit
     return VK_FALSE;
 }
 
-void RendererBackend::createDebugCallback() {
+void RendererBackend::initDebug() {
     const vk::DebugUtilsMessageSeverityFlagsEXT severity = 
         vk::DebugUtilsMessageSeverityFlagsEXT() |
         vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
@@ -124,10 +141,24 @@ void RendererBackend::createDebugCallback() {
         mbgl::Log::Error(mbgl::Event::Render, "Failed to register Vulkan debug callback");
 }
 
+void RendererBackend::recreateSwapchain() {
+    auto& renderableResource = getDefaultRenderable().getResource<RenderableResource>();
+
+    device->waitIdle();
+
+    renderableResource.swapchainFramebuffers.clear();
+    renderableResource.renderPass.reset();
+    renderableResource.swapchainImageViews.clear();
+    renderableResource.swapchainImages.clear();
+
+    initSwapchain();
+}
+
 void RendererBackend::init() {
     initInstance();
     initSurface();
     initDevice();
+    initAllocator();
     initSwapchain();
     initCommandPool();
 }
@@ -146,7 +177,7 @@ void RendererBackend::initInstance() {
         .setApplicationVersion(0)
         .setPEngineName("maplibre-natve")
         .setEngineVersion(0)
-        .setApiVersion(VK_API_VERSION_1_1);
+        .setApiVersion(VK_API_VERSION_1_0);
 
     vk::InstanceCreateInfo createInfo(vk::InstanceCreateFlags(), &appInfo);
 
@@ -183,7 +214,7 @@ void RendererBackend::initInstance() {
 
 #ifndef NDEBUG
     // enable validation layer callback
-    createDebugCallback();
+    initDebug();
 #endif
 }
 
@@ -192,14 +223,55 @@ void RendererBackend::initSurface() {
 }
 
 void RendererBackend::initAllocator() {
-    // TODO init VMA
+    
+    VmaVulkanFunctions functions = {};
+
+    functions.vkGetInstanceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetInstanceProcAddr;
+    functions.vkGetDeviceProcAddr = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetDeviceProcAddr;
+
+    functions.vkGetPhysicalDeviceProperties = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetPhysicalDeviceProperties;
+    functions.vkGetPhysicalDeviceMemoryProperties = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetPhysicalDeviceMemoryProperties;
+    functions.vkAllocateMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkAllocateMemory;
+    functions.vkFreeMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkFreeMemory;
+    functions.vkMapMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkMapMemory;
+    functions.vkUnmapMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkUnmapMemory;
+    functions.vkFlushMappedMemoryRanges = VULKAN_HPP_DEFAULT_DISPATCHER.vkFlushMappedMemoryRanges;
+    functions.vkInvalidateMappedMemoryRanges = VULKAN_HPP_DEFAULT_DISPATCHER.vkInvalidateMappedMemoryRanges;
+    functions.vkBindBufferMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindBufferMemory;
+    functions.vkBindImageMemory = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindImageMemory;
+    functions.vkGetBufferMemoryRequirements = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetBufferMemoryRequirements;
+    functions.vkGetImageMemoryRequirements = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetImageMemoryRequirements;
+    functions.vkCreateBuffer = VULKAN_HPP_DEFAULT_DISPATCHER.vkCreateBuffer;
+    functions.vkDestroyBuffer = VULKAN_HPP_DEFAULT_DISPATCHER.vkDestroyBuffer;
+    functions.vkCreateImage = VULKAN_HPP_DEFAULT_DISPATCHER.vkCreateImage;
+    functions.vkDestroyImage = VULKAN_HPP_DEFAULT_DISPATCHER.vkDestroyImage;
+    functions.vkCmdCopyBuffer = VULKAN_HPP_DEFAULT_DISPATCHER.vkCmdCopyBuffer;
+    functions.vkGetBufferMemoryRequirements2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetBufferMemoryRequirements2KHR;
+    functions.vkGetImageMemoryRequirements2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetImageMemoryRequirements2KHR;
+    functions.vkBindBufferMemory2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindBufferMemory2KHR;
+    functions.vkBindImageMemory2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkBindImageMemory2KHR;
+    functions.vkGetPhysicalDeviceMemoryProperties2KHR = VULKAN_HPP_DEFAULT_DISPATCHER.vkGetPhysicalDeviceMemoryProperties2KHR;
+
+
+    VmaAllocatorCreateInfo allocatorCreateInfo = {};
+
+    allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_0;
+    allocatorCreateInfo.physicalDevice = physicalDevice;
+    allocatorCreateInfo.device = device.get();
+    allocatorCreateInfo.instance = instance.get();
+    allocatorCreateInfo.pVulkanFunctions = &functions;
+
+    VkResult result = vmaCreateAllocator(&allocatorCreateInfo, &allocator);
+    if (result != VK_SUCCESS) {
+        mbgl::Log::Error(mbgl::Event::Render, "Vulkan allocator init failed");
+    }
 }
 
 void RendererBackend::initDevice() {
 
     const auto& extensions = getDeviceExtensions();
     const auto& layers = getLayers();
-    const auto& surface = getDefaultRenderable().getResource<RenderableResource>().surface;
+    const auto& surface = getDefaultRenderable().getResource<RenderableResource>().surface.get();
 
     const auto& isPhysicalDeviceCompatible = [&](const vk::PhysicalDevice& device) -> bool {
         bool extensionsAvailable = checkAvailability(
@@ -272,13 +344,21 @@ void RendererBackend::initDevice() {
     if (surface && graphicsQueueIndex != presentQueueIndex)
         queueCreateInfos.emplace_back(vk::DeviceQueueCreateFlags(), presentQueueIndex, 1, &queuePriority);
 
-    vk::PhysicalDeviceFeatures deviceFeatures;
+    const auto& supportedDeviceFeatures = physicalDevice.getFeatures();
+
+    vk::PhysicalDeviceFeatures enabledDeviceFeatures;
+    
+    if (supportedDeviceFeatures.wideLines) {
+        enabledDeviceFeatures.setWideLines(true);
+    } else {
+        mbgl::Log::Error(mbgl::Event::Render, "Wide line support not available");
+    }
 
     auto& createInfo = vk::DeviceCreateInfo()
         .setQueueCreateInfos(queueCreateInfos)
         .setEnabledExtensionCount(static_cast<uint32_t>(extensions.size()))
         .setPpEnabledExtensionNames(extensions.data())
-        .setPEnabledFeatures(&deviceFeatures);
+        .setPEnabledFeatures(&enabledDeviceFeatures);
 
     // this is not needed for newer implementations
     createInfo.setPEnabledLayerNames(layers);
@@ -295,7 +375,7 @@ void RendererBackend::initDevice() {
 void RendererBackend::initSwapchain() {
 
     auto& renderableResource = getDefaultRenderable().getResource<RenderableResource>();
-    const auto& surface = renderableResource.surface;
+    const auto& surface = renderableResource.surface.get();
     if (!surface)
         return;
 
@@ -353,12 +433,12 @@ void RendererBackend::initSwapchain() {
     swapchainCreateInfo.setClipped(VK_TRUE);
 
     // update this when recreating
-    //swapchainCreateInfo.setOldSwapchain(vk::SwapchainKHR(nullptr));
+    swapchainCreateInfo.setOldSwapchain(vk::SwapchainKHR(renderableResource.swapchain.get()));
 
     renderableResource.swapchain = device->createSwapchainKHRUnique(swapchainCreateInfo);
     renderableResource.swapchainImages = device->getSwapchainImagesKHR(renderableResource.swapchain.get());
 
-    renderableResource.format = swapchainCreateInfo.imageFormat;
+    renderableResource.colorFormat = swapchainCreateInfo.imageFormat;
     renderableResource.extent = swapchainCreateInfo.imageExtent;
 
     // create swapchain image views
@@ -366,7 +446,7 @@ void RendererBackend::initSwapchain() {
 
     auto& imageViewCreateInfo = vk::ImageViewCreateInfo()
         .setViewType(vk::ImageViewType::e2D)
-        .setFormat(renderableResource.format) 
+        .setFormat(renderableResource.colorFormat) 
         .setComponents(vk::ComponentMapping()) // defaults to vk::ComponentSwizzle::eIdentity
         .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 
@@ -375,10 +455,13 @@ void RendererBackend::initSwapchain() {
         renderableResource.swapchainImageViews.push_back(device->createImageViewUnique(imageViewCreateInfo));
     }
 
+    // depth resources
+    initDepthTexture();
+
     // create render pass
     // TODO refactor this
     const auto& colorAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
-        .setFormat(renderableResource.format)
+        .setFormat(renderableResource.colorFormat)
         .setSamples(vk::SampleCountFlagBits::e1)
         .setLoadOp(vk::AttachmentLoadOp::eClear)
         .setStoreOp(vk::AttachmentStoreOp::eStore)
@@ -389,25 +472,54 @@ void RendererBackend::initSwapchain() {
 
     const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
 
+    const auto& depthAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
+        .setFormat(renderableResource.depthFormat)
+        .setSamples(vk::SampleCountFlagBits::e1)
+        .setLoadOp(vk::AttachmentLoadOp::eClear)
+        .setStoreOp(vk::AttachmentStoreOp::eDontCare)
+        .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+        .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+        .setInitialLayout(vk::ImageLayout::eUndefined)
+        .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
+    const vk::AttachmentReference depthAttachmentRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+
     const auto& subpass = vk::SubpassDescription(vk::SubpassDescriptionFlags()) 
         .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
         .setColorAttachmentCount(1)
-        .setPColorAttachments(&colorAttachmentRef);
+        .setColorAttachments(colorAttachmentRef)
+        .setPDepthStencilAttachment(&depthAttachmentRef);
 
-     const auto& subpassDependency = vk::SubpassDependency()
+    const auto subpassSrcStageMask = vk::PipelineStageFlags() |
+        vk::PipelineStageFlagBits::eColorAttachmentOutput | 
+        vk::PipelineStageFlagBits::eLateFragmentTests;
+
+    const auto subpassDstStageMask = vk::PipelineStageFlags() |
+        vk::PipelineStageFlagBits::eColorAttachmentOutput | 
+        vk::PipelineStageFlagBits::eEarlyFragmentTests;
+
+    const auto subpassSrcAccessMask = vk::AccessFlags() | 
+        vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+
+    const auto subpassDstAccessMask = vk::AccessFlags() | 
+        vk::AccessFlagBits::eColorAttachmentWrite |
+        vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+
+    const auto& subpassDependency = vk::SubpassDependency()
         .setSrcSubpass(VK_SUBPASS_EXTERNAL)
         .setDstSubpass(0)
-        .setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-        .setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput)
-        .setDstAccessMask(vk::AccessFlagBits::eColorAttachmentRead);
+        .setSrcStageMask(subpassSrcStageMask)
+        .setDstStageMask(subpassDstStageMask)
+        .setSrcAccessMask(subpassSrcAccessMask)
+        .setDstAccessMask(subpassDstAccessMask);
 
+    const std::array<vk::AttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
     const auto& renderPassCreateInfo = vk::RenderPassCreateInfo()
-        .setAttachmentCount(1)
-        .setPAttachments(&colorAttachment)
+        .setAttachments(attachments)
         .setSubpassCount(1)
-        .setPSubpasses(&subpass)
+        .setSubpasses(subpass)
         .setDependencyCount(1)
-        .setPDependencies(&subpassDependency);
+        .setDependencies(subpassDependency);
 
     renderableResource.renderPass = device->createRenderPassUnique(renderPassCreateInfo);
 
@@ -422,16 +534,99 @@ void RendererBackend::initSwapchain() {
         .setLayers(1);
 
     for (const auto& imageView : renderableResource.swapchainImageViews) {
-        framebufferCreateInfo.setPAttachments(&imageView.get());
+        const std::array<vk::ImageView, 2> imageViews = { imageView.get(), renderableResource.depthImageView.get() };
+        framebufferCreateInfo.setAttachments(imageViews);
         renderableResource.swapchainFramebuffers.push_back(device->createFramebufferUnique(framebufferCreateInfo));
     }
 
     maxFrames = static_cast<uint32_t>(renderableResource.swapchainFramebuffers.size());
 }
 
+void RendererBackend::initDepthTexture() {
+    // check for depth format support
+    const std::vector<vk::Format> formats {
+        vk::Format::eD24UnormS8Uint,
+        vk::Format::eD32SfloatS8Uint,
+        vk::Format::eD16UnormS8Uint,
+        vk::Format::eD32Sfloat,
+    };
+
+    const auto& formatIt = std::find_if(formats.begin(), formats.end(), [&](const auto& format) {
+        const auto& formatProps = physicalDevice.getFormatProperties(format);
+        return formatProps.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment;
+    });
+
+    if (formatIt == formats.end()) {
+        mbgl::Log::Error(mbgl::Event::Render, "Depth/Stencil format not available");
+        return;
+    }
+
+    auto& renderableResource = getDefaultRenderable().getResource<RenderableResource>();
+
+    renderableResource.depthFormat = *formatIt;
+
+    const bool hasLazyMemory = hasMemoryType(physicalDevice, vk::MemoryPropertyFlagBits::eLazilyAllocated);
+    const auto memoryUsage = hasLazyMemory ? VMA_MEMORY_USAGE_GPU_LAZILY_ALLOCATED : VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+
+    const auto imageUsage = vk::ImageUsageFlags() |
+        vk::ImageUsageFlagBits::eDepthStencilAttachment |
+        vk::ImageUsageFlagBits::eTransientAttachment;
+
+    const auto imageCreateInfo = vk::ImageCreateInfo()
+        .setImageType(vk::ImageType::e2D)
+        .setFormat(renderableResource.depthFormat)
+        .setExtent({ renderableResource.extent.width, renderableResource.extent.height, 1 })
+        .setMipLevels(1)
+        .setArrayLayers(1)
+        .setSamples(vk::SampleCountFlagBits::e1)
+        .setTiling(vk::ImageTiling::eOptimal)
+        .setUsage(imageUsage)
+        .setSharingMode(vk::SharingMode::eExclusive)
+        .setInitialLayout(vk::ImageLayout::eUndefined);
+
+    renderableResource.depthAllocation = std::make_unique<ImageAllocation>(allocator);
+    
+    VmaAllocationCreateInfo allocCreateInfo = {};
+    allocCreateInfo.usage = memoryUsage;
+    allocCreateInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+
+    VkResult result = vmaCreateImage(allocator, &VkImageCreateInfo(imageCreateInfo), &allocCreateInfo, 
+        &renderableResource.depthAllocation->image, &renderableResource.depthAllocation->allocation, nullptr);
+
+    if (result != VK_SUCCESS) {
+        mbgl::Log::Error(mbgl::Event::Render, "Vulkan depth texture allocation failed");
+        return;
+    }
+
+    const auto imageViewCreateInfo = vk::ImageViewCreateInfo()
+        .setImage(renderableResource.depthAllocation->image)
+        .setViewType(vk::ImageViewType::e2D)
+        .setFormat(renderableResource.depthFormat)
+        .setComponents(vk::ComponentMapping()) // defaults to vk::ComponentSwizzle::eIdentity
+        .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1));
+
+    renderableResource.depthImageView = device->createImageViewUnique(imageViewCreateInfo);
+}
+
 void RendererBackend::initCommandPool() {
     const vk::CommandPoolCreateInfo createInfo(vk::CommandPoolCreateFlagBits::eResetCommandBuffer, graphicsQueueIndex);
     commandPool = device->createCommandPoolUnique(createInfo);
+}
+
+void RendererBackend::destroyResources() {
+
+    device->waitIdle();
+
+    context.reset();
+    commandPool.reset();
+
+    vmaDestroyAllocator(allocator);
+
+    device.reset();
+
+    // destroy this last so we have cleanup validation
+    debugCallback.reset();
+    instance.reset();
 }
 
 /// @brief Register a list of types with a shader registry instance
@@ -443,51 +638,51 @@ void registerTypes(gfx::ShaderRegistry& registry, const ProgramParameters& progr
     /// The following fold expression will create a shader for every type
     /// in the parameter pack and register it with the shader registry.
 
-    /// Registration calls are wrapped in a lambda that throws on registration
-    /// failure, we shouldn't expect registration to faill unless the shader
-    /// registry instance provided already has conflicting programs present.
-    //(
-    //    [&]() {
-    //        using namespace std::string_literals;
-    //        using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Vulkan>;
-    //        auto group = std::make_shared<ShaderGroup<ShaderID>>(programParameters);
-    //        if (!registry.registerShaderGroup(std::move(group), ShaderClass::name)) {
-    //            assert(!"duplicate shader group");
-    //            throw std::runtime_error("Failed to register "s + ShaderClass::name + " with shader registry!");
-    //        }
-    //    }(),
-    //    ...);
+     //Registration calls are wrapped in a lambda that throws on registration
+     //failure, we shouldn't expect registration to faill unless the shader
+     //registry instance provided already has conflicting programs present.
+    (
+        [&]() {
+            using namespace std::string_literals;
+            using ShaderClass = shaders::ShaderSource<ShaderID, gfx::Backend::Type::Vulkan>;
+            auto group = std::make_shared<ShaderGroup<ShaderID>>(programParameters);
+            if (!registry.registerShaderGroup(std::move(group), ShaderClass::name)) {
+                assert(!"duplicate shader group");
+                throw std::runtime_error("Failed to register "s + ShaderClass::name + " with shader registry!");
+            }
+        }(),
+        ...);
 }
 
 void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramParameters& programParameters) {
-    registerTypes<//shaders::BuiltIn::BackgroundShader,
-                  //shaders::BuiltIn::BackgroundPatternShader,
-                  shaders::BuiltIn::CircleShader//,
-                  //shaders::BuiltIn::ClippingMaskProgram,
-                  //shaders::BuiltIn::CollisionBoxShader,
-                  //shaders::BuiltIn::CollisionCircleShader,
-                  //shaders::BuiltIn::CustomSymbolIconShader,
-                  //shaders::BuiltIn::DebugShader,
-                  //shaders::BuiltIn::FillShader,
-                  //shaders::BuiltIn::FillOutlineShader,
-                  //shaders::BuiltIn::FillPatternShader,
-                  //shaders::BuiltIn::FillOutlinePatternShader,
-                  //shaders::BuiltIn::FillOutlineTriangulatedShader,
-                  //shaders::BuiltIn::FillExtrusionShader,
-                  //shaders::BuiltIn::FillExtrusionPatternShader,
-                  //shaders::BuiltIn::HeatmapShader,
-                  //shaders::BuiltIn::HeatmapTextureShader,
-                  //shaders::BuiltIn::HillshadeShader,
-                  //shaders::BuiltIn::HillshadePrepareShader,
-                  //shaders::BuiltIn::LineShader,
-                  //shaders::BuiltIn::LineGradientShader,
-                  //shaders::BuiltIn::LineSDFShader,
-                  //shaders::BuiltIn::LinePatternShader,
-                  //shaders::BuiltIn::RasterShader,
-                  //shaders::BuiltIn::SymbolIconShader,
-                  //shaders::BuiltIn::SymbolSDFIconShader,
-                  //shaders::BuiltIn::SymbolTextAndIconShader,
-                  //shaders::BuiltIn::WideVectorShader
+    registerTypes<shaders::BuiltIn::BackgroundShader,
+                  shaders::BuiltIn::BackgroundPatternShader,
+                  shaders::BuiltIn::CircleShader,
+                  shaders::BuiltIn::ClippingMaskProgram,
+                  shaders::BuiltIn::CollisionBoxShader,
+                  shaders::BuiltIn::CollisionCircleShader,
+                  shaders::BuiltIn::CustomSymbolIconShader,
+                  shaders::BuiltIn::DebugShader,
+                  shaders::BuiltIn::FillShader,
+                  shaders::BuiltIn::FillOutlineShader,
+                  shaders::BuiltIn::FillPatternShader,
+                  shaders::BuiltIn::FillOutlinePatternShader,
+                  shaders::BuiltIn::FillOutlineTriangulatedShader,
+                  shaders::BuiltIn::FillExtrusionShader,
+                  shaders::BuiltIn::FillExtrusionPatternShader,
+                  shaders::BuiltIn::HeatmapShader,
+                  shaders::BuiltIn::HeatmapTextureShader,
+                  shaders::BuiltIn::HillshadeShader,
+                  shaders::BuiltIn::HillshadePrepareShader,
+                  shaders::BuiltIn::LineShader,
+                  shaders::BuiltIn::LineGradientShader,
+                  shaders::BuiltIn::LineSDFShader,
+                  shaders::BuiltIn::LinePatternShader,
+                  shaders::BuiltIn::RasterShader,
+                  shaders::BuiltIn::SymbolIconShader,
+                  shaders::BuiltIn::SymbolSDFIconShader,
+                  shaders::BuiltIn::SymbolTextAndIconShader,
+                  shaders::BuiltIn::WideVectorShader
     >(shaders, programParameters);
 }
 

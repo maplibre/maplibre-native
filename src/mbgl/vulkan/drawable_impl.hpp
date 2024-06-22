@@ -5,9 +5,10 @@
 #include <mbgl/gfx/index_buffer.hpp>
 #include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/uniform.hpp>
-#include <mbgl/gfx/uniform_buffer.hpp>
+#include <mbgl/vulkan/uniform_buffer.hpp>
 #include <mbgl/vulkan/render_pass.hpp>
 #include <mbgl/vulkan/upload_pass.hpp>
+#include <mbgl/vulkan/pipeline.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
@@ -28,8 +29,6 @@ public:
 
     std::vector<UniqueDrawSegment> segments;
 
-    std::size_t vertexDescHash{0};
-
     gfx::IndexVectorBasePtr indexes;
     std::size_t vertexCount = 0;
     gfx::AttributeDataType vertexType = gfx::AttributeDataType::Invalid;
@@ -40,22 +39,13 @@ public:
     std::vector<gfx::UniqueVertexBufferResource> instanceBuffers;
     gfx::AttributeBindingArray instanceBindings;
 
-    gfx::DepthMode depthMode = gfx::DepthMode::disabled();
-    gfx::StencilMode stencilMode;
-    gfx::CullFaceMode cullFaceMode;
+    vulkan::UniformBufferArray uniformBuffers;
+
     std::size_t vertexAttrId = 0;
 
     std::optional<gfx::RenderPassDescriptor> renderPassDescriptor;
 
-    gfx::StencilMode previousStencilMode;
-};
-
-struct Drawable::DrawSegment final : public gfx::Drawable::DrawSegment {
-    DrawSegment(gfx::DrawMode mode_, SegmentBase&& segment_)
-        : gfx::Drawable::DrawSegment(mode_, std::move(segment_)) {}
-    ~DrawSegment() override = default;
-
-protected:
+    PipelineInfo pipelineInfo;
 };
 
 } // namespace vulkan
