@@ -59,7 +59,7 @@ filter_filenames() {
 ios_headers=$(filter_filenames "platform/ios/src" "$public_headers")
 darwin_headers=$(filter_filenames "platform/darwin/src" "$public_headers")
 
-docc_options=(
+clang_options=(
   --toolchain swift clang
   -extract-api
   --product-name=MapLibre
@@ -73,7 +73,7 @@ docc_options=(
 
 headers=($ios_headers $darwin_headers build/headers/*.h)
 output_name="combined.symbols.json"
-xcrun "${docc_options[@]}" \
+xcrun "${clang_options[@]}" \
   -o "$build_dir/symbol-graphs/$output_name" \
   "${headers[@]}"
 
@@ -86,6 +86,7 @@ $(xcrun --find docc) "$cmd" platform/ios/MapLibre.docc \
     --source-service github \
     --source-service-base-url https://github.com/maplibre/maplibre-native/blob/main \
     --checkout-path $(realpath .) \
+    ${HOSTING_BASE_PATH:+--hosting-base-path "$HOSTING_BASE_PATH"} \
     --output-path "$build_dir"/MapLibre.doccarchive
 
 if [[ "$cmd" == "convert" ]]; then
