@@ -160,6 +160,8 @@ class AnimatedLineExample: UIViewController, MLNMapViewDelegate {
     ].map { CLLocationCoordinate2D(latitude: $0.1, longitude: $0.0) }
 }
 
+// #-end-example-code
+
 struct AnimatedLineExampleUIViewControllerRepresentable: UIViewControllerRepresentable {
     typealias UIViewControllerType = AnimatedLineExample
 
@@ -169,5 +171,3 @@ struct AnimatedLineExampleUIViewControllerRepresentable: UIViewControllerReprese
 
     func updateUIViewController(_: AnimatedLineExample, context _: Context) {}
 }
-
-// #-end-example-code

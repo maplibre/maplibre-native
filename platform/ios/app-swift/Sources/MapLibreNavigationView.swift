@@ -29,6 +29,9 @@ struct MapLibreNavigationView: View {
                 NavigationLink("AnimatedLineExample") {
                     AnimatedLineExampleUIViewControllerRepresentable()
                 }
+                NavigationLink("AnnotationViewExample") {
+                    AnnotationViewExampleUIViewControllerRepresentable()
+                }
             }
         }
     }
