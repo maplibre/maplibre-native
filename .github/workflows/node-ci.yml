@@ -78,12 +78,10 @@ jobs:
             arch: x86_64
           - runs-on: [self-hosted, linux, ARM64]
             arch: arm64
-          # Disabled until Metal backend is complete
-          # A release for macOS can be made from the opengl-2 branch
-          # - runs-on: macos-12
-          #   arch: x86_64
-          # - runs-on: macos-13-xlarge
-          #   arch: arm64
+          - runs-on: macos-12
+            arch: x86_64
+          - runs-on: macos-13
+            arch: arm64
           - runs-on: windows-2022
             arch: x86_64
     continue-on-error: true
@@ -100,7 +98,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
+ 
       - name: Setup submodules
         shell: bash
         run: |
@@ -209,7 +207,11 @@ jobs:
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-            -DMLN_WITH_NODE=ON
+            -DMLN_WITH_NODE=ON \
+            -DMLN_WITH_OPENGL=OFF \
+            -DMLN_WITH_METAL=ON \
+            -DMLN_LEGACY_RENDERER=OFF \
+            -DMLN_WITH_WERROR=OFF
 
       - name: Configure maplibre-native (Linux)
         if: runner.os == 'Linux'

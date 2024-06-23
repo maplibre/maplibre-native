@@ -8,6 +8,7 @@ option(MLN_WITH_NODE "Build MapLibre Native Node.js bindings" OFF)
 option(MLN_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
 option(MLN_WITH_RTTI "Compile with runtime type information" OFF)
 option(MLN_WITH_OPENGL "Build with OpenGL renderer" ON)
+option(MLN_WITH_METAL "Build with Metal renderer" OFF)
 option(MLN_WITH_EGL "Build with EGL renderer" OFF)
 option(MLN_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
@@ -1190,16 +1191,49 @@ if(MLN_WITH_OPENGL)
     endif()
 endif()
 
-if(MBGL_WITH_METAL)
+if(MLN_WITH_METAL)
     message(STATUS "Configuring Metal renderer backend")
     target_compile_definitions(
         mbgl-core
         PRIVATE
-            MBGL_RENDER_BACKEND_METAL=1
+            MLN_RENDER_BACKEND_METAL=1
             "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
     list(APPEND 
         INCLUDE_FILES
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_data.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_impl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_tweaker.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_atlases_tweaker.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/drawable_custom_layer_host_tweaker.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_block.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/uniform_buffer.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/vertex_attribute.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/texture2d.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/change_request.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/layer_tweaker.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/render_target.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/background_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/circle_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/collision_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/fill_extrusion_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/heatmap_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/heatmap_texture_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/hillshade_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/hillshade_prepare_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/line_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/raster_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_program_base.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/symbol_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_drawable_layer.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_drawable_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/mtl/context.hpp
@@ -1223,7 +1257,6 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/background_pattern.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/clipping_mask.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/common.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision_box.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/collision_circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/custom_symbol_icon.hpp
@@ -1242,7 +1275,7 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_icon.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_sdf.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/mtl/symbol_text_and_icon.hpp
-            )
+    )
     list(APPEND 
         SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/buffer_resource.cpp
@@ -1265,27 +1298,26 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/background.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/background_pattern.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/circle.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/collision_box.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/collision_circle.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/clipping_mask.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/custom_symbol_icon.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/debug.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill_extrusion.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill_extrusion_pattern.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/heatmap.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/heatmap_texture.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/hillshade.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/hillshade_prepare.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/line.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/raster.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_icon.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_sdf.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_text_and_icon.cpp
-    ]
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/background.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/background_pattern.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/circle.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/collision_box.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/collision_circle.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/custom_symbol_icon.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/debug.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/fill.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/fill_extrusion.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/fill_extrusion_pattern.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/heatmap.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/heatmap_texture.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade_prepare.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/line.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/raster.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_icon.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_sdf.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_text_and_icon.cpp
     )
 endif()
 
@@ -1333,6 +1365,13 @@ target_include_directories(
     mbgl-core
     PUBLIC ${PROJECT_SOURCE_DIR}/include
 )
+
+if(MLN_WITH_METAL)
+    target_include_directories(
+        mbgl-core
+        PUBLIC ${PROJECT_SOURCE_DIR}/vendor/metal-cpp
+    )
+endif()
 
 include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/csscolorparser.cmake)
@@ -1447,6 +1486,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
     include(${PROJECT_SOURCE_DIR}/platform/android/android.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
     include(${PROJECT_SOURCE_DIR}/platform/linux/linux.cmake)
+elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    include(${PROJECT_SOURCE_DIR}/platform/macos/macos.cmake)
 elseif(WIN32)
     include(${PROJECT_SOURCE_DIR}/platform/windows/windows.cmake)
 else()
