@@ -35,6 +35,9 @@ struct MapLibreNavigationView: View {
                 NavigationLink("BuildingLightExample") {
                     BuildingLightExampleUIViewControllerRepresentable()
                 }
+                NavigationLink("StaticSnapshotExample") {
+                    StaticSnapshotExampleUIViewControllerRepresentable()
+                }
             }
         }
     }
