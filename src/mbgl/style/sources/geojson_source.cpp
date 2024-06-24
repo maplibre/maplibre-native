@@ -9,6 +9,7 @@
 #include <mbgl/util/async_request.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/thread_pool.hpp>
+#include <mbgl/util/identity.hpp>
 
 namespace mbgl {
 namespace style {
@@ -21,7 +22,6 @@ Immutable<GeoJSONOptions> GeoJSONOptions::defaultOptions() {
 
 GeoJSONSource::GeoJSONSource(std::string id, Immutable<GeoJSONOptions> options)
     : Source(makeMutable<Impl>(std::move(id), std::move(options))),
-      threadPool(Scheduler::GetBackground()),
       sequencedScheduler(Scheduler::GetSequenced()) {}
 
 GeoJSONSource::~GeoJSONSource() = default;
@@ -102,7 +102,7 @@ void GeoJSONSource::loadDescription(FileSource& fileSource) {
                 loaded = true;
                 observer->onSourceLoaded(*this);
             };
-            threadPool->scheduleAndReplyValue(makeImplInBackground, onImplReady);
+            threadPool->scheduleAndReplyValue(util::SimpleIdentity::Empty, makeImplInBackground, onImplReady);
         }
     });
 }

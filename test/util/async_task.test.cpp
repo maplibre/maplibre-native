@@ -170,7 +170,7 @@ TEST(AsyncTask, scheduleAndReplyValue) {
     };
 
     std::shared_ptr<Scheduler> sheduler = Scheduler::GetBackground();
-    sheduler->scheduleAndReplyValue(runInBackground, onResult);
+    sheduler->scheduleAndReplyValue(util::SimpleIdentity::Empty, runInBackground, onResult);
     loop.run();
 }
 

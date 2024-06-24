@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/map/camera.hpp>
 #include <mbgl/style/image.hpp>
 #include <mbgl/style/transition_options.hpp>
@@ -22,7 +23,7 @@ class Layer;
 
 class Style {
 public:
-    Style(std::shared_ptr<FileSource>, float pixelRatio);
+    Style(std::shared_ptr<FileSource>, float pixelRatio, const TaggedScheduler& threadPool_);
     ~Style();
 
     void loadJSON(const std::string&);

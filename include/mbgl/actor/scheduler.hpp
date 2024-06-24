@@ -68,9 +68,9 @@ public:
     /// The |TaskFn| return type must be compatible with the |ReplyFn| argument
     /// type. Note: the task result is copied and passed by value.
     template <typename TaskFn, typename ReplyFn>
-    void scheduleAndReplyValue(const TaskFn& task, const ReplyFn& reply) {
+    void scheduleAndReplyValue(const util::SimpleIdentity tag, TaskFn&& task, ReplyFn&& reply) {
         assert(GetCurrent());
-        scheduleAndReplyValue(task, reply, GetCurrent()->makeWeakPtr());
+        scheduleAndReplyValue(tag, task, reply, GetCurrent()->makeWeakPtr());
     }
 
     /// Wait until there's nothing pending or in process
@@ -104,18 +104,19 @@ public:
 
 protected:
     template <typename TaskFn, typename ReplyFn>
-    void scheduleAndReplyValue(const TaskFn& task,
+    void scheduleAndReplyValue(const util::SimpleIdentity tag,
+                               const TaskFn& task,
                                const ReplyFn& reply,
                                mapbox::base::WeakPtr<Scheduler> replyScheduler) {
-        auto scheduled = [replyScheduler = std::move(replyScheduler), task, reply] {
+        auto scheduled = [replyScheduler = std::move(replyScheduler), tag, task, reply] {
             auto lock = replyScheduler.lock();
             if (!replyScheduler) return;
             auto scheduledReply = [reply, result = task()] {
                 reply(result);
             };
-            replyScheduler->schedule(std::move(scheduledReply));
+            replyScheduler->schedule(tag, std::move(scheduledReply));
         };
-        schedule(std::move(scheduled));
+        schedule(tag, std::move(scheduled));
     }
 
     std::function<void(const std::exception_ptr)> handler;
@@ -140,6 +141,12 @@ public:
     void runOnRenderThread(std::function<void()>&& fn) { scheduler->runOnRenderThread(tag, std::move(fn)); }
     void runRenderJobs(bool closeQueue = false) { scheduler->runRenderJobs(tag, closeQueue); }
     void waitForEmpty() const noexcept { scheduler->waitForEmpty(tag); }
+
+    /// type. Note: the task result is copied and passed by value.
+    template <typename TaskFn, typename ReplyFn>
+    void scheduleAndReplyValue(TaskFn&& task, ReplyFn&& reply) {
+        scheduler->scheduleAndReplyValue(tag, task, reply);
+    }
 
     const mbgl::util::SimpleIdentity tag;
 

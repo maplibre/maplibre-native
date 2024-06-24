@@ -20,7 +20,6 @@ public:
     std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>();
     TransformState transformState;
     util::RunLoop loop;
-    style::Style style{fileSource, 1};
     AnnotationManager annotationManager{style};
 
     const std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
@@ -31,6 +30,7 @@ public:
     TaggedScheduler threadPool;
 
     TileParameters tileParameters;
+    style::Style style;
 
     VectorTileTest()
         : threadPool(Scheduler::GetBackground(), uniqueID),
@@ -43,12 +43,14 @@ public:
                          imageManager,
                          glyphManager,
                          0,
-                         threadPool} {}
+                         threadPool},
+          style{fileSource, 1, threadPool} {}
 
     ~VectorTileTest() {
         // Ensure that deferred releases are complete before cleaning up
         loop.waitForEmpty();
         threadPool.waitForEmpty();
+        threadPool.runRenderJobs(true);
     }
 };
 

@@ -80,6 +80,8 @@ public:
     using SnapshotCallback = std::function<void(PremultipliedImage)>;
     void requestSnapshot(SnapshotCallback);
 
+    AndroidRendererBackend& getRendererBackend() const { return *backend; }
+
 protected:
     // Called from the GL Thread //
 

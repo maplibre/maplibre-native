@@ -61,11 +61,11 @@ public:
     StubRenderSourceObserver renderSourceObserver;
     Transform transform;
     TransformState transformState;
-    Style style{fileSource, 1};
     AnnotationManager annotationManager{style};
     std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
     std::shared_ptr<GlyphManager> glyphManager = std::make_shared<GlyphManager>();
     TaggedScheduler threadPool;
+    Style style;
 
     TileParameters tileParameters(MapMode mapMode = MapMode::Continuous) {
         return {1.0,
@@ -81,7 +81,7 @@ public:
     };
 
     SourceTest()
-        : threadPool(Scheduler::GetBackground(), uniqueID) {
+        : threadPool(Scheduler::GetBackground(), uniqueID), style{fileSource, 1, threadPool} {
         // Squelch logging.
         Log::setObserver(std::make_unique<Log::NullObserver>());
 

@@ -27,6 +27,10 @@ void GLFWRendererFrontend::update(std::shared_ptr<mbgl::UpdateParameters> params
     glfwView.invalidate();
 }
 
+const TaggedScheduler& GLFWRendererFrontend::getThreadPool() const {
+    return glfwView.getRendererBackend().getThreadPool();
+}
+
 void GLFWRendererFrontend::render() {
     MLN_TRACE_FUNC();
 
