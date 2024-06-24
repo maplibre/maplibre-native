@@ -18,7 +18,7 @@ public:
     void setObserver(mbgl::RendererObserver&) override;
 
     void update(std::shared_ptr<mbgl::UpdateParameters>) override;
-    const TaggedScheduler& getThreadPool() const override;
+    const mbgl::TaggedScheduler& getThreadPool() const override;
     void render();
 
     mbgl::Renderer* getRenderer();
