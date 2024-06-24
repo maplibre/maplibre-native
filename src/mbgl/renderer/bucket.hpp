@@ -68,6 +68,8 @@ public:
     virtual void updateVertices(
         const Placement&, bool /*updateOpacities*/, const TransformState&, const RenderTile&, std::set<uint32_t>&) {}
 
+    virtual bool check(std::string_view) { return true; }
+
 protected:
     Bucket() = default;
     std::atomic<bool> uploaded { false };

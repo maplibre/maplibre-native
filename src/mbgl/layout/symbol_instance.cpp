@@ -203,7 +203,7 @@ optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex() const {
 }
 
 bool SymbolInstance::check(std::size_t v, int n, std::string_view source) const {
-    if (!isFailed && v != checkVal) {
+    if (v != checkVal) {
         isFailed = true;
         Log::Error(Event::Crash, "SymbolInstance corrupted at " + util::toString(n) + " with value " + util::toString(v) + " from '" + std::string(source) + "'");
     }
@@ -211,7 +211,7 @@ bool SymbolInstance::check(std::size_t v, int n, std::string_view source) const 
 }
 
 bool SymbolInstance::checkKey() const {
-    if (!isFailed && key.size() > 1000) {   // largest observed value=62
+    if (key.size() > 1000) {   // largest observed value=62
         isFailed = true;
         Log::Error(Event::Crash, "SymbolInstance key corrupted with size=" + util::toString(key.size()));
     }

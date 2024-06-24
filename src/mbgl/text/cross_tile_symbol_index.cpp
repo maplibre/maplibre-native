@@ -12,8 +12,8 @@ TileLayerIndex::TileLayerIndex(OverscaledTileID coord_,
                                std::string bucketLeaderId_)
     : coord(coord_), bucketInstanceId(bucketInstanceId_), bucketLeaderId(std::move(bucketLeaderId_)) {
     for (SymbolInstance& symbolInstance : symbolInstances) {
-        if (symbolInstance.getCrossTileID() == SymbolInstance::invalidCrossTileID()) continue;
-        indexedSymbolInstances[symbolInstance.getKey()].emplace_back(symbolInstance.getCrossTileID(),
+        if (symbolInstance.getCrossTileID(__SOURCE_LOCATION__) == SymbolInstance::invalidCrossTileID()) continue;
+        indexedSymbolInstances[symbolInstance.getKey(__SOURCE_LOCATION__)].emplace_back(symbolInstance.getCrossTileID(__SOURCE_LOCATION__),
                                                                 getScaledCoordinates(symbolInstance, coord));
     }
 }
@@ -24,8 +24,8 @@ Point<int64_t> TileLayerIndex::getScaledCoordinates(SymbolInstance& symbolInstan
     const double roundingFactor = 512.0 / util::EXTENT / 2.0;
     const double scale = roundingFactor / std::pow(2, childTileCoord.canonical.z - coord.canonical.z);
     return {
-        static_cast<int64_t>(std::floor((childTileCoord.canonical.x * util::EXTENT + symbolInstance.getAnchor().point.x) * scale)),
-        static_cast<int64_t>(std::floor((childTileCoord.canonical.y * util::EXTENT + symbolInstance.getAnchor().point.y) * scale))
+        static_cast<int64_t>(std::floor((childTileCoord.canonical.x * util::EXTENT + symbolInstance.getAnchor(__SOURCE_LOCATION__).point.x) * scale)),
+        static_cast<int64_t>(std::floor((childTileCoord.canonical.y * util::EXTENT + symbolInstance.getAnchor(__SOURCE_LOCATION__).point.y) * scale))
     };
 }
 
@@ -38,12 +38,12 @@ void TileLayerIndex::findMatches(SymbolBucket& bucket,
     if (bucket.bucketLeaderID != bucketLeaderId) return;
 
     for (auto& symbolInstance : symbolInstances) {
-        if (symbolInstance.getCrossTileID()) {
+        if (symbolInstance.getCrossTileID(__SOURCE_LOCATION__)) {
             // already has a match, skip
             continue;
         }
 
-        auto it = indexedSymbolInstances.find(symbolInstance.getKey());
+        auto it = indexedSymbolInstances.find(symbolInstance.getKey(__SOURCE_LOCATION__));
         if (it == indexedSymbolInstances.end()) {
             // No symbol with this key in this bucket
             continue;
@@ -61,7 +61,7 @@ void TileLayerIndex::findMatches(SymbolBucket& bucket,
                 // don't let any other symbols at the same zoom level duplicate against
                 // the same parent (see issue #10844)
                 zoomCrossTileIDs.insert(thisTileSymbol.crossTileID);
-                symbolInstance.setCrossTileID(thisTileSymbol.crossTileID);
+                symbolInstance.setCrossTileID(thisTileSymbol.crossTileID, __SOURCE_LOCATION__);
                 break;
             }
         }
@@ -134,16 +134,16 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
         // For overscaled tiles the viewport might be showing only a small part of the tile,
         // so we filter out the off-screen symbols to improve the performance.
         for (auto& symbolInstance : bucket.symbolInstances) {
-            if (isInVewport(tileMatrix, symbolInstance.getAnchor().point)) {
-                symbolInstance.setCrossTileID(0u);
+            if (isInVewport(tileMatrix, symbolInstance.getAnchor(__SOURCE_LOCATION__).point)) {
+                symbolInstance.setCrossTileID(0u, __SOURCE_LOCATION__);
             } else {
-                symbolInstance.setCrossTileID(SymbolInstance::invalidCrossTileID());
+                symbolInstance.setCrossTileID(SymbolInstance::invalidCrossTileID(), __SOURCE_LOCATION__);
                 bucket.hasUninitializedSymbols = true;
             }
         }
     } else {
         for (auto& symbolInstance : bucket.symbolInstances) {
-            symbolInstance.setCrossTileID(0u);
+            symbolInstance.setCrossTileID(0u, __SOURCE_LOCATION__);
         }
     }
 
@@ -168,10 +168,10 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
     }
 
     for (auto& symbolInstance : bucket.symbolInstances) {
-        if (!symbolInstance.getCrossTileID()) {
+        if (!symbolInstance.getCrossTileID(__SOURCE_LOCATION__)) {
             // symbol did not match any known symbol, assign a new id
-            symbolInstance.setCrossTileID(++maxCrossTileID);
-            thisZoomUsedCrossTileIDs.insert(symbolInstance.getCrossTileID());
+            symbolInstance.setCrossTileID(++maxCrossTileID, __SOURCE_LOCATION__);
+            thisZoomUsedCrossTileIDs.insert(symbolInstance.getCrossTileID(__SOURCE_LOCATION__));
         }
     }
 
@@ -228,8 +228,18 @@ auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng) -> AddL
     for (const auto& item : layer.getPlacementData()) {
         const RenderTile& renderTile = item.tile;
         Bucket& bucket = item.bucket;
+
+        if (!bucket.check(std::string("CrossTileSymbolIndex::addLayer1 ") +
+                          item.sourceId + "/" + layer.getID())) {
+          continue;
+        }
+
         auto pair = bucket.registerAtCrossTileIndex(layerIndex, renderTile);
         assert(pair.first != 0u);
+
+        bucket.check(std::string("CrossTileSymbolIndex::addLayer2 ") +
+                     item.sourceId + "/" + layer.getID());
+
         if (pair.second) result |= AddLayerResult::BucketsAdded;
         currentBucketIDs.insert(pair.first);
     }
