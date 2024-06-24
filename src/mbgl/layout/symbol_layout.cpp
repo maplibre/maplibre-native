@@ -896,6 +896,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
             }
             renderData.emplace(pair.first, LayerRenderData{bucket, pair.second});
         }
+        bucket->check("SymbolLayout::createBucket");
     }
 }
 

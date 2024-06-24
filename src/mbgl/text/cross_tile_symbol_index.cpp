@@ -228,8 +228,18 @@ auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng) -> AddL
     for (const auto& item : layer.getPlacementData()) {
         const RenderTile& renderTile = item.tile;
         Bucket& bucket = item.bucket;
+
+        if (!bucket.check(std::string("CrossTileSymbolIndex::addLayer1 ") +
+                          item.sourceId + "/" + layer.getID())) {
+          continue;
+        }
+
         auto pair = bucket.registerAtCrossTileIndex(layerIndex, renderTile);
         assert(pair.first != 0u);
+
+        bucket.check(std::string("CrossTileSymbolIndex::addLayer2 ") +
+                     item.sourceId + "/" + layer.getID());
+
         if (pair.second) result |= AddLayerResult::BucketsAdded;
         currentBucketIDs.insert(pair.first);
     }

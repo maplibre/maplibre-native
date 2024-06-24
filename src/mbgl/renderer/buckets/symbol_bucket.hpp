@@ -103,6 +103,16 @@ public:
     // returns references to all the symbols if |sortKeyRange| is `nullopt`.
     SymbolInstanceReferences getSymbols(const optional<SortKeyRange>& sortKeyRange = nullopt) const;
 
+    bool check(std::string_view source) override {
+        bool success = true;
+        for (std::size_t i = 0; i < symbolInstances.size(); ++i) {
+            if (!symbolInstances[i].check(std::string(source) + " instance " + util::toString(i))) {
+                success = false;
+            }
+        }
+        return success;
+    }
+
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     const std::string bucketLeaderID;
     float sortedAngle = std::numeric_limits<float>::max();

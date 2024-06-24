@@ -6,6 +6,10 @@
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/util/bitmask_operations.hpp>
 
+#define STRINGIZE(x) STRINGIZE2(x)
+#define STRINGIZE2(x) #x
+#define __LINE_STRING__ STRINGIZE(__LINE__)
+
 namespace mbgl {
 
 class Anchor;

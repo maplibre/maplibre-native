@@ -250,7 +250,23 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
     	atlasTextures = std::make_shared<TileAtlasTextures>();
     }
     
+    if (layoutResult) {
+        for (const auto& data : layoutResult->layerRenderData) {
+            if (data.second.bucket) {
+                data.second.bucket->check("GeometryTile::onLayout1 " __LINE_STRING__);
+            }
+        }
+    }
+
     observer->onTileChanged(*this);
+    
+    if (layoutResult) {
+        for (const auto& data : layoutResult->layerRenderData) {
+            if (data.second.bucket) {
+                data.second.bucket->check("GeometryTile::onLayout2 " __LINE_STRING__);
+            }
+        }
+    }
 }
 
 void GeometryTile::onError(std::exception_ptr err, const uint64_t resultCorrelationID) {
