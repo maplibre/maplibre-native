@@ -38,6 +38,9 @@ struct MapLibreNavigationView: View {
                 NavigationLink("StaticSnapshotExample") {
                     StaticSnapshotExampleUIViewControllerRepresentable()
                 }
+                NavigationLink("DDSCircleLayerExample") {
+                    DDSCircleLayerExampleUIViewControllerRepresentable().edgesIgnoringSafeArea(.all)
+                }
             }
         }
     }

@@ -27,6 +27,7 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 - <doc:AnimatedLineExample>
 - <doc:WebAPIDataExample>
 - <doc:LineStyleLayerExample>
+- <doc:DDSCircleLayerExample>
 
 ### Map Interaction
 
