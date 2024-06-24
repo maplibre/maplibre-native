@@ -253,7 +253,7 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
     if (layoutResult) {
         for (const auto& data : layoutResult->layerRenderData) {
             if (data.second.bucket) {
-                data.second.bucket->check("GeometryTile::onLayout1 " __LINE_STRING__);
+                data.second.bucket->check(__SOURCE_LOCATION__);
             }
         }
     }
@@ -263,7 +263,7 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
     if (layoutResult) {
         for (const auto& data : layoutResult->layerRenderData) {
             if (data.second.bucket) {
-                data.second.bucket->check("GeometryTile::onLayout2 " __LINE_STRING__);
+                data.second.bucket->check(__SOURCE_LOCATION__);
             }
         }
     }
