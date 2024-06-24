@@ -34,9 +34,7 @@ class MLNRenderFrontend : public mbgl::RendererFrontend {
     }
   }
 
-  const TaggedScheduler& getThreadPool() const override {
-    return mbglBackend.getThreadPool();
-  }
+  const TaggedScheduler& getThreadPool() const override { return mbglBackend.getThreadPool(); }
 
   void setObserver(mbgl::RendererObserver& observer) override {
     if (!renderer) return;

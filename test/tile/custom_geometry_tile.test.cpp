@@ -43,7 +43,7 @@ public:
                          glyphManager,
                          0,
                          {Scheduler::GetBackground(), uniqueID}},
-        style{fileSource, 1, tileParameters.threadPool} {}
+          style{fileSource, 1, tileParameters.threadPool} {}
 };
 
 TEST(CustomGeometryTile, InvokeFetchTile) {

@@ -81,7 +81,8 @@ public:
     };
 
     SourceTest()
-        : threadPool(Scheduler::GetBackground(), uniqueID), style{fileSource, 1, threadPool} {
+        : threadPool(Scheduler::GetBackground(), uniqueID),
+          style{fileSource, 1, threadPool} {
         // Squelch logging.
         Log::setObserver(std::make_unique<Log::NullObserver>());
 

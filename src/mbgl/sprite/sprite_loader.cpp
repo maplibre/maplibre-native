@@ -112,7 +112,6 @@ void SpriteLoader::emitSpriteLoadedIfComplete(style::Sprite sprite) {
             }
             observer->onSpriteLoaded(std::optional(sprite), std::move(result.images));
         });
-
 }
 
 void SpriteLoader::setObserver(SpriteLoaderObserver* observer_) {

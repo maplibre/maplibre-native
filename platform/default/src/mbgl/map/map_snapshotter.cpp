@@ -118,9 +118,7 @@ public:
         return std::move(stillImage);
     }
 
-    const TaggedScheduler& getThreadPool() const {
-        return frontend.getThreadPool();
-    }
+    const TaggedScheduler& getThreadPool() const { return frontend.getThreadPool(); }
 
 private:
     PremultipliedImage stillImage;

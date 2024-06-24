@@ -31,9 +31,9 @@ public:
 
 class SpriteLoaderTest {
 public:
-    SpriteLoaderTest() :
-        threadPool(Scheduler::GetBackground(), uniqueID),
-        spriteLoader(1, threadPool) {}
+    SpriteLoaderTest()
+        : threadPool(Scheduler::GetBackground(), uniqueID),
+          spriteLoader(1, threadPool) {}
 
     ~SpriteLoaderTest() {
         threadPool.waitForEmpty();
