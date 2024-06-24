@@ -1,4 +1,4 @@
-# Vector Layers
+# Vector Tile Sources
 
 Add and style a vector tile source 
 
