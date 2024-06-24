@@ -878,9 +878,12 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                        canonical,
                                                        lastAddedSection);
             }
-            symbolInstance.check(__SOURCE_LOCATION__);
-            assert(lastAddedSection); // True, as hasText == true;
-            updatePaintPropertiesForSection(*bucket, feature, *lastAddedSection, canonical);
+            if (symbolInstance.check(__SOURCE_LOCATION__)) {
+                assert(lastAddedSection); // True, as hasText == true;
+                updatePaintPropertiesForSection(*bucket, feature, *lastAddedSection, canonical);
+            } else {
+                break;
+            }
         }
 
         symbolInstance.releaseSharedData();
@@ -889,14 +892,16 @@ void SymbolLayout::createBucket(const ImagePositions&,
     if (showCollisionBoxes) {
         addToDebugBuffers(*bucket);
     }
-    if (bucket->hasData()){
-        for (const auto& pair : layerPaintProperties) {
-            if (!firstLoad) {
-                bucket->justReloaded = true;
+    if (bucket->hasData()) {
+        if (bucket->check(__SOURCE_LOCATION__)) {
+            for (const auto &pair: layerPaintProperties) {
+                if (!firstLoad) {
+                    bucket->justReloaded = true;
+                }
+                renderData.emplace(pair.first, LayerRenderData{bucket, pair.second});
             }
-            renderData.emplace(pair.first, LayerRenderData{bucket, pair.second});
+            bucket->check(__SOURCE_LOCATION__);
         }
-        bucket->check(__SOURCE_LOCATION__);
     }
 }
 
