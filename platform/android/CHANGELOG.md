@@ -6,6 +6,13 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### ✨ Features and improvements
 
+## 10.3.2-pre3
+
+- Additional symbol instance checks building on previous success in detecting corruption and avoiding crashes
+- More context from check calls to help narrow down the origin of corruption
+
+Note: CI checks are not maintained for backporting releases, so only manual testing is done.
+
 ## 10.3.2-pre2
 
 A minor fix for a bug introduced in 10.3.2-pre1 which caused symbols to disappear randomly.
