@@ -108,15 +108,11 @@ protected:
                                const TaskFn& task,
                                const ReplyFn& reply,
                                mapbox::base::WeakPtr<Scheduler> replyScheduler) {
-        auto scheduled = [replyScheduler = std::move(replyScheduler), tag, task, reply] {
+        schedule(tag, [replyScheduler = std::move(replyScheduler), tag, task, reply] {
             auto lock = replyScheduler.lock();
             if (!replyScheduler) return;
-            auto scheduledReply = [reply, result = task()] {
-                reply(result);
-            };
-            replyScheduler->schedule(tag, std::move(scheduledReply));
-        };
-        schedule(tag, std::move(scheduled));
+            replyScheduler->schedule(tag, [reply, result = task()] { reply(result); });
+        });
     }
 
     std::function<void(const std::exception_ptr)> handler;
