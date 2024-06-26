@@ -51,8 +51,14 @@ void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
     // If this temporary outlives the `schedule` call, and the function is executed immediately
     // by a waiting thread and is already complete, that temporary reference ends up being the
     // last one and the destruction actually occurs here on this thread.
-    std::function<void()> func{[tile_{CaptureWrapper<Tile>{std::move(tile)}}]() {
+    std::function<void()> func{[tile_{CaptureWrapper<Tile>{std::move(tile)}}, this]() mutable {
+        std::exchange(tile_.item, {});
+        deferredDeletionsPending--;
+        deferredSignal.notify_all();
     }};
+
+    std::shared_lock<std::shared_mutex> counterLock(deferredSignalLock);
+    deferredDeletionsPending++;
 
     threadPool.schedule(std::move(func));
 }

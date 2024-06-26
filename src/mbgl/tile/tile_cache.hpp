@@ -7,6 +7,10 @@
 #include <list>
 #include <memory>
 #include <map>
+#include <atomic>
+#include <mutex>
+#include <shared_mutex>
+#include <condition_variable>
 
 namespace mbgl {
 
@@ -15,6 +19,15 @@ public:
     TileCache(const TaggedScheduler& threadPool_, size_t size_ = 0)
         : threadPool(threadPool_),
           size(size_) {}
+
+    ~TileCache() {
+        clear();
+        
+        std::unique_lock<std::shared_mutex> counterLock(deferredSignalLock);
+        while (deferredDeletionsPending != 0) {
+            deferredSignal.wait(counterLock);
+        }
+    }
 
     /// Change the maximum size of the cache.
     void setSize(size_t);
@@ -38,6 +51,9 @@ private:
     std::map<OverscaledTileID, std::unique_ptr<Tile>> tiles;
     std::list<OverscaledTileID> orderedKeys;
     TaggedScheduler threadPool;
+    std::atomic<size_t> deferredDeletionsPending{0};
+    std::shared_mutex deferredSignalLock;
+    std::condition_variable_any deferredSignal;
 
     size_t size;
 };
