@@ -62,6 +62,7 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                 {
                     std::lock_guard<std::mutex> lock(q->lock);
                     if (q->queue.size()) {
+                        q->runningCount++;
                         tasklet = std::move(q->queue.front());
                         q->queue.pop();
                     }
@@ -69,7 +70,6 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                 }
 
                 assert(taskCount > 0);
-                q->runningCount++;
                 taskCount--;
 
                 try {

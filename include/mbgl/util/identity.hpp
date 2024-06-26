@@ -27,7 +27,7 @@ public:
     bool operator!=(const SimpleIdentity& other) const noexcept { return uniqueID != other.uniqueID; }
 
     std::int64_t id() const noexcept { return uniqueID; }
-    bool isEmpty() const noexcept { return uniqueID != emptyID; }
+    bool isEmpty() const noexcept { return uniqueID == emptyID; }
 
     operator bool() const noexcept { return isEmpty(); }
     bool operator!() const noexcept { return !isEmpty(); }
