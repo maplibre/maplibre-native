@@ -137,7 +137,7 @@ void ThreadedSchedulerBase::waitForEmpty(const util::SimpleIdentity tag) {
     // Must not be called from a thread in our pool, or we would deadlock
     assert(!thisThreadIsOwned());
     if (!thisThreadIsOwned()) {
-        auto tagToFind = tag.isEmpty() ? uniqueID : tag;
+        const auto tagToFind = tag.isEmpty() ? uniqueID : tag;
 
         std::shared_ptr<Queue> q;
         {
