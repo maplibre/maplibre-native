@@ -22,7 +22,7 @@ public:
 
     ~TileCache() {
         clear();
-        
+
         std::unique_lock<std::shared_mutex> counterLock(deferredSignalLock);
         while (deferredDeletionsPending != 0) {
             deferredSignal.wait(counterLock);
