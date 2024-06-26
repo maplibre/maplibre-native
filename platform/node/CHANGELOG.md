@@ -1,6 +1,9 @@
 
 ## main
+
+## 5.4.1-pre.0
 * Fixes crash that happened with some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)).
+* Upgrade to nan 2.19 for node 22.x support (https://github.com/maplibre/maplibre-native/pull/2426)
 
 ## 5.4.0
 
