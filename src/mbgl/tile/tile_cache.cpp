@@ -57,7 +57,7 @@ void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
         deferredSignal.notify_all();
     }};
 
-    std::shared_lock<std::shared_mutex> counterLock(deferredSignalLock);
+    std::unique_lock<std::mutex> counterLock(deferredSignalLock);
     deferredDeletionsPending++;
 
     threadPool.schedule(std::move(func));

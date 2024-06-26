@@ -9,7 +9,6 @@
 #include <map>
 #include <atomic>
 #include <mutex>
-#include <shared_mutex>
 #include <condition_variable>
 
 namespace mbgl {
@@ -23,7 +22,7 @@ public:
     ~TileCache() {
         clear();
 
-        std::unique_lock<std::shared_mutex> counterLock(deferredSignalLock);
+        std::unique_lock<std::mutex> counterLock(deferredSignalLock);
         while (deferredDeletionsPending != 0) {
             deferredSignal.wait(counterLock);
         }
@@ -52,8 +51,8 @@ private:
     std::list<OverscaledTileID> orderedKeys;
     TaggedScheduler threadPool;
     std::atomic<size_t> deferredDeletionsPending{0};
-    std::shared_mutex deferredSignalLock;
-    std::condition_variable_any deferredSignal;
+    std::mutex deferredSignalLock;
+    std::condition_variable deferredSignal;
 
     size_t size;
 };
