@@ -81,6 +81,7 @@ public:
     void requestSnapshot(SnapshotCallback);
 
     AndroidRendererBackend& getRendererBackend() const { return *backend; }
+    const TaggedScheduler& getThreadPool() const { return threadPool; }
 
 protected:
     // Called from the GL Thread //
@@ -122,7 +123,8 @@ private:
     float pixelRatio;
     std::optional<std::string> localIdeographFontFamily;
 
-    std::shared_ptr<ThreadPool> threadPool;
+    //std::shared_ptr<ThreadPool> threadPool;
+    TaggedScheduler threadPool;
     const MailboxData mailboxData;
 
     std::mutex initialisationMutex;

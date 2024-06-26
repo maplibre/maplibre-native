@@ -27,6 +27,7 @@ enum class ContextMode : bool {
 class RendererBackend {
 protected:
     explicit RendererBackend(ContextMode);
+    RendererBackend(ContextMode, const TaggedScheduler&);
 
 public:
     virtual ~RendererBackend();

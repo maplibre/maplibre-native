@@ -83,7 +83,7 @@ void AndroidRendererFrontend::update(std::shared_ptr<UpdateParameters> params) {
 }
 
 const TaggedScheduler& AndroidRendererFrontend::getThreadPool() const {
-    return mapRenderer.getRendererBackend().getThreadPool();
+    return mapRenderer.getThreadPool();
 }
 
 void AndroidRendererFrontend::reduceMemoryUse() {

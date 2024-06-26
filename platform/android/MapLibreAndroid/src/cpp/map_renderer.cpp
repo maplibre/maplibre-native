@@ -22,6 +22,7 @@ MapRenderer::MapRenderer(jni::JNIEnv& _env,
       pixelRatio(pixelRatio_),
       localIdeographFontFamily(localIdeographFontFamily_ ? jni::Make<std::string>(_env, localIdeographFontFamily_)
                                                          : std::optional<std::string>{}),
+      threadPool(Scheduler::GetBackground(), {}),
       mailboxData(this) {}
 
 MapRenderer::MailboxData::MailboxData(Scheduler* scheduler_)
@@ -218,7 +219,7 @@ void MapRenderer::onSurfaceCreated(JNIEnv&) {
     backend.reset();
 
     // Create the new backend and renderer
-    backend = std::make_unique<AndroidRendererBackend>();
+    backend = std::make_unique<AndroidRendererBackend>(threadPool);
     renderer = std::make_unique<Renderer>(*backend, pixelRatio, localIdeographFontFamily);
     rendererRef = std::make_unique<ActorRef<Renderer>>(*renderer, mailboxData.getMailbox());
 

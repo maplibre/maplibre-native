@@ -19,6 +19,9 @@ namespace gl {
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_) {}
 
+RendererBackend::RendererBackend(const gfx::ContextMode contextMode_, const TaggedScheduler& threadPool_)
+    : gfx::RendererBackend(contextMode_, threadPool_) {}
+
 std::unique_ptr<gfx::Context> RendererBackend::createContext() {
     MLN_TRACE_FUNC();
 
