@@ -426,7 +426,9 @@ TEST(Thread, WrongThread) {
 }
 #endif
 
-std::function<void()> makeCounterThread(TaggedScheduler& pool, std::atomic<bool>* stopFlag, std::atomic<size_t>* counter) {
+std::function<void()> makeCounterThread(TaggedScheduler& pool,
+                                        std::atomic<bool>* stopFlag,
+                                        std::atomic<size_t>* counter) {
     return [=]() mutable {
         std::this_thread::sleep_for(std::chrono::microseconds(10));
         (*counter)++;
