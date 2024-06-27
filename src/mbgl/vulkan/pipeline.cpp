@@ -116,6 +116,34 @@ vk::CompareOp PipelineInfo::vulkanCompareOp(const gfx::DepthFunctionType& value)
     }
 }
 
+vk::CompareOp PipelineInfo::vulkanCompareOp(const gfx::StencilFunctionType& value) {
+    switch (value) {
+        default:                                        [[fallthrough]];
+        case gfx::StencilFunctionType::Never:           return vk::CompareOp::eNever;
+        case gfx::StencilFunctionType::Less:            return vk::CompareOp::eLess;
+        case gfx::StencilFunctionType::Equal:           return vk::CompareOp::eEqual;
+        case gfx::StencilFunctionType::LessEqual:       return vk::CompareOp::eLessOrEqual;
+        case gfx::StencilFunctionType::Greater:         return vk::CompareOp::eGreater;
+        case gfx::StencilFunctionType::NotEqual:        return vk::CompareOp::eNotEqual;
+        case gfx::StencilFunctionType::GreaterEqual:    return vk::CompareOp::eGreaterOrEqual;
+        case gfx::StencilFunctionType::Always:          return vk::CompareOp::eAlways;
+    }
+}
+
+vk::StencilOp PipelineInfo::vulkanStencilOp(const gfx::StencilOpType& value) {
+    switch (value) {
+        default:                                    [[fallthrough]];
+        case gfx::StencilOpType::Zero:              return vk::StencilOp::eZero;
+        case gfx::StencilOpType::Keep:              return vk::StencilOp::eKeep;
+        case gfx::StencilOpType::Replace:           return vk::StencilOp::eReplace;
+        case gfx::StencilOpType::Increment:         return vk::StencilOp::eIncrementAndClamp;
+        case gfx::StencilOpType::Decrement:         return vk::StencilOp::eDecrementAndClamp;
+        case gfx::StencilOpType::Invert:            return vk::StencilOp::eInvert;
+        case gfx::StencilOpType::IncrementWrap:     return vk::StencilOp::eIncrementAndWrap;
+        case gfx::StencilOpType::DecrementWrap:     return vk::StencilOp::eDecrementAndWrap;
+    }
+}
+
 void PipelineInfo::setCullMode(const gfx::CullFaceMode& value) {
     cullMode = value.enabled ? vulkanCullMode(value.side) : vk::CullModeFlagBits::eNone;
     frontFace = vulkanFrontFace(value.winding);
@@ -163,6 +191,41 @@ void PipelineInfo::setDepthWrite(const gfx::DepthMaskType& value) {
     }
 }
 
+void PipelineInfo::setDepthMode(const gfx::DepthMode& value) {
+    depthFunction = vulkanCompareOp(value.func);
+    setDepthWrite(value.mask);
+}
+
+void PipelineInfo::setStencilMode(const gfx::StencilMode& value) {
+    stencilTest = !value.test.is<gfx::StencilMode::Always>();
+    if (value.test.is<gfx::StencilMode::Always>()) {
+        stencilTest = false;
+        stencilFunction = vk::CompareOp::eNever;
+        return;
+    }
+
+    stencilTest = true;
+
+    if (value.test.is<gfx::StencilMode::Never>()) {
+        stencilFunction = vk::CompareOp::eNever;
+        return;
+    }
+
+    apply_visitor(
+        [&](const auto& test) {
+            stencilFunction = vulkanCompareOp(test.func);
+            dynamicValues.stencilCompareMask = test.mask;
+        },
+        value.test);
+
+    dynamicValues.stencilWriteMask = value.mask;
+    dynamicValues.stencilRef = value.ref;
+    
+    stencilPass = vulkanStencilOp(value.pass);
+    stencilFail = vulkanStencilOp(value.fail);
+    stencilDepthFail = vulkanStencilOp(value.depthFail);
+}
+
 bool PipelineInfo::usesBlendConstants() const {
     if (srcBlendFactor == vk::BlendFactor::eConstantAlpha ||
         srcBlendFactor == vk::BlendFactor::eConstantColor ||
@@ -196,8 +259,48 @@ std::size_t PipelineInfo::hash() const {
         depthWrite,
         depthFunction,
         stencilTest,
+        stencilFunction,
+        stencilPass,
+        stencilFail,
+        stencilDepthFail,
         wideLines
     );
+}
+
+void PipelineInfo::setDynamicValues(const vk::UniqueCommandBuffer& buffer) const {
+    if (dynamicValues.blendConstants.has_value()) {
+        buffer->setBlendConstants(dynamicValues.blendConstants.value().data());
+    }
+
+    if (stencilTest) {
+        buffer->setStencilWriteMask(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilWriteMask);
+        buffer->setStencilCompareMask(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilCompareMask);
+        buffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilRef);
+    }
+    
+    if (wideLines) {
+        buffer->setLineWidth(dynamicValues.lineWidth);
+    }
+}
+
+std::vector<vk::DynamicState> PipelineInfo::getDynamicStates() const {
+    std::vector<vk::DynamicState> dynamicStates;
+
+    if (usesBlendConstants()) {
+        dynamicStates.push_back(vk::DynamicState::eBlendConstants);
+    }
+
+    if (stencilTest) {
+        dynamicStates.push_back(vk::DynamicState::eStencilCompareMask);
+        dynamicStates.push_back(vk::DynamicState::eStencilWriteMask);
+        dynamicStates.push_back(vk::DynamicState::eStencilReference);
+    }
+
+    if (wideLines) {
+        dynamicStates.push_back(vk::DynamicState::eLineWidth);
+    }
+
+    return dynamicStates;
 }
 
 } // namespace vulkan

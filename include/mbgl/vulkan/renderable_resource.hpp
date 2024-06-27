@@ -26,7 +26,6 @@ protected:
         swapchain.reset();
         surface.reset();
 
-        depthImageView.reset();
         depthAllocation.reset();
     }
 
@@ -50,7 +49,6 @@ protected:
     vk::UniqueSwapchainKHR swapchain;
 
     UniqueImageAllocation depthAllocation;
-    vk::UniqueImageView depthImageView;
     vk::Format depthFormat;
 
     std::vector<vk::Image> swapchainImages;

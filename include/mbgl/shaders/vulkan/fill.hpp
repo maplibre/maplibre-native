@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 
@@ -28,11 +27,11 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Vulkan> {
     layout(location = 2) in vec2 inOpacity;
 #endif
 
-    layout(set = 1, binding = 0) uniform FillDrawableUBO {
+    layout(set = 0, binding = 1) uniform FillDrawableUBO {
         mat4 matrix;
     } drawable;
 
-    layout(set = 3, binding = 0) uniform FillInterpolateUBO {
+    layout(set = 0, binding = 3) uniform FillInterpolateUBO {
         float color_t;
         float opacity_t;
     } interp;
@@ -72,7 +71,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Vulkan> {
 
     layout(location = 0) out vec4 outColor;
 
-    layout(set = 4, binding = 0) uniform FillEvaluatedPropsUBO {
+    layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
         vec4 color;
         vec4 outline_color;
         float opacity;
@@ -121,23 +120,11 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Vulkan> {
     layout(location = 2) in vec2 inOpacity;
 #endif
 
-    layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
-        vec2 pattern_atlas_texsize;
-        vec2 units_to_pixels;
-        vec2 world_size;
-        float camera_to_center_distance;
-        float symbol_fade_change;
-        float aspect_ratio;
-        float pixel_ratio;
-        float zoom;
-        float pad1;
-    } global;
-
-    layout(set = 1, binding = 0) uniform FillDrawableUBO {
+    layout(set = 0, binding = 1) uniform FillDrawableUBO {
         mat4 matrix;
     } drawable;
 
-    layout(set = 3, binding = 0) uniform FillInterpolateUBO {
+    layout(set = 0, binding = 3) uniform FillInterpolateUBO {
         float color_t;
         float opacity_t;
     } interp;
@@ -183,7 +170,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Vulkan> {
 
     layout(location = 0) out vec4 outColor;
 
-    layout(set = 4, binding = 0) uniform FillEvaluatedPropsUBO {
+    layout(set = 0, binding = 4) uniform FillEvaluatedPropsUBO {
         vec4 color;
         vec4 outline_color;
         float opacity;
@@ -211,7 +198,6 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Vulkan> {
 #endif
 
         outColor = color * opacity;
-        outColor.rgb /= 2.0;
     }
 )";
 };

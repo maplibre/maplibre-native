@@ -11,9 +11,11 @@
 #include <mbgl/vulkan/layer_group.hpp>
 #include <mbgl/vulkan/tile_layer_group.hpp>
 #include <mbgl/vulkan/renderable_resource.hpp>
+#include <mbgl/vulkan/render_pass.hpp>
 #include <mbgl/vulkan/texture2d.hpp>
 #include <mbgl/vulkan/vertex_attribute.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
+#include <mbgl/shaders/vulkan/clipping_mask.hpp>
 #include <mbgl/util/traits.hpp>
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
@@ -65,7 +67,8 @@ void Context::initFrameResources() {
 
     // descriptor pool info
     const std::vector<vk::DescriptorPoolSize> poolSizes = {
-        {vk::DescriptorType::eUniformBuffer, 100000},
+        { vk::DescriptorType::eUniformBuffer, 10000 },
+        { vk::DescriptorType::eCombinedImageSampler, 5000 },
     };
 
     const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo()
@@ -97,23 +100,48 @@ void Context::destroyResources() {
    
     backend.getDevice()->waitIdle();
 
-    dummyUniformBuffer.reset();
-    dummyVertexBuffer.reset();
-
     for (auto& frame : frameResources)
-        frame.runDeletionQueue();
+        frame.runDeletionQueue(*this);
 
     // all resources have unique handles
     frameResources.clear();
 }
 
-void Context::enqueueDeletion(const std::function<void()>& function) {
+const vk::UniqueDescriptorPool& Context::getCurrentDescriptorPool() const {
+    return frameResources[frameResourceIndex].descriptorPool;
+}
+
+void Context::enqueueDeletion(const std::function<void(const Context&)>& function) {
     if (frameResources.empty()) {
-        function();
+        function(*this);
         return;
     }
     
-    frameResources[frameResourceIndex].deletionQueue.push_back(function);
+    frameResources[frameResourceIndex].deletionQueue.push_back(std::move(function));
+}
+
+void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
+    const auto& device = backend.getDevice();
+
+    const vk::CommandBufferAllocateInfo allocateInfo(
+        backend.getCommandPool().get(), 
+        vk::CommandBufferLevel::ePrimary, 
+        1
+    );
+
+    const auto& commandBuffers = backend.getDevice()->allocateCommandBuffersUnique(allocateInfo);
+    auto& commandBuffer = commandBuffers.front();
+
+    backend.setDebugName(commandBuffer.get(), "OneTimeSubmitCommandBuffer");
+
+    commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
+    function(commandBuffer);
+    commandBuffer->end();
+
+    const auto& submitInfo = vk::SubmitInfo().setCommandBuffers(commandBuffer.get());
+
+    backend.getGraphicsQueue().submit(submitInfo);
+    backend.getDevice()->waitIdle();
 }
 
 void Context::beginFrame() {
@@ -129,7 +157,7 @@ void Context::beginFrame() {
 #endif
     }
 
-    frame.runDeletionQueue();
+    frame.runDeletionQueue(*this);
     device->resetDescriptorPool(getCurrentDescriptorPool().get());
 
     try {
@@ -219,7 +247,7 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
 }
 
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent) {
-    return std::make_shared<UniformBuffer>(createBuffer(data, size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, persistent));
+    return std::make_shared<UniformBuffer>(createBuffer(data, size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, true));
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -256,10 +284,6 @@ gfx::Texture2DPtr Context::createTexture2D() {
 RenderTargetPtr Context::createRenderTarget(const Size size, const gfx::TextureChannelDataType type) {
     return std::make_shared<RenderTarget>(*this, size, type);
 }
-
-void Context::resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) {}
-
-void Context::setDirtyState() {}
 
 std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size,
                                                                        gfx::TextureChannelDataType type,
@@ -307,38 +331,176 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
 
 }
 
+bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
+                                      RenderStaticData& staticData,
+                                      const std::vector<shaders::ClipUBO>& tileUBOs) {
+    using ShaderClass = shaders::ShaderSource<shaders::BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Vulkan>;
+
+    if (!clipping.shader) {
+        const auto group = staticData.shaders->getShaderGroup("ClippingMaskProgram");
+        if (group) {
+            clipping.shader = std::static_pointer_cast<gfx::ShaderProgramBase>(group->getOrCreateShader(*this, {}));
+        }
+    }
+    if (!clipping.shader) {
+        assert(!"Failed to create shader for clip masking");
+        return false;
+    }
+
+    // Create a vertex buffer from the fixed tile coordinates
+    if (!clipping.vertexBuffer) {
+        const auto vertices = RenderStaticData::tileVertices();
+        clipping.vertexBuffer.emplace(createBuffer(vertices.data(), vertices.bytes(), 
+            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, false));
+    }
+
+    // Create a buffer from the fixed tile indexes
+    if (!clipping.indexBuffer) {
+        const auto indices = RenderStaticData::quadTriangleIndices();
+        clipping.indexBuffer.emplace(createBuffer(indices.data(), indices.bytes(), 
+            VK_BUFFER_USAGE_INDEX_BUFFER_BIT, false));
+        clipping.indexCount = 6;
+    }
+
+    // build pipeline
+    if (clipping.pipelineInfo.inputAttributes.empty()) {
+        clipping.pipelineInfo.colorBlend = false;
+        clipping.pipelineInfo.colorMask = vk::ColorComponentFlags();
+
+        clipping.pipelineInfo.depthTest = false;
+        clipping.pipelineInfo.depthWrite = false;
+
+        clipping.pipelineInfo.stencilTest = true;
+        clipping.pipelineInfo.stencilFunction = vk::CompareOp::eAlways;
+        clipping.pipelineInfo.stencilPass = vk::StencilOp::eReplace;
+        clipping.pipelineInfo.dynamicValues.stencilWriteMask = 0b11111111;
+        clipping.pipelineInfo.dynamicValues.stencilRef = 0b11111111;
+
+        clipping.pipelineInfo.inputBindings.push_back(
+            vk::VertexInputBindingDescription()
+                .setBinding(0)
+                .setStride(VertexAttribute::getStrideOf(ShaderClass::attributes[0].dataType))
+                .setInputRate(vk::VertexInputRate::eVertex));
+
+        clipping.pipelineInfo.inputAttributes.push_back(
+            vk::VertexInputAttributeDescription()
+                .setBinding(0)
+                .setLocation(ShaderClass::attributes[0].index)
+                .setFormat(PipelineInfo::vulkanFormat(ShaderClass::attributes[0].dataType)));
+    }
+
+    auto& shaderImpl = static_cast<ShaderProgram&>(*clipping.shader);
+    auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
+    auto& commandBuffer = renderPassImpl.getEncoder().getCommandBuffer();
+
+    const auto& pipeline = shaderImpl.getPipeline(clipping.pipelineInfo);
+
+    commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());
+    clipping.pipelineInfo.setDynamicValues(commandBuffer);
+
+    const std::array<vk::Buffer, 1> vertexBuffers = { clipping.vertexBuffer->getVulkanBuffer() };
+    const std::array<vk::DeviceSize, 1> offset = { 0 };
+
+    commandBuffer->bindVertexBuffers(0, vertexBuffers, offset);
+    commandBuffer->bindIndexBuffer(clipping.indexBuffer->getVulkanBuffer(), 0, vk::IndexType::eUint16);
+
+    for (const auto& tileInfo : tileUBOs) {
+        commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref);
+
+        commandBuffer->pushConstants(shaderImpl.getPipelineLayout().get(), 
+            vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 
+            0, sizeof(tileInfo.matrix), &tileInfo.matrix);
+        commandBuffer->drawIndexed(clipping.indexCount, 1, 0, 0, 0);
+    }
+
+    stats.numDrawCalls++;
+    stats.totalDrawCalls++;
+    return true;
+}
+
 const std::unique_ptr<BufferResource>& Context::getDummyVertexBuffer() {
     if (!dummyVertexBuffer)
-        dummyVertexBuffer = std::make_unique<BufferResource>(*this, nullptr, 16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
+        dummyVertexBuffer = std::make_unique<BufferResource>(*this, nullptr, 
+            16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
     return dummyVertexBuffer;
 }
 
 const std::unique_ptr<BufferResource>& Context::getDummyUniformBuffer() {
     if (!dummyUniformBuffer) 
-        dummyUniformBuffer = std::make_unique<BufferResource>(*this, nullptr, 16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
+        dummyUniformBuffer = std::make_unique<BufferResource>(*this, nullptr, 
+            16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
     return dummyUniformBuffer;
 }
 
-const vk::UniqueDescriptorSetLayout& Context::getDummyDescriptorSetLayout() {
-    if (!dummyDescriptorSetLayout) {
-        const auto descriptorSetBinding = vk::DescriptorSetLayoutBinding()
-            .setBinding(0)
-            .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-            .setDescriptorCount(1);
+const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
+    if (!dummyTexture2D) {
+        const Size size(2, 2);
+        const std::vector<Color> data(size.width * size.height, Color::white());
 
-        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo()
-            .setBindings(descriptorSetBinding);
-
-        dummyDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
-        backend.setDebugName(dummyDescriptorSetLayout.get(), "DummyDescriptorSetLayout");
+        dummyTexture2D = std::make_unique<Texture2D>(*this);
+        dummyTexture2D->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
+        dummyTexture2D->upload(data.data(), size);
     }
 
-    return dummyDescriptorSetLayout;
+    return dummyTexture2D;
 }
 
-void Context::FrameResources::runDeletionQueue() {
+const vk::UniqueDescriptorSetLayout& Context::getUniformDescriptorSetLayout() {
+    if (!uniformDescriptorSetLayout) {
+        std::vector<vk::DescriptorSetLayoutBinding> descriptorSetBindings(shaders::maxUBOCountPerShader, {});
+        const auto stageFlags = vk::ShaderStageFlags() |
+            vk::ShaderStageFlagBits::eVertex |
+            vk::ShaderStageFlagBits::eFragment;
+
+        for (size_t i = 0; i < descriptorSetBindings.size(); ++i) {
+            descriptorSetBindings[i]
+                .setBinding(i)
+                .setStageFlags(stageFlags)
+                .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                .setDescriptorCount(1);
+        }
+
+        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo()
+            .setBindings(descriptorSetBindings);
+        uniformDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
+        backend.setDebugName(uniformDescriptorSetLayout.get(), "UniformDescriptorSetLayout");
+    }
+
+    return uniformDescriptorSetLayout;
+}
+
+const vk::UniqueDescriptorSetLayout& Context::getImageDescriptorSetLayout() {
+    if (!imageDescriptorSetLayout) {
+        std::vector<vk::DescriptorSetLayoutBinding> descriptorSetBindings(shaders::maxTextureCountPerShader, {});
+
+        for (size_t i = 0; i < descriptorSetBindings.size(); ++i) {
+            descriptorSetBindings[i]
+                .setBinding(i)
+                .setStageFlags(vk::ShaderStageFlagBits::eFragment)
+                .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
+                .setDescriptorCount(1);
+        }
+
+        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo()
+            .setBindings(descriptorSetBindings);
+        imageDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
+        backend.setDebugName(imageDescriptorSetLayout.get(), "ImageDescriptorSetLayout");
+    }
+
+    return imageDescriptorSetLayout;
+}
+
+const std::vector<vk::DescriptorSetLayout>& Context::getDescriptorSetLayouts() {
+    if (descriptorSetLayouts.empty()) {
+        descriptorSetLayouts = {getUniformDescriptorSetLayout().get(), getImageDescriptorSetLayout().get() };
+    }
+
+    return descriptorSetLayouts;
+}
+
+void Context::FrameResources::runDeletionQueue(const Context& context) {
     for (const auto& function : deletionQueue)
-        function();
+        function(context);
 
    deletionQueue.clear();
 }

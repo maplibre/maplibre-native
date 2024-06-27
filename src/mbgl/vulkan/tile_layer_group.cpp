@@ -42,24 +42,12 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     auto& context = static_cast<Context&>(parameters.context);
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
 
-    // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
-    // drawables in this layer use 3D stencil mode, we need to set it up here so that all the
-    // drawables end up using the same mode value.
-    // 2D and 3D features in the same layer group is not supported.
-    bool features3d = false;
-    bool stencil3d = false;
-    gfx::StencilMode stencilMode3d;
+    // TODO 3D stencil
 
-    // If we're using stencil clipping, we need to handle 3D features separately
+    // If we're doing 2D stenciling and have any drawables with tile IDs, render each tile into the stencil buffer with
+    // a different value.
     if (stencilTiles && !stencilTiles->empty()) {
-        visitDrawables([&](const gfx::Drawable& drawable) {
-            if (drawable.getEnabled() && drawable.getIs3D() && drawable.hasRenderPass(parameters.pass)) {
-                features3d = true;
-                if (drawable.getEnableStencil()) {
-                    stencil3d = true;
-                }
-            }
-        });
+        parameters.renderTileClippingMasks(stencilTiles);
     }
 
 #if !defined(NDEBUG)

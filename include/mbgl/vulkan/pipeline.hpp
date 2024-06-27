@@ -2,6 +2,8 @@
 
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/gfx/color_mode.hpp>
+#include <mbgl/gfx/depth_mode.hpp>
+#include <mbgl/gfx/stencil_mode.hpp>
 
 namespace mbgl {
 namespace vulkan {
@@ -28,14 +30,24 @@ public:
     vk::CompareOp depthFunction = vk::CompareOp::eAlways;
 
     bool stencilTest = false;
+    vk::CompareOp stencilFunction = vk::CompareOp::eNever;
+    vk::StencilOp stencilPass = vk::StencilOp::eKeep;
+    vk::StencilOp stencilFail = vk::StencilOp::eKeep;
+    vk::StencilOp stencilDepthFail = vk::StencilOp::eKeep;
 
     bool wideLines = false;
 
     // dynamic values (not part of the pipeline/ignored in hash)
     struct {
         std::optional<std::array<float, 4>> blendConstants;
-        std::optional<float> lineWidth;
+        uint32_t stencilWriteMask = 0;
+        uint32_t stencilCompareMask = 0;
+        uint32_t stencilRef = 0;
+        float lineWidth = 1.0f;
     } dynamicValues;
+
+    std::vector<vk::VertexInputBindingDescription> inputBindings;
+    std::vector<vk::VertexInputAttributeDescription> inputAttributes;
 
 public:
 
@@ -46,15 +58,22 @@ public:
     static vk::BlendOp vulkanBlendOp(const gfx::ColorBlendEquationType& value);
     static vk::BlendFactor vulkanBlendFactor(const gfx::ColorBlendFactorType& value);
     static vk::CompareOp vulkanCompareOp(const gfx::DepthFunctionType& value);
+    static vk::CompareOp vulkanCompareOp(const gfx::StencilFunctionType& value);
+    static vk::StencilOp vulkanStencilOp(const gfx::StencilOpType& value);
 
     void setCullMode(const gfx::CullFaceMode& value);
     void setTopology(const gfx::DrawModeType& value);
     void setColorBlend(const gfx::ColorMode& value);
     void setColorBlendFunction(const gfx::ColorMode::BlendFunction& value);
     void setDepthWrite(const gfx::DepthMaskType& value);
+    void setDepthMode(const gfx::DepthMode& value);
+    void setStencilMode(const gfx::StencilMode& value);
 
     bool usesBlendConstants() const;
     std::size_t hash() const;
+
+    void setDynamicValues(const vk::UniqueCommandBuffer& buffer) const;
+    std::vector<vk::DynamicState> getDynamicStates() const;
 
 protected:
 

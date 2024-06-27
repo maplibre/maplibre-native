@@ -11,6 +11,7 @@
 #include <mbgl/util/containers.hpp>
 #include <mbgl/vulkan/uniform_buffer.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
+#include <mbgl/vulkan/pipeline.hpp>
 
 #include <memory>
 #include <optional>
@@ -37,6 +38,7 @@ class RenderPass;
 class RendererBackend;
 class ShaderProgram;
 class VertexBufferResource;
+class Texture2D;
 
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
@@ -78,14 +80,14 @@ public:
 
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
-    void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override;
+    void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override {}
 
     virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
                                               const void* data,
                                               std::size_t size,
                                               bool persistent = false) override;
 
-    void setDirtyState() override;
+    void setDirtyState() override {}
 
     std::unique_ptr<gfx::OffscreenTexture> createOffscreenTexture(Size, gfx::TextureChannelDataType, bool, bool);
 
@@ -121,13 +123,21 @@ public:
     /// Unbind the global uniform buffers
     void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override {}
 
+    bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
+                                          RenderStaticData& staticData,
+                                          const std::vector<shaders::ClipUBO>& tileUBOs);
+
     const std::unique_ptr<BufferResource>& getDummyVertexBuffer();
     const std::unique_ptr<BufferResource>& getDummyUniformBuffer();
-    const vk::UniqueDescriptorSetLayout& getDummyDescriptorSetLayout();
+    const std::unique_ptr<Texture2D>& getDummyTexture();
+    const vk::UniqueDescriptorSetLayout& getUniformDescriptorSetLayout();
+    const vk::UniqueDescriptorSetLayout& getImageDescriptorSetLayout();
+    const std::vector<vk::DescriptorSetLayout>& getDescriptorSetLayouts();
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
-    const vk::UniqueDescriptorPool& getCurrentDescriptorPool() const { return frameResources[frameResourceIndex].descriptorPool; }
-    void enqueueDeletion(const std::function<void()>& function);
+    const vk::UniqueDescriptorPool& getCurrentDescriptorPool() const;
+    void enqueueDeletion(const std::function<void(const Context&)>& function);
+    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
 
 private:
 
@@ -139,7 +149,7 @@ private:
         vk::UniqueSemaphore frameSemaphore;
         vk::UniqueFence flightFrameFence;
 
-        std::vector<std::function<void()>> deletionQueue;
+        std::vector<std::function<void(const Context&)>> deletionQueue;
 
         FrameResources(
             vk::UniqueCommandBuffer&& cb,
@@ -155,7 +165,7 @@ private:
             flightFrameFence(std::move(flight))
         {}
 
-        void runDeletionQueue();
+        void runDeletionQueue(const Context&);
     };
 
     void initFrameResources();
@@ -169,10 +179,22 @@ private:
 
     std::unique_ptr<BufferResource> dummyVertexBuffer;
     std::unique_ptr<BufferResource> dummyUniformBuffer;
-    vk::UniqueDescriptorSetLayout dummyDescriptorSetLayout;
+    std::unique_ptr<Texture2D> dummyTexture2D;
+    vk::UniqueDescriptorSetLayout uniformDescriptorSetLayout;
+    vk::UniqueDescriptorSetLayout imageDescriptorSetLayout;
+    std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
 
     uint8_t frameResourceIndex = 0;
     std::vector<FrameResources> frameResources;
+
+    struct {
+        gfx::ShaderProgramBasePtr shader;
+        std::optional<BufferResource> vertexBuffer;
+        std::optional<BufferResource> indexBuffer;
+        uint32_t indexCount = 0;
+
+        PipelineInfo pipelineInfo;
+    } clipping;
 };
 
 } // namespace vulkan

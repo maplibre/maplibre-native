@@ -33,10 +33,7 @@ public:
     std::size_t vertexCount = 0;
     gfx::AttributeDataType vertexType = gfx::AttributeDataType::Invalid;
 
-    std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
     gfx::AttributeBindingArray attributeBindings;
-
-    std::vector<gfx::UniqueVertexBufferResource> instanceBuffers;
     gfx::AttributeBindingArray instanceBindings;
 
     vulkan::UniformBufferArray uniformBuffers;
@@ -46,6 +43,9 @@ public:
     std::optional<gfx::RenderPassDescriptor> renderPassDescriptor;
 
     PipelineInfo pipelineInfo;
+
+    std::vector<vk::Buffer> vulkanVertexBuffers;
+    std::vector<vk::DeviceSize> vulkanVertexOffsets;
 };
 
 } // namespace vulkan

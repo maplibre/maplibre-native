@@ -89,6 +89,12 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         auto& drawableUniforms = drawable.mutableUniformBuffers();
 
 #ifdef MLN_RENDER_BACKEND_VULKAN
+        const auto& globalUniforms = context.getGlobalUniformBuffers();
+        for (int i = 0; i < globalUniforms.allocatedSize(); ++i) {
+            if (globalUniforms.get(i)) 
+                drawableUniforms.set(i, globalUniforms.get(i));
+        }
+
         for (int i = 0; i < layerUniforms.allocatedSize(); ++i) {
             if (layerUniforms.get(i))   
                 drawableUniforms.set(i, layerUniforms.get(i));

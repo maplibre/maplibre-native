@@ -54,9 +54,10 @@ public:
 
 protected:
 
-    void bindAttributes(CommandEncoder&) const noexcept;
-    void bindUniformBuffers(CommandEncoder&) const noexcept;
-    void bindTextures(CommandEncoder&) const noexcept;
+    void buildVulkanInputBindings() noexcept;
+
+    bool bindAttributes(CommandEncoder&) const noexcept;
+    bool bindDescriptors(CommandEncoder&) const noexcept;
 
     void uploadTextures(UploadPass&) const noexcept;
 

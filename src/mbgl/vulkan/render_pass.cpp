@@ -45,6 +45,22 @@ void RenderPass::endEncoding() {
     commandEncoder.getCommandBuffer()->endRenderPass();
 }
 
+void RenderPass::clearStencil(uint32_t value) const {
+    const auto& resource = descriptor.renderable.getResource<RenderableResource>();
+    const auto& extent = resource.getExtent();
+
+    const auto& attach = vk::ClearAttachment()
+        .setAspectMask(vk::ImageAspectFlagBits::eStencil)
+        .setClearValue(vk::ClearDepthStencilValue(0.0f, value));
+
+    const auto& rect = vk::ClearRect()
+        .setBaseArrayLayer(0)
+        .setLayerCount(1)
+        .setRect({ { 0, 0 }, { extent.width, extent.height } });
+
+    commandEncoder.getCommandBuffer()->clearAttachments(attach, rect);
+}
+
 void RenderPass::pushDebugGroup(const char* name) {
     commandEncoder.pushDebugGroup(name);
 }

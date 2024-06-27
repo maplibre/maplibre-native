@@ -19,27 +19,43 @@ BufferResource::BufferResource(Context& context_,
       usage(usage_),
       persistent(persistent_) {
     
+    const auto& backend = context.getBackend();
     const auto& allocator = context.getBackend().getAllocator();
 
-    VkBufferCreateInfo bufferInfo = {};
+    std::size_t totalSize = size;
+    std::size_t offset = 0;
 
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = size;
-    bufferInfo.usage = usage;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    // TODO -> check avg minUniformBufferOffsetAlignment vs individual buffers
+    persistent = false;
+
+    if (persistent) {
+        const auto& deviceProps = backend.getDeviceProperties();
+        const auto& align = deviceProps.limits.minUniformBufferOffsetAlignment;
+        bufferWindowSize = (size + align - 1) & ~(align - 1);
+
+        assert(bufferWindowSize != 0);
+
+        offset = bufferWindowSize * context.getCurrentFrameResourceIndex();
+        totalSize = bufferWindowSize * backend.getMaxFrames();
+    }
+
+    const auto& bufferInfo = vk::BufferCreateInfo()
+        .setSize(totalSize)
+        .setUsage(vk::BufferUsageFlags(usage))
+        .setSharingMode(vk::SharingMode::eExclusive);
 
     VmaAllocationCreateInfo allocationInfo = {};
 
-    allocationInfo.usage = VMA_MEMORY_USAGE_AUTO;
+    allocationInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
     allocationInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     //allocationInfo.preferredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
     allocationInfo.flags = 
         VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | 
         VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
-    bufferAllocation = std::make_unique<BufferAllocation>(allocator);
+    bufferAllocation = std::make_shared<BufferAllocation>(allocator);
 
-    VkResult result = vmaCreateBuffer(allocator, &bufferInfo, &allocationInfo, 
+    VkResult result = vmaCreateBuffer(allocator, &VkBufferCreateInfo(bufferInfo), &allocationInfo, 
         &bufferAllocation->buffer, &bufferAllocation->allocation, nullptr);
     if (result != VK_SUCCESS) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan buffer allocation failed");
@@ -62,16 +78,16 @@ BufferResource::BufferResource(Context& context_,
         raw.resize(size);
         std::memcpy(raw.data(), data, size);
 
-        std::memcpy(bufferAllocation->mappedBuffer, data, size);
+        std::memcpy(static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + offset, data, size);
         if ((memoryProps & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0) {
-            vmaFlushAllocation(allocator, bufferAllocation->allocation, 0, size);
+            vmaFlushAllocation(allocator, bufferAllocation->allocation, offset, size);
         }
     }
 
     if (isValid()) {
         auto& stats = context.renderingStats();
         stats.numBuffers++;
-        stats.memBuffers += size;
+        stats.memBuffers += totalSize;
         stats.totalBuffers++;
        
         stats.totalBufferObjs++;
@@ -84,7 +100,8 @@ BufferResource::BufferResource(BufferResource&& other) noexcept
       size(other.size),
       usage(other.usage),
       persistent(other.persistent),
-      bufferAllocation(std::move(other.bufferAllocation)) {
+      bufferAllocation(std::move(other.bufferAllocation)),
+      bufferWindowSize(other.bufferWindowSize) {
 
     other.bufferAllocation = nullptr;
 }
@@ -98,10 +115,9 @@ BufferResource::~BufferResource() noexcept {
     if (!bufferAllocation)
         return;
 
-    auto allocation = std::shared_ptr<BufferAllocation>(std::move(bufferAllocation));
-    context.enqueueDeletion(([=]() mutable {
+    context.enqueueDeletion([allocation = std::move(bufferAllocation)](const auto&) mutable {
         allocation.reset();
-    }));
+    });
 }
 
 BufferResource BufferResource::clone() const {
@@ -132,11 +148,23 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
     auto& stats = context.renderingStats();
 
     std::memcpy(raw.data() + offset, newData, updateSize);
-    std::memcpy(static_cast<char*>(bufferAllocation->mappedBuffer) + offset, newData, updateSize);
+    std::memcpy(static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + 
+        getVulkanBufferOffset() + offset, newData, updateSize);
     stats.bufferUpdateBytes += updateSize;
 
     stats.bufferUpdates++;
     version++;
+}
+
+std::size_t BufferResource::getVulkanBufferOffset() const noexcept {
+    if (!persistent)
+        return 0;
+
+    return context.getCurrentFrameResourceIndex() * bufferWindowSize;
+}
+
+std::size_t BufferResource::getVulkanBufferSize() const noexcept {
+    return persistent ? bufferWindowSize : size;
 }
 
 } // namespace mtl

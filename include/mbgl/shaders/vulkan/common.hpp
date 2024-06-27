@@ -11,6 +11,11 @@ struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
+    // The maximum allowed miter limit is 2.0 at the moment. the extrude normal is stored
+    // in a byte (-128..127). We scale regular normals up to length 63, but there are also
+    // "special" normals that have a bigger length (of up to 126 in this case).
+    #define LINE_NORMAL_SCALE (1.0 / (127 / 2))
+
     // Unpack a pair of values that have been packed into a single float.
     // The packed values are assumed to be 8-bit unsigned integers, and are
     // packed like so:
@@ -48,6 +53,18 @@ struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::Vulkan> {
         vec4 maxColor = decode_color(vec2(packedColors[2], packedColors[3]));
         return mix(minColor, maxColor, t);
     }
+
+    layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
+        vec2 pattern_atlas_texsize;
+        vec2 units_to_pixels;
+        vec2 world_size;
+        float camera_to_center_distance;
+        float symbol_fade_change;
+        float aspect_ratio;
+        float pixel_ratio;
+        float zoom;
+        float pad1;
+    } global;
 
     )";
 

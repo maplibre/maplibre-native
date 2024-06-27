@@ -44,12 +44,13 @@ ShaderProgram::ShaderProgram(const std::string& name,
     constexpr auto messages = EShMsgSpvRules | EShMsgVulkanRules;
     const auto defaultResources = GetDefaultResources();
 
-    std::string defineStr;
+    std::string defineStr = programParameters.getDefinesString() + "\n\n";
     for (const auto& define : additionalDefines) {
         defineStr += "#define " + define.first + " " + define.second + "\n";
     }
 
-    const auto compileGlsl = [&](const EShLanguage& language, const std::string_view& data, const char* prelude) -> std::vector<unsigned int> {
+    const auto compileGlsl = [&](const EShLanguage& language, const std::string_view& data, const char* prelude) {
+
         glslang::TShader glslShader(language);
 
         const auto preamble = defineStr + "\n" + prelude;
@@ -64,7 +65,7 @@ ShaderProgram::ShaderProgram(const std::string& name,
 
         if (!glslShader.parse(defaultResources, defaultVersion, ENoProfile, false, true, messages)) {
             mbgl::Log::Error(mbgl::Event::Shader, shaderName + " - " + glslShader.getInfoLog());
-            return {};
+            return std::vector<uint32_t>();
         }
 
         glslang::TProgram glslProgram;
@@ -72,12 +73,12 @@ ShaderProgram::ShaderProgram(const std::string& name,
 
         if (!glslProgram.link(messages)) {
             mbgl::Log::Error(mbgl::Event::Shader, shaderName + " - " + glslProgram.getInfoLog());
-            return {};
+            return std::vector<uint32_t>();
         }
 
         const auto intermediate = glslProgram.getIntermediate(language);
 
-        std::vector<unsigned int> spirv;
+        std::vector<uint32_t> spirv;
         glslang::GlslangToSpv(*intermediate, spirv);
 
         return spirv;
@@ -104,61 +105,22 @@ ShaderProgram::ShaderProgram(const std::string& name,
 
 ShaderProgram::~ShaderProgram() noexcept = default;
 
-const std::vector<vk::DescriptorSetLayout>& ShaderProgram::getDescriptorSetLayouts() {
-    if (!descriptorSetLayouts.empty())
-        return descriptorSetLayouts;
-
-    const auto& dummy = static_cast<Context*>(&backend.getContext())->getDummyDescriptorSetLayout();
-
-    // descriptor set layout
-    uniformBlocks.visit([&](const gfx::UniformBlock& block_) {
-        const auto block = static_cast<const UniformBlock*>(&block_);
-
-        // fill descriptor gap
-        // if we use sets 1 and 4 this will generate dummy layouts for sets 0/2/3
-        for (size_t i = 0, gap = block->getIndex() - descriptorSetLayouts.size(); i < gap; ++i)
-            descriptorSetLayouts.push_back(dummy.get());
-
-        vk::ShaderStageFlags stages;
-        
-        if (block->getBindVertex())
-            stages |= vk::ShaderStageFlagBits::eVertex;
-
-        if (block->getBindFragment()) 
-            stages |= vk::ShaderStageFlagBits::eFragment;
-
-        const auto descriptorSetBinding = vk::DescriptorSetLayoutBinding()
-            .setBinding(0)
-            .setStageFlags(stages)
-            .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-            .setDescriptorCount(1);
-
-        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo()
-            .setBindings(descriptorSetBinding);
-
-        usedDescriptorSetLayouts.push_back(
-            backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo));
-
-        const auto& layout = usedDescriptorSetLayouts.back().get();
-
-        backend.setDebugName(layout, shaderName + "_descriptorSetLayout_" + std::to_string(block->getIndex()));
-
-        descriptorSetLayouts.push_back(layout);
-    });
-
-    // TODO add texture descriptors
-
-    return descriptorSetLayouts;
-}
-
 const vk::UniquePipelineLayout& ShaderProgram::getPipelineLayout() {
     if (pipelineLayout) 
         return pipelineLayout;
 
-    const auto& descriptorSetLayouts = getDescriptorSetLayouts();
+    const auto& pushConstant = vk::PushConstantRange()
+        .setSize(sizeof(mat4))
+        .setStageFlags(vk::ShaderStageFlags() |
+            vk::ShaderStageFlagBits::eVertex |
+            vk::ShaderStageFlagBits::eFragment);
 
-    pipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setSetLayouts(descriptorSetLayouts)
+    auto& context = static_cast<Context&>(backend.getContext());
+    const auto& descriptorSetLayouts = context.getDescriptorSetLayouts();
+
+    pipelineLayout = backend.getDevice()->createPipelineLayoutUnique(vk::PipelineLayoutCreateInfo()
+        .setSetLayouts(descriptorSetLayouts)
+        .setPushConstantRanges(pushConstant)
     );
 
     backend.setDebugName(pipelineLayout.get(), shaderName + "_pipelineLayout");
@@ -171,47 +133,9 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
     if (pipeline) 
         return pipeline;
 
-    // input layout
-    std::vector<vk::VertexInputBindingDescription> inputBindings;
-    std::vector<vk::VertexInputAttributeDescription> inputAttributes;
-
-    if (vertexAttributes.getMaxCount() > 0) {
-        inputBindings.push_back(vk::VertexInputBindingDescription()
-            .setBinding(0)
-            .setStride(vertexAttributes.getTotalSize())
-            .setInputRate(vk::VertexInputRate::eVertex)
-        );
-    }
-
-    vertexAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { 
-        inputAttributes.push_back(vk::VertexInputAttributeDescription()
-            .setBinding(0)
-            .setLocation(attrib.getIndex())
-            .setFormat(PipelineInfo::vulkanFormat(attrib.getDataType()))
-            .setOffset(attrib.getSharedVertexOffset())
-        );
-    });
-
-    if (instanceAttributes.getMaxCount() > 0) {
-        inputBindings.push_back(vk::VertexInputBindingDescription()
-            .setBinding(1)
-            .setStride(instanceAttributes.getTotalSize())
-            .setInputRate(vk::VertexInputRate::eInstance)
-        );
-    }
-
-    instanceAttributes.visitAttributes([&](const gfx::VertexAttribute& attrib) { 
-        inputAttributes.push_back(vk::VertexInputAttributeDescription()
-            .setBinding(1)
-            .setLocation(attrib.getIndex())
-            .setFormat(PipelineInfo::vulkanFormat(attrib.getDataType()))
-            .setOffset(attrib.getSharedVertexOffset())
-        );
-    });
-
     const auto& vertexInputState = vk::PipelineVertexInputStateCreateInfo()
-        .setVertexBindingDescriptions(inputBindings)
-        .setVertexAttributeDescriptions(inputAttributes);
+        .setVertexBindingDescriptions(pipelineInfo.inputBindings)
+        .setVertexAttributeDescriptions(pipelineInfo.inputAttributes);
 
     const auto& inputAssemblyState = vk::PipelineInputAssemblyStateCreateInfo()
         .setTopology(pipelineInfo.topology);
@@ -237,6 +161,12 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
     const auto multisampleState = vk::PipelineMultisampleStateCreateInfo()
         .setRasterizationSamples(vk::SampleCountFlagBits::e1);
 
+    const auto& stencilState = vk::StencilOpState()
+        .setCompareOp(pipelineInfo.stencilFunction)
+        .setPassOp(pipelineInfo.stencilPass)
+        .setFailOp(pipelineInfo.stencilFail)
+        .setDepthFailOp(pipelineInfo.stencilDepthFail);
+
     const auto depthStencilState = vk::PipelineDepthStencilStateCreateInfo()
         .setDepthTestEnable(pipelineInfo.depthTest)
         .setDepthWriteEnable(pipelineInfo.depthWrite)
@@ -244,8 +174,10 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
         .setMinDepthBounds(0.0f)
         .setMaxDepthBounds(1.0f)
         .setDepthCompareOp(pipelineInfo.depthFunction)
-        .setStencilTestEnable(false)
-        ;
+
+        .setStencilTestEnable(pipelineInfo.stencilTest)
+        .setFront(stencilState)
+        .setBack(stencilState);
 
     const auto& colorBlendAttachments = vk::PipelineColorBlendAttachmentState()
         .setBlendEnable(pipelineInfo.colorBlend)
@@ -263,27 +195,19 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
         .setLogicOpEnable(VK_FALSE)
         .setLogicOp(vk::LogicOp::eCopy);
 
-    std::vector<vk::DynamicState> dynamicValues = {
-        // values available for core 1.0
-        //vk::DynamicState::eViewport,
-        //vk::DynamicState::eScissor,
-        //vk::DynamicState::eLineWidth,
-        //vk::DynamicState::eStencilCompareMask,
-        //vk::DynamicState::eStencilWriteMask,
-        //vk::DynamicState::eStencilReference,
-        //vk::DynamicState::eBlendConstants,
-        //vk::DynamicState::eDepthBias,
-        //vk::DynamicState::eDepthBounds,
-    };
+    
+    // values available for core 1.0
+    //vk::DynamicState::eViewport,
+    //vk::DynamicState::eScissor,
+    //vk::DynamicState::eLineWidth,
+    //vk::DynamicState::eStencilCompareMask,
+    //vk::DynamicState::eStencilWriteMask,
+    //vk::DynamicState::eStencilReference,
+    //vk::DynamicState::eBlendConstants,
+    //vk::DynamicState::eDepthBias,
+    //vk::DynamicState::eDepthBounds,
 
-    if (pipelineInfo.usesBlendConstants()) {
-        dynamicValues.push_back(vk::DynamicState::eBlendConstants);
-    }
-
-    if (pipelineInfo.wideLines) {
-        dynamicValues.push_back(vk::DynamicState::eLineWidth);
-    }
-
+    const auto& dynamicValues = pipelineInfo.getDynamicStates();
     const vk::PipelineDynamicStateCreateInfo dynamicState({}, dynamicValues);
 
     const auto& device = backend.getDevice();
@@ -318,6 +242,11 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
     backend.setDebugName(pipeline.get(), shaderName + "_pipeline");
 
     return pipeline;
+}
+
+bool ShaderProgram::hasTextures() const {
+    return std::any_of(textureBindings.begin(), textureBindings.end(), 
+        [](const auto& texture) { return texture.has_value(); });
 }
 
 void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {

@@ -20,6 +20,8 @@ public:
     vulkan::CommandEncoder& getEncoder() { return commandEncoder; }
     void endEncoding();
 
+    void clearStencil(uint32_t value = 0) const;
+
     void addDebugSignpost(const char* name) override;
 
     void bindVertex(const BufferResource&, std::size_t offset, std::size_t index, std::size_t size = 0);
@@ -33,7 +35,6 @@ private:
 private:
     gfx::RenderPassDescriptor descriptor;
     vulkan::CommandEncoder& commandEncoder;
-    int32_t currentStencilReferenceValue = 0;
 };
 
 } // namespace vulkan

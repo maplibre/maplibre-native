@@ -9,7 +9,9 @@
 
 #include <mbgl/shaders/vulkan/shader_group.hpp>
 #include <mbgl/shaders/vulkan/circle.hpp>
+#include <mbgl/shaders/vulkan/clipping_mask.hpp>
 #include <mbgl/shaders/vulkan/fill.hpp>
+#include <mbgl/shaders/vulkan/line.hpp>
 
 #include <cassert>
 #include <string>
@@ -329,6 +331,8 @@ void RendererBackend::initDevice() {
             }
         }
 
+        physicalDeviceProperties = physicalDevice.getProperties();
+
         if (!physicalDevice) 
             throw std::runtime_error("No suitable GPU found");
     };
@@ -453,13 +457,16 @@ void RendererBackend::initSwapchain() {
     for (const auto& image : renderableResource.swapchainImages) {
         imageViewCreateInfo.setImage(image);
         renderableResource.swapchainImageViews.push_back(device->createImageViewUnique(imageViewCreateInfo));
+
+        const size_t index = renderableResource.swapchainImageViews.size() - 1;
+        setDebugName(vk::Image(image), "SwapchainImage_" + std::to_string(index));
+        setDebugName(vk::Image(image), "SwapchainImageView_" + std::to_string(index));
     }
 
     // depth resources
     initDepthTexture();
 
     // create render pass
-    // TODO refactor this
     const auto& colorAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
         .setFormat(renderableResource.colorFormat)
         .setSamples(vk::SampleCountFlagBits::e1)
@@ -528,13 +535,17 @@ void RendererBackend::initSwapchain() {
 
     auto& framebufferCreateInfo = vk::FramebufferCreateInfo()
         .setRenderPass(renderableResource.renderPass.get())
-        .setAttachmentCount(1)
+        .setAttachmentCount(2)
         .setWidth(renderableResource.extent.width)
         .setHeight(renderableResource.extent.height)
         .setLayers(1);
 
     for (const auto& imageView : renderableResource.swapchainImageViews) {
-        const std::array<vk::ImageView, 2> imageViews = { imageView.get(), renderableResource.depthImageView.get() };
+        const std::array<vk::ImageView, 2> imageViews = { 
+            imageView.get(), 
+            renderableResource.depthAllocation->imageView.get() 
+        };
+
         framebufferCreateInfo.setAttachments(imageViews);
         renderableResource.swapchainFramebuffers.push_back(device->createFramebufferUnique(framebufferCreateInfo));
     }
@@ -545,10 +556,9 @@ void RendererBackend::initSwapchain() {
 void RendererBackend::initDepthTexture() {
     // check for depth format support
     const std::vector<vk::Format> formats {
-        vk::Format::eD24UnormS8Uint,
         vk::Format::eD32SfloatS8Uint,
+        vk::Format::eD24UnormS8Uint,
         vk::Format::eD16UnormS8Uint,
-        vk::Format::eD32Sfloat,
     };
 
     const auto& formatIt = std::find_if(formats.begin(), formats.end(), [&](const auto& format) {
@@ -572,7 +582,7 @@ void RendererBackend::initDepthTexture() {
         vk::ImageUsageFlagBits::eDepthStencilAttachment |
         vk::ImageUsageFlagBits::eTransientAttachment;
 
-    const auto imageCreateInfo = vk::ImageCreateInfo()
+    const auto& imageCreateInfo = vk::ImageCreateInfo()
         .setImageType(vk::ImageType::e2D)
         .setFormat(renderableResource.depthFormat)
         .setExtent({ renderableResource.extent.width, renderableResource.extent.height, 1 })
@@ -598,14 +608,17 @@ void RendererBackend::initDepthTexture() {
         return;
     }
 
-    const auto imageViewCreateInfo = vk::ImageViewCreateInfo()
+    const auto& imageViewCreateInfo = vk::ImageViewCreateInfo()
         .setImage(renderableResource.depthAllocation->image)
         .setViewType(vk::ImageViewType::e2D)
         .setFormat(renderableResource.depthFormat)
         .setComponents(vk::ComponentMapping()) // defaults to vk::ComponentSwizzle::eIdentity
         .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1));
 
-    renderableResource.depthImageView = device->createImageViewUnique(imageViewCreateInfo);
+    renderableResource.depthAllocation->imageView = device->createImageViewUnique(imageViewCreateInfo);
+
+    setDebugName(vk::Image(renderableResource.depthAllocation->image), "SwapchainDepthImage");
+    setDebugName(renderableResource.depthAllocation->imageView.get(), "SwapchainDepthImageView");
 }
 
 void RendererBackend::initCommandPool() {

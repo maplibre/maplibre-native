@@ -10,6 +10,7 @@
 #include <mbgl/vulkan/upload_pass.hpp>
 #include <mbgl/vulkan/index_buffer_resource.hpp>
 #include <mbgl/vulkan/vertex_buffer_resource.hpp>
+#include <mbgl/vulkan/texture2d.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/util/logging.hpp>
@@ -154,7 +155,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                     *vertexAttributes,
                                                                     usage,
                                                                     vertexBuffers);
-        impl->attributeBuffers = std::move(vertexBuffers);
 
         vertexAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
@@ -177,7 +177,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                    *instanceAttributes,
                                                                    usage,
                                                                    instanceBuffers);
-        impl->instanceBuffers = std::move(instanceBuffers);
 
         // clear dirty flag
         instanceAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
@@ -185,6 +184,10 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         if (impl->instanceBindings != instanceBindings_) {
             impl->instanceBindings = std::move(instanceBindings_);
         }
+    }
+
+    if (buildAttribs || buildInstanceBuffer) {
+        buildVulkanInputBindings();
     }
 
     const bool texturesNeedUpload = std::any_of(
@@ -206,10 +209,24 @@ void Drawable::draw(PaintParameters& parameters) const {
     auto& commandBuffer = encoder.getCommandBuffer();
 
     auto& shaderImpl = static_cast<mbgl::vulkan::ShaderProgram&>(*shader);
-    
-    bindAttributes(encoder);
-    bindUniformBuffers(encoder);
-    bindTextures(encoder);
+
+    if (!bindAttributes(encoder))
+        return;
+
+    if (!bindDescriptors(encoder))
+        return;
+
+    if (enableDepth) {
+        const auto& depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+        impl->pipelineInfo.setDepthMode(depthMode);
+    }
+
+    if (enableStencil) {
+        const auto& stencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
+        impl->pipelineInfo.setStencilMode(stencilMode);
+    }
+
+    impl->pipelineInfo.setDynamicValues(commandBuffer);
 
     const uint32_t instanceCount = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
 
@@ -223,14 +240,6 @@ void Drawable::draw(PaintParameters& parameters) const {
         const auto& pipeline = shaderImpl.getPipeline(impl->pipelineInfo);
 
         commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());
-
-        if (impl->pipelineInfo.wideLines) {
-            commandBuffer->setLineWidth(impl->pipelineInfo.dynamicValues.lineWidth.value());
-        }
-
-        if (impl->pipelineInfo.dynamicValues.blendConstants.has_value()) {
-            commandBuffer->setBlendConstants(impl->pipelineInfo.dynamicValues.blendConstants.value().data());
-        }
 
         if (segment.indexLength) {
             commandBuffer->drawIndexed(segment.indexLength, instanceCount, segment.indexOffset, segment.vertexOffset, 0);
@@ -276,71 +285,114 @@ gfx::UniformBufferArray& Drawable::mutableUniformBuffers() {
     return impl->uniformBuffers;
 }
 
-void Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
-    auto& context = encoder.getContext();
-    const auto& commandBuffer = encoder.getCommandBuffer();
+void Drawable::buildVulkanInputBindings() noexcept {
 
-    std::vector<vk::Buffer> vertexBuffers;
-    std::vector<vk::DeviceSize> vertexOffsets;
+    impl->vulkanVertexBuffers.clear();
+    impl->vulkanVertexOffsets.clear();
+    
+    impl->pipelineInfo.inputAttributes.clear();
+    impl->pipelineInfo.inputBindings.clear();
 
-    const auto addAttributes = [&](const auto& bindings) {
-        for (const auto& binding : bindings) {
-            if (binding) {
-                const auto& buffer = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
-                vertexBuffers.push_back(buffer->get().getVulkanBuffer());
+    std::vector<const gfx::VertexBufferResource*> uniqueBuffers;
+
+    const auto buildBindings = [&](const gfx::AttributeBindingArray& bindings, 
+        const gfx::VertexAttributeArray& attributes, vk::VertexInputRate inputRate) {
+
+        for (size_t i = 0; i < bindings.size(); ++i) {
+            const auto& binding = bindings[i];
+            if (!binding.has_value()) 
+                continue;
+
+            const auto& vertexBuffer = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
+            const auto& buffer = vertexBuffer->get();
+
+            const auto& buffIt = std::find(uniqueBuffers.begin(), uniqueBuffers.end(), binding->vertexBufferResource);
+            uint32_t bindingIndex = 0;
+
+            if (buffIt == uniqueBuffers.end()) {
+                bindingIndex = impl->pipelineInfo.inputBindings.size();
+                
+                uniqueBuffers.push_back(binding->vertexBufferResource);
+
+                // add new buffer binding
+                impl->pipelineInfo.inputBindings.push_back(vk::VertexInputBindingDescription()
+                    .setBinding(bindingIndex)
+                    .setStride(binding->vertexStride)
+                    .setInputRate(inputRate)
+                );
+
+                impl->vulkanVertexBuffers.push_back(buffer.getVulkanBuffer());
+                impl->vulkanVertexOffsets.push_back(0u);
             } else {
-                const auto& buffer = context.getDummyVertexBuffer();
-                vertexBuffers.push_back(buffer->getVulkanBuffer());
+                bindingIndex = std::distance(uniqueBuffers.begin(), buffIt);
             }
 
-            vertexOffsets.push_back(0u);
+            impl->pipelineInfo.inputAttributes.push_back(
+                vk::VertexInputAttributeDescription()
+                .setBinding(bindingIndex)
+                .setLocation(i)
+                .setFormat(PipelineInfo::vulkanFormat(binding->attribute.dataType))
+                .setOffset(binding->attribute.offset)
+            );
         }
     };
 
-    addAttributes(impl->attributeBindings);
-    addAttributes(impl->instanceBindings);
+    buildBindings(impl->attributeBindings, *vertexAttributes, vk::VertexInputRate::eVertex);
+    buildBindings(impl->instanceBindings, *instanceAttributes, vk::VertexInputRate::eInstance);
+}
 
-    if (!vertexBuffers.empty())
-        commandBuffer->bindVertexBuffers(0, vertexBuffers, vertexOffsets);
+bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
+    if (impl->vulkanVertexBuffers.empty())
+        return false;
+
+    auto& context = encoder.getContext();
+    const auto& commandBuffer = encoder.getCommandBuffer();
+
+    commandBuffer->bindVertexBuffers(0, impl->vulkanVertexBuffers, impl->vulkanVertexOffsets);
 
     if (impl->indexes) {
         const auto* indexBuffer = static_cast<const IndexBuffer*>(impl->indexes->getBuffer());
         const auto& indexBufferResource = indexBuffer->buffer->getResource<IndexBufferResource>().get();
         commandBuffer->bindIndexBuffer(indexBufferResource.getVulkanBuffer(), 0, vk::IndexType::eUint16);
     }
+
+    return true;
 }
 
-void Drawable::bindUniformBuffers(CommandEncoder& encoder) const noexcept {
+bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
     if (!shader)
-        return;
+        return false;
 
     auto& context = encoder.getContext();
     const auto& device = context.getBackend().getDevice();
     const auto& descriptorPool = context.getCurrentDescriptorPool();
     auto* shaderImpl = static_cast<ShaderProgram*>(shader.get());
-    const auto& descriptorSetLayouts = shaderImpl->getDescriptorSetLayouts();
+    const auto& descriptorSetLayouts = context.getDescriptorSetLayouts();
 
-    const auto descriptorAllocInfo = vk::DescriptorSetAllocateInfo()
+    const auto& descriptorAllocInfo = vk::DescriptorSetAllocateInfo()
         .setDescriptorPool(*descriptorPool)
         .setSetLayouts(descriptorSetLayouts);
 
     const auto& drawableDescriptorSets = device->allocateDescriptorSets(descriptorAllocInfo);
 
-    const auto updateDescriptors = [&](const auto& buffer, bool fillGaps) {
+    const auto& uniformDescriptorSet = drawableDescriptorSets[0];
+    
+    const auto updateUniformDescriptors = [&](const auto& buffer, bool fillGaps) {
         for (size_t id = 0; id < buffer.allocatedSize(); ++id) {
-            if (id >= drawableDescriptorSets.size())
-                continue;
-
-            auto& descriptorBufferInfo = vk::DescriptorBufferInfo()
-                .setOffset(0)
-                .setRange(VK_WHOLE_SIZE);
+            vk::DescriptorBufferInfo descriptorBufferInfo;
 
             if (const auto& uniformBuffer = buffer.get(id)) {
                 const auto& uniformBufferImpl = static_cast<const UniformBuffer&>(*uniformBuffer);
                 const auto& bufferResource = uniformBufferImpl.getBufferResource();
-                descriptorBufferInfo.setBuffer(bufferResource.getVulkanBuffer());
+                descriptorBufferInfo
+                    .setBuffer(bufferResource.getVulkanBuffer())
+                    .setOffset(bufferResource.getVulkanBufferOffset())
+                    .setRange(bufferResource.getVulkanBufferSize());
             } else if (fillGaps) {
-                descriptorBufferInfo.setBuffer(context.getDummyUniformBuffer()->getVulkanBuffer());
+                descriptorBufferInfo
+                    .setBuffer(context.getDummyUniformBuffer()->getVulkanBuffer())
+                    .setOffset(0)
+                    .setRange(VK_WHOLE_SIZE);
             } else {
                 continue;
             }
@@ -349,20 +401,44 @@ void Drawable::bindUniformBuffers(CommandEncoder& encoder) const noexcept {
                 .setBufferInfo(descriptorBufferInfo)
                 .setDescriptorCount(1)
                 .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-                .setDstBinding(0)
-                .setDstSet(drawableDescriptorSets[id]);
+                .setDstBinding(id)
+                .setDstSet(uniformDescriptorSet);
 
             device->updateDescriptorSets(writeDescriptorSet, nullptr);
         }
     };
 
-    updateDescriptors(context.getGlobalUniformBuffers(), false);
-    updateDescriptors(getUniformBuffers(), true);
+    updateUniformDescriptors(context.getGlobalUniformBuffers(), false);
+    updateUniformDescriptors(getUniformBuffers(), true);
+
+    if (drawableDescriptorSets.size() >= 2) {
+        const auto& imageDescriptorSet = drawableDescriptorSets[1];
+
+        for (size_t id = 0; id < shaders::maxTextureCountPerShader; ++id) {
+            const auto& texture = id < textures.size() ? textures[id] : nullptr;
+            const auto& textureImpl = texture ? 
+                static_cast<const Texture2D&>(*texture) : 
+                *context.getDummyTexture();
+            
+            const auto& descriptorImageInfo = vk::DescriptorImageInfo()
+                .setImageLayout(textureImpl.getVulkanImageLayout())
+                .setImageView(textureImpl.getVulkanImageView().get())
+                .setSampler(textureImpl.getVulkanSampler());
+
+            const auto& writeDescriptorSet = vk::WriteDescriptorSet()
+                .setImageInfo(descriptorImageInfo)
+                .setDescriptorCount(1)
+                .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
+                .setDstBinding(id)
+                .setDstSet(imageDescriptorSet);
+
+            device->updateDescriptorSets(writeDescriptorSet, nullptr);
+        }
+    }
 
     if (drawableDescriptorSets.empty())
-        return;
+        return true;
 
-    // merge this with context.globalUniforms
     const auto& commandBuffer = encoder.getCommandBuffer();
     commandBuffer->bindDescriptorSets(
         vk::PipelineBindPoint::eGraphics, 
@@ -371,16 +447,8 @@ void Drawable::bindUniformBuffers(CommandEncoder& encoder) const noexcept {
         drawableDescriptorSets,
         nullptr
     );
-}
 
-void Drawable::bindTextures(CommandEncoder& encoder) const noexcept {
-    /* for (size_t id = 0; id < textures.size(); id++) {
-        if (const auto& texture = textures[id]) {
-            if (const auto& location = shader->getSamplerLocation(id)) {
-                static_cast<mtl::Texture2D&>(*texture).bind(renderPass, static_cast<int32_t>(*location));
-            }
-        }
-    }*/
+    return true;
 }
 
 void Drawable::uploadTextures(UploadPass&) const noexcept {

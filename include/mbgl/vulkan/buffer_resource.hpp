@@ -34,6 +34,8 @@ public:
 
     Context& getContext() const noexcept { return context; }
     const VkBuffer& getVulkanBuffer() const noexcept { return bufferAllocation->buffer; }
+    std::size_t getVulkanBufferOffset() const noexcept;
+    std::size_t getVulkanBufferSize() const noexcept;
 
     bool isValid() const noexcept { return !raw.empty(); }
     operator bool() const noexcept { return isValid(); }
@@ -52,7 +54,8 @@ protected:
     std::uint16_t version = 0;
     bool persistent;
 
-    UniqueBufferAllocation bufferAllocation;
+    SharedBufferAllocation bufferAllocation;
+    size_t bufferWindowSize = 0;
 };
 
 } // namespace vulkan

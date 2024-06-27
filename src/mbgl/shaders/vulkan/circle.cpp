@@ -13,12 +13,13 @@ const std::array<AttributeInfo, 3> ShaderSource<BuiltIn::x, gfx::Backend::Type::
     AttributeInfo{1, gfx::AttributeDataType::Float4, idFillColorVertexAttribute},									\
 	AttributeInfo{2, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},									\
 };																													\
-const std::array<TextureInfo, 0> ShaderSource<BuiltIn::x, gfx::Backend::Type::Vulkan>::textures = {};               \
+const std::array<TextureInfo, 1> ShaderSource<BuiltIn::x, gfx::Backend::Type::Vulkan>::textures = {					\
+	TextureInfo{0, idBackgroundImageTexture}																		\
+};																													\
 
 CREATE_TEST_SHADER_(CircleShader)
 CREATE_TEST_SHADER_(BackgroundShader)
 CREATE_TEST_SHADER_(BackgroundPatternShader)
-CREATE_TEST_SHADER_(ClippingMaskProgram)
 CREATE_TEST_SHADER_(CollisionBoxShader)
 CREATE_TEST_SHADER_(CollisionCircleShader)
 CREATE_TEST_SHADER_(CustomSymbolIconShader)
@@ -32,7 +33,7 @@ CREATE_TEST_SHADER_(HeatmapShader)
 CREATE_TEST_SHADER_(HeatmapTextureShader)
 CREATE_TEST_SHADER_(HillshadeShader)
 CREATE_TEST_SHADER_(HillshadePrepareShader)
-CREATE_TEST_SHADER_(LineShader)
+//CREATE_TEST_SHADER_(LineShader)
 CREATE_TEST_SHADER_(LineGradientShader)
 CREATE_TEST_SHADER_(LineSDFShader)
 CREATE_TEST_SHADER_(LinePatternShader)

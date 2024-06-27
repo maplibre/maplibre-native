@@ -20,71 +20,66 @@ namespace vulkan {
 struct BufferAllocation {
 
     const VmaAllocator& allocator;
-    VkBuffer buffer;
-    VmaAllocation allocation;
-    void* mappedBuffer;
+    VkBuffer buffer{};
+    VmaAllocation allocation{};
+    void* mappedBuffer{};
 
     BufferAllocation() = delete;
     BufferAllocation(BufferAllocation&) = delete;
     BufferAllocation& operator=(const BufferAllocation& other) = delete;
 
-    BufferAllocation(const VmaAllocator& allocator_)
-        : allocator(allocator_), buffer(nullptr), allocation(nullptr), mappedBuffer(nullptr) {}
-
-    BufferAllocation(const VmaAllocator& allocator_, VkBuffer& buffer_, VmaAllocation& allocation_)
-        : allocator(allocator_), buffer(buffer_), allocation(allocation_), mappedBuffer(nullptr) {}
-
-    BufferAllocation(const VmaAllocator& allocator_, const vk::BufferCreateInfo& bufferInfo, 
-        const VmaAllocationCreateInfo& allocInfo) : allocator(allocator_) {
-        assert(vmaCreateBuffer(allocator, &VkBufferCreateInfo(bufferInfo), &allocInfo, 
-            &buffer, &allocation, nullptr) == VK_SUCCESS);
-    }
+    BufferAllocation(const VmaAllocator& allocator_) : allocator(allocator_) {}
 
     BufferAllocation(BufferAllocation&& other) noexcept
-        : allocator(other.allocator), buffer(other.buffer), 
-        allocation(other.allocation), mappedBuffer(other.mappedBuffer) {
+        : allocator(other.allocator), 
+        buffer(other.buffer), 
+        allocation(other.allocation), 
+        mappedBuffer(other.mappedBuffer) {
         other.buffer = nullptr;
         other.allocation = nullptr;
     }
 
     ~BufferAllocation() { 
-        vmaUnmapMemory(allocator, allocation);
+        if (mappedBuffer)
+            vmaUnmapMemory(allocator, allocation);
         vmaDestroyBuffer(allocator, buffer, allocation);
     }
 };
 
 struct ImageAllocation {
     const VmaAllocator& allocator;
-    VkImage image;
-    VmaAllocation allocation;
+    VkImage image{};
+    VmaAllocation allocation{};
+
+    vk::UniqueImageView imageView{};
 
     ImageAllocation() = delete;
     ImageAllocation(ImageAllocation&) = delete;
     ImageAllocation& operator=(const ImageAllocation& other) = delete;
 
-    ImageAllocation(const VmaAllocator& allocator_)
-        : allocator(allocator_), image(nullptr), allocation(nullptr) {}
+    ImageAllocation(const VmaAllocator& allocator_) : allocator(allocator_) {}
 
-    ImageAllocation(const VmaAllocator& allocator_, VkImage& image_, VmaAllocation& allocation_)
-        : allocator(allocator_), image(image_), allocation(allocation_) {}
+    ImageAllocation(ImageAllocation&& other) noexcept : 
+        allocator(other.allocator),
+        image(other.image), 
+        allocation(other.allocation), 
+        imageView(std::move(other.imageView)) {
 
-    ImageAllocation(const VmaAllocator& allocator_, const vk::ImageCreateInfo& imageInfo, 
-        const VmaAllocationCreateInfo& allocInfo) : allocator(allocator_) {
-        assert(vmaCreateImage(allocator, &VkImageCreateInfo(imageInfo), &allocInfo, 
-            &image, &allocation, nullptr) == VK_SUCCESS);
-    }
-
-    ImageAllocation(ImageAllocation&& other) noexcept
-        : allocator(other.allocator), image(other.image), allocation(other.allocation) {
         other.image = nullptr;
         other.allocation = nullptr;
     }
 
-    ~ImageAllocation() { vmaDestroyImage(allocator, image, allocation); }
+    ~ImageAllocation() { 
+        imageView.reset();
+        vmaDestroyImage(allocator, image, allocation); 
+    }
 };
 
 using UniqueBufferAllocation = std::unique_ptr<BufferAllocation>;
 using UniqueImageAllocation = std::unique_ptr<ImageAllocation>;
+
+using SharedBufferAllocation = std::shared_ptr<BufferAllocation>;
+using SharedImageAllocation = std::shared_ptr<ImageAllocation>;
 
 class RendererBackend : public gfx::RendererBackend {
 public:
@@ -98,12 +93,14 @@ public:
     virtual void recreateSwapchain();
 
     const vk::UniqueInstance& getInstance() const { return instance; }
+    const vk::PhysicalDevice& getPhysicalDevice() const { return physicalDevice; }
     const vk::UniqueDevice& getDevice() const { return device; }
     const vk::UniqueCommandPool& getCommandPool() const { return commandPool; }
     const vk::Queue& getGraphicsQueue() const { return graphicsQueue; }
     const vk::Queue& getPresentQueue() const { return presentQueue; }
     const uint32_t getMaxFrames() const { return maxFrames; }
     const VmaAllocator& getAllocator() const { return allocator; }
+    const vk::PhysicalDeviceProperties& getDeviceProperties() const { return physicalDeviceProperties; }
 
     template <typename T, typename = typename std::enable_if<vk::isVulkanHandleType<T>::value>>
     void setDebugName(const T& object, const std::string& name) {
@@ -142,6 +139,7 @@ protected:
 
     vk::PhysicalDevice physicalDevice;
     vk::UniqueDevice device;
+    vk::PhysicalDeviceProperties physicalDeviceProperties;
 
     int32_t graphicsQueueIndex = -1;
     int32_t presentQueueIndex = -1;

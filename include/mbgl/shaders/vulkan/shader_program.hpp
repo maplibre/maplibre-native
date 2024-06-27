@@ -62,16 +62,16 @@ public:
     static constexpr std::string_view Name{"GenericVulkanShader"};
     const std::string_view typeName() const noexcept override { return Name; }
 
-    const std::vector<vk::DescriptorSetLayout>& getDescriptorSetLayouts();
     const vk::UniquePipelineLayout& getPipelineLayout();
     const vk::UniquePipeline& getPipeline(const PipelineInfo& pipelineInfo);
 
-    std::optional<size_t> getSamplerLocation(const size_t id) const override { return {}; }
+    std::optional<size_t> getSamplerLocation(const size_t id) const override { return textureBindings[id]; }
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
     
     const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
     gfx::UniformBlockArray& mutableUniformBlocks() override { return uniformBlocks; }
+    bool hasTextures() const;
 
     void initAttribute(const shaders::AttributeInfo&);
     void initInstanceAttribute(const shaders::AttributeInfo&);
@@ -85,9 +85,6 @@ protected:
 
     vk::UniqueShaderModule vertexShader;
     vk::UniqueShaderModule fragmentShader;
-
-    std::vector<vk::UniqueDescriptorSetLayout> usedDescriptorSetLayouts;
-    std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
 
     vk::UniquePipelineLayout pipelineLayout;
     std::unordered_map<std::size_t, vk::UniquePipeline> pipelines;
