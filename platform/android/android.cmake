@@ -131,14 +131,14 @@ target_include_directories(
     ${PROJECT_SOURCE_DIR}/src
 )
 
-find_package(curl REQUIRED CONFIG)
+find_package(curl CONFIG)
 
 target_link_libraries(
     mbgl-test-runner
     PRIVATE
         Mapbox::Base::jni.hpp
         mbgl-compiler-options
-        curl::curl_static
+        $<$<BOOL:${curl_FOUND}>:curl::curl_static>
         -Wl,--whole-archive
         mbgl-test
         -Wl,--no-whole-archive
