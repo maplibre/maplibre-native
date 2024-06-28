@@ -15,6 +15,7 @@ import org.maplibre.android.testapp.activity.style.GridSourceActivity.Companion.
 import org.maplibre.android.testapp.utils.TestingAsyncUtils
 import org.junit.Assert
 import org.junit.Assert.*
+import org.junit.Ignore
 import org.junit.Test
 
 class CustomGeometrySourceTest : BaseTest() {
@@ -54,6 +55,7 @@ class CustomGeometrySourceTest : BaseTest() {
         }
     }
 
+    @Ignore("https://github.com/maplibre/maplibre-native/issues/2488")
     @Test
     fun threadsRestartedWhenSourceReAddedTest() {
         validateTestSetup()

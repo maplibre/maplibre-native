@@ -8,6 +8,7 @@
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 namespace mbgl {
 
@@ -29,6 +30,7 @@ void Renderer::setObserver(RendererObserver* observer) {
 }
 
 void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters) {
+    MLN_TRACE_FUNC();
     assert(updateParameters);
     if (auto renderTree = impl->orchestrator.createRenderTree(updateParameters)) {
         renderTree->prepare();

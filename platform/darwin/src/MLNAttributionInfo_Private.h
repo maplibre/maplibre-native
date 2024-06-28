@@ -1,6 +1,6 @@
-#import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import "MLNAttributionInfo.h"
 
@@ -16,9 +16,12 @@ NS_ASSUME_NONNULL_BEGIN
  @param fontSize The default text size in points.
  @param linkColor The default link color.
  */
-+ (NSArray<MLNAttributionInfo *> *)attributionInfosFromHTMLString:(nullable NSString *)htmlString fontSize:(CGFloat)fontSize linkColor:(nullable MLNColor *)linkColor;
++ (NSArray<MLNAttributionInfo *> *)attributionInfosFromHTMLString:(nullable NSString *)htmlString
+                                                         fontSize:(CGFloat)fontSize
+                                                        linkColor:(nullable MLNColor *)linkColor;
 
-+ (NSAttributedString *)attributedStringForAttributionInfos:(NSArray<MLNAttributionInfo *> *)attributionInfos;
++ (NSAttributedString *)attributedStringForAttributionInfos:
+    (NSArray<MLNAttributionInfo *> *)attributionInfos;
 
 @end
 

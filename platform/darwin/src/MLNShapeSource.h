@@ -1,6 +1,6 @@
 #import "MLNFoundation.h"
-#import "MLNTypes.h"
 #import "MLNSource.h"
+#import "MLNTypes.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -18,11 +18,12 @@ typedef NSString *MLNShapeSourceOption NS_STRING_ENUM;
  An `NSNumber` object containing a Boolean enabling or disabling clustering.
  If the `shape` property contains point shapes, setting this option to
  `YES` clusters the points by radius into groups. The default value is `NO`.
- 
+
  This option corresponds to the
- <a href="https://maplibre.org/maplibre-style-spec/#sources-geojson-cluster"><code>cluster</code></a>
+ <a
+ href="https://maplibre.org/maplibre-style-spec/#sources-geojson-cluster"><code>cluster</code></a>
  source property in the MapLibre Style Spec.
- 
+
  This option only affects point features within an `MLNShapeSource` object; it
  is ignored when creating an `MLNComputedShapeSource` object.
 
@@ -37,7 +38,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionClus
  An `NSNumber` object containing an integer; specifies the radius of each
  cluster if clustering is enabled. A value of 512 produces a radius equal to
  the width of a tile. The default value is 50.
- 
+
  This option only affects point features within an `MLNShapeSource` object; it
  is ignored when creating an `MLNComputedShapeSource` object.
  */
@@ -62,13 +63,14 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionClus
  let firstExpression = NSExpression(format: "sum:({$featureAccumulated, sumValue})")
  let secondExpression = NSExpression(forKeyPath: "magnitude")
  let clusterPropertiesDictionary = ["sumValue" : [firstExpression, secondExpression]]
- 
+
  let options : [MLNShapeSourceOption : Any] = [.clustered : true,
                                             .clusterProperties: clusterPropertiesDictionary]
  ```
 
  This option corresponds to the
- <a href="https://maplibre.org/maplibre-style-spec/#sources-geojson-clusterProperties"><code>clusterProperties</code></a>
+ <a
+ href="https://maplibre.org/maplibre-style-spec/#sources-geojson-clusterProperties"><code>clusterProperties</code></a>
  source property in the MapLibre Style Spec.
 
  This option only affects point features within an `MLNShapeSource` object; it
@@ -80,22 +82,25 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionClus
  which to cluster points if clustering is enabled. Defaults to one zoom level
  less than the value of `MLNShapeSourceOptionMaximumZoomLevel` so that, at the
  maximum zoom level, the shapes are not clustered.
- 
+
  This option corresponds to the
- <a href="https://maplibre.org/maplibre-style-spec/#sources-geojson-clusterMaxZoom"><code>clusterMaxZoom</code></a>
+ <a
+ href="https://maplibre.org/maplibre-style-spec/#sources-geojson-clusterMaxZoom"><code>clusterMaxZoom</code></a>
  source property in the MapLibre Style Spec.
- 
+
  This option only affects point features within an `MLNShapeSource` object; it
  is ignored when creating an `MLNComputedShapeSource` object.
  */
-FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionMaximumZoomLevelForClustering;
+FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption
+    MLNShapeSourceOptionMaximumZoomLevelForClustering;
 
 /**
  An `NSNumber` object containing an integer; specifies the minimum zoom level at
  which to create vector tiles. The default value is 0.
 
  This option corresponds to the
- <a href="https://maplibre.org/maplibre-style-spec/#sources-geojson-minzoom"><code>minzoom</code></a>
+ <a
+ href="https://maplibre.org/maplibre-style-spec/#sources-geojson-minzoom"><code>minzoom</code></a>
  source property in the MapLibre Style Spec.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionMinimumZoomLevel;
@@ -104,9 +109,10 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionMini
  An `NSNumber` object containing an integer; specifies the maximum zoom level at
  which to create vector tiles. A greater value produces greater detail at high
  zoom levels. The default value is 18.
- 
+
  This option corresponds to the
- <a href="https://maplibre.org/maplibre-style-spec/#sources-geojson-maxzoom"><code>maxzoom</code></a>
+ <a
+ href="https://maplibre.org/maplibre-style-spec/#sources-geojson-maxzoom"><code>maxzoom</code></a>
  source property in the MapLibre Style Spec.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionMaximumZoomLevel;
@@ -116,7 +122,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionMaxi
  buffer on each side. A value of 0 produces no buffer. A value of 512 produces a
  buffer as wide as the tile itself. Larger values produce fewer rendering
  artifacts near tile edges and slower performance. The default value is 128.
- 
+
  This option corresponds to the
  <a href="https://maplibre.org/maplibre-style-spec/#sources-geojson-buffer"><code>buffer</code></a>
  source property in the MapLibre Style Spec.
@@ -127,21 +133,23 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionBuff
  An `NSNumber` object containing a double; specifies the Douglas-Peucker
  simplification tolerance. A greater value produces simpler geometries and
  improves performance. The default value is 0.375.
- 
+
  This option corresponds to the
- <a href="https://maplibre.org/maplibre-style-spec/#sources-geojson-tolerance"><code>tolerance</code></a>
+ <a
+ href="https://maplibre.org/maplibre-style-spec/#sources-geojson-tolerance"><code>tolerance</code></a>
  source property in the MapLibre Style Spec.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionSimplificationTolerance;
 
 /**
- An `NSNumber` object containing a Boolean enabling or disabling calculating line distance metrics. 
- 
- Set this property to `YES` in order for the `MLNLineStyleLayer.lineGradient` property to have its intended effect.
- The default value is `NO`.
- 
+ An `NSNumber` object containing a Boolean enabling or disabling calculating line distance metrics.
+
+ Set this property to `YES` in order for the `MLNLineStyleLayer.lineGradient` property to have its
+ intended effect. The default value is `NO`.
+
  This option corresponds to the
- <a href="https://maplibre.org/maplibre-style-spec/sources/#geojson-lineMetrics"><code>lineMetrics</code></a>
+ <a
+ href="https://maplibre.org/maplibre-style-spec/sources/#geojson-lineMetrics"><code>lineMetrics</code></a>
  source property in the MapLibre Style Spec.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionLineDistanceMetrics;
@@ -154,7 +162,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionLine
  `MLNStyle` object along with an `MLNVectorStyleLayer` object. The vector style
  layer defines the appearance of any content supplied by the shape source. You
  can update a shape source by setting its `shape` or `URL` property.
- 
+
  `MLNShapeSource` is optimized for data sets that change dynamically and fit
  completely in memory. For large data sets that do not fit completely in memory,
  use the `MLNComputedShapeSource` or `MLNVectorTileSource` class.
@@ -181,7 +189,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNShapeSourceOption MLNShapeSourceOptionLine
  let source = MLNShapeSource(identifier: "lines", features: [polyline], options: nil)
  mapView.style?.addSource(source)
  ```
- 
+
  #### Related examples
  TODO: Cluster point data
  TODO: Use images to cluster point data
@@ -196,7 +204,7 @@ MLN_EXPORT
 /**
  Returns a shape source with an identifier, URL, and dictionary of options for
  the source.
- 
+
  This class supports the following options: `MLNShapeSourceOptionClustered`,
  `MLNShapeSourceOptionClusterRadius`,
  `MLNShapeSourceOptionMaximumZoomLevelForClustering`,
@@ -210,17 +218,20 @@ MLN_EXPORT
     current application’s resource bundle.
  @param options An `NSDictionary` of options for this source.
  @return An initialized shape source.
- 
+
  #### Related examples
  TODO: Add live data, learn how to add live data to your map by
  updating the an `MLNShapeSource` object's `URL` property.
  */
-- (instancetype)initWithIdentifier:(NSString *)identifier URL:(NSURL *)url options:(nullable NSDictionary<MLNShapeSourceOption, id> *)options NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithIdentifier:(NSString *)identifier
+                               URL:(NSURL *)url
+                           options:(nullable NSDictionary<MLNShapeSourceOption, id> *)options
+    NS_DESIGNATED_INITIALIZER;
 
 /**
  Returns a shape source with an identifier, a shape, and dictionary of options
  for the source.
- 
+
  This class supports the following options: `MLNShapeSourceOptionClustered`,
  `MLNShapeSourceOptionClusterRadius`,
  `MLNShapeSourceOptionMaximumZoomLevelForClustering`,
@@ -243,17 +254,20 @@ MLN_EXPORT
  @param shape A concrete subclass of `MLNShape`
  @param options An `NSDictionary` of options for this source.
  @return An initialized shape source.
- 
+
  #### Related examples
  TODO: Animate a line, learn how to animate line data by continously
  updating an `MLNShapeSource`'s `shape` attribute.
  */
-- (instancetype)initWithIdentifier:(NSString *)identifier shape:(nullable MLNShape *)shape options:(nullable NSDictionary<MLNShapeSourceOption, id> *)options NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithIdentifier:(NSString *)identifier
+                             shape:(nullable MLNShape *)shape
+                           options:(nullable NSDictionary<MLNShapeSourceOption, id> *)options
+    NS_DESIGNATED_INITIALIZER;
 
 /**
  Returns a shape source with an identifier, an array of features, and a dictionary
  of options for the source.
- 
+
  This class supports the following options: `MLNShapeSourceOptionClustered`,
  `MLNShapeSourceOptionClusterRadius`,
  `MLNShapeSourceOptionMaximumZoomLevelForClustering`,
@@ -275,12 +289,14 @@ MLN_EXPORT
  @param options An `NSDictionary` of options for this source.
  @return An initialized shape source.
  */
-- (instancetype)initWithIdentifier:(NSString *)identifier features:(NSArray<MLNShape<MLNFeature> *> *)features options:(nullable NSDictionary<MLNShapeSourceOption, id> *)options;
+- (instancetype)initWithIdentifier:(NSString *)identifier
+                          features:(NSArray<MLNShape<MLNFeature> *> *)features
+                           options:(nullable NSDictionary<MLNShapeSourceOption, id> *)options;
 
 /**
  Returns a shape source with an identifier, an array of shapes, and a dictionary of
  options for the source.
- 
+
  This class supports the following options: `MLNShapeSourceOptionClustered`,
  `MLNShapeSourceOptionClusterRadius`,
  `MLNShapeSourceOptionMaximumZoomLevelForClustering`,
@@ -303,7 +319,9 @@ MLN_EXPORT
  @param options An `NSDictionary` of options for this source.
  @return An initialized shape source.
  */
-- (instancetype)initWithIdentifier:(NSString *)identifier shapes:(NSArray<MLNShape *> *)shapes options:(nullable NSDictionary<MLNShapeSourceOption, id> *)options;
+- (instancetype)initWithIdentifier:(NSString *)identifier
+                            shapes:(NSArray<MLNShape *> *)shapes
+                           options:(nullable NSDictionary<MLNShapeSourceOption, id> *)options;
 
 // MARK: Accessing a Source’s Content
 
@@ -342,7 +360,7 @@ MLN_EXPORT
  the road that lie within the map tiles that the source has loaded, even if the
  road extends into other tiles. The portion of the road within each map tile is
  included individually.
- 
+
  Returned features may not necessarily be visible to the user at the time they
  are loaded: the style may lack a layer that draws the features in question. To
  obtain only _visible_ features, use the
@@ -356,32 +374,36 @@ MLN_EXPORT
  @return An array of objects conforming to the `MLNFeature` protocol that
     represent features in the source that match the predicate.
  */
-- (NSArray<id <MLNFeature>> *)featuresMatchingPredicate:(nullable NSPredicate *)predicate;
+- (NSArray<id<MLNFeature>> *)featuresMatchingPredicate:(nullable NSPredicate *)predicate;
 
 /**
  Returns an array of map features that are the leaves of the specified cluster.
  ("Leaves" are the original points that belong to the cluster.)
- 
+
  This method supports pagination; you supply an offset (number of features to skip)
  and a maximum number of features to return.
- 
- @param cluster An object of type `MLNPointFeatureCluster` (that conforms to the `MLNCluster` protocol).
+
+ @param cluster An object of type `MLNPointFeatureCluster` (that conforms to the `MLNCluster`
+ protocol).
  @param offset Number of features to skip.
  @param limit The maximum number of features to return
- 
+
  @return An array of objects that conform to the `MLNFeature` protocol.
  */
-- (NSArray<id <MLNFeature>> *)leavesOfCluster:(MLNPointFeatureCluster *)cluster offset:(NSUInteger)offset limit:(NSUInteger)limit;
+- (NSArray<id<MLNFeature>> *)leavesOfCluster:(MLNPointFeatureCluster *)cluster
+                                      offset:(NSUInteger)offset
+                                       limit:(NSUInteger)limit;
 
 /**
  Returns an array of map features that are the immediate children of the specified
  cluster *on the next zoom level*. The may include features that also conform to
  the `MLNCluster` protocol (currently only objects of type `MLNPointFeatureCluster`).
- 
- @param cluster An object of type `MLNPointFeatureCluster` (that conforms to the `MLNCluster` protocol).
- 
+
+ @param cluster An object of type `MLNPointFeatureCluster` (that conforms to the `MLNCluster`
+ protocol).
+
  @return An array of objects that conform to the `MLNFeature` protocol.
- 
+
  @note The returned array may contain the `cluster` that was passed in, if the next
     zoom level doesn't match the zoom level for expanding that cluster. See
     `-[MLNShapeSource zoomLevelForExpandingCluster:]`.
@@ -390,9 +412,10 @@ MLN_EXPORT
 
 /**
  Returns the zoom level at which the given cluster expands.
- 
- @param cluster An object of type `MLNPointFeatureCluster` (that conforms to the `MLNCluster` protocol).
- 
+
+ @param cluster An object of type `MLNPointFeatureCluster` (that conforms to the `MLNCluster`
+ protocol).
+
  @return Zoom level. This should be >= 0; any negative return value should be
     considered an error.
  */

@@ -21,6 +21,7 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /** Test activity showcasing using Android SDK animators to animate camera position changes. */
 class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -40,7 +41,7 @@ class CameraAnimatorActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        map.setStyle(Style.getPredefinedStyle("Streets"))
+        map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
         initFab()
     }
 

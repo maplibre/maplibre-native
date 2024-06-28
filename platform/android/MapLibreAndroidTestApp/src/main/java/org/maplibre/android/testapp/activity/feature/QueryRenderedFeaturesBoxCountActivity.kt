@@ -12,6 +12,7 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.NavUtils
 import timber.log.Timber
 
@@ -33,7 +34,7 @@ class QueryRenderedFeaturesBoxCountActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@QueryRenderedFeaturesBoxCountActivity.maplibreMap = maplibreMap
-            maplibreMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Streets")))
+            maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.AMERICANA))
             selectionBox.setOnClickListener { view: View? ->
                 // Query
                 val top = selectionBox.top - mapView.top

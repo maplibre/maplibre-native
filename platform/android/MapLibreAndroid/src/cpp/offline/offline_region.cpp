@@ -1,8 +1,11 @@
 #include "offline_region.hpp"
 
+#include <variant>
+
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/string.hpp>
+#include <mbgl/util/variant.hpp>
 
 #include "offline_region_definition.hpp"
 #include "offline_region_error.hpp"
@@ -180,13 +183,13 @@ jni::Local<jni::Object<OfflineRegion>> OfflineRegion::New(jni::JNIEnv& env,
                                                           const jni::Object<FileSource>& jFileSource,
                                                           mbgl::OfflineRegion region) {
     // Definition
-    auto definition = region.getDefinition().match(
-        [&](const mbgl::OfflineTilePyramidRegionDefinition def) {
-            return OfflineTilePyramidRegionDefinition::New(env, def);
-        },
-        [&](const mbgl::OfflineGeometryRegionDefinition def) {
-            return OfflineGeometryRegionDefinition::New(env, def);
-        });
+    auto definition = std::visit(overloaded{[&](const mbgl::OfflineTilePyramidRegionDefinition def) {
+                                                return OfflineTilePyramidRegionDefinition::New(env, def);
+                                            },
+                                            [&](const mbgl::OfflineGeometryRegionDefinition def) {
+                                                return OfflineGeometryRegionDefinition::New(env, def);
+                                            }},
+                                 region.getDefinition());
 
     // Create region java object
     static auto& javaClass = jni::Class<OfflineRegion>::Singleton(env);

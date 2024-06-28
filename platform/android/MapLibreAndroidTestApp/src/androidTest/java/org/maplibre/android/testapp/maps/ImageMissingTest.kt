@@ -71,8 +71,8 @@ class ImageMissingTest : AppCenter() {
     {
       "version": 8,
       "name": "Streets",
-      "sprite": "maptiler://sprites/streets/sprite",
-      "glyphs": "maptiler://fonts/{fontstack}/{range}.pbf",
+      "sprite": "https://maputnik.github.io/osm-liberty/sprites/osm-liberty",
+      "glyphs": "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
       "sources": {
         "point": {
           "type": "geojson",
@@ -115,8 +115,8 @@ class ImageMissingTest : AppCenter() {
     {
       "version": 8,
       "name": "Streets",
-      "sprite": "maptiler://sprites/streets/sprite",
-      "glyphs": "maptiler://fonts/{fontstack}/{range}.pbf",
+      "sprite": "https://maputnik.github.io/osm-liberty/sprites/osm-liberty",
+      "glyphs": "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
       "sources": {
         "point": {
           "type": "geojson",

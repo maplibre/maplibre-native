@@ -19,6 +19,7 @@ import org.maplibre.android.maps.MapView.OnWillStartLoadingMapListener
 import org.maplibre.android.maps.MapView.OnWillStartRenderingFrameListener
 import org.maplibre.android.maps.MapView.OnWillStartRenderingMapListener
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 
 /**
@@ -88,7 +89,7 @@ class MapChangeActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
             OnMapReadyCallback { maplibreMap: MapLibreMap ->
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
                 maplibreMap.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(55.754020, 37.620948),

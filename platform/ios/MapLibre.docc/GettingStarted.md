@@ -28,6 +28,8 @@ Verify you can import MapLibre in your app:
 import MapLibre
 ```
 
+## SwiftUI
+
 To use MapLibre with SwiftUI we need to create a wrapper for the UIKit view that MapLibre provides (using UIViewRepresentable. The simplest way to implement this protocol is as follows:
 
 <!-- include-example(SimpleMap) -->
@@ -59,3 +61,27 @@ struct MyApp: App {
 When running your app in the simulator you should be greeted with the default [Demotiles](https://demotiles.maplibre.org/) style:
 
 ![](DemotilesScreenshot.png)
+
+## UIKit
+
+You can use the following `UIViewController` to get started with MapLibre Native iOS with UIKit.
+
+```swift
+class SimpleMap: UIViewController, MLNMapViewDelegate {
+    var mapView: MLNMapView!
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        mapView = MLNMapView(frame: view.bounds)
+        mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(mapView)
+
+        mapView.delegate = self
+    }
+
+    // MLNMapViewDelegate method called when map has finished loading
+    func mapView(_: MLNMapView, didFinishLoading _: MLNStyle) {
+    }
+}
+```

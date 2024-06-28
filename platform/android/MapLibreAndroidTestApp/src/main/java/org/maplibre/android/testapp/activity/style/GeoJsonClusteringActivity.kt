@@ -22,6 +22,7 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.utils.BitmapUtils
 import timber.log.Timber
 import java.net.URI
@@ -77,7 +78,7 @@ class GeoJsonClusteringActivity : AppCompatActivity() {
                 try {
                     maplibreMap.setStyle(
                         Style.Builder()
-                            .fromUri(Style.getPredefinedStyle("Bright"))
+                            .fromUri(TestStyles.getPredefinedStyleWithFallback("Bright"))
                             .withSource(createClusterSource().also { clusterSource = it })
                             .withLayer(createSymbolLayer())
                             .withLayer(createClusterLevelLayer(0, clusterLayers))

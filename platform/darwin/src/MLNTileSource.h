@@ -44,7 +44,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionMaximu
 /**
  An `NSValue` object containing an `MLNCoordinateBounds` struct that specifies
  the geographic extent of the source.
- 
+
  If this option is specified, the SDK avoids requesting any tile that falls
  outside of the coordinate bounds. Otherwise, the SDK requests any tile needed
  to cover the viewport, as it does by default.
@@ -122,23 +122,24 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNTileSourceOption MLNTileSourceOptionTileCo
  interpreted.
  */
 typedef NS_ENUM(NSUInteger, MLNTileCoordinateSystem) {
-    /**
-     The origin is at the top-left (northwest), and `y` values increase
-     southwards.
+  /**
+   The origin is at the top-left (northwest), and `y` values increase
+   southwards.
 
-     This tile coordinate system is used by Mapbox and OpenStreetMap tile
-     servers.
-     */
-    MLNTileCoordinateSystemXYZ = 0,
+   This tile coordinate system is used by Mapbox and OpenStreetMap tile
+   servers.
+   */
+  MLNTileCoordinateSystemXYZ = 0,
 
-    /**
-     The origin is at the bottom-left (southwest), and `y` values increase
-     northwards.
+  /**
+   The origin is at the bottom-left (southwest), and `y` values increase
+   northwards.
 
-     This tile coordinate system is used by tile servers that conform to the
-     <a href="http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification">Tile Map Service Specification</a>.
-     */
-    MLNTileCoordinateSystemTMS
+   This tile coordinate system is used by tile servers that conform to the
+   <a href="http://wiki.osgeo.org/wiki/Tile_Map_Service_Specification">Tile Map Service
+   Specification</a>.
+   */
+  MLNTileCoordinateSystemTMS
 };
 
 /**
@@ -147,15 +148,17 @@ typedef NS_ENUM(NSUInteger, MLNTileCoordinateSystem) {
 
 typedef NS_ENUM(NSUInteger, MLNDEMEncoding) {
 
-    /**
-     Raster tiles generated with the [Mapbox encoding formula](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb).
-    */
-    MLNDEMEncodingMapbox = 0,
+  /**
+   Raster tiles generated with the [Mapbox encoding
+   formula](https://docs.mapbox.com/help/troubleshooting/access-elevation-data/#mapbox-terrain-rgb).
+  */
+  MLNDEMEncodingMapbox = 0,
 
-    /**
-     Raster tiles generated with the [Mapzen Terrarium encoding formula](https://aws.amazon.com/public-datasets/terrain/).
-    */
-    MLNDEMEncodingTerrarium
+  /**
+   Raster tiles generated with the [Mapzen Terrarium encoding
+   formula](https://aws.amazon.com/public-datasets/terrain/).
+  */
+  MLNDEMEncodingTerrarium
 };
 
 /**
@@ -166,7 +169,7 @@ typedef NS_ENUM(NSUInteger, MLNDEMEncoding) {
  A tile source is added to an `MLNStyle` object along with one or more
  `MLNRasterStyleLayer` or `MLNVectorStyleLayer` objects. Use a style layer to
  control the appearance of content supplied by the tile source.
- 
+
  A tile source is also known as a tile set. To learn about the structure of a
  Mapbox-hosted tile set, view it in
  <a href="https://www.mapbox.com/studio/tilesets/">Mapbox Studio’s Tilesets editor</a>.

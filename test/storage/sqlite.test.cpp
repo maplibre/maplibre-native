@@ -37,8 +37,8 @@ TEST(SQLite, TEST_REQUIRES_WRITE(TryOpen)) {
     // make sure all the backends behave the same way.
     auto result = mapbox::sqlite::Database::tryOpen("test/fixtures/offline_database/foobar123.db",
                                                     mapbox::sqlite::ReadOnly);
-    ASSERT_TRUE(result.is<mapbox::sqlite::Exception>());
-    ASSERT_EQ(result.get<mapbox::sqlite::Exception>().code, mapbox::sqlite::ResultCode::CantOpen);
+    ASSERT_TRUE(std::holds_alternative<mapbox::sqlite::Exception>(result));
+    ASSERT_EQ(std::get<mapbox::sqlite::Exception>(result).code, mapbox::sqlite::ResultCode::CantOpen);
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 

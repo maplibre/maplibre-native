@@ -6,11 +6,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MBXStateManager : NSObject
 
-+ (instancetype) sharedManager;
++ (instancetype)sharedManager;
 
 - (MBXState *)currentState;
 
-- (void)saveState:(MBXState*)mapViewController;
+- (void)saveState:(MBXState *)mapViewController;
 
 - (void)resetState;
 

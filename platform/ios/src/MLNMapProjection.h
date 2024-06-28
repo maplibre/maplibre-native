@@ -18,7 +18,7 @@ MLN_EXPORT
  @param mapView The map view the camera state to use for the initialization.
  @return An initialized map projection.
  */
-- (instancetype)initWithMapView:(MLNMapView*)mapView;
+- (instancetype)initWithMapView:(MLNMapView *)mapView;
 
 /**
  A camera representing the current projection state
@@ -32,9 +32,9 @@ MLN_EXPORT
  @param insets The insets applied on top of the camera be used in the projection calculation.
 
  @note `MLNMapView` instance frame must not be changed since this projection is initialized,
- 	otherwise the calculation may be wrong.
+        otherwise the calculation may be wrong.
  */
-- (void)setCamera:(MLNMapCamera * _Nonnull)camera withEdgeInsets:(UIEdgeInsets)insets;
+- (void)setCamera:(MLNMapCamera *_Nonnull)camera withEdgeInsets:(UIEdgeInsets)insets;
 
 /**
  Change the projection state to make the provided bounds visible with the specified inset.

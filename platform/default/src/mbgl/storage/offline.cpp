@@ -1,6 +1,7 @@
 #include <mbgl/storage/offline.hpp>
 #include <mbgl/util/tileset.hpp>
 #include <mbgl/util/projection.hpp>
+#include <mbgl/util/variant.hpp>
 
 #include <mapbox/geojson.hpp>
 #include <mapbox/geojson/rapidjson.hpp>
@@ -110,32 +111,37 @@ std::string encodeOfflineRegionDefinition(const OfflineRegionDefinition& region)
     doc.SetObject();
 
     // Encode common properties
-    region.match([&](auto& _region) {
-        doc.AddMember(
-            "style_url", rapidjson::StringRef(_region.styleURL.data(), _region.styleURL.length()), doc.GetAllocator());
-        doc.AddMember("min_zoom", _region.minZoom, doc.GetAllocator());
-        if (std::isfinite(_region.maxZoom)) {
-            doc.AddMember("max_zoom", _region.maxZoom, doc.GetAllocator());
-        }
+    std::visit(
+        [&](auto& _region) {
+            doc.AddMember("style_url",
+                          rapidjson::StringRef(_region.styleURL.data(), _region.styleURL.length()),
+                          doc.GetAllocator());
+            doc.AddMember("min_zoom", _region.minZoom, doc.GetAllocator());
+            if (std::isfinite(_region.maxZoom)) {
+                doc.AddMember("max_zoom", _region.maxZoom, doc.GetAllocator());
+            }
 
-        doc.AddMember("pixel_ratio", _region.pixelRatio, doc.GetAllocator());
-        doc.AddMember("include_ideographs", _region.includeIdeographs, doc.GetAllocator());
-    });
+            doc.AddMember("pixel_ratio", _region.pixelRatio, doc.GetAllocator());
+            doc.AddMember("include_ideographs", _region.includeIdeographs, doc.GetAllocator());
+        },
+        region);
 
     // Encode specific properties
-    region.match(
-        [&](const OfflineTilePyramidRegionDefinition& _region) {
-            rapidjson::GenericValue<rapidjson::UTF8<>, rapidjson::CrtAllocator> bounds(rapidjson::kArrayType);
-            bounds.PushBack(_region.bounds.south(), doc.GetAllocator());
-            bounds.PushBack(_region.bounds.west(), doc.GetAllocator());
-            bounds.PushBack(_region.bounds.north(), doc.GetAllocator());
-            bounds.PushBack(_region.bounds.east(), doc.GetAllocator());
-            doc.AddMember("bounds", bounds, doc.GetAllocator());
-        },
-        [&](const OfflineGeometryRegionDefinition& _region) {
-            doc.AddMember(
-                "geometry", mapbox::geojson::convert(_region.geometry, doc.GetAllocator()), doc.GetAllocator());
-        });
+    std::visit(overloaded{[&](const OfflineTilePyramidRegionDefinition& _region) {
+                              rapidjson::GenericValue<rapidjson::UTF8<>, rapidjson::CrtAllocator> bounds(
+                                  rapidjson::kArrayType);
+                              bounds.PushBack(_region.bounds.south(), doc.GetAllocator());
+                              bounds.PushBack(_region.bounds.west(), doc.GetAllocator());
+                              bounds.PushBack(_region.bounds.north(), doc.GetAllocator());
+                              bounds.PushBack(_region.bounds.east(), doc.GetAllocator());
+                              doc.AddMember("bounds", bounds, doc.GetAllocator());
+                          },
+                          [&](const OfflineGeometryRegionDefinition& _region) {
+                              doc.AddMember("geometry",
+                                            mapbox::geojson::convert(_region.geometry, doc.GetAllocator()),
+                                            doc.GetAllocator());
+                          }},
+               region);
 
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
