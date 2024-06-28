@@ -33,8 +33,7 @@ You need to set your `BUNDLE_ID_PREFIX` to be unique (ideally use a domain that 
 
 You can keep leave the `APPLE_MOBILE_PROVISIONING_PROFILE_NAME` alone.
 
-Set the Team ID to the Team ID of your Apple Developer Account (paid or unpaid both work).
-If you do not know your Team ID, go to your [Apple Developer account](https://developer.apple.com/account), log in, and scroll down to find your Team ID.
+Set the Team ID to the Team ID of your Apple Developer Account (paid or unpaid both work). If you do not know your Team ID, go to your [Apple Developer account](https://developer.apple.com/account), log in, and scroll down to find your Team ID.
 
 If you don't already have a developer account, continue this guide and let Xcode generate a provisioning profile for you. You will need to update the Team ID later once a certificate is generated.
 
@@ -61,7 +60,7 @@ Try to run the example App in the simulator and on a device to confirm your setu
 
 If you get a Python `KeyError` when processing provisioning profiles, you probably have some _really_ old or corrupted profiles.
 
-Have a look through `~/Library/MobileDevice/Provisioning\ Profiles` and remove any expired profiles. Removing all profiles here can also solve some issues.
+Have a look through `~/Library/MobileDevice/Provisioning\ Profiles` and remove any expired profiles. Removing all profiles here can also resolve some issues.
 
 ## Using Bazel from the Command Line
 
