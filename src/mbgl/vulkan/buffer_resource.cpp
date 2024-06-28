@@ -26,18 +26,16 @@ BufferResource::BufferResource(Context& context_,
     std::size_t offset = 0;
 
     // TODO -> check avg minUniformBufferOffsetAlignment vs individual buffers
-    persistent = false;
-
-    if (persistent) {
-        const auto& deviceProps = backend.getDeviceProperties();
-        const auto& align = deviceProps.limits.minUniformBufferOffsetAlignment;
-        bufferWindowSize = (size + align - 1) & ~(align - 1);
-
-        assert(bufferWindowSize != 0);
-
-        offset = bufferWindowSize * context.getCurrentFrameResourceIndex();
-        totalSize = bufferWindowSize * backend.getMaxFrames();
-    }
+    //if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) {
+    //    const auto& deviceProps = backend.getDeviceProperties();
+    //    const auto& align = deviceProps.limits.minUniformBufferOffsetAlignment;
+    //    bufferWindowSize = (size + align - 1) & ~(align - 1);
+    //
+    //    assert(bufferWindowSize != 0);
+    //
+    //    offset = bufferWindowSize * context.getCurrentFrameResourceIndex();
+    //    totalSize = bufferWindowSize * backend.getMaxFrames();
+    //}
 
     const auto& bufferInfo = vk::BufferCreateInfo()
         .setSize(totalSize)
@@ -157,14 +155,14 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
 }
 
 std::size_t BufferResource::getVulkanBufferOffset() const noexcept {
-    if (!persistent)
+    if (bufferWindowSize > 0)
         return 0;
 
     return context.getCurrentFrameResourceIndex() * bufferWindowSize;
 }
 
 std::size_t BufferResource::getVulkanBufferSize() const noexcept {
-    return persistent ? bufferWindowSize : size;
+    return bufferWindowSize > 0 ? bufferWindowSize : size;
 }
 
 } // namespace mtl

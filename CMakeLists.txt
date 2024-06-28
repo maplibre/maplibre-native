@@ -9,6 +9,7 @@ option(MLN_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
 option(MLN_WITH_RTTI "Compile with runtime type information" OFF)
 option(MLN_WITH_OPENGL "Build with OpenGL renderer" ON)
 option(MLN_WITH_EGL "Build with EGL renderer" OFF)
+option(MLN_WITH_VULKAN "Build with Vulkan renderer" OFF)
 option(MLN_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" ON)
@@ -1296,20 +1297,55 @@ if(MBGL_WITH_METAL)
 endif()
 
 if(MLN_WITH_VULKAN)
-    find_package(VulkanHeaders REQUIRED)
-    find_package(VulkanMemoryAllocator REQUIRED)
     message(STATUS "Configuring Vulkan renderer backend")
+
     target_compile_definitions(
         mbgl-core
         PRIVATE
             MLN_RENDER_BACKEND_VULKAN=1
     )
 
+    target_include_directories(
+        mbgl-core
+        PUBLIC
+            ${PROJECT_SOURCE_DIR}/vendor/Vulkan-Headers/include/
+            ${PROJECT_SOURCE_DIR}/vendor/VulkanMemoryAllocator/include/
+    )
+
+    set(ENABLE_OPT OFF)
+    set(ENABLE_HLSL OFF)
+    add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/glslang)
+
+    set_target_properties(
+        glslang
+        PROPERTIES
+            INTERFACE_MAPBOX_NAME "glslang"
+            INTERFACE_MAPBOX_URL "https://github.com/KhronosGroup/glslang.git"
+            INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/glslang/LICENSE.txt
+    )
+
+    set_target_properties(
+        SPIRV
+        PROPERTIES
+            INTERFACE_MAPBOX_NAME "SPIRV"
+            INTERFACE_MAPBOX_URL "https://github.com/KhronosGroup/glslang.git"
+            INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/glslang/LICENSE.txt
+    )
+
+    set_target_properties(
+        glslang-default-resource-limits
+        PROPERTIES
+            INTERFACE_MAPBOX_NAME "glslang-default-resource-limits"
+            INTERFACE_MAPBOX_URL "https://github.com/KhronosGroup/glslang.git"
+            INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/glslang/LICENSE.txt
+    )
+
     target_link_libraries(
         mbgl-core
         PRIVATE
-            Vulkan::Headers
-            GPUOpen::VulkanMemoryAllocator
+            glslang::glslang
+            glslang::SPIRV
+            glslang::glslang-default-resource-limits
     )
 
     list(APPEND 
@@ -1319,8 +1355,10 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/context.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/index_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/layer_group.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/offscreen_texture.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/pipeline.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/renderer_backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/render_pass.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/renderable_resource.hpp
@@ -1328,6 +1366,14 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/tile_layer_group.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/uniform_buffer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/upload_pass.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/vertex_attribute.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/shader_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/shader_program.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/clipping_mask.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/fill.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/line.hpp
     )
 
     list(APPEND 
@@ -1338,17 +1384,25 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_builder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_impl.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/index_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/layer_group.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/offscreen_texture.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/pipeline.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/render_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/texture2d.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/tile_layer_group.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/uniform_buffer.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/upload_pass.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/vertex_attribute.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/shader_program.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/circle.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/fill.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/line.cpp
     )
 
-    #TODO merge with MLN_DRAWABLE_RENDERER? These are added only for GL path otherwise
+    #TODO merge with MLN_DRAWABLE_RENDERER? These are added only for GL path
     list(APPEND 
         SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
@@ -1490,6 +1544,19 @@ export(TARGETS
 
     FILE MapboxCoreTargets.cmake
 )
+
+if(MLN_WITH_VULKAN)
+    export(TARGETS
+        glslang
+        SPIRV
+        glslang-default-resource-limits
+        MachineIndependent
+        OSDependent
+        GenericCodeGen
+
+        APPEND FILE MapboxCoreTargets.cmake
+    )
+endif()
 
 set_target_properties(
     mbgl-core
