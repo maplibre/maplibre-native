@@ -39,7 +39,7 @@ public:
         // Renderable resources that require a swap function to be called
         // explicitly can override this method.
     }
-    
+
 protected:
     friend class RendererBackend;
     friend class RenderPass;

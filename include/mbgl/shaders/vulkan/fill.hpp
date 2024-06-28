@@ -14,7 +14,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Vulkan> {
     static const std::array<AttributeInfo, 3> attributes;
     static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
     static constexpr std::array<TextureInfo, 0> textures{};
-   
+
     static constexpr auto vertex = R"(
 
     layout(location = 0) in vec2 inPosition;

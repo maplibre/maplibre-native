@@ -46,5 +46,5 @@ private:
     }
 };
 
-} // namespace mtl
+} // namespace vulkan
 } // namespace mbgl

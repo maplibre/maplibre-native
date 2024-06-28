@@ -59,9 +59,11 @@ public:
 
     BufferResource createBuffer(const void* data, std::size_t size, std::uint32_t usage, bool persistent) const;
 
-    UniqueShaderProgram createProgram(std::string name, 
-        const std::string_view vertex, const std::string_view fragment, const ProgramParameters& programParameters,
-        const mbgl::unordered_map<std::string, std::string>& additionalDefines);
+    UniqueShaderProgram createProgram(std::string name,
+                                      const std::string_view vertex,
+                                      const std::string_view fragment,
+                                      const ProgramParameters& programParameters,
+                                      const mbgl::unordered_map<std::string, std::string>& additionalDefines);
 
     /// Called at the end of a frame.
     void performCleanup() override {}
@@ -140,7 +142,6 @@ public:
     void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
 
 private:
-
     struct FrameResources {
         vk::UniqueCommandBuffer commandBuffer;
         vk::UniqueDescriptorPool descriptorPool;
@@ -151,19 +152,16 @@ private:
 
         std::vector<std::function<void(const Context&)>> deletionQueue;
 
-        FrameResources(
-            vk::UniqueCommandBuffer&& cb,
-            vk::UniqueDescriptorPool&& dp,
-            vk::UniqueSemaphore&& surf,
-            vk::UniqueSemaphore&& frame,
-            vk::UniqueFence&& flight
-        ) : 
-            commandBuffer(std::move(cb)),
-            descriptorPool(std::move(dp)),
-            surfaceSemaphore(std::move(surf)),
-            frameSemaphore(std::move(frame)),
-            flightFrameFence(std::move(flight))
-        {}
+        FrameResources(vk::UniqueCommandBuffer&& cb,
+                       vk::UniqueDescriptorPool&& dp,
+                       vk::UniqueSemaphore&& surf,
+                       vk::UniqueSemaphore&& frame,
+                       vk::UniqueFence&& flight)
+            : commandBuffer(std::move(cb)),
+              descriptorPool(std::move(dp)),
+              surfaceSemaphore(std::move(surf)),
+              frameSemaphore(std::move(frame)),
+              flightFrameFence(std::move(flight)) {}
 
         void runDeletionQueue(const Context&);
     };
@@ -171,10 +169,9 @@ private:
     void initFrameResources();
     void destroyResources();
 
-
 private:
     RendererBackend& backend;
-    
+
     vulkan::UniformBufferArray globalUniformBuffers;
 
     std::unique_ptr<BufferResource> dummyVertexBuffer;

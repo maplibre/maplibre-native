@@ -87,19 +87,19 @@ constexpr const char* fragmentTestShaderStr = R"(
     }
 )";
 
-#define CREATE_TEST_SHADER(x)                                                            \
-template <>                                                                              \
-struct ShaderSource<BuiltIn::x, gfx::Backend::Type::Vulkan>  {                           \
-    static constexpr const char* name = #x;                                              \
-                                                                                         \
-    static const std::array<UniformBlockInfo, 2> uniforms;                               \
-    static const std::array<AttributeInfo, 3> attributes;                                \
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};                  \
-    static const std::array<TextureInfo, 1> textures;                                    \
-                                                                                         \
-    static constexpr auto vertex = vertexTestShaderStr;                                  \
-    static constexpr auto fragment = fragmentTestShaderStr;                              \
-};
+#define CREATE_TEST_SHADER(x)                                               \
+    template <>                                                             \
+    struct ShaderSource<BuiltIn::x, gfx::Backend::Type::Vulkan> {           \
+        static constexpr const char* name = #x;                             \
+                                                                            \
+        static const std::array<UniformBlockInfo, 2> uniforms;              \
+        static const std::array<AttributeInfo, 3> attributes;               \
+        static constexpr std::array<AttributeInfo, 0> instanceAttributes{}; \
+        static const std::array<TextureInfo, 1> textures;                   \
+                                                                            \
+        static constexpr auto vertex = vertexTestShaderStr;                 \
+        static constexpr auto fragment = fragmentTestShaderStr;             \
+    };
 
 CREATE_TEST_SHADER(CircleShader)
 CREATE_TEST_SHADER(BackgroundShader)
@@ -117,7 +117,7 @@ CREATE_TEST_SHADER(HeatmapShader)
 CREATE_TEST_SHADER(HeatmapTextureShader)
 CREATE_TEST_SHADER(HillshadeShader)
 CREATE_TEST_SHADER(HillshadePrepareShader)
-//CREATE_TEST_SHADER(LineShader)
+// CREATE_TEST_SHADER(LineShader)
 CREATE_TEST_SHADER(LineGradientShader)
 CREATE_TEST_SHADER(LineSDFShader)
 CREATE_TEST_SHADER(LinePatternShader)

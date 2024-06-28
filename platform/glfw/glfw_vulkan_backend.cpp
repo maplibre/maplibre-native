@@ -4,7 +4,7 @@
 #include <mbgl/vulkan/renderable_resource.hpp>
 
 #ifdef _WIN32
-    #define VK_USE_PLATFORM_WIN32_KHR
+#define VK_USE_PLATFORM_WIN32_KHR
 #endif
 
 #define GLFW_INCLUDE_VULKAN
@@ -13,30 +13,21 @@
 class GLFWVulkanRenderableResource final : public mbgl::vulkan::RenderableResource {
 public:
     explicit GLFWVulkanRenderableResource(GLFWVulkanBackend& backend_)
-        : backend(backend_) {
-    
-    }
+        : backend(backend_) {}
 
-    std::vector<const char*> getDeviceExtensions() override {
-        return {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME
-        };
-    }
+    std::vector<const char*> getDeviceExtensions() override { return {VK_KHR_SWAPCHAIN_EXTENSION_NAME}; }
 
-    void createSurface() override { 
+    void createSurface() override {
         VkSurfaceKHR surface_;
 
         VkResult result = glfwCreateWindowSurface(backend.getInstance().get(), backend.getWindow(), nullptr, &surface_);
-        if (result != VK_SUCCESS) 
-            throw std::runtime_error("Failed to create glfw window surface");
+        if (result != VK_SUCCESS) throw std::runtime_error("Failed to create glfw window surface");
 
-        surface = vk::UniqueSurfaceKHR(surface_, 
-            vk::ObjectDestroy<vk::Instance, vk::DispatchLoaderDynamic>(backend.getInstance().get()));
+        surface = vk::UniqueSurfaceKHR(
+            surface_, vk::ObjectDestroy<vk::Instance, vk::DispatchLoaderDynamic>(backend.getInstance().get()));
     }
 
-    void bind() override {
-
-    }
+    void bind() override {}
 
 private:
     GLFWVulkanBackend& backend;
@@ -53,7 +44,6 @@ GLFWVulkanBackend::GLFWVulkanBackend(GLFWwindow* window_, const bool capFrameRat
           }(),
           std::make_unique<GLFWVulkanRenderableResource>(*this)),
       window(window_) {
-
     init();
 }
 

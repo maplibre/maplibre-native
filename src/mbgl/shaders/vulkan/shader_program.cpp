@@ -35,7 +35,6 @@ ShaderProgram::ShaderProgram(const std::string& name,
     : ShaderProgramBase(),
       shaderName(name),
       backend(backend_) {
-
     const char* const shaderNameRaw = shaderName.c_str();
 
     constexpr auto targetClientVersion = glslang::EShTargetVulkan_1_0;
@@ -50,7 +49,6 @@ ShaderProgram::ShaderProgram(const std::string& name,
     }
 
     const auto compileGlsl = [&](const EShLanguage& language, const std::string_view& data, const char* prelude) {
-
         glslang::TShader glslShader(language);
 
         const auto preamble = defineStr + "\n" + prelude;
@@ -84,13 +82,16 @@ ShaderProgram::ShaderProgram(const std::string& name,
         return spirv;
     };
 
-    const auto& vertexSpirv = compileGlsl(EShLanguage::EShLangVertex, vertex,
+    const auto& vertexSpirv = compileGlsl(
+        EShLanguage::EShLangVertex,
+        vertex,
         shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::Vulkan>::vertex);
-    const auto& fragmentSpirv = compileGlsl(EShLanguage::EShLangFragment, fragment,
+    const auto& fragmentSpirv = compileGlsl(
+        EShLanguage::EShLangFragment,
+        fragment,
         shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::Vulkan>::fragment);
 
-    if (vertexSpirv.empty() || fragmentSpirv.empty())
-        return;
+    if (vertexSpirv.empty() || fragmentSpirv.empty()) return;
 
     const auto& device = backend.getDevice();
 
@@ -106,22 +107,18 @@ ShaderProgram::ShaderProgram(const std::string& name,
 ShaderProgram::~ShaderProgram() noexcept = default;
 
 const vk::UniquePipelineLayout& ShaderProgram::getPipelineLayout() {
-    if (pipelineLayout) 
-        return pipelineLayout;
+    if (pipelineLayout) return pipelineLayout;
 
     const auto& pushConstant = vk::PushConstantRange()
-        .setSize(sizeof(mat4))
-        .setStageFlags(vk::ShaderStageFlags() |
-            vk::ShaderStageFlagBits::eVertex |
-            vk::ShaderStageFlagBits::eFragment);
+                                   .setSize(sizeof(mat4))
+                                   .setStageFlags(vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
+                                                  vk::ShaderStageFlagBits::eFragment);
 
     auto& context = static_cast<Context&>(backend.getContext());
     const auto& descriptorSetLayouts = context.getDescriptorSetLayouts();
 
-    pipelineLayout = backend.getDevice()->createPipelineLayoutUnique(vk::PipelineLayoutCreateInfo()
-        .setSetLayouts(descriptorSetLayouts)
-        .setPushConstantRanges(pushConstant)
-    );
+    pipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
+        vk::PipelineLayoutCreateInfo().setSetLayouts(descriptorSetLayouts).setPushConstantRanges(pushConstant));
 
     backend.setDebugName(pipelineLayout.get(), shaderName + "_pipelineLayout");
 
@@ -130,82 +127,79 @@ const vk::UniquePipelineLayout& ShaderProgram::getPipelineLayout() {
 
 const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelineInfo) {
     auto& pipeline = pipelines[pipelineInfo.hash()];
-    if (pipeline) 
-        return pipeline;
+    if (pipeline) return pipeline;
 
     const auto& vertexInputState = vk::PipelineVertexInputStateCreateInfo()
-        .setVertexBindingDescriptions(pipelineInfo.inputBindings)
-        .setVertexAttributeDescriptions(pipelineInfo.inputAttributes);
+                                       .setVertexBindingDescriptions(pipelineInfo.inputBindings)
+                                       .setVertexAttributeDescriptions(pipelineInfo.inputAttributes);
 
-    const auto& inputAssemblyState = vk::PipelineInputAssemblyStateCreateInfo()
-        .setTopology(pipelineInfo.topology);
+    const auto& inputAssemblyState = vk::PipelineInputAssemblyStateCreateInfo().setTopology(pipelineInfo.topology);
 
     const auto& renderableResource = backend.getDefaultRenderable().getResource<RenderableResource>();
     const auto& renderableExtent = renderableResource.getExtent();
-    
+
     const vk::Viewport viewportExtent(0.0f, 0.0f, renderableExtent.width, renderableExtent.height, 0.0f, 1.0f);
-    const vk::Rect2D scissorRect({}, { renderableExtent.width, renderableExtent.height });
+    const vk::Rect2D scissorRect({}, {renderableExtent.width, renderableExtent.height});
 
     const auto& viewportState = vk::PipelineViewportStateCreateInfo()
-        .setViewportCount(1)
-        .setPViewports(&viewportExtent)
-        .setScissorCount(1)
-        .setPScissors(&scissorRect);
+                                    .setViewportCount(1)
+                                    .setPViewports(&viewportExtent)
+                                    .setScissorCount(1)
+                                    .setPScissors(&scissorRect);
 
     const auto rasterState = vk::PipelineRasterizationStateCreateInfo()
-        .setCullMode(pipelineInfo.cullMode)
-        .setFrontFace(pipelineInfo.frontFace)
-        .setPolygonMode(pipelineInfo.polygonMode)
-        .setLineWidth(1.0f);
+                                 .setCullMode(pipelineInfo.cullMode)
+                                 .setFrontFace(pipelineInfo.frontFace)
+                                 .setPolygonMode(pipelineInfo.polygonMode)
+                                 .setLineWidth(1.0f);
 
-    const auto multisampleState = vk::PipelineMultisampleStateCreateInfo()
-        .setRasterizationSamples(vk::SampleCountFlagBits::e1);
+    const auto multisampleState = vk::PipelineMultisampleStateCreateInfo().setRasterizationSamples(
+        vk::SampleCountFlagBits::e1);
 
     const auto& stencilState = vk::StencilOpState()
-        .setCompareOp(pipelineInfo.stencilFunction)
-        .setPassOp(pipelineInfo.stencilPass)
-        .setFailOp(pipelineInfo.stencilFail)
-        .setDepthFailOp(pipelineInfo.stencilDepthFail);
+                                   .setCompareOp(pipelineInfo.stencilFunction)
+                                   .setPassOp(pipelineInfo.stencilPass)
+                                   .setFailOp(pipelineInfo.stencilFail)
+                                   .setDepthFailOp(pipelineInfo.stencilDepthFail);
 
     const auto depthStencilState = vk::PipelineDepthStencilStateCreateInfo()
-        .setDepthTestEnable(pipelineInfo.depthTest)
-        .setDepthWriteEnable(pipelineInfo.depthWrite)
-        .setDepthBoundsTestEnable(false)
-        .setMinDepthBounds(0.0f)
-        .setMaxDepthBounds(1.0f)
-        .setDepthCompareOp(pipelineInfo.depthFunction)
+                                       .setDepthTestEnable(pipelineInfo.depthTest)
+                                       .setDepthWriteEnable(pipelineInfo.depthWrite)
+                                       .setDepthBoundsTestEnable(false)
+                                       .setMinDepthBounds(0.0f)
+                                       .setMaxDepthBounds(1.0f)
+                                       .setDepthCompareOp(pipelineInfo.depthFunction)
 
-        .setStencilTestEnable(pipelineInfo.stencilTest)
-        .setFront(stencilState)
-        .setBack(stencilState);
+                                       .setStencilTestEnable(pipelineInfo.stencilTest)
+                                       .setFront(stencilState)
+                                       .setBack(stencilState);
 
     const auto& colorBlendAttachments = vk::PipelineColorBlendAttachmentState()
-        .setBlendEnable(pipelineInfo.colorBlend)
-        .setColorBlendOp(pipelineInfo.colorBlendFunction)
-        .setSrcColorBlendFactor(pipelineInfo.srcBlendFactor)
-        .setDstColorBlendFactor(pipelineInfo.dstBlendFactor)
-        .setAlphaBlendOp(pipelineInfo.colorBlendFunction)
-        .setSrcAlphaBlendFactor(pipelineInfo.srcBlendFactor)
-        .setDstAlphaBlendFactor(pipelineInfo.dstBlendFactor)
-        .setColorWriteMask(pipelineInfo.colorMask);
+                                            .setBlendEnable(pipelineInfo.colorBlend)
+                                            .setColorBlendOp(pipelineInfo.colorBlendFunction)
+                                            .setSrcColorBlendFactor(pipelineInfo.srcBlendFactor)
+                                            .setDstColorBlendFactor(pipelineInfo.dstBlendFactor)
+                                            .setAlphaBlendOp(pipelineInfo.colorBlendFunction)
+                                            .setSrcAlphaBlendFactor(pipelineInfo.srcBlendFactor)
+                                            .setDstAlphaBlendFactor(pipelineInfo.dstBlendFactor)
+                                            .setColorWriteMask(pipelineInfo.colorMask);
 
     const auto& colorBlendState = vk::PipelineColorBlendStateCreateInfo()
-        .setAttachmentCount(1)
-        .setPAttachments(&colorBlendAttachments)
-        .setLogicOpEnable(VK_FALSE)
-        .setLogicOp(vk::LogicOp::eCopy);
+                                      .setAttachmentCount(1)
+                                      .setPAttachments(&colorBlendAttachments)
+                                      .setLogicOpEnable(VK_FALSE)
+                                      .setLogicOp(vk::LogicOp::eCopy);
 
-    
     // values available for core 1.0
-    //vk::DynamicState::eViewport,
-    //vk::DynamicState::eScissor,
-    //vk::DynamicState::eLineWidth,
-    //vk::DynamicState::eStencilCompareMask,
-    //vk::DynamicState::eStencilWriteMask,
-    //vk::DynamicState::eStencilReference,
-    //vk::DynamicState::eBlendConstants,
-    //vk::DynamicState::eDepthBias,
-    //vk::DynamicState::eDepthBounds,
+    // vk::DynamicState::eViewport,
+    // vk::DynamicState::eScissor,
+    // vk::DynamicState::eLineWidth,
+    // vk::DynamicState::eStencilCompareMask,
+    // vk::DynamicState::eStencilWriteMask,
+    // vk::DynamicState::eStencilReference,
+    // vk::DynamicState::eBlendConstants,
+    // vk::DynamicState::eDepthBias,
+    // vk::DynamicState::eDepthBounds,
 
     const auto& dynamicValues = pipelineInfo.getDynamicStates();
     const vk::PipelineDynamicStateCreateInfo dynamicState({}, dynamicValues);
@@ -222,21 +216,20 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
         vk::PipelineShaderStageCreateInfo()
             .setStage(vk::ShaderStageFlagBits::eFragment)
             .setModule(fragmentShader.get())
-            .setPName("main")
-    };
+            .setPName("main")};
 
     const auto& pipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
-        .setStages(shaderStages)
-        .setPVertexInputState(&vertexInputState)
-        .setPInputAssemblyState(&inputAssemblyState)
-        .setPViewportState(&viewportState)
-        .setPRasterizationState(&rasterState)
-        .setPMultisampleState(&multisampleState)
-        .setPDepthStencilState(&depthStencilState)
-        .setPColorBlendState(&colorBlendState)
-        .setPDynamicState(&dynamicState)
-        .setLayout(pipelineLayout.get())
-        .setRenderPass(renderableResource.getRenderPass().get());
+                                         .setStages(shaderStages)
+                                         .setPVertexInputState(&vertexInputState)
+                                         .setPInputAssemblyState(&inputAssemblyState)
+                                         .setPViewportState(&viewportState)
+                                         .setPRasterizationState(&rasterState)
+                                         .setPMultisampleState(&multisampleState)
+                                         .setPDepthStencilState(&depthStencilState)
+                                         .setPColorBlendState(&colorBlendState)
+                                         .setPDynamicState(&dynamicState)
+                                         .setLayout(pipelineLayout.get())
+                                         .setRenderPass(renderableResource.getRenderPass().get());
 
     pipeline = std::move(device->createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value);
     backend.setDebugName(pipeline.get(), shaderName + "_pipeline");
@@ -245,8 +238,8 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
 }
 
 bool ShaderProgram::hasTextures() const {
-    return std::any_of(textureBindings.begin(), textureBindings.end(), 
-        [](const auto& texture) { return texture.has_value(); });
+    return std::any_of(
+        textureBindings.begin(), textureBindings.end(), [](const auto& texture) { return texture.has_value(); });
 }
 
 void ShaderProgram::initAttribute(const shaders::AttributeInfo& info) {

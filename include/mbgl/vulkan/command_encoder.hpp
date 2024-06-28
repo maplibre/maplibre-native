@@ -30,7 +30,6 @@ public:
     void present(gfx::Renderable&) override;
 
 private:
-
     void pushDebugGroup(const char* name) override;
     void pushDebugGroup(const char* name, const std::array<float, 4>& color);
     void popDebugGroup() override;

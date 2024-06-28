@@ -18,7 +18,6 @@ class ProgramParameters;
 namespace vulkan {
 
 struct BufferAllocation {
-
     const VmaAllocator& allocator;
     VkBuffer buffer{};
     VmaAllocation allocation{};
@@ -28,20 +27,20 @@ struct BufferAllocation {
     BufferAllocation(BufferAllocation&) = delete;
     BufferAllocation& operator=(const BufferAllocation& other) = delete;
 
-    BufferAllocation(const VmaAllocator& allocator_) : allocator(allocator_) {}
+    BufferAllocation(const VmaAllocator& allocator_)
+        : allocator(allocator_) {}
 
     BufferAllocation(BufferAllocation&& other) noexcept
-        : allocator(other.allocator), 
-        buffer(other.buffer), 
-        allocation(other.allocation), 
-        mappedBuffer(other.mappedBuffer) {
+        : allocator(other.allocator),
+          buffer(other.buffer),
+          allocation(other.allocation),
+          mappedBuffer(other.mappedBuffer) {
         other.buffer = nullptr;
         other.allocation = nullptr;
     }
 
-    ~BufferAllocation() { 
-        if (mappedBuffer)
-            vmaUnmapMemory(allocator, allocation);
+    ~BufferAllocation() {
+        if (mappedBuffer) vmaUnmapMemory(allocator, allocation);
         vmaDestroyBuffer(allocator, buffer, allocation);
     }
 };
@@ -57,21 +56,21 @@ struct ImageAllocation {
     ImageAllocation(ImageAllocation&) = delete;
     ImageAllocation& operator=(const ImageAllocation& other) = delete;
 
-    ImageAllocation(const VmaAllocator& allocator_) : allocator(allocator_) {}
+    ImageAllocation(const VmaAllocator& allocator_)
+        : allocator(allocator_) {}
 
-    ImageAllocation(ImageAllocation&& other) noexcept : 
-        allocator(other.allocator),
-        image(other.image), 
-        allocation(other.allocation), 
-        imageView(std::move(other.imageView)) {
-
+    ImageAllocation(ImageAllocation&& other) noexcept
+        : allocator(other.allocator),
+          image(other.image),
+          allocation(other.allocation),
+          imageView(std::move(other.imageView)) {
         other.image = nullptr;
         other.allocation = nullptr;
     }
 
-    ~ImageAllocation() { 
+    ~ImageAllocation() {
         imageView.reset();
-        vmaDestroyImage(allocator, image, allocation); 
+        vmaDestroyImage(allocator, image, allocation);
     }
 };
 
@@ -106,10 +105,9 @@ public:
     void setDebugName(const T& object, const std::string& name) {
 #ifndef NDEBUG
         device->setDebugUtilsObjectNameEXT(vk::DebugUtilsObjectNameInfoEXT()
-                .setObjectType(object.objectType)
-                .setObjectHandle((uint64_t)(T::CType)object)
-                .setPObjectName(name.c_str())
-        );
+                                               .setObjectType(object.objectType)
+                                               .setObjectHandle((uint64_t)(T::CType)object)
+                                               .setPObjectName(name.c_str()));
 #endif
     }
 
@@ -119,7 +117,7 @@ protected:
     virtual std::vector<const char*> getLayers();
     virtual std::vector<const char*> getInstanceExtensions();
     virtual std::vector<const char*> getDeviceExtensions();
-    
+
     void initInstance();
     void initDebug();
     void initSurface();
@@ -132,7 +130,6 @@ protected:
     void destroyResources();
 
 protected:
-    
     vk::DynamicLoader dynamicLoader;
     vk::UniqueInstance instance;
     vk::UniqueDebugUtilsMessengerEXT debugCallback;

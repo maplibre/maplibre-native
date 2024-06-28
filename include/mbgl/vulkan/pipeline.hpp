@@ -9,7 +9,6 @@ namespace mbgl {
 namespace vulkan {
 
 class PipelineInfo final {
-
 public:
     PipelineInfo() noexcept = default;
     ~PipelineInfo() noexcept = default;
@@ -50,7 +49,6 @@ public:
     std::vector<vk::VertexInputAttributeDescription> inputAttributes;
 
 public:
-
     static vk::Format vulkanFormat(const gfx::AttributeDataType& value);
     static vk::PrimitiveTopology vulkanPrimitiveTopology(const gfx::DrawModeType& value);
     static vk::CullModeFlagBits vulkanCullMode(const gfx::CullFaceSideType& value);
@@ -76,7 +74,6 @@ public:
     std::vector<vk::DynamicState> getDynamicStates() const;
 
 protected:
-
 };
 
 } // namespace vulkan

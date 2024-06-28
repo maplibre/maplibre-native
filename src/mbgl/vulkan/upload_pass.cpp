@@ -14,11 +14,8 @@ namespace vulkan {
 
 UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncoder_, const char* name)
     : commandEncoder(commandEncoder_) {
-
     // Push the group for the name provided
     debugGroups.emplace_back(gfx::DebugGroup<gfx::UploadPass>{*this, name});
-
-  
 }
 
 UploadPass::~UploadPass() {
@@ -27,8 +24,6 @@ UploadPass::~UploadPass() {
 
 void UploadPass::endEncoding() {
     debugGroups.clear();
-
-   
 }
 
 std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResource(const void* data,
@@ -39,9 +34,7 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
         commandEncoder.context.createBuffer(data, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, persistent));
 }
 
-void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {
-  
-}
+void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {}
 
 std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(const void* data,
                                                                                 const std::size_t size,
@@ -51,9 +44,7 @@ std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(
         commandEncoder.context.createBuffer(data, size, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, persistent));
 }
 
-void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, const void* data, std::size_t size) {
-    
-}
+void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, const void* data, std::size_t size) {}
 
 std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Size size,
                                                                         const void* data,

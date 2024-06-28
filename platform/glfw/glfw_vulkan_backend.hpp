@@ -27,8 +27,8 @@ public:
 protected:
     std::vector<const char*> getInstanceExtensions() override;
 
-    void activate() override    {}
-    void deactivate() override  {}
+    void activate() override {}
+    void deactivate() override {}
 
 private:
     GLFWwindow* window;

@@ -15,11 +15,7 @@ class BufferResource {
 public:
     BufferResource() noexcept = delete;
 
-    BufferResource(Context& context_,
-                   const void* raw,
-                   std::size_t size,
-                   std::uint32_t usage,
-                   bool persistent);
+    BufferResource(Context& context_, const void* raw, std::size_t size, std::uint32_t usage, bool persistent);
     BufferResource(BufferResource&&) noexcept;
     virtual ~BufferResource() noexcept;
 
