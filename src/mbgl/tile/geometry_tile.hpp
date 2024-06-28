@@ -106,7 +106,7 @@ protected:
 private:
     void markObsolete();
 
-    const std::shared_ptr<Scheduler> threadPool;
+    TaggedScheduler threadPool;
 
     const std::shared_ptr<Mailbox> mailbox;
     Actor<GeometryTileWorker> worker;

@@ -102,7 +102,7 @@ Context::Context(RendererBackend& backend_)
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
-        Scheduler::GetBackground()->runRenderJobs();
+        backend.getThreadPool().runRenderJobs(true /* closeQueue */);
 
         reset();
 #if !defined(NDEBUG)
@@ -115,7 +115,7 @@ Context::~Context() noexcept {
 void Context::beginFrame() {
     MLN_TRACE_FUNC();
 
-    Scheduler::GetBackground()->runRenderJobs();
+    backend.getThreadPool().runRenderJobs();
 
 #if MLN_DRAWABLE_RENDERER
     frameInFlightFence = std::make_shared<gl::Fence>();

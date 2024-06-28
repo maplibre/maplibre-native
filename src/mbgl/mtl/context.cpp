@@ -44,7 +44,7 @@ Context::Context(RendererBackend& backend_)
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
-        Scheduler::GetBackground()->runRenderJobs();
+        backend.getThreadPool().runRenderJobs(true /* closeQueue */);
         performCleanup();
 
         emptyVertexBuffer.reset();
@@ -68,7 +68,7 @@ Context::~Context() noexcept {
 }
 
 void Context::beginFrame() {
-    Scheduler::GetBackground()->runRenderJobs();
+    backend.getThreadPool().runRenderJobs();
 }
 
 void Context::endFrame() {}
