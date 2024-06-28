@@ -61,21 +61,21 @@ define ANDROID_RULES
 
 .PHONY: android-test-lib-$1
 android-test-lib-$1:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=$2 -Pmapbox.with_test=true :MapLibreAndroidTestApp:assemble$(BUILDTYPE)
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=$2 -Pmapbox.with_test=true :MapLibreAndroidTestApp:assemble$(BUILDTYPE)
 
 .PHONY: android-benchmark-$1
 android-benchmark-$1:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=$2 -Pmapbox.with_benchmark=true :MapLibreAndroidTestApp:assemble$(BUILDTYPE)
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=$2 -Pmapbox.with_benchmark=true :MapLibreAndroidTestApp:assemble$(BUILDTYPE)
 
 # Build SDK for for specified abi
 .PHONY: android-lib-$1
 android-lib-$1:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapLibreAndroid:assemble$(BUILDTYPE)
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=$2 :MapLibreAndroid:assemble$(BUILDTYPE)
 
 # Build test app and SDK for for specified abi
 .PHONY: android-$1
 android-$1:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapLibreAndroidTestApp:assemble$(BUILDTYPE)
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=$2 :MapLibreAndroidTestApp:assemble$(BUILDTYPE)
 
 # Build the core test for specified abi
 .PHONY: android-core-test-$1
@@ -140,23 +140,23 @@ run-android-benchmark-$1-%: android-benchmark-$1
 .PHONY: run-android-$1
 run-android-$1:
 	-adb uninstall org.maplibre.testapp 2> /dev/null
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapLibreAndroidTestApp:install$(BUILDTYPE) && adb shell am start -n org.maplibre.testapp/.activity.FeatureOverviewActivity
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=$2 :MapLibreAndroidTestApp:install$(BUILDTYPE) && adb shell am start -n org.maplibre.testapp/.activity.FeatureOverviewActivity
 
 # Build test app instrumentation tests apk and test app apk for specified abi
 .PHONY: android-ui-test-$1
 android-ui-test-$1:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapLibreAndroidTestApp:assembleDebug :MapLibreAndroidTestApp:assembleAndroidTest
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=$2 :MapLibreAndroidTestApp:assembleDebug :MapLibreAndroidTestApp:assembleAndroidTest
 
 # Run test app instrumentation tests on a connected android device or emulator with specified abi
 .PHONY: run-android-ui-test-$1
 run-android-ui-test-$1:
 	-adb uninstall org.maplibre.testapp 2> /dev/null
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapLibreAndroidTestApp:connectedAndroidTest
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=$2 :MapLibreAndroidTestApp:connectedAndroidTest
 
 # Run Java Instrumentation tests on a connected android device or emulator with specified abi and test filter
 run-android-ui-test-$1-%:
 	-adb uninstall org.maplibre.testapp 2> /dev/null
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapLibreAndroidTestApp:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class="$$*"
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=$2 :MapLibreAndroidTestApp:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class="$$*"
 
 # Symbolicate native stack trace with the specified abi
 .PHONY: android-ndk-stack-$1
@@ -174,7 +174,7 @@ run-android-render-test-$1: $(BUILD_DEPS)
 	cp -r metrics/integration MapLibreAndroidTestApp/src/main/assets
 	cp platform/node/test/ignores.json MapLibreAndroidTestApp/src/main/assets/integration/ignores.json
 	# run RenderTest.java to generate static map images
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=$2 :MapLibreAndroidTestApp:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class="org.maplibre.testapp.render.RenderTest"
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=$2 :MapLibreAndroidTestApp:connectedAndroidTest -Pandroid.testInstrumentationRunnerArguments.class="org.maplibre.testapp.render.RenderTest"
 	# pull generated images from the device
 	adb pull "`adb shell 'printenv EXTERNAL_STORAGE' | tr -d '\r'`/maplibre/render" build/render-test
 	# copy expected result and run pixelmatch
@@ -211,22 +211,22 @@ run-android-ui-test-%: run-android-ui-test-arm-v7-%
 # Run Java Unit tests on the JVM of the development machine executing this
 .PHONY: run-android-unit-test
 run-android-unit-test:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:testLegacyDebugUnitTest --info
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testLegacyDebugUnitTest --info
 run-android-unit-test-%:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:testLegacyDebugUnitTest --info --tests "$*"
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:testLegacyDebugUnitTest --info --tests "$*"
 
 # Builds a release package and .tar.gz with debug symbols of the Android SDK
 .PHONY: apackage
 apackage: 
 	make android-lib-arm-v7 && make android-lib-arm-v8 && make android-lib-x86 && make android-lib-x86-64
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=all assembleDrawable$(BUILDTYPE)
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=all assembleDrawable$(BUILDTYPE)
 	mkdir -p build
 	tar -czvf build/debug-symbols.tar.gz -C MapLibreAndroid/build/intermediates/library_jni/drawableRelease/copyDrawableReleaseJniLibsProjectOnly/jni .
 
 # Build test app instrumentation tests apk and test app apk for all abi's
 .PHONY: android-ui-test
 android-ui-test:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=all :MapLibreAndroidTestApp:assembleDebug :MapLibreAndroidTestApp:assembleAndroidTest
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=all :MapLibreAndroidTestApp:assembleDebug :MapLibreAndroidTestApp:assembleAndroidTest
 
 #Run instrumentations tests on MicroSoft App Center, ${devices} can be "xiaomi","huawei","OnePlus","htc"
 .PHONY: run-android-test-app-center
@@ -236,7 +236,7 @@ run-android-test-app-center:
 # Uploads the compiled Android SDK to Maven Central Staging
 .PHONY: run-android-publish
 run-android-publish:
-	$(MLN_ANDROID_GRADLE_SINGLE_JOB)-Pmapbox.abis=all :MapLibreAndroid:publishReleasePublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
+	$(MLN_ANDROID_GRADLE_SINGLE_JOB)-Pmaplibre.abis=all :MapLibreAndroid:publishReleasePublicationToSonatypeRepository closeAndReleaseSonatypeStagingRepository
 
 # Dump system graphics information for the test app
 .PHONY: android-gfxinfo
@@ -250,27 +250,27 @@ android-check : android-ktlint android-checkstyle android-lint-sdk android-lint-
 # Runs checkstyle on the java code
 .PHONY: android-checkstyle
 android-checkstyle:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:checkstyle :MapLibreAndroidTestApp:checkstyle
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:checkstyle :MapLibreAndroidTestApp:checkstyle
 
 # Runs checkstyle on the kotlin code
 .PHONY: android-ktlint
 android-ktlint:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none checkstyle
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none checkstyle
 
 # Runs lint on the Android SDK java code
 .PHONY: android-lint-sdk
 android-lint-sdk:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:lint
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:lint
 
 # Runs lint on the Android test app java code
 .PHONY: android-lint-test-app
 android-lint-test-app:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroidTestApp:lint
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroidTestApp:lint
 
 # Generates LICENSE.md file based on all Android project dependencies
 .PHONY: android-license
 android-license:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:licenseDrawableReleaseReport
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:licenseDrawableReleaseReport
 	python3 scripts/generate-license.py
 
 # Symbolicate ndk stack traces for the arm-v7 abi
@@ -280,22 +280,22 @@ android-ndk-stack: android-ndk-stack-arm-v7
 # Updates Android's vendor submodules
 .PHONY: android-update-vendor
 android-update-vendor:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none updateVendorSubmodules
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none updateVendorSubmodules
 
 # Run android nitpick script
 .PHONY: run-android-nitpick
 run-android-nitpick: android-update-vendor
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none androidNitpick
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none androidNitpick
 
 # Creates a dependency graph using Graphviz
 .PHONY: android-graph
 android-graph:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:generateDependencyGraphMapboxLibraries
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none :MapLibreAndroid:generateDependencyGraphMapboxLibraries
 
 # Lists tasks
 .PHONY: list-tasks
 list-tasks:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=all tasks
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=all tasks
 
 #### Miscellaneous targets #####################################################
 

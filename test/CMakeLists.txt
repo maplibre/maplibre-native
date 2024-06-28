@@ -145,7 +145,7 @@ if(MLN_WITH_OPENGL)
     )
 endif()
 
-if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Android AND ANDROID_NATIVE_API_LEVEL VERSION_LESS 24)
+if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Android)
     message("Target platform does not support HTTP tests or dependencies not found.")
 
     set(MLN_TEST_HAS_TEST_SERVER 0)

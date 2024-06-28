@@ -126,14 +126,19 @@ add_library(
 
 target_include_directories(
     mbgl-test-runner
-    PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${PROJECT_SOURCE_DIR}/platform/android/src ${PROJECT_SOURCE_DIR}/src
+    PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue
+    ${PROJECT_SOURCE_DIR}/platform/android/src
+    ${PROJECT_SOURCE_DIR}/src
 )
+
+find_package(curl CONFIG)
 
 target_link_libraries(
     mbgl-test-runner
     PRIVATE
         Mapbox::Base::jni.hpp
         mbgl-compiler-options
+        $<$<BOOL:${curl_FOUND}>:curl::curl_static>
         -Wl,--whole-archive
         mbgl-test
         -Wl,--no-whole-archive
@@ -142,7 +147,7 @@ target_link_libraries(
 
 target_sources(
     mbgl-test-runner
-    PRIVATE ${PROJECT_SOURCE_DIR}/platform/android/MapLibreAndroid/src/cpp/http_file_source.cpp
+    PRIVATE ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/http_file_source.cpp
 )
 
 add_custom_command(

@@ -7,15 +7,15 @@ ext.nativeBuild = { nativeTargets ->
         // added. When another ABI is specified explicitly, we're just going to build that ABI. In all other
         // cases, all ABIs are built.
         //
-        // When invoking from the command line or to override the device default, set `-Pmapbox.abis=...` to
+        // When invoking from the command line or to override the device default, set `-Pmaplibre.abis=...` to
         // only build the desired architectures.
         //
         // When building from Android Studio, gradle.properties sets `android.buildOnlyTargetAbi=true` so that
         // only the architecture for the device you're running on gets built.
         def abi = 'all'
-        if (!project.hasProperty('android.injected.invoked.from.ide') && project.hasProperty("mapbox.abis")) {
-            // Errors when the user invokes Gradle from the command line and didn't set mapbox.abis
-            abi = project.getProperty("mapbox.abis")
+        if (!project.hasProperty('android.injected.invoked.from.ide') && project.hasProperty("maplibre.abis")) {
+            // Errors when the user invokes Gradle from the command line and didn't set maplibre.abis
+            abi = project.getProperty("maplibre.abis")
         }
 
         if (abi != 'none') {
