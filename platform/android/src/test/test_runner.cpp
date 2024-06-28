@@ -56,11 +56,10 @@ std::atomic<bool> running{true};
 std::atomic<bool> success{false};
 std::once_flag done;
 ALooper* looper = NULL;
-GTestAndroidLogger gTestAndroidLogger = GTestAndroidLogger();
 
 void runner(const std::string& gtestOutput) {
     ::testing::TestEventListeners& listeners = ::testing::UnitTest::GetInstance()->listeners();
-    listeners.Append(&gTestAndroidLogger);
+    listeners.Append(new GTestAndroidLogger); // takes ownership
 
     std::vector<std::string> arguments = {
         "mbgl-test-runner", "--gtest_output=xml:" + gtestOutput, "--gtest_filter=-StringIndexer.GetOOBIdentity"};
