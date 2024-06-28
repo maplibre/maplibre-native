@@ -52,7 +52,7 @@ void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
     // by a waiting thread and is already complete, that temporary reference ends up being the
     // last one and the destruction actually occurs here on this thread.
     std::function<void()> func{[tile_{CaptureWrapper<Tile>{std::move(tile)}}, this]() mutable {
-        std::exchange(tile_.item, {});
+        tile_.item = {};
         deferredDeletionsPending--;
         deferredSignal.notify_all();
     }};
