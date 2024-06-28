@@ -40,11 +40,11 @@ void android_main(struct android_app* app) {
     std::string zipFile = storagePath + "/data.zip";
 
     if (copyFile(env, app->activity->assetManager, zipFile, storagePath, "data.zip")) {
-        if (chdir("/sdcard")) {
-            mbgl::Log::Error(mbgl::Event::General, "Failed to change the directory to /sdcard");
+        if (chdir(storagePath.c_str())) {
+            mbgl::Log::Error(mbgl::Event::General, "Failed to change the directory to storage dir");
             changeState(env, app, success);
         } else {
-            unZipFile(env, zipFile, "/sdcard/");
+            unZipFile(env, zipFile, storagePath);
             runnerThread = std::thread(runner);
         }
     } else {

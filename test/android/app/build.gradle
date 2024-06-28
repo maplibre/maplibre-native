@@ -3,12 +3,15 @@ apply plugin: 'com.android.application'
 android {
     namespace "android.app"
 
-    compileSdkVersion 33
+    buildFeatures {
+        prefab true
+    }
 
     defaultConfig {
         applicationId = 'com.mapbox.mapboxsdk.maps.test_runner'
         minSdkVersion 28
         targetSdkVersion 33
+        compileSdk 34
         def abi = 'all'
         if (project.hasProperty('mapbox.abis')) {
             abi = project.getProperty('mapbox.abis')
@@ -34,7 +37,7 @@ android {
     }
     externalNativeBuild {
         cmake {
-            version '3.10.2'
+            version "3.18.1+"
             path '../../../CMakeLists.txt'
         }
     }
@@ -51,4 +54,5 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
     androidTestImplementation 'androidx.test:rules:1.5.0'
+    implementation 'io.github.vvb2060.ndk:curl:8.8.0'
 }
