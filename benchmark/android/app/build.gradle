@@ -11,8 +11,8 @@ android {
         minSdkVersion 21
         targetSdkVersion 33
         def abi = 'all'
-        if (project.hasProperty('mapbox.abis')) {
-            abi = project.getProperty('mapbox.abis')
+        if (project.hasProperty('maplibre.abis')) {
+            abi = project.getProperty('maplibre.abis')
         }
         ndk {
             if (abi != 'all') {
