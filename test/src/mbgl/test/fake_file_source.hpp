@@ -53,6 +53,8 @@ public:
 
     bool canRequest(const Resource&) const override { return true; }
 
+    bool canRequestNow(const Resource& resource) const override { return canRequest(resource); }
+
     bool respond(Resource::Kind kind, const Response& response) {
         auto it = std::find_if(requests.begin(), requests.end(), [&](FakeFileRequest* fakeRequest) {
             return fakeRequest->resource.kind == kind;

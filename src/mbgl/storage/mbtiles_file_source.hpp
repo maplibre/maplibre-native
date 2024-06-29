@@ -15,6 +15,7 @@ public:
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
     bool canRequest(const Resource&) const override;
+    bool canRequestNow(const Resource&) const override;
 
     void setResourceOptions(ResourceOptions) override;
     ResourceOptions getResourceOptions() override;

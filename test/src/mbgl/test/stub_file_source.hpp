@@ -25,6 +25,7 @@ public:
 
     std::unique_ptr<AsyncRequest> request(const Resource&, Callback) override;
     bool canRequest(const Resource&) const override { return true; }
+    bool canRequestNow(const Resource& resource) const override { return canRequest(resource); }
     void remove(AsyncRequest*);
     void setProperty(const std::string&, const mapbox::base::Value&) override;
     mapbox::base::Value getProperty(const std::string&) const override;

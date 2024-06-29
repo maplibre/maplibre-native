@@ -63,6 +63,10 @@ public:
     /// Checks whether a resource could be requested from this file source.
     virtual bool canRequest(const Resource&) const = 0;
 
+    /// Checks whether a resource can currently be requested from this file source.
+    /// E.g there is currently a network connection for  network based file sources.
+    virtual bool canRequestNow(const Resource&) const = 0;
+
     /**
      * Pause file request activity.
      *
