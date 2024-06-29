@@ -42,7 +42,7 @@ class DDSCircleLayerExample: UIViewController, MLNMapViewDelegate {
         layer.predicate = NSPredicate(format: "class == %@", "shop")
 
         // Style the circle layer color based on the rank
-        layer.circleColor = NSExpression(mglJSONObject: ["step", ["get", "rank"], 0, "red", 10, "green", 20, "blue", 30, "purple", 40, "yellow"])
+        layer.circleColor = NSExpression(mglJSONObject: ["step", ["get", "rank"], 0, "red", 10, "green", 20, "blue", 30, "purple", 40, "yellow"] as [Any])
         layer.circleRadius = NSExpression(forConstantValue: 3)
 
         style.addLayer(layer)

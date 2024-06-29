@@ -42,6 +42,9 @@ struct MapLibreNavigationView: View {
                     NavigationLink("DDSCircleLayerExample") {
                         DDSCircleLayerExampleUIViewControllerRepresentable().edgesIgnoringSafeArea(.all)
                     }
+                    NavigationLink("POIAlongRouteExample") {
+                        POIAlongRouteExampleUIViewControllerRepresentable()
+                    }
                 }
             }
         }
