@@ -216,6 +216,8 @@ public:
     void setLatLngZoom(const LatLng& latLng, double zoom);
 
     void constrain(double& scale, double& x, double& y) const;
+    void constrainCameraAndZoomToBounds(CameraOptions& camera, double& zoom) const;
+
     const mat4& getProjectionMatrix() const;
     const mat4& getInvProjectionMatrix() const;
 
