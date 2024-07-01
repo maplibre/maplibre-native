@@ -75,6 +75,9 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idSymbolEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
+    int i = 0;
+    std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+
     const auto camDist = state.getCameraToCenterDistance();
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
@@ -118,7 +121,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         // Unpitched point labels need to have their rotation applied after projection
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
-        const SymbolDrawableUBO drawableUBO = {
+        drawableUBOVector[i] = {
             /*.matrix=*/util::cast<float>(matrix),
             /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
             /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
@@ -130,10 +133,21 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /*.rotate_symbol=*/rotateInShader,
             /*.pad=*/{0},
         };
-
-        auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
+        drawable.setUBOIndex(i);
+        i++;
     });
+
+    if (layerGroup.getDrawableCount() > 60) {
+        assert(false);
+    }
+
+    const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
+    if (!drawableBuffer || drawableBuffer->getSize() < drawableUBOVectorSize) {
+        drawableBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize);
+    } else {
+        drawableBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
+    }
+    layerUniforms.set(idSymbolDrawableUBO, drawableBuffer);
 }
 
 } // namespace mbgl

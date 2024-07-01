@@ -186,6 +186,13 @@ void Drawable::draw(PaintParameters& parameters) const {
     const auto debugGroup = parameters.encoder->createDebugGroup(debugLabel(*this));
 #endif
 
+    if (uboIndex >= 0) {
+        renderPass.unbindVertex(shaders::idGlobalUBOIndex);
+        renderPass.unbindFragment(shaders::idGlobalUBOIndex);
+        encoder->setVertexBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
+        encoder->setFragmentBytes(&uboIndex, sizeof(uboIndex), shaders::idGlobalUBOIndex);
+    }
+
     bindAttributes(renderPass);
     bindInstanceAttributes(renderPass);
     bindUniformBuffers(renderPass);

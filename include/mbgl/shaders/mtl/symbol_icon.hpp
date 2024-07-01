@@ -21,14 +21,14 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Metal> {
 
     static constexpr auto source = R"(
 struct VertexStage {
-    float4 pos_offset [[attribute(5)]];
-    float4 data [[attribute(6)]];
-    float4 pixeloffset [[attribute(7)]];
-    float3 projected_pos [[attribute(8)]];
-    float fade_opacity [[attribute(9)]];
+    float4 pos_offset [[attribute(6)]];
+    float4 data [[attribute(7)]];
+    float4 pixeloffset [[attribute(8)]];
+    float3 projected_pos [[attribute(9)]];
+    float fade_opacity [[attribute(10)]];
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    float opacity [[attribute(10)]];
+    float opacity [[attribute(11)]];
 #endif
 };
 
@@ -47,9 +47,14 @@ struct FragmentStage {
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
-                                device const SymbolDrawableUBO& drawable [[buffer(1)]],
-                                device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
-                                device const SymbolInterpolateUBO& interp [[buffer(3)]]) {
+                                device const uint32_t& uboIndex [[buffer(1)]],
+                                device const SymbolDrawableUBO* drawableVector [[buffer(2)]],
+                                device const SymbolTilePropsUBO* tilePropsVector [[buffer(3)]],
+                                device const SymbolInterpolateUBO* interpVector [[buffer(4)]]) {
+
+    device const SymbolDrawableUBO& drawable = drawableVector[uboIndex];
+    device const SymbolTilePropsUBO& tileprops = tilePropsVector[uboIndex];
+    device const SymbolInterpolateUBO& interp = interpVector[uboIndex];
 
     const float2 a_pos = vertx.pos_offset.xy;
     const float2 a_offset = vertx.pos_offset.zw;
@@ -122,13 +127,16 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const SymbolTilePropsUBO& tileprops [[buffer(2)]],
-                            device const SymbolEvaluatedPropsUBO& props [[buffer(4)]],
+                            device const uint32_t& uboIndex [[buffer(1)]],
+                            device const SymbolTilePropsUBO* tilePropsVector [[buffer(3)]],
+                            device const SymbolEvaluatedPropsUBO& props [[buffer(5)]],
                             texture2d<float, access::sample> image [[texture(0)]],
                             sampler image_sampler [[sampler(0)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif
+
+    device const SymbolTilePropsUBO& tileprops = tilePropsVector[uboIndex];
 
 #if defined(HAS_UNIFORM_u_opacity)
     const float opacity = (tileprops.is_text ? props.text_opacity : props.icon_opacity) * in.fade_opacity;
