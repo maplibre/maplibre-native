@@ -21,8 +21,8 @@
   },
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@acalcutt/node-pre-gyp": "^1.0.14",
-    "@acalcutt/node-pre-gyp-github": "1.4.8",
+    "@acalcutt/node-pre-gyp": "^1.0.15",
+    "@acalcutt/node-pre-gyp-github": "1.4.9",
     "minimatch": "^9.0.4",
     "npm-run-all": "^4.1.5"
   },
