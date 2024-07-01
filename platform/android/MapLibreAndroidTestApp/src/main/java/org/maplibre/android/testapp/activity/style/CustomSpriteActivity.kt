@@ -20,6 +20,7 @@ import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 
 /**
@@ -38,7 +39,7 @@ class CustomSpriteActivity : AppCompatActivity() {
         mapView.getMapAsync(
             OnMapReadyCallback { map: MapLibreMap ->
                 maplibreMap = map
-                map.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+                map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
                     val fab = findViewById<FloatingActionButton>(R.id.fab)
                     fab.setColorFilter(
                         ContextCompat.getColor(

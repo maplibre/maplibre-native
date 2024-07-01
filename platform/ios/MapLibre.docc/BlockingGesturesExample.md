@@ -2,7 +2,7 @@
 
 Constrain the map to a certain area.
 
-## Overview
+> Note: This example uses SwiftUI.
 
 To constrain the map to a certain area, you need to implement the ``MLNMapViewDelegate/mapView:shouldChangeFromCamera:toCamera:`` method of ``MLNMapViewDelegate``. By returning a boolean you can either allow or disallow a camera change.
 

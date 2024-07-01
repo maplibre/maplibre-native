@@ -134,13 +134,7 @@ private:
 
 /**
  :nodoc:
- Whether the Mapbox wordmark is displayed.
-
- @note The Mapbox terms of service, which governs the use of Mapbox-hosted
- vector tiles and styles,
- <a href="https://docs.mapbox.com/help/how-mapbox-works/attribution/">requires</a> most Mapbox
- customers to display the Mapbox wordmark. If this applies to you, do not
- hide the wordmark or change its contents.
+ Whether to include the MapLibre logo. Note this is not required.
  */
 @property (nonatomic, readwrite) BOOL showsLogo;
 @end
@@ -388,7 +382,7 @@ MLNImage *MLNAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions,
     CGPoint attributionOrigin = CGPointMake(mglImage.size.width - 10 - attributionBackgroundSize.width,
                                             logoImageRect.origin.y + (logoImageRect.size.height / 2) - (attributionBackgroundSize.height / 2) + 1);
     if (!logoImage) {
-        CGSize defaultLogoSize = [MLNMapSnapshotter mapboxLongStyleLogo].size;
+        CGSize defaultLogoSize = [MLNMapSnapshotter maplibreLongStyleLogo].size;
         logoImageRect = CGRectMake(0, mglImage.size.height - (MLNLogoImagePosition.y + defaultLogoSize.height), 0, defaultLogoSize.height);
         attributionOrigin = CGPointMake(10, logoImageRect.origin.y + (logoImageRect.size.height / 2) - (attributionBackgroundSize.height / 2) + 1);
     }
@@ -461,7 +455,7 @@ MLNImage *MLNAttributedSnapshot(mbgl::MapSnapshotter::Attributions attributions,
     CGPoint attributionOrigin = CGPointMake(targetFrame.size.width - 10 - attributionBackgroundSize.width,
                                             MLNLogoImagePosition.y + 1);
     if (!logoImage) {
-        CGSize defaultLogoSize = [MLNMapSnapshotter mapboxLongStyleLogo].size;
+        CGSize defaultLogoSize = [MLNMapSnapshotter maplibreLongStyleLogo].size;
         logoImageRect = CGRectMake(0, MLNLogoImagePosition.y, 0, defaultLogoSize.height);
         attributionOrigin = CGPointMake(10, attributionOrigin.y);
     }
@@ -630,11 +624,11 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(mbgl::MapSnap
     MLNImage *logoImage;
     switch (style) {
         case MLNAttributionInfoStyleLong:
-            logoImage = [MLNMapSnapshotter mapboxLongStyleLogo];
+            logoImage = [MLNMapSnapshotter maplibreLongStyleLogo];
             break;
         case MLNAttributionInfoStyleMedium:
 #if TARGET_OS_IPHONE
-            logoImage = [UIImage imageNamed:@"mapbox_helmet" inBundle:[NSBundle mgl_frameworkBundle] compatibleWithTraitCollection:nil];
+            logoImage = [UIImage imageNamed:@"maplibre-logo-icon" inBundle:[NSBundle mgl_frameworkBundle] compatibleWithTraitCollection:nil];
 #else
             logoImage = [[NSImage alloc] initWithContentsOfFile:[[NSBundle mgl_frameworkBundle] pathForResource:@"mapbox_helmet" ofType:@"pdf"]];
 #endif
@@ -646,11 +640,11 @@ NSArray<MLNAttributionInfo *> *MLNAttributionInfosFromAttributions(mbgl::MapSnap
     return logoImage;
 }
 
-+ (MLNImage *)mapboxLongStyleLogo
++ (MLNImage *)maplibreLongStyleLogo
 {
     MLNImage *logoImage;
 #if TARGET_OS_IPHONE
-    logoImage =[UIImage imageNamed:@"mapbox" inBundle:[NSBundle mgl_frameworkBundle] compatibleWithTraitCollection:nil];
+    logoImage =[UIImage imageNamed:@"maplibre-logo-stroke-gray" inBundle:[NSBundle mgl_frameworkBundle] compatibleWithTraitCollection:nil];
 #else
     logoImage = [[NSImage alloc] initWithContentsOfFile:[[NSBundle mgl_frameworkBundle] pathForResource:@"mapbox" ofType:@"pdf"]];
 #endif

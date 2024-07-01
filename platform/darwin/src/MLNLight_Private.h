@@ -3,10 +3,10 @@
 #import "MLNLight.h"
 
 namespace mbgl {
-    namespace style {
-        class Light;
-    }
+namespace style {
+class Light;
 }
+}  // namespace mbgl
 
 @interface MLNLight (Private)
 

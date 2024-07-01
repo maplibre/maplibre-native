@@ -9,6 +9,7 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing visibility changes to the mapview.
@@ -28,7 +29,7 @@ class VisibilityChangeActivity : AppCompatActivity() {
                 if (map != null) {
                     maplibreMap = map
                 }
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
                 maplibreMap.animateCamera(
                     CameraUpdateFactory.newLatLngZoom(
                         LatLng(55.754020, 37.620948),

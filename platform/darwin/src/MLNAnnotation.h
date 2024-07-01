@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 #import <TargetConditionals.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  An object that adopts this protocol must implement the `coordinate` property.
  The other methods of this protocol are optional.
- 
+
  #### Related examples
  TODO: Annotation models
  TODO: Annotation views, learn how to add objects that follow the

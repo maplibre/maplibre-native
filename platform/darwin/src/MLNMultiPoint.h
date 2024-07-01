@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
 #import "MLNShape.h"
@@ -10,7 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
  The `MLNMultiPoint` class is an abstract superclass used to define shapes
  composed of multiple vertices.
 
- Create instances of `MLNPolyline` or `MLNPolygon` in order to use 
+ Create instances of `MLNPolyline` or `MLNPolygon` in order to use
  properties of `MLNMultiPoint`. Do not create instances of `MLNMultiPoint`
  directly and do not create your own subclasses of this class. You can use
  the method and properties of this class to access information about the
@@ -60,7 +60,7 @@ MLN_EXPORT
 
 /**
  Inserts the given vertices into the shape.
- 
+
  If the shape is currently visible on the map as an annotation, it is redrawn
  immediately. If the shape is part of an `MLNShapeSource` object, you must
  explicitly set the `MLNShapeSource.shape` property in order for any style
@@ -72,11 +72,13 @@ MLN_EXPORT
  @param index The zero-based index at which the first coordinate in `coords`
     will appear in the `coordinates` property.
  */
-- (void)insertCoordinates:(const CLLocationCoordinate2D *)coords count:(NSUInteger)count atIndex:(NSUInteger)index;
+- (void)insertCoordinates:(const CLLocationCoordinate2D *)coords
+                    count:(NSUInteger)count
+                  atIndex:(NSUInteger)index;
 
 /**
  Appends the given vertices to the shape.
- 
+
  If the shape is currently visible on the map as an annotation, it is redrawn
  immediately. If the shape is part of an `MLNShapeSource` object, you must
  explicitly set the `MLNShapeSource.shape` property in order for any style
@@ -91,7 +93,7 @@ MLN_EXPORT
 /**
  Replaces the vertices at the given range in the shape with the same number of
  vertices from a given C array.
- 
+
  If the shape is currently visible on the map as an annotation, it is redrawn
  immediately. If the shape is part of an `MLNShapeSource` object, you must
  explicitly set the `MLNShapeSource.shape` property in order for any style
@@ -112,12 +114,13 @@ MLN_EXPORT
  @param coords The array of coordinates defining part of the shape. The data in
     this array is copied to the shape’s `coordinates` property.
  */
-- (void)replaceCoordinatesInRange:(NSRange)range withCoordinates:(const CLLocationCoordinate2D *)coords;
+- (void)replaceCoordinatesInRange:(NSRange)range
+                  withCoordinates:(const CLLocationCoordinate2D *)coords;
 
 /**
  Replaces the vertices at the given range in the shape with the specified number
  of vertices from a given C array.
- 
+
  If the shape is currently visible on the map as an annotation, it is redrawn
  immediately. If the shape is part of an `MLNShapeSource` object, you must
  explicitly set the `MLNShapeSource.shape` property in order for any style
@@ -142,11 +145,13 @@ MLN_EXPORT
     count must not exceed the number of items currently in the `coordinates`
     property.
  */
-- (void)replaceCoordinatesInRange:(NSRange)range withCoordinates:(const CLLocationCoordinate2D *)coords count:(NSUInteger)count;
+- (void)replaceCoordinatesInRange:(NSRange)range
+                  withCoordinates:(const CLLocationCoordinate2D *)coords
+                            count:(NSUInteger)count;
 
 /**
  Removes the vertices at the given range from the shape.
- 
+
  If the shape is currently visible on the map as an annotation, it is redrawn
  immediately. If the shape is part of an `MLNShapeSource` object, you must
  explicitly set the `MLNShapeSource.shape` property in order for any style

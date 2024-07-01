@@ -221,7 +221,7 @@ apackage:
 	make android-lib-arm-v7 && make android-lib-arm-v8 && make android-lib-x86 && make android-lib-x86-64
 	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=all assembleDrawable$(BUILDTYPE)
 	mkdir -p build
-	tar -czvf build/debug-symbols.tar.gz -C MapLibreAndroid/build/intermediates/library_jni/drawableRelease/jni .
+	tar -czvf build/debug-symbols.tar.gz -C MapLibreAndroid/build/intermediates/library_jni/drawableRelease/copyDrawableReleaseJniLibsProjectOnly/jni .
 
 # Build test app instrumentation tests apk and test app apk for all abi's
 .PHONY: android-ui-test
@@ -270,8 +270,8 @@ android-lint-test-app:
 # Generates LICENSE.md file based on all Android project dependencies
 .PHONY: android-license
 android-license:
-	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:licenseReleaseReport
-	python scripts/generate-license.py
+	$(MLN_ANDROID_GRADLE) -Pmapbox.abis=none :MapLibreAndroid:licenseDrawableReleaseReport
+	python3 scripts/generate-license.py
 
 # Symbolicate ndk stack traces for the arm-v7 abi
 .PHONY: android-ndk-stack

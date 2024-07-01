@@ -65,8 +65,8 @@ constexpr const auto extensionGetters = mapbox::eternal::hash_map<mapbox::eterna
 } // namespace
 
 RenderGeoJSONSource::RenderGeoJSONSource(Immutable<style::GeoJSONSource::Impl> impl_,
-                                         std::shared_ptr<Scheduler> threadPool_)
-    : RenderTileSource(std::move(impl_), std::move(threadPool_)) {}
+                                         const TaggedScheduler& threadPool_)
+    : RenderTileSource(std::move(impl_), threadPool_) {}
 
 RenderGeoJSONSource::~RenderGeoJSONSource() = default;
 

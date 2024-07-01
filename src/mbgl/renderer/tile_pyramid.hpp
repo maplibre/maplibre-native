@@ -29,7 +29,7 @@ class SourcePrepareParameters;
 
 class TilePyramid {
 public:
-    TilePyramid(std::shared_ptr<Scheduler> threadPool_);
+    TilePyramid(const TaggedScheduler& threadPool_);
     ~TilePyramid();
 
     bool isLoaded() const;

@@ -2,6 +2,7 @@
 #include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #include <cassert>
 #include <stdexcept>
@@ -27,7 +28,11 @@ public:
         context.viewport = {0, 0, framebuffer.size};
     }
 
-    void swap() override { backend.swap(); }
+    void swap() override {
+        MLN_TRACE_FUNC();
+
+        backend.swap();
+    }
 
     HeadlessBackend& backend;
     gl::Context& context;
@@ -44,6 +49,8 @@ HeadlessBackend::HeadlessBackend(const Size size_,
       swapBehaviour(swapBehaviour_) {}
 
 HeadlessBackend::~HeadlessBackend() {
+    MLN_TRACE_FUNC();
+
     gfx::BackendScope guard{*this, gfx::BackendScope::ScopeType::Implicit};
     // Some implementations require active context for GL functions to work
     if (impl != nullptr && impl->glNeedsActiveContextOnDestruction()) {
@@ -66,6 +73,8 @@ gl::ProcAddress HeadlessBackend::getExtensionFunctionPointer(const char* name) {
 }
 
 void HeadlessBackend::activate() {
+    MLN_TRACE_FUNC();
+
     active = true;
 
     if (!impl) {
@@ -77,12 +86,16 @@ void HeadlessBackend::activate() {
 }
 
 void HeadlessBackend::deactivate() {
+    MLN_TRACE_FUNC();
+
     assert(impl);
     impl->deactivateContext();
     active = false;
 }
 
 gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
+    MLN_TRACE_FUNC();
+
     if (!resource) {
         resource = std::make_unique<HeadlessRenderableResource>(*this, static_cast<gl::Context&>(getContext()), size);
     }
@@ -90,6 +103,8 @@ gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
 }
 
 void HeadlessBackend::swap() {
+    MLN_TRACE_FUNC();
+
     if (swapBehaviour == SwapBehaviour::Flush) static_cast<gl::Context&>(getContext()).finish();
 }
 
@@ -98,6 +113,8 @@ void HeadlessBackend::updateAssumedState() {
 }
 
 PremultipliedImage HeadlessBackend::readStillImage() {
+    MLN_TRACE_FUNC();
+
     return static_cast<gl::Context&>(getContext()).readFramebuffer<PremultipliedImage>(size);
 }
 
@@ -112,6 +129,8 @@ namespace gfx {
 template <>
 std::unique_ptr<gfx::HeadlessBackend> Backend::Create<gfx::Backend::Type::OpenGL>(
     const Size size, gfx::Renderable::SwapBehaviour swapBehavior, const gfx::ContextMode contextMode) {
+    MLN_TRACE_FUNC();
+
     return std::make_unique<gl::HeadlessBackend>(size, swapBehavior, contextMode);
 }
 

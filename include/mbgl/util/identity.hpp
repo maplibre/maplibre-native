@@ -27,7 +27,7 @@ public:
     bool operator!=(const SimpleIdentity& other) const noexcept { return uniqueID != other.uniqueID; }
 
     std::int64_t id() const noexcept { return uniqueID; }
-    bool isEmpty() const noexcept { return uniqueID != emptyID; }
+    bool isEmpty() const noexcept { return uniqueID == emptyID; }
 
     operator bool() const noexcept { return isEmpty(); }
     bool operator!() const noexcept { return !isEmpty(); }
@@ -58,3 +58,10 @@ inline std::string toString(const util::SimpleIdentity& ident) {
 
 } // namespace util
 } // namespace mbgl
+
+template <>
+struct std::hash<mbgl::util::SimpleIdentity> {
+    std::size_t operator()(const mbgl::util::SimpleIdentity& s) const noexcept {
+        return std::hash<std::int64_t>{}(s.id());
+    }
+};

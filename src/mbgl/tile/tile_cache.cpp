@@ -1,10 +1,13 @@
 #include <mbgl/tile/tile_cache.hpp>
 #include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <cassert>
 
 namespace mbgl {
 
 void TileCache::setSize(size_t size_) {
+    MLN_TRACE_FUNC();
+
     size = size_;
 
     while (orderedKeys.size() > size) {
@@ -37,6 +40,8 @@ struct CaptureWrapper {
 } // namespace
 
 void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
+    MLN_TRACE_FUNC();
+
     tile->cancel();
 
     // The `std::function` must be created in a separate statement from the `schedule` call.
@@ -46,13 +51,21 @@ void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
     // If this temporary outlives the `schedule` call, and the function is executed immediately
     // by a waiting thread and is already complete, that temporary reference ends up being the
     // last one and the destruction actually occurs here on this thread.
-    std::function<void()> func{[tile_{CaptureWrapper<Tile>{std::move(tile)}}]() {
+    std::function<void()> func{[tile_{CaptureWrapper<Tile>{std::move(tile)}}, this]() mutable {
+        tile_.item = {};
+        deferredDeletionsPending--;
+        deferredSignal.notify_all();
     }};
 
-    threadPool->schedule(std::move(func));
+    std::unique_lock<std::mutex> counterLock(deferredSignalLock);
+    deferredDeletionsPending++;
+
+    threadPool.schedule(std::move(func));
 }
 
 void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {
+    MLN_TRACE_FUNC();
+
     if (!tile->isRenderable() || !size) {
         deferredRelease(std::move(tile));
         return;

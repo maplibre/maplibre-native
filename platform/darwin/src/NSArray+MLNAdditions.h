@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import <mbgl/util/feature.hpp>
 
@@ -7,7 +7,8 @@
 
 - (std::vector<mbgl::Value>)mgl_vector;
 
-/** Returns a string resulting from inserting a separator between each attributed string in the array */
+/** Returns a string resulting from inserting a separator between each attributed string in the
+ * array */
 - (NSAttributedString *)mgl_attributedComponentsJoinedByString:(NSString *)separator;
 
 /**

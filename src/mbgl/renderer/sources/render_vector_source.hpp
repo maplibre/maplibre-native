@@ -8,7 +8,7 @@ namespace mbgl {
 
 class RenderVectorSource final : public RenderTileSetSource {
 public:
-    explicit RenderVectorSource(Immutable<style::VectorSource::Impl>, std::shared_ptr<Scheduler>);
+    explicit RenderVectorSource(Immutable<style::VectorSource::Impl>, const TaggedScheduler&);
 
 private:
     void updateInternal(const Tileset&,

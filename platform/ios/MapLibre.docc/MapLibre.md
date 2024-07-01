@@ -4,6 +4,10 @@
     @Available(iOS, introduced: "12.0")
 }
 
+@Options(scope: global) {
+  @AutomaticArticleSubheading(disabled)
+}
+
 Powerful, free and open-source mapping toolkit with full control over data sources and styling.
 
 ## Overview
@@ -17,6 +21,11 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 - <doc:LineOnUserTap>
 - <doc:LocationPrivacyExample>
 - <doc:BlockingGesturesExample>
+- <doc:LineStyleLayerExample>
+- <doc:WebAPIDataExample>
+- <doc:AnimatedLineExample>
+- <doc:AnnotationViewExample>
+- <doc:BuildingLightExample>
 
 ## Topics
 

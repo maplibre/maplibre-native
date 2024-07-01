@@ -43,5 +43,5 @@ private:
     std::vector<std::unique_ptr<LayerFactory>> coreFactories;
     std::map<std::string, LayerFactory*> typeToFactory;
 };
-    
-}  // namespace mbgl
+
+} // namespace mbgl

@@ -1,13 +1,13 @@
+#import "MLNAnnotationContainerView.h"
 #import "MLNMapView.h"
 #import "MLNUserLocationAnnotationView.h"
-#import "MLNAnnotationContainerView.h"
 
 #include <mbgl/util/size.hpp>
 
 namespace mbgl {
-    class Map;
-    class Renderer;
-}
+class Map;
+class Renderer;
+}  // namespace mbgl
 
 class MLNMapViewImpl;
 @class MLNSource;
@@ -48,7 +48,8 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 - (void)didFailToLoadImage:(nonnull NSString *)imageName;
 - (BOOL)shouldRemoveStyleImage:(nonnull NSString *)imageName;
 
-- (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude zoomLevel:(double)zoomLevel;
+- (CLLocationDistance)metersPerPointAtLatitude:(CLLocationDegrees)latitude
+                                     zoomLevel:(double)zoomLevel;
 
 /** Triggers another render pass even when it is not necessary. */
 - (void)setNeedsRerender;
@@ -59,14 +60,15 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 - (mbgl::Map &)mbglMap;
 - (nonnull mbgl::Renderer *)renderer;
 
-/** Returns whether the map view is currently loading or processing any assets required to render the map */
+/** Returns whether the map view is currently loading or processing any assets required to render
+ * the map */
 - (BOOL)isFullyLoaded;
 
 /** Empties the in-memory tile cache. */
 - (void)didReceiveMemoryWarning;
 
 /** Returns an instance of MLNMapView implementation. Used for integration testing. */
-- (nonnull MLNMapViewImpl *) viewImpl;
+- (nonnull MLNMapViewImpl *)viewImpl;
 
 - (void)pauseRendering:(nonnull NSNotification *)notification;
 - (void)resumeRendering:(nonnull NSNotification *)notification;
@@ -77,6 +79,6 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const _Nonnull MLNUnderlyingMapUna
 
 - (MLNMapCamera *_Nullable)cameraByTiltingToPitch:(CGFloat)pitch;
 
-- (BOOL) _opaque;
+- (BOOL)_opaque;
 
 @end

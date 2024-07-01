@@ -22,6 +22,7 @@ MapRenderer::MapRenderer(jni::JNIEnv& _env,
       pixelRatio(pixelRatio_),
       localIdeographFontFamily(localIdeographFontFamily_ ? jni::Make<std::string>(_env, localIdeographFontFamily_)
                                                          : std::optional<std::string>{}),
+      threadPool(Scheduler::GetBackground(), {}),
       mailboxData(this) {}
 
 MapRenderer::MailboxData::MailboxData(Scheduler* scheduler_)
@@ -84,20 +85,17 @@ void MapRenderer::schedule(std::function<void()>&& scheduled) {
     }
 }
 
-std::size_t MapRenderer::waitForEmpty(Milliseconds timeout) {
+void MapRenderer::waitForEmpty([[maybe_unused]] const util::SimpleIdentity tag) {
     try {
         android::UniqueEnv _env = android::AttachEnv();
         static auto& javaClass = jni::Class<MapRenderer>::Singleton(*_env);
-        static auto waitForEmpty = javaClass.GetMethod<jni::jint(jni::jlong)>(*_env, "waitForEmpty");
+        static auto waitForEmpty = javaClass.GetMethod<void()>(*_env, "waitForEmpty");
         if (auto weakReference = javaPeer.get(*_env)) {
-            return weakReference.Call(*_env, waitForEmpty, static_cast<int64_t>(timeout.count()));
+            return weakReference.Call(*_env, waitForEmpty);
         }
-        // If the peer is already cleaned up, there's nothing to wait for
-        return 0;
     } catch (...) {
         Log::Error(Event::Android, "MapRenderer::waitForEmpty failed");
         jni::ThrowJavaError(*android::AttachEnv(), std::current_exception());
-        return 0;
     }
 }
 
@@ -221,7 +219,7 @@ void MapRenderer::onSurfaceCreated(JNIEnv&) {
     backend.reset();
 
     // Create the new backend and renderer
-    backend = std::make_unique<AndroidRendererBackend>();
+    backend = std::make_unique<AndroidRendererBackend>(threadPool);
     renderer = std::make_unique<Renderer>(*backend, pixelRatio, localIdeographFontFamily);
     rendererRef = std::make_unique<ActorRef<Renderer>>(*renderer, mailboxData.getMailbox());
 

@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 
-#import "MLNFoundation.h"
 #import "MLNAnnotation.h"
+#import "MLNFoundation.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -29,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
  shapes collectively using a concrete instance of `MLNVectorStyleLayer`.
  Alternatively, you can add some kinds of shapes directly to a map view as
  annotations or overlays.
- 
+
  You can filter the features in a `MLNVectorStyleLayer` or vary their layout or
  paint attributes based on the features’ geographies. Pass an `MLNShape` into an
  `NSPredicate` with the format `SELF IN %@` or `%@ CONTAINS SELF` and set the
@@ -56,7 +56,8 @@ MLN_EXPORT
  ```swift
  let url = mainBundle.url(forResource: "amsterdam", withExtension: "geojson")!
  let data = try! Data(contentsOf: url)
- let feature = try! MLNShape(data: data, encoding: String.Encoding.utf8.rawValue) as! MLNShapeCollectionFeature
+ let feature = try! MLNShape(data: data, encoding: String.Encoding.utf8.rawValue) as!
+ MLNShapeCollectionFeature
  ```
 
  @param data String data containing GeoJSON source code.
@@ -67,7 +68,9 @@ MLN_EXPORT
     not be parsed as valid GeoJSON source code. If `nil`, `outError` contains an
     `NSError` object describing the problem.
  */
-+ (nullable MLNShape *)shapeWithData:(NSData *)data encoding:(NSStringEncoding)encoding error:(NSError * _Nullable *)outError;
++ (nullable MLNShape *)shapeWithData:(NSData *)data
+                            encoding:(NSStringEncoding)encoding
+                               error:(NSError *_Nullable *)outError;
 
 // MARK: Accessing the Shape Attributes
 

@@ -20,6 +20,7 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
@@ -103,7 +104,7 @@ class ManualLocationUpdatesActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("MissingPermission")
     override fun onMapReady(maplibreMap: MapLibreMap) {
         maplibreMap.setStyle(
-            Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
+            Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
         ) { style: Style? ->
             locationComponent = maplibreMap.locationComponent
             locationComponent!!.activateLocationComponent(

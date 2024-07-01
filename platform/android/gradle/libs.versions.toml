@@ -1,5 +1,5 @@
 [versions]
-mapLibreServices = "6.0.0"
+mapLibreServices = "6.0.1"
 mapboxGestures = "0.7.0"
 appCompat = "1.6.1"
 constraintLayout = "2.1.4"

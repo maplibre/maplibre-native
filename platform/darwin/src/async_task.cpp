@@ -13,17 +13,7 @@ public:
         : task(std::move(fn)),
           loop(CFRunLoopGetCurrent()) {
         CFRunLoopSourceContext context = {
-            0,
-            this,
-            nullptr,
-            nullptr,
-            nullptr,
-            nullptr,
-            nullptr,
-            nullptr,
-            nullptr,
-            perform
-        };
+            0, this, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, perform};
         source = CFRunLoopSourceCreate(kCFAllocatorDefault, 0, &context);
         CFRunLoopAddSource(loop, source, kCFRunLoopCommonModes);
     }
@@ -46,9 +36,7 @@ public:
     }
 
 private:
-    static void perform(void* info) {
-        reinterpret_cast<Impl*>(info)->runTask();
-    }
+    static void perform(void* info) { reinterpret_cast<Impl*>(info)->runTask(); }
 
     std::function<void()> task;
     std::atomic_flag queued = ATOMIC_FLAG_INIT;
@@ -58,8 +46,7 @@ private:
 };
 
 AsyncTask::AsyncTask(std::function<void()>&& fn)
-    : impl(std::make_unique<Impl>(std::move(fn))) {
-}
+    : impl(std::make_unique<Impl>(std::move(fn))) {}
 
 AsyncTask::~AsyncTask() = default;
 
