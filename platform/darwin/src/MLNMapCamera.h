@@ -8,13 +8,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  An `MLNMapCamera` object represents a viewpoint from which the user observes
- some point on an `MLNMapView`.
+ some point on an ``MLNMapView``.
 
  #### Related examples
- TODO: Camera animation, learn how to create a camera that rotates
+ - <doc:BlockingGesturesExample>: learn how to use the
+ ``MLNMapViewDelegate/mapView:shouldChangeFromCamera:toCamera:`` method of ``MLNMapViewDelegate`` to
+ restrict panning.
+ - *TODO:* Camera animation, learn how to create a camera that rotates
  around a central point.
- TODO: Restrict map panning to an area, learn how to restrict map
- panning using `MLNMapViewDelegate`'s `-mapView:shouldChangeFromCamera:toCamera:` method.
  */
 MLN_EXPORT
 @interface MLNMapCamera : NSObject <NSSecureCoding, NSCopying>
@@ -38,17 +39,17 @@ MLN_EXPORT
  The altitude is the distance from the viewpoint to the map, perpendicular to
  the map plane. This property does not account for physical elevation.
 
- This property’s value may be less than that of the `viewingDistance` property.
- Setting this property automatically updates the `viewingDistance` property
- based on the `pitch` property’s current value.
+ This property’s value may be less than that of the ``viewingDistance`` property.
+ Setting this property automatically updates the ``viewingDistance`` property
+ based on the ``pitch`` property’s current value.
  */
 @property (nonatomic) CLLocationDistance altitude;
 
 /**
- The straight-line distance from the viewpoint to the `centerCoordinate`.
+ The straight-line distance from the viewpoint to the ``centerCoordinate``.
 
- Setting this property automatically updates the `altitude` property based on
- the `pitch` property’s current value.
+ Setting this property automatically updates the ``altitude`` property based on
+ the ``pitch`` property’s current value.
  */
 @property (nonatomic) CLLocationDistance viewingDistance;
 
@@ -76,12 +77,12 @@ MLN_EXPORT
 
  This method interprets the distance as a straight-line distance from the
  viewpoint to the center coordinate. To specify the altitude of the viewpoint,
- use the `-cameraLookingAtCenterCoordinate:altitude:pitch:heading:` method.
+ use the ``cameraLookingAtCenterCoordinate:altitude:pitch:heading:`` method.
 
  @param centerCoordinate The geographic coordinate on which the map should be
     centered.
  @param distance The straight-line distance from the viewpoint to the
-    `centerCoordinate`.
+    ``centerCoordinate``.
  @param pitch The viewing angle of the camera, measured in degrees. A value of
     `0` results in a camera pointed straight down at the map. Angles greater
     than `0` result in a camera angled toward the horizon.
@@ -117,11 +118,11 @@ MLN_EXPORT
                                         heading:(CLLocationDirection)heading;
 
 /**
- @note This initializer incorrectly interprets the `distance` parameter. To
-    specify the straight-line distance from the viewpoint to `centerCoordinate`,
-    use the `-cameraLookingAtCenterCoordinate:acrossDistance:pitch:heading:`
+ > This initializer incorrectly interprets the `distance` parameter. To
+    specify the straight-line distance from the viewpoint to ``centerCoordinate``,
+    use the ``cameraLookingAtCenterCoordinate:acrossDistance:pitch:heading:``
     method. To specify the altitude of the viewpoint, use the
-    `-cameraLookingAtCenterCoordinate:altitude:pitch:heading:` method, which has
+    ``cameraLookingAtCenterCoordinate:altitude:pitch:heading:`` method, which has
     the same behavior as this initializer.
  */
 + (instancetype)cameraLookingAtCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
@@ -135,7 +136,7 @@ MLN_EXPORT
  Returns a Boolean value indicating whether the given camera is functionally
  equivalent to the receiver.
 
- Unlike `-isEqual:`, this method returns `YES` if the difference between the
+ Unlike `isEqual:`, this method returns `YES` if the difference between the
  coordinates, altitudes, pitches, or headings of the two camera objects is
  negligible.
 

@@ -12,6 +12,16 @@ Mailbox::Mailbox() = default;
 Mailbox::Mailbox(Scheduler& scheduler_)
     : weakScheduler(scheduler_.makeWeakPtr()) {}
 
+Mailbox::Mailbox(const TaggedScheduler& scheduler_)
+    : schedulerTag(scheduler_.tag),
+      weakScheduler(scheduler_.get()->makeWeakPtr()) {}
+
+void Mailbox::open(const TaggedScheduler& scheduler_) {
+    assert(!weakScheduler);
+    schedulerTag = scheduler_.tag;
+    return open(*scheduler_.get());
+}
+
 void Mailbox::open(Scheduler& scheduler_) {
     assert(!weakScheduler);
 
@@ -90,7 +100,7 @@ void Mailbox::push(std::unique_ptr<Message> message) {
     queue.push(std::move(message));
     auto guard = weakScheduler.lock();
     if (wasEmpty && weakScheduler) {
-        weakScheduler->schedule(makeClosure(shared_from_this()));
+        weakScheduler->schedule(schedulerTag, makeClosure(shared_from_this()));
     }
 }
 

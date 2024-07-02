@@ -31,12 +31,21 @@ public:
 
 class SpriteLoaderTest {
 public:
-    SpriteLoaderTest() = default;
+    SpriteLoaderTest()
+        : threadPool(Scheduler::GetBackground(), uniqueID),
+          spriteLoader(1, threadPool) {}
 
+    ~SpriteLoaderTest() {
+        threadPool.waitForEmpty();
+        threadPool.runRenderJobs(true);
+    }
+
+    util::SimpleIdentity uniqueID;
     util::RunLoop loop;
     StubFileSource fileSource;
     StubSpriteLoaderObserver observer;
-    SpriteLoader spriteLoader{1};
+    TaggedScheduler threadPool;
+    SpriteLoader spriteLoader;
 
     void run() {
         // Squelch logging.

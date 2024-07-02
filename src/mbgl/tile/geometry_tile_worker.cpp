@@ -31,6 +31,7 @@ using namespace style;
 
 GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        ActorRef<GeometryTile> parent_,
+                                       const TaggedScheduler& scheduler_,
                                        OverscaledTileID id_,
                                        std::string sourceID_,
                                        const std::atomic<bool>& obsolete_,
@@ -39,6 +40,7 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        const bool showCollisionBoxes_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
+      scheduler(scheduler_),
       id(id_),
       sourceID(std::move(sourceID_)),
       obsolete(obsolete_),
@@ -49,7 +51,7 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
 GeometryTileWorker::~GeometryTileWorker() {
     MLN_TRACE_FUNC();
 
-    Scheduler::GetBackground()->runOnRenderThread([renderData_{std::move(renderData)}]() {});
+    scheduler.runOnRenderThread([renderData_{std::move(renderData)}]() {});
 }
 
 /*
@@ -466,10 +468,10 @@ void GeometryTileWorker::parse() {
     requestNewImages(imageDependencies);
 
     MBGL_TIMING_FINISH(watch,
-                       " Action: "
-                           << "Parsing,"
-                           << " SourceID: " << sourceID.c_str() << " Canonical: " << static_cast<int>(id.canonical.z)
-                           << "/" << id.canonical.x << "/" << id.canonical.y << " Time");
+                       " Action: " << "Parsing,"
+                                   << " SourceID: " << sourceID.c_str()
+                                   << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
+                                   << id.canonical.y << " Time");
     finalizeLayout();
 }
 
@@ -522,10 +524,10 @@ void GeometryTileWorker::finalizeLayout() {
     firstLoad = false;
 
     MBGL_TIMING_FINISH(watch,
-                       " Action: "
-                           << "SymbolLayout,"
-                           << " SourceID: " << sourceID.c_str() << " Canonical: " << static_cast<int>(id.canonical.z)
-                           << "/" << id.canonical.x << "/" << id.canonical.y << " Time");
+                       " Action: " << "SymbolLayout,"
+                                   << " SourceID: " << sourceID.c_str()
+                                   << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
+                                   << id.canonical.y << " Time");
 
     parent.invoke(&GeometryTile::onLayout,
                   std::make_shared<GeometryTile::LayoutResult>(

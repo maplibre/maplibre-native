@@ -149,8 +149,7 @@ void RunLoop::stop() {
     invoke([&] { uv_unref(impl->holderHandle()); });
 }
 
-std::size_t RunLoop::waitForEmpty(Milliseconds timeout) {
-    const auto startTime = mbgl::util::MonotonicTimer::now();
+void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {
     while (true) {
         std::size_t remaining;
         {
@@ -158,10 +157,8 @@ std::size_t RunLoop::waitForEmpty(Milliseconds timeout) {
             remaining = defaultQueue.size() + highPriorityQueue.size();
         }
 
-        const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
-        const auto elapsedMillis = std::chrono::duration_cast<Milliseconds>(elapsed);
-        if (remaining == 0 || (Milliseconds::zero() < timeout && timeout <= elapsedMillis)) {
-            return remaining;
+        if (remaining == 0) {
+            return;
         }
 
         runOnce();

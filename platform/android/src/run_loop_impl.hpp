@@ -42,7 +42,7 @@ public:
 
     Milliseconds processRunnables();
 
-    std::size_t waitForEmpty(Milliseconds timeout);
+    void waitForEmpty();
 
     ALooper* loop = nullptr;
     RunLoop* runLoop = nullptr;

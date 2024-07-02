@@ -39,6 +39,17 @@ public:
         parent.mailbox->open(scheduler);
     }
 
+    // Construct the Object from a parameter pack `args` (i.e. `Object(args...)`)
+    template <typename U = Object,
+              class... Args,
+              typename std::enable_if_t<std::is_constructible_v<U, Args...> ||
+                                        std::is_constructible_v<U, ActorRef<U>, Args...>>* = nullptr>
+    EstablishedActor(const TaggedScheduler& scheduler, AspiringActor<Object>& parent_, Args&&... args)
+        : parent(parent_) {
+        emplaceObject(std::forward<Args>(args)...);
+        parent.mailbox->open(scheduler);
+    }
+
     // Construct the `Object` from a tuple containing the constructor arguments
     // (i.e. `Object(std::get<0>(args), std::get<1>(args), ...)`)
     template <class ArgsTuple, std::size_t ArgCount = std::tuple_size<std::decay_t<ArgsTuple>>::value>
@@ -46,6 +57,11 @@ public:
         : parent(parent_) {
         emplaceObject(std::forward<ArgsTuple>(args), std::make_index_sequence<ArgCount>{});
         parent.mailbox->open(scheduler);
+    }
+
+    template <class ArgsTuple, std::size_t ArgCount = std::tuple_size<std::decay_t<ArgsTuple>>::value>
+    EstablishedActor(const TaggedScheduler& scheduler, AspiringActor<Object>& parent_, ArgsTuple&& args) {
+        EstablishedActor(*scheduler.get(), parent_, std::forward<ArgsTuple>(args));
     }
 
     EstablishedActor(const EstablishedActor&) = delete;
