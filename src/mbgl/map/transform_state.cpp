@@ -744,6 +744,25 @@ bool TransformState::rotatedNorth() const {
     return (orientation == NO::Leftwards || orientation == NO::Rightwards);
 }
 
+bool TransformState::constrainScreen(double& scale_, double& lat, double& lon) const {
+  if (constrainMode == ConstrainMode::Screen) {
+        double zoom = scaleZoom(scale_);
+        CameraOptions options = CameraOptions();
+        constrainCameraAndZoomToBounds(options, zoom);
+
+        scale_ = zoomScale(zoom);
+ 
+        if (options.center) {
+            LatLng center = options.center.value();
+            lat = center.latitude();
+            lon = center.longitude();
+ 
+            return true;
+        }
+    }
+    return false;
+}
+
 void TransformState::constrain(double& scale_, double& x_, double& y_) const {
     if (constrainMode == ConstrainMode::None || constrainMode == ConstrainMode::Screen) {
         return;
@@ -779,15 +798,15 @@ void TransformState::constrainCameraAndZoomToBounds(CameraOptions& requestedCame
     double requestedScale = zoomScale(requestedZoom);
 
     // Since the transition calculations will include any specified anchor in the result
-    // we need to do the same when testing if the requested center and zoom is outside the bounds or not
+    // we need to do the same when testing if the requested center and zoom is outside the bounds or not.
     if (requestedCamera.anchor) {
         ScreenCoordinate anchor = requestedCamera.anchor.value();
         anchor.y = getSize().height - anchor.y;
         LatLng anchorLatLng = screenCoordinateToLatLng(anchor);
 
         // The screenCoordinateToLatLng function requires the matrices inside the state to reflect
-        // the requested scale. So we create a copy and set the requested zoom before the conversion
-        // This will give us the same result as the transition calculations
+        // the requested scale. So we create a copy and set the requested zoom before the conversion.
+        // This will give us the same result as the transition calculations.
         TransformState state{*this};
         state.setLatLngZoom(getLatLng(), scaleZoom(requestedScale));
         LatLng screenLatLng = state.screenCoordinateToLatLng(anchor);
@@ -846,38 +865,44 @@ void TransformState::constrainCameraAndZoomToBounds(CameraOptions& requestedCame
     }
 
     double maxScale = scaleX > scaleY ? scaleX : scaleY;
+    
+    // Max scale will be 1 when the screen is exactly the same size as the max bounds in either the X or Y direction.
+    // To avoid numerical instabilities we add small amount to the check to make sure we don't try to scale when we
+    // don't actually need it.
     if (maxScale > 1.000001) {
         requestedZoom += scaleZoom(maxScale);
 
         if (scaleY > scaleX) {
-            // If we scaled the y direction we want the x position to be the same as the current x position
+            // If we scaled the y direction we want the resulting x position to be the same as the current x position.
             resultX = currentCenter.x;
-
-            // Since we changed the scale, we might display something outside the bounds.
-            // When checking we need to take into consideration that we just changed the scale,
-            // since the resultX and minX were calculated with the requested scale, and not the scale we
-            // just calculated to make sure we stay inside the bounds.
-            if (resultX * maxScale - w2 < minX * maxScale) {
-                resultX = minX * maxScale + w2;
-                resultX /= maxScale;
-            } else if (resultX * maxScale + w2 > maxX * maxScale) {
-                resultX = maxX * maxScale - w2;
-                resultX /= maxScale;
-            }
         } else {
+            // If we scaled the x direction we want the resulting y position to be the same as the current y position.
             resultY = currentCenter.y;
-            if (resultY * maxScale - h2 < minY * maxScale) {
-                resultY = minY * maxScale + h2;
-                resultY /= maxScale;
-            } else if (resultY * maxScale + h2 > maxY * maxScale) {
-                resultY = maxY * maxScale - h2;
-                resultY /= maxScale;
-            }
+        }
+
+        // Since we changed the scale, we might display something outside the bounds.
+        // When checking we need to take into consideration that we just changed the scale,
+        // since the resultX and minX were calculated with the requested scale, and not the scale we
+        // just calculated to make sure we stay inside the bounds.
+        if (resultX * maxScale - w2 <= minX * maxScale) {
+            resultX = minX * maxScale + w2;
+            resultX /= maxScale;
+        } else if (resultX * maxScale + w2 >= maxX * maxScale) {
+            resultX = maxX * maxScale - w2;
+            resultX /= maxScale;
+        }
+
+        if (resultY * maxScale - h2 <= minY * maxScale) {
+            resultY = minY * maxScale + h2;
+            resultY /= maxScale;
+        } else if (resultY * maxScale + h2 >= maxY * maxScale) {
+            resultY = maxY * maxScale - h2;
+            resultY /= maxScale;
         }
     }
 
     if (resultX != startX || resultY != startY) {
-        // If we made any changes just drop any anchor point
+        // If we made changes just drop any anchor point
         requestedCamera.anchor.reset();
         requestedCamera.center = std::optional(Projection::unproject({resultX, resultY}, requestedScale));
     }
