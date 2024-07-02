@@ -34,18 +34,11 @@ public:
 
     ~OffscreenTextureResource() noexcept override { context.renderingStats().numFrameBuffers--; }
 
-    void bind() override {
-        colorTexture->create();
+    void bind() override { colorTexture->create(); }
 
-    }
+    void swap() override {}
 
-    void swap() override {
-    }
-
-    PremultipliedImage readStillImage() {
-        
-        return {};
-    }
+    PremultipliedImage readStillImage() { return {}; }
 
     gfx::Texture2DPtr& getTexture() {
         assert(colorTexture);
@@ -78,5 +71,5 @@ const gfx::Texture2DPtr& OffscreenTexture::getTexture() {
     return getResource<OffscreenTextureResource>().getTexture();
 }
 
-} // namespace mtl
+} // namespace vulkan
 } // namespace mbgl

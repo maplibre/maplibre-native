@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/map/mode.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/tile/tile_observer.hpp>
@@ -48,7 +49,7 @@ using RenderTiles = std::shared_ptr<const std::vector<std::reference_wrapper<con
 
 class RenderSource : protected TileObserver {
 public:
-    static std::unique_ptr<RenderSource> create(const Immutable<style::Source::Impl>&, std::shared_ptr<Scheduler>);
+    static std::unique_ptr<RenderSource> create(const Immutable<style::Source::Impl>&, const TaggedScheduler&);
     ~RenderSource() override;
 
     bool isEnabled() const;

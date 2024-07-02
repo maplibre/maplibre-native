@@ -100,16 +100,15 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
 
     create();
 
-    if (!imageAllocation) 
-        return;
+    if (!imageAllocation) return;
 
     const auto& backend = context.getBackend();
     const auto& allocator = context.getBackend().getAllocator();
 
     const auto& bufferInfo = vk::BufferCreateInfo()
-        .setSize(size_.width * size_.height * getPixelStride())
-        .setUsage(vk::BufferUsageFlagBits::eTransferSrc)
-        .setSharingMode(vk::SharingMode::eExclusive);
+                                 .setSize(size_.width * size_.height * getPixelStride())
+                                 .setUsage(vk::BufferUsageFlagBits::eTransferSrc)
+                                 .setSharingMode(vk::SharingMode::eExclusive);
 
     VmaAllocationCreateInfo allocationInfo = {};
 
@@ -119,8 +118,12 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
 
     SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
 
-    VkResult result = vmaCreateBuffer(allocator, &VkBufferCreateInfo(bufferInfo), 
-        &allocationInfo, &bufferAllocation->buffer, &bufferAllocation->allocation, nullptr);
+    VkResult result = vmaCreateBuffer(allocator,
+                                      &VkBufferCreateInfo(bufferInfo),
+                                      &allocationInfo,
+                                      &bufferAllocation->buffer,
+                                      &bufferAllocation->allocation,
+                                      nullptr);
     if (result != VK_SUCCESS) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture buffer allocation failed");
         return;
@@ -133,11 +136,12 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
         transitionToTransferLayout(buffer);
 
         const auto& region = vk::BufferImageCopy()
-            .setBufferOffset(0)
-            .setBufferRowLength(size_.width)
-            .setImageSubresource(vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
-            .setImageOffset(vk::Offset3D(xOffset, yOffset))
-            .setImageExtent(vk::Extent3D(size_.width, size_.height, 1));
+                                 .setBufferOffset(0)
+                                 .setBufferRowLength(size_.width)
+                                 .setImageSubresource(
+                                     vk::ImageSubresourceLayers(vk::ImageAspectFlagBits::eColor, 0, 0, 1))
+                                 .setImageOffset(vk::Offset3D(xOffset, yOffset))
+                                 .setImageExtent(vk::Extent3D(size_.width, size_.height, 1));
 
         buffer->copyBufferToImage(bufferAllocation->buffer, imageAllocation->image, imageLayout, region);
 
@@ -149,16 +153,14 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
 
     enqueueCommands(encoderImpl.getCommandBuffer());
 
-    context.enqueueDeletion([buffAlloc = std::move(bufferAllocation)](const auto& context) mutable {
-        buffAlloc.reset();
-    });
+    context.enqueueDeletion(
+        [buffAlloc = std::move(bufferAllocation)](const auto& context) mutable { buffAlloc.reset(); });
 
     context.renderingStats().numTextureUpdates++;
 }
 
 void Texture2D::upload() noexcept {
-    if (!imageData)
-        return;
+    if (!imageData) return;
 
     upload(imageData->data.get(), size);
 
@@ -167,11 +169,9 @@ void Texture2D::upload() noexcept {
 
 vk::Format Texture2D::vulkanFormat(const gfx::TexturePixelType pixel, gfx::TextureChannelDataType channel) {
     // depth/stencil are packed formats
-    if (pixel == gfx::TexturePixelType::Stencil) 
-        return vk::Format::eS8Uint;
+    if (pixel == gfx::TexturePixelType::Stencil) return vk::Format::eS8Uint;
 
-    if (pixel == gfx::TexturePixelType::Depth) 
-        return vk::Format::eUndefined;
+    if (pixel == gfx::TexturePixelType::Depth) return vk::Format::eUndefined;
 
     if (pixel == gfx::TexturePixelType::Alpha) {
         switch (channel) {
@@ -186,11 +186,11 @@ vk::Format Texture2D::vulkanFormat(const gfx::TexturePixelType pixel, gfx::Textu
 
     if (pixel == gfx::TexturePixelType::RGBA) {
         switch (channel) {
-            case gfx::TextureChannelDataType::UnsignedByte: 
+            case gfx::TextureChannelDataType::UnsignedByte:
                 return vk::Format::eR8G8B8A8Unorm;
             case gfx::TextureChannelDataType::HalfFloat:
                 return vk::Format::eR16G16B16A16Sfloat;
-            case gfx::TextureChannelDataType::Float: 
+            case gfx::TextureChannelDataType::Float:
                 return vk::Format::eR32G32B32A32Sfloat;
         }
     }
@@ -200,53 +200,61 @@ vk::Format Texture2D::vulkanFormat(const gfx::TexturePixelType pixel, gfx::Textu
 
 vk::Filter Texture2D::vulkanFilter(const gfx::TextureFilterType type) {
     switch (type) {
-        default:                                [[fallthrough]];
-        case gfx::TextureFilterType::Nearest:   return vk::Filter::eNearest;
-        case gfx::TextureFilterType::Linear:    return vk::Filter::eLinear;
+        default:
+            [[fallthrough]];
+        case gfx::TextureFilterType::Nearest:
+            return vk::Filter::eNearest;
+        case gfx::TextureFilterType::Linear:
+            return vk::Filter::eLinear;
     }
 }
 
 vk::SamplerAddressMode Texture2D::vulkanAddressMode(const gfx::TextureWrapType type) {
     switch (type) {
-        default:                                [[fallthrough]];
-        case gfx::TextureWrapType::Clamp:       return vk::SamplerAddressMode::eClampToEdge;
-        case gfx::TextureWrapType::Repeat:      return vk::SamplerAddressMode::eRepeat;
+        default:
+            [[fallthrough]];
+        case gfx::TextureWrapType::Clamp:
+            return vk::SamplerAddressMode::eClampToEdge;
+        case gfx::TextureWrapType::Repeat:
+            return vk::SamplerAddressMode::eRepeat;
     }
 }
 
 void Texture2D::createTexture() {
-    if (size.width == 0 || size.height == 0)
-        return;
+    if (size.width == 0 || size.height == 0) return;
 
     const auto& backend = context.getBackend();
 
     const auto format = vulkanFormat(pixelFormat, channelType);
-    const auto imageUsage = vk::ImageUsageFlags() |
-        vk::ImageUsageFlagBits::eTransferDst |
-        vk::ImageUsageFlagBits::eSampled;
+    const auto imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eTransferDst |
+                            vk::ImageUsageFlagBits::eSampled;
 
     const auto& imageCreateInfo = vk::ImageCreateInfo()
-        .setImageType(vk::ImageType::e2D)
-        .setFormat(format)
-        .setExtent({ size.width, size.height, 1 })
-        .setMipLevels(1)
-        .setArrayLayers(1)
-        .setSamples(vk::SampleCountFlagBits::e1)
-        .setTiling(vk::ImageTiling::eOptimal)
-        .setUsage(imageUsage)
-        .setSharingMode(vk::SharingMode::eExclusive)
-        .setInitialLayout(vk::ImageLayout::eUndefined);
+                                      .setImageType(vk::ImageType::e2D)
+                                      .setFormat(format)
+                                      .setExtent({size.width, size.height, 1})
+                                      .setMipLevels(1)
+                                      .setArrayLayers(1)
+                                      .setSamples(vk::SampleCountFlagBits::e1)
+                                      .setTiling(vk::ImageTiling::eOptimal)
+                                      .setUsage(imageUsage)
+                                      .setSharingMode(vk::SharingMode::eExclusive)
+                                      .setInitialLayout(vk::ImageLayout::eUndefined);
 
     imageAllocation = std::make_shared<ImageAllocation>(backend.getAllocator());
-    
+
     VmaAllocationCreateInfo allocCreateInfo = {};
 
     allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
     allocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
     allocCreateInfo.flags = 0;
 
-    VkResult result = vmaCreateImage(imageAllocation->allocator, &VkImageCreateInfo(imageCreateInfo), &allocCreateInfo, 
-        &imageAllocation->image, &imageAllocation->allocation, nullptr);
+    VkResult result = vmaCreateImage(imageAllocation->allocator,
+                                     &VkImageCreateInfo(imageCreateInfo),
+                                     &allocCreateInfo,
+                                     &imageAllocation->image,
+                                     &imageAllocation->allocation,
+                                     nullptr);
 
     if (result != VK_SUCCESS) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture allocation failed");
@@ -268,11 +276,12 @@ void Texture2D::createTexture() {
     }
 
     auto& imageViewCreateInfo = vk::ImageViewCreateInfo()
-        .setImage(imageAllocation->image)
-        .setViewType(vk::ImageViewType::e2D)
-        .setFormat(format)
-        .setComponents(imageSwizzle)
-        .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+                                    .setImage(imageAllocation->image)
+                                    .setViewType(vk::ImageViewType::e2D)
+                                    .setFormat(format)
+                                    .setComponents(imageSwizzle)
+                                    .setSubresourceRange(
+                                        vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 
     imageAllocation->imageView = backend.getDevice()->createImageViewUnique(imageViewCreateInfo);
     imageLayout = imageCreateInfo.initialLayout;
@@ -291,15 +300,15 @@ void Texture2D::createSampler() {
     const auto addressModeV = vulkanAddressMode(samplerState.wrapV);
 
     const auto& samplerCreateInfo = vk::SamplerCreateInfo()
-        .setMinFilter(filter)
-        .setMagFilter(filter)
-        .setMipmapMode(vk::SamplerMipmapMode::eNearest)
-        .setMinLod(-VK_LOD_CLAMP_NONE)
-        .setMaxLod(VK_LOD_CLAMP_NONE)
-        .setAddressModeU(addressModeU)
-        .setAddressModeV(addressModeV)
-        .setAddressModeW(vk::SamplerAddressMode::eRepeat)
-        .setAnisotropyEnable(false);
+                                        .setMinFilter(filter)
+                                        .setMagFilter(filter)
+                                        .setMipmapMode(vk::SamplerMipmapMode::eNearest)
+                                        .setMinLod(-VK_LOD_CLAMP_NONE)
+                                        .setMaxLod(VK_LOD_CLAMP_NONE)
+                                        .setAddressModeU(addressModeU)
+                                        .setAddressModeV(addressModeV)
+                                        .setAddressModeW(vk::SamplerAddressMode::eRepeat)
+                                        .setAnisotropyEnable(false);
 
     sampler = context.getBackend().getDevice()->createSampler(samplerCreateInfo);
 
@@ -308,9 +317,7 @@ void Texture2D::createSampler() {
 
 void Texture2D::destroyTexture() {
     if (imageAllocation) {
-        context.enqueueDeletion([allocation = std::move(imageAllocation)](const auto&) mutable { 
-            allocation.reset(); 
-        });
+        context.enqueueDeletion([allocation = std::move(imageAllocation)](const auto&) mutable { allocation.reset(); });
 
         imageLayout = vk::ImageLayout::eUndefined;
     }
@@ -318,7 +325,7 @@ void Texture2D::destroyTexture() {
 
 void Texture2D::destroySampler() {
     if (sampler) {
-        context.enqueueDeletion([sampler_ = std::move(sampler)](const auto& context) mutable { 
+        context.enqueueDeletion([sampler_ = std::move(sampler)](const auto& context) mutable {
             context.getBackend().getDevice()->destroySampler(sampler_);
         });
 
@@ -328,40 +335,40 @@ void Texture2D::destroySampler() {
 
 void Texture2D::transitionToTransferLayout(const vk::UniqueCommandBuffer& buffer) {
     const auto& barrier = vk::ImageMemoryBarrier()
-        .setImage(imageAllocation->image)
-        .setOldLayout(imageLayout)
-        .setNewLayout(vk::ImageLayout::eTransferDstOptimal)
-        .setSrcAccessMask({})
-        .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
-        .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-        .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-        .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+                              .setImage(imageAllocation->image)
+                              .setOldLayout(imageLayout)
+                              .setNewLayout(vk::ImageLayout::eTransferDstOptimal)
+                              .setSrcAccessMask({})
+                              .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
+                              .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                              .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                              .setSubresourceRange(
+                                  vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 
     buffer->pipelineBarrier(
-        vk::PipelineStageFlagBits::eTopOfPipe, 
-        vk::PipelineStageFlagBits::eTransfer, 
-        {}, nullptr, nullptr, barrier
-    );
+        vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, nullptr, barrier);
 
     imageLayout = barrier.newLayout;
 }
 
 void Texture2D::transitionToShaderReadLayout(const vk::UniqueCommandBuffer& buffer) {
     const auto& barrier = vk::ImageMemoryBarrier()
-        .setImage(imageAllocation->image)
-        .setOldLayout(vk::ImageLayout::eTransferDstOptimal)
-        .setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
-        .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
-        .setDstAccessMask(vk::AccessFlagBits::eShaderRead)
-        .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-        .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-        .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+                              .setImage(imageAllocation->image)
+                              .setOldLayout(vk::ImageLayout::eTransferDstOptimal)
+                              .setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
+                              .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
+                              .setDstAccessMask(vk::AccessFlagBits::eShaderRead)
+                              .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                              .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                              .setSubresourceRange(
+                                  vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 
-    buffer->pipelineBarrier(
-        vk::PipelineStageFlagBits::eTransfer, 
-        vk::PipelineStageFlagBits::eFragmentShader, 
-        {}, nullptr, nullptr, barrier
-    );
+    buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                            vk::PipelineStageFlagBits::eFragmentShader,
+                            {},
+                            nullptr,
+                            nullptr,
+                            barrier);
 
     imageLayout = barrier.newLayout;
 }

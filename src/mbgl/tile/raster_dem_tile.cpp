@@ -17,9 +17,9 @@ namespace mbgl {
 RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_, const TileParameters& parameters, const Tileset& tileset)
     : Tile(Kind::RasterDEM, id_),
       loader(*this, id_, parameters, tileset),
-      threadPool(Scheduler::GetBackground()),
+      threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(Scheduler::GetBackground(), ActorRef<RasterDEMTile>(*this, mailbox)) {
+      worker(parameters.threadPool, ActorRef<RasterDEMTile>(*this, mailbox)) {
     encoding = tileset.encoding;
     if (id.canonical.y == 0) {
         // this tile doesn't have upper neighboring tiles so marked those as backfilled
@@ -37,7 +37,7 @@ RasterDEMTile::~RasterDEMTile() {
 
     // The bucket has resources that need to be released on the render thread.
     if (bucket) {
-        threadPool->runOnRenderThread([bucket_{std::move(bucket)}]() {});
+        threadPool.runOnRenderThread([bucket_{std::move(bucket)}]() {});
     }
 }
 

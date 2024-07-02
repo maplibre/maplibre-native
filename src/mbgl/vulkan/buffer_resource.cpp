@@ -9,16 +9,12 @@
 namespace mbgl {
 namespace vulkan {
 
-BufferResource::BufferResource(Context& context_,
-                               const void* data,
-                               std::size_t size_,
-                               std::uint32_t usage_,
-                               bool persistent_)
+BufferResource::BufferResource(
+    Context& context_, const void* data, std::size_t size_, std::uint32_t usage_, bool persistent_)
     : context(context_),
       size(size_),
       usage(usage_),
       persistent(persistent_) {
-    
     const auto& backend = context.getBackend();
     const auto& allocator = context.getBackend().getAllocator();
 
@@ -26,7 +22,7 @@ BufferResource::BufferResource(Context& context_,
     std::size_t offset = 0;
 
     // TODO -> check avg minUniformBufferOffsetAlignment vs individual buffers
-    //if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) {
+    // if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) {
     //    const auto& deviceProps = backend.getDeviceProperties();
     //    const auto& align = deviceProps.limits.minUniformBufferOffsetAlignment;
     //    bufferWindowSize = (size + align - 1) & ~(align - 1);
@@ -38,23 +34,25 @@ BufferResource::BufferResource(Context& context_,
     //}
 
     const auto& bufferInfo = vk::BufferCreateInfo()
-        .setSize(totalSize)
-        .setUsage(vk::BufferUsageFlags(usage))
-        .setSharingMode(vk::SharingMode::eExclusive);
+                                 .setSize(totalSize)
+                                 .setUsage(vk::BufferUsageFlags(usage))
+                                 .setSharingMode(vk::SharingMode::eExclusive);
 
     VmaAllocationCreateInfo allocationInfo = {};
 
     allocationInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
     allocationInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-    //allocationInfo.preferredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-    allocationInfo.flags = 
-        VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | 
-        VMA_ALLOCATION_CREATE_MAPPED_BIT;
+    // allocationInfo.preferredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    allocationInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
     bufferAllocation = std::make_shared<BufferAllocation>(allocator);
 
-    VkResult result = vmaCreateBuffer(allocator, &VkBufferCreateInfo(bufferInfo), &allocationInfo, 
-        &bufferAllocation->buffer, &bufferAllocation->allocation, nullptr);
+    VkResult result = vmaCreateBuffer(allocator,
+                                      &VkBufferCreateInfo(bufferInfo),
+                                      &allocationInfo,
+                                      &bufferAllocation->buffer,
+                                      &bufferAllocation->allocation,
+                                      nullptr);
     if (result != VK_SUCCESS) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan buffer allocation failed");
         return;
@@ -65,13 +63,13 @@ BufferResource::BufferResource(Context& context_,
 
     if (memoryProps & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
         // memory already mapped
-        //mapped = allocation->GetMappedData();
+        // mapped = allocation->GetMappedData();
         vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
     } else {
         // TODO create staing buffer for transfer
-        //vmaMapMemory(allocator, buffer->allocation, &buffer->mapped);
+        // vmaMapMemory(allocator, buffer->allocation, &buffer->mapped);
     }
-    
+
     if (data) {
         raw.resize(size);
         std::memcpy(raw.data(), data, size);
@@ -87,7 +85,7 @@ BufferResource::BufferResource(Context& context_,
         stats.numBuffers++;
         stats.memBuffers += totalSize;
         stats.totalBuffers++;
-       
+
         stats.totalBufferObjs++;
     }
 }
@@ -100,7 +98,6 @@ BufferResource::BufferResource(BufferResource&& other) noexcept
       persistent(other.persistent),
       bufferAllocation(std::move(other.bufferAllocation)),
       bufferWindowSize(other.bufferWindowSize) {
-
     other.bufferAllocation = nullptr;
 }
 
@@ -110,12 +107,9 @@ BufferResource::~BufferResource() noexcept {
         context.renderingStats().memBuffers -= size;
     }
 
-    if (!bufferAllocation)
-        return;
+    if (!bufferAllocation) return;
 
-    context.enqueueDeletion([allocation = std::move(bufferAllocation)](const auto&) mutable {
-        allocation.reset();
-    });
+    context.enqueueDeletion([allocation = std::move(bufferAllocation)](const auto&) mutable { allocation.reset(); });
 }
 
 BufferResource BufferResource::clone() const {
@@ -127,8 +121,7 @@ BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
     if (isValid()) {
         context.renderingStats().numBuffers--;
         context.renderingStats().memBuffers -= size;
-    }
-    ;
+    };
     raw = std::move(other.raw);
     size = other.size;
     usage = other.usage;
@@ -146,8 +139,8 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
     auto& stats = context.renderingStats();
 
     std::memcpy(raw.data() + offset, newData, updateSize);
-    std::memcpy(static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + 
-        getVulkanBufferOffset() + offset, newData, updateSize);
+    std::memcpy(
+        static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + getVulkanBufferOffset() + offset, newData, updateSize);
     stats.bufferUpdateBytes += updateSize;
 
     stats.bufferUpdates++;
@@ -155,8 +148,7 @@ void BufferResource::update(const void* newData, std::size_t updateSize, std::si
 }
 
 std::size_t BufferResource::getVulkanBufferOffset() const noexcept {
-    if (bufferWindowSize > 0)
-        return 0;
+    if (bufferWindowSize > 0) return 0;
 
     return context.getCurrentFrameResourceIndex() * bufferWindowSize;
 }
@@ -165,5 +157,5 @@ std::size_t BufferResource::getVulkanBufferSize() const noexcept {
     return bufferWindowSize > 0 ? bufferWindowSize : size;
 }
 
-} // namespace mtl
+} // namespace vulkan
 } // namespace mbgl

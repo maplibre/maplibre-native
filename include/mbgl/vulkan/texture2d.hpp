@@ -40,7 +40,6 @@ public:
     const vk::Sampler& getVulkanSampler();
 
 private:
-
     static vk::Format vulkanFormat(const gfx::TexturePixelType, const gfx::TextureChannelDataType);
     static vk::Filter vulkanFilter(const gfx::TextureFilterType);
     static vk::SamplerAddressMode vulkanAddressMode(const gfx::TextureWrapType);
@@ -55,7 +54,6 @@ private:
     void transitionToShaderReadLayout(const vk::UniqueCommandBuffer&);
 
 private:
-
     Context& context;
 
     Size size{0, 0};

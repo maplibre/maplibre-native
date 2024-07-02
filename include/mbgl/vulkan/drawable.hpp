@@ -45,7 +45,6 @@ public:
     void setCullFaceMode(const gfx::CullFaceMode&) override;
 
 protected:
-
     void buildVulkanInputBindings() noexcept;
 
     bool bindAttributes(CommandEncoder&) const noexcept;

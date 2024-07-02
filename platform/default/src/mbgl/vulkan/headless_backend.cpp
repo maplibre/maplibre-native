@@ -20,8 +20,7 @@ public:
 
     ~HeadlessRenderableResource() noexcept override = default;
 
-    void bind() override {
-    }
+    void bind() override {}
 
     void swap() override { backend.swap(); }
 
@@ -40,7 +39,7 @@ HeadlessBackend::HeadlessBackend(const Size size_,
 
 HeadlessBackend::~HeadlessBackend() {
     gfx::BackendScope guard{*this, gfx::BackendScope::ScopeType::Implicit};
-    
+
     // Explicitly reset the renderable resource
     resource.reset();
     // Explicitly reset the context so that it is destructed and cleaned up
@@ -65,14 +64,13 @@ void HeadlessBackend::deactivate() {
 
 gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
     if (!resource) {
-        resource = std::make_unique<HeadlessRenderableResource>(*this, static_cast<vulkan::Context&>(getContext()), size);
+        resource = std::make_unique<HeadlessRenderableResource>(
+            *this, static_cast<vulkan::Context&>(getContext()), size);
     }
     return *this;
 }
 
-void HeadlessBackend::swap() {
-
-}
+void HeadlessBackend::swap() {}
 
 PremultipliedImage HeadlessBackend::readStillImage() {
     return PremultipliedImage();

@@ -31,7 +31,7 @@ namespace mbgl {
 namespace vulkan {
 
 // Maximum number of vertex attributes, per vertex descriptor
-// 32 on most devices (~30% Android use 16), 
+// 32 on most devices (~30% Android use 16),
 // per https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxVertexInputBindings
 // this can be queried at runtime (VkPhysicalDeviceLimits.maxVertexInputBindings)
 constexpr uint32_t maximumVertexBindingCount = 16;
@@ -39,7 +39,6 @@ constexpr uint32_t maximumVertexBindingCount = 16;
 Context::Context(RendererBackend& backend_)
     : gfx::Context(vulkan::maximumVertexBindingCount),
       backend(backend_) {
-
     glslang::InitializeProcess();
 
     initFrameResources();
@@ -52,28 +51,22 @@ Context::~Context() noexcept {
 }
 
 void Context::initFrameResources() {
-
     const auto& device = backend.getDevice();
     const auto frameCount = backend.getMaxFrames();
-    
+
     // command buffers
     const vk::CommandBufferAllocateInfo allocateInfo(
-        backend.getCommandPool().get(), 
-        vk::CommandBufferLevel::ePrimary, 
-        frameCount
-    );
+        backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, frameCount);
 
     auto& commandBuffers = backend.getDevice()->allocateCommandBuffersUnique(allocateInfo);
 
     // descriptor pool info
     const std::vector<vk::DescriptorPoolSize> poolSizes = {
-        { vk::DescriptorType::eUniformBuffer, 10000 },
-        { vk::DescriptorType::eCombinedImageSampler, 5000 },
+        {vk::DescriptorType::eUniformBuffer, 10000},
+        {vk::DescriptorType::eCombinedImageSampler, 5000},
     };
 
-    const auto& descriptorPoolInfo = vk::DescriptorPoolCreateInfo()
-        .setPoolSizes(poolSizes)
-        .setMaxSets(100000);
+    const auto& descriptorPoolInfo = vk::DescriptorPoolCreateInfo().setPoolSizes(poolSizes).setMaxSets(100000);
 
     frameResources.reserve(frameCount);
 
@@ -83,8 +76,7 @@ void Context::initFrameResources() {
             std::move(device->createDescriptorPoolUnique(descriptorPoolInfo)),
             std::move(device->createSemaphoreUnique({})),
             std::move(device->createSemaphoreUnique({})),
-            std::move(device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled)))
-        );
+            std::move(device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled))));
 
         const auto& frame = frameResources.back();
 
@@ -97,11 +89,11 @@ void Context::initFrameResources() {
 }
 
 void Context::destroyResources() {
-   
     backend.getDevice()->waitIdle();
 
-    for (auto& frame : frameResources)
+    for (auto& frame : frameResources) {
         frame.runDeletionQueue(*this);
+    }
 
     // all resources have unique handles
     frameResources.clear();
@@ -116,7 +108,7 @@ void Context::enqueueDeletion(const std::function<void(const Context&)>& functio
         function(*this);
         return;
     }
-    
+
     frameResources[frameResourceIndex].deletionQueue.push_back(std::move(function));
 }
 
@@ -124,10 +116,7 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
     const auto& device = backend.getDevice();
 
     const vk::CommandBufferAllocateInfo allocateInfo(
-        backend.getCommandPool().get(), 
-        vk::CommandBufferLevel::ePrimary, 
-        1
-    );
+        backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
 
     const auto& commandBuffers = backend.getDevice()->allocateCommandBuffersUnique(allocateInfo);
     auto& commandBuffer = commandBuffers.front();
@@ -176,11 +165,10 @@ void Context::beginFrame() {
     frame.commandBuffer->reset(vk::CommandBufferResetFlagBits::eReleaseResources);
     frame.commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eSimultaneousUse));
 
-    Scheduler::GetBackground()->runRenderJobs();
+    backend.getThreadPool().runRenderJobs();
 }
 
 void Context::endFrame() {
-    
     const auto& frame = frameResources[frameResourceIndex];
     frame.commandBuffer->end();
 
@@ -193,10 +181,10 @@ void Context::endFrame() {
     const vk::PipelineStageFlags waitStageMask[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
 
     const auto& submitInfo = vk::SubmitInfo()
-        .setCommandBuffers(frame.commandBuffer.get())
-        .setWaitSemaphores(frame.surfaceSemaphore.get())
-        .setWaitDstStageMask(waitStageMask)
-        .setSignalSemaphores(frame.frameSemaphore.get());
+                                 .setCommandBuffers(frame.commandBuffer.get())
+                                 .setWaitSemaphores(frame.surfaceSemaphore.get())
+                                 .setWaitDstStageMask(waitStageMask)
+                                 .setSignalSemaphores(frame.frameSemaphore.get());
 
     const vk::Result resetFenceResult = device->resetFences(1, &frame.flightFrameFence.get());
     if (resetFenceResult != vk::Result::eSuccess) {
@@ -209,14 +197,13 @@ void Context::endFrame() {
 
     // present rendered frame
     const auto& presentInfo = vk::PresentInfoKHR()
-        .setSwapchains(renderableResource.swapchain.get())
-        .setWaitSemaphores(frame.frameSemaphore.get())
-        .setImageIndices(renderableResource.acquiredImageIndex);
+                                  .setSwapchains(renderableResource.swapchain.get())
+                                  .setWaitSemaphores(frame.frameSemaphore.get())
+                                  .setImageIndices(renderableResource.acquiredImageIndex);
 
     try {
         const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
-        if (presentResult == vk::Result::eSuboptimalKHR)
-            backend.recreateSwapchain();
+        if (presentResult == vk::Result::eSuboptimalKHR) backend.recreateSwapchain();
     } catch (vk::OutOfDateKHRError e) {
         backend.recreateSwapchain();
     }
@@ -229,16 +216,15 @@ std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
     return std::make_unique<CommandEncoder>(*this, frame.commandBuffer);
 }
 
-BufferResource Context::createBuffer(const void* data,
-                                     std::size_t size,
-                                     std::uint32_t usage,
-                                     bool persistent) const {
+BufferResource Context::createBuffer(const void* data, std::size_t size, std::uint32_t usage, bool persistent) const {
     return BufferResource(const_cast<Context&>(*this), data, size, usage, persistent);
 }
 
 UniqueShaderProgram Context::createProgram(std::string name,
-    const std::string_view vertex, const std::string_view fragment, const ProgramParameters& programParameters,
-    const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
+                                           const std::string_view vertex,
+                                           const std::string_view fragment,
+                                           const ProgramParameters& programParameters,
+                                           const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
     return std::make_unique<ShaderProgram>(name, vertex, fragment, programParameters, additionalDefines, backend);
 }
 
@@ -304,7 +290,7 @@ std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
 }
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size size) {
-    return nullptr;//std::make_unique<RenderbufferResource>();
+    return nullptr; // std::make_unique<RenderbufferResource>();
 }
 
 std::unique_ptr<gfx::DrawScopeResource> Context::createDrawScopeResource() {
@@ -327,9 +313,7 @@ void Context::clearStencilBuffer(int32_t) {
     assert(false);
 }
 
-void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
-
-}
+void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {}
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                       RenderStaticData& staticData,
@@ -350,15 +334,15 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     // Create a vertex buffer from the fixed tile coordinates
     if (!clipping.vertexBuffer) {
         const auto vertices = RenderStaticData::tileVertices();
-        clipping.vertexBuffer.emplace(createBuffer(vertices.data(), vertices.bytes(), 
-            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, false));
+        clipping.vertexBuffer.emplace(
+            createBuffer(vertices.data(), vertices.bytes(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, false));
     }
 
     // Create a buffer from the fixed tile indexes
     if (!clipping.indexBuffer) {
         const auto indices = RenderStaticData::quadTriangleIndices();
-        clipping.indexBuffer.emplace(createBuffer(indices.data(), indices.bytes(), 
-            VK_BUFFER_USAGE_INDEX_BUFFER_BIT, false));
+        clipping.indexBuffer.emplace(
+            createBuffer(indices.data(), indices.bytes(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT, false));
         clipping.indexCount = 6;
     }
 
@@ -398,8 +382,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());
     clipping.pipelineInfo.setDynamicValues(commandBuffer);
 
-    const std::array<vk::Buffer, 1> vertexBuffers = { clipping.vertexBuffer->getVulkanBuffer() };
-    const std::array<vk::DeviceSize, 1> offset = { 0 };
+    const std::array<vk::Buffer, 1> vertexBuffers = {clipping.vertexBuffer->getVulkanBuffer()};
+    const std::array<vk::DeviceSize, 1> offset = {0};
 
     commandBuffer->bindVertexBuffers(0, vertexBuffers, offset);
     commandBuffer->bindIndexBuffer(clipping.indexBuffer->getVulkanBuffer(), 0, vk::IndexType::eUint16);
@@ -407,9 +391,12 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     for (const auto& tileInfo : tileUBOs) {
         commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref);
 
-        commandBuffer->pushConstants(getPipelineLayout().get(), 
-            vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 
-            0, sizeof(tileInfo.matrix), &tileInfo.matrix);
+        commandBuffer->pushConstants(
+            getPipelineLayout().get(),
+            vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+            0,
+            sizeof(tileInfo.matrix),
+            &tileInfo.matrix);
         commandBuffer->drawIndexed(clipping.indexCount, 1, 0, 0, 0);
     }
 
@@ -420,15 +407,15 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
 const std::unique_ptr<BufferResource>& Context::getDummyVertexBuffer() {
     if (!dummyVertexBuffer)
-        dummyVertexBuffer = std::make_unique<BufferResource>(*this, nullptr, 
-            16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
+        dummyVertexBuffer = std::make_unique<BufferResource>(
+            *this, nullptr, 16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
     return dummyVertexBuffer;
 }
 
 const std::unique_ptr<BufferResource>& Context::getDummyUniformBuffer() {
-    if (!dummyUniformBuffer) 
-        dummyUniformBuffer = std::make_unique<BufferResource>(*this, nullptr, 
-            16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
+    if (!dummyUniformBuffer)
+        dummyUniformBuffer = std::make_unique<BufferResource>(
+            *this, nullptr, 16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
     return dummyUniformBuffer;
 }
 
@@ -448,9 +435,8 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
 const vk::UniqueDescriptorSetLayout& Context::getUniformDescriptorSetLayout() {
     if (!uniformDescriptorSetLayout) {
         std::vector<vk::DescriptorSetLayoutBinding> descriptorSetBindings(shaders::maxUBOCountPerShader, {});
-        const auto stageFlags = vk::ShaderStageFlags() |
-            vk::ShaderStageFlagBits::eVertex |
-            vk::ShaderStageFlagBits::eFragment;
+        const auto stageFlags = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
+                                vk::ShaderStageFlagBits::eFragment;
 
         for (size_t i = 0; i < descriptorSetBindings.size(); ++i) {
             descriptorSetBindings[i]
@@ -460,9 +446,10 @@ const vk::UniqueDescriptorSetLayout& Context::getUniformDescriptorSetLayout() {
                 .setDescriptorCount(1);
         }
 
-        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo()
-            .setBindings(descriptorSetBindings);
-        uniformDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
+        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(
+            descriptorSetBindings);
+        uniformDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(
+            descriptorSetLayoutCreateInfo);
         backend.setDebugName(uniformDescriptorSetLayout.get(), "UniformDescriptorSetLayout");
     }
 
@@ -481,8 +468,8 @@ const vk::UniqueDescriptorSetLayout& Context::getImageDescriptorSetLayout() {
                 .setDescriptorCount(1);
         }
 
-        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo()
-            .setBindings(descriptorSetBindings);
+        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(
+            descriptorSetBindings);
         imageDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
         backend.setDebugName(imageDescriptorSetLayout.get(), "ImageDescriptorSetLayout");
     }
@@ -492,7 +479,7 @@ const vk::UniqueDescriptorSetLayout& Context::getImageDescriptorSetLayout() {
 
 const std::vector<vk::DescriptorSetLayout>& Context::getDescriptorSetLayouts() {
     if (descriptorSetLayouts.empty()) {
-        descriptorSetLayouts = {getUniformDescriptorSetLayout().get(), getImageDescriptorSetLayout().get() };
+        descriptorSetLayouts = {getUniformDescriptorSetLayout().get(), getImageDescriptorSetLayout().get()};
     }
 
     return descriptorSetLayouts;
@@ -522,10 +509,9 @@ const vk::UniquePipelineLayout& Context::getPipelineLayout() {
 }
 
 void Context::FrameResources::runDeletionQueue(const Context& context) {
-    for (const auto& function : deletionQueue)
-        function(context);
+    for (const auto& function : deletionQueue) function(context);
 
-   deletionQueue.clear();
+    deletionQueue.clear();
 }
 
 } // namespace vulkan

@@ -67,7 +67,7 @@ public:
     std::optional<size_t> getSamplerLocation(const size_t id) const override { return textureBindings[id]; }
     const gfx::VertexAttributeArray& getVertexAttributes() const override { return vertexAttributes; }
     const gfx::VertexAttributeArray& getInstanceAttributes() const override { return instanceAttributes; }
-    
+
     const gfx::UniformBlockArray& getUniformBlocks() const override { return uniformBlocks; }
     gfx::UniformBlockArray& mutableUniformBlocks() override { return uniformBlocks; }
     bool hasTextures() const;
@@ -78,7 +78,6 @@ public:
     void initTexture(const shaders::TextureInfo&);
 
 protected:
-    
     std::string shaderName;
     RendererBackend& backend;
 

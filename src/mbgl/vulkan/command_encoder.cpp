@@ -11,13 +11,9 @@ namespace vulkan {
 
 CommandEncoder::CommandEncoder(Context& context_, const vk::UniqueCommandBuffer& buffer_)
     : context(context_),
-      commandBuffer(buffer_) {
+      commandBuffer(buffer_) {}
 
-}
-
-CommandEncoder::~CommandEncoder() {
-
-}
+CommandEncoder::~CommandEncoder() {}
 
 std::unique_ptr<gfx::UploadPass> CommandEncoder::createUploadPass(const char* name, gfx::Renderable& renderable) {
     return std::make_unique<UploadPass>(renderable, *this, name);
@@ -38,10 +34,7 @@ void CommandEncoder::pushDebugGroup(const char* name) {
 
 void CommandEncoder::pushDebugGroup(const char* name, const std::array<float, 4>& color) {
 #ifndef NDEBUG
-    commandBuffer->beginDebugUtilsLabelEXT(vk::DebugUtilsLabelEXT()
-        .setPLabelName(name)
-        .setColor(color)
-    );
+    commandBuffer->beginDebugUtilsLabelEXT(vk::DebugUtilsLabelEXT().setPLabelName(name).setColor(color));
 #endif
 }
 

@@ -38,5 +38,5 @@ void UniformBuffer::update(const void* data, std::size_t size_) {
     buffer.update(data, size, /*offset=*/0);
 }
 
-} // namespace mtl
+} // namespace vulkan
 } // namespace mbgl

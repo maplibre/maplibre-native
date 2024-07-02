@@ -30,7 +30,6 @@ public:
     };
 
 private:
-
     void activate() override;
     void deactivate() override;
 
