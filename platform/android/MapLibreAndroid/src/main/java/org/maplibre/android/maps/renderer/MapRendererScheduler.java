@@ -16,7 +16,4 @@ public interface MapRendererScheduler {
 
   @Keep
   void waitForEmpty();
-
-  @Keep
-  long waitForEmpty(long timeoutMillis);
 }

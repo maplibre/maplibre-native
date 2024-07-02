@@ -93,7 +93,7 @@ private:
 
     TileLoader<RasterDEMTile> loader;
 
-    const std::shared_ptr<Scheduler> threadPool;
+    TaggedScheduler threadPool;
     std::shared_ptr<Mailbox> mailbox;
     Actor<RasterDEMTileWorker> worker;
 

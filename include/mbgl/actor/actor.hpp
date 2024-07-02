@@ -14,6 +14,8 @@
 
 namespace mbgl {
 
+class TaggedScheduler;
+
 /**
     An `Actor<O>` is an owning reference to an asynchronous object of type `O`:
    an "actor". Communication with an actor happens via message passing: you send
@@ -60,6 +62,11 @@ public:
     template <class... Args>
     Actor(Scheduler& scheduler, Args&&... args)
         : target(scheduler, parent, std::forward<Args>(args)...) {}
+
+    template <class... Args>
+    Actor(const TaggedScheduler& scheduler, Args&&... args)
+        : retainer(scheduler.get()),
+          target(scheduler, parent, std::forward<Args>(args)...) {}
 
     template <class... Args>
     Actor(std::shared_ptr<Scheduler> scheduler, Args&&... args)

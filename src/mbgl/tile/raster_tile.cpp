@@ -17,16 +17,16 @@ namespace mbgl {
 RasterTile::RasterTile(const OverscaledTileID& id_, const TileParameters& parameters, const Tileset& tileset)
     : Tile(Kind::Raster, id_),
       loader(*this, id_, parameters, tileset),
-      threadPool(Scheduler::GetBackground()),
+      threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(Scheduler::GetBackground(), ActorRef<RasterTile>(*this, mailbox)) {}
+      worker(parameters.threadPool, ActorRef<RasterTile>(*this, mailbox)) {}
 
 RasterTile::~RasterTile() {
     markObsolete();
 
     // The bucket has resources that need to be released on the render thread.
     if (bucket) {
-        threadPool->runOnRenderThread([bucket_{std::move(bucket)}]() {});
+        threadPool.runOnRenderThread([bucket_{std::move(bucket)}]() {});
     }
 }
 

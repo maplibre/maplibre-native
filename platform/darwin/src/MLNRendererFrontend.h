@@ -1,3 +1,4 @@
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/renderer/renderer.hpp>
@@ -31,6 +32,10 @@ class MLNRenderFrontend : public mbgl::RendererFrontend {
     } else {
       [nativeView setNeedsRerender];
     }
+  }
+
+  const mbgl::TaggedScheduler& getThreadPool() const override {
+    return mbglBackend.getThreadPool();
   }
 
   void setObserver(mbgl::RendererObserver& observer) override {

@@ -6,6 +6,12 @@
 
 ### 🐞 Bug fixes
 
+## 11.0.2-pre0
+
+### ✨ Features and improvements
+
+- Add TaggedScheduler, couple lifetime of tasks and orchestrator ([#2398](https://github.com/maplibre/maplibre-native/pull/2398)).
+
 ## 11.0.1
 
 ### ✨ Features and improvements
