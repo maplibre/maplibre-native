@@ -745,18 +745,18 @@ bool TransformState::rotatedNorth() const {
 }
 
 bool TransformState::constrainScreen(double& scale_, double& lat, double& lon) const {
-  if (constrainMode == ConstrainMode::Screen) {
+    if (constrainMode == ConstrainMode::Screen) {
         double zoom = scaleZoom(scale_);
         CameraOptions options = CameraOptions();
         constrainCameraAndZoomToBounds(options, zoom);
 
         scale_ = zoomScale(zoom);
- 
+
         if (options.center) {
             LatLng center = options.center.value();
             lat = center.latitude();
             lon = center.longitude();
- 
+
             return true;
         }
     }
@@ -865,7 +865,7 @@ void TransformState::constrainCameraAndZoomToBounds(CameraOptions& requestedCame
     }
 
     double maxScale = scaleX > scaleY ? scaleX : scaleY;
-    
+
     // Max scale will be 1 when the screen is exactly the same size as the max bounds in either the X or Y direction.
     // To avoid numerical instabilities we add small amount to the check to make sure we don't try to scale when we
     // don't actually need it.

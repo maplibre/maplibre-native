@@ -58,21 +58,21 @@ void Transform::resize(const Size size) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
-        
+
     double lat;
     double lon;
-    if(state.constrainScreen(scale, lat, lon)) {
+    if (state.constrainScreen(scale, lat, lon)) {
         // Turns out that if you resize during a transition any changes made to the state will be ignored :(
         // So if we have to constrain because of a resize and a transition is in progress - cancel the transition!
-        if(inTransition()) {
+        if (inTransition()) {
             cancelTransitions();
         }
 
-        // It also turns out that state.setProperties isn't enough if you change the center, you need to set Cc and Bc too,
-        // which setLatLngZoom does.
+        // It also turns out that state.setProperties isn't enough if you change the center, you need to set Cc and Bc
+        // too, which setLatLngZoom does.
         state.setLatLngZoom(mbgl::LatLng{lat, lon}, state.scaleZoom(scale));
         observer.onCameraDidChange(MapObserver::CameraChangeMode::Immediate);
-        
+
         return;
     }
     state.constrain(scale, x, y);
