@@ -1,8 +1,8 @@
 # Using GeoJSON with a line style layer
 
-> Note: This example uses UIKit.
-
 Adding an ``MLNLineStyleLayer`` to the map using a GeoJSON file.
+
+> Note: This example uses UIKit.
 
 <!-- include-example(LineStyleLayerExample) -->
 

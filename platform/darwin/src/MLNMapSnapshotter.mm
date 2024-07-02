@@ -130,15 +130,6 @@ private:
 #endif
 @end
 
-@interface MLNMapSnapshotOptions ()
-
-/**
- :nodoc:
- Whether to include the MapLibre logo. Note this is not required.
- */
-@property (nonatomic, readwrite) BOOL showsLogo;
-@end
-
 @implementation MLNMapSnapshotOptions
 
 - (instancetype _Nonnull)initWithStyleURL:(nullable NSURL *)styleURL camera:(MLNMapCamera *)camera size:(CGSize)size

@@ -78,6 +78,12 @@ MLN_EXPORT
 // MARK: - Configuring the Map
 
 /**
+ :nodoc:
+ Whether to include the MapLibre logo. Note this is not required.
+ */
+@property (nonatomic, readwrite) BOOL showsLogo;
+
+/**
  URL of the map style to snapshot.
  */
 @property (nonatomic, readonly) NSURL *styleURL;

@@ -1,8 +1,8 @@
 # Showing data from an API
 
-> Note: This example uses UIKit.
-
 Showing data from an API with custom styling and interaction
+
+> Note: This example uses UIKit.
 
 This example loads lighthouses in the United States from [WikiData](http://tinyurl.com/zrl2jc4). It adds points to the map and applies dynamic styling to these points. When zooming in the dots become larger circles with a custom icon and the name of the lighthouse shown next to it. When tapping a callout is shown with the name of the lighthouse that was tapped on.
 
