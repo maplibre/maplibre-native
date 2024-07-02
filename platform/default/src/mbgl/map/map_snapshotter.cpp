@@ -118,6 +118,8 @@ public:
         return std::move(stillImage);
     }
 
+    const TaggedScheduler& getThreadPool() const { return frontend.getThreadPool(); }
+
 private:
     PremultipliedImage stillImage;
     bool hasPendingStillImageRequest = false;
@@ -155,6 +157,10 @@ public:
     }
 
     PremultipliedImage takeImage() { return renderer->actor().ask(&SnapshotterRenderer::takeImage).get(); }
+
+    const mbgl::TaggedScheduler& getThreadPool() const override {
+        return renderer->actor().ask(&SnapshotterRenderer::getThreadPool).get();
+    }
 
 private:
     std::shared_ptr<UpdateParameters> updateParameters;

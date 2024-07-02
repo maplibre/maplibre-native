@@ -2,6 +2,7 @@
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layer_group.hpp>
 #endif
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/render_source_observer.hpp>
 #include <mbgl/renderer/render_light.hpp>
@@ -55,7 +56,9 @@ using ImmutableLayer = Immutable<style::Layer::Impl>;
 
 class RenderOrchestrator final : public GlyphManagerObserver, public ImageManagerObserver, public RenderSourceObserver {
 public:
-    RenderOrchestrator(bool backgroundLayerAsColor_, const std::optional<std::string>& localFontFamily_);
+    RenderOrchestrator(bool backgroundLayerAsColor_,
+                       TaggedScheduler& threadPool_,
+                       const std::optional<std::string>& localFontFamily_);
     ~RenderOrchestrator() override;
 
     void markContextLost() { contextLost = true; };
@@ -210,7 +213,7 @@ private:
     RenderLayerReferences orderedLayers;
     RenderLayerReferences layersNeedPlacement;
 
-    std::shared_ptr<Scheduler> threadPool;
+    TaggedScheduler threadPool;
 
 #if MLN_DRAWABLE_RENDERER
     std::vector<std::unique_ptr<ChangeRequest>> pendingChanges;
