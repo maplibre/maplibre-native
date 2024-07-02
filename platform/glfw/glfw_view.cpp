@@ -46,6 +46,10 @@
 #define GLFW_INCLUDE_ES3
 #endif
 
+#if MLN_RENDER_BACKEND_VULKAN
+#define GLFW_INCLUDE_VULKAN
+#endif
+
 #define GL_GLEXT_PROTOTYPES
 #include <GLFW/glfw3.h>
 
@@ -1104,7 +1108,7 @@ void GLFWView::report(float duration) {
         std::ostringstream oss;
         oss.precision(2);
         oss << "Frame time: " << std::fixed << frameTime << "ms (" << 1000 / frameTime << "fps)";
-        mbgl::Log::Info(mbgl::Event::OpenGL, oss.str());
+        mbgl::Log::Info(mbgl::Event::Render, oss.str());
 
         frames = 0;
         frameTime = 0;
