@@ -105,29 +105,6 @@ ShaderProgram::ShaderProgram(const std::string& name,
 
 ShaderProgram::~ShaderProgram() noexcept = default;
 
-const vk::UniquePipelineLayout& ShaderProgram::getPipelineLayout() {
-    if (pipelineLayout) 
-        return pipelineLayout;
-
-    const auto& pushConstant = vk::PushConstantRange()
-        .setSize(sizeof(mat4))
-        .setStageFlags(vk::ShaderStageFlags() |
-            vk::ShaderStageFlagBits::eVertex |
-            vk::ShaderStageFlagBits::eFragment);
-
-    auto& context = static_cast<Context&>(backend.getContext());
-    const auto& descriptorSetLayouts = context.getDescriptorSetLayouts();
-
-    pipelineLayout = backend.getDevice()->createPipelineLayoutUnique(vk::PipelineLayoutCreateInfo()
-        .setSetLayouts(descriptorSetLayouts)
-        .setPushConstantRanges(pushConstant)
-    );
-
-    backend.setDebugName(pipelineLayout.get(), shaderName + "_pipelineLayout");
-
-    return pipelineLayout;
-}
-
 const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelineInfo) {
     auto& pipeline = pipelines[pipelineInfo.hash()];
     if (pipeline) 
@@ -152,7 +129,7 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
         .setScissorCount(1)
         .setPScissors(&scissorRect);
 
-    const auto rasterState = vk::PipelineRasterizationStateCreateInfo()
+    const auto& rasterState = vk::PipelineRasterizationStateCreateInfo()
         .setCullMode(pipelineInfo.cullMode)
         .setFrontFace(pipelineInfo.frontFace)
         .setPolygonMode(pipelineInfo.polygonMode)
@@ -167,7 +144,7 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
         .setFailOp(pipelineInfo.stencilFail)
         .setDepthFailOp(pipelineInfo.stencilDepthFail);
 
-    const auto depthStencilState = vk::PipelineDepthStencilStateCreateInfo()
+    const auto& depthStencilState = vk::PipelineDepthStencilStateCreateInfo()
         .setDepthTestEnable(pipelineInfo.depthTest)
         .setDepthWriteEnable(pipelineInfo.depthWrite)
         .setDepthBoundsTestEnable(false)
@@ -211,7 +188,8 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
     const vk::PipelineDynamicStateCreateInfo dynamicState({}, dynamicValues);
 
     const auto& device = backend.getDevice();
-    const auto& pipelineLayout = getPipelineLayout();
+    auto& context = static_cast<Context&>(backend.getContext());
+    const auto& pipelineLayout = context.getPipelineLayout();
 
     const std::array<vk::PipelineShaderStageCreateInfo, 2> shaderStages = {
         vk::PipelineShaderStageCreateInfo()

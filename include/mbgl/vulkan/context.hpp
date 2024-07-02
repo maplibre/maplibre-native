@@ -133,6 +133,7 @@ public:
     const vk::UniqueDescriptorSetLayout& getUniformDescriptorSetLayout();
     const vk::UniqueDescriptorSetLayout& getImageDescriptorSetLayout();
     const std::vector<vk::DescriptorSetLayout>& getDescriptorSetLayouts();
+    const vk::UniquePipelineLayout& getPipelineLayout();
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
     const vk::UniqueDescriptorPool& getCurrentDescriptorPool() const;
@@ -183,6 +184,7 @@ private:
     vk::UniqueDescriptorSetLayout uniformDescriptorSetLayout;
     vk::UniqueDescriptorSetLayout imageDescriptorSetLayout;
     std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
+    vk::UniquePipelineLayout pipelineLayout;
 
     uint8_t frameResourceIndex = 0;
     std::vector<FrameResources> frameResources;

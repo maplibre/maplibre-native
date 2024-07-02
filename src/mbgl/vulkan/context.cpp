@@ -71,7 +71,7 @@ void Context::initFrameResources() {
         { vk::DescriptorType::eCombinedImageSampler, 5000 },
     };
 
-    const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo()
+    const auto& descriptorPoolInfo = vk::DescriptorPoolCreateInfo()
         .setPoolSizes(poolSizes)
         .setMaxSets(100000);
 
@@ -157,8 +157,8 @@ void Context::beginFrame() {
 #endif
     }
 
-    frame.runDeletionQueue(*this);
     device->resetDescriptorPool(getCurrentDescriptorPool().get());
+    frame.runDeletionQueue(*this);
 
     try {
         const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
@@ -407,7 +407,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     for (const auto& tileInfo : tileUBOs) {
         commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref);
 
-        commandBuffer->pushConstants(shaderImpl.getPipelineLayout().get(), 
+        commandBuffer->pushConstants(getPipelineLayout().get(), 
             vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment, 
             0, sizeof(tileInfo.matrix), &tileInfo.matrix);
         commandBuffer->drawIndexed(clipping.indexCount, 1, 0, 0, 0);
@@ -496,6 +496,29 @@ const std::vector<vk::DescriptorSetLayout>& Context::getDescriptorSetLayouts() {
     }
 
     return descriptorSetLayouts;
+}
+
+const vk::UniquePipelineLayout& Context::getPipelineLayout() {
+     if (pipelineLayout) 
+        return pipelineLayout;
+
+    const auto& pushConstant = vk::PushConstantRange()
+        .setSize(sizeof(mat4))
+        .setStageFlags(vk::ShaderStageFlags() |
+            vk::ShaderStageFlagBits::eVertex |
+            vk::ShaderStageFlagBits::eFragment);
+
+    auto& context = static_cast<Context&>(backend.getContext());
+    const auto& descriptorSetLayouts = context.getDescriptorSetLayouts();
+
+    pipelineLayout = backend.getDevice()->createPipelineLayoutUnique(vk::PipelineLayoutCreateInfo()
+        .setSetLayouts(descriptorSetLayouts)
+        .setPushConstantRanges(pushConstant)
+    );
+
+    backend.setDebugName(pipelineLayout.get(), "PipelineLayout");
+
+    return pipelineLayout;
 }
 
 void Context::FrameResources::runDeletionQueue(const Context& context) {

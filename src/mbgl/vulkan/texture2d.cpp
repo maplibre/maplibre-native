@@ -87,10 +87,6 @@ void Texture2D::create() noexcept {
     if (textureDirty) {
         createTexture();
     }
-
-    if (samplerStateDirty) {
-        createSampler();
-    }
 }
 
 void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
@@ -99,6 +95,9 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
 }
 
 void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16_t xOffset, uint16_t yOffset) noexcept {
+    if (!pixelData || size.width == 0 || size.height == 0)
+        return;
+
     create();
 
     if (!imageAllocation) 
@@ -254,11 +253,25 @@ void Texture2D::createTexture() {
         return;
     }
 
+    // defaults to eIdentity
+    vk::ComponentMapping imageSwizzle;
+
+    // alpha only format (eA8UnormKHR) is not part of core
+    // use a R8 texture and map red channel to alpha
+    if (pixelFormat == gfx::TexturePixelType::Alpha) {
+        imageSwizzle = vk::ComponentMapping(
+            vk::ComponentSwizzle::eZero,
+            vk::ComponentSwizzle::eZero,
+            vk::ComponentSwizzle::eZero,
+            vk::ComponentSwizzle::eR
+        );
+    }
+
     auto& imageViewCreateInfo = vk::ImageViewCreateInfo()
         .setImage(imageAllocation->image)
         .setViewType(vk::ImageViewType::e2D)
         .setFormat(format)
-        .setComponents(vk::ComponentMapping()) // this can be changed for non-RGBA types
+        .setComponents(imageSwizzle)
         .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 
     imageAllocation->imageView = backend.getDevice()->createImageViewUnique(imageViewCreateInfo);
@@ -280,11 +293,13 @@ void Texture2D::createSampler() {
     const auto& samplerCreateInfo = vk::SamplerCreateInfo()
         .setMinFilter(filter)
         .setMagFilter(filter)
+        .setMipmapMode(vk::SamplerMipmapMode::eNearest)
+        .setMinLod(-VK_LOD_CLAMP_NONE)
+        .setMaxLod(VK_LOD_CLAMP_NONE)
         .setAddressModeU(addressModeU)
         .setAddressModeV(addressModeV)
-        .setAddressModeW(vk::SamplerAddressMode::eClampToEdge)
-        .setAnisotropyEnable(false)
-        .setCompareEnable(false);
+        .setAddressModeW(vk::SamplerAddressMode::eRepeat)
+        .setAnisotropyEnable(false);
 
     sampler = context.getBackend().getDevice()->createSampler(samplerCreateInfo);
 
@@ -349,6 +364,14 @@ void Texture2D::transitionToShaderReadLayout(const vk::UniqueCommandBuffer& buff
     );
 
     imageLayout = barrier.newLayout;
+}
+
+const vk::Sampler& Texture2D::getVulkanSampler() {
+    if (samplerStateDirty) {
+        createSampler();
+    }
+
+    return sampler;
 }
 
 } // namespace vulkan

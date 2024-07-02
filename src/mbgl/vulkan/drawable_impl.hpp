@@ -3,14 +3,12 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/uniform.hpp>
 #include <mbgl/vulkan/uniform_buffer.hpp>
 #include <mbgl/vulkan/render_pass.hpp>
 #include <mbgl/vulkan/upload_pass.hpp>
 #include <mbgl/vulkan/pipeline.hpp>
 #include <mbgl/programs/segment.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #include <cstdint>
@@ -41,6 +39,9 @@ public:
     std::size_t vertexAttrId = 0;
 
     std::optional<gfx::RenderPassDescriptor> renderPassDescriptor;
+
+    gfx::DepthMode depthFor3D = gfx::DepthMode::disabled();
+    gfx::StencilMode stencilFor3D = gfx::StencilMode::disabled();
 
     PipelineInfo pipelineInfo;
 

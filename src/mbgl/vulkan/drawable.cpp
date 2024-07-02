@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/vulkan/command_encoder.hpp>
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/vulkan/drawable_impl.hpp>
@@ -78,9 +79,12 @@ void Drawable::setDepthType(gfx::DepthMaskType value) {
     impl->pipelineInfo.setDepthWrite(value);
 }
 
-void Drawable::setEnableStencil(bool value) {
-    gfx::Drawable::setEnableStencil(value);
-    impl->pipelineInfo.depthTest = value;
+void Drawable::setDepthModeFor3D(const gfx::DepthMode& value) {
+    impl->depthFor3D = value;
+}
+
+void Drawable::setStencilModeFor3D(const gfx::StencilMode& value) {
+    impl->stencilFor3D = value;
 }
 
 void Drawable::setLineWidth(int32_t value) {
@@ -122,8 +126,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     if (impl->indexes->getDirty()) {
         // Create or update a buffer for the index data.  We don't update any
         // existing buffer because it may still be in use by the previous frame.
-        impl->indexes->getBuffer();
-
         auto indexBufferResource{uploadPass.createIndexBufferResource(
             impl->indexes->data(), impl->indexes->bytes(), usage, /*persistent=*/false)};
         auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(),
@@ -134,7 +136,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         impl->indexes->setDirty(false);
     }
 
-    const bool buildAttribs = !vertexAttributes || vertexAttributes->isDirty();
+    const bool buildAttribs = !vertexAttributes || vertexAttributes->isDirty() || impl->pipelineInfo.inputAttributes.empty();
 
     if (buildAttribs) {
 #if !defined(NDEBUG)
@@ -216,14 +218,23 @@ void Drawable::draw(PaintParameters& parameters) const {
     if (!bindDescriptors(encoder))
         return;
 
-    if (enableDepth) {
-        const auto& depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
-        impl->pipelineInfo.setDepthMode(depthMode);
-    }
+    if (is3D) {
+        impl->pipelineInfo.setDepthMode(impl->depthFor3D);
+        impl->pipelineInfo.setStencilMode(impl->stencilFor3D);
+    } else {
+        if (enableDepth) {
+            const auto& depthMode = parameters.depthModeForSublayer(getSubLayerIndex(), getDepthType());
+            impl->pipelineInfo.setDepthMode(depthMode);
+        } else {
+            impl->pipelineInfo.setDepthMode(gfx::DepthMode::disabled());
+        }
 
-    if (enableStencil) {
-        const auto& stencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
-        impl->pipelineInfo.setStencilMode(stencilMode);
+        if (enableStencil) {
+            const auto& stencilMode = parameters.stencilModeForClipping(tileID->toUnwrapped());
+            impl->pipelineInfo.setStencilMode(stencilMode);
+        } else {
+            impl->pipelineInfo.setStencilMode(gfx::StencilMode::disabled());
+        }
     }
 
     impl->pipelineInfo.setDynamicValues(commandBuffer);
@@ -295,12 +306,11 @@ void Drawable::buildVulkanInputBindings() noexcept {
 
     std::vector<const gfx::VertexBufferResource*> uniqueBuffers;
 
-    const auto buildBindings = [&](const gfx::AttributeBindingArray& bindings, 
-        const gfx::VertexAttributeArray& attributes, vk::VertexInputRate inputRate) {
+    const auto buildBindings = [&](const gfx::AttributeBindingArray& bindings, vk::VertexInputRate inputRate) {
 
         for (size_t i = 0; i < bindings.size(); ++i) {
             const auto& binding = bindings[i];
-            if (!binding.has_value()) 
+            if (!binding.has_value() || !binding->vertexBufferResource) 
                 continue;
 
             const auto& vertexBuffer = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
@@ -337,8 +347,8 @@ void Drawable::buildVulkanInputBindings() noexcept {
         }
     };
 
-    buildBindings(impl->attributeBindings, *vertexAttributes, vk::VertexInputRate::eVertex);
-    buildBindings(impl->instanceBindings, *instanceAttributes, vk::VertexInputRate::eInstance);
+    buildBindings(impl->attributeBindings, vk::VertexInputRate::eVertex);
+    buildBindings(impl->instanceBindings, vk::VertexInputRate::eInstance);
 }
 
 bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
@@ -416,8 +426,8 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
 
         for (size_t id = 0; id < shaders::maxTextureCountPerShader; ++id) {
             const auto& texture = id < textures.size() ? textures[id] : nullptr;
-            const auto& textureImpl = texture ? 
-                static_cast<const Texture2D&>(*texture) : 
+            auto& textureImpl = texture ? 
+                static_cast<Texture2D&>(*texture) : 
                 *context.getDummyTexture();
             
             const auto& descriptorImageInfo = vk::DescriptorImageInfo()
@@ -442,7 +452,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
     const auto& commandBuffer = encoder.getCommandBuffer();
     commandBuffer->bindDescriptorSets(
         vk::PipelineBindPoint::eGraphics, 
-        shaderImpl->getPipelineLayout().get(),
+        context.getPipelineLayout().get(),
         0,
         drawableDescriptorSets,
         nullptr

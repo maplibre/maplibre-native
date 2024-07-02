@@ -2,32 +2,23 @@
 
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/draw_mode.hpp>
-#include <mbgl/vulkan/upload_pass.hpp>
-#include <mbgl/programs/segment.hpp>
 
 #include <memory>
 
 namespace mbgl {
 
-template <class AttributeList>
-class Segment;
-class PaintParameters;
-
 namespace gfx {
 
-class IndexBuffer;
 class UploadPass;
-class VertexBufferResource;
-
-using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
+class DepthMode;
+class StencilMode;
 
 } // namespace gfx
 
 namespace vulkan {
 
-class RenderPass;
-class Texture2D;
-class VertexArray;
+class CommandEncoder;
+class UploadPass;
 
 class Drawable : public gfx::Drawable {
 public:
@@ -47,7 +38,8 @@ public:
     void setColorMode(const gfx::ColorMode& value) override;
     void setEnableDepth(bool value) override;
     void setDepthType(gfx::DepthMaskType value) override;
-    void setEnableStencil(bool value) override;
+    void setDepthModeFor3D(const gfx::DepthMode& value);
+    void setStencilModeFor3D(const gfx::StencilMode& value);
 
     void setLineWidth(int32_t value) override;
     void setCullFaceMode(const gfx::CullFaceMode&) override;

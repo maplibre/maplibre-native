@@ -37,7 +37,7 @@ public:
 
     const vk::ImageLayout& getVulkanImageLayout() const { return imageLayout; }
     const vk::UniqueImageView& getVulkanImageView() const { return imageAllocation->imageView; }
-    const vk::Sampler& getVulkanSampler() const { return sampler; }
+    const vk::Sampler& getVulkanSampler();
 
 private:
 
