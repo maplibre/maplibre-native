@@ -136,7 +136,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         impl->indexes->setDirty(false);
     }
 
-    const bool buildAttribs = !vertexAttributes || vertexAttributes->isDirty() || impl->pipelineInfo.inputAttributes.empty();
+    const bool buildAttribs = !vertexAttributes || vertexAttributes->isDirty() ||
+                              impl->pipelineInfo.inputAttributes.empty();
 
     if (buildAttribs) {
 #if !defined(NDEBUG)
@@ -305,11 +306,9 @@ void Drawable::buildVulkanInputBindings() noexcept {
     std::vector<const gfx::VertexBufferResource*> uniqueBuffers;
 
     const auto buildBindings = [&](const gfx::AttributeBindingArray& bindings, vk::VertexInputRate inputRate) {
-
         for (size_t i = 0; i < bindings.size(); ++i) {
             const auto& binding = bindings[i];
-            if (!binding.has_value() || !binding->vertexBufferResource) 
-                continue;
+            if (!binding.has_value() || !binding->vertexBufferResource) continue;
 
             const auto& vertexBuffer = static_cast<const VertexBufferResource*>(binding->vertexBufferResource);
             const auto& buffer = vertexBuffer->get();

@@ -3,10 +3,10 @@
 namespace mbgl {
 namespace shaders {
 
-#define CREATE_TEST_SHADER_(x)                                                                                      \
-const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::x, gfx::Backend::Type::Vulkan>::attributes = {				\
-	AttributeInfo{0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},										\
-};																													\
+#define CREATE_TEST_SHADER_(x)                                                                              \
+    const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::x, gfx::Backend::Type::Vulkan>::attributes = { \
+        AttributeInfo{0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},                         \
+    };
 
 CREATE_TEST_SHADER_(CircleShader)
 CREATE_TEST_SHADER_(BackgroundShader)

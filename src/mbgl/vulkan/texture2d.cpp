@@ -95,8 +95,7 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
 }
 
 void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16_t xOffset, uint16_t yOffset) noexcept {
-    if (!pixelData || size.width == 0 || size.height == 0)
-        return;
+    if (!pixelData || size.width == 0 || size.height == 0) return;
 
     create();
 
@@ -267,12 +266,10 @@ void Texture2D::createTexture() {
     // alpha only format (eA8UnormKHR) is not part of core
     // use a R8 texture and map red channel to alpha
     if (pixelFormat == gfx::TexturePixelType::Alpha) {
-        imageSwizzle = vk::ComponentMapping(
-            vk::ComponentSwizzle::eZero,
-            vk::ComponentSwizzle::eZero,
-            vk::ComponentSwizzle::eZero,
-            vk::ComponentSwizzle::eR
-        );
+        imageSwizzle = vk::ComponentMapping(vk::ComponentSwizzle::eZero,
+                                            vk::ComponentSwizzle::eZero,
+                                            vk::ComponentSwizzle::eZero,
+                                            vk::ComponentSwizzle::eR);
     }
 
     auto& imageViewCreateInfo = vk::ImageViewCreateInfo()

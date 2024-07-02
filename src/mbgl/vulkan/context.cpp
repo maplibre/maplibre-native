@@ -486,22 +486,18 @@ const std::vector<vk::DescriptorSetLayout>& Context::getDescriptorSetLayouts() {
 }
 
 const vk::UniquePipelineLayout& Context::getPipelineLayout() {
-     if (pipelineLayout) 
-        return pipelineLayout;
+    if (pipelineLayout) return pipelineLayout;
 
     const auto& pushConstant = vk::PushConstantRange()
-        .setSize(sizeof(mat4))
-        .setStageFlags(vk::ShaderStageFlags() |
-            vk::ShaderStageFlagBits::eVertex |
-            vk::ShaderStageFlagBits::eFragment);
+                                   .setSize(sizeof(mat4))
+                                   .setStageFlags(vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
+                                                  vk::ShaderStageFlagBits::eFragment);
 
     auto& context = static_cast<Context&>(backend.getContext());
     const auto& descriptorSetLayouts = context.getDescriptorSetLayouts();
 
-    pipelineLayout = backend.getDevice()->createPipelineLayoutUnique(vk::PipelineLayoutCreateInfo()
-        .setSetLayouts(descriptorSetLayouts)
-        .setPushConstantRanges(pushConstant)
-    );
+    pipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
+        vk::PipelineLayoutCreateInfo().setSetLayouts(descriptorSetLayouts).setPushConstantRanges(pushConstant));
 
     backend.setDebugName(pipelineLayout.get(), "PipelineLayout");
 

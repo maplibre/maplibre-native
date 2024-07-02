@@ -294,7 +294,6 @@ void PipelineInfo::setDepthMode(const gfx::DepthMode& value) {
 }
 
 void PipelineInfo::setStencilMode(const gfx::StencilMode& value) {
-
     if (value.test.is<gfx::StencilMode::Always>()) {
         stencilTest = false;
         stencilFunction = vk::CompareOp::eNever;

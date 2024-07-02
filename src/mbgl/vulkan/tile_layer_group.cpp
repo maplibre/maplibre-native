@@ -42,7 +42,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     auto& context = static_cast<Context&>(parameters.context);
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
 
-   // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
+    // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
     // drawables in this layer use 3D stencil mode, we need to set it up here so that all the
     // drawables end up using the same mode value.
     // 2D and 3D features in the same layer group is not supported.
@@ -79,8 +79,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         }
     } else if (stencilTiles && !stencilTiles->empty()) {
         parameters.renderTileClippingMasks(stencilTiles);
-    } 
-
+    }
 
     bool bindUBOs = false;
     visitDrawables([&](gfx::Drawable& drawable) {
@@ -104,11 +103,11 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             if (!uniformBuffer) continue;
 
             if (features3d) {
-                drawableImpl.setDepthModeFor3D(drawableImpl.getEnableDepth() ? 
-                    depthMode3d.value() : gfx::DepthMode::disabled());
+                drawableImpl.setDepthModeFor3D(drawableImpl.getEnableDepth() ? depthMode3d.value()
+                                                                             : gfx::DepthMode::disabled());
 
-                drawableImpl.setStencilModeFor3D(drawableImpl.getEnableStencil() ? 
-                    stencilMode3d.value() : gfx::StencilMode::disabled());
+                drawableImpl.setStencilModeFor3D(drawableImpl.getEnableStencil() ? stencilMode3d.value()
+                                                                                 : gfx::StencilMode::disabled());
             }
 
             drawableUniforms.set(id, uniformBuffer);

@@ -58,8 +58,8 @@ const std::array<AttributeInfo, 4>
         AttributeInfo{2, gfx::AttributeDataType::UShort4, idFillPatternToVertexAttribute},
         AttributeInfo{3, gfx::AttributeDataType::Float2, idFillOpacityVertexAttribute},
 };
-const std::array<TextureInfo, 1> 
-    ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Vulkan>::textures = {
+const std::array<TextureInfo, 1> ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Vulkan>::textures =
+    {
         TextureInfo{0, idFillImageTexture},
 };
 
@@ -75,19 +75,19 @@ const std::array<AttributeInfo, 2>
         AttributeInfo{1, gfx::AttributeDataType::UByte4, idLineDataVertexAttribute},
 };
 
-const std::array<UniformBlockInfo, 3> 
-    ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan>::uniforms = {
+const std::array<UniformBlockInfo, 3> ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan>::uniforms =
+    {
         UniformBlockInfo{true, false, sizeof(FillExtrusionDrawableUBO), idFillExtrusionDrawableUBO},
         UniformBlockInfo{true, false, sizeof(FillExtrusionPropsUBO), idFillExtrusionPropsUBO},
         UniformBlockInfo{true, false, sizeof(FillExtrusionInterpolateUBO), idFillExtrusionInterpolateUBO},
 };
-const std::array<AttributeInfo, 5> 
-    ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan>::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Short4, idFillExtrusionNormalEdVertexAttribute},
-    AttributeInfo{2, gfx::AttributeDataType::Float4, idFillExtrusionColorVertexAttribute},
-    AttributeInfo{3, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
-    AttributeInfo{4, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
+const std::array<AttributeInfo, 5> ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan>::attributes =
+    {
+        AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
+        AttributeInfo{1, gfx::AttributeDataType::Short4, idFillExtrusionNormalEdVertexAttribute},
+        AttributeInfo{2, gfx::AttributeDataType::Float4, idFillExtrusionColorVertexAttribute},
+        AttributeInfo{3, gfx::AttributeDataType::Float, idFillExtrusionBaseVertexAttribute},
+        AttributeInfo{4, gfx::AttributeDataType::Float, idFillExtrusionHeightVertexAttribute},
 };
 
 const std::array<UniformBlockInfo, 5>
@@ -98,7 +98,7 @@ const std::array<UniformBlockInfo, 5>
         UniformBlockInfo{true, true, sizeof(FillExtrusionTilePropsUBO), idFillExtrusionTilePropsUBO},
         UniformBlockInfo{true, false, sizeof(FillExtrusionInterpolateUBO), idFillExtrusionInterpolateUBO},
 };
-const std::array<AttributeInfo, 6> 
+const std::array<AttributeInfo, 6>
     ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan>::attributes = {
         AttributeInfo{0, gfx::AttributeDataType::Short2, idFillExtrusionPosVertexAttribute},
         AttributeInfo{1, gfx::AttributeDataType::Short4, idFillExtrusionNormalEdVertexAttribute},

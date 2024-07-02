@@ -129,10 +129,10 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
                                     .setPScissors(&scissorRect);
 
     const auto& rasterState = vk::PipelineRasterizationStateCreateInfo()
-                                 .setCullMode(pipelineInfo.cullMode)
-                                 .setFrontFace(pipelineInfo.frontFace)
-                                 .setPolygonMode(pipelineInfo.polygonMode)
-                                 .setLineWidth(1.0f);
+                                  .setCullMode(pipelineInfo.cullMode)
+                                  .setFrontFace(pipelineInfo.frontFace)
+                                  .setPolygonMode(pipelineInfo.polygonMode)
+                                  .setLineWidth(1.0f);
 
     const auto multisampleState = vk::PipelineMultisampleStateCreateInfo().setRasterizationSamples(
         vk::SampleCountFlagBits::e1);
@@ -144,16 +144,16 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
                                    .setDepthFailOp(pipelineInfo.stencilDepthFail);
 
     const auto& depthStencilState = vk::PipelineDepthStencilStateCreateInfo()
-                                       .setDepthTestEnable(pipelineInfo.depthTest)
-                                       .setDepthWriteEnable(pipelineInfo.depthWrite)
-                                       .setDepthBoundsTestEnable(false)
-                                       .setMinDepthBounds(0.0f)
-                                       .setMaxDepthBounds(1.0f)
-                                       .setDepthCompareOp(pipelineInfo.depthFunction)
+                                        .setDepthTestEnable(pipelineInfo.depthTest)
+                                        .setDepthWriteEnable(pipelineInfo.depthWrite)
+                                        .setDepthBoundsTestEnable(false)
+                                        .setMinDepthBounds(0.0f)
+                                        .setMaxDepthBounds(1.0f)
+                                        .setDepthCompareOp(pipelineInfo.depthFunction)
 
-                                       .setStencilTestEnable(pipelineInfo.stencilTest)
-                                       .setFront(stencilState)
-                                       .setBack(stencilState);
+                                        .setStencilTestEnable(pipelineInfo.stencilTest)
+                                        .setFront(stencilState)
+                                        .setBack(stencilState);
 
     const auto& colorBlendAttachments = vk::PipelineColorBlendAttachmentState()
                                             .setBlendEnable(pipelineInfo.colorBlend)
