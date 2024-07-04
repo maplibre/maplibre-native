@@ -180,6 +180,10 @@ jobs:
         cmakeVersion: 3.24.1
         ninjaVersion: latest
 
+    - uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ github.job }}
+
     - name: Build C++ Unit Tests App
       run: |
         ./gradlew assembleDebug assembleAndroidTest
