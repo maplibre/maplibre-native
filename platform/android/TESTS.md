@@ -40,7 +40,7 @@ You can also have a run configuration:
 You can also run the tests from the command line with:
 
 ```
-$ ./gradlew -Pmapbox.abis=none test -p MapLibreAndroidTestApp
+$ ./gradlew -Pmaplibre.abis=none test -p MapLibreAndroidTestApp
 ```
 
 ### Running the UI/Application Exerciser Monkey

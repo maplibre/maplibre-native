@@ -2,7 +2,7 @@
 # if you want to override this file
 
 # Find your team ID inside a .mobileprovision file or in your keychain (Apple development: your@email -> Get Info -> Organizational Unit)
-APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "TC45MCF93C"
+APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "QMC7N4BDVZ"
 APPLE_MOBILE_PROVISIONING_PROFILE_NAME = "iOS Team Provisioning Profile: *"
 BUNDLE_ID_PREFIX = "com.firstnamelastname"
 
