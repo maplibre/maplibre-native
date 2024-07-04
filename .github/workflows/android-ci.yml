@@ -156,7 +156,7 @@ jobs:
             platform/android/InstrumentationTests.apk
 
   android-build-cpp-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
