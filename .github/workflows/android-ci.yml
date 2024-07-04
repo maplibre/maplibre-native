@@ -174,6 +174,12 @@ jobs:
         distribution: "temurin"
         java-version: "17"
 
+    - name: Get CMake and Ninja
+      uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: 3.24.1
+        ninjaVersion: latest
+
     - name: Build C++ Unit Tests App
       run: |
         ./gradlew assembleDebug assembleAndroidTest
