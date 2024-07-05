@@ -502,7 +502,7 @@ final class MapGestureDetector {
         transform.moveBy(-distanceX, -distanceY, 0 /*no duration*/);
 
         notifyOnMoveListeners(detector);
-      } else {
+      } else if (distance != 0 || distanceY != 0) {
         Timber.e("Could not call onMove with parameters %s,%s", distanceX, distanceY);
       }
       return true;
