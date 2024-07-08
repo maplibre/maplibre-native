@@ -3,27 +3,22 @@
 namespace mbgl {
 namespace shaders {
 
-#define CREATE_TEST_SHADER_(x)                                                                              \
-    const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::x, gfx::Backend::Type::Vulkan>::attributes = { \
-        AttributeInfo{0, gfx::AttributeDataType::Short2, idFillPosVertexAttribute},                         \
-    };
-
-CREATE_TEST_SHADER_(CircleShader)
-CREATE_TEST_SHADER_(BackgroundShader)
-CREATE_TEST_SHADER_(BackgroundPatternShader)
-CREATE_TEST_SHADER_(CollisionBoxShader)
-CREATE_TEST_SHADER_(CollisionCircleShader)
-CREATE_TEST_SHADER_(CustomSymbolIconShader)
-CREATE_TEST_SHADER_(DebugShader)
-CREATE_TEST_SHADER_(HeatmapShader)
-CREATE_TEST_SHADER_(HeatmapTextureShader)
-CREATE_TEST_SHADER_(HillshadeShader)
-CREATE_TEST_SHADER_(HillshadePrepareShader)
-CREATE_TEST_SHADER_(SymbolIconShader)
-CREATE_TEST_SHADER_(SymbolSDFIconShader)
-CREATE_TEST_SHADER_(SymbolTextAndIconShader)
-CREATE_TEST_SHADER_(WideVectorShader)
-CREATE_TEST_SHADER_(RasterShader)
+const std::array<UniformBlockInfo, 4> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan>::uniforms = {
+    UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
+    UniformBlockInfo{true, false, sizeof(CircleDrawableUBO), idCircleDrawableUBO},
+    UniformBlockInfo{true, true, sizeof(CircleEvaluatedPropsUBO), idCircleEvaluatedPropsUBO},
+    UniformBlockInfo{true, false, sizeof(CircleInterpolateUBO), idCircleInterpolateUBO},
+};
+const std::array<AttributeInfo, 8> ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan>::attributes = {
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idCirclePosVertexAttribute},
+    AttributeInfo{1, gfx::AttributeDataType::Float4, idCircleColorVertexAttribute},
+    AttributeInfo{2, gfx::AttributeDataType::Float2, idCircleRadiusVertexAttribute},
+    AttributeInfo{3, gfx::AttributeDataType::Float2, idCircleBlurVertexAttribute},
+    AttributeInfo{4, gfx::AttributeDataType::Float2, idCircleOpacityVertexAttribute},
+    AttributeInfo{5, gfx::AttributeDataType::Float4, idCircleStrokeColorVertexAttribute},
+    AttributeInfo{6, gfx::AttributeDataType::Float2, idCircleStrokeWidthVertexAttribute},
+    AttributeInfo{7, gfx::AttributeDataType::Float2, idCircleStrokeOpacityVertexAttribute},
+};
 
 } // namespace shaders
 } // namespace mbgl

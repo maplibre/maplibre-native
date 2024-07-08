@@ -126,6 +126,8 @@ BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
     size = other.size;
     usage = other.usage;
     persistent = other.persistent;
+    bufferAllocation = std::move(other.bufferAllocation);
+    bufferWindowSize = other.bufferWindowSize;
     return *this;
 }
 

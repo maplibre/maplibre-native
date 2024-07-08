@@ -143,7 +143,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 #if !defined(NDEBUG)
         const auto debugGroup = uploadPass.createDebugGroup(debugLabel(*this));
 #endif
-
+    
         if (!vertexAttributes) {
             vertexAttributes = std::make_shared<VertexAttributeArray>();
         }
@@ -214,7 +214,6 @@ void Drawable::draw(PaintParameters& parameters) const {
     auto& shaderImpl = static_cast<mbgl::vulkan::ShaderProgram&>(*shader);
 
     if (!bindAttributes(encoder)) return;
-
     if (!bindDescriptors(encoder)) return;
 
     if (is3D) {
@@ -417,6 +416,8 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
         for (size_t id = 0; id < shaders::maxTextureCountPerShader; ++id) {
             const auto& texture = id < textures.size() ? textures[id] : nullptr;
             auto& textureImpl = texture ? static_cast<Texture2D&>(*texture) : *context.getDummyTexture();
+            
+            if (textureImpl.getVulkanImageLayout() == vk::ImageLayout::eUndefined) continue;
 
             const auto& descriptorImageInfo = vk::DescriptorImageInfo()
                                                   .setImageLayout(textureImpl.getVulkanImageLayout())

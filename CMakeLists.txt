@@ -1314,6 +1314,8 @@ if(MLN_WITH_VULKAN)
 
     set(ENABLE_OPT OFF)
     set(ENABLE_HLSL OFF)
+    set(ENABLE_GLSLANG_BINARIES OFF)
+    set(GLSLANG_TESTS_DEFAULT OFF)
     add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/glslang)
 
     set_target_properties(
@@ -1369,11 +1371,18 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/vertex_attribute.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/shader_group.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/shader_program.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/background.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/circle.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/clipping_mask.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/collision.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/debug.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/fill.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/heatmap.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/hillshade.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/line.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/raster.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/symbol.hpp
     )
 
     list(APPEND 
@@ -1396,10 +1405,17 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/upload_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/vertex_attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/shader_program.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/background.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/circle.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/collision.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/debug.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/fill.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/heatmap.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/hillshade.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/line.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/raster.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/symbol.cpp
     )
 
     #TODO merge with MLN_DRAWABLE_RENDERER? These are added only for GL path

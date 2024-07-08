@@ -161,7 +161,7 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
 void Texture2D::upload() noexcept {
     if (!imageData) return;
 
-    upload(imageData->data.get(), size);
+    upload(imageData->data.get(), imageData->size);
 
     imageData.reset();
 }

@@ -45,6 +45,8 @@ Context::Context(RendererBackend& backend_)
 }
 
 Context::~Context() noexcept {
+    backend.getThreadPool().runRenderJobs(true /* closeQueue */);
+
     destroyResources();
 
     glslang::FinalizeProcess();
@@ -109,7 +111,7 @@ void Context::enqueueDeletion(const std::function<void(const Context&)>& functio
         return;
     }
 
-    frameResources[frameResourceIndex].deletionQueue.push_back(std::move(function));
+    frameResources[frameResourceIndex].deletionQueue.push_back(function);
 }
 
 void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) {

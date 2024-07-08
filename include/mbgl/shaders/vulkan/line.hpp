@@ -687,18 +687,6 @@ layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
     float pad1;
 } props;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
-    vec4 color;
-    float blur;
-    float opacity;
-    float gapwidth;
-    float offset;
-    float width;
-    float floorwidth;
-    uint expressionMask;
-    float pad1;
-} props;
-
 layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {

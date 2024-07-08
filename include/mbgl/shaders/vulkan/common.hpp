@@ -11,6 +11,8 @@ struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
+#define M_PI 3.1415926535897932384626433832795
+
 // The maximum allowed miter limit is 2.0 at the moment. the extrude normal is stored
 // in a byte (-128..127). We scale regular normals up to length 63, but there are also
 // "special" normals that have a bigger length (of up to 126 in this case).
@@ -75,7 +77,12 @@ layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
 
 )";
 
-    static constexpr auto fragment = R"()";
+    static constexpr auto fragment = R"(
+
+#define M_PI 3.1415926535897932384626433832795
+#define SDF_PX 8.0
+
+)";
 };
 
 } // namespace shaders

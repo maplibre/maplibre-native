@@ -720,11 +720,11 @@ layout(location = 2) in vec4 in_color;
 #endif
 
 #if !defined(HAS_UNIFORM_u_base)
-layout(location = 3) in float in_base;
+layout(location = 3) in vec2 in_base;
 #endif
 
 #if !defined(HAS_UNIFORM_u_height)
-layout(location = 4) in float in_height;
+layout(location = 4) in vec2 in_height;
 #endif
 
 layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
@@ -766,16 +766,13 @@ void main() {
 #if defined(HAS_UNIFORM_u_base)
     const float base = props.light_position_base.w;
 #else
-    // TODO
-    // GL uses vec2 in_base so unpack actually does something
-    // metal uses float in_base and passes a single value to unpack that results in a noop
-    const float base = in_base;// max(unpack_mix_float(in_base, interp.base_t), 0.0);
+    const float base = max(unpack_mix_float(in_base, interp.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
     const float height = props.height;
 #else
-    const float height = in_height;// max(unpack_mix_float(in_height, interp.height_t), 0.0);
+    const float height = max(unpack_mix_float(in_height, interp.height_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_color)
@@ -861,11 +858,11 @@ layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec4 in_normal_ed;
 
 #if !defined(HAS_UNIFORM_u_base)
-layout(location = 2) in float in_base;
+layout(location = 2) in vec2 in_base;
 #endif
 
 #if !defined(HAS_UNIFORM_u_height)
-layout(location = 3) in float in_height;
+layout(location = 3) in vec2 in_height;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
@@ -930,16 +927,13 @@ void main() {
 #if defined(HAS_UNIFORM_u_base)
     const float base = props.light_position_base.w;
 #else
-    // TODO
-    // GL uses vec2 in_base so unpack actually does something
-    // metal uses float in_base and passes a single value to unpack that results in a noop
-    const float base = in_base;// max(unpack_mix_float(in_base, interp.base_t), 0.0);
+    const float base = max(unpack_mix_float(in_base, interp.base_t), 0.0);
 #endif
 
 #if defined(HAS_UNIFORM_u_height)
     const float height = props.height;
 #else
-    const float height = in_height;// max(unpack_mix_float(in_height, interp.height_t), 0.0);
+    const float height = max(unpack_mix_float(in_height, interp.height_t), 0.0);
 #endif
 
     const vec3 normal = in_normal_ed.xyz;
