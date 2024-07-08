@@ -21,9 +21,8 @@ const std::array<AttributeInfo, 1>
     ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Vulkan>::attributes = {
         AttributeInfo{0, gfx::AttributeDataType::Float3, idBackgroundPosVertexAttribute},
 };
-const std::array<TextureInfo, 1> 
-    ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Vulkan>::textures = {
-    TextureInfo{0, idBackgroundImageTexture}};
+const std::array<TextureInfo, 1> ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Vulkan>::textures =
+    {TextureInfo{0, idBackgroundImageTexture}};
 
 } // namespace shaders
 } // namespace mbgl

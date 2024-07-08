@@ -31,15 +31,16 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 #ifdef ENABLE_VMA_DEBUG
 
-//#define VMA_DEBUG_MARGIN 32
-//#define VMA_DEBUG_DETECT_CORRUPTION 1
+// #define VMA_DEBUG_MARGIN 32
+// #define VMA_DEBUG_DETECT_CORRUPTION 1
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 
-#define VMA_DEBUG_LOG_FORMAT(format, ...) {         \
-    char buffer[4096];                              \
-    sprintf(buffer, format, __VA_ARGS__);           \
-    mbgl::Log::Info(mbgl::Event::Render, buffer);   \
-}
+#define VMA_DEBUG_LOG_FORMAT(format, ...)             \
+    {                                                 \
+        char buffer[4096];                            \
+        sprintf(buffer, format, __VA_ARGS__);         \
+        mbgl::Log::Info(mbgl::Event::Render, buffer); \
+    }
 
 #endif
 
@@ -701,8 +702,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFIconShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
-                  shaders::BuiltIn::WideVectorShader
-    >(shaders, programParameters);
+                  shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
 }
 
 } // namespace vulkan

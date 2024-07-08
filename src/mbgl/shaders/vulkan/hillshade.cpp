@@ -7,10 +7,10 @@ const std::array<UniformBlockInfo, 1>
     ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Vulkan>::uniforms = {
         UniformBlockInfo{true, true, sizeof(HillshadePrepareDrawableUBO), idHillshadePrepareDrawableUBO},
 };
-const std::array<AttributeInfo, 2> 
+const std::array<AttributeInfo, 2>
     ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Vulkan>::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Short2, idHillshadePosVertexAttribute},
-    AttributeInfo{1, gfx::AttributeDataType::Short2, idHillshadeTexturePosVertexAttribute},
+        AttributeInfo{0, gfx::AttributeDataType::Short2, idHillshadePosVertexAttribute},
+        AttributeInfo{1, gfx::AttributeDataType::Short2, idHillshadeTexturePosVertexAttribute},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Vulkan>::textures = {
     TextureInfo{0, idHillshadeImageTexture},

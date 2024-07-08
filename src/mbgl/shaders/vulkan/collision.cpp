@@ -3,12 +3,11 @@
 namespace mbgl {
 namespace shaders {
 
-const std::array<UniformBlockInfo, 1> 
-    ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Vulkan>::uniforms = {
-    UniformBlockInfo{true, true, sizeof(CollisionUBO), idCollisionUBO},
+const std::array<UniformBlockInfo, 1> ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Vulkan>::uniforms =
+    {
+        UniformBlockInfo{true, true, sizeof(CollisionUBO), idCollisionUBO},
 };
-const std::array<AttributeInfo, 5> 
-    ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Vulkan>::attributes = {
+const std::array<AttributeInfo, 5> ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Vulkan>::attributes = {
     AttributeInfo{0, gfx::AttributeDataType::Short2, idCollisionPosVertexAttribute},
     AttributeInfo{1, gfx::AttributeDataType::Short2, idCollisionAnchorPosVertexAttribute},
     AttributeInfo{2, gfx::AttributeDataType::Short2, idCollisionExtrudeVertexAttribute},
