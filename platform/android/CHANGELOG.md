@@ -6,6 +6,12 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### ✨ Features and improvements
 
+## 10.3.2-hwasan1
+
+Special pre-release with hwasan enabled.
+
+Only ABI armv8 is enabled, to avoid `unsupported option '-fsanitize=hwaddress' for target 'armv7-...'`
+
 ## 10.3.2-pre3
 
 - Additional symbol instance checks building on previous success in detecting corruption and avoiding crashes
