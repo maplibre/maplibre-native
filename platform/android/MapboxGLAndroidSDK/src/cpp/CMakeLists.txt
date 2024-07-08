@@ -199,6 +199,9 @@ target_include_directories(
           ../../../src
           ../../../../default/include)
 
+target_compile_options(mapbox-gl PUBLIC -fsanitize=hwaddress -fsanitize-recover=address -fno-omit-frame-pointer)
+target_link_options(mapbox-gl PUBLIC -fsanitize=hwaddress -fsanitize-recover=address)
+
 target_compile_options(mapbox-gl
                        PRIVATE $<$<CONFIG:Release>:-Oz>
                                $<$<CONFIG:Release>:-Qunused-arguments>

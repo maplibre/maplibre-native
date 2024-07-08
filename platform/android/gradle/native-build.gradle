@@ -31,18 +31,20 @@ ext.nativeBuild = { nativeTargets ->
         }
 
         // Allow determining the C++ STL we're using when building Mapbox GL.
-        def stl = 'c++_static'
+        def stl = 'c++_shared'
         if (project.hasProperty("mapbox.stl")) {
             stl = project.getProperty("mapbox.stl")
         }
 
         defaultConfig {
+            abi = "arm64-v8a"
             if (abi != 'none') {
                 externalNativeBuild {
                     cmake {
                         arguments "-DANDROID_TOOLCHAIN=clang"
                         arguments "-DANDROID_STL=" + stl
                         arguments "-DANDROID_CPP_FEATURES=exceptions"
+                        arguments "-DSANITIZE=hwasan"
 
                         // Enable ccache if the user has installed it.
                         if (file("/usr/bin/ccache").exists()) {
