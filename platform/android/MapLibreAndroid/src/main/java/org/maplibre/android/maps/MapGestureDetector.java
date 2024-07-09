@@ -24,6 +24,7 @@ import com.mapbox.android.gestures.StandardGestureDetector;
 import com.mapbox.android.gestures.StandardScaleGestureDetector;
 import org.maplibre.android.R;
 import org.maplibre.android.constants.MapLibreConstants;
+import org.maplibre.android.log.Logger;
 import org.maplibre.android.utils.MathUtils;
 
 import java.util.ArrayList;
@@ -42,12 +43,11 @@ import static org.maplibre.android.constants.MapLibreConstants.ZOOM_RATE;
 import static org.maplibre.android.maps.MapLibreMap.OnCameraMoveStartedListener.REASON_API_GESTURE;
 import static org.maplibre.android.utils.MathUtils.normalize;
 
-import timber.log.Timber;
-
 /**
  * Manages gestures events on a MapView.
  */
 final class MapGestureDetector {
+  private static final String TAG = "MapGestureDetector";
 
   private final Transform transform;
   private final Projection projection;
@@ -488,8 +488,9 @@ final class MapGestureDetector {
 
     @Override
     public boolean onMove(@NonNull MoveGestureDetector detector, float distanceX, float distanceY) {
-      // first move event is often delivered with no displacement
-      if (!Float.isNaN(distanceX) && !Float.isNaN(distanceY) && (distanceX != 0 || distanceY != 0)) {
+      if (Float.isNaN(distanceX) || Float.isNaN(distanceY)) {
+        Logger.e(TAG, String.format("Could not call onMove with parameters %s,%s", distanceX, distanceY));
+      } else if (distanceX != 0 || distanceY != 0) {  // first move event is often delivered with no displacement
         // dispatching camera start event only when the movement actually occurred
         cameraChangeDispatcher.onCameraMoveStarted(CameraChangeDispatcher.REASON_API_GESTURE);
 
@@ -502,8 +503,6 @@ final class MapGestureDetector {
         transform.moveBy(-distanceX, -distanceY, 0 /*no duration*/);
 
         notifyOnMoveListeners(detector);
-      } else {
-        Timber.e("Could not call onMove with parameters %s,%s", distanceX, distanceY);
       }
       return true;
     }

@@ -4,6 +4,8 @@
 
 ### ✨ Features and improvements
 
+- Avoid logging error for onMove(0,0) on Android ([#2580](https://github.com/maplibre/maplibre-native/pull/2580)).
+
 ### 🐞 Bug fixes
 
 ## 11.0.2-pre0
