@@ -134,6 +134,10 @@ const std::vector<PlacedSymbolData>& Renderer::getPlacedSymbolsData() const {
     return impl->orchestrator.getPlacedSymbolsData();
 }
 
+void Renderer::enableTileCache(bool enable) {
+    impl->orchestrator.enableTileCache(enable);
+}
+
 void Renderer::reduceMemoryUse() {
     gfx::BackendScope guard{impl->backend};
     impl->reduceMemoryUse();
