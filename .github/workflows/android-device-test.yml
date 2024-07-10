@@ -46,12 +46,11 @@ jobs:
           },
           {
             artifactName: android-cpp-tests,
-            testFile: CppUnitTests.apk,
-            appFile: CppUnitTestsApp.apk,
+            testFile: app-release-androidTest.apk,
+            appFile: app-debug.apk,
             name: "Android C++ Unit Tests",
             # Google Pixel 7 Pro
-            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564",
-            testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/09e0738e-c91e-4c5f-81e6-06a06cc340d8"
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564"
           }
         ]
     runs-on: ubuntu-latest
@@ -168,7 +167,7 @@ jobs:
           private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
       - uses: LouisBrunner/checks-action@v2.0.0
-        if: always() && env.run_device_test == 'true'
+        if: always()
         with:
           token: ${{ steps.generate_token_2.outputs.token }}
           check_id: ${{ steps.create_check.outputs.check_id }}
