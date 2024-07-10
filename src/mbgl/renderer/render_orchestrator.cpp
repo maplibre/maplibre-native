@@ -740,7 +740,7 @@ void RenderOrchestrator::removeFeatureState(const std::string& sourceID,
 
 void RenderOrchestrator::enableTileCache(bool enable) {
     tileCacheEnabled = enable;
-    
+
     for (const auto& entry : renderSources) {
         entry.second->enableCache(enable);
     }

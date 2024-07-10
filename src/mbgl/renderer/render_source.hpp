@@ -102,7 +102,7 @@ public:
                                     const std::optional<std::string>&) {}
 
     virtual void enableCache(bool) {};
-    
+
     virtual void reduceMemoryUse() = 0;
 
     virtual void dumpDebugLogs() const = 0;
