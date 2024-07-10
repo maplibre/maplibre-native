@@ -2880,7 +2880,13 @@ public:
     {
         UIAlertAction *action = [UIAlertAction actionWithTitle:[attributionInfo.title.string mgl_titleCasedStringWithLocale:[NSLocale currentLocale]]
                                                          style:UIAlertActionStyleDefault
-                                                       handler:nil];
+                                                       handler:^(UIAlertAction * _Nonnull actionBlock) {
+            NSURL *url = attributionInfo.URL;
+            if (url)
+            {
+                [[UIApplication sharedApplication] openURL:url];
+            }
+        }];
         [attributionController addAction:action];
     }
 
