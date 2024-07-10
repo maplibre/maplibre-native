@@ -20,6 +20,7 @@ import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.style.sources.Source
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.IdleZoomListener
 import org.maplibre.android.testapp.utils.ResourceUtils
 import timber.log.Timber
@@ -45,7 +46,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
                 if (map != null) {
                     maplibreMap = map
                 }
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
                     // Add a parks layer
                     addParksLayer()
 

@@ -15,7 +15,7 @@ target_sources(
 
 target_link_libraries(
     mbgl-vendor-csscolorparser
-    PRIVATE Mapbox::Base::optional mbgl-compiler-options
+    PRIVATE mbgl-compiler-options
 )
 
 target_include_directories(

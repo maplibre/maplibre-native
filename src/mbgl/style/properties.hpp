@@ -6,10 +6,13 @@
 #include <mbgl/style/color_ramp_property_value.hpp>
 #include <mbgl/style/conversion/stringify.hpp>
 #include <mbgl/style/transition_options.hpp>
+#include <mbgl/util/convert.hpp>
 #include <mbgl/util/indexed_tuple.hpp>
 #include <mbgl/util/ignore.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <bitset>
+#include <tuple>
 
 namespace mbgl {
 
@@ -65,8 +68,13 @@ public:
 
     bool hasTransition() const noexcept { return bool(prior); }
 
+    bool isTransitioning(TimePoint now) const {
+        return hasTransition() && (begin <= now) && (now < end) && !value.isDataDriven();
+    }
+
     bool isUndefined() const noexcept { return value.isUndefined(); }
 
+    Value& getValue() noexcept { return value; }
     const Value& getValue() const noexcept { return value; }
 
 private:
@@ -296,12 +304,32 @@ public:
             return PossiblyEvaluated{evaluate<Ps>(parameters)...};
         }
 
+        /// Evaluate the property if necessary, or produce a copy of the previous value if appropriate
+        template <class P>
+        auto maybeEvaluate(const PropertyEvaluationParameters& parameters,
+                           const typename P::EvaluatorType::ResultType& oldResult) const {
+            using Evaluator = typename P::EvaluatorType;
+            const auto& property = this->template get<P>();
+            const bool needEvaluate = parameters.layerChanged || parameters.hasCrossfade || property.hasTransition() ||
+                                      (parameters.zoomChanged && (getDependencies(property) & Dependency::Zoom));
+            return needEvaluate ? property.evaluate(Evaluator(parameters, P::defaultValue()), parameters.now)
+                                : oldResult;
+        }
+
+        /// Optionally evaluate each property or produce a copy of the previous value, if appropriate.
+        PossiblyEvaluated evaluate(const PropertyEvaluationParameters& parameters,
+                                   const PossiblyEvaluated& previous) const {
+            return PossiblyEvaluated{maybeEvaluate<Ps>(parameters, previous.template get<Ps>())...};
+        }
+
         template <class Writer>
         void stringify(Writer& writer) const {
             writer.StartObject();
             util::ignore({(conversion::stringify<Ps>(writer, this->template get<Ps>()), 0)...});
             writer.EndObject();
         }
+
+        unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
 
         /// Get the combined dependencies of any contained expressions
         constexpr Dependency getDependencies() const noexcept {
@@ -310,9 +338,20 @@ public:
             return result;
         }
 
-        unsigned long constantsMask() const { return ConstantsMask<DataDrivenProperties>::getMask(*this); }
+#if MLN_DRAWABLE_RENDERER
+        using GPUExpressions = std::array<gfx::UniqueGPUExpression, UnevaluatedTypes::TypeCount>;
+
+        /// Update the GPU expressions, if applicable, for each item in the tuple.
+        /// @return true if any are updated (including being cleared)
+        bool updateGPUExpressions(Unevaluated::GPUExpressions& exprs, TimePoint now) const {
+            const auto results = util::to_array(std::make_tuple(updateGPUExpression<Ps>(exprs, now)...));
+            return std::any_of(results.begin(), results.end(), [](bool x) { return x; });
+        }
+#endif // MLN_DRAWABLE_RENDERER
 
     protected:
+        // gather dependencies for each type that can appear in this tuple
+
         template <class P>
         Dependency getDependencies(const PropertyValue<P>& v) const noexcept {
             return v.getDependencies();
@@ -322,6 +361,53 @@ public:
         Dependency getDependencies(const Transitioning<P>& v) const noexcept {
             return v.getValue().getDependencies();
         }
+
+#if MLN_DRAWABLE_RENDERER
+        template <typename P>
+        bool updateGPUExpression(Unevaluated::GPUExpressions& exprs, TimePoint now) const {
+            constexpr auto index = TypeIndex<P, Ps...>::value;
+            constexpr bool forceIntZoom = P::EvaluatorType::useIntegerZoom;
+            return updateGPUExpression(exprs[index], this->template get<P>(), now, forceIntZoom);
+        }
+
+        template <class P>
+        static bool updateGPUExpression(gfx::UniqueGPUExpression& expr,
+                                        const PropertyValue<P>& val,
+                                        TimePoint /*now*/,
+                                        bool intZoom) {
+            if (val.isExpression() && val.asExpression().isGPUCapable()) {
+                if (!expr) {
+                    expr = val.asExpression().getGPUExpression(intZoom);
+                    return true;
+                }
+            } else if (expr) {
+                // Previously set and shouldn't be
+                expr.reset();
+                return true;
+            }
+            return false;
+        }
+        template <class P>
+        static bool updateGPUExpression(gfx::UniqueGPUExpression& expr,
+                                        const Transitioning<P>& val,
+                                        TimePoint now,
+                                        bool intZoom) {
+            if (val.isTransitioning(now)) {
+                if (expr) {
+                    expr.reset();
+                    return true;
+                }
+                return false;
+            }
+            return updateGPUExpression(expr, val.getValue(), now, intZoom);
+        }
+        static bool updateGPUExpression(gfx::UniqueGPUExpression&,
+                                        const style::ColorRampPropertyValue&,
+                                        TimePoint,
+                                        bool) {
+            return false;
+        }
+#endif // MLN_DRAWABLE_RENDERER
     };
 
     class Transitionable : public Tuple<TransitionableTypes> {

@@ -3,6 +3,8 @@
 namespace mbgl {
 namespace gfx {
 
+bool Backend::enableGPUExpressionEval = false;
+
 HeadlessBackend::HeadlessBackend(Size size_)
     : mbgl::gfx::Renderable(size_, nullptr) {}
 

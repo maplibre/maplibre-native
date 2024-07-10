@@ -65,6 +65,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     if (!debugShader) {
         return;
     }
+
+    const auto drawableName = "debug-" + name;
     std::unique_ptr<gfx::DrawableBuilder> debugBuilder = [&]() -> std::unique_ptr<gfx::DrawableBuilder> {
         auto builder = context.createDrawableBuilder("debug-builder");
         builder->setShader(debugShader);
@@ -73,6 +75,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setColorMode(gfx::ColorMode::unblended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrId(idDebugPosVertexAttribute);
+        builder->setDrawableName(drawableName);
 
         return builder;
     }();
@@ -102,19 +105,21 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());
         builder->setVertexAttrId(idLinePosNormalVertexAttribute);
+        builder->setDrawableName(drawableName);
 
         return builder;
     };
 #endif
 
     // add or get the layer group for a debug type
-    const auto addOrGetLayerGroupForType = [&debugLayerGroups, &context](
-                                               DebugType type,
-                                               const std::string&& layerName) -> DebugLayerGroupMap::const_iterator {
+    const auto addOrGetLayerGroupForType =
+        [&debugLayerGroups, &context](DebugType type, std::string&& layerName) -> DebugLayerGroupMap::const_iterator {
         auto it = debugLayerGroups.find(type);
         if (it == debugLayerGroups.end()) {
-            auto inserted = debugLayerGroups.insert(std::make_pair(
-                type, context.createTileLayerGroup(static_cast<int32_t>(type), /*initialCapacity=*/64, layerName)));
+            auto inserted = debugLayerGroups.insert(
+                std::make_pair(type,
+                               context.createTileLayerGroup(
+                                   static_cast<int32_t>(type), /*initialCapacity=*/64, std::move(layerName))));
             assert(inserted.second);
             it = inserted.first;
         }
@@ -188,7 +193,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 : linePropertiesUBO(properties) {}
             ~PolylineDrawableTweaker() override = default;
 
-            void init(gfx::Drawable&) override {};
+            void init(gfx::Drawable&) override {}
 
             void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
                 if (!drawable.getTileID().has_value()) {
@@ -220,6 +225,20 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
                 drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
                 drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
+
+                // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
+                assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
+
+                const LineExpressionUBO exprUBO = {
+                    /* color = */ nullptr,
+                    /* blur = */ nullptr,
+                    /* opacity = */ nullptr,
+                    /* gapwidth = */ nullptr,
+                    /* offset = */ nullptr,
+                    /* width = */ nullptr,
+                    /* floorWidth = */ nullptr,
+                };
+                drawableUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, parameters.context);
             };
 
         private:
@@ -244,7 +263,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                                                   /*offset*/ 0.f,
                                                                   /*width*/ 4.f,
                                                                   /*floorwidth*/ 0,
-                                                                  0,
+                                                                  LineExpressionMask::None,
                                                                   0};
         auto tweaker = std::make_shared<PolylineDrawableTweaker>(linePropertiesUBO);
 
@@ -268,7 +287,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         // erase drawables that are not in the current tile set
         for (auto& lg : {outlineLayerGroup, textLayerGroup}) {
             lg->removeDrawablesIf([&](gfx::Drawable& drawable) {
-                return !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+                return drawable.getName() == drawableName &&
+                       !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
             });
         }
 
@@ -323,7 +343,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 
         // erase drawables that are not in the current tile set
         tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
-            return !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
+            return drawable.getName() == drawableName &&
+                   !(drawable.getTileID().has_value() && newTiles.count(*drawable.getTileID()) > 0);
         });
 
         // add new drawables and update existing ones
@@ -362,9 +383,9 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 }
 #endif
 
-RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_, std::shared_ptr<Scheduler> threadPool_)
+RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
     : RenderSource(std::move(impl_)),
-      tilePyramid(std::move(threadPool_)),
+      tilePyramid(threadPool_),
       renderTiles(makeMutable<std::vector<RenderTile>>()) {
     tilePyramid.setObserver(this);
 }
@@ -483,8 +504,8 @@ void RenderTileSource::dumpDebugLogs() const {
 
 // RenderTileSetSource implementation
 
-RenderTileSetSource::RenderTileSetSource(Immutable<style::Source::Impl> impl_, std::shared_ptr<Scheduler> threadPool_)
-    : RenderTileSource(std::move(impl_), std::move(threadPool_)) {}
+RenderTileSetSource::RenderTileSetSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
+    : RenderTileSource(std::move(impl_), threadPool_) {}
 
 RenderTileSetSource::~RenderTileSetSource() = default;
 

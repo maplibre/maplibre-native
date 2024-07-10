@@ -16,10 +16,10 @@ namespace mbgl {
 
 class VectorTileTest {
 public:
+    util::SimpleIdentity uniqueID;
     std::shared_ptr<FileSource> fileSource = std::make_shared<FakeFileSource>();
     TransformState transformState;
     util::RunLoop loop;
-    style::Style style{fileSource, 1};
     AnnotationManager annotationManager{style};
 
     const std::shared_ptr<ImageManager> imageManager = std::make_shared<ImageManager>();
@@ -27,22 +27,30 @@ public:
 
     Tileset tileset{{"https://example.com"}, {0, 22}, "none"};
 
-    const std::shared_ptr<Scheduler> threadPool = Scheduler::GetBackground();
+    TaggedScheduler threadPool;
 
-    TileParameters tileParameters{1.0,
-                                  MapDebugOptions(),
-                                  transformState,
-                                  fileSource,
-                                  MapMode::Continuous,
-                                  annotationManager.makeWeakPtr(),
-                                  imageManager,
-                                  glyphManager,
-                                  0};
+    TileParameters tileParameters;
+    style::Style style;
+
+    VectorTileTest()
+        : threadPool(Scheduler::GetBackground(), uniqueID),
+          tileParameters{1.0,
+                         MapDebugOptions(),
+                         transformState,
+                         fileSource,
+                         MapMode::Continuous,
+                         annotationManager.makeWeakPtr(),
+                         imageManager,
+                         glyphManager,
+                         0,
+                         threadPool},
+          style{fileSource, 1, threadPool} {}
 
     ~VectorTileTest() {
         // Ensure that deferred releases are complete before cleaning up
-        EXPECT_EQ(0, loop.waitForEmpty(Milliseconds::zero()));
-        EXPECT_EQ(0, threadPool->waitForEmpty());
+        loop.waitForEmpty();
+        threadPool.waitForEmpty();
+        threadPool.runRenderJobs(true);
     }
 };
 

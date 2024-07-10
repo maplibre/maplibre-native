@@ -17,6 +17,7 @@ import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.light.Light
 import org.maplibre.android.style.light.Position
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.utils.ColorUtils
 
 /**
@@ -40,7 +41,7 @@ class BuildingFillExtrusionActivity : AppCompatActivity() {
                 if (map != null) {
                     maplibreMap = map
                 }
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
                     setupBuildings(style)
                     setupLight()
                 }

@@ -23,6 +23,7 @@
 #include <mbgl/util/std.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/thread_pool.hpp>
+#include <mbgl/util/hash.hpp>
 
 #include <Foundation/Foundation.hpp>
 #include <Metal/Metal.hpp>
@@ -43,7 +44,7 @@ Context::Context(RendererBackend& backend_)
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
-        Scheduler::GetBackground()->runRenderJobs();
+        backend.getThreadPool().runRenderJobs(true /* closeQueue */);
         performCleanup();
 
         emptyVertexBuffer.reset();
@@ -67,7 +68,7 @@ Context::~Context() noexcept {
 }
 
 void Context::beginFrame() {
-    Scheduler::GetBackground()->runRenderJobs();
+    backend.getThreadPool().runRenderJobs();
 }
 
 void Context::endFrame() {}
@@ -361,7 +362,14 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
         // Create a render pipeline state, telling Metal how to render the primitives
         const auto& renderPassDescriptor = mtlRenderPass.getDescriptor();
-        if (auto state = mtlShader.getRenderPipelineState(renderable, vertDesc, colorMode)) {
+        const std::size_t hash = mbgl::util::hash(ShaderClass::attributes[0].index,
+                                                  0,
+                                                  MTL::VertexFormatShort2,
+                                                  vertexSize,
+                                                  MTL::VertexStepFunctionPerVertex,
+                                                  1);
+        if (auto state = mtlShader.getRenderPipelineState(
+                renderable, vertDesc, colorMode, mbgl::util::hash(colorMode.hash(), hash))) {
             clipMaskPipelineState = std::move(state);
         }
     }
@@ -408,9 +416,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                    MTL::IndexType::IndexTypeUInt16,
                                    indexRes->getMetalBuffer().get(),
                                    /*indexOffset=*/0,
-                                   /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()),
-                                   /*baseVertex=*/0,
-                                   /*baseInstance=*/0);
+                                   /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()));
 #else
     const auto uboIndex = ShaderClass::uniforms[0].index;
     for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
@@ -421,9 +427,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                        MTL::IndexType::IndexTypeUInt16,
                                        indexRes->getMetalBuffer().get(),
                                        /*indexOffset=*/0,
-                                       /*instanceCount=*/1,
-                                       /*baseVertex=*/0,
-                                       /*baseInstance=*/0);
+                                       /*instanceCount=*/1);
     }
 #endif
 

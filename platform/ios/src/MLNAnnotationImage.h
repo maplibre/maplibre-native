@@ -9,10 +9,10 @@ NS_ASSUME_NONNULL_BEGIN
  annotations visually on a map view. Annotation image objects wrap `UIImage`
  objects and may be recycled later and put into a reuse queue that is maintained
  by the map view.
- 
+
  #### Related examples
  TODO: Mark a place on the map with an image, learn how use an image
- as a marker using `MLNAnnotationImage`. 
+ as a marker using `MLNAnnotationImage`.
  */
 MLN_EXPORT
 @interface MLNAnnotationImage : NSObject <NSSecureCoding>
@@ -28,7 +28,8 @@ MLN_EXPORT
  @return The initialized annotation image object or `nil` if there was a problem
     initializing the object.
  */
-+ (instancetype)annotationImageWithImage:(UIImage *)image reuseIdentifier:(NSString *)reuseIdentifier;
++ (instancetype)annotationImageWithImage:(UIImage *)image
+                         reuseIdentifier:(NSString *)reuseIdentifier;
 
 // MARK: Getting and Setting Attributes
 

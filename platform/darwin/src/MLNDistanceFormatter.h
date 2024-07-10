@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
 
@@ -15,7 +15,7 @@ MLN_EXPORT
 
 /**
  Returns a localized formatted string for the provided distance.
- 
+
  @param distance The distance, measured in meters.
  @return A localized formatted distance string including units.
  */

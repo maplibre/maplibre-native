@@ -3,6 +3,7 @@ package org.maplibre.android.testapp.activity.camera
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.*
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -21,8 +22,8 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.*
 import org.maplibre.android.maps.OnMapReadyCallback
-import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.FontCache
 import org.maplibre.android.testapp.utils.ResourceUtils
 import java.lang.annotation.Retention
@@ -45,7 +46,7 @@ class GestureDetectorActivity : AppCompatActivity() {
         mapView.getMapAsync(
             OnMapReadyCallback { maplibreMap: MapLibreMap ->
                 this@GestureDetectorActivity.maplibreMap = maplibreMap
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
                 initializeMap()
             }
         )
@@ -306,7 +307,7 @@ class GestureDetectorActivity : AppCompatActivity() {
 
     private class GestureAlertsAdapter : RecyclerView.Adapter<GestureAlertsAdapter.ViewHolder>() {
         private var isUpdating = false
-        private val updateHandler = Handler()
+        private val updateHandler = Handler(Looper.getMainLooper())
         private val alerts: MutableList<GestureAlert> = ArrayList()
 
         class ViewHolder internal constructor(view: View) : RecyclerView.ViewHolder(view) {

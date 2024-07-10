@@ -154,12 +154,12 @@ jobs:
         run: xvfb-run -a build/mbgl-render-test-runner --manifestPath=metrics/linux-${{ matrix.renderer }}.json
 
       - name: Upload render test result
-        if: always() && steps.render_test.outcome == 'failure' && matrix.renderer == 'drawable'
+        if: always() && steps.render_test.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
-          name: render-test-result
+          name: render-test-result-${{ matrix.renderer }}
           path: |
-            metrics/linux-drawable.html
+            metrics/linux-${{ matrix.renderer }}.html
       
       # expression tests
 

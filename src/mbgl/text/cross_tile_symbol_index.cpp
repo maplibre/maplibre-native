@@ -13,14 +13,14 @@ TileLayerIndex::TileLayerIndex(OverscaledTileID coord_,
     : coord(coord_),
       bucketInstanceId(bucketInstanceId_),
       bucketLeaderId(std::move(bucketLeaderId_)) {
-    for (SymbolInstance& symbolInstance : symbolInstances) {
+    for (const SymbolInstance& symbolInstance : symbolInstances) {
         if (symbolInstance.crossTileID == SymbolInstance::invalidCrossTileID()) continue;
         indexedSymbolInstances[symbolInstance.key].emplace_back(symbolInstance.crossTileID,
                                                                 getScaledCoordinates(symbolInstance, coord));
     }
 }
 
-Point<int64_t> TileLayerIndex::getScaledCoordinates(SymbolInstance& symbolInstance,
+Point<int64_t> TileLayerIndex::getScaledCoordinates(const SymbolInstance& symbolInstance,
                                                     const OverscaledTileID& childTileCoord) const {
     // Round anchor positions to roughly 4 pixel grid
     const double roundingFactor = 512.0 / util::EXTENT / 2.0;

@@ -27,6 +27,7 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * This activity shows how to customize the LocationComponent's pulsing circle.
@@ -87,7 +88,7 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
     @SuppressLint("MissingPermission")
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
             locationComponent = maplibreMap.locationComponent
             val locationComponentOptions = buildLocationComponentOptions(
                 LOCATION_CIRCLE_PULSE_COLOR,

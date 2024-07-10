@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)intersectsOverlayBounds:(MLNCoordinateBounds)overlayBounds;
 
 /** Constructs a shape annotation object, asking the delegate for style values. */
-- (mbgl::Annotation)annotationObjectWithDelegate:(id <MLNMultiPointDelegate>)delegate;
+- (mbgl::Annotation)annotationObjectWithDelegate:(id<MLNMultiPointDelegate>)delegate;
 
 @end
 

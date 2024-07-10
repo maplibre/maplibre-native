@@ -41,7 +41,7 @@ public class HttpRequestImpl implements HttpRequest {
   private static final String userAgentString = toHumanReadableAscii(
     String.format("%s %s (%s) Android/%s (%s)",
       HttpIdentifier.getIdentifier(),
-      BuildConfig.MAPBOX_VERSION_STRING,
+      BuildConfig.MAPLIBRE_VERSION_STRING,
       BuildConfig.GIT_REVISION_SHORT,
       Build.VERSION.SDK_INT,
       Build.CPU_ABI)

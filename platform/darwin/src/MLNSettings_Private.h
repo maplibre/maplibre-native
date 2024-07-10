@@ -1,6 +1,6 @@
-#import "MLNSettings.h"
-#import <mbgl/util/tile_server_options.hpp>
 #import <mbgl/util/default_style.hpp>
+#import <mbgl/util/tile_server_options.hpp>
+#import "MLNSettings.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

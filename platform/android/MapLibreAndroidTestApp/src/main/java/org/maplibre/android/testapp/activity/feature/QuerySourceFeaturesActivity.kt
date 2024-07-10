@@ -18,6 +18,7 @@ import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing using the query source features API to query feature counts
@@ -37,7 +38,7 @@ class QuerySourceFeaturesActivity : AppCompatActivity() {
                 maplibreMap = map
             }
             maplibreMap.getStyle { style: Style -> initStyle(style) }
-            maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+            maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
         }
     }
 

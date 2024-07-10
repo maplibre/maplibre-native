@@ -1,8 +1,8 @@
-#import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
+#import <UIKit/UIKit.h>
 
-#import "MLNFoundation.h"
 #import "MLNAnnotationView.h"
+#import "MLNFoundation.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -25,7 +25,7 @@ MLN_EXPORT
 
  The value of this property is nil during initialization and while user tracking
  is inactive.
- 
+
  #### Related examples
  TODO: Customize the user location annotation, learn how to customize
  the default user location annotation object.

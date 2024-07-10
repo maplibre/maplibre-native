@@ -70,7 +70,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly) MLNCoordinateBounds MLNCoordinateBoundsValue;
 
 /**
- Creates a new value object containing the specified Mapbox coordinate 
+ Creates a new value object containing the specified Mapbox coordinate
  quad structure.
 
  @param quad The value for the new object.
@@ -104,7 +104,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Creates a new value object containing the given `MLNTransition`
  structure.
- 
+
  @param transition The value for the new object.
  @return A new value object that contains the transition information.
  */
@@ -118,7 +118,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Creates a new value object containing the given `MLNSphericalPosition`
  structure.
- 
+
  @param lightPosition The value for the new object.
  @return A new value object that contains the light position information.
  */
@@ -132,7 +132,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Creates a new value object containing the given `MLNLightAnchor`
  enum.
- 
+
  @param lightAnchor The value for the new object.
  @return A new value object that contains the light anchor information.
  */

@@ -68,13 +68,13 @@ jobs:
           - name: Linux
             os: ubuntu-22.04
             build_type: RelWithDebInfo
-            qt_version: 6.5.3
+            qt_version: 6.7.0
             qt_target: desktop
             compiler: ""
           - name: Linux_GCC13
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             build_type: RelWithDebInfo
-            qt_version: 6.5.3
+            qt_version: 6.7.0
             qt_target: desktop
             compiler: "gcc-13"
           - name: macOS
@@ -88,19 +88,19 @@ jobs:
           - name: macOS
             os: macos-14
             build_type: RelWithDebInfo
-            qt_version: 6.6.2
+            qt_version: 6.7.0
             qt_target: desktop
             deployment_target: 11.0
             deployment_arch: "x86_64;arm64"
             compiler: ""
-          - name: macOS_LLVM17
+          - name: macOS_LLVM18
             os: macos-14
             build_type: RelWithDebInfo
-            qt_version: 6.6.2
+            qt_version: 6.7.0
             qt_target: desktop
             deployment_target: 11.0
             deployment_arch: "arm64"
-            compiler: "llvm@17"
+            compiler: "llvm"
           - name: win64_msvc2019
             os: windows-2022
             build_type: "RelWithDebInfo"
@@ -115,7 +115,7 @@ jobs:
             build_type: "RelWithDebInfo"
             compiler_type: x64
             compiler_version: 14.29
-            qt_version: 6.5.3
+            qt_version: 6.7.0
             qt_target: desktop
             qt_arch: win64_msvc2019_64
             qt_tools: ""
@@ -156,7 +156,7 @@ jobs:
             libxcb-render-util0 \
             libxcb-xinerama0 \
             libxcb-xfixes0 \
-            libegl1-mesa \
+            libegl1 \
             fonts-noto-cjk
 
       - name: Install compiler
@@ -210,7 +210,7 @@ jobs:
         uses: seanmiddleditch/gha-setup-ninja@v4
 
       - name: Download Qt
-        uses: jurplel/install-qt-action@v3
+        uses: jurplel/install-qt-action@v4
         with:
           aqtversion: ==3.1.*
           version: ${{ env.QT_VERSION }}

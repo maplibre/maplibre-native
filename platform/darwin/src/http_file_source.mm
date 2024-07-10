@@ -158,7 +158,7 @@ NSString *HTTPFileSource::Impl::getUserAgent() const {
 
     // Avoid %s here because it inserts hidden bidirectional markers on macOS when the system
     // language is set to a right-to-left language.
-    [userAgentComponents addObject:[NSString stringWithFormat:@"MapboxGL/0.0.0 (%@)",
+    [userAgentComponents addObject:[NSString stringWithFormat:@"MapLibreNative/0.0.0 (%@)",
                                     @(mbgl::version::revision)]];
 
     NSString *systemName = @"Darwin";

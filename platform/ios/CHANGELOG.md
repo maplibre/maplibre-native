@@ -1,8 +1,33 @@
-# Changelog for MapLibre Native for iOS 
+# Changelog for MapLibre Native for iOS
 
 MapLibre welcomes participation and contributions from everyone. Please read [`Contributing Guide`](https://github.com/maplibre/maplibre-native/blob/master/CONTRIBUTING.md) to get started.
 
 ## main
+
+- Add [Privacy Manifest](https://developer.apple.com/documentation/bundleresources/privacy_manifest_files). MapLibre Native iOS has no built-in tracking, but it does use some system APIs for functional purposes that are marked by Apple as privacy sensitive. ([#1866](https://github.com/maplibre/maplibre-native/issues/1866)).
+- Change default `MLNMapSnapshotter` logo to the MapLibre logo ([#2541](https://github.com/maplibre/maplibre-native/pull/2541)). Note that showing the MapLibre logo is never required. You can configure whether to show the logo with the (now public) `showsLogo` property of `MLNMapSnapshotterOptions`. Check with your tile provider if you need to show a logo.
+- Fixed attribution link in action sheets ([#2587](https://github.com/maplibre/maplibre-native/pull/2587)).
+## 6.5.0
+
+- Allow uses to handle authorization for location services ([#2453](https://github.com/maplibre/maplibre-native/pull/2453)). See [`MLNMapview.shouldRequestAuthorizationToUseLocationServices`](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/mlnmapview/shouldrequestauthorizationtouselocationservices).
+- Fixed memory usage high in some cases ([#2442](https://github.com/maplibre/maplibre-native/pull/2442)).
+- Avoid processing raster tiles after destruction mailbox ([#2443](https://github.com/maplibre/maplibre-native/pull/2443)).
+- Annotation view recycling re-enabled ([#2454](https://github.com/maplibre/maplibre-native/pull/2454)). Fixes some issues with Annotations.
+- Increase the deferred cleanup timeout ([#2455](https://github.com/maplibre/maplibre-native/pull/2455)). Workaround for rare crash.
+- Fixes crash that happened with some PBF files ([#795](https://github.com/maplibre/maplibre-native/issues/795), [#2460](https://github.com/maplibre/maplibre-native/pull/2460)).
+- Allow using MapLibre Native on iPad Air 2. Note: tests your styles! iPad Air 2 has one of the oldest GPUs that support Metal ([#2470](https://github.com/maplibre/maplibre-native/pull/2470)).
+
+## 6.4.2
+
+- Fix Metal frame glitch on older devices ([#2379](https://github.com/maplibre/maplibre-native/pull/2379)).
+- Fix style switching delay fix when annotations are visible ([#2395](https://github.com/maplibre/maplibre-native/pull/2395)).
+- Small performance and memory usage optimizations.
+
+## 6.4.1
+
+- Update user agent from Mapbox to MapLibreNative ([#2367](https://github.com/maplibre/maplibre-native/pull/2367)).
+- Synchronous rendering on Metal when annotation views are visible ([#2334](https://github.com/maplibre/maplibre-native/pull/2334)).
+- Various performance optimizations.
 
 ## 6.4.0
 

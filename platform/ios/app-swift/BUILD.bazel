@@ -1,0 +1,36 @@
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application")
+load(
+    "@build_bazel_rules_swift//swift:swift.bzl",
+    "swift_library",
+)
+load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
+
+configure_device_profiles()
+
+swift_library(
+    name = "Sources",
+    srcs = glob(["Sources/*.swift"]),
+    data = glob([
+        "Data/*",
+        "Assets.xcassets/*",
+    ]),
+    module_name = "Sources",
+    tags = ["manual"],
+    deps = [
+        "//platform:ios-sdk",
+    ],
+)
+
+ios_application(
+    name = "MapLibreApp",
+    bundle_id = "org.maplibre.swiftapp",
+    families = [
+        "iphone",
+        "ipad",
+    ],
+    infoplists = [":Info.plist"],
+    minimum_os_version = "16.0",
+    provisioning_profile = "xcode_profile",
+    visibility = ["@rules_xcodeproj//xcodeproj:generated"],
+    deps = [":Sources"],
+)

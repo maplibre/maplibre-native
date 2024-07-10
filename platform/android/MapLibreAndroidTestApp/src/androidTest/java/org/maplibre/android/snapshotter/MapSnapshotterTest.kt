@@ -14,6 +14,7 @@ import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.testapp.styles.TestStyles
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -40,7 +41,7 @@ class MapSnapshotterTest {
             val options = MapSnapshotter.Options(512, 512)
                 .withPixelRatio(1.0f)
                 .withStyleBuilder(
-                    Style.Builder().fromUri(Style.getPredefinedStyle("Satellite Hybrid"))
+                    Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
                         .withLayerAbove(bg, "country-label")
                 )
                 .withCameraPosition(

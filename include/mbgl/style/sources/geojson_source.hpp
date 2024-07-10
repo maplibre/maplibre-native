@@ -41,7 +41,7 @@ public:
     using TileFeatures = mapbox::feature::feature_collection<int16_t>;
     using Features = mapbox::feature::feature_collection<double>;
     static std::shared_ptr<GeoJSONData> create(const GeoJSON&,
-                                               std::shared_ptr<Scheduler> scheduler,
+                                               std::shared_ptr<Scheduler> sequencedScheduler,
                                                const Immutable<GeoJSONOptions>& = GeoJSONOptions::defaultOptions());
 
     virtual ~GeoJSONData() = default;
@@ -80,9 +80,9 @@ protected:
 private:
     std::optional<std::string> url;
     std::unique_ptr<AsyncRequest> req;
-    std::shared_ptr<Scheduler> threadPool;
     std::shared_ptr<Scheduler> sequencedScheduler;
     mapbox::base::WeakPtrFactory<Source> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 template <>

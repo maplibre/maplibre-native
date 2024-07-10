@@ -17,6 +17,7 @@ template <typename T>
 class CrossFadedPropertyEvaluator {
 public:
     using ResultType = Faded<T>;
+    static constexpr bool useIntegerZoom = false;
 
     CrossFadedPropertyEvaluator(const PropertyEvaluationParameters& parameters_, T defaultValue_)
         : parameters(parameters_),

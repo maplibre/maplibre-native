@@ -36,7 +36,7 @@ public:
                    uint32_t bucketInstanceId,
                    std::string bucketLeaderId);
 
-    Point<int64_t> getScaledCoordinates(SymbolInstance&, const OverscaledTileID&) const;
+    Point<int64_t> getScaledCoordinates(const SymbolInstance&, const OverscaledTileID&) const;
     void findMatches(SymbolBucket&, const OverscaledTileID&, std::set<uint32_t>&) const;
 
     OverscaledTileID coord;

@@ -54,6 +54,191 @@ float4 unpack_mix_color(const float4 packedColors, const float t) {
                decode_color(float2(packedColors[2], packedColors[3])), t);
 }
 
+
+
+template<class ForwardIt, class T>
+ForwardIt upper_bound(ForwardIt first, ForwardIt last, thread const T& value)
+{
+    size_t count = last - first;
+    while (count > 0)
+    {
+        ForwardIt it = first;
+        const size_t step = count / 2;
+        it += step;
+        if (!(value < *it))
+        {
+            first = ++it;
+            count -= step + 1;
+        }
+        else {
+            count = step;
+        }
+    }
+    return first;
+}
+
+float interpolationFactor(float base, float rangeMin, float rangeMax, float z) {
+    const float zoomDiff = rangeMax - rangeMin;
+    const float zoomProgress = z - rangeMin;
+    if (zoomDiff == 0) {
+        return 0;
+    } else if (base == 1.0f) {
+        return zoomProgress / zoomDiff;
+    } else {
+        return (pow(base, zoomProgress) - 1) / (pow(base, zoomDiff) - 1);
+    }
+}
+
+
+enum class GPUInterpType : uint16_t {
+    Step,
+    Linear,
+    Exponential,
+    Bezier
+};
+enum class GPUOutputType : uint16_t {
+    Float,
+    Color,
+};
+enum class GPUOptions : uint16_t {
+    None = 0,
+    IntegerZoom = 1 << 0,
+    Transitioning = 1 << 1,
+};
+bool operator&(GPUOptions a, GPUOptions b) { return (uint16_t)a & (uint16_t)b; }
+
+constant const int maxExprStops = 16;
+struct alignas(16) GPUExpression {
+    GPUOutputType outputType;
+    uint16_t stopCount;
+    GPUOptions options;
+    GPUInterpType interpolation;
+    
+    union InterpOptions {
+        struct Exponential {
+            float base;
+        } exponential;
+        
+        struct Bezier {
+            float x1;
+            float y1;
+            float x2;
+            float y2;
+        } bezier;
+    } interpOptions;
+    
+    float inputs[maxExprStops];
+    
+    union Stops {
+        float floats[maxExprStops];
+        float2 colors[maxExprStops];
+    } stops;
+    
+    float eval(float zoom) device const {
+        const auto effectiveZoom = (options & GPUOptions::IntegerZoom) ? floor(zoom) : zoom;
+        const auto index = find(effectiveZoom);
+        if (index == 0) {
+            return stops.floats[0];
+        } else if (index == stopCount) {
+            return stops.floats[stopCount - 1];
+        }
+        switch (interpolation) {
+            case GPUInterpType::Step: return stops.floats[index - 1];
+            default: assert(false);
+                [[fallthrough]];
+            case GPUInterpType::Linear: assert(interpOptions.exponential.base == 1.0f);
+                [[fallthrough]];
+            case GPUInterpType::Exponential: {
+                const float rangeBeg = inputs[index - 1];
+                const float rangeEnd = inputs[index];
+                const auto t = interpolationFactor(interpOptions.exponential.base, rangeBeg, rangeEnd, effectiveZoom);
+                return mix(stops.floats[index - 1], stops.floats[index], t);
+            }
+            case GPUInterpType::Bezier:
+                assert(false);
+                return stops.floats[0];
+        }
+    }
+
+    float4 evalColor(float zoom) device const {
+        const auto effectiveZoom = (options & GPUOptions::IntegerZoom) ? floor(zoom) : zoom;
+        const auto index = find(effectiveZoom);
+        if (index == 0) {
+            return getColor(0);
+        } else if (index == stopCount) {
+            return getColor(stopCount - 1);
+        }
+        switch (interpolation) {
+            case GPUInterpType::Step:
+                return getColor(index - 1);
+            default:
+                assert(false);
+                [[fallthrough]];
+            case GPUInterpType::Linear:
+                assert(interpOptions.exponential.base == 1.0f);
+                [[fallthrough]];
+            case GPUInterpType::Exponential: {
+                const float rangeBeg = inputs[index - 1];
+                const float rangeEnd = inputs[index];
+                const auto t = interpolationFactor(interpOptions.exponential.base, rangeBeg, rangeEnd, effectiveZoom);
+                return mix(getColor(index - 1), getColor(index), clamp(t, 0.0, 1.0));
+            }
+            case GPUInterpType::Bezier:
+                assert(false);
+                return getColor(0);
+        }
+    }
+
+    /// Get the index of the entry to use from the zoom level
+    size_t find(float zoom) device const {
+        return upper_bound(&inputs[0], &inputs[stopCount], zoom) - &inputs[0];
+    }
+
+    float4 getColor(size_t index) device const { return decode_color(stops.colors[index]); }
+};
+static_assert(sizeof(GPUExpression) == 32 + (4 + 8) * maxExprStops, "wrong alignment");
+static_assert(sizeof(GPUExpression) % 16 == 0, "wrong alignment");
+
+
+enum {
+    idGlobalPaintParamsUBO,
+    globalUBOCount
+};
+
+enum {
+    idLineDrawableUBO = globalUBOCount,
+    idLineInterpolationUBO,
+    idLineTilePropertiesUBO,
+    idLineEvaluatedPropsUBO,
+    idLineExpressionUBO,
+    lineUBOCount
+};
+
+
+enum class LineExpressionMask : uint32_t {
+    None = 0,
+    Color = 1 << 0,
+    Opacity = 1 << 1,
+    Blur = 1 << 2,
+    Width = 1 << 3,
+    GapWidth = 1 << 4,
+    FloorWidth = 1 << 5,
+    Offset = 1 << 6,
+};
+bool operator&(LineExpressionMask a, LineExpressionMask b) { return (uint32_t)a & (uint32_t)b; }
+
+struct alignas(16) LineExpressionUBO {
+    GPUExpression color;
+    GPUExpression blur;
+    GPUExpression opacity;
+    GPUExpression gapwidth;
+    GPUExpression offset;
+    GPUExpression width;
+    GPUExpression floorwidth;
+};
+static_assert(sizeof(LineExpressionUBO) % 16 == 0, "wrong alignment");
+
+	
 struct alignas(16) GlobalPaintParamsUBO {
     /*  0 */ float2 pattern_atlas_texsize;
     /*  8 */ float2 units_to_pixels;
@@ -62,7 +247,8 @@ struct alignas(16) GlobalPaintParamsUBO {
     /* 28 */ float symbol_fade_change;
     /* 32 */ float aspect_ratio;
     /* 36 */ float pixel_ratio;
-    /* 40 */ float pad1, pad2;
+    /* 40 */ float zoom;
+    /* 44 */ float pad1;
     /* 48 */
 };
 static_assert(sizeof(GlobalPaintParamsUBO) == 3 * 16, "unexpected padding");
@@ -129,7 +315,8 @@ struct alignas(16) LineEvaluatedPropsUBO {
     float offset;
     float width;
     float floorwidth;
-    float pad1, pad2;
+    LineExpressionMask expressionMask;
+    float pad1;
 };
 
 struct alignas(16) SymbolDrawableUBO {

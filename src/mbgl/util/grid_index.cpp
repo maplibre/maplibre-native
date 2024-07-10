@@ -3,6 +3,6 @@
 
 namespace mbgl {
 
-template class GridIndex<IndexedSubfeature>;
+template class GridIndex<RefIndexedSubfeature>;
 
 } // namespace mbgl

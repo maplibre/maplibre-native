@@ -15,6 +15,7 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.*
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import java.util.*
 
 /**
@@ -29,7 +30,7 @@ class FillExtrusionActivity : AppCompatActivity() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(
             OnMapReadyCallback { maplibreMap: MapLibreMap ->
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
                     val lngLats = listOf(
                         Arrays.asList(
                             Point.fromLngLat(5.12112557888031, 52.09071040847704),

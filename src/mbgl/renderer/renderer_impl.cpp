@@ -17,6 +17,7 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_tweaker.hpp>
@@ -58,7 +59,7 @@ RendererObserver& nullObserver() {
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
                      const std::optional<std::string>& localFontFamily_)
-    : orchestrator(!backend_.contextIsShared(), localFontFamily_),
+    : orchestrator(!backend_.contextIsShared(), backend_.getThreadPool(), localFontFamily_),
       backend(backend_),
       observer(&nullObserver()),
       pixelRatio(pixelRatio_) {}
@@ -73,6 +74,7 @@ void Renderer::Impl::setObserver(RendererObserver* observer_) {
 
 void Renderer::Impl::render(const RenderTree& renderTree,
                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
+    MLN_TRACE_FUNC();
     auto& context = backend.getContext();
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {
@@ -258,8 +260,9 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         /* .symbol_fade_change = */ parameters.symbolFadeChange,
         /* .aspect_ratio = */ parameters.state.getSize().aspectRatio(),
         /* .pixel_ratio = */ parameters.pixelRatio,
-        /* .pad1/2 = */ 0,
-        0};
+        /* .zoom = */ static_cast<float>(parameters.state.getZoom()),
+        /* .pad1 = */ 0,
+    };
     auto& globalUniforms = context.mutableGlobalUniformBuffers();
     globalUniforms.createOrUpdate(shaders::idGlobalPaintParamsUBO, &globalPaintParamsUBO, context);
 #endif
@@ -369,6 +372,19 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
             layerGroup.render(orchestrator, parameters);
         });
+
+        // Finally, render any legacy layers which have not been converted to drawables.
+        // Note that they may be out of order, this is just a temporary fix for `RenderLocationIndicatorLayer` (#2216)
+        parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * PaintParameters::numSublayers *
+                                            PaintParameters::depthEpsilon;
+        int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
+        for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
+            parameters.currentLayer = i;
+            const RenderItem& item = *it;
+            if (item.hasRenderPass(parameters.pass)) {
+                item.render(parameters);
+            }
+        }
     };
 #endif
 
@@ -525,6 +541,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 
     frameCount += 1;
+    MLN_END_FRAME();
 }
 
 void Renderer::Impl::reduceMemoryUse() {

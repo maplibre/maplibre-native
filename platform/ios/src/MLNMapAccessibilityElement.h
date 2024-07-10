@@ -21,7 +21,9 @@ MLN_EXPORT
 /** The tag of the annotation represented by this element. */
 @property (nonatomic) MLNAnnotationTag tag;
 
-- (instancetype)initWithAccessibilityContainer:(id)container tag:(MLNAnnotationTag)identifier NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithAccessibilityContainer:(id)container
+                                           tag:(MLNAnnotationTag)identifier
+    NS_DESIGNATED_INITIALIZER;
 
 @end
 
@@ -30,9 +32,10 @@ MLN_EXPORT
 @interface MLNFeatureAccessibilityElement : MLNMapAccessibilityElement
 
 /** The feature represented by this element. */
-@property (nonatomic, strong) id <MLNFeature> feature;
+@property (nonatomic, strong) id<MLNFeature> feature;
 
-- (instancetype)initWithAccessibilityContainer:(id)container feature:(id <MLNFeature>)feature NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithAccessibilityContainer:(id)container
+                                       feature:(id<MLNFeature>)feature NS_DESIGNATED_INITIALIZER;
 
 @end
 
