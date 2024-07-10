@@ -7,7 +7,7 @@ namespace mbgl {
 
 class RenderRasterDEMSource final : public RenderTileSetSource {
 public:
-    explicit RenderRasterDEMSource(Immutable<style::RasterSource::Impl>, std::shared_ptr<Scheduler>);
+    explicit RenderRasterDEMSource(Immutable<style::RasterSource::Impl>, const TaggedScheduler&);
 
     std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,

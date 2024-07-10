@@ -1,14 +1,14 @@
 #import "MLNRasterTileSource.h"
 
-#include <memory>
 #include <mbgl/util/variant.hpp>
+#include <memory>
 
 namespace mbgl {
-    class Tileset;
-    namespace style {
-        class RasterSource;
-    }
+class Tileset;
+namespace style {
+class RasterSource;
 }
+}  // namespace mbgl
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -16,7 +16,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly, nullable) mbgl::style::RasterSource *rawSource;
 
-- (std::unique_ptr<mbgl::style::RasterSource>)pendingSourceWithIdentifier:(NSString *)identifier urlOrTileset:(mbgl::variant<std::string, mbgl::Tileset>)urlOrTileset tileSize:(uint16_t)tileSize;
+- (std::unique_ptr<mbgl::style::RasterSource>)
+    pendingSourceWithIdentifier:(NSString *)identifier
+                   urlOrTileset:(mbgl::variant<std::string, mbgl::Tileset>)urlOrTileset
+                       tileSize:(uint16_t)tileSize;
 
 @end
 

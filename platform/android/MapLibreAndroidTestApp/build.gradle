@@ -78,6 +78,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig true
     }
 
     namespace 'org.maplibre.android.testapp'

@@ -38,6 +38,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.maplibre.android.testapp.styles.TestStyles
 import kotlin.math.abs
 
 @RunWith(AndroidJUnit4ClassRunner::class)
@@ -154,7 +155,7 @@ class LocationLayerControllerTest : EspressoTest() {
                 component.isLocationComponentEnabled = true
                 component.renderMode = RenderMode.NORMAL
                 component.forceLocationUpdate(location)
-                styleChangeIdlingResource.waitForStyle(maplibreMap, Style.getPredefinedStyle("Bright"))
+                styleChangeIdlingResource.waitForStyle(maplibreMap, TestStyles.getPredefinedStyleWithFallback("Bright"))
                 TestingAsyncUtils.waitForLayer(uiController, mapView)
 
                 assertThat(component.renderMode, `is`(equalTo(RenderMode.NORMAL)))
@@ -456,7 +457,7 @@ class LocationLayerControllerTest : EspressoTest() {
                 component.isLocationComponentEnabled = true
                 component.renderMode = RenderMode.NORMAL
                 component.forceLocationUpdate(location)
-                styleChangeIdlingResource.waitForStyle(maplibreMap, Style.getPredefinedStyle("Bright"))
+                styleChangeIdlingResource.waitForStyle(maplibreMap, TestStyles.getPredefinedStyleWithFallback("Bright"))
                 TestingAsyncUtils.waitForLayer(uiController, mapView)
 
                 assertThat(component.renderMode, `is`(equalTo(RenderMode.NORMAL)))
@@ -503,7 +504,7 @@ class LocationLayerControllerTest : EspressoTest() {
                     `is`(true)
                 )
 
-                maplibreMap.setStyle(Style.Builder().fromUrl(Style.getPredefinedStyle("Bright")))
+                maplibreMap.setStyle(Style.Builder().fromUrl(TestStyles.getPredefinedStyleWithFallback("Bright")))
                 TestingAsyncUtils.waitForLayer(uiController, mapView)
 
                 assertThat(

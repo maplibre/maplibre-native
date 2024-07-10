@@ -67,17 +67,21 @@ public:
     // From Scheduler. Schedules by using callbacks to the
     // JVM to process the mailbox on the right thread.
     void schedule(std::function<void()>&& scheduled) override;
+    void schedule(const util::SimpleIdentity, std::function<void()>&& fn) override { schedule(std::move(fn)); };
+
     mapbox::base::WeakPtr<Scheduler> makeWeakPtr() override { return weakFactory.makeWeakPtr(); }
 
     // Wait for the queue to be empty
-    // A timeout of zero results in an unbounded wait
-    std::size_t waitForEmpty(Milliseconds timeout) override;
+    void waitForEmpty(const util::SimpleIdentity tag) override;
 
     void requestRender();
 
     // Snapshot - requires a RunLoop on the calling thread
     using SnapshotCallback = std::function<void(PremultipliedImage)>;
     void requestSnapshot(SnapshotCallback);
+
+    AndroidRendererBackend& getRendererBackend() const { return *backend; }
+    const TaggedScheduler& getThreadPool() const { return threadPool; }
 
 protected:
     // Called from the GL Thread //
@@ -119,7 +123,7 @@ private:
     float pixelRatio;
     std::optional<std::string> localIdeographFontFamily;
 
-    std::shared_ptr<ThreadPool> threadPool;
+    TaggedScheduler threadPool;
     const MailboxData mailboxData;
 
     std::mutex initialisationMutex;

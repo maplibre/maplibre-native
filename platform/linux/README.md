@@ -99,3 +99,36 @@ Next, run the following command.
 This should produce an `out.png` image in your current directory with a barebones image of the world.
 
 ![Sample image of world from mbgl-render command](/misc/sample-barebones-mbgl-render-out.png)
+
+### Running the render tests
+
+To check that the output of the rendering is correct, we compare actual rendered PNGs for simple styles with expected PNGs. The content of the tests used to be stored in the MapLibre GL JS repository, which means that GL JS and Native are mostly pixel-identical in their rendering.
+
+The directory structure of the render tests looks like:
+
+```
+metrics/
+  integration/
+    render-tests/
+      <name-of-style-spec-feature>/
+        <name-of-feature-value>/
+          expected.png
+          style.json
+```
+
+After the render test run, the folder will also contain an `actual.png` file and a `diff.png` which is the difference between the expected and the actual image. There is a pixel difference threshold value which is used to decide if a render test passed or failed.
+
+
+Run all render tests with:
+
+```
+./build/mbgl-render-test-runner --manifestPath metrics/linux-clang8-release-style.json
+```
+
+Or a single test with:
+
+```
+./build/mbgl-render-test-runner --manifestPath metrics/linux-clang8-release-style.json --filter "render-tests/fill-visibility/visible"
+```
+
+The render test results are summarized in a HTML website located next to the manifest file. For example, running `metrics/linux-clang8-release-style.json` produces a summary at `metrics/linux-clang8-release-style.html`.

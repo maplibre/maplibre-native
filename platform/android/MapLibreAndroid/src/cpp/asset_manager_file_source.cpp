@@ -60,7 +60,7 @@ AssetManagerFileSource::AssetManagerFileSource(jni::JNIEnv& env,
                                                const jni::Object<android::AssetManager>& assetManager_,
                                                const ResourceOptions resourceOptions,
                                                const ClientOptions clientOptions)
-    : assetManager(jni::NewGlobal(env, assetManager_)),
+    : assetManager(jni::NewGlobal<jni::EnvAttachingDeleter>(env, assetManager_)),
       impl(std::make_unique<util::Thread<Impl>>(
           util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_FILE),
           "AssetManagerFileSource",

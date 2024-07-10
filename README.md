@@ -18,7 +18,13 @@ To get started with MapLibre Native, go to your platform below.
 
 ## Documentation
 
-The documentation of MapLibre Native is a work in progress. To get an architectural overview and to learn about the current state of the project and its path forward read the [MapLibre Native Markdown Book](https://maplibre.org/maplibre-native/docs/book/). See below for platform-specific documentation.
+- [Android API Documentation](https://maplibre.org/maplibre-native/android/api/), [Android Quickstart](https://maplibre.org/maplibre-native/docs/book/android/getting-started-guide.html)
+- [iOS Documentation](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/)
+- [MapLibre Native Markdown Book](https://maplibre.org/maplibre-native/docs/book/design/ten-thousand-foot-view.html): architectural notes
+- [Core C++ API Documentation](https://maplibre.org/maplibre-native/cpp/api/) (unstable)
+- Everyone is free to share knowledge and information on the [wiki](https://github.com/maplibre/maplibre-native/wiki)
+
+See below for the platform-specific `README.md` files.
 
 ## Platforms
 
@@ -74,6 +80,8 @@ Silver:
 <a href="https://www.microsoft.com/"><img src="https://maplibre.org/img/msft-logo.svg" alt="Logo Microsoft" width="25%"/></a>
 
 <a href="https://www.mappedin.com/"><img src="https://maplibre.org/img/mappedin-logo.svg" alt="Logo mappedin" width="25%"/></a>
+
+<a href="https://www.mapme.com/"><img src="https://maplibre.org/img/mapme-logo.svg" alt="Logo mapme" width="25%"/></a>
 
 Backers and Supporters:
 

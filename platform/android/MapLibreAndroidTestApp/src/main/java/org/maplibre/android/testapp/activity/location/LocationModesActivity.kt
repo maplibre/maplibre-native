@@ -31,6 +31,7 @@ import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import java.util.Random
 
 class LocationModesActivity :
@@ -118,7 +119,7 @@ class LocationModesActivity :
     @SuppressLint("MissingPermission")
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
             locationComponent = maplibreMap.locationComponent
             locationComponent!!.activateLocationComponent(
                 LocationComponentActivationOptions
@@ -249,8 +250,8 @@ class LocationModesActivity :
         }
         maplibreMap.getStyle { style: Style ->
             val styleUrl =
-                Style.getPredefinedStyle(
-                    if (Style.getPredefinedStyle("Bright") == style.uri) {
+                TestStyles.getPredefinedStyleWithFallback(
+                    if (TestStyles.getPredefinedStyleWithFallback("Bright") == style.uri) {
                         "Bright"
                     } else {
                         "Pastel"

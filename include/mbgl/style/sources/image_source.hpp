@@ -40,6 +40,7 @@ private:
     std::optional<std::string> url;
     std::unique_ptr<AsyncRequest> req;
     mapbox::base::WeakPtrFactory<Source> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 template <>

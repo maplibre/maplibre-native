@@ -1,5 +1,5 @@
-#import "MLNUserLocationAnnotationView.h"
 #import "MLNUserLocation.h"
+#import "MLNUserLocationAnnotationView.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

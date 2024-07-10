@@ -1,8 +1,7 @@
 #import <Mapbox.h>
 #import <XCTest/XCTest.h>
 
-#define MLNConstantExpression(constant) \
-    [NSExpression expressionForConstantValue:constant]
+#define MLNConstantExpression(constant) [NSExpression expressionForConstantValue:constant]
 
 @interface MLNStyleLayerTests : XCTestCase <MLNMapViewDelegate>
 

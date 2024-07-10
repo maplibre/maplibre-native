@@ -8,7 +8,7 @@ namespace android {
 
 class AndroidRendererBackend : public gl::RendererBackend, public mbgl::gfx::Renderable {
 public:
-    AndroidRendererBackend();
+    AndroidRendererBackend(const TaggedScheduler& threadPool);
     ~AndroidRendererBackend() override;
 
     void updateViewPort();

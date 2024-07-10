@@ -2,8 +2,8 @@
 
 #import "MLNOfflinePack.h"
 
-#include <mbgl/storage/online_file_source.hpp>
 #include <mbgl/storage/database_file_source.hpp>
+#include <mbgl/storage/online_file_source.hpp>
 
 #include "MLNSettings_Private.h"
 
@@ -28,7 +28,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic) std::shared_ptr<mbgl::FileSource> mbglFileSource;
 
-- (void)getPacksWithCompletionHandler:(void (^)(NSArray<MLNOfflinePack *> *packs, NSError * _Nullable error))completion;
+- (void)getPacksWithCompletionHandler:(void (^)(NSArray<MLNOfflinePack *> *packs,
+                                                NSError *_Nullable error))completion;
 
 @end
 

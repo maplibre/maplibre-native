@@ -1,5 +1,6 @@
 package org.maplibre.android.testapp.style;
 
+import org.junit.Ignore;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Point;
 import org.maplibre.android.geometry.LatLng;
@@ -286,6 +287,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testConstFormatExpression() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -309,6 +311,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testConstFormatExpressionFontScaleParam() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -332,6 +335,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testConstFormatExpressionTextFontParam() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -362,6 +366,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testConstFormatExpressionTextColorParam() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -391,6 +396,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testConstFormatExpressionAllParams() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -425,6 +431,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testConstFormatExpressionMultipleInputs() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -462,6 +469,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testVariableFormatExpression() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -493,6 +501,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testVariableFormatExpressionMultipleInputs() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -525,6 +534,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testFormatExpressionPlainTextCoercion() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -546,6 +556,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testTextFieldFormattedArgument() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -572,6 +583,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testNumberFormatCurrencyExpression() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -597,6 +609,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testNumberFormatMaxExpression() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -622,6 +635,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testNumberFormatMinExpression() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -647,6 +661,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testNumberFormatLocaleExpression() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {
@@ -673,6 +688,7 @@ public class ExpressionTest extends EspressoTest {
   }
 
   @Test
+  @Ignore("https://github.com/maplibre/maplibre-native/issues/2437")
   public void testNumberFormatNonConstantExpression() {
     validateTestSetup();
     invoke(maplibreMap, (uiController, maplibreMap) -> {

@@ -10,6 +10,10 @@ configure_device_profiles()
 swift_library(
     name = "Sources",
     srcs = glob(["Sources/*.swift"]),
+    data = glob([
+        "Data/*",
+        "Assets.xcassets/*",
+    ]),
     module_name = "Sources",
     tags = ["manual"],
     deps = [

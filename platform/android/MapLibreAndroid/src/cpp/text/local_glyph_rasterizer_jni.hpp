@@ -26,7 +26,7 @@ public:
     PremultipliedImage drawGlyphBitmap(const std::string& fontFamily, const bool bold, const char16_t glyphID);
 
 private:
-    jni::Global<jni::Object<LocalGlyphRasterizer>> javaObject;
+    jni::Global<jni::Object<LocalGlyphRasterizer>, jni::EnvAttachingDeleter> javaObject;
 };
 
 } // namespace android

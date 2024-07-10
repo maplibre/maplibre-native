@@ -44,7 +44,7 @@ Context::Context(RendererBackend& backend_)
 
 Context::~Context() noexcept {
     if (cleanupOnDestruction) {
-        Scheduler::GetBackground()->runRenderJobs();
+        backend.getThreadPool().runRenderJobs(true /* closeQueue */);
         performCleanup();
 
         emptyVertexBuffer.reset();
@@ -68,7 +68,7 @@ Context::~Context() noexcept {
 }
 
 void Context::beginFrame() {
-    Scheduler::GetBackground()->runRenderJobs();
+    backend.getThreadPool().runRenderJobs();
 }
 
 void Context::endFrame() {}
@@ -416,9 +416,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                    MTL::IndexType::IndexTypeUInt16,
                                    indexRes->getMetalBuffer().get(),
                                    /*indexOffset=*/0,
-                                   /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()),
-                                   /*baseVertex=*/0,
-                                   /*baseInstance=*/0);
+                                   /*instanceCount=*/static_cast<NS::UInteger>(tileUBOs.size()));
 #else
     const auto uboIndex = ShaderClass::uniforms[0].index;
     for (std::size_t ii = 0; ii < tileUBOs.size(); ++ii) {
@@ -429,9 +427,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                        MTL::IndexType::IndexTypeUInt16,
                                        indexRes->getMetalBuffer().get(),
                                        /*indexOffset=*/0,
-                                       /*instanceCount=*/1,
-                                       /*baseVertex=*/0,
-                                       /*baseInstance=*/0);
+                                       /*instanceCount=*/1);
     }
 #endif
 

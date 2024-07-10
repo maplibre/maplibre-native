@@ -100,13 +100,13 @@ protected:
     const GeometryTileData* getData() const;
     LayerRenderData* getLayerRenderData(const style::Layer::Impl&);
 
-private:
-    void markObsolete();
-
     // Used to signal the worker that it should abandon parsing this tile as soon as possible.
     std::atomic<bool> obsolete{false};
 
-    const std::shared_ptr<Scheduler> threadPool;
+private:
+    void markObsolete();
+
+    TaggedScheduler threadPool;
 
     const std::shared_ptr<Mailbox> mailbox;
     Actor<GeometryTileWorker> worker;

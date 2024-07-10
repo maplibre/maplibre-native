@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.MapLibre
 import org.maplibre.android.geometry.LatLng
@@ -15,6 +16,7 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.RasterLayer
 import org.maplibre.android.style.sources.ImageSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.utils.BitmapUtils
 
 /**
@@ -27,7 +29,7 @@ import org.maplibre.android.utils.BitmapUtils
  */
 class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
     private var runnable: Runnable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +50,7 @@ class AnimatedImageSourceActivity : AppCompatActivity(), OnMapReadyCallback {
         val layer = RasterLayer(ID_IMAGE_LAYER, ID_IMAGE_SOURCE)
         map.setStyle(
             Style.Builder()
-                .fromUri(Style.getPredefinedStyle("Streets"))
+                .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
                 .withSource(imageSource)
                 .withLayer(layer)
         ) { style: Style? ->

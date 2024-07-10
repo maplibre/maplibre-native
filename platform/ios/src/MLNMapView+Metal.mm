@@ -80,18 +80,14 @@ public:
     void swap() override {
         id<CAMetalDrawable> currentDrawable = [mtlView currentDrawable];
         if (currentDrawable) {
-            [commandBuffer presentDrawable:currentDrawable];
-        }
-        [commandBuffer commit];
-
-        // Synchronous rendering can help troubleshoot rendering problems,
-        // particularly those related to resource tracking and multiple queued buffers.
-        // The conditional logic for synchronous rendering is commanded from MLNMapView.updateAnnotationViews:
-        // `_mbglView->setSynchronous(haveVisibleAnnotationViews);`
-        // and fixes the desynchronization of UIView annotation when the map is rendered on the Metal backend
-        // Issue: https://github.com/maplibre/maplibre-native/issues/2053
-        if (backend.getSynchronous()) {
-            [commandBuffer waitUntilCompleted];
+            if (presentsWithTransaction) {
+                [commandBuffer commit];
+                [commandBuffer waitUntilCompleted];
+                [currentDrawable present];
+            } else {
+                [commandBuffer presentDrawable:currentDrawable];
+                [commandBuffer commit];
+            }
         }
 
         commandBuffer = nil;
@@ -116,6 +112,7 @@ public:
     MTKView *mtlView = nil;
     id <MTLCommandBuffer> commandBuffer;
     id <MTLCommandQueue> commandQueue;
+    bool presentsWithTransaction = false;
 
     // We count how often the context was activated/deactivated so that we can truly deactivate it
     // after the activation count drops to 0.
@@ -137,10 +134,10 @@ void MLNMapViewMetalImpl::setOpaque(const bool opaque) {
 }
 
 void MLNMapViewMetalImpl::setPresentsWithTransaction(const bool value) {
-    presentsWithTransaction = value;
+    auto& resource = getResource<MLNMapViewMetalRenderableResource>();
+    resource.presentsWithTransaction = value;
 
     if (@available(iOS 13.0, *)) {
-        auto& resource = getResource<MLNMapViewMetalRenderableResource>();
         if (CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer)) {
             metalLayer.presentsWithTransaction = value;
         }
@@ -180,7 +177,7 @@ void MLNMapViewMetalImpl::createView() {
     resource.mtlView.enableSetNeedsDisplay = YES;
     if (@available(iOS 13.0, *)) {
         CAMetalLayer* metalLayer = MLN_OBJC_DYNAMIC_CAST(resource.mtlView.layer, CAMetalLayer);
-        metalLayer.presentsWithTransaction = presentsWithTransaction;
+        metalLayer.presentsWithTransaction = resource.presentsWithTransaction;
     }
 
     [mapView insertSubview:resource.mtlView atIndex:0];

@@ -11,7 +11,7 @@ class GeoJSONData;
 
 class RenderGeoJSONSource final : public RenderTileSource {
 public:
-    explicit RenderGeoJSONSource(Immutable<style::GeoJSONSource::Impl>, std::shared_ptr<Scheduler>);
+    explicit RenderGeoJSONSource(Immutable<style::GeoJSONSource::Impl>, const TaggedScheduler&);
     ~RenderGeoJSONSource() override;
 
     void update(Immutable<style::Source::Impl>,

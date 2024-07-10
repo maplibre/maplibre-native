@@ -3,7 +3,7 @@
 To make an Android release, do the following:
 
 * Update `CHANGELOG.md` in a pull request
-  * Add a section title containing the version which should be released, e.g. `## 9.6.0 - December 18, 2022`
+  * Add a section title containing the version which should be released, e.g. `## 9.6.0`
   * Remove the `* Add your pull request...` entries
   * Add a new `main` section at the top of the changelog
 

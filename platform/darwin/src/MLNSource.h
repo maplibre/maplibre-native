@@ -21,7 +21,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNInvalidStyleSourceExcepti
 
  Create instances of `MLNShapeSource`, `MLNComputedShapeSource`,
  `MLNImageSource`, and the concrete subclasses of `MLNTileSource`
- (`MLNVectorTileSource` and `MLNRasterTileSource`) in order to use `MLNSource`’s
+ (``MLNVectorTileSource`` and `MLNRasterTileSource`) in order to use `MLNSource`’s
  properties and methods. Do not create instances of `MLNSource` directly, and do
  not create your own subclasses of this class.
  */

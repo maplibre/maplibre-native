@@ -1,5 +1,6 @@
 #include <mbgl/util/http_timeout.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -10,6 +11,8 @@ namespace http {
 Duration errorRetryTimeout(Response::Error::Reason failedRequestReason,
                            uint32_t failedRequests,
                            std::optional<Timestamp> retryAfter) {
+    MLN_TRACE_FUNC();
+
     if (failedRequestReason == Response::Error::Reason::Server) {
         // Retry after one second three times, then start exponential backoff.
         return Seconds(failedRequests <= 3 ? 1 : 1u << std::min(failedRequests - 3, 31u));

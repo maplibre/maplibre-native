@@ -7,6 +7,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test resizing a [android.view.TextureView] backed map on the fly.
@@ -36,7 +37,7 @@ class TextureViewResizeActivity : AppCompatActivity() {
     }
 
     private fun setupMap(maplibreMap: MapLibreMap) {
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
     }
 
     private fun setupFab() {

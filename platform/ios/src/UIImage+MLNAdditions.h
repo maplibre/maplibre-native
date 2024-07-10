@@ -12,7 +12,8 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNResourceNotFoundException
 
 - (nullable instancetype)initWithMLNStyleImage:(const mbgl::style::Image &)styleImage;
 
-- (nullable instancetype)initWithMLNPremultipliedImage:(const mbgl::PremultipliedImage&&)mbglImage scale:(CGFloat)scale;
+- (nullable instancetype)initWithMLNPremultipliedImage:(const mbgl::PremultipliedImage &&)mbglImage
+                                                 scale:(CGFloat)scale;
 
 - (std::unique_ptr<mbgl::style::Image>)mgl_styleImageWithIdentifier:(NSString *)identifier;
 
@@ -20,7 +21,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNResourceNotFoundException
 
 + (UIImage *)mgl_resourceImageNamed:(NSString *)imageName;
 
-- (BOOL)isDataEqualTo:(UIImage*)otherImage;
+- (BOOL)isDataEqualTo:(UIImage *)otherImage;
 
 @end
 

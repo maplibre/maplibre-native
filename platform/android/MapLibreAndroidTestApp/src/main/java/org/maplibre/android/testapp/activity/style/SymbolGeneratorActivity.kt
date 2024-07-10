@@ -25,6 +25,7 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.style.sources.Source
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.ResourceUtils.readRawResource
 import timber.log.Timber
 import java.lang.ref.WeakReference
@@ -45,7 +46,7 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        map.setStyle(Style.getPredefinedStyle("Outdoor")) { style: Style? ->
+        map.setStyle(TestStyles.getPredefinedStyleWithFallback("Outdoor")) { style: Style? ->
             addSymbolClickListener()
             LoadDataTask(this@SymbolGeneratorActivity).execute()
         }

@@ -22,7 +22,8 @@ MLN_EXPORT
 
 // MARK: Initializing a Style Layer
 
-- (instancetype)init __attribute__((unavailable("Use -init methods of concrete subclasses instead.")));
+- (instancetype)init
+    __attribute__((unavailable("Use -init methods of concrete subclasses instead.")));
 
 // MARK: Specifying a Style Layer’s Content
 
