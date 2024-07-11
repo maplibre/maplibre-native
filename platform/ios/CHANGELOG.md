@@ -4,6 +4,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.5.2
+
+- Fix Cocoapods release.
+
 ## 6.5.1
 
 - Enable LTO ([#2504](https://github.com/maplibre/maplibre-native/pull/2504)).
