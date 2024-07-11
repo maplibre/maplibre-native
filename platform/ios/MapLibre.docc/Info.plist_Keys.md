@@ -1,6 +1,6 @@
 # Info.plist Keys
 
-The MapLibre Native for iOS supports custom `Info.plist` keys in your application in order to configure various settings.
+MapLibre Native for iOS supports custom `Info.plist` keys in your application in order to configure various settings.
 
 ## MLNApiKey
 
