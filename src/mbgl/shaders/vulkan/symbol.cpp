@@ -22,8 +22,7 @@ const std::array<TextureInfo, 1> ShaderSource<BuiltIn::SymbolIconShader, gfx::Ba
     TextureInfo{0, idSymbolImageTexture},
 };
 
-const std::array<UniformBlockInfo, 5> 
-    ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Vulkan>::uniforms =
+const std::array<UniformBlockInfo, 5> ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Vulkan>::uniforms =
     {
         UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
         UniformBlockInfo{true, true, sizeof(SymbolDrawableUBO), idSymbolDrawableUBO},
@@ -76,8 +75,8 @@ const std::array<AttributeInfo, 9>
 };
 const std::array<TextureInfo, 2> ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Vulkan>::textures =
     {
-    TextureInfo{0, idSymbolImageTexture},
-    TextureInfo{1, idSymbolImageIconTexture},
+        TextureInfo{0, idSymbolImageTexture},
+        TextureInfo{1, idSymbolImageIconTexture},
 };
 
 const std::array<UniformBlockInfo, 2>

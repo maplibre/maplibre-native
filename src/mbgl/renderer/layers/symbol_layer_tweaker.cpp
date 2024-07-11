@@ -134,7 +134,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
 
-        
 #ifdef MLN_RENDER_BACKEND_VULKAN
         const auto& globalUniforms = context.getGlobalUniformBuffers();
         for (size_t i = 0; i < globalUniforms.allocatedSize(); ++i) {

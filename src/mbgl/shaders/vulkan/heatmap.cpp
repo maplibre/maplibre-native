@@ -15,13 +15,11 @@ const std::array<AttributeInfo, 3> ShaderSource<BuiltIn::HeatmapShader, gfx::Bac
 };
 
 const std::array<UniformBlockInfo, 2>
-    ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Vulkan>::uniforms =
-    {
+    ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Vulkan>::uniforms = {
         UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
         UniformBlockInfo{true, true, sizeof(HeatmapTexturePropsUBO), idHeatmapTexturePropsUBO},
 };
-const std::array<AttributeInfo, 1> 
-    ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Vulkan>::attributes =
+const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Vulkan>::attributes =
     {
         AttributeInfo{0, gfx::AttributeDataType::Short2, idHeatmapPosVertexAttribute},
 };

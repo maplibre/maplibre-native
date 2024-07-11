@@ -140,7 +140,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 #if !defined(NDEBUG)
         const auto debugGroup = uploadPass.createDebugGroup(debugLabel(*this));
 #endif
-    
+
         if (!vertexAttributes) {
             vertexAttributes = std::make_shared<VertexAttributeArray>();
         }
