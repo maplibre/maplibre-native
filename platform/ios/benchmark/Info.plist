@@ -28,8 +28,6 @@
 	<string>15256</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>MLNMapboxMetricsEnabledSettingShownInApp</key>
-	<true/>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2015–2019 Mapbox</string>
 	<key>UIApplicationExitsOnSuspend</key>
