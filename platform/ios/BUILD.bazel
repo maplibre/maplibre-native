@@ -182,6 +182,11 @@ _IOS_APPLICATION_RESOURCES = [
     "app/Assets.xcassets/**",
 ])
 
+apple_bundle_version(
+    name = "maplibre_app_version",
+    build_version = "1.0.0",
+)
+
 ios_application(
     name = "App",
     bundle_id = "{}.maplibre.app".format(BUNDLE_ID_PREFIX),
@@ -193,6 +198,7 @@ ios_application(
     minimum_os_version = "12.0",
     provisioning_profile = "xcode_profile",
     resources = _IOS_APPLICATION_RESOURCES,
+    version = ":maplibre_app_version",
     visibility = ["//visibility:public"],
     deps = [
         "//platform:iosapp",
