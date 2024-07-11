@@ -124,7 +124,7 @@ apple_xcframework(
         "resources/*.lproj/**",
         "resources/*.xcassets/**",
         "resources/metal-cpp-ignores.txt",
-    ]) + ["PrivacyInfo.xcprivacy"],
+    ]),
     infoplists = ["info_plist"],
     ios = {
         "simulator": [

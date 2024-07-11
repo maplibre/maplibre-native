@@ -285,12 +285,12 @@ jobs:
           git tag -a ios-v${{ env.version }} -m "Publish ios-v${{ env.version }}" ${{ github.sha }}
           git push origin ios-v${{ env.version }}
 
-      - name: Add license to XCFramework zip
+      - name: Add license and Privacy Manifest to XCFramework zip
         if: env.make_release
         run: |
           cp ${{ env.xcframework }} MapLibre.dynamic.xcframework.zip
           chmod +w MapLibre.dynamic.xcframework.zip
-          zip MapLibre.dynamic.xcframework.zip LICENSE.md  # add license to zip
+          zip MapLibre.dynamic.xcframework.zip LICENSE.md PrivacyInfo.xcprivacy
         working-directory: .
 
       - name: Release (GitHub)
