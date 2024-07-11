@@ -11,6 +11,11 @@
 #define VMA_DYNAMIC_VULKAN_FUNCTIONS 0
 #include "vk_mem_alloc.h"
 
+#ifndef NDEBUG
+#define ELABLE_VULKAN_VALIDATION
+#define ENABLE_VMA_DEBUG
+#endif
+
 namespace mbgl {
 
 class ProgramParameters;
@@ -89,24 +94,25 @@ public:
     void initShaders(gfx::ShaderRegistry&, const ProgramParameters& programParameters) override;
     void init();
 
-    virtual void recreateSwapchain();
-
     const vk::UniqueInstance& getInstance() const { return instance; }
     const vk::PhysicalDevice& getPhysicalDevice() const { return physicalDevice; }
     const vk::UniqueDevice& getDevice() const { return device; }
     const vk::UniqueCommandPool& getCommandPool() const { return commandPool; }
     const vk::Queue& getGraphicsQueue() const { return graphicsQueue; }
     const vk::Queue& getPresentQueue() const { return presentQueue; }
-    const uint32_t getMaxFrames() const { return maxFrames; }
+    uint32_t getMaxFrames() const { return maxFrames; }
     const VmaAllocator& getAllocator() const { return allocator; }
     const vk::PhysicalDeviceProperties& getDeviceProperties() const { return physicalDeviceProperties; }
+    int32_t getGraphicsQueueIndex() const { return graphicsQueueIndex; }
+    int32_t getPresentQueueIndex() const { return presentQueueIndex; }
 
     template <typename T, typename = typename std::enable_if<vk::isVulkanHandleType<T>::value>>
-    void setDebugName(const T& object, const std::string& name) {
-#ifndef NDEBUG
+    void setDebugName([[maybe_unused]] const T& object, [[maybe_unused]] const std::string& name) const {
+#ifdef ELABLE_VULKAN_VALIDATION
+        const uint64_t handle = reinterpret_cast<uint64_t>(static_cast<typename T::CType>(object));
         device->setDebugUtilsObjectNameEXT(vk::DebugUtilsObjectNameInfoEXT()
                                                .setObjectType(object.objectType)
-                                               .setObjectHandle((uint64_t)(T::CType)object)
+                                               .setObjectHandle(handle)
                                                .setPObjectName(name.c_str()));
 #endif
     }
@@ -145,7 +151,7 @@ protected:
     vk::Queue presentQueue;
 
     vk::UniqueCommandPool commandPool;
-    uint32_t maxFrames = 2;
+    uint32_t maxFrames = 1;
 
     VmaAllocator allocator;
 };

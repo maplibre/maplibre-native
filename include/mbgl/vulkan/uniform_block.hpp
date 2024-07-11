@@ -21,7 +21,7 @@ private:
         : gfx::UniformBlock(std::move(other)) {}
 
 public:
-    void bindBuffer(const gfx::UniformBuffer& uniformBuffer) override {}
+    void bindBuffer(const gfx::UniformBuffer&) override {}
     void unbindBuffer() override {}
 
     bool getBindVertex() const { return bindVertex; }

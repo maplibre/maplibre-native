@@ -10,53 +10,129 @@ namespace vulkan {
 class OffscreenTextureResource final : public RenderableResource {
 public:
     OffscreenTextureResource(
-        Context& context_, const Size size_, const gfx::TextureChannelDataType type_, bool depth, bool stencil)
-        : context(context_),
+        RendererBackend& backend_, const Size size_, const gfx::TextureChannelDataType type_)
+        : RenderableResource(backend_),
           size(size_),
           type(type_) {
         assert(!size.isEmpty());
-        colorTexture = context.createTexture2D();
-        colorTexture->setSize(size);
-        colorTexture->setFormat(gfx::TexturePixelType::RGBA, type);
-        colorTexture->setSamplerConfiguration(
+
+        extent.width = size.width;
+        extent.height = size.height;
+
+        colorTexture = backend.getContext().createTexture2D();
+        auto& texture = static_cast<Texture2D&>(*colorTexture);
+
+        texture.setSize(size);
+        texture.setFormat(gfx::TexturePixelType::RGBA, type);
+        texture.setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
+        texture.setUsage(Texture2DUsage::Attachment);
 
-        if (depth) {
-            depthTexture = context.createTexture2D();
-            depthTexture->setSize(size);
-            depthTexture->setFormat(gfx::TexturePixelType::Depth, gfx::TextureChannelDataType::Float);
-            depthTexture->setSamplerConfiguration(
-                {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        }
-
-        context.renderingStats().numFrameBuffers++;
+        backend.getContext().renderingStats().numFrameBuffers++;
     }
 
-    ~OffscreenTextureResource() noexcept override { context.renderingStats().numFrameBuffers--; }
+    ~OffscreenTextureResource() noexcept override { 
+        framebuffer.reset();
+        renderPass.reset();
+        colorTexture.reset();
+        
+        backend.getContext().renderingStats().numFrameBuffers--; 
+    }
 
-    void bind() override { colorTexture->create(); }
+    void bind() override { 
+        colorTexture->create(); 
+        createRenderPass();
+    }
 
-    void swap() override {}
+    const vk::UniqueFramebuffer& getFramebuffer() const override { return framebuffer; };
 
-    PremultipliedImage readStillImage() { return {}; }
+    PremultipliedImage readStillImage() {
+        assert(false);
+        return {};
+    }
 
     gfx::Texture2DPtr& getTexture() {
         assert(colorTexture);
         return colorTexture;
     }
 
+    void createRenderPass() {
+        if (renderPass) return;
+
+        assert(colorTexture);
+        auto& texture = static_cast<Texture2D&>(*colorTexture); 
+
+        const auto& colorAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
+                                          .setFormat(texture.getVulkanFormat())
+                                          .setSamples(vk::SampleCountFlagBits::e1)
+                                          .setLoadOp(vk::AttachmentLoadOp::eClear)
+                                          .setStoreOp(vk::AttachmentStoreOp::eStore)
+                                          .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+                                          .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+                                          .setInitialLayout(vk::ImageLayout::eUndefined)
+                                          .setFinalLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+
+        const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
+
+        const auto& subpass = vk::SubpassDescription(vk::SubpassDescriptionFlags())
+                                  .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
+                                  .setColorAttachmentCount(1)
+                                  .setColorAttachments(colorAttachmentRef);
+
+        const auto subpassSrcStageMask = vk::PipelineStageFlags() | vk::PipelineStageFlagBits::eColorAttachmentOutput |
+                                         vk::PipelineStageFlagBits::eLateFragmentTests;
+
+        const auto subpassDstStageMask = vk::PipelineStageFlags() | vk::PipelineStageFlagBits::eColorAttachmentOutput |
+                                         vk::PipelineStageFlagBits::eEarlyFragmentTests;
+
+        const auto subpassSrcAccessMask = vk::AccessFlags() | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+
+        const auto subpassDstAccessMask = vk::AccessFlags() | vk::AccessFlagBits::eColorAttachmentWrite |
+                                          vk::AccessFlagBits::eDepthStencilAttachmentWrite;
+
+        const auto& subpassDependency = vk::SubpassDependency()
+                                            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+                                            .setDstSubpass(0)
+                                            .setSrcStageMask(subpassSrcStageMask)
+                                            .setDstStageMask(subpassDstStageMask)
+                                            .setSrcAccessMask(subpassSrcAccessMask)
+                                            .setDstAccessMask(subpassDstAccessMask);
+
+        const auto& renderPassCreateInfo = vk::RenderPassCreateInfo()
+                                               .setAttachments(colorAttachment)
+                                               .setSubpassCount(1)
+                                               .setSubpasses(subpass)
+                                               .setDependencyCount(1)
+                                               .setDependencies(subpassDependency);
+
+        renderPass = backend.getDevice()->createRenderPassUnique(renderPassCreateInfo);
+
+        const auto& framebufferCreateInfo = vk::FramebufferCreateInfo()
+                                                .setRenderPass(renderPass.get())
+                                                .setAttachments(texture.getVulkanImageView().get())
+                                                .setAttachmentCount(1)
+                                                .setWidth(extent.width)
+                                                .setHeight(extent.height)
+                                                .setLayers(1);
+
+        framebuffer = backend.getDevice()->createFramebufferUnique(framebufferCreateInfo);
+    }
+
 private:
-    Context& context;
     const Size size;
     const gfx::TextureChannelDataType type;
+
     gfx::Texture2DPtr colorTexture;
-    gfx::Texture2DPtr depthTexture;
-    gfx::Texture2DPtr stencilTexture;
+    vk::UniqueFramebuffer framebuffer;
 };
 
 OffscreenTexture::OffscreenTexture(
     Context& context, const Size size_, const gfx::TextureChannelDataType type, bool depth, bool stencil)
-    : gfx::OffscreenTexture(size, std::make_unique<OffscreenTextureResource>(context, size_, type, depth, stencil)) {}
+    : gfx::OffscreenTexture(
+          size, std::make_unique<OffscreenTextureResource>(context.getBackend(), size_, type)) {
+    assert(!depth);
+    assert(!stencil);
+}
 
 bool OffscreenTexture::isRenderable() {
     assert(false);

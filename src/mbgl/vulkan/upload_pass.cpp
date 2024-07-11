@@ -12,7 +12,7 @@
 namespace mbgl {
 namespace vulkan {
 
-UploadPass::UploadPass(gfx::Renderable& renderable, CommandEncoder& commandEncoder_, const char* name)
+UploadPass::UploadPass(gfx::Renderable&, CommandEncoder& commandEncoder_, const char* name)
     : commandEncoder(commandEncoder_) {
     // Push the group for the name provided
     debugGroups.emplace_back(gfx::DebugGroup<gfx::UploadPass>{*this, name});
@@ -28,50 +28,54 @@ void UploadPass::endEncoding() {
 
 std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResource(const void* data,
                                                                                   const std::size_t size,
-                                                                                  const gfx::BufferUsageType usage,
+                                                                                  const gfx::BufferUsageType,
                                                                                   bool persistent) {
     return std::make_unique<VertexBufferResource>(
         commandEncoder.context.createBuffer(data, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, persistent));
 }
 
-void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {}
+void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {
+    static_cast<VertexBufferResource&>(resource).get().update(data, size, /*offset=*/0);
+}
 
 std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(const void* data,
                                                                                 const std::size_t size,
-                                                                                const gfx::BufferUsageType usage,
+                                                                                const gfx::BufferUsageType,
                                                                                 bool persistent) {
     return std::make_unique<IndexBufferResource>(
         commandEncoder.context.createBuffer(data, size, VK_BUFFER_USAGE_INDEX_BUFFER_BIT, persistent));
 }
 
-void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, const void* data, std::size_t size) {}
-
-std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Size size,
-                                                                        const void* data,
-                                                                        gfx::TexturePixelType format,
-                                                                        gfx::TextureChannelDataType type) {
-    assert(false);
-    throw std::runtime_error("UploadPass::createTextureResource not implemented on Metal!");
+void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, const void* data, std::size_t size) {
+    static_cast<IndexBufferResource&>(resource).get().update(data, size, /*offset=*/0);
 }
 
-void UploadPass::updateTextureResource(gfx::TextureResource& resource,
-                                       const Size size,
-                                       const void* data,
-                                       gfx::TexturePixelType format,
-                                       gfx::TextureChannelDataType type) {
+std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Size,
+                                                                        const void*,
+                                                                        gfx::TexturePixelType,
+                                                                        gfx::TextureChannelDataType) {
     assert(false);
-    throw std::runtime_error("UploadPass::updateTextureResource not implemented on Metal!");
+    throw std::runtime_error("UploadPass::createTextureResource not implemented on Vulkan!");
 }
 
-void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
-                                          const uint16_t xOffset,
-                                          const uint16_t yOffset,
-                                          const Size size,
-                                          const void* data,
-                                          gfx::TexturePixelType format,
-                                          gfx::TextureChannelDataType type) {
+void UploadPass::updateTextureResource(gfx::TextureResource&,
+                                       const Size,
+                                       const void*,
+                                       gfx::TexturePixelType,
+                                       gfx::TextureChannelDataType) {
     assert(false);
-    throw std::runtime_error("UploadPass::updateTextureResourceSub not implemented on Metal!");
+    throw std::runtime_error("UploadPass::updateTextureResource not implemented on Vulkan!");
+}
+
+void UploadPass::updateTextureResourceSub(gfx::TextureResource&,
+                                          const uint16_t,
+                                          const uint16_t,
+                                          const Size,
+                                          const void*,
+                                          gfx::TexturePixelType,
+                                          gfx::TextureChannelDataType) {
+    assert(false);
+    throw std::runtime_error("UploadPass::updateTextureResourceSub not implemented on Vulkan!");
 }
 
 struct VertexBuffer : public gfx::VertexBufferBase {
@@ -112,23 +116,18 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
 }
 
 gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
-    const std::size_t vertexCount,
-    const gfx::AttributeDataType vertexType,
-    const std::size_t vertexAttributeIndex,
-    const std::vector<std::uint8_t>& vertexData,
+    const std::size_t,
+    const gfx::AttributeDataType,
+    const std::size_t,
+    const std::vector<std::uint8_t>&,
     const gfx::VertexAttributeArray& defaults,
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
-    /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) {
+    /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>&) {
     gfx::AttributeBindingArray bindings;
 
-    constexpr std::size_t align = 16;
-    constexpr std::uint8_t padding = 0;
-
-    uint32_t vertexStride = 0;
-
     // For each attribute in the program, with the corresponding default and optional override...
-    const auto resolveAttr = [&](const size_t id, auto& default_, auto& override_) -> void {
+    const auto resolveAttr = [&](const size_t, auto& default_, auto& override_) -> void {
         auto& effectiveAttr = override_ ? *override_ : default_;
         const auto& defaultAttr = static_cast<const VertexAttribute&>(default_);
         const auto index = static_cast<std::size_t>(defaultAttr.getIndex());

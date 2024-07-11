@@ -43,9 +43,9 @@ const std::array<AttributeInfo, 10> ShaderSource<BuiltIn::SymbolSDFIconShader, g
         // sometimes uniforms
         AttributeInfo{5, gfx::AttributeDataType::Float4, idSymbolColorVertexAttribute},
         AttributeInfo{6, gfx::AttributeDataType::Float4, idSymbolHaloColorVertexAttribute},
-        AttributeInfo{7, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
-        AttributeInfo{8, gfx::AttributeDataType::Float, idSymbolHaloWidthVertexAttribute},
-        AttributeInfo{9, gfx::AttributeDataType::Float, idSymbolHaloBlurVertexAttribute},
+        AttributeInfo{7, gfx::AttributeDataType::Float2, idSymbolOpacityVertexAttribute},
+        AttributeInfo{8, gfx::AttributeDataType::Float2, idSymbolHaloWidthVertexAttribute},
+        AttributeInfo{9, gfx::AttributeDataType::Float2, idSymbolHaloBlurVertexAttribute},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Vulkan>::textures = {
     TextureInfo{0, idSymbolImageTexture},
@@ -70,9 +70,9 @@ const std::array<AttributeInfo, 9>
         // sometimes uniforms
         AttributeInfo{4, gfx::AttributeDataType::Float4, idSymbolColorVertexAttribute},
         AttributeInfo{5, gfx::AttributeDataType::Float4, idSymbolHaloColorVertexAttribute},
-        AttributeInfo{6, gfx::AttributeDataType::Float, idSymbolOpacityVertexAttribute},
-        AttributeInfo{7, gfx::AttributeDataType::Float, idSymbolHaloWidthVertexAttribute},
-        AttributeInfo{8, gfx::AttributeDataType::Float, idSymbolHaloBlurVertexAttribute},
+        AttributeInfo{6, gfx::AttributeDataType::Float2, idSymbolOpacityVertexAttribute},
+        AttributeInfo{7, gfx::AttributeDataType::Float2, idSymbolHaloWidthVertexAttribute},
+        AttributeInfo{8, gfx::AttributeDataType::Float2, idSymbolHaloBlurVertexAttribute},
 };
 const std::array<TextureInfo, 2> ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Vulkan>::textures =
     {

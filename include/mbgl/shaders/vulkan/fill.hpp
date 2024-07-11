@@ -129,7 +129,7 @@ layout(set = 0, binding = 3) uniform FillInterpolateUBO {
     float opacity_t;
 } interp;
 
-#if !defined(HAS_UNIFORM_u_color)
+#if !defined(HAS_UNIFORM_u_outline_color)
 layout(location = 0) out vec4 frag_color;
 #endif
 
@@ -141,7 +141,7 @@ layout(location = 2) out vec2 frag_position;
 
 void main() {
 
-#if !defined(HAS_UNIFORM_u_color)
+#if !defined(HAS_UNIFORM_u_outline_color)
     frag_color = vec4(unpack_mix_color(in_color, interp.color_t));
 #endif
 
@@ -158,7 +158,7 @@ void main() {
 
     static constexpr auto fragment = R"(
 
-#if !defined(HAS_UNIFORM_u_color)
+#if !defined(HAS_UNIFORM_u_outline_color)
 layout(location = 0) in vec4 frag_color;
 #endif
 
@@ -186,7 +186,7 @@ void main() {
     return;
 #endif
 
-#if defined(HAS_UNIFORM_u_color)
+#if defined(HAS_UNIFORM_u_outline_color)
     const vec4 color = props.outline_color;
 #else
     const vec4 color = frag_color;
@@ -866,11 +866,11 @@ layout(location = 3) in vec2 in_height;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 4) in float in_pattern_from;
+layout(location = 4) in vec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 5) in float in_pattern_to;
+layout(location = 5) in vec4 in_pattern_to;
 #endif
 
 layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {
@@ -897,8 +897,8 @@ layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
 } props;
 
 layout(set = 0, binding = 3) uniform FillExtrusionTilePropsUBO {
-    float4 pattern_from;
-    float4 pattern_to;
+    vec4 pattern_from;
+    vec4 pattern_to;
 } tile;
 
 layout(set = 0, binding = 4) uniform FillExtrusionInterpolateUBO {
@@ -950,14 +950,14 @@ void main() {
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_from)
-    const mediump vec4 pattern_from = tiles.pattern_from;
+    const mediump vec4 pattern_from = tile.pattern_from;
 #else
     const mediump vec4 pattern_from = in_pattern_from;
     frag_pattern_from = in_pattern_from;
 #endif
 
 #if defined(HAS_UNIFORM_u_pattern_to)
-    const mediump vec4 pattern_to = tiles.pattern_to;
+    const mediump vec4 pattern_to = tile.pattern_to;
 #else
     const mediump vec4 pattern_to = in_pattern_to;
     frag_pattern_to = in_pattern_to;
@@ -977,7 +977,7 @@ void main() {
     const vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
 
     const vec2 pos = normal.x == 1.0 && normal.y == 0.0 && normal.z == 16384.0
-        ? vec2(vertx.pos) // extrusion top
+        ? vec2(in_position) // extrusion top
         : vec2(edgedistance, z * drawable.height_factor); // extrusion side
     
     vec4 lighting = vec4(0.0, 0.0, 0.0, 1.0);
@@ -1049,8 +1049,8 @@ layout(set = 0, binding = 2) uniform FillExtrusionPropsUBO {
 } props;
 
 layout(set = 0, binding = 3) uniform FillExtrusionTilePropsUBO {
-    float4 pattern_from;
-    float4 pattern_to;
+    vec4 pattern_from;
+    vec4 pattern_to;
 } tile;
 
 layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
@@ -1062,10 +1062,21 @@ void main() {
     return;
 #endif
 
-    const vec2 pattern_tl_a = in_pattern_from.xy;
-    const vec2 pattern_br_a = in_pattern_from.zw;
-    const vec2 pattern_tl_b = in_pattern_to.xy;
-    const vec2 pattern_br_b = in_pattern_to.zw;
+#if defined(HAS_UNIFORM_u_pattern_from)
+    const vec4 pattern_from = tile.pattern_from;
+#else
+    const vec4 pattern_from = frag_pattern_from;
+#endif
+#if defined(HAS_UNIFORM_u_pattern_to)
+    const vec4 pattern_to = tile.pattern_to;
+#else
+    const vec4 pattern_to = frag_pattern_to;
+#endif
+
+    const vec2 pattern_tl_a = pattern_from.xy;
+    const vec2 pattern_br_a = pattern_from.zw;
+    const vec2 pattern_tl_b = pattern_to.xy;
+    const vec2 pattern_br_b = pattern_to.zw;
 
     const vec2 imagecoord = mod(frag_pos_a, 1.0);
     const vec2 pos = mix(pattern_tl_a / drawable.texsize, pattern_br_a / drawable.texsize, imagecoord);

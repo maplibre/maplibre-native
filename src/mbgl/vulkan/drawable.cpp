@@ -7,6 +7,7 @@
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/vulkan/drawable_impl.hpp>
 #include <mbgl/vulkan/render_pass.hpp>
+#include <mbgl/vulkan/renderable_resource.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/vulkan/upload_pass.hpp>
 #include <mbgl/vulkan/index_buffer_resource.hpp>
@@ -109,11 +110,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         return;
     }
 
-    const auto& shaderImpl = static_cast<const ShaderProgram&>(*shader);
-    const auto& shaderUniforms = shaderImpl.getUniformBlocks();
-
     auto& uploadPass = static_cast<UploadPass&>(uploadPass_);
-    auto& context = static_cast<Context&>(uploadPass.getContext());
     constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
     // We need either raw index data or a buffer already created from them.
@@ -235,6 +232,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
     }
 
+    impl->pipelineInfo.setRenderable(renderPass.getDescriptor().renderable);
     impl->pipelineInfo.setDynamicValues(commandBuffer);
 
     const uint32_t instanceCount = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
@@ -343,12 +341,13 @@ void Drawable::buildVulkanInputBindings() noexcept {
 
     buildBindings(impl->attributeBindings, vk::VertexInputRate::eVertex);
     buildBindings(impl->instanceBindings, vk::VertexInputRate::eInstance);
+
+    impl->pipelineInfo.updateVertexInputHash();
 }
 
 bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
     if (impl->vulkanVertexBuffers.empty()) return false;
 
-    auto& context = encoder.getContext();
     const auto& commandBuffer = encoder.getCommandBuffer();
 
     commandBuffer->bindVertexBuffers(0, impl->vulkanVertexBuffers, impl->vulkanVertexOffsets);
@@ -368,7 +367,6 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
     auto& context = encoder.getContext();
     const auto& device = context.getBackend().getDevice();
     const auto& descriptorPool = context.getCurrentDescriptorPool();
-    auto* shaderImpl = static_cast<ShaderProgram*>(shader.get());
     const auto& descriptorSetLayouts = context.getDescriptorSetLayouts();
 
     const auto& descriptorAllocInfo =
@@ -416,8 +414,6 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
         for (size_t id = 0; id < shaders::maxTextureCountPerShader; ++id) {
             const auto& texture = id < textures.size() ? textures[id] : nullptr;
             auto& textureImpl = texture ? static_cast<Texture2D&>(*texture) : *context.getDummyTexture();
-            
-            if (textureImpl.getVulkanImageLayout() == vk::ImageLayout::eUndefined) continue;
 
             const auto& descriptorImageInfo = vk::DescriptorImageInfo()
                                                   .setImageLayout(textureImpl.getVulkanImageLayout())

@@ -25,32 +25,42 @@
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
-#ifndef NDEBUG
-#define ENABLE_VMA_DEBUG
-#endif
-
 #ifdef ENABLE_VMA_DEBUG
 
 //#define VMA_DEBUG_MARGIN 32
 //#define VMA_DEBUG_DETECT_CORRUPTION 1
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 
-#define VMA_DEBUG_LOG_FORMAT(format, ...) {         \
-    char buffer[4096];                              \
-    sprintf(buffer, format, __VA_ARGS__);           \
-    mbgl::Log::Info(mbgl::Event::Render, buffer);   \
-}
+//#define VMA_DEBUG_LOG_FORMAT(format, ...) {         \
+//    char buffer[4096];                              \
+//    sprintf(buffer, format, __VA_ARGS__);           \
+//    mbgl::Log::Info(mbgl::Event::Render, buffer);   \
+//}
 
+#endif
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#pragma clang diagnostic ignored "-Wnullability-completeness"
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#pragma clang diagnostic ignored "-Wunused-function"
 #endif
 
 #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
 
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+
 namespace mbgl {
 namespace vulkan {
 
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
-    : gfx::RendererBackend(contextMode_) {}
+    : gfx::RendererBackend(contextMode_),
+      allocator(nullptr) {}
 
 RendererBackend::~RendererBackend() {
     destroyResources();
@@ -62,7 +72,7 @@ std::unique_ptr<gfx::Context> RendererBackend::createContext() {
 
 std::vector<const char*> RendererBackend::getLayers() {
     return {
-#ifndef NDEBUG
+#ifdef ELABLE_VULKAN_VALIDATION
         "VK_LAYER_KHRONOS_validation"
 #endif
     };
@@ -70,14 +80,14 @@ std::vector<const char*> RendererBackend::getLayers() {
 
 std::vector<const char*> RendererBackend::getInstanceExtensions() {
     return {
-#ifndef NDEBUG
+#ifdef ELABLE_VULKAN_VALIDATION
         VK_EXT_DEBUG_UTILS_EXTENSION_NAME
 #endif
     };
 }
 
 std::vector<const char*> RendererBackend::getDeviceExtensions() {
-    return getDefaultRenderable().getResource<RenderableResource>().getDeviceExtensions();
+    return getDefaultRenderable().getResource<SurfaceRenderableResource>().getDeviceExtensions();
 }
 
 template <typename T, typename F>
@@ -99,21 +109,10 @@ static bool checkAvailability(const std::vector<T>& availableValues,
     return true;
 }
 
-static bool hasMemoryType(const vk::PhysicalDevice& physicalDevice, const vk::MemoryPropertyFlagBits& type) {
-    const auto& memoryProps = physicalDevice.getMemoryProperties();
-    for (uint32_t i = 0; i < memoryProps.memoryTypeCount; ++i) {
-        if (memoryProps.memoryTypes[i].propertyFlags & type) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                                                      VkDebugUtilsMessageTypeFlagsEXT messageType,
+                                                      VkDebugUtilsMessageTypeFlagsEXT,
                                                       const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
-                                                      void* userData) {
+                                                      void*) {
     EventSeverity mbglSeverity = EventSeverity::Debug;
 
     switch (messageSeverity) {
@@ -132,6 +131,9 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugCallback(VkDebugUtilsMessageSeverit
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
             mbglSeverity = EventSeverity::Error;
             break;
+
+        default:
+            return VK_FALSE;
     }
 
     mbgl::Log::Record(mbglSeverity, mbgl::Event::Render, callbackData->pMessage);
@@ -159,19 +161,6 @@ void RendererBackend::initDebug() {
     debugCallback = instance->createDebugUtilsMessengerEXTUnique(createInfo);
 
     if (!debugCallback) mbgl::Log::Error(mbgl::Event::Render, "Failed to register Vulkan debug callback");
-}
-
-void RendererBackend::recreateSwapchain() {
-    auto& renderableResource = getDefaultRenderable().getResource<RenderableResource>();
-
-    device->waitIdle();
-
-    renderableResource.swapchainFramebuffers.clear();
-    renderableResource.renderPass.reset();
-    renderableResource.swapchainImageViews.clear();
-    renderableResource.swapchainImages.clear();
-
-    initSwapchain();
 }
 
 void RendererBackend::init() {
@@ -234,14 +223,14 @@ void RendererBackend::initInstance() {
     // initialize function pointers for instance
     VULKAN_HPP_DEFAULT_DISPATCHER.init(instance.get());
 
-#ifndef NDEBUG
+#ifdef ELABLE_VULKAN_VALIDATION
     // enable validation layer callback
     initDebug();
 #endif
 }
 
 void RendererBackend::initSurface() {
-    getDefaultRenderable().getResource<RenderableResource>().createSurface();
+    getDefaultRenderable().getResource<SurfaceRenderableResource>().createPlatformSurface();
 }
 
 void RendererBackend::initAllocator() {
@@ -291,11 +280,11 @@ void RendererBackend::initAllocator() {
 void RendererBackend::initDevice() {
     const auto& extensions = getDeviceExtensions();
     const auto& layers = getLayers();
-    const auto& surface = getDefaultRenderable().getResource<RenderableResource>().surface.get();
+    const auto& surface = getDefaultRenderable().getResource<SurfaceRenderableResource>().getPlatformSurface().get();
 
-    const auto& isPhysicalDeviceCompatible = [&](const vk::PhysicalDevice& device) -> bool {
+    const auto& isPhysicalDeviceCompatible = [&](const vk::PhysicalDevice& candidate) -> bool {
         bool extensionsAvailable = checkAvailability(
-            device.enumerateDeviceExtensionProperties(), extensions, [](const vk::ExtensionProperties& value) {
+            candidate.enumerateDeviceExtensionProperties(), extensions, [](const vk::ExtensionProperties& value) {
                 return value.extensionName.data();
             });
 
@@ -304,7 +293,7 @@ void RendererBackend::initDevice() {
         graphicsQueueIndex = -1;
         presentQueueIndex = -1;
 
-        const auto& queues = device.getQueueFamilyProperties();
+        const auto& queues = candidate.getQueueFamilyProperties();
 
         for (auto i = 0u; i < queues.size(); ++i) {
             const auto& queue = queues[i];
@@ -313,7 +302,7 @@ void RendererBackend::initDevice() {
 
             if (queue.queueFlags & vk::QueueFlagBits::eGraphics) graphicsQueueIndex = i;
 
-            if (surface && device.getSurfaceSupportKHR(i, surface)) presentQueueIndex = i;
+            if (surface && candidate.getSurfaceSupportKHR(i, surface)) presentQueueIndex = i;
 
             if (graphicsQueueIndex != -1 && (!surface || presentQueueIndex != -1)) break;
         }
@@ -321,9 +310,8 @@ void RendererBackend::initDevice() {
         if (graphicsQueueIndex == -1 || (surface && presentQueueIndex == -1)) return false;
 
         if (surface) {
-            if (device.getSurfaceFormatsKHR(surface).empty()) return false;
-
-            if (device.getSurfacePresentModesKHR(surface).empty()) return false;
+            if (candidate.getSurfaceFormatsKHR(surface).empty()) return false;
+            if (candidate.getSurfacePresentModesKHR(surface).empty()) return false;
         }
 
         return true;
@@ -333,9 +321,9 @@ void RendererBackend::initDevice() {
         const auto& physicalDevices = instance->enumeratePhysicalDevices();
         if (physicalDevices.empty()) throw std::runtime_error("No Vulkan compatible GPU found");
 
-        for (const auto& device : physicalDevices) {
-            if (isPhysicalDeviceCompatible(device)) {
-                physicalDevice = device;
+        for (const auto& candidate : physicalDevices) {
+            if (isPhysicalDeviceCompatible(candidate)) {
+                physicalDevice = candidate;
                 break;
             }
         }
@@ -381,251 +369,19 @@ void RendererBackend::initDevice() {
     VULKAN_HPP_DEFAULT_DISPATCHER.init(device.get());
 
     graphicsQueue = device->getQueue(graphicsQueueIndex, 0);
-    presentQueue = device->getQueue(presentQueueIndex, 0);
+    if (presentQueueIndex != -1)
+        presentQueue = device->getQueue(presentQueueIndex, 0);
 }
 
 void RendererBackend::initSwapchain() {
-    auto& renderableResource = getDefaultRenderable().getResource<RenderableResource>();
-    const auto& surface = renderableResource.surface.get();
-    if (!surface) return;
+    const auto& renderable = getDefaultRenderable();
+    auto& renderableResource = renderable.getResource<SurfaceRenderableResource>();
+    const auto& size = renderable.getSize();
+    renderableResource.init(size.width, size.height);
 
-    const std::vector<vk::SurfaceFormatKHR>& formats = physicalDevice.getSurfaceFormatsKHR(surface);
-    const auto& formatIt = std::find_if(formats.begin(), formats.end(), [](const vk::SurfaceFormatKHR& format) {
-        return format.format == vk::Format::eB8G8R8A8Unorm && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
-    });
-
-    if (formatIt == formats.end()) throw std::runtime_error("No suitable swapchain format found");
-
-    // only vk::PresentModeKHR::eFifo (vsync on) is guaranteed
-    // TODO check for vk::PresentModeKHR::eImmediate when uncapped
-
-    // pick surface size
-    const vk::SurfaceCapabilitiesKHR& capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface);
-
-    vk::Extent2D extent;
-    if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
-        extent = capabilities.currentExtent;
-    } else {
-        // actual size should be set by the renderable constructor in this case
-        const auto& renderableSize = getDefaultRenderable().getSize();
-
-        // update values based on surface limits
-        extent.width = std::min(std::max(renderableSize.width, capabilities.minImageExtent.width),
-                                capabilities.maxImageExtent.width);
-        extent.height = std::min(std::max(renderableSize.height, capabilities.minImageExtent.height),
-                                 capabilities.maxImageExtent.height);
+    if (renderableResource.getPlatformSurface()) {
+        maxFrames = renderableResource.getImageCount();
     }
-
-    uint32_t swapchainImageCount = capabilities.minImageCount + 1;
-    // check surface limits (0 is unlimited)
-    if (capabilities.maxImageCount > 0) swapchainImageCount = std::min(swapchainImageCount, capabilities.maxImageCount);
-
-    auto& swapchainCreateInfo = vk::SwapchainCreateInfoKHR()
-                                    .setSurface(surface)
-                                    .setMinImageCount(swapchainImageCount)
-                                    .setImageFormat(formatIt->format)
-                                    .setImageColorSpace(formatIt->colorSpace)
-                                    .setPresentMode(vk::PresentModeKHR::eFifo)
-                                    .setImageExtent(extent)
-                                    .setImageArrayLayers(1)
-                                    .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);
-
-    if (graphicsQueueIndex != presentQueueIndex) {
-        swapchainCreateInfo.setImageSharingMode(vk::SharingMode::eConcurrent); // revisit this
-        const std::array<uint32_t, 2> queueIndices = {static_cast<uint32_t>(graphicsQueueIndex),
-                                                      static_cast<uint32_t>(presentQueueIndex)};
-        swapchainCreateInfo.setQueueFamilyIndices(queueIndices);
-    } else {
-        swapchainCreateInfo.setImageSharingMode(vk::SharingMode::eExclusive);
-    }
-
-    swapchainCreateInfo.setPreTransform(capabilities.currentTransform);
-    swapchainCreateInfo.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque);
-    swapchainCreateInfo.setClipped(VK_TRUE);
-
-    // update this when recreating
-    swapchainCreateInfo.setOldSwapchain(vk::SwapchainKHR(renderableResource.swapchain.get()));
-
-    renderableResource.swapchain = device->createSwapchainKHRUnique(swapchainCreateInfo);
-    renderableResource.swapchainImages = device->getSwapchainImagesKHR(renderableResource.swapchain.get());
-
-    renderableResource.colorFormat = swapchainCreateInfo.imageFormat;
-    renderableResource.extent = swapchainCreateInfo.imageExtent;
-
-    // create swapchain image views
-    renderableResource.swapchainImageViews.reserve(renderableResource.swapchainImages.size());
-
-    auto& imageViewCreateInfo =
-        vk::ImageViewCreateInfo()
-            .setViewType(vk::ImageViewType::e2D)
-            .setFormat(renderableResource.colorFormat)
-            .setComponents(vk::ComponentMapping()) // defaults to vk::ComponentSwizzle::eIdentity
-            .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
-
-    for (const auto& image : renderableResource.swapchainImages) {
-        imageViewCreateInfo.setImage(image);
-        renderableResource.swapchainImageViews.push_back(device->createImageViewUnique(imageViewCreateInfo));
-
-        const size_t index = renderableResource.swapchainImageViews.size() - 1;
-        setDebugName(vk::Image(image), "SwapchainImage_" + std::to_string(index));
-        setDebugName(vk::Image(image), "SwapchainImageView_" + std::to_string(index));
-    }
-
-    // depth resources
-    initDepthTexture();
-
-    // create render pass
-    const auto& colorAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
-                                      .setFormat(renderableResource.colorFormat)
-                                      .setSamples(vk::SampleCountFlagBits::e1)
-                                      .setLoadOp(vk::AttachmentLoadOp::eClear)
-                                      .setStoreOp(vk::AttachmentStoreOp::eStore)
-                                      .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-                                      .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                      .setInitialLayout(vk::ImageLayout::eUndefined)
-                                      .setFinalLayout(vk::ImageLayout::ePresentSrcKHR);
-
-    const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
-
-    const auto& depthAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
-                                      .setFormat(renderableResource.depthFormat)
-                                      .setSamples(vk::SampleCountFlagBits::e1)
-                                      .setLoadOp(vk::AttachmentLoadOp::eClear)
-                                      .setStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                      .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-                                      .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                      .setInitialLayout(vk::ImageLayout::eUndefined)
-                                      .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
-
-    const vk::AttachmentReference depthAttachmentRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
-
-    const auto& subpass = vk::SubpassDescription(vk::SubpassDescriptionFlags())
-                              .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
-                              .setColorAttachmentCount(1)
-                              .setColorAttachments(colorAttachmentRef)
-                              .setPDepthStencilAttachment(&depthAttachmentRef);
-
-    const auto subpassSrcStageMask = vk::PipelineStageFlags() | vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                                     vk::PipelineStageFlagBits::eLateFragmentTests;
-
-    const auto subpassDstStageMask = vk::PipelineStageFlags() | vk::PipelineStageFlagBits::eColorAttachmentOutput |
-                                     vk::PipelineStageFlagBits::eEarlyFragmentTests;
-
-    const auto subpassSrcAccessMask = vk::AccessFlags() | vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-
-    const auto subpassDstAccessMask = vk::AccessFlags() | vk::AccessFlagBits::eColorAttachmentWrite |
-                                      vk::AccessFlagBits::eDepthStencilAttachmentWrite;
-
-    const auto& subpassDependency = vk::SubpassDependency()
-                                        .setSrcSubpass(VK_SUBPASS_EXTERNAL)
-                                        .setDstSubpass(0)
-                                        .setSrcStageMask(subpassSrcStageMask)
-                                        .setDstStageMask(subpassDstStageMask)
-                                        .setSrcAccessMask(subpassSrcAccessMask)
-                                        .setDstAccessMask(subpassDstAccessMask);
-
-    const std::array<vk::AttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
-    const auto& renderPassCreateInfo = vk::RenderPassCreateInfo()
-                                           .setAttachments(attachments)
-                                           .setSubpassCount(1)
-                                           .setSubpasses(subpass)
-                                           .setDependencyCount(1)
-                                           .setDependencies(subpassDependency);
-
-    renderableResource.renderPass = device->createRenderPassUnique(renderPassCreateInfo);
-
-    // create swapchain framebuffers
-    renderableResource.swapchainFramebuffers.reserve(renderableResource.swapchainImageViews.size());
-
-    auto& framebufferCreateInfo = vk::FramebufferCreateInfo()
-                                      .setRenderPass(renderableResource.renderPass.get())
-                                      .setAttachmentCount(2)
-                                      .setWidth(renderableResource.extent.width)
-                                      .setHeight(renderableResource.extent.height)
-                                      .setLayers(1);
-
-    for (const auto& imageView : renderableResource.swapchainImageViews) {
-        const std::array<vk::ImageView, 2> imageViews = {imageView.get(),
-                                                         renderableResource.depthAllocation->imageView.get()};
-
-        framebufferCreateInfo.setAttachments(imageViews);
-        renderableResource.swapchainFramebuffers.push_back(device->createFramebufferUnique(framebufferCreateInfo));
-    }
-
-    maxFrames = static_cast<uint32_t>(renderableResource.swapchainFramebuffers.size());
-}
-
-void RendererBackend::initDepthTexture() {
-    // check for depth format support
-    const std::vector<vk::Format> formats{
-        vk::Format::eD32SfloatS8Uint,
-        vk::Format::eD24UnormS8Uint,
-        vk::Format::eD16UnormS8Uint,
-    };
-
-    const auto& formatIt = std::find_if(formats.begin(), formats.end(), [&](const auto& format) {
-        const auto& formatProps = physicalDevice.getFormatProperties(format);
-        return formatProps.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment;
-    });
-
-    if (formatIt == formats.end()) {
-        mbgl::Log::Error(mbgl::Event::Render, "Depth/Stencil format not available");
-        return;
-    }
-
-    auto& renderableResource = getDefaultRenderable().getResource<RenderableResource>();
-
-    renderableResource.depthFormat = *formatIt;
-
-    const bool hasLazyMemory = hasMemoryType(physicalDevice, vk::MemoryPropertyFlagBits::eLazilyAllocated);
-    const auto memoryUsage = hasLazyMemory ? VMA_MEMORY_USAGE_GPU_LAZILY_ALLOCATED
-                                           : VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-
-    const auto imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eDepthStencilAttachment |
-                            vk::ImageUsageFlagBits::eTransientAttachment;
-
-    const auto& imageCreateInfo = vk::ImageCreateInfo()
-                                      .setImageType(vk::ImageType::e2D)
-                                      .setFormat(renderableResource.depthFormat)
-                                      .setExtent({renderableResource.extent.width, renderableResource.extent.height, 1})
-                                      .setMipLevels(1)
-                                      .setArrayLayers(1)
-                                      .setSamples(vk::SampleCountFlagBits::e1)
-                                      .setTiling(vk::ImageTiling::eOptimal)
-                                      .setUsage(imageUsage)
-                                      .setSharingMode(vk::SharingMode::eExclusive)
-                                      .setInitialLayout(vk::ImageLayout::eUndefined);
-
-    renderableResource.depthAllocation = std::make_unique<ImageAllocation>(allocator);
-
-    VmaAllocationCreateInfo allocCreateInfo = {};
-    allocCreateInfo.usage = memoryUsage;
-    allocCreateInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
-
-    VkResult result = vmaCreateImage(allocator,
-                                     &VkImageCreateInfo(imageCreateInfo),
-                                     &allocCreateInfo,
-                                     &renderableResource.depthAllocation->image,
-                                     &renderableResource.depthAllocation->allocation,
-                                     nullptr);
-
-    if (result != VK_SUCCESS) {
-        mbgl::Log::Error(mbgl::Event::Render, "Vulkan depth texture allocation failed");
-        return;
-    }
-
-    const auto& imageViewCreateInfo =
-        vk::ImageViewCreateInfo()
-            .setImage(renderableResource.depthAllocation->image)
-            .setViewType(vk::ImageViewType::e2D)
-            .setFormat(renderableResource.depthFormat)
-            .setComponents(vk::ComponentMapping()) // defaults to vk::ComponentSwizzle::eIdentity
-            .setSubresourceRange(vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eDepth, 0, 1, 0, 1));
-
-    renderableResource.depthAllocation->imageView = device->createImageViewUnique(imageViewCreateInfo);
-
-    setDebugName(vk::Image(renderableResource.depthAllocation->image), "SwapchainDepthImage");
-    setDebugName(renderableResource.depthAllocation->imageView.get(), "SwapchainDepthImageView");
 }
 
 void RendererBackend::initCommandPool() {

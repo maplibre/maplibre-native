@@ -9,7 +9,7 @@ namespace vulkan {
 
 class VertexBufferResource : public gfx::VertexBufferResource {
 public:
-    VertexBufferResource() noexcept = default;
+    VertexBufferResource() noexcept = delete;
     VertexBufferResource(BufferResource&& buffer_) noexcept
         : buffer(std::move(buffer_)) {}
     VertexBufferResource(VertexBufferResource&& other) noexcept

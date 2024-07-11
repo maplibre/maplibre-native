@@ -24,7 +24,7 @@ layout(location = 3) in vec3 in_projected_pos;
 layout(location = 4) in float in_fade_opacity;
 
 #if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 5) in float in_opacity;
+layout(location = 5) in vec2 in_opacity;
 #endif    
 
 layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
@@ -215,11 +215,11 @@ layout(location = 7) in vec2 in_opacity;
 #endif
 
 #if !defined(HAS_UNIFORM_u_halo_width)
-layout(location = 8) in float in_halo_width;
+layout(location = 8) in vec2 in_halo_width;
 #endif
 
 #if !defined(HAS_UNIFORM_u_halo_blur)
-layout(location = 9) in float in_halo_blur;
+layout(location = 9) in vec2 in_halo_blur;
 #endif  
 
 layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
@@ -514,11 +514,11 @@ layout(location = 6) in vec2 in_opacity;
 #endif
 
 #if !defined(HAS_UNIFORM_u_halo_width)
-layout(location = 7) in float in_halo_width;
+layout(location = 7) in vec2 in_halo_width;
 #endif
 
 #if !defined(HAS_UNIFORM_u_halo_blur)
-layout(location = 8) in float in_halo_blur;
+layout(location = 8) in vec2 in_halo_blur;
 #endif  
 
 layout(set = 0, binding = 1) uniform SymbolDrawableUBO {

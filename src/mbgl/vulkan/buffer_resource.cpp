@@ -15,7 +15,6 @@ BufferResource::BufferResource(
       size(size_),
       usage(usage_),
       persistent(persistent_) {
-    const auto& backend = context.getBackend();
     const auto& allocator = context.getBackend().getAllocator();
 
     std::size_t totalSize = size;
@@ -23,6 +22,7 @@ BufferResource::BufferResource(
 
     // TODO -> check avg minUniformBufferOffsetAlignment vs individual buffers
     // if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) {
+    //    const auto& backend = context.getBackend();
     //    const auto& deviceProps = backend.getDeviceProperties();
     //    const auto& align = deviceProps.limits.minUniformBufferOffsetAlignment;
     //    bufferWindowSize = (size + align - 1) & ~(align - 1);
@@ -40,7 +40,7 @@ BufferResource::BufferResource(
 
     VmaAllocationCreateInfo allocationInfo = {};
 
-    allocationInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+    allocationInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
     allocationInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     // allocationInfo.preferredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
     allocationInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
@@ -48,7 +48,7 @@ BufferResource::BufferResource(
     bufferAllocation = std::make_shared<BufferAllocation>(allocator);
 
     VkResult result = vmaCreateBuffer(allocator,
-                                      &VkBufferCreateInfo(bufferInfo),
+                                      reinterpret_cast<const VkBufferCreateInfo*>(&bufferInfo),
                                       &allocationInfo,
                                       &bufferAllocation->buffer,
                                       &bufferAllocation->allocation,

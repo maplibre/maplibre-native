@@ -50,10 +50,11 @@ public:
     Context(const Context&) = delete;
     Context& operator=(const Context& other) = delete;
 
-    const RendererBackend& getBackend() const { return backend; }
+    RendererBackend& getBackend() const { return backend; }
 
     void beginFrame() override;
     void endFrame() override;
+    void waitFrame() const;
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
@@ -82,7 +83,7 @@ public:
 
     RenderTargetPtr createRenderTarget(const Size size, const gfx::TextureChannelDataType type) override;
 
-    void resetState(gfx::DepthMode depthMode, gfx::ColorMode colorMode) override {}
+    void resetState(gfx::DepthMode, gfx::ColorMode) override {}
 
     virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
                                               const void* data,
@@ -125,7 +126,7 @@ public:
     /// Unbind the global uniform buffers
     void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override {}
 
-    bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
+    bool renderTileClippingMasks(gfx::RenderPass& renderPass,
                                           RenderStaticData& staticData,
                                           const std::vector<shaders::ClipUBO>& tileUBOs);
 
@@ -153,7 +154,7 @@ private:
 
         std::vector<std::function<void(const Context&)>> deletionQueue;
 
-        FrameResources(vk::UniqueCommandBuffer&& cb,
+        FrameResources(vk::UniqueCommandBuffer& cb,
                        vk::UniqueDescriptorPool&& dp,
                        vk::UniqueSemaphore&& surf,
                        vk::UniqueSemaphore&& frame,

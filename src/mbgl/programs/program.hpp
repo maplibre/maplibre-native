@@ -52,7 +52,7 @@ public:
 
     std::unique_ptr<gfx::Program<Name>> program;
 
-    Program(const ProgramParameters& programParameters) {
+    Program([[maybe_unused]] const ProgramParameters& programParameters) {
         switch (gfx::Backend::GetType()) {
 #if MLN_RENDER_BACKEND_METAL
             case gfx::Backend::Type::Metal: {

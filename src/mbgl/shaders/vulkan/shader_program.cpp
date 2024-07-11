@@ -18,7 +18,7 @@
 
 #include <glslang/Public/ShaderLang.h>
 #include <glslang/Public/ResourceLimits.h>
-#include <glslang/SPIRV/GlslangToSpv.h>
+#include <SPIRV/GlslangToSpv.h>
 
 using namespace std::string_literals;
 
@@ -35,7 +35,6 @@ ShaderProgram::ShaderProgram(const std::string& name,
     : ShaderProgramBase(),
       shaderName(name),
       backend(backend_) {
-    const char* const shaderNameRaw = shaderName.c_str();
 
     constexpr auto targetClientVersion = glslang::EShTargetVulkan_1_0;
     constexpr auto targetLanguageVersion = glslang::EShTargetSpv_1_0;
@@ -116,8 +115,7 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
 
     const auto& inputAssemblyState = vk::PipelineInputAssemblyStateCreateInfo().setTopology(pipelineInfo.topology);
 
-    const auto& renderableResource = backend.getDefaultRenderable().getResource<RenderableResource>();
-    const auto& renderableExtent = renderableResource.getExtent();
+    const auto& renderableExtent = pipelineInfo.viewExtent;
 
     const vk::Viewport viewportExtent(0.0f, 0.0f, renderableExtent.width, renderableExtent.height, 0.0f, 1.0f);
     const vk::Rect2D scissorRect({}, {renderableExtent.width, renderableExtent.height});
@@ -211,7 +209,7 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
                                          .setPColorBlendState(&colorBlendState)
                                          .setPDynamicState(&dynamicState)
                                          .setLayout(pipelineLayout.get())
-                                         .setRenderPass(renderableResource.getRenderPass().get());
+                                         .setRenderPass(pipelineInfo.renderPass);
 
     pipeline = std::move(device->createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value);
     backend.setDebugName(pipeline.get(), shaderName + "_pipeline");

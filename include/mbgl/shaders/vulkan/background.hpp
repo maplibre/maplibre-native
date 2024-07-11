@@ -106,6 +106,9 @@ void main() {
 )";
 
     static constexpr auto fragment = R"(
+layout(location = 0) in vec2 frag_pos_a;
+layout(location = 1) in vec2 frag_pos_b;
+
 layout(location = 0) out vec4 out_color;
 
 layout(set = 0, binding = 2) uniform BackgroundPatternLayerUBO {

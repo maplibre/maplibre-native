@@ -35,7 +35,7 @@ layout(location = 1) out float frag_notUsed;
 
 void main() {
 
-    vec4 projectedPoint = drawable.matrix * vec4(in_anchor_position), 0.0, 1.0);
+    vec4 projectedPoint = drawable.matrix * vec4(in_anchor_position, 0.0, 1.0);
     float camera_to_anchor_distance = projectedPoint.w;
     float collision_perspective_ratio = clamp(
         0.5 + 0.5 * (global.camera_to_center_distance / camera_to_anchor_distance),
@@ -43,7 +43,7 @@ void main() {
         4.0);
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.xy += (in_extrude + in_shift) * drawable.extrude_scale * position.w * collision_perspective_ratio;
+    gl_Position.xy += (in_extrude + in_shift) * drawable.extrude_scale * gl_Position.w * collision_perspective_ratio;
     gl_Position.y *= -1.0;
 
     frag_placed = in_placed.x;
@@ -118,7 +118,7 @@ layout(location = 4) out vec2 frag_extrude_scale;
 
 void main() {
 
-    vec4 projectedPoint = drawable.matrix * vec4(in_anchor_position), 0, 1);
+    vec4 projectedPoint = drawable.matrix * vec4(in_anchor_position, 0, 1);
     float camera_to_anchor_distance = projectedPoint.w;
     float collision_perspective_ratio = clamp(
         0.5 + 0.5 * (global.camera_to_center_distance / camera_to_anchor_distance),
@@ -126,8 +126,8 @@ void main() {
         4.0);
 
     float padding_factor = 1.2; // Pad the vertices slightly to make room for anti-alias blur
-    gl_Position = drawable.matrix * vec4(in_pos, 0.0, 1.0);
-    gl_Position.xy += in_extrude * drawable.extrude_scale * padding_factor * position.w * collision_perspective_ratio;
+    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    gl_Position.xy += in_extrude * drawable.extrude_scale * padding_factor * gl_Position.w * collision_perspective_ratio;
     gl_Position.y *= -1.0;
 
     frag_placed = in_placed.x;
@@ -142,6 +142,9 @@ void main() {
 
 layout(location = 0) in float frag_placed;
 layout(location = 1) in float frag_notUsed;
+layout(location = 2) in float frag_radius;
+layout(location = 3) in vec2 frag_extrude;
+layout(location = 4) in vec2 frag_extrude_scale;
 
 layout(location = 0) out vec4 out_color;
 

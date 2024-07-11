@@ -82,6 +82,18 @@ layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
 #define M_PI 3.1415926535897932384626433832795
 #define SDF_PX 8.0
 
+layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
+    vec2 pattern_atlas_texsize;
+    vec2 units_to_pixels;
+    vec2 world_size;
+    float camera_to_center_distance;
+    float symbol_fade_change;
+    float aspect_ratio;
+    float pixel_ratio;
+    float zoom;
+    float pad1;
+} global;
+
 )";
 };
 

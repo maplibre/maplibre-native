@@ -51,6 +51,12 @@ gfx::Texture2D& Texture2D::setImage(std::shared_ptr<PremultipliedImage> image_) 
     return *this;
 }
 
+gfx::Texture2D& Texture2D::setUsage(Texture2DUsage value) noexcept {
+    textureUsage = value;
+    textureDirty = true;
+    return *this;
+}
+
 size_t Texture2D::getDataSize() const noexcept {
     return size.width * size.height * getPixelStride();
 }
@@ -89,19 +95,40 @@ void Texture2D::create() noexcept {
     }
 }
 
+void Texture2D::upload() noexcept {
+    if (!imageData) return;
+
+    upload(imageData->data.get(), imageData->size);
+
+    imageData.reset();
+}
+
 void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     setSize(size_);
     uploadSubRegion(pixelData, size_, 0, 0);
 }
 
 void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16_t xOffset, uint16_t yOffset) noexcept {
-    if (!pixelData || size.width == 0 || size.height == 0) return;
+    if (!pixelData || size_.width == 0 || size_.height == 0) return;
+
+    const auto& encoder = context.createCommandEncoder();
+    const auto& encoderImpl = static_cast<const CommandEncoder&>(*encoder);
+
+    uploadSubRegion(pixelData, size_, xOffset, yOffset, encoderImpl.getCommandBuffer());
+}
+
+void Texture2D::uploadSubRegion(const void* pixelData,
+                                const Size& size_,
+                                uint16_t xOffset,
+                                uint16_t yOffset,
+                                const vk::UniqueCommandBuffer& commandBuffer) noexcept {
+
+    if (!pixelData || size_.width == 0 || size_.height == 0) return;
 
     create();
 
     if (!imageAllocation) return;
 
-    const auto& backend = context.getBackend();
     const auto& allocator = context.getBackend().getAllocator();
 
     const auto& bufferInfo = vk::BufferCreateInfo()
@@ -118,7 +145,7 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
     SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
 
     VkResult result = vmaCreateBuffer(allocator,
-                                      &VkBufferCreateInfo(bufferInfo),
+                                      reinterpret_cast<const VkBufferCreateInfo*>(&bufferInfo),
                                       &allocationInfo,
                                       &bufferAllocation->buffer,
                                       &bufferAllocation->allocation,
@@ -147,23 +174,11 @@ void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16
         transitionToShaderReadLayout(buffer);
     };
 
-    const auto& encoder = context.createCommandEncoder();
-    const auto& encoderImpl = static_cast<const CommandEncoder&>(*encoder);
+    enqueueCommands(commandBuffer);
 
-    enqueueCommands(encoderImpl.getCommandBuffer());
-
-    context.enqueueDeletion(
-        [buffAlloc = std::move(bufferAllocation)](const auto& context) mutable { buffAlloc.reset(); });
+    context.enqueueDeletion([buffAlloc = std::move(bufferAllocation)](const auto&) mutable { buffAlloc.reset(); });
 
     context.renderingStats().numTextureUpdates++;
-}
-
-void Texture2D::upload() noexcept {
-    if (!imageData) return;
-
-    upload(imageData->data.get(), imageData->size);
-
-    imageData.reset();
 }
 
 vk::Format Texture2D::vulkanFormat(const gfx::TexturePixelType pixel, gfx::TextureChannelDataType channel) {
@@ -225,8 +240,29 @@ void Texture2D::createTexture() {
     const auto& backend = context.getBackend();
 
     const auto format = vulkanFormat(pixelFormat, channelType);
-    const auto imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eTransferDst |
-                            vk::ImageUsageFlagBits::eSampled;
+
+    vk::ImageUsageFlags imageUsage;
+    vk::ImageTiling imageTiling;
+
+    switch (textureUsage) {
+        default:
+        case Texture2DUsage::ShaderInput:
+            imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eTransferDst |
+                         vk::ImageUsageFlagBits::eSampled;
+            imageTiling = vk::ImageTiling::eOptimal;
+            break;
+
+        case Texture2DUsage::Attachment:
+            imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eColorAttachment |
+                         vk::ImageUsageFlagBits::eSampled;
+            imageTiling = vk::ImageTiling::eOptimal;
+            break;
+
+        case Texture2DUsage::Read:
+            imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eTransferDst;
+            imageTiling = vk::ImageTiling::eLinear;
+            break;
+    }
 
     const auto& imageCreateInfo = vk::ImageCreateInfo()
                                       .setImageType(vk::ImageType::e2D)
@@ -235,7 +271,7 @@ void Texture2D::createTexture() {
                                       .setMipLevels(1)
                                       .setArrayLayers(1)
                                       .setSamples(vk::SampleCountFlagBits::e1)
-                                      .setTiling(vk::ImageTiling::eOptimal)
+                                      .setTiling(imageTiling)
                                       .setUsage(imageUsage)
                                       .setSharingMode(vk::SharingMode::eExclusive)
                                       .setInitialLayout(vk::ImageLayout::eUndefined);
@@ -244,12 +280,17 @@ void Texture2D::createTexture() {
 
     VmaAllocationCreateInfo allocCreateInfo = {};
 
-    allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
-    allocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-    allocCreateInfo.flags = 0;
+    if (textureUsage != Texture2DUsage::Read) {
+        allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+        allocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    } else {
+        allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
+        allocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+        allocCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+    }
 
     VkResult result = vmaCreateImage(imageAllocation->allocator,
-                                     &VkImageCreateInfo(imageCreateInfo),
+                                     reinterpret_cast<const VkImageCreateInfo*>(&imageCreateInfo),
                                      &allocCreateInfo,
                                      &imageAllocation->image,
                                      &imageAllocation->allocation,
@@ -272,16 +313,25 @@ void Texture2D::createTexture() {
                                             vk::ComponentSwizzle::eR);
     }
 
-    auto& imageViewCreateInfo = vk::ImageViewCreateInfo()
-                                    .setImage(imageAllocation->image)
-                                    .setViewType(vk::ImageViewType::e2D)
-                                    .setFormat(format)
-                                    .setComponents(imageSwizzle)
-                                    .setSubresourceRange(
-                                        vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+    if (textureUsage != Texture2DUsage::Read) {
+        auto& imageViewCreateInfo = vk::ImageViewCreateInfo()
+                                        .setImage(imageAllocation->image)
+                                        .setViewType(vk::ImageViewType::e2D)
+                                        .setFormat(format)
+                                        .setComponents(imageSwizzle)
+                                        .setSubresourceRange(
+                                            vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 
-    imageAllocation->imageView = backend.getDevice()->createImageViewUnique(imageViewCreateInfo);
-    imageLayout = imageCreateInfo.initialLayout;
+        imageAllocation->imageView = backend.getDevice()->createImageViewUnique(imageViewCreateInfo);
+    }
+    
+    // if the image is used as an attachment
+    // it's layout is managed by the render pass
+    if (textureUsage == Texture2DUsage::Attachment) {
+        imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
+    } else {
+        imageLayout = imageCreateInfo.initialLayout;
+    }
 
     context.renderingStats().numCreatedTextures++;
     context.renderingStats().numActiveTextures++;
@@ -322,8 +372,8 @@ void Texture2D::destroyTexture() {
 
 void Texture2D::destroySampler() {
     if (sampler) {
-        context.enqueueDeletion([sampler_ = std::move(sampler)](const auto& context) mutable {
-            context.getBackend().getDevice()->destroySampler(sampler_);
+        context.enqueueDeletion([sampler_ = std::move(sampler)](const auto& context_) mutable {
+            context_.getBackend().getDevice()->destroySampler(sampler_);
         });
 
         sampler = nullptr;
@@ -351,7 +401,7 @@ void Texture2D::transitionToTransferLayout(const vk::UniqueCommandBuffer& buffer
 void Texture2D::transitionToShaderReadLayout(const vk::UniqueCommandBuffer& buffer) {
     const auto& barrier = vk::ImageMemoryBarrier()
                               .setImage(imageAllocation->image)
-                              .setOldLayout(vk::ImageLayout::eTransferDstOptimal)
+                              .setOldLayout(imageLayout)
                               .setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
                               .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
                               .setDstAccessMask(vk::AccessFlagBits::eShaderRead)
@@ -370,12 +420,71 @@ void Texture2D::transitionToShaderReadLayout(const vk::UniqueCommandBuffer& buff
     imageLayout = barrier.newLayout;
 }
 
+void Texture2D::transitionToGeneralLayout(const vk::UniqueCommandBuffer& buffer) {
+    const auto& barrier = vk::ImageMemoryBarrier()
+                              .setImage(imageAllocation->image)
+                              .setOldLayout(imageLayout)
+                              .setNewLayout(vk::ImageLayout::eGeneral)
+                              .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
+                              .setDstAccessMask(vk::AccessFlagBits::eMemoryRead)
+                              .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                              .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                              .setSubresourceRange(
+                                  vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+
+    buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                            vk::PipelineStageFlagBits::eTransfer,
+                            {},
+                            nullptr,
+                            nullptr,
+                            barrier);
+
+    imageLayout = barrier.newLayout;
+}
+
 const vk::Sampler& Texture2D::getVulkanSampler() {
     if (samplerStateDirty) {
         createSampler();
     }
 
     return sampler;
+}
+
+void Texture2D::copyImage(vk::Image image) {
+    if (!image) return;
+
+    create();
+
+    context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) { 
+
+        const auto& copyInfo = vk::ImageCopy()
+                                   .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
+                                   .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
+                                   .setExtent({size.width, size.height, 1});
+
+        transitionToTransferLayout(commandBuffer);
+        commandBuffer->copyImage(
+            image, vk::ImageLayout::eTransferSrcOptimal, imageAllocation->image, imageLayout, copyInfo);
+        transitionToGeneralLayout(commandBuffer);
+    });
+}
+
+std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
+    if (!imageData) {
+        imageData = std::make_shared<PremultipliedImage>();
+    }
+
+    // TODO should check for offset/padding
+    //vk::ImageSubresource subresource(vk::ImageAspectFlagBits::eColor);
+
+    imageData->resize(size);
+
+    void* mappedData = nullptr;
+    vmaMapMemory(context.getBackend().getAllocator(), imageAllocation->allocation, &mappedData);
+    memcpy(imageData->data.get(), mappedData, getDataSize());
+    vmaUnmapMemory(context.getBackend().getAllocator(), imageAllocation->allocation);
+
+    return imageData;
 }
 
 } // namespace vulkan

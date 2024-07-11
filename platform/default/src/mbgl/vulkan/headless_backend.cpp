@@ -1,6 +1,7 @@
 #include <mbgl/vulkan/headless_backend.hpp>
 #include <mbgl/vulkan/renderable_resource.hpp>
 #include <mbgl/vulkan/context.hpp>
+#include <mbgl/vulkan/texture2d.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 
 #include <cassert>
@@ -10,40 +11,35 @@
 namespace mbgl {
 namespace vulkan {
 
-class HeadlessRenderableResource final : public vulkan::RenderableResource {
+class HeadlessRenderableResource final : public vulkan::SurfaceRenderableResource {
 public:
-    HeadlessRenderableResource(HeadlessBackend& backend_, vulkan::Context& context_, Size size_)
-        : backend(backend_),
-          context(context_),
-          color(context.createRenderbuffer<gfx::RenderbufferPixelType::RGBA>(size_)),
-          depthStencil(context.createRenderbuffer<gfx::RenderbufferPixelType::DepthStencil>(size_)) {}
+    HeadlessRenderableResource(HeadlessBackend& backend_)
+        : SurfaceRenderableResource(backend_) {}
 
     ~HeadlessRenderableResource() noexcept override = default;
 
+    void createPlatformSurface() override {}
     void bind() override {}
-
-    void swap() override { backend.swap(); }
-
-    HeadlessBackend& backend;
-    vulkan::Context& context;
-    gfx::Renderbuffer<gfx::RenderbufferPixelType::RGBA> color;
-    gfx::Renderbuffer<gfx::RenderbufferPixelType::DepthStencil> depthStencil;
 };
 
 HeadlessBackend::HeadlessBackend(const Size size_,
-                                 gfx::HeadlessBackend::SwapBehaviour swapBehaviour_,
+                                 gfx::HeadlessBackend::SwapBehaviour,
                                  const gfx::ContextMode contextMode_)
     : mbgl::vulkan::RendererBackend(contextMode_),
-      mbgl::gfx::HeadlessBackend(size_),
-      swapBehaviour(swapBehaviour_) {}
+      mbgl::gfx::HeadlessBackend(size_) {
+    init();
+}
 
 HeadlessBackend::~HeadlessBackend() {
     gfx::BackendScope guard{*this, gfx::BackendScope::ScopeType::Implicit};
+
+    texture.reset();
 
     // Explicitly reset the renderable resource
     resource.reset();
     // Explicitly reset the context so that it is destructed and cleaned up
     // before we destruct the impl object.
+    getThreadPool().runRenderJobs(true /* closeQueue */);
     context.reset();
 }
 
@@ -64,16 +60,30 @@ void HeadlessBackend::deactivate() {
 
 gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
     if (!resource) {
-        resource = std::make_unique<HeadlessRenderableResource>(
-            *this, static_cast<vulkan::Context&>(getContext()), size);
+        resource = std::make_unique<HeadlessRenderableResource>(*this);
     }
     return *this;
 }
 
-void HeadlessBackend::swap() {}
+void HeadlessBackend::swap() {
+    static_cast<Context&>(*context).waitFrame();
+}
 
 PremultipliedImage HeadlessBackend::readStillImage() {
-    return PremultipliedImage();
+    auto& contextImpl = static_cast<Context&>(*context);
+    auto& resourceImpl = static_cast<HeadlessRenderableResource&>(*resource);
+
+    if (!texture) {
+        texture = std::make_unique<Texture2D>(contextImpl);
+        texture->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
+        texture->setSize(size);
+        texture->setUsage(Texture2DUsage::Read);
+    }
+
+    contextImpl.waitFrame();
+    texture->copyImage(resourceImpl.getAcquiredImage());
+
+    return std::move(*texture->readImage());
 }
 
 RendererBackend* HeadlessBackend::getRendererBackend() {

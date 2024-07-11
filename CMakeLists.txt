@@ -1399,6 +1399,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/pipeline.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/render_pass.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/renderable_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/texture2d.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/tile_layer_group.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/uniform_buffer.cpp

@@ -634,6 +634,7 @@ void main() {
     frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 
     frag_width2 = vec2(outset, inset);
+    frag_linesofar = (floor(in_data.z / 4.0) + in_data.w * 64.0) * LINE_DISTANCE_SCALE;
 }
 )";
 
@@ -784,27 +785,27 @@ layout(location = 2) in vec4 in_color;
 #endif
 
 #if !defined(HAS_UNIFORM_u_blur)
-layout(location = 2) in vec2 in_blur;
+layout(location = 3) in vec2 in_blur;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-layout(location = 3) in vec2 in_opacity;
+layout(location = 4) in vec2 in_opacity;
 #endif
 
 #if !defined(HAS_UNIFORM_u_gapwidth)
-layout(location = 4) in vec2 in_gapwidth;
+layout(location = 5) in vec2 in_gapwidth;
 #endif
 
 #if !defined(HAS_UNIFORM_u_offset)
-layout(location = 5) in vec2 in_offset;
+layout(location = 6) in vec2 in_offset;
 #endif
 
 #if !defined(HAS_UNIFORM_u_width)
-layout(location = 6) in vec2 in_width;
+layout(location = 7) in vec2 in_width;
 #endif
 
 #if !defined(HAS_UNIFORM_u_floorwidth)
-layout(location = 7) in vec2 in_floorwidth;
+layout(location = 8) in vec2 in_floorwidth;
 #endif
 
 layout(set = 0, binding = 1) uniform LineSDFDrawableUBO {
@@ -849,7 +850,7 @@ layout(location = 3) out vec2 frag_tex_a;
 layout(location = 4) out vec2 frag_tex_b;
 
 #if !defined(HAS_UNIFORM_u_color)
-layout(location = 5) out lowp float frag_color;
+layout(location = 5) out lowp vec4 frag_color;
 #endif
 
 #if !defined(HAS_UNIFORM_u_blur)
@@ -963,7 +964,7 @@ layout(location = 3) in vec2 frag_tex_a;
 layout(location = 4) in vec2 frag_tex_b;
 
 #if !defined(HAS_UNIFORM_u_color)
-layout(location = 5) in lowp float frag_color;
+layout(location = 5) in lowp vec4 frag_color;
 #endif
 
 #if !defined(HAS_UNIFORM_u_blur)

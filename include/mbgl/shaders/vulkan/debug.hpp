@@ -53,7 +53,7 @@ layout(set = 0, binding = 1) uniform DebugUBO {
 layout(set = 1, binding = 0) uniform sampler2D image_sampler;
 
 void main() {
-    vec4 overlay_color = texture(image_sampler, in.uv);
+    vec4 overlay_color = texture(image_sampler, frag_uv);
     out_color = mix(debug.color, overlay_color, overlay_color.a);
 }
 )";

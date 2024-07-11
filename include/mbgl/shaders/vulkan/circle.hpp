@@ -172,7 +172,7 @@ void main() {
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
-    frag_opacity = unpack_mix_float(in_opacity, interp.opacity_t));
+    frag_opacity = unpack_mix_float(in_opacity, interp.opacity_t);
 #endif
 
 #if !defined(HAS_UNIFORM_u_stroke_color)

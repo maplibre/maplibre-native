@@ -60,7 +60,7 @@ void Context::initFrameResources() {
     const vk::CommandBufferAllocateInfo allocateInfo(
         backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, frameCount);
 
-    auto& commandBuffers = backend.getDevice()->allocateCommandBuffersUnique(allocateInfo);
+    auto commandBuffers = backend.getDevice()->allocateCommandBuffersUnique(allocateInfo);
 
     // descriptor pool info
     const std::vector<vk::DescriptorPoolSize> poolSizes = {
@@ -73,12 +73,11 @@ void Context::initFrameResources() {
     frameResources.reserve(frameCount);
 
     for (uint32_t index = 0; index < frameCount; ++index) {
-        frameResources.emplace_back(
-            std::move(commandBuffers[index]),
-            std::move(device->createDescriptorPoolUnique(descriptorPoolInfo)),
-            std::move(device->createSemaphoreUnique({})),
-            std::move(device->createSemaphoreUnique({})),
-            std::move(device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled))));
+        frameResources.emplace_back(commandBuffers[index],
+                                    device->createDescriptorPoolUnique(descriptorPoolInfo),
+                                    device->createSemaphoreUnique({}),
+                                    device->createSemaphoreUnique({}),
+                                    device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled)));
 
         const auto& frame = frameResources.back();
 
@@ -88,6 +87,9 @@ void Context::initFrameResources() {
         backend.setDebugName(frame.surfaceSemaphore.get(), "SurfaceSemaphore_" + std::to_string(index));
         backend.setDebugName(frame.flightFrameFence.get(), "FrameFence_" + std::to_string(index));
     }
+
+    // force placeholder texture upload before any descriptor sets
+    (void)getDummyTexture();
 }
 
 void Context::destroyResources() {
@@ -115,8 +117,6 @@ void Context::enqueueDeletion(const std::function<void(const Context&)>& functio
 }
 
 void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
-    const auto& device = backend.getDevice();
-
     const vk::CommandBufferAllocateInfo allocateInfo(
         backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
 
@@ -135,9 +135,8 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
     backend.getDevice()->waitIdle();
 }
 
-void Context::beginFrame() {
+void Context::waitFrame() const {
     const auto& device = backend.getDevice();
-    auto& renderableResource = backend.getDefaultRenderable().getResource<RenderableResource>();
     auto& frame = frameResources[frameResourceIndex];
     constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
 
@@ -147,21 +146,33 @@ void Context::beginFrame() {
         mbgl::Log::Error(mbgl::Event::Render, "Wait fence failed");
 #endif
     }
+}
+void Context::beginFrame() {
+    const auto& device = backend.getDevice();
+    auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
+    auto& frame = frameResources[frameResourceIndex];
+    constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
+
+    waitFrame();
 
     device->resetDescriptorPool(getCurrentDescriptorPool().get());
     frame.runDeletionQueue(*this);
 
-    try {
-        const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
-            renderableResource.swapchain.get(), timeout, frame.surfaceSemaphore.get(), nullptr);
+    if (renderableResource.getPlatformSurface()) {
+        try {
+            const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
+                renderableResource.getSwapchain().get(), timeout, frame.surfaceSemaphore.get(), nullptr);
 
-        if (acquireImageResult.result == vk::Result::eSuccess)
-            renderableResource.acquiredImageIndex = acquireImageResult.value;
-        else if (acquireImageResult.result == vk::Result::eSuboptimalKHR)
-            backend.recreateSwapchain();
+            if (acquireImageResult.result == vk::Result::eSuccess)
+                renderableResource.setAcquiredImageIndex(acquireImageResult.value);
+            else if (acquireImageResult.result == vk::Result::eSuboptimalKHR)
+                renderableResource.recreateSwapchain();
 
-    } catch (vk::OutOfDateKHRError e) {
-        backend.recreateSwapchain();
+        } catch (vk::OutOfDateKHRError e) {
+            renderableResource.recreateSwapchain();
+        }
+    } else {
+        renderableResource.setAcquiredImageIndex(frameResourceIndex);
     }
 
     frame.commandBuffer->reset(vk::CommandBufferResetFlagBits::eReleaseResources);
@@ -176,17 +187,17 @@ void Context::endFrame() {
 
     const auto& device = backend.getDevice();
     const auto& graphicsQueue = backend.getGraphicsQueue();
-    const auto& presentQueue = backend.getPresentQueue();
-    const auto& renderableResource = backend.getDefaultRenderable().getResource<RenderableResource>();
+    auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
 
     // submit frame commands
-    const vk::PipelineStageFlags waitStageMask[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+    auto& submitInfo = vk::SubmitInfo().setCommandBuffers(frame.commandBuffer.get());
 
-    const auto& submitInfo = vk::SubmitInfo()
-                                 .setCommandBuffers(frame.commandBuffer.get())
-                                 .setWaitSemaphores(frame.surfaceSemaphore.get())
-                                 .setWaitDstStageMask(waitStageMask)
-                                 .setSignalSemaphores(frame.frameSemaphore.get());
+    if (renderableResource.getPlatformSurface()) {
+        const vk::PipelineStageFlags waitStageMask[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+        submitInfo.setSignalSemaphores(frame.frameSemaphore.get())
+            .setWaitSemaphores(frame.surfaceSemaphore.get())
+            .setWaitDstStageMask(waitStageMask);
+    }
 
     const vk::Result resetFenceResult = device->resetFences(1, &frame.flightFrameFence.get());
     if (resetFenceResult != vk::Result::eSuccess) {
@@ -198,16 +209,20 @@ void Context::endFrame() {
     graphicsQueue.submit(submitInfo, frame.flightFrameFence.get());
 
     // present rendered frame
-    const auto& presentInfo = vk::PresentInfoKHR()
-                                  .setSwapchains(renderableResource.swapchain.get())
-                                  .setWaitSemaphores(frame.frameSemaphore.get())
-                                  .setImageIndices(renderableResource.acquiredImageIndex);
+    if (renderableResource.getPlatformSurface()) {
+        const auto acquiredImage = renderableResource.getAcquiredImageIndex();
+        const auto& presentInfo = vk::PresentInfoKHR()
+                                      .setSwapchains(renderableResource.getSwapchain().get())
+                                      .setWaitSemaphores(frame.frameSemaphore.get())
+                                      .setImageIndices(acquiredImage);
 
-    try {
-        const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
-        if (presentResult == vk::Result::eSuboptimalKHR) backend.recreateSwapchain();
-    } catch (vk::OutOfDateKHRError e) {
-        backend.recreateSwapchain();
+        try {
+            const auto& presentQueue = backend.getPresentQueue();
+            const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
+            if (presentResult == vk::Result::eSuboptimalKHR) renderableResource.recreateSwapchain();
+        } catch (vk::OutOfDateKHRError e) {
+            renderableResource.recreateSwapchain();
+        }
     }
 
     frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
@@ -235,7 +250,7 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
 }
 
 gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent) {
-    return std::make_shared<UniformBuffer>(createBuffer(data, size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, true));
+    return std::make_shared<UniformBuffer>(createBuffer(data, size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, persistent));
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -291,7 +306,7 @@ std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
     return nullptr;
 }
 
-std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size size) {
+std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {
     return nullptr; // std::make_unique<RenderbufferResource>();
 }
 
@@ -307,7 +322,7 @@ gfx::VertexAttributeArrayPtr Context::createVertexAttributeArray() const {
 #if !defined(NDEBUG)
 void Context::visualizeStencilBuffer() {}
 
-void Context::visualizeDepthBuffer(float depthRangeSize) {}
+void Context::visualizeDepthBuffer(float) {}
 #endif // !defined(NDEBUG)
 
 void Context::clearStencilBuffer(int32_t) {
@@ -315,7 +330,7 @@ void Context::clearStencilBuffer(int32_t) {
     assert(false);
 }
 
-void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {}
+void Context::bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {}
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                       RenderStaticData& staticData,
@@ -379,6 +394,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
     auto& commandBuffer = renderPassImpl.getEncoder().getCommandBuffer();
 
+    clipping.pipelineInfo.setRenderable(renderPassImpl.getDescriptor().renderable);
+
     const auto& pipeline = shaderImpl.getPipeline(clipping.pipelineInfo);
 
     commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());
@@ -428,7 +445,11 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
 
         dummyTexture2D = std::make_unique<Texture2D>(*this);
         dummyTexture2D->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
-        dummyTexture2D->upload(data.data(), size);
+        dummyTexture2D->setSize(size);
+
+        submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
+            dummyTexture2D->uploadSubRegion(data.data(), size, 0, 0, commandBuffer);
+        });
     }
 
     return dummyTexture2D;
@@ -436,20 +457,19 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
 
 const vk::UniqueDescriptorSetLayout& Context::getUniformDescriptorSetLayout() {
     if (!uniformDescriptorSetLayout) {
-        std::vector<vk::DescriptorSetLayoutBinding> descriptorSetBindings(shaders::maxUBOCountPerShader, {});
+        std::vector<vk::DescriptorSetLayoutBinding> bindings;
         const auto stageFlags = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
                                 vk::ShaderStageFlagBits::eFragment;
 
-        for (size_t i = 0; i < descriptorSetBindings.size(); ++i) {
-            descriptorSetBindings[i]
-                .setBinding(i)
-                .setStageFlags(stageFlags)
-                .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-                .setDescriptorCount(1);
+        for (size_t i = 0; i < shaders::maxUBOCountPerShader; ++i) {
+            bindings.push_back(vk::DescriptorSetLayoutBinding()
+                                   .setBinding(i)
+                                   .setStageFlags(stageFlags)
+                                   .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                                   .setDescriptorCount(1));
         }
 
-        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(
-            descriptorSetBindings);
+        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
         uniformDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(
             descriptorSetLayoutCreateInfo);
         backend.setDebugName(uniformDescriptorSetLayout.get(), "UniformDescriptorSetLayout");
@@ -460,18 +480,17 @@ const vk::UniqueDescriptorSetLayout& Context::getUniformDescriptorSetLayout() {
 
 const vk::UniqueDescriptorSetLayout& Context::getImageDescriptorSetLayout() {
     if (!imageDescriptorSetLayout) {
-        std::vector<vk::DescriptorSetLayoutBinding> descriptorSetBindings(shaders::maxTextureCountPerShader, {});
+        std::vector<vk::DescriptorSetLayoutBinding> bindings;
 
-        for (size_t i = 0; i < descriptorSetBindings.size(); ++i) {
-            descriptorSetBindings[i]
-                .setBinding(i)
-                .setStageFlags(vk::ShaderStageFlagBits::eFragment)
-                .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-                .setDescriptorCount(1);
+        for (size_t i = 0; i < shaders::maxTextureCountPerShader; ++i) {
+            bindings.push_back(vk::DescriptorSetLayoutBinding()
+                                   .setBinding(i)
+                                   .setStageFlags(vk::ShaderStageFlagBits::eFragment)
+                                   .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
+                                   .setDescriptorCount(1));
         }
 
-        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(
-            descriptorSetBindings);
+        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
         imageDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
         backend.setDebugName(imageDescriptorSetLayout.get(), "ImageDescriptorSetLayout");
     }
@@ -496,10 +515,10 @@ const vk::UniquePipelineLayout& Context::getPipelineLayout() {
                                                   vk::ShaderStageFlagBits::eFragment);
 
     auto& context = static_cast<Context&>(backend.getContext());
-    const auto& descriptorSetLayouts = context.getDescriptorSetLayouts();
+    const auto& descriptorLayouts = context.getDescriptorSetLayouts();
 
     pipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setSetLayouts(descriptorSetLayouts).setPushConstantRanges(pushConstant));
+        vk::PipelineLayoutCreateInfo().setSetLayouts(descriptorLayouts).setPushConstantRanges(pushConstant));
 
     backend.setDebugName(pipelineLayout.get(), "PipelineLayout");
 

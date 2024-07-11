@@ -12,6 +12,12 @@ namespace vulkan {
 class Context;
 class RenderPass;
 
+enum class Texture2DUsage {
+    ShaderInput,
+    Attachment,
+    Read,
+};
+
 class Texture2D : public gfx::Texture2D {
 public:
     Texture2D(Context& context_);
@@ -21,6 +27,7 @@ public:
     gfx::Texture2D& setFormat(gfx::TexturePixelType, gfx::TextureChannelDataType) noexcept override;
     gfx::Texture2D& setSize(Size size_) noexcept override;
     gfx::Texture2D& setImage(std::shared_ptr<PremultipliedImage>) noexcept override;
+    gfx::Texture2D& setUsage(Texture2DUsage) noexcept;
 
     Size getSize() const noexcept override { return size; }
     size_t getDataSize() const noexcept override;
@@ -29,15 +36,25 @@ public:
 
     void create() noexcept override;
 
+    void upload() noexcept override;
     void upload(const void* pixelData, const Size& size_) noexcept override;
     void uploadSubRegion(const void* pixelData, const Size& size, uint16_t xOffset, uint16_t yOffset) noexcept override;
-    void upload() noexcept override;
+    void uploadSubRegion(const void* pixelData,
+                         const Size& size,
+                         uint16_t xOffset,
+                         uint16_t yOffset,
+                         const vk::UniqueCommandBuffer& buffer) noexcept;
 
     bool needsUpload() const noexcept override { return !!imageData; };
+
+    vk::Format getVulkanFormat() const { return vulkanFormat(pixelFormat, channelType); }
 
     const vk::ImageLayout& getVulkanImageLayout() const { return imageLayout; }
     const vk::UniqueImageView& getVulkanImageView() const { return imageAllocation->imageView; }
     const vk::Sampler& getVulkanSampler();
+
+    void copyImage(vk::Image image);
+    std::shared_ptr<PremultipliedImage> readImage();
 
 private:
     static vk::Format vulkanFormat(const gfx::TexturePixelType, const gfx::TextureChannelDataType);
@@ -52,6 +69,7 @@ private:
 
     void transitionToTransferLayout(const vk::UniqueCommandBuffer&);
     void transitionToShaderReadLayout(const vk::UniqueCommandBuffer&);
+    void transitionToGeneralLayout(const vk::UniqueCommandBuffer&);
 
 private:
     Context& context;
@@ -69,6 +87,8 @@ private:
     vk::ImageLayout imageLayout{vk::ImageLayout::eUndefined};
 
     vk::Sampler sampler{};
+
+    Texture2DUsage textureUsage{Texture2DUsage::ShaderInput};
 };
 
 } // namespace vulkan

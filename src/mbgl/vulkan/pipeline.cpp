@@ -1,6 +1,7 @@
 #include <mbgl/vulkan/pipeline.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/util/hash.hpp>
+#include <mbgl/vulkan/renderable_resource.hpp>
 
 namespace mbgl {
 namespace vulkan {
@@ -322,6 +323,13 @@ void PipelineInfo::setStencilMode(const gfx::StencilMode& value) {
     stencilDepthFail = vulkanStencilOp(value.depthFail);
 }
 
+void PipelineInfo::setRenderable(const gfx::Renderable& value) {
+    const auto& renderableResource = value.getResource<RenderableResource>();
+
+    renderPass = renderableResource.getRenderPass().get();
+    viewExtent = renderableResource.getExtent();
+}
+
 bool PipelineInfo::usesBlendConstants() const {
     if (srcBlendFactor == vk::BlendFactor::eConstantAlpha || srcBlendFactor == vk::BlendFactor::eConstantColor ||
         srcBlendFactor == vk::BlendFactor::eOneMinusConstantAlpha ||
@@ -338,7 +346,25 @@ bool PipelineInfo::usesBlendConstants() const {
     return false;
 }
 
+void PipelineInfo::updateVertexInputHash() {
+    vertexInputHash = 0;
+
+    for (const auto& value : inputAttributes) {
+        util::hash_combine(vertexInputHash, value.binding);
+        util::hash_combine(vertexInputHash, value.format);
+        util::hash_combine(vertexInputHash, value.location);
+        util::hash_combine(vertexInputHash, value.offset);
+    }
+
+    for (const auto& value : inputBindings) {
+        util::hash_combine(vertexInputHash, value.binding);
+        util::hash_combine(vertexInputHash, value.inputRate);
+    }
+ }
+
 std::size_t PipelineInfo::hash() const {
+    
+
     return util::hash(topology,
                       cullMode,
                       frontFace,
@@ -356,7 +382,10 @@ std::size_t PipelineInfo::hash() const {
                       stencilPass,
                       stencilFail,
                       stencilDepthFail,
-                      wideLines);
+                      wideLines,
+                      VkRenderPass(renderPass),
+                      vertexInputHash
+    );
 }
 
 void PipelineInfo::setDynamicValues(const vk::UniqueCommandBuffer& buffer) const {

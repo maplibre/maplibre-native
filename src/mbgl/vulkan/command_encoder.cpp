@@ -24,22 +24,21 @@ std::unique_ptr<gfx::RenderPass> CommandEncoder::createRenderPass(const char* na
     return std::make_unique<RenderPass>(*this, name, descriptor);
 }
 
-void CommandEncoder::present(gfx::Renderable& renderable) {
-    renderable.getResource<RenderableResource>().swap();
-}
+void CommandEncoder::present(gfx::Renderable&) {}
 
 void CommandEncoder::pushDebugGroup(const char* name) {
     pushDebugGroup(name, {});
 }
 
-void CommandEncoder::pushDebugGroup(const char* name, const std::array<float, 4>& color) {
-#ifndef NDEBUG
+void CommandEncoder::pushDebugGroup([[maybe_unused]] const char* name,
+                                    [[maybe_unused]] const std::array<float, 4>& color) {
+#ifdef ELABLE_VULKAN_VALIDATION
     commandBuffer->beginDebugUtilsLabelEXT(vk::DebugUtilsLabelEXT().setPLabelName(name).setColor(color));
 #endif
 }
 
 void CommandEncoder::popDebugGroup() {
-#ifndef NDEBUG
+#ifdef ELABLE_VULKAN_VALIDATION
     commandBuffer->endDebugUtilsLabelEXT();
 #endif
 }

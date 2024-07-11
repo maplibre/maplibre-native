@@ -36,6 +36,10 @@ public:
 
     bool wideLines = false;
 
+    // external values (used in hash)
+    vk::RenderPass renderPass{};
+    vk::Extent2D viewExtent{};
+
     // dynamic values (not part of the pipeline/ignored in hash)
     struct {
         std::optional<std::array<float, 4>> blendConstants;
@@ -66,14 +70,18 @@ public:
     void setDepthWrite(const gfx::DepthMaskType& value);
     void setDepthMode(const gfx::DepthMode& value);
     void setStencilMode(const gfx::StencilMode& value);
+    void setRenderable(const gfx::Renderable& value);
 
     bool usesBlendConstants() const;
+    void updateVertexInputHash();
     std::size_t hash() const;
 
     void setDynamicValues(const vk::UniqueCommandBuffer& buffer) const;
     std::vector<vk::DynamicState> getDynamicStates() const;
 
 protected:
+
+    std::size_t vertexInputHash{0};
 };
 
 } // namespace vulkan

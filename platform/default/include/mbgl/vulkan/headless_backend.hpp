@@ -8,6 +8,8 @@
 namespace mbgl {
 namespace vulkan {
 
+class Texture2D;
+
 class HeadlessBackend final : public vulkan::RendererBackend, public gfx::HeadlessBackend {
 public:
     HeadlessBackend(Size = {256, 256},
@@ -38,7 +40,8 @@ private:
 private:
     std::unique_ptr<Impl> impl;
     bool active = false;
-    SwapBehaviour swapBehaviour = SwapBehaviour::NoFlush;
+
+    std::unique_ptr<Texture2D> texture;
 };
 
 } // namespace vulkan
