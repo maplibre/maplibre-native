@@ -35,7 +35,6 @@ ShaderProgram::ShaderProgram(const std::string& name,
     : ShaderProgramBase(),
       shaderName(name),
       backend(backend_) {
-
     constexpr auto targetClientVersion = glslang::EShTargetVulkan_1_0;
     constexpr auto targetLanguageVersion = glslang::EShTargetSpv_1_0;
     constexpr auto defaultVersion = 450;

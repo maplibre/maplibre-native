@@ -145,7 +145,6 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
 }
 
 void SurfaceRenderableResource::initDepthStencil() {
-
     const auto& physicalDevice = backend.getPhysicalDevice();
     const auto& device = backend.getDevice();
     const auto& allocator = backend.getAllocator();
@@ -229,7 +228,6 @@ const vk::Image SurfaceRenderableResource::getAcquiredImage() const {
 }
 
 void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
-
     if (surface) {
         initSwapchain(w, h);
     } else {
@@ -332,8 +330,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
                                       .setLayers(1);
 
     for (const auto& imageView : swapchainImageViews) {
-        const std::array<vk::ImageView, 2> imageViews = {imageView.get(),
-                                                         depthAllocation->imageView.get()};
+        const std::array<vk::ImageView, 2> imageViews = {imageView.get(), depthAllocation->imageView.get()};
 
         framebufferCreateInfo.setAttachments(imageViews);
         swapchainFramebuffers.push_back(device->createFramebufferUnique(framebufferCreateInfo));

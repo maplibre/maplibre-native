@@ -28,7 +28,7 @@ protected:
 
 class SurfaceRenderableResource : public RenderableResource {
 protected:
-    explicit SurfaceRenderableResource(RendererBackend& backend_) 
+    explicit SurfaceRenderableResource(RendererBackend& backend_)
         : RenderableResource(backend_) {}
     virtual ~SurfaceRenderableResource();
 
@@ -52,13 +52,13 @@ public:
 
     void init(uint32_t w, uint32_t h);
     void recreateSwapchain();
-protected:
 
+protected:
     vk::UniqueSurfaceKHR surface;
     vk::UniqueSwapchainKHR swapchain;
 
     uint32_t acquiredImageIndex{0};
-    
+
     // optional color textures when no surface is available
     std::vector<UniqueImageAllocation> colorAllocations;
 

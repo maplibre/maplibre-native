@@ -9,8 +9,7 @@ namespace vulkan {
 
 class OffscreenTextureResource final : public RenderableResource {
 public:
-    OffscreenTextureResource(
-        RendererBackend& backend_, const Size size_, const gfx::TextureChannelDataType type_)
+    OffscreenTextureResource(RendererBackend& backend_, const Size size_, const gfx::TextureChannelDataType type_)
         : RenderableResource(backend_),
           size(size_),
           type(type_) {
@@ -31,16 +30,16 @@ public:
         backend.getContext().renderingStats().numFrameBuffers++;
     }
 
-    ~OffscreenTextureResource() noexcept override { 
+    ~OffscreenTextureResource() noexcept override {
         framebuffer.reset();
         renderPass.reset();
         colorTexture.reset();
-        
-        backend.getContext().renderingStats().numFrameBuffers--; 
+
+        backend.getContext().renderingStats().numFrameBuffers--;
     }
 
-    void bind() override { 
-        colorTexture->create(); 
+    void bind() override {
+        colorTexture->create();
         createRenderPass();
     }
 
@@ -60,7 +59,7 @@ public:
         if (renderPass) return;
 
         assert(colorTexture);
-        auto& texture = static_cast<Texture2D&>(*colorTexture); 
+        auto& texture = static_cast<Texture2D&>(*colorTexture);
 
         const auto& colorAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
                                           .setFormat(texture.getVulkanFormat())
@@ -128,8 +127,7 @@ private:
 
 OffscreenTexture::OffscreenTexture(
     Context& context, const Size size_, const gfx::TextureChannelDataType type, bool depth, bool stencil)
-    : gfx::OffscreenTexture(
-          size, std::make_unique<OffscreenTextureResource>(context.getBackend(), size_, type)) {
+    : gfx::OffscreenTexture(size, std::make_unique<OffscreenTextureResource>(context.getBackend(), size_, type)) {
     assert(!depth);
     assert(!stencil);
 }

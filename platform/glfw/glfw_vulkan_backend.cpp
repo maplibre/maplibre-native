@@ -20,7 +20,7 @@ public:
 
     void createPlatformSurface() override {
         auto& glfwBackend = static_cast<GLFWVulkanBackend&>(backend);
-        
+
         VkSurfaceKHR surface_;
 
         VkResult result = glfwCreateWindowSurface(

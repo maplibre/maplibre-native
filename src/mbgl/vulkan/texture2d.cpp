@@ -122,7 +122,6 @@ void Texture2D::uploadSubRegion(const void* pixelData,
                                 uint16_t xOffset,
                                 uint16_t yOffset,
                                 const vk::UniqueCommandBuffer& commandBuffer) noexcept {
-
     if (!pixelData || size_.width == 0 || size_.height == 0) return;
 
     create();
@@ -324,7 +323,7 @@ void Texture2D::createTexture() {
 
         imageAllocation->imageView = backend.getDevice()->createImageViewUnique(imageViewCreateInfo);
     }
-    
+
     // if the image is used as an attachment
     // it's layout is managed by the render pass
     if (textureUsage == Texture2DUsage::Attachment) {
@@ -432,12 +431,8 @@ void Texture2D::transitionToGeneralLayout(const vk::UniqueCommandBuffer& buffer)
                               .setSubresourceRange(
                                   vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
 
-    buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
-                            vk::PipelineStageFlagBits::eTransfer,
-                            {},
-                            nullptr,
-                            nullptr,
-                            barrier);
+    buffer->pipelineBarrier(
+        vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, nullptr, barrier);
 
     imageLayout = barrier.newLayout;
 }
@@ -455,8 +450,7 @@ void Texture2D::copyImage(vk::Image image) {
 
     create();
 
-    context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) { 
-
+    context.submitOneTimeCommand([&](const vk::UniqueCommandBuffer& commandBuffer) {
         const auto& copyInfo = vk::ImageCopy()
                                    .setSrcSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
                                    .setDstSubresource({vk::ImageAspectFlagBits::eColor, 0, 0, 1})
@@ -475,7 +469,7 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
     }
 
     // TODO should check for offset/padding
-    //vk::ImageSubresource subresource(vk::ImageAspectFlagBits::eColor);
+    // vk::ImageSubresource subresource(vk::ImageAspectFlagBits::eColor);
 
     imageData->resize(size);
 

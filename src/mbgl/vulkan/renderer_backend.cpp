@@ -27,8 +27,8 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 #ifdef ENABLE_VMA_DEBUG
 
-//#define VMA_DEBUG_MARGIN 32
-//#define VMA_DEBUG_DETECT_CORRUPTION 1
+// #define VMA_DEBUG_MARGIN 32
+// #define VMA_DEBUG_DETECT_CORRUPTION 1
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 
 //#define VMA_DEBUG_LOG_FORMAT(format, ...) {         \
@@ -369,8 +369,7 @@ void RendererBackend::initDevice() {
     VULKAN_HPP_DEFAULT_DISPATCHER.init(device.get());
 
     graphicsQueue = device->getQueue(graphicsQueueIndex, 0);
-    if (presentQueueIndex != -1)
-        presentQueue = device->getQueue(presentQueueIndex, 0);
+    if (presentQueueIndex != -1) presentQueue = device->getQueue(presentQueueIndex, 0);
 }
 
 void RendererBackend::initSwapchain() {
@@ -457,8 +456,7 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolIconShader,
                   shaders::BuiltIn::SymbolSDFIconShader,
                   shaders::BuiltIn::SymbolTextAndIconShader,
-                  shaders::BuiltIn::WideVectorShader
-    >(shaders, programParameters);
+                  shaders::BuiltIn::WideVectorShader>(shaders, programParameters);
 }
 
 } // namespace vulkan

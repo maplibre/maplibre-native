@@ -360,11 +360,9 @@ void PipelineInfo::updateVertexInputHash() {
         util::hash_combine(vertexInputHash, value.binding);
         util::hash_combine(vertexInputHash, value.inputRate);
     }
- }
+}
 
 std::size_t PipelineInfo::hash() const {
-    
-
     return util::hash(topology,
                       cullMode,
                       frontFace,
@@ -384,8 +382,7 @@ std::size_t PipelineInfo::hash() const {
                       stencilDepthFail,
                       wideLines,
                       VkRenderPass(renderPass),
-                      vertexInputHash
-    );
+                      vertexInputHash);
 }
 
 void PipelineInfo::setDynamicValues(const vk::UniqueCommandBuffer& buffer) const {

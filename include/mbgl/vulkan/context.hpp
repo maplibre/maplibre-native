@@ -127,8 +127,8 @@ public:
     void unbindGlobalUniformBuffers(gfx::RenderPass&) const noexcept override {}
 
     bool renderTileClippingMasks(gfx::RenderPass& renderPass,
-                                          RenderStaticData& staticData,
-                                          const std::vector<shaders::ClipUBO>& tileUBOs);
+                                 RenderStaticData& staticData,
+                                 const std::vector<shaders::ClipUBO>& tileUBOs);
 
     const std::unique_ptr<BufferResource>& getDummyVertexBuffer();
     const std::unique_ptr<BufferResource>& getDummyUniformBuffer();

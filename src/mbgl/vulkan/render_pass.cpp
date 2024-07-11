@@ -22,12 +22,11 @@ RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const 
     clearValues[1].depthStencil.setDepth(descriptor.clearDepth.value_or(1.0f));
     clearValues[1].depthStencil.setStencil(descriptor.clearStencil.value_or(0));
 
-    const auto& renderPassBeginInfo =
-        vk::RenderPassBeginInfo()
-            .setRenderPass(resource.getRenderPass().get())
-            .setFramebuffer(resource.getFramebuffer().get())
-            .setRenderArea({{0, 0}, resource.getExtent()})
-            .setClearValues(clearValues);
+    const auto& renderPassBeginInfo = vk::RenderPassBeginInfo()
+                                          .setRenderPass(resource.getRenderPass().get())
+                                          .setFramebuffer(resource.getFramebuffer().get())
+                                          .setRenderArea({{0, 0}, resource.getExtent()})
+                                          .setClearValues(clearValues);
 
     pushDebugGroup(name);
 

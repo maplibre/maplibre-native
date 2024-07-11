@@ -80,7 +80,6 @@ public:
     std::vector<vk::DynamicState> getDynamicStates() const;
 
 protected:
-
     std::size_t vertexInputHash{0};
 };
 
