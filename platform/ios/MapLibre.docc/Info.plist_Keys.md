@@ -6,7 +6,7 @@ MapLibre Native for iOS supports custom `Info.plist` keys in your application in
 
 If it is required by the tileserver you use, set the API key to be used by all instances of ``MLNMapView`` in the current application.
 
-As an alternative, you can use ``MLNSettings.accessToken`` to set a token in code.
+As an alternative, you can use ``MLNSettings/accessToken`` to set a token in code.
 
 ## MLNAccuracyAuthorizationDescription
 
