@@ -6,7 +6,7 @@ MapLibre Native iOS can render text that is part of an ``MLNSymbolStyleLayer`` i
 
 ## Server-side fonts
 
-By default, the map renders characters using glyphs downloaded from the server. You apply fonts when building a style with [Maputnik](https://studio.mapbox.com/), in the `text-font` layout property in style JSON, or in the ``MLNSymbolStyleLayer/textFontNames`` property at runtime. The values in these properties must be font display names, not font family names or PostScript names.
+By default, the map renders characters using glyphs downloaded from the server. You apply fonts when building a style with [Maputnik](https://maputnik.github.io), in the `text-font` layout property in style JSON, or in the ``MLNSymbolStyleLayer/textFontNames`` property at runtime. The values in these properties must be font display names, not font family names or PostScript names.
 
 Each font name in the list must match a font that is present on the server; otherwise, the text will not load, even if one of the fonts is available. Each font name must be included in the `{fontstack}` portion of the JSON stylesheet’s [`glyphs`](https://maplibre.org/maplibre-style-spec/glyphs/) property.
 
