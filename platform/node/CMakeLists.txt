@@ -5,13 +5,14 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/module.cmake)
 
 add_node_module(
     mbgl-node
-    INSTALL_PATH ${PROJECT_SOURCE_DIR}/lib/{node_abi}/mbgl.node
+    INSTALL_PATH ${PROJECT_SOURCE_DIR}/platform/node/lib/{node_abi}/mbgl.node
     NAN_VERSION 2.19.0
     EXCLUDE_NODE_ABIS
         46
         47
         48
         51
+        127
 )
 
 if(WIN32)

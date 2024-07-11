@@ -187,8 +187,8 @@ jobs:
     - name: Build C++ Unit Tests App
       run: |
         ./gradlew assembleDebug assembleAndroidTest
-        cp app/build/outputs/apk/debug/app-debug.apk CppUnitTestsApp.apk
-        cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk CppUnitTests.apk
+        cp app/build/outputs/apk/debug/app-debug.apk .
+        cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk .
 
     - name: Store C++ Unit Tests .apk files
       uses: actions/upload-artifact@v4
@@ -196,8 +196,8 @@ jobs:
         name: android-cpp-tests
         if-no-files-found: error
         path: |
-          ./test/android/CppUnitTestsApp.apk
-          ./test/android/CppUnitTests.apk
+          ./test/android/app-debug.apk
+          ./test/android/app-release-androidTest.apk
 
   android-build-render-test:
     runs-on: ubuntu-latest
