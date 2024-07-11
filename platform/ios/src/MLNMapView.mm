@@ -2871,7 +2871,7 @@ public:
 
     if (shouldShowVersion)
     {
-        attributionController.title = [actionSheetTitle stringByAppendingFormat:@" %@", [NSBundle mgl_frameworkInfoDictionary][@"MLNSemanticVersionString"]];
+        attributionController.title = [actionSheetTitle stringByAppendingFormat:@" %@", [NSBundle mgl_frameworkInfoDictionary][@"CFBundleShortVersionString"]];
     }
     
     NSArray *attributionInfos = [self.style attributionInfosWithFontSize:[UIFont buttonFontSize] linkColor:nil];
