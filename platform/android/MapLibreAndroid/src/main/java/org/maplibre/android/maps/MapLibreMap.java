@@ -2510,14 +2510,12 @@ public final class MapLibreMap {
   //
 
   /**
-   * A Boolean value indicating whether the map may cache tiles for different zoom levels or not.
+   * Indicating whether the map may cache tiles for different zoom levels or not.
    *
    * @param enabled true causes the map view to consume more memory and have a smoother user
-   * experience when zoom in/out.
-   *
-   * The default value of this property is `true`.
+   * experience when zoom in/out. The default value of this property is `true`.
    */
-  public void setTileCacheEnabled(boolean enabled) {
+  public void experimental_setTileCacheEnabled(boolean enabled) {
       nativeMapView.setTileCacheEnabled(enabled);
   }
 }
