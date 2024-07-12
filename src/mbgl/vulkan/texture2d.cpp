@@ -489,7 +489,7 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
             memcpy(imageData->data.get() + rowSize * i, mappedData + layout.rowPitch * i, rowSize);
         }
     }
-    
+
     vmaUnmapMemory(context.getBackend().getAllocator(), imageAllocation->allocation);
 
     return imageData;

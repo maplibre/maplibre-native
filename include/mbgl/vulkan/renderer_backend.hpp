@@ -13,7 +13,7 @@
 
 #ifndef NDEBUG
 #define ELABLE_VULKAN_VALIDATION
-//#define ENABLE_VMA_DEBUG
+// #define ENABLE_VMA_DEBUG
 #endif
 
 namespace mbgl {

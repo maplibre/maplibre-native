@@ -56,7 +56,7 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #pragma clang diagnostic pop
 #endif
 
-//#define ENABLE_RENDERDOC_FRAME_CAPTURE
+// #define ENABLE_RENDERDOC_FRAME_CAPTURE
 
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
 #include "renderdoc_app.h"
