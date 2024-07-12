@@ -134,8 +134,8 @@ const std::vector<PlacedSymbolData>& Renderer::getPlacedSymbolsData() const {
     return impl->orchestrator.getPlacedSymbolsData();
 }
 
-void Renderer::enableTileCache(bool enable) {
-    impl->orchestrator.enableTileCache(enable);
+void Renderer::setTileCacheEnabled(bool enable) {
+    impl->orchestrator.setTileCacheEnabled(enable);
 }
 
 void Renderer::reduceMemoryUse() {

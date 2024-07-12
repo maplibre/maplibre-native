@@ -7506,7 +7506,7 @@ static void *windowScreenContext = &windowScreenContext;
 
 - (void)setTileCacheEnabled:(BOOL)enable {
     _tileCacheEnabled = enable;
-    _rendererFrontend->enableTileCache(enable);
+    _rendererFrontend->setTileCacheEnabled(enable);
 }
 
 - (BOOL)tileCacheEnabled {

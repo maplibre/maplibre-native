@@ -92,7 +92,7 @@ public:
                             const std::optional<std::string>& featureID,
                             const std::optional<std::string>& stateKey);
 
-    void enableTileCache(bool);
+    void setTileCacheEnabled(bool);
     void reduceMemoryUse();
     void dumpDebugLogs();
     void collectPlacedSymbolData(bool);

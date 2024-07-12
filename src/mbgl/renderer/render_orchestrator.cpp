@@ -738,7 +738,7 @@ void RenderOrchestrator::removeFeatureState(const std::string& sourceID,
     }
 }
 
-void RenderOrchestrator::enableTileCache(bool enable) {
+void RenderOrchestrator::setTileCacheEnabled(bool enable) {
     tileCacheEnabled = enable;
 
     for (const auto& entry : renderSources) {
