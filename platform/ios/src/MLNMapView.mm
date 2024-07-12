@@ -861,7 +861,6 @@ public:
     _targetCoordinate = kCLLocationCoordinate2DInvalid;
     
     _shouldRequestAuthorizationToUseLocationServices = YES;
-    _tileCacheEnabled = YES;
 }
 
 - (mbgl::Size)size
@@ -7341,6 +7340,12 @@ static void *windowScreenContext = &windowScreenContext;
     return _mbglView->getObject();
 }
 
+// MARK: Tile Cache
+
+- (void)experimental_setTileCacheEnabled:(BOOL)enabled {
+    _rendererFrontend->setTileCacheEnabled(enabled);
+}
+
 @end
 
 // MARK: - IBAdditions methods
@@ -7500,17 +7505,6 @@ static void *windowScreenContext = &windowScreenContext;
 {
     MLNLogDebug(@"Setting showsHeading: %@", MLNStringFromBOOL(showsHeading));
     self.showsUserHeadingIndicator = showsHeading;
-}
-
-// MARK: Tile Cache
-
-- (void)setTileCacheEnabled:(BOOL)enable {
-    _tileCacheEnabled = enable;
-    _rendererFrontend->setTileCacheEnabled(enable);
-}
-
-- (BOOL)tileCacheEnabled {
-    return _tileCacheEnabled;
 }
 
 @end

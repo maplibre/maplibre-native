@@ -2114,14 +2114,12 @@ MLN_EXPORT
 // MARK: Tile Cache
 
 /**
- A Boolean value indicating whether the map may cache tiles for different zoom levels or not.
+ Indicating whether the map may cache tiles for different zoom levels or not.
 
- Setting this property to `YES` causes the map view to consume more memory and have a smoother user
- experience when zoom in/out.
-
- The default value of this property is `YES`.
+ @param enabled  causes the map view to consume more memory and have a smoother user
+ * experience when zoom in/out.  The default value of this property is `YES`.
  */
-@property (nonatomic, assign) BOOL tileCacheEnabled;
+- (void)experimental_setTileCacheEnabled:(BOOL)enabled;
 
 // MARK: Debugging the Map
 
