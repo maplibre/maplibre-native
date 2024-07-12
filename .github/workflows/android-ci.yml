@@ -184,6 +184,10 @@ jobs:
       with:
         key: ${{ github.job }}
 
+    - name: Create data.zip in assets directory
+      run: tar chf test/android/app/src/main/assets/data.zip --format=zip --files-from=test/android/app/src/main/assets/to_zip.txt
+      working-directory: .
+
     - name: Build C++ Unit Tests App
       run: |
         ./gradlew assembleDebug assembleAndroidTest
