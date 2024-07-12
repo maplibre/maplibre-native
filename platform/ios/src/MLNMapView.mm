@@ -2864,14 +2864,14 @@ public:
         }
     }
 
-    NSString *actionSheetTitle = NSLocalizedStringWithDefaultValue(@"SDK_NAME", nil, nil, @"MapLibre Native for iOS", @"Action sheet title");
+    NSString *actionSheetTitle = NSLocalizedStringWithDefaultValue(@"SDK_NAME", nil, nil, @"MapLibre Native iOS", @"Action sheet title");
     UIAlertController *attributionController = [UIAlertController alertControllerWithTitle:actionSheetTitle
                                                                                    message:nil
                                                                             preferredStyle:UIAlertControllerStyleActionSheet];
-
-    if (shouldShowVersion)
+    NSString *version = [NSBundle mgl_frameworkInfoDictionary][@"CFBundleShortVersionString"];
+    if (shouldShowVersion && version != nil && ![version isEqualToString:@""]) 
     {
-        attributionController.title = [actionSheetTitle stringByAppendingFormat:@" %@", [NSBundle mgl_frameworkInfoDictionary][@"MLNSemanticVersionString"]];
+        attributionController.title = [actionSheetTitle stringByAppendingFormat:@" %@", version];
     }
     
     NSArray *attributionInfos = [self.style attributionInfosWithFontSize:[UIFont buttonFontSize] linkColor:nil];
@@ -2879,7 +2879,13 @@ public:
     {
         UIAlertAction *action = [UIAlertAction actionWithTitle:[attributionInfo.title.string mgl_titleCasedStringWithLocale:[NSLocale currentLocale]]
                                                          style:UIAlertActionStyleDefault
-                                                       handler:nil];
+                                                       handler:^(UIAlertAction * _Nonnull actionBlock) {
+            NSURL *url = attributionInfo.URL;
+            if (url)
+            {
+                [[UIApplication sharedApplication] openURL:url];
+            }
+        }];
         [attributionController addAction:action];
     }
 
