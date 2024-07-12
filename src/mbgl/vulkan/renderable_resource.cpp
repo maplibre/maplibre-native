@@ -35,23 +35,23 @@ void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
     colorAllocations.reserve(imageCount);
     swapchainImages.reserve(imageCount);
 
-    colorFormat = vk::Format::eR8G8B8A8Srgb;
+    colorFormat = vk::Format::eR8G8B8A8Unorm;
     extent = vk::Extent2D(w, h);
 
     const auto imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eColorAttachment |
                             vk::ImageUsageFlagBits::eTransferSrc;
 
-    const auto& imageCreateInfo = vk::ImageCreateInfo()
-                                      .setImageType(vk::ImageType::e2D)
-                                      .setFormat(colorFormat)
-                                      .setExtent({w, h, 1})
-                                      .setMipLevels(1)
-                                      .setArrayLayers(1)
-                                      .setSamples(vk::SampleCountFlagBits::e1)
-                                      .setTiling(vk::ImageTiling::eOptimal)
-                                      .setUsage(imageUsage)
-                                      .setSharingMode(vk::SharingMode::eExclusive)
-                                      .setInitialLayout(vk::ImageLayout::eUndefined);
+    const auto imageCreateInfo = vk::ImageCreateInfo()
+                                     .setImageType(vk::ImageType::e2D)
+                                     .setFormat(colorFormat)
+                                     .setExtent({w, h, 1})
+                                     .setMipLevels(1)
+                                     .setArrayLayers(1)
+                                     .setSamples(vk::SampleCountFlagBits::e1)
+                                     .setTiling(vk::ImageTiling::eOptimal)
+                                     .setUsage(imageUsage)
+                                     .setSharingMode(vk::SharingMode::eExclusive)
+                                     .setInitialLayout(vk::ImageLayout::eUndefined);
 
     VmaAllocationCreateInfo allocCreateInfo = {};
 
@@ -85,7 +85,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
 
     const std::vector<vk::SurfaceFormatKHR>& formats = physicalDevice.getSurfaceFormatsKHR(surface.get());
     const auto& formatIt = std::find_if(formats.begin(), formats.end(), [](const vk::SurfaceFormatKHR& format) {
-        return format.format == vk::Format::eB8G8R8A8Unorm && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
+        return format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
     });
 
     if (formatIt == formats.end()) throw std::runtime_error("No suitable swapchain format found");
@@ -108,15 +108,15 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     // check surface limits (0 is unlimited)
     if (capabilities.maxImageCount > 0) swapchainImageCount = std::min(swapchainImageCount, capabilities.maxImageCount);
 
-    auto& swapchainCreateInfo = vk::SwapchainCreateInfoKHR()
-                                    .setSurface(surface.get())
-                                    .setMinImageCount(swapchainImageCount)
-                                    .setImageFormat(formatIt->format)
-                                    .setImageColorSpace(formatIt->colorSpace)
-                                    .setPresentMode(vk::PresentModeKHR::eFifo)
-                                    .setImageExtent(extent)
-                                    .setImageArrayLayers(1)
-                                    .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);
+    auto swapchainCreateInfo = vk::SwapchainCreateInfoKHR()
+                                   .setSurface(surface.get())
+                                   .setMinImageCount(swapchainImageCount)
+                                   .setImageFormat(formatIt->format)
+                                   .setImageColorSpace(formatIt->colorSpace)
+                                   .setPresentMode(vk::PresentModeKHR::eFifo)
+                                   .setImageExtent(extent)
+                                   .setImageArrayLayers(1)
+                                   .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);
 
     int32_t graphicsQueueIndex = backend.getGraphicsQueueIndex();
     int32_t presentQueueIndex = backend.getPresentQueueIndex();
@@ -175,17 +175,17 @@ void SurfaceRenderableResource::initDepthStencil() {
     const auto imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eDepthStencilAttachment |
                             vk::ImageUsageFlagBits::eTransientAttachment;
 
-    const auto& imageCreateInfo = vk::ImageCreateInfo()
-                                      .setImageType(vk::ImageType::e2D)
-                                      .setFormat(depthFormat)
-                                      .setExtent({extent.width, extent.height, 1})
-                                      .setMipLevels(1)
-                                      .setArrayLayers(1)
-                                      .setSamples(vk::SampleCountFlagBits::e1)
-                                      .setTiling(vk::ImageTiling::eOptimal)
-                                      .setUsage(imageUsage)
-                                      .setSharingMode(vk::SharingMode::eExclusive)
-                                      .setInitialLayout(vk::ImageLayout::eUndefined);
+    const auto imageCreateInfo = vk::ImageCreateInfo()
+                                     .setImageType(vk::ImageType::e2D)
+                                     .setFormat(depthFormat)
+                                     .setExtent({extent.width, extent.height, 1})
+                                     .setMipLevels(1)
+                                     .setArrayLayers(1)
+                                     .setSamples(vk::SampleCountFlagBits::e1)
+                                     .setTiling(vk::ImageTiling::eOptimal)
+                                     .setUsage(imageUsage)
+                                     .setSharingMode(vk::SharingMode::eExclusive)
+                                     .setInitialLayout(vk::ImageLayout::eUndefined);
 
     depthAllocation = std::make_unique<ImageAllocation>(allocator);
 
@@ -205,7 +205,7 @@ void SurfaceRenderableResource::initDepthStencil() {
         return;
     }
 
-    const auto& imageViewCreateInfo =
+    const auto imageViewCreateInfo =
         vk::ImageViewCreateInfo()
             .setImage(depthAllocation->image)
             .setViewType(vk::ImageViewType::e2D)
@@ -239,7 +239,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
     // create swapchain image views
     swapchainImageViews.reserve(swapchainImages.size());
 
-    auto& imageViewCreateInfo =
+    auto imageViewCreateInfo =
         vk::ImageViewCreateInfo()
             .setViewType(vk::ImageViewType::e2D)
             .setFormat(colorFormat)
@@ -260,7 +260,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
 
     // create render pass
     const auto colorLayout = surface ? vk::ImageLayout::ePresentSrcKHR : vk::ImageLayout::eTransferSrcOptimal;
-    const auto& colorAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
+    const auto colorAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
                                       .setFormat(colorFormat)
                                       .setSamples(vk::SampleCountFlagBits::e1)
                                       .setLoadOp(vk::AttachmentLoadOp::eClear)
@@ -272,23 +272,23 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
 
     const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
 
-    const auto& depthAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
-                                      .setFormat(depthFormat)
-                                      .setSamples(vk::SampleCountFlagBits::e1)
-                                      .setLoadOp(vk::AttachmentLoadOp::eClear)
-                                      .setStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                      .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-                                      .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                      .setInitialLayout(vk::ImageLayout::eUndefined)
-                                      .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
+    const auto depthAttachment = vk::AttachmentDescription()
+                                     .setFormat(depthFormat)
+                                     .setSamples(vk::SampleCountFlagBits::e1)
+                                     .setLoadOp(vk::AttachmentLoadOp::eClear)
+                                     .setStoreOp(vk::AttachmentStoreOp::eDontCare)
+                                     .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+                                     .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+                                     .setInitialLayout(vk::ImageLayout::eUndefined)
+                                     .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
     const vk::AttachmentReference depthAttachmentRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
-    const auto& subpass = vk::SubpassDescription(vk::SubpassDescriptionFlags())
-                              .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
-                              .setColorAttachmentCount(1)
-                              .setColorAttachments(colorAttachmentRef)
-                              .setPDepthStencilAttachment(&depthAttachmentRef);
+    const auto subpass = vk::SubpassDescription()
+                             .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
+                             .setColorAttachmentCount(1)
+                             .setColorAttachments(colorAttachmentRef)
+                             .setPDepthStencilAttachment(&depthAttachmentRef);
 
     const auto subpassSrcStageMask = vk::PipelineStageFlags() | vk::PipelineStageFlagBits::eColorAttachmentOutput |
                                      vk::PipelineStageFlagBits::eLateFragmentTests;
@@ -301,7 +301,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
     const auto subpassDstAccessMask = vk::AccessFlags() | vk::AccessFlagBits::eColorAttachmentWrite |
                                       vk::AccessFlagBits::eDepthStencilAttachmentWrite;
 
-    const auto& subpassDependency = vk::SubpassDependency()
+    const auto subpassDependency = vk::SubpassDependency()
                                         .setSrcSubpass(VK_SUBPASS_EXTERNAL)
                                         .setDstSubpass(0)
                                         .setSrcStageMask(subpassSrcStageMask)
@@ -310,11 +310,9 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
                                         .setDstAccessMask(subpassDstAccessMask);
 
     const std::array<vk::AttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
-    const auto& renderPassCreateInfo = vk::RenderPassCreateInfo()
+    const auto renderPassCreateInfo = vk::RenderPassCreateInfo()
                                            .setAttachments(attachments)
-                                           .setSubpassCount(1)
                                            .setSubpasses(subpass)
-                                           .setDependencyCount(1)
                                            .setDependencies(subpassDependency);
 
     renderPass = device->createRenderPassUnique(renderPassCreateInfo);
@@ -322,12 +320,12 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
     // create swapchain framebuffers
     swapchainFramebuffers.reserve(swapchainImageViews.size());
 
-    auto& framebufferCreateInfo = vk::FramebufferCreateInfo()
-                                      .setRenderPass(renderPass.get())
-                                      .setAttachmentCount(2)
-                                      .setWidth(extent.width)
-                                      .setHeight(extent.height)
-                                      .setLayers(1);
+    auto framebufferCreateInfo = vk::FramebufferCreateInfo()
+                                     .setRenderPass(renderPass.get())
+                                     .setAttachmentCount(2)
+                                     .setWidth(extent.width)
+                                     .setHeight(extent.height)
+                                     .setLayers(1);
 
     for (const auto& imageView : swapchainImageViews) {
         const std::array<vk::ImageView, 2> imageViews = {imageView.get(), depthAllocation->imageView.get()};

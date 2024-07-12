@@ -27,15 +27,16 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 #ifdef ENABLE_VMA_DEBUG
 
-// #define VMA_DEBUG_MARGIN 32
-// #define VMA_DEBUG_DETECT_CORRUPTION 1
+#define VMA_DEBUG_MARGIN 32
+#define VMA_DEBUG_DETECT_CORRUPTION 1
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 
-//#define VMA_DEBUG_LOG_FORMAT(format, ...) {         \
-//    char buffer[4096];                              \
-//    sprintf(buffer, format, __VA_ARGS__);           \
-//    mbgl::Log::Info(mbgl::Event::Render, buffer);   \
-//}
+#define VMA_DEBUG_LOG_FORMAT(format, ...)             \
+    {                                                 \
+        char buffer[4096];                            \
+        sprintf(buffer, format, __VA_ARGS__);         \
+        mbgl::Log::Info(mbgl::Event::Render, buffer); \
+    }
 
 #endif
 
@@ -53,6 +54,19 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 #if defined(__clang__)
 #pragma clang diagnostic pop
+#endif
+
+//#define ENABLE_RENDERDOC_FRAME_CAPTURE
+
+#ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
+#include "renderdoc_app.h"
+
+static RENDERDOC_API_1_1_2* g_rdoc_api = nullptr;
+
+#ifdef _WIN32
+#include <libloaderapi.h>
+#endif
+
 #endif
 
 namespace mbgl {
@@ -88,6 +102,36 @@ std::vector<const char*> RendererBackend::getInstanceExtensions() {
 
 std::vector<const char*> RendererBackend::getDeviceExtensions() {
     return getDefaultRenderable().getResource<SurfaceRenderableResource>().getDeviceExtensions();
+}
+
+void RendererBackend::initFrameCapture() {
+#ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
+
+#ifdef _WIN32
+    if (HMODULE mod = GetModuleHandleA("renderdoc.dll")) {
+        pRENDERDOC_GetAPI RENDERDOC_GetAPI = (pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
+        int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)&g_rdoc_api);
+        assert(ret == 1);
+    }
+#endif
+
+#endif
+}
+
+void RendererBackend::startFrameCapture() {
+#ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
+    if (g_rdoc_api) {
+        g_rdoc_api->StartFrameCapture(nullptr, nullptr);
+    }
+#endif
+}
+
+void RendererBackend::endFrameCapture() {
+#ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
+    if (g_rdoc_api) {
+        g_rdoc_api->EndFrameCapture(nullptr, nullptr);
+    }
+#endif
 }
 
 template <typename T, typename F>
@@ -154,7 +198,7 @@ void RendererBackend::initDebug() {
                                                    vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
                                                    vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding;
 
-    const auto& createInfo =
+    const auto createInfo =
         vk::DebugUtilsMessengerCreateInfoEXT().setMessageSeverity(severity).setMessageType(type).setPfnUserCallback(
             vkDebugCallback);
 
@@ -164,6 +208,7 @@ void RendererBackend::initDebug() {
 }
 
 void RendererBackend::init() {
+    initFrameCapture();
     initInstance();
     initSurface();
     initDevice();
@@ -180,13 +225,7 @@ void RendererBackend::initInstance() {
 
     // Vulkan 1.1 on Android is supported on 71% of devices (compared to 1.3 with 6%) as of April 23 2024
     // https://vulkan.gpuinfo.org/
-    const auto& appInfo = vk::ApplicationInfo()
-                              .setPApplicationName("maplibre-natve")
-                              .setApplicationVersion(0)
-                              .setPEngineName("maplibre-natve")
-                              .setEngineVersion(0)
-                              .setApiVersion(VK_API_VERSION_1_0);
-
+    const vk::ApplicationInfo appInfo("maplibre-native", 1, "maplibre-native", VK_API_VERSION_1_0);
     vk::InstanceCreateInfo createInfo(vk::InstanceCreateFlags(), &appInfo);
 
     const auto& layers = getLayers();
@@ -354,11 +393,11 @@ void RendererBackend::initDevice() {
         mbgl::Log::Error(mbgl::Event::Render, "Wide line support not available");
     }
 
-    auto& createInfo = vk::DeviceCreateInfo()
-                           .setQueueCreateInfos(queueCreateInfos)
-                           .setEnabledExtensionCount(static_cast<uint32_t>(extensions.size()))
-                           .setPpEnabledExtensionNames(extensions.data())
-                           .setPEnabledFeatures(&enabledDeviceFeatures);
+    auto createInfo = vk::DeviceCreateInfo()
+                          .setQueueCreateInfos(queueCreateInfos)
+                          .setEnabledExtensionCount(static_cast<uint32_t>(extensions.size()))
+                          .setPpEnabledExtensionNames(extensions.data())
+                          .setPEnabledFeatures(&enabledDeviceFeatures);
 
     // this is not needed for newer implementations
     createInfo.setPEnabledLayerNames(layers);

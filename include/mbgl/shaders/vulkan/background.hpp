@@ -32,7 +32,7 @@ void main() {
     static constexpr auto fragment = R"(
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform BackgroundLayerUBO {
+layout(set = 0, binding = 2) uniform BackgroundLayerUBO {
     vec4 color;
     float opacity;
     float pad1, pad2, pad3;
@@ -89,16 +89,16 @@ layout(location = 1) out vec2 frag_pos_b;
 
 void main() {
 
-    const vec2 pos_a = get_pattern_pos(drawable.pixel_coord_upper,
-                                         drawable.pixel_coord_lower,
-                                         layer.scale_a * layer.pattern_size_a,
-                                         drawable.tile_units_to_pixels,
-                                         in_position);
-    const vec2 pos_b = get_pattern_pos(drawable.pixel_coord_upper,
-                                         drawable.pixel_coord_lower,
-                                         layer.scale_b * layer.pattern_size_b,
-                                         drawable.tile_units_to_pixels,
-                                         in_position);
+    frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper,
+                                 drawable.pixel_coord_lower,
+                                 layer.scale_a * layer.pattern_size_a,
+                                 drawable.tile_units_to_pixels,
+                                 in_position);
+    frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper,
+                                 drawable.pixel_coord_lower,
+                                 layer.scale_b * layer.pattern_size_b,
+                                 drawable.tile_units_to_pixels,
+                                 in_position);
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
     gl_Position.y *= -1.0;

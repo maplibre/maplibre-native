@@ -18,6 +18,9 @@ struct ShaderSource<BuiltIn::Prelude, gfx::Backend::Type::Vulkan> {
 // "special" normals that have a bigger length (of up to 126 in this case).
 #define LINE_NORMAL_SCALE (1.0 / (127 / 2))
 
+// The attribute conveying progress along a line is scaled to [0, 2^15).
+#define MAX_LINE_DISTANCE 32767.0
+
 // Unpack a pair of values that have been packed into a single float.
 // The packed values are assumed to be 8-bit unsigned integers, and are
 // packed like so:

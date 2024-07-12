@@ -61,22 +61,21 @@ public:
         assert(colorTexture);
         auto& texture = static_cast<Texture2D&>(*colorTexture);
 
-        const auto& colorAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
-                                          .setFormat(texture.getVulkanFormat())
-                                          .setSamples(vk::SampleCountFlagBits::e1)
-                                          .setLoadOp(vk::AttachmentLoadOp::eClear)
-                                          .setStoreOp(vk::AttachmentStoreOp::eStore)
-                                          .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
-                                          .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                          .setInitialLayout(vk::ImageLayout::eUndefined)
-                                          .setFinalLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
+        const auto colorAttachment = vk::AttachmentDescription(vk::AttachmentDescriptionFlags())
+                                         .setFormat(texture.getVulkanFormat())
+                                         .setSamples(vk::SampleCountFlagBits::e1)
+                                         .setLoadOp(vk::AttachmentLoadOp::eClear)
+                                         .setStoreOp(vk::AttachmentStoreOp::eStore)
+                                         .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+                                         .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
+                                         .setInitialLayout(vk::ImageLayout::eUndefined)
+                                         .setFinalLayout(vk::ImageLayout::eShaderReadOnlyOptimal);
 
         const vk::AttachmentReference colorAttachmentRef(0, vk::ImageLayout::eColorAttachmentOptimal);
 
-        const auto& subpass = vk::SubpassDescription(vk::SubpassDescriptionFlags())
-                                  .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
-                                  .setColorAttachmentCount(1)
-                                  .setColorAttachments(colorAttachmentRef);
+        const auto subpass = vk::SubpassDescription(vk::SubpassDescriptionFlags())
+                                 .setPipelineBindPoint(vk::PipelineBindPoint::eGraphics)
+                                 .setColorAttachments(colorAttachmentRef);
 
         const auto subpassSrcStageMask = vk::PipelineStageFlags() | vk::PipelineStageFlagBits::eColorAttachmentOutput |
                                          vk::PipelineStageFlagBits::eLateFragmentTests;
@@ -89,30 +88,28 @@ public:
         const auto subpassDstAccessMask = vk::AccessFlags() | vk::AccessFlagBits::eColorAttachmentWrite |
                                           vk::AccessFlagBits::eDepthStencilAttachmentWrite;
 
-        const auto& subpassDependency = vk::SubpassDependency()
-                                            .setSrcSubpass(VK_SUBPASS_EXTERNAL)
-                                            .setDstSubpass(0)
-                                            .setSrcStageMask(subpassSrcStageMask)
-                                            .setDstStageMask(subpassDstStageMask)
-                                            .setSrcAccessMask(subpassSrcAccessMask)
-                                            .setDstAccessMask(subpassDstAccessMask);
+        const auto subpassDependency = vk::SubpassDependency()
+                                           .setSrcSubpass(VK_SUBPASS_EXTERNAL)
+                                           .setDstSubpass(0)
+                                           .setSrcStageMask(subpassSrcStageMask)
+                                           .setDstStageMask(subpassDstStageMask)
+                                           .setSrcAccessMask(subpassSrcAccessMask)
+                                           .setDstAccessMask(subpassDstAccessMask);
 
-        const auto& renderPassCreateInfo = vk::RenderPassCreateInfo()
-                                               .setAttachments(colorAttachment)
-                                               .setSubpassCount(1)
-                                               .setSubpasses(subpass)
-                                               .setDependencyCount(1)
-                                               .setDependencies(subpassDependency);
+        const auto renderPassCreateInfo = vk::RenderPassCreateInfo()
+                                              .setAttachments(colorAttachment)
+                                              .setSubpasses(subpass)
+                                              .setDependencies(subpassDependency);
 
         renderPass = backend.getDevice()->createRenderPassUnique(renderPassCreateInfo);
 
-        const auto& framebufferCreateInfo = vk::FramebufferCreateInfo()
-                                                .setRenderPass(renderPass.get())
-                                                .setAttachments(texture.getVulkanImageView().get())
-                                                .setAttachmentCount(1)
-                                                .setWidth(extent.width)
-                                                .setHeight(extent.height)
-                                                .setLayers(1);
+        const auto framebufferCreateInfo = vk::FramebufferCreateInfo()
+                                               .setRenderPass(renderPass.get())
+                                               .setAttachments(texture.getVulkanImageView().get())
+                                               .setAttachmentCount(1)
+                                               .setWidth(extent.width)
+                                               .setHeight(extent.height)
+                                               .setLayers(1);
 
         framebuffer = backend.getDevice()->createFramebufferUnique(framebufferCreateInfo);
     }
@@ -125,8 +122,11 @@ private:
     vk::UniqueFramebuffer framebuffer;
 };
 
-OffscreenTexture::OffscreenTexture(
-    Context& context, const Size size_, const gfx::TextureChannelDataType type, bool depth, bool stencil)
+OffscreenTexture::OffscreenTexture(Context& context,
+                                   const Size size_,
+                                   const gfx::TextureChannelDataType type,
+                                   [[maybe_unused]] bool depth,
+                                   [[maybe_unused]] bool stencil)
     : gfx::OffscreenTexture(size, std::make_unique<OffscreenTextureResource>(context.getBackend(), size_, type)) {
     assert(!depth);
     assert(!stencil);

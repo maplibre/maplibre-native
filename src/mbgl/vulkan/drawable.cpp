@@ -369,11 +369,10 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
     const auto& descriptorPool = context.getCurrentDescriptorPool();
     const auto& descriptorSetLayouts = context.getDescriptorSetLayouts();
 
-    const auto& descriptorAllocInfo =
+    const auto descriptorAllocInfo =
         vk::DescriptorSetAllocateInfo().setDescriptorPool(*descriptorPool).setSetLayouts(descriptorSetLayouts);
 
     const auto& drawableDescriptorSets = device->allocateDescriptorSets(descriptorAllocInfo);
-
     const auto& uniformDescriptorSet = drawableDescriptorSets[0];
 
     const auto updateUniformDescriptors = [&](const auto& buffer, bool fillGaps) {
@@ -394,18 +393,21 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
                 continue;
             }
 
-            const auto& writeDescriptorSet = vk::WriteDescriptorSet()
-                                                 .setBufferInfo(descriptorBufferInfo)
-                                                 .setDescriptorCount(1)
-                                                 .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-                                                 .setDstBinding(id)
-                                                 .setDstSet(uniformDescriptorSet);
+            const auto writeDescriptorSet = vk::WriteDescriptorSet()
+                                                .setBufferInfo(descriptorBufferInfo)
+                                                .setDescriptorCount(1)
+                                                .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                                                .setDstBinding(id)
+                                                .setDstSet(uniformDescriptorSet);
 
             device->updateDescriptorSets(writeDescriptorSet, nullptr);
         }
     };
+    const auto& globalUniforms = context.getGlobalUniformBuffers();
+    for (size_t i = 0; i < globalUniforms.allocatedSize(); ++i) {
+        if (globalUniforms.get(i)) impl->uniformBuffers.set(i, globalUniforms.get(i));
+    }
 
-    updateUniformDescriptors(context.getGlobalUniformBuffers(), false);
     updateUniformDescriptors(getUniformBuffers(), true);
 
     if (drawableDescriptorSets.size() >= 2) {
@@ -415,17 +417,17 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
             const auto& texture = id < textures.size() ? textures[id] : nullptr;
             auto& textureImpl = texture ? static_cast<Texture2D&>(*texture) : *context.getDummyTexture();
 
-            const auto& descriptorImageInfo = vk::DescriptorImageInfo()
-                                                  .setImageLayout(textureImpl.getVulkanImageLayout())
-                                                  .setImageView(textureImpl.getVulkanImageView().get())
-                                                  .setSampler(textureImpl.getVulkanSampler());
+            const auto descriptorImageInfo = vk::DescriptorImageInfo()
+                                                 .setImageLayout(textureImpl.getVulkanImageLayout())
+                                                 .setImageView(textureImpl.getVulkanImageView().get())
+                                                 .setSampler(textureImpl.getVulkanSampler());
 
-            const auto& writeDescriptorSet = vk::WriteDescriptorSet()
-                                                 .setImageInfo(descriptorImageInfo)
-                                                 .setDescriptorCount(1)
-                                                 .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-                                                 .setDstBinding(id)
-                                                 .setDstSet(imageDescriptorSet);
+            const auto writeDescriptorSet = vk::WriteDescriptorSet()
+                                                .setImageInfo(descriptorImageInfo)
+                                                .setDescriptorCount(1)
+                                                .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
+                                                .setDstBinding(id)
+                                                .setDstSet(imageDescriptorSet);
 
             device->updateDescriptorSets(writeDescriptorSet, nullptr);
         }

@@ -166,7 +166,7 @@ layout(location = 0) in vec4 frag_color;
 layout(location = 1) in float frag_opacity;
 #endif
 
-layout(location = 2) in float frag_position;
+layout(location = 2) in vec2 frag_position;
 
 layout(location = 0) out vec4 out_color;
 
@@ -198,7 +198,9 @@ void main() {
     const float opacity = frag_opacity;
 #endif
 
-    out_color = color * opacity;
+    float dist = length(frag_position - gl_FragCoord.xy);
+    float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
+    out_color = color * opacity * alpha;
 }
 )";
 };

@@ -116,6 +116,17 @@ void BackgroundLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintPara
             const BackgroundDrawableUBO drawableUBO = {/* .matrix = */ util::cast<float>(matrix)};
             drawableUniforms.createOrUpdate(idBackgroundDrawableUBO, &drawableUBO, context);
         }
+
+#ifdef MLN_RENDER_BACKEND_VULKAN
+        const auto& globalUniforms = context.getGlobalUniformBuffers();
+        for (size_t i = 0; i < globalUniforms.allocatedSize(); ++i) {
+            if (globalUniforms.get(i)) drawableUniforms.set(i, globalUniforms.get(i));
+        }
+
+        for (size_t i = 0; i < layerUniforms.allocatedSize(); ++i) {
+            if (layerUniforms.get(i)) drawableUniforms.set(i, layerUniforms.get(i));
+        }
+#endif
     });
 }
 

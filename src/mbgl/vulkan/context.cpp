@@ -68,7 +68,7 @@ void Context::initFrameResources() {
         {vk::DescriptorType::eCombinedImageSampler, 5000},
     };
 
-    const auto& descriptorPoolInfo = vk::DescriptorPoolCreateInfo().setPoolSizes(poolSizes).setMaxSets(100000);
+    const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo().setPoolSizes(poolSizes).setMaxSets(100000);
 
     frameResources.reserve(frameCount);
 
@@ -129,7 +129,7 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
     function(commandBuffer);
     commandBuffer->end();
 
-    const auto& submitInfo = vk::SubmitInfo().setCommandBuffers(commandBuffer.get());
+    const auto submitInfo = vk::SubmitInfo().setCommandBuffers(commandBuffer.get());
 
     backend.getGraphicsQueue().submit(submitInfo);
     backend.getDevice()->waitIdle();
@@ -148,6 +148,8 @@ void Context::waitFrame() const {
     }
 }
 void Context::beginFrame() {
+    backend.startFrameCapture();
+
     const auto& device = backend.getDevice();
     auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
     auto& frame = frameResources[frameResourceIndex];
@@ -190,10 +192,10 @@ void Context::endFrame() {
     auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
 
     // submit frame commands
-    auto& submitInfo = vk::SubmitInfo().setCommandBuffers(frame.commandBuffer.get());
+    const vk::PipelineStageFlags waitStageMask[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+    auto submitInfo = vk::SubmitInfo().setCommandBuffers(frame.commandBuffer.get());
 
     if (renderableResource.getPlatformSurface()) {
-        const vk::PipelineStageFlags waitStageMask[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
         submitInfo.setSignalSemaphores(frame.frameSemaphore.get())
             .setWaitSemaphores(frame.surfaceSemaphore.get())
             .setWaitDstStageMask(waitStageMask);
@@ -211,10 +213,10 @@ void Context::endFrame() {
     // present rendered frame
     if (renderableResource.getPlatformSurface()) {
         const auto acquiredImage = renderableResource.getAcquiredImageIndex();
-        const auto& presentInfo = vk::PresentInfoKHR()
-                                      .setSwapchains(renderableResource.getSwapchain().get())
-                                      .setWaitSemaphores(frame.frameSemaphore.get())
-                                      .setImageIndices(acquiredImage);
+        const auto presentInfo = vk::PresentInfoKHR()
+                                     .setSwapchains(renderableResource.getSwapchain().get())
+                                     .setWaitSemaphores(frame.frameSemaphore.get())
+                                     .setImageIndices(acquiredImage);
 
         try {
             const auto& presentQueue = backend.getPresentQueue();
@@ -226,6 +228,8 @@ void Context::endFrame() {
     }
 
     frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
+
+    backend.endFrameCapture();
 }
 
 std::unique_ptr<gfx::CommandEncoder> Context::createCommandEncoder() {
@@ -441,7 +445,7 @@ const std::unique_ptr<BufferResource>& Context::getDummyUniformBuffer() {
 const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
     if (!dummyTexture2D) {
         const Size size(2, 2);
-        const std::vector<Color> data(size.width * size.height, Color::white());
+        const std::vector<Color> data(size.width * size.height * 4, Color::white());
 
         dummyTexture2D = std::make_unique<Texture2D>(*this);
         dummyTexture2D->setFormat(gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
@@ -469,7 +473,7 @@ const vk::UniqueDescriptorSetLayout& Context::getUniformDescriptorSetLayout() {
                                    .setDescriptorCount(1));
         }
 
-        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
+        const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
         uniformDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(
             descriptorSetLayoutCreateInfo);
         backend.setDebugName(uniformDescriptorSetLayout.get(), "UniformDescriptorSetLayout");
@@ -490,7 +494,7 @@ const vk::UniqueDescriptorSetLayout& Context::getImageDescriptorSetLayout() {
                                    .setDescriptorCount(1));
         }
 
-        const auto& descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
+        const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
         imageDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
         backend.setDebugName(imageDescriptorSetLayout.get(), "ImageDescriptorSetLayout");
     }
@@ -509,10 +513,8 @@ const std::vector<vk::DescriptorSetLayout>& Context::getDescriptorSetLayouts() {
 const vk::UniquePipelineLayout& Context::getPipelineLayout() {
     if (pipelineLayout) return pipelineLayout;
 
-    const auto& pushConstant = vk::PushConstantRange()
-                                   .setSize(sizeof(mat4))
-                                   .setStageFlags(vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
-                                                  vk::ShaderStageFlagBits::eFragment);
+    const auto stages = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
+    const auto pushConstant = vk::PushConstantRange().setSize(sizeof(mat4)).setStageFlags(stages);
 
     auto& context = static_cast<Context&>(backend.getContext());
     const auto& descriptorLayouts = context.getDescriptorSetLayouts();

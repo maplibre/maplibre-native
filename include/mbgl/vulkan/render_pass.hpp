@@ -26,7 +26,6 @@ public:
     void addDebugSignpost(const char* name) override;
 
     void bindVertex(const BufferResource&, std::size_t offset, std::size_t index, std::size_t size = 0);
-
     void bindFragment(const BufferResource&, std::size_t offset, std::size_t index, std::size_t size = 0);
 
 private:

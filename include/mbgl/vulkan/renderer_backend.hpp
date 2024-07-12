@@ -13,7 +13,7 @@
 
 #ifndef NDEBUG
 #define ELABLE_VULKAN_VALIDATION
-#define ENABLE_VMA_DEBUG
+//#define ENABLE_VMA_DEBUG
 #endif
 
 namespace mbgl {
@@ -117,6 +117,9 @@ public:
 #endif
     }
 
+    void startFrameCapture();
+    void endFrameCapture();
+
 protected:
     std::unique_ptr<gfx::Context> createContext() override;
 
@@ -130,8 +133,8 @@ protected:
     void initDevice();
     void initAllocator();
     void initSwapchain();
-    void initDepthTexture();
     void initCommandPool();
+    void initFrameCapture();
 
     void destroyResources();
 

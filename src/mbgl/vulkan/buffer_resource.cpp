@@ -33,10 +33,10 @@ BufferResource::BufferResource(
     //    totalSize = bufferWindowSize * backend.getMaxFrames();
     //}
 
-    const auto& bufferInfo = vk::BufferCreateInfo()
-                                 .setSize(totalSize)
-                                 .setUsage(vk::BufferUsageFlags(usage))
-                                 .setSharingMode(vk::SharingMode::eExclusive);
+    const auto bufferInfo = vk::BufferCreateInfo()
+                                .setSize(totalSize)
+                                .setUsage(vk::BufferUsageFlags(usage))
+                                .setSharingMode(vk::SharingMode::eExclusive);
 
     VmaAllocationCreateInfo allocationInfo = {};
 

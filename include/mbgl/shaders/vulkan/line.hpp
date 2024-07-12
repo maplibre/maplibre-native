@@ -347,7 +347,7 @@ void main() {
     vec2 a_extrude = in_data.xy - 128.0;
     float a_direction = mod(in_data.z, 4.0) - 1.0;
     vec2 pos = floor(in_pos_normal * 0.5);
-    frag_lineprogress = (floor(vertx.data.z / 4.0) + vertx.data.w * 64.0) * 2.0 / MAX_LINE_DISTANCE;
+    frag_lineprogress = (floor(in_data.z / 4.0) + in_data.w * 64.0) * 2.0 / MAX_LINE_DISTANCE;
 
     // x is 1 if it's a round cap, 0 otherwise
     // y is 1 if the normal points up, and -1 if it points down

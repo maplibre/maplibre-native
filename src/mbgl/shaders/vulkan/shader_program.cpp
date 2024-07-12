@@ -108,65 +108,64 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
     auto& pipeline = pipelines[pipelineInfo.hash()];
     if (pipeline) return pipeline;
 
-    const auto& vertexInputState = vk::PipelineVertexInputStateCreateInfo()
-                                       .setVertexBindingDescriptions(pipelineInfo.inputBindings)
-                                       .setVertexAttributeDescriptions(pipelineInfo.inputAttributes);
+    const auto vertexInputState = vk::PipelineVertexInputStateCreateInfo()
+                                      .setVertexBindingDescriptions(pipelineInfo.inputBindings)
+                                      .setVertexAttributeDescriptions(pipelineInfo.inputAttributes);
 
-    const auto& inputAssemblyState = vk::PipelineInputAssemblyStateCreateInfo().setTopology(pipelineInfo.topology);
+    const auto inputAssemblyState = vk::PipelineInputAssemblyStateCreateInfo().setTopology(pipelineInfo.topology);
 
-    const auto& renderableExtent = pipelineInfo.viewExtent;
+    const auto renderableExtent = pipelineInfo.viewExtent;
 
     const vk::Viewport viewportExtent(0.0f, 0.0f, renderableExtent.width, renderableExtent.height, 0.0f, 1.0f);
     const vk::Rect2D scissorRect({}, {renderableExtent.width, renderableExtent.height});
 
-    const auto& viewportState = vk::PipelineViewportStateCreateInfo()
-                                    .setViewportCount(1)
-                                    .setPViewports(&viewportExtent)
-                                    .setScissorCount(1)
-                                    .setPScissors(&scissorRect);
+    const auto viewportState = vk::PipelineViewportStateCreateInfo()
+                                   .setViewportCount(1)
+                                   .setPViewports(&viewportExtent)
+                                   .setScissorCount(1)
+                                   .setPScissors(&scissorRect);
 
-    const auto& rasterState = vk::PipelineRasterizationStateCreateInfo()
-                                  .setCullMode(pipelineInfo.cullMode)
-                                  .setFrontFace(pipelineInfo.frontFace)
-                                  .setPolygonMode(pipelineInfo.polygonMode)
-                                  .setLineWidth(1.0f);
+    const auto rasterState = vk::PipelineRasterizationStateCreateInfo()
+                                 .setCullMode(pipelineInfo.cullMode)
+                                 .setFrontFace(pipelineInfo.frontFace)
+                                 .setPolygonMode(pipelineInfo.polygonMode)
+                                 .setLineWidth(1.0f);
 
     const auto multisampleState = vk::PipelineMultisampleStateCreateInfo().setRasterizationSamples(
         vk::SampleCountFlagBits::e1);
 
-    const auto& stencilState = vk::StencilOpState()
-                                   .setCompareOp(pipelineInfo.stencilFunction)
-                                   .setPassOp(pipelineInfo.stencilPass)
-                                   .setFailOp(pipelineInfo.stencilFail)
-                                   .setDepthFailOp(pipelineInfo.stencilDepthFail);
+    const auto stencilState = vk::StencilOpState()
+                                  .setCompareOp(pipelineInfo.stencilFunction)
+                                  .setPassOp(pipelineInfo.stencilPass)
+                                  .setFailOp(pipelineInfo.stencilFail)
+                                  .setDepthFailOp(pipelineInfo.stencilDepthFail);
 
-    const auto& depthStencilState = vk::PipelineDepthStencilStateCreateInfo()
-                                        .setDepthTestEnable(pipelineInfo.depthTest)
-                                        .setDepthWriteEnable(pipelineInfo.depthWrite)
-                                        .setDepthBoundsTestEnable(false)
-                                        .setMinDepthBounds(0.0f)
-                                        .setMaxDepthBounds(1.0f)
-                                        .setDepthCompareOp(pipelineInfo.depthFunction)
+    const auto depthStencilState = vk::PipelineDepthStencilStateCreateInfo()
+                                       .setDepthTestEnable(pipelineInfo.depthTest)
+                                       .setDepthWriteEnable(pipelineInfo.depthWrite)
+                                       .setDepthBoundsTestEnable(false)
+                                       .setMinDepthBounds(0.0f)
+                                       .setMaxDepthBounds(1.0f)
+                                       .setDepthCompareOp(pipelineInfo.depthFunction)
+                                       .setStencilTestEnable(pipelineInfo.stencilTest)
+                                       .setFront(stencilState)
+                                       .setBack(stencilState);
 
-                                        .setStencilTestEnable(pipelineInfo.stencilTest)
-                                        .setFront(stencilState)
-                                        .setBack(stencilState);
+    const auto colorBlendAttachments = vk::PipelineColorBlendAttachmentState()
+                                           .setBlendEnable(pipelineInfo.colorBlend)
+                                           .setColorBlendOp(pipelineInfo.colorBlendFunction)
+                                           .setSrcColorBlendFactor(pipelineInfo.srcBlendFactor)
+                                           .setDstColorBlendFactor(pipelineInfo.dstBlendFactor)
+                                           .setAlphaBlendOp(pipelineInfo.colorBlendFunction)
+                                           .setSrcAlphaBlendFactor(pipelineInfo.srcBlendFactor)
+                                           .setDstAlphaBlendFactor(pipelineInfo.dstBlendFactor)
+                                           .setColorWriteMask(pipelineInfo.colorMask);
 
-    const auto& colorBlendAttachments = vk::PipelineColorBlendAttachmentState()
-                                            .setBlendEnable(pipelineInfo.colorBlend)
-                                            .setColorBlendOp(pipelineInfo.colorBlendFunction)
-                                            .setSrcColorBlendFactor(pipelineInfo.srcBlendFactor)
-                                            .setDstColorBlendFactor(pipelineInfo.dstBlendFactor)
-                                            .setAlphaBlendOp(pipelineInfo.colorBlendFunction)
-                                            .setSrcAlphaBlendFactor(pipelineInfo.srcBlendFactor)
-                                            .setDstAlphaBlendFactor(pipelineInfo.dstBlendFactor)
-                                            .setColorWriteMask(pipelineInfo.colorMask);
-
-    const auto& colorBlendState = vk::PipelineColorBlendStateCreateInfo()
-                                      .setAttachmentCount(1)
-                                      .setPAttachments(&colorBlendAttachments)
-                                      .setLogicOpEnable(VK_FALSE)
-                                      .setLogicOp(vk::LogicOp::eCopy);
+    const auto colorBlendState = vk::PipelineColorBlendStateCreateInfo()
+                                     .setAttachmentCount(1)
+                                     .setPAttachments(&colorBlendAttachments)
+                                     .setLogicOpEnable(VK_FALSE)
+                                     .setLogicOp(vk::LogicOp::eCopy);
 
     // values available for core 1.0
     // vk::DynamicState::eViewport,
@@ -197,18 +196,18 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
             .setModule(fragmentShader.get())
             .setPName("main")};
 
-    const auto& pipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
-                                         .setStages(shaderStages)
-                                         .setPVertexInputState(&vertexInputState)
-                                         .setPInputAssemblyState(&inputAssemblyState)
-                                         .setPViewportState(&viewportState)
-                                         .setPRasterizationState(&rasterState)
-                                         .setPMultisampleState(&multisampleState)
-                                         .setPDepthStencilState(&depthStencilState)
-                                         .setPColorBlendState(&colorBlendState)
-                                         .setPDynamicState(&dynamicState)
-                                         .setLayout(pipelineLayout.get())
-                                         .setRenderPass(pipelineInfo.renderPass);
+    const auto pipelineCreateInfo = vk::GraphicsPipelineCreateInfo()
+                                        .setStages(shaderStages)
+                                        .setPVertexInputState(&vertexInputState)
+                                        .setPInputAssemblyState(&inputAssemblyState)
+                                        .setPViewportState(&viewportState)
+                                        .setPRasterizationState(&rasterState)
+                                        .setPMultisampleState(&multisampleState)
+                                        .setPDepthStencilState(&depthStencilState)
+                                        .setPColorBlendState(&colorBlendState)
+                                        .setPDynamicState(&dynamicState)
+                                        .setLayout(pipelineLayout.get())
+                                        .setRenderPass(pipelineInfo.renderPass);
 
     pipeline = std::move(device->createGraphicsPipelineUnique(nullptr, pipelineCreateInfo).value);
     backend.setDebugName(pipeline.get(), shaderName + "_pipeline");
