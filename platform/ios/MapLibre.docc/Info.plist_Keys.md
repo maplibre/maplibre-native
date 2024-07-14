@@ -6,8 +6,6 @@ MapLibre Native for iOS supports custom `Info.plist` keys in your application in
 
 If it is required by the tileserver you use, set the API key to be used by all instances of ``MLNMapView`` in the current application.
 
-As an alternative, you can use ``MLNSettings.accessToken`` to set a token in code.
-
 ## MLNAccuracyAuthorizationDescription
 
 Set the accuracy authorization description string as an element of `NSLocationTemporaryUsageDescriptionDictionary` to be used by the map to request authorization when the `MLNLocationManager.accuracyAuthorization` is set to `CLAccuracyAuthorizationReducedAccuracy`. Requesting accuracy authorization is available for devices running iOS 14.0 and above.
