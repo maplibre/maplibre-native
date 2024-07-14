@@ -72,7 +72,8 @@ public:
     void scheduleAndReplyValue(const util::SimpleIdentity tag, TaskFn&& task, ReplyFn&& reply) {
         assert(GetCurrent());
         static_assert(std::is_invocable_v<TaskFn>);
-        scheduleAndReplyValue(tag, std::forward<TaskFn>(task), std::forward<ReplyFn>(reply), GetCurrent()->makeWeakPtr());
+        scheduleAndReplyValue(
+            tag, std::forward<TaskFn>(task), std::forward<ReplyFn>(reply), GetCurrent()->makeWeakPtr());
     }
 
     /// Wait until there's nothing pending or in process
@@ -119,7 +120,6 @@ private:
             replyScheduler->schedule(tag, [reply, result = task()] { reply(result); });
         });
     }
-
 };
 
 /// @brief A TaggedScheduler pairs a scheduler with an identifier. Tasklets submitted via a TaggedScheduler
