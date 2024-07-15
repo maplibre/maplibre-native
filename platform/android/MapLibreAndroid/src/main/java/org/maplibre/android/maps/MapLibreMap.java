@@ -2516,6 +2516,6 @@ public final class MapLibreMap {
    * experience when zoom in/out. The default value of this property is `true`.
    */
   public void experimental_setTileCacheEnabled(boolean enabled) {
-      nativeMapView.setTileCacheEnabled(enabled);
+    nativeMapView.setTileCacheEnabled(enabled);
   }
 }
