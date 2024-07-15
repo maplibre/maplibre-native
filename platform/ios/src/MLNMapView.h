@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNMapProjection;
 @class MLNPolyline;
 @class MLNPolygon;
+@class MLNScaleBar;
 @class MLNShape;
 
 @protocol MLNMapViewDelegate;
@@ -295,7 +296,7 @@ MLN_EXPORT
  A control indicating the scale of the map. The scale bar is positioned in the
  upper-left corner. Enable the scale bar via `showsScale`.
  */
-@property (nonatomic, readonly) UIView *scaleBar;
+@property (nonatomic, readonly) MLNScaleBar *scaleBar;
 
 /**
  Sets whether the scale uses styles that make it easier to read on a dark styled map
