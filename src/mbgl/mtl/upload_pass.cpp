@@ -6,6 +6,7 @@
 #include <mbgl/mtl/renderable_resource.hpp>
 #include <mbgl/mtl/vertex_attribute.hpp>
 #include <mbgl/mtl/vertex_buffer_resource.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <Metal/Metal.hpp>
@@ -157,6 +158,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) {
+    MLN_TRACE_FUNC();
+
     gfx::AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
 

@@ -2,6 +2,8 @@
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/uniform_buffer_gl.hpp>
+#include <mbgl/util/instrumentation.hpp>
+
 #include <utility>
 
 namespace mbgl {
@@ -503,6 +505,7 @@ void UniformBufferAllocator::release(BufferRef* ref) noexcept {
 }
 
 void UniformBufferAllocator::defragment(const std::shared_ptr<gl::Fence>& fence) {
+    MLN_TRACE_FUNC();
     impl->defragment(fence);
 }
 
