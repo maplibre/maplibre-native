@@ -139,9 +139,9 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         }
         // Otherwise, create a new one
         if (rawBufSize > 0) {
-            auto buffer = std::make_unique<VertexBuffer>();
-            buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
-            vec->setBuffer(std::move(buffer));
+            auto buffer_ = std::make_unique<VertexBuffer>();
+            buffer_->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
+            vec->setBuffer(std::move(buffer_));
             vec->setDirty(false);
             return static_cast<VertexBuffer*>(vec->getBuffer())->resource;
         }
@@ -190,14 +190,14 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         }
 
         // If the attribute references data shared with a bucket, get the corresponding buffer.
-        if (const auto& buffer = getBuffer(effectiveAttr.getSharedRawData(), usage)) {
+        if (const auto& buffer_ = getBuffer(effectiveAttr.getSharedRawData(), usage)) {
             assert(effectiveAttr.getSharedStride() * effectiveAttr.getSharedVertexOffset() <
                    effectiveAttr.getSharedRawData()->getRawSize() * effectiveAttr.getSharedRawData()->getRawCount());
 
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getSharedType(), effectiveAttr.getSharedOffset()},
                 /*.vertexStride = */ effectiveAttr.getSharedStride(),
-                /*.vertexBufferResource = */ buffer.get(),
+                /*.vertexBufferResource = */ buffer_.get(),
                 /*.vertexOffset = */ effectiveAttr.getSharedVertexOffset(),
             };
             return;
@@ -206,11 +206,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         assert(effectiveAttr.getStride() > 0);
 
         // Otherwise, turn the data managed by the attribute into a buffer.
-        if (const auto& buffer = VertexAttribute::getBuffer(effectiveAttr, *this, gfx::BufferUsageType::StaticDraw)) {
+        if (const auto& buffer_ = VertexAttribute::getBuffer(effectiveAttr, *this, gfx::BufferUsageType::StaticDraw)) {
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getDataType(), /*offset=*/0},
                 /*.vertexStride = */ static_cast<uint32_t>(effectiveAttr.getStride()),
-                /*.vertexBufferResource = */ buffer.get(),
+                /*.vertexBufferResource = */ buffer_.get(),
                 /*.vertexOffset = */ 0,
             };
             return;
@@ -218,7 +218,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
         assert(false);
     };
-    defaults.resolve(overrides, resolveAttr);
+    // This version is called when the attribute is available, but isn't being used by the shader
+    const auto missingAttr = [&](const size_t, auto& missingAttr) -> void {
+        missingAttr->setDirty(false);
+    };
+    defaults.resolve(overrides, resolveAttr, missingAttr);
 
     return bindings;
 }

@@ -12,7 +12,7 @@ using namespace platform;
 
 namespace {
 
-static constexpr const char* const extName = "GL_EXT_disjoint_timer_query";
+constexpr const char *const extName = "GL_EXT_disjoint_timer_query";
 
 struct TimestampQueryLoader {
     TimestampQueryLoader(const GlContexsLoader &loadExtension)
@@ -25,8 +25,10 @@ struct TimestampQueryLoader {
           glGetQueryiv(loadExtension({{extName, "glGetQueryiv"}, {extName, "glGetQueryivEXT"}})),
           glGetQueryObjectiv(loadExtension({{extName, "glGetQueryObjectiv"}, {extName, "glGetQueryObjectivEXT"}})),
           glGetQueryObjectuiv(loadExtension({{extName, "glGetQueryObjectuiv"}, {extName, "glGetQueryObjectuivEXT"}})),
-          glGetQueryObjecti64v(loadExtension({{extName, "glGetQueryObjecti64v"}, {extName, "glGetQueryObjecti64vEXT"}})),
-          glGetQueryObjectui64v(loadExtension({{extName, "glGetQueryObjectui64v"}, {extName, "glGetQueryObjectui64vEXT"}})),
+          glGetQueryObjecti64v(
+              loadExtension({{extName, "glGetQueryObjecti64v"}, {extName, "glGetQueryObjecti64vEXT"}})),
+          glGetQueryObjectui64v(
+              loadExtension({{extName, "glGetQueryObjectui64v"}, {extName, "glGetQueryObjectui64vEXT"}})),
           glGetInteger64v(loadExtension({{extName, "glGetInteger64v"}, {extName, "glGetInteger64vEXT"}})) {}
 
     ExtensionFunction<void(GLsizei n, GLuint *ids)> glGenQueries;
