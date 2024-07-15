@@ -4,6 +4,8 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+- Experimental API to toggle tile cache in map view ([#2590](https://github.com/maplibre/maplibre-native/pull/2590)). This can reduce memory usage at the cost of having to parse tile data again when the zoom level changes.
+
 ## 6.5.1
 
 - Enable LTO ([#2504](https://github.com/maplibre/maplibre-native/pull/2504)).

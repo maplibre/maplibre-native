@@ -330,6 +330,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     for (const auto& entry : sourceDiff.added) {
         std::unique_ptr<RenderSource> renderSource = RenderSource::create(entry.second, threadPool);
         renderSource->setObserver(this);
+        renderSource->enableCache(tileCacheEnabled);
         renderSources.emplace(entry.first, std::move(renderSource));
     }
     transformState = updateParameters->transformState;
@@ -734,6 +735,14 @@ void RenderOrchestrator::removeFeatureState(const std::string& sourceID,
 
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         renderSource->removeFeatureState(sourceLayerID, featureID, stateKey);
+    }
+}
+
+void RenderOrchestrator::setTileCacheEnabled(bool enable) {
+    tileCacheEnabled = enable;
+
+    for (const auto& entry : renderSources) {
+        entry.second->enableCache(enable);
     }
 }
 

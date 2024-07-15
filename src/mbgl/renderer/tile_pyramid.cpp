@@ -215,12 +215,14 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
     }
 
-    if (type != SourceType::Annotations) {
+    if (type != SourceType::Annotations && cacheEnabled) {
         auto conservativeCacheSize = static_cast<size_t>(
             std::max(static_cast<double>(parameters.transformState.getSize().width) / tileSize, 1.0) *
             std::max(static_cast<double>(parameters.transformState.getSize().height) / tileSize, 1.0) *
             (parameters.transformState.getMaxZoom() - parameters.transformState.getMinZoom() + 1) * 0.5);
         cache.setSize(conservativeCacheSize);
+    } else {
+        cache.setSize(0);
     }
 
     // Remove stale tiles. This goes through the (sorted!) tiles map and retain
@@ -388,8 +390,8 @@ std::vector<Feature> TilePyramid::querySourceFeatures(const SourceQueryOptions& 
     return result;
 }
 
-void TilePyramid::setCacheSize(size_t size) {
-    cache.setSize(size);
+void TilePyramid::enableCache(bool enable) {
+    cacheEnabled = enable;
 }
 
 void TilePyramid::reduceMemoryUse() {
