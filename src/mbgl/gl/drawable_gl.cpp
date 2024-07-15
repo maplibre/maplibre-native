@@ -7,6 +7,7 @@
 #include <mbgl/gl/vertex_buffer_resource.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
 namespace mbgl {
@@ -22,6 +23,8 @@ DrawableGL::~DrawableGL() {
 }
 
 void DrawableGL::draw(PaintParameters& parameters) const {
+    MLN_TRACE_FUNC();
+
     if (isCustom) {
         return;
     }
@@ -147,6 +150,8 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
+    MLN_TRACE_FUNC();
+
     const bool build = vertexAttributes &&
                        (vertexAttributes->isDirty() ||
                         std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
@@ -238,6 +243,7 @@ gfx::StencilMode DrawableGL::makeStencilMode(PaintParameters& parameters) const 
 }
 
 void DrawableGL::uploadTextures() const {
+    MLN_TRACE_FUNC();
     for (const auto& texture : textures) {
         if (texture) {
             texture->upload();
