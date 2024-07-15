@@ -2112,6 +2112,16 @@ MLN_EXPORT
                                          predicate:(nullable NSPredicate *)predicate
     NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
 
+// MARK: Tile Cache
+
+/**
+ Indicating whether the map may cache tiles for different zoom levels or not.
+
+ @param enabled  causes the map view to consume more memory and have a smoother user
+ * experience when zoom in/out.  The default value of this property is `YES`.
+ */
+- (void)experimental_setTileCacheEnabled:(BOOL)enabled;
+
 // MARK: Debugging the Map
 
 /**

@@ -60,7 +60,7 @@ public:
 
     std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const;
 
-    void setCacheSize(size_t);
+    void enableCache(bool);
     void reduceMemoryUse();
 
     void setObserver(TileObserver*);
@@ -84,6 +84,7 @@ private:
     float prevLng = 0;
 
     bool fadingTiles = false;
+    bool cacheEnabled = true;
 };
 
 } // namespace mbgl

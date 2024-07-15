@@ -7340,6 +7340,12 @@ static void *windowScreenContext = &windowScreenContext;
     return _mbglView->getObject();
 }
 
+// MARK: Tile Cache
+
+- (void)experimental_setTileCacheEnabled:(BOOL)enabled {
+    _rendererFrontend->setTileCacheEnabled(enabled);
+}
+
 @end
 
 // MARK: - IBAdditions methods
