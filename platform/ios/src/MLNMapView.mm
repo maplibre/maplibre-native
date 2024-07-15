@@ -2864,14 +2864,14 @@ public:
         }
     }
 
-    NSString *actionSheetTitle = NSLocalizedStringWithDefaultValue(@"SDK_NAME", nil, nil, @"MapLibre Native for iOS", @"Action sheet title");
+    NSString *actionSheetTitle = NSLocalizedStringWithDefaultValue(@"SDK_NAME", nil, nil, @"MapLibre Native iOS", @"Action sheet title");
     UIAlertController *attributionController = [UIAlertController alertControllerWithTitle:actionSheetTitle
                                                                                    message:nil
                                                                             preferredStyle:UIAlertControllerStyleActionSheet];
-
-    if (shouldShowVersion)
+    NSString *version = [NSBundle mgl_frameworkInfoDictionary][@"CFBundleShortVersionString"];
+    if (shouldShowVersion && version != nil && ![version isEqualToString:@""]) 
     {
-        attributionController.title = [actionSheetTitle stringByAppendingFormat:@" %@", [NSBundle mgl_frameworkInfoDictionary][@"MLNSemanticVersionString"]];
+        attributionController.title = [actionSheetTitle stringByAppendingFormat:@" %@", version];
     }
     
     NSArray *attributionInfos = [self.style attributionInfosWithFontSize:[UIFont buttonFontSize] linkColor:nil];
@@ -2883,7 +2883,7 @@ public:
             NSURL *url = attributionInfo.URL;
             if (url)
             {
-                [[UIApplication sharedApplication] openURL:url];
+                [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
             }
         }];
         [attributionController addAction:action];
@@ -7338,6 +7338,12 @@ static void *windowScreenContext = &windowScreenContext;
 
 - (MLNBackendResource)backendResource {
     return _mbglView->getObject();
+}
+
+// MARK: Tile Cache
+
+- (void)experimental_setTileCacheEnabled:(BOOL)enabled {
+    _rendererFrontend->setTileCacheEnabled(enabled);
 }
 
 @end

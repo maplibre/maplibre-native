@@ -20,7 +20,7 @@ repos:
     - id: actionlint
       additional_dependencies: [shellcheck-py]
 - repo: https://github.com/nicklockwood/SwiftFormat
-  rev: "0.54.0"
+  rev: "0.54.1"
   hooks:
     - id: swiftformat
       args: [--swiftversion, "5.8"]

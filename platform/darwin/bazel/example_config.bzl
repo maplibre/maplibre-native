@@ -8,6 +8,3 @@ BUNDLE_ID_PREFIX = "com.firstnamelastname"
 
 # Enter your API key for MapTiler here, if you have one.
 API_KEY = "0000000000"
-
-# Semantic version number to include in plist files.
-SEM_VER = "0.0.0"

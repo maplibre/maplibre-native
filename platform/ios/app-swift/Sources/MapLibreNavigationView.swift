@@ -50,6 +50,8 @@ struct MapLibreNavigationView: View {
                     }
                     NavigationLink("OfflinePackExampleUIViewControllerRepresentable") {
                         OfflinePackExampleUIViewControllerRepresentable()
+                    NavigationLink("MultipleImagesExample") {
+                        MultipleImagesExampleUIViewControllerRepresentable().edgesIgnoringSafeArea(.all)
                     }
                 }
             }

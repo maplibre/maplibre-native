@@ -620,6 +620,14 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
+  public void setTileCacheEnabled(boolean enabled) {
+    if (checkState("setTileCacheEnabled")) {
+      return;
+    }
+    nativeSetTileCacheEnabled(enabled);
+  }
+
+  @Override
   public void onLowMemory() {
     if (checkState("onLowMemory")) {
       return;
@@ -1331,6 +1339,9 @@ final class NativeMapView implements NativeMap {
   @Keep
   private native void nativeSetVisibleCoordinateBounds(LatLng[] coordinates, RectF padding,
                                                        double direction, long duration);
+
+  @Keep
+  private native void nativeSetTileCacheEnabled(boolean enabled);
 
   @Keep
   private native void nativeOnLowMemory();

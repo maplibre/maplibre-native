@@ -494,6 +494,10 @@ void RenderTileSource::removeFeatureState(const std::optional<std::string>& sour
     featureState.removeState(sourceLayerID, featureID, stateKey);
 }
 
+void RenderTileSource::enableCache(bool enable) {
+    tilePyramid.enableCache(enable);
+}
+
 void RenderTileSource::reduceMemoryUse() {
     tilePyramid.reduceMemoryUse();
 }
