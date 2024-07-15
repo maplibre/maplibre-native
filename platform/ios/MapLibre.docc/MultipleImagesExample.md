@@ -8,7 +8,8 @@ This example uses POIs in national parks and adds them to the map with data and 
 
 ## Preparation
 
-You can skip this step and download the [`pois-nps.mbtiles`](https://maplibre-native.s3.eu-central-1.amazonaws.com/ios-swift-example-app-resources/pois-nps.mbtiles) directly.
+We've done all the work for you and generated [`pois-nps.mbtiles`](https://maplibre-native.s3.eu-central-1.amazonaws.com/ios-swift-example-app-resources/pois-nps.mbtiles), which you can download directly.
+You can skip the rest of this section unless you're curious how we built the MBTiles from the source data.
 
 - Data, Shapefile download: [https://public-nps.opendata.arcgis.com/datasets/a40e2faa953b4c5cb7fe10004dc3008e_0/](https://public-nps.opendata.arcgis.com/datasets/a40e2faa953b4c5cb7fe10004dc3008e_0/)
 - Icons: [https://www.nps.gov/subjects/gisandmapping/map-symbols-patterns-for-nps-maps.htm](https://www.nps.gov/subjects/gisandmapping/map-symbols-patterns-for-nps-maps.htm)
