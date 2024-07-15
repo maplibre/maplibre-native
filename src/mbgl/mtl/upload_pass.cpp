@@ -139,9 +139,9 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         }
         // Otherwise, create a new one
         if (rawBufSize > 0) {
-            auto buffer = std::make_unique<VertexBuffer>();
-            buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
-            vec->setBuffer(std::move(buffer));
+            auto buffer_ = std::make_unique<VertexBuffer>();
+            buffer_->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
+            vec->setBuffer(std::move(buffer_));
             vec->setDirty(false);
             return static_cast<VertexBuffer*>(vec->getBuffer())->resource;
         }
@@ -218,7 +218,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
         assert(false);
     };
-    defaults.resolve(overrides, resolveAttr);
+    // This version is called when the attribute is available, but isn't being used by the shader
+    const auto missingAttr = [&](const size_t, auto& missingAttr) -> void {
+        missingAttr->setDirty(false);
+    };
+    defaults.resolve(overrides, resolveAttr, missingAttr);
 
     return bindings;
 }

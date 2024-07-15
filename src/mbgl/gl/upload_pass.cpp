@@ -268,6 +268,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return;
         }
 
+        overrideAttr->setDirty(false);
+
         bindings[index] = {
             /*.attribute = */ {defaultAttr.getDataType(), offset},
             /* vertexStride = */ static_cast<uint32_t>(stride),
@@ -280,7 +282,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         // The vertex stride is the sum of the attribute strides
         vertexStride += static_cast<uint32_t>(stride);
     };
-    defaults.resolve(overrides, resolveAttr);
+    // This version is called when the attribute is available, but isn't being used by the shader
+    const auto missingAttr = [&](const size_t, auto& missingAttr) -> void {
+        missingAttr->setDirty(false);
+    };
+    defaults.resolve(overrides, resolveAttr, missingAttr);
 
     assert(vertexStride * vertexCount <= allData.size());
 
