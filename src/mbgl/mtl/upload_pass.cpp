@@ -190,14 +190,14 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         }
 
         // If the attribute references data shared with a bucket, get the corresponding buffer.
-        if (const auto& buffer = getBuffer(effectiveAttr.getSharedRawData(), usage)) {
+        if (const auto& buffer_ = getBuffer(effectiveAttr.getSharedRawData(), usage)) {
             assert(effectiveAttr.getSharedStride() * effectiveAttr.getSharedVertexOffset() <
                    effectiveAttr.getSharedRawData()->getRawSize() * effectiveAttr.getSharedRawData()->getRawCount());
 
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getSharedType(), effectiveAttr.getSharedOffset()},
                 /*.vertexStride = */ effectiveAttr.getSharedStride(),
-                /*.vertexBufferResource = */ buffer.get(),
+                /*.vertexBufferResource = */ buffer_.get(),
                 /*.vertexOffset = */ effectiveAttr.getSharedVertexOffset(),
             };
             return;
@@ -206,11 +206,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         assert(effectiveAttr.getStride() > 0);
 
         // Otherwise, turn the data managed by the attribute into a buffer.
-        if (const auto& buffer = VertexAttribute::getBuffer(effectiveAttr, *this, gfx::BufferUsageType::StaticDraw)) {
+        if (const auto& buffer_ = VertexAttribute::getBuffer(effectiveAttr, *this, gfx::BufferUsageType::StaticDraw)) {
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getDataType(), /*offset=*/0},
                 /*.vertexStride = */ static_cast<uint32_t>(effectiveAttr.getStride()),
-                /*.vertexBufferResource = */ buffer.get(),
+                /*.vertexBufferResource = */ buffer_.get(),
                 /*.vertexOffset = */ 0,
             };
             return;

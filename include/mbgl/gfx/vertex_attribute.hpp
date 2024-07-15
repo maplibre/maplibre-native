@@ -328,10 +328,10 @@ public:
     }
 
     /// Call the provided delegate with each value, providing the override if one exists.
-    /// @param foundDelegate The function called for each attribute in `default`, with the corresponding override, if present
-    /// @param missingDelegate The function called for any overrides with no corresponding default
+    /// @param foundDelegate Called for each attribute in `default`, with the corresponding override, if present
+    /// @param missingDelegate Called for any overrides with no corresponding default
     template <typename ResolveFunc /* void(const size_t, VertexAttribute&, const std::unique_ptr<VertexAttribute>&) */,
-            typename MissingFunc /* void(const size_t, const std::unique_ptr<VertexAttribute>&) */>
+              typename MissingFunc /* void(const size_t, const std::unique_ptr<VertexAttribute>&) */>
     void resolve(const VertexAttributeArray& overrides, ResolveFunc foundDelegate, MissingFunc missingDelegate) const {
         for (size_t id = 0; id < attrs.size(); id++) {
             const auto& override = overrides.get(id);

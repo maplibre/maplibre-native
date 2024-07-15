@@ -148,7 +148,7 @@ public:
     std::optional<CollisionBoundaries> avoidEdges;
 };
 
-// PlacementController implemenation
+// PlacementController implementation
 
 PlacementController::PlacementController()
     : placement(makeMutable<Placement>()) {}
