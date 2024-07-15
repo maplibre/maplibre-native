@@ -2883,7 +2883,7 @@ public:
             NSURL *url = attributionInfo.URL;
             if (url)
             {
-                [[UIApplication sharedApplication] openURL:url];
+                [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
             }
         }];
         [attributionController addAction:action];
