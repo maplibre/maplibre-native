@@ -190,6 +190,7 @@
         "MLNTilePyramidOfflineRegion.h": "platform/darwin/src/MLNTilePyramidOfflineRegion.h",
         "MLNVectorTileSource.h": "platform/darwin/src/MLNVectorTileSource.h",
         "MLNOfflineStorage.h": "platform/darwin/src/MLNOfflineStorage.h",
+        "MLNScaleBar.h": "platform/ios/src/MLNScaleBar.h",
         "MLNMapView.h": "platform/ios/src/MLNMapView.h",
         "Mapbox/Mapbox.h": "platform/ios/src/Mapbox.h"
     },
@@ -238,7 +239,6 @@
         "MLNLoggingConfiguration_Private.h": "platform/darwin/src/MLNLoggingConfiguration_Private.h",
         "NSComparisonPredicate+MLNAdditions.h": "platform/darwin/src/NSComparisonPredicate+MLNAdditions.h",
         "MLNMapAccessibilityElement.h": "platform/ios/src/MLNMapAccessibilityElement.h",
-        "MLNScaleBar.h": "platform/ios/src/MLNScaleBar.h",
         "MMEDate.h": "platform/ios/vendor/mapbox-events-ios/MapboxMobileEvents/MMEDate.h",
         "NSString+MLNAdditions.h": "platform/darwin/src/NSString+MLNAdditions.h",
         "UIDevice+MLNAdditions.h": "platform/ios/src/UIDevice+MLNAdditions.h",
