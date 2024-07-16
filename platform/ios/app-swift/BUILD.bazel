@@ -31,6 +31,9 @@ ios_application(
     infoplists = [":Info.plist"],
     minimum_os_version = "16.0",
     provisioning_profile = "xcode_profile",
+    resources = [
+        "@pois_nps_mbtiles//file",
+    ],
     visibility = ["@rules_xcodeproj//xcodeproj:generated"],
     deps = [":Sources"],
 )

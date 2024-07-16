@@ -80,8 +80,6 @@ static const MLNRow MLNImperialTable[] ={
 @property (nonatomic) UIView *containerView;
 @property (nonatomic) MLNDistanceFormatter *formatter;
 @property (nonatomic, assign) MLNRow row;
-@property (nonatomic) UIColor *primaryColor;
-@property (nonatomic) UIColor *secondaryColor;
 @property (nonatomic, assign) CGFloat borderWidth;
 @property (nonatomic) NSMutableDictionary* labelImageCache;
 @property (nonatomic) MLNScaleBarLabel* prototypeLabel;

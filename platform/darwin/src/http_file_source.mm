@@ -146,10 +146,7 @@ NSString *HTTPFileSource::Impl::getUserAgent() const {
 
     NSBundle *sdkBundle = HTTPFileSource::Impl::getSDKBundle();
     if (sdkBundle) {
-        NSString *versionString = sdkBundle.infoDictionary[@"MLNSemanticVersionString"];
-        if (!versionString) {
-            versionString = sdkBundle.infoDictionary[@"CFBundleShortVersionString"];
-        }
+        NSString *versionString = sdkBundle.infoDictionary[@"CFBundleShortVersionString"];
         if (versionString) {
             [userAgentComponents addObject:[NSString stringWithFormat:@"%@/%@",
                                             sdkBundle.infoDictionary[@"CFBundleName"], versionString]];
