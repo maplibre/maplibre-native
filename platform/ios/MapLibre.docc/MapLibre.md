@@ -42,6 +42,11 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 - <doc:LocationPrivacyExample>
 - <doc:StaticSnapshotExample>
 
+### Offline
+
+- <doc:OfflinePackExample>
+- <doc:ManageOfflineRegionsExample>
+
 ### Map
 
 - ``MLNSettings``

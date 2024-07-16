@@ -45,6 +45,12 @@ struct MapLibreNavigationView: View {
                     NavigationLink("POIAlongRouteExample") {
                         POIAlongRouteExampleUIViewControllerRepresentable()
                     }
+                    NavigationLink("ManageOfflineRegionsExample") {
+                        ManageOfflineRegionsExampleUIViewControllerRepresentable()
+                    }
+                    NavigationLink("OfflinePackExampleUIViewControllerRepresentable") {
+                        OfflinePackExampleUIViewControllerRepresentable()
+                    }
                     NavigationLink("MultipleImagesExample") {
                         MultipleImagesExampleUIViewControllerRepresentable().edgesIgnoringSafeArea(.all)
                     }
