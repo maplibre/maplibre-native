@@ -27,16 +27,18 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 #ifdef ENABLE_VMA_DEBUG
 
-#define VMA_DEBUG_MARGIN 32
-#define VMA_DEBUG_DETECT_CORRUPTION 1
+//#define VMA_DEBUG_MARGIN 32
+//#define VMA_DEBUG_DETECT_CORRUPTION 1
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 
-#define VMA_DEBUG_LOG_FORMAT(format, ...)             \
-    {                                                 \
-        char buffer[4096];                            \
-        sprintf(buffer, format, __VA_ARGS__);         \
-        mbgl::Log::Info(mbgl::Event::Render, buffer); \
-    }
+//#define VMA_DEBUG_LOG_FORMAT(format, ...)
+//#define VMA_LEAK_LOG_FORMAT(format, ...)
+//#define VMA_DEBUG_LOG_FORMAT(format, ...)           \
+//{                                                   \
+//    char buffer[4096];                              \
+//    sprintf(buffer, format, __VA_ARGS__);           \
+//    mbgl::Log::Info(mbgl::Event::Render, buffer);   \
+//}
 
 #endif
 
@@ -47,6 +49,7 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #pragma clang diagnostic ignored "-Wnullability-completeness"
 #pragma clang diagnostic ignored "-Wmissing-field-initializers"
 #pragma clang diagnostic ignored "-Wunused-function"
+#pragma clang diagnostic ignored "-Wshadow"
 #endif
 
 #define VMA_IMPLEMENTATION
@@ -56,17 +59,18 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #pragma clang diagnostic pop
 #endif
 
-// #define ENABLE_RENDERDOC_FRAME_CAPTURE
+#ifdef _WIN32
+
+#ifndef NDEBUG
+//#define ENABLE_RENDERDOC_FRAME_CAPTURE
+#include <windows.h>
+#endif
+
+#endif
 
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
 #include "renderdoc_app.h"
-
 static RENDERDOC_API_1_1_2* g_rdoc_api = nullptr;
-
-#ifdef _WIN32
-#include <libloaderapi.h>
-#endif
-
 #endif
 
 namespace mbgl {
@@ -389,6 +393,10 @@ void RendererBackend::initDevice() {
 
     if (supportedDeviceFeatures.wideLines) {
         enabledDeviceFeatures.setWideLines(true);
+
+        // more wideLines info
+        //physicalDeviceProperties.limits.lineWidthRange;
+        //physicalDeviceProperties.limits.lineWidthGranularity;
     } else {
         mbgl::Log::Error(mbgl::Event::Render, "Wide line support not available");
     }

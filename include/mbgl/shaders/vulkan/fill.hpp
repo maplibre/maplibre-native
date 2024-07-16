@@ -502,14 +502,14 @@ void main() {
     const vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
 
     const vec2 position2 = in_position.xy;
-    const vec4 position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    vec4 position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    position.y *= -1.0;
 
     frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, position2),
     frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, position2),
     frag_pos = (position.xy / position.w + 1.0) / 2.0 * global.world_size;
     
     gl_Position = position;
-    gl_Position.y *= -1.0;
 }
 )";
 
@@ -599,7 +599,7 @@ void main() {
     const float dist = length(frag_pos - gl_FragCoord.xy);
     const float alpha = 1.0 - smoothstep(0.0, 1.0, dist);
 
-    out_color = mix(color1, color2, props.fade) * opacity;
+    out_color = mix(color1, color2, props.fade) * alpha * opacity;
 }
 )";
 };
@@ -801,7 +801,7 @@ void main() {
     vec4 vcolor = vec4(0.0, 0.0, 0.0, 1.0);
 
     // Add slight ambient lighting so no extrusions are totally black
-    color += min(vec4(0.03, 0.03, 0.03, 1.0), vec4(1.0));
+    color += vec4(0.03, 0.03, 0.03, 1.0);
 
     // Calculate cos(theta), where theta is the angle between surface normal and diffuse light ray
     const float directionalFraction = clamp(dot(normal / 16384.0, props.light_position_base.xyz), 0.0, 1.0);

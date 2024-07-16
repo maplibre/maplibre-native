@@ -577,7 +577,7 @@ layout(location = 7) out mediump float frag_halo_width;
 layout(location = 8) out mediump float frag_halo_blur;
 #endif
 
-layout(location = 9) out bool frag_is_icon;
+layout(location = 9) out int frag_is_icon;
 
 void main() {
 
@@ -637,7 +637,7 @@ void main() {
     const mat2 rotation_matrix = mat2(angle_cos, -1.0 * angle_sin, angle_sin, angle_cos);
 
     const vec4 projected_pos = drawable.label_plane_matrix * vec4(in_projected_pos.xy, 0.0, 1.0);
-    const vec2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
+    const vec2 pos_rot = a_offset / 32.0 * fontScale;
     const vec2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     gl_Position = drawable.coord_matrix * vec4(pos0, 0.0, 1.0);
     gl_Position.y *= -1.0;
@@ -645,9 +645,10 @@ void main() {
     const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? global.symbol_fade_change : -global.symbol_fade_change;
 
-    frag_is_icon = (is_sdf == ICON);
-
-    frag_tex = a_tex / (frag_is_icon ? drawable.texsize_icon : drawable.texsize);
+    const bool is_icon = (is_sdf == ICON);
+	frag_is_icon = int(is_icon);
+    
+	frag_tex = a_tex / (is_icon ? drawable.texsize_icon : drawable.texsize);
     frag_fade_opacity = max(0.0, min(1.0, raw_fade_opacity[0] + fade_change));
     frag_font_scale = fontScale;
     frag_gamma_scale = gl_Position.w;
@@ -696,6 +697,8 @@ layout(location = 7) in mediump float frag_halo_width;
 #if !defined(HAS_UNIFORM_u_halo_blur)
 layout(location = 8) in mediump float frag_halo_blur;
 #endif
+
+layout(location = 9) flat in int frag_is_icon;
 
 layout(location = 0) out vec4 out_color;
 
@@ -771,7 +774,7 @@ void main() {
     const float halo_blur = frag_halo_blur;
 #endif
 
-    if (frag_is_icon) {
+    if (bool(frag_is_icon)) {
         const float alpha = opacity * frag_fade_opacity;
         out_color = texture(icon_image, frag_tex) * alpha;
         return;
@@ -782,7 +785,7 @@ void main() {
     const vec4 color = tile.is_halo ? halo_color : fill_color;
     const float gamma = ((tile.is_halo ? (halo_blur * 1.19 / SDF_PX) : 0) + EDGE_GAMMA) / fontGamma;
     const float buff = tile.is_halo ? (6.0 - halo_width / frag_font_scale) / SDF_PX : (256.0 - 64.0) / 256.0;
-    const float dist = texture(image0_sampler, frag_tex).a;
+    const float dist = texture(glyph_image, frag_tex).a;
     const float gamma_scaled = gamma * frag_gamma_scale;
     const float alpha = smoothstep(buff - gamma_scaled, buff + gamma_scaled, dist);
 

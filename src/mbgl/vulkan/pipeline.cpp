@@ -243,8 +243,20 @@ void PipelineInfo::setCullMode(const gfx::CullFaceMode& value) {
     frontFace = vulkanFrontFace(value.winding);
 }
 
-void PipelineInfo::setTopology(const gfx::DrawModeType& value) {
+void PipelineInfo::setDrawMode(const gfx::DrawModeType& value) {
     topology = vulkanPrimitiveTopology(value);
+}
+
+void PipelineInfo::setDrawMode(const gfx::DrawMode& value) {
+    topology = vulkanPrimitiveTopology(value.type);
+
+    if (value.type == gfx::DrawModeType::Lines ||
+        value.type == gfx::DrawModeType::LineStrip ||
+        value.type == gfx::DrawModeType::LineLoop) {
+        setLineWidth(value.size);
+    } else {
+        setLineWidth(1.0f);
+    }
 }
 
 void PipelineInfo::setColorBlend(const gfx::ColorMode& value) {
@@ -328,6 +340,11 @@ void PipelineInfo::setRenderable(const gfx::Renderable& value) {
 
     renderPass = renderableResource.getRenderPass().get();
     viewExtent = renderableResource.getExtent();
+}
+
+void PipelineInfo::setLineWidth(float value) {
+    wideLines = value != 1.0f;
+    dynamicValues.lineWidth = value;
 }
 
 bool PipelineInfo::usesBlendConstants() const {

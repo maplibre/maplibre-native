@@ -233,26 +233,24 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     impl->pipelineInfo.setRenderable(renderPass.getDescriptor().renderable);
-    impl->pipelineInfo.setDynamicValues(commandBuffer);
 
-    const uint32_t instanceCount = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
+    const uint32_t instances = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
 
     for (const auto& seg : impl->segments) {
-        const auto& mode = seg->getMode();
         const auto& segment = seg->getSegment();
 
         // update pipeline info with per segment modifiers
-        impl->pipelineInfo.setTopology(mode.type);
+        impl->pipelineInfo.setDrawMode(seg->getMode());
+
+        impl->pipelineInfo.setDynamicValues(commandBuffer);
 
         const auto& pipeline = shaderImpl.getPipeline(impl->pipelineInfo);
-
         commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());
 
         if (segment.indexLength) {
-            commandBuffer->drawIndexed(
-                segment.indexLength, instanceCount, segment.indexOffset, segment.vertexOffset, 0);
+            commandBuffer->drawIndexed(segment.indexLength, instances, segment.indexOffset, segment.vertexOffset, 0);
         } else {
-            commandBuffer->draw(segment.vertexLength, instanceCount, segment.vertexOffset, 0);
+            commandBuffer->draw(segment.vertexLength, instances, segment.vertexOffset, 0);
         }
 
         context.renderingStats().numDrawCalls++;

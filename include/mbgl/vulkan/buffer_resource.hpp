@@ -11,6 +11,40 @@ namespace vulkan {
 
 class Context;
 
+struct BufferAllocation {
+    const VmaAllocator& allocator;
+    VmaAllocation allocation{};
+    VkBuffer buffer{};
+    void* mappedBuffer{};
+
+    BufferAllocation() = delete;
+    BufferAllocation(BufferAllocation&) = delete;
+    BufferAllocation& operator=(const BufferAllocation& other) = delete;
+
+    BufferAllocation(const VmaAllocator& allocator_)
+        : allocator(allocator_) {}
+
+    BufferAllocation(BufferAllocation&& other) noexcept
+        : allocator(other.allocator),
+          allocation(other.allocation),
+          buffer(other.buffer),
+          mappedBuffer(other.mappedBuffer) {
+        other.buffer = nullptr;
+        other.allocation = nullptr;
+        other.mappedBuffer = nullptr;
+    }
+
+    ~BufferAllocation() { destroy(); }
+
+    bool create(const VmaAllocationCreateInfo& allocInfo, const vk::BufferCreateInfo& bufferInfo);
+    void destroy();
+
+    void setName(const std::string& name) const;
+};
+
+using UniqueBufferAllocation = std::unique_ptr<BufferAllocation>;
+using SharedBufferAllocation = std::shared_ptr<BufferAllocation>;
+
 class BufferResource {
 public:
     BufferResource() noexcept = delete;

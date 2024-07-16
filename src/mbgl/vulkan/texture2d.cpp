@@ -9,6 +9,31 @@
 namespace mbgl {
 namespace vulkan {
 
+ 
+bool ImageAllocation::create(const VmaAllocationCreateInfo& allocInfo, const vk::ImageCreateInfo& imageInfo) {
+    VkResult result = vmaCreateImage(
+        allocator, reinterpret_cast<const VkImageCreateInfo*>(&imageInfo), &allocInfo, &image, &allocation, nullptr);
+
+    if (result != VK_SUCCESS) {
+        return false;
+    }
+
+    return true;
+}
+
+void ImageAllocation::destroy() {
+    imageView.reset();
+    vmaDestroyImage(allocator, image, allocation);
+}
+
+void ImageAllocation::setName([[maybe_unused]] const std::string& name) const {
+#ifdef ENABLE_VMA_DEBUG
+    if (allocation) {
+        vmaSetAllocationName(allocator, allocation, name.data());
+    }
+#endif
+}
+
 Texture2D::Texture2D(Context& context_)
     : context(context_) {}
 
@@ -142,14 +167,7 @@ void Texture2D::uploadSubRegion(const void* pixelData,
     allocationInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
     SharedBufferAllocation bufferAllocation = std::make_shared<BufferAllocation>(allocator);
-
-    VkResult result = vmaCreateBuffer(allocator,
-                                      reinterpret_cast<const VkBufferCreateInfo*>(&bufferInfo),
-                                      &allocationInfo,
-                                      &bufferAllocation->buffer,
-                                      &bufferAllocation->allocation,
-                                      nullptr);
-    if (result != VK_SUCCESS) {
+    if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture buffer allocation failed");
         return;
     }
@@ -275,8 +293,6 @@ void Texture2D::createTexture() {
                                      .setSharingMode(vk::SharingMode::eExclusive)
                                      .setInitialLayout(vk::ImageLayout::eUndefined);
 
-    imageAllocation = std::make_shared<ImageAllocation>(backend.getAllocator());
-
     VmaAllocationCreateInfo allocCreateInfo = {};
 
     if (textureUsage != Texture2DUsage::Read) {
@@ -288,14 +304,8 @@ void Texture2D::createTexture() {
         allocCreateInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
     }
 
-    VkResult result = vmaCreateImage(imageAllocation->allocator,
-                                     reinterpret_cast<const VkImageCreateInfo*>(&imageCreateInfo),
-                                     &allocCreateInfo,
-                                     &imageAllocation->image,
-                                     &imageAllocation->allocation,
-                                     nullptr);
-
-    if (result != VK_SUCCESS) {
+    imageAllocation = std::make_shared<ImageAllocation>(backend.getAllocator());
+    if (!imageAllocation->create(allocCreateInfo, imageCreateInfo)) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan texture allocation failed");
         return;
     }

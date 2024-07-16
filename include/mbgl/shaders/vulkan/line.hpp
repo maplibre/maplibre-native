@@ -494,7 +494,7 @@ layout(location = 7) in vec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 7) in vec4 in_pattern_to;
+layout(location = 8) in vec4 in_pattern_to;
 #endif
 
 layout(set = 0, binding = 1) uniform LineDrawableUBO {
@@ -919,6 +919,7 @@ void main() {
     // We store these in the least significant bit of in_pos_normal
     mediump vec2 normal = in_pos_normal - 2.0 * pos;
     frag_normal = vec2(normal.x, normal.y * 2.0 - 1.0);
+    frag_normal.y *= -1.0;
 
     // these transformations used to be applied in the JS and native code bases.
     // moved them into the shader for clarity and simplicity.

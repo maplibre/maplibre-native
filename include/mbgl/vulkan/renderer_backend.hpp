@@ -22,69 +22,6 @@ class ProgramParameters;
 
 namespace vulkan {
 
-struct BufferAllocation {
-    const VmaAllocator& allocator;
-    VkBuffer buffer{};
-    VmaAllocation allocation{};
-    void* mappedBuffer{};
-
-    BufferAllocation() = delete;
-    BufferAllocation(BufferAllocation&) = delete;
-    BufferAllocation& operator=(const BufferAllocation& other) = delete;
-
-    BufferAllocation(const VmaAllocator& allocator_)
-        : allocator(allocator_) {}
-
-    BufferAllocation(BufferAllocation&& other) noexcept
-        : allocator(other.allocator),
-          buffer(other.buffer),
-          allocation(other.allocation),
-          mappedBuffer(other.mappedBuffer) {
-        other.buffer = nullptr;
-        other.allocation = nullptr;
-    }
-
-    ~BufferAllocation() {
-        if (mappedBuffer) vmaUnmapMemory(allocator, allocation);
-        vmaDestroyBuffer(allocator, buffer, allocation);
-    }
-};
-
-struct ImageAllocation {
-    const VmaAllocator& allocator;
-    VkImage image{};
-    VmaAllocation allocation{};
-
-    vk::UniqueImageView imageView{};
-
-    ImageAllocation() = delete;
-    ImageAllocation(ImageAllocation&) = delete;
-    ImageAllocation& operator=(const ImageAllocation& other) = delete;
-
-    ImageAllocation(const VmaAllocator& allocator_)
-        : allocator(allocator_) {}
-
-    ImageAllocation(ImageAllocation&& other) noexcept
-        : allocator(other.allocator),
-          image(other.image),
-          allocation(other.allocation),
-          imageView(std::move(other.imageView)) {
-        other.image = nullptr;
-        other.allocation = nullptr;
-    }
-
-    ~ImageAllocation() {
-        imageView.reset();
-        vmaDestroyImage(allocator, image, allocation);
-    }
-};
-
-using UniqueBufferAllocation = std::unique_ptr<BufferAllocation>;
-using UniqueImageAllocation = std::unique_ptr<ImageAllocation>;
-
-using SharedBufferAllocation = std::shared_ptr<BufferAllocation>;
-using SharedImageAllocation = std::shared_ptr<ImageAllocation>;
-
 class RendererBackend : public gfx::RendererBackend {
 public:
     RendererBackend(gfx::ContextMode);

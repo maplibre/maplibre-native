@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/vulkan/renderer_backend.hpp>
+#include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/gfx/color_mode.hpp>
 #include <mbgl/gfx/depth_mode.hpp>
 #include <mbgl/gfx/stencil_mode.hpp>
@@ -64,13 +65,15 @@ public:
     static vk::StencilOp vulkanStencilOp(const gfx::StencilOpType& value);
 
     void setCullMode(const gfx::CullFaceMode& value);
-    void setTopology(const gfx::DrawModeType& value);
+    void setDrawMode(const gfx::DrawModeType& value);
+    void setDrawMode(const gfx::DrawMode& value);
     void setColorBlend(const gfx::ColorMode& value);
     void setColorBlendFunction(const gfx::ColorMode::BlendFunction& value);
     void setDepthWrite(const gfx::DepthMaskType& value);
     void setDepthMode(const gfx::DepthMode& value);
     void setStencilMode(const gfx::StencilMode& value);
     void setRenderable(const gfx::Renderable& value);
+    void setLineWidth(float value);
 
     bool usesBlendConstants() const;
     void updateVertexInputHash();

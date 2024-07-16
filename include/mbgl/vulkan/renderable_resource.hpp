@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/renderable.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
+#include <mbgl/vulkan/texture2d.hpp>
 
 namespace mbgl {
 namespace vulkan {

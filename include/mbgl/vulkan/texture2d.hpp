@@ -12,6 +12,39 @@ namespace vulkan {
 class Context;
 class RenderPass;
 
+struct ImageAllocation {
+    const VmaAllocator& allocator;
+    VmaAllocation allocation{};
+    VkImage image{};
+    vk::UniqueImageView imageView{};
+
+    ImageAllocation() = delete;
+    ImageAllocation(ImageAllocation&) = delete;
+    ImageAllocation& operator=(const ImageAllocation& other) = delete;
+
+    ImageAllocation(const VmaAllocator& allocator_)
+        : allocator(allocator_) {}
+
+    ImageAllocation(ImageAllocation&& other) noexcept
+        : allocator(other.allocator),
+          allocation(other.allocation),
+          image(other.image),
+          imageView(std::move(other.imageView)) {
+        other.image = nullptr;
+        other.allocation = nullptr;
+    }
+
+    ~ImageAllocation() { destroy(); }
+
+    bool create(const VmaAllocationCreateInfo& allocInfo, const vk::ImageCreateInfo& imageInfo);
+    void destroy();
+
+    void setName(const std::string& name) const;
+};
+
+using UniqueImageAllocation = std::unique_ptr<ImageAllocation>;
+using SharedImageAllocation = std::shared_ptr<ImageAllocation>;
+
 enum class Texture2DUsage {
     ShaderInput,
     Attachment,

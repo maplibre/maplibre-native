@@ -63,16 +63,8 @@ void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
         colorAllocations.push_back(std::make_unique<ImageAllocation>(backend.getAllocator()));
         auto& colorAllocation = colorAllocations.back();
 
-        VkResult result = vmaCreateImage(colorAllocation->allocator,
-                                         reinterpret_cast<const VkImageCreateInfo*>(&imageCreateInfo),
-                                         &allocCreateInfo,
-                                         &colorAllocation->image,
-                                         &colorAllocation->allocation,
-                                         nullptr);
-
-        if (result != VK_SUCCESS) {
+        if (!colorAllocation->create(allocCreateInfo, imageCreateInfo)) {
             mbgl::Log::Error(mbgl::Event::Render, "Vulkan color texture allocation failed");
-            return;
         }
 
         swapchainImages.push_back(colorAllocation->image);
@@ -147,7 +139,6 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
 void SurfaceRenderableResource::initDepthStencil() {
     const auto& physicalDevice = backend.getPhysicalDevice();
     const auto& device = backend.getDevice();
-    const auto& allocator = backend.getAllocator();
 
     // check for depth format support
     const std::vector<vk::Format> formats = {
@@ -187,20 +178,12 @@ void SurfaceRenderableResource::initDepthStencil() {
                                      .setSharingMode(vk::SharingMode::eExclusive)
                                      .setInitialLayout(vk::ImageLayout::eUndefined);
 
-    depthAllocation = std::make_unique<ImageAllocation>(allocator);
-
     VmaAllocationCreateInfo allocCreateInfo = {};
     allocCreateInfo.usage = memoryUsage;
     allocCreateInfo.flags = VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
 
-    VkResult result = vmaCreateImage(allocator,
-                                     reinterpret_cast<const VkImageCreateInfo*>(&imageCreateInfo),
-                                     &allocCreateInfo,
-                                     &depthAllocation->image,
-                                     &depthAllocation->allocation,
-                                     nullptr);
-
-    if (result != VK_SUCCESS) {
+    depthAllocation = std::make_unique<ImageAllocation>(backend.getAllocator());
+    if (!depthAllocation->create(allocCreateInfo, imageCreateInfo)) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan depth texture allocation failed");
         return;
     }

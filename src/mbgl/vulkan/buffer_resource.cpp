@@ -9,6 +9,31 @@
 namespace mbgl {
 namespace vulkan {
 
+bool BufferAllocation::create(const VmaAllocationCreateInfo& allocInfo, const vk::BufferCreateInfo& bufferInfo) {
+    VkResult result = vmaCreateBuffer(
+        allocator, reinterpret_cast<const VkBufferCreateInfo*>(&bufferInfo), &allocInfo, &buffer, &allocation, nullptr);
+
+    if (result != VK_SUCCESS) {
+        return false;
+    }
+
+    return true;
+}
+
+void BufferAllocation::destroy() {
+    if (mappedBuffer) vmaUnmapMemory(allocator, allocation);
+    vmaDestroyBuffer(allocator, buffer, allocation);
+    mappedBuffer = nullptr;
+}
+
+void BufferAllocation::setName([[maybe_unused]] const std::string& name) const {
+#ifdef ENABLE_VMA_DEBUG
+    if (allocation) {
+        vmaSetAllocationName(allocator, allocation, name.data());
+    }
+#endif
+}
+
 BufferResource::BufferResource(
     Context& context_, const void* data, std::size_t size_, std::uint32_t usage_, bool persistent_)
     : context(context_),
@@ -46,14 +71,7 @@ BufferResource::BufferResource(
     allocationInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
     bufferAllocation = std::make_shared<BufferAllocation>(allocator);
-
-    VkResult result = vmaCreateBuffer(allocator,
-                                      reinterpret_cast<const VkBufferCreateInfo*>(&bufferInfo),
-                                      &allocationInfo,
-                                      &bufferAllocation->buffer,
-                                      &bufferAllocation->allocation,
-                                      nullptr);
-    if (result != VK_SUCCESS) {
+    if (!bufferAllocation->create(allocationInfo, bufferInfo)) {
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan buffer allocation failed");
         return;
     }
