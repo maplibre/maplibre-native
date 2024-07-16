@@ -4,8 +4,14 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-- Allow changing color of scalebar on iOS ([#2614](https://github.com/maplibre/maplibre-native/pull/2614)).
+## 6.5.2
+
+- Fix Cocoapods release ([#2599](https://github.com/maplibre/maplibre-native/pull/2599)).
 - Experimental API to toggle tile cache in map view ([#2590](https://github.com/maplibre/maplibre-native/pull/2590)). This can reduce memory usage at the cost of having to parse tile data again when the zoom level changes.
+- Allow changing color of scalebar on iOS ([#2614](https://github.com/maplibre/maplibre-native/pull/2614)).
+- Fix version in action sheet ([#2602](https://github.com/maplibre/maplibre-native/pull/2602)).
+- Fixed attribution link in action sheets ([#2587](https://github.com/maplibre/maplibre-native/pull/2587)).
+- Internal: Add TaggedScheduler, couple lifetime of tasks and orchestrator ([#2398](https://github.com/maplibre/maplibre-native/pull/2398)).
 
 ## 6.5.1
 
