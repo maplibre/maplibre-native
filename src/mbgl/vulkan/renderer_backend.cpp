@@ -27,13 +27,13 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 #ifdef ENABLE_VMA_DEBUG
 
-//#define VMA_DEBUG_MARGIN 32
-//#define VMA_DEBUG_DETECT_CORRUPTION 1
+// #define VMA_DEBUG_MARGIN 32
+// #define VMA_DEBUG_DETECT_CORRUPTION 1
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 
-//#define VMA_DEBUG_LOG_FORMAT(format, ...)
-//#define VMA_LEAK_LOG_FORMAT(format, ...)
-//#define VMA_DEBUG_LOG_FORMAT(format, ...)           \
+// #define VMA_DEBUG_LOG_FORMAT(format, ...)
+// #define VMA_LEAK_LOG_FORMAT(format, ...)
+// #def ine VMA_DEBUG_LOG_FORMAT(format, ...)           \
 //{                                                   \
 //    char buffer[4096];                              \
 //    sprintf(buffer, format, __VA_ARGS__);           \
@@ -62,7 +62,7 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #ifdef _WIN32
 
 #ifndef NDEBUG
-//#define ENABLE_RENDERDOC_FRAME_CAPTURE
+// #define ENABLE_RENDERDOC_FRAME_CAPTURE
 #include <windows.h>
 #endif
 
@@ -395,8 +395,8 @@ void RendererBackend::initDevice() {
         enabledDeviceFeatures.setWideLines(true);
 
         // more wideLines info
-        //physicalDeviceProperties.limits.lineWidthRange;
-        //physicalDeviceProperties.limits.lineWidthGranularity;
+        // physicalDeviceProperties.limits.lineWidthRange;
+        // physicalDeviceProperties.limits.lineWidthGranularity;
     } else {
         mbgl::Log::Error(mbgl::Event::Render, "Wide line support not available");
     }

@@ -250,8 +250,7 @@ void PipelineInfo::setDrawMode(const gfx::DrawModeType& value) {
 void PipelineInfo::setDrawMode(const gfx::DrawMode& value) {
     topology = vulkanPrimitiveTopology(value.type);
 
-    if (value.type == gfx::DrawModeType::Lines ||
-        value.type == gfx::DrawModeType::LineStrip ||
+    if (value.type == gfx::DrawModeType::Lines || value.type == gfx::DrawModeType::LineStrip ||
         value.type == gfx::DrawModeType::LineLoop) {
         setLineWidth(value.size);
     } else {

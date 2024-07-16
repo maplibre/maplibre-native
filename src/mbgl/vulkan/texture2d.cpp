@@ -9,7 +9,6 @@
 namespace mbgl {
 namespace vulkan {
 
- 
 bool ImageAllocation::create(const VmaAllocationCreateInfo& allocInfo, const vk::ImageCreateInfo& imageInfo) {
     VkResult result = vmaCreateImage(
         allocator, reinterpret_cast<const VkImageCreateInfo*>(&imageInfo), &allocInfo, &image, &allocation, nullptr);
