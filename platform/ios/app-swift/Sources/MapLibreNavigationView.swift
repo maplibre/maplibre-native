@@ -26,14 +26,28 @@ struct MapLibreNavigationView: View {
                 NavigationLink("AddMarkerExample") {
                     AddMarkerSymbolExampleUIViewControllerRepresentable()
                 }
-                NavigationLink("AnimatedLineExample") {
-                    AnimatedLineExampleUIViewControllerRepresentable()
-                }
-                NavigationLink("AnnotationViewExample") {
-                    AnnotationViewExampleUIViewControllerRepresentable()
-                }
-                NavigationLink("BuildingLightExample") {
-                    BuildingLightExampleUIViewControllerRepresentable()
+                Group {
+                    NavigationLink("AnimatedLineExample") {
+                        AnimatedLineExampleUIViewControllerRepresentable()
+                    }
+                    NavigationLink("AnnotationViewExample") {
+                        AnnotationViewExampleUIViewControllerRepresentable()
+                    }
+                    NavigationLink("BuildingLightExample") {
+                        BuildingLightExampleUIViewControllerRepresentable()
+                    }
+                    NavigationLink("StaticSnapshotExample") {
+                        StaticSnapshotExampleUIViewControllerRepresentable()
+                    }
+                    NavigationLink("DDSCircleLayerExample") {
+                        DDSCircleLayerExampleUIViewControllerRepresentable().edgesIgnoringSafeArea(.all)
+                    }
+                    NavigationLink("POIAlongRouteExample") {
+                        POIAlongRouteExampleUIViewControllerRepresentable()
+                    }
+                    NavigationLink("MultipleImagesExample") {
+                        MultipleImagesExampleUIViewControllerRepresentable().edgesIgnoringSafeArea(.all)
+                    }
                 }
             }
         }

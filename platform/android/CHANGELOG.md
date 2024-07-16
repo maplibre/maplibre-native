@@ -4,6 +4,9 @@
 
 ### ✨ Features and improvements
 
+- Avoid logging error for onMove(0,0) on Android ([#2580](https://github.com/maplibre/maplibre-native/pull/2580)).
+- Experimental API to toggle tile cache in map view ([#2590](https://github.com/maplibre/maplibre-native/pull/2590)). This can reduce memory usage at the cost of having to parse tile data again when the zoom level changes.
+
 ### 🐞 Bug fixes
 
 ## 11.0.2-pre0

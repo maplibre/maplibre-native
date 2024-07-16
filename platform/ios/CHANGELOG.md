@@ -4,8 +4,23 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-- Add [Privacy Manifest](https://developer.apple.com/documentation/bundleresources/privacy_manifest_files). MapLibre Native iOS has no built-in tracking, but it does use some system APIs for functional purposes that are marked by Apple as privacy sensitive. ([#1866](https://github.com/maplibre/maplibre-native/issues/1866)).
-- Change default `MLNMapSnapshotter` logo to the MapLibre logo ([#2541](https://github.com/maplibre/maplibre-native/pull/2541)). Note that showing the MapLibre logo is never required. Check with your tile provider if you need to show a logo.
+## 6.5.2
+
+- Fix Cocoapods release ([#2599](https://github.com/maplibre/maplibre-native/pull/2599)).
+- Experimental API to toggle tile cache in map view ([#2590](https://github.com/maplibre/maplibre-native/pull/2590)). This can reduce memory usage at the cost of having to parse tile data again when the zoom level changes.
+- Allow changing color of scalebar on iOS ([#2614](https://github.com/maplibre/maplibre-native/pull/2614)).
+- Fix version in action sheet ([#2602](https://github.com/maplibre/maplibre-native/pull/2602)).
+- Fixed attribution link in action sheets ([#2587](https://github.com/maplibre/maplibre-native/pull/2587)).
+- Internal: Add TaggedScheduler, couple lifetime of tasks and orchestrator ([#2398](https://github.com/maplibre/maplibre-native/pull/2398)).
+
+## 6.5.1
+
+- Enable LTO ([#2504](https://github.com/maplibre/maplibre-native/pull/2504)).
+- Enable vertex instance drawing on simulator ([#2518](https://github.com/maplibre/maplibre-native/pull/2518)).
+- Change default `MLNMapSnapshotter` logo to the MapLibre logo ([#2541](https://github.com/maplibre/maplibre-native/pull/2541)). Note that showing the MapLibre logo is never required. You can configure whether to show the logo with the (now public) `showsLogo` property of `MLNMapSnapshotterOptions`. Check with your tile provider if you need to show a logo.
+- Add [Privacy Manifest](https://developer.apple.com/documentation/bundleresources/privacy_manifest_files). MapLibre Native iOS has no built-in tracking, but it does use some system APIs for functional purposes that are marked by Apple as privacy sensitive ([#2480](https://github.com/maplibre/maplibre-native/pull/2480)).
+- Fixed attribution link in action sheets ([#2587](https://github.com/maplibre/maplibre-native/pull/2587)).
+- Update included third-party licenses ([#2491](https://github.com/maplibre/maplibre-native/pull/2491)).
 
 ## 6.5.0
 

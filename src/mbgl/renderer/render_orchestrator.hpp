@@ -92,6 +92,7 @@ public:
                             const std::optional<std::string>& featureID,
                             const std::optional<std::string>& stateKey);
 
+    void setTileCacheEnabled(bool);
     void reduceMemoryUse();
     void dumpDebugLogs();
     void collectPlacedSymbolData(bool);
@@ -206,6 +207,7 @@ private:
     const bool backgroundLayerAsColor;
     bool contextLost = false;
     bool placedSymbolDataCollected = false;
+    bool tileCacheEnabled = true;
 
     // Vectors with reserved capacity of layerImpls->size() to avoid
     // reallocation on each frame.
