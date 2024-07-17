@@ -117,7 +117,7 @@ public:
     void setIndex(int value) { index = value; }
 
     /// @brief Get the stride of the vertex attribute
-    std::size_t getStride() const { return stride; }
+    virtual std::size_t getStride() const { return stride; }
     void setStride(std::size_t value) { stride = value; }
 
     /// @brief Get the count of vertex attribute items
@@ -180,11 +180,15 @@ public:
         items.clear();
     }
 
-    /// @brief Get dirty state
-    bool isDirty() const { return dirty; }
-
     /// @brief Set dirty state
     void setDirty(bool value = true) { dirty = value; }
+
+    bool isModifiedSince(std::chrono::duration<double> time) const {
+        if (sharedRawData) {
+            return sharedRawData->isModifiedAfter(time);
+        }
+        return dirty;
+    }
 
     template <std::size_t I = 0, typename... Tp>
     inline typename std::enable_if<I == sizeof...(Tp), void>::type set(std::size_t, std::tuple<Tp...>, std::size_t) {}
@@ -255,6 +259,9 @@ protected:
     }
 
 protected:
+    friend class VertexAttributeArray;
+    bool isDirty() const { return dirty; }
+
     int index;
     std::size_t stride;
 
@@ -310,8 +317,9 @@ public:
                                                 std::size_t count = 0);
 
     /// Indicates whether any values have changed
-    virtual bool isDirty() const {
-        return std::any_of(attrs.begin(), attrs.end(), [](const auto& attr) { return attr && attr->isDirty(); });
+    bool isModifiedSince(std::chrono::duration<double> time) const {
+        return std::any_of(
+            attrs.begin(), attrs.end(), [&](const auto& attr) { return attr && attr->isModifiedSince(time); });
     }
 
     /// Clear the collection

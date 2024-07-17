@@ -128,11 +128,12 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         if (auto* rawData = static_cast<VertexBuffer*>(vec->getBuffer()); rawData && rawData->resource) {
             auto& resource = static_cast<VertexBufferResource&>(*rawData->resource);
 
-            // If it's changed, update it
+            // If the already-allocated buffer is large enough, we can re-use it
             if (rawBufSize <= resource.getSizeInBytes()) {
-                if (vec->getDirty()) {
+                // If the source changed, update the buffer contents
+                if (vec->isModifiedAfter(resource.getLastUpdated())) {
                     updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
-                    vec->setDirty(false);
+                    resource.setLastUpdated(vec->getLastModified());
                 }
                 return rawData->resource;
             }
@@ -142,7 +143,6 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
             auto buffer_ = std::make_unique<VertexBuffer>();
             buffer_->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
             vec->setBuffer(std::move(buffer_));
-            vec->setDirty(false);
             return static_cast<VertexBuffer*>(vec->getBuffer())->resource;
         }
     }
@@ -157,6 +157,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::VertexAttributeArray& defaults,
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
+    const std::chrono::duration<double> lastUpdate,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) {
     MLN_TRACE_FUNC();
 

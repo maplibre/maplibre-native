@@ -27,6 +27,9 @@ const void* castGpuIdToTracyPtr(GpuId id) {
 
 #define MLN_TRACE_FUNC() ZoneScoped
 #define MLN_TRACE_ZONE(label) ZoneScopedN(#label)
+#define MLN_ZONE_TEXT(text, size) ZoneText(text, size)
+#define MLN_ZONE_STR(str) ZoneText(str.c_str(), str.size())
+#define MLN_ZONE_VALUE(n) ZoneValue(n)
 
 constexpr const char* tracyTextureMemoryLabel = "Texture Memory";
 #define MLN_TRACE_ALLOC_TEXTURE(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyTextureMemoryLabel)
@@ -111,5 +114,8 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 #define MLN_TRACE_FREE_CONST_BUFFER(id)
 #define MLN_TRACE_FUNC()
 #define MLN_TRACE_ZONE(label)
+#define MLN_ZONE_TEXT(text, size)
+#define MLN_ZONE_STR(str)
+#define MLN_ZONE_VALUE(n)
 
 #endif // MLN_TRACY_ENABLE

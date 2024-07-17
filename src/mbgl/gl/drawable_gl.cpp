@@ -151,14 +151,21 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     }
 
     MLN_TRACE_FUNC();
+#ifdef MLN_TRACY_ENABLE
+    {
+        auto str = name + "/" + (tileID ? util::toString(*tileID) : std::string());
+        MLN_ZONE_STR(str);
+    }
+#endif
 
     const bool build = vertexAttributes &&
-                       (vertexAttributes->isDirty() ||
+                       (vertexAttributes->isModifiedSince(attributeUpdateTime) ||
                         std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
                             return !static_cast<const DrawSegmentGL&>(*seg).getVertexArray().isValid();
                         }));
 
     if (build) {
+        MLN_TRACE_ZONE(build attributes);
         auto& context = uploadPass.getContext();
         auto& glContext = static_cast<gl::Context&>(context);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
@@ -178,11 +185,16 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                                                           defaults,
                                                           overrides,
                                                           usage,
+                                                          attributeUpdateTime,
                                                           vertexBuffers);
 
         impl->attributeBuffers = std::move(vertexBuffers);
 
-        if (impl->indexes->getDirty()) {
+        if (impl->indexes) {
+            impl->indexes->updateModified();
+        }
+        if (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime)) {
+            MLN_TRACE_ZONE(build indexes);
             auto indexBufferResource{
                 uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
             auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(),
@@ -190,11 +202,11 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
             auto buffer = std::make_unique<IndexBufferGL>(std::move(indexBuffer));
 
             impl->indexes->setBuffer(std::move(buffer));
-            impl->indexes->setDirty(false);
         }
 
         // Create a VAO for each group of vertexes described by a segment
         for (const auto& seg : impl->segments) {
+            MLN_TRACE_ZONE(segment);
             auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
             const auto& mlSeg = glSeg.getSegment();
 
@@ -217,7 +229,9 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                     glSeg.setVertexArray(std::move(vertexArray));
                 }
             }
-        };
+        }
+
+        attributeUpdateTime = util::MonotonicTimer::now();
     }
 
     const bool texturesNeedUpload = std::any_of(
