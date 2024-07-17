@@ -23,7 +23,8 @@ MapRenderer::MapRenderer(jni::JNIEnv& _env,
       localIdeographFontFamily(localIdeographFontFamily_ ? jni::Make<std::string>(_env, localIdeographFontFamily_)
                                                          : std::optional<std::string>{}),
       threadPool(Scheduler::GetBackground(), {}),
-      mailboxData(this) {}
+      mailboxData(this),
+      backend(std::make_unique<AndroidRendererBackend>(threadPool)) {}
 
 MapRenderer::MailboxData::MailboxData(Scheduler* scheduler_)
     : scheduler(scheduler_) {
