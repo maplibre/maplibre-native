@@ -2883,7 +2883,7 @@ public:
             NSURL *url = attributionInfo.URL;
             if (url)
             {
-                [[UIApplication sharedApplication] openURL:url];
+                [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
             }
         }];
         [attributionController addAction:action];
@@ -7338,6 +7338,12 @@ static void *windowScreenContext = &windowScreenContext;
 
 - (MLNBackendResource)backendResource {
     return _mbglView->getObject();
+}
+
+// MARK: Tile Cache
+
+- (void)experimental_setTileCacheEnabled:(BOOL)enabled {
+    _rendererFrontend->setTileCacheEnabled(enabled);
 }
 
 @end

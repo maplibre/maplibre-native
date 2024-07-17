@@ -676,6 +676,10 @@ jni::Local<jni::Array<jni::jlong>> NativeMapView::addMarkers(jni::JNIEnv& env,
     return result;
 }
 
+void NativeMapView::setTileCacheEnabled(JNIEnv&, jni::jboolean enabled) {
+    rendererFrontend->setTileCacheEnabled(enabled);
+}
+
 void NativeMapView::onLowMemory(JNIEnv&) {
     rendererFrontend->reduceMemoryUse();
 }
@@ -1284,6 +1288,7 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setDebug, "nativeSetDebug"),
         METHOD(&NativeMapView::getDebug, "nativeGetDebug"),
         METHOD(&NativeMapView::isFullyLoaded, "nativeIsFullyLoaded"),
+        METHOD(&NativeMapView::setTileCacheEnabled, "nativeSetTileCacheEnabled"),
         METHOD(&NativeMapView::onLowMemory, "nativeOnLowMemory"),
         METHOD(&NativeMapView::getMetersPerPixelAtLatitude, "nativeGetMetersPerPixelAtLatitude"),
         METHOD(&NativeMapView::projectedMetersForLatLng, "nativeProjectedMetersForLatLng"),
