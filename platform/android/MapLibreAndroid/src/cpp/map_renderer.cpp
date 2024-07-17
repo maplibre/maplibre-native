@@ -182,6 +182,7 @@ void MapRenderer::render(JNIEnv&) {
     }
 
     // Activate the backend
+    assert(backend);
     gfx::BackendScope backendGuard{*backend};
 
     // Ensure that the "current" scheduler on the render thread is
@@ -207,6 +208,7 @@ void MapRenderer::onSurfaceCreated(JNIEnv&) {
     std::lock_guard<std::mutex> lock(initialisationMutex);
 
     // The GL context is already active if get a new surface.
+    assert(backend);
     gfx::BackendScope backendGuard{*backend, gfx::BackendScope::ScopeType::Implicit};
 
     // The android system will have already destroyed the underlying
