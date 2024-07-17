@@ -50,7 +50,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        renderer: [legacy, drawable]
+        renderer: [legacy, drawable, vulkan]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -90,6 +90,9 @@ jobs:
 
       - if: matrix.renderer == 'legacy'
         run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
+
+      - if: matrix.renderer == 'vulkan'
+        run: echo renderer_flag_cmake="-DMLN_DRAWABLE_RENDERER=ON -DMLN_LEGACY_RENDERER=OFF -DMLN_WITH_VULKAN=ON -DMLN_WITH_OPENGL=OFF" >> "$GITHUB_ENV"
 
       - name: Build MapLibre Native Core
         env:
