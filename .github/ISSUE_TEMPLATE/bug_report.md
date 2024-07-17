@@ -18,7 +18,7 @@ assignees: ''
 
 <!-- Steps to reproduce the behavior. -->
 <!-- Someone else needs to be able to follow these steps without additional context. -->
-<!-- If your issue relates to a particular style, prividing a minimal style JSON that reproduces the problem is helpful. -->
+<!-- If your issue relates to a particular style, providing a minimal style JSON that reproduces the problem is helpful. -->
 
 
 
