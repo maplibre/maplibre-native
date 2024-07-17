@@ -7,7 +7,6 @@
 #include <mbgl/util/run_loop.hpp>
 
 #include <args.hxx>
-#include <filesystem>
 
 #include "file_source.hpp"
 #include "manifest_parser.hpp"
@@ -195,7 +194,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
         bool shouldIgnore = false;
         std::string ignoreReason;
 
-        const std::filesystem::path ignoreName(id);
+        const mbgl::filesystem::path ignoreName(id);
         const auto it = std::find_if(
             ignores.cbegin(), ignores.cend(), [&ignoreName](auto pair) { return pair.first == ignoreName; });
         if (it != ignores.end()) {
