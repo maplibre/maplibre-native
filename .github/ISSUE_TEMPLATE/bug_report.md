@@ -7,27 +7,50 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Bug description**
+
+<!-- A clear and concise description of what the bug is. -->
+<!-- You may want to include screenshots or videos for clarity. -->
+
+
 
 **To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+
+<!-- Steps to reproduce the behavior. -->
+<!-- Someone else needs to be able to follow these steps without additional context. -->
+<!-- If your issue relates to a particular style, prividing a minimal style JSON that reproduces the problem is helpful. -->
+
+
 
 **Expected behavior**
-A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+<!-- A clear and concise description of what you expected to happen. -->
 
-**Platform information (please complete the following information):**
- - OS: [e.g. iOS]
- - Platform [e.g. Qt, Node.js, iOS]
- - Version [e.g. 22]
 
+
+**Actual behavior**
+
+<!-- A clear and concise description of what actually happens. -->
+
+
+
+**Platform information**
+
+<!-- e.g. Android, iOS, Qt, Node.js, Linux, Windows, Core-->
+
+Platform:
+
+<!-- Can also be a commit hash. -->
+
+MapLibre Native Version:
+
+<!-- When Android or iOS, please also fill these out. Include the OS version. -->
+
+ - OS:
+ - Device:
 
 **Additional context**
-Add any other context about the problem here.
+
+<!-- When applicable, additional context that is helpful. -->
+
+N/A
