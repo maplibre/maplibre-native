@@ -27,37 +27,23 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 #ifdef ENABLE_VMA_DEBUG
 
-// #define VMA_DEBUG_MARGIN 32
-// #define VMA_DEBUG_DETECT_CORRUPTION 1
+#define VMA_DEBUG_MARGIN 32
+#define VMA_DEBUG_DETECT_CORRUPTION 1
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 
-// #define VMA_DEBUG_LOG_FORMAT(format, ...)
-// #define VMA_LEAK_LOG_FORMAT(format, ...)
-// #def ine VMA_DEBUG_LOG_FORMAT(format, ...)           \
-//{                                                   \
-//    char buffer[4096];                              \
-//    sprintf(buffer, format, __VA_ARGS__);           \
-//    mbgl::Log::Info(mbgl::Event::Render, buffer);   \
-//}
+#define VMA_DEBUG_LOG_FORMAT(format, ...)
+#define VMA_LEAK_LOG_FORMAT(format, ...)
+#define VMA_DEBUG_LOG_FORMAT(format, ...)           \
+{                                                   \
+    char buffer[4096];                              \
+    sprintf(buffer, format, __VA_ARGS__);           \
+    mbgl::Log::Info(mbgl::Event::Render, buffer);   \
+}
 
-#endif
-
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#pragma clang diagnostic ignored "-Wunused-variable"
-#pragma clang diagnostic ignored "-Wnullability-completeness"
-#pragma clang diagnostic ignored "-Wmissing-field-initializers"
-#pragma clang diagnostic ignored "-Wunused-function"
-#pragma clang diagnostic ignored "-Wshadow"
 #endif
 
 #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
-
-#if defined(__clang__)
-#pragma clang diagnostic pop
-#endif
 
 #ifdef _WIN32
 

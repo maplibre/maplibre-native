@@ -41,7 +41,7 @@ Texture2D::~Texture2D() {
     destroySampler();
 
     context.renderingStats().numActiveTextures--;
-    context.renderingStats().memTextures -= getDataSize();
+    context.renderingStats().memTextures -= Texture2D::getDataSize();
 }
 
 gfx::Texture2D& Texture2D::setSamplerConfiguration(const SamplerState& samplerState_) noexcept {
@@ -82,17 +82,17 @@ gfx::Texture2D& Texture2D::setUsage(Texture2DUsage value) noexcept {
 }
 
 size_t Texture2D::getDataSize() const noexcept {
-    return size.width * size.height * getPixelStride();
+    return size.width * size.height * Texture2D::getPixelStride();
 }
 
 size_t Texture2D::getPixelStride() const noexcept {
     switch (channelType) {
         case gfx::TextureChannelDataType::UnsignedByte:
-            return 1 * numChannels();
+            return 1 * Texture2D::numChannels();
         case gfx::TextureChannelDataType::HalfFloat:
-            return 2 * numChannels();
+            return 2 * Texture2D::numChannels();
         case gfx::TextureChannelDataType::Float:
-            return 4 * numChannels();
+            return 4 * Texture2D::numChannels();
         default:
             return 0;
     }

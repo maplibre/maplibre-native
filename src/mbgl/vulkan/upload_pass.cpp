@@ -81,6 +81,8 @@ struct VertexBuffer : public gfx::VertexBufferBase {
     std::unique_ptr<gfx::VertexBufferResource> resource;
 };
 
+static const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
+
 const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec,
                                                              const gfx::BufferUsageType usage) {
     if (vec) {

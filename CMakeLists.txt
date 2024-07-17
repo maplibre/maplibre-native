@@ -1305,51 +1305,6 @@ if(MLN_WITH_VULKAN)
             MLN_RENDER_BACKEND_VULKAN=1
     )
 
-    target_include_directories(
-        mbgl-core
-        PUBLIC
-            ${PROJECT_SOURCE_DIR}/vendor/Vulkan-Headers/include/
-            ${PROJECT_SOURCE_DIR}/vendor/VulkanMemoryAllocator/include/
-    )
-
-    set(ENABLE_OPT OFF)
-    set(ENABLE_HLSL OFF)
-    set(ENABLE_GLSLANG_BINARIES OFF)
-    set(GLSLANG_TESTS_DEFAULT OFF)
-    add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/glslang)
-
-    set_target_properties(
-        glslang
-        PROPERTIES
-            INTERFACE_MAPBOX_NAME "glslang"
-            INTERFACE_MAPBOX_URL "https://github.com/KhronosGroup/glslang.git"
-            INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/glslang/LICENSE.txt
-    )
-
-    set_target_properties(
-        SPIRV
-        PROPERTIES
-            INTERFACE_MAPBOX_NAME "SPIRV"
-            INTERFACE_MAPBOX_URL "https://github.com/KhronosGroup/glslang.git"
-            INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/glslang/LICENSE.txt
-    )
-
-    set_target_properties(
-        glslang-default-resource-limits
-        PROPERTIES
-            INTERFACE_MAPBOX_NAME "glslang-default-resource-limits"
-            INTERFACE_MAPBOX_URL "https://github.com/KhronosGroup/glslang.git"
-            INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/glslang/LICENSE.txt
-    )
-
-    target_link_libraries(
-        mbgl-core
-        PRIVATE
-            glslang::glslang
-            glslang::SPIRV
-            glslang::glslang-default-resource-limits
-    )
-
     list(APPEND 
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/buffer_resource.hpp
@@ -1563,15 +1518,16 @@ export(TARGETS
 )
 
 if(MLN_WITH_VULKAN)
-    export(TARGETS
-        glslang
-        SPIRV
-        glslang-default-resource-limits
-        MachineIndependent
-        OSDependent
-        GenericCodeGen
+    include(${PROJECT_SOURCE_DIR}/vendor/vulkan.cmake)
 
-        APPEND FILE MapboxCoreTargets.cmake
+    target_link_libraries(
+        mbgl-core
+        PUBLIC
+            mbgl-vendor-vulkan-headers
+            mbgl-vendor-VulkanMemoryAllocator
+            glslang
+            SPIRV
+            glslang-default-resource-limits
     )
 endif()
 

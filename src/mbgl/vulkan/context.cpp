@@ -170,7 +170,7 @@ void Context::beginFrame() {
             else if (acquireImageResult.result == vk::Result::eSuboptimalKHR)
                 renderableResource.recreateSwapchain();
 
-        } catch (vk::OutOfDateKHRError e) {
+        } catch (const vk::OutOfDateKHRError& e) {
             renderableResource.recreateSwapchain();
         }
     } else {
@@ -222,7 +222,7 @@ void Context::endFrame() {
             const auto& presentQueue = backend.getPresentQueue();
             const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
             if (presentResult == vk::Result::eSuboptimalKHR) renderableResource.recreateSwapchain();
-        } catch (vk::OutOfDateKHRError e) {
+        } catch (const vk::OutOfDateKHRError& e) {
             renderableResource.recreateSwapchain();
         }
     }

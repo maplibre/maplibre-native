@@ -77,7 +77,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
 
     const std::vector<vk::SurfaceFormatKHR>& formats = physicalDevice.getSurfaceFormatsKHR(surface.get());
     const auto& formatIt = std::find_if(formats.begin(), formats.end(), [](const vk::SurfaceFormatKHR& format) {
-        return format.format == vk::Format::eB8G8R8A8Srgb && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
+        return format.format == vk::Format::eB8G8R8A8Unorm && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
     });
 
     if (formatIt == formats.end()) throw std::runtime_error("No suitable swapchain format found");

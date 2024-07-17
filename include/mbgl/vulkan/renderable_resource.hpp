@@ -13,7 +13,7 @@ class RenderableResource : public gfx::RenderableResource {
 protected:
     explicit RenderableResource(RendererBackend& backend_)
         : backend(backend_) {}
-    virtual ~RenderableResource() = default;
+    ~RenderableResource() override = default;
 
 public:
     const vk::Extent2D& getExtent() const { return extent; }
@@ -31,7 +31,7 @@ class SurfaceRenderableResource : public RenderableResource {
 protected:
     explicit SurfaceRenderableResource(RendererBackend& backend_)
         : RenderableResource(backend_) {}
-    virtual ~SurfaceRenderableResource();
+    ~SurfaceRenderableResource() override;
 
     void initColor(uint32_t w, uint32_t h);
     void initSwapchain(uint32_t w, uint32_t h);

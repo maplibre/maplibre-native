@@ -85,10 +85,10 @@ public:
 
     void resetState(gfx::DepthMode, gfx::ColorMode) override {}
 
-    virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
-                                              const void* data,
-                                              std::size_t size,
-                                              bool persistent = false) override;
+    bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
+                                      const void* data,
+                                      std::size_t size,
+                                      bool persistent = false) override;
 
     void setDirtyState() override {}
 

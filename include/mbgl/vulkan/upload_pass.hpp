@@ -31,10 +31,6 @@ public:
     RenderbufferResource() = default;
 };
 
-namespace {
-const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
-}
-
 class UploadPass final : public gfx::UploadPass {
 public:
     UploadPass(gfx::Renderable&, CommandEncoder&, const char* name);
