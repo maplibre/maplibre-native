@@ -837,6 +837,7 @@ void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::
 void Context::performCleanup() {
     MLN_TRACE_FUNC();
 
+#ifndef NDEBUG
     // TODO: Find a better way to unbind VAOs after we're done with them without
     // introducing unnecessary bind(0)/bind(N) sequences.
     {
@@ -847,6 +848,7 @@ void Context::performCleanup() {
 
         bindVertexArray = 0;
     }
+#endif
 
     for (auto id : abandonedPrograms) {
         if (program == id) {
