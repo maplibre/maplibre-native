@@ -144,7 +144,8 @@ public:
      * responsibility of the SDK bindings to re-execute a user-provided callback
      * on the main thread.
      */
-    virtual void getOfflineRegion(int64_t regionID, std::function<void(expected<std::optional<OfflineRegion>, std::exception_ptr>)>);
+    virtual void getOfflineRegion(int64_t regionID,
+                                  std::function<void(expected<std::optional<OfflineRegion>, std::exception_ptr>)>);
 
     /**
      * Create an offline region in the database.

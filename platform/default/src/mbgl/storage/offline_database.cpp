@@ -839,13 +839,11 @@ expected<std::optional<OfflineRegion>, std::exception_ptr> OfflineDatabase::getR
     mapbox::sqlite::Query query{getStatement("SELECT definition, description FROM regions WHERE id = ?1")};
     query.bind(1, regionID);
     if (query.run()) {
-
         const auto definition = query.get<std::string>(0);
         const auto description = query.get<std::vector<uint8_t>>(1);
 
         if (definition.empty() && description.empty()) {
-            throw std::runtime_error(
-                    "Region " + std::to_string(regionID) + " not found in database");
+            throw std::runtime_error("Region " + std::to_string(regionID) + " not found in database");
         }
 
         OfflineRegion result(regionID, decodeOfflineRegionDefinition(definition), description);
