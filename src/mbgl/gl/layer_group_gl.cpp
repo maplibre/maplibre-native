@@ -22,6 +22,7 @@ TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex_, std::size_t initialCapac
 
 void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
     MLN_TRACE_FUNC();
+    MLN_ZONE_STR(name);
 
     if (!enabled) {
         return;
