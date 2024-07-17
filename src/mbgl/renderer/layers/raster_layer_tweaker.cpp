@@ -96,12 +96,6 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
         const RasterDrawableUBO drawableUBO{/*.matrix = */ util::cast<float>(matrix)};
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idRasterDrawableUBO, &drawableUBO, parameters.context);
-
-#ifdef MLN_RENDER_BACKEND_VULKAN
-        for (size_t i = 0; i < layerUniforms.allocatedSize(); ++i) {
-            if (layerUniforms.get(i)) drawableUniforms.set(i, layerUniforms.get(i));
-        }
-#endif
     });
 }
 

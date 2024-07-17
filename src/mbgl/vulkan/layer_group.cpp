@@ -59,6 +59,13 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
             bindUBOs = true;
         }
 
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        for (size_t i = 0; i < uniformBuffers.allocatedSize(); ++i) {
+            if (uniformBuffers.get(i)) {
+                drawableUniforms.set(i, uniformBuffers.get(i));
+            }
+        }
+
         drawable.draw(parameters);
     });
 

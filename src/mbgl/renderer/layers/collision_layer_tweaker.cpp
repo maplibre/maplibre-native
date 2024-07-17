@@ -66,13 +66,6 @@ void CollisionLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParam
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idCollisionUBO, &drawableUBO, context);
-
-#ifdef MLN_RENDER_BACKEND_VULKAN
-        const auto& layerUniforms = layerGroup.mutableUniformBuffers();
-        for (size_t i = 0; i < layerUniforms.allocatedSize(); ++i) {
-            if (layerUniforms.get(i)) drawableUniforms.set(i, layerUniforms.get(i));
-        }
-#endif
     });
 }
 

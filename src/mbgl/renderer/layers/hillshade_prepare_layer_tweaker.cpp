@@ -59,20 +59,6 @@ void HillshadePrepareLayerTweaker::execute(LayerGroupBase& layerGroup, const Pai
 
         drawable.mutableUniformBuffers().createOrUpdate(
             idHillshadePrepareDrawableUBO, &drawableUBO, parameters.context);
-
-#ifdef MLN_RENDER_BACKEND_VULKAN
-        auto& drawableUniforms = drawable.mutableUniformBuffers();
-        auto& layerUniforms = layerGroup.mutableUniformBuffers();
-
-        const auto& globalUniforms = parameters.context.getGlobalUniformBuffers();
-        for (size_t i = 0; i < globalUniforms.allocatedSize(); ++i) {
-            if (globalUniforms.get(i)) drawableUniforms.set(i, globalUniforms.get(i));
-        }
-
-        for (size_t i = 0; i < layerUniforms.allocatedSize(); ++i) {
-            if (layerUniforms.get(i)) drawableUniforms.set(i, layerUniforms.get(i));
-        }
-#endif
     });
 }
 
