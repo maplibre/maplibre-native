@@ -52,7 +52,7 @@ public:
         static std::unique_ptr<Instance> createInstance(gl::Context& context,
                                                         [[maybe_unused]] const ProgramParameters& programParameters,
                                                         [[maybe_unused]] const std::string& additionalDefines) {
-#if MLN_RENDER_BACKEND_OPENGL 
+#if MLN_RENDER_BACKEND_OPENGL
             constexpr auto backend = gfx::Backend::Type::OpenGL;
 
             // Compile the shader
