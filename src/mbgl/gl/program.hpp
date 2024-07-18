@@ -52,15 +52,9 @@ public:
         static std::unique_ptr<Instance> createInstance(gl::Context& context,
                                                         [[maybe_unused]] const ProgramParameters& programParameters,
                                                         [[maybe_unused]] const std::string& additionalDefines) {
-#if MLN_RENDER_BACKEND_OPENGL
+#if MLN_RENDER_BACKEND_OPENGL 
             constexpr auto backend = gfx::Backend::Type::OpenGL;
-#elif MLN_RENDER_BACKEND_METAL
-            constexpr auto backend = gfx::Backend::Type::Metal;
-#endif
 
-#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
-            return std::make_unique<Instance>(context);
-#else
             // Compile the shader
             std::initializer_list<const char*> vertexSource = {
                 "#version 300 es\n",
@@ -77,6 +71,8 @@ public:
                 programParameters.fragmentSource(gfx::Backend::Type::OpenGL).c_str()};
 
             return std::make_unique<Instance>(context, vertexSource, fragmentSource);
+#else
+            return std::make_unique<Instance>(context);
 #endif
         }
 

@@ -14,7 +14,7 @@
 #include <unordered_map>
 
 #include <mbgl/shaders/shader_manifest.hpp>
-#if !MLN_RENDER_BACKEND_METAL && !MLN_RENDER_BACKEND_VULKAN
+#if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/program.hpp>
 #endif
 

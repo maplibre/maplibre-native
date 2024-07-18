@@ -18,7 +18,7 @@
 #include <array>
 
 #include <mbgl/shaders/shader_manifest.hpp>
-#if !MLN_RENDER_BACKEND_METAL && !MLN_RENDER_BACKEND_VULKAN
+#if MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/program.hpp>
 #endif
 
@@ -263,7 +263,7 @@ public:
 
     SymbolProgram([[maybe_unused]] const ProgramParameters& programParameters) {
         switch (gfx::Backend::GetType()) {
-#if !MLN_RENDER_BACKEND_METAL && !MLN_RENDER_BACKEND_VULKAN
+#if MLN_RENDER_BACKEND_OPENGL
             case gfx::Backend::Type::OpenGL: {
                 program = std::make_unique<gl::Program<Name>>(programParameters.withDefaultSource(
                     {gfx::Backend::Type::OpenGL,
