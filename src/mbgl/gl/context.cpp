@@ -837,8 +837,10 @@ void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::
 void Context::performCleanup() {
     MLN_TRACE_FUNC();
 
-    // TODO: Find a better way to unbind VAOs after we're done with them without
-    // introducing unnecessary bind(0)/bind(N) sequences.
+#ifndef NDEBUG
+    // In debug builds, un-bind all texture units so that any incorrect use results in an
+    // error rather than using whatever texture happened to have been bound previously.
+    // This takes some time, however, so don't do it in release builds.
     {
         for (auto i = 0; i < gfx::MaxActiveTextureUnits; i++) {
             activeTextureUnit = i;
@@ -847,6 +849,7 @@ void Context::performCleanup() {
 
         bindVertexArray = 0;
     }
+#endif
 
     for (auto id : abandonedPrograms) {
         if (program == id) {
