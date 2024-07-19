@@ -130,6 +130,8 @@ void ThreadedSchedulerBase::schedule(const util::SimpleIdentity tag, std::functi
         taskCount++;
     }
 
+    // Take the worker lock before notifying to prevent threads from waiting while we try to wake them
+    std::lock_guard<std::mutex> workerLock(workerMutex);
     cvAvailable.notify_one();
 }
 
