@@ -27,17 +27,15 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 #ifdef ENABLE_VMA_DEBUG
 
-#define VMA_DEBUG_MARGIN 32
+#define VMA_DEBUG_MARGIN 16
 #define VMA_DEBUG_DETECT_CORRUPTION 1
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 
-#define VMA_DEBUG_LOG_FORMAT(format, ...)
-#define VMA_LEAK_LOG_FORMAT(format, ...)
-#define VMA_DEBUG_LOG_FORMAT(format, ...)             \
-    {                                                 \
-        char buffer[4096];                            \
-        sprintf(buffer, format, __VA_ARGS__);         \
-        mbgl::Log::Info(mbgl::Event::Render, buffer); \
+#define VMA_LEAK_LOG_FORMAT(format, ...)            \
+{                                                   \
+    char buffer[4096];                              \
+    sprintf(buffer, format, __VA_ARGS__);           \
+    mbgl::Log::Info(mbgl::Event::Render, buffer);   \
     }
 
 #endif
@@ -45,18 +43,15 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #define VMA_IMPLEMENTATION
 #include "vk_mem_alloc.h"
 
-#ifdef _WIN32
+#ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
 
-#ifndef NDEBUG
-// #define ENABLE_RENDERDOC_FRAME_CAPTURE
+#ifdef _WIN32
 #include <windows.h>
 #endif
 
-#endif
-
-#ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
 #include "renderdoc_app.h"
 static RENDERDOC_API_1_1_2* g_rdoc_api = nullptr;
+
 #endif
 
 namespace mbgl {
@@ -100,6 +95,12 @@ void RendererBackend::initFrameCapture() {
 #ifdef _WIN32
     if (HMODULE mod = GetModuleHandleA("renderdoc.dll")) {
         pRENDERDOC_GetAPI RENDERDOC_GetAPI = (pRENDERDOC_GetAPI)GetProcAddress(mod, "RENDERDOC_GetAPI");
+        int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)&g_rdoc_api);
+        assert(ret == 1);
+    }
+#elif __unix__
+    if (void* mod = dlopen("librenderdoc.so", RTLD_NOW | RTLD_NOLOAD)) {
+        pRENDERDOC_GetAPI RENDERDOC_GetAPI = (pRENDERDOC_GetAPI)dlsym(mod, "RENDERDOC_GetAPI");
         int ret = RENDERDOC_GetAPI(eRENDERDOC_API_Version_1_1_2, (void**)&g_rdoc_api);
         assert(ret == 1);
     }

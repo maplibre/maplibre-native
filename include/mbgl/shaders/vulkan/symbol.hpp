@@ -841,7 +841,7 @@ vec2 ellipseRotateVec2(vec2 v, float angle, float radiusRatio /* A/B */) {
 void main() {
     const vec2 extrude = mod(in_position, 2.0) * 2.0 - 1.0;
     const vec2 anchor = (parameters.anchor - vec2(0.5, 0.5)) * 2.0;
-    const vec2 center = floor(parameters * 0.5);
+    const vec2 center = floor(in_position * 0.5);
     const float angle = radians(-parameters.angle_degrees);
     vec2 corner = extrude - anchor;
 

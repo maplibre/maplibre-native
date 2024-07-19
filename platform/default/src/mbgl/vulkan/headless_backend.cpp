@@ -14,7 +14,11 @@ namespace vulkan {
 class HeadlessRenderableResource final : public vulkan::SurfaceRenderableResource {
 public:
     HeadlessRenderableResource(HeadlessBackend& backend_)
-        : SurfaceRenderableResource(backend_) {}
+        : SurfaceRenderableResource(backend_) {
+        if (backend_.getDevice() && !renderPass) {
+            init(backend_.getSize().width, backend_.getSize().height);
+        }
+    }
 
     ~HeadlessRenderableResource() noexcept override = default;
 

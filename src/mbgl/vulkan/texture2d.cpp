@@ -82,7 +82,7 @@ gfx::Texture2D& Texture2D::setUsage(Texture2DUsage value) noexcept {
 }
 
 size_t Texture2D::getDataSize() const noexcept {
-    return size.width * size.height * Texture2D::getPixelStride();
+    return Texture2D::getPixelStride() * size.width * size.height;
 }
 
 size_t Texture2D::getPixelStride() const noexcept {
@@ -155,7 +155,7 @@ void Texture2D::uploadSubRegion(const void* pixelData,
     const auto& allocator = context.getBackend().getAllocator();
 
     const auto bufferInfo = vk::BufferCreateInfo()
-                                .setSize(size_.width * size_.height * getPixelStride())
+                                .setSize(static_cast<vk::DeviceSize>(size_.width) * size_.height * getPixelStride())
                                 .setUsage(vk::BufferUsageFlagBits::eTransferSrc)
                                 .setSharingMode(vk::SharingMode::eExclusive);
 
