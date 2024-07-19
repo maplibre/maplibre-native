@@ -31,11 +31,11 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 #define VMA_DEBUG_DETECT_CORRUPTION 1
 #define VMA_DEBUG_INITIALIZE_ALLOCATIONS 1
 
-#define VMA_LEAK_LOG_FORMAT(format, ...)            \
-{                                                   \
-    char buffer[4096];                              \
-    sprintf(buffer, format, __VA_ARGS__);           \
-    mbgl::Log::Info(mbgl::Event::Render, buffer);   \
+#define VMA_LEAK_LOG_FORMAT(format, ...)              \
+    {                                                 \
+        char buffer[4096];                            \
+        sprintf(buffer, format, __VA_ARGS__);         \
+        mbgl::Log::Info(mbgl::Event::Render, buffer); \
     }
 
 #endif
