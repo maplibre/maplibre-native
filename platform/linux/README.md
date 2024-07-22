@@ -58,8 +58,7 @@ cmake --build build --target mbgl-render -j $(nproc 2>/dev/null || sysctl -n hw.
 ## Running `mbgl-render`
 Running `mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json` should produce a map tile image with the default MapLibre styling from [the MapLibre demo](https://maplibre.org/).
 
-![Sample image of world from mbgl-render command](https://github.com/user-attachments/assets/b1a9355f-731e-4a0f-ab90-68c5ae4beb65)
-
+![Sample image of world from mbgl-render command](/misc/sample-maplibre-style-mbgl-render-out.png)
 
 ### Outside of Docker
 
