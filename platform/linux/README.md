@@ -67,7 +67,7 @@ Render output image using default MapLibre demo tiles server. You can run this b
 
 ```bash
 ./build/bin/mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
-open out.png
+xdg-open out.png
 ```
 
 ### Inside Docker
