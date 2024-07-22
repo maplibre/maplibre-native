@@ -34,6 +34,9 @@ docker build -t maplibre-native-image -f platform/linux/Dockerfile .
 
 # Run docker image as the current user.
 # This ensures that the files created in the container are owned by the current user.
+docker run --rm -it -v "$PWD:/code/" -u $(id -u):$(id -g) maplibre-native-image ___any_build_command___
+
+# You can also execute build commands from inside the docker container by starting it without parameters:
 docker run --rm -it -v "$PWD:/code/" -u $(id -u):$(id -g) maplibre-native-image
 ```
 
