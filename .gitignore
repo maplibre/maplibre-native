@@ -24,6 +24,7 @@
 compile_commands.json
 /build
 **/.idea
+**/.clwb
 /platform/android/MapLibreAndroidTestApp/local.properties
 /new_offline.db
 *.gpg
