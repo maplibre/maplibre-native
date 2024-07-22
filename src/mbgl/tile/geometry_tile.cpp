@@ -195,8 +195,8 @@ GeometryTile::~GeometryTile() {
     imageManager->removeRequestor(*this);
 
     if (layoutResult) {
-        threadPool.runOnRenderThread(
-            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {});
+        threadPool.releaseOnRenderThread(std::move(layoutResult));
+        threadPool.releaseOnRenderThread(std::move(atlasTextures));
     }
 }
 
