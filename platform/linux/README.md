@@ -30,23 +30,18 @@ You can use a Docker container to build MapLibre Native. Note that you cannot bu
 
 ```bash
 # Build docker image from the repo root
+# Specifying USER_ID and GROUP_ID allows container to create files with the same owner as the host user,
+# and avoids having to pass -u $(id -u):$(id -g) to docker run.  
 docker build \
   -t maplibre-native-image \
-  -f platform/linux/Dockerfile .
+  --build-arg USER_ID=$(id -u) \
+  --build-arg GROUP_ID=$(id -g) \
+  -f platform/linux/Dockerfile \
+  platform/linux
 
-# Run docker image as the current user.
-# This ensures that the files created in the container are owned by the current user.
-docker run --rm -it -v "$PWD:/app/" -v "$PWD/.docker_cache:/home/user/.cache" -u $(id -u):$(id -g) maplibre-native-image ___any_build_command___
-
-# You can also execute build commands from inside the docker container by starting it without parameters:
-docker run --rm -it -v "$PWD:/app/" -v "$PWD/.docker_cache:/home/user/.cache" -u $(id -u):$(id -g) maplibre-native-image
-```
-
-You can safely ignore this type of message and a missing username. It happens if your linux user was not the first one created on the system.
-
-```
-groups: cannot find name for group ID ....
-I have no name!@...:/root$ `
+# Run all build commands using the docker container.
+# You can also execute build commands from inside the docker container by starting it without the build command.
+docker run --rm -it -v "$PWD:/app/" -v "$PWD/.docker_cache:/home/user/.cache" maplibre-native-image ___any_build_command___
 ```
 
 ## Build
@@ -58,7 +53,6 @@ cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DC
 # Build mbgl-render using all available CPUs
 cmake --build build --target mbgl-render -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 ```
-
 
 ## Running `mbgl-render`
 Running `mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json` should produce a map tile image with the default MapLibre styling from [the MapLibre demo](https://maplibre.org/).

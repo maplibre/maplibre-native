@@ -6,6 +6,7 @@ RUN    apt-get update \
         apt-transport-https \
         curl \
         gnupg \
+        sudo `# allows dev to install more packages without switching to root or rebuilding container` \
         build-essential \
         libsqlite3-dev \
         libcurl4-openssl-dev \
@@ -29,7 +30,24 @@ RUN curl -fsSL https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/
     && chmod +x /usr/local/bin/bazel \
     && :
 
-# When running docker with -u flag, the user should exist in the container to avoid various warnings
-RUN groupadd -f user && useradd -m -g user user
-
 WORKDIR /app
+
+ARG USERNAME=user
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+# Create docker user as passed in by the build command
+# This was modeled on https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
+
+COPY startup.sh /usr/local/bin/startup.sh
+RUN chmod +x /usr/local/bin/startup.sh
+
+# This allows users to `docker run` without specifying -u and -g
+USER $USERNAME
+
+ENTRYPOINT ["/usr/local/bin/startup.sh"]
+CMD ["bash"]
