@@ -16,7 +16,7 @@ cd maplibre-native
 
 ```bash
 # Install build tools
-apt install clang cmake ccache ninja-build pkg-config
+apt install build-essential clang cmake ccache ninja-build pkg-config
 
 # Install system dependencies
 apt install libcurl4-openssl-dev libglfw3-dev libuv1-dev libpng-dev libicu-dev libjpeg-turbo8-dev libwebp-dev xvfb
@@ -26,18 +26,20 @@ Optional: `libsqlite3-dev` (also available as vendored dependency).
 
 ### Building with Docker
 
-You can use a Docker container to build MapLibre Native. A `Dockerfile` that installes the required dependencies when the image is built is provided in this directory.
+You can use a Docker container to build MapLibre Native. Note that you cannot build using both Docker and host methods at the same time. If you want to switch, you need to clean the repository first, e.g. by using `git clean -dxfi -e .idea -e .clwb -e .vscode`
 
 ```bash
 # Build docker image from the repo root
-docker build -t maplibre-native-image -f platform/linux/Dockerfile .
+docker build \
+  -t maplibre-native-image \
+  -f platform/linux/Dockerfile .
 
 # Run docker image as the current user.
 # This ensures that the files created in the container are owned by the current user.
-docker run --rm -it -v "$PWD:/code/" -u $(id -u):$(id -g) maplibre-native-image ___any_build_command___
+docker run --rm -it -v "$PWD:/app/" -v "$PWD/.docker_cache:/home/user/.cache" -u $(id -u):$(id -g) maplibre-native-image ___any_build_command___
 
 # You can also execute build commands from inside the docker container by starting it without parameters:
-docker run --rm -it -v "$PWD:/code/" -u $(id -u):$(id -g) maplibre-native-image
+docker run --rm -it -v "$PWD:/app/" -v "$PWD/.docker_cache:/home/user/.cache" -u $(id -u):$(id -g) maplibre-native-image
 ```
 
 You can safely ignore this type of message and a missing username. It happens if your linux user was not the first one created on the system.
