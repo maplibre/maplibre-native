@@ -23,7 +23,8 @@ MapRenderer::MapRenderer(jni::JNIEnv& _env,
       localIdeographFontFamily(localIdeographFontFamily_ ? jni::Make<std::string>(_env, localIdeographFontFamily_)
                                                          : std::optional<std::string>{}),
       threadPool(Scheduler::GetBackground(), {}),
-      mailboxData(this) {}
+      mailboxData(this),
+      backend(std::make_unique<AndroidRendererBackend>(threadPool)) {}
 
 MapRenderer::MailboxData::MailboxData(Scheduler* scheduler_)
     : scheduler(scheduler_) {
@@ -159,7 +160,7 @@ void MapRenderer::requestSnapshot(SnapshotCallback callback) {
 
 void MapRenderer::resetRenderer() {
     renderer.reset();
-    backend.reset();
+    backend = std::make_unique<AndroidRendererBackend>(threadPool);
 }
 
 void MapRenderer::scheduleSnapshot(std::unique_ptr<SnapshotCallback> callback) {
@@ -181,6 +182,7 @@ void MapRenderer::render(JNIEnv&) {
     }
 
     // Activate the backend
+    assert(backend);
     gfx::BackendScope backendGuard{*backend};
 
     // Ensure that the "current" scheduler on the render thread is
@@ -206,6 +208,7 @@ void MapRenderer::onSurfaceCreated(JNIEnv&) {
     std::lock_guard<std::mutex> lock(initialisationMutex);
 
     // The GL context is already active if get a new surface.
+    assert(backend);
     gfx::BackendScope backendGuard{*backend, gfx::BackendScope::ScopeType::Implicit};
 
     // The android system will have already destroyed the underlying

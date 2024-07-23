@@ -53,6 +53,8 @@ void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
     // last one and the destruction actually occurs here on this thread.
     std::function<void()> func{[tile_{CaptureWrapper<Tile>{std::move(tile)}}, this]() mutable {
         tile_.item = {};
+
+        std::lock_guard<std::mutex> counterLock(deferredSignalLock);
         deferredDeletionsPending--;
         deferredSignal.notify_all();
     }};
