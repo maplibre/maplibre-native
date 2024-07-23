@@ -4,6 +4,7 @@
 
 #include <mapbox/std/weak.hpp>
 
+#include <condition_variable>
 #include <functional>
 #include <memory>
 #include <type_traits>
@@ -106,7 +107,9 @@ public:
     [[nodiscard]] static std::shared_ptr<Scheduler> GetSequenced();
 
     /// Set a function to be called when an exception occurs on a thread controlled by the scheduler
-    void setExceptionHandler(std::function<void(const std::exception_ptr)> handler_) { handler = std::move(handler_); }
+    void setExceptionHandler(std::function<void(const std::exception_ptr)> handler_) {
+        handler = std::move(handler_);
+    }
 
     /// Capture an object and release it on a thread in the pool.
     /// @tparam T The arbitrary type to be captured
@@ -162,11 +165,11 @@ private:
     template <typename T>
     struct CaptureWrapper {
         CaptureWrapper(T&& item_)
-                : item(std::move(item_)) {}
+            : item(std::move(item_)) {}
         CaptureWrapper(const CaptureWrapper& other)
-                : item(other.item) {}
+            : item(other.item) {}
         CaptureWrapper(CaptureWrapper&& other)
-                : item(std::move(other.item)) {}
+            : item(std::move(other.item)) {}
         T item;
     };
 
