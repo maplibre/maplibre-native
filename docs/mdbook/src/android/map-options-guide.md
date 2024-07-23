@@ -223,7 +223,7 @@ Finally we will see a result similar to this :
   <img src="https://github.com/user-attachments/assets/1749e7aa-e836-4ccd-8777-bd6994395e25" alt="Screenshot with the MapLibreMapOptions">
 </div>
 
-For full content of `MapOptionsRuntimeActivity` and `MapOptionsXmlActivity`, please visit source code of [Test APP](https://github.com/jDilshodbek/maplibre-gl-native/tree/feature/documentation-maplibre-map-options/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options).
+For full content of `MapOptionsRuntimeActivity` and `MapOptionsXmlActivity`, please visit source code of [Test APP](https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options).
 
 You can read more about `MapLibreMapOptions` in the [documentation](https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-map-libre-map-options/index.html?query=open%20class%20MapLibreMapOptions%20:%20Parcelable).
 
@@ -307,6 +307,6 @@ class SupportMapFragmentActivity :
     }
 }
 ```
-You can also find full contents of `SupportMapFragmentActivity` in the [Test App](https://github.com/jDilshodbek/maplibre-gl-native/blob/feature/documentation-maplibre-map-options/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/fragment/SupportMapFragmentActivity.kt).
+You can also find full contents of `SupportMapFragmentActivity` in the [Test App](https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/fragment/SupportMapFragmentActivity.kt).
 
 To learn more about `SupportFragment` , please visit the [documentation](https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-support-map-fragment/index.html?query=open%20class%20SupportMapFragment%20:%20Fragment,%20OnMapReadyCallback).
