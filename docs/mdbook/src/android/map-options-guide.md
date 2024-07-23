@@ -83,9 +83,7 @@ class MapOptionsXmlActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        this.maplibreMap.setStyle(
-            Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
-        )
+        this.maplibreMap.setStyle("https://demotiles.maplibre.org/style.json")
     }
 
     override fun onStart() {
@@ -185,9 +183,7 @@ class MapOptionsRuntimeActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        this.maplibreMap.setStyle(
-            Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
-        )
+        this.maplibreMap.setStyle("https://demotiles.maplibre.org/style.json")
     }
 
     override fun onStart() {
@@ -295,7 +291,7 @@ class SupportMapFragmentActivity :
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
+        maplibreMap.setStyle("https://demotiles.maplibre.org/style.json")
     }
 
     override fun onDestroy() {
