@@ -83,7 +83,8 @@ jobs:
             libpng-dev \
             libglfw3-dev \
             libwebp-dev \
-            libopengl0
+            libopengl0 \
+            mesa-vulkan-drivers
 
       - if: matrix.renderer == 'drawable'
         run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> "$GITHUB_ENV"
