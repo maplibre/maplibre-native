@@ -1,13 +1,14 @@
-# MapLibreMapOptions
-This guide will explain different ways to create a map
+# MapLibre Configuration
+This guide will explain different ways to create a map.
 
 When working with maps there are chances of providing default values for MapView to render.
-There are several ways to build MapView:
-1. Providing existing XML namespace tags of MapView in layout
-2. Creating `MapLibreMapOptions` and providing builder function values into MapView
-3. Creating `SupportMapFragment` with the help of `MapLibreMapOptions`
 
-Before explaining MapView configurations we need to know what we can do with both XML namespaces and `MapLibreMaptions`
+There are several ways to build MapView:
+1. Providing existing XML namespace tags of MapView in layout.
+2. Creating `MapLibreMapOptions` and providing builder function values into MapView.
+3. Creating `SupportMapFragment` with the help of `MapLibreMapOptions`.
+
+Before explaining MapView configurations we need to know what we can do with both XML namespaces and `MapLibreMaptions`.
 
 
 Common configurations can be set:
@@ -21,9 +22,10 @@ Common configurations can be set:
 - Attribution
 - Placement of above elements on the Map and more
 
-We will see how to achieve these configurations in XML layout and programmatically in Activity code step by step
+We will see how to achieve these configurations in XML layout and programmatically in Activity code step by step.
 
-1. Creating MapView namespace and provide some data in layout file
+### 1. MapView Configuration inside XML layout.
+We need to use MapView namespace and provide some data in layout file.
   ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -62,7 +64,7 @@ We will see how to achieve these configurations in XML layout and programmatical
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
-We can give any other existing values to `maplibre` tags and  only need to create Mapview and MapLibreMap objects with simple setup in Activity
+We can give any other existing values to `maplibre` tags and  only need to create Mapview and MapLibreMap objects with simple setup in Activity.
 ```kotlin
 class MapOptionsXmlActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
@@ -119,7 +121,9 @@ class MapOptionsXmlActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 }
 ```
-2. Creating `MapLibreMapOptions` and with MapView constructor. Here we don't have to create MapView from xml since we want to create it programmatically
+### 2. MapView configuration with `MapLibreMapOptions`
+
+ Here we don't have to create MapView from XML since we want to create it programmatically.
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
@@ -130,7 +134,7 @@ class MapOptionsXmlActivity : AppCompatActivity(), OnMapReadyCallback {
     android:orientation="vertical"/>
 ```
 
-And all setup happens in Activity code:
+A `MapLibreMapOptions` object must be created and passed to MapView constructor. And all setup happens in Activity code:
 ```kotlin
 class MapOptionsRuntimeActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -219,13 +223,13 @@ Finally we will see a result similar to this :
   <img src="https://github.com/user-attachments/assets/1749e7aa-e836-4ccd-8777-bd6994395e25" alt="Screenshot with the MapLibreMapOptions">
 </div>
 
-For full content of `MapOptionsRuntimeActivity` and `MapOptionsXmlActivity`, please visit source code of [Test APP](https://github.com/jDilshodbek/maplibre-gl-native/tree/feature/documentation-maplibre-map-options/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options)
+For full content of `MapOptionsRuntimeActivity` and `MapOptionsXmlActivity`, please visit source code of [Test APP](https://github.com/jDilshodbek/maplibre-gl-native/tree/feature/documentation-maplibre-map-options/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options).
 
-You can read more about `MapLibreMapOptions` in the [documentation](https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-map-libre-map-options/index.html?query=open%20class%20MapLibreMapOptions%20:%20Parcelable)
+You can read more about `MapLibreMapOptions` in the [documentation](https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-map-libre-map-options/index.html?query=open%20class%20MapLibreMapOptions%20:%20Parcelable).
 
-3. Creating `SupportMapFragment` with the help of `MapLibreMapOptions`
+### 3. `SupportMapFragment` with the help of `MapLibreMapOptions`.
 
- If you are using MapFragment in your project, it is also easy to give initial values to the `newInstance()` static method of `SupportMapFragment` which requires passing `MapLibreMapOptions` parameter
+ If you are using MapFragment in your project, it is also easy to give initial values to the `newInstance()` static method of `SupportMapFragment` which requires passing `MapLibreMapOptions` parameter.
 
 Let's see how we can do in a sample activity:
 
@@ -303,6 +307,6 @@ class SupportMapFragmentActivity :
     }
 }
 ```
-You can also find full contents of `SupportMapFragmentActivity` in the [Test App](https://github.com/jDilshodbek/maplibre-gl-native/blob/feature/documentation-maplibre-map-options/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/fragment/SupportMapFragmentActivity.kt)
+You can also find full contents of `SupportMapFragmentActivity` in the [Test App](https://github.com/jDilshodbek/maplibre-gl-native/blob/feature/documentation-maplibre-map-options/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/fragment/SupportMapFragmentActivity.kt).
 
-To learn more about `SupportFragment` , please visit the [documentation](https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-support-map-fragment/index.html?query=open%20class%20SupportMapFragment%20:%20Fragment,%20OnMapReadyCallback)
+To learn more about `SupportFragment` , please visit the [documentation](https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-support-map-fragment/index.html?query=open%20class%20SupportMapFragment%20:%20Fragment,%20OnMapReadyCallback).
