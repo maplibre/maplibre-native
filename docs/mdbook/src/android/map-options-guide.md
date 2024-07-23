@@ -4,7 +4,8 @@ This guide will explain different ways to create a map
 When working with maps there are chances of providing default values for MapView to render.
 There are several ways to build MapView:
 1. Providing existing XML namespace tags of MapView in layout
-2. Creating `MapLibreMapOptions` and providing builder function values
+2. Creating `MapLibreMapOptions` and providing builder function values into MapView
+3. Creating `SupportMapFragment` with the help of `MapLibreMapOptions`
 
 Before explaining MapView configurations we need to know what we can do with both XML namespaces and `MapLibreMaptions`
 
@@ -222,5 +223,86 @@ For full content of `MapOptionsRuntimeActivity` and `MapOptionsXmlActivity`, ple
 
 You can read more about `MapLibreMapOptions` in the [documentation](https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-map-libre-map-options/index.html?query=open%20class%20MapLibreMapOptions%20:%20Parcelable)
 
+3. Creating `SupportMapFragment` with the help of `MapLibreMapOptions`
 
+ If you are using MapFragment in your project, it is also easy to give initial values to the `newInstance()` static method of `SupportMapFragment` which requires passing `MapLibreMapOptions` parameter
 
+Let's see how we can do in a sample activity:
+
+```kotlin
+class SupportMapFragmentActivity :
+    AppCompatActivity(),
+    OnMapViewReadyCallback,
+    OnMapReadyCallback,
+    OnDidFinishRenderingFrameListener {
+    private lateinit var maplibreMap: MapLibreMap
+    private lateinit var mapView: MapView
+    private var initialCameraAnimation = true
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_map_fragment)
+        val mapFragment: SupportMapFragment?
+        if (savedInstanceState == null) {
+            mapFragment = SupportMapFragment.newInstance(createFragmentOptions())
+            supportFragmentManager
+                .beginTransaction()
+                .add(R.id.fragment_container, mapFragment, TAG)
+                .commit()
+        } else {
+            mapFragment = supportFragmentManager.findFragmentByTag(TAG) as SupportMapFragment?
+        }
+        mapFragment!!.getMapAsync(this)
+    }
+
+    private fun createFragmentOptions(): MapLibreMapOptions {
+        val options = MapLibreMapOptions.createFromAttributes(this, null)
+        options.scrollGesturesEnabled(false)
+        options.zoomGesturesEnabled(false)
+        options.tiltGesturesEnabled(false)
+        options.rotateGesturesEnabled(false)
+        options.debugActive(false)
+        val dc = LatLng(38.90252, -77.02291)
+        options.minZoomPreference(9.0)
+        options.maxZoomPreference(11.0)
+        options.camera(
+            CameraPosition.Builder()
+                .target(dc)
+                .zoom(11.0)
+                .build()
+        )
+        return options
+    }
+
+    override fun onMapViewReady(map: MapView) {
+        mapView = map
+        mapView.addOnDidFinishRenderingFrameListener(this)
+    }
+
+    override fun onMapReady(map: MapLibreMap) {
+        maplibreMap = map
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mapView.removeOnDidFinishRenderingFrameListener(this)
+    }
+
+    override fun onDidFinishRenderingFrame(fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double) {
+        if (initialCameraAnimation && fully && maplibreMap != null) {
+            maplibreMap.animateCamera(
+                CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().tilt(45.0).build()),
+                5000
+            )
+            initialCameraAnimation = false
+        }
+    }
+
+    companion object {
+        private const val TAG = "com.mapbox.map"
+    }
+}
+```
+You can also find full contents of `SupportMapFragmentActivity` in the [Test App](https://github.com/jDilshodbek/maplibre-gl-native/blob/feature/documentation-maplibre-map-options/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/fragment/SupportMapFragmentActivity.kt)
+
+To learn more about `SupportFragment` , please visit the [documentation](https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-support-map-fragment/index.html?query=open%20class%20SupportMapFragment%20:%20Fragment,%20OnMapReadyCallback)
