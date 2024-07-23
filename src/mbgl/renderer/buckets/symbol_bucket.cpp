@@ -66,6 +66,10 @@ SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEval
 
 SymbolBucket::~SymbolBucket() {
     SymbolBucket::count --;
+    if (SymbolBucket::count <= 2) {
+        SymbolBucket::count += 1;
+        SymbolBucket::count -= 1;
+    }
     auto pos = std::find(SymbolBucket::list.begin(), SymbolBucket::list.end(), this);
     if (pos != SymbolBucket::list.end()) {
         SymbolBucket::list.erase(pos);
