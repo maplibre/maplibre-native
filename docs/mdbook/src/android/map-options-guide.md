@@ -64,6 +64,9 @@ We need to use MapView namespace and provide some data in layout file.
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
+```
+This can be found in platform/android/MapLibreAndroidTestApp/src/main/res/layout/activity_map_options_xml.xml
+```
 We can give any other existing values to `maplibre` tags and  only need to create Mapview and MapLibreMap objects with simple setup in Activity.
 ```kotlin
 class MapOptionsXmlActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -121,6 +124,9 @@ class MapOptionsXmlActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 }
 ```
+```
+This can be found in platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsXmlActivity.kt
+```
 ### 2. MapView configuration with `MapLibreMapOptions`
 
  Here we don't have to create MapView from XML since we want to create it programmatically.
@@ -133,7 +139,9 @@ class MapOptionsXmlActivity : AppCompatActivity(), OnMapReadyCallback {
     android:layout_height="match_parent"
     android:orientation="vertical"/>
 ```
-
+```
+This can beound in platform/android/MapLibreAndroidTestApp/src/main/res/layout/activity_map_options_runtime.xml
+```
 A `MapLibreMapOptions` object must be created and passed to MapView constructor. And all setup happens in Activity code:
 ```kotlin
 class MapOptionsRuntimeActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -217,6 +225,9 @@ class MapOptionsRuntimeActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.onLowMemory()
     }
 }
+```
+```
+This can be found in platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsRuntimeActivity.kt}}
 ```
 Finally we will see a result similar to this :
 <div style="align: center">
@@ -306,6 +317,9 @@ class SupportMapFragmentActivity :
         private const val TAG = "com.mapbox.map"
     }
 }
+```
+```
+This can be found platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/fragment/SupportMapFragmentActivity.kt}}
 ```
 You can also find full contents of `SupportMapFragmentActivity` in the [Test App](https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/fragment/SupportMapFragmentActivity.kt).
 
