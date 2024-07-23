@@ -267,7 +267,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     // Keep track of current map state and debug preferences,
     // saving and restoring when the application's state changes.
     self.currentState =  [MBXStateManager sharedManager].currentState;
-
+    [self.mapView experimental_setTileCacheEnabled:false];
+    
     if (!self.currentState) {
         // Create a new state with the below default values
         self.currentState = [[MBXState alloc] init];
@@ -1024,7 +1025,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 {
     [self.mapView removeAnnotations:self.mapView.annotations];
 
-    MBXCustomCalloutAnnotation *firstAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
+    /*MBXCustomCalloutAnnotation *firstAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
     firstAnnotation.coordinate = CLLocationCoordinate2DMake(48.8533940, 2.3775439);
     firstAnnotation.title = @"Open anchored to annotation";
     firstAnnotation.anchoredToAnnotation = YES;
@@ -1042,7 +1043,15 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     thirdAnnotation.anchoredToAnnotation = YES;
     thirdAnnotation.dismissesAutomatically = YES;
 
-    NSArray *annotations = @[firstAnnotation, secondAnnotation, thirdAnnotation];
+    NSArray *annotations = @[firstAnnotation, secondAnnotation, thirdAnnotation];*/
+    
+    MBXCustomCalloutAnnotation *firstAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
+    firstAnnotation.coordinate = CLLocationCoordinate2DMake(51.50998, -0.1337);
+    firstAnnotation.title = @"Open anchored to annotation";
+    firstAnnotation.anchoredToAnnotation = YES;
+    firstAnnotation.dismissesAutomatically = NO;
+    NSArray *annotations = @[firstAnnotation];
+    
     [self.mapView addAnnotations:annotations];
 
     [self.mapView showAnnotations:annotations animated:YES];
@@ -2150,7 +2159,8 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     
     /// Style that does not require an `apiKey` nor any further configuration
     [self.styleNames addObject:@"MapLibre Basic"];
-    [self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
+    //[self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
+    [self.styleURLs addObject:[NSURL URLWithString:@"https://duozaj7fhj4pz.cloudfront.net/espresso/OSM/amazon_delivery_rabbit_external_OSM_Espresso.json"]];
 
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];

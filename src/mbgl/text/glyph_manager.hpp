@@ -61,6 +61,7 @@ private:
     struct Entry {
         std::map<GlyphRange, GlyphRequest> ranges;
         std::map<GlyphID, Immutable<Glyph>> glyphs;
+        std::map<GlyphID, Immutable<Glyph>> tempGlyphs;
     };
 
     std::unordered_map<FontStack, Entry, FontStackHasher> entries;

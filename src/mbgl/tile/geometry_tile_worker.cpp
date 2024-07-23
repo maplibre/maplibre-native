@@ -498,9 +498,11 @@ void GeometryTileWorker::finalizeLayout() {
     MBGL_TIMING_START(watch)
     std::optional<AlphaImage> glyphAtlasImage;
     ImageAtlas iconAtlas = makeImageAtlas(imageMap, patternMap, versionMap);
+    //ImageAtlas iconAtlas = {};
     if (!layouts.empty()) {
+        //GlyphAtlas glyphAtlas = {};
         GlyphAtlas glyphAtlas = makeGlyphAtlas(glyphMap);
-        glyphAtlasImage = std::move(glyphAtlas.image);
+        /**/glyphAtlasImage = std::move(glyphAtlas.image);
 
         for (auto& layout : layouts) {
             if (obsolete) {

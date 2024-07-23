@@ -18,6 +18,7 @@
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/instrumentation.hpp>
+#include <mbgl/renderer/buckets/symbol_bucket.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_tweaker.hpp>
@@ -542,6 +543,21 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 
     frameCount += 1;
     MLN_END_FRAME();
+    
+    size_t totalSymbolBucketsMem = 0;
+    for(size_t i = 0; i < SymbolBucket::list.size(); i++) {
+        totalSymbolBucketsMem += SymbolBucket::list[i]->getMemSize();
+    }
+    
+    std::stringstream ss;
+    ss << "\nusedSymbolBucketsMem: " << context.renderingStats().usedSymbolBucketsMem
+       << "\nusedSymbolBucketsCount: " << context.renderingStats().usedSymbolBucketsCount
+       << "\ntotalSymbolBucketsMem: " << totalSymbolBucketsMem
+       << "\ntotalSymbolBucketsCount: " << SymbolBucket::count;
+    Log::Debug(Event::General, ss.str());
+
+    context.renderingStats().usedSymbolBucketsMem = 0;
+    context.renderingStats().usedSymbolBucketsCount = 0;
 }
 
 void Renderer::Impl::reduceMemoryUse() {

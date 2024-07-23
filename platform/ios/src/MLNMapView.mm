@@ -258,7 +258,7 @@ typedef NS_ENUM(NSUInteger, MLNUserTrackingState) {
     MLNUserTrackingStateChanged,
 };
 
-const NSTimeInterval MLNAnimationDuration = 0.3;
+const NSTimeInterval MLNAnimationDuration = 15;
 
 /// Duration of an animation due to a user location update, typically chosen to
 /// match a typical interval between user location updates.

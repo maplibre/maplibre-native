@@ -94,7 +94,7 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
       tileSize(static_cast<uint32_t>(util::tileSize_D * overscaling)),
       tilePixelRatio(static_cast<float>(util::EXTENT) / tileSize),
       layout(createLayout(toSymbolLayerProperties(layers.at(0)).layerImpl().layout, zoom)) {
-    const SymbolLayer::Impl& leader = toSymbolLayerProperties(layers.at(0)).layerImpl();
+    /**/const SymbolLayer::Impl& leader = toSymbolLayerProperties(layers.at(0)).layerImpl();
 
     textSize = leader.layout.get<TextSize>();
     iconSize = leader.layout.get<IconSize>();
@@ -604,7 +604,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
             // In tiled rendering mode, add all symbols in the buffers so that we can:
             //  (1) render symbols that overlap into this tile
             //  (2) approximate collision detection effects from neighboring symbols
-            symbolInstances.emplace_back(anchor,
+            /**/symbolInstances.emplace_back(anchor,
                                          std::move(sharedData),
                                          shapedTextOrientations,
                                          shapedIcon,
@@ -802,6 +802,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                  allowVerticalPlacement,
                                                  std::move(placementModes),
                                                  iconsInText);
+    SymbolBucket::list.emplace_back(bucket.get());
 
     for (SymbolInstance& symbolInstance : bucket->symbolInstances) {
         const bool hasText = symbolInstance.hasText();
@@ -832,7 +833,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                 iconSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical)
                                        ? static_cast<float>(M_PI_2)
                                        : 0.0f;
-                iconSymbol.vertexStartIndex = addSymbols(
+                iconSymbol.vertexStartIndex = addSymbolIcons(
                     iconBuffer, sizeData, iconQuads, symbolInstance.anchor, iconSymbol, feature.sortKey);
             };
 
@@ -921,7 +922,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
             if (!firstLoad) {
                 bucket->justReloaded = true;
             }
-            renderData.emplace(pair.first, LayerRenderData{bucket, pair.second});
+            /**/renderData.emplace(pair.first /*+ "2"*/, LayerRenderData{bucket, pair.second});
         }
     }
 }
@@ -933,7 +934,7 @@ void SymbolLayout::updatePaintPropertiesForSection(SymbolBucket& bucket,
     const auto& formattedSection = sectionOptionsToValue((*feature.formattedText).sectionAt(sectionIndex));
     for (auto& pair : bucket.paintProperties) {
         pair.second.textBinders.populateVertexVectors(
-            feature, bucket.text.vertices().elements(), feature.index, {}, {}, canonical, formattedSection);
+            feature, bucket.text3.vertices().elements(), feature.index, {}, {}, canonical, formattedSection);
     }
 }
 
@@ -949,7 +950,7 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
     const bool hasFormatSectionOverrides = bucket.hasFormatSectionOverrides();
     const auto& placedIconIndex = writingMode == WritingModeType::Vertical ? symbolInstance.placedVerticalIconIndex
                                                                            : symbolInstance.placedIconIndex;
-    bucket.text.placedSymbols.emplace_back(symbolInstance.anchor.point,
+    bucket.text3.placedSymbols.emplace_back(symbolInstance.anchor.point,
                                            symbolInstance.anchor.segment.value_or(0u),
                                            sizeData.min,
                                            sizeData.max,
@@ -958,8 +959,8 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
                                            symbolInstance.line(),
                                            calculateTileDistances(symbolInstance.line(), symbolInstance.anchor),
                                            placedIconIndex);
-    placedIndex = bucket.text.placedSymbols.size() - 1;
-    PlacedSymbol& placedSymbol = bucket.text.placedSymbols.back();
+    placedIndex = bucket.text3.placedSymbols.size() - 1;
+    PlacedSymbol& placedSymbol = bucket.text3.placedSymbols.back();
     placedSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical)
                              ? static_cast<float>(M_PI_2)
                              : 0.0f;
@@ -972,8 +973,8 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
             }
             lastAddedSection = symbolQuad.sectionIndex;
         }
-        size_t index = addSymbol(
-            bucket.text, sizeData, symbolQuad, symbolInstance.anchor, placedSymbol, feature.sortKey);
+        size_t index = addSymbolText(
+            bucket.text3, sizeData, symbolQuad, symbolInstance.anchor, placedSymbol, feature.sortKey);
         if (firstSymbol) {
             placedSymbol.vertexStartIndex = index;
             firstSymbol = false;
@@ -983,13 +984,109 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
     return lastAddedSection ? *lastAddedSection : 0u;
 }
 
-size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
+size_t SymbolLayout::addSymbolText(SymbolBucket::Buffer& buffer,
                                const Range<float> sizeData,
                                const SymbolQuad& symbol,
                                const Anchor& labelAnchor,
                                PlacedSymbol& placedSymbol,
                                float sortKey) {
-    constexpr const uint16_t vertexLength = 4;
+    /**/constexpr const uint16_t vertexLength = 4;
+
+    const auto& tl = symbol.tl;
+    const auto& tr = symbol.tr;
+    const auto& bl = symbol.bl;
+    const auto& br = symbol.br;
+    const auto& tex = symbol.tex;
+    const auto& pixelOffsetTL = symbol.pixelOffsetTL;
+    const auto& pixelOffsetBR = symbol.pixelOffsetBR;
+    const auto& minFontScale = symbol.minFontScale;
+
+    if (buffer.segments.empty() ||
+        buffer.segments.back().vertexLength + vertexLength > std::numeric_limits<uint16_t>::max() ||
+        std::fabs(buffer.segments.back().sortKey - sortKey) > std::numeric_limits<float>::epsilon()) {
+        buffer.segments.emplace_back(buffer.vertices().elements(), buffer.triangles.elements(), 0ul, 0ul, sortKey);
+    }
+
+    // We're generating triangle fans, so we always start with the first
+    // coordinate in this polygon.
+    auto& segment = buffer.segments.back();
+    assert(segment.vertexLength <= std::numeric_limits<uint16_t>::max());
+    auto index = static_cast<uint16_t>(segment.vertexLength);
+
+    // coordinates (2 triangles)
+    /**/auto& vertices = buffer.vertices();
+    vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
+                                                             tl,
+                                                             symbol.glyphOffset.y,
+                                                             tex.x,
+                                                             tex.y,
+                                                             sizeData,
+                                                             symbol.isSDF,
+                                                             pixelOffsetTL,
+                                                             minFontScale));
+    vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
+                                                             tr,
+                                                             symbol.glyphOffset.y,
+                                                             tex.x + tex.w,
+                                                             tex.y,
+                                                             sizeData,
+                                                             symbol.isSDF,
+                                                             {pixelOffsetBR.x, pixelOffsetTL.y},
+                                                             minFontScale));
+    vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
+                                                             bl,
+                                                             symbol.glyphOffset.y,
+                                                             tex.x,
+                                                             tex.y + tex.h,
+                                                             sizeData,
+                                                             symbol.isSDF,
+                                                             {pixelOffsetTL.x, pixelOffsetBR.y},
+                                                             minFontScale));
+    vertices.emplace_back(SymbolSDFIconProgram::layoutVertex(labelAnchor.point,
+                                                             br,
+                                                             symbol.glyphOffset.y,
+                                                             tex.x + tex.w,
+                                                             tex.y + tex.h,
+                                                             sizeData,
+                                                             symbol.isSDF,
+                                                             pixelOffsetBR,
+                                                             minFontScale));
+
+    // Dynamic/Opacity vertices are initialized so that the vertex count always
+    // agrees with the layout vertex buffer, but they will always be updated
+    // before rendering happens
+    auto dynamicVertex = SymbolSDFIconProgram::dynamicLayoutVertex(labelAnchor.point, 0);
+    buffer.dynamicVertices().emplace_back(dynamicVertex);
+    buffer.dynamicVertices().emplace_back(dynamicVertex);
+    buffer.dynamicVertices().emplace_back(dynamicVertex);
+    buffer.dynamicVertices().emplace_back(dynamicVertex);
+
+    auto opacityVertex = SymbolSDFIconProgram::opacityVertex(1.0, 1.0);
+    buffer.opacityVertices().emplace_back(opacityVertex);
+    buffer.opacityVertices().emplace_back(opacityVertex);
+    buffer.opacityVertices().emplace_back(opacityVertex);
+    buffer.opacityVertices().emplace_back(opacityVertex);
+
+    // add the two triangles, referencing the four coordinates we just inserted.
+    buffer.triangles.emplace_back(index + 0, index + 1, index + 2);
+    buffer.triangles.emplace_back(index + 1, index + 2, index + 3);
+
+    segment.vertexLength += vertexLength;
+    segment.indexLength += 6;
+
+    placedSymbol.glyphOffsets.push_back(symbol.glyphOffset.x);
+
+    return index;
+    //return 0;
+}
+
+size_t SymbolLayout::addSymbolIcon(SymbolBucket::Buffer& buffer,
+                               const Range<float> sizeData,
+                               const SymbolQuad& symbol,
+                               const Anchor& labelAnchor,
+                               PlacedSymbol& placedSymbol,
+                               float sortKey) {
+    /**/constexpr const uint16_t vertexLength = 4;
 
     const auto& tl = symbol.tl;
     const auto& tr = symbol.tr;
@@ -1076,9 +1173,10 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
     placedSymbol.glyphOffsets.push_back(symbol.glyphOffset.x);
 
     return index;
+    //return 0;
 }
 
-size_t SymbolLayout::addSymbols(SymbolBucket::Buffer& buffer,
+size_t SymbolLayout::addSymbolIcons(SymbolBucket::Buffer& buffer,
                                 const Range<float> sizeData,
                                 const SymbolQuads& symbols,
                                 const Anchor& labelAnchor,
@@ -1087,7 +1185,7 @@ size_t SymbolLayout::addSymbols(SymbolBucket::Buffer& buffer,
     bool firstSymbol = true;
     size_t firstIndex = 0;
     for (auto& symbol : symbols) {
-        const size_t index = addSymbol(buffer, sizeData, symbol, labelAnchor, placedSymbol, sortKey);
+        const size_t index = addSymbolIcon(buffer, sizeData, symbol, labelAnchor, placedSymbol, sortKey);
         if (firstSymbol) {
             firstIndex = index;
             firstSymbol = false;

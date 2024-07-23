@@ -99,7 +99,7 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
         atlasTextures->glyph = uploadPass.getContext().createTexture2D();
         atlasTextures->glyph->setSamplerConfiguration(
             {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp});
-        atlasTextures->glyph->upload(*layoutResult->glyphAtlasImage);
+        /**/atlasTextures->glyph->upload(*layoutResult->glyphAtlasImage);
 #else
         atlasTextures->glyph = uploadPass.createTexture(*layoutResult->glyphAtlasImage);
 #endif
@@ -109,7 +109,7 @@ void GeometryTileRenderData::upload(gfx::UploadPass& uploadPass) {
     if (layoutResult->iconAtlas.image.valid()) {
 #if MLN_DRAWABLE_RENDERER
         atlasTextures->icon = uploadPass.getContext().createTexture2D();
-        atlasTextures->icon->upload(layoutResult->iconAtlas.image);
+        /**/atlasTextures->icon->upload(layoutResult->iconAtlas.image);
 #else
         atlasTextures->icon = uploadPass.createTexture(layoutResult->iconAtlas.image);
 #endif

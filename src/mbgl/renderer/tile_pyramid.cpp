@@ -219,6 +219,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         auto conservativeCacheSize = static_cast<size_t>(
             std::max(static_cast<double>(parameters.transformState.getSize().width) / tileSize, 1.0) *
             std::max(static_cast<double>(parameters.transformState.getSize().height) / tileSize, 1.0) *
+            //1);
             (parameters.transformState.getMaxZoom() - parameters.transformState.getMinZoom() + 1) * 0.5);
         cache.setSize(conservativeCacheSize);
     } else {
