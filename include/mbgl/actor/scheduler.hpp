@@ -107,9 +107,7 @@ public:
     [[nodiscard]] static std::shared_ptr<Scheduler> GetSequenced();
 
     /// Set a function to be called when an exception occurs on a thread controlled by the scheduler
-    void setExceptionHandler(std::function<void(const std::exception_ptr)> handler_) {
-        handler = std::move(handler_);
-    }
+    void setExceptionHandler(std::function<void(const std::exception_ptr)> handler_) { handler = std::move(handler_); }
 
     /// Capture an object and release it on a thread in the pool.
     /// @tparam T The arbitrary type to be captured
