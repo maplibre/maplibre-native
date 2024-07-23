@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/util/identity.hpp>
-#include <mbgl/util/instrumentation.hpp>
 
 #include <mapbox/std/weak.hpp>
 
@@ -38,7 +37,7 @@ class Scheduler {
 public:
     virtual ~Scheduler() {
         std::unique_lock<std::mutex> counterLock(deferredSignalLock);
-        while (deferredDeletionsPending != 0) {
+        while (deferredDeletionsPending > 0) {
             deferredSignal.wait(counterLock);
         }
     }
@@ -109,11 +108,14 @@ public:
     /// Set a function to be called when an exception occurs on a thread controlled by the scheduler
     void setExceptionHandler(std::function<void(const std::exception_ptr)> handler_) { handler = std::move(handler_); }
 
-    /// Destroy a tile without blocking
+    /// Capture an object and release it on a thread in the pool.
+    /// @tparam T The arbitrary type to be captured
+    /// @tparam TWrap The type of the owning wrapper (`shared_ptr`, `Immutable`, `Mutable`, ...)
+    ///
+    /// To be used with a `unique_ptr` it must first be converted to a `shared_ptr`, because we have
+    /// be able to make a copy in the process of capturing it in a lambda.
     template <typename T>
     void deferredRelease(const util::SimpleIdentity tag, T&& item) {
-        MLN_TRACE_FUNC();
-
         // The `std::function` must be created in a separate statement from the `schedule` call.
         // Creating a `std::function` from a lambda involves a copy, which is why we must use
         // `shared_ptr` rather than `unique_ptr` for the capture.  As a result, a temporary holds
@@ -132,7 +134,7 @@ public:
         }};
 
         {
-            std::unique_lock<std::mutex> counterLock(deferredSignalLock);
+            std::lock_guard<std::mutex> counterLock(deferredSignalLock);
             deferredDeletionsPending++;
         }
 
@@ -155,6 +157,19 @@ private:
     std::mutex deferredSignalLock;
     std::condition_variable deferredSignal;
 
+    /// This exists solely to prevent a problem where temporary lambda captures
+    /// are retained for the duration of the scope instead of being destroyed immediately.
+    template <typename T>
+    struct CaptureWrapper {
+        CaptureWrapper(T&& item_)
+                : item(std::move(item_)) {}
+        CaptureWrapper(const CaptureWrapper& other)
+                : item(other.item) {}
+        CaptureWrapper(CaptureWrapper&& other)
+                : item(std::move(other.item)) {}
+        T item;
+    };
+
     template <typename TaskFn, typename ReplyFn>
     void scheduleAndReplyValue(const util::SimpleIdentity tag,
                                TaskFn&& task,
@@ -166,19 +181,6 @@ private:
             replyScheduler->schedule(tag, [reply, result = task()] { reply(result); });
         });
     }
-
-    /// This exists solely to prevent a problem where temporary lambda captures
-    /// are retained for the duration of the scope instead of being destroyed immediately.
-    template <typename T>
-    struct CaptureWrapper {
-        CaptureWrapper(T&& item_)
-            : item(std::move(item_)) {}
-        CaptureWrapper(const CaptureWrapper& other)
-            : item(other.item) {}
-        CaptureWrapper(CaptureWrapper&& other)
-            : item(std::move(other.item)) {}
-        T item;
-    };
 };
 
 /// @brief A TaggedScheduler pairs a scheduler with an identifier. Tasklets submitted via a TaggedScheduler

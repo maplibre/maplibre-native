@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/gfx/texture.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/style/layer_impl.hpp>
@@ -54,16 +55,17 @@ public:
     virtual void prepare(const SourcePrepareParameters&) {}
 
 protected:
-    TileRenderData();
-    TileRenderData(std::shared_ptr<TileAtlasTextures>);
+    TileRenderData(std::shared_ptr<TileAtlasTextures>, const TaggedScheduler&);
     std::shared_ptr<TileAtlasTextures> atlasTextures;
+    TaggedScheduler threadPool;
 };
 
 template <typename BucketType>
 class SharedBucketTileRenderData final : public TileRenderData {
 public:
-    SharedBucketTileRenderData(std::shared_ptr<BucketType> bucket_)
-        : bucket(std::move(bucket_)) {}
+    SharedBucketTileRenderData(std::shared_ptr<BucketType> bucket_, const TaggedScheduler& threadPool_)
+        : TileRenderData({}, threadPool_),
+          bucket(std::move(bucket_)) {}
 
 private:
     // TileRenderData overrides.

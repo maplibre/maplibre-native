@@ -386,7 +386,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
     : RenderSource(std::move(impl_)),
       tilePyramid(threadPool_),
-      renderTiles(makeMutable<std::vector<RenderTile>>()) {
+      renderTiles(makeMutable<std::vector<RenderTile>>()),
+      threadPool(threadPool_) {
     tilePyramid.setObserver(this);
 }
 
@@ -411,6 +412,7 @@ void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
         tiles->back().prepare(parameters);
     }
     featureState.coalesceChanges(*tiles);
+    threadPool.deferredRelease(std::move(renderTiles));
     renderTiles = std::move(tiles);
 }
 

@@ -21,9 +21,6 @@ public:
 
     ~TileCache() { clear(); }
 
-    /// Destroy a tile without blocking
-    void deferredRelease(std::unique_ptr<Tile>&&);
-
     /// Change the maximum size of the cache.
     void setSize(size_t);
 
@@ -38,6 +35,9 @@ public:
     Tile* get(const OverscaledTileID& key);
     bool has(const OverscaledTileID& key);
     void clear();
+
+    /// Destroy a tile without blocking
+    void deferredRelease(std::unique_ptr<Tile>&&);
 
 private:
     std::map<OverscaledTileID, std::unique_ptr<Tile>> tiles;

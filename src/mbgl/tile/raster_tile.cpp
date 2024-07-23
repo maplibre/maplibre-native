@@ -31,7 +31,7 @@ RasterTile::~RasterTile() {
 }
 
 std::unique_ptr<TileRenderData> RasterTile::createRenderData() {
-    return std::make_unique<SharedBucketTileRenderData<RasterBucket>>(bucket);
+    return std::make_unique<SharedBucketTileRenderData<RasterBucket>>(bucket, threadPool);
 }
 
 void RasterTile::setError(std::exception_ptr err) {

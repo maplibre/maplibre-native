@@ -42,7 +42,7 @@ RasterDEMTile::~RasterDEMTile() {
 }
 
 std::unique_ptr<TileRenderData> RasterDEMTile::createRenderData() {
-    return std::make_unique<SharedBucketTileRenderData<HillshadeBucket>>(bucket);
+    return std::make_unique<SharedBucketTileRenderData<HillshadeBucket>>(bucket, threadPool);
 }
 
 void RasterDEMTile::setError(std::exception_ptr err) {
