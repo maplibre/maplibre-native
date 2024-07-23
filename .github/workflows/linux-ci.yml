@@ -146,7 +146,7 @@ jobs:
       - run: chmod +x build/mbgl-test-runner
 
       - name: Run C++ tests
-        continue-on-error: ${{ matrix.renderer == 'drawable' }}
+        continue-on-error: ${{ matrix.renderer == 'vulkan' }}
         run: xvfb-run -a build/mbgl-test-runner
 
       # render tests
