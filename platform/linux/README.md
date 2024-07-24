@@ -12,6 +12,7 @@ cd maplibre-native
 ```
 
 ## Requirements
+
 ### Building without Docker
 
 ```bash
@@ -26,7 +27,7 @@ Optional: `libsqlite3-dev` (also available as vendored dependency).
 
 ### Building with Docker
 
-See instructions in [docker/README.md](../../docker/README.md) to build docker container
+See instructions in [docker/README.md](docker/README.md) to build in a docker container.
 
 ## Build
 
