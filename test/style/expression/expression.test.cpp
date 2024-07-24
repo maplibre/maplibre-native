@@ -81,23 +81,19 @@ TEST_P(ExpressionEqualityTest, ExpressionEquality) {
 static std::vector<std::string> populateNames() {
     std::vector<std::string> test_inputs;
 
-    const std::string ending {".a.json"};
+    const std::string ending{".a.json"};
 
-    std::filesystem::path style_directory {"test/fixtures/expression_equality"};
+    std::filesystem::path style_directory{"test/fixtures/expression_equality"};
 
-    for (const auto& file_entry : std::filesystem::directory_iterator(style_directory))
-    {
+    for (const auto& file_entry : std::filesystem::directory_iterator(style_directory)) {
         auto file_entry_path = file_entry.path().string();
-        if(!file_entry.path().empty() && 
-            file_entry_path.length() >= ending.length() &&
-            file_entry_path.compare(file_entry_path.length() - ending.length(), ending.length(), ending) == 0)
-        {
-            #if ANDROID
-                if (name.find("number-format") != std::string::npos)
-                {
-                    continue;
-                }    
-            #endif
+        if (!file_entry.path().empty() && file_entry_path.length() >= ending.length() &&
+            file_entry_path.compare(file_entry_path.length() - ending.length(), ending.length(), ending) == 0) {
+#if ANDROID
+            if (name.find("number-format") != std::string::npos) {
+                continue;
+            }
+#endif
             auto file_name = file_entry.path().filename().string();
             test_inputs.push_back(file_name.substr(0, file_name.length() - ending.length()));
         }
