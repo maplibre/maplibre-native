@@ -29,17 +29,18 @@ class MapOptionsRuntimeActivity : AppCompatActivity(), OnMapReadyCallback {
         val maplibreMapOptions = MapLibreMapOptions.createFromAttributes(this)
         maplibreMapOptions.apply {
             apiBaseUri("https://api.maplibre.org")
-            camera(CameraPosition.Builder()
-                .bearing(34.0)
-                .target(LatLng(52.519003, 13.400972))
-                .zoom(16.0)
-                .tilt(25.0)
-                .build()
+            camera(
+                CameraPosition.Builder()
+                    .bearing(0.0)
+                    .target(LatLng(42.31230486601532, 64.63967338936439))
+                    .zoom(3.9)
+                    .tilt(0.0)
+                    .build()
             )
             maxPitchPreference(90.0)
             minPitchPreference(0.0)
-            maxZoomPreference(34.0)
-            minZoomPreference(15.0)
+            maxZoomPreference(26.0)
+            minZoomPreference(2.0)
             localIdeographFontFamily("Droid Sans")
             zoomGesturesEnabled(true)
             compassEnabled(true)
@@ -58,9 +59,7 @@ class MapOptionsRuntimeActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        this.maplibreMap.setStyle(
-            Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
-        )
+        this.maplibreMap.setStyle("https://demotiles.maplibre.org/style.json")
     }
 
     override fun onStart() {

@@ -227,7 +227,7 @@ This can be found in platform/android/MapLibreAndroidTestApp/src/main/java/org/m
 ```
 Finally we will see a result similar to this :
 <div style="align: center">
-  <img src="https://github.com/user-attachments/assets/1749e7aa-e836-4ccd-8777-bd6994395e25" alt="Screenshot with the MapLibreMapOptions">
+  <img src="https://github.com/user-attachments/assets/dd85f496-3e6f-4788-933e-4ec3d5999935" alt="Screenshot with the MapLibreMapOptions">
 </div>
 
 For full content of `MapOptionsRuntimeActivity` and `MapOptionsXmlActivity`, please visit source code of [Test APP](https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options).

@@ -27,9 +27,7 @@ class MapOptionsXmlActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        this.maplibreMap.setStyle(
-            Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
-        )
+        this.maplibreMap.setStyle("https://demotiles.maplibre.org/style.json")
     }
 
     override fun onStart() {
