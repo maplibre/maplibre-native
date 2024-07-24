@@ -16,4 +16,4 @@ init-docker:
 
 # run a build command with docker, e.g. `just docker bazel build ...`, or open container shell with `just docker`
 docker *ARGS:
-    docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/user/.cache" maplibre-native-image
+    docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/user/.cache" maplibre-native-image {{ARGS}}
