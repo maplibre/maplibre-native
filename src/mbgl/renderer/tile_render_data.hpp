@@ -36,7 +36,7 @@ public:
 
 class TileRenderData {
 public:
-    virtual ~TileRenderData();
+    virtual ~TileRenderData() = default;
 
 #if MLN_DRAWABLE_RENDERER
     const gfx::Texture2DPtr& getGlyphAtlasTexture() const;
