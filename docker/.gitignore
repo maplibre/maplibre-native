@@ -1,2 +1,4 @@
-.cache/
+# Make sure empty file is not ignored
+.cache/*
+!.cache/
 !.cache/empty_file
