@@ -56,4 +56,3 @@ __generated__
 cache.sqlite
 cache.sqlite-journal
 out.png
-.docker_cache/

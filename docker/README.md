@@ -14,14 +14,14 @@ You must build your own docker image, specific with your user and group IDs to e
 
 ```bash
 # Build docker image from the repo __root__
-# Specifying USER_ID and GROUP_ID allows container to create files with the same owner as the host user,
+# Specifying USER_UID and USER_GID allows container to create files with the same owner as the host user,
 # and avoids having to pass -u $(id -u):$(id -g) to docker run.  
 docker build \
   -t maplibre-native-image \
-  --build-arg USER_ID=$(id -u) \
-  --build-arg GROUP_ID=$(id -g) \
+  --build-arg USER_UID=$(id -u) \
+  --build-arg USER_GID=$(id -g) \
   -f docker/Dockerfile \
-  docker/
+  docker
 ```
 
 ## Run Docker Container
@@ -29,11 +29,11 @@ docker build \
 ```bash
 # Run all build commands using the docker container.
 # You can also execute build commands from inside the docker container by starting it without the build command.
-docker run --rm -it -v "$PWD:/app/" -v "$PWD/.docker_cache:/home/user/.cache" maplibre-native-image
+docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/user/.cache" maplibre-native-image
 ```
 
 You can also run any command inside the container, for example:
 
 ```bash
-docker run --rm -it -v "$PWD:/app/" -v "$PWD/.docker_cache:/home/user/.cache" maplibre-native-image cmake ...
+docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/user/.cache" maplibre-native-image cmake ...
 ``` 
