@@ -1,4 +1,3 @@
-#include <list>
 #include <mbgl/layout/symbol_layout.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
@@ -7,7 +6,10 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/text/placement.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/math.hpp>
+
+#include <list>
 #include <utility>
 
 namespace mbgl {
@@ -154,6 +156,7 @@ PlacementController::PlacementController()
     : placement(makeMutable<Placement>()) {}
 
 void PlacementController::setPlacement(Immutable<Placement> placement_) {
+    MLN_TRACE_FUNC();
     placement = std::move(placement_);
     stale = false;
 }
@@ -200,6 +203,7 @@ Placement::Placement()
 Placement::~Placement() = default;
 
 void Placement::placeLayers(const RenderLayerReferences& layers) {
+    MLN_TRACE_FUNC();
     for (auto it = layers.crbegin(); it != layers.crend(); ++it) {
         std::set<uint32_t> seenCrossTileIDs;
         placeLayer(*it, seenCrossTileIDs);
@@ -1631,6 +1635,7 @@ bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const 
 // static
 Mutable<Placement> Placement::create(std::shared_ptr<const UpdateParameters> updateParameters_,
                                      std::optional<Immutable<Placement>> prevPlacement) {
+    MLN_TRACE_ZONE(create placement);
     assert(updateParameters_);
     switch (updateParameters_->mode) {
         case MapMode::Continuous:
