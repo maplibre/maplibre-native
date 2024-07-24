@@ -83,7 +83,7 @@ static std::vector<std::string> populateNames() {
 
     const std::string ending{".a.json"};
 
-    std::filesystem::path style_directory{"test/fixtures/expression_equality"};
+    const std::filesystem::path style_directory{"test/fixtures/expression_equality"};
 
     for (const auto& file_entry : std::filesystem::directory_iterator(style_directory)) {
         auto file_entry_path = file_entry.path().string();
