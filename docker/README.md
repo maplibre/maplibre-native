@@ -20,8 +20,8 @@ docker build \
   -t maplibre-native-image \
   --build-arg USER_ID=$(id -u) \
   --build-arg GROUP_ID=$(id -g) \
-  -f platform/linux/Dockerfile \
-  platform/linux
+  -f docker/Dockerfile \
+  docker/
 ```
 
 ## Run Docker Container
