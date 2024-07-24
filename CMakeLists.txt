@@ -1418,7 +1418,6 @@ target_include_directories(
 )
 
 include(${PROJECT_SOURCE_DIR}/vendor/boost.cmake)
-include(${PROJECT_SOURCE_DIR}/vendor/csscolorparser.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/earcut.hpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/eternal.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/mapbox-base.cmake)
@@ -1440,6 +1439,26 @@ set_target_properties(
         INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/unordered_dense/LICENSE
 )
 
+include(FetchContent)
+FetchContent_Declare(
+        Corrosion
+        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+        GIT_TAG v0.5
+)
+FetchContent_MakeAvailable(Corrosion)
+
+corrosion_import_crate(MANIFEST_PATH rustutils/Cargo.toml)
+# rustutils_headers is a set of .h headers generated from rustutils crate
+corrosion_add_cxxbridge(rustutils_headers CRATE rustutils FILES lib.rs)
+set_target_properties(
+        rustutils
+        rustutils_headers
+        PROPERTIES
+        INTERFACE_MAPBOX_NAME "Rust Utils"
+        INTERFACE_MAPBOX_AUTHOR "Yuri Astrakhan"
+        INTERFACE_MAPBOX_LICENSE ${CMAKE_CURRENT_LIST_DIR}/rustutils/LICENSE-MIT
+)
+
 target_link_libraries(
     mbgl-core
     PRIVATE
@@ -1450,7 +1469,6 @@ target_link_libraries(
         Mapbox::Base::cheap-ruler-cpp
         mbgl-compiler-options
         mbgl-vendor-boost
-        mbgl-vendor-csscolorparser
         mbgl-vendor-earcut.hpp
         mbgl-vendor-eternal
         mbgl-vendor-parsedate
@@ -1459,6 +1477,7 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
+        rustutils_headers
     PUBLIC
         Mapbox::Base
         Mapbox::Base::Extras::expected-lite
@@ -1468,11 +1487,13 @@ target_link_libraries(
         Mapbox::Base::variant
         $<$<BOOL:${MLN_USE_TRACY}>:TracyClient>
         unordered_dense
+        rustutils
 )
 
 export(TARGETS
+    rustutils_headers
     mbgl-core
-
+    rustutils
     mapbox-base
     mapbox-base-cheap-ruler-cpp
     mapbox-base-extras-expected-lite
@@ -1488,7 +1509,6 @@ export(TARGETS
     mapbox-base-variant
     mbgl-compiler-options
     mbgl-vendor-boost
-    mbgl-vendor-csscolorparser
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
     mbgl-vendor-parsedate

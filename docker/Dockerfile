@@ -55,5 +55,9 @@ RUN chmod +x /usr/local/bin/startup.sh
 # This allows users to `docker run` without specifying -u and -g
 USER $USERNAME
 
+ENV RUSTUP_HOME=/home/$USERNAME/.cache/.rustup \
+    CARGO_HOME=/home/$USERNAME/.cache/.cargo \
+    PATH=/home/$USERNAME/.cache/.cargo/bin:$PATH
+
 ENTRYPOINT ["/usr/local/bin/startup.sh"]
 CMD ["bash"]

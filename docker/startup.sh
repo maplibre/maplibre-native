@@ -10,4 +10,19 @@ if [ ! -d /app/.github ] || [ ! -d /home/user/.cache ]; then
     exit 1
 fi
 
+
+if [ ! -f "$CARGO_HOME/env" ]; then
+    echo "Downloading and installing Rust..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+fi
+. "$CARGO_HOME/env"
+
+
+
+if ! command -v cxxbridge > /dev/null; then
+    echo "Installing cxxbridge..."
+    cargo install cxxbridge-cmd
+fi
+
+
 exec "$@"
