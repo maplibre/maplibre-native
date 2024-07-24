@@ -26,101 +26,15 @@ We will see how to achieve these configurations in XML layout and programmatical
 
 ### 1. MapView Configuration inside XML layout.
 We need to use MapView namespace and provide some data in layout file.
-  ```xml
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".activity.options.MapOptionsXmlActivity">
-
-    <org.maplibre.android.maps.MapView
-        android:id="@+id/mapView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:maplibre_apiBaseUri="https://api.maplibre.org"
-        app:maplibre_cameraBearing="34.0"
-        app:maplibre_cameraPitchMax="90.0"
-        app:maplibre_cameraPitchMin="0.0"
-        app:maplibre_cameraTargetLat="52.519003"
-        app:maplibre_cameraTargetLng="13.400972"
-        app:maplibre_cameraTilt="25.0"
-        app:maplibre_cameraZoom="16"
-        app:maplibre_cameraZoomMax="34.0"
-        app:maplibre_cameraZoomMin="15.0"
-        app:maplibre_localIdeographFontFamilies="@array/array_local_ideograph_family_test"
-        app:maplibre_localIdeographFontFamily="Droid Sans"
-        app:maplibre_uiCompass="true"
-        app:maplibre_uiCompassFadeFacingNorth="true"
-        app:maplibre_uiCompassGravity="top|end"
-        app:maplibre_uiDoubleTapGestures="true"
-        app:maplibre_uiHorizontalScrollGestures="true"
-        app:maplibre_uiRotateGestures="true"
-        app:maplibre_uiScrollGestures="true"
-        app:maplibre_uiTiltGestures="true"
-        app:maplibre_uiZoomGestures="true" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+```xml
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/res/layout/activity_map_options_xml.xml}}
 ```
 ```
 This can be found in platform/android/MapLibreAndroidTestApp/src/main/res/layout/activity_map_options_xml.xml
 ```
 We can give any other existing values to `maplibre` tags and  only need to create Mapview and MapLibreMap objects with simple setup in Activity.
 ```kotlin
-class MapOptionsXmlActivity : AppCompatActivity(), OnMapReadyCallback {
-    private lateinit var mapView: MapView
-    private lateinit var maplibreMap: MapLibreMap
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map_options_xml)
-        mapView = findViewById(R.id.mapView)
-        mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(this)
-    }
-
-    override fun onMapReady(maplibreMap: MapLibreMap) {
-        this.maplibreMap = maplibreMap
-        this.maplibreMap.setStyle("https://demotiles.maplibre.org/style.json")
-    }
-
-    override fun onStart() {
-        super.onStart()
-        mapView.onStart()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mapView.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mapView.onPause()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        mapView.onStop()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        mapView.onSaveInstanceState(outState)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mapView.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        mapView.onLowMemory()
-    }
-}
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsXmlActivity.kt}}
 ```
 ```
 This can be found in platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsXmlActivity.kt
@@ -129,98 +43,14 @@ This can be found in platform/android/MapLibreAndroidTestApp/src/main/java/org/m
 
  Here we don't have to create MapView from XML since we want to create it programmatically.
 ```xml
-<?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"/>
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/res/layout/activity_map_options_xml.xml}}
 ```
 ```
-This can beound in platform/android/MapLibreAndroidTestApp/src/main/res/layout/activity_map_options_runtime.xml
+This can be found in platform/android/MapLibreAndroidTestApp/src/main/res/layout/activity_map_options_runtime.xml
 ```
 A `MapLibreMapOptions` object must be created and passed to MapView constructor. And all setup happens in Activity code:
 ```kotlin
-class MapOptionsRuntimeActivity : AppCompatActivity(), OnMapReadyCallback {
-
-    private lateinit var maplibreMap: MapLibreMap
-    private lateinit var mapView: MapView
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map_options_runtime)
-
-        // Create map configuration
-        val maplibreMapOptions = MapLibreMapOptions.createFromAttributes(this)
-        maplibreMapOptions.apply {
-            apiBaseUri("https://api.maplibre.org")
-            camera(CameraPosition.Builder()
-                .bearing(34.0)
-                .target(LatLng(52.519003, 13.400972))
-                .zoom(16.0)
-                .tilt(25.0)
-                .build()
-            )
-            maxPitchPreference(90.0)
-            minPitchPreference(0.0)
-            maxZoomPreference(34.0)
-            minZoomPreference(15.0)
-            localIdeographFontFamily("Droid Sans")
-            zoomGesturesEnabled(true)
-            compassEnabled(true)
-            compassFadesWhenFacingNorth(true)
-            scrollGesturesEnabled(true)
-            rotateGesturesEnabled(true)
-            tiltGesturesEnabled(true)
-        }
-
-        // Create map programmatically, add to view hierarchy
-        mapView = MapView(this, maplibreMapOptions)
-        mapView.getMapAsync(this)
-        mapView.onCreate(savedInstanceState)
-        (findViewById<View>(R.id.container) as ViewGroup).addView(mapView)
-    }
-
-    override fun onMapReady(maplibreMap: MapLibreMap) {
-        this.maplibreMap = maplibreMap
-        this.maplibreMap.setStyle("https://demotiles.maplibre.org/style.json")
-    }
-
-    override fun onStart() {
-        super.onStart()
-        mapView.onStart()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mapView.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mapView.onPause()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        mapView.onStop()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        mapView.onSaveInstanceState(outState)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mapView.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        mapView.onLowMemory()
-    }
-}
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsRuntimeActivity.kt}}
 ```
 ```
 This can be found in platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/options/MapOptionsRuntimeActivity.kt}}
@@ -241,78 +71,7 @@ You can read more about `MapLibreMapOptions` in the [documentation](https://mapl
 Let's see how we can do in a sample activity:
 
 ```kotlin
-class SupportMapFragmentActivity :
-    AppCompatActivity(),
-    OnMapViewReadyCallback,
-    OnMapReadyCallback,
-    OnDidFinishRenderingFrameListener {
-    private lateinit var maplibreMap: MapLibreMap
-    private lateinit var mapView: MapView
-    private var initialCameraAnimation = true
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map_fragment)
-        val mapFragment: SupportMapFragment?
-        if (savedInstanceState == null) {
-            mapFragment = SupportMapFragment.newInstance(createFragmentOptions())
-            supportFragmentManager
-                .beginTransaction()
-                .add(R.id.fragment_container, mapFragment, TAG)
-                .commit()
-        } else {
-            mapFragment = supportFragmentManager.findFragmentByTag(TAG) as SupportMapFragment?
-        }
-        mapFragment!!.getMapAsync(this)
-    }
-
-    private fun createFragmentOptions(): MapLibreMapOptions {
-        val options = MapLibreMapOptions.createFromAttributes(this, null)
-        options.scrollGesturesEnabled(false)
-        options.zoomGesturesEnabled(false)
-        options.tiltGesturesEnabled(false)
-        options.rotateGesturesEnabled(false)
-        options.debugActive(false)
-        val dc = LatLng(38.90252, -77.02291)
-        options.minZoomPreference(9.0)
-        options.maxZoomPreference(11.0)
-        options.camera(
-            CameraPosition.Builder()
-                .target(dc)
-                .zoom(11.0)
-                .build()
-        )
-        return options
-    }
-
-    override fun onMapViewReady(map: MapView) {
-        mapView = map
-        mapView.addOnDidFinishRenderingFrameListener(this)
-    }
-
-    override fun onMapReady(map: MapLibreMap) {
-        maplibreMap = map
-        maplibreMap.setStyle("https://demotiles.maplibre.org/style.json")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mapView.removeOnDidFinishRenderingFrameListener(this)
-    }
-
-    override fun onDidFinishRenderingFrame(fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double) {
-        if (initialCameraAnimation && fully && maplibreMap != null) {
-            maplibreMap.animateCamera(
-                CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().tilt(45.0).build()),
-                5000
-            )
-            initialCameraAnimation = false
-        }
-    }
-
-    companion object {
-        private const val TAG = "com.mapbox.map"
-    }
-}
+{{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/fragment/SupportMapFragmentActivity.kt}}
 ```
 ```
 This can be found platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/fragment/SupportMapFragmentActivity.kt}}
