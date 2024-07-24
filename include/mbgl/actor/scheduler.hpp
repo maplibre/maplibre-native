@@ -36,12 +36,7 @@ namespace mbgl {
 */
 class Scheduler {
 public:
-    virtual ~Scheduler() {
-        std::unique_lock<std::mutex> counterLock(deferredSignalLock);
-        while (deferredDeletionsPending > 0) {
-            deferredSignal.wait(counterLock);
-        }
-    }
+    virtual ~Scheduler() = default;
 
     /// Enqueues a function for execution.
     virtual void schedule(std::function<void()>&&) = 0;
@@ -126,7 +121,7 @@ public:
         // last one and the destruction actually occurs here on this thread.
         std::function<void()> func{[owner_{CaptureWrapper<T>{std::forward<T>(item)}}, this]() mutable {
             {
-                // move to local and destroy, since not everything allows assignment of `{}`
+                // move to local and destroy, since not everything allows assignment
                 T temporary{std::move(owner_.item)};
             }
             std::lock_guard<std::mutex> counterLock(deferredSignalLock);
@@ -152,6 +147,13 @@ public:
 
 protected:
     std::function<void(const std::exception_ptr)> handler;
+
+    void waitForDeferred() {
+        std::unique_lock<std::mutex> counterLock(deferredSignalLock);
+        while (deferredDeletionsPending > 0) {
+            deferredSignal.wait(counterLock);
+        }
+    }
 
 private:
     size_t deferredDeletionsPending{0};
