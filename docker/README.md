@@ -1,0 +1,39 @@
+# Linux
+
+These steps will allow you to compile code as described [platform/linux/README.md](../platform/linux/README.md) using a docker container. All the steps should be executed from the root of the repository.
+
+ATTENTION: You cannot build MapLibre native using both Docker and host methods at the same time. If you want to switch, you need to clean the repository first, e.g. by using this command:
+
+```bash
+git clean -dxfi -e .idea -e .clwb -e .vscode
+```
+
+### Build Docker Image
+
+You must build your own docker image, specific with your user and group IDs to ensure file permissions stay correct.
+
+```bash
+# Build docker image from the repo __root__
+# Specifying USER_ID and GROUP_ID allows container to create files with the same owner as the host user,
+# and avoids having to pass -u $(id -u):$(id -g) to docker run.  
+docker build \
+  -t maplibre-native-image \
+  --build-arg USER_ID=$(id -u) \
+  --build-arg GROUP_ID=$(id -g) \
+  -f platform/linux/Dockerfile \
+  platform/linux
+```
+
+## Run Docker Container
+
+```bash
+# Run all build commands using the docker container.
+# You can also execute build commands from inside the docker container by starting it without the build command.
+docker run --rm -it -v "$PWD:/app/" -v "$PWD/.docker_cache:/home/user/.cache" maplibre-native-image
+```
+
+You can also run any command inside the container, for example:
+
+```bash
+docker run --rm -it -v "$PWD:/app/" -v "$PWD/.docker_cache:/home/user/.cache" maplibre-native-image cmake ...
+``` 

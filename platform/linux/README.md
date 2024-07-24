@@ -26,23 +26,7 @@ Optional: `libsqlite3-dev` (also available as vendored dependency).
 
 ### Building with Docker
 
-You can use a Docker container to build MapLibre Native. Note that you cannot build using both Docker and host methods at the same time. If you want to switch, you need to clean the repository first, e.g. by using `git clean -dxfi -e .idea -e .clwb -e .vscode`
-
-```bash
-# Build docker image from the repo root
-# Specifying USER_ID and GROUP_ID allows container to create files with the same owner as the host user,
-# and avoids having to pass -u $(id -u):$(id -g) to docker run.  
-docker build \
-  -t maplibre-native-image \
-  --build-arg USER_ID=$(id -u) \
-  --build-arg GROUP_ID=$(id -g) \
-  -f platform/linux/Dockerfile \
-  platform/linux
-
-# Run all build commands using the docker container.
-# You can also execute build commands from inside the docker container by starting it without the build command.
-docker run --rm -it -v "$PWD:/app/" -v "$PWD/.docker_cache:/home/user/.cache" maplibre-native-image ___any_build_command___
-```
+See instructions in [docker/README.md](../../docker/README.md) to build docker container
 
 ## Build
 
@@ -59,16 +43,12 @@ Running `mbgl-render --style https://raw.githubusercontent.com/maplibre/demotile
 
 ![Sample image of world from mbgl-render command](/misc/sample-maplibre-style-mbgl-render-out.png)
 
-### Outside of Docker
-
-Render output image using default MapLibre demo tiles server. You can run this binary on your host machine even if you built it inside a Docker container.
-
 ```bash
 ./build/bin/mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
 xdg-open out.png
 ```
 
-### Inside Docker
+### Headless rendering
 
 If you run `mbgl-render` inside a Docker or on a remote headless server, you will likely get this error because there is no X server running in the container.
 
