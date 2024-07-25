@@ -19,7 +19,7 @@ public:
         : threadPool(threadPool_),
           size(size_) {}
 
-    ~TileCache() { clear(); }
+    ~TileCache();
 
     /// Change the maximum size of the cache.
     void setSize(size_t);

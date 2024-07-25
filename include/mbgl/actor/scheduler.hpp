@@ -145,15 +145,15 @@ public:
         runOnRenderThread(tag, std::move(func));
     }
 
-protected:
-    std::function<void(const std::exception_ptr)> handler;
-
     void waitForDeferred() {
         std::unique_lock<std::mutex> counterLock(deferredSignalLock);
         while (deferredDeletionsPending > 0) {
             deferredSignal.wait(counterLock);
         }
     }
+
+protected:
+    std::function<void(const std::exception_ptr)> handler;
 
 private:
     size_t deferredDeletionsPending{0};
@@ -221,6 +221,8 @@ public:
     void releaseOnRenderThread(T&& owner) {
         scheduler->releaseOnRenderThread<T>(tag, std::forward<T>(owner));
     }
+
+    void waitForDeferred() { scheduler->waitForDeferred(); }
 
     const mbgl::util::SimpleIdentity tag;
 

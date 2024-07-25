@@ -5,7 +5,12 @@
 
 namespace mbgl {
 
-void TileCache::setSize(size_t size_) {
+TileCache::~TileCache() {
+    clear();
+    threadPool.waitForDeferred();
+}
+
+    void TileCache::setSize(size_t size_) {
     MLN_TRACE_FUNC();
 
     size = size_;
