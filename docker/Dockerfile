@@ -26,7 +26,12 @@ RUN    apt-get update \
     && : # end of the RUN cmd - easier to keep a colon at the end of the list, than to keep the backslashes in check
 
 # This could also be `.../releases/latest/download/bazelisk-linux-amd64` for the latest version, but for predictability better hardcode it
-RUN curl -fsSL https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64 -o /usr/local/bin/bazel \
+# Detect if current CPU is x64 or ARM64 and download the appropriate binary
+RUN if [ "$(uname -m)" = "aarch64" ]; then \
+        curl -fsSL https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-arm64 -o /usr/local/bin/bazel ;\
+    else \
+        curl -fsSL https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64 -o /usr/local/bin/bazel ;\
+    fi \
     && chmod +x /usr/local/bin/bazel \
     && :
 
