@@ -38,7 +38,8 @@ ARG USER_GID=$USER_UID
 
 # Create docker user wuth sudo rights as passed in by the build command
 # This was modeled on https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
-RUN groupadd --gid $USER_GID $USERNAME \
+# On a Mac, USER_GID might already exist, so ignore it if it fails (--force)
+RUN groupadd --force --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
