@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.graphics.RectF
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -12,6 +13,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ListPopupWindow
 import org.maplibre.android.location.LocationComponent
@@ -54,6 +56,8 @@ class LocationModesActivity :
     @RenderMode.Mode
     private var renderMode = RenderMode.NORMAL
     private var lastLocation: Location? = null
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_layer_mode)
@@ -80,7 +84,7 @@ class LocationModesActivity :
         if (savedInstanceState != null) {
             cameraMode = savedInstanceState.getInt(SAVED_STATE_CAMERA)
             renderMode = savedInstanceState.getInt(SAVED_STATE_RENDER)
-            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION)
+            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION, Location::class.java)
         }
         mapView.onCreate(savedInstanceState)
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
@@ -230,9 +234,7 @@ class LocationModesActivity :
             if (defaultStyle) R.style.maplibre_LocationComponent else R.style.CustomLocationComponent
         )
         if (defaultStyle) {
-            val padding: IntArray
-            padding =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            val padding: IntArray = if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     intArrayOf(0, 750, 0, 0)
                 } else {
                     intArrayOf(0, 250, 0, 0)

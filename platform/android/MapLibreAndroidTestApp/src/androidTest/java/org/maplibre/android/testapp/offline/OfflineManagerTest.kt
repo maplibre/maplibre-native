@@ -3,6 +3,9 @@ package org.maplibre.android.testapp.offline
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import org.junit.After
@@ -59,18 +62,20 @@ class OfflineManagerTest : AppCenter() {
 
         val latch1 = CountDownLatch(1)
         rule.activity.runOnUiThread {
-            FileUtils.CopyFileFromAssetsTask(
-                rule.activity,
-                object : FileUtils.OnFileCopiedFromAssetsListener {
-                    override fun onFileCopiedFromAssets() {
+            runTest(Dispatchers.IO) {
+                val copied = FileUtils.copyFileFromAssetsTask(
+                    rule.activity,
+                    TEST_DB_FILE_NAME,
+                    FileSource.getResourcesCachePath(rule.activity)
+                )
+                withContext(Dispatchers.Main) {
+                    if (copied) {
                         latch1.countDown()
-                    }
-
-                    override fun onError() {
+                    } else {
                         throw IOException("Unable to copy DB file.")
                     }
                 }
-            ).execute(TEST_DB_FILE_NAME, FileSource.getResourcesCachePath(rule.activity))
+            }
         }
         latch1.await()
 

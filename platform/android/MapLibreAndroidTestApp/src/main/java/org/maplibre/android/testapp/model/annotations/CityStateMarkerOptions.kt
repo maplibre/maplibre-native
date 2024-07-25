@@ -1,12 +1,15 @@
 package org.maplibre.android.testapp.model.annotations
 
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.annotation.RequiresApi
 import org.maplibre.android.annotations.BaseMarkerOptions
 import org.maplibre.android.annotations.IconFactory
 import org.maplibre.android.geometry.LatLng
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 class CityStateMarkerOptions : BaseMarkerOptions<CityStateMarker?, CityStateMarkerOptions?> {
     private var infoWindowBackgroundColor: String? = null
     fun infoWindowBackground(color: String?): CityStateMarkerOptions {
@@ -14,12 +17,13 @@ class CityStateMarkerOptions : BaseMarkerOptions<CityStateMarker?, CityStateMark
         return getThis()
     }
 
-    constructor() {}
+    constructor()
+
     private constructor(`in`: Parcel) {
-        position(`in`.readParcelable<Parcelable>(LatLng::class.java.classLoader) as LatLng)
+        position(`in`.readParcelable(LatLng::class.java.classLoader, LatLng::class.java))
         snippet(`in`.readString())
         val iconId = `in`.readString()
-        val iconBitmap = `in`.readParcelable<Bitmap>(Bitmap::class.java.classLoader)
+        val iconBitmap = `in`.readParcelable(Bitmap::class.java.classLoader, Bitmap::class.java)
         val icon = iconBitmap?.let { IconFactory.recreate(iconId.toString(), it) }
         icon(icon)
         title(`in`.readString())

@@ -2,6 +2,7 @@ package org.maplibre.android.snapshotter
 
 import android.content.Context
 import android.graphics.*
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.text.Html
@@ -10,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.Keep
+import androidx.annotation.RequiresApi
 import androidx.annotation.UiThread
 import androidx.core.content.res.ResourcesCompat
 import org.maplibre.android.R
@@ -533,6 +535,7 @@ open class MapSnapshotter(context: Context, options: Options) {
         canvas.restore()
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun createTextView(mapSnapshot: MapSnapshot, shortText: Boolean, scale: Float): TextView {
         val textColor = ResourcesCompat.getColor(context.resources, R.color.maplibre_gray_dark, context.theme)
         val widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
@@ -543,7 +546,7 @@ open class MapSnapshotter(context: Context, options: Options) {
         textView.textSize = 10 * scale
         textView.setTextColor(textColor)
         textView.setBackgroundResource(R.drawable.maplibre_rounded_corner)
-        textView.text = Html.fromHtml(createAttributionString(mapSnapshot, shortText))
+        textView.text = Html.fromHtml(createAttributionString(mapSnapshot, shortText), Html.FROM_HTML_MODE_LEGACY)
         textView.measure(widthMeasureSpec, heightMeasureSpec)
         textView.layout(0, 0, textView.measuredWidth, textView.measuredHeight)
         return textView
