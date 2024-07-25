@@ -2,7 +2,6 @@ package org.maplibre.android.snapshotter
 
 import android.content.Context
 import android.graphics.*
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.text.Html
@@ -544,7 +543,7 @@ open class MapSnapshotter(context: Context, options: Options) {
         textView.textSize = 10 * scale
         textView.setTextColor(textColor)
         textView.setBackgroundResource(R.drawable.maplibre_rounded_corner)
-        textView.text = Html.fromHtml(createAttributionString(mapSnapshot, shortText), Html.FROM_HTML_MODE_LEGACY)
+        textView.text = Html.fromHtml(createAttributionString(mapSnapshot, shortText))
         textView.measure(widthMeasureSpec, heightMeasureSpec)
         textView.layout(0, 0, textView.measuredWidth, textView.measuredHeight)
         return textView
