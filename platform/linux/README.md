@@ -12,11 +12,12 @@ cd maplibre-native
 ```
 
 ## Requirements
+
 ### Building without Docker
 
 ```bash
 # Install build tools
-apt install clang cmake ccache ninja-build pkg-config
+apt install build-essential clang cmake ccache ninja-build pkg-config
 
 # Install system dependencies
 apt install libcurl4-openssl-dev libglfw3-dev libuv1-dev libpng-dev libicu-dev libjpeg-turbo8-dev libwebp-dev xvfb
@@ -26,26 +27,7 @@ Optional: `libsqlite3-dev` (also available as vendored dependency).
 
 ### Building with Docker
 
-You can use a Docker container to build MapLibre Native. A `Dockerfile` that installes the required dependencies when the image is built is provided in this directory.
-
-```bash
-# Build docker image from the repo root
-docker build -t maplibre-native-image -f platform/linux/Dockerfile .
-
-# Run docker image as the current user.
-# This ensures that the files created in the container are owned by the current user.
-docker run --rm -it -v "$PWD:/code/" -u $(id -u):$(id -g) maplibre-native-image ___any_build_command___
-
-# You can also execute build commands from inside the docker container by starting it without parameters:
-docker run --rm -it -v "$PWD:/code/" -u $(id -u):$(id -g) maplibre-native-image
-```
-
-You can safely ignore this type of message and a missing username. It happens if your linux user was not the first one created on the system.
-
-```
-groups: cannot find name for group ID ....
-I have no name!@...:/root$ `
-```
+See instructions in [docker/README.md](../../docker/README.md) to build in a docker container.
 
 ## Build
 
@@ -57,22 +39,17 @@ cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DC
 cmake --build build --target mbgl-render -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 ```
 
-
 ## Running `mbgl-render`
 Running `mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json` should produce a map tile image with the default MapLibre styling from [the MapLibre demo](https://maplibre.org/).
 
 ![Sample image of world from mbgl-render command](/misc/sample-maplibre-style-mbgl-render-out.png)
-
-### Outside of Docker
-
-Render output image using default MapLibre demo tiles server. You can run this binary on your host machine even if you built it inside a Docker container.
 
 ```bash
 ./build/bin/mbgl-render --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --output out.png
 xdg-open out.png
 ```
 
-### Inside Docker
+### Headless rendering
 
 If you run `mbgl-render` inside a Docker or on a remote headless server, you will likely get this error because there is no X server running in the container.
 
