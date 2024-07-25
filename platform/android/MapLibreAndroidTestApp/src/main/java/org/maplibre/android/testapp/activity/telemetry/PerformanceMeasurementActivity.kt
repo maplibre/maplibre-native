@@ -5,7 +5,6 @@ import android.os.Build
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.WindowManager
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -24,7 +23,6 @@ import java.util.*
 /**
  * Test activity showcasing gathering performance measurement data.
  */
-@RequiresApi(Build.VERSION_CODES.R)
 class PerformanceMeasurementActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -142,8 +140,14 @@ class PerformanceMeasurementActivity : AppCompatActivity() {
             }
         private val windowSize: String
             get() {
-                val metrics = MapLibre.getApplicationContext().resources.displayMetrics
-                return "{${metrics.widthPixels},${metrics.heightPixels}}"
+                val windowManager =
+                    MapLibre.getApplicationContext().getSystemService(WINDOW_SERVICE) as WindowManager
+                val display = windowManager.defaultDisplay
+                val metrics = DisplayMetrics()
+                display.getMetrics(metrics)
+                val width = metrics.widthPixels
+                val height = metrics.heightPixels
+                return "{$width,$height}"
             }
     }
 }

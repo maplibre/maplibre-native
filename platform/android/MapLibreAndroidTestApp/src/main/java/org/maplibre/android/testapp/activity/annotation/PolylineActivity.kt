@@ -1,13 +1,11 @@
 package org.maplibre.android.testapp.activity.annotation
 
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.annotations.Polyline
 import org.maplibre.android.annotations.PolylineOptions
@@ -35,12 +33,11 @@ class PolylineActivity : AppCompatActivity() {
     private var width = true
     private var color = true
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_polyline)
         if (savedInstanceState != null) {
-            polylineOptions = savedInstanceState.getParcelableArrayList(STATE_POLYLINE_OPTIONS, PolylineOptions::class.java)
+            polylineOptions = savedInstanceState.getParcelableArrayList(STATE_POLYLINE_OPTIONS)
         } else {
             polylineOptions!!.addAll(allPolylines)
         }

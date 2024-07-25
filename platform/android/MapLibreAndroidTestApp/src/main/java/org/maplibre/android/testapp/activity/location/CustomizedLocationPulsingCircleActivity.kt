@@ -3,7 +3,6 @@ package org.maplibre.android.testapp.activity.location
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.location.Location
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -14,7 +13,6 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.ListPopupWindow
 import org.maplibre.android.location.LocationComponent
@@ -47,14 +45,13 @@ class CustomizedLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyC
     //endregion
 
     @SuppressLint("SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_layer_customized_pulsing_circle)
         LOCATION_CIRCLE_PULSE_COLOR = Color.BLUE
         mapView = findViewById(R.id.mapView)
         if (savedInstanceState != null) {
-            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION, Location::class.java)
+            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION)
             LOCATION_CIRCLE_PULSE_COLOR = savedInstanceState.getInt(
                 SAVED_STATE_LOCATION_CIRCLE_PULSE_COLOR
             )

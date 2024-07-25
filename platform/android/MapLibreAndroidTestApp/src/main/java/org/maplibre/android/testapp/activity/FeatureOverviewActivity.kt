@@ -5,10 +5,8 @@ import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.res.Resources.NotFoundException
-import android.os.Build
 import android.os.Bundle
 import android.view.View
-import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -39,7 +37,6 @@ class FeatureOverviewActivity : AppCompatActivity() {
     private var sectionAdapter: FeatureSectionAdapter? = null
     private var features: List<Feature>? = null
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_feature_overview)
@@ -61,7 +58,7 @@ class FeatureOverviewActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             loadFeatures()
         } else {
-            features = savedInstanceState.getParcelableArrayList(KEY_STATE_FEATURES, Feature::class.java)
+            features = savedInstanceState.getParcelableArrayList(KEY_STATE_FEATURES)
             onFeaturesLoaded(features)
         }
     }

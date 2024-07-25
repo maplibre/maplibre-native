@@ -1,11 +1,9 @@
 package org.maplibre.android.testapp.activity.annotation
 
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.geometry.LatLng
@@ -28,7 +26,6 @@ class PressForMarkerActivity : AppCompatActivity() {
     private lateinit var maplibreMap: MapLibreMap
     private var markerList: ArrayList<MarkerOptions>? = ArrayList()
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_press_for_marker)

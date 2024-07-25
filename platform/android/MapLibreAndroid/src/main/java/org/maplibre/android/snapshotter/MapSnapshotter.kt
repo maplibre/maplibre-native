@@ -11,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.Keep
-import androidx.annotation.RequiresApi
 import androidx.annotation.UiThread
 import androidx.core.content.res.ResourcesCompat
 import org.maplibre.android.R
@@ -488,7 +487,6 @@ open class MapSnapshotter(context: Context, options: Options) {
         drawAttribution(mapSnapshot, canvas, measure, layout)
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun getAttributionMeasure(mapSnapshot: MapSnapshot, snapshot: Bitmap, margin: Int): AttributionMeasure {
         val logo = createScaledLogo(snapshot)
         val longText = createTextView(mapSnapshot, false, logo.scale)
@@ -536,7 +534,6 @@ open class MapSnapshotter(context: Context, options: Options) {
         canvas.restore()
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun createTextView(mapSnapshot: MapSnapshot, shortText: Boolean, scale: Float): TextView {
         val textColor = ResourcesCompat.getColor(context.resources, R.color.maplibre_gray_dark, context.theme)
         val widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
