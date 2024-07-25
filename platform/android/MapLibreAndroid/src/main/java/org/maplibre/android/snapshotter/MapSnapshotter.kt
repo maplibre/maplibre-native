@@ -488,6 +488,7 @@ open class MapSnapshotter(context: Context, options: Options) {
         drawAttribution(mapSnapshot, canvas, measure, layout)
     }
 
+    @RequiresApi(Build.VERSION_CODES.N)
     private fun getAttributionMeasure(mapSnapshot: MapSnapshot, snapshot: Bitmap, margin: Int): AttributionMeasure {
         val logo = createScaledLogo(snapshot)
         val longText = createTextView(mapSnapshot, false, logo.scale)
