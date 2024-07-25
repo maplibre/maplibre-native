@@ -35,12 +35,12 @@ static int channelStorageSize(gfx::TextureChannelDataType type) {
 TextureResource::TextureResource(UniqueTexture&& texture_, int byteSize_)
     : texture(std::move(texture_)),
       byteSize(byteSize_) {
-    MLN_TRACE_ALLOC_TEXTURE(texture.get(), byteSize);
+    MLN_TRACE_ALLOC_TEXTURE(texture.get(), byteSize)
 }
 
 TextureResource::~TextureResource() noexcept {
     auto& stats = texture.get_deleter().context->renderingStats();
-    MLN_TRACE_FREE_TEXTURE(texture.get());
+    MLN_TRACE_FREE_TEXTURE(texture.get())
     stats.memTextures -= byteSize;
     assert(stats.memTextures >= 0);
 }

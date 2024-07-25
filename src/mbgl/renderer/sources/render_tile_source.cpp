@@ -7,6 +7,7 @@
 #include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/tile/vector_tile.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/math.hpp>
 
 #if MLN_DRAWABLE_RENDERER
@@ -401,6 +402,8 @@ std::unique_ptr<RenderItem> RenderTileSource::createRenderItem() {
 }
 
 void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
+    MLN_TRACE_FUNC()
+    MLN_ZONE_STR(baseImpl->id)
     bearing = static_cast<float>(parameters.transform.state.getBearing());
     filteredRenderTiles = nullptr;
     renderTilesSortedByY = nullptr;
