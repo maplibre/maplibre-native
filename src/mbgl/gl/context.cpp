@@ -836,7 +836,6 @@ void Context::draw(const gfx::DrawMode& drawMode, std::size_t indexOffset, std::
 
 void Context::performCleanup() {
     MLN_TRACE_FUNC()
-
 #ifndef NDEBUG
     // In debug builds, un-bind all texture units so that any incorrect use results in an
     // error rather than using whatever texture happened to have been bound previously.
