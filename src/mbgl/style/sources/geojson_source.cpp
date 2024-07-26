@@ -9,6 +9,7 @@
 #include <mbgl/util/async_request.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/thread_pool.hpp>
+#include <mbgl/util/identity.hpp>
 
 namespace mbgl {
 namespace style {
@@ -21,7 +22,6 @@ Immutable<GeoJSONOptions> GeoJSONOptions::defaultOptions() {
 
 GeoJSONSource::GeoJSONSource(std::string id, Immutable<GeoJSONOptions> options)
     : Source(makeMutable<Impl>(std::move(id), std::move(options))),
-      threadPool(Scheduler::GetBackground()),
       sequencedScheduler(Scheduler::GetSequenced()) {}
 
 GeoJSONSource::~GeoJSONSource() = default;
@@ -77,32 +77,37 @@ void GeoJSONSource::loadDescription(FileSource& fileSource) {
         } else if (res.noContent) {
             observer->onSourceError(*this, std::make_exception_ptr(std::runtime_error("unexpectedly empty GeoJSON")));
         } else {
-            auto makeImplInBackground = [currentImpl = baseImpl,
-                                         data = res.data,
-                                         seqScheduler{sequencedScheduler}]() -> Immutable<Source::Impl> {
-                assert(data);
-                auto& current = static_cast<const Impl&>(*currentImpl);
-                conversion::Error error;
-                std::shared_ptr<GeoJSONData> geoJSONData;
-                if (std::optional<GeoJSON> geoJSON = conversion::convertJSON<GeoJSON>(*data, error)) {
-                    geoJSONData = GeoJSONData::create(*geoJSON, std::move(seqScheduler), current.getOptions());
-                } else {
-                    // Create an empty GeoJSON VT object to make sure we're not
-                    // infinitely waiting for tiles to load.
-                    Log::Error(Event::ParseStyle, "Failed to parse GeoJSON data: " + error.message);
-                }
-                return makeMutable<Impl>(current, std::move(geoJSONData));
-            };
-            auto onImplReady = [this, self = makeWeakPtr(), capturedReq = req.get()](Immutable<Source::Impl> newImpl) {
-                assert(capturedReq);
-                if (!self) return;                    // This source has been deleted.
-                if (capturedReq != req.get()) return; // A new request is being processed, ignore this impl.
+            // Note: This task appears to be safe enough to schedule on the generic background queue.
+            // This task does not reference other objects who's lifetimes are coupled with a map.
+            Scheduler::GetBackground()->scheduleAndReplyValue(
+                util::SimpleIdentity::Empty,
+                /* makeImplInBackground */
+                [currentImpl = baseImpl,
+                 data = res.data,
+                 seqScheduler{sequencedScheduler}]() -> Immutable<Source::Impl> {
+                    assert(data);
+                    auto& current = static_cast<const Impl&>(*currentImpl);
+                    conversion::Error error;
+                    std::shared_ptr<GeoJSONData> geoJSONData;
+                    if (std::optional<GeoJSON> geoJSON = conversion::convertJSON<GeoJSON>(*data, error)) {
+                        geoJSONData = GeoJSONData::create(*geoJSON, std::move(seqScheduler), current.getOptions());
+                    } else {
+                        // Create an empty GeoJSON VT object to make sure we're not
+                        // infinitely waiting for tiles to load.
+                        Log::Error(Event::ParseStyle, "Failed to parse GeoJSON data: " + error.message);
+                    }
+                    return makeMutable<Impl>(current, std::move(geoJSONData));
+                },
+                /* onImplReady */
+                [this, self = makeWeakPtr(), capturedReq = req.get()](Immutable<Source::Impl> newImpl) {
+                    assert(capturedReq);
+                    if (!self) return;                    // This source has been deleted.
+                    if (capturedReq != req.get()) return; // A new request is being processed, ignore this impl.
 
-                baseImpl = std::move(newImpl);
-                loaded = true;
-                observer->onSourceLoaded(*this);
-            };
-            threadPool->scheduleAndReplyValue(makeImplInBackground, onImplReady);
+                    baseImpl = std::move(newImpl);
+                    loaded = true;
+                    observer->onSourceLoaded(*this);
+                });
         }
     });
 }

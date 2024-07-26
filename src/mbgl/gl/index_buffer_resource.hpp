@@ -8,9 +8,7 @@ namespace gl {
 
 class IndexBufferResource : public gfx::IndexBufferResource {
 public:
-    IndexBufferResource(UniqueBuffer&& buffer_, int byteSize_)
-        : buffer(std::move(buffer_)),
-          byteSize(byteSize_) {}
+    IndexBufferResource(UniqueBuffer&& buffer_, int byteSize_);
     ~IndexBufferResource() noexcept override;
 
     UniqueBuffer buffer;

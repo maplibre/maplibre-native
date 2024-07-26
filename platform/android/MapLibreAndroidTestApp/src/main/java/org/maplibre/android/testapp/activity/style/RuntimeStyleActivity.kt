@@ -34,6 +34,7 @@ import org.maplibre.android.style.sources.Source
 import org.maplibre.android.style.sources.TileSet
 import org.maplibre.android.style.sources.VectorSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.ResourceUtils
 import timber.log.Timber
 import java.io.IOException
@@ -95,7 +96,7 @@ class RuntimeStyleActivity : AppCompatActivity() {
                 )
                 maplibreMap.setStyle(
                     Style.Builder()
-                        .fromUri(Style.getPredefinedStyle("Streets")) // set custom transition
+                        .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets")) // set custom transition
                         .withTransition(TransitionOptions(250, 50))
                 ) { style: Style ->
                     styleLoaded = true

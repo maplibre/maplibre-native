@@ -16,7 +16,7 @@ std::function<void()> Scheduler::bindOnce(std::function<void()> fn) {
 static auto& current() {
     static util::ThreadLocal<Scheduler> scheduler;
     return scheduler;
-};
+}
 
 void Scheduler::SetCurrent(Scheduler* scheduler) {
     current().set(scheduler);

@@ -9,6 +9,7 @@ import org.maplibre.android.maps.* // ktlint-disable no-wildcard-imports
 import org.maplibre.android.maps.MapFragment.OnMapViewReadyCallback
 import org.maplibre.android.maps.MapView.OnDidFinishRenderingFrameListener
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing using the MapFragment API using Support Library Fragments.
@@ -67,7 +68,7 @@ class SupportMapFragmentActivity :
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
     }
 
     override fun onDestroy() {

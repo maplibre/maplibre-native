@@ -4,7 +4,7 @@
 # https://github.com/bazelbuild/rules_apple/issues/2241
 # To use this script, make sure the XCFramework is built with Bazel (see ios-ci.yml).
 # Then to start a local preview, run:
-# $ platform/ios/scripts/docc.sh bazel
+# $ platform/ios/scripts/docc.sh preview
 # You can also build the documentation locally
 # $ platform/ios/scripts/docc.sh
 # Then go to build/MapLibre.doccarchive and run
@@ -31,6 +31,10 @@ mkdir -p "$build_dir"/headers
 
 bazel build --//:renderer=metal //platform/darwin:generated_style_public_hdrs
 
+# download resources from S3
+
+aws s3 sync --no-sign-request "s3://maplibre-native/ios-documentation-resources" "platform/ios/MapLibre.docc/Resources"
+
 public_headers=$(bazel query 'kind("source file", deps(//platform:ios-sdk, 2))' --output location | grep ".h$" | sed -r 's#.*/([^:]+).*#\1#')
 style_headers=$(bazel cquery --//:renderer=metal //platform/darwin:generated_style_public_hdrs --output=files)
 
@@ -55,19 +59,23 @@ filter_filenames() {
 ios_headers=$(filter_filenames "platform/ios/src" "$public_headers")
 darwin_headers=$(filter_filenames "platform/darwin/src" "$public_headers")
 
-for header in $ios_headers $darwin_headers $style_headers; do
-  xcrun --toolchain swift clang \
-     -extract-api \
-     --product-name=MapLibre \
-     -isysroot $SDK_PATH \
-     -F "$SDK_PATH"/System/Library/Frameworks \
-     -I "$PWD" \
-     -I "$build_dir"/headers \
-     -I platform/darwin/src \
-     -x objective-c-header  \
-     -o "$build_dir"/symbol-graphs/$(basename $header).symbols.json  \
-     $header
-done
+clang_options=(
+  --toolchain swift clang
+  -extract-api
+  --product-name=MapLibre
+  -isysroot "$SDK_PATH"
+  -F "$SDK_PATH/System/Library/Frameworks"
+  -I "$PWD"
+  -I "$build_dir/headers"
+  -I platform/darwin/src
+  -x objective-c-header
+)
+
+headers=($ios_headers $darwin_headers build/headers/*.h)
+output_name="combined.symbols.json"
+xcrun "${clang_options[@]}" \
+  -o "$build_dir/symbol-graphs/$output_name" \
+  "${headers[@]}"
 
 export DOCC_HTML_DIR=$(dirname $(xcrun --toolchain swift --find docc))/../share/docc/render
 $(xcrun --find docc) "$cmd" platform/ios/MapLibre.docc \
@@ -78,6 +86,7 @@ $(xcrun --find docc) "$cmd" platform/ios/MapLibre.docc \
     --source-service github \
     --source-service-base-url https://github.com/maplibre/maplibre-native/blob/main \
     --checkout-path $(realpath .) \
+    ${HOSTING_BASE_PATH:+--hosting-base-path "$HOSTING_BASE_PATH"} \
     --output-path "$build_dir"/MapLibre.doccarchive
 
 if [[ "$cmd" == "convert" ]]; then

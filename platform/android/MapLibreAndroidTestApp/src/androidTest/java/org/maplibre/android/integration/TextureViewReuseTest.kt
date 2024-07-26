@@ -3,6 +3,7 @@ package org.maplibre.android.integration
 import androidx.test.filters.LargeTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
+import org.junit.Ignore
 import org.maplibre.android.testapp.activity.maplayout.TextureRecyclerViewActivity
 import org.junit.Rule
 import org.junit.Test

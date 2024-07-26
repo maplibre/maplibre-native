@@ -11,6 +11,7 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.*
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import java.util.*
 
 /**
@@ -41,7 +42,7 @@ class TextureViewAnimationActivity : AppCompatActivity() {
         mapView = findViewById<View>(R.id.mapView) as MapView
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             this@TextureViewAnimationActivity.maplibreMap = maplibreMap
-            maplibreMap.setStyle(Style.getPredefinedStyle("Streets"))
+            maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
             setFpsView(maplibreMap)
 
             // Animate the map view

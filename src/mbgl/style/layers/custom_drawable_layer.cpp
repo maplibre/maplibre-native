@@ -91,8 +91,9 @@ class LineDrawableTweaker : public gfx::DrawableTweaker {
 public:
     LineDrawableTweaker(const shaders::LineEvaluatedPropsUBO& properties)
         : linePropertiesUBO(properties) {}
+    ~LineDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override {}
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -124,6 +125,9 @@ public:
         drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
         drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
         drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
+
+        // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
+        assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
     };
 
 private:
@@ -135,7 +139,7 @@ public:
     WideVectorDrawableTweaker(const CustomDrawableLayerHost::Interface::LineOptions& options_)
         : options(options_) {}
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override {}
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -198,8 +202,9 @@ public:
     FillDrawableTweaker(const Color& color_, float opacity_)
         : color(color_),
           opacity(opacity_) {}
+    ~FillDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override {}
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -244,8 +249,9 @@ class SymbolDrawableTweaker : public gfx::DrawableTweaker {
 public:
     SymbolDrawableTweaker(const CustomDrawableLayerHost::Interface::SymbolOptions& options_)
         : options(options_) {}
+    ~SymbolDrawableTweaker() override = default;
 
-    void init(gfx::Drawable&) override {};
+    void init(gfx::Drawable&) override {}
 
     void execute(gfx::Drawable& drawable, const PaintParameters& parameters) override {
         if (!drawable.getTileID().has_value()) {
@@ -536,8 +542,8 @@ void CustomDrawableLayerHost::Interface::finish() {
                                                                           lineOptions.gapWidth,
                                                                           lineOptions.offset,
                                                                           lineOptions.width,
-                                                                          0,
-                                                                          0,
+                                                                          /*floorwidth=*/0,
+                                                                          LineExpressionMask::None,
                                                                           0};
                 auto tweaker = std::make_shared<LineDrawableTweaker>(linePropertiesUBO);
 

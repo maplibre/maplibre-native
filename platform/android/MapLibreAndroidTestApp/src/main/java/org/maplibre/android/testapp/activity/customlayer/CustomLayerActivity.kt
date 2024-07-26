@@ -16,6 +16,7 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.style.layers.CustomLayer
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.model.customlayer.ExampleCustomLayer
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing the Custom Layer API
@@ -43,7 +44,7 @@ class CustomLayerActivity : AppCompatActivity() {
                         10.0
                     )
                 )
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? -> initFab() }
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? -> initFab() }
             }
         )
     }

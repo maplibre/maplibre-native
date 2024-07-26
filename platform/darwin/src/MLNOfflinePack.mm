@@ -12,6 +12,7 @@
 
 #include <mbgl/map/map_options.hpp>
 #include <mbgl/storage/database_file_source.hpp>
+#include <mbgl/util/variant.hpp>
 
 const MLNExceptionName MLNInvalidOfflinePackException = @"MLNInvalidOfflinePackException";
 
@@ -93,15 +94,14 @@ private:
     MLNAssert([MLNTilePyramidOfflineRegion conformsToProtocol:@protocol(MLNOfflineRegion_Private)], @"MLNTilePyramidOfflineRegion should conform to MLNOfflineRegion_Private.");
     MLNAssert([MLNShapeOfflineRegion conformsToProtocol:@protocol(MLNOfflineRegion_Private)], @"MLNShapeOfflineRegion should conform to MLNOfflineRegion_Private.");
     
-    
-    
-    return regionDefinition.match(
-                           [&] (const mbgl::OfflineTilePyramidRegionDefinition def){
-                               return (id <MLNOfflineRegion>)[[MLNTilePyramidOfflineRegion alloc] initWithOfflineRegionDefinition:def];
-                           },
-                           [&] (const mbgl::OfflineGeometryRegionDefinition& def){
-                               return (id <MLNOfflineRegion>)[[MLNShapeOfflineRegion alloc] initWithOfflineRegionDefinition:def];
-                           });
+    return  std::visit(mbgl::overloaded{
+                                   [&] (const mbgl::OfflineTilePyramidRegionDefinition def){
+                                       return (id <MLNOfflineRegion>)[[MLNTilePyramidOfflineRegion alloc] initWithOfflineRegionDefinition:def];
+                                   },
+                                   [&] (const mbgl::OfflineGeometryRegionDefinition& def){
+                                       return (id <MLNOfflineRegion>)[[MLNShapeOfflineRegion alloc] initWithOfflineRegionDefinition:def];
+                                   }
+    }, regionDefinition);
 }
 
 - (NSData *)context {

@@ -13,8 +13,8 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.OnMapReadyCallback
-import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import java.util.*
 
 /**
@@ -46,7 +46,7 @@ class PolylineActivity : AppCompatActivity() {
         mapView.getMapAsync(
             OnMapReadyCallback { maplibreMap: MapLibreMap ->
                 this@PolylineActivity.maplibreMap = maplibreMap
-                maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid"))
+                maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"))
                 maplibreMap.setOnPolylineClickListener { polyline: Polyline ->
                     Toast.makeText(
                         this@PolylineActivity,

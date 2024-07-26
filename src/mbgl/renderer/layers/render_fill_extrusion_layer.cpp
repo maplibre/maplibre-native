@@ -58,9 +58,11 @@ void RenderFillExtrusionLayer::transition(const TransitionParameters& parameters
 }
 
 void RenderFillExtrusionLayer::evaluate(const PropertyEvaluationParameters& parameters) {
-    auto properties = makeMutable<FillExtrusionLayerProperties>(staticImmutableCast<FillExtrusionLayer::Impl>(baseImpl),
-                                                                parameters.getCrossfadeParameters(),
-                                                                unevaluated.evaluate(parameters));
+    const auto previousProperties = staticImmutableCast<FillExtrusionLayerProperties>(evaluatedProperties);
+    auto properties = makeMutable<FillExtrusionLayerProperties>(
+        staticImmutableCast<FillExtrusionLayer::Impl>(baseImpl),
+        parameters.getCrossfadeParameters(),
+        unevaluated.evaluate(parameters, previousProperties->evaluated));
 
     passes = (properties->evaluated.get<style::FillExtrusionOpacity>() > 0)
                  ? (RenderPass::Translucent | RenderPass::Pass3D)
@@ -312,7 +314,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
         // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
         const auto& tileID = drawable.getTileID();
-        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
+        if (!(drawable.getRenderPass() & passes) || (tileID && !hasRenderTile(*tileID))) {
             return true;
         }
         return false;

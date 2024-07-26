@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
 #import "MLNMultiPoint.h"
@@ -44,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  To make the polygon straddle the antimeridian, specify some longitudes less
  than −180 degrees or greater than 180 degrees.
- 
+
  #### Related examples
  TODO: Add a polygon annotation, learn how to initialize an
  `MLNPolygon` object from an array of coordinates.
@@ -72,7 +72,8 @@ MLN_EXPORT
  @param count The number of items in the `coords` array.
  @return A new polygon object.
  */
-+ (instancetype)polygonWithCoordinates:(const CLLocationCoordinate2D *)coords count:(NSUInteger)count;
++ (instancetype)polygonWithCoordinates:(const CLLocationCoordinate2D *)coords
+                                 count:(NSUInteger)count;
 
 /**
  Creates and returns an `MLNPolygon` object from the specified set of
@@ -86,7 +87,9 @@ MLN_EXPORT
     is considered to have no interior polygons.
  @return A new polygon object.
  */
-+ (instancetype)polygonWithCoordinates:(const CLLocationCoordinate2D *)coords count:(NSUInteger)count interiorPolygons:(nullable NSArray<MLNPolygon *> *)interiorPolygons;
++ (instancetype)polygonWithCoordinates:(const CLLocationCoordinate2D *)coords
+                                 count:(NSUInteger)count
+                      interiorPolygons:(nullable NSArray<MLNPolygon *> *)interiorPolygons;
 
 @end
 

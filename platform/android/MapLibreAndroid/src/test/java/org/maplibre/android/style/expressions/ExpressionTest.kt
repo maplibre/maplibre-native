@@ -1,4 +1,4 @@
-package com.mapbox.mapboxsdk.style.expressions
+package org.maplibre.android.style.expressions
 
 import android.graphics.Color
 import org.maplibre.geojson.Point
@@ -10,7 +10,6 @@ import org.maplibre.android.utils.ColorUtils
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.maplibre.android.style.expressions.Expression
 import org.robolectric.RobolectricTestRunner
 import java.util.*
 

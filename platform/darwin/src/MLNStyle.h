@@ -5,9 +5,9 @@
 
 #import "MLNTypes.h"
 
+#import "MLNDefaultStyle.h"
 #import "MLNSettings.h"
 #import "MLNTileServerOptions.h"
-#import "MLNDefaultStyle.h"
 
 @class MLNSource;
 @class MLNLight;
@@ -43,23 +43,23 @@ MLN_EXPORT
 /**
  Returns list of predefined styles
  */
-+ (NSArray<MLNDefaultStyle*>*) predefinedStyles;
++ (NSArray<MLNDefaultStyle *> *)predefinedStyles;
 
 /**
  Returns default style
  */
-+ (MLNDefaultStyle*) defaultStyle;
++ (MLNDefaultStyle *)defaultStyle;
 
 /**
  Returns default style as NSURL
  */
-+ (nullable NSURL*) defaultStyleURL;
++ (nullable NSURL *)defaultStyleURL;
 
 /** Get predefined style by name
- 
+
  @param withStyleName style name.
  */
-+ (nullable MLNDefaultStyle*) predefinedStyle:(NSString*)withStyleName;
++ (nullable MLNDefaultStyle *)predefinedStyle:(NSString *)withStyleName;
 
 // MARK: Accessing Metadata About the Style
 
@@ -156,8 +156,7 @@ MLN_EXPORT
  @return `YES` if `source` was removed successfully. If `NO`, `outError` contains
  an `NSError` object describing the problem.
  */
-- (BOOL)removeSource:(MLNSource *)source error:(NSError * __nullable * __nullable)outError;
-
+- (BOOL)removeSource:(MLNSource *)source error:(NSError *__nullable *__nullable)outError;
 
 // MARK: Managing Style Layers
 
@@ -335,7 +334,6 @@ MLN_EXPORT
  */
 - (void)removeImageForName:(NSString *)name;
 
-
 // MARK: Managing the Style's Light
 
 /**
@@ -350,10 +348,10 @@ MLN_EXPORT
 
  This method automatically modifies the text property of any symbol style layer
  in the style whose source is the
- <a href="https://www.mapbox.com/vector-tiles/mapbox-streets-v8/#overview">Mapbox Streets source</a>.
- On iOS, the user can set the system’s preferred language in Settings, General
- Settings, Language & Region. On macOS, the user can set the system’s preferred
- language in the Language & Region pane of System Preferences.
+ <a href="https://www.mapbox.com/vector-tiles/mapbox-streets-v8/#overview">Mapbox Streets
+ source</a>. On iOS, the user can set the system’s preferred language in Settings, General Settings,
+ Language & Region. On macOS, the user can set the system’s preferred language in the Language &
+ Region pane of System Preferences.
 
  @param locale The locale into which labels should be localized. To use the
     system’s preferred language, if supported, specify `nil`. To use the local

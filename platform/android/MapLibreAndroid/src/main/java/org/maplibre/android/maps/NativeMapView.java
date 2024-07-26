@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import androidx.annotation.IntRange;
@@ -616,6 +617,14 @@ final class NativeMapView implements NativeMap {
       return;
     }
     nativeSetVisibleCoordinateBounds(coordinates, padding, direction, duration);
+  }
+
+  @Override
+  public void setTileCacheEnabled(boolean enabled) {
+    if (checkState("setTileCacheEnabled")) {
+      return;
+    }
+    nativeSetTileCacheEnabled(enabled);
   }
 
   @Override
@@ -1332,6 +1341,9 @@ final class NativeMapView implements NativeMap {
                                                        double direction, long duration);
 
   @Keep
+  private native void nativeSetTileCacheEnabled(boolean enabled);
+
+  @Keep
   private native void nativeOnLowMemory();
 
   @Keep
@@ -1524,7 +1536,7 @@ final class NativeMapView implements NativeMap {
 
   @Override
   public void setOnFpsChangedListener(@Nullable final MapLibreMap.OnFpsChangedListener listener) {
-    final Handler handler = new Handler();
+    final Handler handler = new Handler(Looper.getMainLooper());
     mapRenderer.queueEvent(new Runnable() {
 
       @Override

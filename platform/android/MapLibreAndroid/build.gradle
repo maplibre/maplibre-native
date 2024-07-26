@@ -34,12 +34,11 @@ dependencies {
 }
 
 tasks.withType(DokkaTask.class) {
-    moduleName.set("MapLibre Native for Android")
+    moduleName.set("MapLibre Native Android")
 
     dokkaSourceSets {
-
         configureEach {
-            includes.from("README.md")
+            includes.from("Module.md")
         }
     } 
 }
@@ -51,10 +50,7 @@ android {
         targetSdkVersion 33
         buildConfigField "String", "GIT_REVISION_SHORT", String.format("\"%s\"", getGitRevision())
         buildConfigField "String", "GIT_REVISION", String.format("\"%s\"", getGitRevision(false))
-        buildConfigField "String", "MAPBOX_SDK_IDENTIFIER", String.format("\"%s\"", "mapbox-maps-android")
-        buildConfigField "String", "MAPBOX_SDK_VERSION", String.format("\"%s\"", project.VERSION_NAME)
-        buildConfigField "String", "MAPBOX_VERSION_STRING", String.format("\"Mapbox/%s\"", project.VERSION_NAME)
-        buildConfigField "String", "MAPBOX_EVENTS_USER_AGENT", String.format("\"mapbox-maps-android/%s\"", project.VERSION_NAME)
+        buildConfigField "String", "MAPLIBRE_VERSION_STRING", String.format("\"MapLibre Native/%s\"", project.VERSION_NAME)
         consumerProguardFiles 'proguard-rules.pro'
 
         externalNativeBuild {
@@ -134,6 +130,9 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    buildFeatures {
+        buildConfig true
     }
 }
 

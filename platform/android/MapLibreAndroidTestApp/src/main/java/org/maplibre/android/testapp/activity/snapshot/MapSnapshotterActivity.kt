@@ -28,6 +28,7 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.style.sources.RasterSource
 import org.maplibre.android.style.sources.Source
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.utils.BitmapUtils
 import timber.log.Timber
 import java.util.Objects
@@ -49,7 +50,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
         grid.getViewTreeObserver()
             .addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
-                    grid.getViewTreeObserver().removeGlobalOnLayoutListener(this)
+                    grid.getViewTreeObserver().removeOnGlobalLayoutListener(this)
                     addSnapshots()
                 }
             })
@@ -68,7 +69,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
         // Optionally the style
         val builder = Style.Builder()
             .fromUri(
-                Style.getPredefinedStyle(
+                TestStyles.getPredefinedStyleWithFallback(
                     if ((column + row) % 2 == 0) {
                         "Streets"
                     } else {

@@ -297,7 +297,7 @@ public:
 
     // Look for buffers that either have zero living references or equal or under FragmentationThresh
     // references. In the latter case, attempt to relocate these allocations to more utilized buffers.
-    void defragment(const std::shared_ptr<gl::Fence>& fence) noexcept override {
+    void defragment(const std::shared_ptr<gl::Fence>& fence) override {
         if (buffers.size() == 0) {
             return;
         }
@@ -502,7 +502,7 @@ void UniformBufferAllocator::release(BufferRef* ref) noexcept {
     impl->release(ref);
 }
 
-void UniformBufferAllocator::defragment(const std::shared_ptr<gl::Fence>& fence) noexcept {
+void UniformBufferAllocator::defragment(const std::shared_ptr<gl::Fence>& fence) {
     impl->defragment(fence);
 }
 

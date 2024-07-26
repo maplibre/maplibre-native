@@ -1,0 +1,4 @@
+# Exclude everything because we expect users to mount this dir as a volume,
+# so none of this repos' content should be part of the docker build context.
+*
+!startup.sh

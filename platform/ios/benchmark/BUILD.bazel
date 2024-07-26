@@ -26,8 +26,6 @@ filegroup(
     srcs = glob([
         "*.lproj/**",
         "Assets.xcassets/**",
-        "assets/**/*.json",
-        "assets/**/*.png",
     ]),
     visibility = ["//platform/ios:__pkg__"],
 )

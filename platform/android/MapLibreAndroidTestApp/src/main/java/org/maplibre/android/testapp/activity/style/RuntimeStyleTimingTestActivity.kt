@@ -8,6 +8,7 @@ import org.maplibre.android.maps.*
 import org.maplibre.android.style.layers.*
 import org.maplibre.android.style.sources.VectorSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity for unit test execution
@@ -39,7 +40,7 @@ class RuntimeStyleTimingTestActivity : AppCompatActivity() {
             )
             maplibreMap.setStyle(
                 Style.Builder()
-                    .fromUri(Style.getPredefinedStyle("Streets"))
+                    .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
                     .withSource(parks)
                     .withLayer(parksLayer)
             )

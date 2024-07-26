@@ -178,7 +178,7 @@ public:
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
-                              const CrossfadeParameters&) override {};
+                              const CrossfadeParameters&) override {}
 
     std::tuple<float> interpolationFactor(float) const override { return std::tuple<float>{0.0f}; }
 
@@ -272,7 +272,7 @@ public:
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
-                              const CrossfadeParameters&) override {};
+                              const CrossfadeParameters&) override {}
     void populateVertexVector(const GeometryTileFeature& feature,
                               std::size_t length,
                               std::size_t index,
@@ -391,7 +391,7 @@ public:
 
     void setPatternParameters(const std::optional<ImagePosition>&,
                               const std::optional<ImagePosition>&,
-                              const CrossfadeParameters&) override {};
+                              const CrossfadeParameters&) override {}
     void populateVertexVector(const GeometryTileFeature& feature,
                               std::size_t length,
                               std::size_t index,
@@ -415,6 +415,9 @@ public:
         const AttributeValue value = zoomInterpolatedAttributeValue(attributeValue(range.min),
                                                                     attributeValue(range.max));
         const auto elements = vertexVector.elements();
+        if (vertexVector.empty()) {
+            vertexVector.reserve(length);
+        }
         for (std::size_t i = elements; i < length; ++i) {
             vertexVector.emplace_back(Vertex{value});
         }
@@ -473,7 +476,7 @@ public:
 #endif // MLN_LEGACY_RENDERER
 
     std::tuple<float> interpolationFactor(float currentZoom) const override {
-        const float possiblyRoundedZoom = expression.useIntegerZoom ? std::floor(currentZoom) : currentZoom;
+        const float possiblyRoundedZoom = expression.getUseIntegerZoom() ? std::floor(currentZoom) : currentZoom;
 
         return std::tuple<float>{
             std::fmax(0.0f, std::fmin(1.0f, expression.interpolationFactor(zoomRange, possiblyRoundedZoom)))};

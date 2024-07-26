@@ -22,8 +22,7 @@ void logStyleDependencies(EventSeverity severity, Event event, const style::Styl
             counts[0]++;
         } else {
             for (size_t i = 0; i < maskCount; ++i) {
-                const auto mask = Dependency{1u << i};
-                if ((deps & mask) == mask) {
+                if (deps & Dependency{1u << i}) {
                     counts[i + 1]++;
                 }
             }
@@ -33,7 +32,9 @@ void logStyleDependencies(EventSeverity severity, Event event, const style::Styl
     ss << "Style '" << style.getName() << "' has " << layers.size() << " layers:\n";
     ss << "  " << Dependency::None << ": " << counts[0] << "\n";
     for (size_t i = 0; i < maskCount; ++i) {
-        ss << "  " << Dependency{1u << i} << ": " << counts[i + 1] << "\n";
+        if (counts[i + 1]) {
+            ss << "  " << Dependency{1u << i} << ": " << counts[i + 1] << "\n";
+        }
     }
     Log::Record(severity, event, ss.str());
 }
@@ -51,7 +52,7 @@ Map::Impl::Impl(RendererFrontend& frontend_,
       pixelRatio(mapOptions.pixelRatio()),
       crossSourceCollisions(mapOptions.crossSourceCollisions()),
       fileSource(std::move(fileSource_)),
-      style(std::make_unique<style::Style>(fileSource, pixelRatio)),
+      style(std::make_unique<style::Style>(fileSource, pixelRatio, frontend_.getThreadPool())),
       annotationManager(*style) {
     transform.setNorthOrientation(mapOptions.northOrientation());
     style->impl->setObserver(this);

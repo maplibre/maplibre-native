@@ -28,7 +28,7 @@ class MapSnapshotterLocalStyleActivity : AppCompatActivity(), MapSnapshotter.Sna
         container.viewTreeObserver
             .addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
-                    container.viewTreeObserver.removeGlobalOnLayoutListener(this)
+                    container.viewTreeObserver.removeOnGlobalLayoutListener(this)
                     val styleJson: String
                     styleJson = try {
                         ResourceUtils.readRawResource(

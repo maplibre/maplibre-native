@@ -4,6 +4,10 @@
     @Available(iOS, introduced: "12.0")
 }
 
+@Options(scope: global) {
+  @AutomaticArticleSubheading(disabled)
+}
+
 Powerful, free and open-source mapping toolkit with full control over data sources and styling.
 
 ## Overview
@@ -12,6 +16,36 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 > Note: For information on creating and modifying map styles, see the [MapLibre Style Spec documentation](https://maplibre.org/maplibre-style-spec/).
 
 ## Topics
+
+### Essentials
+
+- <doc:GettingStarted>
+- <doc:AddMarkerSymbolExample>
+
+### Styling and Dynamic Data
+
+- <doc:AnimatedLineExample>
+- <doc:WebAPIDataExample>
+- <doc:LineStyleLayerExample>
+- <doc:DDSCircleLayerExample>
+- <doc:POIAlongRouteExample>
+
+### Map Interaction
+
+- <doc:LineOnUserTap>
+- <doc:BlockingGesturesExample>
+- <doc:AnnotationViewExample>
+- <doc:BuildingLightExample>
+
+### Features
+
+- <doc:LocationPrivacyExample>
+- <doc:StaticSnapshotExample>
+
+### Offline
+
+- <doc:OfflinePackExample>
+- <doc:ManageOfflineRegionsExample>
 
 ### Map
 

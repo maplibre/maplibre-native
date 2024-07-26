@@ -10,8 +10,10 @@ import org.maplibre.android.testapp.activity.BaseTest
 import org.maplibre.android.testapp.activity.espresso.PixelTestActivity
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 
+@Ignore("https://github.com/maplibre/maplibre-native/issues/2468")
 class VisibleRegionTest : BaseTest() {
 
     override fun getActivityClass(): Class<*> {

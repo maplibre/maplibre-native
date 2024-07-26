@@ -6,6 +6,7 @@ import org.maplibre.android.maps.*
 import org.maplibre.android.style.layers.HillshadeLayer
 import org.maplibre.android.style.sources.RasterDemSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing using HillshadeLayer.
@@ -27,7 +28,7 @@ class HillshadeLayerActivity : AppCompatActivity() {
                 val hillshadeLayer = HillshadeLayer(LAYER_ID, SOURCE_ID)
                 maplibreMap.setStyle(
                     Style.Builder()
-                        .fromUri(Style.getPredefinedStyle("Streets"))
+                        .fromUri(TestStyles.getPredefinedStyleWithFallback("Streets"))
                         .withLayerBelow(hillshadeLayer, LAYER_BELOW_ID)
                         .withSource(rasterDemSource)
                 )

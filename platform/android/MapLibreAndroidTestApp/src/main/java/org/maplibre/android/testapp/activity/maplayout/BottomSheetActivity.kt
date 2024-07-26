@@ -11,6 +11,7 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.*
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.utils.MapFragmentUtils
 
 /**
@@ -169,12 +170,12 @@ class BottomSheetActivity : AppCompatActivity() {
 
         companion object {
             private val STYLES = arrayOf(
-                Style.getPredefinedStyle("Streets"),
-                Style.getPredefinedStyle("Satellite Hybrid"),
-                Style.getPredefinedStyle("Bright"),
-                Style.getPredefinedStyle("Pastel"),
-                Style.getPredefinedStyle("Satellite Hybrid"),
-                Style.getPredefinedStyle("Outdoor")
+                TestStyles.getPredefinedStyleWithFallback("Streets"),
+                TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
+                TestStyles.getPredefinedStyleWithFallback("Bright"),
+                TestStyles.getPredefinedStyleWithFallback("Pastel"),
+                TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
+                TestStyles.getPredefinedStyleWithFallback("Outdoor")
             )
 
             fun newInstance(context: Context?, mapCounter: Int): MainMapFragment {
@@ -216,7 +217,7 @@ class BottomSheetActivity : AppCompatActivity() {
                     15.0
                 )
             )
-            maplibreMap.setStyle(Style.getPredefinedStyle("Bright"))
+            maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Bright"))
         }
 
         override fun onStart() {

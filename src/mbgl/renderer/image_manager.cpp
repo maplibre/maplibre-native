@@ -4,13 +4,16 @@
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/renderer/image_manager_observer.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <sstream>
 
 namespace mbgl {
 
-static ImageManagerObserver nullObserver;
+namespace {
+ImageManagerObserver nullObserver;
+} // namespace
 
 ImageManager::ImageManager() = default;
 
@@ -189,6 +192,7 @@ void ImageManager::reduceMemoryUse() {
 
 void ImageManager::reduceMemoryUseIfCacheSizeExceedsLimit() {
     if (requestedImagesCacheSize > util::DEFAULT_ON_DEMAND_IMAGES_CACHE_SIZE) {
+        MLN_TRACE_FUNC()
         reduceMemoryUse();
     }
 }
@@ -284,6 +288,10 @@ void ImageManager::notify(ImageRequestor& requestor, const ImageRequestPair& pai
     ImageMap iconMap;
     ImageMap patternMap;
     ImageVersionMap versionMap;
+
+    iconMap.reserve(pair.first.size());
+    patternMap.reserve(pair.first.size());
+    versionMap.reserve(pair.first.size());
 
     for (const auto& dependency : pair.first) {
         auto it = images.find(dependency.first);

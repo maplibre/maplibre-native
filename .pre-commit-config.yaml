@@ -5,20 +5,25 @@ repos:
     -   id: check-yaml
         args: [--allow-multiple-documents]
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v18.1.4
+  rev: v18.1.8
   hooks:
   - id: clang-format
     files: '.*\.(hpp|cpp|h)'
-    exclude: '(vendor/.*|platform/(ios|darwin|macos)/.*|test/ios/.*|render-test/ios/.*|benchmark/ios/.*)'
+    exclude: '(vendor/.*|darwin/include/mbgl/storage/reachability.h)'
 - repo: https://github.com/keith/pre-commit-buildifier
-  rev: 6.4.0
+  rev: 6.4.0.1
   hooks:
     - id: buildifier
 - repo: https://github.com/Mateusz-Grzelinski/actionlint-py
-  rev: v1.6.27.13
+  rev: v1.7.1.15
   hooks:
     - id: actionlint
       additional_dependencies: [shellcheck-py]
+- repo: https://github.com/nicklockwood/SwiftFormat
+  rev: "0.54.2"
+  hooks:
+    - id: swiftformat
+      args: [--swiftversion, "5.8"]
 ci:
   # sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
   skip: [buildifier]

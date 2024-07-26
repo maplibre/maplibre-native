@@ -6,6 +6,7 @@
 #include <queue>
 
 #include <mapbox/std/weak.hpp>
+#include <mbgl/actor/scheduler.hpp>
 
 namespace mbgl {
 
@@ -21,11 +22,13 @@ public:
     Mailbox();
 
     Mailbox(Scheduler&);
+    Mailbox(const TaggedScheduler&);
 
     /// Attach the given scheduler to this mailbox and begin processing messages
     /// sent to it. The mailbox must be a "holding" mailbox, as created by the
     /// default constructor Mailbox().
-    void open(Scheduler& scheduler_);
+    void open(const TaggedScheduler& scheduler_);
+    void open(Scheduler&);
     void close();
 
     // Indicate this mailbox will no longer be checked for messages
@@ -46,6 +49,7 @@ private:
         Abandoned
     };
 
+    util::SimpleIdentity schedulerTag = util::SimpleIdentity::Empty;
     mapbox::base::WeakPtr<Scheduler> weakScheduler;
 
     std::recursive_mutex receivingMutex;
