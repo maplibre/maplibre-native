@@ -55,6 +55,8 @@ void Scheduler::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity t
     }
 
     assert(m_taskQueue.size() + pendingItems == 0);
+
+    waitForDeferred();
 }
 
 } // namespace QMapLibre

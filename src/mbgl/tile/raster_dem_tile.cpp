@@ -37,12 +37,12 @@ RasterDEMTile::~RasterDEMTile() {
 
     // The bucket has resources that need to be released on the render thread.
     if (bucket) {
-        threadPool.runOnRenderThread([bucket_{std::move(bucket)}]() {});
+        threadPool.releaseOnRenderThread(std::move(bucket));
     }
 }
 
 std::unique_ptr<TileRenderData> RasterDEMTile::createRenderData() {
-    return std::make_unique<SharedBucketTileRenderData<HillshadeBucket>>(bucket);
+    return std::make_unique<SharedBucketTileRenderData<HillshadeBucket>>(bucket, threadPool);
 }
 
 void RasterDEMTile::setError(std::exception_ptr err) {

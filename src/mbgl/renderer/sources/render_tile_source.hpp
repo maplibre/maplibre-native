@@ -57,6 +57,7 @@ protected:
     Immutable<std::vector<RenderTile>> renderTiles;
     mutable RenderTiles filteredRenderTiles;
     mutable RenderTiles renderTilesSortedByY;
+    TaggedScheduler threadPool;
 
 private:
     float bearing = 0.0F;

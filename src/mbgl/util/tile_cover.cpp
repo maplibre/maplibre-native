@@ -2,6 +2,7 @@
 #include <mbgl/math/log2.hpp>
 #include <mbgl/util/bounding_volumes.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/interpolate.hpp>
 #include <mbgl/util/tile_coordinate.hpp>
 #include <mbgl/util/tile_cover.hpp>
@@ -157,6 +158,8 @@ int32_t coveringZoomLevel(double zoom, style::SourceType type, uint16_t size) no
 std::vector<OverscaledTileID> tileCover(const TransformState& state,
                                         uint8_t z,
                                         const std::optional<uint8_t>& overscaledZ) {
+    MLN_TRACE_FUNC();
+
     struct Node {
         AABB aabb;
         uint8_t zoom;

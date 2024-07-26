@@ -19,14 +19,7 @@ public:
         : threadPool(threadPool_),
           size(size_) {}
 
-    ~TileCache() {
-        clear();
-
-        std::unique_lock<std::mutex> counterLock(deferredSignalLock);
-        while (deferredDeletionsPending != 0) {
-            deferredSignal.wait(counterLock);
-        }
-    }
+    ~TileCache();
 
     /// Change the maximum size of the cache.
     void setSize(size_t);
@@ -50,9 +43,6 @@ private:
     std::map<OverscaledTileID, std::unique_ptr<Tile>> tiles;
     std::list<OverscaledTileID> orderedKeys;
     TaggedScheduler threadPool;
-    size_t deferredDeletionsPending{0};
-    std::mutex deferredSignalLock;
-    std::condition_variable deferredSignal;
     size_t size;
 };
 

@@ -46,8 +46,9 @@ LayerRenderData* GeometryTile::LayoutResult::getLayerRenderData(const style::Lay
 class GeometryTileRenderData final : public TileRenderData {
 public:
     GeometryTileRenderData(std::shared_ptr<GeometryTile::LayoutResult> layoutResult_,
-                           std::shared_ptr<TileAtlasTextures> atlasTextures_)
-        : TileRenderData(std::move(atlasTextures_)),
+                           std::shared_ptr<TileAtlasTextures> atlasTextures_,
+                           const TaggedScheduler& threadPool_)
+        : TileRenderData(std::move(atlasTextures_), threadPool_),
           layoutResult(std::move(layoutResult_)) {}
 
 private:
@@ -195,8 +196,8 @@ GeometryTile::~GeometryTile() {
     imageManager->removeRequestor(*this);
 
     if (layoutResult) {
-        threadPool.runOnRenderThread(
-            [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {});
+        threadPool.releaseOnRenderThread(std::move(layoutResult));
+        threadPool.releaseOnRenderThread(std::move(atlasTextures));
     }
 }
 
@@ -244,7 +245,7 @@ void GeometryTile::reset() {
 std::unique_ptr<TileRenderData> GeometryTile::createRenderData() {
     MLN_TRACE_FUNC();
 
-    return std::make_unique<GeometryTileRenderData>(layoutResult, atlasTextures);
+    return std::make_unique<GeometryTileRenderData>(layoutResult, atlasTextures, threadPool);
 }
 
 void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& layers) {

@@ -161,6 +161,7 @@ void ThreadedSchedulerBase::waitForEmpty(const util::SimpleIdentity tag) {
             std::lock_guard<std::mutex> lock(taggedQueueLock);
             taggedQueue.erase(tagToFind);
         }
+        waitForDeferred();
     }
 }
 

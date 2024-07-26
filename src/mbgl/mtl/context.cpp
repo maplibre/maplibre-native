@@ -61,6 +61,9 @@ Context::~Context() noexcept {
         }
 
 #if !defined(NDEBUG)
+        // Make sure deferred cleanup is done before we check stats
+        backend.getThreadPool().waitForEmpty();
+        backend.getThreadPool().runRenderJobs();
         Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
 #endif
         assert(stats.isZero());

@@ -163,6 +163,7 @@ void RunLoop::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag
 
         runOnce();
     }
+    waitForDeferred();
 }
 
 void RunLoop::addWatch(int fd, Event event, std::function<void(int, Event)>&& callback) {

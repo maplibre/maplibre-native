@@ -51,7 +51,7 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
 GeometryTileWorker::~GeometryTileWorker() {
     MLN_TRACE_FUNC();
 
-    scheduler.runOnRenderThread([renderData_{std::move(renderData)}]() {});
+    scheduler.releaseOnRenderThread(std::move(renderData));
 }
 
 /*

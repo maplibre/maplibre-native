@@ -2,12 +2,9 @@
 
 namespace mbgl {
 
-TileRenderData::TileRenderData() = default;
-
-TileRenderData::TileRenderData(std::shared_ptr<TileAtlasTextures> atlasTextures_)
-    : atlasTextures(std::move(atlasTextures_)) {}
-
-TileRenderData::~TileRenderData() = default;
+TileRenderData::TileRenderData(std::shared_ptr<TileAtlasTextures> atlasTextures_, const TaggedScheduler& threadPool_)
+    : atlasTextures(std::move(atlasTextures_)),
+      threadPool(threadPool_) {}
 
 #if MLN_DRAWABLE_RENDERER
 static gfx::Texture2DPtr noTexture;

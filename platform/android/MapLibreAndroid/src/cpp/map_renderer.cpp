@@ -94,6 +94,7 @@ void MapRenderer::waitForEmpty([[maybe_unused]] const util::SimpleIdentity tag) 
         if (auto weakReference = javaPeer.get(*_env)) {
             return weakReference.Call(*_env, waitForEmpty);
         }
+        waitForDeferred();
     } catch (...) {
         Log::Error(Event::Android, "MapRenderer::waitForEmpty failed");
         jni::ThrowJavaError(*android::AttachEnv(), std::current_exception());

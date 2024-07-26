@@ -61,6 +61,7 @@ void RunLoop::waitForEmpty([[maybe_unused]] const SimpleIdentity tag) {
 
         runOnce();
     }
+    waitForDeferred();
 }
 
 } // namespace util

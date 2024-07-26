@@ -7,6 +7,7 @@
 #include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/tile/vector_tile.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/math.hpp>
 
 #if MLN_DRAWABLE_RENDERER
@@ -386,7 +387,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
     : RenderSource(std::move(impl_)),
       tilePyramid(threadPool_),
-      renderTiles(makeMutable<std::vector<RenderTile>>()) {
+      renderTiles(makeMutable<std::vector<RenderTile>>()),
+      threadPool(threadPool_) {
     tilePyramid.setObserver(this);
 }
 
@@ -401,6 +403,7 @@ std::unique_ptr<RenderItem> RenderTileSource::createRenderItem() {
 }
 
 void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
+    MLN_TRACE_FUNC();
     bearing = static_cast<float>(parameters.transform.state.getBearing());
     filteredRenderTiles = nullptr;
     renderTilesSortedByY = nullptr;
@@ -411,7 +414,10 @@ void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
         tiles->back().prepare(parameters);
     }
     featureState.coalesceChanges(*tiles);
-    renderTiles = std::move(tiles);
+    {
+        MLN_TRACE_ZONE(release);
+        renderTiles = std::move(tiles);
+    }
 }
 
 void RenderTileSource::updateFadingTiles() {
