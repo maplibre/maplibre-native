@@ -121,7 +121,6 @@ dependencies {
     androidTestImplementation libs.androidxTestExtJUnit
     androidTestImplementation libs.androidxTestCoreKtx
     androidTestImplementation libs.kotlinxCoroutinesTest
-    androidTestImplementation libs.kotlinxCoroutinesCore
 }
 
 apply from: "${rootDir}/gradle/gradle-make.gradle"
