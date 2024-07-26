@@ -26,7 +26,12 @@ RUN    apt-get update \
     && : # end of the RUN cmd - easier to keep a colon at the end of the list, than to keep the backslashes in check
 
 # This could also be `.../releases/latest/download/bazelisk-linux-amd64` for the latest version, but for predictability better hardcode it
-RUN curl -fsSL https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64 -o /usr/local/bin/bazel \
+# Detect if current CPU is x64 or ARM64 and download the appropriate binary
+RUN if [ "$(uname -m)" = "aarch64" ]; then \
+        curl -fsSL https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-arm64 -o /usr/local/bin/bazel ;\
+    else \
+        curl -fsSL https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64 -o /usr/local/bin/bazel ;\
+    fi \
     && chmod +x /usr/local/bin/bazel \
     && :
 
@@ -38,7 +43,8 @@ ARG USER_GID=$USER_UID
 
 # Create docker user wuth sudo rights as passed in by the build command
 # This was modeled on https://code.visualstudio.com/remote/advancedcontainers/add-nonroot-user
-RUN groupadd --gid $USER_GID $USERNAME \
+# On a Mac, USER_GID might already exist, so ignore it if it fails (--force)
+RUN groupadd --force --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
