@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/util/chrono.hpp>
 #include <mbgl/util/identity.hpp>
 
 #include <mapbox/std/weak.hpp>
@@ -134,7 +133,6 @@ public:
     TaggedScheduler(const TaggedScheduler&) = default;
 
     /// @brief Get the wrapped scheduler
-    /// @return
     const std::shared_ptr<Scheduler>& get() const noexcept { return scheduler; }
 
     void schedule(std::function<void()>&& fn) { scheduler->schedule(tag, std::move(fn)); }
