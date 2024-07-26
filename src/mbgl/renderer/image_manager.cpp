@@ -4,6 +4,7 @@
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/renderer/image_manager_observer.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
 #include <sstream>
@@ -191,6 +192,7 @@ void ImageManager::reduceMemoryUse() {
 
 void ImageManager::reduceMemoryUseIfCacheSizeExceedsLimit() {
     if (requestedImagesCacheSize > util::DEFAULT_ON_DEMAND_IMAGES_CACHE_SIZE) {
+        MLN_TRACE_FUNC()
         reduceMemoryUse();
     }
 }

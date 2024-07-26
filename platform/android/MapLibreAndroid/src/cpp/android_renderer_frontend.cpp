@@ -4,9 +4,10 @@
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/util/async_task.hpp>
-#include <mbgl/util/thread.hpp>
-#include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/geojson.hpp>
+#include <mbgl/util/instrumentation.hpp>
+#include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/thread.hpp>
 
 #include "android_renderer_backend.hpp"
 
@@ -78,6 +79,7 @@ void AndroidRendererFrontend::setObserver(RendererObserver& observer) {
 }
 
 void AndroidRendererFrontend::update(std::shared_ptr<UpdateParameters> params) {
+    MLN_TRACE_FUNC()
     updateParams = std::move(params);
     updateAsyncTask->send();
 }
