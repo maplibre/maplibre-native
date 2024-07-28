@@ -1,6 +1,7 @@
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/source_state.hpp>
 #include <mbgl/style/conversion_impl.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
 namespace mbgl {
@@ -42,6 +43,7 @@ void SourceFeatureState::getState(FeatureState& result,
 }
 
 void SourceFeatureState::coalesceChanges(std::vector<RenderTile>& tiles) {
+    MLN_TRACE_FUNC()
     LayerFeatureStates changes;
     for (const auto& layerStatesEntry : stateChanges) {
         const auto& sourceLayer = layerStatesEntry.first;

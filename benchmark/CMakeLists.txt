@@ -10,7 +10,6 @@ add_library(
     ${PROJECT_SOURCE_DIR}/benchmark/parse/vector_tile.benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/src/mbgl/benchmark/benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/storage/offline_database.benchmark.cpp
-    ${PROJECT_SOURCE_DIR}/benchmark/util/dtoa.benchmark.cpp
     ${PROJECT_SOURCE_DIR}/benchmark/util/tilecover.benchmark.cpp
 )
 
