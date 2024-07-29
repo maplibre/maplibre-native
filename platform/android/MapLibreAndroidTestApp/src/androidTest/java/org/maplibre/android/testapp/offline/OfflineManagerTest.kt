@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -53,6 +54,7 @@ class OfflineManagerTest : AppCenter() {
         latch.await()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test(timeout = 30_000)
     fun combinedTest() {
 
@@ -62,7 +64,7 @@ class OfflineManagerTest : AppCenter() {
 
         val latch1 = CountDownLatch(1)
         rule.activity.runOnUiThread {
-            runTest(Dispatchers.IO) {
+            runTest {
                 val copied = FileUtils.copyFileFromAssetsTask(
                     rule.activity,
                     TEST_DB_FILE_NAME,
