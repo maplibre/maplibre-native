@@ -77,7 +77,8 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
 
     const std::vector<vk::SurfaceFormatKHR>& formats = physicalDevice.getSurfaceFormatsKHR(surface.get());
     const auto& formatIt = std::find_if(formats.begin(), formats.end(), [](const vk::SurfaceFormatKHR& format) {
-        return format.format == vk::Format::eB8G8R8A8Unorm && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
+        return (format.format == vk::Format::eB8G8R8A8Unorm || format.format == vk::Format::eR8G8B8A8Unorm) &&
+               format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear;
     });
 
     if (formatIt == formats.end()) throw std::runtime_error("No suitable swapchain format found");
@@ -114,7 +115,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     int32_t presentQueueIndex = backend.getPresentQueueIndex();
 
     if (graphicsQueueIndex != presentQueueIndex) {
-        swapchainCreateInfo.setImageSharingMode(vk::SharingMode::eConcurrent); // revisit this
+        swapchainCreateInfo.setImageSharingMode(vk::SharingMode::eConcurrent);
         const std::array<uint32_t, 2> queueIndices = {static_cast<uint32_t>(graphicsQueueIndex),
                                                       static_cast<uint32_t>(presentQueueIndex)};
         swapchainCreateInfo.setQueueFamilyIndices(queueIndices);
@@ -123,8 +124,13 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     }
 
     swapchainCreateInfo.setPreTransform(capabilities.currentTransform);
-    swapchainCreateInfo.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque);
     swapchainCreateInfo.setClipped(VK_TRUE);
+
+    if (capabilities.supportedCompositeAlpha & vk::CompositeAlphaFlagBitsKHR::eInherit) {
+        swapchainCreateInfo.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eInherit);
+    } else {
+        swapchainCreateInfo.setCompositeAlpha(vk::CompositeAlphaFlagBitsKHR::eOpaque);
+    }
 
     // update this when recreating
     swapchainCreateInfo.setOldSwapchain(vk::SwapchainKHR(swapchain.get()));

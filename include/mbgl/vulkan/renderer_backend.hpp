@@ -3,6 +3,12 @@
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/context.hpp>
 
+#ifdef _WIN32
+#define VK_USE_PLATFORM_WIN32_KHR
+#elif defined(__ANDROID__)
+#define VK_USE_PLATFORM_ANDROID_KHR
+#endif
+
 #define VULKAN_HPP_DISPATCH_LOADER_DYNAMIC 1
 #include <vulkan/vulkan.hpp>
 
@@ -46,6 +52,7 @@ public:
     template <typename T, typename = typename std::enable_if<vk::isVulkanHandleType<T>::value>>
     void setDebugName([[maybe_unused]] const T& object, [[maybe_unused]] const std::string& name) const {
 #ifdef ELABLE_VULKAN_VALIDATION
+        if (!debugUtilsEnabled) return;
         const uint64_t handle = reinterpret_cast<uint64_t>(static_cast<typename T::CType>(object));
         device->setDebugUtilsObjectNameEXT(vk::DebugUtilsObjectNameInfoEXT()
                                                .setObjectType(object.objectType)
@@ -53,6 +60,12 @@ public:
                                                .setPObjectName(name.c_str()));
 #endif
     }
+
+    void beginDebugLabel(const vk::CommandBuffer& buffer,
+                         const char* name,
+                         const std::array<float, 4>& color) const;
+    void endDebugLabel(const vk::CommandBuffer& buffer) const;
+    void insertDebugLabel(const vk::CommandBuffer& buffer, const char* name) const;
 
     void startFrameCapture();
     void endFrameCapture();
@@ -63,6 +76,7 @@ protected:
     virtual std::vector<const char*> getLayers();
     virtual std::vector<const char*> getInstanceExtensions();
     virtual std::vector<const char*> getDeviceExtensions();
+    std::vector<const char*> getDebugExtensions();
 
     void initInstance();
     void initDebug();
@@ -78,7 +92,8 @@ protected:
 protected:
     vk::DynamicLoader dynamicLoader;
     vk::UniqueInstance instance;
-    vk::UniqueDebugUtilsMessengerEXT debugCallback;
+    vk::UniqueDebugUtilsMessengerEXT debugUtilsCallback;
+    vk::UniqueDebugReportCallbackEXT debugReportCallback;
 
     vk::PhysicalDevice physicalDevice;
     vk::UniqueDevice device;
@@ -94,6 +109,8 @@ protected:
     uint32_t maxFrames = 1;
 
     VmaAllocator allocator;
+
+    bool debugUtilsEnabled{false};
 };
 
 } // namespace vulkan

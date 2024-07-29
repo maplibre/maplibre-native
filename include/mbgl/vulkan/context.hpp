@@ -140,7 +140,7 @@ public:
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
     const vk::UniqueDescriptorPool& getCurrentDescriptorPool() const;
-    void enqueueDeletion(const std::function<void(const Context&)>& function);
+    void enqueueDeletion(std::function<void(const Context&)>&& function);
     void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
 
 private:

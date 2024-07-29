@@ -27,6 +27,10 @@
 #include <algorithm>
 #include <cstring>
 
+#ifndef MLN_VULKAN_DESCRIPTOR_POOL_SIZE
+#define MLN_VULKAN_DESCRIPTOR_POOL_SIZE 10000
+#endif
+
 namespace mbgl {
 namespace vulkan {
 
@@ -35,11 +39,20 @@ namespace vulkan {
 // per https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxVertexInputBindings
 // this can be queried at runtime (VkPhysicalDeviceLimits.maxVertexInputBindings)
 constexpr uint32_t maximumVertexBindingCount = 16;
+static uint32_t glslangRefCount = 0;
+
+class RenderbufferResource : public gfx::RenderbufferResource {
+public:
+    RenderbufferResource() = default;
+};
 
 Context::Context(RendererBackend& backend_)
     : gfx::Context(vulkan::maximumVertexBindingCount),
       backend(backend_) {
-    glslang::InitializeProcess();
+
+    if (glslangRefCount++ == 0) {
+        glslang::InitializeProcess();
+    }
 
     initFrameResources();
 }
@@ -49,7 +62,9 @@ Context::~Context() noexcept {
 
     destroyResources();
 
-    glslang::FinalizeProcess();
+    if (--glslangRefCount == 0) {
+        glslang::FinalizeProcess();
+    }
 }
 
 void Context::initFrameResources() {
@@ -64,11 +79,12 @@ void Context::initFrameResources() {
 
     // descriptor pool info
     const std::vector<vk::DescriptorPoolSize> poolSizes = {
-        {vk::DescriptorType::eUniformBuffer, 10000},
-        {vk::DescriptorType::eCombinedImageSampler, 5000},
+        {vk::DescriptorType::eUniformBuffer, MLN_VULKAN_DESCRIPTOR_POOL_SIZE},
+        {vk::DescriptorType::eCombinedImageSampler, MLN_VULKAN_DESCRIPTOR_POOL_SIZE},
     };
 
-    const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo().setPoolSizes(poolSizes).setMaxSets(100000);
+    const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo().setPoolSizes(poolSizes).setMaxSets(
+        MLN_VULKAN_DESCRIPTOR_POOL_SIZE);
 
     frameResources.reserve(frameCount);
 
@@ -107,13 +123,13 @@ const vk::UniqueDescriptorPool& Context::getCurrentDescriptorPool() const {
     return frameResources[frameResourceIndex].descriptorPool;
 }
 
-void Context::enqueueDeletion(const std::function<void(const Context&)>& function) {
+void Context::enqueueDeletion(std::function<void(const Context&)>&& function) {
     if (frameResources.empty()) {
         function(*this);
         return;
     }
 
-    frameResources[frameResourceIndex].deletionQueue.push_back(function);
+    frameResources[frameResourceIndex].deletionQueue.push_back(std::move(function));
 }
 
 void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
@@ -142,9 +158,7 @@ void Context::waitFrame() const {
 
     const vk::Result waitFenceResult = device->waitForFences(1, &frame.flightFrameFence.get(), VK_TRUE, timeout);
     if (waitFenceResult != vk::Result::eSuccess) {
-#ifndef NDEBUG
         mbgl::Log::Error(mbgl::Event::Render, "Wait fence failed");
-#endif
     }
 }
 void Context::beginFrame() {
@@ -203,9 +217,7 @@ void Context::endFrame() {
 
     const vk::Result resetFenceResult = device->resetFences(1, &frame.flightFrameFence.get());
     if (resetFenceResult != vk::Result::eSuccess) {
-#ifndef NDEBUG
         mbgl::Log::Error(mbgl::Event::Render, "Reset fence failed");
-#endif
     }
 
     graphicsQueue.submit(submitInfo, frame.flightFrameFence.get());
@@ -306,16 +318,16 @@ std::unique_ptr<gfx::OffscreenTexture> Context::createOffscreenTexture(Size size
 std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
                                                                      gfx::TexturePixelType,
                                                                      gfx::TextureChannelDataType) {
-    assert(false);
+    throw std::runtime_error("Vulkan TextureResource not implemented");
     return nullptr;
 }
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {
-    return nullptr; // std::make_unique<RenderbufferResource>();
+    return std::make_unique<RenderbufferResource>();
 }
 
 std::unique_ptr<gfx::DrawScopeResource> Context::createDrawScopeResource() {
-    assert(false);
+    throw std::runtime_error("Vulkan DrawScopeResource not implemented");
     return nullptr;
 }
 

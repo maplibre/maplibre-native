@@ -30,17 +30,12 @@ void CommandEncoder::pushDebugGroup(const char* name) {
     pushDebugGroup(name, {});
 }
 
-void CommandEncoder::pushDebugGroup([[maybe_unused]] const char* name,
-                                    [[maybe_unused]] const std::array<float, 4>& color) {
-#ifdef ELABLE_VULKAN_VALIDATION
-    commandBuffer->beginDebugUtilsLabelEXT(vk::DebugUtilsLabelEXT().setPLabelName(name).setColor(color));
-#endif
+void CommandEncoder::pushDebugGroup(const char* name, const std::array<float, 4>& color) {
+    context.getBackend().beginDebugLabel(commandBuffer.get(), name, color);
 }
 
 void CommandEncoder::popDebugGroup() {
-#ifdef ELABLE_VULKAN_VALIDATION
-    commandBuffer->endDebugUtilsLabelEXT();
-#endif
+    context.getBackend().endDebugLabel(commandBuffer.get());
 }
 
 } // namespace vulkan

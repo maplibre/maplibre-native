@@ -67,10 +67,8 @@ void RenderPass::popDebugGroup() {
     commandEncoder.popDebugGroup();
 }
 
-void RenderPass::addDebugSignpost([[maybe_unused]] const char* name) {
-#ifdef ELABLE_VULKAN_VALIDATION
-    commandEncoder.getCommandBuffer()->insertDebugUtilsLabelEXT(vk::DebugUtilsLabelEXT().setPLabelName(name));
-#endif
+void RenderPass::addDebugSignpost(const char* name) {
+    commandEncoder.getContext().getBackend().insertDebugLabel(commandEncoder.getCommandBuffer().get(), name);
 }
 
 void RenderPass::bindVertex(const BufferResource& buf, std::size_t offset, std::size_t, std::size_t size) {

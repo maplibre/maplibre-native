@@ -59,10 +59,11 @@ Drawable::~Drawable() {}
 void Drawable::setEnableColor(bool value) {
     gfx::Drawable::setEnableColor(value);
 
-    if (value)
+    if (value) {
         impl->pipelineInfo.colorMask = vk::FlagTraits<vk::ColorComponentFlagBits>::allFlags;
-    else
+    } else {
         impl->pipelineInfo.colorMask = vk::ColorComponentFlags();
+    }
 }
 
 void Drawable::setColorMode(const gfx::ColorMode& value) {

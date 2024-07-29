@@ -43,20 +43,18 @@ BufferResource::BufferResource(
     const auto& allocator = context.getBackend().getAllocator();
 
     std::size_t totalSize = size;
-    std::size_t offset = 0;
-
+    
     // TODO -> check avg minUniformBufferOffsetAlignment vs individual buffers
-    // if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) {
-    //    const auto& backend = context.getBackend();
-    //    const auto& deviceProps = backend.getDeviceProperties();
-    //    const auto& align = deviceProps.limits.minUniformBufferOffsetAlignment;
-    //    bufferWindowSize = (size + align - 1) & ~(align - 1);
-    //
-    //    assert(bufferWindowSize != 0);
-    //
-    //    offset = bufferWindowSize * context.getCurrentFrameResourceIndex();
-    //    totalSize = bufferWindowSize * backend.getMaxFrames();
-    //}
+     if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) {
+        const auto& backend = context.getBackend();
+        const auto& deviceProps = backend.getDeviceProperties();
+        const auto& align = deviceProps.limits.minUniformBufferOffsetAlignment;
+        bufferWindowSize = (size + align - 1) & ~(align - 1);
+    
+        assert(bufferWindowSize != 0);
+    
+        totalSize = bufferWindowSize * backend.getMaxFrames();
+    }
 
     const auto bufferInfo = vk::BufferCreateInfo()
                                 .setSize(totalSize)
@@ -67,7 +65,6 @@ BufferResource::BufferResource(
 
     allocationInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_HOST;
     allocationInfo.requiredFlags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-    // allocationInfo.preferredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
     allocationInfo.flags = VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT | VMA_ALLOCATION_CREATE_MAPPED_BIT;
 
     bufferAllocation = std::make_shared<BufferAllocation>(allocator);
@@ -76,26 +73,12 @@ BufferResource::BufferResource(
         return;
     }
 
-    VkMemoryPropertyFlags memoryProps;
-    vmaGetAllocationMemoryProperties(allocator, bufferAllocation->allocation, &memoryProps);
-
-    if (memoryProps & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) {
-        // memory already mapped
-        // mapped = allocation->GetMappedData();
-        vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
-    } else {
-        // TODO create staing buffer for transfer
-        // vmaMapMemory(allocator, buffer->allocation, &buffer->mapped);
-    }
+    vmaMapMemory(allocator, bufferAllocation->allocation, &bufferAllocation->mappedBuffer);
 
     if (data) {
         raw.resize(size);
         std::memcpy(raw.data(), data, size);
-
-        std::memcpy(static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + offset, data, size);
-        if ((memoryProps & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) == 0) {
-            vmaFlushAllocation(allocator, bufferAllocation->allocation, offset, size);
-        }
+        std::memcpy(static_cast<uint8_t*>(bufferAllocation->mappedBuffer) + getVulkanBufferOffset(), data, size);
     }
 
     if (isValid()) {

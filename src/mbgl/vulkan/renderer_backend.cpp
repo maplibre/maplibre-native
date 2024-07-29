@@ -23,6 +23,10 @@
 #include <cassert>
 #include <string>
 
+#ifdef ELABLE_VULKAN_VALIDATION
+#include <vulkan/vulkan_to_string.hpp>
+#endif
+
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 #ifdef ENABLE_VMA_DEBUG
@@ -57,6 +61,25 @@ static RENDERDOC_API_1_1_2* g_rdoc_api = nullptr;
 namespace mbgl {
 namespace vulkan {
 
+template <typename T, typename F>
+static bool checkAvailability(const std::vector<T>& availableValues,
+                              const std::vector<const char*>& requiredValues,
+                              const F& getter) {
+    for (const auto& requiredValue : requiredValues) {
+        bool found = false;
+        for (const auto& availableValue : availableValues) {
+            if (strcmp(requiredValue, getter(availableValue)) == 0) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) return false;
+    }
+
+    return true;
+}
+
 RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
     : gfx::RendererBackend(contextMode_),
       allocator(nullptr) {}
@@ -78,15 +101,64 @@ std::vector<const char*> RendererBackend::getLayers() {
 }
 
 std::vector<const char*> RendererBackend::getInstanceExtensions() {
-    return {
-#ifdef ELABLE_VULKAN_VALIDATION
-        VK_EXT_DEBUG_UTILS_EXTENSION_NAME
-#endif
-    };
+    return {};
 }
 
 std::vector<const char*> RendererBackend::getDeviceExtensions() {
     return getDefaultRenderable().getResource<SurfaceRenderableResource>().getDeviceExtensions();
+}
+
+std::vector<const char*> RendererBackend::getDebugExtensions() {
+    std::vector<const char*> extensions;
+
+    const auto& availableExtensions = vk::enumerateInstanceExtensionProperties();
+
+    debugUtilsEnabled = checkAvailability(
+        availableExtensions, {VK_EXT_DEBUG_UTILS_EXTENSION_NAME}, [](const vk::ExtensionProperties& value) {
+            return value.extensionName.data();
+        });
+
+    if (debugUtilsEnabled) {
+        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    } else {
+        // check for VK_EXT_debug_report (deprecated)
+        bool debugReportAvailable = checkAvailability(
+            availableExtensions, {VK_EXT_DEBUG_REPORT_EXTENSION_NAME}, [](const vk::ExtensionProperties& value) {
+                return value.extensionName.data();
+            });
+
+        if (debugReportAvailable) {
+            extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+        } else {
+            mbgl::Log::Error(mbgl::Event::Render, "No debugging extension available");
+        }
+    }
+
+    return extensions;
+}
+
+void RendererBackend::beginDebugLabel([[maybe_unused]] const vk::CommandBuffer& buffer,
+                                      [[maybe_unused]] const char* name,
+                                      [[maybe_unused]] const std::array<float, 4>& color) const {
+#ifdef ELABLE_VULKAN_VALIDATION
+    if (!debugUtilsEnabled) return;
+    buffer.beginDebugUtilsLabelEXT(vk::DebugUtilsLabelEXT().setPLabelName(name).setColor(color));
+#endif
+}
+
+void RendererBackend::endDebugLabel([[maybe_unused]] const vk::CommandBuffer& buffer) const {
+#ifdef ELABLE_VULKAN_VALIDATION
+    if (!debugUtilsEnabled) return;
+    buffer.endDebugUtilsLabelEXT();
+#endif
+}
+
+void RendererBackend::insertDebugLabel([[maybe_unused]] const vk::CommandBuffer& buffer,
+                                       [[maybe_unused]] const char* name) const {
+#ifdef ELABLE_VULKAN_VALIDATION
+    if (!debugUtilsEnabled) return;
+    buffer.insertDebugUtilsLabelEXT(vk::DebugUtilsLabelEXT().setPLabelName(name));
+#endif
 }
 
 void RendererBackend::initFrameCapture() {
@@ -125,29 +197,12 @@ void RendererBackend::endFrameCapture() {
 #endif
 }
 
-template <typename T, typename F>
-static bool checkAvailability(const std::vector<T>& availableValues,
-                              const std::vector<const char*>& requiredValues,
-                              const F& getter) {
-    for (const auto& requiredValue : requiredValues) {
-        bool found = false;
-        for (const auto& availableValue : availableValues) {
-            if (strcmp(requiredValue, getter(availableValue)) == 0) {
-                found = true;
-                break;
-            }
-        }
+#ifdef ELABLE_VULKAN_VALIDATION
 
-        if (!found) return false;
-    }
-
-    return true;
-}
-
-static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                                                      VkDebugUtilsMessageTypeFlagsEXT,
-                                                      const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
-                                                      void*) {
+static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                                                           VkDebugUtilsMessageTypeFlagsEXT,
+                                                           const VkDebugUtilsMessengerCallbackDataEXT* callbackData,
+                                                           void*) {
     EventSeverity mbglSeverity = EventSeverity::Debug;
 
     switch (messageSeverity) {
@@ -176,26 +231,80 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugCallback(VkDebugUtilsMessageSeverit
     return VK_FALSE;
 }
 
+static VKAPI_ATTR VkBool32 vkDebugReportCallback(VkDebugReportFlagsEXT flags,
+                                                 VkDebugReportObjectTypeEXT objectType,
+                                                 [[maybe_unused]] uint64_t object,
+                                                 [[maybe_unused]] size_t location,
+                                                 int32_t messageCode,
+                                                 const char* pLayerPrefix,
+                                                 const char* pMessage,
+                                                 [[maybe_unused]] void* pUserData) {
+
+    EventSeverity mbglSeverity = EventSeverity::Debug;
+
+    if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
+        mbglSeverity = EventSeverity::Info;
+    } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT) {
+        mbglSeverity = EventSeverity::Warning;
+    } else if (flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
+        mbglSeverity = EventSeverity::Warning;
+    } else if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
+        mbglSeverity = EventSeverity::Error;
+    } else if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
+        mbglSeverity = EventSeverity::Debug;
+    }
+
+    const std::string message = "[" + vk::to_string(vk::DebugReportObjectTypeEXT(objectType)) + "]" + "[code - " +
+                                std::to_string(messageCode) + "]" + "[layer - " + pLayerPrefix + "]" + pMessage;
+
+    mbgl::Log::Record(mbglSeverity, mbgl::Event::Render, message);
+
+    return VK_FALSE;
+}
+
+#endif
+
 void RendererBackend::initDebug() {
-    const vk::DebugUtilsMessageSeverityFlagsEXT severity = vk::DebugUtilsMessageSeverityFlagsEXT() |
-                                                           vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
-                                                           vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
-                                                           vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
-                                                           vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;
+#ifdef ELABLE_VULKAN_VALIDATION
+    if (debugUtilsEnabled) {
+        const vk::DebugUtilsMessageSeverityFlagsEXT severity = vk::DebugUtilsMessageSeverityFlagsEXT() |
+                                                               vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
+                                                               vk::DebugUtilsMessageSeverityFlagBitsEXT::eInfo |
+                                                               vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning |
+                                                               vk::DebugUtilsMessageSeverityFlagBitsEXT::eError;
 
-    const vk::DebugUtilsMessageTypeFlagsEXT type = vk::DebugUtilsMessageTypeFlagsEXT() |
-                                                   vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
-                                                   vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
-                                                   vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
-                                                   vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding;
+        const vk::DebugUtilsMessageTypeFlagsEXT type = vk::DebugUtilsMessageTypeFlagsEXT() |
+                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral |
+                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation |
+                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance |
+                                                       vk::DebugUtilsMessageTypeFlagBitsEXT::eDeviceAddressBinding;
 
-    const auto createInfo =
-        vk::DebugUtilsMessengerCreateInfoEXT().setMessageSeverity(severity).setMessageType(type).setPfnUserCallback(
-            vkDebugCallback);
+        const auto createInfo =
+            vk::DebugUtilsMessengerCreateInfoEXT().setMessageSeverity(severity).setMessageType(type).setPfnUserCallback(
+                vkDebugUtilsCallback);
 
-    debugCallback = instance->createDebugUtilsMessengerEXTUnique(createInfo);
+        debugUtilsCallback = instance->createDebugUtilsMessengerEXTUnique(createInfo);
 
-    if (!debugCallback) mbgl::Log::Error(mbgl::Event::Render, "Failed to register Vulkan debug callback");
+        if (!debugUtilsCallback) {
+            mbgl::Log::Error(mbgl::Event::Render, "Failed to register Vulkan debug utils callback");
+        }
+    } else {
+        const vk::DebugReportFlagsEXT flags = vk::DebugReportFlagsEXT() | vk::DebugReportFlagBitsEXT::eDebug |
+                                              vk::DebugReportFlagBitsEXT::eError |
+                                              vk::DebugReportFlagBitsEXT::eInformation |
+                                              vk::DebugReportFlagBitsEXT::ePerformanceWarning |
+                                              vk::DebugReportFlagBitsEXT::eWarning;
+
+        const auto createInfo = vk::DebugReportCallbackCreateInfoEXT().setFlags(flags).setPfnCallback(
+            vkDebugReportCallback);
+
+        debugReportCallback = instance->createDebugReportCallbackEXTUnique(createInfo);
+
+        if (!debugReportCallback) {
+            mbgl::Log::Error(mbgl::Event::Render, "Failed to register Vulkan debug report callback");
+        }
+    }
+#endif
 }
 
 void RendererBackend::init() {
@@ -210,9 +319,7 @@ void RendererBackend::init() {
 
 void RendererBackend::initInstance() {
     // initialize minimal set of function pointers
-    PFN_vkGetInstanceProcAddr getInstanceProcAddr = dynamicLoader.getProcAddress<PFN_vkGetInstanceProcAddr>(
-        "vkGetInstanceProcAddr");
-    VULKAN_HPP_DEFAULT_DISPATCHER.init(getInstanceProcAddr);
+    VULKAN_HPP_DEFAULT_DISPATCHER.init(dynamicLoader);
 
     // Vulkan 1.1 on Android is supported on 71% of devices (compared to 1.3 with 6%) as of April 23 2024
     // https://vulkan.gpuinfo.org/
@@ -228,24 +335,25 @@ void RendererBackend::initInstance() {
     if (layersAvailable) {
         createInfo.setPEnabledLayerNames(layers);
     } else {
-#ifndef NDEBUG
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan layers not found");
-#endif
     }
 
-    const auto& extensions = getInstanceExtensions();
+    auto extensions = getInstanceExtensions();
 
     bool extensionsAvailable = checkAvailability(
         vk::enumerateInstanceExtensionProperties(), extensions, [](const vk::ExtensionProperties& value) {
             return value.extensionName.data();
         });
 
+#ifdef ELABLE_VULKAN_VALIDATION
+    const auto& debugExtensions = getDebugExtensions();
+    extensions.insert(extensions.end(), debugExtensions.begin(), debugExtensions.end());
+#endif
+
     if (extensionsAvailable) {
         createInfo.setPEnabledExtensionNames(extensions);
     } else {
-#ifndef NDEBUG
         mbgl::Log::Error(mbgl::Event::Render, "Vulkan extensions not found");
-#endif
     }
 
     instance = vk::createInstanceUnique(createInfo);
@@ -303,7 +411,7 @@ void RendererBackend::initAllocator() {
 
     VkResult result = vmaCreateAllocator(&allocatorCreateInfo, &allocator);
     if (result != VK_SUCCESS) {
-        mbgl::Log::Error(mbgl::Event::Render, "Vulkan allocator init failed");
+        throw std::runtime_error("Vulkan allocator init failed");
     }
 }
 
@@ -423,7 +531,8 @@ void RendererBackend::initCommandPool() {
 }
 
 void RendererBackend::destroyResources() {
-    device->waitIdle();
+    if (device)
+        device->waitIdle();
 
     context.reset();
     commandPool.reset();
@@ -433,7 +542,8 @@ void RendererBackend::destroyResources() {
     device.reset();
 
     // destroy this last so we have cleanup validation
-    debugCallback.reset();
+    debugUtilsCallback.reset();
+    debugReportCallback.reset();
     instance.reset();
 }
 

@@ -133,7 +133,6 @@ OffscreenTexture::OffscreenTexture(Context& context,
 }
 
 bool OffscreenTexture::isRenderable() {
-    assert(false);
     return true;
 }
 
