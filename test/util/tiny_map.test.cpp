@@ -336,10 +336,7 @@ void benchmark(const std::string_view label,
             for (std::size_t j = 0; j < lookups; ++j) {
                 for (const auto& k : testKeys) {
                     if (map.count(k)) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-volatile"
-                        do_not_optimize_away++;
-#pragma clang diagnostic pop
+                        do_not_optimize_away = do_not_optimize_away + 1;
                     }
                 }
             }
