@@ -922,8 +922,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/color.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/constants.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/convert.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/dtoa.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/dtoa.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/event.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/filesystem.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/font_stack.cpp

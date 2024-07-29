@@ -82,7 +82,7 @@ jobs:
             build_type: RelWithDebInfo
             qt_version: 5.15.2
             qt_target: desktop
-            deployment_target: 10.13
+            deployment_target: 10.15
             deployment_arch: "x86_64"
             compiler: ""
           - name: macOS
