@@ -64,6 +64,10 @@ struct RenderingStats {
     
     int usedSymbolBucketsMem = 0;
     int usedSymbolBucketsCount = 0;
+    
+    int symbolRenderLayersCount = 0;
+    int lineRenderLayersCount = 0;
+    int fillRenderLayersCount = 0;
 
     RenderingStats& operator+=(const RenderingStats&);
 

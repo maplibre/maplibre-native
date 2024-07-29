@@ -62,10 +62,16 @@ SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEval
                                                   {RenderSymbolLayer::textPaintProperties(evaluated), zoom}}));
     }
     SymbolBucket::count ++;
+    /*std::stringstream ss;
+    ss << "\naddBucket: " << SymbolBucket::count;
+    Log::Debug(Event::General, ss.str());*/
 }
 
 SymbolBucket::~SymbolBucket() {
     SymbolBucket::count --;
+    /*std::stringstream ss;
+    ss << "\nremoveBucket: " << SymbolBucket::count;
+    Log::Debug(Event::General, ss.str());*/
     if (SymbolBucket::count <= 2) {
         SymbolBucket::count += 1;
         SymbolBucket::count -= 1;

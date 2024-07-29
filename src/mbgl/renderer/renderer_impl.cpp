@@ -550,14 +550,21 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
     
     std::stringstream ss;
-    ss << "\nusedSymbolBucketsMem: " << context.renderingStats().usedSymbolBucketsMem
+    ss << "\ntotalSymbolBucketsMem: " << totalSymbolBucketsMem
+       << "\ntotalSymbolBucketsCount: " << SymbolBucket::count
+       << "\nusedSymbolBucketsMem: " << context.renderingStats().usedSymbolBucketsMem
        << "\nusedSymbolBucketsCount: " << context.renderingStats().usedSymbolBucketsCount
-       << "\ntotalSymbolBucketsMem: " << totalSymbolBucketsMem
-       << "\ntotalSymbolBucketsCount: " << SymbolBucket::count;
+       << "\nsymbolRenderLayersCount: " << context.renderingStats().symbolRenderLayersCount
+       << "\nlineRenderLayersCount: " << context.renderingStats().lineRenderLayersCount
+       << "\nfillRenderLayersCount: " << context.renderingStats().fillRenderLayersCount
+       << "\nzoom: " << parameters.state.getZoom();
     Log::Debug(Event::General, ss.str());
 
     context.renderingStats().usedSymbolBucketsMem = 0;
     context.renderingStats().usedSymbolBucketsCount = 0;
+    context.renderingStats().symbolRenderLayersCount = 0;
+    context.renderingStats().lineRenderLayersCount = 0;
+    context.renderingStats().fillRenderLayersCount = 0;
 }
 
 void Renderer::Impl::reduceMemoryUse() {

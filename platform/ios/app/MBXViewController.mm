@@ -1025,36 +1025,29 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 {
     [self.mapView removeAnnotations:self.mapView.annotations];
 
-    /*MBXCustomCalloutAnnotation *firstAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
-    firstAnnotation.coordinate = CLLocationCoordinate2DMake(48.8533940, 2.3775439);
-    firstAnnotation.title = @"Open anchored to annotation";
-    firstAnnotation.anchoredToAnnotation = YES;
-    firstAnnotation.dismissesAutomatically = NO;
-
-    MBXCustomCalloutAnnotation *secondAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
-    secondAnnotation.coordinate = CLLocationCoordinate2DMake(48.8543940, 2.3775439);
-    secondAnnotation.title = @"Open not anchored to annotation";
-    secondAnnotation.anchoredToAnnotation = NO;
-    secondAnnotation.dismissesAutomatically = NO;
-
-    MBXCustomCalloutAnnotation *thirdAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
-    thirdAnnotation.coordinate = CLLocationCoordinate2DMake(48.8553940, 2.3775439);
-    thirdAnnotation.title = @"Dismisses automatically";
-    thirdAnnotation.anchoredToAnnotation = YES;
-    thirdAnnotation.dismissesAutomatically = YES;
-
-    NSArray *annotations = @[firstAnnotation, secondAnnotation, thirdAnnotation];*/
-    
     MBXCustomCalloutAnnotation *firstAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
     firstAnnotation.coordinate = CLLocationCoordinate2DMake(51.50998, -0.1337);
     firstAnnotation.title = @"Open anchored to annotation";
     firstAnnotation.anchoredToAnnotation = YES;
     firstAnnotation.dismissesAutomatically = NO;
-    NSArray *annotations = @[firstAnnotation];
+
+    MBXCustomCalloutAnnotation *secondAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
+    secondAnnotation.coordinate = CLLocationCoordinate2DMake(51.50988, -0.1337);
+    secondAnnotation.title = @"Open not anchored to annotation";
+    secondAnnotation.anchoredToAnnotation = NO;
+    secondAnnotation.dismissesAutomatically = NO;
+
+    MBXCustomCalloutAnnotation *thirdAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
+    thirdAnnotation.coordinate = CLLocationCoordinate2DMake(51.50978, -0.1337);
+    thirdAnnotation.title = @"Dismisses automatically";
+    thirdAnnotation.anchoredToAnnotation = YES;
+    thirdAnnotation.dismissesAutomatically = YES;
+
+    NSArray *annotations = @[firstAnnotation, secondAnnotation, thirdAnnotation];
     
     [self.mapView addAnnotations:annotations];
 
-    [self.mapView showAnnotations:annotations animated:YES];
+    [self.mapView showAnnotations:annotations animated:NO];
 }
 
 - (void)styleBuildingExtrusions

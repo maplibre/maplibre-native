@@ -258,6 +258,10 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         pair.second->setShowCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision);
     }
 
+    std::stringstream ss;
+    ss << "\ntilePyramidRenderedTiles: " << renderedTiles.size();
+    Log::Debug(Event::General, ss.str());
+    
     // Initialize renderable tiles and update the contained layer render data.
     for (auto& entry : renderedTiles) {
         Tile& tile = entry.second;

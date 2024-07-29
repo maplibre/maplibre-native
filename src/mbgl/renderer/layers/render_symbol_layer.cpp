@@ -979,6 +979,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         removeAllDrawables();
         return;
     }
+    
+    context.renderingStats().symbolRenderLayersCount ++;
 
     // Set up a layer group
     if (!layerGroup) {
@@ -1057,11 +1059,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     collisionBuilder->setRenderPass(passes);
     collisionBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
     collisionBuilder->setColorMode(gfx::ColorMode::alphaBlended());
-
+    
     StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
-
+        
         const auto* optRenderData = getRenderDataForPass(tile, passes);
         if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
             removeTile(passes, tileID);

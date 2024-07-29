@@ -367,6 +367,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         removeAllDrawables();
         return;
     }
+    
+    context.renderingStats().lineRenderLayersCount ++;
 
     // Set up a layer group
     if (!layerGroup) {

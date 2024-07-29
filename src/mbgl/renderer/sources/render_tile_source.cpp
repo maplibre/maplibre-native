@@ -412,6 +412,9 @@ void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
     }
     featureState.coalesceChanges(*tiles);
     renderTiles = std::move(tiles);
+    std::stringstream ss;
+    ss << "\nsourcePrepareRenderTiles: " << renderTiles->size();
+    Log::Debug(Event::General, ss.str());
 }
 
 void RenderTileSource::updateFadingTiles() {
@@ -433,6 +436,9 @@ RenderTiles RenderTileSource::getRenderTiles() const {
         }
         filteredRenderTiles = std::move(result);
     }
+    /*std::stringstream ss;
+    ss << "\nfilteredRenderTiles: " << renderTiles->size();
+    Log::Debug(Event::General, ss.str());*/
     return filteredRenderTiles;
 }
 
