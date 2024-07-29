@@ -61,9 +61,7 @@ public:
 #endif
     }
 
-    void beginDebugLabel(const vk::CommandBuffer& buffer,
-                         const char* name,
-                         const std::array<float, 4>& color) const;
+    void beginDebugLabel(const vk::CommandBuffer& buffer, const char* name, const std::array<float, 4>& color) const;
     void endDebugLabel(const vk::CommandBuffer& buffer) const;
     void insertDebugLabel(const vk::CommandBuffer& buffer, const char* name) const;
 

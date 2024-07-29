@@ -43,16 +43,16 @@ BufferResource::BufferResource(
     const auto& allocator = context.getBackend().getAllocator();
 
     std::size_t totalSize = size;
-    
+
     // TODO -> check avg minUniformBufferOffsetAlignment vs individual buffers
-     if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) {
+    if (usage & VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT) {
         const auto& backend = context.getBackend();
         const auto& deviceProps = backend.getDeviceProperties();
         const auto& align = deviceProps.limits.minUniformBufferOffsetAlignment;
         bufferWindowSize = (size + align - 1) & ~(align - 1);
-    
+
         assert(bufferWindowSize != 0);
-    
+
         totalSize = bufferWindowSize * backend.getMaxFrames();
     }
 

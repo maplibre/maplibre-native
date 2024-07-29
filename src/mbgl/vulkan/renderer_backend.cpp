@@ -239,7 +239,6 @@ static VKAPI_ATTR VkBool32 vkDebugReportCallback(VkDebugReportFlagsEXT flags,
                                                  const char* pLayerPrefix,
                                                  const char* pMessage,
                                                  [[maybe_unused]] void* pUserData) {
-
     EventSeverity mbglSeverity = EventSeverity::Debug;
 
     if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
@@ -531,8 +530,7 @@ void RendererBackend::initCommandPool() {
 }
 
 void RendererBackend::destroyResources() {
-    if (device)
-        device->waitIdle();
+    if (device) device->waitIdle();
 
     context.reset();
     commandPool.reset();

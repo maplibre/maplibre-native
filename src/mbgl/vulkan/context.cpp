@@ -49,7 +49,6 @@ public:
 Context::Context(RendererBackend& backend_)
     : gfx::Context(vulkan::maximumVertexBindingCount),
       backend(backend_) {
-
     if (glslangRefCount++ == 0) {
         glslang::InitializeProcess();
     }
