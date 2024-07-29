@@ -1564,10 +1564,6 @@ bool NodeFileSource::canRequest(const mbgl::Resource&) const {
     return true;
 }
 
-bool NodeFileSource::canRequestNow(const mbgl::Resource& resource) const {
-    return canRequest(resource);
-}
-
 void NodeFileSource::setResourceOptions(mbgl::ResourceOptions options) {
     this->_resourceOptions = std::move(options);
 }

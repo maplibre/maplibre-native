@@ -86,10 +86,6 @@ bool LocalFileSource::canRequest(const Resource& resource) const {
     return acceptsURL(resource.url);
 }
 
-bool LocalFileSource::canRequestNow(const Resource& resource) const {
-    return canRequest(resource);
-}
-
 void LocalFileSource::pause() {
     impl->pause();
 }

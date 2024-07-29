@@ -2,6 +2,7 @@
 #include <mbgl/storage/database_file_source.hpp>
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/storage/file_source_request.hpp>
+#include <mbgl/storage/network_status.hpp>
 #include <mbgl/storage/offline_database.hpp>
 #include <mbgl/storage/offline_download.hpp>
 #include <mbgl/storage/resource_options.hpp>
@@ -31,7 +32,7 @@ public:
             offlineResponse->noContent = true;
             offlineResponse->error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
                                                                        "Not found in offline database");
-        } else if (!offlineResponse->isUsable() && onlineFileSource->canRequestNow(resource)) {
+        } else if (!offlineResponse->isUsable()) {
             offlineResponse->error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound,
                                                                        "Cached resource is unusable");
         }
@@ -226,10 +227,6 @@ bool DatabaseFileSource::canRequest(const Resource& resource) const {
     return resource.hasLoadingMethod(Resource::LoadingMethod::Cache) &&
            resource.url.rfind(mbgl::util::ASSET_PROTOCOL, 0) == std::string::npos &&
            resource.url.rfind(mbgl::util::FILE_PROTOCOL, 0) == std::string::npos;
-}
-
-bool DatabaseFileSource::canRequestNow(const Resource& resource) const {
-    return canRequest(resource);
 }
 
 void DatabaseFileSource::setDatabasePath(const std::string& path, std::function<void()> callback) {
