@@ -54,6 +54,7 @@ public:
                                                  const std::optional<std::map<std::string, mbgl::Value>>& args) const;
 
     // Memory
+    void setTileCacheEnabled(bool);
     void reduceMemoryUse();
 
 private:

@@ -50,10 +50,9 @@ private:
     std::map<OverscaledTileID, std::unique_ptr<Tile>> tiles;
     std::list<OverscaledTileID> orderedKeys;
     TaggedScheduler threadPool;
-    std::atomic<size_t> deferredDeletionsPending{0};
+    size_t deferredDeletionsPending{0};
     std::mutex deferredSignalLock;
     std::condition_variable deferredSignal;
-
     size_t size;
 };
 

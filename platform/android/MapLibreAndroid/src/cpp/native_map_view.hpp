@@ -192,6 +192,8 @@ public:
 
     jni::Local<jni::Array<jni::jlong>> addMarkers(jni::JNIEnv&, const jni::Array<jni::Object<Marker>>&);
 
+    void setTileCacheEnabled(JNIEnv&, jni::jboolean);
+
     void onLowMemory(JNIEnv& env);
 
     void setDebug(JNIEnv&, jni::jboolean);
