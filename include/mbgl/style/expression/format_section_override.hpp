@@ -35,7 +35,7 @@ public:
         defaultValue.match([&fn](const style::PropertyExpression<T>& e) { fn(e.getExpression()); }, [](const T&) {});
     }
 
-    bool operator==(const Expression& e) const final { return false; }
+    bool operator==(const Expression&) const final { return false; }
 
     bool operator==(const FormatSectionOverride<T>& other) const {
         if (getType() != other.getType() || propertyName != other.propertyName) {
