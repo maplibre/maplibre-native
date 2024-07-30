@@ -31,6 +31,9 @@ cc_library(
     copts = [
         "-Wno-deprecated-declarations",
     ],
+    deps = [
+        "//:mbgl-core",
+    ],
 )
 
 # From: platform/ios/core-files.json
