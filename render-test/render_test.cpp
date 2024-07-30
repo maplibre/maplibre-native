@@ -127,7 +127,7 @@ ArgumentsTuple parseArguments(int argc, char** argv) {
                           shuffle,
                           online,
                           seed,
-                          manifestPath.string(),
+                          manifestPath.generic_string(),
                           updateResults,
                           std::move(testFilter)};
 }
@@ -266,7 +266,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
         }
     }
 
-    const std::string manifestName = mbgl::filesystem::path(manifestPath).stem();
+    const std::string manifestName = mbgl::filesystem::path(manifestPath).stem().generic_string();
     const std::string resultPath = manifest.getResultPath() + "/" + manifestName + ".html";
     std::string resultsHTML = createResultPage(stats, metadatas, shuffle, seed);
     mbgl::util::write_file(resultPath, resultsHTML);
@@ -300,7 +300,7 @@ int runRenderTests(int argc, char** argv, std::function<void()> testStatus) {
                100.0 * stats.erroredTests / count);
     }
 
-    printf("Results at: %s\n", mbgl::filesystem::canonical(resultPath).c_str());
+    printf("Results at: %s\n", mbgl::filesystem::canonical(resultPath).generic_string().c_str());
 
     return returnCode;
 }

@@ -171,7 +171,7 @@ std::string toJSON(const std::vector<mbgl::Feature>& features, unsigned indent, 
 }
 
 JSONReply readJson(const mbgl::filesystem::path& jsonPath) {
-    auto maybeJSON = mbgl::util::readFile(jsonPath);
+    auto maybeJSON = mbgl::util::readFile(jsonPath.generic_string());
     if (!maybeJSON) {
         return {std::string("Unable to open file ") + jsonPath.string()};
     }
@@ -960,7 +960,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 }
                 size_t size = 0;
                 if (compressed) {
-                    size = mbgl::util::compress(*mbgl::util::readFile(filePath)).size();
+                    size = mbgl::util::compress(*mbgl::util::readFile(filePath.generic_string())).size();
                 } else {
                     size = mbgl::filesystem::file_size(filePath);
                 }
