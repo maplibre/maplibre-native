@@ -507,7 +507,7 @@ TEST(OfflineDatabase, GetRegion) {
     OfflineDatabase db(":memory:", fixture::tileServerOptions);
     OfflineTilePyramidRegionDefinition definition{
         "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false};
-    OfflineRegionMetadata  metadata{{1, 2, 3}};
+    OfflineRegionMetadata metadata{{1, 2, 3}};
 
     auto createdRegion = db.createRegion(definition, metadata);
     ASSERT_TRUE(createdRegion);
