@@ -115,6 +115,8 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     int32_t presentQueueIndex = backend.getPresentQueueIndex();
 
     if (graphicsQueueIndex != presentQueueIndex) {
+        // TODO if this scenario is widespred and performance is a problem (shouldn't be the case on most hardware)
+        // rework to vk::SharingMode::eExclusive + queue ownership
         swapchainCreateInfo.setImageSharingMode(vk::SharingMode::eConcurrent);
         const std::array<uint32_t, 2> queueIndices = {static_cast<uint32_t>(graphicsQueueIndex),
                                                       static_cast<uint32_t>(presentQueueIndex)};

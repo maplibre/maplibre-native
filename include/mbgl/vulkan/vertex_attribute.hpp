@@ -13,15 +13,12 @@ class VertexAttributeArray;
 class UploadPass;
 
 class VertexAttribute final : public gfx::VertexAttribute {
-    // Can only be created by VertexAttributeArray
-private:
-    friend VertexAttributeArray;
+
+public:
     VertexAttribute(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
         : gfx::VertexAttribute(index_, dataType_, count_) {}
     VertexAttribute(VertexAttribute&& other)
         : gfx::VertexAttribute(std::move(other)) {}
-
-public:
     VertexAttribute(const VertexAttribute& other) = delete;
     ~VertexAttribute() override = default;
 
@@ -48,7 +45,7 @@ public:
 
 private:
     gfx::UniqueVertexAttribute create(int index, gfx::AttributeDataType dataType, std::size_t count) const override {
-        return gfx::UniqueVertexAttribute(new VertexAttribute(index, dataType, count));
+        return std::make_unique<VertexAttribute>(index, dataType, count);
     }
 };
 
