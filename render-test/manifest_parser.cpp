@@ -116,8 +116,9 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
     if (document.HasMember("result_path")) {
         const auto& resultPathValue = document["result_path"];
         if (!resultPathValue.IsString()) {
-            mbgl::Log::Warning(mbgl::Event::General,
-                               "Invalid result_path is provided inside the manifest file: " + filePath.generic_string());
+            mbgl::Log::Warning(
+                mbgl::Event::General,
+                "Invalid result_path is provided inside the manifest file: " + filePath.generic_string());
             return std::nullopt;
         }
         manifest.resultPath = (getValidPath(manifest.manifestPath, resultPathValue.GetString()) / "").generic_string();
@@ -141,7 +142,8 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
     if (document.HasMember("access_token")) {
         const auto& apiKeyValue = document["access_token"];
         if (!apiKeyValue.IsString()) {
-            mbgl::Log::Warning(mbgl::Event::General,
+            mbgl::Log::Warning(
+                mbgl::Event::General,
                 "Invalid access_token is provided inside the manifest file: " + filePath.generic_string());
             return std::nullopt;
         }
@@ -169,7 +171,8 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
     if (document.HasMember("metric_path")) {
         const auto& metricPathValue = document["metric_path"];
         if (!metricPathValue.IsString()) {
-            mbgl::Log::Warning(mbgl::Event::General,
+            mbgl::Log::Warning(
+                mbgl::Event::General,
                 "Invalid metric_path is provided inside the manifest file: " + filePath.generic_string());
             return std::nullopt;
         }
@@ -206,8 +209,7 @@ std::optional<Manifest> ManifestParser::parseManifest(const std::string& manifes
     if (document.HasMember("ignore_paths")) {
         const auto& ignorePathValue = document["ignore_paths"];
         if (!ignorePathValue.IsArray()) {
-            mbgl::Log::Warning(
-                mbgl::Event::General,
+            mbgl::Log::Warning(mbgl::Event::General,
                                "Provided ignore_paths inside the manifest file: " + filePath.generic_string() +
                                    " is not a valid array");
             return std::nullopt;
