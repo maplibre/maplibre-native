@@ -1381,7 +1381,7 @@ target_link_libraries(
         Mapbox::Base::geojson.hpp
         Mapbox::Base::geometry.hpp
         Mapbox::Base::variant
-        "$<$<BOOL:${MLN_USE_TRACY}>:TracyClient>"
+        $<$<BOOL:${MLN_USE_TRACY}>:TracyClient>
         unordered_dense
 )
 
@@ -1412,7 +1412,6 @@ export(TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
-    "$<$<BOOL:${MLN_USE_TRACY}>:TracyClient>"
     unordered_dense
 
     FILE MapboxCoreTargets.cmake
