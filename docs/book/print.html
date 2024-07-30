@@ -1449,7 +1449,7 @@ If we successfully get the response, call <code>addMarkersToMap()</code> on the 
             // Intentionally specify package name
             // This makes copy from another project easier
             org.maplibre.android.R.drawable.maplibre_info_icon_default,
-            null
+            theme
         )!!
         val bitmapBlue = infoIconDrawable.toBitmap()
         val bitmapRed = infoIconDrawable
@@ -1535,12 +1535,13 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
     private var permissionsManager: PermissionsManager? = null
     private var locationComponent: LocationComponent? = null
     private lateinit var maplibreMap: MapLibreMap
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_layer_basic_pulsing_circle)
         mapView = findViewById(R.id.mapView)
         if (savedInstanceState != null) {
-            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION)
+            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION, Location::class.java)
         }
         mapView.onCreate(savedInstanceState)
         checkPermissions()
@@ -2034,7 +2035,7 @@ class SupportMapFragmentActivity :
     }
 
     override fun onDidFinishRenderingFrame(fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double) {
-        if (initialCameraAnimation &amp;&amp; fully &amp;&amp; maplibreMap != null) {
+        if (initialCameraAnimation &amp;&amp; fully &amp;&amp; this::maplibreMap.isInitialized) {
             maplibreMap.animateCamera(
                 CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().tilt(45.0).build()),
                 5000
