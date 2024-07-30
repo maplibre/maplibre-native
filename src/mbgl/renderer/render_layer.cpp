@@ -58,6 +58,9 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     assert(params.source);
     assert(params.source->isEnabled());
     renderTiles = params.source->getRenderTiles();
+    /*std::stringstream ss;
+    ss << "\nrenderLayerPrepareRenderTiles: " << renderTiles->size();
+    Log::Debug(Event::General, ss.str());*/
     addRenderPassesFromTiles();
 
 #if MLN_DRAWABLE_RENDERER

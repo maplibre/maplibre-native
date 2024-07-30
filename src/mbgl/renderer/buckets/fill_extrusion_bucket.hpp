@@ -55,6 +55,8 @@ public:
 #endif // MLN_LEGACY_RENDERER
 
     std::unordered_map<std::string, FillExtrusionProgram::Binders> paintPropertyBinders;
+    
+    static std::vector<const FillExtrusionBucket*> list;
 };
 
 } // namespace mbgl

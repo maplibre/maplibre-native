@@ -50,7 +50,8 @@ public:
                     const CanonicalTileID&) override;
 
     bool hasData() const override;
-
+    size_t getMemSize() const override;
+    
     void upload(gfx::UploadPass&) override;
 
     float getQueryRadius(const RenderLayer&) const override;
@@ -92,6 +93,9 @@ public:
 #endif // MLN_LEGACY_RENDERER
 
     std::map<std::string, FillProgram::Binders> paintPropertyBinders;
+    
+    static size_t count;
+    static std::vector<const FillBucket*> list;
 };
 
 } // namespace mbgl

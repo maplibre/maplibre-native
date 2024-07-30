@@ -12,6 +12,8 @@ namespace mbgl {
 
 using namespace style;
 
+std::vector<const LineBucket*> LineBucket::list;
+
 LineBucket::LineBucket(LineBucket::PossiblyEvaluatedLayoutProperties layout_,
                        const std::map<std::string, Immutable<LayerProperties>>& layerPaintProperties,
                        const float zoom_,

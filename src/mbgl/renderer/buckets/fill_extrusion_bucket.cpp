@@ -37,6 +37,8 @@ namespace mbgl {
 
 using namespace style;
 
+std::vector<const FillExtrusionBucket*> FillExtrusionBucket::list;
+
 struct GeometryTooLongException : std::exception {};
 
 FillExtrusionBucket::FillExtrusionBucket(

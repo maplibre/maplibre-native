@@ -134,6 +134,10 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             idealTiles = {idealTiles[0]};
         }
     }
+    
+    std::stringstream ss1;
+    ss1 << "\ntilePyramidIdealTiles: " << idealTiles.size();
+    Log::Debug(Event::General, ss1.str());
 
     // Stores a list of all the tiles that we're definitely going to retain.
     // There are two kinds of tiles we need: the ideal tiles determined by the

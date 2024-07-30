@@ -353,7 +353,10 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
 - (IBAction)showSettings:(__unused id)sender
 {
-    self.randomWalk = NO;
+    
+    [self addAnnotationWithCustomCallout];
+    
+    /*self.randomWalk = NO;
 
     UITableViewController *settingsViewController = [[UITableViewController alloc] initWithStyle:UITableViewStyleGrouped];
     settingsViewController.tableView.delegate = self;
@@ -362,7 +365,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     settingsViewController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(dismissSettings:)];
     UINavigationController *wrapper = [[UINavigationController alloc] initWithRootViewController:settingsViewController];
     wrapper.navigationBar.tintColor = self.navigationController.navigationBar.tintColor;
-    [self.navigationController presentViewController:wrapper animated:YES completion:nil];
+    [self.navigationController presentViewController:wrapper animated:YES completion:nil];*/
 }
 
 - (void)dismissSettings:(__unused id)sender
@@ -1023,31 +1026,47 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 
 - (void)addAnnotationWithCustomCallout
 {
-    [self.mapView removeAnnotations:self.mapView.annotations];
-
-    MBXCustomCalloutAnnotation *firstAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
-    firstAnnotation.coordinate = CLLocationCoordinate2DMake(51.50998, -0.1337);
-    firstAnnotation.title = @"Open anchored to annotation";
-    firstAnnotation.anchoredToAnnotation = YES;
-    firstAnnotation.dismissesAutomatically = NO;
-
-    MBXCustomCalloutAnnotation *secondAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
-    secondAnnotation.coordinate = CLLocationCoordinate2DMake(51.50988, -0.1337);
-    secondAnnotation.title = @"Open not anchored to annotation";
-    secondAnnotation.anchoredToAnnotation = NO;
-    secondAnnotation.dismissesAutomatically = NO;
-
-    MBXCustomCalloutAnnotation *thirdAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
-    thirdAnnotation.coordinate = CLLocationCoordinate2DMake(51.50978, -0.1337);
-    thirdAnnotation.title = @"Dismisses automatically";
-    thirdAnnotation.anchoredToAnnotation = YES;
-    thirdAnnotation.dismissesAutomatically = YES;
-
-    NSArray *annotations = @[firstAnnotation, secondAnnotation, thirdAnnotation];
-    
-    [self.mapView addAnnotations:annotations];
-
-    [self.mapView showAnnotations:annotations animated:NO];
+    if (self.mapView.annotations.count != 3) {
+        [self.mapView removeAnnotations:self.mapView.annotations];
+        
+        MBXCustomCalloutAnnotation *firstAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
+        firstAnnotation.coordinate = CLLocationCoordinate2DMake(51.62338, -1.1337);
+        firstAnnotation.title = @"Open anchored to annotation";
+        firstAnnotation.anchoredToAnnotation = YES;
+        firstAnnotation.dismissesAutomatically = NO;
+        
+        MBXCustomCalloutAnnotation *secondAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
+        secondAnnotation.coordinate = CLLocationCoordinate2DMake(51.62333, -1.1337);
+        secondAnnotation.title = @"Open not anchored to annotation";
+        secondAnnotation.anchoredToAnnotation = NO;
+        secondAnnotation.dismissesAutomatically = NO;
+        
+        MBXCustomCalloutAnnotation *thirdAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
+        thirdAnnotation.coordinate = CLLocationCoordinate2DMake(51.62328, -1.1337);
+        thirdAnnotation.title = @"Dismisses automatically";
+        thirdAnnotation.anchoredToAnnotation = YES;
+        thirdAnnotation.dismissesAutomatically = YES;
+        
+        NSArray *annotations = @[firstAnnotation, secondAnnotation, thirdAnnotation];
+        
+        [self.mapView addAnnotations:annotations];
+        
+        [self.mapView showAnnotations:annotations animated:NO];
+    } else {
+        [self.mapView removeAnnotations:self.mapView.annotations];
+        
+        MBXCustomCalloutAnnotation *firstAnnotation = [[MBXCustomCalloutAnnotation alloc] init];
+        firstAnnotation.coordinate = CLLocationCoordinate2DMake(51.62338, -1.1337);
+        firstAnnotation.title = @"Open anchored to annotation";
+        firstAnnotation.anchoredToAnnotation = YES;
+        firstAnnotation.dismissesAutomatically = NO;
+        
+        NSArray *annotations = @[firstAnnotation];
+        
+        [self.mapView addAnnotations:annotations];
+        
+        [self.mapView showAnnotations:annotations animated:NO];
+    }
 }
 
 - (void)styleBuildingExtrusions
@@ -2154,6 +2173,7 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
     [self.styleNames addObject:@"MapLibre Basic"];
     //[self.styleURLs addObject:[NSURL URLWithString:@"https://demotiles.maplibre.org/style.json"]];
     [self.styleURLs addObject:[NSURL URLWithString:@"https://duozaj7fhj4pz.cloudfront.net/espresso/OSM/amazon_delivery_rabbit_external_OSM_Espresso.json"]];
+    //[self.styleURLs addObject:[NSURL URLWithString:@"https://api.maptiler.com/maps/b33abf35-1ba5-46cb-b172-fdf3a718a5a7/style.json?key=G4MQXsYbLiUxOu3SV4lh"]];
 
     /// Add MapLibre Styles if an `apiKey` exists
     NSString* apiKey = [MLNSettings apiKey];

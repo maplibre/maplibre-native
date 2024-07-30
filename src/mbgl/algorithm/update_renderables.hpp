@@ -15,6 +15,50 @@ template <typename GetTileFn,
           typename RetainTileFn,
           typename RenderTileFn,
           typename IdealTileIDs>
+bool checkChildren(GetTileFn getTile,
+                   CreateTileFn createTile,
+                   RetainTileFn retainTile,
+                   RenderTileFn renderTile,
+                   const IdealTileIDs& idealDataTileID,
+                   const Range<uint8_t>& zoomRange,
+                   int levels) {
+    if (levels == 0) {
+        return false;
+    }
+    bool covered = true;
+    const UnwrappedTileID idealRenderTileID = idealDataTileID.toUnwrapped();
+    int32_t overscaledZ = idealDataTileID.overscaledZ + 1;
+    if (overscaledZ > zoomRange.max) {
+        // We're looking for an overzoomed child tile.
+        const auto childDataTileID = idealDataTileID.scaledTo(overscaledZ);
+        auto tile = getTile(childDataTileID);
+        if (tile && tile->isRenderable()) {
+            retainTile(*tile, TileNecessity::Optional);
+            renderTile(idealRenderTileID, *tile);
+        } else {
+            covered = checkChildren(getTile, createTile, retainTile, renderTile, childDataTileID, zoomRange, levels - 1);
+        }
+    } else {
+        // Check all four actual child tiles.
+        for (const auto& childTileID : idealDataTileID.canonical.children()) {
+            const OverscaledTileID childDataTileID(overscaledZ, idealRenderTileID.wrap, childTileID);
+            auto tile = getTile(childDataTileID);
+            if (tile && tile->isRenderable()) {
+                retainTile(*tile, TileNecessity::Optional);
+                renderTile(childDataTileID.toUnwrapped(), *tile);
+            } else {
+                covered = checkChildren(getTile, createTile, retainTile, renderTile, childDataTileID, zoomRange, levels - 1);
+            }
+        }
+    }
+    return covered;
+}
+
+template <typename GetTileFn,
+          typename CreateTileFn,
+          typename RetainTileFn,
+          typename RenderTileFn,
+          typename IdealTileIDs>
 void updateRenderables(GetTileFn getTile,
                        CreateTileFn createTile,
                        RetainTileFn retainTile,
@@ -54,7 +98,9 @@ void updateRenderables(GetTileFn getTile,
 
             // The tile isn't loaded yet, but retain it anyway because it's an ideal tile.
             retainTile(*tile, TileNecessity::Required);
-            covered = true;
+            covered = checkChildren(getTile, createTile, retainTile, renderTile, idealDataTileID, zoomRange, 3);
+            
+            /*covered = true;
             overscaledZ = idealDataTileID.overscaledZ + 1;
             if (overscaledZ > zoomRange.max) {
                 // We're looking for an overzoomed child tile.
@@ -64,7 +110,34 @@ void updateRenderables(GetTileFn getTile,
                     retainTile(*tile, TileNecessity::Optional);
                     renderTile(idealRenderTileID, *tile);
                 } else {
-                    covered = false;
+                    //covered = false;
+                    
+                    int32_t overscaledZ2 = childDataTileID.overscaledZ + 1;
+                    if (overscaledZ2 > zoomRange.max) {
+                        // We're looking for an overzoomed child tile.
+                        const auto childDataTileID2 = childDataTileID.scaledTo(overscaledZ2);
+                        tile = getTile(childDataTileID2);
+                        if (tile && tile->isRenderable()) {
+                            retainTile(*tile, TileNecessity::Optional);
+                            renderTile(idealRenderTileID, *tile);
+                        } else {
+                            covered = false;
+                        }
+                    } else {
+                        // Check all four actual child tiles.
+                        for (const auto& childTileID2 : childDataTileID.canonical.children()) {
+                            const OverscaledTileID childDataTileID2(overscaledZ2, childDataTileID.wrap, childTileID2);
+                            tile = getTile(childDataTileID2);
+                            if (tile && tile->isRenderable()) {
+                                retainTile(*tile, TileNecessity::Optional);
+                                renderTile(childDataTileID2.toUnwrapped(), *tile);
+                            } else {
+                                // At least one child tile doesn't exist, so we are
+                                // going to look for parents as well.
+                                covered = false;
+                            }
+                        }
+                    }
                 }
             } else {
                 // Check all four actual child tiles.
@@ -77,10 +150,37 @@ void updateRenderables(GetTileFn getTile,
                     } else {
                         // At least one child tile doesn't exist, so we are
                         // going to look for parents as well.
-                        covered = false;
+                        //covered = false;
+                        
+                        int32_t overscaledZ2 = childDataTileID.overscaledZ + 1;
+                        if (overscaledZ2 > zoomRange.max) {
+                            // We're looking for an overzoomed child tile.
+                            const auto childDataTileID2 = childDataTileID.scaledTo(overscaledZ2);
+                            tile = getTile(childDataTileID2);
+                            if (tile && tile->isRenderable()) {
+                                retainTile(*tile, TileNecessity::Optional);
+                                renderTile(idealRenderTileID, *tile);
+                            } else {
+                                covered = false;
+                            }
+                        } else {
+                            // Check all four actual child tiles.
+                            for (const auto& childTileID2 : childDataTileID.canonical.children()) {
+                                const OverscaledTileID childDataTileID2(overscaledZ2, childDataTileID.wrap, childTileID2);
+                                tile = getTile(childDataTileID2);
+                                if (tile && tile->isRenderable()) {
+                                    retainTile(*tile, TileNecessity::Optional);
+                                    renderTile(childDataTileID2.toUnwrapped(), *tile);
+                                } else {
+                                    // At least one child tile doesn't exist, so we are
+                                    // going to look for parents as well.
+                                    covered = false;
+                                }
+                            }
+                        }
                     }
                 }
-            }
+            }*/
 
             if (!covered) {
                 // We couldn't find child tiles that entirely cover the ideal tile.

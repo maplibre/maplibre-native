@@ -8,6 +8,9 @@
 
 namespace mbgl {
 
+size_t FillBucket::count = 0;
+std::vector<const FillBucket*> FillBucket::list;
+
 FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
                        const std::map<std::string, Immutable<style::LayerProperties>>& layerPaintProperties,
                        const float zoom,
@@ -18,9 +21,15 @@ FillBucket::FillBucket(const FillBucket::PossiblyEvaluatedLayoutProperties&,
                                      std::forward_as_tuple(pair.first),
                                      std::forward_as_tuple(getEvaluated<FillLayerProperties>(pair.second), zoom));
     }
+    FillBucket::count ++;
 }
 
 FillBucket::~FillBucket() {
+    FillBucket::count --;
+    auto pos = std::find(FillBucket::list.begin(), FillBucket::list.end(), this);
+    if (pos != FillBucket::list.end()) {
+        FillBucket::list.erase(pos);
+    }
     sharedVertices->release();
 }
 
@@ -95,6 +104,26 @@ void FillBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
 bool FillBucket::hasData() const {
     return !triangleSegments.empty() || !basicLineSegments.empty();
 }
+
+size_t FillBucket::getMemSize() const {
+    size_t memSize = 0;
+    
+    memSize += sizeof(this);
+    
+    memSize += lineVertices.bytes();
+    memSize += lineIndexes.bytes();
+    memSize += lineSegments.size() * sizeof(LineAttributes);
+    
+    memSize += basicLines.bytes();
+    memSize += basicLineSegments.size() * sizeof(FillAttributes);
+    
+    memSize += vertices.bytes();
+    memSize += triangles.bytes();
+    memSize += triangleSegments.size() * sizeof(FillAttributes);
+    
+    return memSize;
+}
+
 
 float FillBucket::getQueryRadius(const RenderLayer& layer) const {
     using namespace style;

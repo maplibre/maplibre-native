@@ -64,6 +64,9 @@ private:
 
     const float zoom;
     const uint32_t overscaling;
+    
+public:
+    static std::vector<const LineBucket*> list;
 };
 
 } // namespace mbgl
