@@ -13,7 +13,6 @@ class VertexAttributeArray;
 class UploadPass;
 
 class VertexAttribute final : public gfx::VertexAttribute {
-
 public:
     VertexAttribute(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
         : gfx::VertexAttribute(index_, dataType_, count_) {}

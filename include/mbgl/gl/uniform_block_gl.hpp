@@ -7,7 +7,6 @@ namespace mbgl {
 namespace gl {
 
 class UniformBlockGL final : public gfx::UniformBlock {
-
 public:
     UniformBlockGL(int index_, std::size_t size_)
         : UniformBlock(index_, size_) {}

@@ -279,13 +279,13 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             parameters.pass = RenderPass::Pass3D;
 
             // TODO is this needed?
-            //if (!parameters.staticData.depthRenderbuffer ||
+            // if (!parameters.staticData.depthRenderbuffer ||
             //    parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
             //    parameters.staticData.depthRenderbuffer =
             //        parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
             //            parameters.staticData.backendSize);
             //}
-            //parameters.staticData.depthRenderbuffer->setShouldClear(true);
+            // parameters.staticData.depthRenderbuffer->setShouldClear(true);
         }
     };
 

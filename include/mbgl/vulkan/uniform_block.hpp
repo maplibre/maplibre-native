@@ -6,7 +6,6 @@ namespace mbgl {
 namespace vulkan {
 
 class UniformBlock final : public gfx::UniformBlock {
-
 public:
     UniformBlock(int index_, std::size_t size_)
         : gfx::UniformBlock(index_, size_) {}
