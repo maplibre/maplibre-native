@@ -103,7 +103,7 @@ class JsonApiActivity : AppCompatActivity() {
             // Intentionally specify package name
             // This makes copy from another project easier
             org.maplibre.android.R.drawable.maplibre_info_icon_default,
-            null
+            theme
         )!!
         val bitmapBlue = infoIconDrawable.toBitmap()
         val bitmapRed = infoIconDrawable

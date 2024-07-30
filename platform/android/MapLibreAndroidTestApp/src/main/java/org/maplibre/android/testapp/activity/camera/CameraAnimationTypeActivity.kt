@@ -50,7 +50,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
     private var cameraState = false
     private val cameraIdleListener = OnCameraIdleListener {
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             Timber.w(maplibreMap.cameraPosition.toString())
         }
     }
@@ -114,7 +114,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private val nextLatLng: LatLng
-        private get() {
+        get() {
             cameraState = !cameraState
             return if (cameraState) LAT_LNG_TOWER_BRIDGE else LAT_LNG_LONDON_EYE
         }
@@ -146,7 +146,7 @@ class CameraAnimationTypeActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             maplibreMap.removeOnCameraIdleListener(cameraIdleListener)
         }
         mapView.onDestroy()
