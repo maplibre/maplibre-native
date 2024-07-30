@@ -270,8 +270,8 @@ void DatabaseFileSource::listOfflineRegions(
     impl->actor().invoke(&DatabaseFileSourceThread::listRegions, std::move(callback));
 }
 
-void DatabaseFileSource::getOfflineRegion(const int64_t regionID,
-                                          std::function<void(expected<std::optional<OfflineRegion>, std::exception_ptr>)> callback) {
+void DatabaseFileSource::getOfflineRegion(
+    const int64_t regionID, std::function<void(expected<std::optional<OfflineRegion>, std::exception_ptr>)> callback) {
     impl->actor().invoke(&DatabaseFileSourceThread::getRegion, regionID, std::move(callback));
 }
 

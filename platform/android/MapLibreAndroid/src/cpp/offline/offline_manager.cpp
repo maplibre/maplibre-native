@@ -76,8 +76,8 @@ void OfflineManager::getOfflineRegion(jni::JNIEnv& env_,
             // Keep a shared ptr to a global reference of the callback and file
             // source so they are not GC'd in the meanwhile
             callback = std::make_shared<decltype(globalCallback)>(std::move(globalCallback)),
-            jFileSource = std::make_shared<decltype(globalFilesource)>(std::move(globalFilesource)), regionID](
-            mbgl::expected<std::optional<mbgl::OfflineRegion>, std::exception_ptr> result) mutable {
+            jFileSource = std::make_shared<decltype(globalFilesource)>(std::move(globalFilesource)),
+            regionID](mbgl::expected<std::optional<mbgl::OfflineRegion>, std::exception_ptr> result) mutable {
             // Reattach, the callback comes from a different thread
             android::UniqueEnv env = android::AttachEnv();
 
@@ -86,11 +86,9 @@ void OfflineManager::getOfflineRegion(jni::JNIEnv& env_,
             } else {
                 auto region = result.value();
                 if (region) {
-                    OfflineManager::GetOfflineRegionCallback::onRegion(*env, *jFileSource,
-                                                                       *callback, *region);
+                    OfflineManager::GetOfflineRegionCallback::onRegion(*env, *jFileSource, *callback, *region);
                 } else {
-                    OfflineManager::GetOfflineRegionCallback::onRegionNotFound(*env, *jFileSource,
-                                                                               *callback);
+                    OfflineManager::GetOfflineRegionCallback::onRegionNotFound(*env, *jFileSource, *callback);
                 }
             }
         });
