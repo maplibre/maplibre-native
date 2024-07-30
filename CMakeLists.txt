@@ -1300,7 +1300,8 @@ endif()
 set_source_files_properties(
     ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
     PROPERTIES
-    COMPILE_FLAGS "-Wno-deprecated-declarations"
+    COMPILE_FLAGS
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-deprecated-declarations>
 )
 
 source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})
