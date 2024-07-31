@@ -14,13 +14,14 @@ template <typename GetTileFn,
           typename CreateTileFn,
           typename RetainTileFn,
           typename RenderTileFn,
-          typename IdealTileIDs>
+          typename IdealTileIDs,
+          typename TileData>
 void updateRenderables(GetTileFn getTile,
                        CreateTileFn createTile,
                        RetainTileFn retainTile,
                        RenderTileFn renderTile,
                        const IdealTileIDs& idealTileIDs,
-                       const std::map<UnwrappedTileID, std::reference_wrapper<Tile>> previouslyRenderedTiles,
+                       const std::map<UnwrappedTileID, std::reference_wrapper<TileData>> previouslyRenderedTiles,
                        const Range<uint8_t>& zoomRange,
                        const std::optional<uint8_t>& maxParentOverscaleFactor = std::nullopt) {
     std::unordered_set<OverscaledTileID> checked;
@@ -59,7 +60,7 @@ void updateRenderables(GetTileFn getTile,
             auto addPreviouslyRenderedTilesIfChildrenOf = [&](const UnwrappedTileID& tileID) {
                 for (auto previouslyRenderedTileIt : previouslyRenderedTiles) {
                     const UnwrappedTileID previouslyRenderedTileID = previouslyRenderedTileIt.first;
-                    Tile& previouslyRenderedTile = previouslyRenderedTileIt.second;
+                    TileData& previouslyRenderedTile = previouslyRenderedTileIt.second;
                     if (previouslyRenderedTileID == tileID || previouslyRenderedTileID.isChildOf(tileID)) {
                         retainTile(previouslyRenderedTile, TileNecessity::Optional);
                         renderTile(previouslyRenderedTileID, previouslyRenderedTile);
