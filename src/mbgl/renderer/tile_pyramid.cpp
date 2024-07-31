@@ -202,8 +202,14 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             maxParentTileOverscaleFactor);
     }
 
-    algorithm::updateRenderables(
-        getTileFn, createTileFn, retainTileFn, renderTileFn, idealTiles, previouslyRenderedTiles, zoomRange, maxParentTileOverscaleFactor);
+    algorithm::updateRenderables(getTileFn,
+                                 createTileFn,
+                                 retainTileFn,
+                                 renderTileFn,
+                                 idealTiles,
+                                 previouslyRenderedTiles,
+                                 zoomRange,
+                                 maxParentTileOverscaleFactor);
 
     for (auto previouslyRenderedTile : previouslyRenderedTiles) {
         Tile& tile = previouslyRenderedTile.second;

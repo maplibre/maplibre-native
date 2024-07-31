@@ -55,7 +55,7 @@ void updateRenderables(GetTileFn getTile,
 
             // The tile isn't loaded yet, but retain it anyway because it's an ideal tile.
             retainTile(*tile, TileNecessity::Required);
-            
+
             auto addPreviouslyRenderedTilesIfChildOf = [&](const UnwrappedTileID& tileID) {
                 for (auto previouslyRenderedTileIt : previouslyRenderedTiles) {
                     const UnwrappedTileID previouslyRenderedTileID = previouslyRenderedTileIt.first;
@@ -66,7 +66,7 @@ void updateRenderables(GetTileFn getTile,
                     }
                 }
             };
-            
+
             covered = true;
             overscaledZ = idealDataTileID.overscaledZ + 1;
             if (overscaledZ > zoomRange.max) {
@@ -78,7 +78,7 @@ void updateRenderables(GetTileFn getTile,
                     renderTile(idealRenderTileID, *tile);
                 } else {
                     covered = false;
-                    
+
                     // Reuse previously rendered tiles in order to avoid empty screen
                     addPreviouslyRenderedTilesIfChildOf(idealRenderTileID);
                 }
@@ -94,7 +94,7 @@ void updateRenderables(GetTileFn getTile,
                         // At least one child tile doesn't exist, so we are
                         // going to look for parents as well.
                         covered = false;
-                        
+
                         // Reuse previously rendered tiles in order to avoid empty screen
                         addPreviouslyRenderedTilesIfChildOf(childDataTileID.toUnwrapped());
                     }
