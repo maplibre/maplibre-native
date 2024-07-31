@@ -31,10 +31,12 @@ multidex = "2.0.1"
 androidxTestExtJUnit = "1.1.5"
 androidxTestCoreKtx = "1.5.0"
 kotlinxSerializationJson = "1.6.0"
+kotlinxCoroutinesTest = "1.6.4"
 
 androidGradlePlugin = "8.5.1"
 
 [libraries]
+kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 maplibreJavaGeoJSON = { group = "org.maplibre.gl", name = "android-sdk-geojson", version.ref = "mapLibreServices" }
 mapboxAndroidGestures = { group = "com.mapbox.mapboxsdk", name = "mapbox-android-gestures", version.ref = "mapboxGestures" }
 maplibreJavaTurf = { group = "org.maplibre.gl", name = "android-sdk-turf", version.ref = "mapLibreServices" }
