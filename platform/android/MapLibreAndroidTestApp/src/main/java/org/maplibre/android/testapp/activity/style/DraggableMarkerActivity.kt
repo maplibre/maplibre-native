@@ -336,9 +336,7 @@ class DraggableMarkerActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
-        outState?.let {
-            mapView.onSaveInstanceState(it)
-        }
+        mapView.onSaveInstanceState(outState)
     }
 }
 

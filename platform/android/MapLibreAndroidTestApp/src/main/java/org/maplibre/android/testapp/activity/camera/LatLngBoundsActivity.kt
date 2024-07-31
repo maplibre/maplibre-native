@@ -99,7 +99,7 @@ class LatLngBoundsActivity : AppCompatActivity() {
 
     private fun initBottomSheet() {
         bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
-        bottomSheetBehavior.setBottomSheetCallback(
+        bottomSheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, slideOffset: Float) {
                     val offset = convertSlideOffset(slideOffset)
