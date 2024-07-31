@@ -32,7 +32,7 @@ UniformBufferGL::UniformBufferGL(const void* data_, std::size_t size_, IBufferAl
       uniqueDebugId(generateDebugId()),
 #endif
       managedBuffer(allocator_, this) {
-    MLN_TRACE_ALLOC_CONST_BUFFER(uniqueDebugId, size_);
+    MLN_TRACE_ALLOC_CONST_BUFFER(uniqueDebugId, size_)
     if (size_ > managedBuffer.allocator.pageSize()) {
         // Buffer is very large, won't fit in the provided allocator
         MBGL_CHECK_ERROR(glGenBuffers(1, &localID));
@@ -66,7 +66,7 @@ UniformBufferGL::UniformBufferGL(const UniformBufferGL& other)
       uniqueDebugId(generateDebugId()),
 #endif
       managedBuffer(other.managedBuffer.allocator, this) {
-    MLN_TRACE_ALLOC_CONST_BUFFER(uniqueDebugId, other.size);
+    MLN_TRACE_ALLOC_CONST_BUFFER(uniqueDebugId, other.size)
     managedBuffer.setOwner(this);
     if (other.isManagedAllocation) {
         managedBuffer.allocate(other.managedBuffer.getContents().data(), other.size);
@@ -83,7 +83,7 @@ UniformBufferGL::~UniformBufferGL() {
 #ifdef MLN_TRACY_ENABLE
     assert(uniqueDebugId > 0);
 #endif
-    MLN_TRACE_FREE_CONST_BUFFER(uniqueDebugId);
+    MLN_TRACE_FREE_CONST_BUFFER(uniqueDebugId)
     if (isManagedAllocation) {
         return;
     }
