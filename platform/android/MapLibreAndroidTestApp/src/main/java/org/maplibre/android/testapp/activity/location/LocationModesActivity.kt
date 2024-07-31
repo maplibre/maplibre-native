@@ -54,6 +54,7 @@ class LocationModesActivity :
     @RenderMode.Mode
     private var renderMode = RenderMode.NORMAL
     private var lastLocation: Location? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_layer_mode)
@@ -80,7 +81,7 @@ class LocationModesActivity :
         if (savedInstanceState != null) {
             cameraMode = savedInstanceState.getInt(SAVED_STATE_CAMERA)
             renderMode = savedInstanceState.getInt(SAVED_STATE_RENDER)
-            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION)
+            lastLocation = savedInstanceState.getParcelable(SAVED_STATE_LOCATION, Location::class.java)
         }
         mapView.onCreate(savedInstanceState)
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
@@ -230,9 +231,7 @@ class LocationModesActivity :
             if (defaultStyle) R.style.maplibre_LocationComponent else R.style.CustomLocationComponent
         )
         if (defaultStyle) {
-            val padding: IntArray
-            padding =
-                if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            val padding: IntArray = if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
                     intArrayOf(0, 750, 0, 0)
                 } else {
                     intArrayOf(0, 250, 0, 0)

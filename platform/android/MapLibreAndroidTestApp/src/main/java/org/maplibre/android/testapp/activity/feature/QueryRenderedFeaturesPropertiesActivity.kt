@@ -161,7 +161,7 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             maplibreMap.removeOnMapClickListener(mapClickListener)
         }
         mapView.onDestroy()
@@ -172,7 +172,7 @@ class QueryRenderedFeaturesPropertiesActivity : AppCompatActivity() {
         mapView.onLowMemory()
     }
 
-    private class CustomMarker internal constructor(
+    private class CustomMarker constructor(
         baseMarkerOptions: BaseMarkerOptions<*, *>?,
         val features: List<Feature>?
     ) : Marker(baseMarkerOptions)
