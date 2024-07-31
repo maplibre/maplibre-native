@@ -56,7 +56,7 @@ void updateRenderables(GetTileFn getTile,
             // The tile isn't loaded yet, but retain it anyway because it's an ideal tile.
             retainTile(*tile, TileNecessity::Required);
 
-            auto addPreviouslyRenderedTilesIfChildOf = [&](const UnwrappedTileID& tileID) {
+            auto addPreviouslyRenderedTilesIfChildrenOf = [&](const UnwrappedTileID& tileID) {
                 for (auto previouslyRenderedTileIt : previouslyRenderedTiles) {
                     const UnwrappedTileID previouslyRenderedTileID = previouslyRenderedTileIt.first;
                     Tile& previouslyRenderedTile = previouslyRenderedTileIt.second;
@@ -80,7 +80,7 @@ void updateRenderables(GetTileFn getTile,
                     covered = false;
 
                     // Reuse previously rendered tiles in order to avoid empty screen
-                    addPreviouslyRenderedTilesIfChildOf(idealRenderTileID);
+                    addPreviouslyRenderedTilesIfChildrenOf(idealRenderTileID);
                 }
             } else {
                 // Check all four actual child tiles.
@@ -96,7 +96,7 @@ void updateRenderables(GetTileFn getTile,
                         covered = false;
 
                         // Reuse previously rendered tiles in order to avoid empty screen
-                        addPreviouslyRenderedTilesIfChildOf(childDataTileID.toUnwrapped());
+                        addPreviouslyRenderedTilesIfChildrenOf(childDataTileID.toUnwrapped());
                     }
                 }
             }
