@@ -906,6 +906,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_cache.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_cache.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_diff.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_id_hash.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_id_io.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_loader.hpp

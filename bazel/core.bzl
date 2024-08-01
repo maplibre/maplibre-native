@@ -564,6 +564,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/tile/tile.hpp",
     "src/mbgl/tile/tile_cache.cpp",
     "src/mbgl/tile/tile_cache.hpp",
+    "src/mbgl/tile/tile_diff.hpp",
     "src/mbgl/tile/tile_id_hash.cpp",
     "src/mbgl/tile/tile_id_io.cpp",
     "src/mbgl/tile/tile_loader.hpp",
