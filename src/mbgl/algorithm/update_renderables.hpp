@@ -61,7 +61,8 @@ void updateRenderables(GetTileFn getTile,
                 for (auto& prefetchedTileIt : prefetchedTiles) {
                     const UnwrappedTileID prefetchedTileID = prefetchedTileIt.first.toUnwrapped();
                     TileData* prefetchedTile = prefetchedTileIt.second.get();
-                    if (prefetchedTile->isRenderable() && (prefetchedTileID == tileID || prefetchedTileID.isChildOf(tileID))) {
+                    if (prefetchedTile->isRenderable() &&
+                        (prefetchedTileID == tileID || prefetchedTileID.isChildOf(tileID))) {
                         retainTile(*prefetchedTile, TileNecessity::Optional);
                         renderTile(prefetchedTileID, *prefetchedTile);
                     }
