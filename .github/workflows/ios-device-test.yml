@@ -6,6 +6,9 @@ on:
     types:
       - completed
 
+permissions:
+  id-token: write         # needed for AWS
+
 jobs:
   ios-device-test:
     strategy:
