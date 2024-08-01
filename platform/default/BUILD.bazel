@@ -25,6 +25,17 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "utf_conversion",
+    srcs = ["src/mbgl/util/utf.cpp"],
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
+        "-Wno-deprecated-declarations",
+    ],
+    deps = [
+        "//:mbgl-core",
+    ],
+)
+
 # From: platform/ios/core-files.json
 # Mostly platform/default
 cc_library(
@@ -53,7 +64,6 @@ cc_library(
         "src/mbgl/util/monotonic_timer.cpp",
         "src/mbgl/util/png_writer.cpp",
         "src/mbgl/util/thread_local.cpp",
-        "src/mbgl/util/utf.cpp",
     ] + select({
         "//:metal_renderer": ["src/mbgl/mtl/headless_backend.cpp"],
         "//conditions:default": ["src/mbgl/gl/headless_backend.cpp"],
@@ -125,6 +135,7 @@ cc_library(
         "//test:__pkg__",
     ],
     deps = [
+        ":utf_conversion",
         "//:mbgl-core",
     ] + select({
         "@platforms//os:ios": [

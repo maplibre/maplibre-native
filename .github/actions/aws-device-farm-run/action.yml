@@ -51,14 +51,12 @@ runs:
   using: "composite"
   steps:
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ inputs.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
           role-to-assume: ${{ inputs.AWS_ROLE_TO_ASSUME }}
-          role-duration-seconds: 3600
-          role-session-name: MySessionName
+          role-session-name: ${{ github.run_id }}
+          role-duration-seconds: 14400
 
       - name: Create upload app
         shell: bash

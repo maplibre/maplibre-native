@@ -1,42 +1,33 @@
-package org.maplibre.android.testapp.activity.camera
+package org.maplibre.android.testapp.activity.options
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
-import timber.log.Timber
 
-/** Test activity showcasing using maximum and minimum zoom levels to restrict camera movement. */
-class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
+/**
+ *  TestActivity demonstrating configuring MapView with XML
+ */
+
+class MapOptionsXmlActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
-    private val clickListener = OnMapClickListener {
-        if (this::maplibreMap.isInitialized) {
-            maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Outdoor")))
-        }
-        true
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_maxmin_zoom)
+        setContentView(R.layout.activity_map_options_xml)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
-        mapView.addOnDidFinishLoadingStyleListener { Timber.d("Style Loaded") }
     }
 
-    override fun onMapReady(map: MapLibreMap) {
-        maplibreMap = map
-        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
-        maplibreMap.setMinZoomPreference(3.0)
-        maplibreMap.setMaxZoomPreference(5.0)
-        maplibreMap.addOnMapClickListener(clickListener)
+    override fun onMapReady(maplibreMap: MapLibreMap) {
+        this.maplibreMap = maplibreMap
+        this.maplibreMap.setStyle("https://demotiles.maplibre.org/style.json")
     }
 
     override fun onStart() {
@@ -66,9 +57,6 @@ class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (this::maplibreMap.isInitialized) {
-            maplibreMap.removeOnMapClickListener(clickListener)
-        }
         mapView.onDestroy()
     }
 
