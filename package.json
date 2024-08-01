@@ -1,28 +1,12 @@
 {
-  "name": "@maplibre/maplibre-gl-native",
+  "name": "maplibre-native",
   "version": "5.4.0",
-  "description": "Renders map tiles with MapLibre Native",
-  "keywords": [
-    "maplibre",
-    "gl"
-  ],
-  "directories": {
-    "lib": "lib"
-  },
-  "files": [
-    "lib",
-    "platform/node/index.d.ts"
-  ],
-  "main": "platform/node/index.js",
-  "types": "platform/node/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/maplibre/maplibre-native.git"
-  },
+  "description": "",
+  "keywords": [],
+  "files": [],
+  "main": "index.js",
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@acalcutt/node-pre-gyp": "^1.0.14",
-    "@acalcutt/node-pre-gyp-github": "1.4.8",
     "minimatch": "^9.0.4",
     "npm-run-all": "^4.1.5"
   },
@@ -57,23 +41,6 @@
     "typescript": "^5.4.5",
     "xcode": "^3.0.1"
   },
-  "engines": {
-    "node": ">=6"
-  },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build=false",
-    "test": "tape platform/node/test/js/**/*.test.js",
-    "test-memory": "node --expose-gc platform/node/test/memory.test.js",
-    "test-expressions": "node -r esm platform/node/test/expression.test.js",
-    "test-render": "node -r esm platform/node/test/render.test.js",
-    "test-query": "node -r esm platform/node/test/query.test.js"
-  },
-  "gypfile": true,
-  "binary": {
-    "module_name": "mbgl",
-    "module_path": "./lib/{node_abi}",
-    "host": "https://github.com/maplibre/maplibre-native/releases/download/",
-    "remote_path": "node-v{version}",
-    "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
   }
 }

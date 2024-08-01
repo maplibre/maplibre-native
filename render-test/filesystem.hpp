@@ -1,9 +1,9 @@
 #pragma once
 
-#include <ghc/filesystem.hpp>
+#include <filesystem>
 
 namespace mbgl {
 
-namespace filesystem = ghc::filesystem;
+namespace filesystem = std::filesystem;
 
 } // namespace mbgl

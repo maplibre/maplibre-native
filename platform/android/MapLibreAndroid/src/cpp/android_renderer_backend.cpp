@@ -28,7 +28,7 @@ private:
     AndroidRendererBackend& backend;
 };
 
-AndroidRendererBackend::AndroidRendererBackend()
+AndroidRendererBackend::AndroidRendererBackend(const TaggedScheduler& threadPool)
     : gl::RendererBackend(gfx::ContextMode::Unique),
       mbgl::gfx::Renderable({64, 64}, std::make_unique<AndroidGLRenderableResource>(*this)) {}
 

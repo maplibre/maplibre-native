@@ -42,23 +42,19 @@ void Scheduler::processEvents() {
     cvEmpty.notify_all();
 }
 
-std::size_t Scheduler::waitForEmpty(std::chrono::milliseconds timeout) {
+void Scheduler::waitForEmpty([[maybe_unused]] const mbgl::util::SimpleIdentity tag) {
     MBGL_VERIFY_THREAD(tid);
 
-    const auto startTime = mbgl::util::MonotonicTimer::now();
     std::unique_lock<std::mutex> lock(m_taskQueueMutex);
     const auto isDone = [&] {
         return m_taskQueue.empty() && pendingItems == 0;
     };
+
     while (!isDone()) {
-        const auto elapsed = mbgl::util::MonotonicTimer::now() - startTime;
-        if (timeout <= elapsed || !cvEmpty.wait_for(lock, timeout - elapsed, isDone)) {
-            assert(isDone());
-            break;
-        }
+        cvEmpty.wait(lock);
     }
 
-    return m_taskQueue.size() + pendingItems;
+    assert(m_taskQueue.size() + pendingItems == 0);
 }
 
 } // namespace QMapLibre

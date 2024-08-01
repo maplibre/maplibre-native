@@ -23,10 +23,7 @@ brew install bazelisk
 
 ### Creating `config.bzl`
 
-> [!NOTE]  
-> This is optional.
-
-You may want to configure Bazel, otherwise the default config gets used.
+Configure Bazel, otherwise the default config will get used.
 
 ```
 cp platform/darwin/bazel/example_config.bzl platform/darwin/bazel/config.bzl
@@ -36,12 +33,9 @@ You need to set your `BUNDLE_ID_PREFIX` to be unique (ideally use a domain that 
 
 You can keep leave the `APPLE_MOBILE_PROVISIONING_PROFILE_NAME` alone.
 
-Set the Team ID to the Team ID of your Apple Developer Account (paid or unpaid both work).
-If you do not know your Team ID, go to your [Apple Developer account](https://developer.apple.com/account), log in, and scroll down to find your Team ID.
+Set the Team ID to the Team ID of your Apple Developer Account (paid or unpaid both work). If you do not know your Team ID, go to your [Apple Developer account](https://developer.apple.com/account), log in, and scroll down to find your Team ID.
 
 If you don't already have a developer account, continue this guide and let Xcode generate a provisioning profile for you. You will need to update the Team ID later once a certificate is generated.
-
-If you are encountering build errors due to provisioning profiles, skip down to the troubleshooting section.
 
 ## Create the Xcode Project
 
@@ -53,27 +47,30 @@ xed platform/ios/MapLibre.xcodeproj
 ```
 
 Then once in Xcode, click on "MapLibre" on the left, then "App" under Targets, then "Signing & Capabilities" in the tabbed menu. 
-Confirm that no errors are shown:
+Confirm that no errors are shown.
 
 <img width="921" alt="image" src="https://github.com/polvi/maplibre-native/assets/649392/a1ef30cb-97fc-429a-acee-194436f3fb8a">
 
 Try to run the example App in the simulator and on a device to confirm your setup works.
 
+> [!IMPORTANT]  
+> The Bazel configuration files are the source of truth of the build configuration. All changes to the build settings need to be done through Bazel, not in Xcode.
+
 ### Troubleshooting Provisioning Profiles
 
 If you get a Python `KeyError` when processing provisioning profiles, you probably have some _really_ old or corrupted profiles.
 
-Have a look through `~/Library/MobileDevice/Provisioning\ Profiles` and remove any expired profiles.
+Have a look through `~/Library/MobileDevice/Provisioning\ Profiles` and remove any expired profiles. Removing all profiles here can also resolve some issues.
 
 ## Using Bazel from the Command Line
 
 It is also possible to build and run the test application in a simulator from the command line without opening Xcode.
 
 ```
-bazel run //platform/ios:App
+bazel run //platform/ios:App --//:renderer=metal
 ```
 
-If you want to build your own XCFramework, see the 'Build XCFramework' step in the [iOS CI workflow](../../.github/workflows/ios-ci.yml).
+You can also build targets from the command line. For example, if you want to build your own XCFramework, see the 'Build XCFramework' step in the [iOS CI workflow](../../.github/workflows/ios-ci.yml).
 
 ## Render Tests
 
@@ -88,34 +85,36 @@ xcrun simctl listapps booted
 
 to get the data directory of the render test app. This allows you to inspect test results. When adding new tests, the generated expectations and `actual.png` file can be copied into the source directory from here.
 
+## C++ Unit Tests
+
+Run the tests from the `CppUnitTests` target in Xcode to run the C++ Unit Tests on iOS.
+
+## Swift App
+
+There is also an example app built with Swift instead of Objective-C. The target is called `MapLibreApp` and the source code lives in `platform/ios/app-swift`.
+
 ## Documentation
 
-We use [DocC](https://www.swift.org/documentation/docc) for documentation. To build the documentation locally, run the following command from the root directory of the repository:
+We use [DocC](https://www.swift.org/documentation/docc) for documentation. You need to have [aws-cli](https://github.com/aws/aws-cli) installed to download the resources from S3 (see below). Run the following command:
+
+```
+aws s3 sync --no-sign-request "s3://maplibre-native/ios-documentation-resources" "platform/ios/MapLibre.docc/Resources"
+```
+
+Then, to build the documentation locally, run the following command:
 
 ```
 platform/ios/scripts/docc.sh preview
 ```
 
-You need to have [aws-cli](https://github.com/aws/aws-cli) installed to download the resources from S3 (see below).
-
 ### Resources
 
 Resources like images should not be checked in but should be uploaded to the [S3 Bucket](https://s3.eu-central-1.amazonaws.com/maplibre-native/index.html#ios-documentation-resources/). You can share a `.zip` with all files that should be added in the PR.
 
-If you want to get direct access you need an AWS account to get permissions to upload files. Create an account and authenticate with aws-cli. Share account's ARN that you can get with
+If you want to get direct access you need an AWS account to get permissions to upload files. Create an account and authenticate with aws-cli. Share the account ARN that you can get with
 
 ```
 aws sts get-caller-identity
-```
-
-When the needed resources are uploaded the filenames need to be added to the `resources` array in `platform/ios/scripts/docc.sh`.
-
-```bash
-resources=(
-  "AddPackageDependencies@2x.png"
-  # ...
-  # add here
-)
 ```
 
 ### Examples
@@ -145,5 +144,3 @@ Then the code block will be updated when you run:
 ```sh
 node scripts/update-ios-examples.mjs
 ```
-
-You need to add the relevant example paths and documentation paths to that file.

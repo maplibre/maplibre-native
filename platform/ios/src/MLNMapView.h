@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNMapProjection;
 @class MLNPolyline;
 @class MLNPolygon;
+@class MLNScaleBar;
 @class MLNShape;
 
 @protocol MLNMapViewDelegate;
@@ -295,7 +296,7 @@ MLN_EXPORT
  A control indicating the scale of the map. The scale bar is positioned in the
  upper-left corner. Enable the scale bar via `showsScale`.
  */
-@property (nonatomic, readonly) UIView *scaleBar;
+@property (nonatomic, readonly) MLNScaleBar *scaleBar;
 
 /**
  Sets whether the scale uses styles that make it easier to read on a dark styled map
@@ -2110,6 +2111,16 @@ MLN_EXPORT
                           (nullable NSSet<NSString *> *)styleLayerIdentifiers
                                          predicate:(nullable NSPredicate *)predicate
     NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
+
+// MARK: Tile Cache
+
+/**
+ Indicating whether the map may cache tiles for different zoom levels or not.
+
+ @param enabled  causes the map view to consume more memory and have a smoother user
+ * experience when zoom in/out.  The default value of this property is `YES`.
+ */
+- (void)experimental_setTileCacheEnabled:(BOOL)enabled;
 
 // MARK: Debugging the Map
 

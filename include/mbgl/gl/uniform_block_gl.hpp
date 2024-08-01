@@ -6,21 +6,15 @@
 namespace mbgl {
 namespace gl {
 
-class UniformBlockArrayGL;
-
 class UniformBlockGL final : public gfx::UniformBlock {
-    // Can only be created by UniformBlockArrayGL
-private:
-    friend UniformBlockArrayGL;
-
+public:
     UniformBlockGL(int index_, std::size_t size_)
         : UniformBlock(index_, size_) {}
     UniformBlockGL(const UniformBlockGL& other)
         : UniformBlock(other) {}
     UniformBlockGL(UniformBlockGL&& other)
         : UniformBlock(std::move(other)) {}
-
-public:
+    ~UniformBlockGL() override = default;
     void bindBuffer(const gfx::UniformBuffer& uniformBuffer) override;
     void unbindBuffer() override;
 };
@@ -44,11 +38,10 @@ public:
 
 private:
     std::unique_ptr<gfx::UniformBlock> create(int index, std::size_t size) override {
-        return std::unique_ptr<gfx::UniformBlock>(new UniformBlockGL(index, size));
+        return std::make_unique<UniformBlockGL>(index, size);
     }
     std::unique_ptr<gfx::UniformBlock> copy(const gfx::UniformBlock& uniformBlocks) override {
-        return std::unique_ptr<gfx::UniformBlock>(
-            new UniformBlockGL(static_cast<const UniformBlockGL&>(uniformBlocks)));
+        return std::make_unique<UniformBlockGL>(static_cast<const UniformBlockGL&>(uniformBlocks));
     }
 };
 
