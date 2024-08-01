@@ -19,8 +19,8 @@
 
 #ifndef NDEBUG
 #define ENABLE_VULKAN_VALIDATION
-//#define ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
-// #define ENABLE_VMA_DEBUG
+// #define ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
+//  #define ENABLE_VMA_DEBUG
 #endif
 
 namespace mbgl {
