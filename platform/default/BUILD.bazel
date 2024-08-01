@@ -28,7 +28,7 @@ cc_library(
 cc_library(
     name = "utf_conversion",
     srcs = ["src/mbgl/util/utf.cpp"],
-    copts = [
+    copts = CPP_FLAGS + MAPLIBRE_FLAGS + [
         "-Wno-deprecated-declarations",
     ],
     deps = [
