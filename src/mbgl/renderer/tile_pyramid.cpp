@@ -122,8 +122,6 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
             if (panZoom < idealZoom) {
                 panTiles = util::tileCover(parameters.transformState, panZoom);
-            } else {
-                panTiles = util::tileCover(parameters.transformState, idealZoom, panZoom);
             }
         }
 
