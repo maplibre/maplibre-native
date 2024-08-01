@@ -57,7 +57,6 @@ void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
 
     allocCreateInfo.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
     allocCreateInfo.requiredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-    allocCreateInfo.flags = 0;
 
     for (uint32_t i = 0; i < imageCount; ++i) {
         colorAllocations.push_back(std::make_unique<ImageAllocation>(backend.getAllocator()));
@@ -150,8 +149,8 @@ void SurfaceRenderableResource::initDepthStencil() {
 
     // check for depth format support
     const std::vector<vk::Format> formats = {
-        vk::Format::eD32SfloatS8Uint,
         vk::Format::eD24UnormS8Uint,
+        vk::Format::eD32SfloatS8Uint,
         vk::Format::eD16UnormS8Uint,
     };
 

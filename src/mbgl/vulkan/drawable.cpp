@@ -436,7 +436,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
 
     const auto& commandBuffer = encoder.getCommandBuffer();
     commandBuffer->bindDescriptorSets(
-        vk::PipelineBindPoint::eGraphics, context.getPipelineLayout().get(), 0, drawableDescriptorSets, nullptr);
+        vk::PipelineBindPoint::eGraphics, context.getGeneralPipelineLayout().get(), 0, drawableDescriptorSets, nullptr);
 
     return true;
 }

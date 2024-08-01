@@ -191,7 +191,7 @@ void Context::beginFrame() {
     }
 
     frame.commandBuffer->reset(vk::CommandBufferResetFlagBits::eReleaseResources);
-    frame.commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eSimultaneousUse));
+    frame.commandBuffer->begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
 
     backend.getThreadPool().runRenderJobs();
 }
@@ -380,6 +380,8 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 
     // build pipeline
     if (clipping.pipelineInfo.inputAttributes.empty()) {
+        clipping.pipelineInfo.usePushConstants = true;
+
         clipping.pipelineInfo.colorBlend = false;
         clipping.pipelineInfo.colorMask = vk::ColorComponentFlags();
 
@@ -426,7 +428,7 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref);
 
         commandBuffer->pushConstants(
-            getPipelineLayout().get(),
+            getPushConstantPipelineLayout().get(),
             vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
             0,
             sizeof(tileInfo.matrix),
@@ -521,21 +523,31 @@ const std::vector<vk::DescriptorSetLayout>& Context::getDescriptorSetLayouts() {
     return descriptorSetLayouts;
 }
 
-const vk::UniquePipelineLayout& Context::getPipelineLayout() {
-    if (pipelineLayout) return pipelineLayout;
+const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
+    if (generalPipelineLayout) return generalPipelineLayout;
+
+    const auto& descriptorLayouts = getDescriptorSetLayouts();
+
+    generalPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
+        vk::PipelineLayoutCreateInfo().setSetLayouts(descriptorLayouts));
+
+    backend.setDebugName(generalPipelineLayout.get(), "PipelineLayout_general");
+
+    return generalPipelineLayout;
+}
+
+const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
+    if (pushConstantPipelineLayout) return pushConstantPipelineLayout;
 
     const auto stages = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment;
-    const auto pushConstant = vk::PushConstantRange().setSize(sizeof(mat4)).setStageFlags(stages);
+    const auto pushConstant = vk::PushConstantRange().setSize(sizeof(matf4)).setStageFlags(stages);
 
-    auto& context = static_cast<Context&>(backend.getContext());
-    const auto& descriptorLayouts = context.getDescriptorSetLayouts();
+    pushConstantPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
+        vk::PipelineLayoutCreateInfo().setPushConstantRanges(pushConstant));
 
-    pipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setSetLayouts(descriptorLayouts).setPushConstantRanges(pushConstant));
+    backend.setDebugName(pushConstantPipelineLayout.get(), "PipelineLayout_pushConstants");
 
-    backend.setDebugName(pipelineLayout.get(), "PipelineLayout");
-
-    return pipelineLayout;
+    return pushConstantPipelineLayout;
 }
 
 void Context::FrameResources::runDeletionQueue(const Context& context) {

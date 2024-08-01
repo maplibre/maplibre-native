@@ -14,6 +14,9 @@ public:
     PipelineInfo() noexcept = default;
     ~PipelineInfo() noexcept = default;
 
+    // used to select the pipeline layout
+    bool usePushConstants = false;
+
     vk::PrimitiveTopology topology = vk::PrimitiveTopology::eTriangleList;
     vk::CullModeFlagBits cullMode = vk::CullModeFlagBits::eNone;
     vk::FrontFace frontFace = vk::FrontFace::eClockwise;

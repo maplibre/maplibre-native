@@ -23,7 +23,7 @@
 #include <cassert>
 #include <string>
 
-#ifdef ELABLE_VULKAN_VALIDATION
+#ifdef ENABLE_VULKAN_VALIDATION
 #include <vulkan/vulkan_to_string.hpp>
 #endif
 
@@ -94,7 +94,7 @@ std::unique_ptr<gfx::Context> RendererBackend::createContext() {
 
 std::vector<const char*> RendererBackend::getLayers() {
     return {
-#ifdef ELABLE_VULKAN_VALIDATION
+#ifdef ENABLE_VULKAN_VALIDATION
         "VK_LAYER_KHRONOS_validation"
 #endif
     };
@@ -140,14 +140,14 @@ std::vector<const char*> RendererBackend::getDebugExtensions() {
 void RendererBackend::beginDebugLabel([[maybe_unused]] const vk::CommandBuffer& buffer,
                                       [[maybe_unused]] const char* name,
                                       [[maybe_unused]] const std::array<float, 4>& color) const {
-#ifdef ELABLE_VULKAN_VALIDATION
+#ifdef ENABLE_VULKAN_VALIDATION
     if (!debugUtilsEnabled) return;
     buffer.beginDebugUtilsLabelEXT(vk::DebugUtilsLabelEXT().setPLabelName(name).setColor(color));
 #endif
 }
 
 void RendererBackend::endDebugLabel([[maybe_unused]] const vk::CommandBuffer& buffer) const {
-#ifdef ELABLE_VULKAN_VALIDATION
+#ifdef ENABLE_VULKAN_VALIDATION
     if (!debugUtilsEnabled) return;
     buffer.endDebugUtilsLabelEXT();
 #endif
@@ -155,7 +155,7 @@ void RendererBackend::endDebugLabel([[maybe_unused]] const vk::CommandBuffer& bu
 
 void RendererBackend::insertDebugLabel([[maybe_unused]] const vk::CommandBuffer& buffer,
                                        [[maybe_unused]] const char* name) const {
-#ifdef ELABLE_VULKAN_VALIDATION
+#ifdef ENABLE_VULKAN_VALIDATION
     if (!debugUtilsEnabled) return;
     buffer.insertDebugUtilsLabelEXT(vk::DebugUtilsLabelEXT().setPLabelName(name));
 #endif
@@ -197,7 +197,7 @@ void RendererBackend::endFrameCapture() {
 #endif
 }
 
-#ifdef ELABLE_VULKAN_VALIDATION
+#ifdef ENABLE_VULKAN_VALIDATION
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL vkDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                                            VkDebugUtilsMessageTypeFlagsEXT,
@@ -264,7 +264,7 @@ static VKAPI_ATTR VkBool32 vkDebugReportCallback(VkDebugReportFlagsEXT flags,
 #endif
 
 void RendererBackend::initDebug() {
-#ifdef ELABLE_VULKAN_VALIDATION
+#ifdef ENABLE_VULKAN_VALIDATION
     if (debugUtilsEnabled) {
         const vk::DebugUtilsMessageSeverityFlagsEXT severity = vk::DebugUtilsMessageSeverityFlagsEXT() |
                                                                vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose |
@@ -322,7 +322,7 @@ void RendererBackend::initInstance() {
 
     // Vulkan 1.1 on Android is supported on 71% of devices (compared to 1.3 with 6%) as of April 23 2024
     // https://vulkan.gpuinfo.org/
-    const vk::ApplicationInfo appInfo("maplibre-native", 1, "maplibre-native", VK_API_VERSION_1_0);
+    vk::ApplicationInfo appInfo("maplibre-native", 1, "maplibre-native", 1, VK_API_VERSION_1_0);
     vk::InstanceCreateInfo createInfo(vk::InstanceCreateFlags(), &appInfo);
 
     const auto& layers = getLayers();
@@ -344,9 +344,20 @@ void RendererBackend::initInstance() {
             return value.extensionName.data();
         });
 
-#ifdef ELABLE_VULKAN_VALIDATION
+#ifdef ENABLE_VULKAN_VALIDATION
     const auto& debugExtensions = getDebugExtensions();
     extensions.insert(extensions.end(), debugExtensions.begin(), debugExtensions.end());
+
+#ifdef ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
+    appInfo.setApiVersion(VK_API_VERSION_1_1);
+
+    const std::array<vk::ValidationFeatureEnableEXT, 2> validationFeatures = {
+        vk::ValidationFeatureEnableEXT::eGpuAssisted, vk::ValidationFeatureEnableEXT::eGpuAssistedReserveBindingSlot};
+    const vk::ValidationFeaturesEXT validationFeatureInfo(validationFeatures);
+
+    createInfo.setPNext(&validationFeatureInfo);
+#endif
+
 #endif
 
     if (extensionsAvailable) {
@@ -360,7 +371,7 @@ void RendererBackend::initInstance() {
     // initialize function pointers for instance
     VULKAN_HPP_DEFAULT_DISPATCHER.init(instance.get());
 
-#ifdef ELABLE_VULKAN_VALIDATION
+#ifdef ENABLE_VULKAN_VALIDATION
     // enable validation layer callback
     initDebug();
 #endif

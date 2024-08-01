@@ -18,7 +18,8 @@
 #include "vk_mem_alloc.h"
 
 #ifndef NDEBUG
-#define ELABLE_VULKAN_VALIDATION
+#define ENABLE_VULKAN_VALIDATION
+//#define ENABLE_VULKAN_GPU_ASSISTED_VALIDATION
 // #define ENABLE_VMA_DEBUG
 #endif
 
@@ -51,7 +52,7 @@ public:
 
     template <typename T, typename = typename std::enable_if<vk::isVulkanHandleType<T>::value>>
     void setDebugName([[maybe_unused]] const T& object, [[maybe_unused]] const std::string& name) const {
-#ifdef ELABLE_VULKAN_VALIDATION
+#ifdef ENABLE_VULKAN_VALIDATION
         if (!debugUtilsEnabled) return;
         const uint64_t handle = reinterpret_cast<uint64_t>(static_cast<typename T::CType>(object));
         device->setDebugUtilsObjectNameEXT(vk::DebugUtilsObjectNameInfoEXT()
