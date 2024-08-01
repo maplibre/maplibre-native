@@ -14,7 +14,8 @@ class CityStateMarkerOptions : BaseMarkerOptions<CityStateMarker?, CityStateMark
         return getThis()
     }
 
-    constructor() {}
+    constructor()
+
     private constructor(`in`: Parcel) {
         position(`in`.readParcelable<Parcelable>(LatLng::class.java.classLoader) as LatLng)
         snippet(`in`.readString())
