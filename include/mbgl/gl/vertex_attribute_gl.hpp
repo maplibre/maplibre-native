@@ -11,13 +11,10 @@ class VertexBufferResource;
 } // namespace gfx
 namespace gl {
 
-class VertexAttributeArrayGL;
 class UploadPass;
 
 class VertexAttributeGL final : public gfx::VertexAttribute {
-    // Can only be created by VertexAttributeArrayGL
-private:
-    friend VertexAttributeArrayGL;
+public:
     VertexAttributeGL(int index_, gfx::AttributeDataType dataType_, std::size_t count_)
         : VertexAttribute(index_, dataType_, count_) {}
     VertexAttributeGL(const VertexAttributeGL& other)
@@ -26,8 +23,6 @@ private:
     VertexAttributeGL(VertexAttributeGL&& other)
         : VertexAttribute(std::move(other)),
           glType(other.glType) {}
-
-public:
     ~VertexAttributeGL() override = default;
 
     platform::GLenum getGLType() const { return glType; }
@@ -70,12 +65,11 @@ private:
     std::unique_ptr<gfx::VertexAttribute> create(int index,
                                                  gfx::AttributeDataType dataType,
                                                  std::size_t count) const override {
-        return std::unique_ptr<gfx::VertexAttribute>(new VertexAttributeGL(index, dataType, count));
+        return std::make_unique<VertexAttributeGL>(index, dataType, count);
     }
-    using gfx::VertexAttributeArray::copy;
+
     std::unique_ptr<gfx::VertexAttribute> copy(const gfx::VertexAttribute& attr) const override {
-        return std::unique_ptr<gfx::VertexAttribute>(
-            new VertexAttributeGL(static_cast<const VertexAttributeGL&>(attr)));
+        return std::make_unique<VertexAttributeGL>(static_cast<const VertexAttributeGL&>(attr));
     }
 };
 

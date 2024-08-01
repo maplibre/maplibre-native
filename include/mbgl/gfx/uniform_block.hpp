@@ -12,8 +12,8 @@ using UniqueUniformBlock = std::unique_ptr<UniformBlock>;
 
 /// @brief This class represents an uniform block
 class UniformBlock {
-protected:
-    /// @brief Constructor. Can only be created by UniformBlockArray implementations
+public:
+    /// @brief Constructor
     /// @param index_
     /// @param size_
     UniformBlock(int index_, std::size_t size_)
@@ -23,8 +23,6 @@ protected:
     UniformBlock(UniformBlock&& other)
         : index(other.index),
           size(other.size) {}
-
-public:
     /// @brief Destructor
     virtual ~UniformBlock() = default;
 
