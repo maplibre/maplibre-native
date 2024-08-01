@@ -15,7 +15,6 @@ struct MockSource {
     mbgl::Range<uint8_t> zoomRange{0, 16};
     std::map<mbgl::OverscaledTileID, std::unique_ptr<MockTileData>> dataTiles;
     std::set<mbgl::OverscaledTileID> idealTiles;
-    std::map<mbgl::UnwrappedTileID, std::reference_wrapper<MockTileData>> previouslyRenderedTiles;
 
     // Test API
     inline MockTileData* createTileData(const mbgl::OverscaledTileID& tileID);

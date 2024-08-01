@@ -21,7 +21,7 @@ void updateRenderables(GetTileFn getTile,
                        RetainTileFn retainTile,
                        RenderTileFn renderTile,
                        const IdealTileIDs& idealTileIDs,
-                       const std::map<UnwrappedTileID, std::reference_wrapper<TileData>> previouslyRenderedTiles,
+                       const std::map<OverscaledTileID, std::unique_ptr<TileData>>& prefetchedTiles,
                        const Range<uint8_t>& zoomRange,
                        const std::optional<uint8_t>& maxParentOverscaleFactor = std::nullopt) {
     std::unordered_set<OverscaledTileID> checked;
@@ -57,13 +57,13 @@ void updateRenderables(GetTileFn getTile,
             // The tile isn't loaded yet, but retain it anyway because it's an ideal tile.
             retainTile(*tile, TileNecessity::Required);
 
-            auto addPreviouslyRenderedTilesIfChildrenOf = [&](const UnwrappedTileID& tileID) {
-                for (auto previouslyRenderedTileIt : previouslyRenderedTiles) {
-                    const UnwrappedTileID previouslyRenderedTileID = previouslyRenderedTileIt.first;
-                    TileData& previouslyRenderedTile = previouslyRenderedTileIt.second;
-                    if (previouslyRenderedTileID == tileID || previouslyRenderedTileID.isChildOf(tileID)) {
-                        retainTile(previouslyRenderedTile, TileNecessity::Optional);
-                        renderTile(previouslyRenderedTileID, previouslyRenderedTile);
+            auto addPrefetchedTilesIfChildrenOf = [&](const UnwrappedTileID& tileID) {
+                for (auto& prefetchedTileIt : prefetchedTiles) {
+                    const UnwrappedTileID prefetchedTileID = prefetchedTileIt.first.toUnwrapped();
+                    TileData* prefetchedTile = prefetchedTileIt.second.get();
+                    if (prefetchedTile->isRenderable() && (prefetchedTileID == tileID || prefetchedTileID.isChildOf(tileID))) {
+                        retainTile(*prefetchedTile, TileNecessity::Optional);
+                        renderTile(prefetchedTileID, *prefetchedTile);
                     }
                 }
             };
@@ -80,8 +80,8 @@ void updateRenderables(GetTileFn getTile,
                 } else {
                     covered = false;
 
-                    // Reuse previously rendered tiles in order to avoid empty screen
-                    addPreviouslyRenderedTilesIfChildrenOf(idealRenderTileID);
+                    // Reuse prefetched tiles in order to avoid empty screen
+                    addPrefetchedTilesIfChildrenOf(idealRenderTileID);
                 }
             } else {
                 // Check all four actual child tiles.
@@ -96,8 +96,8 @@ void updateRenderables(GetTileFn getTile,
                         // going to look for parents as well.
                         covered = false;
 
-                        // Reuse previously rendered tiles in order to avoid empty screen
-                        addPreviouslyRenderedTilesIfChildrenOf(childDataTileID.toUnwrapped());
+                        // Reuse prefetched tiles in order to avoid empty screen
+                        addPrefetchedTilesIfChildrenOf(childDataTileID.toUnwrapped());
                     }
                 }
             }

@@ -122,6 +122,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
 
             if (panZoom < idealZoom) {
                 panTiles = util::tileCover(parameters.transformState, panZoom);
+            } else {
+                panTiles = util::tileCover(parameters.transformState, idealZoom, panZoom);
             }
         }
 
@@ -197,7 +199,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             retainTileFn,
             [](const UnwrappedTileID&, Tile&) {},
             panTiles,
-            previouslyRenderedTiles,
+            tiles,
             zoomRange,
             maxParentTileOverscaleFactor);
     }
@@ -207,7 +209,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                                  retainTileFn,
                                  renderTileFn,
                                  idealTiles,
-                                 previouslyRenderedTiles,
+                                 tiles,
                                  zoomRange,
                                  maxParentTileOverscaleFactor);
 

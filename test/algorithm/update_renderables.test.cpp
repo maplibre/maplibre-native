@@ -122,7 +122,7 @@ TEST(UpdateRenderables, SingleTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 1, 1}}, Found},                      // found ideal tile
@@ -138,7 +138,7 @@ TEST(UpdateRenderables, SingleTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 1, 1}}, Found},                      // found ideal tile
@@ -155,7 +155,7 @@ TEST(UpdateRenderables, SingleTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 1}}, NotFound},                   // missing ideal tile
@@ -181,7 +181,7 @@ TEST(UpdateRenderables, SingleTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 1}}, Found},                      // missing ideal tile
@@ -209,7 +209,7 @@ TEST(UpdateRenderables, SingleTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 1}}, Found},                      // newly added tile
@@ -233,7 +233,7 @@ TEST(UpdateRenderables, SingleTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, Found},                      // found tile, not ready
@@ -264,7 +264,7 @@ TEST(UpdateRenderables, SingleTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, Found},                      // found tile, now ready
@@ -302,7 +302,7 @@ TEST(UpdateRenderables, UseParentTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 1}}, NotFound},                   // missing ideal tile
@@ -350,7 +350,7 @@ TEST(UpdateRenderables, DontUseWrongParentTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, NotFound},                   // missing ideal tile
@@ -373,7 +373,7 @@ TEST(UpdateRenderables, DontUseWrongParentTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, Found},                      // non-ready ideal tile
@@ -397,7 +397,7 @@ TEST(UpdateRenderables, DontUseWrongParentTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, Found},                      // non-ready ideal tile
@@ -447,7 +447,7 @@ TEST(UpdateRenderables, UseParentTileWhenChildNotReady) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 1}}, Found},                      // found, but not ready
@@ -470,7 +470,7 @@ TEST(UpdateRenderables, UseParentTileWhenChildNotReady) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 1}}, Found},                      // found and ready
@@ -502,7 +502,7 @@ TEST(UpdateRenderables, UseOverlappingParentTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, NotFound},                   // ideal tile not found
@@ -543,7 +543,7 @@ TEST(UpdateRenderables, UseChildTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{0, 0, {0, 0, 0}}, NotFound},                   // ideal tile, missing
@@ -582,7 +582,7 @@ TEST(UpdateRenderables, PreferChildTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, NotFound},                   // ideal tile, not found
@@ -610,7 +610,7 @@ TEST(UpdateRenderables, PreferChildTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, Found}, // ideal tile, not ready
@@ -638,7 +638,7 @@ TEST(UpdateRenderables, PreferChildTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, Found}, // ideal tile, not ready
@@ -669,7 +669,7 @@ TEST(UpdateRenderables, PreferChildTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, Found}, // ideal tile, not ready
@@ -712,7 +712,7 @@ TEST(UpdateRenderables, UseParentAndChildTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, NotFound},                   // ideal tile, missing
@@ -738,7 +738,7 @@ TEST(UpdateRenderables, UseParentAndChildTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, Found},                      // ideal tile, not ready
@@ -773,7 +773,7 @@ TEST(UpdateRenderables, DontUseTilesLowerThanMinzoom) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, NotFound},                   // ideal tile, missing
@@ -807,7 +807,7 @@ TEST(UpdateRenderables, UseOverzoomedTileAfterMaxzoom) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, NotFound},                   // ideal tile, missing
@@ -827,7 +827,7 @@ TEST(UpdateRenderables, UseOverzoomedTileAfterMaxzoom) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, Found},                      // ideal tile, missing
@@ -851,7 +851,7 @@ TEST(UpdateRenderables, UseOverzoomedTileAfterMaxzoom) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{3, 0, {2, 0, 0}}, NotFound},                   // ideal tile, missing
@@ -873,7 +873,7 @@ TEST(UpdateRenderables, UseOverzoomedTileAfterMaxzoom) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{3, 0, {2, 0, 0}}, Found},                      //
@@ -891,7 +891,7 @@ TEST(UpdateRenderables, UseOverzoomedTileAfterMaxzoom) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, Found},                      //
@@ -911,7 +911,7 @@ TEST(UpdateRenderables, UseOverzoomedTileAfterMaxzoom) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, NotFound},                   //
@@ -943,7 +943,7 @@ TEST(UpdateRenderables, AscendToNonOverzoomedTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{3, 0, {2, 0, 0}}, Found},                      //
@@ -963,7 +963,7 @@ TEST(UpdateRenderables, AscendToNonOverzoomedTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{3, 0, {2, 0, 0}}, NotFound},                   //
@@ -987,7 +987,7 @@ TEST(UpdateRenderables, AscendToNonOverzoomedTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{3, 0, {2, 0, 0}}, Found},                      // ideal tile, not ready
@@ -1008,7 +1008,7 @@ TEST(UpdateRenderables, AscendToNonOverzoomedTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{3, 0, {2, 0, 0}}, Found},                      // ideal tile, not ready
@@ -1040,7 +1040,7 @@ TEST(UpdateRenderables, DoNotAscendMultipleTimesIfNotFound) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{8, 0, {8, 0, 0}}, NotFound},                   // ideal tile
@@ -1080,7 +1080,7 @@ TEST(UpdateRenderables, DoNotAscendMultipleTimesIfNotFound) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{8, 0, {8, 0, 0}}, Found},                      // ideal tile, not ready
@@ -1125,7 +1125,7 @@ TEST(UpdateRenderables, DontRetainUnusedNonIdealTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, Found},                      // ideal tile, not ready
@@ -1168,7 +1168,7 @@ TEST(UpdateRenderables, WrappedTiles) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(
         ActionLog({
@@ -1228,7 +1228,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, NotFound},                   // ideal tile, not found
@@ -1254,7 +1254,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
@@ -1280,7 +1280,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
@@ -1307,7 +1307,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
@@ -1334,7 +1334,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
@@ -1363,7 +1363,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
@@ -1393,7 +1393,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
@@ -1425,7 +1425,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
@@ -1465,7 +1465,7 @@ TEST(UpdateRenderables, LoadRequiredIfIdealTileCantBeFound) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not found
@@ -1521,7 +1521,7 @@ TEST(UpdateRenderables, LoadOverscaledMaxZoomTile) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{4, 0, {2, 0, 0}}, Found},
@@ -1558,7 +1558,7 @@ TEST(UpdateRenderables, MaxParentOverscaleFactor) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange,
                                  4);
     EXPECT_EQ(ActionLog({GetTileDataAction{{4, 0, {4, 0, 0}}, NotFound}, // ideal tile
@@ -1592,7 +1592,7 @@ TEST(UpdateRenderables, MaxParentOverscaleFactor) {
                                  retainTileData,
                                  renderTile,
                                  source.idealTiles,
-                                 source.previouslyRenderedTiles,
+                                 source.dataTiles,
                                  source.zoomRange,
                                  3);
     EXPECT_EQ(ActionLog({GetTileDataAction{{4, 0, {4, 0, 0}}, Found}, // ideal tile
