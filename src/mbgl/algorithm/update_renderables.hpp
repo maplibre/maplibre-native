@@ -26,6 +26,7 @@ void updateRenderables(GetTileFn getTile,
                        const std::optional<uint8_t>& maxParentOverscaleFactor = std::nullopt) {
     std::unordered_set<OverscaledTileID> checked;
     bool covered;
+    bool parentOrChildTileFound;
     int32_t overscaledZ;
 
     // for (all in the set of ideal tiles of the source) {
@@ -56,21 +57,8 @@ void updateRenderables(GetTileFn getTile,
 
             // The tile isn't loaded yet, but retain it anyway because it's an ideal tile.
             retainTile(*tile, TileNecessity::Required);
-
-            auto addPrefetchedTilesIfChildrenOf = [&](const OverscaledTileID& tileID) {
-                for (auto& prefetchedTileEntry : prefetchedTiles) {
-                    const auto& prefetchedDataTileID = prefetchedTileEntry.first;
-                    const UnwrappedTileID prefetchedRenderTileID = prefetchedDataTileID.toUnwrapped();
-                    auto* prefetchedTile = prefetchedTileEntry.second.get();
-                    if (prefetchedTile->isRenderable() && prefetchedDataTileID.canonical.z <= zoomRange.max &&
-                        prefetchedDataTileID.isChildOf(tileID)) {
-                        retainTile(*prefetchedTile, TileNecessity::Optional);
-                        renderTile(prefetchedRenderTileID, *prefetchedTile);
-                    }
-                }
-            };
-
             covered = true;
+            parentOrChildTileFound = false;
             overscaledZ = idealDataTileID.overscaledZ + 1;
             if (overscaledZ > zoomRange.max) {
                 // We're looking for an overzoomed child tile.
@@ -79,11 +67,9 @@ void updateRenderables(GetTileFn getTile,
                 if (tile && tile->isRenderable()) {
                     retainTile(*tile, TileNecessity::Optional);
                     renderTile(idealRenderTileID, *tile);
+                    parentOrChildTileFound = true;
                 } else {
                     covered = false;
-
-                    // Reuse prefetched tiles in order to avoid empty screen
-                    addPrefetchedTilesIfChildrenOf(idealDataTileID);
                 }
             } else {
                 // Check all four actual child tiles.
@@ -93,13 +79,11 @@ void updateRenderables(GetTileFn getTile,
                     if (tile && tile->isRenderable()) {
                         retainTile(*tile, TileNecessity::Optional);
                         renderTile(childDataTileID.toUnwrapped(), *tile);
+                        parentOrChildTileFound = true;
                     } else {
                         // At least one child tile doesn't exist, so we are
                         // going to look for parents as well.
                         covered = false;
-
-                        // Reuse prefetched tiles in order to avoid empty screen
-                        addPrefetchedTilesIfChildrenOf(childDataTileID);
                     }
                 }
             }
@@ -149,8 +133,23 @@ void updateRenderables(GetTileFn getTile,
 
                         if (tile->isRenderable()) {
                             renderTile(parentDataTileID.toUnwrapped(), *tile);
+                            parentOrChildTileFound = true;
                             // Break parent tile ascent, since we found one.
                             break;
+                        }
+                    }
+                }
+                
+                if (!parentOrChildTileFound) {
+                    // Reuse prefetched tiles in order to avoid empty screen
+                    for (auto& prefetchedTileEntry : prefetchedTiles) {
+                        const auto& prefetchedDataTileID = prefetchedTileEntry.first;
+                        const UnwrappedTileID prefetchedRenderTileID = prefetchedDataTileID.toUnwrapped();
+                        auto* prefetchedTile = prefetchedTileEntry.second.get();
+                        if (prefetchedTile->isRenderable() && prefetchedDataTileID.canonical.z <= zoomRange.max &&
+                            prefetchedDataTileID.isChildOf(idealDataTileID)) {
+                            retainTile(*prefetchedTile, TileNecessity::Optional);
+                            renderTile(prefetchedRenderTileID, *prefetchedTile);
                         }
                     }
                 }
