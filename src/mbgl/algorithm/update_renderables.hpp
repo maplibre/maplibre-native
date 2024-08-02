@@ -15,13 +15,13 @@ template <typename GetTileFn,
           typename RetainTileFn,
           typename RenderTileFn,
           typename IdealTileIDs,
-          typename TileData>
+          typename PrefetchedTileMap>
 void updateRenderables(GetTileFn getTile,
                        CreateTileFn createTile,
                        RetainTileFn retainTile,
                        RenderTileFn renderTile,
                        const IdealTileIDs& idealTileIDs,
-                       const std::map<OverscaledTileID, std::unique_ptr<TileData>>& prefetchedTiles,
+                       const PrefetchedTileMap& prefetchedTiles,
                        const Range<uint8_t>& zoomRange,
                        const std::optional<uint8_t>& maxParentOverscaleFactor = std::nullopt) {
     std::unordered_set<OverscaledTileID> checked;
@@ -57,14 +57,15 @@ void updateRenderables(GetTileFn getTile,
             // The tile isn't loaded yet, but retain it anyway because it's an ideal tile.
             retainTile(*tile, TileNecessity::Required);
 
-            auto addPrefetchedTilesIfChildrenOf = [&](const UnwrappedTileID& tileID) {
-                for (auto& prefetchedTileIt : prefetchedTiles) {
-                    const UnwrappedTileID prefetchedTileID = prefetchedTileIt.first.toUnwrapped();
-                    TileData* prefetchedTile = prefetchedTileIt.second.get();
-                    if (prefetchedTile->isRenderable() &&
-                        (prefetchedTileID == tileID || prefetchedTileID.isChildOf(tileID))) {
+            auto addPrefetchedTilesIfChildrenOf = [&](const OverscaledTileID& tileID) {
+                for (auto& prefetchedTileEntry : prefetchedTiles) {
+                    const auto& prefetchedDataTileID = prefetchedTileEntry.first;
+                    const UnwrappedTileID prefetchedRenderTileID = prefetchedDataTileID.toUnwrapped();
+                    auto* prefetchedTile = prefetchedTileEntry.second.get();
+                    if (prefetchedTile->isRenderable() && prefetchedDataTileID.canonical.z <= zoomRange.max &&
+                        prefetchedDataTileID.isChildOf(tileID)) {
                         retainTile(*prefetchedTile, TileNecessity::Optional);
-                        renderTile(prefetchedTileID, *prefetchedTile);
+                        renderTile(prefetchedRenderTileID, *prefetchedTile);
                     }
                 }
             };
@@ -82,7 +83,7 @@ void updateRenderables(GetTileFn getTile,
                     covered = false;
 
                     // Reuse prefetched tiles in order to avoid empty screen
-                    addPrefetchedTilesIfChildrenOf(idealRenderTileID);
+                    addPrefetchedTilesIfChildrenOf(idealDataTileID);
                 }
             } else {
                 // Check all four actual child tiles.
@@ -98,7 +99,7 @@ void updateRenderables(GetTileFn getTile,
                         covered = false;
 
                         // Reuse prefetched tiles in order to avoid empty screen
-                        addPrefetchedTilesIfChildrenOf(childDataTileID.toUnwrapped());
+                        addPrefetchedTilesIfChildrenOf(childDataTileID);
                     }
                 }
             }
