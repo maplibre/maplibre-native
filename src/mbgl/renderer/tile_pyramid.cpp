@@ -398,7 +398,7 @@ std::vector<Feature> TilePyramid::querySourceFeatures(const SourceQueryOptions& 
     return result;
 }
 
-void TilePyramid::enableCache(bool enable) {
+void TilePyramid::setCacheEnabled(bool enable) {
     cacheEnabled = enable;
 }
 

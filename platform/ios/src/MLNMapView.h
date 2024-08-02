@@ -411,6 +411,17 @@ MLN_EXPORT
  */
 @property (nonatomic, assign) BOOL prefetchesTiles;
 
+/**
+ A Boolean value indicating whether the map may cache tiles for different zoom levels or not.
+
+ When this property is set to `YES`,  the map view consumes more memory and 
+ provide a smoother user experience when zoom in/out.
+ 
+ The default value of this property is `YES`.
+ */
+
+@property (nonatomic, assign) BOOL tileCacheEnabled;
+
 // MARK: Displaying the User’s Location
 
 /**
@@ -2111,16 +2122,6 @@ MLN_EXPORT
                           (nullable NSSet<NSString *> *)styleLayerIdentifiers
                                          predicate:(nullable NSPredicate *)predicate
     NS_SWIFT_NAME(visibleFeatures(in:styleLayerIdentifiers:predicate:));
-
-// MARK: Tile Cache
-
-/**
- Indicating whether the map may cache tiles for different zoom levels or not.
-
- @param enabled  causes the map view to consume more memory and have a smoother user
- * experience when zoom in/out.  The default value of this property is `YES`.
- */
-- (void)experimental_setTileCacheEnabled:(BOOL)enabled;
 
 // MARK: Debugging the Map
 

@@ -3149,6 +3149,16 @@ static void *windowScreenContext = &windowScreenContext;
     return self.mbglMap.getPrefetchZoomDelta() > 0 ? YES : NO;
 }
 
+- (void)setTileCacheEnabled:(BOOL)enabled
+{
+    _rendererFrontend->setTileCacheEnabled(enabled);
+}
+
+- (BOOL)tileCacheEnabled
+{
+    return _rendererFrontend->getTileCacheEnabled();
+}
+
 // MARK: - Accessibility -
 
 - (NSString *)accessibilityValue
@@ -7338,12 +7348,6 @@ static void *windowScreenContext = &windowScreenContext;
 
 - (MLNBackendResource)backendResource {
     return _mbglView->getObject();
-}
-
-// MARK: Tile Cache
-
-- (void)experimental_setTileCacheEnabled:(BOOL)enabled {
-    _rendererFrontend->setTileCacheEnabled(enabled);
 }
 
 @end
