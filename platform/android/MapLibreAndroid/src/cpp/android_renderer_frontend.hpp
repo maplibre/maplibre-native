@@ -55,6 +55,7 @@ public:
 
     // Memory
     void setTileCacheEnabled(bool);
+    bool getTileCacheEnabled();
     void reduceMemoryUse();
 
 private:
