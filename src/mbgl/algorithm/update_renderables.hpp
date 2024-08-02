@@ -139,7 +139,7 @@ void updateRenderables(GetTileFn getTile,
                         }
                     }
                 }
-                
+
                 if (!parentOrChildTileFound) {
                     // Reuse prefetched tiles in order to avoid empty screen
                     for (auto& prefetchedTileEntry : prefetchedTiles) {

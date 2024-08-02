@@ -497,21 +497,22 @@ TEST(UpdateRenderables, UseChildTiles) {
 
     algorithm::updateRenderables(
         getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
-    EXPECT_EQ(ActionLog({
-                  GetTileDataAction{{0, 0, {0, 0, 0}}, Found},                      // ideal tile not ready
-                  RetainTileDataAction{{0, 0, {0, 0, 0}}, TileNecessity::Required}, //
-                  GetTileDataAction{{1, 0, {1, 0, 0}}, NotFound},                   // child tile not found
-                  GetTileDataAction{{1, 0, {1, 0, 1}}, NotFound},                   // child tile not found
-                  GetTileDataAction{{1, 0, {1, 1, 0}}, NotFound},                   // child tile not found
-                  GetTileDataAction{{1, 0, {1, 1, 1}}, NotFound},                   // child tile not found
-                                                                                    // no parent tile of 0 to consider
-                                                                                    // no parent or child tile found, check prefetched tiles
-                  RetainTileDataAction{{2, 0, {2, 0, 0}}, TileNecessity::Optional},
-                  RenderTileAction{{2, 0, 0}, *tile_2_2_0_0},                       // render child from 2 levels down
-                  RetainTileDataAction{{2, 0, {2, 1, 0}}, TileNecessity::Optional},
-                  RenderTileAction{{2, 1, 0}, *tile_2_2_1_0},                       // render child from 2 levels down
-              }),
-              log);
+    EXPECT_EQ(
+        ActionLog({
+            GetTileDataAction{{0, 0, {0, 0, 0}}, Found},                      // ideal tile not ready
+            RetainTileDataAction{{0, 0, {0, 0, 0}}, TileNecessity::Required}, //
+            GetTileDataAction{{1, 0, {1, 0, 0}}, NotFound},                   // child tile not found
+            GetTileDataAction{{1, 0, {1, 0, 1}}, NotFound},                   // child tile not found
+            GetTileDataAction{{1, 0, {1, 1, 0}}, NotFound},                   // child tile not found
+            GetTileDataAction{{1, 0, {1, 1, 1}}, NotFound},                   // child tile not found
+                                                                              // no parent tile of 0 to consider
+                                                            // no parent or child tile found, check prefetched tiles
+            RetainTileDataAction{{2, 0, {2, 0, 0}}, TileNecessity::Optional}, //
+            RenderTileAction{{2, 0, 0}, *tile_2_2_0_0},                       // render child from 2 levels down
+            RetainTileDataAction{{2, 0, {2, 1, 0}}, TileNecessity::Optional}, //
+            RenderTileAction{{2, 1, 0}, *tile_2_2_1_0},                       // render child from 2 levels down
+        }),
+        log);
 }
 
 TEST(UpdateRenderables, PreferChildTiles) {
