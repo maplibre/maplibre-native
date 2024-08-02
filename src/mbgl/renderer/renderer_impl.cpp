@@ -278,13 +278,14 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             const auto debugGroup(parameters.encoder->createDebugGroup("common-3d"));
             parameters.pass = RenderPass::Pass3D;
 
-            if (!parameters.staticData.depthRenderbuffer ||
-                parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
-                parameters.staticData.depthRenderbuffer =
-                    parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
-                        parameters.staticData.backendSize);
-            }
-            parameters.staticData.depthRenderbuffer->setShouldClear(true);
+            // TODO is this needed?
+            // if (!parameters.staticData.depthRenderbuffer ||
+            //    parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
+            //    parameters.staticData.depthRenderbuffer =
+            //        parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
+            //            parameters.staticData.backendSize);
+            //}
+            // parameters.staticData.depthRenderbuffer->setShouldClear(true);
         }
     };
 

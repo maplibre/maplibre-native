@@ -4,6 +4,13 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.5.3
+
+- Disabled iOS 14 metal options ([#2620](https://github.com/maplibre/maplibre-native/pull/2620)).
+- Don't unbind texture units in release builds ([#2630](https://github.com/maplibre/maplibre-native/pull/2630)).
+- Avoid re-creating fill extrusion drawables unnecessarily ([#2624](https://github.com/maplibre/maplibre-native/pull/2624)).
+- Take locks before signaling thread condition variables ([#2636](https://github.com/maplibre/maplibre-native/pull/2636)).
+
 ## 6.5.2
 
 - Fix Cocoapods release ([#2599](https://github.com/maplibre/maplibre-native/pull/2599)).
