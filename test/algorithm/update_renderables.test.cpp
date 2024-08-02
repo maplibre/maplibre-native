@@ -485,6 +485,32 @@ TEST(UpdateRenderables, UseChildTiles) {
                                                                                     // no parent tile of 0 to consider
               }),
               log);
+    
+    // Remove direct children and add children 2 zoom levels down
+    log.clear();
+    source.dataTiles.erase(OverscaledTileID{1, 0, 0});
+    source.dataTiles.erase(OverscaledTileID{1, 1, 0});
+    auto tile_2_2_0_0 = source.createTileData(OverscaledTileID{2, 0, 0});
+    tile_2_2_0_0->renderable = true;
+    auto tile_2_2_1_0 = source.createTileData(OverscaledTileID{2, 1, 0});
+    tile_2_2_1_0->renderable = true;
+    
+    algorithm::updateRenderables(
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
+    EXPECT_EQ(ActionLog({
+                  GetTileDataAction{{0, 0, {0, 0, 0}}, Found},                      // ideal tile not ready
+                  RetainTileDataAction{{0, 0, {0, 0, 0}}, TileNecessity::Required}, //
+                  GetTileDataAction{{1, 0, {1, 0, 0}}, NotFound},                   // child tile not found
+                  RetainTileDataAction{{2, 0, {2, 0, 0}}, TileNecessity::Optional},
+                  RenderTileAction{{2, 0, 0}, *tile_2_2_0_0},                       // render child from 2 levels down
+                  RetainTileDataAction{{2, 0, {2, 1, 0}}, TileNecessity::Optional},
+                  RenderTileAction{{2, 1, 0}, *tile_2_2_1_0},                       // render child from 2 levels down
+                  GetTileDataAction{{1, 0, {1, 0, 1}}, NotFound},                   // child tile not found
+                  GetTileDataAction{{1, 0, {1, 1, 0}}, NotFound},                   // child tile not found
+                  GetTileDataAction{{1, 0, {1, 1, 1}}, NotFound},                   // child tile not found
+                                                                                    // no parent tile of 0 to consider
+              }),
+              log);
 }
 
 TEST(UpdateRenderables, PreferChildTiles) {
