@@ -334,6 +334,16 @@ public final class MapLibreMap {
     nativeMapView.setTileCacheEnabled(enabled);
   }
 
+  /**
+   * Check whether tile cache is enabled or not.
+   *
+   * @return true if enabled
+   * @see MapLibreMap#setTileCacheEnabled(boolean)
+   */
+  public boolean getTileCacheEnabled() {
+    return nativeMapView.getTileCacheEnabled();
+  }
+
   //
   // MinZoom
   //
