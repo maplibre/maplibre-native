@@ -16,6 +16,7 @@
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/tile/tile_diff.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/logging.hpp>
@@ -357,15 +358,70 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         builder.setEnableStencil(true);
     };
 
-    stats.drawablesRemoved += fillTileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
-        // If the render pass has changed or the tile has dropped out of the cover set, remove it.
-        const auto& tileID = drawable.getTileID();
-        return tileID && !hasRenderTile(*tileID);
-    });
+    // Remove drawables for removed tiles
+    for (const auto& tileID : renderTileDiff->removed) {
+        removeTile(renderPass, tileID);
+    }
 
     fillTileLayerGroup->setStencilTiles(renderTiles);
 
     StringIDSetsPair propertiesAsUniforms;
+
+    // Update tiles that weren't added or removed
+    std::vector<OverscaledTileID> resetTileIDs;
+    for (const auto& tileID : renderTileDiff->remainder) {
+        const auto tileRef = getRenderTile(tileID);
+        if (!tileRef) {
+            assert(false);
+            continue;
+        }
+        const RenderTile& tile = tileRef->get();
+
+        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
+        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
+            removeTile(renderPass, tileID);
+
+            if (renderData && !renderData->bucket) {
+                // We'll need to treat this tile as an add
+                resetTileIDs.push_back(tileID);
+            }
+            continue;
+        }
+
+        auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
+
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(renderPass, tileID);
+
+            // We'll need to treat this tile as an add
+            resetTileIDs.push_back(tileID);
+        }
+        setRenderTileBucketID(tileID, bucket.getID());
+    }
+
+    // Create drawables for new tiles
+    const auto newTile = [&](const OverscaledTileID& tileID) {
+        const auto tileRef = getRenderTile(tileID);
+        if (!tileRef) {
+            assert(false);
+            return;
+        }
+        const RenderTile& tile = tileRef->get();
+
+        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
+        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
+            return;
+        }
+
+        auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
+        setRenderTileBucketID(tileID, bucket.getID());
+    };
+    // With C++20 we can chain iterator ranges and use `for(:)`
+    std::for_each(renderTileDiff->added.begin(), renderTileDiff->added.end(), newTile);
+    std::for_each(resetTileIDs.begin(), resetTileIDs.end(), newTile);
+
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
 

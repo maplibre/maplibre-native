@@ -12,31 +12,38 @@ namespace mbgl {
 
 class RenderTile;
 
-class TileDifference {
-public:
-    std::vector<UnwrappedTileID> added;
-    std::vector<UnwrappedTileID> removed;
-    std::vector<UnwrappedTileID> remainder;
+struct TileDifference {
+    const std::vector<OverscaledTileID> added;
+    const std::vector<OverscaledTileID> removed;
+    const std::vector<OverscaledTileID> remainder;
 };
 
-namespace detail {
-// Iterate a collection of `RenderTile` as if they were tile IDs
-template <typename T>
-struct TileIDIterator : public boost::iterator_adaptor<TileIDIterator<T>,
-                                                       T,
-                                                       UnwrappedTileID,
-                                                       boost::random_access_traversal_tag,
-                                                       const UnwrappedTileID&> {
-    const UnwrappedTileID& dereference() const { return this->base()->id; }
+namespace tile_diff_detail {
+
+template <typename W, typename T>
+inline constexpr bool is_ref_wrap = std::is_same_v<std::remove_cv_t<typename W::value_type>, std::reference_wrapper<T>>;
+template <typename T, typename TI>
+using adaptor_base = boost::iterator_adaptor<TI, T, boost::use_default, boost::use_default, const OverscaledTileID&>;
+
+// Iterate a collection of `RenderTile` (or `reference_wrapper` thereto) as if they were tile IDs
+template <typename T, bool wrap = is_ref_wrap<T, RenderTile> || is_ref_wrap<T, const RenderTile>>
+struct TileIDIterator : public adaptor_base<T, TileIDIterator<T>> {
+    const OverscaledTileID& dereference() const { return this->base()->get().getOverscaledTileID(); }
     TileIDIterator(const TileIDIterator<T>::iterator_adaptor_::base_type& p)
         : TileIDIterator<T>::iterator_adaptor_(p) {}
 };
-} // namespace detail
+template <typename T>
+struct TileIDIterator<T, false> : public adaptor_base<T, TileIDIterator<T>> {
+    const OverscaledTileID& dereference() const { return this->base()->getOverscaledTileID(); }
+    TileIDIterator(const TileIDIterator<T>::iterator_adaptor_::base_type& p)
+        : TileIDIterator<T>::iterator_adaptor_(p) {}
+};
+} // namespace tile_diff_detail
 
 /// @brief Compute the differences in tile IDs between two containers of `RenderTile` ordered by tile ID
 template <typename TIterA, typename TIterB>
 TileDifference diffTiles(TIterA aBeg_, TIterA aEnd_, TIterB bBeg_, TIterB bEnd_) {
-    using namespace detail;
+    using namespace tile_diff_detail;
     const TileIDIterator<TIterA> aBeg = aBeg_;
     const TileIDIterator<TIterA> aEnd = aEnd_;
     const TileIDIterator<TIterB> bBeg = bBeg_;
@@ -45,12 +52,20 @@ TileDifference diffTiles(TIterA aBeg_, TIterA aEnd_, TIterB bBeg_, TIterB bEnd_)
     assert(std::is_sorted(aBeg, aEnd));
     assert(std::is_sorted(bBeg, bEnd));
 
-    TileDifference result;
-    std::set_difference(aBeg, aEnd, bBeg, bEnd, std::back_inserter(result.removed));
-    std::set_difference(bBeg, bEnd, aBeg, aEnd, std::back_inserter(result.added));
-    std::set_intersection(aBeg, aEnd, bBeg, bEnd, std::back_inserter(result.remainder));
+    std::vector<OverscaledTileID> added;
+    std::set_difference(bBeg, bEnd, aBeg, aEnd, std::back_inserter(added));
 
-    return result;
+    std::vector<OverscaledTileID> removed;
+    std::set_difference(aBeg, aEnd, bBeg, bEnd, std::back_inserter(removed));
+
+    std::vector<OverscaledTileID> remainder;
+    std::set_intersection(aBeg, aEnd, bBeg, bEnd, std::back_inserter(remainder));
+
+    return {
+        std::move(added),
+        std::move(removed),
+        std::move(remainder),
+    };
 }
 
 } // namespace mbgl

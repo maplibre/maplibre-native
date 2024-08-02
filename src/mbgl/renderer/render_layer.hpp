@@ -205,6 +205,8 @@ protected:
 
     const LayerRenderData* getRenderDataForPass(const RenderTile&, RenderPass) const;
 
+    std::optional<std::reference_wrapper<const RenderTile>> getRenderTile(const OverscaledTileID& tileID) const;
+
 #if MLN_DRAWABLE_RENDERER
     void setLayerGroup(LayerGroupBasePtr, UniqueChangeRequestVec&);
 
@@ -275,6 +277,7 @@ protected:
 protected:
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;
+    std::shared_ptr<TileDifference> renderTileDiff;
 
     // Retains ownership of tiles
     Immutable<std::vector<RenderTile>> renderTilesOwner;

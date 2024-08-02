@@ -1,16 +1,18 @@
 #pragma once
 
 #include <mbgl/renderer/render_source.hpp>
+#include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/source_state.hpp>
 #include <mbgl/renderer/tile_pyramid.hpp>
 #include <mbgl/style/sources/vector_source_impl.hpp>
-#include <mbgl/renderer/render_tree.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/context.hpp>
 #endif
 
 namespace mbgl {
+
+class TileDifference;
 
 /**
  * @brief Base class for render sources that provide render tiles.
@@ -27,6 +29,7 @@ public:
     bool hasFadingTiles() const override;
 
     RenderTiles getRenderTiles() const override;
+    std::shared_ptr<TileDifference> getRenderTileDiff() const override;
     RenderTiles getRenderTilesSortedByYPosition() const override;
     const Tile* getRenderedTile(const UnwrappedTileID&) const override;
     Immutable<std::vector<RenderTile>> getRawRenderTiles() const override { return renderTiles; }
@@ -56,6 +59,8 @@ protected:
     RenderTileSource(Immutable<style::Source::Impl>, const TaggedScheduler&);
     TilePyramid tilePyramid;
     Immutable<std::vector<RenderTile>> renderTiles;
+    Immutable<std::vector<RenderTile>> previousRenderTiles;
+    mutable std::shared_ptr<TileDifference> renderTileDiff;
     mutable RenderTiles filteredRenderTiles;
     mutable RenderTiles renderTilesSortedByY;
 

@@ -30,6 +30,7 @@ class RenderTile;
 class Scheduler;
 class SourceQueryOptions;
 class Tile;
+class TileDifference;
 class TileParameters;
 class TransformParameters;
 class TransformState;
@@ -69,6 +70,8 @@ public:
     // If supported, returns a shared list of RenderTiles, sorted by tile id and
     // excluding tiles hold for fade; returns nullptr otherwise.
     virtual RenderTiles getRenderTiles() const { return nullptr; }
+    // If supported, returns a description of the tile IDs which were added and removed in the last `prepare`
+    virtual std::shared_ptr<TileDifference> getRenderTileDiff() const { return nullptr; }
     // If supported, returns a shared list of RenderTiles, sorted in opposite y
     // position, so tiles with overlapping symbols are drawn on top of each other,
     // with lower symbols being drawn on top of higher symbols; returns nullptr otherwise.

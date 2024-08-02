@@ -9,6 +9,8 @@
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/tile/tile_diff.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
 #if MLN_DRAWABLE_RENDERER
@@ -60,6 +62,7 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     assert(params.source->isEnabled());
     renderTiles = params.source->getRenderTiles();
     renderTilesOwner = params.source->getRawRenderTiles();
+    renderTileDiff = params.source->getRenderTileDiff();
     addRenderPassesFromTiles();
 
 #if MLN_DRAWABLE_RENDERER
@@ -142,6 +145,24 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
     return nullptr;
 }
 
+std::optional<std::reference_wrapper<const RenderTile>> RenderLayer::getRenderTile(
+    const OverscaledTileID& tileID) const {
+    // Search `RenderTiles` for a tile ID without creating a "key" instance of `RenderTile`
+    struct Comp {
+        bool operator()(const std::reference_wrapper<const RenderTile>& tile, const OverscaledTileID& id) const {
+            return tile.get().getOverscaledTileID() < id;
+        }
+        bool operator()(const OverscaledTileID& id, const std::reference_wrapper<const RenderTile>& tile) const {
+            return id < tile.get().getOverscaledTileID();
+        }
+    };
+    const auto result = std::lower_bound(renderTiles->begin(), renderTiles->end(), tileID, Comp());
+    if (result != renderTiles->end() && result->get().getOverscaledTileID() == tileID) {
+        return *result;
+    }
+    return std::nullopt;
+}
+
 #if MLN_DRAWABLE_RENDERER
 std::size_t RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
     if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
@@ -163,6 +184,8 @@ std::size_t RenderLayer::removeAllDrawables() {
 }
 
 void RenderLayer::updateRenderTileIDs() {
+    MLN_TRACE_FUNC()
+
     if (!renderTiles || renderTiles->empty()) {
         renderTileIDs.clear();
         return;

@@ -5,6 +5,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/tile_parameters.hpp>
 #include <mbgl/renderer/tile_render_data.hpp>
+#include <mbgl/tile/tile_diff.hpp>
 #include <mbgl/tile/vector_tile.hpp>
 #include <mbgl/util/constants.hpp>
 #include <mbgl/util/instrumentation.hpp>
@@ -387,7 +388,8 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
     : RenderSource(std::move(impl_)),
       tilePyramid(threadPool_),
-      renderTiles(makeMutable<std::vector<RenderTile>>()) {
+      renderTiles(makeMutable<std::vector<RenderTile>>()),
+      previousRenderTiles(makeMutable<std::vector<RenderTile>>()) {
     tilePyramid.setObserver(this);
 }
 
@@ -414,6 +416,9 @@ void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
         tiles->back().prepare(parameters);
     }
     featureState.coalesceChanges(*tiles);
+
+    renderTileDiff.reset();
+    previousRenderTiles = std::move(renderTiles);
     renderTiles = std::move(tiles);
 }
 
@@ -437,6 +442,15 @@ RenderTiles RenderTileSource::getRenderTiles() const {
         filteredRenderTiles = std::move(result);
     }
     return filteredRenderTiles;
+}
+
+std::shared_ptr<TileDifference> RenderTileSource::getRenderTileDiff() const {
+    if (!renderTileDiff) {
+        const auto tiles = getRenderTiles();
+        renderTileDiff = std::make_shared<TileDifference>(
+            diffTiles(previousRenderTiles->begin(), previousRenderTiles->end(), tiles->begin(), tiles->end()));
+    }
+    return renderTileDiff;
 }
 
 RenderTiles RenderTileSource::getRenderTilesSortedByYPosition() const {
