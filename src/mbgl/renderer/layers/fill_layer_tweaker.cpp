@@ -87,6 +87,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         }
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
+
         switch (static_cast<RenderFillLayer::FillVariant>(drawable.getType())) {
             case RenderFillLayer::FillVariant::Fill: {
                 const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};

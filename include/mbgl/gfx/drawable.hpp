@@ -97,7 +97,7 @@ public:
     int32_t getLineWidth() const { return lineWidth; }
 
     /// Set line width
-    void setLineWidth(int32_t value) { lineWidth = value; }
+    virtual void setLineWidth(int32_t value) { lineWidth = value; }
 
     /// @brief Get the texture at the given internal ID.
     const gfx::Texture2DPtr& getTexture(size_t id) const;
@@ -122,7 +122,7 @@ public:
     bool getEnableColor() const { return enableColor; }
 
     /// Set whether to render to the color target
-    void setEnableColor(bool value) { enableColor = value; }
+    virtual void setEnableColor(bool value) { enableColor = value; }
 
     /// Whether to do stenciling (based on the Tile ID or 3D)
     bool getEnableStencil() const { return enableStencil; }
@@ -175,7 +175,7 @@ public:
     const gfx::CullFaceMode& getCullFaceMode() const;
 
     /// Set cull face mode
-    void setCullFaceMode(const gfx::CullFaceMode&);
+    virtual void setCullFaceMode(const gfx::CullFaceMode&);
 
     /// Get color mode
     const gfx::ColorMode& getColorMode() const;
