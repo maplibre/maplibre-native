@@ -13,8 +13,11 @@ const style::LayerTypeInfo* LineLayerFactory::getTypeInfo() const noexcept {
 
 std::unique_ptr<style::Layer> LineLayerFactory::createLayer(const std::string& id,
                                                             const style::conversion::Convertible& value) noexcept {
-    const auto source = getSource(value);
-    return std::unique_ptr<style::Layer>(source ? new (std::nothrow) style::LineLayer(id, *source) : nullptr);
+    auto const source = getSource(value);
+    if (!source) {
+        return nullptr;
+    }
+    return std::unique_ptr<style::Layer>(new style::LineLayer(id, *source));
 }
 
 std::unique_ptr<Layout> LineLayerFactory::createLayout(
@@ -27,17 +30,14 @@ std::unique_ptr<Layout> LineLayerFactory::createLayout(
         PatternLayout<LineBucket, LineLayerProperties, LinePattern, LineLayoutProperties, LineSortKey>;
     auto layerProperties = staticImmutableCast<LineLayerProperties>(group.front());
     if (layerProperties->layerImpl().layout.get<LineSortKey>().isUndefined()) {
-        return std::unique_ptr<Layout>(
-            new (std::nothrow) LayoutTypeUnsorted(parameters.bucketParameters, group, std::move(layer), parameters));
+        return std::make_unique<LayoutTypeUnsorted>(parameters.bucketParameters, group, std::move(layer), parameters);
     }
-    return std::unique_ptr<Layout>(
-        new (std::nothrow) LayoutTypeSorted(parameters.bucketParameters, group, std::move(layer), parameters));
+    return std::make_unique<LayoutTypeSorted>(parameters.bucketParameters, group, std::move(layer), parameters);
 }
 
 std::unique_ptr<RenderLayer> LineLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
     assert(impl->getTypeInfo() == getTypeInfo());
-    auto lineImpl = staticImmutableCast<style::LineLayer::Impl>(impl);
-    return std::unique_ptr<RenderLayer>(new (std::nothrow) RenderLineLayer(std::move(lineImpl)));
+    return std::make_unique<RenderLineLayer>(staticImmutableCast<style::LineLayer::Impl>(impl));
 }
 
 } // namespace mbgl

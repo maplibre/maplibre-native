@@ -12,11 +12,13 @@ const style::LayerTypeInfo* RasterLayerFactory::getTypeInfo() const noexcept {
 
 std::unique_ptr<style::Layer> RasterLayerFactory::createLayer(const std::string& id,
                                                               const style::conversion::Convertible& value) noexcept {
-    const auto source = getSource(value);
+    auto const source = getSource(value);
     if (!source) {
         return nullptr;
     }
-    return std::unique_ptr<style::Layer>(new (std::nothrow) style::RasterLayer(id, *source));
+
+    std::unique_ptr<style::Layer> layer = std::unique_ptr<style::Layer>(new style::RasterLayer(id, *source));
+    return layer;
 }
 
 std::unique_ptr<RenderLayer> RasterLayerFactory::createRenderLayer(Immutable<style::Layer::Impl> impl) noexcept {
