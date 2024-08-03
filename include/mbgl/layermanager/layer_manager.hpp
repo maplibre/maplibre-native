@@ -47,7 +47,7 @@ public:
     /// Returns a new Layout instance on success call; returns `nullptr` otherwise.
     std::unique_ptr<Layout> createLayout(const LayoutParameters&,
                                          std::unique_ptr<GeometryTileLayer>,
-                                         const std::vector<Immutable<style::LayerProperties>>&) noexcept;
+                                         const std::vector<Immutable<style::LayerProperties>>&);
 
     /**
      * @brief a build-time flag to enable/disable annotations in

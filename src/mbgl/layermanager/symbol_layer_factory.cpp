@@ -20,10 +20,9 @@ std::unique_ptr<style::Layer> SymbolLayerFactory::createLayer(const std::string&
     return std::unique_ptr<style::Layer>(new style::SymbolLayer(id, *source));
 }
 
-std::unique_ptr<Layout> SymbolLayerFactory::createLayout(
-    const LayoutParameters& parameters,
-    std::unique_ptr<GeometryTileLayer> tileLayer,
-    const std::vector<Immutable<style::LayerProperties>>& group) noexcept {
+std::unique_ptr<Layout> SymbolLayerFactory::createLayout(const LayoutParameters& parameters,
+                                                         std::unique_ptr<GeometryTileLayer> tileLayer,
+                                                         const std::vector<Immutable<style::LayerProperties>>& group) {
     return std::make_unique<SymbolLayout>(parameters.bucketParameters, group, std::move(tileLayer), parameters);
 }
 
