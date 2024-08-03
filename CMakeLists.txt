@@ -1439,13 +1439,7 @@ set_target_properties(
         INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/unordered_dense/LICENSE
 )
 
-include(FetchContent)
-FetchContent_Declare(
-        Corrosion
-        GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-        GIT_TAG v0.5
-)
-FetchContent_MakeAvailable(Corrosion)
+add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/corrosion)
 
 corrosion_import_crate(MANIFEST_PATH rustutils/Cargo.toml)
 # rustutils_headers is a set of .h headers generated from rustutils crate

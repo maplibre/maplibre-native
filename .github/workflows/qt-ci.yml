@@ -206,6 +206,14 @@ jobs:
           arch: ${{ matrix.compiler_type }}
           toolset: ${{ matrix.compiler_version }}
 
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build artifacts
+        if: github.event_name != 'release' && github.event_name != 'workflow_dispatch'
+        uses: Swatinem/rust-cache@v2
+        # TODO: ensure right directories are being cached
+
       - name: Setup ninja
         uses: seanmiddleditch/gha-setup-ninja@v5
 
