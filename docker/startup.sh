@@ -1,14 +1,36 @@
 #!/bin/sh
 
-if [ ! -d /app/.github ] || [ ! -d /home/user/.cache ]; then
+if [ ! -d /app/.github ] || [ ! -d ~/.cache ]; then
     echo " "
     echo "ERROR: Docker container was not started properly."
     echo "       From the root of this repo, run the following command."
     echo "       You may add any command to perform in the container at the end of this command."
     echo " "
-    echo '  docker run --rm -it -v "$PWD:/app/" -v "$PWD/docker/.cache:/home/user/.cache" maplibre-native-image'
+    echo "  docker run --rm -it -v \"$PWD:/app/\" -v \"$PWD/docker/.cache:/home/$USERNAME/.cache\" maplibre-native-image"
     exit 1
 fi
+
+export PATH="$PATH:~/.local/bin/"
+
+
+# Work in progress:  install and configure Swift and pre-commit
+# Detect if current CPU is x64 or ARM64 and download the appropriate binary
+#RUN echo "Download and install SWIFT" \
+#    && if [ "$(uname -m)" = "aarch64" ]; then \
+#        curl -fsSL https://download.swift.org/swift-5.10.1-release/ubuntu2204-aarch64/swift-5.10.1-RELEASE/swift-5.10.1-RELEASE-ubuntu22.04-aarch64.tar.gz \
+#                -o /tmp/swift.tar.gz ;\
+#    else \
+#        curl -fsSL https://download.swift.org/swift-5.10.1-release/ubuntu2204/swift-5.10.1-RELEASE/swift-5.10.1-RELEASE-ubuntu22.04.tar.gz \
+#                -o /tmp/swift.tar.gz ;\
+#    fi \
+#    && tar -xzf /tmp/swift.tar.gz -C / --strip-components=1 \
+#    && rm /tmp/swift.tar.gz \
+#    && :
+#if [ ! -f "/app/.git/hooks/pre-commit" ]; then
+#    echo "Configuring pre-commit git hooks by creating a .git/hooks/pre-commit file..."
+#    ~/.local/bin/pre-commit install
+#fi
+
 
 
 if [ ! -f "$CARGO_HOME/env" ]; then
@@ -23,6 +45,7 @@ if ! command -v cxxbridge > /dev/null; then
     echo "Installing cxxbridge..."
     cargo install cxxbridge-cmd
 fi
+
 
 
 exec "$@"

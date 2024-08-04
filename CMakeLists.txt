@@ -1442,11 +1442,11 @@ set_target_properties(
 add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/corrosion)
 
 corrosion_import_crate(MANIFEST_PATH rustutils/Cargo.toml)
-# rustutils_headers is a set of .h headers generated from rustutils crate
-corrosion_add_cxxbridge(rustutils_headers CRATE rustutils FILES lib.rs)
+# rustutils_bridge is a set of .h headers generated from rustutils crate
+corrosion_add_cxxbridge(rustutils_bridge CRATE rustutils FILES lib.rs)
 set_target_properties(
         rustutils
-        rustutils_headers
+        rustutils_bridge
         PROPERTIES
         INTERFACE_MAPBOX_NAME "Rust Utils"
         INTERFACE_MAPBOX_AUTHOR "Yuri Astrakhan"
@@ -1471,7 +1471,7 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
-        rustutils_headers
+        rustutils_bridge
     PUBLIC
         Mapbox::Base
         Mapbox::Base::Extras::expected-lite
@@ -1485,7 +1485,7 @@ target_link_libraries(
 )
 
 export(TARGETS
-    rustutils_headers
+    rustutils_bridge
     mbgl-core
     rustutils
     mapbox-base

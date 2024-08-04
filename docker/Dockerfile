@@ -1,3 +1,4 @@
+# Ubuntu version should match SWIFT version below
 FROM ubuntu:22.04
 
 # Install build tools and dependencies
@@ -23,11 +24,15 @@ RUN    apt-get update \
         ccache \
         ninja-build \
         pkg-config \
+        python3 \
+        python3-pip \
+        python-is-python3 \
     && : # end of the RUN cmd - easier to keep a colon at the end of the list, than to keep the backslashes in check
 
 # This could also be `.../releases/latest/download/bazelisk-linux-amd64` for the latest version, but for predictability better hardcode it
 # Detect if current CPU is x64 or ARM64 and download the appropriate binary
-RUN if [ "$(uname -m)" = "aarch64" ]; then \
+RUN echo "Download and install Bazel" \
+    && if [ "$(uname -m)" = "aarch64" ]; then \
         curl -fsSL https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-arm64 -o /usr/local/bin/bazel ;\
     else \
         curl -fsSL https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64 -o /usr/local/bin/bazel ;\
@@ -35,7 +40,6 @@ RUN if [ "$(uname -m)" = "aarch64" ]; then \
     && chmod +x /usr/local/bin/bazel \
     && :
 
-WORKDIR /app
 
 ARG USERNAME=user
 ARG USER_UID=1000
@@ -49,15 +53,21 @@ RUN groupadd --force --gid $USER_GID $USERNAME \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
-COPY startup.sh /usr/local/bin/startup.sh
-RUN chmod +x /usr/local/bin/startup.sh
-
 # This allows users to `docker run` without specifying -u and -g
 USER $USERNAME
+
+RUN pip install pre-commit
 
 ENV RUSTUP_HOME=/home/$USERNAME/.cache/.rustup \
     CARGO_HOME=/home/$USERNAME/.cache/.cargo \
     PATH=/home/$USERNAME/.cache/.cargo/bin:$PATH
 
+# As the very last step, copy the startup script
+USER root
+COPY startup.sh /usr/local/bin/startup.sh
+RUN chmod +x /usr/local/bin/startup.sh
+USER $USERNAME
+
+WORKDIR /app
 ENTRYPOINT ["/usr/local/bin/startup.sh"]
 CMD ["bash"]

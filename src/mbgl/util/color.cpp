@@ -3,7 +3,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/string.hpp>
 
-#include <rustutils_headers/lib.h>
+#include <rustutils_bridge/lib.h>
 
 namespace mbgl {
 
