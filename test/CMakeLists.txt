@@ -144,6 +144,22 @@ if(MLN_WITH_OPENGL)
     )
 endif()
 
+
+if(MLN_WITH_VULKAN)
+    target_sources(
+        mbgl-test
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/api/custom_drawable_layer.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
+    )
+    target_compile_definitions(
+        mbgl-test
+        PRIVATE MLN_RENDER_BACKEND_VULKAN=1
+    )
+endif()
+
 if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Android)
     message("Target platform does not support HTTP tests or dependencies not found.")
 

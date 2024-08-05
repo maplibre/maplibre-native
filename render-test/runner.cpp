@@ -290,7 +290,7 @@ void TestRunner::checkProbingResults(TestMetadata& resultMetadata) {
                                                 const std::string& message = std::string()) {
         try {
             mbgl::filesystem::create_directories(path);
-            mbgl::util::write_file(path / "metrics.json", serializeMetrics(resultMetadata.metrics));
+            mbgl::util::write_file((path / "metrics.json").generic_string(), serializeMetrics(resultMetadata.metrics));
             resultMetadata.errorMessage += message;
         } catch (mbgl::filesystem::filesystem_error& ex) {
             const auto msg = "Failed to write metrics. path='" + path.string() + "' err='" + ex.what() +

@@ -97,4 +97,6 @@
     <string name="activity_within">Within expression</string>
     <string name="activity_stretchable_image">Stretchable Image</string>
     <string name="activity_image_in_label">Image In Label</string>
+    <string name="activity_map_options_runtime">MapOptions Runtime</string>
+    <string name="activity_map_options_xml">MapOptions XML</string>
 </resources>

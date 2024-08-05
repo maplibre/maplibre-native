@@ -17,4 +17,5 @@
     <string name="category_location">Location</string>
     <string name="category_integration">_Integration</string>
     <string name="category_turf">Turf</string>
+    <string name="category_map_options">Map Options</string>
 </resources>
