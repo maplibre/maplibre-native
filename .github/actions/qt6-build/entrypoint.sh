@@ -10,6 +10,7 @@ export PATH="$QT_ROOT_DIR/bin:$PATH"
 
 echo "Downloading and installing Rust..."
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+. "$HOME/.cargo/env"
 
 mkdir build && cd build
 qt-cmake ../source/ \
