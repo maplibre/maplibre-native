@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.options.MapOptionsXmlActivity">
+
+    <org.maplibre.android.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:maplibre_apiBaseUri="https://api.maplibre.org"
+        app:maplibre_cameraBearing="0.0"
+        app:maplibre_cameraPitchMax="90.0"
+        app:maplibre_cameraPitchMin="0.0"
+        app:maplibre_cameraTargetLat="42.31230486601532"
+        app:maplibre_cameraTargetLng="64.63967338936439"
+        app:maplibre_cameraTilt="0.0"
+        app:maplibre_cameraZoom="3.9"
+        app:maplibre_cameraZoomMax="26.0"
+        app:maplibre_cameraZoomMin="2.0"
+        app:maplibre_localIdeographFontFamilies="@array/array_local_ideograph_family_test"
+        app:maplibre_localIdeographFontFamily="Droid Sans"
+        app:maplibre_uiCompass="true"
+        app:maplibre_uiCompassFadeFacingNorth="true"
+        app:maplibre_uiCompassGravity="top|end"
+        app:maplibre_uiDoubleTapGestures="true"
+        app:maplibre_uiHorizontalScrollGestures="true"
+        app:maplibre_uiRotateGestures="true"
+        app:maplibre_uiScrollGestures="true"
+        app:maplibre_uiTiltGestures="true"
+        app:maplibre_uiZoomGestures="true" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -47,7 +47,7 @@ class UpdateMetadataActivity :
         val input = EditText(this)
         input.setText(metadata)
         input.inputType = InputType.TYPE_CLASS_TEXT
-        if (metadata != null) {
+        if (metadata.isNotEmpty()) {
             input.setSelection(metadata.length)
         }
         builder.setView(input)
@@ -113,7 +113,7 @@ class UpdateMetadataActivity :
         OfflineManager.getInstance(this).listOfflineRegions(object : ListOfflineRegionsCallback {
             override fun onList(offlineRegions: Array<OfflineRegion>?) {
                 if (offlineRegions != null && offlineRegions.size > 0) {
-                    adapter!!.setOfflineRegions(Arrays.asList(*offlineRegions))
+                    adapter!!.setOfflineRegions(listOf(*offlineRegions))
                 }
             }
 
@@ -129,7 +129,7 @@ class UpdateMetadataActivity :
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mapView != null) {
+        if (this::mapView.isInitialized) {
             mapView.onPause()
             mapView.onStop()
             mapView.onDestroy()
@@ -172,7 +172,7 @@ class UpdateMetadataActivity :
             return convertView!!
         }
 
-        internal class ViewHolder {
+        class ViewHolder {
             var text: TextView? = null
         }
 

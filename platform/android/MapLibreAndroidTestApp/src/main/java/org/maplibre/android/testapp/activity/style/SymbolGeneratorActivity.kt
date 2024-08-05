@@ -4,14 +4,19 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.os.AsyncTask
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
@@ -28,7 +33,6 @@ import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.ResourceUtils.readRawResource
 import timber.log.Timber
-import java.lang.ref.WeakReference
 
 /**
  * Test activity showcasing using a symbol generator that generates Bitmaps from Android SDK Views.
@@ -44,11 +48,17 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
         mapView.getMapAsync(this)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
         map.setStyle(TestStyles.getPredefinedStyleWithFallback("Outdoor")) { style: Style? ->
             addSymbolClickListener()
-            LoadDataTask(this@SymbolGeneratorActivity).execute()
+            lifecycleScope.launch(Dispatchers.IO) {
+                val featureCollection = loadDataTask(this@SymbolGeneratorActivity)
+                withContext(Dispatchers.Main) {
+                    featureCollection?.let { onDataLoaded(it) }
+                }
+            }
         }
     }
 
@@ -164,34 +174,13 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private class LoadDataTask internal constructor(activity: SymbolGeneratorActivity) :
-        AsyncTask<Void?, Void?, FeatureCollection?>() {
-        private val activity: WeakReference<SymbolGeneratorActivity>
-
-        init {
-            this.activity = WeakReference(activity)
-        }
-
-        override fun doInBackground(vararg p0: Void?): FeatureCollection? {
-            val context: Context? = activity.get()
-            if (context != null) {
-                // read local geojson from raw folder
-                val tinyCountriesJson = readRawResource(context, R.raw.tiny_countries)
-                return FeatureCollection.fromJson(tinyCountriesJson)
-            }
-            return null
-        }
-
-        override fun onPostExecute(featureCollection: FeatureCollection?) {
-            super.onPostExecute(featureCollection)
-            val activity = activity.get()
-            if (featureCollection == null || activity == null) {
-                return
-            }
-            activity.onDataLoaded(featureCollection)
-        }
+    private fun loadDataTask(context: SymbolGeneratorActivity) : FeatureCollection? {
+        // read local geojson from raw folder
+        val tinyCountriesJson = readRawResource(context, R.raw.tiny_countries)
+        return FeatureCollection.fromJson(tinyCountriesJson)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun onDataLoaded(featureCollection: FeatureCollection) {
         if (mapView.isDestroyed) {
             return
@@ -298,41 +287,30 @@ class SymbolGeneratorActivity : AppCompatActivity(), OnMapReadyCallback {
             PropertyFactory.textField(textFieldExpressionResult),
             PropertyFactory.textColor(textColorExpressionResult)
         )
-        GenerateSymbolTask(maplibreMap, this).execute(featureCollection)
+        lifecycleScope.launch(Dispatchers.IO) {
+            val bitmapHashMap = generateSymbolTask(this@SymbolGeneratorActivity, featureCollection)
+            withContext(Dispatchers.Main) {
+                maplibreMap.getStyle { style -> style.addImagesAsync(bitmapHashMap) }
+            }
+        }
     }
 
-    private class GenerateSymbolTask internal constructor(
-        private val maplibreMap: MapLibreMap?,
-        context: Context
-    ) : AsyncTask<FeatureCollection?, Void?, HashMap<String, Bitmap>>() {
-        private val context: WeakReference<Context>
-
-        init {
-            this.context = WeakReference(context)
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun generateSymbolTask(
+        context: Context,
+         featureCollection: FeatureCollection?
+    ) : HashMap<String, Bitmap> {
+        val imagesMap = HashMap<String, Bitmap>()
+        featureCollection?.features()?.forEach {
+            val countryName = it.getStringProperty(FEATURE_ID)
+            val textView = TextView(context)
+            textView.setBackgroundColor(context.resources.getColor(R.color.blueAccent, null))
+            textView.setPadding(10, 5, 10, 5)
+            textView.setTextColor(Color.WHITE)
+            textView.text = countryName
+            imagesMap[countryName] = SymbolGenerator.generate(textView)
         }
-
-        override fun doInBackground(vararg p0: FeatureCollection?): HashMap<String, Bitmap>? {
-            val imagesMap = HashMap<String, Bitmap>()
-            val context = context.get()
-            val features = p0[0]?.features()
-            if (context != null && features != null) {
-                for (feature in features) {
-                    val countryName = feature.getStringProperty(FEATURE_ID)
-                    val textView = TextView(context)
-                    textView.setBackgroundColor(context.resources.getColor(R.color.blueAccent))
-                    textView.setPadding(10, 5, 10, 5)
-                    textView.setTextColor(Color.WHITE)
-                    textView.text = countryName
-                    imagesMap[countryName] = SymbolGenerator.generate(textView)
-                }
-            }
-            return imagesMap
-        }
-
-        override fun onPostExecute(bitmapHashMap: HashMap<String, Bitmap>) {
-            super.onPostExecute(bitmapHashMap)
-            maplibreMap?.getStyle { style -> style.addImagesAsync(bitmapHashMap) }
-        }
+        return imagesMap
     }
 
     companion object {
