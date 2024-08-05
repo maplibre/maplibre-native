@@ -118,8 +118,5 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 #define MLN_TRACE_FREE_CONST_BUFFER(id)
 #define MLN_TRACE_FUNC()
 #define MLN_TRACE_ZONE(label)
-#define MLN_ZONE_TEXT(text, size)
-#define MLN_ZONE_STR(str)
-#define MLN_ZONE_VALUE(n)
 
 #endif // MLN_TRACY_ENABLE
