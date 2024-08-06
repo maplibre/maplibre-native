@@ -1014,6 +1014,10 @@ void RenderOrchestrator::updateDebugLayerGroups(const RenderTree& renderTree, Pa
 
 #endif // MLN_DRAWABLE_RENDERER
 
+void RenderOrchestrator::onGlyphsLoaded(const FontStack& fontStack, const GlyphRange& range) {
+    observer->onGlyphsLoaded(fontStack, range);
+}
+
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
                                        const GlyphRange& glyphRange,
                                        std::exception_ptr error) {
@@ -1024,6 +1028,10 @@ void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
                    std::to_string(glyphRange.second) + " for font stack " + fontStackToString(fontStack) + ": " +
                    util::toString(error));
     observer->onResourceError(error);
+}
+
+void RenderOrchestrator::onGlyphsRequested(const FontStack& fontStack, const GlyphRange& range) {
+    observer->onGlyphsRequested(fontStack, range);
 }
 
 void RenderOrchestrator::onTileError(RenderSource& source, const OverscaledTileID& tileID, std::exception_ptr error) {
@@ -1040,6 +1048,26 @@ void RenderOrchestrator::onTileChanged(RenderSource&, const OverscaledTileID&) {
 
     observer->onInvalidate();
 }
+
+void RenderOrchestrator::onTileRequested(RenderSource&, const OverscaledTileID& id) {
+    observer->onTileRequested(id);
+}
+
+void RenderOrchestrator::onTileLoadedFromNetwork(RenderSource&, const OverscaledTileID& id) {
+    observer->onTileLoadedFromNetwork(id);
+}
+
+void RenderOrchestrator::onTileLoadedFromDisk(RenderSource&, const OverscaledTileID& id) {
+    observer->onTileLoadedFromDisk(id);
+}
+
+void RenderOrchestrator::onTileFailedToLoad(RenderSource&, const OverscaledTileID& id) {
+    observer->onTileFailedToLoad(id);
+}
+
+void RenderOrchestrator::onTileFinishedLoading(RenderSource&, const OverscaledTileID& id) {
+    observer->onTileFinishedLoading(id);
+};
 
 void RenderOrchestrator::onStyleImageMissing(const std::string& id, const std::function<void()>& done) {
     MLN_TRACE_FUNC()

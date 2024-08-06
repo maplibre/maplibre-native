@@ -168,11 +168,17 @@ private:
                                                const std::unordered_map<std::string, const RenderLayer*>&) const;
 
     // GlyphManagerObserver implementation.
+    void onGlyphsLoaded(const FontStack&, const GlyphRange&) override;
     void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) override;
-
+    void onGlyphsRequested(const FontStack&, const GlyphRange&) override;
     // RenderSourceObserver implementation.
     void onTileChanged(RenderSource&, const OverscaledTileID&) override;
     void onTileError(RenderSource&, const OverscaledTileID&, std::exception_ptr) override;
+    void onTileRequested(RenderSource&, const OverscaledTileID&) override;
+    void onTileLoadedFromNetwork(RenderSource&, const OverscaledTileID&) override;
+    void onTileLoadedFromDisk(RenderSource&, const OverscaledTileID&) override;
+    void onTileFailedToLoad(RenderSource&, const OverscaledTileID&) override;
+    void onTileFinishedLoading(RenderSource&, const OverscaledTileID&) override;
 
     // ImageManagerObserver implementation
     void onStyleImageMissing(const std::string&, const std::function<void()>&) override;

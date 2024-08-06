@@ -26,12 +26,14 @@ namespace mbgl {
 
 namespace vulkan {
 
-ShaderProgram::ShaderProgram(const std::string& name,
+ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
+                             const std::string& name,
                              const std::string_view& vertex,
                              const std::string_view& fragment,
                              const ProgramParameters& programParameters,
                              const mbgl::unordered_map<std::string, std::string>& additionalDefines,
-                             RendererBackend& backend_)
+                             RendererBackend& backend_,
+                             gfx::ContextObserver& observer)
     : ShaderProgramBase(),
       shaderName(name),
       backend(backend_) {
@@ -61,6 +63,7 @@ ShaderProgram::ShaderProgram(const std::string& name,
 
         if (!glslShader.parse(defaultResources, defaultVersion, ENoProfile, false, true, messages)) {
             mbgl::Log::Error(mbgl::Event::Shader, shaderName + " - " + glslShader.getInfoLog());
+            observer.onShaderCompileFailed(shaderID, gfx::Backend::Type::Vulkan);
             return std::vector<uint32_t>();
         }
 
@@ -69,6 +72,7 @@ ShaderProgram::ShaderProgram(const std::string& name,
 
         if (!glslProgram.link(messages)) {
             mbgl::Log::Error(mbgl::Event::Shader, shaderName + " - " + glslProgram.getInfoLog());
+            observer.onShaderCompileFailed(shaderID, gfx::Backend::Type::Vulkan);
             return std::vector<uint32_t>();
         }
 

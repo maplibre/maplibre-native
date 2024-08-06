@@ -52,6 +52,50 @@ public:
         delegate.invoke(&RendererObserver::onRemoveUnusedStyleImages, ids);
     }
 
+    void onPreCompileShader(mbgl::shaders::BuiltIn id, mbgl::gfx::Backend::Type type) override {
+        delegate.invoke(&RendererObserver::onPreCompileShader, id, type);
+    }
+
+    void onPostCompileShader(mbgl::shaders::BuiltIn id, mbgl::gfx::Backend::Type type) override {
+        delegate.invoke(&RendererObserver::onPostCompileShader, id, type);
+    }
+
+    void onShaderCompileFailed(mbgl::shaders::BuiltIn id, mbgl::gfx::Backend::Type type) override {
+        delegate.invoke(&RendererObserver::onShaderCompileFailed, id, type);
+    }
+
+    void onGlyphsLoaded(const mbgl::FontStack& stack, const mbgl::GlyphRange& range) override {
+        delegate.invoke(&RendererObserver::onGlyphsLoaded, stack, range);
+    }
+
+    void onGlyphsError(const mbgl::FontStack& stack, const mbgl::GlyphRange& range, std::exception_ptr ex) override {
+        delegate.invoke(&RendererObserver::onGlyphsError, stack, range, ex);
+    }
+
+    void onGlyphsRequested(const mbgl::FontStack& stack, const mbgl::GlyphRange& range) override {
+        delegate.invoke(&RendererObserver::onGlyphsRequested, stack, range);
+    }
+
+    void onTileRequested(const mbgl::OverscaledTileID& id) override {
+        delegate.invoke(&RendererObserver::onTileRequested, id);
+    }
+
+    void onTileLoadedFromNetwork(const mbgl::OverscaledTileID& id) override {
+        delegate.invoke(&RendererObserver::onTileLoadedFromNetwork, id);
+    }
+
+    void onTileLoadedFromDisk(const mbgl::OverscaledTileID& id) override {
+        delegate.invoke(&RendererObserver::onTileLoadedFromDisk, id);
+    }
+
+    void onTileFailedToLoad(const mbgl::OverscaledTileID& id) override {
+        delegate.invoke(&RendererObserver::onTileFailedToLoad, id);
+    }
+
+    void onTileFinishedLoading(const mbgl::OverscaledTileID& id) override {
+        delegate.invoke(&RendererObserver::onTileFinishedLoading, id);
+    }
+
 private:
     std::shared_ptr<Mailbox> mailbox;
     ActorRef<RendererObserver> delegate;

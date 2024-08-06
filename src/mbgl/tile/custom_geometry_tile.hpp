@@ -20,7 +20,8 @@ public:
                        std::string sourceID,
                        const TileParameters&,
                        Immutable<style::CustomGeometrySource::TileOptions>,
-                       ActorRef<style::CustomTileLoader> loader);
+                       ActorRef<style::CustomTileLoader> loader,
+                       TileObserver* observer = nullptr);
     ~CustomGeometryTile() override;
 
     void setTileData(const GeoJSON& geoJSON);

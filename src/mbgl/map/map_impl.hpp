@@ -40,6 +40,9 @@ public:
     void onStyleLoading() final;
     void onStyleLoaded() final;
     void onStyleError(std::exception_ptr) final;
+    void onSpriteLoaded(const std::optional<style::Sprite>&) final;
+    void onSpriteError(const std::optional<style::Sprite>&, std::exception_ptr) final;
+    void onSpriteRequested(const std::optional<style::Sprite>&) final;
 
     // RendererObserver
     void onInvalidate() final;
@@ -51,6 +54,30 @@ public:
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
     void onRegisterShaders(gfx::ShaderRegistry&) final;
+
+    void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type) final;
+    void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type) final;
+    void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type) final;
+    void onGlyphsLoaded(const FontStack&, const GlyphRange&) final;
+    void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) final;
+    void onGlyphsRequested(const FontStack&, const GlyphRange&) final;
+    void onTileRequested(const OverscaledTileID&) final;
+    void onTileLoadedFromNetwork(const OverscaledTileID&) final;
+    void onTileLoadedFromDisk(const OverscaledTileID&) final;
+    void onTileFailedToLoad(const OverscaledTileID&) final;
+    void onTileFinishedLoading(const OverscaledTileID&) final;
+
+    void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type) final;
+    void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type) final;
+    void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type) final;
+    void onGlyphsLoaded(const FontStack&, const GlyphRange&) final;
+    void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) final;
+    void onGlyphsRequested(const FontStack&, const GlyphRange&) final;
+    void onTileRequested(const OverscaledTileID&) final;
+    void onTileLoadedFromNetwork(const OverscaledTileID&) final;
+    void onTileLoadedFromDisk(const OverscaledTileID&) final;
+    void onTileFailedToLoad(const OverscaledTileID&) final;
+    void onTileFinishedLoading(const OverscaledTileID&) final;
 
     // Map
     void jumpTo(const CameraOptions&);

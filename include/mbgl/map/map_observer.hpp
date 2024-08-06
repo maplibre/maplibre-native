@@ -1,7 +1,11 @@
 #pragma once
 
+#include <mbgl/tile/tile_id.hpp>
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/image.hpp>
+#include <mbgl/style/sprite.hpp>
+#include <mbgl/text/glyph.hpp>
+#include <mbgl/shaders/shader_source.hpp>
 
 #include <cstdint>
 #include <string>
@@ -66,6 +70,28 @@ public:
     // Observe this event to easily mutate or observe shaders as soon
     // as the registry becomes available.
     virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
+
+    // Shaders compilation
+    virtual void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type) {}
+    virtual void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type) {}
+    virtual void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type) {}
+
+    // Glyph requests
+    virtual void onGlyphsLoaded(const FontStack&, const GlyphRange&) {}
+    virtual void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) {}
+    virtual void onGlyphsRequested(const FontStack&, const GlyphRange&) {}
+
+    // Tile requests
+    virtual void onTileRequested(const OverscaledTileID&) {}
+    virtual void onTileLoadedFromNetwork(const OverscaledTileID&) {}
+    virtual void onTileLoadedFromDisk(const OverscaledTileID&) {}
+    virtual void onTileFailedToLoad(const OverscaledTileID&) {}
+    virtual void onTileFinishedLoading(const OverscaledTileID&) {} // Client-side tile processing
+
+    // Sprite requests
+    virtual void onSpriteLoaded(const std::optional<style::Sprite>&) {}
+    virtual void onSpriteError(const std::optional<style::Sprite>&, std::exception_ptr) {}
+    virtual void onSpriteRequested(const std::optional<style::Sprite>&) {}
 };
 
 } // namespace mbgl

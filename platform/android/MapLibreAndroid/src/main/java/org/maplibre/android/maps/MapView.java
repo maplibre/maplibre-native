@@ -907,6 +907,258 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   /**
+   * Set a callback that's invoked before a shader is compiled.
+   *
+   * @param listener The callback that's invoked before a shader is compiled
+   */
+  public void addOnPreCompileShaderListener(MapView.onPreCompileShaderListener callback) {
+    mapChangeReceiver.addOnPreCompileShaderListener(callback);
+  }
+  
+  /**
+   * Removes a callback that's invoked before a shader is compiled.
+   *
+   * @param listener The callback that's invoked before a shader is compiled
+   */
+  public void removeOnPreCompileShaderListener(MapView.onPreCompileShaderListener callback) {
+    mapChangeReceiver.removeOnPreCompileShaderListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after a shader is compiled.
+   *
+   * @param listener The callback that's invoked after a shader is compiled
+   */
+  public void addOnPostCompileShaderListener(MapView.onPostCompileShaderListener callback) {
+    mapChangeReceiver.addOnPostCompileShaderListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a shader is compiled.
+   *
+   * @param listener The callback that's invoked after a shader is compiled
+   */
+  public void removeOnPostCompileShaderListener(MapView.onPostCompileShaderListener callback) {
+    mapChangeReceiver.removeOnPostCompileShaderListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after a shader failed to compile.
+   *
+   * @param listener The callback that's invoked after a shader failes to compile
+   */
+  public void addOnShaderCompileFailedListener(MapView.onShaderCompileFailedListener callback) {
+    mapChangeReceiver.addOnShaderCompileFailedListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a shader failed to compile.
+   *
+   * @param listener The callback that's invoked after a shader failes to compile
+   */
+  public void removeOnShaderCompileFailedListener(MapView.onShaderCompileFailedListener callback) {
+    mapChangeReceiver.removeOnShaderCompileFailedListener(callback);
+  }
+  
+  /**
+   * Set a callback that's invoked after a range of glyphs are loaded.
+   *
+   * @param listener The callback that's invoked after a range of glyphs are loaded
+   */
+  public void addOnGlyphsLoadedListener(MapView.onGlyphsLoadedListener callback) {
+    mapChangeReceiver.addOnGlyphsLoadedListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a range of glyphs are loaded.
+   *
+   * @param listener The callback that's invoked after a range of glyphs are loaded
+   */
+  public void removeOnGlyphsLoadedListener(MapView.onGlyphsLoadedListener callback) {
+    mapChangeReceiver.removeOnGlyphsLoadedListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after a range of glyphs fail to load.
+   *
+   * @param listener The callback that's invoked after a range of glyphs fail to load
+   */
+  public void addOnGlyphsErrorListener(MapView.onGlyphsErrorListener callback) {
+    mapChangeReceiver.addOnGlyphsErrorListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a range of glyphs fail to load.
+   *
+   * @param listener The callback that's invoked after a range of glyphs fail to load
+   */
+  public void removeOnGlyphsErrorListener(MapView.onGlyphsErrorListener callback) {
+    mapChangeReceiver.removeOnGlyphsErrorListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after a range of glyphs are requested.
+   *
+   * @param listener The callback that's invoked after a range of glyphs are requested
+   */
+  public void addOnGlyphsRequestedListener(MapView.onGlyphsRequestedListener callback) {
+    mapChangeReceiver.addOnGlyphsRequestedListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a range of glyphs are requested.
+   *
+   * @param listener The callback that's invoked after a range of glyphs are requested
+   */
+  public void removeOnGlyphsRequestedListener(MapView.onGlyphsRequestedListener callback) {
+    mapChangeReceiver.removeOnGlyphsRequestedListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after a tile is requested.
+   *
+   * @param listener The callback that's invoked after a tile is requested
+   */
+  public void addOnTileRequestedListener(MapView.onTileRequestedListener callback) {
+    mapChangeReceiver.addOnTileRequestedListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a tile is requested.
+   *
+   * @param listener The callback that's invoked after a tile is requested
+   */
+  public void removeOnTileRequestedListener(MapView.onTileRequestedListener callback) {
+    mapChangeReceiver.removeOnTileRequestedListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after a tile is loaded from the network.
+   *
+   * @param listener The callback that's invoked after a tile is loaded from the network
+   */
+  public void addOnTileLoadedFromNetworkListener(MapView.onTileLoadedFromNetworkListener callback) {
+    mapChangeReceiver.addOnTileLoadedFromNetworkListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a tile is loaded from the network.
+   *
+   * @param listener The callback that's invoked after a tile is loaded from the network
+   */
+  public void removeOnTileLoadedFromNetworkListener(MapView.onTileLoadedFromNetworkListener callback) {
+    mapChangeReceiver.removeOnTileLoadedFromNetworkListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after a tile is loaded from the disk cache.
+   *
+   * @param listener The callback that's invoked after a tile is loaded from the disk cache
+   */
+  public void addOnTileLoadedFromDiskListener(MapView.onTileLoadedFromDiskListener callback) {
+    mapChangeReceiver.addOnTileLoadedFromDiskListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a tile is loaded from the disk cache.
+   *
+   * @param listener The callback that's invoked after a tile is loaded from the disk cache
+   */
+  public void removeOnTileLoadedFromDiskListener(MapView.onTileLoadedFromDiskListener callback) {
+    mapChangeReceiver.removeOnTileLoadedFromDiskListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after a tile fails to load
+   *
+   * @param listener The callback that's invoked after a tile fails to load
+   */
+  public void addOnTileFailedToLoadListener(MapView.onTileFailedToLoadListener callback) {
+    mapChangeReceiver.addOnTileFailedToLoadListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a tile fails to load
+   *
+   * @param listener The callback that's invoked after a tile fails to load
+   */
+  public void removeOnTileFailedToLoadListener(MapView.onTileFailedToLoadListener callback) {
+    mapChangeReceiver.removeOnTileFailedToLoadListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after a tile is fully loaded and processed by the client.
+   *
+   * @param listener The callback that's invoked after a tile is fully loaded and processed by the client
+   */
+  public void addOnTileFinishedLoadingListener(MapView.onTileFinishedLoadingListener callback) {
+    mapChangeReceiver.addOnTileFinishedLoadingListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a tile is fully loaded and processed by the client.
+   *
+   * @param listener The callback that's invoked after a tile is fully loaded and processed by the client
+   */
+  public void removeOnTileFinishedLoadingListener(MapView.onTileFinishedLoadingListener callback) {
+    mapChangeReceiver.removeOnTileFinishedLoadingListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after a sprite is loaded.
+   *
+   * @param listener The callback that's invoked after a sprite is loaded
+   */
+  public void addOnSpriteLoadedListener(MapView.onSpriteLoadedListener callback) {
+    mapChangeReceiver.addOnSpriteLoadedListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a sprite is loaded.
+   *
+   * @param listener The callback that's invoked after a sprite is loaded
+   */
+  public void removeOnSpriteLoadedListener(MapView.onSpriteLoadedListener callback) {
+    mapChangeReceiver.removeOnSpriteLoadedListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after a sprite fails to laod.
+   *
+   * @param listener The callback that's invoked after a sprite fails to load
+   */
+  public void addOnSpriteErrorListener(MapView.onSpriteErrorListener callback) {
+    mapChangeReceiver.addOnSpriteErrorListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a sprite fails to laod.
+   *
+   * @param listener The callback that's invoked after a sprite fails to load
+   */
+  public void removeOnSpriteErrorListener(MapView.onSpriteErrorListener callback) {
+    mapChangeReceiver.removeOnSpriteErrorListener(callback);
+  }
+
+  /**
+   * Set a callback that's invoked after a sprite is requested.
+   *
+   * @param listener The callback that's invoked after a sprite is requested
+   */
+  public void addOnSpriteRequestedListener(MapView.onSpriteRequestedListener callback) {
+    mapChangeReceiver.addOnSpriteRequestedListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked after a sprite is requested.
+   *
+   * @param listener The callback that's invoked after a sprite is requested
+   */
+  public void removeOnSpriteRequestedListener(MapView.onSpriteRequestedListener callback) {
+    mapChangeReceiver.removeOnSpriteRequestedListener(callback);
+  }
+
+  /**
    * Interface definition for a callback to be invoked when the camera will change.
    * <p>
    * {@link MapView#addOnCameraWillChangeListener(OnCameraWillChangeListener)}
@@ -1121,6 +1373,243 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * @return true if image can be removed, false otherwise.
      */
     boolean onCanRemoveUnusedStyleImage(@NonNull String id);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked before a shader is compiled.
+   * <p>
+   * {@link MapView#addOnPreCompileShaderListener(OnPreCompileShaderListener)}
+   * </p>
+   */
+  public interface OnPreCompileShaderListener {
+    /**
+     * Called before a shader is compiled.
+     *
+     * @param id of a shader type enumeration. See `mbgl::shaders::BuiltIn` for a list of possible values.
+     * @param type of graphics backend the shader is being compiled for. See `mbgl::gfx::Backend::Type` for a list of possible values.
+     */
+    void onPreCompileShader(int id, int type);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a shader is compiled.
+   * <p>
+   * {@link MapView#addOnPostCompileShaderListener(OnPostCompileShaderListener)}
+   * </p>
+   */
+  public interface OnPostCompileShaderListener {
+    /**
+     * Called after a shader is compiled.
+     *
+     * @param id of a shader type enumeration. See `mbgl::shaders::BuiltIn` for a list of possible values.
+     * @param type of graphics backend the shader is being compiled for. See `mbgl::gfx::Backend::Type` for a list of possible values.
+     */
+    void onPostCompileShader(int id, int type);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a shader failed to compile.
+   * <p>
+   * {@link MapView#addOnShaderCompileFailedListener(OnShaderCompileFailedListener)}
+   * </p>
+   */
+  public interface OnShaderCompileFailedListener {
+    /**
+     * Called when a shader fails to compile.
+     *
+     * @param id of a shader type enumeration. See `mbgl::shaders::BuiltIn` for a list of possible values.
+     * @param type of graphics backend the shader is being compiled for. See `mbgl::gfx::Backend::Type` for a list of possible values.
+     */
+    void onShaderCompileFailed(int id, int type);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a range of glyphs are loaded.
+   * <p>
+   * {@link MapView#addOnGlyphsLoadedListener(OnGlyphsLoadedListener)}
+   * </p>
+   */
+  public interface OnGlyphsLoadedListener {
+    /**
+     * Called when a range of glyphs for a font stack are loaded.
+     *
+     * @param stack of font names.
+     * @param rangeStart of glyph indices being loaded.
+     * @param rangeEnd of glyph indices being loaded.
+     */
+    void onGlyphsLoaded(@NonNull List<String> stack, int rangeStart, int rangeEnd);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a range of glyphs fail to load.
+   * <p>
+   * {@link MapView#addOnGlyphsErrorListener(OnGlyphsErrorListener)}
+   * </p>
+   */
+  public interface OnGlyphsErrorListener {
+    /**
+     * Called when a range of glyphs for a font stack failed to load.
+     *
+     * @param stack of font names.
+     * @param rangeStart of glyph indices that failed to load.
+     * @param rangeEnd of glyph indices that failed to load.
+     */
+    void onGlyphsError(@NonNull List<String> stack, int rangeStart, int rangeEnd);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a range of glyphs are requested.
+   * <p>
+   * {@link MapView#addOnGlyphsRequestedListener(OnGlyphsRequestedListener)}
+   * </p>
+   */
+  public interface OnGlyphsRequestedListener {
+    /**
+     * Called when a range of glyphs for a font stack are requested.
+     *
+     * @param stack of font names.
+     * @param rangeStart of glyph indices that are being requested.
+     * @param rangeEnd of glyph indices that are being requested.
+     */
+    void onGlyphsRequested(@NonNull List<String> stack, int rangeStart, int rangeEnd);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a tile is requested.
+   * <p>
+   * {@link MapView#addOnTileRequestedListener(OnTileRequestedListener)}
+   * </p>
+   */
+  public interface OnTileRequestedListener {
+    /**
+     * Called when a tile is requested.
+     *
+     * @param x coordinate of the tile.
+     * @param y coordinate of the tile.
+     * @param z coordinate of the tile.
+     * @param overscaledZ coordinate of the tile.
+     */
+    void onTileRequested(int x, int y, int z, int overscaledZ);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a tile is loaded from the network.
+   * <p>
+   * {@link MapView#addOnTileLoadedFromNetworkListener(OnTileLoadedFromNetworkListener)}
+   * </p>
+   */
+  public interface OnTileLoadedFromNetworkListener {
+    /**
+     * Called when a tile is loaded from the network.
+     *
+     * @param x coordinate of the tile.
+     * @param y coordinate of the tile.
+     * @param z coordinate of the tile.
+     * @param overscaledZ coordinate of the tile.
+     */
+    void onTileLoadedFromNetwork(int x, int y, int z, int overscaledZ);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a tile is loaded from the disk cache.
+   * <p>
+   * {@link MapView#addOnTileLoadedFromDiskListener(OnTileLoadedFromDiskListener)}
+   * </p>
+   */
+  public interface OnTileLoadedFromDiskListener {
+    /**
+     * Called when a tile is loaded from the disk cache.
+     *
+     * @param x coordinate of the tile.
+     * @param y coordinate of the tile.
+     * @param z coordinate of the tile.
+     * @param overscaledZ coordinate of the tile.
+     */
+    void onTileLoadedFromDisk(int x, int y, int z, int overscaledZ);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a tile fails to load.
+   * <p>
+   * {@link MapView#addOnTileFailedToLoadListener(OnTileFailedToLoadListener)}
+   * </p>
+   */
+  public interface OnTileFailedToLoadListener {
+    /**
+     * Called when a tile fails to load.
+     *
+     * @param x coordinate of the tile.
+     * @param y coordinate of the tile.
+     * @param z coordinate of the tile.
+     * @param overscaledZ coordinate of the tile.
+     */
+    void onTileFailedToLoad(int x, int y, int z, int overscaledZ);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a tile is fully loaded and processed by the client.
+   * <p>
+   * {@link MapView#addOnTileFinishedLoadingListener(OnTileFinishedLoadingListener)}
+   * </p>
+   */
+  public interface OnTileFinishedLoadingListener {
+    /**
+     * Called when a tile is fully loaded and processed by the client.
+     *
+     * @param x coordinate of the tile.
+     * @param y coordinate of the tile.
+     * @param z coordinate of the tile.
+     * @param overscaledZ coordinate of the tile.
+     */
+    void onTileFinishedLoading(int x, int y, int z, int overscaledZ);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a sprite is requested.
+   * <p>
+   * {@link MapView#addOnSpriteLoadedListener(OnSpriteLoadedListener)}
+   * </p>
+   */
+  public interface OnSpriteLoadedListener {
+    /**
+     * Called when a sprite is loaded.
+     *
+     * @param id of the sprite.
+     * @param url of the sprite.
+     */
+    void onSpriteLoaded(@NonNull String id, @NonNull String url);
+  }
+
+  /**
+   * Interface definition for a callback to be invoked after a sprite fails to load.
+   * <p>
+   * {@link MapView#addOnSpriteErrorListener(OnSpriteErrorListener)}
+   * </p>
+   */
+  public interface OnSpriteErrorListener {
+    /**
+     * Called when a sprite fails to load.
+     *
+     * @param id of the sprite.
+     * @param url of the sprite.
+     */
+    void onSpriteError(@NonNull String id, @NonNull String url);
+  }
+  
+  /**
+   * Interface definition for a callback to be invoked after a sprite is requested.
+   * <p>
+   * {@link MapView#addOnSpriteRequestedListener(OnSpriteRequestedListener)}
+   * </p>
+   */
+  public interface OnSpriteRequestedListener {
+    /**
+     * Called when a sprite is requested.
+     *
+     * @param id of the sprite.
+     * @param url of the sprite.
+     */
+    void onSpriteRequested(@NonNull String id, @NonNull String url);
   }
 
   /**

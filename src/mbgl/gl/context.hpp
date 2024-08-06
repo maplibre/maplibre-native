@@ -47,6 +47,8 @@ public:
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
+    gfx::ContextObserver& getObserver() const { return *observer; }
+
     void beginFrame() override;
     void endFrame() override;
 

@@ -1187,6 +1187,104 @@ final class NativeMapView implements NativeMap {
     }
   }
 
+  @Keep
+  private void onPreCompileShader(int id, int type) {
+    if (stateCallback != null) {
+      stateCallback.onPreCompileShader(id, type);
+    }
+  }
+
+  @Keep
+  private void onPostCompileShader(int id, int type) {
+    if (stateCallback != null) {
+      stateCallback.onPostCompileShader(id, type);
+    }
+  }
+
+  @Keep
+  private void onShaderCompileFailed(int id, int type) {
+    if (stateCallback != null) {
+      stateCallback.onShaderCompileFailed(id, type);
+    }
+  }
+
+  @Keep
+  private void onGlyphsLoaded(List<String> stack, int rangeStart, int rangeEnd) {
+    if (stateCallback != null) {
+      stateCallback.onGlyphsLoaded(stack, rangeStart, rangeEnd);
+    }
+  }
+
+  @Keep
+  private void onGlyphsError(List<String> stack, int rangeStart, int rangeEnd) {
+    if (stateCallback != null) {
+      stateCallback.onGlyphsError(stack, rangeStart, rangeEnd);
+    }
+  }
+
+  @Keep
+  private void onGlyphsRequested(List<String> stack, int rangeStart, int rangeEnd) {
+    if (stateCallback != null) {
+      stateCallback.onGlyphsRequested(stack, rangeStart, rangeEnd);
+    }
+  }
+
+  @Keep
+  private void onTileRequested(int x, int y, int z, int overscaledZ) {
+    if (stateCallback != null) {
+      stateCallback.onTileRequested(x, y, z, overscaledZ);
+    }
+  }
+
+  @Keep
+  private void onTileLoadedFromNetwork(int x, int y, int z, int overscaledZ) {
+    if (stateCallback != null) {
+      stateCallback.onTileLoadedFromNetwork(x, y, z, overscaledZ);
+    }
+  }
+
+  @Keep
+  private void onTileLoadedFromDisk(int x, int y, int z, int overscaledZ) {
+    if (stateCallback != null) {
+      stateCallback.onTileLoadedFromDisk(x, y, z, overscaledZ);
+    }
+  }
+
+  @Keep
+  private void onTileFailedToLoad(int x, int y, int z, int overscaledZ) {
+    if (stateCallback != null) {
+      stateCallback.onTileFailedToLoad(x, y, z, overscaledZ);
+    }
+  }
+
+  @Keep
+  private void onTileFinishedLoading(int x, int y, int z, int overscaledZ) {
+    if (stateCallback != null) {
+      stateCallback.onTileFinishedLoading(x, y, z, overscaledZ);
+    }
+  }
+
+  @Keep
+  private void onSpriteLoaded(String id, String url) {
+    if (stateCallback != null) {
+      stateCallback.onSpriteLoaded(id, url);
+    }
+  }
+
+  @Keep
+  private void onSpriteError(String id, String url) {
+    if (stateCallback != null) {
+      stateCallback.onSpriteError(id, url);
+    }
+  }
+
+  @Keep
+  private void onSpriteRequested(String id, String url) {
+    if (stateCallback != null) {
+      stateCallback.onSpriteRequested(id, url);
+    }
+  }
+
   //
   // JNI methods
   //
@@ -1611,5 +1709,33 @@ final class NativeMapView implements NativeMap {
     void onStyleImageMissing(String imageId);
 
     boolean onCanRemoveUnusedStyleImage(String imageId);
+
+    void onPreCompileShader(int id, int type);
+
+    void onPostCompileShader(int id, int type);
+
+    void onShaderCompileFailed(int id, int type);
+
+    void onGlyphsLoaded(List<String> stack, int rangeStart, int rangeEnd);
+
+    void onGlyphsError(List<String> stack, int rangeStart, int rangeEnd);
+
+    void onGlyphsRequested(List<String> stack, int rangeStart, int rangeEnd);
+
+    void onTileRequested(int x, int y, int z, int overscaledZ);
+
+    void onTileLoadedFromNetwork(int x, int y, int z, int overscaledZ);
+
+    void onTileLoadedFromDisk(int x, int y, int z, int overscaledZ);
+
+    void onTileFailedToLoad(int x, int y, int z, int overscaledZ);
+
+    void onTileFinishedLoading(int x, int y, int z, int overscaledZ);
+
+    void onSpriteLoaded(String id, String url);
+    
+    void onSpriteError(String id, String url);
+
+    void onSpriteRequested(String id, String url);
   }
 }

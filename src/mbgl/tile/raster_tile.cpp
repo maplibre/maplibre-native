@@ -14,8 +14,11 @@
 
 namespace mbgl {
 
-RasterTile::RasterTile(const OverscaledTileID& id_, const TileParameters& parameters, const Tileset& tileset)
-    : Tile(Kind::Raster, id_),
+RasterTile::RasterTile(const OverscaledTileID& id_,
+                       const TileParameters& parameters,
+                       const Tileset& tileset,
+                       TileObserver* observer_)
+    : Tile(Kind::Raster, id_, observer_),
       loader(*this, id_, parameters, tileset),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
@@ -61,6 +64,10 @@ void RasterTile::onParsed(std::unique_ptr<RasterBucket> result, const uint64_t r
         }
         renderable = static_cast<bool>(bucket);
         observer->onTileChanged(*this);
+
+        if (!pending) {
+            observer->onTileFinishedLoading(*this);
+        }
     }
 }
 

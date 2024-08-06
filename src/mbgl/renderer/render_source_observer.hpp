@@ -13,6 +13,11 @@ public:
 
     virtual void onTileChanged(RenderSource&, const OverscaledTileID&) {}
     virtual void onTileError(RenderSource&, const OverscaledTileID&, std::exception_ptr) {}
+    virtual void onTileRequested(RenderSource&, const OverscaledTileID&) {};
+    virtual void onTileLoadedFromNetwork(RenderSource&, const OverscaledTileID&) {};
+    virtual void onTileLoadedFromDisk(RenderSource&, const OverscaledTileID&) {};
+    virtual void onTileFailedToLoad(RenderSource&, const OverscaledTileID&) {};
+    virtual void onTileFinishedLoading(RenderSource&, const OverscaledTileID&) {};
 };
 
 } // namespace mbgl
