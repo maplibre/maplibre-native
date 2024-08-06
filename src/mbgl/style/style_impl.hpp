@@ -118,6 +118,7 @@ private:
     // SpriteLoaderObserver implementation.
     void onSpriteLoaded(std::optional<style::Sprite> sprite, std::vector<Immutable<style::Image::Impl>>) override;
     void onSpriteError(std::optional<style::Sprite> sprite, std::exception_ptr) override;
+    void onSpriteRequested(const std::optional<style::Sprite>&) override;
 
     // SourceObserver implementation.
     void onSourceLoaded(Source&) override;

@@ -14,8 +14,8 @@
 
 namespace mbgl {
 
-RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_, const TileParameters& parameters, const Tileset& tileset)
-    : Tile(Kind::RasterDEM, id_),
+RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_, const TileParameters& parameters, const Tileset& tileset, TileObserver* observer)
+    : Tile(Kind::RasterDEM, id_, observer),
       loader(*this, id_, parameters, tileset),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
@@ -72,6 +72,10 @@ void RasterDEMTile::onParsed(std::unique_ptr<HillshadeBucket> result, const uint
         }
         renderable = static_cast<bool>(bucket);
         observer->onTileChanged(*this);
+
+        if (!pending) {
+            observer->onTileFinishedLoading(*this);
+        }
     }
 }
 

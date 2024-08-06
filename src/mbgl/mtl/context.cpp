@@ -87,12 +87,15 @@ BufferResource Context::createBuffer(
 // `NS::Object::sendMessage`, and the alignment rules are different.  We assume that, because
 // `NS::Object` does not use virtual methods and only serves as a way for C++ code to store
 // and pass ObjC `id`s to `objc_msgSend`, this won't cause any real problems.
-UniqueShaderProgram Context::createProgram(std::string name,
+UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
+                                           std::string name,
                                            const std::string_view source,
                                            const std::string_view vertexName,
                                            const std::string_view fragmentName,
                                            const ProgramParameters& programParameters,
                                            const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
+    observer->onPreCompileShader(shaderID, gfx::Backend::Type::Metal);
+
     const auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
     // No NSMutableDictionary?
@@ -142,6 +145,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
         const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();
         Log::Error(Event::Shader, name + " compile failed" + errStr);
+        observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal);
         assert(false);
         return nullptr;
     }
@@ -150,6 +154,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     MTLFunctionPtr vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
+        observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal);
         assert(false);
         return nullptr;
     }
@@ -161,13 +166,17 @@ UniqueShaderProgram Context::createProgram(std::string name,
         fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
         if (!fragmentFunction) {
             Log::Error(Event::Shader, name + " missing fragment function " + fragmentName.data());
+            observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal);
             assert(false);
             return nullptr;
         }
     }
 
-    return std::make_unique<ShaderProgram>(
+    auto shader = std::make_unique<ShaderProgram>(
         std::move(name), backend, std::move(vertexFunction), std::move(fragmentFunction));
+    observer->onPostCompileShader(shaderID, gfx::Backend::Type::Metal);
+
+    return shader;
 }
 
 MTLTexturePtr Context::createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const {

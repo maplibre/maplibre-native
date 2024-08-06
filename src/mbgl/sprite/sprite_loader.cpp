@@ -40,6 +40,8 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
         return;
     }
 
+    observer->onSpriteRequested(sprite);
+
     std::string id = sprite->id;
     std::string url = sprite->spriteURL;
 

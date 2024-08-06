@@ -21,6 +21,8 @@ public:
     virtual void onSpriteLoaded(std::optional<style::Sprite>, std::vector<Immutable<style::Image::Impl>>) {}
 
     virtual void onSpriteError(std::optional<style::Sprite>, std::exception_ptr) {}
+
+    virtual void onSpriteRequested(const std::optional<style::Sprite>&) {}
 };
 
 } // namespace mbgl

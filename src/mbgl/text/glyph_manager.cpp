@@ -76,6 +76,8 @@ void GlyphManager::requestRange(GlyphRequest& request,
         return;
     }
 
+    observer->onGlyphsRequested(fontStack, range);
+
     request.req = fileSource.request(
         Resource::glyphs(glyphURL, fontStack, range),
         [this, fontStack, range](const Response& res) { processResponse(res, fontStack, range); });

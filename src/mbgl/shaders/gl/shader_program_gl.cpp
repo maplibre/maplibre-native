@@ -118,23 +118,33 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
     const std::string& vertexSource,
     const std::string& fragmentSource,
     const std::string& additionalDefines) noexcept(false) {
-    // throws on compile error
-    auto vertProg = context.createShader(
-        ShaderType::Vertex,
-        std::initializer_list<const char*>{
-            "#version 300 es\n",
+
+    try {
+        context.getObserver().onPreCompileShader(programParameters.getProgramType(), gfx::Backend::Type::OpenGL);
+
+        // throws on compile error
+        auto vertProg = context.createShader(
+            ShaderType::Vertex,
+            std::initializer_list<const char*>{
+                "#version 300 es\n",
+                programParameters.getDefinesString().c_str(),
+                additionalDefines.c_str(),
+                shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::vertex,
+                vertexSource.c_str()});
+        auto fragProg = context.createShader(
+            ShaderType::Fragment,
+            {"#version 300 es\n",
             programParameters.getDefinesString().c_str(),
             additionalDefines.c_str(),
-            shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::vertex,
-            vertexSource.c_str()});
-    auto fragProg = context.createShader(
-        ShaderType::Fragment,
-        {"#version 300 es\n",
-         programParameters.getDefinesString().c_str(),
-         additionalDefines.c_str(),
-         shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::fragment,
-         fragmentSource.c_str()});
-    auto program = context.createProgram(vertProg, fragProg, firstAttribName.data());
+            shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::fragment,
+            fragmentSource.c_str()});
+        auto program = context.createProgram(vertProg, fragProg, firstAttribName.data());
+
+        context.getObserver().onPostCompileShader(programParameters.getProgramType(), gfx::Backend::Type::OpenGL);
+    } catch (const std::exception& e) {
+        context.getObserver().onShaderCompileFailed(programParameters.getProgramType(), gfx::Backend::Type::OpenGL);
+        std::rethrow_exception(std::current_exception());
+    }
 
     UniformBlockArrayGL uniformBlocks;
     for (const auto& blockInfo : uniformBlocksInfo) {
