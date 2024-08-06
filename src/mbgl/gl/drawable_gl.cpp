@@ -159,7 +159,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 #endif
 
     const bool build = vertexAttributes &&
-                       (vertexAttributes->isModifiedSince(attributeUpdateTime) ||
+                       (vertexAttributes->isModifiedAfter(attributeUpdateTime) ||
                         std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
                             return !static_cast<const DrawSegmentGL&>(*seg).getVertexArray().isValid();
                         }));

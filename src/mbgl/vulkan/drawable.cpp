@@ -155,6 +155,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                     shader->getVertexAttributes(),
                                                                     *vertexAttributes,
                                                                     usage,
+                                                                    attributeUpdateTime,
                                                                     vertexBuffers);
 
         vertexAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
@@ -165,7 +166,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     // build instance buffer
-    const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isModifiedSince(attributeUpdateTime));
+    const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isModifiedAfter(attributeUpdateTime));
 
     if (buildInstanceBuffer) {
         // Build instance attribute buffers

@@ -550,7 +550,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         impl->indexes->setBuffer(std::move(buffer));
     }
 
-    const bool buildAttribs = !vertexAttributes || vertexAttributes->isModifiedSince(attributeUpdateTime) ||
+    const bool buildAttribs = !vertexAttributes || vertexAttributes->isModifiedAfter(attributeUpdateTime) ||
                               !impl->vertexDesc;
 
     if (buildAttribs) {
@@ -632,7 +632,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     // build instance buffer
-    const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isModifiedSince(attributeUpdateTime));
+    const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isModifiedAfter(attributeUpdateTime));
 
     if (buildInstanceBuffer) {
         // Build instance attribute buffers

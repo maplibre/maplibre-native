@@ -183,7 +183,7 @@ public:
     /// @brief Set dirty state
     void setDirty(bool value = true) { dirty = value; }
 
-    bool isModifiedSince(std::chrono::duration<double> time) const {
+    bool isModifiedAfter(std::chrono::duration<double> time) const {
         if (sharedRawData) {
             return sharedRawData->isModifiedAfter(time);
         }
@@ -317,9 +317,9 @@ public:
                                                 std::size_t count = 0);
 
     /// Indicates whether any values have changed
-    bool isModifiedSince(std::chrono::duration<double> time) const {
+    bool isModifiedAfter(std::chrono::duration<double> time) const {
         return std::any_of(
-            attrs.begin(), attrs.end(), [&](const auto& attr) { return attr && attr->isModifiedSince(time); });
+            attrs.begin(), attrs.end(), [&](const auto& attr) { return attr && attr->isModifiedAfter(time); });
     }
 
     /// Clear the collection

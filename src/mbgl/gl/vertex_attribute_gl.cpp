@@ -162,7 +162,7 @@ const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute&
     const auto count = attr.getCount();
     const auto stride_ = getStride(type);
     auto& rawData = attr.getRawData();
-    if (attr.isModifiedSince(lastUpdate) || rawData.size() != count * stride_) {
+    if (attr.isModifiedAfter(lastUpdate) || rawData.size() != count * stride_) {
         rawData.resize(stride_ * count);
 
         if (!rawData.empty()) {
