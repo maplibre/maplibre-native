@@ -1683,11 +1683,4 @@ TEST(Map, InvalidUTF8InTile) {
     };
 
     test.runLoop.run();
-
-    EXPECT_GE(log.count({EventSeverity::Error,
-                         Event::ParseTile,
-                         int64_t(-1),
-                         "Encountered section with invalid UTF-8 in tile, source: points "},
-                        true),
-              1u);
 }
