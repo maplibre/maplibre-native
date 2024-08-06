@@ -4,6 +4,8 @@
 #include <mbgl/gl/renderer_backend.hpp>
 #include "android_renderer_backend.hpp"
 
+#include <EGL/egl.h>
+
 namespace mbgl {
 namespace android {
 
@@ -11,7 +13,7 @@ class AndroidGLRendererBackend : public AndroidRendererBackend,
                                  public gl::RendererBackend,
                                  public mbgl::gfx::Renderable {
 public:
-    AndroidGLRendererBackend();
+    AndroidGLRendererBackend(bool multiThreadedGpuResourceUpload);
     ~AndroidGLRendererBackend() override;
 
     mbgl::gfx::RendererBackend& getImpl() override { return *this; }
@@ -23,6 +25,10 @@ public:
 
     void resizeFramebuffer(int width, int height) override;
     PremultipliedImage readFramebuffer() override;
+
+    bool supportFreeThreadedUpload() const override;
+    std::shared_ptr<gl::UploadThreadContext> createUploadThreadContext() override;
+    void initFreeThreadedUpload() override;
 
     // mbgl::gfx::RendererBackend implementation
 public:
@@ -40,6 +46,33 @@ protected:
 protected:
     mbgl::gl::ProcAddress getExtensionFunctionPointer(const char*) override;
     void updateAssumedState() override;
+
+private:
+    int eglClientVersion = 0;
+    EGLContext eglMainCtx = EGL_NO_CONTEXT;
+    EGLDisplay eglDsply = EGL_NO_DISPLAY;
+    EGLSurface eglSurf = EGL_NO_SURFACE;
+    EGLConfig eglConfig;
+    bool multiThreadedGpuResourceUpload = false;
+};
+
+class AndroidUploadThreadContext : public gl::UploadThreadContext {
+public:
+    AndroidUploadThreadContext(AndroidRendererBackend&, EGLDisplay, EGLConfig, EGLContext, int);
+    ~AndroidUploadThreadContext() override;
+    void createContext() override;
+    void destroyContext() override;
+    void bindContext() override;
+    void unbindContext() override;
+
+private:
+    AndroidRendererBackend& backend;
+    EGLDisplay display = EGL_NO_DISPLAY;
+    EGLConfig config;
+    EGLContext mainContext = EGL_NO_CONTEXT;
+    EGLContext sharedContext = EGL_NO_CONTEXT;
+    EGLSurface surface = EGL_NO_SURFACE;
+    int clientVersion = 0;
 };
 
 } // namespace android

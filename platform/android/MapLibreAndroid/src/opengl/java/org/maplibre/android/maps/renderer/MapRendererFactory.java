@@ -15,12 +15,15 @@ import org.maplibre.android.maps.renderer.textureview.TextureViewMapRenderer;
 
 @Keep
 public class MapRendererFactory {
-  public static TextureViewMapRenderer newTextureViewMapRenderer(@NonNull Context context, TextureView textureView,
-                                                                 String localFontFamily, boolean translucentSurface,
+  public static TextureViewMapRenderer newTextureViewMapRenderer(@NonNull Context context,
+                                                                 TextureView textureView,
+                                                                 String localFontFamily,
+                                                                 boolean multiThreadedGpuResourceUpload,
+                                                                 boolean translucentSurface,
                                                                  Runnable initCallback) {
 
     TextureViewMapRenderer mapRenderer = new TextureViewMapRenderer(context, textureView,
-            localFontFamily, translucentSurface) {
+            localFontFamily, multiThreadedGpuResourceUpload, translucentSurface) {
       @Override
       protected void onSurfaceCreated(Surface surface) {
         initCallback.run();
@@ -32,13 +35,16 @@ public class MapRendererFactory {
     return mapRenderer;
   }
 
-  public static SurfaceViewMapRenderer newSurfaceViewMapRenderer(@NonNull Context context, String localFontFamily,
-                                                                 boolean renderSurfaceOnTop, Runnable initCallback) {
+  public static SurfaceViewMapRenderer newSurfaceViewMapRenderer(@NonNull Context context,
+                                                                 String localFontFamily,
+                                                                 boolean multiThreadedGpuResourceUpload,
+                                                                 boolean renderSurfaceOnTop,
+                                                                 Runnable initCallback) {
 
     MapLibreGLSurfaceView surfaceView = new MapLibreGLSurfaceView(context);
     surfaceView.setZOrderMediaOverlay(renderSurfaceOnTop);
 
-    return new GLSurfaceViewMapRenderer(context, surfaceView, localFontFamily) {
+    return new GLSurfaceViewMapRenderer(context, surfaceView, localFontFamily, multiThreadedGpuResourceUpload) {
       @Override
       public void onSurfaceCreated(Surface surface) {
         initCallback.run();

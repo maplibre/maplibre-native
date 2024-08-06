@@ -12,6 +12,7 @@
 #endif
 
 #include <cassert>
+#include <stdexcept>
 
 namespace mbgl {
 namespace gl {
@@ -148,6 +149,17 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::SymbolTextAndIconShader>(shaders, programParameters);
 }
 #endif
+
+gl::ResourceUploadThreadPool& RendererBackend::getResourceUploadThreadPool() {
+    if (!supportFreeThreadedUpload()) {
+        throw std::runtime_error("Parallel resource upload is not supported on this backend");
+    }
+    if (!resourceUploadThreadPool) {
+        initFreeThreadedUpload();
+        resourceUploadThreadPool = std::make_unique<gl::ResourceUploadThreadPool>(*this);
+    }
+    return *resourceUploadThreadPool;
+}
 
 } // namespace gl
 } // namespace mbgl

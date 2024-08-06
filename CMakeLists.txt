@@ -1083,6 +1083,8 @@ if(MLN_WITH_OPENGL)
         SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/attribute.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/buffer_resource.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/command_encoder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.cpp
@@ -1111,6 +1113,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderer_backend.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/resource_pool.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/resource_pool.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/resource_upload_thread_pool.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/resource_upload_thread_pool.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/state.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.hpp

@@ -94,6 +94,8 @@ public class MapLibreMapOptions implements Parcelable {
 
   private boolean crossSourceCollisions = true;
 
+  private boolean multiThreadedGpuResourceUploadEnabled = false;
+
   /**
    * Creates a new MapLibreMapOptions object.
    *
@@ -151,6 +153,8 @@ public class MapLibreMapOptions implements Parcelable {
     pixelRatio = in.readFloat();
     foregroundLoadColor = in.readInt();
     crossSourceCollisions = in.readByte() != 0;
+
+    multiThreadedGpuResourceUploadEnabled = in.readByte() != 0;
   }
 
   /**
@@ -731,6 +735,18 @@ public class MapLibreMapOptions implements Parcelable {
   }
 
   /**
+   * Specifies if multi-threaded Gpu Resource Uploads are enabled for a map view.
+   *
+   * @param enabled True and multi-threaded Gpu Resource Uploads will be enabled
+   * @return This
+   */
+  @NonNull
+  public MapLibreMapOptions multiThreadedGpuResourceUploadEnabled(boolean enabled) {
+    multiThreadedGpuResourceUploadEnabled = enabled;
+    return this;
+  }
+
+  /**
    * Enable local ideograph font family, defaults to true.
    *
    * @param enabled true to enable, false to disable
@@ -1144,6 +1160,15 @@ public class MapLibreMapOptions implements Parcelable {
     return pixelRatio;
   }
 
+  /**
+   * Get the current multi-threaded Gpu Resource Upload state for a map view.
+   *
+   * @return True multi-threaded Gpu Resource Uploads are enabled
+   */
+  public boolean getMultiThreadedGpuResourceUploadEnabled() {
+    return multiThreadedGpuResourceUploadEnabled;
+  }
+
   public static final Parcelable.Creator<MapLibreMapOptions> CREATOR = new Parcelable.Creator<MapLibreMapOptions>() {
     public MapLibreMapOptions createFromParcel(@NonNull Parcel in) {
       return new MapLibreMapOptions(in);
@@ -1205,6 +1230,8 @@ public class MapLibreMapOptions implements Parcelable {
     dest.writeFloat(pixelRatio);
     dest.writeInt(foregroundLoadColor);
     dest.writeByte((byte) (crossSourceCollisions ? 1 : 0));
+
+    dest.writeByte((byte) (multiThreadedGpuResourceUploadEnabled ? 1 : 0));
   }
 
   @Override
@@ -1325,7 +1352,11 @@ public class MapLibreMapOptions implements Parcelable {
       return false;
     }
 
-    return false;
+    if (multiThreadedGpuResourceUploadEnabled != options.multiThreadedGpuResourceUploadEnabled) {
+      return false;
+    }
+
+    return true;
   }
 
   @Override
@@ -1372,6 +1403,7 @@ public class MapLibreMapOptions implements Parcelable {
     result = 31 * result + Arrays.hashCode(localIdeographFontFamilies);
     result = 31 * result + (int) pixelRatio;
     result = 31 * result + (crossSourceCollisions ? 1 : 0);
+    result = 31 * result + (multiThreadedGpuResourceUploadEnabled ? 1 : 0);
     return result;
   }
 }
