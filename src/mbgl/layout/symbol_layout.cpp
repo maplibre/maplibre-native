@@ -83,7 +83,7 @@ inline Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> createLayout(
 SymbolLayout::SymbolLayout(const BucketParameters& parameters,
                            const std::vector<Immutable<style::LayerProperties>>& layers,
                            std::unique_ptr<GeometryTileLayer> sourceLayer_,
-                           const LayoutParameters& layoutParameters) noexcept try
+                           const LayoutParameters& layoutParameters)
     : bucketLeaderID(layers.front()->baseImpl->id),
       sourceLayer(std::move(sourceLayer_)),
       overscaling(static_cast<float>(parameters.tileID.overscaleFactor())),
@@ -216,9 +216,6 @@ SymbolLayout::SymbolLayout(const BucketParameters& parameters,
     if (layout->get<SymbolPlacement>() == SymbolPlacementType::Line) {
         util::mergeLines(features);
     }
-} catch (...) {
-    // this function is not supposed to throw
-    // ignore exception
 }
 
 bool SymbolLayout::hasDependencies() const {
