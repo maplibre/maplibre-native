@@ -54,7 +54,7 @@ public:
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
     void onRegisterShaders(gfx::ShaderRegistry&) final;
-    
+
     void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type) final;
     void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type) final;
     void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type) final;

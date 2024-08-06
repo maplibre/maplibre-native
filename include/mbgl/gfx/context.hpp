@@ -70,9 +70,7 @@ public:
     Context& operator=(const Context& other) = delete;
     virtual ~Context() = default;
 
-    virtual void setObserver(ContextObserver* observer_) {
-        observer = observer_ ? observer_ : &nullObserver;
-    }
+    virtual void setObserver(ContextObserver* observer_) { observer = observer_ ? observer_ : &nullObserver; }
 
     virtual void beginFrame() = 0;
     virtual void endFrame() = 0;

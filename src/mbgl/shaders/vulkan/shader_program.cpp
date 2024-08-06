@@ -26,8 +26,7 @@ namespace mbgl {
 
 namespace vulkan {
 
-ShaderProgram::ShaderProgram(
-                             shaders::BuiltIn shaderID,
+ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
                              const std::string& name,
                              const std::string_view& vertex,
                              const std::string_view& fragment,

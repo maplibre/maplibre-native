@@ -118,7 +118,6 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
     const std::string& vertexSource,
     const std::string& fragmentSource,
     const std::string& additionalDefines) noexcept(false) {
-
     try {
         context.getObserver().onPreCompileShader(programParameters.getProgramType(), gfx::Backend::Type::OpenGL);
 
@@ -134,10 +133,10 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         auto fragProg = context.createShader(
             ShaderType::Fragment,
             {"#version 300 es\n",
-            programParameters.getDefinesString().c_str(),
-            additionalDefines.c_str(),
-            shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::fragment,
-            fragmentSource.c_str()});
+             programParameters.getDefinesString().c_str(),
+             additionalDefines.c_str(),
+             shaders::ShaderSource<shaders::BuiltIn::Prelude, gfx::Backend::Type::OpenGL>::fragment,
+             fragmentSource.c_str()});
         auto program = context.createProgram(vertProg, fragProg, firstAttribName.data());
 
         context.getObserver().onPostCompileShader(programParameters.getProgramType(), gfx::Backend::Type::OpenGL);

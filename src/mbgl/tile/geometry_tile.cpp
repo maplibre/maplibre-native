@@ -165,7 +165,10 @@ const LayerRenderData* GeometryTileRenderData::getLayerRenderData(const style::L
    that could flag the tile as non-pending too early.
  */
 
-GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, const TileParameters& parameters, TileObserver* observer_)
+GeometryTile::GeometryTile(const OverscaledTileID& id_,
+                           std::string sourceID_,
+                           const TileParameters& parameters,
+                           TileObserver* observer_)
     : Tile(Kind::Geometry, id_, observer_),
       ImageRequestor(parameters.imageManager),
       sourceID(std::move(sourceID_)),

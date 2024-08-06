@@ -14,7 +14,10 @@
 
 namespace mbgl {
 
-RasterTile::RasterTile(const OverscaledTileID& id_, const TileParameters& parameters, const Tileset& tileset, TileObserver* observer)
+RasterTile::RasterTile(const OverscaledTileID& id_,
+                       const TileParameters& parameters,
+                       const Tileset& tileset,
+                       TileObserver* observer)
     : Tile(Kind::Raster, id_, observer),
       loader(*this, id_, parameters, tileset),
       threadPool(parameters.threadPool),

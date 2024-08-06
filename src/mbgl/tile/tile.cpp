@@ -82,5 +82,4 @@ void Tile::onTileFailedToLoad() {
     observer->onTileFailedToLoad(*this);
 };
 
-
 } // namespace mbgl

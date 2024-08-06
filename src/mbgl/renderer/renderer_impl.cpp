@@ -80,7 +80,6 @@ void Renderer::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID, gfx::Backe
     observer->onShaderCompileFailed(shaderID, type);
 }
 
-
 void Renderer::Impl::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }

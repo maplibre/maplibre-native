@@ -60,9 +60,9 @@ public:
 
     // Entry point for custom shader registration
     virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
-    virtual void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type) {};
-    virtual void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type) {};
-    virtual void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type) {};
+    virtual void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type){};
+    virtual void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type){};
+    virtual void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type){};
 
     // Glyph loading
     virtual void onGlyphsLoaded(const FontStack&, const GlyphRange&) {}

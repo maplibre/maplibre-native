@@ -259,7 +259,8 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
                                            const ProgramParameters& programParameters,
                                            const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
     observer->onPreCompileShader(shaderID, gfx::Backend::Type::Metal);
-    auto program = std::make_unique<ShaderProgram>(shaderID, name, vertex, fragment, programParameters, additionalDefines, backend, *observer);
+    auto program = std::make_unique<ShaderProgram>(
+        shaderID, name, vertex, fragment, programParameters, additionalDefines, backend, *observer);
     observer->onPostCompileShader(shaderID, gfx::Backend::Type::Metal);
     return program;
 }

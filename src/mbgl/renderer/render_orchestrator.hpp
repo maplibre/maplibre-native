@@ -171,7 +171,7 @@ private:
     void onGlyphsLoaded(const FontStack&, const GlyphRange&) override;
     void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) override;
     void onGlyphsRequested(const FontStack&, const GlyphRange&) override;
-    
+
     // RenderSourceObserver implementation.
     void onTileChanged(RenderSource&, const OverscaledTileID&) override;
     void onTileError(RenderSource&, const OverscaledTileID&, std::exception_ptr) override;

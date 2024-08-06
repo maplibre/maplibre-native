@@ -159,7 +159,6 @@ void Map::Impl::onSpriteRequested(const std::optional<style::Sprite>& sprite) {
     observer.onSpriteRequested(sprite);
 }
 
-
 // MARK: - Map::Impl RendererObserver
 
 void Map::Impl::onInvalidate() {
@@ -288,6 +287,5 @@ void Map::Impl::onTileFailedToLoad(const OverscaledTileID& id) {
 void Map::Impl::onTileFinishedLoading(const OverscaledTileID& id) {
     observer.onTileFinishedLoading(id);
 }
-
 
 } // namespace mbgl

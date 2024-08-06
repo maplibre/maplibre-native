@@ -168,7 +168,7 @@ void TileLoader<T>::loadedData(const Response& res, Resource::LoadingMethod meth
         tile.onTileFailedToLoad();
         return;
     }
-    
+
     if (method == Resource::LoadingMethod::NetworkOnly) {
         tile.onTileLoadedFromNetwork();
     } else if (method == Resource::LoadingMethod::CacheOnly) {
