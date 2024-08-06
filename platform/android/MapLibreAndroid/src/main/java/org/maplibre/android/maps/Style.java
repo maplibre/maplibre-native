@@ -604,7 +604,9 @@ public class Style {
                              @NonNull List<ImageStretches> stretchY,
                              @Nullable ImageContent content) {
     validateState("addImages");
-    bitmapImageConversionTask.execute(Builder.ImageWrapper.convertToImageArray(images, sdf, stretchX, stretchY, content));
+    bitmapImageConversionTask.execute(
+            Builder.ImageWrapper.convertToImageArray(images, sdf, stretchX, stretchY, content)
+    );
   }
 
   /**
