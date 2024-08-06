@@ -17,7 +17,6 @@ import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.log.Logger;
 import org.maplibre.android.util.TileServerOptions;
 import org.maplibre.android.utils.CheckFileWritePermissionTask;
-import org.maplibre.android.utils.FileUtils;
 import org.maplibre.android.utils.ThreadUtils;
 
 import java.io.File;
