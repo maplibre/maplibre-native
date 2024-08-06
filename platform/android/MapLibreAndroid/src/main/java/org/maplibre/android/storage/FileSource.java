@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Environment;
 
 import androidx.annotation.Keep;
@@ -17,12 +16,16 @@ import org.maplibre.android.MapLibre;
 import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.log.Logger;
 import org.maplibre.android.util.TileServerOptions;
+import org.maplibre.android.utils.CheckFileWritePermissionTask;
 import org.maplibre.android.utils.FileUtils;
 import org.maplibre.android.utils.ThreadUtils;
 
 import java.io.File;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import kotlin.Unit;
+import kotlinx.coroutines.CoroutineScope;
 
 /**
  * Holds a central reference to the core's DefaultFileSource for as long as
@@ -105,7 +108,7 @@ public class FileSource {
    * @return the files directory path
    */
   @NonNull
-  private static String getCachePath(@NonNull Context context) {
+  static String getCachePath(@NonNull Context context) {
     SharedPreferences preferences = context.getSharedPreferences(
       MapLibreConstants.MAPLIBRE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
     String cachePath = preferences.getString(MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH, null);
@@ -197,31 +200,11 @@ public class FileSource {
     ThreadUtils.checkThread(TAG);
     lockPathLoaders();
     if (resourcesCachePath == null || internalCachePath == null) {
-      new FileDirsPathsTask().execute(context);
-    }
-  }
-
-  private static class FileDirsPathsTask extends AsyncTask<Context, Void, String[]> {
-
-    @Override
-    protected void onCancelled() {
-      unlockPathLoaders();
-    }
-
-    @NonNull
-    @Override
-    protected String[] doInBackground(Context... contexts) {
-      return new String[] {
-        getCachePath(contexts[0]),
-        contexts[0].getCacheDir().getAbsolutePath()
-      };
-    }
-
-    @Override
-    protected void onPostExecute(String[] paths) {
-      resourcesCachePath = paths[0];
-      internalCachePath = paths[1];
-      unlockPathLoaders();
+      new FileDirsPathsTask((path1, path2) -> {
+        resourcesCachePath = path1;
+        internalCachePath = path2;
+        return Unit.INSTANCE;
+      }).execute(context);
     }
   }
 
@@ -269,29 +252,11 @@ public class FileSource {
    * so it needs to be wrapped in a weak reference or released on the client side if necessary.
    * </p>
    *
-   * @param context  the context of the path
    * @param path     the new database path
    * @param callback the callback to obtain the result
-   * @deprecated Use {@link #setResourcesCachePath(String, ResourcesCachePathChangeCallback)}
    */
-  @Deprecated
-  public static void setResourcesCachePath(@NonNull final Context context,
+  public static void setResourcesCachePath(@NonNull final CoroutineScope scope,
                                            @NonNull final String path,
-                                           @NonNull final ResourcesCachePathChangeCallback callback) {
-    setResourcesCachePath(path, callback);
-  }
-
-  /**
-   * Changes the path of the resources cache database.
-   * <p>
-   * The callback reference is <b>strongly kept</b> throughout the process,
-   * so it needs to be wrapped in a weak reference or released on the client side if necessary.
-   * </p>
-   *
-   * @param path     the new database path
-   * @param callback the callback to obtain the result
-   */
-  public static void setResourcesCachePath(@NonNull final String path,
                                            @NonNull final ResourcesCachePathChangeCallback callback) {
     final Context applicationContext = MapLibre.getApplicationContext();
     final FileSource fileSource = FileSource.getInstance(applicationContext);
@@ -300,23 +265,21 @@ public class FileSource {
       // no need to change the path
       callback.onSuccess(path);
     } else {
-      new FileUtils.CheckFileWritePermissionTask(new FileUtils.OnCheckFileWritePermissionListener() {
-        @Override
-        public void onWritePermissionGranted() {
+      new CheckFileWritePermissionTask(scope, (writable, error) -> {
+        if (error != null) {
+          Logger.e(TAG, "Path is not writable: " + path, error);
+          callback.onError("Path is not writable: " + path);
+        } else if (writable) {
           final SharedPreferences.Editor editor =
             applicationContext.getSharedPreferences(MapLibreConstants.MAPLIBRE_SHARED_PREFERENCES,
               Context.MODE_PRIVATE).edit();
           editor.putString(MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH, path);
           editor.apply();
           internalSetResourcesCachePath(applicationContext, path, callback);
+        } else {
+          callback.onError("Path is not writable: " + path);
         }
-
-        @Override
-        public void onError() {
-          String message = "Path is not writable: " + path;
-          Logger.e(TAG, message);
-          callback.onError(message);
-        }
+        return Unit.INSTANCE;
       }).execute(new File(path));
     }
   }
@@ -363,7 +326,7 @@ public class FileSource {
     resourcesCachePathLoaderLock.lock();
   }
 
-  private static void unlockPathLoaders() {
+  static void unlockPathLoaders() {
     resourcesCachePathLoaderLock.unlock();
     internalCachePathLoaderLock.unlock();
   }

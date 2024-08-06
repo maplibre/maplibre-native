@@ -10,6 +10,7 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.coroutineScope
 import org.maplibre.android.log.Logger
 import org.maplibre.android.offline.OfflineManager
 import org.maplibre.android.offline.OfflineRegion
@@ -62,7 +63,7 @@ class ChangeResourcesCachePathActivity :
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         binding.listView.onItemClickListener = null
         val path: String = adapter.getItem(position) as String
-        FileSource.setResourcesCachePath(path, callback)
+        FileSource.setResourcesCachePath(lifecycle.coroutineScope, path, callback)
     }
 
     override fun onError(message: String) {

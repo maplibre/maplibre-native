@@ -1,5 +1,6 @@
 package org.maplibre.android.testapp.storage
 
+import androidx.lifecycle.lifecycleScope
 import androidx.test.annotation.UiThreadTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
@@ -68,6 +69,7 @@ class FileSourceStandaloneTest : AppCenter() {
         val secondLatch = CountDownLatch(1)
         rule.activity.runOnUiThread {
             FileSource.setResourcesCachePath(
+                rule.activity.lifecycleScope,
                 fileSourceTestUtils.testPath,
                 object : FileSource.ResourcesCachePathChangeCallback {
                     override fun onSuccess(path: String) {
@@ -82,6 +84,7 @@ class FileSourceStandaloneTest : AppCenter() {
             )
 
             FileSource.setResourcesCachePath(
+                rule.activity.lifecycleScope,
                 fileSourceTestUtils.testPath2,
                 object : FileSource.ResourcesCachePathChangeCallback {
                     override fun onSuccess(path: String) {
