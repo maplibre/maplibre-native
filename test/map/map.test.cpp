@@ -1642,6 +1642,8 @@ TEST(Map, StencilOverflow) {
 }
 
 TEST(Map, InvalidUTF8InTile) {
+    FixtureLog log;
+
     MapTest<> test{1, MapMode::Continuous};
 
     test.fileSource->tileResponse = [&](const Resource&) {
@@ -1665,9 +1667,9 @@ TEST(Map, InvalidUTF8InTile) {
         "id": "mountain_peak",
         "type": "symbol",
         "source": "invalidutf8",
-        "source-layer": "test",
+        "source-layer": "points",
         "layout": {
-            "text-field": "{name:latin} {name:nonlatin}\n{ele} m\n▲"
+            "text-field": "{name}"
         }
       }]
     })STYLE");
@@ -1681,4 +1683,11 @@ TEST(Map, InvalidUTF8InTile) {
     };
 
     test.runLoop.run();
+
+    EXPECT_GE(log.count({EventSeverity::Error,
+                         Event::ParseTile,
+                         int64_t(-1),
+                         "Encountered section with invalid UTF-8 in tile, source: points "},
+                        true),
+              1u);
 }
