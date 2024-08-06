@@ -25,7 +25,7 @@ const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAtt
                     attrib.rawData.data(), attrib.rawData.size(), usage, false);
                 attrib.setBuffer(std::move(buffer));
                 attrib.setRawData({});
-                attrib.setDirty(false);
+                attrib_.setDirty(false);
             } else {
                 assert(false);
             }

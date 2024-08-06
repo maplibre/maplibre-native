@@ -84,8 +84,7 @@ struct VertexBuffer : public gfx::VertexBufferBase {
 static const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 
 const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec,
-                                                             const gfx::BufferUsageType usage,
-                                                             const std::chrono::duration<double> lastUpdate) {
+                                                             const gfx::BufferUsageType usage) {
     if (vec) {
         const auto* rawBufPtr = vec->getRawData();
         const auto rawBufSize = vec->getRawCount() * vec->getRawSize();
