@@ -157,7 +157,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::VertexAttributeArray& defaults,
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
-    const std::chrono::duration<double> lastUpdate,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) {
     MLN_TRACE_FUNC();
 
