@@ -17,8 +17,9 @@ public:
     AndroidRendererBackend& operator=(const AndroidRendererBackend&) = delete;
     virtual ~AndroidRendererBackend() = default;
 
-    static std::unique_ptr<AndroidRendererBackend> Create(ANativeWindow* window) {
-        return mbgl::gfx::Backend::Create<AndroidRendererBackend, ANativeWindow*>(window);
+    static std::unique_ptr<AndroidRendererBackend> Create(ANativeWindow* window, bool multiThreadedGpuResourceUpload) {
+        return mbgl::gfx::Backend::Create<AndroidRendererBackend, ANativeWindow*, bool>(window,
+                                                                                        multiThreadedGpuResourceUpload);
     }
     virtual mbgl::gfx::RendererBackend& getImpl() = 0;
 

@@ -12,6 +12,7 @@
 #include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/programs/segment.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #include <cstdint>
@@ -22,6 +23,28 @@ namespace mbgl {
 namespace gl {
 
 using namespace platform;
+
+struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {
+    DrawSegmentGL(gfx::DrawMode mode_, SegmentBase&& segment_, VertexArray&& vertexArray_)
+        : gfx::Drawable::DrawSegment(mode_, std::move(segment_)),
+          vertexArray(std::move(vertexArray_)) {}
+
+    ~DrawSegmentGL() override = default;
+
+    const VertexArray& getVertexArray() const { return vertexArray; }
+    void setVertexArray(VertexArray&& value) { vertexArray = std::move(value); }
+
+protected:
+    VertexArray vertexArray;
+};
+
+struct IndexBufferGL : public gfx::IndexBufferBase {
+    IndexBufferGL(std::unique_ptr<gfx::IndexBuffer>&& buffer_)
+        : buffer(std::move(buffer_)) {}
+    ~IndexBufferGL() override = default;
+
+    std::unique_ptr<mbgl::gfx::IndexBuffer> buffer;
+};
 
 class DrawableGL::Impl final {
 public:
@@ -49,20 +72,37 @@ public:
     GLfloat pointSize = 0.0f;
 
     size_t vertexAttrId = 0;
-};
 
-struct DrawableGL::DrawSegmentGL final : public gfx::Drawable::DrawSegment {
-    DrawSegmentGL(gfx::DrawMode mode_, SegmentBase&& segment_, VertexArray&& vertexArray_)
-        : gfx::Drawable::DrawSegment(mode_, std::move(segment_)),
-          vertexArray(std::move(vertexArray_)) {}
+    void createVAOs(gl::Context& context) {
+        MLN_TRACE_FUNC();
 
-    ~DrawSegmentGL() override = default;
+        // Bind a VAO for each group of vertexes described by a segment
+        for (const auto& seg : segments) {
+            MLN_TRACE_ZONE(VAO_For_segment);
+            auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
+            const auto& mlSeg = glSeg.getSegment();
 
-    const VertexArray& getVertexArray() const { return vertexArray; }
-    void setVertexArray(VertexArray&& value) { vertexArray = std::move(value); }
+            if (mlSeg.indexLength == 0) {
+                continue;
+            }
 
-protected:
-    VertexArray vertexArray;
+            for (auto& binding : attributeBindings) {
+                if (binding) {
+                    binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
+                }
+            }
+
+            if (!glSeg.getVertexArray().isValid() && indexes) {
+                auto vertexArray = context.createVertexArray();
+                const auto& indexBuf = static_cast<IndexBufferGL&>(*indexes->getBuffer());
+                vertexArray.bind(context, *indexBuf.buffer, attributeBindings);
+                assert(vertexArray.isValid());
+                if (vertexArray.isValid()) {
+                    glSeg.setVertexArray(std::move(vertexArray));
+                }
+            }
+        }
+    }
 };
 
 } // namespace gl

@@ -1,5 +1,6 @@
 #include <mbgl/gl/drawable_gl.hpp>
 #include <mbgl/gl/drawable_gl_impl.hpp>
+#include <mbgl/gl/renderer_backend.hpp>
 #include <mbgl/gl/texture2d.hpp>
 #include <mbgl/gl/upload_pass.hpp>
 #include <mbgl/gl/vertex_array.hpp>
@@ -29,6 +30,8 @@ void DrawableGL::draw(PaintParameters& parameters) const {
     }
 
     auto& context = static_cast<gl::Context&>(parameters.context);
+
+    impl->createVAOs(context);
 
     if (shader) {
         const auto& shaderGL = static_cast<const ShaderProgramGL&>(*shader);
@@ -133,15 +136,7 @@ void DrawableGL::setVertexAttrId(const size_t id) {
     impl->vertexAttrId = id;
 }
 
-struct IndexBufferGL : public gfx::IndexBufferBase {
-    IndexBufferGL(std::unique_ptr<gfx::IndexBuffer>&& buffer_)
-        : buffer(std::move(buffer_)) {}
-    ~IndexBufferGL() override = default;
-
-    std::unique_ptr<mbgl::gfx::IndexBuffer> buffer;
-};
-
-void DrawableGL::upload(gfx::UploadPass& uploadPass) {
+void DrawableGL::issueUpload(gfx::UploadPass& uploadPass) {
     if (isCustom) {
         return;
     }
@@ -152,16 +147,9 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     }
 
     MLN_TRACE_FUNC();
-#ifdef MLN_TRACY_ENABLE
-    {
-        auto str = name + "/" + (tileID ? util::toString(*tileID) : std::string());
-        MLN_ZONE_STR(str);
-    }
-#endif
 
-    auto& context = uploadPass.getContext();
-    auto& glContext = static_cast<gl::Context&>(context);
     constexpr auto usage = gfx::BufferUsageType::StaticDraw;
+    assert(impl);
 
     // Create an index buffer if necessary}
     if (impl->indexes && (!impl->indexes->getBuffer() || impl->indexes->getDirty())) {
@@ -201,33 +189,6 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         impl->attributeBuffers = std::move(vertexBuffers);
     }
 
-    // Bind a VAO for each group of vertexes described by a segment
-    for (const auto& seg : impl->segments) {
-        MLN_TRACE_ZONE(segment);
-        auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
-        const auto& mlSeg = glSeg.getSegment();
-
-        if (mlSeg.indexLength == 0) {
-            continue;
-        }
-
-        for (auto& binding : impl->attributeBindings) {
-            if (binding) {
-                binding->vertexOffset = static_cast<uint32_t>(mlSeg.vertexOffset);
-            }
-        }
-
-        if (!glSeg.getVertexArray().isValid() && impl->indexes) {
-            auto vertexArray = glContext.createVertexArray();
-            const auto& indexBuffer = static_cast<IndexBufferGL&>(*impl->indexes->getBuffer());
-            vertexArray.bind(glContext, *indexBuffer.buffer, impl->attributeBindings);
-            assert(vertexArray.isValid());
-            if (vertexArray.isValid()) {
-                glSeg.setVertexArray(std::move(vertexArray));
-            }
-        }
-    }
-
     const auto needsUpload = [](const auto& texture) {
         return texture && texture->needsUpload();
     };
@@ -254,6 +215,7 @@ gfx::StencilMode DrawableGL::makeStencilMode(PaintParameters& parameters) const 
 
 void DrawableGL::uploadTextures() const {
     MLN_TRACE_FUNC();
+
     for (const auto& texture : textures) {
         if (texture) {
             texture->upload();

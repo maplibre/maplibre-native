@@ -22,7 +22,7 @@ TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity,
                      shaders::maxSSBOCountPerLayer,
                      shaders::maxUBOCountPerLayer) {}
 
-void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
+void TileLayerGroup::issueUpload(gfx::UploadPass& uploadPass) {
     if (!enabled || !getDrawableCount()) {
         return;
     }

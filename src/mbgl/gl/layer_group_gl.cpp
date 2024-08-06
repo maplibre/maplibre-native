@@ -19,10 +19,7 @@ using namespace platform;
 TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
     : TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)) {}
 
-void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
-    MLN_TRACE_FUNC();
-    MLN_ZONE_STR(name);
-
+void TileLayerGroupGL::issueUpload(gfx::UploadPass& uploadPass) {
     if (!enabled) {
         return;
     }
@@ -43,7 +40,7 @@ void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
         const auto debugGroup = uploadPass.createDebugGroup(labelPtr);
 #endif
 
-        drawableGL.upload(uploadPass);
+        drawableGL.issueUpload(uploadPass);
     });
 }
 
@@ -142,7 +139,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
 LayerGroupGL::LayerGroupGL(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
     : LayerGroup(layerIndex_, initialCapacity, std::move(name_)) {}
 
-void LayerGroupGL::upload(gfx::UploadPass& uploadPass) {
+void LayerGroupGL::issueUpload(gfx::UploadPass& uploadPass) {
     if (!enabled) {
         return;
     }
@@ -158,7 +155,7 @@ void LayerGroupGL::upload(gfx::UploadPass& uploadPass) {
         const auto debugGroup = uploadPass.createDebugGroup(drawable.getName().c_str());
 #endif
 
-        drawableGL.upload(uploadPass);
+        drawableGL.issueUpload(uploadPass);
     });
 }
 

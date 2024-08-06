@@ -12,8 +12,9 @@ public class GLSurfaceViewMapRenderer extends SurfaceViewMapRenderer {
 
   public GLSurfaceViewMapRenderer(Context context,
                                 @NonNull MapLibreGLSurfaceView surfaceView,
-                                String localIdeographFontFamily) {
-    super(context, surfaceView, localIdeographFontFamily);
+                                String localIdeographFontFamily,
+                                boolean multiThreadedGpuResourceUpload) {
+    super(context, surfaceView, localIdeographFontFamily, multiThreadedGpuResourceUpload);
 
     surfaceView.setEGLContextFactory(new EGLContextFactory());
     surfaceView.setEGLWindowSurfaceFactory(new EGLWindowSurfaceFactory());
