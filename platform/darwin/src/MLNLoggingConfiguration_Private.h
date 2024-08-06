@@ -22,7 +22,8 @@ NS_INLINE NSString *MLNStringFromNSEdgeInsets(NSEdgeInsets insets) {
 #if MLN_LOGGING_ENABLE_DEBUG
 #define MLNLogDebug(message, ...) \
   MLNLogWithType(MLNLoggingLevelDebug, __PRETTY_FUNCTION__, __LINE__, message, ##__VA_ARGS__)
-  #define MLNLogDebugMessage(message) MLNLogWithTypeMessage(MLNLoggingLevelDebug, __PRETTY_FUNCTION__, __LINE__, message)
+#define MLNLogDebugMessage(message) \
+  MLNLogWithTypeMessage(MLNLoggingLevelDebug, __PRETTY_FUNCTION__, __LINE__, message)
 #else
 #define MLNLogDebug(...)
 #define MLNLogDebugMessage(...)
@@ -76,7 +77,10 @@ NS_INLINE NSString *MLNStringFromNSEdgeInsets(NSEdgeInsets insets) {
                messageType:(MLNLoggingLevel)type
                     format:(id)messageFormat, ...;
 
-- (void)logCallingFunction:(const char *)callingFunction functionLine:(NSUInteger)functionLine messageType:(MLNLoggingLevel)type message:(NSString *)message;
+- (void)logCallingFunction:(const char *)callingFunction
+              functionLine:(NSUInteger)functionLine
+               messageType:(MLNLoggingLevel)type
+                   message:(NSString *)message;
 
 @end
 #endif
