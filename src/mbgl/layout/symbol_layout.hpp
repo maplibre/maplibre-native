@@ -28,7 +28,7 @@ public:
     SymbolLayout(const BucketParameters&,
                  const std::vector<Immutable<style::LayerProperties>>&,
                  std::unique_ptr<GeometryTileLayer>,
-                 const LayoutParameters& parameters);
+                 const LayoutParameters& parameters) noexcept;
 
     ~SymbolLayout() final = default;
 
