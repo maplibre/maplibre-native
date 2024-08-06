@@ -22,8 +22,10 @@ NS_INLINE NSString *MLNStringFromNSEdgeInsets(NSEdgeInsets insets) {
 #if MLN_LOGGING_ENABLE_DEBUG
 #define MLNLogDebug(message, ...) \
   MLNLogWithType(MLNLoggingLevelDebug, __PRETTY_FUNCTION__, __LINE__, message, ##__VA_ARGS__)
+  #define MLNLogDebugMessage(message) MLNLogWithTypeMessage(MLNLoggingLevelDebug, __PRETTY_FUNCTION__, __LINE__, message)
 #else
 #define MLNLogDebug(...)
+#define MLNLogDebugMessage(...)
 #endif
 
 #define MLNLogInfo(message, ...) \
@@ -34,6 +36,8 @@ NS_INLINE NSString *MLNStringFromNSEdgeInsets(NSEdgeInsets insets) {
   MLNLogWithType(MLNLoggingLevelError, __PRETTY_FUNCTION__, __LINE__, message, ##__VA_ARGS__)
 #define MLNLogFault(message, ...) \
   MLNLogWithType(MLNLoggingLevelFault, __PRETTY_FUNCTION__, __LINE__, message, ##__VA_ARGS__)
+#define MLNLogErrorMessage(message) \
+  MLNLogWithType(MLNLoggingLevelError, __PRETTY_FUNCTION__, __LINE__, message)
 
 #endif
 
@@ -71,6 +75,8 @@ NS_INLINE NSString *MLNStringFromNSEdgeInsets(NSEdgeInsets insets) {
               functionLine:(NSUInteger)functionLine
                messageType:(MLNLoggingLevel)type
                     format:(id)messageFormat, ...;
+
+- (void)logCallingFunction:(const char *)callingFunction functionLine:(NSUInteger)functionLine messageType:(MLNLoggingLevel)type message:(NSString *)message;
 
 @end
 #endif
