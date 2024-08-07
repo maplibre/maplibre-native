@@ -297,7 +297,7 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState& state,
+                             const TransformState& /*state*/,
                              const std::shared_ptr<UpdateParameters>&,
                              [[maybe_unused]] const RenderTree& renderTree,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
@@ -596,7 +596,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                             bucket.sharedBasicLineIndexes,
                                             bucket.basicLineSegments.data(),
                                             bucket.basicLineSegments.size());
-                finish(*outlineBuilder, idFillInterpolateUBO, getFillOutlineInterpolateUBO(), FillVariant::FillOutline);
+                finish(*outlineBuilder, FillVariant::FillOutline);
             }
 #endif
         } else {
