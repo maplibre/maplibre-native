@@ -4,7 +4,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
-- Fix reported [crash](https://github.com/maplibre/maplibre-native/issues/2678) when feature contains invalid UTF-8 data.
+## 6.5.4
+
+- Fix crash when feature contains invalid UTF-8 data ([#2693](https://github.com/maplibre/maplibre-native/pull/2693)).
+- Bazel updates ([#2696](https://github.com/maplibre/maplibre-native/pull/2696)).
 
 ## 6.5.3
 
