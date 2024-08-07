@@ -1640,3 +1640,47 @@ TEST(Map, StencilOverflow) {
 
     // TODO: confirm that the stencil masking actually worked
 }
+
+TEST(Map, InvalidUTF8InTile) {
+    FixtureLog log;
+
+    MapTest<> test{1, MapMode::Continuous};
+
+    test.fileSource->tileResponse = [&](const Resource&) {
+        Response result;
+        result.data = std::make_shared<std::string>(
+            util::read_file("test/fixtures/map/invalid_utf8/invalidutf8feature.mvt"));
+        return result;
+    };
+    test.fileSource->glyphsResponse = makeResponse("glyphs.pbf", true);
+
+    test.map.jumpTo(CameraOptions().withZoom(11.0));
+    test.map.getStyle().loadJSON(R"STYLE({
+      "version": 8,
+      "sources": {
+        "invalidutf8": {
+          "type": "vector",
+          "tiles": ["http://example.com/{z}-{x}-{y}.vector.pbf"]
+        }
+      },
+      "layers": [{
+        "id": "mountain_peak",
+        "type": "symbol",
+        "source": "invalidutf8",
+        "source-layer": "points",
+        "layout": {
+            "text-field": "{name}"
+        }
+      }]
+    })STYLE");
+
+    test.observer.didFinishLoadingMapCallback = [&]() {
+        test.observer.didFinishRenderingFrameCallback = [&](MapObserver::RenderFrameStatus status) {
+            if (!status.needsRepaint) {
+                test.runLoop.stop();
+            }
+        };
+    };
+
+    test.runLoop.run();
+}
