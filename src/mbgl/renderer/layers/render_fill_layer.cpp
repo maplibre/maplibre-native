@@ -130,7 +130,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                             const auto& indexBuffer,
                             const auto& segments,
                             auto&& textureBindings) {
-                const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+                auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
                 const auto allUniformValues = programInstance.computeAllUniformValues(
                     FillProgram::LayoutUniformValues{
@@ -214,7 +214,7 @@ void RenderFillLayer::render(PaintParameters& parameters) {
                             const auto& indexBuffer,
                             const auto& segments,
                             auto&& textureBindings) {
-                const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+                auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
                 paintPropertyBinders.setPatternParameters(patternPosA, patternPosB, crossfade);
 
                 const auto allUniformValues = programInstance.computeAllUniformValues(

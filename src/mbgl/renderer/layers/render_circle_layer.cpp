@@ -118,7 +118,7 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
         const auto& evaluated = getEvaluated<CircleLayerProperties>(data->layerProperties);
         const bool scaleWithMap = evaluated.template get<CirclePitchScale>() == CirclePitchScaleType::Map;
         const bool pitchWithMap = evaluated.template get<CirclePitchAlignment>() == AlignmentType::Map;
-        const auto& paintPropertyBinders = circleBucket.paintPropertyBinders.at(getID());
+        auto& paintPropertyBinders = circleBucket.paintPropertyBinders.at(getID());
 
         using LayoutUniformValues = CircleProgram::LayoutUniformValues;
         const auto& allUniformValues = CircleProgram::computeAllUniformValues(
@@ -329,7 +329,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto& bucket = static_cast<const CircleBucket&>(*renderData->bucket);
         const auto vertexCount = bucket.vertices.elements();
-        const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+        auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {

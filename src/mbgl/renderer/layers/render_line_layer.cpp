@@ -157,7 +157,7 @@ void RenderLineLayer::render(PaintParameters& parameters) {
                         const std::optional<ImagePosition>& patternPositionA,
                         const std::optional<ImagePosition>& patternPositionB,
                         auto&& textureBindings) {
-            const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+            auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
             paintPropertyBinders.setPatternParameters(patternPositionA, patternPositionB, crossfade);
 
