@@ -176,8 +176,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         assert(false);
     };
     // This version is called when the attribute is available, but isn't being used by the shader
-    const auto missingAttr = [&](const size_t, auto& missingAttr) -> void {
-        missingAttr->setDirty(false);
+    const auto missingAttr = [&](const size_t, auto& attr_) -> void {
+        attr_->setDirty(false);
     };
     defaults.resolve(overrides, resolveAttr, missingAttr);
 

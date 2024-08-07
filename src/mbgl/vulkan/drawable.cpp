@@ -209,8 +209,8 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     auto& context = static_cast<Context&>(parameters.context);
-    auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
-    auto& encoder = renderPass.getEncoder();
+    auto& renderPass_ = static_cast<RenderPass&>(*parameters.renderPass);
+    auto& encoder = renderPass_.getEncoder();
     auto& commandBuffer = encoder.getCommandBuffer();
 
     auto& shaderImpl = static_cast<mbgl::vulkan::ShaderProgram&>(*shader);
@@ -237,7 +237,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
     }
 
-    impl->pipelineInfo.setRenderable(renderPass.getDescriptor().renderable);
+    impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
 
     const uint32_t instances = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
 
@@ -268,17 +268,17 @@ void Drawable::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueD
     impl->segments = std::move(segments);
 }
 
-void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type) {
+void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type_) {
     impl->vertexCount = count;
-    impl->vertexType = type;
+    impl->vertexType = type_;
 
-    if (count && type != gfx::AttributeDataType::Invalid && !data.empty()) {
+    if (count && type_ != gfx::AttributeDataType::Invalid && !data.empty()) {
         if (!vertexAttributes) {
             vertexAttributes = std::make_shared<VertexAttributeArray>();
         }
-        if (auto& attrib = vertexAttributes->set(impl->vertexAttrId, /*index=*/-1, type)) {
+        if (auto& attrib = vertexAttributes->set(impl->vertexAttrId, /*index=*/-1, type_)) {
             attrib->setRawData(std::move(data));
-            attrib->setStride(VertexAttribute::getStrideOf(type));
+            attrib->setStride(VertexAttribute::getStrideOf(type_));
         } else {
             using namespace std::string_literals;
             Log::Warning(Event::General,
