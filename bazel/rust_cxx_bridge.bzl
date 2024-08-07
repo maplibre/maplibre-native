@@ -34,7 +34,7 @@ def rust_cxx_bridge(name, src, deps = []):
             "-o",
             "$(location %s.cc)" % src,
         ],
-        tool = "@cxx.rs//:codegen",
+        tool = "cxxbridge",  # FIXME!!! how do i call an app that's already installed locally? Or perhaps set up some pipeline to download/build it?
     )
 
     cc_library(
