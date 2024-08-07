@@ -9,8 +9,8 @@ namespace mbgl {
 
 AnnotationTile::AnnotationTile(const OverscaledTileID& overscaledTileID,
                                const TileParameters& parameters,
-                               TileObserver* observer)
-    : GeometryTile(overscaledTileID, AnnotationManager::SourceID, parameters, observer),
+                               TileObserver* observer_)
+    : GeometryTile(overscaledTileID, AnnotationManager::SourceID, parameters, observer_),
       annotationManager(parameters.annotationManager) {
     auto guard = annotationManager.lock();
     if (annotationManager) {

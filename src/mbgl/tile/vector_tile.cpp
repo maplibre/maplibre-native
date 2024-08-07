@@ -10,8 +10,8 @@ VectorTile::VectorTile(const OverscaledTileID& id_,
                        std::string sourceID_,
                        const TileParameters& parameters,
                        const Tileset& tileset,
-                       TileObserver* observer)
-    : GeometryTile(id_, std::move(sourceID_), parameters, observer),
+                       TileObserver* observer_)
+    : GeometryTile(id_, std::move(sourceID_), parameters, observer_),
       loader(*this, id_, parameters, tileset) {}
 
 VectorTile::~VectorTile() {
