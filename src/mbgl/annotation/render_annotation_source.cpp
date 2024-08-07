@@ -42,8 +42,8 @@ void RenderAnnotationSource::update(Immutable<style::Source::Impl> baseImpl_,
                        // See https://github.com/mapbox/mapbox-gl-native/issues/10197
                        {0, 16},
                        std::nullopt,
-                       [&](const OverscaledTileID& tileID, TileObserver* observer) {
-                           return std::make_unique<AnnotationTile>(tileID, parameters, observer);
+                       [&](const OverscaledTileID& tileID, TileObserver* observer_) {
+                           return std::make_unique<AnnotationTile>(tileID, parameters, observer_);
                        });
 }
 
