@@ -122,8 +122,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         return;
     }
 
-    if (impl->indexes->isModifiedAfter(attributeUpdateTime)) {
-        // Create or update a buffer for the index data.  We don't update any
+    if (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime)) {
+        // Create a buffer for the index data.  We don't update any
         // existing buffer because it may still be in use by the previous frame.
         auto indexBufferResource{uploadPass.createIndexBufferResource(
             impl->indexes->data(), impl->indexes->bytes(), usage, /*persistent=*/false)};
