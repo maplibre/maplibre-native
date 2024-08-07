@@ -6,6 +6,25 @@
 
 ### 🐞 Bug fixes
 
+## 11.1.0
+
+### ✨ Features and improvements
+
+- Avoid logging error for onMove(0,0) on Android ([#2580](https://github.com/maplibre/maplibre-native/pull/2580)).
+- Experimental API to toggle tile cache in map view ([#2590](https://github.com/maplibre/maplibre-native/pull/2590)). This can reduce memory usage at the cost of having to parse tile data again when the zoom level changes.
+- Add TaggedScheduler, couple lifetime of tasks and orchestrator ([#2398](https://github.com/maplibre/maplibre-native/pull/2398)).
+
+### 🐞 Bug fixes
+
+- Fix null pointer dereference MapRenderer Android ([#2631](https://github.com/maplibre/maplibre-native/pull/2631)).
+- Take locks before signaling thread condition variables ([#2636](https://github.com/maplibre/maplibre-native/pull/2636)).
+
+## 11.0.2-pre0
+
+### ✨ Features and improvements
+
+- Add TaggedScheduler, couple lifetime of tasks and orchestrator ([#2398](https://github.com/maplibre/maplibre-native/pull/2398)).
+
 ## 11.0.1
 
 ### ✨ Features and improvements

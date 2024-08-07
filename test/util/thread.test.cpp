@@ -343,7 +343,7 @@ TEST(Thread, PoolWait) {
         pool->schedule([&] { std::this_thread::sleep_for(Milliseconds(100)); });
     }
 
-    EXPECT_EQ(0, pool->waitForEmpty());
+    pool->waitForEmpty();
 }
 
 TEST(Thread, PoolWaitRecursiveAdd) {
@@ -358,7 +358,7 @@ TEST(Thread, PoolWaitRecursiveAdd) {
         std::this_thread::sleep_for(Milliseconds(10));
     });
 
-    EXPECT_EQ(0, pool->waitForEmpty());
+    pool->waitForEmpty();
 }
 
 TEST(Thread, PoolWaitAdd) {
@@ -385,28 +385,14 @@ TEST(Thread, PoolWaitAdd) {
     // more items would be added by the sequential task if not blocked
     pool->schedule([&] { std::this_thread::sleep_for(Milliseconds(100)); });
 
-    EXPECT_EQ(0, pool->waitForEmpty());
+    pool->waitForEmpty();
 
     addActive = false;
-    EXPECT_EQ(0, pool->waitForEmpty());
-}
-
-TEST(Thread, PoolWaitTimeout) {
-    auto pool = Scheduler::GetBackground();
-
-    std::mutex mutex;
-    {
-        std::lock_guard<std::mutex> outerLock(mutex);
-        pool->schedule([&] { std::lock_guard<std::mutex> innerLock(mutex); });
-
-        // should always time out
-        EXPECT_EQ(1, pool->waitForEmpty(Milliseconds(100)));
-    }
-
-    EXPECT_EQ(0, pool->waitForEmpty());
+    pool->waitForEmpty();
 }
 
 TEST(Thread, PoolWaitException) {
+    const auto id = util::SimpleIdentity{};
     auto pool = Scheduler::GetBackground();
 
     std::atomic<int> caught{0};
@@ -414,7 +400,7 @@ TEST(Thread, PoolWaitException) {
 
     constexpr int threadCount = 3;
     for (int i = 0; i < threadCount; ++i) {
-        pool->schedule([=] {
+        pool->schedule(id, [=] {
             std::this_thread::sleep_for(Milliseconds(i));
             if (i & 1) {
                 throw std::runtime_error("test");
@@ -425,7 +411,7 @@ TEST(Thread, PoolWaitException) {
     }
 
     // Exceptions shouldn't cause deadlocks by, e.g., abandoning locks.
-    EXPECT_EQ(0, pool->waitForEmpty());
+    pool->waitForEmpty(id);
     EXPECT_EQ(threadCount, caught);
 }
 
@@ -434,8 +420,55 @@ TEST(Thread, WrongThread) {
     auto pool = Scheduler::GetBackground();
 
     // Asserts in debug builds, silently ignored in release.
-    pool->schedule([&] { EXPECT_EQ(0, pool->waitForEmpty()); });
+    pool->schedule([&] { pool->waitForEmpty(); });
 
-    EXPECT_EQ(0, pool->waitForEmpty());
+    pool->waitForEmpty();
 }
 #endif
+
+std::function<void()> makeCounterThread(TaggedScheduler& pool,
+                                        std::atomic<bool>* stopFlag,
+                                        std::atomic<size_t>* counter) {
+    return [=]() mutable {
+        std::this_thread::sleep_for(std::chrono::microseconds(10));
+        (*counter)++;
+        if (!*stopFlag) {
+            pool.schedule(makeCounterThread(pool, stopFlag, counter));
+        }
+    };
+}
+
+TEST(Thread, TaggedPools) {
+    TaggedScheduler poolTag1{Scheduler::GetBackground(), {}};
+    TaggedScheduler poolTag2{Scheduler::GetBackground(), {}};
+
+    std::atomic<bool> stopTasks1{false};
+    std::atomic<bool> stopTasks2{false};
+    std::atomic<size_t> runCount1{0};
+    std::atomic<size_t> runCount2{0};
+
+    // Run a bunch of tasks on two different pool tags (that share the same thread pool)
+    for (auto i = 0; i < 50; i++) {
+        poolTag1.schedule(makeCounterThread(poolTag1, &stopTasks1, &runCount1));
+        poolTag2.schedule(makeCounterThread(poolTag2, &stopTasks2, &runCount2));
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+
+    // Stop tasks on queue 1 and wait for it to empty
+    stopTasks1 = true;
+    poolTag1.waitForEmpty();
+    const auto totalRuns1 = runCount1.load();
+
+    // Do the same for queue 2
+    stopTasks2 = true;
+    poolTag2.waitForEmpty();
+    const auto totalRuns2 = runCount2.load();
+
+    // No other tasks in queue 1 ran while waiting on queue 2.
+    ASSERT_TRUE(totalRuns1 == runCount1);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+
+    // Same for queue 2
+    ASSERT_TRUE(totalRuns2 == runCount2);
+}

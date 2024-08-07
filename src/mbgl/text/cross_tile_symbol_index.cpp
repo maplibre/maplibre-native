@@ -1,8 +1,10 @@
 #include <mbgl/text/cross_tile_symbol_index.hpp>
+
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 namespace mbgl {
 
@@ -216,6 +218,9 @@ bool CrossTileSymbolLayerIndex::removeStaleBuckets(const std::unordered_set<uint
 CrossTileSymbolIndex::CrossTileSymbolIndex() = default;
 
 auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng) -> AddLayerResult {
+    MLN_TRACE_FUNC()
+    MLN_ZONE_STR(layer.getID())
+
     auto found = layerIndexes.find(layer.getID());
     if (found == layerIndexes.end()) {
         found = layerIndexes
@@ -246,6 +251,8 @@ auto CrossTileSymbolIndex::addLayer(const RenderLayer& layer, float lng) -> AddL
 }
 
 void CrossTileSymbolIndex::pruneUnusedLayers(const std::set<std::string>& usedLayers) {
+    MLN_TRACE_FUNC()
+
     for (auto it = layerIndexes.begin(); it != layerIndexes.end();) {
         if (usedLayers.find(it->first) == usedLayers.end()) {
             it = layerIndexes.erase(it);

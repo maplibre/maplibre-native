@@ -171,7 +171,7 @@ std::string toJSON(const std::vector<mbgl::Feature>& features, unsigned indent, 
 }
 
 JSONReply readJson(const mbgl::filesystem::path& jsonPath) {
-    auto maybeJSON = mbgl::util::readFile(jsonPath);
+    auto maybeJSON = mbgl::util::readFile(jsonPath.generic_string());
     if (!maybeJSON) {
         return {std::string("Unable to open file ") + jsonPath.string()};
     }
@@ -311,17 +311,17 @@ std::vector<std::string> readExpectedEntries(const std::regex& regex, const mbgl
 } // namespace
 
 std::vector<std::string> readExpectedImageEntries(const mbgl::filesystem::path& base) {
-    static const std::regex regex(".*/expected.*.png");
+    static const std::regex regex(".*[/\\\\]expected.*.png");
     return readExpectedEntries(regex, base);
 }
 
 std::vector<std::string> readExpectedMetricEntries(const mbgl::filesystem::path& base) {
-    static const std::regex regex(".*/metrics.json");
+    static const std::regex regex(".*[/\\\\]metrics.json");
     return readExpectedEntries(regex, base);
 }
 
 std::vector<std::string> readExpectedJSONEntries(const mbgl::filesystem::path& base) {
-    static const std::regex regex(".*/expected.*.json");
+    static const std::regex regex(".*[/\\\\]expected.*.json");
     return readExpectedEntries(regex, base);
 }
 
@@ -960,7 +960,7 @@ TestOperations parseTestOperations(TestMetadata& metadata) {
                 }
                 size_t size = 0;
                 if (compressed) {
-                    size = mbgl::util::compress(*mbgl::util::readFile(filePath)).size();
+                    size = mbgl::util::compress(*mbgl::util::readFile(filePath.generic_string())).size();
                 } else {
                     size = mbgl::filesystem::file_size(filePath);
                 }

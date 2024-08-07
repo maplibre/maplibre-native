@@ -47,11 +47,12 @@ public:
                             const std::optional<std::string>&,
                             const std::optional<std::string>&) override;
 
+    void enableCache(bool) override;
     void reduceMemoryUse() override;
     void dumpDebugLogs() const override;
 
 protected:
-    RenderTileSource(Immutable<style::Source::Impl>, std::shared_ptr<Scheduler>);
+    RenderTileSource(Immutable<style::Source::Impl>, const TaggedScheduler&);
     TilePyramid tilePyramid;
     Immutable<std::vector<RenderTile>> renderTiles;
     mutable RenderTiles filteredRenderTiles;
@@ -67,7 +68,7 @@ private:
  */
 class RenderTileSetSource : public RenderTileSource {
 protected:
-    RenderTileSetSource(Immutable<style::Source::Impl>, std::shared_ptr<Scheduler>);
+    RenderTileSetSource(Immutable<style::Source::Impl>, const TaggedScheduler&);
     ~RenderTileSetSource() override;
 
     virtual void updateInternal(const Tileset&,

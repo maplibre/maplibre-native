@@ -49,7 +49,7 @@ ios_application(
     infoplists = [
         "Info.plist",
     ],
-    minimum_os_version = "12.0",
+    minimum_os_version = "13.0",
     provisioning_profile = "//platform/ios:xcode_profile",
     deps = [
         "//platform/ios/test/common:test_app_srcs",
@@ -58,7 +58,7 @@ ios_application(
 
 ios_unit_test(
     name = "CppUnitTests",
-    minimum_os_version = "12.0",
+    minimum_os_version = "13.0",
     provisioning_profile = "//platform/ios:xcode_profile",
     test_host = "CppUnitTestsApp",
     visibility = ["@rules_xcodeproj//xcodeproj:generated"],

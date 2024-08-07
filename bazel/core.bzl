@@ -582,8 +582,6 @@ MLN_CORE_SOURCE = [
     "src/mbgl/util/color.cpp",
     "src/mbgl/util/constants.cpp",
     "src/mbgl/util/convert.cpp",
-    "src/mbgl/util/dtoa.cpp",
-    "src/mbgl/util/dtoa.hpp",
     "src/mbgl/util/event.cpp",
     "src/mbgl/util/filesystem.hpp",
     "src/mbgl/util/font_stack.cpp",

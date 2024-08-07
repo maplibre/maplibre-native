@@ -141,7 +141,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
             builder.withSource(source)
         } else if (row == 0 && column == 2) {
             val carBitmap = BitmapUtils.getBitmapFromDrawable(
-                ResourcesCompat.getDrawable(resources, R.drawable.ic_directions_car_black, null)
+                ResourcesCompat.getDrawable(resources, R.drawable.ic_directions_car_black, theme)
             )
 
             // marker source
@@ -207,7 +207,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
 
             override fun onStyleImageMissing(imageName: String) {
                 val androidIcon =
-                    BitmapUtils.getBitmapFromDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_android_2, null))
+                    BitmapUtils.getBitmapFromDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_android_2, theme))
                 snapshotter.addImage(imageName, androidIcon!!, false)
             }
         })

@@ -31,6 +31,7 @@ using namespace style;
 
 GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        ActorRef<GeometryTile> parent_,
+                                       const TaggedScheduler& scheduler_,
                                        OverscaledTileID id_,
                                        std::string sourceID_,
                                        const std::atomic<bool>& obsolete_,
@@ -39,6 +40,7 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
                                        const bool showCollisionBoxes_)
     : self(std::move(self_)),
       parent(std::move(parent_)),
+      scheduler(scheduler_),
       id(id_),
       sourceID(std::move(sourceID_)),
       obsolete(obsolete_),
@@ -47,9 +49,9 @@ GeometryTileWorker::GeometryTileWorker(ActorRef<GeometryTileWorker> self_,
       showCollisionBoxes(showCollisionBoxes_) {}
 
 GeometryTileWorker::~GeometryTileWorker() {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
-    Scheduler::GetBackground()->runOnRenderThread([renderData_{std::move(renderData)}]() {});
+    scheduler.runOnRenderThread([renderData_{std::move(renderData)}]() {});
 }
 
 /*
@@ -126,7 +128,7 @@ GeometryTileWorker::~GeometryTileWorker() {
 void GeometryTileWorker::setData(std::unique_ptr<const GeometryTileData> data_,
                                  std::set<std::string> availableImages_,
                                  uint64_t correlationID_) {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     try {
         data = std::move(data_);
@@ -153,7 +155,7 @@ void GeometryTileWorker::setData(std::unique_ptr<const GeometryTileData> data_,
 void GeometryTileWorker::setLayers(std::vector<Immutable<LayerProperties>> layers_,
                                    std::set<std::string> availableImages_,
                                    uint64_t correlationID_) {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     try {
         layers = std::move(layers_);
@@ -196,7 +198,7 @@ void GeometryTileWorker::reset(uint64_t correlationID_) {
 }
 
 void GeometryTileWorker::setShowCollisionBoxes(bool showCollisionBoxes_, uint64_t correlationID_) {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     try {
         showCollisionBoxes = showCollisionBoxes_;
@@ -226,7 +228,7 @@ void GeometryTileWorker::setShowCollisionBoxes(bool showCollisionBoxes_, uint64_
 }
 
 void GeometryTileWorker::symbolDependenciesChanged() {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     try {
         switch (state) {
@@ -256,7 +258,7 @@ void GeometryTileWorker::symbolDependenciesChanged() {
 }
 
 void GeometryTileWorker::coalesced() {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     try {
         switch (state) {
@@ -287,14 +289,14 @@ void GeometryTileWorker::coalesced() {
 }
 
 void GeometryTileWorker::coalesce() {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     state = Coalescing;
     self.invoke(&GeometryTileWorker::coalesced);
 }
 
 void GeometryTileWorker::onGlyphsAvailable(GlyphMap newGlyphMap) {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     for (auto& newFontGlyphs : newGlyphMap) {
         FontStackHash fontStack = newFontGlyphs.first;
@@ -325,7 +327,7 @@ void GeometryTileWorker::onImagesAvailable(ImageMap newIconMap,
                                            ImageMap newPatternMap,
                                            ImageVersionMap newVersionMap,
                                            uint64_t imageCorrelationID_) {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     if (imageCorrelationID != imageCorrelationID_) {
         return; // Ignore outdated image request replies.
@@ -338,7 +340,7 @@ void GeometryTileWorker::onImagesAvailable(ImageMap newIconMap,
 }
 
 void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependencies) {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     for (auto& fontDependencies : glyphDependencies) {
         auto fontGlyphs = glyphMap.find(FontStackHasher()(fontDependencies.first));
@@ -354,7 +356,7 @@ void GeometryTileWorker::requestNewGlyphs(const GlyphDependencies& glyphDependen
 }
 
 void GeometryTileWorker::requestNewImages(const ImageDependencies& imageDependencies) {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     pendingImageDependencies = imageDependencies;
 
@@ -364,7 +366,7 @@ void GeometryTileWorker::requestNewImages(const ImageDependencies& imageDependen
 }
 
 void GeometryTileWorker::parse() {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     if (!data || !layers) {
         return;
@@ -466,10 +468,10 @@ void GeometryTileWorker::parse() {
     requestNewImages(imageDependencies);
 
     MBGL_TIMING_FINISH(watch,
-                       " Action: "
-                           << "Parsing,"
-                           << " SourceID: " << sourceID.c_str() << " Canonical: " << static_cast<int>(id.canonical.z)
-                           << "/" << id.canonical.x << "/" << id.canonical.y << " Time");
+                       " Action: " << "Parsing,"
+                                   << " SourceID: " << sourceID.c_str()
+                                   << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
+                                   << id.canonical.y << " Time");
     finalizeLayout();
 }
 
@@ -487,7 +489,7 @@ bool GeometryTileWorker::hasPendingParseResult() const {
 }
 
 void GeometryTileWorker::finalizeLayout() {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     if (!data || !layers || !hasPendingParseResult() || hasPendingDependencies()) {
         return;
@@ -522,10 +524,10 @@ void GeometryTileWorker::finalizeLayout() {
     firstLoad = false;
 
     MBGL_TIMING_FINISH(watch,
-                       " Action: "
-                           << "SymbolLayout,"
-                           << " SourceID: " << sourceID.c_str() << " Canonical: " << static_cast<int>(id.canonical.z)
-                           << "/" << id.canonical.x << "/" << id.canonical.y << " Time");
+                       " Action: " << "SymbolLayout,"
+                                   << " SourceID: " << sourceID.c_str()
+                                   << " Canonical: " << static_cast<int>(id.canonical.z) << "/" << id.canonical.x << "/"
+                                   << id.canonical.y << " Time");
 
     parent.invoke(&GeometryTile::onLayout,
                   std::make_shared<GeometryTile::LayoutResult>(

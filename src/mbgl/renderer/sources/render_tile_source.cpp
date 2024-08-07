@@ -7,6 +7,7 @@
 #include <mbgl/renderer/tile_render_data.hpp>
 #include <mbgl/tile/vector_tile.hpp>
 #include <mbgl/util/constants.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/math.hpp>
 
 #if MLN_DRAWABLE_RENDERER
@@ -383,9 +384,9 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 }
 #endif
 
-RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_, std::shared_ptr<Scheduler> threadPool_)
+RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
     : RenderSource(std::move(impl_)),
-      tilePyramid(std::move(threadPool_)),
+      tilePyramid(threadPool_),
       renderTiles(makeMutable<std::vector<RenderTile>>()) {
     tilePyramid.setObserver(this);
 }
@@ -401,6 +402,8 @@ std::unique_ptr<RenderItem> RenderTileSource::createRenderItem() {
 }
 
 void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
+    MLN_TRACE_FUNC()
+    MLN_ZONE_STR(baseImpl->id)
     bearing = static_cast<float>(parameters.transform.state.getBearing());
     filteredRenderTiles = nullptr;
     renderTilesSortedByY = nullptr;
@@ -494,6 +497,10 @@ void RenderTileSource::removeFeatureState(const std::optional<std::string>& sour
     featureState.removeState(sourceLayerID, featureID, stateKey);
 }
 
+void RenderTileSource::enableCache(bool enable) {
+    tilePyramid.enableCache(enable);
+}
+
 void RenderTileSource::reduceMemoryUse() {
     tilePyramid.reduceMemoryUse();
 }
@@ -504,8 +511,8 @@ void RenderTileSource::dumpDebugLogs() const {
 
 // RenderTileSetSource implementation
 
-RenderTileSetSource::RenderTileSetSource(Immutable<style::Source::Impl> impl_, std::shared_ptr<Scheduler> threadPool_)
-    : RenderTileSource(std::move(impl_), std::move(threadPool_)) {}
+RenderTileSetSource::RenderTileSetSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
+    : RenderTileSource(std::move(impl_), threadPool_) {}
 
 RenderTileSetSource::~RenderTileSetSource() = default;
 
