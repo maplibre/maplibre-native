@@ -347,7 +347,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         const auto& renderData = *optRenderData;
-        const auto& bucket = static_cast<const FillExtrusionBucket&>(*renderData.bucket);
+        auto& bucket = static_cast<FillExtrusionBucket&>(*renderData.bucket);
 
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
@@ -370,7 +370,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
         const auto patternPosB = tile.getPattern(fillPatternValue.to.id());
 
-        const auto& binders = bucket.paintPropertyBinders.at(getID());
+        auto& binders = bucket.paintPropertyBinders.at(getID());
         if (hasPattern) {
             binders.setPatternParameters(patternPosA, patternPosB, crossfade);
         }

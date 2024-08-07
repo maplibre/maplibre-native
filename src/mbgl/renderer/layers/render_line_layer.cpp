@@ -459,7 +459,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
-        const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+        auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
         const auto& crossfade = getCrossfade<LineLayerProperties>(renderData->layerProperties);
 

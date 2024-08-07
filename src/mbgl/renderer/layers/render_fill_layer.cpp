@@ -376,7 +376,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
-        const auto& binders = bucket.paintPropertyBinders.at(getID());
+        auto& binders = bucket.paintPropertyBinders.at(getID());
 
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
@@ -387,94 +387,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
         const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
-
-        const auto& fillPatternValue = evaluated.get<FillPattern>().constantOr(Faded<expression::Image>{"", ""});
-        const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
-        const auto patternPosB = tile.getPattern(fillPatternValue.to.id());
-        binders.setPatternParameters(patternPosA, patternPosB, crossfade);
-
-        const auto zoom = static_cast<float>(state.getZoom());
-
-        std::optional<FillInterpolateUBO> fillInterpolateUBO = std::nullopt;
-        std::optional<FillOutlineInterpolateUBO> fillOutlineInterpolateUBO = std::nullopt;
-        std::optional<FillPatternInterpolateUBO> fillPatternInterpolateUBO = std::nullopt;
-        std::optional<FillOutlinePatternInterpolateUBO> fillOutlinePatternInterpolateUBO = std::nullopt;
-
-        auto getFillInterpolateUBO = [&]() -> const FillInterpolateUBO& {
-            if (!fillInterpolateUBO) {
-                fillInterpolateUBO = {
-                    /* .color_t = */ std::get<0>(binders.get<FillColor>()->interpolationFactor(zoom)),
-                    /* .opacity_t = */ std::get<0>(binders.get<FillOpacity>()->interpolationFactor(zoom)),
-                    0,
-                    0,
-                };
-            }
-
-            return *fillInterpolateUBO;
-        };
-
-        auto getFillOutlineInterpolateUBO = [&]() -> const FillOutlineInterpolateUBO& {
-            if (!fillOutlineInterpolateUBO) {
-                fillOutlineInterpolateUBO = {
-                    /* .color_t = */ std::get<0>(binders.get<FillOutlineColor>()->interpolationFactor(zoom)),
-                    /* .opacity_t = */ std::get<0>(binders.get<FillOpacity>()->interpolationFactor(zoom)),
-                    0,
-                    0,
-                };
-            }
-
-            return *fillOutlineInterpolateUBO;
-        };
-
-        auto getFillPatternInterpolateUBO = [&]() -> const FillPatternInterpolateUBO& {
-            if (!fillPatternInterpolateUBO) {
-                fillPatternInterpolateUBO = {
-                    /* .pattern_from_t = */ std::get<0>(binders.get<FillPattern>()->interpolationFactor(zoom)),
-                    /* .pattern_to_t = */ std::get<0>(binders.get<FillPattern>()->interpolationFactor(zoom)),
-                    /* .opacity_t = */ std::get<0>(binders.get<FillOpacity>()->interpolationFactor(zoom)),
-                    0,
-                };
-            }
-
-            return *fillPatternInterpolateUBO;
-        };
-
-        auto getFillOutlinePatternInterpolateUBO = [&]() -> const FillOutlinePatternInterpolateUBO& {
-            if (!fillOutlinePatternInterpolateUBO) {
-                fillOutlinePatternInterpolateUBO = {
-                    /* .pattern_from_t = */ std::get<0>(binders.get<FillPattern>()->interpolationFactor(zoom)),
-                    /* .pattern_to_t = */ std::get<0>(binders.get<FillPattern>()->interpolationFactor(zoom)),
-                    /* .opacity_t = */ std::get<0>(binders.get<FillOpacity>()->interpolationFactor(zoom)),
-                    0,
-                };
-            }
-
-            return *fillOutlinePatternInterpolateUBO;
-        };
-
-        std::optional<FillPatternTilePropsUBO> fillPatternTilePropsUBO = std::nullopt;
-        auto getFillPatternTilePropsUBO = [&]() -> const FillPatternTilePropsUBO& {
-            if (!fillPatternTilePropsUBO) {
-                fillPatternTilePropsUBO = {
-                    /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-                    /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
-                };
-            }
-
-            return *fillPatternTilePropsUBO;
-        };
-
-        std::optional<FillOutlinePatternTilePropsUBO> fillOutlinePatternTilePropsUBO = std::nullopt;
-        auto getFillOutlinePatternTilePropsUBO = [&]() -> const FillOutlinePatternTilePropsUBO& {
-            if (!fillOutlinePatternTilePropsUBO) {
-                fillOutlinePatternTilePropsUBO = {
-                    /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-                    /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
-                };
-            }
-
-            return *fillOutlinePatternTilePropsUBO;
-        };
 
         gfx::DrawableTweakerPtr atlasTweaker;
         auto getAtlasTweaker = [&]() {
@@ -513,38 +425,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         // If we already have drawables for this tile, update them.
         auto updateExisting = [&](gfx::Drawable& drawable) {
-            auto& drawableUniforms = drawable.mutableUniformBuffers();
-            switch (static_cast<FillVariant>(drawable.getType())) {
-                case FillVariant::Fill: {
-                    drawableUniforms.createOrUpdate(idFillInterpolateUBO, &getFillInterpolateUBO(), context);
-                    break;
-                }
-                case FillVariant::FillOutline: {
-                    drawableUniforms.createOrUpdate(idFillInterpolateUBO, &getFillOutlineInterpolateUBO(), context);
-                    break;
-                }
-                case FillVariant::FillPattern: {
-                    drawableUniforms.createOrUpdate(idFillInterpolateUBO, &getFillPatternInterpolateUBO(), context);
-                    drawableUniforms.createOrUpdate(idFillTilePropsUBO, &getFillPatternTilePropsUBO(), context);
-                    break;
-                }
-                case FillVariant::FillOutlinePattern: {
-                    drawableUniforms.createOrUpdate(
-                        idFillInterpolateUBO, &getFillOutlinePatternInterpolateUBO(), context);
-                    drawableUniforms.createOrUpdate(idFillTilePropsUBO, &getFillOutlinePatternTilePropsUBO(), context);
-                    break;
-                }
-                case FillVariant::FillOutlineTriangulated: {
-                    break;
-                }
-                default: {
-#ifndef NDEBUG
-                    mbgl::Log::Error(mbgl::Event::Render, "Invalid fill variant type supplied during drawable update!");
-#endif
-                    break;
-                }
-            }
-
             drawable.setVertexAttributes(vertexAttrs);
             return true;
         };
@@ -611,6 +491,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     for (auto& drawable : builder->clearDrawables()) {
                         drawable->setTileID(tileID);
                         drawable->setType(static_cast<size_t>(FillVariant::FillOutlineTriangulated));
+                        drawable->setBinders(renderData->bucket, &binders);
+                        drawable->setRenderTile(renderTilesOwner, &tile);
+
                         fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                         ++stats.drawablesAdded;
                     }
@@ -648,19 +531,16 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 }
             }
 
-            const auto finish = [&](gfx::DrawableBuilder& builder,
-                                    const size_t interpolateUBOId,
-                                    const auto& interpolateUBO,
-                                    FillVariant type) {
+            const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
                 builder.flush(context);
 
                 for (auto& drawable : builder.clearDrawables()) {
                     drawable->setTileID(tileID);
                     drawable->setLayerTweaker(layerTweaker);
                     drawable->setType(static_cast<size_t>(type));
+                    drawable->setBinders(renderData->bucket, &binders);
+                    drawable->setRenderTile(renderTilesOwner, &tile);
 
-                    auto& drawableUniforms = drawable->mutableUniformBuffers();
-                    drawableUniforms.createOrUpdate(interpolateUBOId, &interpolateUBO, context);
                     fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                     ++stats.drawablesAdded;
                 }
@@ -688,7 +568,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                          bucket.sharedTriangles,
                                          bucket.triangleSegments.data(),
                                          bucket.triangleSegments.size());
-                finish(*fillBuilder, idFillInterpolateUBO, getFillInterpolateUBO(), FillVariant::Fill);
+                finish(*fillBuilder, FillVariant::Fill);
             }
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
@@ -704,8 +584,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                     bucket.sharedBasicLineIndexes,
                                                     bucket.basicLineSegments.data(),
                                                     bucket.basicLineSegments.size());
-                        finish(
-                            *outlineBuilder, idFillInterpolateUBO, getFillInterpolateUBO(), FillVariant::FillOutline);
+                        finish(*outlineBuilder, FillVariant::FillOutline);
                     }
                 }
             }
@@ -770,22 +649,16 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlinePatternBuilder->addTweaker(getAtlasTweaker());
             }
 
-            const auto finish = [&](gfx::DrawableBuilder& builder,
-                                    const size_t interpolateNameId,
-                                    const auto& interpolateUBO,
-                                    const size_t tileUBOId,
-                                    const auto& tileUBO,
-                                    FillVariant type) {
+            const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
                 builder.flush(context);
 
                 for (auto& drawable : builder.clearDrawables()) {
                     drawable->setTileID(tileID);
                     drawable->setLayerTweaker(layerTweaker);
                     drawable->setType(static_cast<size_t>(type));
+                    drawable->setBinders(renderData->bucket, &binders);
+                    drawable->setRenderTile(renderTilesOwner, &tile);
 
-                    auto& drawableUniforms = drawable->mutableUniformBuffers();
-                    drawableUniforms.createOrUpdate(interpolateNameId, &interpolateUBO, context);
-                    drawableUniforms.createOrUpdate(tileUBOId, &tileUBO, context);
                     fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
                     ++stats.drawablesAdded;
                 }
@@ -806,12 +679,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                             bucket.triangleSegments.data(),
                                             bucket.triangleSegments.size());
 
-                finish(*patternBuilder,
-                       idFillInterpolateUBO,
-                       getFillPatternInterpolateUBO(),
-                       idFillTilePropsUBO,
-                       getFillPatternTilePropsUBO(),
-                       FillVariant::FillPattern);
+                finish(*patternBuilder, FillVariant::FillPattern);
             }
 
             if (doOutline && outlinePatternBuilder && bucket.sharedBasicLineIndexes->elements()) {
@@ -823,12 +691,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                    bucket.basicLineSegments.data(),
                                                    bucket.basicLineSegments.size());
 
-                finish(*outlinePatternBuilder,
-                       idFillInterpolateUBO,
-                       getFillOutlinePatternInterpolateUBO(),
-                       idFillTilePropsUBO,
-                       getFillOutlinePatternTilePropsUBO(),
-                       FillVariant::FillOutlinePattern);
+                finish(*outlinePatternBuilder, FillVariant::FillOutlinePattern);
             }
         }
     }
