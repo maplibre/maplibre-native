@@ -7,6 +7,12 @@ bazel_dep(name = "platforms", version = "0.0.10")
 bazel_dep(name = "rules_apple", version = "3.7.0", repo_name = "build_bazel_rules_apple")
 bazel_dep(name = "rules_swift", version = "2.1.1", repo_name = "build_bazel_rules_swift")
 bazel_dep(name = "rules_xcodeproj", version = "2.5.2")
+bazel_dep(name = "rules_rust", version = "0.49.0")
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(versions = ["1.80.0"])
+use_repo(rust, "rust_toolchains")
+register_toolchains("@rust_toolchains//:all")
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
 npm.npm_translate_lock(
