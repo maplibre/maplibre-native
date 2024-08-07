@@ -803,7 +803,8 @@ public:
                            tileset.zoomRange,
                            tileset.bounds,
                            [&](const OverscaledTileID& tileID, TileObserver* observer) {
-                             return std::make_unique<FakeTile>(*this, tileID, observer); });
+                               return std::make_unique<FakeTile>(*this, tileID, observer);
+                           });
     }
 
     const std::optional<Tileset>& getTileset() const override {
