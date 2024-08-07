@@ -140,52 +140,52 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         auto program = context.createProgram(vertProg, fragProg, firstAttribName.data());
 
         context.getObserver().onPostCompileShader(programParameters.getProgramType(), gfx::Backend::Type::OpenGL);
+
+        UniformBlockArrayGL uniformBlocks;
+        for (const auto& blockInfo : uniformBlocksInfo) {
+            GLint index = MBGL_CHECK_ERROR(glGetUniformBlockIndex(program, blockInfo.name.data()));
+            GLint size = 0;
+            MBGL_CHECK_ERROR(glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_DATA_SIZE, &size));
+            assert(size > 0);
+            GLint binding = static_cast<GLint>(blockInfo.binding);
+            MBGL_CHECK_ERROR(glUniformBlockBinding(program, index, binding));
+            uniformBlocks.set(blockInfo.id, binding, size);
+        }
+
+        SamplerLocationArray samplerLocations;
+        for (const auto& textureInfo : texturesInfo) {
+            GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, textureInfo.name.data()));
+            assert(location != -1);
+            if (location != -1) {
+                samplerLocations[textureInfo.id] = location;
+            }
+        }
+
+        VertexAttributeArrayGL attrs;
+        GLint count = 0;
+        GLint maxLength = 0;
+        MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &count));
+        MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxLength));
+        auto name = std::vector<GLchar>(maxLength);
+        for (GLint index = 0; index < count; ++index) {
+            GLsizei length = 0; // "number of characters actually written in name (excluding the null terminator)"
+            GLint size = 0;     // "size of the attribute variable, in units of the type returned in type"
+            GLenum glType = 0;
+            MBGL_CHECK_ERROR(glGetActiveAttrib(program, index, maxLength, &length, &size, &glType, name.data()));
+            if (!strncmp(name.data(), "gl_", 3)) { // Is there a better way to detect built-in attributes?
+                continue;
+            }
+            const GLint location = MBGL_CHECK_ERROR(glGetAttribLocation(program, name.data()));
+            assert(attributesInfo[location].name == std::string_view(name.data()));
+            addAttr(attrs, attributesInfo[location].id, location, length, size, glType);
+        }
+
+        return std::make_shared<ShaderProgramGL>(
+            std::move(program), std::move(uniformBlocks), std::move(attrs), std::move(samplerLocations));
     } catch (const std::exception& e) {
         context.getObserver().onShaderCompileFailed(programParameters.getProgramType(), gfx::Backend::Type::OpenGL);
         std::rethrow_exception(std::current_exception());
     }
-
-    UniformBlockArrayGL uniformBlocks;
-    for (const auto& blockInfo : uniformBlocksInfo) {
-        GLint index = MBGL_CHECK_ERROR(glGetUniformBlockIndex(program, blockInfo.name.data()));
-        GLint size = 0;
-        MBGL_CHECK_ERROR(glGetActiveUniformBlockiv(program, index, GL_UNIFORM_BLOCK_DATA_SIZE, &size));
-        assert(size > 0);
-        GLint binding = static_cast<GLint>(blockInfo.binding);
-        MBGL_CHECK_ERROR(glUniformBlockBinding(program, index, binding));
-        uniformBlocks.set(blockInfo.id, binding, size);
-    }
-
-    SamplerLocationArray samplerLocations;
-    for (const auto& textureInfo : texturesInfo) {
-        GLint location = MBGL_CHECK_ERROR(glGetUniformLocation(program, textureInfo.name.data()));
-        assert(location != -1);
-        if (location != -1) {
-            samplerLocations[textureInfo.id] = location;
-        }
-    }
-
-    VertexAttributeArrayGL attrs;
-    GLint count = 0;
-    GLint maxLength = 0;
-    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &count));
-    MBGL_CHECK_ERROR(glGetProgramiv(program, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &maxLength));
-    auto name = std::vector<GLchar>(maxLength);
-    for (GLint index = 0; index < count; ++index) {
-        GLsizei length = 0; // "number of characters actually written in name (excluding the null terminator)"
-        GLint size = 0;     // "size of the attribute variable, in units of the type returned in type"
-        GLenum glType = 0;
-        MBGL_CHECK_ERROR(glGetActiveAttrib(program, index, maxLength, &length, &size, &glType, name.data()));
-        if (!strncmp(name.data(), "gl_", 3)) { // Is there a better way to detect built-in attributes?
-            continue;
-        }
-        const GLint location = MBGL_CHECK_ERROR(glGetAttribLocation(program, name.data()));
-        assert(attributesInfo[location].name == std::string_view(name.data()));
-        addAttr(attrs, attributesInfo[location].id, location, length, size, glType);
-    }
-
-    return std::make_shared<ShaderProgramGL>(
-        std::move(program), std::move(uniformBlocks), std::move(attrs), std::move(samplerLocations));
 }
 
 } // namespace gl

@@ -765,8 +765,8 @@ class FakeTileSource;
 
 class FakeTile : public Tile {
 public:
-    FakeTile(FakeTileSource& source_, const OverscaledTileID& tileID)
-        : Tile(Tile::Kind::Geometry, tileID),
+    FakeTile(FakeTileSource& source_, const OverscaledTileID& tileID, TileObserver* observer)
+        : Tile(Tile::Kind::Geometry, tileID, observer),
           source(source_) {
         renderable = true;
     }
@@ -802,7 +802,8 @@ public:
                            util::tileSize_I,
                            tileset.zoomRange,
                            tileset.bounds,
-                           [&](const OverscaledTileID& tileID) { return std::make_unique<FakeTile>(*this, tileID); });
+                           [&](const OverscaledTileID& tileID, TileObserver* observer) {
+                             return std::make_unique<FakeTile>(*this, tileID, observer); });
     }
 
     const std::optional<Tileset>& getTileset() const override {

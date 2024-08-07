@@ -21,7 +21,7 @@ public:
                        const TileParameters&,
                        Immutable<style::CustomGeometrySource::TileOptions>,
                        ActorRef<style::CustomTileLoader> loader,
-                       TileObserver*);
+                       TileObserver* observer = nullptr);
     ~CustomGeometryTile() override;
 
     void setTileData(const GeoJSON& geoJSON);

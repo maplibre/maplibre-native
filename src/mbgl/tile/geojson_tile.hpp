@@ -16,7 +16,7 @@ public:
                 std::string sourceID,
                 const TileParameters&,
                 std::shared_ptr<style::GeoJSONData>,
-                TileObserver*);
+                TileObserver* observer = nullptr);
 
     void updateData(std::shared_ptr<style::GeoJSONData> data, bool needsRelayout = false);
 

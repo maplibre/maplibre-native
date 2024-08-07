@@ -28,7 +28,7 @@ class TileAtlasTextures;
 
 class GeometryTile : public Tile, public GlyphRequestor, public ImageRequestor {
 public:
-    GeometryTile(const OverscaledTileID&, std::string sourceID, const TileParameters&, TileObserver*);
+    GeometryTile(const OverscaledTileID&, std::string sourceID, const TileParameters&, TileObserver* observer = nullptr);
 
     ~GeometryTile() override;
 

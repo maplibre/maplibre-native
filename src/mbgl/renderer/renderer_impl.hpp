@@ -25,7 +25,7 @@ class ShadeRegistry;
 class Renderer::Impl : public gfx::ContextObserver {
 public:
     Impl(gfx::RendererBackend&, float pixelRatio_, const std::optional<std::string>& localFontFamily_);
-    ~Impl();
+    virtual ~Impl();
 
     // ContextObserver
     void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type) override;
