@@ -426,10 +426,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         // If we already have drawables for this tile, update them.
         auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
             drawable.setVertexAttributes(vertexAttrs);
             return true;
         };
@@ -504,6 +500,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->flush(context);
                     for (auto& drawable : builder->clearDrawables()) {
                         addDrawable(std::move(drawable), FillVariant::FillOutlineTriangulated);
+                        drawable->setBinders(renderData->bucket, &binders);
+                        drawable->setRenderTile(renderTilesOwner, &tile);
+
                     }
                 }
             };
@@ -543,6 +542,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 builder.flush(context);
 
                 for (auto& drawable : builder.clearDrawables()) {
+                    drawable->setBinders(renderData->bucket, &binders);
+                    drawable->setRenderTile(renderTilesOwner, &tile);
+
                     addDrawable(std::move(drawable), type);
                 }
             };
@@ -654,6 +656,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 builder.flush(context);
 
                 for (auto& drawable : builder.clearDrawables()) {
+                    drawable->setBinders(renderData->bucket, &binders);
+                    drawable->setRenderTile(renderTilesOwner, &tile);
+
                     addDrawable(std::move(drawable), type);
                 }
             };
