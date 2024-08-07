@@ -386,7 +386,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         setRenderTileBucketID(tileID, bucket.getID());
 
         const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
-        const auto& crossfade = getCrossfade<FillLayerProperties>(renderData->layerProperties);
 
         gfx::DrawableTweakerPtr atlasTweaker;
         auto getAtlasTweaker = [&]() {
