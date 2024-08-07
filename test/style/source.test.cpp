@@ -802,8 +802,8 @@ public:
                            util::tileSize_I,
                            tileset.zoomRange,
                            tileset.bounds,
-                           [&](const OverscaledTileID& tileID, TileObserver* observer) {
-                               return std::make_unique<FakeTile>(*this, tileID, observer);
+                           [&](const OverscaledTileID& tileID, TileObserver* observer_) {
+                               return std::make_unique<FakeTile>(*this, tileID, observer_);
                            });
     }
 
