@@ -765,8 +765,8 @@ class FakeTileSource;
 
 class FakeTile : public Tile {
 public:
-    FakeTile(FakeTileSource& source_, const OverscaledTileID& tileID, TileObserver* observer)
-        : Tile(Tile::Kind::Geometry, tileID, observer),
+    FakeTile(FakeTileSource& source_, const OverscaledTileID& tileID, TileObserver* observer_)
+        : Tile(Tile::Kind::Geometry, tileID, observer_),
           source(source_) {
         renderable = true;
     }
