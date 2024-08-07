@@ -135,7 +135,8 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
     const vk::CommandBufferAllocateInfo allocateInfo(
         backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
 
-    const auto& commandBuffers = backend.getDevice()->allocateCommandBuffersUnique(allocateInfo);
+    const auto& device = backend.getDevice();
+    const auto& commandBuffers = device->allocateCommandBuffersUnique(allocateInfo);
     auto& commandBuffer = commandBuffers.front();
 
     backend.setDebugName(commandBuffer.get(), "OneTimeSubmitCommandBuffer");
@@ -146,8 +147,14 @@ void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueComm
 
     const auto submitInfo = vk::SubmitInfo().setCommandBuffers(commandBuffer.get());
 
-    backend.getGraphicsQueue().submit(submitInfo);
-    backend.getDevice()->waitIdle();
+    const auto& fence = device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlags()));
+    backend.getGraphicsQueue().submit(submitInfo, fence.get());
+
+    constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
+    const vk::Result waitFenceResult = device->waitForFences(1, &fence.get(), VK_TRUE, timeout);
+    if (waitFenceResult != vk::Result::eSuccess) {
+        mbgl::Log::Error(mbgl::Event::Render, "OneTimeCommand - Wait fence failed");
+    }
 }
 
 void Context::waitFrame() const {
@@ -161,10 +168,27 @@ void Context::waitFrame() const {
     }
 }
 void Context::beginFrame() {
-    backend.startFrameCapture();
-
     const auto& device = backend.getDevice();
     auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
+    const auto& platformSurface = renderableResource.getPlatformSurface();
+
+    if (platformSurface && surfaceUpdateRequested) {
+        renderableResource.recreateSwapchain();
+
+        // we wait for an idle device to recreate the swapchain
+        // so it's a good oportunity to delete all queued items
+        for (auto& frame : frameResources) {
+            device->resetDescriptorPool(frame.descriptorPool.get());
+            frame.runDeletionQueue(*this);
+        }
+
+        // sync resources with swapchain
+        frameResourceIndex = 0;
+        surfaceUpdateRequested = false;
+    }
+
+    backend.startFrameCapture();
+
     auto& frame = frameResources[frameResourceIndex];
     constexpr uint64_t timeout = std::numeric_limits<uint64_t>::max();
 
@@ -173,18 +197,25 @@ void Context::beginFrame() {
     device->resetDescriptorPool(getCurrentDescriptorPool().get());
     frame.runDeletionQueue(*this);
 
-    if (renderableResource.getPlatformSurface()) {
+    if (platformSurface) {
         try {
             const vk::ResultValue acquireImageResult = device->acquireNextImageKHR(
                 renderableResource.getSwapchain().get(), timeout, frame.surfaceSemaphore.get(), nullptr);
 
-            if (acquireImageResult.result == vk::Result::eSuccess)
+            if (acquireImageResult.result == vk::Result::eSuccess) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
-            else if (acquireImageResult.result == vk::Result::eSuboptimalKHR)
-                renderableResource.recreateSwapchain();
+            } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
+                // request an update and restart frame
+                requestSurfaceUpdate();
+                beginFrame();
+                return;
+            }
 
         } catch (const vk::OutOfDateKHRError& e) {
-            renderableResource.recreateSwapchain();
+            // request an update and restart frame
+            requestSurfaceUpdate();
+            beginFrame();
+            return;
         }
     } else {
         renderableResource.setAcquiredImageIndex(frameResourceIndex);
@@ -203,12 +234,13 @@ void Context::endFrame() {
     const auto& device = backend.getDevice();
     const auto& graphicsQueue = backend.getGraphicsQueue();
     auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
+    const auto& platformSurface = renderableResource.getPlatformSurface();
 
     // submit frame commands
     const vk::PipelineStageFlags waitStageMask[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
     auto submitInfo = vk::SubmitInfo().setCommandBuffers(frame.commandBuffer.get());
 
-    if (renderableResource.getPlatformSurface()) {
+    if (platformSurface) {
         submitInfo.setSignalSemaphores(frame.frameSemaphore.get())
             .setWaitSemaphores(frame.surfaceSemaphore.get())
             .setWaitDstStageMask(waitStageMask);
@@ -222,7 +254,7 @@ void Context::endFrame() {
     graphicsQueue.submit(submitInfo, frame.flightFrameFence.get());
 
     // present rendered frame
-    if (renderableResource.getPlatformSurface()) {
+    if (platformSurface) {
         const auto acquiredImage = renderableResource.getAcquiredImageIndex();
         const auto presentInfo = vk::PresentInfoKHR()
                                      .setSwapchains(renderableResource.getSwapchain().get())
@@ -232,9 +264,11 @@ void Context::endFrame() {
         try {
             const auto& presentQueue = backend.getPresentQueue();
             const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
-            if (presentResult == vk::Result::eSuboptimalKHR) renderableResource.recreateSwapchain();
+            if (presentResult == vk::Result::eSuboptimalKHR) {
+                requestSurfaceUpdate();
+            }
         } catch (const vk::OutOfDateKHRError& e) {
-            renderableResource.recreateSwapchain();
+            requestSurfaceUpdate();
         }
     }
 

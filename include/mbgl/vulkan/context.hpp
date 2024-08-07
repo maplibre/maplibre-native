@@ -144,6 +144,8 @@ public:
     void enqueueDeletion(std::function<void(const Context&)>&& function);
     void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
 
+    void requestSurfaceUpdate() { surfaceUpdateRequested = true; }
+
 private:
     struct FrameResources {
         vk::UniqueCommandBuffer commandBuffer;
@@ -188,6 +190,7 @@ private:
 
     uint8_t frameResourceIndex = 0;
     std::vector<FrameResources> frameResources;
+    bool surfaceUpdateRequested{false};
 
     struct {
         gfx::ShaderProgramBasePtr shader;

@@ -74,6 +74,9 @@ android {
         create("drawable") {
             dimension = "renderer"
         }
+        create("vulkan") {
+            dimension = "renderer"
+        }
     }
 
     buildFeatures {

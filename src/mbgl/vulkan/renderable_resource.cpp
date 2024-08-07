@@ -337,7 +337,7 @@ void SurfaceRenderableResource::recreateSwapchain() {
 }
 
 const vk::UniqueFramebuffer& SurfaceRenderableResource::getFramebuffer() const {
-    return swapchainFramebuffers[backend.getContext<Context&>().getCurrentFrameResourceIndex()];
+    return swapchainFramebuffers[acquiredImageIndex];
 }
 
 } // namespace vulkan

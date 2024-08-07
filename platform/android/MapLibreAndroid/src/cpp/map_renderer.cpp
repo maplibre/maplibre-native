@@ -6,6 +6,7 @@
 #include <mbgl/util/logging.hpp>
 
 #include <string>
+#include <android/native_window_jni.h>
 
 #include "attach_env.hpp"
 #include "android_renderer_backend.hpp"
@@ -23,8 +24,7 @@ MapRenderer::MapRenderer(jni::JNIEnv& _env,
       localIdeographFontFamily(localIdeographFontFamily_ ? jni::Make<std::string>(_env, localIdeographFontFamily_)
                                                          : std::optional<std::string>{}),
       threadPool(Scheduler::GetBackground(), {}),
-      mailboxData(this),
-      backend(std::make_unique<AndroidRendererBackend>(threadPool)) {}
+      mailboxData(this) {}
 
 MapRenderer::MailboxData::MailboxData(Scheduler* scheduler_)
     : scheduler(scheduler_) {
@@ -160,7 +160,6 @@ void MapRenderer::requestSnapshot(SnapshotCallback callback) {
 
 void MapRenderer::resetRenderer() {
     renderer.reset();
-    backend = std::make_unique<AndroidRendererBackend>(threadPool);
 }
 
 void MapRenderer::scheduleSnapshot(std::unique_ptr<SnapshotCallback> callback) {
@@ -183,7 +182,7 @@ void MapRenderer::render(JNIEnv&) {
 
     // Activate the backend
     assert(backend);
-    gfx::BackendScope backendGuard{*backend};
+    gfx::BackendScope backendGuard{backend->getImpl()};
 
     // Ensure that the "current" scheduler on the render thread is
     // this scheduler.
@@ -203,13 +202,9 @@ void MapRenderer::render(JNIEnv&) {
     }
 }
 
-void MapRenderer::onSurfaceCreated(JNIEnv&) {
+void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface>& surface) {
     // Lock as the initialization can come from the main thread or the GL thread first
     std::lock_guard<std::mutex> lock(initialisationMutex);
-
-    // The GL context is already active if get a new surface.
-    assert(backend);
-    gfx::BackendScope backendGuard{*backend, gfx::BackendScope::ScopeType::Implicit};
 
     // The android system will have already destroyed the underlying
     // GL resources if this is not the first initialization and an
@@ -220,10 +215,17 @@ void MapRenderer::onSurfaceCreated(JNIEnv&) {
     // Reset in opposite order
     renderer.reset();
     backend.reset();
+    window.reset();
+
+    if (surface) {
+        window = std::unique_ptr<ANativeWindow, std::function<void(ANativeWindow*)>>(
+            ANativeWindow_fromSurface(&env, reinterpret_cast<jobject>(surface.get())),
+            [](ANativeWindow* window_) { ANativeWindow_release(window_); });
+    }
 
     // Create the new backend and renderer
-    backend = std::make_unique<AndroidRendererBackend>(threadPool);
-    renderer = std::make_unique<Renderer>(*backend, pixelRatio, localIdeographFontFamily);
+    backend = AndroidRendererBackend::Create(window.get());
+    renderer = std::make_unique<Renderer>(backend->getImpl(), pixelRatio, localIdeographFontFamily);
     rendererRef = std::make_unique<ActorRef<Renderer>>(*renderer, mailboxData.getMailbox());
 
     // Set the observer on the new Renderer implementation
@@ -235,7 +237,8 @@ void MapRenderer::onSurfaceCreated(JNIEnv&) {
 void MapRenderer::onSurfaceChanged(JNIEnv& env, jint width, jint height) {
     if (!renderer) {
         // In case the surface has been destroyed (due to app back-grounding)
-        onSurfaceCreated(env);
+        jni::jobject* nullObj = nullptr;
+        onSurfaceCreated(env, jni::Object<AndroidSurface>(nullObj));
     }
 
     backend->resizeFramebuffer(width, height);
@@ -252,6 +255,7 @@ void MapRenderer::onRendererReset(JNIEnv&) {
 // needs to be called on GL thread
 void MapRenderer::onSurfaceDestroyed(JNIEnv&) {
     resetRenderer();
+    window.reset();
 }
 
 void MapRenderer::setSwapBehaviorFlush(JNIEnv&, jboolean flush) {
