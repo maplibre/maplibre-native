@@ -112,13 +112,13 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                     const auto& crossfade_,
                     const gfx::StencilMode& stencilMode,
                     const gfx::ColorMode& colorMode,
-                    const auto& tileBucket,
+                    auto& tileBucket,
                     const auto& uniformValues,
                     const std::optional<ImagePosition>& patternPositionA,
                     const std::optional<ImagePosition>& patternPositionB,
                     const auto& textureBindings,
                     const std::string& uniqueName) {
-        const auto& paintPropertyBinders = tileBucket.paintPropertyBinders.at(getID());
+        auto& paintPropertyBinders = tileBucket.paintPropertyBinders.at(getID());
         paintPropertyBinders.setPatternParameters(patternPositionA, patternPositionB, crossfade_);
 
         const auto allUniformValues = programInstance.computeAllUniformValues(
@@ -152,7 +152,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                     if (!renderData) {
                         continue;
                     }
-                    const auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
+                    auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
                     draw(*fillExtrusionProgram,
                          evaluated,
                          crossfade,
@@ -200,7 +200,7 @@ void RenderFillExtrusionLayer::render(PaintParameters& parameters) {
                     if (!renderData) {
                         continue;
                     }
-                    const auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
+                    auto& bucket = static_cast<FillExtrusionBucket&>(*renderData->bucket);
                     const std::optional<ImagePosition> patternPosA = tile.getPattern(fillPatternValue.from.id());
                     const std::optional<ImagePosition> patternPosB = tile.getPattern(fillPatternValue.to.id());
                     const auto numTiles = std::pow(2, tile.id.canonical.z);
