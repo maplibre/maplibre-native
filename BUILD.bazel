@@ -123,6 +123,7 @@ cc_library(
     deps = [
         ":mbgl-core-generated-private-artifacts",
         ":mbgl-core-generated-public-artifacts",
+        "//rustutils:rustutils",
         "//vendor:boost",
         "//vendor:earcut.hpp",
         "//vendor:eternal",

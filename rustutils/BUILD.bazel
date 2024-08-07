@@ -1,0 +1,14 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_static_library")
+load("//bazel:rust_cxx_bridge.bzl", "rust_cxx_bridge")
+
+rust_cxx_bridge(
+    name = "bridge",
+    src = "src/lib.rs",
+)
+
+rust_static_library(
+    name = "rustutils",
+    srcs = ["src/**/*.rs"],
+    edition = "2021",
+)
