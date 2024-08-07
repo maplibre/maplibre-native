@@ -431,6 +431,16 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
+        const auto addDrawable = [&](std::unique_ptr<gfx::Drawable> drawable, FillVariant type) {
+            drawable->setTileID(tileID);
+            drawable->setType(static_cast<size_t>(type));
+            drawable->setLayerTweaker(layerTweaker);
+            drawable->setBinders(renderData->bucket, &binders);
+            drawable->setRenderTile(renderTilesOwner, &tile);
+            fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+            ++stats.drawablesAdded;
+        };
+
         // Outline always occurs in translucent pass, defaults to fill color
         // Outline does not default to fill in the pattern case
         const auto doOutline = evaluated.get<FillAntialias>() && (unevaluated.get<FillPattern>().isUndefined() ||
@@ -485,16 +495,9 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                          bucket.lineSegments.data(),
                                          bucket.lineSegments.size());
 
-                    // finish
                     builder->flush(context);
                     for (auto& drawable : builder->clearDrawables()) {
-                        drawable->setTileID(tileID);
-                        drawable->setType(static_cast<size_t>(FillVariant::FillOutlineTriangulated));
-                        drawable->setBinders(renderData->bucket, &binders);
-                        drawable->setRenderTile(renderTilesOwner, &tile);
-
-                        fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                        ++stats.drawablesAdded;
+                        addDrawable(std::move(drawable), FillVariant::FillOutlineTriangulated);
                     }
                 }
             };
@@ -534,14 +537,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 builder.flush(context);
 
                 for (auto& drawable : builder.clearDrawables()) {
-                    drawable->setTileID(tileID);
-                    drawable->setLayerTweaker(layerTweaker);
-                    drawable->setType(static_cast<size_t>(type));
-                    drawable->setBinders(renderData->bucket, &binders);
-                    drawable->setRenderTile(renderTilesOwner, &tile);
-
-                    fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                    ++stats.drawablesAdded;
+                    addDrawable(std::move(drawable), type);
                 }
             };
 
@@ -652,14 +648,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 builder.flush(context);
 
                 for (auto& drawable : builder.clearDrawables()) {
-                    drawable->setTileID(tileID);
-                    drawable->setLayerTweaker(layerTweaker);
-                    drawable->setType(static_cast<size_t>(type));
-                    drawable->setBinders(renderData->bucket, &binders);
-                    drawable->setRenderTile(renderTilesOwner, &tile);
-
-                    fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
-                    ++stats.drawablesAdded;
+                    addDrawable(std::move(drawable), type);
                 }
             };
 
