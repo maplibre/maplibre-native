@@ -71,7 +71,7 @@ public:
     // as the registry becomes available.
     virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
 
-    // Shaders compilation
+    // Shader compilation
     virtual void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type) {}
     virtual void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type) {}
     virtual void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type) {}
@@ -82,11 +82,11 @@ public:
     virtual void onGlyphsRequested(const FontStack&, const GlyphRange&) {}
 
     // Tile requests
-    virtual void onTileRequested(const OverscaledTileID&) {};
-    virtual void onTileLoadedFromNetwork(const OverscaledTileID&) {};
-    virtual void onTileLoadedFromDisk(const OverscaledTileID&) {};
-    virtual void onTileFailedToLoad(const OverscaledTileID&) {};
-    virtual void onTileFinishedLoading(const OverscaledTileID&) {}; // Client-side tile processing
+    virtual void onTileRequested(const OverscaledTileID&) {}
+    virtual void onTileLoadedFromNetwork(const OverscaledTileID&) {}
+    virtual void onTileLoadedFromDisk(const OverscaledTileID&) {}
+    virtual void onTileFailedToLoad(const OverscaledTileID&) {}
+    virtual void onTileFinishedLoading(const OverscaledTileID&) {} // Client-side tile processing
 
     // Sprite requests
     virtual void onSpriteLoaded(const std::optional<style::Sprite>&) {}
