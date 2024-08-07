@@ -58,7 +58,7 @@ public:
     Tile& operator=(const Tile&) = delete;
 
     Tile(Kind, OverscaledTileID, TileObserver* observer = nullptr);
-    virtual ~Tile();
+    ~Tile() override;
 
     virtual std::unique_ptr<TileRenderData> createRenderData() = 0;
 
