@@ -398,6 +398,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/geo.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/geojson.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/geometry.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/hash.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/ignore.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/image.hpp
@@ -932,7 +933,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/geometry_util.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/grid_index.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/grid_index.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/hash.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/http_header.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/http_header.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/http_timeout.cpp
