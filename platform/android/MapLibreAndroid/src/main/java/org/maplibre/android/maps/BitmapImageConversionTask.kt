@@ -25,7 +25,8 @@ internal class BitmapImageConversionTask(
 		}
 	}
 
-	fun cancel() {
+	/** Cancel any currently executing coroutines. */
+	fun cancelAll() {
 		job.cancel()
 	}
 }

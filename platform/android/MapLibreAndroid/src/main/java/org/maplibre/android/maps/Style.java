@@ -723,7 +723,7 @@ public class Style {
     sources.clear();
     layers.clear();
     images.clear();
-    bitmapImageConversionTask.cancel();
+    bitmapImageConversionTask.cancelAll();
   }
 
   /**

@@ -15,9 +15,9 @@ object FileUtils {
 	 *
 	 * @param path the path of the file that should be deleted
 	 */
-	fun deleteFile(path: String) {
+	fun deleteFile(path: String, scope: CoroutineScope) {
 		// Delete the file in a separate thread to avoid affecting the UI
-		Thread {
+		scope.launch(Dispatchers.IO) {
 			try {
 				val file = File(path)
 				if (file.exists()) {
@@ -30,7 +30,7 @@ object FileUtils {
 			} catch (exception: Exception) {
 				Logger.e(TAG, "Failed to delete file: ", exception)
 			}
-		}.start()
+		}
 	}
 }
 

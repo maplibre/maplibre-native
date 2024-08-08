@@ -11,6 +11,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import org.maplibre.android.log.Logger
 import org.maplibre.android.offline.OfflineManager
 import org.maplibre.android.offline.OfflineRegion
@@ -46,7 +47,7 @@ class ChangeResourcesCachePathActivity :
         binding.listView.emptyView = binding.empty
         binding.listView.onItemClickListener = this
 
-        offlineManager = OfflineManager.getInstance(this)
+        offlineManager = OfflineManager.getInstance(this, lifecycleScope)
     }
 
     override fun onStart() {

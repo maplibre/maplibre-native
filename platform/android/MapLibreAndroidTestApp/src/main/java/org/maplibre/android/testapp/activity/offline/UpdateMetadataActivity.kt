@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.offline.OfflineManager
@@ -110,7 +111,7 @@ class UpdateMetadataActivity :
     }
 
     private fun loadOfflineRegions() {
-        OfflineManager.getInstance(this).listOfflineRegions(object : ListOfflineRegionsCallback {
+        OfflineManager.getInstance(this, lifecycleScope).listOfflineRegions(object : ListOfflineRegionsCallback {
             override fun onList(offlineRegions: Array<OfflineRegion>?) {
                 if (offlineRegions != null && offlineRegions.size > 0) {
                     adapter!!.setOfflineRegions(listOf(*offlineRegions))
