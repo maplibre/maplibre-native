@@ -16,8 +16,6 @@ class SymbolLayerTweaker : public LayerTweaker {
 public:
     SymbolLayerTweaker(std::string id_, Immutable<style::LayerProperties> properties)
         : LayerTweaker(std::move(id_), properties) {}
-
-public:
     ~SymbolLayerTweaker() override = default;
 
     void execute(LayerGroupBase&, const PaintParameters&) override;
@@ -27,8 +25,8 @@ private:
 
     // Interpolation UBOs are shared by drawables of the same type (text/icon) in each tile
     struct InterpUBOKey {
-        const UnwrappedTileID tileID;
-        const bool isText;
+        UnwrappedTileID tileID;
+        bool isText;
 
         bool operator==(const InterpUBOKey& other) const { return isText == other.isText && tileID == other.tileID; }
     };
