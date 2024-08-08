@@ -21,7 +21,8 @@ using namespace style;
 
 RenderLayer::RenderLayer(Immutable<style::LayerProperties> properties)
     : evaluatedProperties(std::move(properties)),
-      baseImpl(evaluatedProperties->baseImpl) {}
+      baseImpl(evaluatedProperties->baseImpl),
+      renderTilesOwner(makeMutable<std::vector<RenderTile>>()) {}
 
 void RenderLayer::transition(const TransitionParameters& parameters, Immutable<style::Layer::Impl> newImpl) {
     baseImpl = std::move(newImpl);
@@ -58,6 +59,7 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     assert(params.source);
     assert(params.source->isEnabled());
     renderTiles = params.source->getRenderTiles();
+    renderTilesOwner = params.source->getRawRenderTiles();
     addRenderPassesFromTiles();
 
 #if MLN_DRAWABLE_RENDERER

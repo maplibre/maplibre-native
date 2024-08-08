@@ -130,7 +130,7 @@ void RenderHeatmapLayer::render(PaintParameters& parameters) {
 
             const auto extrudeScale = tile.id.pixelsToTileUnits(1.0f, static_cast<float>(parameters.state.getZoom()));
 
-            const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+            auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
             const auto allUniformValues = HeatmapProgram::computeAllUniformValues(
                 HeatmapProgram::LayoutUniformValues{
@@ -363,7 +363,7 @@ void RenderHeatmapLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto& bucket = static_cast<HeatmapBucket&>(*renderData->bucket);
         const auto vertexCount = bucket.vertices.elements();
-        const auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
+        auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
