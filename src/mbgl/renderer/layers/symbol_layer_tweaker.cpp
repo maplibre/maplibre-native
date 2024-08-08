@@ -86,13 +86,13 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                                                   /*.text_opacity=*/constOrDefault<TextOpacity>(evaluated),
                                                   /*.text_halo_width=*/constOrDefault<TextHaloWidth>(evaluated),
                                                   /*.text_halo_blur=*/constOrDefault<TextHaloBlur>(evaluated),
-                                                  0,
+                                                  /* pad */ 0,
                                                   /*.icon_fill_color=*/constOrDefault<IconColor>(evaluated),
                                                   /*.icon_halo_color=*/constOrDefault<IconHaloColor>(evaluated),
                                                   /*.icon_opacity=*/constOrDefault<IconOpacity>(evaluated),
                                                   /*.icon_halo_width=*/constOrDefault<IconHaloWidth>(evaluated),
                                                   /*.icon_halo_blur=*/constOrDefault<IconHaloBlur>(evaluated),
-                                                  0};
+                                                  /* pad */ 0};
         context.emplaceOrUpdateUniformBuffer(evaluatedPropsUniformBuffer, &propsUBO);
         propertiesUpdated = false;
     }
@@ -202,6 +202,18 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         drawableUniforms.createOrUpdate(idSymbolTilePropsUBO, &tileUBO, context);
         drawableUniforms.set(idSymbolInterpolateUBO, getInterpUBO(tileID, isText, paintProperties));
     });
+
+    // Regularly remove UBOs which are not being updated
+    constexpr int pruneFrameInterval = 10;
+    if ((parameters.frameCount % pruneFrameInterval) == 0) {
+        for (auto i = interpUBOs.begin(); i != interpUBOs.end();) {
+            if (i->second.updatedFrame < parameters.frameCount) {
+                i = interpUBOs.erase(i);
+            } else {
+                i++;
+            }
+        }
+    }
 }
 
 } // namespace mbgl
