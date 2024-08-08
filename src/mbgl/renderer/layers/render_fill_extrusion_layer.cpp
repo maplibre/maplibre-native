@@ -17,7 +17,6 @@
 #include <mbgl/style/layers/fill_extrusion_layer_impl.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/tile.hpp>
-#include <mbgl/util/convert.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/math.hpp>
 
@@ -271,9 +270,9 @@ bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates&
 
 void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
-                                      const TransformState& state,
+                                      const TransformState&,
                                       const std::shared_ptr<UpdateParameters>&,
-                                      const RenderTree& /*renderTree*/,
+                                      const RenderTree&,
                                       UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
         removeAllDrawables();
@@ -320,7 +319,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         return false;
     });
 
-    const auto zoom = static_cast<float>(state.getZoom());
     const auto layerPrefix = getID() + "/";
     const auto hasPattern = !unevaluated.get<FillExtrusionPattern>().isUndefined();
     const auto opaque = evaluated.get<FillExtrusionOpacity>() >= 1;
@@ -365,30 +363,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
 
         const auto vertexCount = bucket.vertices.elements();
-        const auto defPattern = mbgl::Faded<expression::Image>{"", ""};
-        const auto fillPatternValue = evaluated.get<FillExtrusionPattern>().constantOr(defPattern);
-        const auto patternPosA = tile.getPattern(fillPatternValue.from.id());
-        const auto patternPosB = tile.getPattern(fillPatternValue.to.id());
-
         auto& binders = bucket.paintPropertyBinders.at(getID());
-        if (hasPattern) {
-            binders.setPatternParameters(patternPosA, patternPosB, crossfade);
-        }
-
-        const FillExtrusionInterpolateUBO interpUBO = {
-            /* .base_t = */ std::get<0>(binders.get<FillExtrusionBase>()->interpolationFactor(zoom)),
-            /* .height_t = */ std::get<0>(binders.get<FillExtrusionHeight>()->interpolationFactor(zoom)),
-            /* .color_t = */ std::get<0>(binders.get<FillExtrusionColor>()->interpolationFactor(zoom)),
-            /* .pattern_from_t = */ std::get<0>(binders.get<FillExtrusionPattern>()->interpolationFactor(zoom)),
-            /* .pattern_to_t = */ std::get<0>(binders.get<FillExtrusionPattern>()->interpolationFactor(zoom)),
-            /* .pad = */ 0,
-            0,
-            0};
-
-        const FillExtrusionTilePropsUBO tilePropsUBO = {
-            /* pattern_from = */ patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
-            /* pattern_to = */ patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0},
-        };
 
         // If we already have drawables for this tile, update them.
         auto updateExisting = [&](gfx::Drawable& drawable) {
@@ -396,10 +371,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 // This drawable was produced on a previous style/bucket, and should not be updated.
                 return false;
             }
-
-            auto& drawableUniforms = drawable.mutableUniformBuffers();
-            drawableUniforms.createOrUpdate(idFillExtrusionTilePropsUBO, &tilePropsUBO, context);
-            drawableUniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
             return true;
         };
         if (updateTile(drawPass, tileID, std::move(updateExisting))) {
@@ -510,11 +481,10 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
 
             for (auto& drawable : builder.clearDrawables()) {
                 drawable->setTileID(tileID);
+                drawable->setType(static_cast<std::size_t>(hasPattern));
                 drawable->setLayerTweaker(layerTweaker);
-
-                auto& drawableUniforms = drawable->mutableUniformBuffers();
-                drawableUniforms.createOrUpdate(idFillExtrusionTilePropsUBO, &tilePropsUBO, context);
-                drawableUniforms.createOrUpdate(idFillExtrusionInterpolateUBO, &interpUBO, context);
+                drawable->setBinders(renderData.bucket, &binders);
+                drawable->setRenderTile(renderTilesOwner, &tile);
 
                 tileLayerGroup->addDrawable(drawPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;

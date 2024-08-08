@@ -297,10 +297,10 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
-                             const TransformState& /*state*/,
+                             const TransformState&,
                              const std::shared_ptr<UpdateParameters>&,
-                             [[maybe_unused]] const RenderTree& renderTree,
-                             [[maybe_unused]] UniqueChangeRequestVec& changes) {
+                             const RenderTree&,
+                             UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;
@@ -409,6 +409,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         propertiesAsUniforms.second.clear();
 
         // `Fill*Program` all use `style::FillPaintProperties`
+        // TODO: Only rebuild the vertex attributes when something has changed.
+        // TODO: Can we update them in-place instead of replacing?
         auto vertexAttrs = context.createVertexAttributeArray();
         vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
             binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
