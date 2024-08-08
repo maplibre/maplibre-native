@@ -155,7 +155,7 @@ protected:
                                  const std::vector<ProjectedCollisionBox>& /*textBoxes*/,
                                  const std::vector<ProjectedCollisionBox>& /*iconBoxes*/
     ) {}
-    // Implentation specific hooks, which get called during a symbol bucket placement.
+    // Implementation specific hooks, which get called during a symbol bucket placement.
     virtual std::optional<CollisionBoundaries> getAvoidEdges(const SymbolBucket&, const mat4& /*posMatrix*/) {
         return std::nullopt;
     }

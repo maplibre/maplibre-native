@@ -43,7 +43,8 @@ void SourceFeatureState::getState(FeatureState& result,
 }
 
 void SourceFeatureState::coalesceChanges(std::vector<RenderTile>& tiles) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
+
     LayerFeatureStates changes;
     for (const auto& layerStatesEntry : stateChanges) {
         const auto& sourceLayer = layerStatesEntry.first;

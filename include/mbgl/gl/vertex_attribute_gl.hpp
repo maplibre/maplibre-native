@@ -31,9 +31,11 @@ public:
     bool getNormalized() const { return normalized; }
     void setNormalized(bool value) { normalized = value; }
 
-    std::size_t getStride() const;
+    std::size_t getStride() const override;
 
-    static const std::vector<std::uint8_t>& getRaw(gfx::VertexAttribute& attr, platform::GLenum);
+    static const std::vector<std::uint8_t>& getRaw(gfx::VertexAttribute& attr,
+                                                   platform::GLenum,
+                                                   std::chrono::duration<double> lastUpdate);
 
 private:
     static int getSize(platform::GLenum glType);
@@ -57,9 +59,6 @@ public:
         return *this;
     }
     VertexAttributeArrayGL& operator=(const VertexAttributeArrayGL&) = delete;
-
-    /// Indicates whether any values have changed
-    bool isDirty() const override;
 
 private:
     std::unique_ptr<gfx::VertexAttribute> create(int index,

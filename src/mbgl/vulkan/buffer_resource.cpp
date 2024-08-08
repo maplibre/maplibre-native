@@ -133,7 +133,7 @@ BufferResource& BufferResource::operator=(BufferResource&& other) noexcept {
 }
 
 void BufferResource::update(const void* newData, std::size_t updateSize, std::size_t offset) noexcept {
-    assert(size >= 0 && updateSize + offset <= size);
+    assert(updateSize + offset <= size);
     updateSize = std::min(updateSize, size - offset);
     if (updateSize <= 0) {
         return;

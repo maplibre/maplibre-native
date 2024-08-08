@@ -146,6 +146,22 @@ public:
             sharedDynamicVertices->release();
             sharedOpacityVertices->release();
         }
+
+        void updateModified() {
+            if (sharedVertices) {
+                sharedVertices->updateModified();
+            }
+            if (sharedDynamicVertices) {
+                sharedDynamicVertices->updateModified();
+            }
+            if (sharedOpacityVertices) {
+                sharedOpacityVertices->updateModified();
+            }
+            if (sharedTriangles) {
+                sharedTriangles->updateModified();
+            }
+        }
+
         std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
         VertexVector& vertices() { return *sharedVertices; }
         const VertexVector& vertices() const { return *sharedVertices; }

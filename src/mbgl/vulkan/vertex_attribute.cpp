@@ -25,25 +25,13 @@ const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAtt
                     attrib.rawData.data(), attrib.rawData.size(), usage, false);
                 attrib.setBuffer(std::move(buffer));
                 attrib.setRawData({});
+                attrib_.setDirty(false);
             } else {
                 assert(false);
             }
         }
     }
     return attrib_.getBuffer();
-}
-
-bool VertexAttributeArray::isDirty() const {
-    return std::any_of(attrs.begin(), attrs.end(), [](const auto& attr) {
-        if (attr) {
-            // If we have shared data, the dirty flag from that overrides ours
-            const auto& attrib = static_cast<const VertexAttribute&>(*attr);
-            if (const auto& shared = attrib.getSharedRawData()) {
-                return shared->getDirty();
-            }
-        }
-        return attr && attr->isDirty();
-    });
 }
 
 } // namespace vulkan

@@ -340,7 +340,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
         [&](const gfx::UniqueDrawableBuilder& builder, gfx::Drawable* drawable, const RasterBucket& bucket) {
             // The bucket may later add, remove, or change masking.  In that case, the tile's
             // shared data and segments are not updated, and it needs to be re-created.
-            if (drawable && (bucket.sharedVertices->getDirty() || bucket.sharedTriangles->getDirty())) {
+            if (drawable && (bucket.sharedVertices->isModifiedAfter(drawable->createTime) ||
+                             bucket.sharedTriangles->isModifiedAfter(drawable->createTime))) {
                 return false;
             }
 
@@ -447,18 +448,26 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             bool cleared = false;
             auto& bucket = static_cast<RasterBucket&>(*bucket_);
 
-            // If the bucket data has changed, rebuild the drawables.
-            const bool bucketSharedData = (!bucket.vertices.empty() && !bucket.indices.empty() &&
-                                           !bucket.segments.empty());
-            const bool bucketDirty = bucketSharedData && (bucket.vertices.getDirty() || bucket.indices.getDirty());
-            if (bucketDirty) {
-                // Note, vertex/index dirty flags will be reset when those buffers are uploaded.
-                removeTile(renderPass, tileID);
-                cleared = true;
-            } else if (setRenderTileBucketID(tileID, bucket.getID())) {
+            if (setRenderTileBucketID(tileID, bucket.getID())) {
                 // Bucket ID changed, we need to rebuild the drawables
                 removeTile(renderPass, tileID);
                 cleared = true;
+            }
+            // If the bucket data has changed, rebuild the drawables.
+            else if (!bucket.vertices.empty() && !bucket.indices.empty() && !bucket.segments.empty()) {
+                // Find the earliest time on existing drawables
+                std::optional<std::chrono::duration<double>> tileUpdateTime;
+                tileLayerGroup->visitDrawables(renderPass, tileID, [&](const auto& drawable) {
+                    if (!tileUpdateTime || drawable.createTime < *tileUpdateTime) {
+                        tileUpdateTime = drawable.createTime;
+                    }
+                });
+
+                if (tileUpdateTime && (bucket.vertices.isModifiedAfter(*tileUpdateTime) ||
+                                       bucket.indices.isModifiedAfter(*tileUpdateTime))) {
+                    removeTile(renderPass, tileID);
+                    cleared = true;
+                }
             }
 
             if (!cleared) {

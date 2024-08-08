@@ -5,6 +5,7 @@
 #include <mbgl/util/thread_local.hpp>
 #include <mbgl/util/containers.hpp>
 #include <mbgl/util/identity.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #include <algorithm>
 #include <condition_variable>
@@ -107,6 +108,7 @@ public:
     }
 
     void runRenderJobs(const util::SimpleIdentity tag, bool closeQueue = false) override {
+        MLN_TRACE_FUNC();
         std::shared_ptr<RenderQueue> queue;
         std::unique_lock<std::mutex> lock(taggedRenderQueueLock);
 
@@ -130,6 +132,7 @@ public:
             auto fn = std::move(queue->queue.front());
             queue->queue.pop();
             if (fn) {
+                MLN_TRACE_ZONE(render job);
                 fn();
             }
         }

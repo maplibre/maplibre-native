@@ -116,13 +116,14 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
     // We need either raw index data or a buffer already created from them.
     // We can have a buffer and no indexes, but only if it's not marked dirty.
-    if (!impl->indexes || (impl->indexes->empty() && (!impl->indexes->getBuffer() || impl->indexes->getDirty()))) {
+    if (!impl->indexes || (impl->indexes->empty() &&
+                           (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime)))) {
         assert(!"Missing index data");
         return;
     }
 
-    if (impl->indexes->getDirty()) {
-        // Create or update a buffer for the index data.  We don't update any
+    if (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime)) {
+        // Create a buffer for the index data.  We don't update any
         // existing buffer because it may still be in use by the previous frame.
         auto indexBufferResource{uploadPass.createIndexBufferResource(
             impl->indexes->data(), impl->indexes->bytes(), usage, /*persistent=*/false)};
@@ -131,10 +132,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         auto buffer = std::make_unique<IndexBuffer>(std::move(indexBuffer));
 
         impl->indexes->setBuffer(std::move(buffer));
-        impl->indexes->setDirty(false);
     }
 
-    const bool buildAttribs = !vertexAttributes || vertexAttributes->isDirty() ||
+    const bool buildAttribs = !vertexAttributes || vertexAttributes->isModifiedAfter(attributeUpdateTime) ||
                               impl->pipelineInfo.inputAttributes.empty();
 
     if (buildAttribs) {
@@ -155,6 +155,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                     shader->getVertexAttributes(),
                                                                     *vertexAttributes,
                                                                     usage,
+                                                                    attributeUpdateTime,
                                                                     vertexBuffers);
 
         vertexAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
@@ -165,7 +166,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     // build instance buffer
-    const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isDirty());
+    const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isModifiedAfter(attributeUpdateTime));
 
     if (buildInstanceBuffer) {
         // Build instance attribute buffers
@@ -177,6 +178,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                    shader->getInstanceAttributes(),
                                                                    *instanceAttributes,
                                                                    usage,
+                                                                   attributeUpdateTime,
                                                                    instanceBuffers);
 
         // clear dirty flag
@@ -185,6 +187,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         if (impl->instanceBindings != instanceBindings_) {
             impl->instanceBindings = std::move(instanceBindings_);
         }
+
+        attributeUpdateTime = util::MonotonicTimer::now();
     }
 
     if (buildAttribs || buildInstanceBuffer) {
@@ -205,8 +209,8 @@ void Drawable::draw(PaintParameters& parameters) const {
     }
 
     auto& context = static_cast<Context&>(parameters.context);
-    auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
-    auto& encoder = renderPass.getEncoder();
+    auto& renderPass_ = static_cast<RenderPass&>(*parameters.renderPass);
+    auto& encoder = renderPass_.getEncoder();
     auto& commandBuffer = encoder.getCommandBuffer();
 
     auto& shaderImpl = static_cast<mbgl::vulkan::ShaderProgram&>(*shader);
@@ -233,7 +237,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         }
     }
 
-    impl->pipelineInfo.setRenderable(renderPass.getDescriptor().renderable);
+    impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
 
     const uint32_t instances = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
 
@@ -264,17 +268,17 @@ void Drawable::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<UniqueD
     impl->segments = std::move(segments);
 }
 
-void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type) {
+void Drawable::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type_) {
     impl->vertexCount = count;
-    impl->vertexType = type;
+    impl->vertexType = type_;
 
-    if (count && type != gfx::AttributeDataType::Invalid && !data.empty()) {
+    if (count && type_ != gfx::AttributeDataType::Invalid && !data.empty()) {
         if (!vertexAttributes) {
             vertexAttributes = std::make_shared<VertexAttributeArray>();
         }
-        if (auto& attrib = vertexAttributes->set(impl->vertexAttrId, /*index=*/-1, type)) {
+        if (auto& attrib = vertexAttributes->set(impl->vertexAttrId, /*index=*/-1, type_)) {
             attrib->setRawData(std::move(data));
-            attrib->setStride(VertexAttribute::getStrideOf(type));
+            attrib->setStride(VertexAttribute::getStrideOf(type_));
         } else {
             using namespace std::string_literals;
             Log::Warning(Event::General,
@@ -352,9 +356,10 @@ bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
     commandBuffer->bindVertexBuffers(0, impl->vulkanVertexBuffers, impl->vulkanVertexOffsets);
 
     if (impl->indexes) {
-        const auto* indexBuffer = static_cast<const IndexBuffer*>(impl->indexes->getBuffer());
-        const auto& indexBufferResource = indexBuffer->buffer->getResource<IndexBufferResource>().get();
-        commandBuffer->bindIndexBuffer(indexBufferResource.getVulkanBuffer(), 0, vk::IndexType::eUint16);
+        if (const auto* indexBuffer = static_cast<const IndexBuffer*>(impl->indexes->getBuffer())) {
+            const auto& indexBufferResource = indexBuffer->buffer->getResource<IndexBufferResource>().get();
+            commandBuffer->bindIndexBuffer(indexBufferResource.getVulkanBuffer(), 0, vk::IndexType::eUint16);
+        }
     }
 
     return true;
