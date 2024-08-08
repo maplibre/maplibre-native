@@ -39,7 +39,7 @@ private:
     void makeOptional();
 
     void loadFromCache();
-    void loadedData(const Response&);
+    void loadedData(const Response&, Resource::LoadingMethod);
     void loadFromNetwork();
 
     bool hasPendingNetworkRequest() const {
@@ -52,6 +52,7 @@ private:
     std::shared_ptr<FileSource> fileSource;
     std::unique_ptr<AsyncRequest> request;
     TileUpdateParameters updateParameters{Duration::zero(), false};
+    bool requested{false};
 
     /// @brief It's possible for async requests in flight to mess with the request
     /// object at the same time as the loader's destructor. This construct is shared

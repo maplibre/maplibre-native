@@ -42,7 +42,7 @@ public:
                 uint16_t tileSize,
                 Range<uint8_t> zoomRange,
                 std::optional<LatLngBounds> bounds,
-                std::function<std::unique_ptr<Tile>(const OverscaledTileID&)> createTile);
+                std::function<std::unique_ptr<Tile>(const OverscaledTileID&, TileObserver*)> createTile);
 
     const std::map<UnwrappedTileID, std::reference_wrapper<Tile>>& getRenderedTiles() const { return renderedTiles; }
     Tile* getTile(const OverscaledTileID&);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/backend.hpp>
+#include <mbgl/shaders/shader_source.hpp>
 
 #include <array>
 #include <cassert>
@@ -42,6 +43,13 @@ public:
     /// @return Mutated ProgramParameters
     ProgramParameters withDefaultSource(const ProgramSource& source) const noexcept;
 
+    /// @brief Provide a `BuiltIn` value used to indicate the program type
+    /// @param source ProgramSource
+    /// @return Mutated ProgramParameters
+    ProgramParameters withProgramType(shaders::BuiltIn type) const noexcept;
+
+    shaders::BuiltIn getProgramType() const noexcept { return programType; }
+
     /// @brief Get a list of built-in shader preprocessor defines
     /// @return Shader source string
     /// @todo With the addition of future backends, defines should also be backend-aware
@@ -67,6 +75,7 @@ public:
 private:
     std::unordered_map<std::string, std::string> defines;
     std::uint64_t definesHash;
+    shaders::BuiltIn programType = shaders::BuiltIn::None;
 
     // cached value of `defines` converted to string format
     mutable std::string definesStr;

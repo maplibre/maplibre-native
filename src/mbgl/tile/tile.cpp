@@ -8,10 +8,15 @@ namespace mbgl {
 
 static TileObserver nullObserver;
 
-Tile::Tile(Kind kind_, OverscaledTileID id_)
+Tile::Tile(Kind kind_, OverscaledTileID id_, TileObserver* observer_)
     : kind(kind_),
-      id(id_),
-      observer(&nullObserver) {}
+      id(id_) {
+    if (observer_) {
+        observer = observer_;
+    } else {
+        observer = &nullObserver;
+    }
+}
 
 Tile::~Tile() = default;
 
@@ -60,5 +65,21 @@ float Tile::getQueryPadding(const std::unordered_map<std::string, const RenderLa
 }
 
 void Tile::querySourceFeatures(std::vector<Feature>&, const SourceQueryOptions&) {}
+
+void Tile::onTileRequested() {
+    observer->onTileRequested(*this);
+};
+
+void Tile::onTileLoadedFromNetwork() {
+    observer->onTileLoadedFromNetwork(*this);
+};
+
+void Tile::onTileLoadedFromDisk() {
+    observer->onTileLoadedFromDisk(*this);
+};
+
+void Tile::onTileFailedToLoad() {
+    observer->onTileFailedToLoad(*this);
+};
 
 } // namespace mbgl

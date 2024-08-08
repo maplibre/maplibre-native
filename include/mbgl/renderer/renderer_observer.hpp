@@ -1,5 +1,11 @@
 #pragma once
 
+#include <mbgl/tile/tile_id.hpp>
+#include <mbgl/util/font_stack.hpp>
+#include <mbgl/text/glyph_range.hpp>
+#include <mbgl/gfx/backend.hpp>
+#include <mbgl/shaders/shader_source.hpp>
+
 #include <cstdint>
 #include <exception>
 #include <functional>
@@ -54,6 +60,21 @@ public:
 
     // Entry point for custom shader registration
     virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
+    virtual void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type){};
+    virtual void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type){};
+    virtual void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type){};
+
+    // Glyph loading
+    virtual void onGlyphsLoaded(const FontStack&, const GlyphRange&) {}
+    virtual void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) {}
+    virtual void onGlyphsRequested(const FontStack&, const GlyphRange&) {}
+
+    // Tile loading
+    virtual void onTileRequested(const OverscaledTileID&) {};
+    virtual void onTileLoadedFromNetwork(const OverscaledTileID&) {};
+    virtual void onTileLoadedFromDisk(const OverscaledTileID&) {};
+    virtual void onTileFailedToLoad(const OverscaledTileID&) {};
+    virtual void onTileFinishedLoading(const OverscaledTileID&) {};
 };
 
 } // namespace mbgl

@@ -147,6 +147,18 @@ void Map::Impl::onStyleError(std::exception_ptr error) {
     observer.onDidFailLoadingMap(type, description);
 }
 
+void Map::Impl::onSpriteLoaded(const std::optional<style::Sprite>& sprite) {
+    observer.onSpriteLoaded(sprite);
+}
+
+void Map::Impl::onSpriteError(const std::optional<style::Sprite>& sprite, std::exception_ptr ex) {
+    observer.onSpriteError(sprite, ex);
+}
+
+void Map::Impl::onSpriteRequested(const std::optional<style::Sprite>& sprite) {
+    observer.onSpriteRequested(sprite);
+}
+
 // MARK: - Map::Impl RendererObserver
 
 void Map::Impl::onInvalidate() {
@@ -230,6 +242,50 @@ void Map::Impl::onRemoveUnusedStyleImages(const std::vector<std::string>& unused
 
 void Map::Impl::onRegisterShaders(gfx::ShaderRegistry& registry) {
     observer.onRegisterShaders(registry);
+}
+
+void Map::Impl::onPreCompileShader(shaders::BuiltIn shaderID, gfx::Backend::Type type) {
+    observer.onPreCompileShader(shaderID, type);
+}
+
+void Map::Impl::onPostCompileShader(shaders::BuiltIn shaderID, gfx::Backend::Type type) {
+    observer.onPostCompileShader(shaderID, type);
+}
+
+void Map::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID, gfx::Backend::Type type) {
+    observer.onShaderCompileFailed(shaderID, type);
+}
+
+void Map::Impl::onGlyphsLoaded(const FontStack& fontStack, const GlyphRange& ranges) {
+    observer.onGlyphsLoaded(fontStack, ranges);
+}
+
+void Map::Impl::onGlyphsError(const FontStack& fontStack, const GlyphRange& ranges, std::exception_ptr ex) {
+    observer.onGlyphsError(fontStack, ranges, ex);
+}
+
+void Map::Impl::onGlyphsRequested(const FontStack& fontStack, const GlyphRange& ranges) {
+    observer.onGlyphsRequested(fontStack, ranges);
+}
+
+void Map::Impl::onTileRequested(const OverscaledTileID& id) {
+    observer.onTileRequested(id);
+}
+
+void Map::Impl::onTileLoadedFromNetwork(const OverscaledTileID& id) {
+    observer.onTileLoadedFromNetwork(id);
+}
+
+void Map::Impl::onTileLoadedFromDisk(const OverscaledTileID& id) {
+    observer.onTileLoadedFromDisk(id);
+}
+
+void Map::Impl::onTileFailedToLoad(const OverscaledTileID& id) {
+    observer.onTileFailedToLoad(id);
+}
+
+void Map::Impl::onTileFinishedLoading(const OverscaledTileID& id) {
+    observer.onTileFinishedLoading(id);
 }
 
 } // namespace mbgl

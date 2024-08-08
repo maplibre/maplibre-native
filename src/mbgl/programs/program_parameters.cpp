@@ -34,6 +34,12 @@ ProgramParameters ProgramParameters::withDefaultSource(const ProgramSource& sour
     return params;
 }
 
+ProgramParameters ProgramParameters::withProgramType(shaders::BuiltIn type) const noexcept {
+    ProgramParameters params = *this;
+    params.programType = type;
+    return params;
+}
+
 const std::string& ProgramParameters::getDefinesString() const {
     if (definesStr.empty() && !defines.empty()) {
         definesStr.assign(defines.size() * 32, '\0');

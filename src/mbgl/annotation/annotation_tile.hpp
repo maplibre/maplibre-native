@@ -11,7 +11,7 @@ class TileParameters;
 
 class AnnotationTile : public GeometryTile {
 public:
-    AnnotationTile(const OverscaledTileID&, const TileParameters&);
+    AnnotationTile(const OverscaledTileID&, const TileParameters&, TileObserver*);
     ~AnnotationTile() override;
 
 private:

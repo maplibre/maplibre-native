@@ -65,7 +65,7 @@ public:
             auto& context = static_cast<Context&>(gfxContext);
             const auto shaderSource = std::string(shaders::prelude) + source;
             shader = context.createProgram(
-                shaderName, shaderSource, vertMain, fragMain, programParameters, additionalDefines);
+                ShaderID, shaderName, shaderSource, vertMain, fragMain, programParameters, additionalDefines);
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {
                 assert(false);

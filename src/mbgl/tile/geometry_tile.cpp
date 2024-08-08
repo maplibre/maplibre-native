@@ -165,8 +165,11 @@ const LayerRenderData* GeometryTileRenderData::getLayerRenderData(const style::L
    that could flag the tile as non-pending too early.
  */
 
-GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, const TileParameters& parameters)
-    : Tile(Kind::Geometry, id_),
+GeometryTile::GeometryTile(const OverscaledTileID& id_,
+                           std::string sourceID_,
+                           const TileParameters& parameters,
+                           TileObserver* observer_)
+    : Tile(Kind::Geometry, id_, observer_),
       ImageRequestor(parameters.imageManager),
       sourceID(std::move(sourceID_)),
       threadPool(parameters.threadPool),
@@ -300,6 +303,10 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
     }
 
     observer->onTileChanged(*this);
+
+    if (!pending) {
+        observer->onTileFinishedLoading(*this);
+    }
 }
 
 void GeometryTile::onError(std::exception_ptr err, const uint64_t resultCorrelationID) {

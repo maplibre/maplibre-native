@@ -68,6 +68,18 @@ Renderer::Impl::~Impl() {
     assert(gfx::BackendScope::exists());
 };
 
+void Renderer::Impl::onPreCompileShader(shaders::BuiltIn shaderID, gfx::Backend::Type type) {
+    observer->onPreCompileShader(shaderID, type);
+}
+
+void Renderer::Impl::onPostCompileShader(shaders::BuiltIn shaderID, gfx::Backend::Type type) {
+    observer->onPostCompileShader(shaderID, type);
+}
+
+void Renderer::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID, gfx::Backend::Type type) {
+    observer->onShaderCompileFailed(shaderID, type);
+}
+
 void Renderer::Impl::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }
@@ -76,6 +88,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
     MLN_TRACE_FUNC()
     auto& context = backend.getContext();
+    context.setObserver(this);
+
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {
         const auto& mtlBackend = static_cast<mtl::RendererBackend&>(backend);

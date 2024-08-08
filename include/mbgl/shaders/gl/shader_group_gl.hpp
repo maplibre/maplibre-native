@@ -14,7 +14,7 @@ class ShaderGroupGL final : public gfx::ShaderGroup {
 public:
     ShaderGroupGL(const ProgramParameters& programParameters_)
         : gfx::ShaderGroup(),
-          programParameters(programParameters_) {}
+          programParameters(programParameters_.withProgramType(ShaderID)) {}
     ~ShaderGroupGL() noexcept override = default;
 
     gfx::ShaderPtr getOrCreateShader(gfx::Context& context,

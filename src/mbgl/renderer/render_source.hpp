@@ -121,6 +121,11 @@ protected:
 
     void onTileChanged(Tile&) override;
     void onTileError(Tile&, std::exception_ptr) final;
+    void onTileRequested(Tile&) override;
+    void onTileLoadedFromNetwork(Tile&) override;
+    void onTileLoadedFromDisk(Tile&) override;
+    void onTileFailedToLoad(Tile&) override;
+    void onTileFinishedLoading(Tile&) override;
 };
 
 } // namespace mbgl

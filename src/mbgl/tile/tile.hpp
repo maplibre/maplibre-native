@@ -6,6 +6,7 @@
 #include <mbgl/util/tile_coordinate.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/tile/tile_necessity.hpp>
+#include <mbgl/tile/tile_loader_observer.hpp>
 #include <mbgl/renderer/tile_mask.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/tile/geometry_tile_data.hpp>
@@ -46,7 +47,7 @@ inline bool operator==(const TileUpdateParameters& a, const TileUpdateParameters
 inline bool operator!=(const TileUpdateParameters& a, const TileUpdateParameters& b) {
     return !(a == b);
 }
-class Tile {
+class Tile : public TileLoaderObserver {
 public:
     enum class Kind : uint8_t {
         Geometry,
@@ -56,8 +57,8 @@ public:
     Tile(const Tile&) = delete;
     Tile& operator=(const Tile&) = delete;
 
-    Tile(Kind, OverscaledTileID);
-    virtual ~Tile();
+    Tile(Kind, OverscaledTileID, TileObserver* observer = nullptr);
+    ~Tile() override;
 
     virtual std::unique_ptr<TileRenderData> createRenderData() = 0;
 
@@ -134,6 +135,12 @@ public:
     virtual void setFeatureState(const LayerFeatureStates&) {}
 
     void dumpDebugLogs() const;
+
+    // TileLoaderObserver
+    void onTileRequested() override;
+    void onTileLoadedFromNetwork() override;
+    void onTileLoadedFromDisk() override;
+    void onTileFailedToLoad() override;
 
     const Kind kind;
     OverscaledTileID id;
