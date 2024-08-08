@@ -284,10 +284,6 @@ GeometryCollection offsetLine(const GeometryCollection& rings, double offset) {
     return newRings;
 }
 
-void setSegments(std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket) {
-    builder->setSegments(gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
-}
-
 } // namespace
 
 bool RenderLineLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeometry,
@@ -359,6 +355,14 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
 }
 
 #if MLN_DRAWABLE_RENDERER
+namespace {
+
+inline void setSegments(std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket) {
+    builder->setSegments(gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
+}
+
+} // namespace
+
 void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState&,
