@@ -66,8 +66,7 @@ void CircleLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
 
         auto* binders = static_cast<CircleProgram::Binders*>(drawable.getBinders());
-        const auto* tile = drawable.getRenderTile();
-        if (!binders || !tile) {
+        if (!binders) {
             assert(false);
             return;
         }

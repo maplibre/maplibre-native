@@ -274,9 +274,9 @@ using namespace shaders;
 
 void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
-                               const TransformState& state,
-                               [[maybe_unused]] const std::shared_ptr<UpdateParameters>&,
-                               [[maybe_unused]] const RenderTree& renderTree,
+                               const TransformState&,
+                               const std::shared_ptr<UpdateParameters>&,
+                               const RenderTree&,
                                UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
