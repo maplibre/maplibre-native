@@ -1,11 +1,13 @@
 package org.maplibre.android.http;
 
 import androidx.annotation.Keep;
-import androidx.annotation.Nullable;
 
 import org.maplibre.android.MapLibre;
 
 import java.util.concurrent.locks.ReentrantLock;
+
+import kotlin.Unit;
+import kotlinx.coroutines.CoroutineScope;
 
 @Keep
 public class NativeHttpRequest implements HttpResponder {
@@ -19,12 +21,19 @@ public class NativeHttpRequest implements HttpResponder {
   private long nativePtr;
 
   @Keep
-  private NativeHttpRequest(long nativePtr, String resourceUrl, String etag, String modified, boolean offlineUsage) {
+  private NativeHttpRequest(
+            long nativePtr,
+            String resourceUrl,
+            String etag,
+            String modified,
+            boolean offlineUsage,
+            CoroutineScope scope
+  ) {
     this.nativePtr = nativePtr;
 
     if (resourceUrl.startsWith("local://")) {
       // used by render test to serve files from assets
-      executeLocalRequest(resourceUrl);
+      executeLocalRequest(resourceUrl, scope);
       return;
     }
     httpRequest.executeRequest(this, nativePtr, resourceUrl, etag, modified, offlineUsage);
@@ -48,29 +57,28 @@ public class NativeHttpRequest implements HttpResponder {
     lock.lock();
     if (nativePtr != 0) {
       nativeOnResponse(responseCode,
-        etag,
-        lastModified,
-        cacheControl,
-        expires,
-        retryAfter,
-        xRateLimitReset,
-        body);
+              etag,
+              lastModified,
+              cacheControl,
+              expires,
+              retryAfter,
+              xRateLimitReset,
+              body
+      );
     }
     lock.unlock();
   }
 
-  private void executeLocalRequest(String resourceUrl) {
-    new LocalRequestTask(new LocalRequestTask.OnLocalRequestResponse() {
-      @Override
-      public void onResponse(@Nullable byte[] bytes) {
-        if (bytes != null) {
-          lock.lock();
-          if (nativePtr != 0) {
-            NativeHttpRequest.this.nativeOnResponse(200, null, null, null, null, null, null, bytes);
-          }
-          lock.unlock();
+  private void executeLocalRequest(String resourceUrl, CoroutineScope scope) {
+    new LocalRequestTask(scope, bytes -> {
+      if (bytes != null) {
+        lock.lock();
+        if (nativePtr != 0) {
+          NativeHttpRequest.this.nativeOnResponse(200, null, null, null, null, null, null, bytes);
         }
+        lock.unlock();
       }
+      return Unit.INSTANCE;
     }).execute(resourceUrl);
   }
 

@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.annotation.Keep
 import androidx.annotation.UiThread
+import kotlinx.coroutines.CoroutineScope
 import org.maplibre.android.LibraryLoader
 import org.maplibre.android.R
 import org.maplibre.android.geometry.LatLngBounds.Companion.world
@@ -24,7 +25,7 @@ import java.nio.channels.FileChannel
  * It'll help you list and create offline regions.
  */
 @UiThread
-class OfflineManager private constructor(context: Context) {
+class OfflineManager private constructor(context: Context, private val scope: CoroutineScope) {
     // Native peer pointer
     @Keep
     private val nativePtr: Long = 0
@@ -139,7 +140,7 @@ class OfflineManager private constructor(context: Context) {
 
     private fun deleteAmbientDatabase(context: Context) {
         val path = FileSource.getInternalCachePath(context) + File.separator + "mbgl-cache.db"
-        FileUtils.deleteFile(path)
+        FileUtils.deleteFile(path, scope)
     }
 
     /**
@@ -648,9 +649,9 @@ class OfflineManager private constructor(context: Context) {
          */
         @Synchronized
         @JvmStatic
-        fun getInstance(context: Context): OfflineManager {
+        fun getInstance(context: Context, scope: CoroutineScope): OfflineManager {
             if (instance == null) {
-                instance = OfflineManager(context)
+                instance = OfflineManager(context, scope)
             }
             return instance!!
         }

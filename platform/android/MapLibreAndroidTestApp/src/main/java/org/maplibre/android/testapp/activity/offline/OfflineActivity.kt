@@ -5,6 +5,7 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import org.maplibre.android.MapLibre
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -94,7 +95,7 @@ class OfflineActivity : AppCompatActivity(), DownloadRegionDialogListener {
         listRegions!!.setOnClickListener { view: View? -> handleListRegions() }
 
         // Set up the OfflineManager
-        offlineManager = OfflineManager.getInstance(this)
+        offlineManager = OfflineManager.getInstance(this, lifecycleScope)
     }
 
     override fun onStart() {
