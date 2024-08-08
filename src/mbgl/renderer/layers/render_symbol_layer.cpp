@@ -779,7 +779,6 @@ void updateTileAttributes(const SymbolBucket::Buffer& buffer,
 }
 
 void updateTileDrawable(gfx::Drawable& drawable,
-                        gfx::Context& context,
                         const SymbolBucket& bucket,
                         const SymbolBucket::PaintProperties& paintProps,
                         const SymbolPaintProperties::PossiblyEvaluated& evaluated) {
@@ -793,8 +792,6 @@ void updateTileDrawable(gfx::Drawable& drawable,
 
     // This property can be set after the initial appearance of the tile, as part of the layout process.
     drawData.bucketVariablePlacement = bucket.hasVariablePlacement;
-
-    auto& drawableUniforms = drawable.mutableUniformBuffers();
 
     const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
     const auto vertexCount = buffer.vertices().elements();
@@ -1003,6 +1000,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto& renderData = *optRenderData;
         const auto& bucket = static_cast<const SymbolBucket&>(*renderData.bucket);
+        const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
 
         const auto prevBucketID = getRenderTileBucketID(tileID);
         if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
@@ -1023,7 +1021,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             const auto& layout = *bucket.layout;
-            const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
             const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
             const std::string suffix = isText ? "text/" : "icon/";
 
@@ -1086,8 +1083,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             propertiesAsUniforms.first.clear();
             propertiesAsUniforms.second.clear();
 
-            const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
-            updateTileDrawable(drawable, context, bucket, bucketPaintProperties, evaluated);
+            updateTileDrawable(drawable, bucket, bucketPaintProperties, evaluated);
             return true;
         };
         if (updateTile(passes, tileID, std::move(updateExisting))) {
