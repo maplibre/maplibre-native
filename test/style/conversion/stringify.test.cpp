@@ -128,6 +128,6 @@ TEST(Stringify, Layout) {
 
     SymbolLayoutProperties::Unevaluated layout;
     layout.get<SymbolAvoidEdges>() = true;
-    layout.get<IconPadding>() = 2.0;
+    layout.get<IconPadding>() = { 2.f };
     ASSERT_EQ(stringify(layout), "{\"icon-padding\":2.0,\"symbol-avoid-edges\":true}");
 }

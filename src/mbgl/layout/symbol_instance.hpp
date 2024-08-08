@@ -64,7 +64,7 @@ public:
                    style::SymbolPlacementType textPlacement,
                    const std::array<float, 2>& textOffset,
                    float iconBoxScale,
-                   float iconPadding,
+                   Padding iconPadding,
                    const std::array<float, 2>& iconOffset,
                    const RefIndexedSubfeature& indexedFeature,
                    std::size_t layoutFeatureIndex,

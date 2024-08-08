@@ -33,6 +33,11 @@ Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Color>::o
     return jni::Make<jni::String>(env, value.stringify());
 }
 
+Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Padding>::operator()(jni::JNIEnv& env,
+                                                                                            const Padding& value) const {
+    return jni::Make<jni::String>(env, value.toString());
+}
+
 Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, style::expression::Formatted>::operator()(
     jni::JNIEnv& env, const style::expression::Formatted& value) const {
     return Formatted::New(env, value);

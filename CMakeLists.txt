@@ -962,6 +962,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/mat4.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/mat4.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/math.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/padding.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/premultiply.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/quaternion.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/rapidjson.cpp

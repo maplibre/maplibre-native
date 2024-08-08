@@ -49,6 +49,8 @@ global.expressionType = function (property) {
             return 'StringType';
         case 'color':
             return `ColorType`;
+        case 'padding':
+            return `PaddingType`;
         case 'formatted':
             return `FormattedType`;
         case 'array':
@@ -92,6 +94,8 @@ global.evaluatedType = function (property) {
     return (isLightProperty(property) ? 'Light' : '') + `${camelize(property.name)}Type`;
   case 'color':
     return `Color`;
+  case 'padding':
+    return `Padding`;
   case 'array':
     if (property.length) {
       return `std::array<${evaluatedType({type: property.value, name: property.name})}, ${property.length}>`;
@@ -210,6 +214,7 @@ global.defaultValue = function (property) {
       return `{ ${color} }`;
     }
   case 'array':
+  case 'padding':
     const defaults = (property.default || []).map((e) => defaultValue({ type: property.value, default: e }));
     if (property.length) {
       return `{{${defaults.join(', ')}}}`;

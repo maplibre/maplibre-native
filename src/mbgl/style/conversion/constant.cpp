@@ -113,6 +113,46 @@ std::optional<Color> Converter<Color>::operator()(const Convertible& value, Erro
     return *color;
 }
 
+std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, Error& error) const {
+    std::optional<Padding> result;
+    if (isArray(value)) {
+        if (arrayLength(value) > 0 && arrayLength(value) <= 4) {
+            auto vector = Converter<std::vector<float>>{}(value, error);
+            if (vector) {
+                const auto &arr = *vector;
+                switch (vector->size()) {
+                    case 1:
+                        // A single value applies to all four sides.
+                        result = Padding(arr[0]);
+                        break;
+                    case 2:
+                        // two values apply to [top/bottom, left/right].
+                        result = Padding(arr[0], arr[1], arr[0], arr[1]);
+                        break;
+                    case 3:
+                        // three values apply to [top, left/right, bottom].
+                        result = Padding(arr[0], arr[1], arr[2], arr[1]);
+                        break;
+                    case 4:
+                        // four values apply to [top, right, bottom, left].
+                        result = Padding(arr[0], arr[1], arr[2], arr[3]);
+                        break;
+                }
+            }
+        }
+    } else {
+        std::optional<float> number = toNumber(value);
+        if (number) {
+            result = Padding(*number);
+        }
+    }
+
+    if (!result) {
+        error.message = "value must be a number or an array of numbers (between 1 and 4 elements)";
+    }
+    return result;
+}
+
 template <size_t N>
 std::optional<std::array<float, N>> Converter<std::array<float, N>>::operator()(const Convertible& value,
                                                                                 Error& error) const {

@@ -59,6 +59,11 @@ void stringify(Writer& writer, const Color& v) {
 }
 
 template <class Writer>
+void stringify(Writer& writer, const Padding& v) {
+    writer.String(v.toString());
+}
+
+template <class Writer>
 void stringify(Writer& writer, const std::array<float, 2>& v) {
     writer.StartArray();
     writer.Double(v[0]);

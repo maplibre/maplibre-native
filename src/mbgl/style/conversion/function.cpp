@@ -131,6 +131,7 @@ template std::optional<PropertyExpression<LineJoinType>> convertFunctionToExpres
                                                                                                    Error&,
                                                                                                    bool);
 template std::optional<PropertyExpression<Color>> convertFunctionToExpression<Color>(const Convertible&, Error&, bool);
+template std::optional<PropertyExpression<Padding>> convertFunctionToExpression<Padding>(const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<Position>> convertFunctionToExpression<Position>(const Convertible&,
                                                                                            Error&,
                                                                                            bool);
@@ -245,6 +246,10 @@ std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,
                 return std::nullopt;
             }
             return literal(*result);
+        },
+        [&](const type::PaddingType&) -> std::optional<std::unique_ptr<Expression>> {
+            // BUGBUG wip
+            return std::nullopt;
         },
         [&](const type::Array& array) -> std::optional<std::unique_ptr<Expression>> {
             if (!isArray(value)) {
