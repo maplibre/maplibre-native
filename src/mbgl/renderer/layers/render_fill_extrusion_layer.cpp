@@ -303,7 +303,6 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
     auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
 
     const auto& evaluated = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).evaluated;
-    const auto& crossfade = static_cast<const FillExtrusionLayerProperties&>(*evaluatedProperties).crossfade;
 
     // `passes` is set to (RenderPass::Translucent | RenderPass::Pass3D), but `render()`
     // only runs on the translucent pass, so although our output is 3D, it does not render

@@ -136,7 +136,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             return;
         }
 
-        const auto& paintProperties = bucket->paintProperties.at(getID());
+        const auto& paintProperties = bucket->paintProperties.at(id);
 
         // from RenderTile::translatedMatrix
         const auto translate = isText ? evaluated.get<style::TextTranslate>() : evaluated.get<style::IconTranslate>();
