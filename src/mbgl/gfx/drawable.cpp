@@ -81,6 +81,10 @@ const RenderTile* Drawable::getRenderTile() const {
     return impl->renderTile;
 }
 
+const std::shared_ptr<Bucket>& Drawable::getBucket() const {
+    return impl->bucket;
+}
+
 void Drawable::setRenderTile(Immutable<std::vector<RenderTile>> renderTiles_, const RenderTile* tile_) {
     impl->renderTiles = std::move(renderTiles_);
     impl->renderTile = tile_;

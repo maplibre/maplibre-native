@@ -256,6 +256,7 @@ public:
     void setBinders(std::shared_ptr<Bucket>, PaintPropertyBindersBase*);
 
     const RenderTile* getRenderTile() const;
+    const std::shared_ptr<Bucket>& getBucket() const;
     void setRenderTile(Immutable<std::vector<RenderTile>>, const RenderTile*);
 
 protected:
