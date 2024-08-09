@@ -41,9 +41,9 @@ std::size_t Texture2DDescHash::operator()(const Texture2DDesc& desc) const {
     return seed;
 }
 
-Texture2DPool::Texture2DPool(Context* context, size_t maxPoolStorage)
-    : context(context),
-      maxPoolStorage(maxPoolStorage) {
+Texture2DPool::Texture2DPool(Context* context_, size_t maxPoolStorage_)
+    : context(context_),
+      maxPoolStorage(maxPoolStorage_) {
     assert(context);
 }
 
