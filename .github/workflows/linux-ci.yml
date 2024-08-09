@@ -198,6 +198,9 @@ jobs:
             xvfb \
             x11-xserver-utils
 
+      - name: Install cxxbridge-cmd (compile)
+        run: cargo install cxxbridge-cmd
+
       - name: Cache Bazel
         uses: actions/cache@v4
         with:
