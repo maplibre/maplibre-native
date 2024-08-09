@@ -1024,7 +1024,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
             const std::string suffix = isText ? "text/" : "icon/";
 
-            auto addVertices = [&collisionBuilder](const auto& vertices) {
+            const auto addVertices = [&collisionBuilder](const auto& vertices) {
                 collisionBuilder->setRawVertices({}, vertices.size(), gfx::AttributeDataType::Short2);
             };
 
@@ -1144,7 +1144,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         gfx::DrawableTweakerPtr textTweaker, iconTweaker;
     };
 
-    std::unordered_map<UnwrappedTileID, TileInfo> tileCache;
+    mbgl::unordered_map<UnwrappedTileID, TileInfo> tileCache;
     tileCache.reserve(renderTiles->size());
 
     for (auto& group : renderableSegments) {

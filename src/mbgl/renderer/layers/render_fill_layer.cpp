@@ -426,6 +426,10 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
         // If we already have drawables for this tile, update them.
         auto updateExisting = [&](gfx::Drawable& drawable) {
+            if (drawable.getLayerTweaker() != layerTweaker) {
+                // This drawable was produced on a previous style/bucket, and should not be updated.
+                return false;
+            }
             drawable.setVertexAttributes(vertexAttrs);
             return true;
         };
