@@ -401,7 +401,7 @@ std::size_t PipelineInfo::hash() const {
                       vertexInputHash);
 }
 
-void PipelineInfo::setDynamicValues(const vk::UniqueCommandBuffer& buffer) const {
+void PipelineInfo::setDynamicValues(const RendererBackend& backend, const vk::UniqueCommandBuffer& buffer) const {
     if (dynamicValues.blendConstants.has_value()) {
         buffer->setBlendConstants(dynamicValues.blendConstants.value().data());
     }
@@ -412,12 +412,12 @@ void PipelineInfo::setDynamicValues(const vk::UniqueCommandBuffer& buffer) const
         buffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, dynamicValues.stencilRef);
     }
 
-    if (wideLines) {
+    if (backend.getDeviceFeatures().wideLines && wideLines) {
         buffer->setLineWidth(dynamicValues.lineWidth);
     }
 }
 
-std::vector<vk::DynamicState> PipelineInfo::getDynamicStates() const {
+std::vector<vk::DynamicState> PipelineInfo::getDynamicStates(const RendererBackend& backend) const {
     std::vector<vk::DynamicState> dynamicStates;
 
     if (usesBlendConstants()) {
@@ -430,7 +430,7 @@ std::vector<vk::DynamicState> PipelineInfo::getDynamicStates() const {
         dynamicStates.push_back(vk::DynamicState::eStencilReference);
     }
 
-    if (wideLines) {
+    if (backend.getDeviceFeatures().wideLines && wideLines) {
         dynamicStates.push_back(vk::DynamicState::eLineWidth);
     }
 

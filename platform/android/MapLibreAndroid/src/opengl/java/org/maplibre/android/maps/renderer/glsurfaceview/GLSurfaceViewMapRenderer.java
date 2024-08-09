@@ -2,6 +2,7 @@ package org.maplibre.android.maps.renderer.glsurfaceview;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 
@@ -47,6 +48,11 @@ public class GLSurfaceViewMapRenderer extends MapRenderer implements GLSurfaceVi
         nativeReset();
       }
     });
+  }
+
+  @Override
+  public View getView() {
+    return this.glSurfaceView;
   }
 
   @Override

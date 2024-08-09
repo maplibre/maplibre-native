@@ -37,7 +37,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap.hpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap_factory.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/bitmap_factory.hpp
-        ${PROJECT_SOURCE_DIR}/platform/android/src/gl_functions.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/image.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/jni.cpp
         ${PROJECT_SOURCE_DIR}/platform/android/src/jni.hpp
@@ -48,7 +47,6 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/android/src/timer.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/map/map_snapshotter.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/platform/time.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/storage/asset_file_source.cpp
@@ -72,8 +70,25 @@ target_sources(
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/thread_local.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
-        ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
 )
+
+if(MLN_WITH_OPENGL)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+            ${PROJECT_SOURCE_DIR}/platform/linux/src/headless_backend_egl.cpp
+            ${PROJECT_SOURCE_DIR}/platform/android/src/gl_functions.cpp
+    )
+endif()
+
+if(MLN_WITH_VULKAN)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+    )
+endif()
 
 target_include_directories(
     mbgl-core

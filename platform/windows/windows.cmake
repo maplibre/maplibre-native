@@ -34,7 +34,6 @@ target_sources(
     PRIVATE
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gfx/headless_frontend.cpp
-        ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/collator.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/i18n/number_format.cpp
         ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/layermanager/layer_manager.cpp
@@ -80,6 +79,14 @@ target_compile_definitions(
         USE_STD_FILESYSTEM
 )
 
+if(MLN_WITH_OPENGL)
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/gl/headless_backend.cpp
+    )
+endif()
+
 if(MLN_WITH_EGL)
     find_package(unofficial-angle CONFIG REQUIRED)
     target_sources(
@@ -123,12 +130,6 @@ elseif(MLN_WITH_OSMESA)
             OSMesa::libGLESv2
     )
 elseif(MLN_WITH_VULKAN)
-    target_include_directories(
-        mbgl-core
-        PRIVATE
-            ${PROJECT_SOURCE_DIR}/vendor/Vulkan-Headers/include
-    )
-
     target_sources(
         mbgl-core
         PRIVATE

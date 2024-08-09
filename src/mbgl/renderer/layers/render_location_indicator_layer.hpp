@@ -20,7 +20,10 @@ private:
     void markContextDestroyed() override;
     void prepare(const LayerPrepareParameters &) override;
 
+#if MLN_RENDER_BACKEND_OPENGL
     void render(PaintParameters &) override;
+#endif
+
     void populateDynamicRenderFeatureIndex(DynamicFeatureIndex &) const override;
 
     bool contextDestroyed = false;

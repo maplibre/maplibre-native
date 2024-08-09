@@ -493,11 +493,10 @@ void RendererBackend::initDevice() {
         queueCreateInfos.emplace_back(vk::DeviceQueueCreateFlags(), presentQueueIndex, 1, &queuePriority);
 
     const auto& supportedDeviceFeatures = physicalDevice.getFeatures();
-
-    vk::PhysicalDeviceFeatures enabledDeviceFeatures;
+    physicalDeviceFeatures = vk::PhysicalDeviceFeatures();
 
     if (supportedDeviceFeatures.wideLines) {
-        enabledDeviceFeatures.setWideLines(true);
+        physicalDeviceFeatures.setWideLines(true);
 
         // more wideLines info
         // physicalDeviceProperties.limits.lineWidthRange;
@@ -510,7 +509,7 @@ void RendererBackend::initDevice() {
                           .setQueueCreateInfos(queueCreateInfos)
                           .setEnabledExtensionCount(static_cast<uint32_t>(extensions.size()))
                           .setPpEnabledExtensionNames(extensions.data())
-                          .setPEnabledFeatures(&enabledDeviceFeatures);
+                          .setPEnabledFeatures(&physicalDeviceFeatures);
 
     // this is not needed for newer implementations
     createInfo.setPEnabledLayerNames(layers);
@@ -528,11 +527,12 @@ void RendererBackend::initSwapchain() {
     const auto& renderable = getDefaultRenderable();
     auto& renderableResource = renderable.getResource<SurfaceRenderableResource>();
     const auto& size = renderable.getSize();
-    renderableResource.init(size.width, size.height);
 
-    if (renderableResource.getPlatformSurface()) {
-        maxFrames = renderableResource.getImageCount();
-    }
+    // use triple buffering if rendering to a surface
+    // no buffering when using headless
+    maxFrames = renderableResource.getPlatformSurface() ? 3 : 1;
+
+    renderableResource.init(size.width, size.height);
 }
 
 void RendererBackend::initCommandPool() {

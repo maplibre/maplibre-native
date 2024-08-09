@@ -47,6 +47,7 @@ public:
     uint32_t getMaxFrames() const { return maxFrames; }
     const VmaAllocator& getAllocator() const { return allocator; }
     const vk::PhysicalDeviceProperties& getDeviceProperties() const { return physicalDeviceProperties; }
+    const vk::PhysicalDeviceFeatures& getDeviceFeatures() const { return physicalDeviceFeatures; }
     int32_t getGraphicsQueueIndex() const { return graphicsQueueIndex; }
     int32_t getPresentQueueIndex() const { return presentQueueIndex; }
 
@@ -97,6 +98,7 @@ protected:
     vk::PhysicalDevice physicalDevice;
     vk::UniqueDevice device;
     vk::PhysicalDeviceProperties physicalDeviceProperties;
+    vk::PhysicalDeviceFeatures physicalDeviceFeatures;
 
     int32_t graphicsQueueIndex = -1;
     int32_t presentQueueIndex = -1;
