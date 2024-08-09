@@ -16,7 +16,7 @@ cat << EOF > instrumentation-test-input.json
   "styleURLs": [
     "https://external.xx.fbcdn.net/maps/vt/style/canterbury_1_0/?locale=en_US",
     "https://api.maptiler.com/maps/basic-v2/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL",
-    "https://zelonewolf.github.io/openstreetmap-americana/style.json"
+    "https://americanamap.org/style.json"
   ],
   "resultsAPI": "$RESULTS_API",
   "apiKey": "get_your_own_OpIi9ZULNHzrESv6T2vL"

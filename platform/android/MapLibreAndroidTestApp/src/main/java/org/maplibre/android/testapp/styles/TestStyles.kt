@@ -5,7 +5,7 @@ import org.maplibre.android.maps.Style
 object TestStyles {
     val VERSATILES = "https://tiles.versatiles.org/assets/styles/colorful.json"
 
-    val AMERICANA = "https://zelonewolf.github.io/openstreetmap-americana/style.json"
+    val AMERICANA = "https://americanamap.org/style.json"
 
     fun getPredefinedStyleWithFallback(name: String): String {
         try {
