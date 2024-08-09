@@ -219,6 +219,7 @@ jobs:
           arch: ${{ matrix.qt_arch }}
           tools: ${{ matrix.qt_tools }}
           extra: --base https://mirrors.ocf.berkeley.edu/qt/
+          cache: true
 
       - name: Update ccache
         if: runner.os == 'Windows'
