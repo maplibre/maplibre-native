@@ -265,7 +265,7 @@ void GridIndex<T>::query(const BBox& queryBBox, std::function<bool(const T&, con
             cellIndex = xCellCount * y + x;
             // Look up other boxes
             for (auto uid : boxCells[cellIndex]) {
-                if (seenBoxes.count(uid) == 0) {
+                if (!seenBoxes.contains(uid)) {
                     seenBoxes.insert(uid);
 
                     auto& pair = boxElements.at(uid);
@@ -280,7 +280,7 @@ void GridIndex<T>::query(const BBox& queryBBox, std::function<bool(const T&, con
 
             // Look up circles
             for (auto uid : circleCells[cellIndex]) {
-                if (seenCircles.count(uid) == 0) {
+                if (!seenCircles.contains(uid)) {
                     seenCircles.insert(uid);
 
                     auto& pair = circleElements.at(uid);
@@ -330,7 +330,7 @@ void GridIndex<T>::query(const BCircle& queryBCircle, std::function<bool(const T
             cellIndex = xCellCount * y + x;
             // Look up boxes
             for (auto uid : boxCells[cellIndex]) {
-                if (seenBoxes.count(uid) == 0) {
+                if (!seenBoxes.contains(uid)) {
                     seenBoxes.insert(uid);
 
                     auto& pair = boxElements.at(uid);
@@ -345,7 +345,7 @@ void GridIndex<T>::query(const BCircle& queryBCircle, std::function<bool(const T
 
             // Look up other circles
             for (auto uid : circleCells[cellIndex]) {
-                if (seenCircles.count(uid) == 0) {
+                if (!seenCircles.contains(uid)) {
                     seenCircles.insert(uid);
 
                     auto& pair = circleElements.at(uid);

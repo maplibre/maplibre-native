@@ -138,7 +138,7 @@ public:
     void queueRequest(OnlineFileRequest* req) { pendingRequests.insert(req); }
 
     void activateRequest(OnlineFileRequest* req) {
-        auto callback = [=](const Response& response) {
+        auto callback = [=, this](const Response& response) {
             activeRequests.erase(req);
             req->request.reset();
             req->completed(response);

@@ -234,6 +234,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
     constexpr const size_t bitsPerComponent = 8;
     constexpr const size_t bytesPerPixel = 4;
     const size_t bytesPerRow = bytesPerPixel * size.width;
+    const auto bitmapInfo = static_cast<uint32_t>(kCGBitmapByteOrderDefault) | static_cast<uint32_t>(kCGImageAlphaPremultipliedLast);
 
     CGContextHandle context(CGBitmapContextCreate(
         rgbaBitmap.data.get(),
@@ -242,8 +243,7 @@ PremultipliedImage drawGlyphBitmap(GlyphID glyphID, CTFontRef font, GlyphMetrics
         bitsPerComponent,
         bytesPerRow,
         *colorSpace,
-        // NOLINTNEXTLINE(bugprone-suspicious-enum-usage)
-        kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast));
+        bitmapInfo));
     if (!context) {
         throw std::runtime_error("CGBitmapContextCreate failed");
     }

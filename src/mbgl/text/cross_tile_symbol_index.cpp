@@ -203,7 +203,7 @@ bool CrossTileSymbolLayerIndex::removeStaleBuckets(const std::unordered_set<uint
     bool tilesChanged = false;
     for (auto& zoomIndexes : indexes) {
         for (auto it = zoomIndexes.second.begin(); it != zoomIndexes.second.end();) {
-            if (!currentIDs.count(it->second.bucketInstanceId)) {
+            if (!currentIDs.contains(it->second.bucketInstanceId)) {
                 removeBucketCrossTileIDs(zoomIndexes.first, it->second);
                 it = zoomIndexes.second.erase(it);
                 tilesChanged = true;
