@@ -108,6 +108,9 @@ Context::~Context() noexcept {
 
         reset();
 
+        // Delete all pooled resources while the context is still valid
+        texturePool.reset();
+
 #if !defined(NDEBUG)
         Log::Debug(Event::General, "Rendering Stats:\n" + stats.toString("\n"));
 #endif
@@ -517,8 +520,8 @@ void Context::reset() {
 
     performCleanup();
 
-    // Delete all pooled resources and reset the pool
-    texturePool.reset();
+    // Delete all unused pooled resources
+    texturePool->shrink();
 }
 
 #if MLN_DRAWABLE_RENDERER

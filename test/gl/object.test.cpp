@@ -59,14 +59,18 @@ TEST(GLObject, Store) {
         {8, 8}, gfx::TexturePixelType::RGBA, gfx::TextureChannelDataType::UnsignedByte);
     EXPECT_NE(texture.get(), 0u);
     texture.reset();
-    EXPECT_FALSE(context.empty());
+    EXPECT_FALSE(context.empty(false));
+    EXPECT_FALSE(context.empty(true));
     context.performCleanup();
-    EXPECT_FALSE(context.empty());
+    EXPECT_TRUE(context.empty(false));
+    EXPECT_FALSE(context.empty(true));
     context.reset();
-    EXPECT_TRUE(context.empty());
+    EXPECT_TRUE(context.empty(false));
+    EXPECT_TRUE(context.empty(true));
 
     context.reset();
-    EXPECT_TRUE(context.empty());
+    EXPECT_TRUE(context.empty(false));
+    EXPECT_TRUE(context.empty(true));
 }
 
 #endif

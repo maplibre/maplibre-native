@@ -7,8 +7,7 @@
 namespace mbgl {
 
 // Simple non-thread-safe LRU cache
-// Item must be hashable
-template <typename Item>
+template <typename Item, typename Hash = std::hash<Item>>
 class LRU {
 public:
     // Number of cached items
@@ -36,16 +35,16 @@ public:
             throw std::runtime_error("LRU::evict: empty cache");
         }
         Item x = std::move(list.back());
-        map.erase(list.back());
+        map.erase(x);
         list.pop_back();
         return x;
     }
 
     // Check if item exists in cache without changing its order
-    bool isHit(Item x) { return map.find(std::move(x)) != map.end(); }
+    bool isHit(const Item& x) const { return map.find(std::move(x)) != map.end(); }
 
     // remove item from cache if it exists
-    void remove(Item x) {
+    void remove(const Item& x) {
         auto it = map.find(x);
         if (it != map.end()) {
             list.erase(it->second);
@@ -55,7 +54,7 @@ public:
 
 private:
     std::list<Item> list;
-    std::unordered_map<Item, typename std::list<Item>::iterator> map;
+    std::unordered_map<Item, typename std::list<Item>::iterator, Hash> map;
 };
 
 } // namespace mbgl
