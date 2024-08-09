@@ -31,7 +31,7 @@ multidex = "2.0.1"
 androidxTestExtJUnit = "1.1.5"
 androidxTestCoreKtx = "1.5.0"
 kotlinxSerializationJson = "1.6.0"
-kotlinxCoroutinesTest = "1.6.4"
+kotlinxCoroutinesTest = "1.8.1"
 
 androidGradlePlugin = "8.5.1"
 
