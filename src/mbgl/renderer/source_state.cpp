@@ -116,7 +116,7 @@ void SourceFeatureState::removeState(const std::optional<std::string>& sourceLay
     }
 
     if (stateKey && featureID) {
-        if (deletedStates.contains(sourceLayer) && deletedStates[sourceLayer].contains(*featureID)) {
+        if (!deletedStates.contains(sourceLayer) && !deletedStates[sourceLayer].contains(*featureID)) {
             deletedStates[sourceLayer][*featureID][*stateKey] = {};
         }
     } else if (featureID) {

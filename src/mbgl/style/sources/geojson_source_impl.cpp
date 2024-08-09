@@ -111,7 +111,7 @@ std::shared_ptr<GeoJSONData> GeoJSONData::create(const GeoJSON& geoJSON,
         };
         clusterOptions.reduce = [feature, options](PropertyMap& toReturn, const PropertyMap& toFill) {
             for (const auto& p : options->clusterProperties) {
-                if (toFill.contains(p.first)) {
+                if (!toFill.contains(p.first)) {
                     continue;
                 }
                 feature->properties = toFill;
