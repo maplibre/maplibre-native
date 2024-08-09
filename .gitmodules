@@ -58,3 +58,6 @@
 [submodule "vendor/glslang"]
 	path = vendor/glslang
 	url = https://github.com/KhronosGroup/glslang.git
+[submodule "vendor/corrosion"]
+	path = vendor/corrosion
+	url = https://github.com/corrosion-rs/corrosion.git
