@@ -1385,7 +1385,7 @@ set_source_files_properties(
 # gcc 12 compiler bug, remove when fixed
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105651
 set_source_files_properties(
-    ${PROJECT_SOURCE_DIR}/src/mbgl/text/cross_tile_symbol_index.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/compound_expression.cpp
     PROPERTIES
     COMPILE_FLAGS
     $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_EQUAL:$<CXX_COMPILER_VERSION>,12>>:-Wno-error=restrict>
