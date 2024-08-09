@@ -25,7 +25,9 @@ layout (std140) uniform GlobalPaintParamsUBO {
     highp float global_pad1, global_pad2;
 };
 
-layout (std140) uniform SymbolDrawableUBO {
+uniform highp int u_ubo_index;
+
+struct SymbolDrawableUBO {
     highp mat4 u_matrix;
     highp mat4 u_label_plane_matrix;
     highp mat4 u_coord_matrix;
@@ -38,7 +40,11 @@ layout (std140) uniform SymbolDrawableUBO {
     highp vec2 drawable_pad1;
 };
 
-layout (std140) uniform SymbolTilePropsUBO {
+layout (std140) uniform SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawableUBO[60];
+};
+
+struct SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;
     bool u_pitch_with_map;
@@ -49,13 +55,21 @@ layout (std140) uniform SymbolTilePropsUBO {
     bool tileprops_pad1;
 };
 
-layout (std140) uniform SymbolInterpolateUBO {
+layout (std140) uniform SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tilepropsUBO[60];
+};
+
+struct SymbolInterpolateUBO {
     highp float u_fill_color_t;
     highp float u_halo_color_t;
     highp float u_opacity_t;
     highp float u_halo_width_t;
     highp float u_halo_blur_t;
     highp float interp_pad1, interp_pad2, interp_pad3;
+};
+
+layout (std140) uniform SymbolInterpolateUBOVector {
+    SymbolInterpolateUBO interpolateUBO[60];
 };
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {
@@ -82,6 +96,21 @@ out lowp float opacity;
 #endif
 
 void main() {
+    highp mat4 u_matrix = drawableUBO[u_ubo_index].u_matrix;
+    highp mat4 u_label_plane_matrix = drawableUBO[u_ubo_index].u_label_plane_matrix;
+    highp mat4 u_coord_matrix = drawableUBO[u_ubo_index].u_coord_matrix;
+    highp vec2 u_texsize = drawableUBO[u_ubo_index].u_texsize;
+    bool u_rotate_symbol = drawableUBO[u_ubo_index].u_rotate_symbol;
+
+    bool u_is_text = tilepropsUBO[u_ubo_index].u_is_text;
+    bool u_pitch_with_map = tilepropsUBO[u_ubo_index].u_pitch_with_map;
+    bool u_is_size_zoom_constant = tilepropsUBO[u_ubo_index].u_is_size_zoom_constant;
+    bool u_is_size_feature_constant = tilepropsUBO[u_ubo_index].u_is_size_feature_constant;
+    highp float u_size_t = tilepropsUBO[u_ubo_index].u_size_t;
+    highp float u_size = tilepropsUBO[u_ubo_index].u_size;
+
+    highp float u_opacity_t = interpolateUBO[u_ubo_index].u_opacity_t;
+
     highp float u_opacity = u_is_text ? u_text_opacity : u_icon_opacity;
 
     #ifndef HAS_UNIFORM_u_opacity
@@ -152,7 +181,9 @@ lowp float opacity = u_opacity;
 )";
     static constexpr const char* fragment = R"(uniform sampler2D u_texture;
 
-layout (std140) uniform SymbolTilePropsUBO {
+uniform highp int u_ubo_index;
+
+struct SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;
     bool u_pitch_with_map;
@@ -161,6 +192,10 @@ layout (std140) uniform SymbolTilePropsUBO {
     highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
     highp float u_size; // used when size is both zoom and feature constant
     bool tileprops_pad1;
+};
+
+layout (std140) uniform SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tilepropsUBO[60];
 };
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {
@@ -186,6 +221,8 @@ in lowp float opacity;
 #endif
 
 void main() {
+    bool u_is_text = tilepropsUBO[u_ubo_index].u_is_text;
+
     highp float u_opacity = u_is_text ? u_text_opacity : u_icon_opacity;
 
     #ifdef HAS_UNIFORM_u_opacity

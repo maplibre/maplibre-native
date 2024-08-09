@@ -1,6 +1,8 @@
 #define SDF_PX 8.0
 
-layout (std140) uniform SymbolDrawableUBO {
+uniform highp int u_ubo_index;
+
+struct SymbolDrawableUBO {
     highp mat4 u_matrix;
     highp mat4 u_label_plane_matrix;
     highp mat4 u_coord_matrix;
@@ -13,7 +15,11 @@ layout (std140) uniform SymbolDrawableUBO {
     highp vec2 drawable_pad1;
 };
 
-layout (std140) uniform SymbolTilePropsUBO {
+layout (std140) uniform SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawableUBO[60];
+};
+
+struct SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;
     bool u_pitch_with_map;
@@ -22,6 +28,10 @@ layout (std140) uniform SymbolTilePropsUBO {
     highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
     highp float u_size; // used when size is both zoom and feature constant
     bool tileprops_pad1;
+};
+
+layout (std140) uniform SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tilepropsUBO[60];
 };
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {
@@ -51,6 +61,11 @@ in vec3 v_data1;
 #pragma mapbox: define lowp float halo_blur
 
 void main() {
+    highp float u_gamma_scale = drawableUBO[u_ubo_index].u_gamma_scale;
+
+    bool u_is_text = tilepropsUBO[u_ubo_index].u_is_text;
+    bool u_is_halo = tilepropsUBO[u_ubo_index].u_is_halo;
+
     highp vec4 u_fill_color = u_is_text ? u_text_fill_color : u_icon_fill_color;
     highp vec4 u_halo_color = u_is_text ? u_text_halo_color : u_icon_halo_color;
     highp float u_opacity = u_is_text ? u_text_opacity : u_icon_opacity;
