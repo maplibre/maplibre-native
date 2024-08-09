@@ -76,6 +76,11 @@ public:
         callback(db->listRegions());
     }
 
+    void getRegion(const int64_t regionID,
+                   const std::function<void(expected<std::optional<OfflineRegion>, std::exception_ptr>)>& callback) {
+        callback(db->getRegion(regionID));
+    }
+
     void createRegion(const OfflineRegionDefinition& definition,
                       const OfflineRegionMetadata& metadata,
                       const std::function<void(expected<OfflineRegion, std::exception_ptr>)>& callback) {
@@ -263,6 +268,11 @@ void DatabaseFileSource::setMaximumAmbientCacheSize(uint64_t size, std::function
 void DatabaseFileSource::listOfflineRegions(
     std::function<void(expected<OfflineRegions, std::exception_ptr>)> callback) {
     impl->actor().invoke(&DatabaseFileSourceThread::listRegions, std::move(callback));
+}
+
+void DatabaseFileSource::getOfflineRegion(
+    const int64_t regionID, std::function<void(expected<std::optional<OfflineRegion>, std::exception_ptr>)> callback) {
+    impl->actor().invoke(&DatabaseFileSourceThread::getRegion, regionID, std::move(callback));
 }
 
 void DatabaseFileSource::createOfflineRegion(
