@@ -1,12 +1,12 @@
 module(name = "maplibre")
 
-bazel_dep(name = "apple_support", version = "1.11.1", repo_name = "build_bazel_apple_support")
-bazel_dep(name = "aspect_rules_js", version = "1.34.1")
-bazel_dep(name = "bazel_skylib", version = "1.5.0")
-bazel_dep(name = "platforms", version = "0.0.8")
-bazel_dep(name = "rules_apple", version = "3.1.1", repo_name = "build_bazel_rules_apple")
-bazel_dep(name = "rules_swift", version = "1.13.0", repo_name = "build_bazel_rules_swift")
-bazel_dep(name = "rules_xcodeproj", version = "1.13.0")
+bazel_dep(name = "apple_support", version = "1.16.0", repo_name = "build_bazel_apple_support")
+bazel_dep(name = "aspect_rules_js", version = "1.42.3")
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "platforms", version = "0.0.10")
+bazel_dep(name = "rules_apple", version = "3.7.0", repo_name = "build_bazel_rules_apple")
+bazel_dep(name = "rules_swift", version = "2.1.1", repo_name = "build_bazel_rules_swift")
+bazel_dep(name = "rules_xcodeproj", version = "2.5.2")
 
 npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
 npm.npm_translate_lock(
@@ -35,4 +35,28 @@ http_file(
     downloaded_file_path = "pois-nps.mbtiles",
     sha256 = "6a218702a5a60bb6358494217cac2836a087355ac092f6b01f089d8b1b2842ca",
     url = "https://maplibre-native.s3.eu-central-1.amazonaws.com/ios-swift-example-app-resources/pois-nps.mbtiles",
+)
+
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "glfw",
+    build_file = "@//vendor:glfw.BUILD",
+    integrity = "sha256-tewASycS/Qjohh3CcUKPBId1IAot9xnM9XUUO6dJo+k=",
+    strip_prefix = "glfw-3.4",
+    urls = ["https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip"],
+)
+
+new_local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
+
+new_local_repository(
+    name = "libuv",
+    build_file = "@//vendor:libuv.BUILD",
+    path = "/opt/homebrew/opt/libuv",
+)
+
+darwin_config = use_repo_rule("//platform/darwin:bazel/darwin_config_repository_rule.bzl", "darwin_config")
+
+darwin_config(
+    name = "darwin_config",
 )
