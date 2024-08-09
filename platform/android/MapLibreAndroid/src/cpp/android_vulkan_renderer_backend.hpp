@@ -8,8 +8,9 @@
 namespace mbgl {
 namespace android {
 
-class AndroidVulkanRendererBackend : public AndroidRendererBackend, public vulkan::RendererBackend,
-        public mbgl::gfx::Renderable {
+class AndroidVulkanRendererBackend : public AndroidRendererBackend,
+                                     public vulkan::RendererBackend,
+                                     public mbgl::gfx::Renderable {
 public:
     AndroidVulkanRendererBackend(ANativeWindow*);
     ~AndroidVulkanRendererBackend() override;

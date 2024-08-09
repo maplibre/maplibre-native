@@ -7,8 +7,9 @@
 namespace mbgl {
 namespace android {
 
-class AndroidGLRendererBackend : public AndroidRendererBackend, public gl::RendererBackend,
-        public mbgl::gfx::Renderable {
+class AndroidGLRendererBackend : public AndroidRendererBackend,
+                                 public gl::RendererBackend,
+                                 public mbgl::gfx::Renderable {
 public:
     AndroidGLRendererBackend();
     ~AndroidGLRendererBackend() override;

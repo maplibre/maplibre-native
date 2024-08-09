@@ -32,10 +32,10 @@ public:
 private:
 };
 
-AndroidVulkanRendererBackend::AndroidVulkanRendererBackend(ANativeWindow* window_) :
-    vulkan::RendererBackend(gfx::ContextMode::Unique),
-    mbgl::gfx::Renderable({64, 64}, std::make_unique<AndroidVulkanRenderableResource>(*this)),
-    window(window_) {
+AndroidVulkanRendererBackend::AndroidVulkanRendererBackend(ANativeWindow* window_)
+    : vulkan::RendererBackend(gfx::ContextMode::Unique),
+      mbgl::gfx::Renderable({64, 64}, std::make_unique<AndroidVulkanRenderableResource>(*this)),
+      window(window_) {
     init();
 }
 
@@ -55,7 +55,8 @@ namespace mbgl {
 namespace gfx {
 
 template <>
-std::unique_ptr<android::AndroidRendererBackend> Backend::Create<mbgl::gfx::Backend::Type::Vulkan>(ANativeWindow* window) {
+std::unique_ptr<android::AndroidRendererBackend> Backend::Create<mbgl::gfx::Backend::Type::Vulkan>(
+    ANativeWindow* window) {
     return std::make_unique<android::AndroidVulkanRendererBackend>(window);
 }
 

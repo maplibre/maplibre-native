@@ -40,7 +40,9 @@
 
 #else
 
-#define MBGL_CHECK_ERROR(x) while (0) {}
+#define MBGL_CHECK_ERROR(x) \
+    while (0) {             \
+    }
 
 #endif
 
@@ -765,7 +767,6 @@ bool RenderLocationIndicatorImpl::anisotropicFilteringAvailable = false;
 #else
 
 class RenderLocationIndicatorImpl {
-
 public:
     RenderLocationIndicatorImpl(std::string) {}
 
