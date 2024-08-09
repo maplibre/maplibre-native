@@ -137,6 +137,17 @@ public:
     virtual void listOfflineRegions(std::function<void(expected<OfflineRegions, std::exception_ptr>)>);
 
     /**
+     * Retrieve given region in the offline database.
+     *
+     * The query will be executed asynchronously and the results passed to the
+     * given callback, which will be executed on the database thread; it is the
+     * responsibility of the SDK bindings to re-execute a user-provided callback
+     * on the main thread.
+     */
+    virtual void getOfflineRegion(int64_t regionID,
+                                  std::function<void(expected<std::optional<OfflineRegion>, std::exception_ptr>)>);
+
+    /**
      * Create an offline region in the database.
      *
      * When the initial database queries have completed, the provided callback
