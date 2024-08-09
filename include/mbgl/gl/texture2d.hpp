@@ -59,8 +59,8 @@ public:
     void unbind() noexcept;
 
 private:
-    void createObject() noexcept;
-    void createStorage(const void* data = nullptr) noexcept;
+    void allocateTexture() noexcept;
+    void updateTextureData(const void* data = nullptr) noexcept;
 
 private:
     gl::Context& context;
