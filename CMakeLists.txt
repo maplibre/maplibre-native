@@ -1382,6 +1382,15 @@ set_source_files_properties(
     $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wno-deprecated-declarations>
 )
 
+# gcc 12 compiler bug, remove when fixed
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105651
+set_source_files_properties(
+    ${PROJECT_SOURCE_DIR}/src/mbgl/text/cross_tile_symbol_index.cpp
+    PROPERTIES
+    COMPILE_FLAGS
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_EQUAL:$<CXX_COMPILER_VERSION>,12>>:-Wno-error=restrict>
+)
+
 source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})
 source_group(TREE ${PROJECT_SOURCE_DIR}/src FILES ${SRC_FILES})
 
