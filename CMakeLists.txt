@@ -1388,7 +1388,7 @@ set_source_files_properties(
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/compound_expression.cpp
     PROPERTIES
     COMPILE_FLAGS
-    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_EQUAL:$<CXX_COMPILER_VERSION>,12>>:-Wno-error=restrict>
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_EQUAL:$<CXX_COMPILER_VERSION>,12>>:-Wno-restrict>
 )
 
 source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})
