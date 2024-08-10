@@ -385,7 +385,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitStandard)) {
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::RateLimit, res.error->reason);
         ASSERT_EQ(true, bool(res.error->retryAfter));
-        ASSERT_LT(util::now(), res.error->retryAfter);
+        ASSERT_TRUE(util::now() < res.error->retryAfter);
         loop.stop();
     });
 
@@ -400,7 +400,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitMBX)) {
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::RateLimit, res.error->reason);
         ASSERT_EQ(true, bool(res.error->retryAfter));
-        ASSERT_LT(util::now(), res.error->retryAfter);
+        ASSERT_TRUE(util::now() < res.error->retryAfter);
         loop.stop();
     });
 
