@@ -166,7 +166,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheRevalidateModified)) {
         EXPECT_EQ("Response", *res.data);
         EXPECT_FALSE(bool(res.expires));
         EXPECT_TRUE(res.mustRevalidate);
-        EXPECT_EQ(Timestamp{Seconds(1420070400)}, *res.modified);
+        EXPECT_TRUE(Timestamp{Seconds(1420070400)} == *res.modified);
         EXPECT_FALSE(res.etag);
 
         // The first response is stored in the cache, but it has
@@ -520,7 +520,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedNotModified)
             EXPECT_LT(util::now(), *res.expires);
             EXPECT_TRUE(res.mustRevalidate);
             ASSERT_TRUE(bool(res.modified));
-            EXPECT_EQ(Timestamp{Seconds(1420070400)}, *res.modified);
+            EXPECT_TRUE(Timestamp{Seconds(1420070400)} == *res.modified);
             EXPECT_FALSE(bool(res.etag));
             loop.stop();
         });
@@ -557,7 +557,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedModified)) {
             EXPECT_EQ("Response", *res.data);
             EXPECT_FALSE(bool(res.expires));
             EXPECT_TRUE(res.mustRevalidate);
-            EXPECT_EQ(Timestamp{Seconds(1420070400)}, *res.modified);
+            EXPECT_TRUE(Timestamp{Seconds(1420070400)} == *res.modified);
             EXPECT_FALSE(res.etag);
             loop.stop();
         });
@@ -662,10 +662,10 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
             ASSERT_TRUE(res.data.get());
             EXPECT_EQ("Cached value", *res.data);
             ASSERT_TRUE(res.expires);
-            EXPECT_EQ(Timestamp{Seconds(1417392000)}, *res.expires);
+            EXPECT_TRUE(Timestamp{Seconds(1417392000)} == *res.expires);
             EXPECT_TRUE(res.mustRevalidate);
             ASSERT_TRUE(res.modified);
-            EXPECT_EQ(Timestamp{Seconds(1417392000)}, *res.modified);
+            EXPECT_TRUE(Timestamp{Seconds(1417392000)} == *res.modified);
             ASSERT_TRUE(res.etag);
             EXPECT_EQ("snowfall", *res.etag);
 
@@ -702,7 +702,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
         // a 304 Not Modified response.
         EXPECT_EQ("Prior value", *res.data);
         ASSERT_TRUE(res.expires);
-        EXPECT_LE(util::now(), *res.expires);
+        EXPECT_TRUE(util::now() <= *res.expires);
         EXPECT_TRUE(res.mustRevalidate);
         ASSERT_TRUE(res.modified);
         EXPECT_EQ(Timestamp{Seconds(1417392000)}, *res.modified);
