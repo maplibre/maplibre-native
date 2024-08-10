@@ -406,7 +406,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshEtagNotModified)) {
             EXPECT_TRUE(res.notModified);
             EXPECT_FALSE(res.data.get());
             ASSERT_TRUE(bool(res.expires));
-            EXPECT_LT(util::now(), *res.expires);
+            EXPECT_TRUE(util::now() < *res.expires);
             EXPECT_TRUE(res.mustRevalidate);
             EXPECT_FALSE(bool(res.modified));
             ASSERT_TRUE(bool(res.etag));
