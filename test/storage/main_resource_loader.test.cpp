@@ -42,9 +42,9 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheResponse)) {
             EXPECT_EQ(response.error, res2.error);
             ASSERT_TRUE(res2.data.get());
             EXPECT_EQ(*response.data, *res2.data);
-            EXPECT_EQ(response.expires, res2.expires);
+            EXPECT_TRUE(response.expires == res2.expires);
             EXPECT_EQ(response.mustRevalidate, res2.mustRevalidate);
-            EXPECT_EQ(response.modified, res2.modified);
+            EXPECT_TRUE(response.modified == res2.modified);
             EXPECT_EQ(response.etag, res2.etag);
 
             loop.stop();
