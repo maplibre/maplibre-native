@@ -35,24 +35,29 @@ public:
         defaultValue.match([&fn](const style::PropertyExpression<T>& e) { fn(e.getExpression()); }, [](const T&) {});
     }
 
-    bool operator==(const Expression&) const final { return false; }
+    bool operator==(const Expression& e) const final override {
+        if (e.getKind() == Kind::FormatSectionOverride) {
+            const auto* other = static_cast<const FormatSectionOverride*>(&e);
 
-    bool operator==(const FormatSectionOverride<T>& other) const {
-        if (getType() != other.getType() || propertyName != other.propertyName) {
-            return false;
+            if (getType() != other->getType() || propertyName != other->propertyName) {
+                return false;
+            }
+
+            // Check that default values or property expressions are equal.
+            return defaultValue.match(
+                [other](const style::PropertyExpression<T>& thisExpr) {
+                    return other->defaultValue.match(
+                        [&thisExpr](const style::PropertyExpression<T>& otherExpr) { return thisExpr == otherExpr; },
+                        [](const T&) { return false; });
+                },
+                [other](const T& thisValue) {
+                    return other->defaultValue.match(
+                        [&thisValue](const T& otherValue) { return thisValue == otherValue; },
+                        [](const style::PropertyExpression<T>&) { return false; });
+                });
         }
 
-        // Check that default values or property expressions are equal.
-        return defaultValue.match(
-            [other](const style::PropertyExpression<T>& thisExpr) {
-                return other.defaultValue.match(
-                    [&thisExpr](const style::PropertyExpression<T>& otherExpr) { return thisExpr == otherExpr; },
-                    [](const T&) { return false; });
-            },
-            [other](const T& thisValue) {
-                return other.defaultValue.match([&thisValue](const T& otherValue) { return thisValue == otherValue; },
-                                                [](const style::PropertyExpression<T>&) { return false; });
-            });
+        return false;
     }
 
     std::vector<std::optional<Value>> possibleOutputs() const final { return {std::nullopt}; }
