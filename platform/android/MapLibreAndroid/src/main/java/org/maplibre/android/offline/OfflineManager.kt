@@ -12,7 +12,7 @@ import org.maplibre.android.R
 import org.maplibre.android.geometry.LatLngBounds.Companion.world
 import org.maplibre.android.net.ConnectivityReceiver
 import org.maplibre.android.storage.FileSource
-import org.maplibre.android.utils.FileUtils
+import org.maplibre.android.utils.deleteFileAsync
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -140,7 +140,7 @@ class OfflineManager private constructor(context: Context, private val scope: Co
 
     private fun deleteAmbientDatabase(context: Context) {
         val path = FileSource.getInternalCachePath(context) + File.separator + "mbgl-cache.db"
-        FileUtils.deleteFile(path, scope)
+        deleteFileAsync(path, scope)
     }
 
     /**

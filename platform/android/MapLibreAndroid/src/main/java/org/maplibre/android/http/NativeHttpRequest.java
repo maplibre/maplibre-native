@@ -9,6 +9,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import kotlin.Unit;
 import kotlinx.coroutines.CoroutineScope;
 
+import static org.maplibre.android.http.LocalRequestAsyncKt.localRequestAsync;
+
 @Keep
 public class NativeHttpRequest implements HttpResponder {
 
@@ -70,7 +72,7 @@ public class NativeHttpRequest implements HttpResponder {
   }
 
   private void executeLocalRequest(String resourceUrl, CoroutineScope scope) {
-    new LocalRequestTask(scope, bytes -> {
+    localRequestAsync(resourceUrl, scope, bytes -> {
       if (bytes != null) {
         lock.lock();
         if (nativePtr != 0) {
@@ -79,7 +81,7 @@ public class NativeHttpRequest implements HttpResponder {
         lock.unlock();
       }
       return Unit.INSTANCE;
-    }).execute(resourceUrl);
+    });
   }
 
   public void handleFailure(int type, String errorMessage) {

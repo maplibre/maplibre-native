@@ -16,7 +16,6 @@ import org.maplibre.android.MapLibre;
 import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.log.Logger;
 import org.maplibre.android.util.TileServerOptions;
-import org.maplibre.android.utils.CheckFileWritePermissionTask;
 import org.maplibre.android.utils.ThreadUtils;
 
 import java.io.File;
@@ -25,6 +24,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import kotlin.Unit;
 import kotlinx.coroutines.CoroutineScope;
+
+import static org.maplibre.android.utils.FileUtilsKt.checkFileWritePermissionAsync;
 
 /**
  * Holds a central reference to the core's DefaultFileSource for as long as
@@ -264,7 +265,7 @@ public class FileSource {
       // no need to change the path
       callback.onSuccess(path);
     } else {
-      new CheckFileWritePermissionTask(scope, (writable, error) -> {
+      checkFileWritePermissionAsync(new File(path), scope, (writable, error) -> {
         if (error != null) {
           Logger.e(TAG, "Path is not writable: " + path, error);
           callback.onError("Path is not writable: " + path);
@@ -279,7 +280,7 @@ public class FileSource {
           callback.onError("Path is not writable: " + path);
         }
         return Unit.INSTANCE;
-      }).execute(new File(path));
+      });
     }
   }
 
