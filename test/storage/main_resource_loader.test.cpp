@@ -311,7 +311,7 @@ TEST(MainResourceLoader, OptionalNonExpired) {
             ASSERT_TRUE(res.data.get());
             EXPECT_EQ("Cached value", *res.data);
             ASSERT_TRUE(bool(res.expires));
-            EXPECT_EQ(*response.expires, *res.expires);
+            EXPECT_TRUE(*response.expires == *res.expires);
             EXPECT_FALSE(res.mustRevalidate);
             EXPECT_FALSE(bool(res.modified));
             EXPECT_FALSE(bool(res.etag));
@@ -344,7 +344,7 @@ TEST(MainResourceLoader, OptionalExpired) {
             ASSERT_TRUE(res.data.get());
             EXPECT_EQ("Cached value", *res.data);
             ASSERT_TRUE(bool(res.expires));
-            EXPECT_EQ(*response.expires, *res.expires);
+            EXPECT_TRUE(*response.expires == *res.expires);
             EXPECT_FALSE(res.mustRevalidate);
             EXPECT_FALSE(bool(res.modified));
             EXPECT_FALSE(bool(res.etag));
@@ -517,7 +517,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(NoCacheRefreshModifiedNotModified)
             EXPECT_TRUE(res.notModified);
             EXPECT_FALSE(res.data.get());
             ASSERT_TRUE(bool(res.expires));
-            EXPECT_LT(util::now(), *res.expires);
+            EXPECT_TRUE(util::now() < *res.expires);
             EXPECT_TRUE(res.mustRevalidate);
             ASSERT_TRUE(bool(res.modified));
             EXPECT_TRUE(Timestamp{Seconds(1420070400)} == *res.modified);
