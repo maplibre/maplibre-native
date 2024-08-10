@@ -188,7 +188,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheRevalidateModified)) {
                 EXPECT_EQ("Response", *res2.data);
                 EXPECT_TRUE(bool(res2.expires));
                 EXPECT_TRUE(res2.mustRevalidate);
-                EXPECT_EQ(Timestamp{Seconds(1420070400)}, *res2.modified);
+                EXPECT_TRUE(Timestamp{Seconds(1420070400)} == *res2.modified);
                 EXPECT_FALSE(res2.etag);
             } else {
                 // The test server sends a Cache-Control header with a max-age
@@ -203,7 +203,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(CacheRevalidateModified)) {
                 EXPECT_FALSE(res2.data.get());
                 EXPECT_TRUE(bool(res2.expires));
                 EXPECT_TRUE(res2.mustRevalidate);
-                EXPECT_EQ(Timestamp{Seconds(1420070400)}, *res2.modified);
+                EXPECT_TRUE(Timestamp{Seconds(1420070400)} == *res2.modified);
                 EXPECT_FALSE(res2.etag);
                 loop.stop();
             }
@@ -705,7 +705,7 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleMustRevalidate)) {
         EXPECT_TRUE(util::now() <= *res.expires);
         EXPECT_TRUE(res.mustRevalidate);
         ASSERT_TRUE(res.modified);
-        EXPECT_EQ(Timestamp{Seconds(1417392000)}, *res.modified);
+        EXPECT_TRUE(Timestamp{Seconds(1417392000)} == *res.modified);
         ASSERT_TRUE(res.etag);
         EXPECT_EQ("snowfall", *res.etag);
         loop.stop();
