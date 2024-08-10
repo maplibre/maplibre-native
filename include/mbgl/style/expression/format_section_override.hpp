@@ -60,10 +60,7 @@ public:
         return false;
     }
 
-
-    bool operator==(const FormatSectionOverride&other) const {
-        return *this == static_cast<const Expression&>(other);
-    }
+    bool operator==(const FormatSectionOverride& other) const { return *this == static_cast<const Expression&>(other); }
 
     std::vector<std::optional<Value>> possibleOutputs() const final { return {std::nullopt}; }
 
