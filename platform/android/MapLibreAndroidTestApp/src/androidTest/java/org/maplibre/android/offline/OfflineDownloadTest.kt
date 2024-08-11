@@ -1,5 +1,6 @@
 package org.maplibre.android.offline
 
+import androidx.lifecycle.lifecycleScope
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import org.junit.Ignore
@@ -31,7 +32,7 @@ class OfflineDownloadTest : OfflineRegion.OfflineRegionObserver {
     @Test(timeout = 60000)
     fun offlineDownload() {
         rule.runOnUiThreadActivity {
-            OfflineManager.getInstance(rule.activity).createOfflineRegion(
+            OfflineManager.getInstance(rule.activity, rule.activity.lifecycleScope).createOfflineRegion(
                 createTestRegionDefinition(),
                 ByteArray(0),
                 object : OfflineManager.CreateOfflineRegionCallback {
