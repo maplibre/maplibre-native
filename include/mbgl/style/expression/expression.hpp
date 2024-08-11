@@ -224,7 +224,7 @@ public:
     virtual void eachChild(const std::function<void(const Expression&)>&) const = 0;
 
     virtual bool operator==(const Expression&) const = 0;
-    bool operator!=(const Expression& rhs) const noexcept { return !operator==(rhs); }
+    bool operator!=(const Expression&) const = default;
 
     Kind getKind() const noexcept { return kind; };
     const type::Type& getType() const noexcept { return type; };

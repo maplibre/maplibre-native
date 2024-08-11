@@ -306,7 +306,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     std::unordered_set<std::string> constantsMaskChanged;
     for (RenderLayer& layer : orderedLayers) {
         const std::string& id = layer.getID();
-        const bool layerAddedOrChanged = layerDiff.added.count(id) || layerDiff.changed.count(id);
+        const bool layerAddedOrChanged = layerDiff.added.contains(id) || layerDiff.changed.contains(id);
         evaluationParameters.layerChanged = layerAddedOrChanged;
         evaluationParameters.hasCrossfade = layer.hasCrossfade();
 
@@ -383,7 +383,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             if (layerInfo->source != LayerTypeInfo::Source::NotRequired) {
                 if (layer.baseImpl->source == sourceImpl->id) {
                     const std::string& layerId = layer.getID();
-                    sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff || constantsMaskChanged.count(layerId) ||
+                    sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff ||
+                                           constantsMaskChanged.contains(layerId) ||
                                            hasLayoutDifference(layerDiff, layerId));
                     if (layerIsVisible) {
                         filteredLayersForSource.push_back(layer.evaluatedProperties);
