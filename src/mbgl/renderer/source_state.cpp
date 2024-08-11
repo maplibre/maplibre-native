@@ -110,18 +110,17 @@ void SourceFeatureState::removeState(const std::optional<std::string>& sourceLay
                                      const std::optional<std::string>& stateKey) {
     std::string sourceLayer = sourceLayerID.value_or(std::string());
 
-    bool sourceLayerDeleted = (deletedStates.count(sourceLayer) > 0) && deletedStates[sourceLayer].empty();
+    bool sourceLayerDeleted = deletedStates.contains(sourceLayer) && deletedStates[sourceLayer].empty();
     if (sourceLayerDeleted) {
         return;
     }
 
     if (stateKey && featureID) {
-        if ((deletedStates.count(sourceLayer) == 0) && (deletedStates[sourceLayer].count(*featureID)) == 0) {
+        if (!deletedStates.contains(sourceLayer) && !deletedStates[sourceLayer].contains(*featureID)) {
             deletedStates[sourceLayer][*featureID][*stateKey] = {};
         }
     } else if (featureID) {
-        bool updateInQueue = (stateChanges.count(sourceLayer) != 0U) &&
-                             (stateChanges[sourceLayer].count(*featureID) != 0U);
+        bool updateInQueue = stateChanges.contains(sourceLayer) && stateChanges[sourceLayer].contains(*featureID);
         if (updateInQueue) {
             for (const auto& changeEntry : stateChanges[sourceLayer][*featureID]) {
                 deletedStates[sourceLayer][*featureID][changeEntry.first] = {};

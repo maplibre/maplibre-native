@@ -35,7 +35,7 @@ public:
         defaultValue.match([&fn](const style::PropertyExpression<T>& e) { fn(e.getExpression()); }, [](const T&) {});
     }
 
-    bool operator==(const Expression& e) const final {
+    bool operator==(const Expression& e) const final override {
         if (e.getKind() == Kind::FormatSectionOverride) {
             const auto* other = static_cast<const FormatSectionOverride*>(&e);
 
@@ -59,6 +59,8 @@ public:
 
         return false;
     }
+
+    bool operator==(const FormatSectionOverride& other) const { return *this == static_cast<const Expression&>(other); }
 
     std::vector<std::optional<Value>> possibleOutputs() const final { return {std::nullopt}; }
 
