@@ -140,9 +140,9 @@ TEST(HTTPFileSource, TEST_REQUIRES_SERVER(ExpiresParsing)) {
                               EXPECT_EQ(nullptr, res.error);
                               ASSERT_TRUE(res.data.get());
                               EXPECT_EQ("Hello World!", *res.data);
-                              EXPECT_EQ(Timestamp{Seconds(1420797926)}, res.expires);
+                              EXPECT_TRUE(Timestamp{Seconds(1420797926)} == res.expires);
                               EXPECT_FALSE(res.mustRevalidate);
-                              EXPECT_EQ(Timestamp{Seconds(1420794326)}, res.modified);
+                              EXPECT_TRUE(Timestamp{Seconds(1420794326)} == res.modified);
                               EXPECT_EQ("foo", *res.etag);
                               loop.stop();
                           });
