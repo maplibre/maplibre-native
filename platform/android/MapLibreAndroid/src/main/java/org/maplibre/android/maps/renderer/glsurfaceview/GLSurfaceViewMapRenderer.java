@@ -120,7 +120,7 @@ public class GLSurfaceViewMapRenderer extends MapRenderer implements GLSurfaceVi
    * {@inheritDoc}
    */
   @Override
-  public long waitForEmpty(long timeoutMillis) {
-    return glSurfaceView.waitForEmpty(timeoutMillis);
+  public void waitForEmpty() {
+    glSurfaceView.waitForEmpty();
   }
 }

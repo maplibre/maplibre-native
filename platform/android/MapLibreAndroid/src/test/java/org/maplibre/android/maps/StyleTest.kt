@@ -56,7 +56,7 @@ class StyleTest {
 
     @Test
     fun testFromUrl() {
-        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets"))
+        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
     }
@@ -144,7 +144,7 @@ class StyleTest {
         val source = mockk<GeoJsonSource>()
         every { source.id } returns "1"
         val builder =
-            Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withSource(source)
+            Style.Builder().fromUri(Style.getPredefinedStyle("Streets")).withSource(source)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         maplibreMap.notifyStyleLoaded()
@@ -155,7 +155,7 @@ class StyleTest {
     fun testWithFromLoadingLayer() {
         val layer = mockk<SymbolLayer>()
         every { layer.id } returns "1"
-        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withLayer(layer)
+        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets")).withLayer(layer)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         maplibreMap.notifyStyleLoaded()
@@ -172,7 +172,7 @@ class StyleTest {
         val layer = mockk<SymbolLayer>()
         every { layer.id } returns "1"
         val builder =
-            Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withLayerAt(layer, 1)
+            Style.Builder().fromUri(Style.getPredefinedStyle("Streets")).withLayerAt(layer, 1)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         maplibreMap.notifyStyleLoaded()
@@ -183,7 +183,7 @@ class StyleTest {
     fun testWithFromLoadingLayerBelow() {
         val layer = mockk<SymbolLayer>()
         every { layer.id } returns "1"
-        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets"))
+        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
             .withLayerBelow(layer, "below")
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
@@ -195,7 +195,7 @@ class StyleTest {
     fun testWithFromLoadingLayerAbove() {
         val layer = mockk<SymbolLayer>()
         every { layer.id } returns "1"
-        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets"))
+        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
             .withLayerBelow(layer, "below")
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
@@ -206,7 +206,7 @@ class StyleTest {
     @Test
     fun testWithFromLoadingTransitionOptions() {
         val transitionOptions = TransitionOptions(100, 200)
-        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets"))
+        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
             .withTransition(transitionOptions)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
@@ -218,7 +218,7 @@ class StyleTest {
     fun testFromCallback() {
         val callback = mockk<Style.OnStyleLoaded>()
         every { callback.onStyleLoaded(any()) } answers {}
-        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets"))
+        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
         maplibreMap.setStyle(builder, callback)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         maplibreMap.notifyStyleLoaded()
@@ -274,7 +274,7 @@ class StyleTest {
         val source = mockk<GeoJsonSource>()
         every { source.id } returns "1"
         val builder =
-            Style.Builder().fromUrl(Style.getPredefinedStyle("Streets")).withSource(source)
+            Style.Builder().fromUri(Style.getPredefinedStyle("Streets")).withSource(source)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Streets") }
         maplibreMap.notifyStyleLoaded()
@@ -290,7 +290,7 @@ class StyleTest {
     @Test
     fun testGetNullWhileLoading() {
         val transitionOptions = TransitionOptions(100, 200)
-        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets"))
+        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
             .withTransition(transitionOptions)
         maplibreMap.setStyle(builder)
         Assert.assertNull(maplibreMap.style)
@@ -315,11 +315,11 @@ class StyleTest {
 
     @Test(expected = IllegalStateException::class)
     fun testIllegalStateExceptionWithStyleReload() {
-        val builder = Style.Builder().fromUrl(Style.getPredefinedStyle("Streets"))
+        val builder = Style.Builder().fromUri(Style.getPredefinedStyle("Streets"))
         maplibreMap.setStyle(builder)
         maplibreMap.notifyStyleLoaded()
         val style = maplibreMap.style
-        maplibreMap.setStyle(Style.Builder().fromUrl(Style.getPredefinedStyle("Bright")))
+        maplibreMap.setStyle(Style.Builder().fromUri(Style.getPredefinedStyle("Bright")))
         style!!.addLayer(mockk<SymbolLayer>())
     }
 
@@ -327,7 +327,7 @@ class StyleTest {
     fun testAddImage() {
         val bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
         val builder =
-            Style.Builder().fromUrl(Style.getPredefinedStyle("Satellite Hybrid")).withImage("id", bitmap)
+            Style.Builder().fromUri(Style.getPredefinedStyle("Satellite Hybrid")).withImage("id", bitmap)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Satellite Hybrid") }
         verify(exactly = 0) { nativeMapView.addImages(any()) }
@@ -341,7 +341,7 @@ class StyleTest {
         drawable.intrinsicHeight = 10
         drawable.intrinsicWidth = 10
         val builder =
-            Style.Builder().fromUrl(Style.getPredefinedStyle("Satellite Hybrid")).withImage("id", drawable)
+            Style.Builder().fromUri(Style.getPredefinedStyle("Satellite Hybrid")).withImage("id", drawable)
         maplibreMap.setStyle(builder)
         verify(exactly = 1) { nativeMapView.styleUri = Style.getPredefinedStyle("Satellite Hybrid") }
         verify(exactly = 0) { nativeMapView.addImages(any()) }

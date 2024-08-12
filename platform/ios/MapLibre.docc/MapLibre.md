@@ -4,6 +4,10 @@
     @Available(iOS, introduced: "12.0")
 }
 
+@Options(scope: global) {
+  @AutomaticArticleSubheading(disabled)
+}
+
 Powerful, free and open-source mapping toolkit with full control over data sources and styling.
 
 ## Overview
@@ -11,14 +15,37 @@ Powerful, free and open-source mapping toolkit with full control over data sourc
 [MapLibre Native](https://github.com/maplibre/maplibre-native) is a map rendering toolkit with support for iOS. It can be used as an alternative to MapKit. You have full control over the data sources used for rendering the map, as well as the styling. You can even participate in the development as MapLibre Native is free and open-source project.
 > Note: For information on creating and modifying map styles, see the [MapLibre Style Spec documentation](https://maplibre.org/maplibre-style-spec/).
 
-## Guides
+## Topics
+
+### Essentials
 
 - <doc:GettingStarted>
-- <doc:LineOnUserTap>
-- <doc:LocationPrivacyExample>
-- <doc:BlockingGesturesExample>
+- <doc:AddMarkerSymbolExample>
 
-## Topics
+### Styling and Dynamic Data
+
+- <doc:AnimatedLineExample>
+- <doc:WebAPIDataExample>
+- <doc:LineStyleLayerExample>
+- <doc:DDSCircleLayerExample>
+- <doc:POIAlongRouteExample>
+
+### Map Interaction
+
+- <doc:LineOnUserTap>
+- <doc:BlockingGesturesExample>
+- <doc:AnnotationViewExample>
+- <doc:BuildingLightExample>
+
+### Features
+
+- <doc:LocationPrivacyExample>
+- <doc:StaticSnapshotExample>
+
+### Offline
+
+- <doc:OfflinePackExample>
+- <doc:ManageOfflineRegionsExample>
 
 ### Map
 

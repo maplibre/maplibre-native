@@ -28,6 +28,7 @@ import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.style.sources.RasterSource
 import org.maplibre.android.style.sources.Source
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.utils.BitmapUtils
 import timber.log.Timber
 import java.util.Objects
@@ -68,7 +69,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
         // Optionally the style
         val builder = Style.Builder()
             .fromUri(
-                Style.getPredefinedStyle(
+                TestStyles.getPredefinedStyleWithFallback(
                     if ((column + row) % 2 == 0) {
                         "Streets"
                     } else {
@@ -140,7 +141,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
             builder.withSource(source)
         } else if (row == 0 && column == 2) {
             val carBitmap = BitmapUtils.getBitmapFromDrawable(
-                ResourcesCompat.getDrawable(resources, R.drawable.ic_directions_car_black, null)
+                ResourcesCompat.getDrawable(resources, R.drawable.ic_directions_car_black, theme)
             )
 
             // marker source
@@ -206,7 +207,7 @@ class MapSnapshotterActivity : AppCompatActivity() {
 
             override fun onStyleImageMissing(imageName: String) {
                 val androidIcon =
-                    BitmapUtils.getBitmapFromDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_android_2, null))
+                    BitmapUtils.getBitmapFromDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_android_2, theme))
                 snapshotter.addImage(imageName, androidIcon!!, false)
             }
         })

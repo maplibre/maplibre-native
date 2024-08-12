@@ -1,13 +1,16 @@
-#include <list>
+#include <mbgl/text/placement.hpp>
+
 #include <mbgl/layout/symbol_layout.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/renderer/render_layer.hpp>
 #include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
-#include <mbgl/text/placement.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/math.hpp>
+
+#include <list>
 #include <utility>
 
 namespace mbgl {
@@ -246,7 +249,7 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
                          collisionGroups.get(params.sourceId),
                          getAvoidEdges(symbolBucket, renderTile.matrix)};
     for (const SymbolInstance& symbol : getSortedSymbols(params, ctx.pixelRatio)) {
-        if (seenCrossTileIDs.count(symbol.crossTileID) != 0u) continue;
+        if (seenCrossTileIDs.contains(symbol.crossTileID)) continue;
         placeSymbol(symbol, ctx);
 
         // Prevent a flickering issue while zooming out.
@@ -980,7 +983,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
         true);
 
     for (SymbolInstance& symbolInstance : bucket.symbolInstances) {
-        bool isDuplicate = seenCrossTileIDs.count(symbolInstance.crossTileID) > 0;
+        bool isDuplicate = seenCrossTileIDs.contains(symbolInstance.crossTileID);
 
         auto it = opacities.find(symbolInstance.crossTileID);
         auto opacityState = defaultOpacityState;
@@ -1411,7 +1414,7 @@ void TilePlacement::placeLayers(const RenderLayerReferences& layers) {
         const SymbolInstance& symbol = intersection.symbol;
         const PlacementContext& ctx = intersection.ctx;
         currentIntersectionPriority = intersection.priority;
-        if (seenCrossTileIDs.count(symbol.crossTileID) != 0u) continue;
+        if (seenCrossTileIDs.contains(symbol.crossTileID)) continue;
         JointPlacement placement = placeSymbol(symbol, ctx);
         if (shouldRetryPlacement(placement, ctx)) continue;
         seenCrossTileIDs.insert(symbol.crossTileID);
@@ -1631,6 +1634,7 @@ bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const 
 // static
 Mutable<Placement> Placement::create(std::shared_ptr<const UpdateParameters> updateParameters_,
                                      std::optional<Immutable<Placement>> prevPlacement) {
+    MLN_TRACE_FUNC()
     assert(updateParameters_);
     switch (updateParameters_->mode) {
         case MapMode::Continuous:

@@ -9,6 +9,7 @@ import org.maplibre.android.maps.* // ktlint-disable no-wildcard-imports
 import org.maplibre.android.maps.MapFragment.OnMapViewReadyCallback
 import org.maplibre.android.maps.MapView.OnDidFinishRenderingFrameListener
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * Test activity showcasing using the MapFragment API using SDK Fragments.
@@ -31,12 +32,12 @@ class MapFragmentActivity :
         val mapFragment: MapFragment
         if (savedInstanceState == null) {
             mapFragment = MapFragment.newInstance(createFragmentOptions())
-            fragmentManager
+            supportFragmentManager
                 .beginTransaction()
                 .add(R.id.fragment_container, mapFragment, TAG)
                 .commit()
         } else {
-            mapFragment = fragmentManager.findFragmentByTag(TAG) as MapFragment
+            mapFragment = supportFragmentManager.findFragmentByTag(TAG) as MapFragment
         }
         mapFragment.getMapAsync(this)
     }
@@ -67,18 +68,18 @@ class MapFragmentActivity :
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        maplibreMap.setStyle(Style.getPredefinedStyle("Outdoor"))
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Outdoor"))
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mapView != null) {
+        if (this::mapView.isInitialized) {
             mapView.removeOnDidFinishRenderingFrameListener(this)
         }
     }
 
     override fun onDidFinishRenderingFrame(fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double) {
-        if (initialCameraAnimation && fully && maplibreMap != null) {
+        if (initialCameraAnimation && fully && this::maplibreMap.isInitialized) {
             maplibreMap.animateCamera(
                 CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().tilt(45.0).build()),
                 5000

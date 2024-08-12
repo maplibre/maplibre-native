@@ -1,17 +1,18 @@
+#include <mbgl/util/immutable.hpp>
 #import "MLNFoundation.h"
 #import "MLNShapeSource.h"
-#include <mbgl/util/immutable.hpp>
 
 NS_ASSUME_NONNULL_BEGIN
 
 namespace mbgl {
-    namespace style {
-        struct GeoJSONOptions;
-    }
+namespace style {
+struct GeoJSONOptions;
 }
+}  // namespace mbgl
 
 MLN_EXPORT
-mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(NSDictionary<MLNShapeSourceOption, id> *options);
+mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(
+    NSDictionary<MLNShapeSourceOption, id> *options);
 
 @interface MLNShapeSource (Private)
 
@@ -21,7 +22,7 @@ mbgl::Immutable<mbgl::style::GeoJSONOptions> MLNGeoJSONOptionsFromDictionary(NSD
  that the feature conforms to `MLNCluster`. This method is used for testing and
  should be considered experimental, likely to be removed or changed in future
  releases.
- 
+
  @param feature An object that conforms to the `MLNFeature` protocol.
  @param indent Used during recursion. Specify 0.
  */

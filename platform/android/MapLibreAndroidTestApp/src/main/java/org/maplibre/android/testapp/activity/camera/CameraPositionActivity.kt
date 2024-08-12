@@ -25,6 +25,7 @@ import org.maplibre.android.maps.MapLibreMap.*
 import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 
 /** Test activity showcasing how to listen to camera change events. */
@@ -47,7 +48,7 @@ class CameraPositionActivity : FragmentActivity(), OnMapReadyCallback, View.OnCl
 
     override fun onMapReady(map: MapLibreMap) {
         maplibreMap = map
-        map.setStyle(Style.getPredefinedStyle("Satellite Hybrid")) { style: Style? ->
+        map.setStyle(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")) { style: Style? ->
             // add a listener to FAB
             fab = findViewById(R.id.fab)
             fab.setColorFilter(ContextCompat.getColor(this@CameraPositionActivity, R.color.primary))

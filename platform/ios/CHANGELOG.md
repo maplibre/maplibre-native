@@ -4,6 +4,46 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.5.4
+
+- Fix crash when feature contains invalid UTF-8 data ([#2693](https://github.com/maplibre/maplibre-native/pull/2693)).
+- Bazel updates ([#2696](https://github.com/maplibre/maplibre-native/pull/2696)).
+
+## 6.5.3
+
+- Disabled iOS 14 metal options ([#2620](https://github.com/maplibre/maplibre-native/pull/2620)).
+- Don't unbind texture units in release builds ([#2630](https://github.com/maplibre/maplibre-native/pull/2630)).
+- Avoid re-creating fill extrusion drawables unnecessarily ([#2624](https://github.com/maplibre/maplibre-native/pull/2624)).
+- Take locks before signaling thread condition variables ([#2636](https://github.com/maplibre/maplibre-native/pull/2636)).
+
+## 6.5.2
+
+- Fix Cocoapods release ([#2599](https://github.com/maplibre/maplibre-native/pull/2599)).
+- Experimental API to toggle tile cache in map view ([#2590](https://github.com/maplibre/maplibre-native/pull/2590)). This can reduce memory usage at the cost of having to parse tile data again when the zoom level changes.
+- Allow changing color of scalebar on iOS ([#2614](https://github.com/maplibre/maplibre-native/pull/2614)).
+- Fix version in action sheet ([#2602](https://github.com/maplibre/maplibre-native/pull/2602)).
+- Fixed attribution link in action sheets ([#2587](https://github.com/maplibre/maplibre-native/pull/2587)).
+- Internal: Add TaggedScheduler, couple lifetime of tasks and orchestrator ([#2398](https://github.com/maplibre/maplibre-native/pull/2398)).
+
+## 6.5.1
+
+- Enable LTO ([#2504](https://github.com/maplibre/maplibre-native/pull/2504)).
+- Enable vertex instance drawing on simulator ([#2518](https://github.com/maplibre/maplibre-native/pull/2518)).
+- Change default `MLNMapSnapshotter` logo to the MapLibre logo ([#2541](https://github.com/maplibre/maplibre-native/pull/2541)). Note that showing the MapLibre logo is never required. You can configure whether to show the logo with the (now public) `showsLogo` property of `MLNMapSnapshotterOptions`. Check with your tile provider if you need to show a logo.
+- Add [Privacy Manifest](https://developer.apple.com/documentation/bundleresources/privacy_manifest_files). MapLibre Native iOS has no built-in tracking, but it does use some system APIs for functional purposes that are marked by Apple as privacy sensitive ([#2480](https://github.com/maplibre/maplibre-native/pull/2480)).
+- Fixed attribution link in action sheets ([#2587](https://github.com/maplibre/maplibre-native/pull/2587)).
+- Update included third-party licenses ([#2491](https://github.com/maplibre/maplibre-native/pull/2491)).
+
+## 6.5.0
+
+- Allow uses to handle authorization for location services ([#2453](https://github.com/maplibre/maplibre-native/pull/2453)). See [`MLNMapview.shouldRequestAuthorizationToUseLocationServices`](https://maplibre.org/maplibre-native/ios/latest/documentation/maplibre/mlnmapview/shouldrequestauthorizationtouselocationservices).
+- Fixed memory usage high in some cases ([#2442](https://github.com/maplibre/maplibre-native/pull/2442)).
+- Avoid processing raster tiles after destruction mailbox ([#2443](https://github.com/maplibre/maplibre-native/pull/2443)).
+- Annotation view recycling re-enabled ([#2454](https://github.com/maplibre/maplibre-native/pull/2454)). Fixes some issues with Annotations.
+- Increase the deferred cleanup timeout ([#2455](https://github.com/maplibre/maplibre-native/pull/2455)). Workaround for rare crash.
+- Fixes crash that happened with some PBF files ([#795](https://github.com/maplibre/maplibre-native/issues/795), [#2460](https://github.com/maplibre/maplibre-native/pull/2460)).
+- Allow using MapLibre Native on iPad Air 2. Note: tests your styles! iPad Air 2 has one of the oldest GPUs that support Metal ([#2470](https://github.com/maplibre/maplibre-native/pull/2470)).
+
 ## 6.4.2
 
 - Fix Metal frame glitch on older devices ([#2379](https://github.com/maplibre/maplibre-native/pull/2379)).

@@ -1,8 +1,12 @@
 package org.maplibre.android.testapp.activity.style
 
-import android.os.AsyncTask
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
@@ -11,11 +15,11 @@ import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.*
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.GeoParseUtil
 import org.maplibre.android.utils.BitmapUtils
 import timber.log.Timber
 import java.io.IOException
-import java.lang.ref.WeakReference
 import java.util.ArrayList
 
 /**
@@ -34,12 +38,13 @@ class StretchableImageActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(maplibreMap: MapLibreMap) {
         this.maplibreMap = maplibreMap
-        maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style ->
+        maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
             val popup = BitmapUtils.getBitmapFromDrawable(
-                resources.getDrawable(R.drawable.popup)
+                ResourcesCompat.getDrawable(resources, R.drawable.popup, theme)
             )
-            val popupDebug =
-                BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.popup_debug))
+            val popupDebug = BitmapUtils.getBitmapFromDrawable(
+                ResourcesCompat.getDrawable(resources, R.drawable.popup_debug, theme)
+            )
 
             // The two (blue) columns of pixels that can be stretched horizontally:
             //   - the pixels between x: 25 and x: 55 can be stretched
@@ -57,7 +62,12 @@ class StretchableImageActivity : AppCompatActivity(), OnMapReadyCallback {
             val content = ImageContent(25F, 25F, 115F, 100F)
             style.addImage(NAME_POPUP, popup!!, stretchX, stretchY, content)
             style.addImage(NAME_POPUP_DEBUG, popupDebug!!, stretchX, stretchY, content)
-            LoadFeatureTask(this@StretchableImageActivity).execute()
+            lifecycleScope.launch(Dispatchers.IO) {
+                val feature = loadFeatureTask(this@StretchableImageActivity)
+                withContext(Dispatchers.Main) {
+                    onFeatureLoaded(feature)
+                }
+            }
         }
     }
 
@@ -92,35 +102,16 @@ class StretchableImageActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private class LoadFeatureTask(activity: StretchableImageActivity) :
-        AsyncTask<Void?, Int?, String?>() {
-        private val activity: WeakReference<StretchableImageActivity>
-        protected override fun doInBackground(vararg p0: Void?): String? {
-            val activity = activity.get()
-            if (activity != null) {
-                var json: String? = null
-                try {
-                    json = GeoParseUtil.loadStringFromAssets(
-                        activity.applicationContext,
-                        "stretchable_image.geojson"
-                    )
-                } catch (exception: IOException) {
-                    Timber.e(exception, "Could not read feature")
-                }
-                return json
-            }
-            return null
+    private fun loadFeatureTask(activity: StretchableImageActivity) : String? {
+        try {
+            return GeoParseUtil.loadStringFromAssets(
+                activity.applicationContext,
+                "stretchable_image.geojson"
+            )
+        } catch (exception: IOException) {
+            Timber.e(exception, "Could not read feature")
         }
-
-        override fun onPostExecute(json: String?) {
-            super.onPostExecute(json)
-            val activity = activity.get()
-            activity?.onFeatureLoaded(json)
-        }
-
-        init {
-            this.activity = WeakReference(activity)
-        }
+        return null
     }
 
     override fun onStart() {

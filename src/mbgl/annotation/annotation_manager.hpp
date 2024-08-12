@@ -91,6 +91,7 @@ private:
 
     std::unordered_set<AnnotationTile*> tiles;
     mapbox::base::WeakPtrFactory<AnnotationManager> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace mbgl

@@ -33,6 +33,8 @@ interface NativeMap {
 
   void resizeView(int width, int height);
 
+  void setTileCacheEnabled(boolean enabled);
+
   void onLowMemory();
 
   void destroy();

@@ -17,6 +17,7 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_tweaker.hpp>
@@ -58,7 +59,7 @@ RendererObserver& nullObserver() {
 Renderer::Impl::Impl(gfx::RendererBackend& backend_,
                      float pixelRatio_,
                      const std::optional<std::string>& localFontFamily_)
-    : orchestrator(!backend_.contextIsShared(), localFontFamily_),
+    : orchestrator(!backend_.contextIsShared(), backend_.getThreadPool(), localFontFamily_),
       backend(backend_),
       observer(&nullObserver()),
       pixelRatio(pixelRatio_) {}
@@ -73,6 +74,7 @@ void Renderer::Impl::setObserver(RendererObserver* observer_) {
 
 void Renderer::Impl::render(const RenderTree& renderTree,
                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
+    MLN_TRACE_FUNC()
     auto& context = backend.getContext();
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {
@@ -276,13 +278,14 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             const auto debugGroup(parameters.encoder->createDebugGroup("common-3d"));
             parameters.pass = RenderPass::Pass3D;
 
-            if (!parameters.staticData.depthRenderbuffer ||
-                parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
-                parameters.staticData.depthRenderbuffer =
-                    parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
-                        parameters.staticData.backendSize);
-            }
-            parameters.staticData.depthRenderbuffer->setShouldClear(true);
+            // TODO is this needed?
+            // if (!parameters.staticData.depthRenderbuffer ||
+            //    parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
+            //    parameters.staticData.depthRenderbuffer =
+            //        parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
+            //            parameters.staticData.backendSize);
+            //}
+            // parameters.staticData.depthRenderbuffer->setShouldClear(true);
         }
     };
 
@@ -539,6 +542,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 
     frameCount += 1;
+    MLN_END_FRAME()
 }
 
 void Renderer::Impl::reduceMemoryUse() {

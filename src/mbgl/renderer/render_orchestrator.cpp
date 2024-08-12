@@ -26,6 +26,7 @@
 #include <mbgl/style/transition_options.hpp>
 #include <mbgl/text/glyph_manager.hpp>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/math.hpp>
 #include <mbgl/util/string.hpp>
 #include <mbgl/util/logging.hpp>
@@ -84,6 +85,8 @@ public:
           updateSymbolOpacities(updateSymbolOpacities_) {}
 
     void prepare() override {
+        MLN_TRACE_FUNC()
+
         for (auto it = layersNeedPlacement.rbegin(); it != layersNeedPlacement.rend(); ++it) {
             placement->updateLayerBuckets(*it, parameters->transformParams.state, updateSymbolOpacities);
         }
@@ -111,7 +114,9 @@ public:
 
 } // namespace
 
-RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_, const std::optional<std::string>& localFontFamily_)
+RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_,
+                                       TaggedScheduler& threadPool_,
+                                       const std::optional<std::string>& localFontFamily_)
     : observer(&nullObserver()),
       glyphManager(std::make_unique<GlyphManager>(std::make_unique<LocalGlyphRasterizer>(localFontFamily_))),
       imageManager(std::make_unique<ImageManager>()),
@@ -122,12 +127,14 @@ RenderOrchestrator::RenderOrchestrator(bool backgroundLayerAsColor_, const std::
       layerImpls(makeMutable<std::vector<Immutable<style::Layer::Impl>>>()),
       renderLight(makeMutable<Light::Impl>()),
       backgroundLayerAsColor(backgroundLayerAsColor_),
-      threadPool(Scheduler::GetBackground()) {
+      threadPool(threadPool_) {
     glyphManager->setObserver(this);
     imageManager->setObserver(this);
 }
 
 RenderOrchestrator::~RenderOrchestrator() {
+    MLN_TRACE_FUNC()
+
     if (contextLost) {
         // Signal all RenderLayers that the context was lost
         // before cleaning up. At the moment, only CustomLayer is
@@ -142,9 +149,7 @@ RenderOrchestrator::~RenderOrchestrator() {
     // Wait for any deferred cleanup tasks to complete before releasing and potentially
     // destroying the scheduler.  Those cleanup tasks must not hold the final reference
     // to the scheduler because it cannot be destroyed from one of its own pool threads.
-    constexpr auto deferredCleanupTimeout = Milliseconds{1000};
-    [[maybe_unused]] const auto remaining = threadPool->waitForEmpty(deferredCleanupTimeout);
-    assert(remaining == 0);
+    threadPool.waitForEmpty();
 }
 
 void RenderOrchestrator::setObserver(RendererObserver* observer_) {
@@ -153,6 +158,8 @@ void RenderOrchestrator::setObserver(RendererObserver* observer_) {
 
 std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     const std::shared_ptr<UpdateParameters>& updateParameters) {
+    MLN_TRACE_FUNC()
+
     const auto startTime = util::MonotonicTimer::now().count();
 
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
@@ -189,7 +196,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
                                         updateParameters->annotationManager,
                                         imageManager,
                                         glyphManager,
-                                        updateParameters->prefetchZoomDelta};
+                                        updateParameters->prefetchZoomDelta,
+                                        threadPool};
 
     glyphManager->setURL(updateParameters->glyphURL);
 
@@ -298,10 +306,17 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     std::unordered_set<std::string> constantsMaskChanged;
     for (RenderLayer& layer : orderedLayers) {
         const std::string& id = layer.getID();
-        const bool layerAddedOrChanged = layerDiff.added.count(id) || layerDiff.changed.count(id);
+        const bool layerAddedOrChanged = layerDiff.added.contains(id) || layerDiff.changed.contains(id);
         evaluationParameters.layerChanged = layerAddedOrChanged;
         evaluationParameters.hasCrossfade = layer.hasCrossfade();
-        if (layerAddedOrChanged || zoomChanged || evaluationParameters.hasCrossfade || layer.hasTransition()) {
+
+        // Only re-evaluate on change of zoom if the style has some reference to it
+        using Dependency = expression::Dependency;
+        const bool zoomChangedAndMatters = zoomChanged && !layerAddedOrChanged &&
+                                           (layer.getStyleDependencies() & Dependency::Zoom);
+
+        if (layerAddedOrChanged || zoomChangedAndMatters || evaluationParameters.hasCrossfade ||
+            layer.hasTransition()) {
             const auto previousMask = layer.evaluatedProperties->constantsMask();
             layer.evaluate(evaluationParameters);
             if (previousMask != layer.evaluatedProperties->constantsMask()) {
@@ -322,6 +337,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     for (const auto& entry : sourceDiff.added) {
         std::unique_ptr<RenderSource> renderSource = RenderSource::create(entry.second, threadPool);
         renderSource->setObserver(this);
+        renderSource->enableCache(tileCacheEnabled);
         renderSources.emplace(entry.first, std::move(renderSource));
     }
     transformState = updateParameters->transformState;
@@ -350,6 +366,9 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Update all sources and initialize renderItems.
     for (const auto& sourceImpl : *sourceImpls) {
+        MLN_TRACE_ZONE(update source)
+        MLN_ZONE_STR(sourceImpl->id)
+
         RenderSource* source = renderSources.at(sourceImpl->id).get();
         bool sourceNeedsRendering = false;
         bool sourceNeedsRelayout = false;
@@ -364,7 +383,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             if (layerInfo->source != LayerTypeInfo::Source::NotRequired) {
                 if (layer.baseImpl->source == sourceImpl->id) {
                     const std::string& layerId = layer.getID();
-                    sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff || constantsMaskChanged.count(layerId) ||
+                    sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff ||
+                                           constantsMaskChanged.contains(layerId) ||
                                            hasLayoutDifference(layerDiff, layerId));
                     if (layerIsVisible) {
                         filteredLayersForSource.push_back(layer.evaluatedProperties);
@@ -427,7 +447,11 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     auto opaquePassCutOffEstimation = layerRenderItems.size();
     for (auto& renderItem : layerRenderItems) {
+        MLN_TRACE_ZONE(prepare layer)
+
         RenderLayer& renderLayer = renderItem.layer;
+        MLN_ZONE_STR(renderLayer.getID())
+
         renderLayer.prepare(
             {renderItem.source, *imageManager, *patternAtlas, *lineAtlas, updateParameters->transformState});
         if (renderLayer.needsPlacement()) {
@@ -440,6 +464,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             }
         }
     }
+
     // Symbol placement.
     assert((updateParameters->mode == MapMode::Tile) || !placedSymbolDataCollected);
     bool symbolBucketsChanged = false;
@@ -457,6 +482,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     if (isMapModeContinuous) {
+        MLN_TRACE_ZONE(placement)
+
         std::optional<Duration> placementUpdatePeriodOverride;
         if (symbolBucketsAdded && !tiltedView) {
             // If the view is not tilted, we want *the new* symbols to show up
@@ -491,6 +518,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             updateParameters->timePoint);
         renderTreeParameters->needsRepaint = hasTransitions(updateParameters->timePoint);
     } else {
+        MLN_TRACE_ZONE(placement)
+
         renderTreeParameters->placementChanged = symbolBucketsChanged = !layersNeedPlacement.empty();
         if (renderTreeParameters->placementChanged) {
             Mutable<Placement> placement = Placement::create(updateParameters);
@@ -529,6 +558,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
 std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(const ScreenLineString& geometry,
                                                                const RenderedQueryOptions& options) const {
+    MLN_TRACE_FUNC()
+
     std::unordered_map<std::string, const RenderLayer*> layers;
     if (options.layerIDs) {
         for (const auto& layerID : *options.layerIDs) {
@@ -549,6 +580,8 @@ void RenderOrchestrator::queryRenderedSymbols(std::unordered_map<std::string, st
                                               const ScreenLineString& geometry,
                                               const std::unordered_map<std::string, const RenderLayer*>& layers,
                                               const RenderedQueryOptions& options) const {
+    MLN_TRACE_FUNC()
+
     const auto hasCrossTileIndex = [](const auto& pair) {
         return pair.second->baseImpl->getTypeInfo()->crossTileIndex == style::LayerTypeInfo::CrossTileIndex::Required;
     };
@@ -597,6 +630,8 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
     const ScreenLineString& geometry,
     const RenderedQueryOptions& options,
     const std::unordered_map<std::string, const RenderLayer*>& layers) const {
+    MLN_TRACE_FUNC()
+
     std::unordered_set<std::string> sourceIDs;
     std::unordered_map<std::string, const RenderLayer*> filteredLayers;
     for (const auto& pair : layers) {
@@ -646,6 +681,8 @@ std::vector<Feature> RenderOrchestrator::queryRenderedFeatures(
 }
 
 std::vector<Feature> RenderOrchestrator::queryShapeAnnotations(const ScreenLineString& geometry) const {
+    MLN_TRACE_FUNC()
+
     assert(LayerManager::annotationsEnabled);
     std::unordered_map<std::string, const RenderLayer*> shapeAnnotationLayers;
     RenderedQueryOptions options;
@@ -666,6 +703,8 @@ std::vector<Feature> RenderOrchestrator::queryShapeAnnotations(const ScreenLineS
 
 std::vector<Feature> RenderOrchestrator::querySourceFeatures(const std::string& sourceID,
                                                              const SourceQueryOptions& options) const {
+    MLN_TRACE_FUNC()
+
     const RenderSource* source = getRenderSource(sourceID);
     if (!source) return {};
 
@@ -678,6 +717,8 @@ FeatureExtensionValue RenderOrchestrator::queryFeatureExtensions(
     const std::string& extension,
     const std::string& extensionField,
     const std::optional<std::map<std::string, Value>>& args) const {
+    MLN_TRACE_FUNC()
+
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         return renderSource->queryFeatureExtensions(feature, extension, extensionField, args);
     }
@@ -688,6 +729,8 @@ void RenderOrchestrator::setFeatureState(const std::string& sourceID,
                                          const std::optional<std::string>& sourceLayerID,
                                          const std::string& featureID,
                                          const FeatureState& state) {
+    MLN_TRACE_FUNC()
+
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         renderSource->setFeatureState(sourceLayerID, featureID, state);
     }
@@ -697,6 +740,8 @@ void RenderOrchestrator::getFeatureState(FeatureState& state,
                                          const std::string& sourceID,
                                          const std::optional<std::string>& sourceLayerID,
                                          const std::string& featureID) const {
+    MLN_TRACE_FUNC()
+
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         renderSource->getFeatureState(state, sourceLayerID, featureID);
     }
@@ -706,12 +751,24 @@ void RenderOrchestrator::removeFeatureState(const std::string& sourceID,
                                             const std::optional<std::string>& sourceLayerID,
                                             const std::optional<std::string>& featureID,
                                             const std::optional<std::string>& stateKey) {
+    MLN_TRACE_FUNC()
+
     if (RenderSource* renderSource = getRenderSource(sourceID)) {
         renderSource->removeFeatureState(sourceLayerID, featureID, stateKey);
     }
 }
 
+void RenderOrchestrator::setTileCacheEnabled(bool enable) {
+    tileCacheEnabled = enable;
+
+    for (const auto& entry : renderSources) {
+        entry.second->enableCache(enable);
+    }
+}
+
 void RenderOrchestrator::reduceMemoryUse() {
+    MLN_TRACE_FUNC()
+
     filteredLayersForSource.shrink_to_fit();
     for (const auto& entry : renderSources) {
         entry.second->reduceMemoryUse();
@@ -721,6 +778,8 @@ void RenderOrchestrator::reduceMemoryUse() {
 }
 
 void RenderOrchestrator::dumpDebugLogs() {
+    MLN_TRACE_FUNC()
+
     for (const auto& entry : renderSources) {
         entry.second->dumpDebugLogs();
     }
@@ -776,6 +835,8 @@ bool RenderOrchestrator::hasTransitions(TimePoint timePoint) const {
 }
 
 bool RenderOrchestrator::isLoaded() const {
+    MLN_TRACE_FUNC()
+
     // do the simple boolean check before iterating over all the tiles in all the sources
     if (!imageManager->isLoaded()) {
         return false;
@@ -791,6 +852,8 @@ bool RenderOrchestrator::isLoaded() const {
 }
 
 void RenderOrchestrator::clearData() {
+    MLN_TRACE_FUNC()
+
     if (!sourceImpls->empty()) sourceImpls = makeMutable<std::vector<Immutable<style::Source::Impl>>>();
     if (!layerImpls->empty()) layerImpls = makeMutable<std::vector<Immutable<style::Layer::Impl>>>();
     if (!imageImpls->empty()) imageImpls = makeMutable<std::vector<Immutable<style::Image::Impl>>>();
@@ -825,6 +888,8 @@ void RenderOrchestrator::addChanges(UniqueChangeRequestVec& changes) {
 }
 
 void RenderOrchestrator::updateLayerIndex(LayerGroupBasePtr layerGroup, const int32_t newIndex) {
+    MLN_TRACE_FUNC()
+
     if (!layerGroup || layerGroup->getLayerIndex() == newIndex) {
         return;
     }
@@ -842,6 +907,8 @@ void RenderOrchestrator::updateLayerIndex(LayerGroupBasePtr layerGroup, const in
 }
 
 bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup) {
+    MLN_TRACE_FUNC()
+
     const auto index = layerGroup->getLayerIndex();
     const auto range = layerGroupsByLayerIndex.equal_range(index);
     bool found = false;
@@ -862,6 +929,8 @@ bool RenderOrchestrator::addLayerGroup(LayerGroupBasePtr layerGroup) {
 }
 
 bool RenderOrchestrator::removeLayerGroup(const LayerGroupBasePtr& layerGroup) {
+    MLN_TRACE_FUNC()
+
     if (!layerGroup) {
         return false;
     }
@@ -880,6 +949,8 @@ size_t RenderOrchestrator::numLayerGroups() const noexcept {
 }
 
 int32_t RenderOrchestrator::maxLayerIndex() const {
+    MLN_TRACE_FUNC()
+
     if (!layerGroupsByLayerIndex.empty()) {
         assert(layerGroupsByLayerIndex.crbegin()->first == layerGroupsByLayerIndex.crbegin()->second->getLayerIndex());
         return layerGroupsByLayerIndex.crbegin()->first;
@@ -892,6 +963,8 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
                                       const TransformState& state,
                                       const std::shared_ptr<UpdateParameters>& updateParameters,
                                       const RenderTree& renderTree) {
+    MLN_TRACE_FUNC()
+
     const bool isMapModeContinuous = updateParameters->mode == MapMode::Continuous;
     const auto transitionOptions = isMapModeContinuous ? updateParameters->transitionOptions
                                                        : style::TransitionOptions();
@@ -952,6 +1025,8 @@ void RenderOrchestrator::updateDebugLayerGroups(const RenderTree& renderTree, Pa
 void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
                                        const GlyphRange& glyphRange,
                                        std::exception_ptr error) {
+    MLN_TRACE_FUNC()
+
     Log::Error(Event::Style,
                "Failed to load glyph range " + std::to_string(glyphRange.first) + "-" +
                    std::to_string(glyphRange.second) + " for font stack " + fontStackToString(fontStack) + ": " +
@@ -960,6 +1035,8 @@ void RenderOrchestrator::onGlyphsError(const FontStack& fontStack,
 }
 
 void RenderOrchestrator::onTileError(RenderSource& source, const OverscaledTileID& tileID, std::exception_ptr error) {
+    MLN_TRACE_FUNC()
+
     Log::Error(Event::Style,
                "Failed to load tile " + util::toString(tileID) + " for source " + source.baseImpl->id + ": " +
                    util::toString(error));
@@ -967,14 +1044,20 @@ void RenderOrchestrator::onTileError(RenderSource& source, const OverscaledTileI
 }
 
 void RenderOrchestrator::onTileChanged(RenderSource&, const OverscaledTileID&) {
+    MLN_TRACE_FUNC()
+
     observer->onInvalidate();
 }
 
 void RenderOrchestrator::onStyleImageMissing(const std::string& id, const std::function<void()>& done) {
+    MLN_TRACE_FUNC()
+
     observer->onStyleImageMissing(id, done);
 }
 
 void RenderOrchestrator::onRemoveUnusedStyleImages(const std::vector<std::string>& unusedImageIDs) {
+    MLN_TRACE_FUNC()
+
     observer->onRemoveUnusedStyleImages(unusedImageIDs);
 }
 

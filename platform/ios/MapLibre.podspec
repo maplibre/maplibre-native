@@ -16,4 +16,3 @@ Pod::Spec.new do |s|
     s.ios.deployment_target = '12.0'
     s.ios.vendored_frameworks = "MapLibre.xcframework"
 end
-

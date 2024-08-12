@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "house-icon.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

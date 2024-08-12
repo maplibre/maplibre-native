@@ -15,6 +15,7 @@ import org.maplibre.android.maps.Style
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.model.annotations.CityStateMarker
 import org.maplibre.android.testapp.model.annotations.CityStateMarkerOptions
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.IconUtils
 
 /**
@@ -31,7 +32,7 @@ class InfoWindowAdapterActivity : AppCompatActivity() {
         mapView.getMapAsync(
             OnMapReadyCallback { map: MapLibreMap ->
                 maplibreMap = map
-                map.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
+                map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
                     addMarkers()
                     addCustomInfoWindowAdapter()
                 }

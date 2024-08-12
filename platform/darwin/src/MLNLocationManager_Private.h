@@ -1,5 +1,5 @@
 #import "MLNLocationManager.h"
 
-@interface MLNCLLocationManager : NSObject<MLNLocationManager>
+@interface MLNCLLocationManager : NSObject <MLNLocationManager>
 
 @end

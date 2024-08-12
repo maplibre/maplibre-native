@@ -6,6 +6,39 @@
 
 ### 🐞 Bug fixes
 
+## 11.1.0
+
+### ✨ Features and improvements
+
+- Avoid logging error for onMove(0,0) on Android ([#2580](https://github.com/maplibre/maplibre-native/pull/2580)).
+- Experimental API to toggle tile cache in map view ([#2590](https://github.com/maplibre/maplibre-native/pull/2590)). This can reduce memory usage at the cost of having to parse tile data again when the zoom level changes.
+- Add TaggedScheduler, couple lifetime of tasks and orchestrator ([#2398](https://github.com/maplibre/maplibre-native/pull/2398)).
+
+### 🐞 Bug fixes
+
+- Fix null pointer dereference MapRenderer Android ([#2631](https://github.com/maplibre/maplibre-native/pull/2631)).
+- Take locks before signaling thread condition variables ([#2636](https://github.com/maplibre/maplibre-native/pull/2636)).
+
+## 11.0.2-pre0
+
+### ✨ Features and improvements
+
+- Add TaggedScheduler, couple lifetime of tasks and orchestrator ([#2398](https://github.com/maplibre/maplibre-native/pull/2398)).
+
+## 11.0.1
+
+### ✨ Features and improvements
+
+- Updated included licenses third-party projects ([#2491](https://github.com/maplibre/maplibre-native/pull/2491)).
+- Move all `WeakPtrFactory` members to the end of the containing class ([#2472](https://github.com/maplibre/maplibre-native/pull/2472)).
+
+### 🐞 Bug fixes
+
+- Fixes crash that happened when parsing some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)).
+- Shut down the mailbox on raster tiles as with GeometryTile to avoid processing messages after it's queued for destruction ([#2443](https://github.com/maplibre/maplibre-native/pull/2443)).
+- Increase the deferred cleanup timeout ([#2455](https://github.com/maplibre/maplibre-native/pull/2455)).
+- Fix crash caused `DefaultRefDeleter`, reported by Komoot ([#2487](https://github.com/maplibre/maplibre-native/pull/2487)).
+
 ## 11.0.0
 
 The rendering internals of MapLibre Native have undergone major changes. We've had an extensive period of [pre-releases](https://github.com/maplibre/maplibre-native/issues/1608) leading up to this official release. While we've worked hard to minimize potential issues, it's possible that there may still be regressions. Therefore, it's important to conduct your own testing and report any encountered issues on GitHub.

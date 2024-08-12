@@ -15,6 +15,7 @@ import org.maplibre.android.style.layers.Layer
 import org.maplibre.android.style.layers.Property
 import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import timber.log.Timber
 import java.util.*
 
@@ -60,7 +61,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
         mapView = MapView(this, maplibreMapOptions)
         (findViewById<View>(R.id.coordinator_layout) as ViewGroup).addView(mapView, 0)
         mapView.addOnDidFinishLoadingStyleListener {
-            if (maplibreMap != null) {
+            if (this::maplibreMap.isInitialized) {
                 setupNavigationView(maplibreMap.style!!.layers)
             }
         }
@@ -136,7 +137,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
     private fun setupDebugChangeView() {
         val fabDebug = findViewById<FloatingActionButton>(R.id.fabDebug)
         fabDebug.setOnClickListener { view: View? ->
-            if (maplibreMap != null) {
+            if (this::maplibreMap.isInitialized) {
                 maplibreMap.isDebugActive = !maplibreMap.isDebugActive
                 Timber.d("Debug FAB: isDebug Active? %s", maplibreMap.isDebugActive)
             }
@@ -146,7 +147,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
     private fun setupStyleChangeView() {
         val fabStyles = findViewById<FloatingActionButton>(R.id.fabStyles)
         fabStyles.setOnClickListener { view: View? ->
-            if (maplibreMap != null) {
+            if (this::maplibreMap.isInitialized) {
                 currentStyleIndex++
                 if (currentStyleIndex == STYLES.size) {
                     currentStyleIndex = 0
@@ -204,7 +205,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
 
     override fun onDestroy() {
         super.onDestroy()
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             maplibreMap.removeOnCameraMoveListener(cameraMoveListener!!)
         }
         mapView.onDestroy()
@@ -258,12 +259,12 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
 
     companion object {
         private val STYLES = arrayOf(
-            Style.getPredefinedStyle("Streets"),
-            Style.getPredefinedStyle("Outdoor"),
-            Style.getPredefinedStyle("Bright"),
-            Style.getPredefinedStyle("Pastel"),
-            Style.getPredefinedStyle("Satellite Hybrid"),
-            Style.getPredefinedStyle("Satellite Hybrid")
+            TestStyles.getPredefinedStyleWithFallback("Streets"),
+            TestStyles.getPredefinedStyleWithFallback("Outdoor"),
+            TestStyles.getPredefinedStyleWithFallback("Bright"),
+            TestStyles.getPredefinedStyleWithFallback("Pastel"),
+            TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid"),
+            TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")
         )
     }
 }

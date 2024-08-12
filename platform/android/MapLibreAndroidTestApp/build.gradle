@@ -78,6 +78,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig true
     }
 
     namespace 'org.maplibre.android.testapp'
@@ -119,7 +120,7 @@ dependencies {
     androidTestImplementation libs.appCenter
     androidTestImplementation libs.androidxTestExtJUnit
     androidTestImplementation libs.androidxTestCoreKtx
-
+    androidTestImplementation libs.kotlinxCoroutinesTest
 }
 
 apply from: "${rootDir}/gradle/gradle-make.gradle"

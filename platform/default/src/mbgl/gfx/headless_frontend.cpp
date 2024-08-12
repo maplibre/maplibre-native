@@ -48,6 +48,10 @@ void HeadlessFrontend::update(std::shared_ptr<UpdateParameters> updateParameters
     }
 }
 
+const TaggedScheduler& HeadlessFrontend::getThreadPool() const {
+    return backend->getRendererBackend()->getThreadPool();
+}
+
 void HeadlessFrontend::setObserver(RendererObserver& observer_) {
     assert(renderer);
     renderer->setObserver(&observer_);

@@ -46,6 +46,11 @@ RendererBackend::RendererBackend(const gfx::ContextMode contextMode_)
       commandQueue(NS::TransferPtr(device->newCommandQueue())) {
     assert(device);
     assert(commandQueue);
+#if TARGET_OS_SIMULATOR
+    baseVertexInstanceDrawingSupported = true;
+#else
+    baseVertexInstanceDrawingSupported = device->supportsFamily(MTL::GPUFamilyApple3);
+#endif
 }
 
 RendererBackend::~RendererBackend() = default;

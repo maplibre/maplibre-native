@@ -1,5 +1,5 @@
-#import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
+#import <Foundation/Foundation.h>
 
 #import "MLNFoundation.h"
 
@@ -49,7 +49,9 @@ MLN_EXPORT
 /**
  This method is not supported for the `MLNCoordinateFormatter` class.
  */
-- (BOOL)getObjectValue:(out id __nullable * __nullable)obj forString:(NSString *)string errorDescription:(out NSString * __nullable * __nullable)error;
+- (BOOL)getObjectValue:(out id __nullable *__nullable)obj
+             forString:(NSString *)string
+      errorDescription:(out NSString *__nullable *__nullable)error;
 
 @end
 

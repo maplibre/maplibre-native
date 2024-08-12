@@ -34,11 +34,11 @@ CGImageRef CGImageCreateWithMLNPremultipliedImage(mbgl::PremultipliedImage&& src
     constexpr const size_t bytesPerPixel = 4;
     constexpr const size_t bitsPerPixel = bitsPerComponent * bytesPerPixel;
     const size_t bytesPerRow = bytesPerPixel * src.size.width;
+    const auto bitmapInfo = static_cast<uint32_t>(kCGBitmapByteOrderDefault) | static_cast<uint32_t>(kCGImageAlphaPremultipliedLast);
 
     return CGImageCreate(src.size.width, src.size.height, bitsPerComponent, bitsPerPixel,
                          bytesPerRow, *colorSpace,
-                         // NOLINTNEXTLINE(bugprone-suspicious-enum-usage)
-                         kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast, *provider,
+                         bitmapInfo, *provider,
                          NULL, false, kCGRenderingIntentDefault);
 }
 
@@ -56,11 +56,10 @@ mbgl::PremultipliedImage MLNPremultipliedImageFromCGImage(CGImageRef src) {
     constexpr const size_t bitsPerComponent = 8;
     constexpr const size_t bytesPerPixel = 4;
     const size_t bytesPerRow = bytesPerPixel * width;
+    const auto bitmapInfo = static_cast<uint32_t>(kCGBitmapByteOrderDefault) | static_cast<uint32_t>(kCGImageAlphaPremultipliedLast);
 
     CGContextHandle context(CGBitmapContextCreate(
-        image.data.get(), width, height, bitsPerComponent, bytesPerRow, *colorSpace,
-        // NOLINTNEXTLINE(bugprone-suspicious-enum-usage)
-        kCGBitmapByteOrderDefault | kCGImageAlphaPremultipliedLast));
+        image.data.get(), width, height, bitsPerComponent, bytesPerRow, *colorSpace, bitmapInfo));
     if (!context) {
         throw std::runtime_error("CGBitmapContextCreate failed");
     }

@@ -12,7 +12,6 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.FillLayer
@@ -20,6 +19,7 @@ import org.maplibre.android.style.layers.PropertyFactory
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.style.sources.Source
 import org.maplibre.android.testapp.R
+import org.maplibre.android.testapp.styles.TestStyles
 import org.maplibre.android.testapp.utils.IdleZoomListener
 import org.maplibre.android.testapp.utils.ResourceUtils
 import timber.log.Timber
@@ -39,29 +39,25 @@ class DataDrivenStyleActivity : AppCompatActivity() {
         // Initialize map as normal
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(
-            OnMapReadyCallback { map: MapLibreMap? ->
-                // Store for later
-                if (map != null) {
-                    maplibreMap = map
-                }
-                maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) { style: Style? ->
-                    // Add a parks layer
-                    addParksLayer()
+        mapView.getMapAsync {
+            // Store for later
+            maplibreMap = it
+            it.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
+                // Add a parks layer
+                addParksLayer()
 
-                    // Add debug overlay
-                    setupDebugZoomView()
-                }
-
-                // Center and Zoom (Amsterdam, zoomed to streets)
-                maplibreMap.animateCamera(
-                    CameraUpdateFactory.newLatLngZoom(
-                        LatLng(52.379189, 4.899431),
-                        14.0
-                    )
-                )
+                // Add debug overlay
+                setupDebugZoomView()
             }
-        )
+
+            // Center and Zoom (Amsterdam, zoomed to streets)
+            it.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(52.379189, 4.899431),
+                    14.0
+                )
+            )
+        }
     }
 
     private fun setupDebugZoomView() {
@@ -106,7 +102,7 @@ class DataDrivenStyleActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (maplibreMap != null && idleListener != null) {
+        if (this::maplibreMap.isInitialized && idleListener != null) {
             maplibreMap.removeOnCameraIdleListener(idleListener!!)
         }
         mapView.onDestroy()

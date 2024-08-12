@@ -8,13 +8,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMapOptions
-import org.maplibre.android.maps.Style
 import org.maplibre.android.maps.SupportMapFragment
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.databinding.ActivityRecyclerviewBinding
+import org.maplibre.android.testapp.styles.TestStyles
 
 /**
  * TestActivity showcasing how to integrate a MapView in a RecyclerView.
@@ -99,7 +101,7 @@ class NestedViewPagerActivity : AppCompatActivity() {
             }
         }
 
-        class MapPagerAdapter(private val context: Context, fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
+        class MapPagerAdapter(private val context: Context, fm: FragmentManager) : FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
             override fun getItem(position: Int): androidx.fragment.app.Fragment {
                 val options = MapLibreMapOptions.createFromAttributes(context)
@@ -113,7 +115,7 @@ class NestedViewPagerActivity : AppCompatActivity() {
                     0 -> {
                         options.camera(CameraPosition.Builder().target(LatLng(34.920526, 102.634774)).zoom(3.0).build())
                         val fragment = SupportMapFragment.newInstance(options)
-                        fragment.getMapAsync { maplibreMap -> maplibreMap.setStyle(Style.getPredefinedStyle("Streets")) }
+                        fragment.getMapAsync { maplibreMap -> maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) }
                         return fragment
                     }
                     1 -> {
@@ -122,7 +124,7 @@ class NestedViewPagerActivity : AppCompatActivity() {
                     2 -> {
                         options.camera(CameraPosition.Builder().target(LatLng(62.326440, 92.764913)).zoom(3.0).build())
                         val fragment = SupportMapFragment.newInstance(options)
-                        fragment.getMapAsync { maplibreMap -> maplibreMap.setStyle(Style.getPredefinedStyle("Pastel")) }
+                        fragment.getMapAsync { maplibreMap -> maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Pastel")) }
                         return fragment
                     }
                     3 -> {
@@ -131,7 +133,7 @@ class NestedViewPagerActivity : AppCompatActivity() {
                     4 -> {
                         options.camera(CameraPosition.Builder().target(LatLng(-25.007786, 133.623852)).zoom(3.0).build())
                         val fragment = SupportMapFragment.newInstance(options)
-                        fragment.getMapAsync { maplibreMap -> maplibreMap.setStyle(Style.getPredefinedStyle("Satellite Hybrid")) }
+                        fragment.getMapAsync { maplibreMap -> maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Satellite Hybrid")) }
                         return fragment
                     }
                     5 -> {
