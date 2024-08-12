@@ -113,7 +113,7 @@ class BenchmarkActivity : AppCompatActivity() {
     //    <item>Americana</item>
     //  </array>
     //  <array name="benchmark_style_urls">
-    //    <item>https://zelonewolf.github.io/openstreetmap-americana/style.json</item>
+    //    <item>https://americanamap.org/style.json</item>
     // </array>
     // ```
     private lateinit var inputData: BenchmarkInputData
