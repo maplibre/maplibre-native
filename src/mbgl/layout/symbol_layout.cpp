@@ -18,6 +18,10 @@
 
 #include <mapbox/polylabel.hpp>
 
+#include <numbers>
+
+using namespace std::numbers;
+
 namespace mbgl {
 
 using namespace style;
@@ -838,7 +842,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                 index = iconBuffer.placedSymbols.size() - 1;
                 PlacedSymbol& iconSymbol = iconBuffer.placedSymbols.back();
                 iconSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical)
-                                       ? static_cast<float>(M_PI_2)
+                                       ? pi_v<float> / 2
                                        : 0.0f;
                 iconSymbol.vertexStartIndex = addSymbols(
                     iconBuffer, sizeData, iconQuads, symbolInstance.anchor, iconSymbol, feature.sortKey);
@@ -968,9 +972,7 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
                                            placedIconIndex);
     placedIndex = bucket.text.placedSymbols.size() - 1;
     PlacedSymbol& placedSymbol = bucket.text.placedSymbols.back();
-    placedSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical)
-                             ? static_cast<float>(M_PI_2)
-                             : 0.0f;
+    placedSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical) ? pi_v<float> / 2 : 0.0f;
 
     bool firstSymbol = true;
     for (const auto& symbolQuad : glyphQuads) {
