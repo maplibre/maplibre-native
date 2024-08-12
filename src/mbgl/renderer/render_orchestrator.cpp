@@ -306,10 +306,17 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     std::unordered_set<std::string> constantsMaskChanged;
     for (RenderLayer& layer : orderedLayers) {
         const std::string& id = layer.getID();
-        const bool layerAddedOrChanged = layerDiff.added.count(id) || layerDiff.changed.count(id);
+        const bool layerAddedOrChanged = layerDiff.added.contains(id) || layerDiff.changed.contains(id);
         evaluationParameters.layerChanged = layerAddedOrChanged;
         evaluationParameters.hasCrossfade = layer.hasCrossfade();
-        if (layerAddedOrChanged || zoomChanged || evaluationParameters.hasCrossfade || layer.hasTransition()) {
+
+        // Only re-evaluate on change of zoom if the style has some reference to it
+        using Dependency = expression::Dependency;
+        const bool zoomChangedAndMatters = zoomChanged && !layerAddedOrChanged &&
+                                           (layer.getStyleDependencies() & Dependency::Zoom);
+
+        if (layerAddedOrChanged || zoomChangedAndMatters || evaluationParameters.hasCrossfade ||
+            layer.hasTransition()) {
             const auto previousMask = layer.evaluatedProperties->constantsMask();
             layer.evaluate(evaluationParameters);
             if (previousMask != layer.evaluatedProperties->constantsMask()) {
@@ -376,7 +383,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             if (layerInfo->source != LayerTypeInfo::Source::NotRequired) {
                 if (layer.baseImpl->source == sourceImpl->id) {
                     const std::string& layerId = layer.getID();
-                    sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff || constantsMaskChanged.count(layerId) ||
+                    sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff ||
+                                           constantsMaskChanged.contains(layerId) ||
                                            hasLayoutDifference(layerDiff, layerId));
                     if (layerIsVisible) {
                         filteredLayersForSource.push_back(layer.evaluatedProperties);
