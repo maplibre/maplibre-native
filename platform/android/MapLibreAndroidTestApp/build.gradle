@@ -120,6 +120,7 @@ dependencies {
     androidTestImplementation libs.appCenter
     androidTestImplementation libs.androidxTestExtJUnit
     androidTestImplementation libs.androidxTestCoreKtx
+    androidTestImplementation libs.kotlinxCoroutinesCore
     androidTestImplementation libs.kotlinxCoroutinesTest
 }
 
