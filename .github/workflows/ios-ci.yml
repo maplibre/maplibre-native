@@ -37,6 +37,8 @@ jobs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files-yaml.outputs.ios_any_modified != 'true' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Get all iOS files that have changed
         if: github.event_name != 'workflow_dispatch'
@@ -199,7 +201,7 @@ jobs:
 
       - name: Deploy DocC documentation (main) 🚀
         if: github.ref == 'refs/heads/main'
-        uses: JamesIves/github-pages-deploy-action@v4.6.1
+        uses: JamesIves/github-pages-deploy-action@v4.6.3
         with:
           branch: gh-pages
           folder: build/docs

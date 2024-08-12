@@ -26,7 +26,7 @@ std::string glErrors() {
 Fence::Fence() {}
 
 Fence::~Fence() {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     if (fence) {
         glDeleteSync(fence);
@@ -34,14 +34,14 @@ Fence::~Fence() {
 }
 
 void Fence::insert() noexcept {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     assert(!fence);
     fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 }
 
 bool Fence::isSignaled() const {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     if (!fence) {
         return false;

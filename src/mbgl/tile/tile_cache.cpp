@@ -6,7 +6,7 @@
 namespace mbgl {
 
 void TileCache::setSize(size_t size_) {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     size = size_;
 
@@ -40,7 +40,7 @@ struct CaptureWrapper {
 } // namespace
 
 void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     tile->cancel();
 
@@ -53,6 +53,8 @@ void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
     // last one and the destruction actually occurs here on this thread.
     std::function<void()> func{[tile_{CaptureWrapper<Tile>{std::move(tile)}}, this]() mutable {
         tile_.item = {};
+
+        std::lock_guard<std::mutex> counterLock(deferredSignalLock);
         deferredDeletionsPending--;
         deferredSignal.notify_all();
     }};
@@ -64,7 +66,7 @@ void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
 }
 
 void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {
-    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC()
 
     if (!tile->isRenderable() || !size) {
         deferredRelease(std::move(tile));

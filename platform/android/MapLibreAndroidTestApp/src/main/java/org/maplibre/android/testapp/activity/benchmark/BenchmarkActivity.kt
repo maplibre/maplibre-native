@@ -36,8 +36,6 @@ import org.maplibre.android.testapp.utils.BenchmarkResults
 import org.maplibre.android.testapp.utils.FrameTimeStore
 import java.io.File
 
-import java.util.*
-
 data class BenchmarkInputData(
     val styleNames: List<String>,
     val styleURLs: List<String>,
@@ -119,18 +117,6 @@ class BenchmarkActivity : AppCompatActivity() {
     // </array>
     // ```
     private lateinit var inputData: BenchmarkInputData
-
-    @SuppressLint("DiscouragedApi")
-    private fun getStringFromResources(name: String): String {
-        return try {
-            resources.getString(applicationContext.resources.getIdentifier(
-                name,
-                "string",
-                applicationContext.packageName))
-        } catch (e: Throwable) {
-            ""
-        }
-    }
 
     @SuppressLint("DiscouragedApi")
     private fun getArrayFromResources(name: String): Array<String> {
