@@ -4,8 +4,6 @@ import android.content.Context;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-
-import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.renderer.MapRenderer;
 
 public class SurfaceViewMapRenderer extends MapRenderer {

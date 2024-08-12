@@ -80,7 +80,7 @@ public abstract class MapRenderer implements MapRendererScheduler {
     nativeInitialize(this, pixelRatio, localIdeographFontFamily);
   }
 
-  abstract public View getView();
+  public abstract View getView();
 
   public void onStart() {
     // Implement if needed

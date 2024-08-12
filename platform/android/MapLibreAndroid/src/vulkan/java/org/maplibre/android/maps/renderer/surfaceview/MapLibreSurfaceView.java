@@ -9,7 +9,6 @@ import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
-import java.io.Writer;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -33,7 +32,7 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
    * @see #setRenderMode(int)
    * @see #requestRender()
    */
-  public final static int RENDERMODE_WHEN_DIRTY = 0;
+  public static final int RENDERMODE_WHEN_DIRTY = 0;
   /**
    * The renderer is called
    * continuously to re-render the scene.
@@ -41,7 +40,7 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
    * @see #getRenderMode()
    * @see #setRenderMode(int)
    */
-  public final static int RENDERMODE_CONTINUOUSLY = 1;
+  public static final int RENDERMODE_CONTINUOUSLY = 1;
 
   /**
    * Standard View constructor. In order to render something, you
@@ -134,7 +133,9 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
    *
    * @param renderMode one of the RENDERMODE_X constants
    */
-  public void setRenderMode(int renderMode) { renderThread.setRenderMode(renderMode); }
+  public void setRenderMode(int renderMode) {
+    renderThread.setRenderMode(renderMode);
+  }
 
   /**
    * Get the current rendering mode. May be called
@@ -311,132 +312,128 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
     private void guardedRun() throws InterruptedException {
       wantRenderNotification = false;
 
-      try {
-        boolean sizeChanged = false;
-        boolean wantRenderNotification = false;
-        boolean doRenderNotification = false;
-        int w = 0;
-        int h = 0;
-        Runnable event = null;
-        Runnable finishDrawingRunnable = null;
+      boolean sizeChanged = false;
+      boolean wantRenderNotification = false;
+      boolean doRenderNotification = false;
+      int w = 0;
+      int h = 0;
+      Runnable event = null;
+      Runnable finishDrawingRunnable = null;
 
-        while (true) {
-          synchronized (renderThreadManager) {
-            while (true) {
-              if (shouldExit) {
-                return;
-              }
-
-              if (!eventQueue.isEmpty()) {
-                event = eventQueue.remove(0);
-                break;
-              }
-
-              // Update the pause state.
-              if (paused != requestPaused) {
-                paused = requestPaused;
-                renderThreadManager.notifyAll();
-              }
-
-              if (paused && graphicsSurfaceCreated) {
-                MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
-                if (view != null) {
-                  view.renderer.onSurfaceDestroyed();
-                  graphicsSurfaceCreated = false;
-                }
-              }
-
-              // lost surface
-              if (!hasSurface && !waitingForSurface) {
-                MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
-                if (view != null) {
-                  view.renderer.onSurfaceDestroyed();
-                  graphicsSurfaceCreated = false;
-                }
-                waitingForSurface = true;
-                renderThreadManager.notifyAll();
-              }
-
-              // acquired surface
-              if (hasSurface && waitingForSurface) {
-                MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
-                if (view != null) {
-                  view.renderer.onSurfaceCreated();
-                  graphicsSurfaceCreated = true;
-                }
-                waitingForSurface = false;
-                renderThreadManager.notifyAll();
-              }
-
-              if (doRenderNotification) {
-                this.wantRenderNotification = false;
-                doRenderNotification = false;
-                renderComplete = true;
-                renderThreadManager.notifyAll();
-              }
-
-              if (this.finishDrawingRunnable != null) {
-                finishDrawingRunnable = this.finishDrawingRunnable;
-                this.finishDrawingRunnable = null;
-              }
-
-              // Ready to draw?
-              if (readyToDraw()) {
-                if (this.sizeChanged) {
-                  sizeChanged = true;
-                  w = width;
-                  h = height;
-                  this.wantRenderNotification = true;
-                  this.sizeChanged = false;
-                }
-                requestRender = false;
-                renderThreadManager.notifyAll();
-                if (this.wantRenderNotification) {
-                  wantRenderNotification = true;
-                }
-                break;
-              } else {
-                if (finishDrawingRunnable != null) {
-                  Log.w(TAG, "Warning, !readyToDraw() but waiting for "
-                    + "draw finished! Early reporting draw finished.");
-                  finishDrawingRunnable.run();
-                  finishDrawingRunnable = null;
-                }
-              }
-              // By design, this is the only place in a RenderThread thread where we wait().
-              renderThreadManager.wait();
+      while (true) {
+        synchronized (renderThreadManager) {
+          while (true) {
+            if (shouldExit) {
+              return;
             }
-          } // end of synchronized(sRenderThreadManager)
 
-          if (event != null) {
-            event.run();
-            event = null;
-            continue;
-          }
-
-          MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
-          if (sizeChanged) {
-            if (view != null) {
-              view.renderer.onSurfaceChanged(w, h);
+            if (!eventQueue.isEmpty()) {
+              event = eventQueue.remove(0);
+              break;
             }
-            sizeChanged = false;
-          }
 
+            // Update the pause state.
+            if (paused != requestPaused) {
+              paused = requestPaused;
+              renderThreadManager.notifyAll();
+            }
+
+            if (paused && graphicsSurfaceCreated) {
+              MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
+              if (view != null) {
+                view.renderer.onSurfaceDestroyed();
+                graphicsSurfaceCreated = false;
+              }
+            }
+
+            // lost surface
+            if (!hasSurface && !waitingForSurface) {
+              MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
+              if (view != null) {
+                view.renderer.onSurfaceDestroyed();
+                graphicsSurfaceCreated = false;
+              }
+              waitingForSurface = true;
+              renderThreadManager.notifyAll();
+            }
+
+            // acquired surface
+            if (hasSurface && waitingForSurface) {
+              MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
+              if (view != null) {
+                view.renderer.onSurfaceCreated();
+                graphicsSurfaceCreated = true;
+              }
+              waitingForSurface = false;
+              renderThreadManager.notifyAll();
+            }
+
+            if (doRenderNotification) {
+              this.wantRenderNotification = false;
+              doRenderNotification = false;
+              renderComplete = true;
+              renderThreadManager.notifyAll();
+            }
+
+            if (this.finishDrawingRunnable != null) {
+              finishDrawingRunnable = this.finishDrawingRunnable;
+              this.finishDrawingRunnable = null;
+            }
+
+            // Ready to draw?
+            if (readyToDraw()) {
+              if (this.sizeChanged) {
+                sizeChanged = true;
+                w = width;
+                h = height;
+                this.wantRenderNotification = true;
+                this.sizeChanged = false;
+              }
+              requestRender = false;
+              renderThreadManager.notifyAll();
+              if (this.wantRenderNotification) {
+                wantRenderNotification = true;
+              }
+              break;
+            } else {
+              if (finishDrawingRunnable != null) {
+                Log.w(TAG, "Warning, !readyToDraw() but waiting for "
+                  + "draw finished! Early reporting draw finished.");
+                finishDrawingRunnable.run();
+                finishDrawingRunnable = null;
+              }
+            }
+            // By design, this is the only place in a RenderThread thread where we wait().
+            renderThreadManager.wait();
+          }
+        } // end of synchronized(sRenderThreadManager)
+
+        if (event != null) {
+          event.run();
+          event = null;
+          continue;
+        }
+
+        MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
+        if (sizeChanged) {
           if (view != null) {
-            view.renderer.onDrawFrame();
-            if (finishDrawingRunnable != null) {
-              finishDrawingRunnable.run();
-              finishDrawingRunnable = null;
-            }
+            view.renderer.onSurfaceChanged(w, h);
           }
+          sizeChanged = false;
+        }
 
-          if (wantRenderNotification) {
-            doRenderNotification = true;
-            wantRenderNotification = false;
+        if (view != null) {
+          view.renderer.onDrawFrame();
+          if (finishDrawingRunnable != null) {
+            finishDrawingRunnable.run();
+            finishDrawingRunnable = null;
           }
         }
-      } finally {
 
+        if (wantRenderNotification) {
+          doRenderNotification = true;
+          wantRenderNotification = false;
+        }
       }
     }
 

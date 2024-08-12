@@ -13,7 +13,6 @@ import org.maplibre.android.LibraryLoader;
 import org.maplibre.android.log.Logger;
 import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.MapLibreMapOptions;
-import org.maplibre.android.maps.MapView;
 import org.maplibre.android.maps.renderer.surfaceview.MapLibreSurfaceView;
 import org.maplibre.android.maps.renderer.surfaceview.SurfaceViewMapRenderer;
 import org.maplibre.android.maps.renderer.textureview.TextureViewMapRenderer;
@@ -76,7 +75,7 @@ public abstract class MapRenderer implements MapRendererScheduler {
     nativeInitialize(this, pixelRatio, localIdeographFontFamily);
   }
 
-  abstract public View getView();
+  public abstract View getView();
 
   public void onStart() {
     // Implement if needed

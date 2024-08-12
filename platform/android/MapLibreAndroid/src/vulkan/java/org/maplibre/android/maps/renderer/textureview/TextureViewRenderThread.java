@@ -220,8 +220,9 @@ class TextureViewRenderThread extends Thread implements TextureView.SurfaceTextu
               break;
             }
 
-            if (requestRender && !paused)
+            if (requestRender && !paused) {
               break;
+            }
 
             // Wait until needed
             lock.wait();
