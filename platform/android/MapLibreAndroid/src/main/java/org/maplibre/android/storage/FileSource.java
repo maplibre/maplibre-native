@@ -25,6 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import kotlin.Unit;
 import kotlinx.coroutines.CoroutineScope;
 
+import static org.maplibre.android.storage.FileDirsPathsAsyncKt.fileDirsPathsAsync;
 import static org.maplibre.android.utils.FileUtilsKt.checkFileWritePermissionAsync;
 
 /**
@@ -200,11 +201,11 @@ public class FileSource {
     ThreadUtils.checkThread(TAG);
     lockPathLoaders();
     if (resourcesCachePath == null || internalCachePath == null) {
-      new FileDirsPathsTask((path1, path2) -> {
+      fileDirsPathsAsync(context, (path1, path2) -> {
         resourcesCachePath = path1;
         internalCachePath = path2;
         return Unit.INSTANCE;
-      }).execute(context);
+      });
     }
   }
 
