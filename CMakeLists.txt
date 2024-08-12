@@ -9,6 +9,7 @@ option(MLN_WITH_SANITIZER "Use [address|thread|undefined] here" OFF)
 option(MLN_WITH_RTTI "Compile with runtime type information" OFF)
 option(MLN_WITH_OPENGL "Build with OpenGL renderer" ON)
 option(MLN_WITH_EGL "Build with EGL renderer" OFF)
+option(MLN_WITH_VULKAN "Build with Vulkan renderer" OFF)
 option(MLN_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" ON)
@@ -119,7 +120,7 @@ target_link_libraries(
 
 cmake_policy(SET CMP0063 NEW)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_C_EXTENSIONS OFF)
@@ -162,16 +163,6 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/render_target.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_program_base.hpp
         ${PROJECT_SOURCE_DIR}/include/mbgl/util/suppress_copies.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_info.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/buffer_allocator.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_block_gl.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/uniform_buffer_gl.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/vertex_attribute_gl.hpp
-        ${PROJECT_SOURCE_DIR}/include/mbgl/gl/texture2d.hpp
     )
     list(APPEND SRC_FILES
         ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/drawable.cpp
@@ -219,16 +210,12 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/collision_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/collision_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/buffer_allocator.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_impl.hpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/layer_group_gl.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture2d.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_block_gl.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_buffer_gl.cpp
-        ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_attribute_gl.cpp
+    )
+
+    target_compile_definitions(
+        mbgl-core
+        PUBLIC
+            "MLN_DRAWABLE_RENDERER=$<BOOL:${MLN_DRAWABLE_RENDERER}>"
     )
 endif()
 
@@ -252,6 +239,10 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_group.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/types.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer_render_parameters.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/background_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/circle_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/fill_extrusion_layer_factory.hpp
@@ -854,6 +845,11 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/types.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_render_parameters.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_layer_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/bidi.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/check_max_angle.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/check_max_angle.hpp
@@ -1005,11 +1001,6 @@ if(MLN_WITH_OPENGL)
     )
     list(APPEND 
         INCLUDE_FILES
-            ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer_render_parameters.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/mtl/custom_layer_render_parameters.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderable_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderer_backend.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/location_indicator_layer_factory.hpp
@@ -1081,11 +1072,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/fence.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/fence.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_render_parameters.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_layer_factory.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/debugging_extension.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/debugging_extension.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/defines.hpp
@@ -1159,6 +1145,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/symbol_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/widevector_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_program_gl.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/gl/buffer_allocator.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/drawable_gl_builder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/layer_group_gl.hpp
@@ -1170,6 +1157,7 @@ if(MLN_WITH_OPENGL)
         list(APPEND SRC_FILES
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_info.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/gl/shader_program_gl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/buffer_allocator.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_builder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/drawable_gl_impl.hpp
@@ -1287,6 +1275,96 @@ if(MBGL_WITH_METAL)
     )
 endif()
 
+if(MLN_WITH_VULKAN)
+    message(STATUS "Configuring Vulkan renderer backend")
+
+    target_compile_definitions(
+        mbgl-core
+        PRIVATE
+            MLN_RENDER_BACKEND_VULKAN=1
+    )
+
+    list(APPEND 
+        INCLUDE_FILES
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/command_encoder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/context.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable_builder.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/index_buffer_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/layer_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/offscreen_texture.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/pipeline.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/renderer_backend.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/render_pass.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/renderable_resource.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/texture2d.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/tile_layer_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/uniform_buffer.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/upload_pass.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/vertex_attribute.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/shader_group.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/shader_program.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/background.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/circle.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/clipping_mask.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/collision.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/common.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/debug.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/fill.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/heatmap.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/hillshade.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/line.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/raster.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/symbol.hpp
+    )
+
+    list(APPEND 
+        SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/buffer_resource.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/command_encoder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/context.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_builder.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_impl.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/index_buffer_resource.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/layer_group.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/offscreen_texture.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/pipeline.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/render_pass.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/renderable_resource.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/texture2d.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/tile_layer_group.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/uniform_buffer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/upload_pass.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/vertex_attribute.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/shader_program.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/background.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/circle.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/collision.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/debug.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/fill.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/heatmap.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/hillshade.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/line.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/raster.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/symbol.cpp
+    )
+
+    #TODO merge with MLN_DRAWABLE_RENDERER? These are added only for GL path
+    list(APPEND 
+        SRC_FILES
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_drawable_layer_factory.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.hpp
+    )
+endif()
+
 target_sources(
     mbgl-core PRIVATE
     ${INCLUDE_FILES}
@@ -1296,6 +1374,23 @@ target_sources(
 if (MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-core PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
+
+set_source_files_properties(
+    ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/util/utf.cpp
+    PROPERTIES
+    COMPILE_FLAGS
+    $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wno-deprecated-declarations>
+)
+
+# gcc 12 compiler bug, remove when fixed
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105651
+set_source_files_properties(
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/compound_expression.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/font_stack.cpp
+    PROPERTIES
+    COMPILE_FLAGS
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER:$<CXX_COMPILER_VERSION>,12.0.0>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,13.0.0>>:-Wno-restrict>
+)
 
 source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})
 source_group(TREE ${PROJECT_SOURCE_DIR}/src FILES ${SRC_FILES})
@@ -1381,7 +1476,7 @@ target_link_libraries(
         Mapbox::Base::geojson.hpp
         Mapbox::Base::geometry.hpp
         Mapbox::Base::variant
-        TracyClient
+        $<$<BOOL:${MLN_USE_TRACY}>:TracyClient>
         unordered_dense
 )
 
@@ -1412,11 +1507,24 @@ export(TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
-    TracyClient
     unordered_dense
 
     FILE MapboxCoreTargets.cmake
 )
+
+if(MLN_WITH_VULKAN)
+    include(${PROJECT_SOURCE_DIR}/vendor/vulkan.cmake)
+
+    target_link_libraries(
+        mbgl-core
+        PUBLIC
+            mbgl-vendor-vulkan-headers
+            mbgl-vendor-VulkanMemoryAllocator
+            glslang
+            SPIRV
+            glslang-default-resource-limits
+    )
+endif()
 
 set_target_properties(
     mbgl-core

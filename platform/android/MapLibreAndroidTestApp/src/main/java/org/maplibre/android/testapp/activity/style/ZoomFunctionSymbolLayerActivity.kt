@@ -11,7 +11,6 @@ import org.maplibre.geojson.Point
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.Property
@@ -52,16 +51,14 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_zoom_symbol_layer)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(
-            OnMapReadyCallback { map: MapLibreMap ->
-                maplibreMap = map
-                map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
-                    updateSource(style)
-                    addLayer(style)
-                    map.addOnMapClickListener(mapClickListener)
-                }
+        mapView.getMapAsync { map: MapLibreMap ->
+            maplibreMap = map
+            map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
+                updateSource(style)
+                addLayer(style)
+                map.addOnMapClickListener(mapClickListener)
             }
-        )
+        }
     }
 
     private fun updateSource(style: Style?) {
@@ -121,7 +118,7 @@ class ZoomFunctionSymbolLayerActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             if (item.itemId == R.id.menu_action_change_location) {
                 isInitialPosition = !isInitialPosition
                 updateSource(maplibreMap.style)

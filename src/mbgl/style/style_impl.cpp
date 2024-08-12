@@ -28,8 +28,6 @@
 namespace mbgl {
 namespace style {
 
-static Observer nullObserver;
-
 Style::Impl::Impl(std::shared_ptr<FileSource> fileSource_, float pixelRatio, const TaggedScheduler& threadPool_)
     : fileSource(std::move(fileSource_)),
       spriteLoader(std::make_unique<SpriteLoader>(pixelRatio, threadPool_)),
