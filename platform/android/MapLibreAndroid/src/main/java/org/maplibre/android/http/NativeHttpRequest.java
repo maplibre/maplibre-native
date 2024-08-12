@@ -28,14 +28,13 @@ public class NativeHttpRequest implements HttpResponder {
             String resourceUrl,
             String etag,
             String modified,
-            boolean offlineUsage,
-            CoroutineScope scope
+            boolean offlineUsage
   ) {
     this.nativePtr = nativePtr;
 
     if (resourceUrl.startsWith("local://")) {
       // used by render test to serve files from assets
-      executeLocalRequest(resourceUrl, scope);
+      executeLocalRequest(resourceUrl);
       return;
     }
     httpRequest.executeRequest(this, nativePtr, resourceUrl, etag, modified, offlineUsage);
@@ -71,8 +70,8 @@ public class NativeHttpRequest implements HttpResponder {
     lock.unlock();
   }
 
-  private void executeLocalRequest(String resourceUrl, CoroutineScope scope) {
-    localRequestAsync(resourceUrl, scope, bytes -> {
+  private void executeLocalRequest(String resourceUrl) {
+    localRequestAsync(resourceUrl, bytes -> {
       if (bytes != null) {
         lock.lock();
         if (nativePtr != 0) {

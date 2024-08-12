@@ -11,8 +11,8 @@ import org.maplibre.android.log.Logger
 import java.io.IOException
 import java.io.InputStream
 
-fun localRequestAsync(url: String, scope: CoroutineScope, onCompletion: ((ByteArray?) -> Unit)?) {
-	scope.launch(Dispatchers.IO) {
+fun localRequestAsync(url: String, onCompletion: ((ByteArray?) -> Unit)?) {
+	CoroutineScope(Dispatchers.IO).launch {
 		val bytes = loadFile(
 			MapLibre.getApplicationContext().assets,
 			"integration/" + url
