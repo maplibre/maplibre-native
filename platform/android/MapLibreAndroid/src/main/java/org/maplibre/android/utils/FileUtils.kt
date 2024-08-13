@@ -32,21 +32,6 @@ fun deleteFileAsync(path: String, scope: CoroutineScope) {
 	}
 }
 
-fun checkFileReadPermissionAsync(file: File, scope: CoroutineScope, onCompletion: (Boolean, Throwable?) -> Unit) {
-	scope.launch(Dispatchers.IO) {
-		try {
-			val result = file.canRead()
-			withContext(Dispatchers.Main) {
-				onCompletion(result, null)
-			}
-		} catch (e: Exception) {
-			withContext(Dispatchers.Main) {
-				onCompletion(false, e)
-			}
-		}
-	}
-}
-
 fun checkFileWritePermissionAsync(file: File, scope: CoroutineScope, onCompletion: (Boolean, Throwable?) -> Unit) {
 	scope.launch(Dispatchers.IO) {
 		try {
