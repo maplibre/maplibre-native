@@ -1180,8 +1180,8 @@ if(MBGL_WITH_METAL)
     message(STATUS "Configuring Metal renderer backend")
     target_compile_definitions(
         mbgl-core
-        PRIVATE
-            MBGL_RENDER_BACKEND_METAL=1
+        PRIVATE MLN_RENDER_BACKEND_METAL=1
+        PUBLIC
             "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
     list(APPEND 
