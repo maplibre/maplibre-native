@@ -109,7 +109,7 @@ public class FileSource {
    * @return the files directory path
    */
   @NonNull
-  private static String getCachePath(@NonNull Context context) {
+  static String getCachePath(@NonNull Context context) {
     SharedPreferences preferences = context.getSharedPreferences(
       MapLibreConstants.MAPLIBRE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
     String cachePath = preferences.getString(MAPBOX_SHARED_PREFERENCE_RESOURCES_CACHE_PATH, null);
