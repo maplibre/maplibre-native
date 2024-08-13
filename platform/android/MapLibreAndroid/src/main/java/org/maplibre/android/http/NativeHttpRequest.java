@@ -7,9 +7,8 @@ import org.maplibre.android.MapLibre;
 import java.util.concurrent.locks.ReentrantLock;
 
 import kotlin.Unit;
-import kotlinx.coroutines.CoroutineScope;
 
-import static org.maplibre.android.http.LocalRequestAsyncKt.localRequestAsync;
+import static org.maplibre.android.http.LocalRequestKt.localRequest;
 
 @Keep
 public class NativeHttpRequest implements HttpResponder {
@@ -71,7 +70,7 @@ public class NativeHttpRequest implements HttpResponder {
   }
 
   private void executeLocalRequest(String resourceUrl) {
-    localRequestAsync(resourceUrl, bytes -> {
+    localRequest(resourceUrl, bytes -> {
       if (bytes != null) {
         lock.lock();
         if (nativePtr != 0) {

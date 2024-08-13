@@ -1,29 +1,21 @@
 package org.maplibre.android.http
 
 import android.content.res.AssetManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.maplibre.android.MapLibre
 import org.maplibre.android.MapStrictMode
 import org.maplibre.android.log.Logger
 import java.io.IOException
 import java.io.InputStream
 
-fun localRequestAsync(url: String, onCompletion: ((ByteArray?) -> Unit)?) {
-	CoroutineScope(Dispatchers.IO).launch {
-		val bytes = loadFile(
-			MapLibre.getApplicationContext().assets,
-			"integration/" + url
-				.substring(8)
-				.replace("%20".toRegex(), " ")
-				.replace("%2c".toRegex(), ",")
-		)
-		withContext(Dispatchers.Main) {
-			onCompletion?.invoke(bytes)
-		}
-	}
+fun localRequest(url: String, onCompletion: ((ByteArray?) -> Unit)?) {
+	val bytes = loadFile(
+		MapLibre.getApplicationContext().assets,
+		"integration/" + url
+			.substring(8)
+			.replace("%20".toRegex(), " ")
+			.replace("%2c".toRegex(), ",")
+	)
+	onCompletion?.invoke(bytes)
 }
 
 private const val TAG = "Mbgl-LocalRequestTask"
