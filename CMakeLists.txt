@@ -221,6 +221,7 @@ if(MLN_DRAWABLE_RENDERER)
 endif()
 
 list(APPEND INCLUDE_FILES
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/context.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/actor_ref.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/aspiring_actor.hpp
@@ -229,10 +230,11 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/message.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/actor/scheduler.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/annotation/annotation.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend_scope.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/fill_generator.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/gfx_types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/polyline_generator.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/fill_generator.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderable.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/renderer_backend.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/rendering_stats.hpp
@@ -240,12 +242,11 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader_group.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/shader.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/types.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/gfx/backend.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer_render_parameters.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_layer_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/i18n/collator.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/i18n/number_format.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/background_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/circle_layer_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/fill_extrusion_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/fill_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/heatmap_layer_factory.hpp
@@ -271,6 +272,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/math/wrap.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/platform/settings.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/platform/thread.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/platform/time.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/query.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/renderer/renderer_frontend.hpp
@@ -349,16 +351,8 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/image.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/layer_properties.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/background_layer.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/circle_layer.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/fill_extrusion_layer.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/fill_layer.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/heatmap_layer.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/hillshade_layer.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/line_layer.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/raster_layer.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/symbol_layer.hpp
-    ${PROJECT_SOURCE_DIR}/include/mbgl/style/light.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_layer_render_parameters.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/position.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/property_expression.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/property_value.hpp
@@ -379,6 +373,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_necessity.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/async_request.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/async_task.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/bitmask_operations.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/char_array_buffer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/chrono.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/client_options.hpp
@@ -405,6 +400,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/instrumentation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/interpolate.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/logging.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/monotonic_timer.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/noncopyable.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/platform.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/premultiply.hpp
@@ -468,18 +464,18 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/depth_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/draw_scope.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/fill_generator.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/index_buffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/index_vector.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/offscreen_texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/polyline_generator.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/fill_generator.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/program.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/render_pass.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderbuffer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/renderer_backend.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/rendering_stats.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_registry.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/shader_group.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/stencil_mode.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/texture.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/uniform.hpp
@@ -488,6 +484,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/gfx/vertex_vector.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/background_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/circle_layer_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/fill_extrusion_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/fill_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/heatmap_layer_factory.cpp
@@ -609,6 +606,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_background_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_circle_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_circle_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_fill_extrusion_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_fill_extrusion_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_fill_layer.cpp
@@ -697,7 +696,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/collection.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/color_ramp_property_value.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/constant.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/sprite.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/coordinate.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/custom_geometry_source_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/filter.cpp
@@ -715,6 +713,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/stringify.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/tileset.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/transition_options.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/sprite.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/sprite.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/custom_tile_loader.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/custom_tile_loader.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/assertion.cpp
@@ -756,62 +756,40 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/value.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/within.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/filter.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/image.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sprite.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sprite.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/image.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/image_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/image_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layer_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layer_observer.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/background_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/background_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/background_layer_impl.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/background_layer_properties.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/background_layer_properties.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/circle_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/circle_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/circle_layer_impl.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/circle_layer_properties.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/circle_layer_properties.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_extrusion_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_render_parameters.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_extrusion_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_extrusion_layer_impl.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_extrusion_layer_properties.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_extrusion_layer_properties.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_layer_impl.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_layer_properties.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/fill_layer_properties.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/heatmap_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/heatmap_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/heatmap_layer_impl.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/heatmap_layer_properties.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/heatmap_layer_properties.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/hillshade_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/hillshade_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/hillshade_layer_impl.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/hillshade_layer_properties.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/hillshade_layer_properties.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/line_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/line_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/line_layer_impl.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/line_layer_properties.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/line_layer_properties.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/raster_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/raster_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/raster_layer_impl.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/raster_layer_properties.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/raster_layer_properties.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/symbol_layer.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/symbol_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/symbol_layer_impl.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/symbol_layer_properties.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/symbol_layer_properties.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layout_property.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/light.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/light_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/light_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/light_observer.hpp
@@ -846,11 +824,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/style_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/types.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_render_parameters.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_layer_factory.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/bidi.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/check_max_angle.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/check_max_angle.hpp
@@ -916,6 +889,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile_data.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile_data.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/camera.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/camera.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/bounding_volumes.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/bounding_volumes.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/chrono.cpp
@@ -959,6 +933,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/math.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/premultiply.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/quaternion.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/quaternion.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/rapidjson.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/rapidjson.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/rect.hpp
@@ -977,7 +952,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tile_cover_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tile_cover_impl.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tile_range.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/default_style.cpp    
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/default_style.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tile_server_options.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tiny_sdf.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/tiny_sdf.hpp
