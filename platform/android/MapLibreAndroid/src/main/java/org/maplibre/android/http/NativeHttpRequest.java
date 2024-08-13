@@ -1,13 +1,9 @@
 package org.maplibre.android.http;
 
 import androidx.annotation.Keep;
-
 import org.maplibre.android.MapLibre;
-
 import java.util.concurrent.locks.ReentrantLock;
-
 import kotlin.Unit;
-
 import static org.maplibre.android.http.LocalRequestKt.localRequest;
 
 @Keep
