@@ -6267,6 +6267,7 @@ static void *windowScreenContext = &windowScreenContext;
 
     __weak MLNMapView *weakSelf = self;
     [self _flyToCamera:camera
+             zoomLevel:self.zoomLevel
            edgePadding:self.edgePaddingForFollowing
           withDuration:animated ? -1 : 0
           peakAltitude:-1
