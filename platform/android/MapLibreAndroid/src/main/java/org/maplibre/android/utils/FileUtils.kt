@@ -14,7 +14,7 @@ private const val TAG = "Mbgl-FileUtils"
  *
  * @param path the path of the file that should be deleted
  */
-fun deleteFileAsync(path: String, scope: CoroutineScope) {
+internal fun deleteFileAsync(path: String, scope: CoroutineScope) {
 	// Delete the file in a separate coroutine to avoid affecting the UI
 	scope.launch(Dispatchers.IO) {
 		try {
@@ -32,7 +32,14 @@ fun deleteFileAsync(path: String, scope: CoroutineScope) {
 	}
 }
 
-fun checkFileWritePermissionAsync(file: File, scope: CoroutineScope, onCompletion: (Boolean, Throwable?) -> Unit) {
+/**
+ * Asynchronously checks if a file can be written to.
+ *
+ * @param file the file to check
+ * @param scope the coroutine scope
+ * @param onCompletion the callback that is called when the check completes successfully
+ */
+internal fun checkFileWritePermissionAsync(file: File, scope: CoroutineScope, onCompletion: (Boolean, Throwable?) -> Unit) {
 	scope.launch(Dispatchers.IO) {
 		try {
 			val result = file.canWrite()
