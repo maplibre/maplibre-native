@@ -98,7 +98,7 @@ void Mailbox::push(std::unique_ptr<Message> message) {
         return;
     }
 
-    bool wasEmpty;
+    bool wasEmpty = false;
     {
         MLN_TRACE_ZONE(queue lock)
         std::lock_guard<std::mutex> queueLock(queueMutex);
