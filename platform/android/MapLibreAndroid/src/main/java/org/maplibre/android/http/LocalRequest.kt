@@ -7,7 +7,7 @@ import org.maplibre.android.log.Logger
 import java.io.IOException
 import java.io.InputStream
 
-fun localRequest(url: String, onCompletion: ((ByteArray?) -> Unit)?) {
+internal fun localRequest(url: String, onCompletion: ((ByteArray?) -> Unit)?) {
 	val bytes = loadFile(
 		MapLibre.getApplicationContext().assets,
 		"integration/" + url
