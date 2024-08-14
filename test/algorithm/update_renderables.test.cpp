@@ -118,7 +118,7 @@ TEST(UpdateRenderables, SingleTile) {
     tile_1_1_1_1->renderable = true;
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 1, 1}}, Found},                      // found ideal tile
                   RetainTileDataAction{{1, 0, {1, 1, 1}}, TileNecessity::Required}, //
@@ -129,7 +129,7 @@ TEST(UpdateRenderables, SingleTile) {
     // Check a repeated render with the same data.
     log.clear();
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 1, 1}}, Found},                      // found ideal tile
                   RetainTileDataAction{{1, 0, {1, 1, 1}}, TileNecessity::Required}, //
@@ -141,7 +141,7 @@ TEST(UpdateRenderables, SingleTile) {
     log.clear();
     source.idealTiles.emplace(OverscaledTileID{1, 0, 1});
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 1}}, NotFound},                   // missing ideal tile
                   CreateTileDataAction{{1, 0, {1, 0, 1}}},                          // create ideal tile
@@ -162,7 +162,7 @@ TEST(UpdateRenderables, SingleTile) {
     log.clear();
     source.dataTiles[{1, 0, {1, 0, 1}}]->triedOptional = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 1}}, Found},                      // missing ideal tile
                   RetainTileDataAction{{1, 0, {1, 0, 1}}, TileNecessity::Required}, //
@@ -185,7 +185,7 @@ TEST(UpdateRenderables, SingleTile) {
     auto tile_1_1_0_1 = source.createTileData(OverscaledTileID{1, 0, 1});
     tile_1_1_0_1->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 1}}, Found},                      // newly added tile
                   RetainTileDataAction{{1, 0, {1, 0, 1}}, TileNecessity::Required}, //
@@ -204,7 +204,7 @@ TEST(UpdateRenderables, SingleTile) {
     auto tile_1_1_0_0 = source.createTileData(OverscaledTileID{1, 0, 0});
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, Found},                      // found tile, not ready
                   RetainTileDataAction{{1, 0, {1, 0, 0}}, TileNecessity::Required}, //
@@ -230,7 +230,7 @@ TEST(UpdateRenderables, SingleTile) {
     log.clear();
     tile_1_1_0_0->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, Found},                      // found tile, now ready
                   RetainTileDataAction{{1, 0, {1, 0, 0}}, TileNecessity::Required}, //
@@ -263,7 +263,7 @@ TEST(UpdateRenderables, UseParentTile) {
     auto tile_0_0_0_0 = source.createTileData(OverscaledTileID{0, 0, 0});
     tile_0_0_0_0->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 1}}, NotFound},                   // missing ideal tile
                   CreateTileDataAction{{1, 0, {1, 0, 1}}},                          //
@@ -306,7 +306,7 @@ TEST(UpdateRenderables, DontUseWrongParentTile) {
     auto tile_1_1_1_0 = source.createTileData(OverscaledTileID{1, 1, 0});
     tile_1_1_1_0->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, NotFound},                   // missing ideal tile
                   CreateTileDataAction{{2, 0, {2, 0, 0}}},                          //
@@ -324,7 +324,7 @@ TEST(UpdateRenderables, DontUseWrongParentTile) {
     log.clear();
     source.dataTiles[{2, 0, {2, 0, 0}}]->triedOptional = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, Found},                      // non-ready ideal tile
                   RetainTileDataAction{{2, 0, {2, 0, 0}}, TileNecessity::Required}, //
@@ -343,7 +343,7 @@ TEST(UpdateRenderables, DontUseWrongParentTile) {
     log.clear();
     source.idealTiles.emplace(OverscaledTileID{2, 2, 0});
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, Found},                      // non-ready ideal tile
                   RetainTileDataAction{{2, 0, {2, 0, 0}}, TileNecessity::Required}, //
@@ -388,7 +388,7 @@ TEST(UpdateRenderables, UseParentTileWhenChildNotReady) {
 
     // Make sure that it renders the parent tile.
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 1}}, Found},                      // found, but not ready
                   RetainTileDataAction{{1, 0, {1, 0, 1}}, TileNecessity::Required}, //
@@ -406,7 +406,7 @@ TEST(UpdateRenderables, UseParentTileWhenChildNotReady) {
     log.clear();
     tile_1_1_0_1->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 1}}, Found},                      // found and ready
                   RetainTileDataAction{{1, 0, {1, 0, 1}}, TileNecessity::Required}, //
@@ -433,7 +433,7 @@ TEST(UpdateRenderables, UseOverlappingParentTile) {
     tile_1_1_0_1->renderable = true;
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, NotFound},                   // ideal tile not found
                   CreateTileDataAction{{1, 0, {1, 0, 0}}},                          //
@@ -469,7 +469,7 @@ TEST(UpdateRenderables, UseChildTiles) {
     tile_1_1_1_0->renderable = true;
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{0, 0, {0, 0, 0}}, NotFound},                   // ideal tile, missing
                   CreateTileDataAction{{0, 0, {0, 0, 0}}},                          //
@@ -483,6 +483,33 @@ TEST(UpdateRenderables, UseChildTiles) {
                   RenderTileAction{{1, 1, 0}, *tile_1_1_1_0},                       // render child tile
                   GetTileDataAction{{1, 0, {1, 1, 1}}, NotFound},                   // child tile not found
                                                                                     // no parent tile of 0 to consider
+              }),
+              log);
+
+    // Remove direct children and add children 2 zoom levels down
+    log.clear();
+    source.dataTiles.erase(OverscaledTileID{1, 0, 0});
+    source.dataTiles.erase(OverscaledTileID{1, 1, 0});
+    auto tile_2_2_0_0 = source.createTileData(OverscaledTileID{2, 0, 0});
+    tile_2_2_0_0->renderable = true;
+    auto tile_2_2_1_0 = source.createTileData(OverscaledTileID{2, 1, 0});
+    tile_2_2_1_0->renderable = true;
+
+    algorithm::updateRenderables(
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
+    EXPECT_EQ(ActionLog({
+                  GetTileDataAction{{0, 0, {0, 0, 0}}, Found},                      // ideal tile not ready
+                  RetainTileDataAction{{0, 0, {0, 0, 0}}, TileNecessity::Required}, //
+                  GetTileDataAction{{1, 0, {1, 0, 0}}, NotFound},                   // child tile not found
+                  GetTileDataAction{{1, 0, {1, 0, 1}}, NotFound},                   // child tile not found
+                  GetTileDataAction{{1, 0, {1, 1, 0}}, NotFound},                   // child tile not found
+                  GetTileDataAction{{1, 0, {1, 1, 1}}, NotFound},                   // child tile not found
+                                                                                    // no parent tile of 0 to consider
+                  // no parent or child tile found, check prefetched tiles
+                  RetainTileDataAction{{2, 0, {2, 0, 0}}, TileNecessity::Optional}, //
+                  RenderTileAction{{2, 0, 0}, *tile_2_2_0_0},                       // render child from 2 levels down
+                  RetainTileDataAction{{2, 0, {2, 1, 0}}, TileNecessity::Optional}, //
+                  RenderTileAction{{2, 1, 0}, *tile_2_2_1_0},                       // render child from 2 levels down
               }),
               log);
 }
@@ -503,7 +530,7 @@ TEST(UpdateRenderables, PreferChildTiles) {
     tile_2_2_0_0->renderable = true;
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, NotFound},                   // ideal tile, not found
                   CreateTileDataAction{{1, 0, {1, 0, 0}}},                          //
@@ -526,7 +553,7 @@ TEST(UpdateRenderables, PreferChildTiles) {
     auto tile_2_2_0_1 = source.createTileData(OverscaledTileID{2, 0, 1});
     tile_2_2_0_1->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, Found}, // ideal tile, not ready
                   // ideal tile was added in previous invocation, but is not yet ready
@@ -549,7 +576,7 @@ TEST(UpdateRenderables, PreferChildTiles) {
     auto tile_2_2_1_0 = source.createTileData(OverscaledTileID{2, 1, 0});
     tile_2_2_1_0->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, Found}, // ideal tile, not ready
                   // ideal tile was added in first invocation, but is not yet ready
@@ -575,7 +602,7 @@ TEST(UpdateRenderables, PreferChildTiles) {
     auto tile_2_2_1_1 = source.createTileData(OverscaledTileID{2, 1, 1});
     tile_2_2_1_1->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, Found}, // ideal tile, not ready
                   // ideal tile was added in first invocation, but is not yet ready
@@ -613,7 +640,7 @@ TEST(UpdateRenderables, UseParentAndChildTiles) {
 
     // Check that it uses the child tile and the parent tile to cover the rest.
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, NotFound},                   // ideal tile, missing
                   CreateTileDataAction{{1, 0, {1, 0, 0}}},                          //
@@ -634,7 +661,7 @@ TEST(UpdateRenderables, UseParentAndChildTiles) {
     log.clear();
     source.dataTiles.erase(OverscaledTileID{2, 0, 0});
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{1, 0, {1, 0, 0}}, Found},                      // ideal tile, not ready
                   RetainTileDataAction{{1, 0, {1, 0, 0}}, TileNecessity::Required}, //
@@ -664,7 +691,7 @@ TEST(UpdateRenderables, DontUseTilesLowerThanMinzoom) {
     tile_1_1_0_0->renderable = true;
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, NotFound},                   // ideal tile, missing
                   CreateTileDataAction{{2, 0, {2, 0, 0}}},                          //
@@ -693,7 +720,7 @@ TEST(UpdateRenderables, UseOverzoomedTileAfterMaxzoom) {
     auto tile_3_3_0_0 = source.createTileData(OverscaledTileID{3, 0, 0});
     tile_3_3_0_0->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, NotFound},                   // ideal tile, missing
                   CreateTileDataAction{{2, 0, {2, 0, 0}}},                          //
@@ -708,7 +735,7 @@ TEST(UpdateRenderables, UseOverzoomedTileAfterMaxzoom) {
     log.clear();
     source.dataTiles[{2, 0, {2, 0, 0}}]->triedOptional = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, Found},                      // ideal tile, missing
                   RetainTileDataAction{{2, 0, {2, 0, 0}}, TileNecessity::Required}, //
@@ -727,7 +754,7 @@ TEST(UpdateRenderables, UseOverzoomedTileAfterMaxzoom) {
     auto tile_2_2_0_0 = source.createTileData(OverscaledTileID{2, 0, {2, 0, 0}});
     tile_2_2_0_0->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{3, 0, {2, 0, 0}}, NotFound},                   // ideal tile, missing
                   CreateTileDataAction{{3, 0, {2, 0, 0}}},                          //
@@ -744,7 +771,7 @@ TEST(UpdateRenderables, UseOverzoomedTileAfterMaxzoom) {
     auto tile_3_2_0_0 = source.createTileData(OverscaledTileID{3, 0, {2, 0, 0}});
     tile_3_2_0_0->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{3, 0, {2, 0, 0}}, Found},                      //
                   RetainTileDataAction{{3, 0, {2, 0, 0}}, TileNecessity::Required}, //
@@ -757,7 +784,7 @@ TEST(UpdateRenderables, UseOverzoomedTileAfterMaxzoom) {
     source.idealTiles.clear();
     source.idealTiles.emplace(OverscaledTileID{2, 0, 0});
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, Found},                      //
                   RetainTileDataAction{{2, 0, {2, 0, 0}}, TileNecessity::Required}, //
@@ -772,7 +799,7 @@ TEST(UpdateRenderables, UseOverzoomedTileAfterMaxzoom) {
 
     // Use the overzoomed tile even though it doesn't match the zoom level.
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, NotFound},                   //
                   CreateTileDataAction{{2, 0, {2, 0, 0}}},                          //
@@ -799,7 +826,7 @@ TEST(UpdateRenderables, AscendToNonOverzoomedTiles) {
     auto tile_3_2_0_0 = source.createTileData(OverscaledTileID{3, 0, {2, 0, 0}});
     tile_3_2_0_0->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{3, 0, {2, 0, 0}}, Found},                      //
                   RetainTileDataAction{{3, 0, {2, 0, 0}}, TileNecessity::Required}, //
@@ -814,7 +841,7 @@ TEST(UpdateRenderables, AscendToNonOverzoomedTiles) {
     auto tile_2_2_0_0 = source.createTileData(OverscaledTileID{2, 0, {2, 0, 0}});
     tile_2_2_0_0->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{3, 0, {2, 0, 0}}, NotFound},                   //
                   CreateTileDataAction{{3, 0, {2, 0, 0}}},                          //
@@ -833,7 +860,7 @@ TEST(UpdateRenderables, AscendToNonOverzoomedTiles) {
     auto tile_1_1_0_0 = source.createTileData(OverscaledTileID{1, 0, {1, 0, 0}});
     tile_1_1_0_0->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{3, 0, {2, 0, 0}}, Found},                      // ideal tile, not ready
                   RetainTileDataAction{{3, 0, {2, 0, 0}}, TileNecessity::Required}, //
@@ -849,7 +876,7 @@ TEST(UpdateRenderables, AscendToNonOverzoomedTiles) {
     log.clear();
     source.dataTiles[{3, 0, {2, 0, 0}}]->triedOptional = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{3, 0, {2, 0, 0}}, Found},                      // ideal tile, not ready
                   RetainTileDataAction{{3, 0, {2, 0, 0}}, TileNecessity::Required}, //
@@ -876,7 +903,7 @@ TEST(UpdateRenderables, DoNotAscendMultipleTimesIfNotFound) {
     source.idealTiles.emplace(OverscaledTileID{8, 1, 0});
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{8, 0, {8, 0, 0}}, NotFound},                   // ideal tile
                   CreateTileDataAction{{8, 0, {8, 0, 0}}},                          //
@@ -911,7 +938,7 @@ TEST(UpdateRenderables, DoNotAscendMultipleTimesIfNotFound) {
     tile_4_0_0_0->renderable = true;
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{8, 0, {8, 0, 0}}, Found},                      // ideal tile, not ready
                   RetainTileDataAction{{8, 0, {8, 0, 0}}, TileNecessity::Required}, //
@@ -951,7 +978,7 @@ TEST(UpdateRenderables, DontRetainUnusedNonIdealTiles) {
     source.createTileData(OverscaledTileID{2, 0, 0});
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{2, 0, {2, 0, 0}}, Found},                      // ideal tile, not ready
                   RetainTileDataAction{{2, 0, {2, 0, 0}}, TileNecessity::Required}, //
@@ -989,7 +1016,7 @@ TEST(UpdateRenderables, WrappedTiles) {
     tile_0_0_0_0->renderable = true;
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(
         ActionLog({
             GetTileDataAction{{1, -1, {1, 1, 0}}, NotFound},                   // ideal tile 1/-1/0 (wrapped to -1)
@@ -1044,7 +1071,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
     source.idealTiles.emplace(OverscaledTileID{6, 0, 0});
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, NotFound},                   // ideal tile, not found
                   CreateTileDataAction{{6, 0, {6, 0, 0}}},                          //
@@ -1065,7 +1092,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
     // Repeat.
     log.clear();
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
                   RetainTileDataAction{{6, 0, {6, 0, 0}}, TileNecessity::Required}, //
@@ -1086,7 +1113,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
     log.clear();
     source.dataTiles[{6, 0, {6, 0, 0}}]->triedOptional = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
                   RetainTileDataAction{{6, 0, {6, 0, 0}}, TileNecessity::Required}, //
@@ -1108,7 +1135,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
     // Repeat.
     log.clear();
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
                   RetainTileDataAction{{6, 0, {6, 0, 0}}, TileNecessity::Required}, //
@@ -1130,7 +1157,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
     log.clear();
     source.dataTiles[{5, 0, {5, 0, 0}}]->triedOptional = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
                   RetainTileDataAction{{6, 0, {6, 0, 0}}, TileNecessity::Required}, //
@@ -1154,7 +1181,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
     log.clear();
     source.dataTiles[{4, 0, {4, 0, 0}}]->triedOptional = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
                   RetainTileDataAction{{6, 0, {6, 0, 0}}, TileNecessity::Required}, //
@@ -1179,7 +1206,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
     log.clear();
     source.dataTiles[{3, 0, {3, 0, 0}}]->triedOptional = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
                   RetainTileDataAction{{6, 0, {6, 0, 0}}, TileNecessity::Required}, //
@@ -1206,7 +1233,7 @@ TEST(UpdateRenderables, RepeatedRenderWithMissingOptionals) {
     auto tile_3_3_0_0 = source.dataTiles[{3, 0, {3, 0, 0}}].get();
     tile_3_3_0_0->renderable = true;
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not ready
                   RetainTileDataAction{{6, 0, {6, 0, 0}}, TileNecessity::Required}, //
@@ -1241,7 +1268,7 @@ TEST(UpdateRenderables, LoadRequiredIfIdealTileCantBeFound) {
     tile_6_6_0_0->loaded = true;
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{6, 0, {6, 0, 0}}, Found},                      // ideal tile, not found
                   RetainTileDataAction{{6, 0, {6, 0, 0}}, TileNecessity::Required}, //
@@ -1292,7 +1319,7 @@ TEST(UpdateRenderables, LoadOverscaledMaxZoomTile) {
     tile_1_1_0_0->loaded = true;
 
     algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange);
+        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.dataTiles, source.zoomRange);
     EXPECT_EQ(ActionLog({
                   GetTileDataAction{{4, 0, {2, 0, 0}}, Found},
                   RetainTileDataAction{{4, 0, {2, 0, 0}}, TileNecessity::Required},
@@ -1323,8 +1350,14 @@ TEST(UpdateRenderables, MaxParentOverscaleFactor) {
     tile_0_0_0_0->renderable = true;
 
     // Set max parent overscale factor to 4, so that tile 0,0,0 would be rendered
-    algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange, 4);
+    algorithm::updateRenderables(getTileData,
+                                 createTileData,
+                                 retainTileData,
+                                 renderTile,
+                                 source.idealTiles,
+                                 source.dataTiles,
+                                 source.zoomRange,
+                                 4);
     EXPECT_EQ(ActionLog({GetTileDataAction{{4, 0, {4, 0, 0}}, NotFound}, // ideal tile
                          CreateTileDataAction{{4, 0, {4, 0, 0}}},
                          RetainTileDataAction{{4, 0, {4, 0, 0}}, TileNecessity::Required},
@@ -1351,8 +1384,14 @@ TEST(UpdateRenderables, MaxParentOverscaleFactor) {
 
     // Set max parent overscale factor to 3.
     // Parent tile 0,0,0 should not be requested / rendered.
-    algorithm::updateRenderables(
-        getTileData, createTileData, retainTileData, renderTile, source.idealTiles, source.zoomRange, 3);
+    algorithm::updateRenderables(getTileData,
+                                 createTileData,
+                                 retainTileData,
+                                 renderTile,
+                                 source.idealTiles,
+                                 source.dataTiles,
+                                 source.zoomRange,
+                                 3);
     EXPECT_EQ(ActionLog({GetTileDataAction{{4, 0, {4, 0, 0}}, Found}, // ideal tile
                          RetainTileDataAction{{4, 0, {4, 0, 0}}, TileNecessity::Required},
                          GetTileDataAction{{5, 0, {5, 0, 0}}, NotFound}, // child tiles
