@@ -1251,7 +1251,9 @@ MLN_EXPORT
  @param zoomLevel The new zoom level for the map.
  @param completion The block to execute after the animation finishes.
  */
-- (void)flyToCamera:(MLNMapCamera *)camera zoomLevel:(double)zoomLevel completionHandler:(nullable void (^)(void))completion;
+- (void)flyToCamera:(MLNMapCamera *)camera
+            zoomLevel:(double)zoomLevel
+    completionHandler:(nullable void (^)(void))completion;
 
 /**
  Moves the viewpoint to a different location using a transition animation that
@@ -1287,7 +1289,7 @@ MLN_EXPORT
  @param completion The block to execute after the animation finishes.
  */
 - (void)flyToCamera:(MLNMapCamera *)camera
-          zoomLevel:(double)zoomLevel
+            zoomLevel:(double)zoomLevel
          withDuration:(NSTimeInterval)duration
     completionHandler:(nullable void (^)(void))completion;
 
@@ -1334,7 +1336,7 @@ MLN_EXPORT
  @param completion The block to execute after the animation finishes.
  */
 - (void)flyToCamera:(MLNMapCamera *)camera
-          zoomLevel:(double)zoomLevel
+            zoomLevel:(double)zoomLevel
          withDuration:(NSTimeInterval)duration
          peakAltitude:(CLLocationDistance)peakAltitude
     completionHandler:(nullable void (^)(void))completion;
@@ -1378,7 +1380,7 @@ MLN_EXPORT
  @param completion The block to execute after the animation finishes.
  */
 - (void)flyToCamera:(MLNMapCamera *)camera
-          zoomLevel:(double)zoomLevel
+            zoomLevel:(double)zoomLevel
           edgePadding:(UIEdgeInsets)insets
          withDuration:(NSTimeInterval)duration
     completionHandler:(nullable void (^)(void))completion;
