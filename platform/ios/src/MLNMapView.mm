@@ -4190,19 +4190,19 @@ static void *windowScreenContext = &windowScreenContext;
 - (void)flyToCamera:(MLNMapCamera *)camera completionHandler:(nullable void (^)(void))completion
 {
     MLNLogDebug(@"Setting flyToCamera: %@ completionHandler: %@", camera, completion);
-    [self flyToCamera:camera withDuration:-1 completionHandler:completion];
+    [self flyToCamera:camera zoomLevel: self.zoomLevel withDuration:-1 completionHandler:completion];
 }
 
 - (void)flyToCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion
 {
     MLNLogDebug(@"Setting flyToCamera: %@ withDuration: %f completionHandler: %@", camera, duration, completion);
-    [self flyToCamera:camera withDuration:duration peakAltitude:-1 completionHandler:completion];
+    [self flyToCamera:camera zoomLevel: self.zoomLevel withDuration:duration peakAltitude:-1 completionHandler:completion];
 }
 
 - (void)flyToCamera:(MLNMapCamera *)camera withDuration:(NSTimeInterval)duration peakAltitude:(CLLocationDistance)peakAltitude completionHandler:(nullable void (^)(void))completion
 {
     MLNLogDebug(@"Setting flyToCamera: %@ withDuration: %f peakAltitude: %f completionHandler: %@", camera, duration, peakAltitude, completion);
-    [self _flyToCamera:camera edgePadding:self.contentInset withDuration:duration peakAltitude:peakAltitude completionHandler:completion];
+    [self _flyToCamera:camera zoomLevel: self.zoomLevel edgePadding:self.contentInset withDuration:duration peakAltitude:peakAltitude completionHandler:completion];
 }
 
 - (void)flyToCamera:(MLNMapCamera *)camera edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion {
@@ -4210,10 +4210,36 @@ static void *windowScreenContext = &windowScreenContext;
                                                     self.contentInset.left + insets.left,
                                                     self.contentInset.bottom + insets.bottom,
                                                     self.contentInset.right + insets.right);
-    [self _flyToCamera:camera edgePadding:finalEdgeInsets withDuration:duration peakAltitude:-1 completionHandler:completion];
+    [self _flyToCamera:camera zoomLevel: self.zoomLevel edgePadding:finalEdgeInsets withDuration:duration peakAltitude:-1 completionHandler:completion];
 }
 
-- (void)_flyToCamera:(MLNMapCamera *)camera edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration peakAltitude:(CLLocationDistance)peakAltitude completionHandler:(nullable void (^)(void))completion
+- (void)flyToCamera:(MLNMapCamera *)camera zoomLevel:(double)zoomLevel completionHandler:(nullable void (^)(void))completion
+{
+    MLNLogDebug(@"Setting flyToCamera: %@ completionHandler: %@", camera, completion);
+    [self flyToCamera:camera zoomLevel:zoomLevel withDuration:-1 completionHandler:completion];
+}
+
+- (void)flyToCamera:(MLNMapCamera *)camera zoomLevel:(double)zoomLevel withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion
+{
+    MLNLogDebug(@"Setting flyToCamera: %@ withDuration: %f completionHandler: %@", camera, duration, completion);
+    [self flyToCamera:camera zoomLevel:zoomLevel withDuration:duration peakAltitude:-1 completionHandler:completion];
+}
+
+- (void)flyToCamera:(MLNMapCamera *)camera zoomLevel:(double)zoomLevel withDuration:(NSTimeInterval)duration peakAltitude:(CLLocationDistance)peakAltitude completionHandler:(nullable void (^)(void))completion
+{
+    MLNLogDebug(@"Setting flyToCamera: %@ withDuration: %f peakAltitude: %f completionHandler: %@", camera, duration, peakAltitude, completion);
+    [self _flyToCamera:camera zoomLevel:zoomLevel edgePadding:self.contentInset withDuration:duration peakAltitude:peakAltitude completionHandler:completion];
+}
+
+- (void)flyToCamera:(MLNMapCamera *)camera zoomLevel:(double)zoomLevel edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration completionHandler:(nullable void (^)(void))completion {
+    UIEdgeInsets finalEdgeInsets = UIEdgeInsetsMake(self.contentInset.top + insets.top,
+                                                    self.contentInset.left + insets.left,
+                                                    self.contentInset.bottom + insets.bottom,
+                                                    self.contentInset.right + insets.right);
+    [self _flyToCamera:camera zoomLevel:zoomLevel edgePadding:finalEdgeInsets withDuration:duration peakAltitude:-1 completionHandler:completion];
+}
+
+- (void)_flyToCamera:(MLNMapCamera *)camera zoomLevel:(double)zoomLevel edgePadding:(UIEdgeInsets)insets withDuration:(NSTimeInterval)duration peakAltitude:(CLLocationDistance)peakAltitude completionHandler:(nullable void (^)(void))completion
 {
     if (!_mbglMap)
     {
@@ -4269,6 +4295,7 @@ static void *windowScreenContext = &windowScreenContext;
     self.cameraChangeReasonBitmask |= MLNCameraChangeReasonProgrammatic;
 
     mbgl::CameraOptions cameraOptions = [self cameraOptionsObjectForAnimatingToCamera:camera edgePadding:insets];
+    cameraOptions.zoom = zoomLevel;
     self.mbglMap.flyTo(cameraOptions, animationOptions);
     [self didChangeValueForKey:@"camera"];
 }

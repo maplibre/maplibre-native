@@ -1241,6 +1241,20 @@ MLN_EXPORT
 
 /**
  Moves the viewpoint to a different location using a transition animation that
+ evokes powered flight and a default duration based on the length of the flight
+ path.
+
+ The transition animation seamlessly incorporates zooming and panning to help
+ the user find his or her bearings even after traversing a great distance.
+
+ @param camera The new viewpoint.
+ @param zoomLevel The new zoom level for the map.
+ @param completion The block to execute after the animation finishes.
+ */
+- (void)flyToCamera:(MLNMapCamera *)camera zoomLevel:(double)zoomLevel completionHandler:(nullable void (^)(void))completion;
+
+/**
+ Moves the viewpoint to a different location using a transition animation that
  evokes powered flight and an optional transition duration.
 
  The transition animation seamlessly incorporates zooming and panning to help
@@ -1254,6 +1268,26 @@ MLN_EXPORT
  @param completion The block to execute after the animation finishes.
  */
 - (void)flyToCamera:(MLNMapCamera *)camera
+         withDuration:(NSTimeInterval)duration
+    completionHandler:(nullable void (^)(void))completion;
+
+/**
+ Moves the viewpoint to a different location using a transition animation that
+ evokes powered flight and an optional transition duration.
+
+ The transition animation seamlessly incorporates zooming and panning to help
+ the user find his or her bearings even after traversing a great distance.
+
+ @param camera The new viewpoint.
+ @param zoomLevel The new zoom level for the map.
+ @param duration The amount of time, measured in seconds, that the transition
+    animation should take. Specify `0` to jump to the new viewpoint
+    instantaneously. Specify a negative value to use the default duration, which
+    is based on the length of the flight path.
+ @param completion The block to execute after the animation finishes.
+ */
+- (void)flyToCamera:(MLNMapCamera *)camera
+          zoomLevel:(double)zoomLevel
          withDuration:(NSTimeInterval)duration
     completionHandler:(nullable void (^)(void))completion;
 
@@ -1282,6 +1316,31 @@ MLN_EXPORT
 
 /**
  Moves the viewpoint to a different location using a transition animation that
+ evokes powered flight and an optional transition duration and peak altitude.
+
+ The transition animation seamlessly incorporates zooming and panning to help
+ the user find his or her bearings even after traversing a great distance.
+
+ @param camera The new viewpoint.
+ @param zoomLevel The new zoom level for the map.
+ @param duration The amount of time, measured in seconds, that the transition
+    animation should take. Specify `0` to jump to the new viewpoint
+    instantaneously. Specify a negative value to use the default duration, which
+    is based on the length of the flight path.
+ @param peakAltitude The altitude, measured in meters, at the midpoint of the
+    animation. The value of this parameter is ignored if it is negative or if
+    the animation transition resulting from a similar call to
+    `-setCamera:animated:` would have a midpoint at a higher altitude.
+ @param completion The block to execute after the animation finishes.
+ */
+- (void)flyToCamera:(MLNMapCamera *)camera
+          zoomLevel:(double)zoomLevel
+         withDuration:(NSTimeInterval)duration
+         peakAltitude:(CLLocationDistance)peakAltitude
+    completionHandler:(nullable void (^)(void))completion;
+
+/**
+ Moves the viewpoint to a different location using a transition animation that
  evokes powered flight.
 
  The transition animation seamlessly incorporates zooming and panning to help
@@ -1297,6 +1356,29 @@ MLN_EXPORT
  @param completion The block to execute after the animation finishes.
  */
 - (void)flyToCamera:(MLNMapCamera *)camera
+          edgePadding:(UIEdgeInsets)insets
+         withDuration:(NSTimeInterval)duration
+    completionHandler:(nullable void (^)(void))completion;
+
+/**
+ Moves the viewpoint to a different location using a transition animation that
+ evokes powered flight.
+
+ The transition animation seamlessly incorporates zooming and panning to help
+ the user find his or her bearings even after traversing a great distance.
+
+ @param camera The new viewpoint.
+ @param zoomLevel The new zoom level for the map.
+ @param duration The amount of time, measured in seconds, that the transition
+    animation should take. Specify `0` to jump to the new viewpoint
+    instantaneously. Specify a negative value to use the default duration, which
+    is based on the length of the flight path.
+ @param edgePadding The minimum padding (in screen points) that would be visible
+ around the returned camera object if it were set as the receiver’s camera.
+ @param completion The block to execute after the animation finishes.
+ */
+- (void)flyToCamera:(MLNMapCamera *)camera
+          zoomLevel:(double)zoomLevel
           edgePadding:(UIEdgeInsets)insets
          withDuration:(NSTimeInterval)duration
     completionHandler:(nullable void (^)(void))completion;
