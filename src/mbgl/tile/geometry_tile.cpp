@@ -30,6 +30,7 @@ namespace mbgl {
 
 LayerRenderData* GeometryTile::LayoutResult::getLayerRenderData(const style::Layer::Impl& layerImpl) {
     MLN_TRACE_FUNC()
+    MLN_ZONE_STR(layerImpl.id)
 
     auto it = layerRenderData.find(layerImpl.id);
     if (it == layerRenderData.end()) {
@@ -258,6 +259,8 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
     impls.reserve(layers.size());
 
     for (const auto& layer : layers) {
+        MLN_TRACE_ZONE(layer)
+        MLN_ZONE_STR(layer->baseImpl->id)
         // Skip irrelevant layers.
         const auto& layerImpl = *layer->baseImpl;
         assert(layerImpl.getTypeInfo()->source != LayerTypeInfo::Source::NotRequired);
