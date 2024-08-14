@@ -14,6 +14,12 @@ namespace style {
 using ImageStretch = std::pair<float, float>;
 using ImageStretches = std::vector<ImageStretch>;
 
+enum class TextFit: uint8_t {
+    stretchOrShrink,
+    stretchOnly,
+    proportional
+};
+
 class ImageContent {
 public:
     float left;
@@ -34,14 +40,18 @@ public:
           bool sdf,
           ImageStretches stretchX = {},
           ImageStretches stretchY = {},
-          const std::optional<ImageContent>& content = std::nullopt);
+          const std::optional<ImageContent>& content = std::nullopt,
+          const std::optional<TextFit>& textFitWidth = std::nullopt,
+          const std::optional<TextFit>& textFitHeight = std::nullopt);
     Image(std::string id,
           PremultipliedImage&& image,
           float pixelRatio,
           ImageStretches stretchX = {},
           ImageStretches stretchY = {},
-          const std::optional<ImageContent>& content = std::nullopt)
-        : Image(std::move(id), std::move(image), pixelRatio, false, std::move(stretchX), std::move(stretchY), content) {
+          const std::optional<ImageContent>& content = std::nullopt,
+          const std::optional<TextFit>& textFitWidth = std::nullopt,
+          const std::optional<TextFit>& textFitHeight = std::nullopt)
+        : Image(std::move(id), std::move(image), pixelRatio, false, std::move(stretchX), std::move(stretchY), content, textFitWidth, textFitHeight) {
     }
     Image(const Image&);
 
@@ -62,6 +72,12 @@ public:
 
     /// The space where text can be fit into this image.
     const std::optional<ImageContent>& getContent() const;
+    
+    /// The constraints on the horizontal scaling of the image when `icon-text-fit` is used
+    const std::optional<TextFit>& getTextFitWidth() const;
+    
+    /// The constraints on the vertical scaling of the image when `icon-text-fit` is used
+    const std::optional<TextFit>& getTextFitHeight() const;
 
     class Impl;
     Immutable<Impl> baseImpl;

@@ -7,10 +7,7 @@ namespace mbgl {
 
 CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
                                    const Anchor& anchor,
-                                   const float top,
-                                   const float bottom,
-                                   const float left,
-                                   const float right,
+                                   const Box box,
                                    const std::optional<Padding>& collisionPadding,
                                    const float boxScale,
                                    const float padding,
@@ -20,12 +17,12 @@ CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
                                    const float rotate)
     : indexedFeature(std::move(indexedFeature_)),
       alongLine(placement != style::SymbolPlacementType::Point) {
-    if (top == 0 && bottom == 0 && left == 0 && right == 0) return;
-
-    float y1 = top * boxScale - padding;
-    float y2 = bottom * boxScale + padding;
-    float x1 = left * boxScale - padding;
-    float x2 = right * boxScale + padding;
+    if (box.x1 == 0 && box.x2 == 0 && box.y1 == 0 && box.y2 == 0) return;
+    
+    float y1 = box.y1 * boxScale - padding;
+    float y2 = box.y2 * boxScale + padding;
+    float x1 = box.x1 * boxScale - padding;
+    float x2 = box.x2 * boxScale + padding;
 
     if (collisionPadding) {
         x1 -= collisionPadding->left * boxScale;

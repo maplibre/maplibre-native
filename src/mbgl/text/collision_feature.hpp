@@ -92,10 +92,10 @@ public:
                      const float rotate)
         : CollisionFeature(line,
                            anchor,
-                           shapedText.top,
-                           shapedText.bottom,
-                           shapedText.left,
-                           shapedText.right,
+                           {shapedText.left,
+                            shapedText.top,
+                            shapedText.right,
+                            shapedText.bottom },
                            std::nullopt,
                            boxScale,
                            padding,
@@ -121,10 +121,7 @@ public:
                      const float rotate)
         : CollisionFeature(line,
                            anchor,
-                           (shapedIcon ? shapedIcon->top() : 0),
-                           (shapedIcon ? shapedIcon->bottom() : 0),
-                           (shapedIcon ? shapedIcon->left() : 0),
-                           (shapedIcon ? shapedIcon->right() : 0),
+                           CollisionFeature::calculateIconBox(shapedIcon),
                            (shapedIcon ? shapedIcon->collisionPadding() : std::optional<Padding>{std::nullopt}),
                            boxScale,
                            padding,
@@ -135,10 +132,7 @@ public:
 
     CollisionFeature(const GeometryCoordinates& line,
                      const Anchor&,
-                     float top,
-                     float bottom,
-                     float left,
-                     float right,
+                     const Box box,
                      const std::optional<Padding>& collisionPadding,
                      float boxScale,
                      float padding,
@@ -152,6 +146,19 @@ public:
     bool alongLine;
 
 private:
+    static Box calculateIconBox(const std::optional<PositionedIcon>& shapedIcon) {
+        if (shapedIcon) {
+            auto iconImage = shapedIcon->image();
+            if (iconImage.content.has_value() &&
+                (iconImage.textFitWidth.has_value() || iconImage.textFitHeight.has_value())) {
+                return PositionedIcon::applyTextFit(*shapedIcon);
+            } else {
+                return {shapedIcon->left(), shapedIcon->top(), shapedIcon->right(), shapedIcon->bottom()};
+            }
+        }
+        return {0, 0, 0, 0};
+    }
+    
     void bboxifyLabel(const GeometryCoordinates& line,
                       GeometryCoordinate& anchorPoint,
                       std::size_t segment,

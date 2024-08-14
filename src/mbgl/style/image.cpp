@@ -11,9 +11,11 @@ Image::Image(std::string id,
              bool sdf,
              ImageStretches stretchX,
              ImageStretches stretchY,
-             const std::optional<ImageContent>& content)
+             const std::optional<ImageContent>& content,
+             const std::optional<TextFit>& textFitWidth,
+             const std::optional<TextFit>& textFitHeight)
     : baseImpl(makeMutable<Impl>(
-          std::move(id), std::move(image), pixelRatio, sdf, std::move(stretchX), std::move(stretchY), content)) {}
+          std::move(id), std::move(image), pixelRatio, sdf, std::move(stretchX), std::move(stretchY), content, std::move(textFitWidth), std::move(textFitHeight))) {}
 
 std::string Image::getID() const {
     return baseImpl->id;
@@ -45,5 +47,12 @@ const std::optional<ImageContent>& Image::getContent() const {
     return baseImpl->content;
 }
 
+const std::optional<TextFit>& Image::getTextFitWidth() const {
+    return baseImpl->textFitWidth;
+}
+
+const std::optional<TextFit>& Image::getTextFitHeight() const {
+    return baseImpl->textFitHeight;
+}
 } // namespace style
 } // namespace mbgl

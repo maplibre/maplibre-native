@@ -76,8 +76,12 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
     const uint16_t imageWidth = image.paddedRect.w - 2 * border;
     const uint16_t imageHeight = image.paddedRect.h - 2 * border;
 
-    const float iconWidth = shapedIcon.right() - shapedIcon.left();
-    const float iconHeight = shapedIcon.bottom() - shapedIcon.top();
+    Box iconBox = {
+        shapedIcon.left(),
+        shapedIcon.top(),
+        shapedIcon.right(),
+        shapedIcon.bottom()
+    };
 
     const ImageStretches stretchXFull{{0.0f, imageWidth}};
     const ImageStretches stretchYFull{{0.0f, imageHeight}};
@@ -100,14 +104,19 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
 
     if (hasIconTextFit && image.content) {
         auto& content = *image.content;
+        auto contentWidth = content.right - content.left;
+        auto contentHeight = content.bottom - content.top ;
+        if (image.textFitWidth.has_value() || image.textFitHeight.has_value()) {
+            iconBox = PositionedIcon::applyTextFit(shapedIcon);
+        }
         stretchOffsetX = sumWithinRange(stretchX, 0, content.left);
         stretchOffsetY = sumWithinRange(stretchY, 0, content.top);
         stretchContentWidth = sumWithinRange(stretchX, content.left, content.right);
         stretchContentHeight = sumWithinRange(stretchY, content.top, content.bottom);
         fixedOffsetX = content.left - stretchOffsetX;
         fixedOffsetY = content.top - stretchOffsetY;
-        fixedContentWidth = content.right - content.left - stretchContentWidth;
-        fixedContentHeight = content.bottom - content.top - stretchContentHeight;
+        fixedContentWidth = contentWidth - stretchContentWidth;
+        fixedContentHeight = contentHeight - stretchContentHeight;
     }
 
     std::optional<std::array<float, 4>> matrix{std::nullopt};
@@ -117,22 +126,27 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
         const float angle_cos = std::cos(angle);
         matrix = std::array<float, 4>{{angle_cos, -angle_sin, angle_sin, angle_cos}};
     }
+    
+    auto iconLeft = iconBox.x1;
+    auto iconTop = iconBox.y1;
+    auto iconWidth = iconBox.x2 - iconLeft;
+    auto iconHeight = iconBox.y2 - iconTop;
 
     auto makeBox = [&](Cut left, Cut top, Cut right, Cut bottom) {
         const float leftEm = getEmOffset(
-            left.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left());
+            left.stretch - stretchOffsetX, stretchContentWidth, iconWidth, iconLeft);
         const float leftPx = getPxOffset(left.fixed - fixedOffsetX, fixedContentWidth, left.stretch, stretchWidth);
 
         const float topEm = getEmOffset(
-            top.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top());
+            top.stretch - stretchOffsetY, stretchContentHeight, iconHeight, iconTop);
         const float topPx = getPxOffset(top.fixed - fixedOffsetY, fixedContentHeight, top.stretch, stretchHeight);
 
         const float rightEm = getEmOffset(
-            right.stretch - stretchOffsetX, stretchContentWidth, iconWidth, shapedIcon.left());
+            right.stretch - stretchOffsetX, stretchContentWidth, iconWidth, iconLeft);
         const float rightPx = getPxOffset(right.fixed - fixedOffsetX, fixedContentWidth, right.stretch, stretchWidth);
 
         const float bottomEm = getEmOffset(
-            bottom.stretch - stretchOffsetY, stretchContentHeight, iconHeight, shapedIcon.top());
+            bottom.stretch - stretchOffsetY, stretchContentHeight, iconHeight, iconTop);
         const float bottomPx = getPxOffset(
             bottom.fixed - fixedOffsetY, fixedContentHeight, bottom.stretch, stretchHeight);
 
