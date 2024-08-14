@@ -445,7 +445,7 @@ void RendererBackend::initDevice() {
         const auto& queues = candidate.getQueueFamilyProperties();
 
         // Use to test on specific GPU type (if multiple)
-        //if (candidate.getProperties().deviceType != vk::PhysicalDeviceType::eIntegratedGpu) return false;
+        // if (candidate.getProperties().deviceType != vk::PhysicalDeviceType::eIntegratedGpu) return false;
 
         for (auto i = 0u; i < queues.size(); ++i) {
             const auto& queue = queues[i];
@@ -498,7 +498,7 @@ void RendererBackend::initDevice() {
     [[maybe_unused]] const auto& supportedDeviceFeatures = physicalDevice.getFeatures();
     physicalDeviceFeatures = vk::PhysicalDeviceFeatures();
 
-    // TODO 
+    // TODO
     // - WideLines disabled on Android (20.77% device coverage https://vulkan.gpuinfo.org/listfeaturescore10.php)
     // - Rework this to a dynamic toggle based on MLN_TRIANGULATE_FILL_OUTLINES/MLN_ENABLE_POLYLINE_DRAWABLES
 #if !defined(__ANDROID__) && !defined(__apple__)
