@@ -414,9 +414,9 @@ MLN_EXPORT
 /**
  A Boolean value indicating whether the map may cache tiles for different zoom levels or not.
 
- When this property is set to `YES`,  the map view consumes more memory and 
+ When this property is set to `YES`,  the map view consumes more memory and
  provide a smoother user experience when zoom in/out.
- 
+
  The default value of this property is `YES`.
  */
 

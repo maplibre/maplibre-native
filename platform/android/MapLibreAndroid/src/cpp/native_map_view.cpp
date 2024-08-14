@@ -1211,7 +1211,6 @@ jni::jint NativeMapView::getPrefetchZoomDelta(JNIEnv&) {
     return jni::jint(map->getPrefetchZoomDelta());
 }
 
-
 void NativeMapView::setTileCacheEnabled(JNIEnv&, jni::jboolean enabled) {
     rendererFrontend->setTileCacheEnabled(enabled);
 }

@@ -62,7 +62,7 @@ class MLNRenderFrontend : public mbgl::RendererFrontend {
     if (!renderer) return;
     renderer->setTileCacheEnabled(enable);
   }
-    
+
   bool getTileCacheEnabled() {
     if (!renderer) return false;
     return renderer->getTileCacheEnabled();
