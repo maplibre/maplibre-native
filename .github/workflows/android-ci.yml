@@ -225,9 +225,9 @@ jobs:
 
       - name: Build Render Test App
         run: |
-          ./gradlew assemble assembleAndroidTest
-          cp app/build/outputs/apk/release/app-release.apk RenderTestsApp.apk
-          cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk RenderTests.apk
+          ./gradlew assembleOpengl assembleOpenglAndroidTest
+          cp app/build/outputs/apk/opengl/release/app-opengl-release.apk RenderTestsApp.apk
+          cp app/build/outputs/apk/androidTest/opengl/release/app-opengl-release-androidTest.apk RenderTests.apk
         working-directory: ./render-test/android
 
       - name: Store Render Test .apk files

@@ -34,7 +34,7 @@ if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
 endif()
 
-if(WIN32 AND NOT MLN_WITH_QT)
+if(WIN32 AND NOT MLN_WITH_QT AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/custom-toolchain.cmake)
 endif()
 
@@ -1317,6 +1317,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/line.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/raster.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/symbol.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/widevector.hpp
     )
 
     list(APPEND 
@@ -1351,6 +1352,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/line.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/raster.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/symbol.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/widevector.cpp
     )
 
     #TODO merge with MLN_DRAWABLE_RENDERER? These are added only for GL path

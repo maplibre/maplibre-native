@@ -641,10 +641,12 @@ void main() {
     // We store these in the least significant bit of in_pos_normal
     mediump vec2 normal = in_pos_normal - 2.0 * pos;
     frag_normal = vec2(normal.x, normal.y * 2.0 - 1.0);
+    frag_normal.y *= -1.0;
 
     // these transformations used to be applied in the JS and native code bases.
     // moved them into the shader for clarity and simplicity.
-    float halfwidth = drawable.width / 2.0;
+    float width = 1.0;
+    float halfwidth = width / 2.0;
     float outset = halfwidth + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
 
     // Scale the extrusion vector down to a normal and then up by the line width
@@ -652,17 +654,15 @@ void main() {
     mediump vec2 dist = outset * a_extrude * LINE_NORMAL_SCALE;
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
-    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0) + projected_extrude;
+    gl_Position = drawable.matrix * vec4(pos, 0.0, 1.0) + projected_extrude;
+    gl_Position.y *= -1.0;
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
-    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * drawable.units_to_pixels);
+    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * global.units_to_pixels);
 
-    frag_width = outset;
-    frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective
-    
-    gl_Position.y *= -1.0;
-
+    frag_width2 = outset;
+    frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 }
 )";
 
@@ -698,7 +698,7 @@ void main() {
     const float blur2 = (1.0 / DEVICE_PIXEL_RATIO) * frag_gamma_scale;
     const float alpha = clamp(min(dist + blur2, frag_width2 - dist) / blur2, 0.0, 1.0);
 
-    out_color = props.outline_color * (alpha * props.opacit));
+    out_color = props.outline_color * alpha * props.opacity;
 }
 )";
 };

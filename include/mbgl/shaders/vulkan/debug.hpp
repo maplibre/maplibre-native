@@ -59,18 +59,5 @@ void main() {
 )";
 };
 
-template <>
-struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Vulkan> {
-    static constexpr const char* name = "WideVectorShader";
-
-    static constexpr std::array<UniformBlockInfo, 0> uniforms{};
-    static constexpr std::array<AttributeInfo, 0> attributes{};
-    static constexpr std::array<AttributeInfo, 0> instanceAttributes{};
-    static constexpr std::array<TextureInfo, 0> textures{};
-
-    static constexpr auto vertex = R"()";
-    static constexpr auto fragment = R"()";
-};
-
 } // namespace shaders
 } // namespace mbgl

@@ -114,7 +114,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     int32_t presentQueueIndex = backend.getPresentQueueIndex();
 
     if (graphicsQueueIndex != presentQueueIndex) {
-        // TODO if this scenario is widespred and performance is a problem (shouldn't be the case on most hardware)
+        // TODO if this scenario is widespread and performance is a problem (shouldn't be the case on most hardware)
         // rework to vk::SharingMode::eExclusive + queue ownership
         swapchainCreateInfo.setImageSharingMode(vk::SharingMode::eConcurrent);
         const std::array<uint32_t, 2> queueIndices = {static_cast<uint32_t>(graphicsQueueIndex),
@@ -267,7 +267,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
                                      .setSamples(vk::SampleCountFlagBits::e1)
                                      .setLoadOp(vk::AttachmentLoadOp::eClear)
                                      .setStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                     .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+                                     .setStencilLoadOp(vk::AttachmentLoadOp::eClear)
                                      .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
                                      .setInitialLayout(vk::ImageLayout::eUndefined)
                                      .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);

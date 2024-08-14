@@ -176,7 +176,7 @@ void Context::beginFrame() {
         renderableResource.recreateSwapchain();
 
         // we wait for an idle device to recreate the swapchain
-        // so it's a good oportunity to delete all queued items
+        // so it's a good opportunity to delete all queued items
         for (auto& frame : frameResources) {
             device->resetDescriptorPool(frame.descriptorPool.get());
             frame.runDeletionQueue(*this);
