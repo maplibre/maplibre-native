@@ -61,6 +61,32 @@ class OfflineManager private constructor(context: Context) {
     }
 
     /**
+     * This callback receives an asynchronous response containing the
+     * OfflineRegion in the database or an error message otherwise.
+     */
+    @Keep
+    interface GetOfflineRegionCallback {
+        /**
+         * Receives the offline region.
+         *
+         * @param offlineRegion the offline region if it exists
+         */
+        fun onRegion(offlineRegion: OfflineRegion)
+
+        /**
+         * Receives notice if the requested regionId is not in the database
+         */
+        fun onRegionNotFound()
+
+        /**
+         * Receives the error message.
+         *
+         * @param error the error message
+         */
+        fun onError(error: String)
+    }
+
+    /**
      * This callback receives an asynchronous response containing the newly created
      * OfflineRegion in the database or an error message otherwise.
      */
@@ -133,6 +159,44 @@ class OfflineManager private constructor(context: Context) {
                     handler.post {
                         fileSource.deactivate()
                         callback.onList(offlineRegions)
+                    }
+                }
+
+                override fun onError(error: String) {
+                    handler.post {
+                        fileSource.deactivate()
+                        callback.onError(error)
+                    }
+                }
+            }
+        )
+    }
+
+    /**
+     * Retrieve given region in the offline database.
+     *
+     * The query will be executed asynchronously and the results passed to the given
+     * callback on the main thread.
+     *
+     * @param callback the callback to be invoked
+     */
+    fun getOfflineRegion(regionID: Long, callback: GetOfflineRegionCallback) {
+        fileSource.activate()
+        getOfflineRegion(
+            fileSource,
+            regionID,
+            object : GetOfflineRegionCallback {
+                override fun onRegion(offlineRegion: OfflineRegion) {
+                    handler.post {
+                        fileSource.deactivate()
+                        callback.onRegion(offlineRegion)
+                    }
+                }
+
+                override fun onRegionNotFound() {
+                    handler.post {
+                        fileSource.deactivate()
+                        callback.onRegionNotFound()
                     }
                 }
 
@@ -515,6 +579,9 @@ class OfflineManager private constructor(context: Context) {
 
     @Keep
     private external fun listOfflineRegions(fileSource: FileSource, callback: ListOfflineRegionsCallback)
+
+    @Keep
+    private external fun getOfflineRegion(fileSource: FileSource, regionID: Long, callback: GetOfflineRegionCallback)
 
     @Keep
     private external fun createOfflineRegion(fileSource: FileSource, definition: OfflineRegionDefinition, metadata: ByteArray, callback: CreateOfflineRegionCallback)

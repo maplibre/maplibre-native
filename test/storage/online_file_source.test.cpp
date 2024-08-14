@@ -155,7 +155,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RetryDelayOnExpiredTile)) {
     std::unique_ptr<AsyncRequest> req = fs->request(resource, [&](Response res) {
         counter++;
         EXPECT_EQ(nullptr, res.error);
-        EXPECT_GT(util::now(), *res.expires);
+        EXPECT_TRUE(util::now() > *res.expires);
         EXPECT_FALSE(res.mustRevalidate);
         loop.stop();
     });
@@ -177,14 +177,14 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RetryOnClockSkew)) {
         switch (counter++) {
             case 0: {
                 EXPECT_EQ(nullptr, res.error);
-                EXPECT_GT(util::now(), *res.expires);
+                EXPECT_TRUE(util::now() > *res.expires);
             } break;
             case 1: {
                 EXPECT_EQ(nullptr, res.error);
 
                 auto now = util::now();
-                EXPECT_LT(now + Seconds(40), *res.expires) << "Expiration not interpolated to 60s";
-                EXPECT_GT(now + Seconds(80), *res.expires) << "Expiration not interpolated to 60s";
+                EXPECT_TRUE(now + Seconds(40) < *res.expires) << "Expiration not interpolated to 60s";
+                EXPECT_TRUE(now + Seconds(80) > *res.expires) << "Expiration not interpolated to 60s";
 
                 loop.stop();
             } break;
@@ -385,7 +385,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitStandard)) {
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::RateLimit, res.error->reason);
         ASSERT_EQ(true, bool(res.error->retryAfter));
-        ASSERT_LT(util::now(), res.error->retryAfter);
+        ASSERT_TRUE(util::now() < res.error->retryAfter);
         loop.stop();
     });
 
@@ -400,7 +400,7 @@ TEST(OnlineFileSource, TEST_REQUIRES_SERVER(RateLimitMBX)) {
         ASSERT_NE(nullptr, res.error);
         EXPECT_EQ(Response::Error::Reason::RateLimit, res.error->reason);
         ASSERT_EQ(true, bool(res.error->retryAfter));
-        ASSERT_LT(util::now(), res.error->retryAfter);
+        ASSERT_TRUE(util::now() < res.error->retryAfter);
         loop.stop();
     });
 

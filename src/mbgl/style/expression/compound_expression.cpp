@@ -1098,6 +1098,7 @@ std::string expectedTypesError(const Definitions& definitions, const std::vector
                 }
             });
     }
+
     std::string signatures = overloads.empty() ? boost::algorithm::join(availableOverloads, " | ")
                                                : boost::algorithm::join(overloads, " | ");
 

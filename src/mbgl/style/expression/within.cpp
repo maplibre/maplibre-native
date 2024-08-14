@@ -13,6 +13,10 @@
 #include <mbgl/math/angles.hpp>
 #include <mbgl/math/clamp.hpp>
 
+#include <numbers>
+
+using namespace std::numbers;
+
 namespace mbgl {
 namespace {
 
@@ -21,7 +25,7 @@ Point<int64_t> latLonToTileCoodinates(const Point<double>& point, const mbgl::Ca
 
     const auto x = (point.x + util::LONGITUDE_MAX) * size / util::DEGREES_MAX;
     const auto y = (util::LONGITUDE_MAX -
-                    util::rad2deg(std::log(std::tan(point.y * M_PI / util::DEGREES_MAX + M_PI / 4.0)))) *
+                    util::rad2deg(std::log(std::tan(point.y * pi / util::DEGREES_MAX + pi / 4)))) *
                    size / util::DEGREES_MAX;
 
     Point<int64_t> p;

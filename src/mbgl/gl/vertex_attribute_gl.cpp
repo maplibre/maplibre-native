@@ -153,9 +153,6 @@ std::size_t VertexAttributeGL::getStride() const {
     return getStride(getGLType());
 }
 
-namespace {
-const std::vector<std::uint8_t> noData;
-}
 const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute& attr,
                                                            platform::GLenum type,
                                                            std::chrono::duration<double> lastUpdate) {

@@ -35,7 +35,11 @@
 #include <mbgl/gl/types.hpp>
 #include <mbgl/renderer/image_manager.hpp>
 
+#include <numbers>
+
 using namespace mbgl::platform;
+using namespace std::numbers;
+
 namespace mbgl {
 
 struct LocationIndicatorRenderParameters {
@@ -108,8 +112,8 @@ protected:
             const vec2 norm = normalized();
 
             // From theta to bearing
-            return util::rad2degf(util::wrap<float>(
-                static_cast<float>(M_PI_2) - std::atan2(-norm.y, norm.x), 0.0f, static_cast<float>(M_PI * 2.0)));
+            return util::rad2degf(
+                util::wrap<float>((pi_v<float> / 2) - std::atan2(-norm.y, norm.x), 0.0f, pi_v<float> * 2));
         }
         Point<double> toPoint() const { return {x, y}; }
 
