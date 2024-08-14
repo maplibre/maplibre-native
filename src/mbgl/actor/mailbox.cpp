@@ -136,7 +136,7 @@ void Mailbox::receive() {
     }
 
     std::unique_ptr<Message> message;
-    bool wasEmpty;
+    bool wasEmpty = false;
 
     {
         std::lock_guard<std::mutex> queueLock(queueMutex);
