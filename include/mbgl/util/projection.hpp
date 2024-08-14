@@ -6,6 +6,8 @@
 #include <mbgl/math/angles.hpp>
 #include <mbgl/math/clamp.hpp>
 
+#include <numbers>
+
 namespace mbgl {
 
 class ProjectedMeters {
@@ -65,7 +67,7 @@ public:
 
     static LatLng latLngForProjectedMeters(const ProjectedMeters& projectedMeters) {
         double latitude = util::rad2deg(2 * std::atan(std::exp(projectedMeters.northing() / util::EARTH_RADIUS_M)) -
-                                        (M_PI / 2.0));
+                                        (std::numbers::pi / 2.0));
         double longitude = util::rad2deg(projectedMeters.easting()) / util::EARTH_RADIUS_M;
 
         latitude = util::clamp(latitude, -util::LATITUDE_MAX, util::LATITUDE_MAX);
