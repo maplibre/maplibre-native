@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include <stdexcept>
+
 using namespace mbgl;
 
 TEST(LRU, LRU) {
@@ -32,9 +34,5 @@ TEST(LRU, LRU) {
     EXPECT_EQ(lru.evict(), 4);
     EXPECT_TRUE(lru.empty());
     EXPECT_FALSE(lru.isHit(4));
-    try {
-        lru.evict();
-    } catch (const std::exception& e) {
-        EXPECT_STREQ(e.what(), "LRU::evict: empty cache");
-    }
+    EXPECT_THROW(lru.evict(), std::runtime_error);
 }
