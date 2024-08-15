@@ -53,10 +53,10 @@ android {
 
     flavorDimensions += "renderer"
     productFlavors {
-        create("OpenGL") {
+        create("opengl") {
             dimension = "renderer"
         }
-        create("Vulkan") {
+        create("vulkan") {
             dimension = "renderer"
             externalNativeBuild {
                 cmake {
