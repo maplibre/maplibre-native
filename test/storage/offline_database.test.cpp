@@ -465,8 +465,8 @@ TEST(OfflineDatabase, UpdateMetadata) {
 
     OfflineRegionMetadata newmetadata{{4, 5, 6}};
     db.updateMetadata(region->getID(), newmetadata);
-    auto regions = db.listRegions().value();
-    EXPECT_EQ(regions.at(0).getMetadata(), newmetadata);
+    auto newRegion = db.getRegion(region->getID()).value();
+    EXPECT_EQ(newRegion->getMetadata(), newmetadata);
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -498,6 +498,36 @@ TEST(OfflineDatabase, ListRegions) {
                           }},
                regions.at(0).getDefinition());
     EXPECT_EQ(metadata, regions.at(0).getMetadata());
+
+    EXPECT_EQ(0u, log.uncheckedCount());
+}
+
+TEST(OfflineDatabase, GetRegion) {
+    FixtureLog log;
+    OfflineDatabase db(":memory:", fixture::tileServerOptions);
+    OfflineTilePyramidRegionDefinition definition{
+        "http://example.com/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, false};
+    OfflineRegionMetadata metadata{{1, 2, 3}};
+
+    auto createdRegion = db.createRegion(definition, metadata);
+    ASSERT_TRUE(createdRegion);
+    auto regionId = createdRegion->getID();
+    auto region = db.getRegion(regionId).value();
+
+    EXPECT_EQ(regionId, region->getID());
+    std::visit(overloaded{[&](OfflineTilePyramidRegionDefinition& def) {
+                              EXPECT_EQ(definition.styleURL, def.styleURL);
+                              EXPECT_EQ(definition.bounds, def.bounds);
+                              EXPECT_EQ(definition.minZoom, def.minZoom);
+                              EXPECT_EQ(definition.maxZoom, def.maxZoom);
+                              EXPECT_EQ(definition.pixelRatio, def.pixelRatio);
+                              EXPECT_EQ(definition.includeIdeographs, def.includeIdeographs);
+                          },
+                          [&](auto&) {
+                              EXPECT_FALSE(false);
+                          }},
+               region->getDefinition());
+    EXPECT_EQ(metadata, region->getMetadata());
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -1760,7 +1790,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(MergeDatabaseWithSingleRegion_Update))
         auto updatedTile = db.getRegionResource(Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
 
         auto updatedStamp = updatedTile->first.modified;
-        EXPECT_EQ(*originalStamp, *updatedStamp);
+        EXPECT_TRUE(*originalStamp == *updatedStamp);
     }
 }
 
@@ -1785,7 +1815,7 @@ TEST(OfflineDatabase, MergeDatabaseWithSingleRegion_NoUpdate) {
     auto updatedTile = db.getRegionResource(Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
 
     // Verify the modified timestamp matches the tile in the main db.
-    EXPECT_EQ(originalStamp, updatedTile->first.modified);
+    EXPECT_TRUE(originalStamp == updatedTile->first.modified);
 }
 
 TEST(OfflineDatabase, MergeDatabaseWithSingleRegion_AmbientTiles) {

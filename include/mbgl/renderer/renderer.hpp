@@ -108,6 +108,7 @@ public:
     const std::vector<PlacedSymbolData>& getPlacedSymbolsData() const;
 
     // Memory
+    void setTileCacheEnabled(bool);
     void reduceMemoryUse();
     void clearData();
 

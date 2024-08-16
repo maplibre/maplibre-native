@@ -192,7 +192,7 @@ class LocationComponentTest : EspressoTest() {
                 uiController: UiController,
                 context: Context
             ) {
-                maplibreMap.setStyle(Style.Builder().fromUrl(TestStyles.getPredefinedStyleWithFallback("Bright")))
+                maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Bright")))
 
                 component.activateLocationComponent(
                     LocationComponentActivationOptions
@@ -677,7 +677,7 @@ class LocationComponentTest : EspressoTest() {
                 component.isLocationComponentEnabled = true
                 component.forceLocationUpdate(location)
                 component.isLocationComponentEnabled = false
-                maplibreMap.setStyle(Style.Builder().fromUrl(TestStyles.getPredefinedStyleWithFallback("Bright")))
+                maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Bright")))
                 component.isLocationComponentEnabled = true
                 TestingAsyncUtils.waitForLayer(uiController, mapView)
 
@@ -823,7 +823,7 @@ class LocationComponentTest : EspressoTest() {
                         .build()
                 )
                 component.isLocationComponentEnabled = true
-                maplibreMap.setStyle(Style.Builder().fromUrl(TestStyles.getPredefinedStyleWithFallback("Bright")))
+                maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Bright")))
                 component.onStop()
                 component.onStart()
                 TestingAsyncUtils.waitForLayer(uiController, mapView)
@@ -910,7 +910,7 @@ class LocationComponentTest : EspressoTest() {
                 )
                 component.isLocationComponentEnabled = true
                 component.forceLocationUpdate(location)
-                maplibreMap.setStyle(Style.Builder().fromUrl(TestStyles.getPredefinedStyleWithFallback("Bright")))
+                maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Bright")))
                 component.onStop()
                 TestingAsyncUtils.waitForLayer(uiController, mapView)
                 component.onStart()

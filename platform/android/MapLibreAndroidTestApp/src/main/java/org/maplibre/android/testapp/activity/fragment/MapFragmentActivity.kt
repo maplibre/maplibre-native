@@ -32,12 +32,12 @@ class MapFragmentActivity :
         val mapFragment: MapFragment
         if (savedInstanceState == null) {
             mapFragment = MapFragment.newInstance(createFragmentOptions())
-            fragmentManager
+            supportFragmentManager
                 .beginTransaction()
                 .add(R.id.fragment_container, mapFragment, TAG)
                 .commit()
         } else {
-            mapFragment = fragmentManager.findFragmentByTag(TAG) as MapFragment
+            mapFragment = supportFragmentManager.findFragmentByTag(TAG) as MapFragment
         }
         mapFragment.getMapAsync(this)
     }
@@ -73,13 +73,13 @@ class MapFragmentActivity :
 
     override fun onDestroy() {
         super.onDestroy()
-        if (mapView != null) {
+        if (this::mapView.isInitialized) {
             mapView.removeOnDidFinishRenderingFrameListener(this)
         }
     }
 
     override fun onDidFinishRenderingFrame(fully: Boolean, frameEncodingTime: Double, frameRenderingTime: Double) {
-        if (initialCameraAnimation && fully && maplibreMap != null) {
+        if (initialCameraAnimation && fully && this::maplibreMap.isInitialized) {
             maplibreMap.animateCamera(
                 CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().tilt(45.0).build()),
                 5000

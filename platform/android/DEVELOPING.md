@@ -45,9 +45,17 @@ To run the instrumentation tests, choose the "Instrumentation Tests" run configu
 
 Your device needs remain unlocked for the duration of the tests.
 
+## C++ Unit Tests
+
+There is a separate Gradle project that contains a test app which runs the C++ Unit Tests. It does not depend on the Android platform implementations.
+
+You can find the project in `test/android.` You can open this project in Android Studio and run the C++ Tests on an Android device or Simulator.
+
+To run a particular set of tests you can modify the `--gtest_filter` flag in `platform/android/src/test/test_runner.cpp`. See the [GoogleTest documentation](https://google.github.io/googletest/advanced.html#running-a-subset-of-the-tests) for details how to use this flag.
+
 ### AWS Device Farm
 
-The instrumentation tests are running on AWS Device Farm. To see the results and the logs, go to:
+The instrumentation tests and C++ unit tests are running on AWS Device Farm. To see the results and the logs, go to:
 
 https://us-west-2.console.aws.amazon.com/devicefarm/home?region=us-east-1#/mobile/projects/20687d72-0e46-403e-8f03-0941850665bc/runs
 

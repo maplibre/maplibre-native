@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# This script is used in linux-ci.yml.
+# Bazel 7 started including branch coverage in the coverage report.
+# Now codecov is reporting branch coverage instead of line coverage.
+# This script makes sure branch coverage is not included so codecov reports line coveage.
+
+filtered_args=()
+
+for arg in "$@"; do
+  # Skip the argument if it's "-b"
+  if [ "$arg" != "-b" ]; then
+    filtered_args+=("$arg")
+  fi
+done
+
+gcov "${filtered_args[@]}"

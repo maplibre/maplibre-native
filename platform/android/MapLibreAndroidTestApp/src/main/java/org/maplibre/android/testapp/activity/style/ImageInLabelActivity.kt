@@ -3,6 +3,7 @@ package org.maplibre.android.testapp.activity.style
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import org.maplibre.geojson.Feature
 import org.maplibre.geojson.FeatureCollection
 import org.maplibre.geojson.Point
@@ -35,10 +36,11 @@ class ImageInLabelActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(maplibreMap: MapLibreMap) {
         maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style ->
             val us = BitmapUtils.getBitmapFromDrawable(
-                resources.getDrawable(R.drawable.ic_us)
+                ResourcesCompat.getDrawable(resources, R.drawable.ic_us, theme)
             )
-            val android =
-                BitmapUtils.getBitmapFromDrawable(resources.getDrawable(R.drawable.ic_android))
+            val android = BitmapUtils.getBitmapFromDrawable(
+                ResourcesCompat.getDrawable(resources, R.drawable.ic_android, theme)
+            )
             style.addImage("us", us!!)
             style.addImage("android", android!!)
             val point = Point.fromLngLat(-10.0, 0.0)

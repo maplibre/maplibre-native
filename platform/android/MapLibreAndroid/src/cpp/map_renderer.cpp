@@ -1,9 +1,10 @@
 #include "map_renderer.hpp"
 
-#include <mbgl/renderer/renderer.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mbgl/renderer/renderer.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/run_loop.hpp>
 
 #include <string>
 
@@ -23,7 +24,8 @@ MapRenderer::MapRenderer(jni::JNIEnv& _env,
       localIdeographFontFamily(localIdeographFontFamily_ ? jni::Make<std::string>(_env, localIdeographFontFamily_)
                                                          : std::optional<std::string>{}),
       threadPool(Scheduler::GetBackground(), {}),
-      mailboxData(this) {}
+      mailboxData(this),
+      backend(std::make_unique<AndroidRendererBackend>(threadPool)) {}
 
 MapRenderer::MailboxData::MailboxData(Scheduler* scheduler_)
     : scheduler(scheduler_) {
@@ -62,6 +64,7 @@ ActorRef<Renderer> MapRenderer::actor() const {
 }
 
 void MapRenderer::schedule(std::function<void()>&& scheduled) {
+    MLN_TRACE_FUNC()
     try {
         // Create a runnable
         android::UniqueEnv _env = android::AttachEnv();
@@ -75,6 +78,7 @@ void MapRenderer::schedule(std::function<void()>&& scheduled) {
         static auto queueEvent = javaClass.GetMethod<void(jni::Object<MapRendererRunnable>)>(*_env, "queueEvent");
         auto weakReference = javaPeer.get(*_env);
         if (weakReference) {
+            MLN_TRACE_ZONE(java)
             weakReference.Call(*_env, queueEvent, peer);
         }
 
@@ -159,7 +163,7 @@ void MapRenderer::requestSnapshot(SnapshotCallback callback) {
 
 void MapRenderer::resetRenderer() {
     renderer.reset();
-    backend.reset();
+    backend = std::make_unique<AndroidRendererBackend>(threadPool);
 }
 
 void MapRenderer::scheduleSnapshot(std::unique_ptr<SnapshotCallback> callback) {
@@ -181,6 +185,7 @@ void MapRenderer::render(JNIEnv&) {
     }
 
     // Activate the backend
+    assert(backend);
     gfx::BackendScope backendGuard{*backend};
 
     // Ensure that the "current" scheduler on the render thread is
@@ -206,6 +211,7 @@ void MapRenderer::onSurfaceCreated(JNIEnv&) {
     std::lock_guard<std::mutex> lock(initialisationMutex);
 
     // The GL context is already active if get a new surface.
+    assert(backend);
     gfx::BackendScope backendGuard{*backend, gfx::BackendScope::ScopeType::Implicit};
 
     // The android system will have already destroyed the underlying

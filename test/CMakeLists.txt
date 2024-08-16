@@ -87,7 +87,6 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/async_task.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/bounding_volumes.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/camera.test.cpp
-    ${PROJECT_SOURCE_DIR}/test/util/dtoa.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/geo.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/grid_index.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/hash.test.cpp
@@ -143,6 +142,22 @@ if(MLN_WITH_OPENGL)
     target_compile_definitions(
         mbgl-test
         PRIVATE MLN_RENDER_BACKEND_OPENGL=1
+    )
+endif()
+
+
+if(MLN_WITH_VULKAN)
+    target_sources(
+        mbgl-test
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/test/api/custom_layer.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/api/custom_drawable_layer.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
+    )
+    target_compile_definitions(
+        mbgl-test
+        PRIVATE MLN_RENDER_BACKEND_VULKAN=1
     )
 endif()
 

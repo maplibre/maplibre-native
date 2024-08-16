@@ -46,7 +46,7 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
             PixelBarChangeListener(textViewY, R.string.scrollby_y_value)
         )
         mapView = findViewById(R.id.mapView)
-        mapView.setTag(true)
+        mapView.tag = true
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
     }
@@ -59,10 +59,10 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
         uiSettings.isAttributionEnabled = false
         val fab = findViewById<FloatingActionButton>(R.id.fab)
         fab.setColorFilter(ContextCompat.getColor(this@ScrollByActivity, R.color.primary))
-        fab.setOnClickListener { view: View? ->
+        fab.setOnClickListener { _: View? ->
             maplibreMap.scrollBy(
-                (seekBarX!!.progress * MULTIPLIER_PER_PIXEL).toFloat(),
-                (seekBarY!!.progress * MULTIPLIER_PER_PIXEL).toFloat()
+                (seekBarX.progress * MULTIPLIER_PER_PIXEL).toFloat(),
+                (seekBarY.progress * MULTIPLIER_PER_PIXEL).toFloat()
             )
         }
     }
@@ -105,15 +105,14 @@ class ScrollByActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private class PixelBarChangeListener
-    internal constructor(
+    private class PixelBarChangeListener(
         private val valueView: TextView,
         @field:StringRes @param:StringRes
         private val prefixTextResource: Int

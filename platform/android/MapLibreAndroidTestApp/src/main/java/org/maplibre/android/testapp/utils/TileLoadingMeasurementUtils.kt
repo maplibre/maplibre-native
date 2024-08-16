@@ -7,8 +7,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
-import android.util.DisplayMetrics
-import android.view.WindowManager
+import androidx.annotation.RequiresApi
 import androidx.annotation.StringDef
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -26,11 +25,11 @@ import timber.log.Timber
 import java.io.IOException
 import java.util.*
 
+@RequiresApi(Build.VERSION_CODES.M)
 class TileLoadingMeasurementUtils {
 
     companion object {
 
-        private const val ATTRIBUTE_REQUEST_URL = "requestUrl"
         fun setUpTileLoadingMeasurement() {
             if (isTileLoadingMeasurementOn) {
                 val okHttpClient: OkHttpClient = Builder()
@@ -41,7 +40,7 @@ class TileLoadingMeasurementUtils {
         }
 
         private val isTileLoadingMeasurementOn: Boolean
-            private get() = isBooleanMetaDataValueOn(
+            get() = isBooleanMetaDataValueOn(
                 MapLibreConstants.KEY_META_DATA_MEASURE_TILE_DOWNLOAD_ON,
                 MapLibreConstants.DEFAULT_MEASURE_TILE_DOWNLOAD_ON
             )
@@ -76,7 +75,7 @@ class TileLoadingMeasurementUtils {
          */
         internal class TileLoadingInterceptor : Interceptor {
             @StringDef(*[CONNECTION_NONE, CONNECTION_CELLULAR, CONNECTION_WIFI])
-            @kotlin.annotation.Retention(AnnotationRetention.SOURCE)
+            @Retention(AnnotationRetention.SOURCE)
             internal annotation class ConnectionState
 
             @Throws(IOException::class)
@@ -108,7 +107,7 @@ class TileLoadingMeasurementUtils {
 
             companion object {
                 private var metadata: String? = null
-                    private get() {
+                    get() {
                         if (field == null) {
                             val metaData = JsonObject()
                             metaData.addProperty("os", "android")
@@ -116,7 +115,7 @@ class TileLoadingMeasurementUtils {
                             metaData.addProperty("brand", Build.BRAND)
                             metaData.addProperty("device", Build.MODEL)
                             metaData.addProperty("version", Build.VERSION.RELEASE)
-                            metaData.addProperty("abi", Build.CPU_ABI)
+                            metaData.addProperty("abi", Build.SUPPORTED_ABIS[0])
                             metaData.addProperty("country", Locale.getDefault().isO3Country)
                             metaData.addProperty("ram", ram)
                             metaData.addProperty("screenSize", windowSize)
@@ -133,7 +132,7 @@ class TileLoadingMeasurementUtils {
                 }
 
                 private val ram: String
-                    private get() {
+                    get() {
                         val actManager = MapLibre.getApplicationContext()
                             .getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
                         val memInfo = ActivityManager.MemoryInfo()
@@ -141,44 +140,33 @@ class TileLoadingMeasurementUtils {
                         return memInfo.totalMem.toString()
                     }
                 private val windowSize: String
-                    private get() {
-                        val windowManager = MapLibre.getApplicationContext()
-                            .getSystemService(Context.WINDOW_SERVICE) as WindowManager
-                        val display = windowManager.defaultDisplay
-                        val metrics = DisplayMetrics()
-                        display.getMetrics(metrics)
-                        val width = metrics.widthPixels
-                        val height = metrics.heightPixels
-                        return "{$width,$height}"
+                    get() {
+                        val metrics = MapLibre.getApplicationContext().resources.displayMetrics
+                        return "{${metrics.widthPixels},${metrics.heightPixels}}"
                     }
 
                 @get:ConnectionState
                 private val connectionState: String
-                    private get() {
+                    get() {
                         val appContext = MapLibre.getApplicationContext()
                         val connectivityManager =
                             appContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            if (connectivityManager != null) {
-                                val capabilities =
-                                    connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-                                if (capabilities != null) {
-                                    if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                                        return CONNECTION_WIFI
-                                    } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                                        return CONNECTION_CELLULAR
-                                    }
+                            val capabilities =
+                                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+                            if (capabilities != null) {
+                                if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                                    return CONNECTION_WIFI
+                                } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                                    return CONNECTION_CELLULAR
                                 }
                             }
                         } else {
-                            if (connectivityManager != null) {
-                                val activeNetwork = connectivityManager.activeNetworkInfo
-                                if (activeNetwork != null) {
-                                    if (activeNetwork.type == ConnectivityManager.TYPE_WIFI) {
-                                        return CONNECTION_WIFI
-                                    } else if (activeNetwork.type == ConnectivityManager.TYPE_MOBILE) {
-                                        return CONNECTION_CELLULAR
-                                    }
+                            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)?.let {
+                                if (it.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                                    return CONNECTION_WIFI
+                                } else if (it.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                                    return CONNECTION_CELLULAR
                                 }
                             }
                         }
@@ -187,6 +175,6 @@ class TileLoadingMeasurementUtils {
             }
         }
 
-        private class Attribute<T> internal constructor(private val name: String, private val value: T)
+        private class Attribute<T>(private val name: String, private val value: T)
     }
 }

@@ -19,7 +19,10 @@ updates:
           - '*'
   - package-ecosystem: 'gradle'
     open-pull-requests-limit: 1
-    directory: '/platform/android'
+    directories:
+      - '/platform/android'
+      - '/render-test/android'
+      - '/test/android'
     schedule:
       interval: 'weekly'
     groups:

@@ -10,6 +10,9 @@
 #include <mbgl/util/math.hpp>
 
 #include <cassert>
+#include <numbers>
+
+using namespace std::numbers;
 
 namespace mbgl {
 
@@ -281,7 +284,7 @@ SymbolQuads getGlyphQuads(const Shaping& shapedText,
                 // and translated.
 
                 const Point<float> center{-halfAdvance, halfAdvance - Shaping::yOffset};
-                const float verticalRotation = static_cast<float>(-M_PI_2);
+                const float verticalRotation = -pi_v<float> / 2;
 
                 // xHalfWidhtOffsetcorrection is a difference between full-width
                 // and half-width advance, should be 0 for full-width glyphs and

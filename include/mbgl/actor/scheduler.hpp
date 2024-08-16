@@ -1,12 +1,12 @@
 #pragma once
 
-#include <mbgl/util/chrono.hpp>
 #include <mbgl/util/identity.hpp>
 
 #include <mapbox/std/weak.hpp>
 
 #include <functional>
 #include <memory>
+#include <type_traits>
 
 namespace mbgl {
 
@@ -70,7 +70,9 @@ public:
     template <typename TaskFn, typename ReplyFn>
     void scheduleAndReplyValue(const util::SimpleIdentity tag, TaskFn&& task, ReplyFn&& reply) {
         assert(GetCurrent());
-        scheduleAndReplyValue(tag, task, reply, GetCurrent()->makeWeakPtr());
+        static_assert(std::is_invocable_v<TaskFn>);
+        scheduleAndReplyValue(
+            tag, std::forward<TaskFn>(task), std::forward<ReplyFn>(reply), GetCurrent()->makeWeakPtr());
     }
 
     /// Wait until there's nothing pending or in process
@@ -103,10 +105,13 @@ public:
     void setExceptionHandler(std::function<void(const std::exception_ptr)> handler_) { handler = std::move(handler_); }
 
 protected:
+    std::function<void(const std::exception_ptr)> handler;
+
+private:
     template <typename TaskFn, typename ReplyFn>
     void scheduleAndReplyValue(const util::SimpleIdentity tag,
-                               const TaskFn& task,
-                               const ReplyFn& reply,
+                               TaskFn&& task,
+                               ReplyFn&& reply,
                                mapbox::base::WeakPtr<Scheduler> replyScheduler) {
         schedule(tag, [replyScheduler = std::move(replyScheduler), tag, task, reply] {
             auto lock = replyScheduler.lock();
@@ -114,8 +119,6 @@ protected:
             replyScheduler->schedule(tag, [reply, result = task()] { reply(result); });
         });
     }
-
-    std::function<void(const std::exception_ptr)> handler;
 };
 
 /// @brief A TaggedScheduler pairs a scheduler with an identifier. Tasklets submitted via a TaggedScheduler
@@ -130,7 +133,6 @@ public:
     TaggedScheduler(const TaggedScheduler&) = default;
 
     /// @brief Get the wrapped scheduler
-    /// @return
     const std::shared_ptr<Scheduler>& get() const noexcept { return scheduler; }
 
     void schedule(std::function<void()>&& fn) { scheduler->schedule(tag, std::move(fn)); }
