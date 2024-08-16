@@ -389,7 +389,7 @@ RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_, const T
     : RenderSource(std::move(impl_)),
       tilePyramid(threadPool_),
       renderTiles(makeMutable<std::vector<RenderTile>>()),
-      previousRenderTiles(makeMutable<std::vector<RenderTile>>()) {
+      previousRenderTiles(std::make_shared<RenderTiles::element_type>()) {
     tilePyramid.setObserver(this);
 }
 
@@ -407,18 +407,18 @@ void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
     MLN_TRACE_FUNC();
     MLN_ZONE_STR(baseImpl->id);
     bearing = static_cast<float>(parameters.transform.state.getBearing());
-    filteredRenderTiles = nullptr;
-    renderTilesSortedByY = nullptr;
+
     auto tiles = makeMutable<std::vector<RenderTile>>();
     tiles->reserve(tilePyramid.getRenderedTiles().size());
-    for (auto& entry : tilePyramid.getRenderedTiles()) {
-        tiles->emplace_back(entry.first, entry.second);
+    for (auto& [tileID, tileRef] : tilePyramid.getRenderedTiles()) {
+        tiles->emplace_back(tileID, tileRef);
         tiles->back().prepare(parameters);
     }
     featureState.coalesceChanges(*tiles);
 
     renderTileDiff.reset();
-    previousRenderTiles = std::move(renderTiles);
+    renderTilesSortedByY.reset();
+    previousRenderTiles = getRenderTiles();
     renderTiles = std::move(tiles);
 }
 
@@ -446,9 +446,7 @@ RenderTiles RenderTileSource::getRenderTiles() const {
 
 std::shared_ptr<TileDifference> RenderTileSource::getRenderTileDiff() const {
     if (!renderTileDiff) {
-        const auto tiles = getRenderTiles();
-        renderTileDiff = std::make_shared<TileDifference>(
-            diffTiles(previousRenderTiles->begin(), previousRenderTiles->end(), tiles->begin(), tiles->end()));
+        renderTileDiff = std::make_shared<TileDifference>(diffTiles(previousRenderTiles, getRenderTiles()));
     }
     return renderTileDiff;
 }

@@ -33,6 +33,9 @@
 #include <mbgl/shaders/shader_program_base.hpp>
 #endif
 
+#define _LIBCPP_ENABLE_EXPERIMENTAL
+#include <ranges>
+
 namespace mbgl {
 
 using namespace style;
@@ -296,6 +299,18 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 
 #if MLN_DRAWABLE_RENDERER
 
+namespace {
+
+// Setup that's the same for all drawables
+void commonInit(gfx::DrawableBuilder& builder) {
+    builder.setRenderPass(RenderPass::Translucent);
+    builder.setColorMode(gfx::ColorMode::alphaBlended());
+    builder.setCullFaceMode(gfx::CullFaceMode::disabled());
+    builder.setEnableStencil(true);
+}
+
+} // namespace
+
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState&,
@@ -353,11 +368,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     const auto layerPrefix = getID() + "/";
     constexpr auto renderPass = RenderPass::Translucent;
 
-    const auto commonInit = [&](gfx::DrawableBuilder& builder) {
-        builder.setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder.setEnableStencil(true);
-    };
-
     // Remove drawables for removed tiles
     for (const auto& tileID : renderTileDiff->removed) {
         removeTile(renderPass, tileID);
@@ -367,23 +377,41 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     StringIDSetsPair propertiesAsUniforms;
 
-    // Update tiles that weren't added or removed
-    std::vector<OverscaledTileID> resetTileIDs;
-    for (const auto& tileID : renderTileDiff->remainder) {
-        const auto tileRef = getRenderTile(tileID);
-        if (!tileRef) {
-            assert(false);
-            continue;
-        }
-        const RenderTile& tile = tileRef->get();
+    const auto buildVertexAttrs = [&](FillBucket& bucket,
+                                      const FillProgram::Binders& binders,
+                                      const FillPaintProperties::PossiblyEvaluated& evaluated) {
+        propertiesAsUniforms.first.clear();
+        propertiesAsUniforms.second.clear();
 
+        // `Fill*Program` all use `style::FillPaintProperties`
+        // TODO: Only rebuild the vertex attributes when something has changed.
+        // TODO: Can we update them in-place instead of replacing?
+        auto vertexAttrs = context.createVertexAttributeArray();
+        vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
+            binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
+
+        if (const auto& attr = vertexAttrs->set(idFillPosVertexAttribute)) {
+            attr->setSharedRawData(bucket.sharedVertices,
+                                   offsetof(FillLayoutVertex, a1),
+                                   /*vertexOffset=*/0,
+                                   sizeof(FillLayoutVertex),
+                                   gfx::AttributeDataType::Short2);
+        }
+        return vertexAttrs;
+    };
+
+    // Update tiles that weren't added or removed
+    using RenderTileRefVec = std::vector<RenderTiles::element_type::value_type>;
+    RenderTileRefVec resetTileIDs;
+    for (const RenderTile& tile : renderTileDiff->remainder) {
+        const auto& tileID = tile.getOverscaledTileID();
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
             removeTile(renderPass, tileID);
 
             if (renderData && !renderData->bucket) {
                 // We'll need to treat this tile as an add
-                resetTileIDs.push_back(tileID);
+                resetTileIDs.push_back(tile);
             }
             continue;
         }
@@ -396,52 +424,42 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             removeTile(renderPass, tileID);
 
             // We'll need to treat this tile as an add
-            resetTileIDs.push_back(tileID);
-        }
-        setRenderTileBucketID(tileID, bucket.getID());
-    }
-
-    // Create drawables for new tiles
-    const auto newTile = [&](const OverscaledTileID& tileID) {
-        const auto tileRef = getRenderTile(tileID);
-        if (!tileRef) {
-            assert(false);
-            return;
-        }
-        const RenderTile& tile = tileRef->get();
-
-        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
-        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
-            return;
-        }
-
-        auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
-        setRenderTileBucketID(tileID, bucket.getID());
-    };
-    // With C++20 we can chain iterator ranges and use `for(:)`
-    std::for_each(renderTileDiff->added.begin(), renderTileDiff->added.end(), newTile);
-    std::for_each(resetTileIDs.begin(), resetTileIDs.end(), newTile);
-
-    for (const RenderTile& tile : *renderTiles) {
-        const auto& tileID = tile.getOverscaledTileID();
-
-        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
-        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
-            removeTile(renderPass, tileID);
+            resetTileIDs.push_back(tile);
             continue;
         }
-
-        auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
-        auto& binders = bucket.paintPropertyBinders.at(getID());
-
-        const auto prevBucketID = getRenderTileBucketID(tileID);
-        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
-            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
-            removeTile(renderPass, tileID);
-        }
         setRenderTileBucketID(tileID, bucket.getID());
 
+        auto updateExisting = [&](gfx::Drawable& drawable) {
+            if (drawable.getLayerTweaker() != layerTweaker) {
+                // This drawable was produced on a previous style/bucket, and should not be updated.
+                return false;
+            }
+            auto& binders = bucket.paintPropertyBinders.at(getID());
+            const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
+            drawable.setVertexAttributes(buildVertexAttrs(bucket, binders, evaluated));
+            return true;
+        };
+        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
+            // Existing drawable was updated
+        } else {
+            // Existing drawable is obsolete, build a new one
+            resetTileIDs.push_back(tile);
+        }
+    }
+
+    // Create drawables for tiles that are new or need to be re-created
+    for (const RenderTile& tile : std::ranges::join_view(std::array<std::ranges::ref_view<RenderTileRefVec>, 2>{
+             std::views::all(renderTileDiff->added), std::views::all(resetTileIDs)})) {
+        const auto& tileID = tile.getOverscaledTileID();
+        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
+        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
+            return;
+        }
+
         const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
+        auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
+        auto& binders = bucket.paintPropertyBinders.at(getID());
+        setRenderTileBucketID(tileID, bucket.getID());
 
         gfx::DrawableTweakerPtr atlasTweaker;
         auto getAtlasTweaker = [&]() {
@@ -461,33 +479,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return atlasTweaker;
         };
 
-        propertiesAsUniforms.first.clear();
-        propertiesAsUniforms.second.clear();
-
-        // `Fill*Program` all use `style::FillPaintProperties`
-        // TODO: Only rebuild the vertex attributes when something has changed.
-        // TODO: Can we update them in-place instead of replacing?
-        auto vertexAttrs = context.createVertexAttributeArray();
-        vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
-            binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
-
         const auto vertexCount = bucket.vertices.elements();
-        if (const auto& attr = vertexAttrs->set(idFillPosVertexAttribute)) {
-            attr->setSharedRawData(bucket.sharedVertices,
-                                   offsetof(FillLayoutVertex, a1),
-                                   /*vertexOffset=*/0,
-                                   sizeof(FillLayoutVertex),
-                                   gfx::AttributeDataType::Short2);
-        }
-
-        // If we already have drawables for this tile, update them.
-        auto updateExisting = [&](gfx::Drawable& drawable) {
-            drawable.setVertexAttributes(vertexAttrs);
-            return true;
-        };
-        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
-            continue;
-        }
+        auto vertexAttrs = buildVertexAttrs(bucket, binders, evaluated);
 
         const auto addDrawable = [&](std::unique_ptr<gfx::Drawable> drawable, FillVariant type) {
             drawable->setTileID(tileID);
@@ -576,9 +569,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
                     commonInit(*builder);
                     builder->setDepthType(opaque ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
-                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
-                    builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);
                 }
             }
@@ -588,8 +579,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     builder->setLineWidth(2.0f);
                     builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
-                    builder->setColorMode(gfx::ColorMode::alphaBlended());
-                    builder->setRenderPass(RenderPass::Translucent);
                     outlineBuilder = std::move(builder);
                 }
             }
@@ -680,9 +669,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     commonInit(*builder);
                     builder->setShader(fillShader);
                     builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
-                    builder->setRenderPass(RenderPass::Translucent);
                     patternBuilder = std::move(builder);
                 }
             }
@@ -692,9 +679,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setShader(outlineShader);
                     builder->setLineWidth(2.0f);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(2);
-                    builder->setRenderPass(RenderPass::Translucent);
                     outlinePatternBuilder = std::move(builder);
                 }
             }

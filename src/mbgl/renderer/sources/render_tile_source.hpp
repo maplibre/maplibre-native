@@ -59,7 +59,7 @@ protected:
     RenderTileSource(Immutable<style::Source::Impl>, const TaggedScheduler&);
     TilePyramid tilePyramid;
     Immutable<std::vector<RenderTile>> renderTiles;
-    Immutable<std::vector<RenderTile>> previousRenderTiles;
+    RenderTiles previousRenderTiles;
     mutable std::shared_ptr<TileDifference> renderTileDiff;
     mutable RenderTiles filteredRenderTiles;
     mutable RenderTiles renderTilesSortedByY;
