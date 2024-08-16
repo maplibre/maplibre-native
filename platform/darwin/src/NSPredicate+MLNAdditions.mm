@@ -73,6 +73,15 @@ static NSDictionary * const MLNPredicateOperatorTypesByJSONOperator = @{
     if (operatorTypeNumber) {
         NSPredicateOperatorType operatorType = (NSPredicateOperatorType)[operatorTypeNumber unsignedIntegerValue];
         
+        // Handle ["in", "attributeName", "val"..] -> ["in", ["get", "attributeName"], ["literal", "val"..]]
+        if (operatorType == NSInPredicateOperatorType && objects.count >= 3 && [[objects objectAtIndex:1] isKindOfClass:[NSString class]] && ![[objects objectAtIndex:2] isKindOfClass:[NSArray class]]) {
+            NSMutableArray *newObjects = [NSMutableArray arrayWithCapacity:3];
+            [newObjects addObject:[objects objectAtIndex:0]];
+            [newObjects addObject:@[@"get", [objects objectAtIndex:1]]];
+            [newObjects addObject:@[@"literal", [objects subarrayWithRange:NSMakeRange(2, objects.count - 2)]]];
+            return [NSPredicate predicateWithMLNJSONObject:newObjects];
+        }
+
         NSComparisonPredicateOptions options = 0;
         if (objects.count > 3) {
             NSArray *collatorExpression = objects[3];
@@ -162,6 +171,13 @@ static NSDictionary * const MLNPredicateOperatorTypesByJSONOperator = @{
                                                          modifier:NSDirectPredicateModifier
                                                              type:NSInPredicateOperatorType
                                                           options:0];
+    }
+    if ([op isEqualToString:@"!has"] || [op isEqualToString:@"!in"]) {
+        NSString *opRest = [op substringFromIndex:1];
+        NSMutableArray *newObjects = [NSMutableArray arrayWithArray:objects];
+        [newObjects replaceObjectAtIndex:0 withObject:opRest];
+        NSPredicate *predicate = [NSPredicate predicateWithMLNJSONObject:newObjects];
+        return [NSCompoundPredicate notPredicateWithSubpredicate:predicate];
     }
     
     NSExpression *expression = [NSExpression expressionWithMLNJSONObject:object];

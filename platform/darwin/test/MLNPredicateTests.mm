@@ -580,6 +580,34 @@
     }
 }
 
+-(void)testPredicateCompatibility {
+    {
+        NSArray *jsonPredicate = @[@"!in", @[@"get", @"x"], @[@"literal", @[@6, @5, @4, @3]]];
+        NSPredicate *expectedPredicate = [NSPredicate predicateWithFormat:@"NOT x IN {6, 5, 4, 3}"];
+        XCTAssertEqualObjects([NSPredicate predicateWithMLNJSONObject:jsonPredicate], expectedPredicate);
+    }
+    {
+        NSArray *jsonPredicate = @[@"in", @"x", @6];
+        NSPredicate *expectedPredicate = [NSPredicate predicateWithFormat:@"x IN {6}"];
+        XCTAssertEqualObjects([NSPredicate predicateWithMLNJSONObject:jsonPredicate], expectedPredicate);
+    }
+    {
+        NSArray *jsonPredicate = @[@"!in", @"x", @6];
+        NSPredicate *expectedPredicate = [NSPredicate predicateWithFormat:@"NOT x IN {6}"];
+        XCTAssertEqualObjects([NSPredicate predicateWithMLNJSONObject:jsonPredicate], expectedPredicate);
+    }
+    {
+        NSArray *jsonPredicate = @[@"in", @"x", @6, @5, @4, @3];
+        NSPredicate *expectedPredicate = [NSPredicate predicateWithFormat:@"x IN {6, 5, 4, 3}"];
+        XCTAssertEqualObjects([NSPredicate predicateWithMLNJSONObject:jsonPredicate], expectedPredicate);
+    }
+    {
+        NSArray *jsonPredicate = @[@"!in", @"x", @6, @5, @4, @3];
+        NSPredicate *expectedPredicate = [NSPredicate predicateWithFormat:@"NOT x IN {6, 5, 4, 3}"];
+        XCTAssertEqualObjects([NSPredicate predicateWithMLNJSONObject:jsonPredicate], expectedPredicate);
+    }
+}
+
 - (void)testSymmetryWithPredicate:(NSPredicate *)forwardPredicate mustRoundTrip:(BOOL)mustRoundTrip {
     auto forwardFilter = forwardPredicate.mgl_filter;
     NSPredicate *forwardPredicateAfter = [NSPredicate mgl_predicateWithFilter:forwardFilter];
