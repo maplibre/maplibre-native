@@ -7,7 +7,7 @@ add_library(
 )
 
 target_include_directories(
-    mbgl-vendor-protozero SYSTEM
+    mbgl-vendor-metal-cpp SYSTEM
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}/metal-cpp
 )
 
