@@ -1272,6 +1272,8 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_sdf.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_text_and_icon.cpp
     )
+
+    
 endif()
 
 if(MLN_WITH_VULKAN)
@@ -1438,6 +1440,8 @@ include(${PROJECT_SOURCE_DIR}/vendor/tracy.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
+
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/unordered_dense)
 set_target_properties(
@@ -1468,6 +1472,7 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
+        $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
     PUBLIC
         Mapbox::Base
         Mapbox::Base::Extras::expected-lite
