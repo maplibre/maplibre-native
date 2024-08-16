@@ -1273,6 +1273,10 @@ if(MLN_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_text_and_icon.cpp
     )
 
+    find_library(METAL_FRAMEWORK Metal)
+    if (METAL_FRAMEWORK)
+        target_link_libraries(mbgl-core PRIVATE ${METAL_FRAMEWORK})
+    endif()
     
 endif()
 

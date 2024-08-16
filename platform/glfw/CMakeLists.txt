@@ -59,6 +59,17 @@ if(MLN_WITH_VULKAN)
     )
 endif()
 
+if(MLN_WITH_METAL)
+    target_sources(
+        mbgl-glfw
+        PRIVATE ${PROJECT_SOURCE_DIR}/platform/glfw/glfw_metal_backend.mm
+    )
+    target_compile_definitions(
+        mbgl-glfw
+        PRIVATE MLN_RENDER_BACKEND_METAL=1
+    )
+endif()
+
 target_include_directories(
     mbgl-glfw
     PRIVATE
@@ -112,6 +123,8 @@ if(NOT WIN32 AND MLN_WITH_OPENGL)
         PRIVATE OpenGL::GL
     )
 endif()
+
+
 
 set_property(TARGET mbgl-glfw PROPERTY FOLDER MapLibre)
 
