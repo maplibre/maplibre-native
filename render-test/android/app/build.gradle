@@ -1,6 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
+    ndkVersion '27.0.12077973'
+
     sourceSets {
         test {
             assets.srcDirs += ['../../../metrics']
