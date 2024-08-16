@@ -1510,6 +1510,7 @@ export(TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
+    mbgl-vendor-metal-cpp
     unordered_dense
 
     FILE MapboxCoreTargets.cmake
