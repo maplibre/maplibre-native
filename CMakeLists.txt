@@ -1176,7 +1176,7 @@ if(MLN_WITH_OPENGL)
     endif()
 endif()
 
-if(MBGL_WITH_METAL)
+if(MLN_WITH_METAL)
     message(STATUS "Configuring Metal renderer backend")
     target_compile_definitions(
         mbgl-core
@@ -1271,7 +1271,6 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_icon.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_sdf.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_text_and_icon.cpp
-    ]
     )
 endif()
 
