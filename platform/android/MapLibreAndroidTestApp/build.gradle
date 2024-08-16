@@ -29,15 +29,6 @@ android {
         multiDexEnabled = true
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
     nativeBuild(["example-custom-layer"])
     packagingOptions {
         resources {
@@ -90,6 +81,10 @@ android {
         disable 'MissingTranslation', 'GoogleAppIndexingWarning', 'UnpackedNativeCode', 'IconDipSize', 'TypographyQuotes'
         warningsAsErrors true
     }
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 dependencies {
