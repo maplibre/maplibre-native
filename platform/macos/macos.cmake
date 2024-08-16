@@ -30,6 +30,16 @@ if(MLN_WITH_OPENGL)
     )
 endif()
 
+if(MLN_WITH_METAL)
+    find_package(OpenGL REQUIRED)
+
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/mtl/headless_backend.cpp
+    )
+endif()
+
 target_sources(
     mbgl-core
     PRIVATE
