@@ -59,6 +59,9 @@
 #include <iostream>
 #include <utility>
 #include <sstream>
+#include <numbers>
+
+using namespace std::numbers;
 
 #if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
 #include <mbgl/style/layers/location_indicator_layer.hpp>
@@ -765,7 +768,7 @@ void GLFWView::updateAnimatedAnnotations() {
 
         const double period = 10;
         const double x = dt / period * 360 - 180;
-        const double y = std::sin(dt / period * M_PI * 2.0) * 80;
+        const double y = std::sin(dt / period * pi * 2.0) * 80;
         map->updateAnnotation(animatedAnnotationIDs[i], mbgl::SymbolAnnotation{{x, y}, "default_marker"});
     }
 }
