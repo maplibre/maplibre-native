@@ -81,21 +81,11 @@ EvaluationResult toPadding(const Value& paddingValue) {
                     return item.template is<double>();
                 });
                 if ((len >= 1 && len <= 4) && isNumeric) {
-                    float floats[4] = { 0 };
+                    float componentsAsFloats[4] = { 0 };
                     for (std::size_t i = 0; i < len; i++) {
-                        floats[i] = static_cast<float>(components[i].template get<double>());
+                        componentsAsFloats[i] = static_cast<float>(components[i].template get<double>());
                     }
-                    switch (len) {
-                        case 4:
-                            return Padding(floats[0], floats[1], floats[2], floats[3]);
-                        case 3:
-                            return Padding(floats[0], floats[1], floats[2]);
-                        case 2:
-                            return Padding(floats[0], floats[1]);
-                        case 1:
-                        default:
-                            return Padding(floats[0]);
-                    }
+                    return Padding(std::span<float>(componentsAsFloats, len));
                 } else {
                     return EvaluationError{"Invalid padding value " + stringify(paddingValue) +
                                            ": expected an array containing from one to four "

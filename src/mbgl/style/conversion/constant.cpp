@@ -119,21 +119,7 @@ std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, 
         if (arrayLength(value) > 0 && arrayLength(value) <= 4) {
             auto vector = Converter<std::vector<float>>{}(value, error);
             if (vector) {
-                const auto &arr = *vector;
-                switch (vector->size()) {
-                    case 1:
-                        result = Padding(arr[0]);
-                        break;
-                    case 2:
-                        result = Padding(arr[0], arr[1]);
-                        break;
-                    case 3:
-                        result = Padding(arr[0], arr[1], arr[2]);
-                        break;
-                    case 4:
-                        result = Padding(arr[0], arr[1], arr[2], arr[3]);
-                        break;
-                }
+                result = Padding(*vector);
             }
         }
     } else {
