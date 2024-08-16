@@ -254,7 +254,7 @@ jobs:
         if: matrix.flavor == 'opengl'
         uses: actions/upload-artifact@v4
         with:
-          name: android-render-tests-${{ matrix.flavor }}
+          name: android-render-tests
           if-no-files-found: error
           path: |
             ./render-test/android/RenderTestsApp.apk
