@@ -122,19 +122,15 @@ std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, 
                 const auto &arr = *vector;
                 switch (vector->size()) {
                     case 1:
-                        // A single value applies to all four sides.
                         result = Padding(arr[0]);
                         break;
                     case 2:
-                        // two values apply to [top/bottom, left/right].
-                        result = Padding(arr[0], arr[1], arr[0], arr[1]);
+                        result = Padding(arr[0], arr[1]);
                         break;
                     case 3:
-                        // three values apply to [top, left/right, bottom].
-                        result = Padding(arr[0], arr[1], arr[2], arr[1]);
+                        result = Padding(arr[0], arr[1], arr[2]);
                         break;
                     case 4:
-                        // four values apply to [top, right, bottom, left].
                         result = Padding(arr[0], arr[1], arr[2], arr[3]);
                         break;
                 }

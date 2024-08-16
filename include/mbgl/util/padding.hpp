@@ -11,13 +11,23 @@ namespace mbgl {
 // BUGBUG add: A single number is accepted for backwards-compatibility, and treated the
 // same as a one-element array — padding applied to all sides.
 // Padding values are in CSS order: top, right, bottom, left.
+// BUGBUG leverage span
 class Padding {
 public:
     Padding() = default;
+
+    // A single value applies to all four sides.
     Padding(float value)
         : top(value), right(value), bottom(value), left(value) {
-    };
-
+    }
+    // two values apply to [top/bottom, left/right].
+    Padding(float tb_, float lr_)
+        : top(tb_), right(lr_), bottom(tb_), left(lr_) {
+    }
+    // three values apply to [top, left/right, bottom].
+    Padding(float t_, float lr_, float b_)
+        : top(t_), right(lr_), bottom(b_), left(lr_) {
+    }
     Padding(float t_, float r_, float b_, float l_)
         : top(t_), right(r_), bottom(b_), left(l_) {
     }

@@ -18,12 +18,20 @@
           "geometry": { "type": "Point", "coordinates": [-60, 0] }
          }, {
           "type": "Feature",
-          "properties": { },
-          "geometry": { "type": "Point", "coordinates": [-40, 0] }
+          "properties": { "padding": 5 },
+          "geometry": { "type": "Point", "coordinates": [-30, 0] }
          }, {
           "type": "Feature",
-          "properties": { },
-          "geometry": { "type": "Point", "coordinates": [-20, 0] }
+          "properties": { "padding": [-20, -5] },
+          "geometry": { "type": "Point", "coordinates": [-0, 0] }
+         }, {
+          "type": "Feature",
+          "properties": { "padding": [2, 2, -10] },
+          "geometry": { "type": "Point", "coordinates": [30, 0] }
+         }, {
+          "type": "Feature",
+          "properties": { "padding": [2, 10, -20, 2] },
+          "geometry": { "type": "Point", "coordinates": [60, 0] }
          }
         ]
       }
@@ -42,16 +50,7 @@
       "source": "geojson",
       "layout": {
         "icon-image": "icon",
-        "icon-padding": [10]
-      }
-    }, {
-      "id": "symbolB",
-      "type": "symbol",
-      "source": "geojson",
-      "layout": {
-        "icon-image": "icon",
-        "icon-padding": [2, 2, -20],
-        "icon-offset": [120, 0]
+        "icon-padding": ["coalesce", ["get", "padding"], ["literal", [2]]]
       }
     }
   ]
