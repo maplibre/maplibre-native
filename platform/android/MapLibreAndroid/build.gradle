@@ -13,7 +13,7 @@ apply from: "${rootDir}/gradle/native-build.gradle"
 dependencies {
     lintChecks project(":MapLibreAndroidLint")
     api libs.maplibreJavaGeoJSON
-    api libs.mapboxAndroidGestures
+    api libs.maplibreGestures
 
     implementation libs.maplibreJavaTurf
     implementation libs.supportAnnotations
