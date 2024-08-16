@@ -96,7 +96,6 @@ dependencies {
     implementation project(':MapLibreAndroid')
     implementation libs.maplibreJavaTurf
 
-    implementation libs.supportAppcompatV7
     implementation libs.supportRecyclerView
     implementation libs.supportDesign
     implementation libs.supportConstraintLayout

@@ -55,7 +55,6 @@ testEspressoIntents = { group = "androidx.test.espresso", name = "espresso-inten
 testEspressoContrib = { group = "androidx.test.espresso", name = "espresso-contrib", version.ref = "espresso" }
 testUiAutomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiAutomator" }
 supportAnnotations = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
-supportAppcompatV7 = { group = "androidx.appcompat", name = "appcompat", version.ref = "appCompat" }
 supportFragmentV4 = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
 supportRecyclerView = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerView" }
 supportConstraintLayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintLayout" }
