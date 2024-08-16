@@ -260,7 +260,7 @@ jobs:
         if: matrix.flavor == 'opengl'
         run: |
           cp ./render-test/android/RenderTestsApp-opengl.apk ./render-test/android/RenderTestsApp.apk
-          cp ./render-test/android/RenderTests-opengl.apk ./render-test/android/RenderTestsApp.apk
+          cp ./render-test/android/RenderTests-opengl.apk ./render-test/android/RenderTests.apk
 
       - name: Store Render Test .apk files
         if: matrix.flavor == 'opengl'
