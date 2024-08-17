@@ -276,7 +276,7 @@ jobs:
         if: runner.os == 'MacOS'
         uses: actions/upload-artifact@v4
         with:
-          name: render-query-test-results
+          name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
           path: metrics/macos-xcode11-release-style.html
 
       - name: Test (Linux)
