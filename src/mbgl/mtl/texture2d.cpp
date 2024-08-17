@@ -151,7 +151,7 @@ void Texture2D::createMetalTexture() noexcept {
     if (auto textureDescriptor = NS::RetainPtr(
             MTL::TextureDescriptor::texture2DDescriptor(format, size.width, size.height, /*mipmapped=*/false))) {
         textureDescriptor->setUsage(usage);
-#if TARGET_OS_SIMULATOR
+#if TARGET_OS_SIMULATOR || defined(__x86_64__)
         switch (format) {
             case MTL::PixelFormatDepth16Unorm:
             case MTL::PixelFormatDepth32Float:
@@ -160,7 +160,7 @@ void Texture2D::createMetalTexture() noexcept {
             case MTL::PixelFormatDepth32Float_Stencil8:
             case MTL::PixelFormatX32_Stencil8:
             case MTL::PixelFormatX24_Stencil8:
-                // On iOS simulator, the default shared mode is invalid for depth and stencil textures.
+                // On iOS simulator and x86-64, the default shared mode is invalid for depth and stencil textures.
                 //  'Texture Descriptor Validation MTLTextureDescriptor: Depth, Stencil, DepthStencil
                 //   textures cannot be allocated with MTLStorageModeShared on this device.
                 textureDescriptor->setStorageMode(MTL::StorageMode::StorageModePrivate);
