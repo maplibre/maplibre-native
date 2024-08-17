@@ -172,10 +172,19 @@ static NSDictionary * const MLNPredicateOperatorTypesByJSONOperator = @{
                                                              type:NSInPredicateOperatorType
                                                           options:0];
     }
-    if ([op isEqualToString:@"!has"] || [op isEqualToString:@"!in"]) {
-        NSString *opRest = [op substringFromIndex:1];
+    // Handle ["has", "attributeName"]. Also handled by expression using mgl_does:have, but this is simpler..
+    if ([op isEqualToString:@"has"] && objects.count == 2 && [[objects objectAtIndex:1] isKindOfClass:[NSString class]]) {
+        NSString *key = [objects objectAtIndex:1];
+        return [NSPredicate predicateWithFormat:@"(%K!=nil)", key];
+    }
+    // Handle ["!has", "attributeName"]. Also handled by expression using mgl_does:have, but this is simpler..
+    if ([op isEqualToString:@"!has"] && objects.count == 2 && [[objects objectAtIndex:1] isKindOfClass:[NSString class]]) {
+        NSString *key = [objects objectAtIndex:1];
+        return [NSPredicate predicateWithFormat:@"(%K==nil)", key];
+    }
+    if ([op isEqualToString:@"!in"]) {
         NSMutableArray *newObjects = [NSMutableArray arrayWithArray:objects];
-        [newObjects replaceObjectAtIndex:0 withObject:opRest];
+        [newObjects replaceObjectAtIndex:0 withObject:@"in"];
         NSPredicate *predicate = [NSPredicate predicateWithMLNJSONObject:newObjects];
         return [NSCompoundPredicate notPredicateWithSubpredicate:predicate];
     }

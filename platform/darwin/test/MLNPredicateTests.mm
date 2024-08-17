@@ -582,6 +582,24 @@
 
 -(void)testPredicateCompatibility {
     {
+        NSArray *jsonPredicate = @[@"has", @"x"];
+        NSPredicate *expectedPredicate = [NSPredicate predicateWithFormat:@"(x!=nil)"];
+        XCTAssertEqualObjects([NSPredicate predicateWithMLNJSONObject:jsonPredicate], expectedPredicate);
+        NSDictionary *attributesWith = @{@"x": @33};
+        NSDictionary *attributesWithout = @{@"y": @33};
+        XCTAssertTrue([expectedPredicate evaluateWithObject:attributesWith]);
+        XCTAssertFalse([expectedPredicate evaluateWithObject:attributesWithout]);
+    }
+    {
+        NSArray *jsonPredicate = @[@"!has", @"x"];
+        NSPredicate *expectedPredicate = [NSPredicate predicateWithFormat:@"(x==nil)"];
+        XCTAssertEqualObjects([NSPredicate predicateWithMLNJSONObject:jsonPredicate], expectedPredicate);
+        NSDictionary *attributesWith = @{@"x": @33};
+        NSDictionary *attributesWithout = @{@"y": @33};
+        XCTAssertFalse([expectedPredicate evaluateWithObject:attributesWith]);
+        XCTAssertTrue([expectedPredicate evaluateWithObject:attributesWithout]);
+    }
+    {
         NSArray *jsonPredicate = @[@"!in", @[@"get", @"x"], @[@"literal", @[@6, @5, @4, @3]]];
         NSPredicate *expectedPredicate = [NSPredicate predicateWithFormat:@"NOT x IN {6, 5, 4, 3}"];
         XCTAssertEqualObjects([NSPredicate predicateWithMLNJSONObject:jsonPredicate], expectedPredicate);
