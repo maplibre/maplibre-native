@@ -82,13 +82,13 @@ size_t Texture2D::numChannels() const noexcept {
 }
 
 MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
-    // On iOS simulator, we need to use the combined depth/stencil format.  If the depth and stencil
+    // On iOS simulator and x86-64, we need to use the combined depth/stencil format.  If the depth and stencil
     // formats are both set on a render pipeline, they have to be identical or we'll get, e.g.:
     //     validateWithDevice:4343: failed assertion `Render Pipeline Descriptor Validation
     //                              depthAttachmentPixelFormat (MTLPixelFormatDepth32Float) and
     //                              stencilAttachmentPixelFormat (MTLPixelFormatStencil8) must match.
 
-#if TARGET_OS_SIMULATOR
+#if TARGET_OS_SIMULATOR || defined(__x86_64__)
     if (channelType == gfx::TextureChannelDataType::Float && pixelFormat == gfx::TexturePixelType::Depth &&
         (usage & MTL::TextureUsageRenderTarget)) {
         return MTL::PixelFormatDepth32Float_Stencil8;
