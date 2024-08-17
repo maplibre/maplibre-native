@@ -608,21 +608,37 @@
         NSArray *jsonPredicate = @[@"in", @"x", @6];
         NSPredicate *expectedPredicate = [NSPredicate predicateWithFormat:@"x IN {6}"];
         XCTAssertEqualObjects([NSPredicate predicateWithMLNJSONObject:jsonPredicate], expectedPredicate);
+        NSDictionary *attributesWith = @{@"x": @6};
+        NSDictionary *attributesWithout = @{@"x": @7, @"y": @6};
+        XCTAssertTrue([expectedPredicate evaluateWithObject:attributesWith]);
+        XCTAssertFalse([expectedPredicate evaluateWithObject:attributesWithout]);
     }
     {
         NSArray *jsonPredicate = @[@"!in", @"x", @6];
         NSPredicate *expectedPredicate = [NSPredicate predicateWithFormat:@"NOT x IN {6}"];
         XCTAssertEqualObjects([NSPredicate predicateWithMLNJSONObject:jsonPredicate], expectedPredicate);
+        NSDictionary *attributesWith = @{@"x": @6};
+        NSDictionary *attributesWithout = @{@"x": @7, @"y": @6};
+        XCTAssertFalse([expectedPredicate evaluateWithObject:attributesWith]);
+        XCTAssertTrue([expectedPredicate evaluateWithObject:attributesWithout]);
     }
     {
         NSArray *jsonPredicate = @[@"in", @"x", @6, @5, @4, @3];
         NSPredicate *expectedPredicate = [NSPredicate predicateWithFormat:@"x IN {6, 5, 4, 3}"];
         XCTAssertEqualObjects([NSPredicate predicateWithMLNJSONObject:jsonPredicate], expectedPredicate);
+        NSDictionary *attributesWith = @{@"x": @5};
+        NSDictionary *attributesWithout = @{@"x": @7, @"y": @5};
+        XCTAssertTrue([expectedPredicate evaluateWithObject:attributesWith]);
+        XCTAssertFalse([expectedPredicate evaluateWithObject:attributesWithout]);
     }
     {
         NSArray *jsonPredicate = @[@"!in", @"x", @6, @5, @4, @3];
         NSPredicate *expectedPredicate = [NSPredicate predicateWithFormat:@"NOT x IN {6, 5, 4, 3}"];
         XCTAssertEqualObjects([NSPredicate predicateWithMLNJSONObject:jsonPredicate], expectedPredicate);
+        NSDictionary *attributesWith = @{@"x": @5};
+        NSDictionary *attributesWithout = @{@"x": @7, @"y": @5};
+        XCTAssertFalse([expectedPredicate evaluateWithObject:attributesWith]);
+        XCTAssertTrue([expectedPredicate evaluateWithObject:attributesWithout]);
     }
 }
 
