@@ -73,7 +73,7 @@ static NSDictionary * const MLNPredicateOperatorTypesByJSONOperator = @{
     if (operatorTypeNumber) {
         NSPredicateOperatorType operatorType = (NSPredicateOperatorType)[operatorTypeNumber unsignedIntegerValue];
         
-        // Handle ["in", "attributeName", "val"..] -> ["in", ["get", "attributeName"], ["literal", "val"..]]
+        // Handle ["in", "attributeName", "val"..] -> ["in", ["get", "attributeName"], ["literal", ["val"..]]]
         if (operatorType == NSInPredicateOperatorType && objects.count >= 3 && [[objects objectAtIndex:1] isKindOfClass:[NSString class]] && ![[objects objectAtIndex:2] isKindOfClass:[NSArray class]]) {
             NSMutableArray *newObjects = [NSMutableArray arrayWithCapacity:3];
             [newObjects addObject:[objects objectAtIndex:0]];
