@@ -177,7 +177,7 @@ static NSDictionary * const MLNPredicateOperatorTypesByJSONOperator = @{
         NSString *key = [objects objectAtIndex:1];
         return [NSPredicate predicateWithFormat:@"(%K!=nil)", key];
     }
-    // Handle ["!has", "attributeName"]. Also handled by expression using mgl_does:have, but this is simpler..
+    // Handle ["!has", "attributeName"].
     if ([op isEqualToString:@"!has"] && objects.count == 2 && [[objects objectAtIndex:1] isKindOfClass:[NSString class]]) {
         NSString *key = [objects objectAtIndex:1];
         return [NSPredicate predicateWithFormat:@"(%K==nil)", key];
