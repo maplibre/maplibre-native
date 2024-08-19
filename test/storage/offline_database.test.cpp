@@ -1790,7 +1790,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(MergeDatabaseWithSingleRegion_Update))
         auto updatedTile = db.getRegionResource(Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
 
         auto updatedStamp = updatedTile->first.modified;
-        EXPECT_EQ(*originalStamp, *updatedStamp);
+        EXPECT_TRUE(*originalStamp == *updatedStamp);
     }
 }
 
@@ -1815,7 +1815,7 @@ TEST(OfflineDatabase, MergeDatabaseWithSingleRegion_NoUpdate) {
     auto updatedTile = db.getRegionResource(Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
 
     // Verify the modified timestamp matches the tile in the main db.
-    EXPECT_EQ(originalStamp, updatedTile->first.modified);
+    EXPECT_TRUE(originalStamp == updatedTile->first.modified);
 }
 
 TEST(OfflineDatabase, MergeDatabaseWithSingleRegion_AmbientTiles) {

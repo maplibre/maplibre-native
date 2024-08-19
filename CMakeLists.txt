@@ -120,7 +120,7 @@ target_link_libraries(
 
 cmake_policy(SET CMP0063 NEW)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_C_EXTENSIONS OFF)
@@ -1382,6 +1382,16 @@ set_source_files_properties(
     PROPERTIES
     COMPILE_FLAGS
     $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wno-deprecated-declarations>
+)
+
+# gcc 12 compiler bug, remove when fixed
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105651
+set_source_files_properties(
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/compound_expression.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/font_stack.cpp
+    PROPERTIES
+    COMPILE_FLAGS
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER:$<CXX_COMPILER_VERSION>,12.0.0>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,13.0.0>>:-Wno-restrict>
 )
 
 source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})

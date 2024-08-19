@@ -249,7 +249,7 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
                          collisionGroups.get(params.sourceId),
                          getAvoidEdges(symbolBucket, renderTile.matrix)};
     for (const SymbolInstance& symbol : getSortedSymbols(params, ctx.pixelRatio)) {
-        if (seenCrossTileIDs.count(symbol.crossTileID) != 0u) continue;
+        if (seenCrossTileIDs.contains(symbol.crossTileID)) continue;
         placeSymbol(symbol, ctx);
 
         // Prevent a flickering issue while zooming out.
@@ -983,7 +983,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
         true);
 
     for (SymbolInstance& symbolInstance : bucket.symbolInstances) {
-        bool isDuplicate = seenCrossTileIDs.count(symbolInstance.crossTileID) > 0;
+        bool isDuplicate = seenCrossTileIDs.contains(symbolInstance.crossTileID);
 
         auto it = opacities.find(symbolInstance.crossTileID);
         auto opacityState = defaultOpacityState;
@@ -1414,7 +1414,7 @@ void TilePlacement::placeLayers(const RenderLayerReferences& layers) {
         const SymbolInstance& symbol = intersection.symbol;
         const PlacementContext& ctx = intersection.ctx;
         currentIntersectionPriority = intersection.priority;
-        if (seenCrossTileIDs.count(symbol.crossTileID) != 0u) continue;
+        if (seenCrossTileIDs.contains(symbol.crossTileID)) continue;
         JointPlacement placement = placeSymbol(symbol, ctx);
         if (shouldRetryPlacement(placement, ctx)) continue;
         seenCrossTileIDs.insert(symbol.crossTileID);
