@@ -149,8 +149,7 @@ void Mailbox::receive() {
     }
 }
 
-void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag)
-{
+void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag) {
     auto guard = weakScheduler.lock();
     if (weakScheduler) {
         std::weak_ptr<Mailbox> mailbox = shared_from_this();
@@ -159,16 +158,10 @@ void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag)
                 locked->receive();
             }
         };
-        if(tag)
-        {
-            weakScheduler->schedule(
-                *tag,
-                std::move(setToRecieve)
-            );
+        if (tag) {
+            weakScheduler->schedule(*tag, std::move(setToRecieve));
         } else {
-            weakScheduler->schedule(
-                std::move(setToRecieve)
-            );
+            weakScheduler->schedule(std::move(setToRecieve));
         }
     }
 }
