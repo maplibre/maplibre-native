@@ -138,7 +138,7 @@ void Renderer::setTileCacheEnabled(bool enable) {
     impl->orchestrator.setTileCacheEnabled(enable);
 }
 
-bool Renderer::getTileCacheEnabled() {
+bool Renderer::getTileCacheEnabled() const {
     return impl->orchestrator.getTileCacheEnabled();
 }
 

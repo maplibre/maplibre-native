@@ -109,7 +109,7 @@ public:
 
     // Memory
     void setTileCacheEnabled(bool);
-    bool getTileCacheEnabled();
+    bool getTileCacheEnabled() const;
     void reduceMemoryUse();
     void clearData();
 

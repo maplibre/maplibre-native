@@ -766,7 +766,7 @@ void RenderOrchestrator::setTileCacheEnabled(bool enable) {
     }
 }
 
-bool RenderOrchestrator::getTileCacheEnabled() {
+bool RenderOrchestrator::getTileCacheEnabled() const {
     return tileCacheEnabled;
 }
 

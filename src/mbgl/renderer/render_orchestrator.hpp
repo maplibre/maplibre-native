@@ -93,7 +93,7 @@ public:
                             const std::optional<std::string>& stateKey);
 
     void setTileCacheEnabled(bool);
-    bool getTileCacheEnabled();
+    bool getTileCacheEnabled() const;
     void reduceMemoryUse();
     void dumpDebugLogs();
     void collectPlacedSymbolData(bool);
