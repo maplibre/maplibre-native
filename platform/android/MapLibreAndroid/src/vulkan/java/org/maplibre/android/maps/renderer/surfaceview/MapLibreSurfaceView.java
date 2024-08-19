@@ -313,6 +313,8 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
       wantRenderNotification = false;
 
       boolean sizeChanged = false;
+      boolean initSurface = false;
+      boolean destroySurface = false;
       boolean wantRenderNotification = false;
       boolean doRenderNotification = false;
       int w = 0;
@@ -341,16 +343,17 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
             if (paused && graphicsSurfaceCreated) {
               MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
               if (view != null) {
-                view.renderer.onSurfaceDestroyed();
+                destroySurface = true;
                 graphicsSurfaceCreated = false;
               }
+              renderThreadManager.notifyAll();
             }
 
             // lost surface
             if (!hasSurface && !waitingForSurface) {
               MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
               if (view != null) {
-                view.renderer.onSurfaceDestroyed();
+                destroySurface = true;
                 graphicsSurfaceCreated = false;
               }
               waitingForSurface = true;
@@ -361,7 +364,7 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
             if (hasSurface && waitingForSurface) {
               MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
               if (view != null) {
-                view.renderer.onSurfaceCreated();
+                initSurface = true;
                 graphicsSurfaceCreated = true;
               }
               waitingForSurface = false;
@@ -415,11 +418,26 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
         }
 
         MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
+
+        if (destroySurface) {
+          if (view != null) {
+            view.renderer.onSurfaceDestroyed();
+            destroySurface = false;
+          }
+        }
+
+        if (initSurface) {
+          if (view != null) {
+            view.renderer.onSurfaceCreated();
+            initSurface = false;
+          }
+        }
+
         if (sizeChanged) {
           if (view != null) {
             view.renderer.onSurfaceChanged(w, h);
+            sizeChanged = false;
           }
-          sizeChanged = false;
         }
 
         if (view != null) {
