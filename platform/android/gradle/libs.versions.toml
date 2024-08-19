@@ -38,6 +38,7 @@ androidGradlePlugin = "8.5.2"
 [libraries]
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+kotlinxCoroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 maplibreJavaGeoJSON = { group = "org.maplibre.gl", name = "android-sdk-geojson", version.ref = "mapLibreServices" }
 maplibreGestures = { group = "org.maplibre.gl", name = "maplibre-android-gestures", version.ref = "maplibreGestures" }
 maplibreJavaTurf = { group = "org.maplibre.gl", name = "android-sdk-turf", version.ref = "mapLibreServices" }
