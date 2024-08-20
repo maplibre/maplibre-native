@@ -5,9 +5,10 @@
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/color.hpp>
-#include <mbgl/util/identity.hpp>
-#include <mbgl/util/traits.hpp>
 #include <mbgl/util/containers.hpp>
+#include <mbgl/util/identity.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
+#include <mbgl/util/traits.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -259,6 +260,8 @@ public:
     const std::shared_ptr<Bucket>& getBucket() const;
     void setRenderTile(Immutable<std::vector<RenderTile>>, const RenderTile*);
 
+  const std::chrono::duration<double> createTime = util::MonotonicTimer::now();
+
 protected:
     bool enabled = true;
     bool enableColor = true;
@@ -279,6 +282,7 @@ protected:
     UniqueDrawableData drawableData{};
     gfx::VertexAttributeArrayPtr vertexAttributes;
     gfx::VertexAttributeArrayPtr instanceAttributes;
+    std::chrono::duration<double> attributeUpdateTime = util::MonotonicTimer::now();
 
     struct Impl;
     std::unique_ptr<Impl> impl;

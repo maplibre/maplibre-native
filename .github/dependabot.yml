@@ -25,6 +25,8 @@ updates:
       - '/test/android'
     schedule:
       interval: 'weekly'
+    ignore:
+      - dependency-name: 'io.github.vvb2060.ndk:curl'
     groups:
       dependencies:
         patterns:
