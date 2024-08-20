@@ -76,7 +76,7 @@ std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Si
                                                                         const void* data,
                                                                         gfx::TexturePixelType format,
                                                                         gfx::TextureChannelDataType type) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     auto obj = commandEncoder.context.createUniqueTexture(size, format, type);
     auto resource = std::make_unique<gl::TextureResource>(std::move(obj));
@@ -97,7 +97,7 @@ void UploadPass::updateTextureResource(gfx::TextureResource& resource,
                                        const void* data,
                                        gfx::TexturePixelType format,
                                        gfx::TextureChannelDataType type) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     updateTextureResourceSub(resource, 0, 0, size, data, format, type);
 }
@@ -109,7 +109,7 @@ void UploadPass::updateTextureResourceSub(gfx::TextureResource& resource,
                                           const void* data,
                                           gfx::TexturePixelType format,
                                           gfx::TextureChannelDataType type) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     auto& ctx = commandEncoder.context;
     assert(ctx.getTexturePool().isUsed(static_cast<gl::TextureResource&>(resource).texture));

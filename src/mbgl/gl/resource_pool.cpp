@@ -64,7 +64,7 @@ Texture2DPool::~Texture2DPool() {
 }
 
 TextureID Texture2DPool::alloc(const Texture2DDesc& desc) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     context->renderingStats().numActiveTextures++;
 
@@ -87,7 +87,7 @@ TextureID Texture2DPool::alloc(const Texture2DDesc& desc) {
 }
 
 void Texture2DPool::release(TextureID id) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     assert(isUsed(id));
     auto desc = descriptions.at(id);
@@ -102,7 +102,7 @@ void Texture2DPool::release(TextureID id) {
 }
 
 TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     // Create handle
     TextureID id = 0;
@@ -136,7 +136,7 @@ TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
     auto storage = storageSize(desc);
     poolStorage += storage;
     context->renderingStats().memTextures += storage;
-    MLN_TRACE_ALLOC_TEXTURE(id, storage)
+    MLN_TRACE_ALLOC_TEXTURE(id, storage);
 
     // Evict old textures if necessary
     evict();
@@ -145,7 +145,7 @@ TextureID Texture2DPool::allocateGLMemory(const Texture2DDesc& desc) {
 }
 
 void Texture2DPool::freeAllocatedGLMemory(TextureID id) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     // Remove from descriptions
     auto desc_it = descriptions.find(id);
@@ -171,7 +171,7 @@ void Texture2DPool::freeAllocatedGLMemory(TextureID id) {
     poolStorage -= storage;
     context->renderingStats().memTextures -= storage;
     assert(context->renderingStats().memTextures >= 0);
-    MLN_TRACE_FREE_TEXTURE(id)
+    MLN_TRACE_FREE_TEXTURE(id);
 
     // Delete the texture
     MBGL_CHECK_ERROR(glDeleteTextures(1, &id));
@@ -189,7 +189,7 @@ void Texture2DPool::evict() {
 }
 
 void Texture2DPool::shrink() {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     while (!lru_cache.empty()) {
         TextureID id = lru_cache.evict();

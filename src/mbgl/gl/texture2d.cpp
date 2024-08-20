@@ -72,7 +72,7 @@ size_t Texture2D::numChannels() const noexcept {
 }
 
 void Texture2D::allocateTexture() noexcept {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     // Create a new texture object
     auto obj = context.createUniqueTexture(size, pixelFormat, channelType);
@@ -82,7 +82,7 @@ void Texture2D::allocateTexture() noexcept {
 }
 
 void Texture2D::updateTextureData(const void* data) noexcept {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     if (data) {
         uploadSubRegion(data, size, 0, 0);
     }
