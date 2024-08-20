@@ -1,8 +1,9 @@
 // Global functions //
 
-const ejs = require('ejs');
-const fs = require('fs');
-const path = require('path');
+import ejs from "ejs";
+import fs from "node:fs";
+
+import path from "node:path";
 
 global.iff = function (condition, val) {
   return condition() ? val : "";
@@ -61,7 +62,7 @@ global.writeIfModified = function(filename, newContent, output) {
   console.warn(`* Updating outdated file '${filename}'`);
 };
 
-global.readAndCompile = function(filename, root) {
+export function readAndCompile(filename, root) {
   if (root) {
     filename = path.resolve(path.join(root, filename));
   }

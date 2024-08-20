@@ -1,13 +1,9 @@
-#!/usr/bin/env node
-'use strict';
+import { ArgumentParser } from "argparse";
+import * as path from "node:path";
+import spec from "./style-spec.js";
+import colorParser from "csscolorparser";
 
-const { ArgumentParser } = require("argparse");
-const path = require('path');
-const fs = require('fs');
-const spec = require('./style-spec');
-const colorParser = require('csscolorparser');
-
-require('./style-code');
+import { readAndCompile } from "./style-code.js";
 
 // Parse command line
 const args = (() => {
@@ -98,7 +94,7 @@ global.evaluatedType = function (property) {
     } else {
       return `std::vector<${evaluatedType({type: property.value, name: property.name})}>`;
     }
-  default: throw new Error(`unknown type for ${property.name}`)
+  default: throw new Error(`unknown type for ${property.name} ${JSON.stringify(property)}`)
   }
 };
 
@@ -222,7 +218,7 @@ global.defaultValue = function (property) {
 };
 
 console.log("Generating style code...");
-const root = path.dirname(__dirname);
+const root = path.join(import.meta.dirname, "..")
 const outLocation = args.out ? args.out : root;
 
 const layerHpp = readAndCompile(`include/mbgl/style/layers/layer.hpp.ejs`, root);

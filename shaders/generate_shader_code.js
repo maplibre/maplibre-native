@@ -1,12 +1,8 @@
-#!/usr/bin/env node
-'use strict';
-
 console.log("Generating shaders...");
 
-const { ArgumentParser } = require("argparse");
-const path = require("node:path");
-const fs = require("node:fs")
-const os = require("node:os");
+import { ArgumentParser } from "argparse";
+import path from "node:path";
+import fs from "node:fs";
 
 const generatedHeader = `// Generated code, do not modify this file!`;
 
@@ -220,7 +216,7 @@ const args = (() => {
 
 
 // Generate shader source headers
-const root = path.dirname(__dirname);
+const root = path.dirname(import.meta.dirname);
 const outLocation = args.out ? args.out : root;
 const shaderRoot = path.join(root, "shaders");
 const outputRoot = path.join(outLocation, "include/mbgl/shaders");

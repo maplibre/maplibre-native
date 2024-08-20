@@ -1,4 +1,4 @@
-const referenceSpec = require('../scripts/style-spec-reference/v8');
+import referenceSpec from "../scripts/style-spec-reference/v8.json" with { type: "json" };;
 
 referenceSpec.layer.type.values["location-indicator"] = {};
 referenceSpec["layout_location-indicator"] = {
@@ -193,4 +193,4 @@ referenceSpec["paint_location-indicator"] = {
     }
 };
 
-var spec = module.exports = referenceSpec
+export default referenceSpec;

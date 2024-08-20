@@ -42,5 +42,6 @@
     "typescript": "^5.4.5",
     "xcode": "^3.0.1"
   },
-  "scripts": {}
+  "scripts": {},
+  "type": "module"
 }
