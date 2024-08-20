@@ -9,7 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNMapView;
 @class MLNUserLocation;
 
-/** View representing an `MLNUserLocation` on screen. */
+/** View representing an ``MLNUserLocation`` on screen. */
 MLN_EXPORT
 @interface MLNUserLocationAnnotationView : MLNAnnotationView
 

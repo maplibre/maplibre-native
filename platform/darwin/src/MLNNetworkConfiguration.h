@@ -11,7 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  :nodoc:
- Provides an `NSURLSession` object for the specified `MLNNetworkConfiguration`.
+ Provides an `NSURLSession` object for the specified ``MLNNetworkConfiguration``.
  This API should be considered experimental, likely to be removed or changed in
  future releases.
 
@@ -27,7 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /**
- The `MLNNetworkConfiguration` object provides a global way to set a base
+ The ``MLNNetworkConfiguration`` object provides a global way to set a base
  `NSURLSessionConfiguration`, and other resources.
  */
 MLN_EXPORT
@@ -35,12 +35,12 @@ MLN_EXPORT
 
 /**
  :nodoc:
- Delegate for the `MLNNetworkConfiguration` class.
+ Delegate for the ``MLNNetworkConfiguration`` class.
  */
 @property (nonatomic, weak) id<MLNNetworkConfigurationDelegate> delegate;
 
 /**
- Returns the shared instance of the `MLNNetworkConfiguration` class.
+ Returns the shared instance of the ``MLNNetworkConfiguration`` class.
  */
 @property (class, nonatomic, readonly) MLNNetworkConfiguration *sharedManager;
 
@@ -51,8 +51,8 @@ MLN_EXPORT
  If this property is set to nil or if no session configuration is provided this property
  is set to the default session configuration.
 
- Assign this object before instantiating any `MLNMapView` object, or using
- `MLNOfflineStorage`
+ Assign this object before instantiating any ``MLNMapView`` object, or using
+ ``MLNOfflineStorage``
 
  @note `NSURLSession` objects store a copy of this configuration. Any further changes
  to mutable properties on this configuration object passed to a session’s initializer

@@ -4,7 +4,7 @@
  :nodoc:
  Bitmask values that describe why a camera move occurred.
 
- Values of this type are passed to the `MLNMapView`'s delegate in the following methods:
+ Values of this type are passed to the ``MLNMapView``'s delegate in the following methods:
 
  - `-mapView:shouldChangeFromCamera:toCamera:reason:`
  - `-mapView:regionWillChangeWithReason:animated:`
@@ -12,8 +12,8 @@
  - `-mapView:regionDidChangeWithReason:animated:`
 
  It's important to note that it's almost impossible to perform a rotate without zooming (in or out),
- so if you'll often find `MLNCameraChangeReasonGesturePinch` set alongside
- `MLNCameraChangeReasonGestureRotate`.
+ so if you'll often find ``MLNCameraChangeReasonGesturePinch`` set alongside
+ ``MLNCameraChangeReasonGestureRotate``.
 
  Since there are several reasons why a zoom or rotation has occurred, it is worth considering
  creating a combined constant, for example:

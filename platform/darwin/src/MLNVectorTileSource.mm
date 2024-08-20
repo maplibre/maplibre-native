@@ -95,7 +95,7 @@ static NSArray * const MLNMapboxStreetsLanguages = @[
 ];
 
 /**
- Like `MLNMapboxStreetsLanguages`, but deanglicized for use with
+ Like ``MLNMapboxStreetsLanguages``, but deanglicized for use with
  `+[NSBundle preferredLocalizationsFromArray:forPreferences:]`.
  */
 static NSArray * const MLNMapboxStreetsAlternativeLanguages = @[
