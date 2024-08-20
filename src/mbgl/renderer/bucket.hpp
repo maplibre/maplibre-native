@@ -74,6 +74,11 @@ public:
     const util::SimpleIdentity& getID() const { return bucketID; }
 #endif
 
+    virtual bool check(std::string_view) { return true; }
+
+    const std::optional<std::thread::id>& getRenderThreadID() const { return renderThreadID; }
+    void setRenderThreadID(std::optional<std::thread::id> id) { renderThreadID = id; }
+
 protected:
     Bucket() = default;
     std::atomic<bool> uploaded{false};
@@ -81,6 +86,8 @@ protected:
 #if MLN_DRAWABLE_RENDERER
     util::SimpleIdentity bucketID;
 #endif
+
+    std::optional<std::thread::id> renderThreadID;
 };
 
 } // namespace mbgl

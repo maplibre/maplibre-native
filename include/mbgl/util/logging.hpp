@@ -8,6 +8,11 @@
 #include <string>
 #include <optional>
 
+#define STRINGIZE(x) STRINGIZE2(x)
+#define STRINGIZE2(x) #x
+#define __LINE_STRING__ STRINGIZE(__LINE__)
+#define __SOURCE_LOCATION__ __FILE__ ":" __LINE_STRING__
+
 namespace mbgl {
 
 class Log {

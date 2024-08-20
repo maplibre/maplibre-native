@@ -1,5 +1,7 @@
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
+#include <mbgl/util/logging.hpp>
+
 #include <utility>
 
 namespace mbgl {
@@ -127,7 +129,7 @@ SymbolInstance::SymbolInstance(Anchor& anchor_,
     if (!sharedData->empty()) symbolContent |= SymbolContent::Text;
     if (allowVerticalPlacement && shapedTextOrientations.vertical) {
         const float verticalPointLabelAngle = 90.0f;
-        verticalTextCollisionFeature = CollisionFeature(line(),
+        verticalTextCollisionFeature = CollisionFeature(line({}),
                                                         anchor,
                                                         shapedTextOrientations.vertical,
                                                         textBoxScale_,
@@ -162,49 +164,59 @@ SymbolInstance::SymbolInstance(Anchor& anchor_,
     }
 }
 
-const GeometryCoordinates& SymbolInstance::line() const {
+const GeometryCoordinates& SymbolInstance::line(std::string_view source) const {
+    check(source);
     assert(sharedData);
     return sharedData->line;
 }
 
-const SymbolQuads& SymbolInstance::rightJustifiedGlyphQuads() const {
+const SymbolQuads& SymbolInstance::rightJustifiedGlyphQuads(std::string_view source) const {
+    check(source);
     assert(sharedData);
     return sharedData->rightJustifiedGlyphQuads;
 }
 
-const SymbolQuads& SymbolInstance::leftJustifiedGlyphQuads() const {
+const SymbolQuads& SymbolInstance::leftJustifiedGlyphQuads(std::string_view source) const {
+    check(source);
     assert(sharedData);
     return sharedData->leftJustifiedGlyphQuads;
 }
 
-const SymbolQuads& SymbolInstance::centerJustifiedGlyphQuads() const {
+const SymbolQuads& SymbolInstance::centerJustifiedGlyphQuads(std::string_view source) const {
+    check(source);
     assert(sharedData);
     return sharedData->centerJustifiedGlyphQuads;
 }
 
-const SymbolQuads& SymbolInstance::verticalGlyphQuads() const {
+const SymbolQuads& SymbolInstance::verticalGlyphQuads(std::string_view source) const {
+    check(source);
     assert(sharedData);
     return sharedData->verticalGlyphQuads;
 }
 
-const std::optional<SymbolQuads>& SymbolInstance::iconQuads() const {
+const std::optional<SymbolQuads>& SymbolInstance::iconQuads(std::string_view source) const {
+    check(source);
     assert(sharedData);
     return sharedData->iconQuads;
 }
 
-bool SymbolInstance::hasText() const {
-    return static_cast<bool>(symbolContent & SymbolContent::Text);
+bool SymbolInstance::hasText(std::string_view source) const {
+    check(source);
+    return (symbolContent & SymbolContent::Text);
 }
 
-bool SymbolInstance::hasIcon() const {
-    return static_cast<bool>(symbolContent & SymbolContent::IconRGBA) || hasSdfIcon();
+bool SymbolInstance::hasIcon(std::string_view source) const {
+    check(source);
+    return (symbolContent & SymbolContent::IconRGBA) || hasSdfIcon(source);
 }
 
-bool SymbolInstance::hasSdfIcon() const {
-    return static_cast<bool>(symbolContent & SymbolContent::IconSDF);
+bool SymbolInstance::hasSdfIcon(std::string_view source) const {
+    check(source);
+    return (symbolContent & SymbolContent::IconSDF);
 }
 
-const std::optional<SymbolQuads>& SymbolInstance::verticalIconQuads() const {
+const std::optional<SymbolQuads>& SymbolInstance::verticalIconQuads(std::string_view source) const {
+    check(source);
     assert(sharedData);
     return sharedData->verticalIconQuads;
 }
@@ -213,10 +225,79 @@ void SymbolInstance::releaseSharedData() {
     sharedData.reset();
 }
 
-std::optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex() const {
+std::optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex(std::string_view source) const {
+    check(source);
     if (placedRightTextIndex) return placedRightTextIndex;
     if (placedCenterTextIndex) return placedCenterTextIndex;
     if (placedLeftTextIndex) return placedLeftTextIndex;
     return std::nullopt;
 }
+
+bool SymbolInstance::check(std::string_view source) const {
+    return !isFailed && check(check01, 1, source) && check(check02, 2, source) && check(check03, 3, source) &&
+           check(check04, 4, source) && check(check05, 5, source) && check(check06, 6, source) &&
+           check(check07, 7, source) && check(check08, 8, source) && check(check09, 9, source) &&
+           check(check10, 10, source) && check(check11, 11, source) && check(check12, 12, source) &&
+           check(check13, 13, source) && check(check14, 14, source) && check(check15, 15, source) &&
+           check(check16, 16, source) && check(check17, 17, source) && check(check18, 18, source) &&
+           check(check19, 19, source) && check(check20, 20, source) && check(check21, 21, source) &&
+           check(check22, 22, source) && check(check23, 23, source) && check(check24, 24, source) &&
+           check(check25, 25, source) && check(check26, 26, source) && check(check27, 27, source) &&
+           check(check28, 28, source) && check(check29, 29, source);
+}
+
+bool SymbolInstance::checkIndexes(std::size_t textCount,
+                                  std::size_t iconSize,
+                                  std::size_t sdfSize,
+                                  std::string_view source) const {
+    return !isFailed && checkIndex(placedRightTextIndex, textCount, source) &&
+           checkIndex(placedCenterTextIndex, textCount, source) && checkIndex(placedLeftTextIndex, textCount, source) &&
+           checkIndex(placedVerticalTextIndex, textCount, source) &&
+           checkIndex(placedIconIndex, hasSdfIcon({}) ? sdfSize : iconSize, source) &&
+           checkIndex(placedVerticalIconIndex, hasSdfIcon({}) ? sdfSize : iconSize, source);
+}
+
+bool SymbolInstance::check(std::size_t v, int n, std::string_view source) const {
+    if (!isFailed && v != checkVal && !source.empty()) {
+        isFailed = true;
+        Log::Error(Event::Crash,
+                   "SymbolInstance corrupted at " + util::toString(n) + " with value " + util::toString(v) + " from " +
+                       std::string(source));
+    }
+    return !isFailed;
+}
+
+bool SymbolInstance::checkKey(std::string_view source) const {
+    if (!isFailed && key.size() > 1000) { // largest observed value=62
+        isFailed = true;
+        Log::Error(
+            Event::Crash,
+            "SymbolInstance key corrupted with size=" + util::toString(key.size()) + " from " + std::string(source));
+    }
+    return !isFailed;
+}
+
+bool SymbolInstance::checkIndex(const std::optional<std::size_t>& index,
+                                std::size_t size,
+                                std::string_view source) const {
+    if (index.has_value() && *index >= size) {
+        isFailed = true;
+        Log::Error(Event::Crash,
+                   "SymbolInstance index corrupted with value=" + util::toString(*index) +
+                       " size=" + util::toString(size) + " from " + std::string(source));
+    }
+    return !isFailed;
+}
+
+void SymbolInstance::forceFail() const {
+    isFailed = true;
+}
+
+// this is just to avoid warnings about the values never being set
+void SymbolInstance::forceFailInternal() {
+    check01 = check02 = check03 = check04 = check05 = check06 = check07 = check08 = check09 = check10 = check11 =
+        check12 = check13 = check14 = check15 = check16 = check17 = check18 = check19 = check20 = check21 = check22 =
+            check23 = check24 = check25 = check26 = check27 = check28 = check29 = 0;
+}
+
 } // namespace mbgl

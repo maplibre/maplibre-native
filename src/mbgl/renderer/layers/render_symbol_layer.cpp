@@ -489,6 +489,10 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
         assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
+        if (!bucket.check(__SOURCE_LOCATION__)) {
+            continue;
+        }
+
         // Prevent a flickering issue when a symbol is moved.
         // bucket.justReloaded = false;
 

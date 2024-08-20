@@ -76,6 +76,8 @@ public:
 
     void reset();
 
+    const std::thread::id renderThreadID = std::this_thread::get_id();
+
 private:
     std::map<std::string, CrossTileSymbolLayerIndex> layerIndexes;
     uint32_t maxCrossTileID = 0;

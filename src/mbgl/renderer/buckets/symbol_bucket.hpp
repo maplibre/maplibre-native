@@ -105,6 +105,8 @@ public:
     // |sortKeyRange| is `std::nullopt`.
     SymbolInstanceReferences getSymbols(const std::optional<SortKeyRange>& sortKeyRange = std::nullopt) const;
 
+    bool check(std::string_view source) override;
+
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     const std::string bucketLeaderID;
     float sortedAngle = std::numeric_limits<float>::max();
