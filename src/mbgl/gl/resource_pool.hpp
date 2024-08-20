@@ -37,7 +37,7 @@ class Texture2DPool {
 public:
     // Create a texture pool with a maximum storage size maxPoolStorage in bytes
     // If maxPoolStorage is 0, pooling will disabled
-    Texture2DPool(Context* context, size_t maxPoolStorage = 32 * 1024 * 1024);
+    Texture2DPool(Context* context, size_t maxPoolStorage = 16 * 1024 * 1024);
 
     // Deallocate all storage
     ~Texture2DPool();
