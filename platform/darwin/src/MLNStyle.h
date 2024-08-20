@@ -29,7 +29,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNRedundantSourceIdentifier
  It is also possible to directly manipulate the current map style
  via ``MLNMapView/style`` by updating the style's data sources or layers.
 
- @note Wait until the map style has finished loading before modifying a map's
+ > Note: Wait until the map style has finished loading before modifying a map's
     style via any of the ``MLNStyle`` instance methods below. You can use the
     ``MLNMapViewDelegate/mapView:didFinishLoadingStyle:`` or
     ``MLNMapViewDelegate/mapViewDidFinishLoadingMap:`` methods as indicators
@@ -101,12 +101,12 @@ MLN_EXPORT
 /**
  Adds a new source to the current style.
 
- @note Adding the same source instance more than once will result in a
+ > Note: Adding the same source instance more than once will result in a
     ``MLNRedundantSourceException``. Reusing the same source identifier, even with
     different source instances, will result in a
     ``MLNRedundantSourceIdentifierException``.
 
- @note Sources should be added in
+ > Note: Sources should be added in
     ``MLNMapViewDelegate/mapView:didFinishLoadingStyle:`` or
     ``MLNMapViewDelegate/mapViewDidFinishLoadingMap:`` to ensure that the map
     has loaded the style and is ready to accept a new source.
@@ -154,11 +154,11 @@ MLN_EXPORT
 /**
  Adds a new layer on top of existing layers.
 
- @note Adding the same layer instance more than once will result in a
+ > Note: Adding the same layer instance more than once will result in a
     ``MLNRedundantLayerException``. Reusing the same layer identifer, even with
     different layer instances, will also result in an exception.
 
- @note Layers should be added in
+ > Note: Layers should be added in
     ``MLNMapViewDelegate/mapView:didFinishLoadingStyle:`` or
     ``MLNMapViewDelegate/mapViewDidFinishLoadingMap:`` to ensure that the map
     has loaded the style and is ready to accept a new layer.
@@ -171,11 +171,11 @@ MLN_EXPORT
 /**
  Inserts a new layer into the style at the given index.
 
- @note Adding the same layer instance more than once will result in a
+ > Note: Adding the same layer instance more than once will result in a
     ``MLNRedundantLayerException``. Reusing the same layer identifer, even with
     different layer instances, will also result in an exception.
 
- @note Layers should be added in
+ > Note: Layers should be added in
     ``MLNMapViewDelegate/mapView:didFinishLoadingStyle:`` or
     ``MLNMapViewDelegate/mapViewDidFinishLoadingMap:`` to ensure that the map
     has loaded the style and is ready to accept a new layer.
@@ -190,7 +190,7 @@ MLN_EXPORT
 /**
  Inserts a new layer below another layer.
 
- @note Inserting the same layer instance more than once will result in a
+ > Note: Inserting the same layer instance more than once will result in a
     ``MLNRedundantLayerException``. Reusing the same layer identifer, even with
     different layer instances, will also result in an exception.
 
@@ -206,7 +206,7 @@ MLN_EXPORT
 /**
  Inserts a new layer above another layer.
 
- @note Inserting the same layer instance more than once will result in a
+ > Note: Inserting the same layer instance more than once will result in a
     ``MLNRedundantLayerException``. Reusing the same layer identifer, even with
     different layer instances, will also result in an exception.
 

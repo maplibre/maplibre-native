@@ -404,7 +404,7 @@ MLN_EXPORT
 
  @return An array of objects that conform to the ``MLNFeature`` protocol.
 
- @note The returned array may contain the `cluster` that was passed in, if the next
+ > Note: The returned array may contain the `cluster` that was passed in, if the next
     zoom level doesn't match the zoom level for expanding that cluster. See
     ``MLNShapeSource/zoomLevelForExpandingCluster:``.
  */

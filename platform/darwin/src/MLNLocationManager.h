@@ -45,7 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
  The default value is `kCLLocationAccuracyBest` when ``MLNMapView`` uses its
  default location manager.
 
- @note Determining a location with greater accuracy requires more time and more power.
+ > Note: Determining a location with greater accuracy requires more time and more power.
 
  @see `CLLocationManager.desiredAccuracy`
  */
@@ -62,7 +62,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Specifies the level of location accuracy the Maps SDK has permission to use.
 
- @note If the value of this property is `CLAccuracyAuthorizationFullAccuracy`, you can set the
+ > Note: If the value of this property is `CLAccuracyAuthorizationFullAccuracy`, you can set the
  ``MLNLocationManager/desiredAccuracy`` property to any value. If the value is
  `CLAccuracyAuthorizationReducedAccuracy`, setting ``MLNLocationManager/desiredAccuracy`` to a value
  other than` kCLLocationAccuracyReduced` has no effect on the location information.
@@ -95,7 +95,7 @@ NS_ASSUME_NONNULL_BEGIN
  Requests the user's permission to temporarily use location update services
  with full accuracy.
 
- @note If the user turned off location accuracy you may use this method to
+ > Note: If the user turned off location accuracy you may use this method to
  request full accuracy for a session.
  */
 - (void)requestTemporaryFullAccuracyAuthorizationWithPurposeKey:(NSString *)purposeKey

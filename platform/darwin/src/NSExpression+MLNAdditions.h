@@ -199,7 +199,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode
 /**
  Returns a constant expression appending the passed expression.
 
- @note Both the receiver and the given expression must be an `NSString` constant
+ > Note: Both the receiver and the given expression must be an `NSString` constant
  expression type; otherwise, an exception is rised.
 
  @param expression The expression to append to the receiver.

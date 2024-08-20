@@ -189,7 +189,7 @@ NS_INLINE MLNCoordinateBounds MLNCoordinateBoundsOffset(MLNCoordinateBounds boun
 /**
  Returns `YES` if the coordinate bounds covers no area.
 
- @note A bounds may be empty but have a non-zero coordinate span (e.g., when its
+ > Note: A bounds may be empty but have a non-zero coordinate span (e.g., when its
     northeast point lies due north of its southwest point).
  */
 NS_INLINE BOOL MLNCoordinateBoundsIsEmpty(MLNCoordinateBounds bounds) {

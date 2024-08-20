@@ -173,7 +173,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNUserLocationAnnotationTyp
  mapView.addGestureRecognizer(mapTapGestureRecognizer)
  ```
 
- @note You are responsible for getting permission to use the map data and for
+ > Note: You are responsible for getting permission to use the map data and for
  ensuring that your use adheres to the relevant terms of use.
  */
 MLN_EXPORT
@@ -360,7 +360,7 @@ MLN_EXPORT
  If you choose to reimplement this view, assign the `-showAttribution:` method
  as the action for your view to present the default notices and settings.
 
- @note Attribution is often required for many vector sources,
+ > Note: Attribution is often required for many vector sources,
     OpenStreetMap data, or other data such as satellite or terrain
     data. If that applies to this map view, do not hide this view or remove
     any notices from it.
@@ -786,7 +786,7 @@ vertically on the map.
     location or `NO` if you want the map to display the new location
     immediately.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`.
  */
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)coordinate animated:(BOOL)animated;
@@ -802,7 +802,7 @@ vertically on the map.
     zooming to the new location or `NO` if you want the map to display the new
     location immediately.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`.
  */
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
@@ -822,7 +822,7 @@ vertically on the map.
     zooming, and rotating to the new location or `NO` if you want the map to
     display the new location immediately.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`.
  */
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
@@ -844,7 +844,7 @@ vertically on the map.
     display the new location immediately.
  @param completion The block executed after the animation finishes.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`.
  */
 - (void)setCenterCoordinate:(CLLocationCoordinate2D)centerCoordinate
@@ -1314,7 +1314,7 @@ vertically on the map.
     including the entire coordinate bounds. The camera object uses the current
     direction and pitch.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`; you may receive a `nil` return value
  depending on the order of notification delivery.
  */
@@ -1332,7 +1332,7 @@ vertically on the map.
     including the entire coordinate bounds. The camera object uses the current
     direction and pitch.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`; you may receive a `nil` return value
  depending on the order of notification delivery.
  */
@@ -1354,7 +1354,7 @@ vertically on the map.
     including the entire coordinate bounds. The initial camera's pitch and
     direction will be honored.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`; you may receive a `nil` return value
  depending on the order of notification delivery.
  */
@@ -1375,7 +1375,7 @@ vertically on the map.
     (close to the ground) as possible while still including the entire shape.
     The initial camera's pitch and direction will be honored.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`; you may receive a `nil` return value
  depending on the order of notification delivery.
  */
@@ -1396,7 +1396,7 @@ vertically on the map.
     (close to the ground) as possible while still including the entire shape.
     The camera object uses the current pitch.
 
- @note The behavior of this method is undefined if called in response to
+ > Note: The behavior of this method is undefined if called in response to
  `UIApplicationWillTerminateNotification`; you may receive a `nil` return value
  depending on the order of notification delivery.
  */
@@ -1614,7 +1614,7 @@ vertically on the map.
 /**
  Adds an annotation to the map view.
 
- @note ``MLNMultiPolyline``, ``MLNMultiPolyline``, ``MLNMultiPolyline``, and
+ > Note: ``MLNMultiPolyline``, ``MLNMultiPolyline``, ``MLNMultiPolyline``, and
     ``MLNPointCollection`` objects cannot be added to the map view at this time.
     Any multipoint, multipolyline, multipolygon, shape or point collection
     object that is specified is silently ignored.
@@ -1632,7 +1632,7 @@ vertically on the map.
 /**
  Adds an array of annotations to the map view.
 
- @note ``MLNMultiPolyline``, ``MLNMultiPolyline``, and ``MLNMultiPolyline`` objects
+ > Note: ``MLNMultiPolyline``, ``MLNMultiPolyline``, and ``MLNMultiPolyline`` objects
     cannot be added to the map view at this time. Nor can ``MLNMultiPoint``
     objects that are not instances of ``MLNPolyline`` or ``MLNPolyline``. Any
     multipoint, multipolyline, multipolygon, or shape collection objects that
@@ -1749,7 +1749,7 @@ vertically on the map.
  will animate to bring the annotation and its callout just on screen. If you
  need finer control, consider using `-selectAnnotation:animated:`.
 
- @note In versions prior to `4.0.0` if the annotation was offscreen it was not
+ > Note: In versions prior to `4.0.0` if the annotation was offscreen it was not
  selected.
  */
 @property (nonatomic, copy) NSArray<id<MLNAnnotation>> *selectedAnnotations;
@@ -1777,7 +1777,7 @@ vertically on the map.
  @param annotation The annotation object to select.
  @param animated If `YES`, the annotation and callout view are animated on-screen.
 
- @note In versions prior to `4.0.0` selecting an offscreen annotation did not
+ > Note: In versions prior to `4.0.0` selecting an offscreen annotation did not
  change the camera.
  */
 - (void)selectAnnotation:(id<MLNAnnotation>)annotation
@@ -1806,7 +1806,7 @@ vertically on the map.
  @param animated If `YES`, the annotation and callout view are animated on-screen.
  @param completion The block executed after the animation finishes.
 
- @note In versions prior to `4.0.0` selecting an offscreen annotation did not
+ > Note: In versions prior to `4.0.0` selecting an offscreen annotation did not
  change the camera.
  */
 - (void)selectAnnotation:(id<MLNAnnotation>)annotation

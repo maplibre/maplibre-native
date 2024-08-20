@@ -51,7 +51,7 @@ MLN_EXPORT
  user interaction, a change in the user’s location, when the user tracking mode
  changes, or when the viewport changes.
 
- @note During user interaction with the map, this method may be called many
+ > Note: During user interaction with the map, this method may be called many
  times to update the user location annotation. Therefore, your implementation of
  this method should be as lightweight as possible to avoid negatively affecting
  performance.

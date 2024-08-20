@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
  This method is called from background threads, i.e. it is not called on the main
  thread.
 
- @note Background sessions (i.e. created with
+ > Note: Background sessions (i.e. created with
  `-[NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:]`)
  and sessions created with a delegate that conforms to `NSURLSessionDataDelegate`
  are not supported at this time.
@@ -54,11 +54,11 @@ MLN_EXPORT
  Assign this object before instantiating any ``MLNMapView`` object, or using
  ``MLNOfflineStorage``
 
- @note `NSURLSession` objects store a copy of this configuration. Any further changes
+ > Note: `NSURLSession` objects store a copy of this configuration. Any further changes
  to mutable properties on this configuration object passed to a session’s initializer
  will not affect the behavior of that session.
 
- @note Background sessions are not currently supported.
+ > Note: Background sessions are not currently supported.
  */
 @property (atomic, strong, null_resettable) NSURLSessionConfiguration *sessionConfiguration;
 

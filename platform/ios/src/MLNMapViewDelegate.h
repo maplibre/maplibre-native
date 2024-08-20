@@ -73,7 +73,8 @@ NS_ASSUME_NONNULL_BEGIN
  @return A Boolean value indicating whether the map view should stay at
  `oldCamera` or transition to `newCamera`.
 
- @note If this method is implemented `-mapView:shouldChangeFromCamera:toCamera:` will not be called.
+ > Note: If this method is implemented `-mapView:shouldChangeFromCamera:toCamera:` will not be
+ called.
  */
 - (BOOL)mapView:(MLNMapView *)mapView
     shouldChangeFromCamera:(MLNMapCamera *)oldCamera
@@ -102,7 +103,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param animated Whether the change will cause an animated effect on the map.
  @param reason The reason for the camera change.
 
- @note If this method is implemented `-mapView:regionWillChangeAnimated:` will not be called.
+ > Note: If this method is implemented `-mapView:regionWillChangeAnimated:` will not be called.
  */
 - (void)mapView:(MLNMapView *)mapView
     regionWillChangeWithReason:(MLNCameraChangeReason)reason
@@ -144,7 +145,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param mapView The map view whose viewpoint is changing.
  @param reason The reason for the camera change.
 
- @note If this method is implemented `-mapViewRegionIsChanging:` will not be called.
+ > Note: If this method is implemented `-mapViewRegionIsChanging:` will not be called.
  */
 - (void)mapView:(MLNMapView *)mapView regionIsChangingWithReason:(MLNCameraChangeReason)reason;
 
@@ -174,7 +175,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param animated Whether the change caused an animated effect on the map.
  @param reason The reason for the camera change.
 
- @note If this method is implemented `-mapView:regionDidChangeAnimated:` will not be called.
+ > Note: If this method is implemented `-mapView:regionDidChangeAnimated:` will not be called.
  */
 - (void)mapView:(MLNMapView *)mapView
     regionDidChangeWithReason:(MLNCameraChangeReason)reason

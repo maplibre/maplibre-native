@@ -173,7 +173,7 @@ MLN_EXPORT
  The default value of this property is `NO`. Keep this property set to `NO` if
  the view’s legibility is important.
 
- @note Scaling many on-screen annotation views can contribute to poor map
+ > Note: Scaling many on-screen annotation views can contribute to poor map
     performance. Consider keeping this property disabled if your use case
     involves hundreds or thousands of annotation views.
  */
