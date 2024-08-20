@@ -76,14 +76,14 @@ typedef NS_OPTIONS(NSUInteger, MLNMapDebugMaskOptions) {
   MLNMapDebugCollisionBoxesMask = 1 << 4,
   /** Each drawing operation is replaced by a translucent fill. Overlapping
       drawing operations appear more prominent to help diagnose overdrawing.
-      @note This option does nothing in Release builds of the SDK. */
+      > Note: This option does nothing in Release builds of the SDK. */
   MLNMapDebugOverdrawVisualizationMask = 1 << 5,
 #if !TARGET_OS_IPHONE
   /** The stencil buffer is shown instead of the color buffer.
-      @note This option does nothing in Release builds of the SDK. */
+      > Note: This option does nothing in Release builds of the SDK. */
   MLNMapDebugStencilBufferMask = 1 << 6,
   /** The depth buffer is shown instead of the color buffer.
-      @note This option does nothing in Release builds of the SDK. */
+      > Note: This option does nothing in Release builds of the SDK. */
   MLNMapDebugDepthBufferMask = 1 << 7,
 #endif
 };
