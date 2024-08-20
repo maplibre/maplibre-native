@@ -1,9 +1,9 @@
 import { ArgumentParser } from "argparse";
 import * as path from "node:path";
-import spec from "./style-spec.js";
+import spec from "./style-spec.mjs";
 import colorParser from "csscolorparser";
 
-import { readAndCompile } from "./style-code.js";
+import { readAndCompile } from "./style-code.mjs";
 
 // Parse command line
 const args = (() => {

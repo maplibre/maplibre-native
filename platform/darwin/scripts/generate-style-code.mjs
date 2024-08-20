@@ -4,7 +4,7 @@ import _ from "lodash";
 import colorParser from "csscolorparser";
 import assert from "assert";
 
-import { readAndCompile } from "../../../scripts/style-code.js";
+import { readAndCompile } from "../../../scripts/style-code.mjs";
 
 import cocoaConventions from './style-spec-cocoa-conventions-v8.json' with { type: "json" };
 import styleSpec from '../../../scripts/style-spec-reference/v8.json' with { type: "json" };
