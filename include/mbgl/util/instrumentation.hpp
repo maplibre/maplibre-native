@@ -25,12 +25,12 @@ const void* castGpuIdToTracyPtr(GpuId id) {
     "MLN_RENDER_BACKEND_OPENGL is not defined. MLN_RENDER_BACKEND_OPENGL is expected to be defined in CMake and Bazel"
 #endif
 
-#define MLN_TRACE_FUNC() ZoneScoped;
-#define MLN_TRACE_ZONE(label) ZoneScopedN(#label);
+#define MLN_TRACE_FUNC() ZoneScoped
+#define MLN_TRACE_ZONE(label) ZoneScopedN(#label)
 
-#define MLN_ZONE_TEXT(label) ZoneText(#label, strlen(#label));
-#define MLN_ZONE_STR(str) ZoneText(str.c_str(), str.size());
-#define MLN_ZONE_VALUE(val) ZoneValue(static_cast<uint64_t>(val));
+#define MLN_ZONE_TEXT(text, size) ZoneText(text, size)
+#define MLN_ZONE_STR(str) ZoneText(str.c_str(), str.size())
+#define MLN_ZONE_VALUE(n) ZoneValue(n)
 
 constexpr const char* tracyTextureMemoryLabel = "Texture Memory";
 #define MLN_TRACE_ALLOC_TEXTURE(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyTextureMemoryLabel);

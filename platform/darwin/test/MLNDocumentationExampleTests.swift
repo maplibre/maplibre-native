@@ -541,8 +541,8 @@ class MLNDocumentationExampleTests: XCTestCase, MLNMapViewDelegate {
                 throw ExampleError.featureIsNotACluster
             }
 
-            // Currently the only supported class that conforms to `MLNCluster` is
-            // `MLNPointFeatureCluster`
+            // Currently the only supported class that conforms to ``MLNCluster`` is
+            // ``MLNPointFeatureCluster``
             guard cluster is MLNPointFeatureCluster else {
                 throw ExampleError.unexpectedFeatureType
             }

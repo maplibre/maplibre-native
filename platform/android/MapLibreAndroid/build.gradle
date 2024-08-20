@@ -13,7 +13,7 @@ apply from: "${rootDir}/gradle/native-build.gradle"
 dependencies {
     lintChecks project(":MapLibreAndroidLint")
     api libs.maplibreJavaGeoJSON
-    api libs.mapboxAndroidGestures
+    api libs.maplibreGestures
 
     implementation libs.maplibreJavaTurf
     implementation libs.supportAnnotations
@@ -123,17 +123,13 @@ android {
         warningsAsErrors false
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
     buildFeatures {
         buildConfig true
     }
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 licenseReport {
@@ -157,7 +153,6 @@ configurations {
 
 apply from: "${rootDir}/gradle/gradle-checkstyle.gradle"
 apply from: "${rootDir}/gradle/gradle-dependencies-graph.gradle"
-apply from: "${rootDir}/gradle/gradle-update-vendor-modules.gradle"
 apply from: "${rootDir}/gradle/android-nitpick.gradle"
 apply from: "${rootDir}/gradle/gradle-publish.gradle"
 // intentionally disabled

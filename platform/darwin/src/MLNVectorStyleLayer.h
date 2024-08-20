@@ -6,13 +6,13 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- `MLNVectorStyleLayer` is an abstract superclass for style layers whose content
- is defined by an `MLNShapeSource` or `MLNVectorTileSource` object.
+ ``MLNVectorStyleLayer`` is an abstract superclass for style layers whose content
+ is defined by an ``MLNShapeSource`` or ``MLNShapeSource`` object.
 
- Create instances of `MLNCircleStyleLayer`, `MLNFillStyleLayer`,
- `MLNFillExtrusionStyleLayer`, `MLNHeatmapStyleLayer`, `MLNLineStyleLayer`, and
- `MLNSymbolStyleLayer` in order to use `MLNVectorStyleLayer`'s properties and
- methods. Do not create instances of `MLNVectorStyleLayer` directly, and do not
+ Create instances of ``MLNCircleStyleLayer``, ``MLNCircleStyleLayer``,
+ ``MLNFillExtrusionStyleLayer``, ``MLNFillExtrusionStyleLayer``, ``MLNFillExtrusionStyleLayer``, and
+ ``MLNSymbolStyleLayer`` in order to use ``MLNSymbolStyleLayer``'s properties and
+ methods. Do not create instances of ``MLNVectorStyleLayer`` directly, and do not
  create your own subclasses of this class.
  */
 MLN_EXPORT
