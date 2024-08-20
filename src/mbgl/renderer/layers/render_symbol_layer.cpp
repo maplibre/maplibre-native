@@ -1344,7 +1344,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                     auto drawData = std::make_unique<gfx::SymbolDrawableData>(
                         /*.isHalo=*/isHalo,
-                        /*.bucketVaraiblePlacement=*/bucket.hasVariablePlacement,
+                        /*.bucketVariablePlacement=*/bucket.hasVariablePlacement,
                         /*.symbolType=*/renderable.type,
                         /*.pitchAlignment=*/values.pitchAlignment,
                         /*.rotationAlignment=*/values.rotationAlignment,

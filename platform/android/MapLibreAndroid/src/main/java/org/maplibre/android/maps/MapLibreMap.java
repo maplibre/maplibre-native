@@ -15,11 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 import androidx.annotation.UiThread;
 
-import com.mapbox.android.gestures.AndroidGesturesManager;
-import com.mapbox.android.gestures.MoveGestureDetector;
-import com.mapbox.android.gestures.RotateGestureDetector;
-import com.mapbox.android.gestures.ShoveGestureDetector;
-import com.mapbox.android.gestures.StandardScaleGestureDetector;
+import org.maplibre.android.gestures.AndroidGesturesManager;
+import org.maplibre.android.gestures.MoveGestureDetector;
+import org.maplibre.android.gestures.RotateGestureDetector;
+import org.maplibre.android.gestures.ShoveGestureDetector;
+import org.maplibre.android.gestures.StandardScaleGestureDetector;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Geometry;
 import org.maplibre.android.MapStrictMode;
@@ -322,6 +322,26 @@ public final class MapLibreMap {
   @IntRange(from = 0)
   public int getPrefetchZoomDelta() {
     return nativeMapView.getPrefetchZoomDelta();
+  }
+
+  /**
+   * Indicating whether the map may cache tiles for different zoom levels or not.
+   *
+   * @param enabled true causes the map view to consume more memory and have a smoother user
+   * experience when zoom in/out. The default value of this property is `true`.
+   */
+  public void setTileCacheEnabled(boolean enabled) {
+    nativeMapView.setTileCacheEnabled(enabled);
+  }
+
+  /**
+   * Check whether tile cache is enabled or not.
+   *
+   * @return true if enabled
+   * @see MapLibreMap#setTileCacheEnabled(boolean)
+   */
+  public boolean getTileCacheEnabled() {
+    return nativeMapView.getTileCacheEnabled();
   }
 
   //
@@ -2503,19 +2523,5 @@ public final class MapLibreMap {
     for (OnDeveloperAnimationListener listener : developerAnimationStartedListeners) {
       listener.onDeveloperAnimationStarted();
     }
-  }
-
-  //
-  // Tile cache
-  //
-
-  /**
-   * Indicating whether the map may cache tiles for different zoom levels or not.
-   *
-   * @param enabled true causes the map view to consume more memory and have a smoother user
-   * experience when zoom in/out. The default value of this property is `true`.
-   */
-  public void experimental_setTileCacheEnabled(boolean enabled) {
-    nativeMapView.setTileCacheEnabled(enabled);
   }
 }

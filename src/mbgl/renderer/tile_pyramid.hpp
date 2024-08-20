@@ -60,7 +60,7 @@ public:
 
     std::vector<Feature> querySourceFeatures(const SourceQueryOptions&) const;
 
-    void enableCache(bool);
+    void setCacheEnabled(bool);
     void reduceMemoryUse();
 
     void setObserver(TileObserver*);

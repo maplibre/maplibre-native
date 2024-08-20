@@ -152,14 +152,14 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode
  parameters and steps.
 
  @param inputExpression The interpolating expression input.
- @param curveType The curve type could be `MLNExpressionInterpolationModeLinear`,
- `MLNExpressionInterpolationModeExponential` and
- `MLNExpressionInterpolationModeCubicBezier`.
+ @param curveType The curve type could be ``MLNExpressionInterpolationModeLinear``,
+ ``MLNExpressionInterpolationModeExponential`` and
+ ``MLNExpressionInterpolationModeCubicBezier``.
  @param parameters The parameters expression.
  @param stops The stops expression.
 
  #### Related examples
- TODO: Create a heatmap layer, learn how to style an `MLNHeatmapStyleLayer`
+ TODO: Create a heatmap layer, learn how to style an ``MLNHeatmapStyleLayer``
  based on zoom level and point density with this expression.
  */
 + (instancetype)mgl_expressionForInterpolatingExpression:(nonnull NSExpression *)inputExpression
@@ -185,10 +185,10 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode
     NS_SWIFT_NAME(init(forMLNMatchingKey:in:default:));
 
 /**
- Returns an attributed function expression specifying an `MLNAttributedExpression` constant
+ Returns an attributed function expression specifying an ``MLNAttributedExpression`` constant
  expression array.
 
- @param attributedExpressions The `MLNAttributedExpression` constant expression array.
+ @param attributedExpressions The ``MLNAttributedExpression`` constant expression array.
  */
 + (instancetype)mgl_expressionForAttributedExpressions:
     (nonnull NSArray<NSExpression *> *)attributedExpressions
@@ -199,7 +199,7 @@ FOUNDATION_EXTERN MLN_EXPORT const MLNExpressionInterpolationMode
 /**
  Returns a constant expression appending the passed expression.
 
- @note Both the receiver and the given expression must be an `NSString` constant
+ > Note: Both the receiver and the given expression must be an `NSString` constant
  expression type; otherwise, an exception is rised.
 
  @param expression The expression to append to the receiver.

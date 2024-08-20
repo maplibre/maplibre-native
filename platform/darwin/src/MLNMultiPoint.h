@@ -7,16 +7,16 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MLNMultiPoint` class is an abstract superclass used to define shapes
+ The ``MLNMultiPoint`` class is an abstract superclass used to define shapes
  composed of multiple vertices.
 
- Create instances of `MLNPolyline` or `MLNPolygon` in order to use
- properties of `MLNMultiPoint`. Do not create instances of `MLNMultiPoint`
+ Create instances of ``MLNPolyline`` or ``MLNPolyline`` in order to use
+ properties of ``MLNMultiPoint``. Do not create instances of ``MLNMultiPoint``
  directly and do not create your own subclasses of this class. You can use
  the method and properties of this class to access information about the
  vertices of the line or polygon.
 
- Do not confuse `MLNMultiPoint` with `MLNPointCollection`, which represents a
+ Do not confuse ``MLNMultiPoint`` with ``MLNMultiPoint``, which represents a
  collection of related but disconnected points.
  */
 MLN_EXPORT
@@ -62,8 +62,8 @@ MLN_EXPORT
  Inserts the given vertices into the shape.
 
  If the shape is currently visible on the map as an annotation, it is redrawn
- immediately. If the shape is part of an `MLNShapeSource` object, you must
- explicitly set the `MLNShapeSource.shape` property in order for any style
+ immediately. If the shape is part of an ``MLNShapeSource`` object, you must
+ explicitly set the ``MLNShapeSource/shape`` property in order for any style
  layers that use the source to be redrawn.
 
  @param coords The array of coordinates to insert into the shape. The data in
@@ -80,8 +80,8 @@ MLN_EXPORT
  Appends the given vertices to the shape.
 
  If the shape is currently visible on the map as an annotation, it is redrawn
- immediately. If the shape is part of an `MLNShapeSource` object, you must
- explicitly set the `MLNShapeSource.shape` property in order for any style
+ immediately. If the shape is part of an ``MLNShapeSource`` object, you must
+ explicitly set the ``MLNShapeSource/shape`` property in order for any style
  layers that use the source to be redrawn.
 
  @param coords The array of coordinates to add to the shape. The data in this
@@ -95,8 +95,8 @@ MLN_EXPORT
  vertices from a given C array.
 
  If the shape is currently visible on the map as an annotation, it is redrawn
- immediately. If the shape is part of an `MLNShapeSource` object, you must
- explicitly set the `MLNShapeSource.shape` property in order for any style
+ immediately. If the shape is part of an ``MLNShapeSource`` object, you must
+ explicitly set the ``MLNShapeSource/shape`` property in order for any style
  layers that use the source to be redrawn.
 
  The number of coordinates in `coords` must be equal to the length of `range`.
@@ -122,8 +122,8 @@ MLN_EXPORT
  of vertices from a given C array.
 
  If the shape is currently visible on the map as an annotation, it is redrawn
- immediately. If the shape is part of an `MLNShapeSource` object, you must
- explicitly set the `MLNShapeSource.shape` property in order for any style
+ immediately. If the shape is part of an ``MLNShapeSource`` object, you must
+ explicitly set the ``MLNShapeSource/shape`` property in order for any style
  layers that use the source to be redrawn.
 
  If `count` is greater than the `length` field of `range`, some vertices will
@@ -153,8 +153,8 @@ MLN_EXPORT
  Removes the vertices at the given range from the shape.
 
  If the shape is currently visible on the map as an annotation, it is redrawn
- immediately. If the shape is part of an `MLNShapeSource` object, you must
- explicitly set the `MLNShapeSource.shape` property in order for any style
+ immediately. If the shape is part of an ``MLNShapeSource`` object, you must
+ explicitly set the ``MLNShapeSource/shape`` property in order for any style
  layers that use the source to be redrawn.
 
  If `range` extends beyond the shape’s `coordinates` property, an

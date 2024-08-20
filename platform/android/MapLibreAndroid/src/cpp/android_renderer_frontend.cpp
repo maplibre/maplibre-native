@@ -92,6 +92,10 @@ void AndroidRendererFrontend::setTileCacheEnabled(bool enabled) {
     mapRenderer.actor().invoke(&Renderer::setTileCacheEnabled, enabled);
 }
 
+bool AndroidRendererFrontend::getTileCacheEnabled() const {
+    return mapRenderer.actor().ask(&Renderer::getTileCacheEnabled).get();
+}
+
 void AndroidRendererFrontend::reduceMemoryUse() {
     mapRenderer.actor().invoke(&Renderer::reduceMemoryUse);
 }
