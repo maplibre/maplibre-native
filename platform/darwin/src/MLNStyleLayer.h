@@ -22,7 +22,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNExceptionName const MLNInvalidStyleLayerExceptio
  create your own subclasses of this class.
 
  Do not add ``MLNStyleLayer`` objects to the `style` property of a ``MLNStyleLayer`` before
- `-mapView:didFinishLoadingStyle:` is called.
+ ``MLNMapViewDelegate/mapView:didFinishLoadingStyle:`` is called.
  */
 MLN_EXPORT
 @interface MLNStyleLayer : NSObject

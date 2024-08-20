@@ -46,7 +46,7 @@ MLN_EXPORT
  > Note: You must set the API key before attempting to load any style which
     requires the token. Therefore, you should generally set it before creating an instance of
     ``MLNMapView``. The recommended way to set an api key is to add an entry
-    to your application’s Info.plist file with the key ``MLNApiKey``
+    to your application’s Info.plist file with the key `MLNApiKey``
     and the type `String`. Alternatively, you may call this method from your
     application delegate’s `-applicationDidFinishLaunching:` method.
  */
