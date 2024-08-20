@@ -39,9 +39,6 @@ public:
     }
     VertexAttributeArray& operator=(const VertexAttributeArray& other) = delete;
 
-    /// Indicates whether any values have changed
-    bool isDirty() const override;
-
 private:
     gfx::UniqueVertexAttribute create(int index, gfx::AttributeDataType dataType, std::size_t count) const override {
         return std::make_unique<VertexAttribute>(index, dataType, count);

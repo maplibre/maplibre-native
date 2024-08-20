@@ -9,12 +9,12 @@ bool operator==(const CLLocationCoordinate2D lhs, const CLLocationCoordinate2D r
 @interface MLNShape (Private)
 
 /**
- Returns an `mbgl::GeoJSON` representation of the `MLNShape`.
+ Returns an `mbgl::GeoJSON` representation of the ``MLNShape``.
  */
 - (mbgl::GeoJSON)geoJSONObject;
 
 /**
- Returns an `mbgl::Geometry<double>` representation of the `MLNShape`.
+ Returns an `mbgl::Geometry<double>` representation of the ``MLNShape``.
  */
 - (mbgl::Geometry<double>)geometryObject;
 

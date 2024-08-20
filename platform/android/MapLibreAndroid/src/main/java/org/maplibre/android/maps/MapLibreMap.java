@@ -15,11 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Size;
 import androidx.annotation.UiThread;
 
-import com.mapbox.android.gestures.AndroidGesturesManager;
-import com.mapbox.android.gestures.MoveGestureDetector;
-import com.mapbox.android.gestures.RotateGestureDetector;
-import com.mapbox.android.gestures.ShoveGestureDetector;
-import com.mapbox.android.gestures.StandardScaleGestureDetector;
+import org.maplibre.android.gestures.AndroidGesturesManager;
+import org.maplibre.android.gestures.MoveGestureDetector;
+import org.maplibre.android.gestures.RotateGestureDetector;
+import org.maplibre.android.gestures.ShoveGestureDetector;
+import org.maplibre.android.gestures.StandardScaleGestureDetector;
 import org.maplibre.geojson.Feature;
 import org.maplibre.geojson.Geometry;
 import org.maplibre.android.MapStrictMode;
