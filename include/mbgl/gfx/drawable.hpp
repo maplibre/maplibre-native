@@ -260,7 +260,7 @@ public:
     const std::shared_ptr<Bucket>& getBucket() const;
     void setRenderTile(Immutable<std::vector<RenderTile>>, const RenderTile*);
 
-  const std::chrono::duration<double> createTime = util::MonotonicTimer::now();
+    const std::chrono::duration<double> createTime = util::MonotonicTimer::now();
 
 protected:
     bool enabled = true;
