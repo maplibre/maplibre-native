@@ -4,12 +4,24 @@ import _ from "lodash";
 import colorParser from "csscolorparser";
 import assert from "assert";
 
-import { readAndCompile } from "../../../scripts/style-code.mjs";
+import { readAndCompile, writeIfModified, camelize, unhyphenate } from "../../../scripts/style-code.mjs";
 
 import cocoaConventions from './style-spec-cocoa-conventions-v8.json' with { type: "json" };
 import styleSpec from '../../../scripts/style-spec-reference/v8.json' with { type: "json" };
 import styleSpecOverrides from './style-spec-overrides-v8.json' with { type: "json" };
 
+function setupGlobalEjsHelpers() {
+    const funcs = {
+      camelize,
+      unhyphenate
+    };
+    for (const [funcName, func] of Object.entries(funcs)) {
+      // @ts-ignore
+      global[funcName] = func;
+    }
+  }
+  
+  setupGlobalEjsHelpers();
 
 // Parse command line
 const args = (() => {

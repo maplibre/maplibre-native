@@ -3,7 +3,7 @@ import * as path from "node:path";
 import spec from "./style-spec.mjs";
 import colorParser from "csscolorparser";
 
-import { readAndCompile } from "./style-code.mjs";
+import { camelize, camelizeWithLeadingLowercase, readAndCompile, writeIfModified } from "./style-code.mjs";
 
 // Parse command line
 const args = (() => {
@@ -17,22 +17,33 @@ const args = (() => {
   return parser.parse_args();
 })();
 
-function parseCSSColor(str) {
+function parseCSSColor(/** @type {string} **/ str) {
   const color = colorParser.parseCSSColor(str);
+  if (!color) throw new Error("Could not parse CSS color");
   return [
       color[0] / 255 * color[3], color[1] / 255 * color[3], color[2] / 255 * color[3], color[3]
   ];
 }
 
-global.isLightProperty = function (property) {
+/**
+ * @param {any} property 
+ */
+function isLightProperty(property) {
   return property['light-property'] === true;
 };
 
-global.isOverridable = function (property) {
+/**
+ * @param {any} property 
+ */
+function isOverridable(property) {
     return ['text-color'].includes(property.name);
 };
 
-global.expressionType = function (property) {
+/**
+ * @param {any} property 
+ * @returns {string}
+ */
+function expressionType(property) {
     switch (property.type) {
         case 'boolean':
             return 'BooleanType';
@@ -53,7 +64,12 @@ global.expressionType = function (property) {
     }
 };
 
-global.evaluatedType = function (property) {
+/**
+ * 
+ * @param {any} property 
+ * @returns {string}
+ */
+function evaluatedType(property) {
   if (/-translate-anchor$/.test(property.name)) {
     return 'TranslateAnchorType';
   }
@@ -98,7 +114,12 @@ global.evaluatedType = function (property) {
   }
 };
 
+/**
+ * @param {any} property 
+ * @param {any} type 
+ */
 function attributeUniformType(property, type) {
+    /** @type {Record<string, string[]>} **/
     const attributeNameExceptions = {
       'text-opacity': ['opacity'],
       'icon-opacity': ['opacity'],
@@ -116,6 +137,7 @@ function attributeUniformType(property, type) {
       'fill-pattern': ['pattern_to', 'pattern_from'],
       'fill-extrusion-pattern': ['pattern_to', 'pattern_from']
     }
+    /** @type {string[]} **/
     const names = attributeNameExceptions[property.name] ||
        [ property.name.replace(type + '-', '').replace(/-/g, '_') ];
 
@@ -124,7 +146,10 @@ function attributeUniformType(property, type) {
     }).join(', ');
 }
 
-global.layoutPropertyType = function (property) {
+/**
+ * @param {any} property 
+ */
+function layoutPropertyType(property) {
   switch (property['property-type']) {
     case 'data-driven':
     case 'cross-faded-data-driven':
@@ -134,7 +159,13 @@ global.layoutPropertyType = function (property) {
   }
 };
 
-global.paintPropertyType = function (property, type) {
+/**
+ * 
+ * @param {any} property 
+ * @param {any} type 
+ * @returns 
+ */
+function paintPropertyType(property, type) {
   switch (property['property-type']) {
     case 'data-driven':
       if (isOverridable(property))
@@ -149,7 +180,10 @@ global.paintPropertyType = function (property, type) {
   }
 };
 
-global.propertyValueType = function (property) {
+/**
+ * @param {any} property 
+ */
+function propertyValueType(property) {
   switch (property['property-type']) {
     case 'color-ramp':
       return `ColorRampPropertyValue`;
@@ -158,6 +192,11 @@ global.propertyValueType = function (property) {
   }
 };
 
+/**
+ * @param {any} property 
+ * @param {number} num 
+ * @returns {string}
+ */
 function formatNumber(property, num = 0) {
   if (evaluatedType(property) === "float") {
     const str = num.toString();
@@ -166,7 +205,10 @@ function formatNumber(property, num = 0) {
   return num.toString();
 }
 
-global.defaultValue = function (property) {
+/**
+ * @param {any} property 
+ */
+function defaultValue(property) {
   // https://github.com/mapbox/mapbox-gl-native/issues/5258
   if (property.name === 'line-round-limit') {
     return 1;
@@ -206,7 +248,7 @@ global.defaultValue = function (property) {
       return `{ ${color} }`;
     }
   case 'array':
-    const defaults = (property.default || []).map((e) => defaultValue({ type: property.value, default: e }));
+    const defaults = (property.default || []).map((/** @type {any} **/ e) => defaultValue({ type: property.value, default: e }));
     if (property.length) {
       return `{{${defaults.join(', ')}}}`;
     } else {
@@ -237,7 +279,9 @@ spec.paint_line['line-floor-width'] = {
 };
 
 const layers = Object.keys(spec.layer.type.values).map((type) => {
-  const layoutProperties = Object.keys(spec[`layout_${type}`]).reduce((memo, name) => {
+
+  /** @type {any[]} */
+  const layoutProperties = Object.keys(spec[`layout_${type}`]).reduce((/** @type {any} **/ memo, name) => {
     if (name !== 'visibility') {
       spec[`layout_${type}`][name].name = name;
       memo.push(spec[`layout_${type}`][name]);
@@ -249,7 +293,8 @@ const layers = Object.keys(spec.layer.type.values).map((type) => {
   // to get a deterministic order.
   layoutProperties.sort((a, b) => collator.compare(a.name, b.name));
 
-  const paintProperties = Object.keys(spec[`paint_${type}`]).reduce((memo, name) => {
+  /** @type {any[]} */
+  const paintProperties = Object.keys(spec[`paint_${type}`]).reduce((/** @type {any} **/ memo, name) => {
     spec[`paint_${type}`][name].name = name;
     memo.push(spec[`paint_${type}`][name]);
     return memo;
@@ -269,7 +314,27 @@ const layers = Object.keys(spec.layer.type.values).map((type) => {
   };
 });
 
-for (const layer of layers) {
+function setupGlobalEjsHelpers() {
+  const funcs = {
+    layoutPropertyType,
+    evaluatedType,
+    isOverridable,
+    expressionType,
+    defaultValue,
+    paintPropertyType,
+    propertyValueType,
+    camelize,
+    camelizeWithLeadingLowercase
+  };
+  for (const [funcName, func] of Object.entries(funcs)) {
+    // @ts-ignore
+    global[funcName] = func;
+  }
+}
+
+setupGlobalEjsHelpers();
+
+for (let layer of layers) {
   const layerFileName = layer.type.replace('-', '_');
 
   writeIfModified(`src/mbgl/style/layers/${layerFileName}_layer_properties.hpp`, propertiesHpp(layer), outLocation);
@@ -285,7 +350,8 @@ for (const layer of layers) {
 }
 
 // Light
-const lightProperties = Object.keys(spec[`light`]).reduce((memo, name) => {
+/** @type {any[]} **/
+const lightProperties = Object.keys(spec[`light`]).reduce((/** @type {any} **/ memo, name) => {
   var property = spec[`light`][name];
   property.name = name;
   property['light-property'] = true;

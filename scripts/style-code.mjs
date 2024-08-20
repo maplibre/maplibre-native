@@ -1,43 +1,63 @@
-// Global functions //
+// EJS Helpers
 
 import ejs from "ejs";
 import fs from "node:fs";
 
 import path from "node:path";
 
-global.iff = function (condition, val) {
+/**
+ * @param {() => boolean} condition
+ * @param {string} val
+ * @returns {string}
+ */
+export function iff(condition, val) {
   return condition() ? val : "";
 };
 
-global.camelize = function (str) {
+/**
+ * @param {string} str 
+ * @returns {string}
+ */
+export function camelize(str) {
   return str.replace(/(?:^|-)(.)/g, function (_, x) {
     return x.toUpperCase();
   });
 };
 
-global.camelizeWithLeadingLowercase = function (str) {
+/**
+ * @param {string} str 
+ * @returns {string}
+ */
+export function camelizeWithLeadingLowercase(str) {
   return str.replace(/-(.)/g, function (_, x) {
     return x.toUpperCase();
   });
 };
 
-global.snakeCaseUpper = function snakeCaseUpper(str) {
+export function snakeCaseUpper(/** @type {string} **/ str) {
   return str.replace(/-/g, "_").toUpperCase();
 };
 
-global.unhyphenate = function (str) {
+export function unhyphenate (/** @type {string} **/ str) {
  return str.replace(/-/g, " ");
 };
 
 // Write out a list of files that this script is modifying so that we can check
-var files = [];
+/** @type {string[]} **/
+let files = [];
 process.on('exit', function() {
   const list = path.join(path.dirname(process.argv[1]), path.basename(process.argv[1], '.js') + '.list');
   console.log(`Writing files that this script modifies to: ${list}`);
   fs.writeFileSync(list, files.join("\n"));
 });
 
-global.writeIfModified = function(filename, newContent, output) {
+/**
+ * 
+ * @param {string} filename 
+ * @param {string} newContent 
+ * @param {string} output 
+ */
+export function writeIfModified(filename, newContent, output) {
   if (output) {
     filename = path.resolve(path.join(output, filename));
   }
@@ -62,6 +82,12 @@ global.writeIfModified = function(filename, newContent, output) {
   console.warn(`* Updating outdated file '${filename}'`);
 };
 
+/**
+ * 
+ * @param {string} filename 
+ * @param {string} root 
+ * @returns 
+ */
 export function readAndCompile(filename, root) {
   if (root) {
     filename = path.resolve(path.join(root, filename));
