@@ -110,7 +110,7 @@ function evaluatedType(property) {
     } else {
       return `std::vector<${evaluatedType({type: property.value, name: property.name})}>`;
     }
-  default: throw new Error(`unknown type for ${property.name} ${JSON.stringify(property)}`)
+  default: throw new Error(`unknown type for ${property.name}`)
   }
 };
 
