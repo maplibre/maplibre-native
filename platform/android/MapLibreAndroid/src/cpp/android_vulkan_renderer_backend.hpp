@@ -20,6 +20,9 @@ public:
 
     std::vector<const char*> getInstanceExtensions() override;
 
+    void resizeFramebuffer(int width, int height) override;
+    void swap() override;
+
     // mbgl::gfx::RendererBackend implementation
 public:
     mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }

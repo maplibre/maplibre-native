@@ -70,7 +70,7 @@ void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
     }
 }
 
-void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
+void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::PresentModeKHR presentMode) {
     const auto& physicalDevice = backend.getPhysicalDevice();
     const auto& device = backend.getDevice();
 
@@ -83,7 +83,16 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     if (formatIt == formats.end()) throw std::runtime_error("No suitable swapchain format found");
 
     // only vk::PresentModeKHR::eFifo (vsync on) is guaranteed
-    // TODO check for vk::PresentModeKHR::eImmediate when uncapped
+    if (presentMode != vk::PresentModeKHR::eFifo) {
+        const std::vector<vk::PresentModeKHR>& presentModes = physicalDevice.getSurfacePresentModesKHR(surface.get());
+        if (std::find(presentModes.begin(), presentModes.end(), presentMode) == presentModes.end()) {
+            mbgl::Log::Error(
+                mbgl::Event::Render,
+                "Requested PresentModeKHR not available (" + std::to_string(static_cast<int>(presentMode)) + ")");
+
+            presentMode = vk::PresentModeKHR::eFifo;
+        }
+    }
 
     // pick surface size
     const vk::SurfaceCapabilitiesKHR& capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get());
@@ -105,7 +114,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
                                    .setMinImageCount(swapchainImageCount)
                                    .setImageFormat(formatIt->format)
                                    .setImageColorSpace(formatIt->colorSpace)
-                                   .setPresentMode(vk::PresentModeKHR::eFifo)
+                                   .setPresentMode(presentMode)
                                    .setImageExtent(extent)
                                    .setImageArrayLayers(1)
                                    .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);

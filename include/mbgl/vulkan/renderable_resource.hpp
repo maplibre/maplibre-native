@@ -34,7 +34,7 @@ protected:
     ~SurfaceRenderableResource() override;
 
     void initColor(uint32_t w, uint32_t h);
-    void initSwapchain(uint32_t w, uint32_t h);
+    void initSwapchain(uint32_t w, uint32_t h, vk::PresentModeKHR presentMode = vk::PresentModeKHR::eFifo);
 
     void initDepthStencil();
 

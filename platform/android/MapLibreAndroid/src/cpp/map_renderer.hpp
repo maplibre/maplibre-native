@@ -145,6 +145,7 @@ private:
 
     bool framebufferSizeChanged = false;
     std::atomic<bool> destroyed{false};
+    bool swapBehaviorFlush{true};
 
     std::unique_ptr<SnapshotCallback> snapshotCallback;
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
