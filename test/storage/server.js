@@ -1,6 +1,8 @@
 import express from "express";
 import path from "node:path";
 
+if (!import.meta.dirname) throw new Error("Could not get import.meta.dirname. Use Node.js 20.11 or newer.");
+
 // This needs to be here to make sure the pipe stays open.
 // We're waiting until the stdin pipe gets closed (e.g. because the parent
 // process dies)
