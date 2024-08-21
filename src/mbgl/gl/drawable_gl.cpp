@@ -158,11 +158,12 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     }
 #endif
 
-    const bool build = vertexAttributes &&
-                       (vertexAttributes->isModifiedAfter(attributeUpdateTime) ||
-                        std::any_of(impl->segments.begin(), impl->segments.end(), [](const auto& seg) {
-                            return !static_cast<const DrawSegmentGL&>(*seg).getVertexArray().isValid();
-                        }));
+    if (impl->indexes) {
+        impl->indexes->updateModified();
+    }
+
+    const bool build = (vertexAttributes && vertexAttributes->isModifiedAfter(attributeUpdateTime)) ||
+                       (impl->indexes && impl->indexes->isModifiedAfter(attributeUpdateTime));
 
     if (build) {
         MLN_TRACE_ZONE(build attributes);
@@ -190,10 +191,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 
         impl->attributeBuffers = std::move(vertexBuffers);
 
-        if (impl->indexes) {
-            impl->indexes->updateModified();
-        }
-        if (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime)) {
+        if (impl->indexes && (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime))) {
             MLN_TRACE_ZONE(build indexes);
             auto indexBufferResource{
                 uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
@@ -220,7 +218,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                 }
             }
 
-            if (!glSeg.getVertexArray().isValid()) {
+            if (!glSeg.getVertexArray().isValid() && impl->indexes) {
                 auto vertexArray = glContext.createVertexArray();
                 const auto& indexBuffer = static_cast<IndexBufferGL&>(*impl->indexes->getBuffer());
                 vertexArray.bind(glContext, *indexBuffer.buffer, bindings);
