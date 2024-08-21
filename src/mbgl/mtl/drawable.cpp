@@ -663,9 +663,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         uploadTextures(uploadPass);
     }
 
-    if (buildAttribs || buildInstanceBuffer) {
-        attributeUpdateTime = util::MonotonicTimer::now();
-    }
+    attributeUpdateTime = util::MonotonicTimer::now();
 }
 
 } // namespace mtl
