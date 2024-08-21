@@ -697,7 +697,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 
     for (const RenderTile& renderTile : *renderTiles) {
         auto* bucket = static_cast<SymbolBucket*>(renderTile.getBucket(*baseImpl));
-        if (bucket && bucket->bucketLeaderID == getID()) {
+        if (bucket && bucket->bucketLeaderID == getID() && bucket->check(__SOURCE_LOCATION__)) {
             // Only place this layer if it's the "group leader" for the bucket
             const Tile* tile = params.source->getRenderedTile(renderTile.id);
             assert(tile);
@@ -1063,7 +1063,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& tileID = tile.getOverscaledTileID();
 
         const auto* optRenderData = getRenderDataForPass(tile, passes);
-        if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
+        if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData() ||
+            !optRenderData->bucket->check(__SOURCE_LOCATION__)) {
             removeTile(passes, tileID);
             continue;
         }

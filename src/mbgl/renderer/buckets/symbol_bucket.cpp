@@ -263,7 +263,7 @@ void SymbolBucket::sortFeatures(const float angle) {
     // position. The index array buffer is rewritten to reference the
     // (unchanged) vertices in the sorted order.
     for (const SymbolInstance& symbolInstance : getSortedSymbols(angle)) {
-        if (!symbolInstance.check("sortFeatures")) continue;
+        if (!symbolInstance.check(__SOURCE_LOCATION__)) continue;
         if (!symbolInstance.checkIndexes(
                 text.placedSymbols.size(), icon.placedSymbols.size(), sdfIcon.placedSymbols.size(), "sortFeatures"))
             continue;

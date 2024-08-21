@@ -249,7 +249,7 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
                          collisionGroups.get(params.sourceId),
                          getAvoidEdges(symbolBucket, renderTile.matrix)};
     for (const SymbolInstance& symbol : getSortedSymbols(params, ctx.pixelRatio)) {
-        if (!symbol.check("Placement::placeSymbolBucket")) continue;
+        if (!symbol.check(__SOURCE_LOCATION__)) continue;
         if (seenCrossTileIDs.contains(symbol.getCrossTileID(__SOURCE_LOCATION__))) continue;
         placeSymbol(symbol, ctx);
 
@@ -273,7 +273,7 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
 
 JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, const PlacementContext& ctx) {
     static const JointPlacement kUnplaced(false, false, false);
-    if (!symbolInstance.check("placeSymbol")) return kUnplaced;
+    if (!symbolInstance.check(__SOURCE_LOCATION__)) return kUnplaced;
     if (symbolInstance.getCrossTileID(__SOURCE_LOCATION__) == SymbolInstance::invalidCrossTileID) return kUnplaced;
 
     if (ctx.getRenderTile().holdForFade()) {
@@ -636,16 +636,23 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         collisionCircles[&symbolInstance.getTextCollisionFeature(__SOURCE_LOCATION__)] = textBoxes;
     }
 
-    assert(symbolInstance.getCrossTileID(__SOURCE_LOCATION__) != 0);
-
-    if (placements.find(symbolInstance.getCrossTileID(__SOURCE_LOCATION__)) != placements.end()) {
-        // If there's a previous placement with this ID, it comes from a tile
-        // that's fading out Erase it so that the placement result from the
-        // non-fading tile supersedes it
-        placements.erase(symbolInstance.getCrossTileID(__SOURCE_LOCATION__));
+    if (!symbolInstance.check(__SOURCE_LOCATION__)) {
+        return kUnplaced;
     }
 
-    if (!symbolInstance.check("/placeSymbol")) return kUnplaced;
+    if (symbolInstance.getCrossTileID(__SOURCE_LOCATION__) != 0) {
+        const auto hit = placements.find(symbolInstance.getCrossTileID(__SOURCE_LOCATION__));
+        if (hit != placements.end()) {
+            // If there's a previous placement with this ID, it comes from a tile that's fading out
+            // Erase it so that the placement result from the non-fading tile supersedes it
+            placements.erase(hit);
+        }
+    } else {
+        assert(false);
+        // We skipped some setup, don't use this one or we might run into inconsistencies
+        symbolInstance.forceFail();
+        return kUnplaced;
+    }
 
     JointPlacement result(
         placeText || ctx.alwaysShowText, placeIcon || ctx.alwaysShowIcon, offscreen || bucket.justReloaded);
@@ -1006,7 +1013,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
         true);
 
     for (SymbolInstance& symbolInstance : bucket.symbolInstances) {
-        if (!symbolInstance.check("updateBucketOpacities")) continue;
+        if (!symbolInstance.check(__SOURCE_LOCATION__)) continue;
         bool isDuplicate = seenCrossTileIDs.contains(symbolInstance.getCrossTileID(__SOURCE_LOCATION__));
 
         auto it = opacities.find(symbolInstance.getCrossTileID(__SOURCE_LOCATION__));
@@ -1621,7 +1628,7 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
     };
 
     for (const SymbolInstance& symbol : symbolInstances) {
-        if (!symbol.check("TilePlacement::placeSymbolBucket")) continue;
+        if (!symbol.check(__SOURCE_LOCATION__)) continue;
         auto intersectStatus = symbolIntersectsTileEdges(symbol);
         if (intersectStatus.flags == IntersectStatus::None) continue;
         intersections.emplace_back(symbol, ctx, intersectStatus, currentIntersectionPriority);

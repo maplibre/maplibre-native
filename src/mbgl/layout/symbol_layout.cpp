@@ -817,7 +817,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                  iconsInText);
 
     for (SymbolInstance& symbolInstance : bucket->symbolInstances) {
-        if (!symbolInstance.check("createBucket 1")) continue;
+        if (!symbolInstance.check(__SOURCE_LOCATION__)) continue;
 
         const bool hasText = symbolInstance.hasText(__SOURCE_LOCATION__);
         const bool hasIcon = symbolInstance.hasIcon(__SOURCE_LOCATION__);
@@ -936,7 +936,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                        canonical,
                                                        lastAddedSection);
             }
-            symbolInstance.check("createBucket loop");
+            symbolInstance.check(__SOURCE_LOCATION__);
             assert(lastAddedSection); // True, as hasText == true;
             updatePaintPropertiesForSection(*bucket, feature, *lastAddedSection, canonical);
         }
