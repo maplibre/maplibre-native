@@ -1,6 +1,4 @@
-#!/usr/bin/env node
-/* jshint node: true */
-'use strict';
+import express from "express";
 
 // This needs to be here to make sure the pipe stays open.
 // We're waiting until the stdin pipe gets closed (e.g. because the parent
@@ -8,9 +6,6 @@
 process.stdin.on('readable', function() {});
 process.stdin.on('end', function() { process.exit(0); });
 
-
-var fs = require('fs');
-var express = require('express');
 var app = express();
 
 // We're manually setting Etag headers.
