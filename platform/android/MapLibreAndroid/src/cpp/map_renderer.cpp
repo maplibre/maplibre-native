@@ -231,7 +231,8 @@ void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface
     renderer = std::make_unique<Renderer>(backend->getImpl(), pixelRatio, localIdeographFontFamily);
     rendererRef = std::make_unique<ActorRef<Renderer>>(*renderer, mailboxData.getMailbox());
 
-    backend->setSwapBehavior(swapBehaviorFlush ? gfx::Renderable::SwapBehaviour::Flush : gfx::Renderable::SwapBehaviour::NoFlush);
+    backend->setSwapBehavior(swapBehaviorFlush ? gfx::Renderable::SwapBehaviour::Flush
+                                               : gfx::Renderable::SwapBehaviour::NoFlush);
 
     // Set the observer on the new Renderer implementation
     if (rendererObserver) {
@@ -267,7 +268,8 @@ void MapRenderer::setSwapBehaviorFlush(JNIEnv&, jboolean flush) {
     swapBehaviorFlush = flush;
 
     if (backend) {
-        backend->setSwapBehavior(flush ? gfx::Renderable::SwapBehaviour::Flush : gfx::Renderable::SwapBehaviour::NoFlush);
+        backend->setSwapBehavior(flush ? gfx::Renderable::SwapBehaviour::Flush
+                                       : gfx::Renderable::SwapBehaviour::NoFlush);
     }
 }
 
