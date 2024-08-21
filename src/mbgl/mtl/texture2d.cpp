@@ -89,7 +89,7 @@ MTL::PixelFormat Texture2D::getMetalPixelFormat() const noexcept {
     //                              stencilAttachmentPixelFormat (MTLPixelFormatStencil8) must match.
 
 #if TARGET_OS_SIMULATOR || defined(__x86_64__)
-    if (channelType == gfx::TextureChannelDataType::Float &&
+    if ((channelType == gfx::TextureChannelDataType::Float || channelType == gfx::TextureChannelDataType::UnsignedByte) &&
         (pixelFormat == gfx::TexturePixelType::Depth || pixelFormat == gfx::TexturePixelType::Stencil)) {
         return MTL::PixelFormatDepth32Float_Stencil8;
     }
