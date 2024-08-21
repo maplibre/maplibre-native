@@ -192,7 +192,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         }
 
         tileUBOs.emplace_back(shaders::ClipUBO{/*.matrix=*/util::cast<float>(matrixForTile(tileID)),
-                                               /*.stencil_ref=*/stencilID,
+                                               /*.stencil_ref=*/static_cast<uint32_t>(stencilID),
                                                /*.pad=*/0,
                                                0,
                                                0});
