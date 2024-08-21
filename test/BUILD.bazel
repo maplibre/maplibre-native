@@ -25,6 +25,7 @@ cc_library(
     ]),
     copts = CPP_FLAGS + MAPLIBRE_FLAGS + select({
         "@platforms//os:ios": ["-DUSE_CPP_TEST_SERVER"],
+        "@platforms//os:linux": ["-DUSE_CPP_TEST_SERVER"],
         "//conditions:default": [],
     }),
     includes = [

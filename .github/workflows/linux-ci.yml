@@ -208,11 +208,6 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
-      - name: Start server
-        run: |
-          npm install
-          node test/storage/server.js &
-
       - name: Generate coverage report
         run: |
           xvfb-run -a \
