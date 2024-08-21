@@ -153,11 +153,13 @@ std::size_t VertexAttributeGL::getStride() const {
     return getStride(getGLType());
 }
 
-const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute& attr, platform::GLenum type) {
+const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute& attr,
+                                                           platform::GLenum type,
+                                                           std::chrono::duration<double> lastUpdate) {
     const auto count = attr.getCount();
     const auto stride_ = getStride(type);
     auto& rawData = attr.getRawData();
-    if (attr.isDirty() || rawData.size() != count * stride_) {
+    if (attr.isModifiedAfter(lastUpdate) || rawData.size() != count * stride_) {
         rawData.resize(stride_ * count);
 
         if (!rawData.empty()) {
@@ -175,19 +177,6 @@ const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute&
         attr.setDirty(false);
     }
     return rawData;
-}
-
-bool VertexAttributeArrayGL::isDirty() const {
-    return std::any_of(attrs.begin(), attrs.end(), [](const auto& attr) {
-        if (attr) {
-            // If we have shared data, the dirty flag from that overrides ours
-            const auto& glAttrib = static_cast<const VertexAttributeGL&>(*attr);
-            if (const auto& shared = glAttrib.getSharedRawData()) {
-                return shared->getDirty();
-            }
-        }
-        return attr && attr->isDirty();
-    });
 }
 
 } // namespace gl

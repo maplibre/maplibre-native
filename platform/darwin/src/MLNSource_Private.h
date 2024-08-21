@@ -24,7 +24,7 @@ struct SourceWrapper {
  Assert that the style source is valid.
 
  This macro should be used at the beginning of any public-facing instance method
- of `MLNSource` and its subclasses. For private methods, an assertion is more appropriate.
+ of ``MLNSource`` and its subclasses. For private methods, an assertion is more appropriate.
  */
 #define MLNAssertStyleSourceIsValid()                                            \
   do {                                                                           \
@@ -73,16 +73,16 @@ struct SourceWrapper {
  Once a mbgl source is added, ownership of the object is transferred to the
  `mbgl::Map` and this object no longer has an active unique_ptr reference to the
  `mbgl::Source`. If this object's mbgl source is in that state, the mbgl source
- can still be changed but the changes will not be visible until the `MLNSource`
- is added back to the map via `-[MLNStyle addSource:]` and styled with a
- `MLNLayer`.
+ can still be changed but the changes will not be visible until the ``MLNSource``
+ is added back to the map via ``MLNStyle/addSource:`` and styled with a
+ ``MLNLayer``.
  */
 - (void)addToStylable:(id<MLNStylable>)mapView;
 
 /**
  Removes the mbgl source that this object represents from the mbgl map.
  When a mbgl source is removed, ownership of the object is transferred back
- to the `MLNSource` instance and the unique_ptr reference is valid again. It is
+ to the ``MLNSource`` instance and the unique_ptr reference is valid again. It is
  safe to add the source back to the style after it is removed.
  */
 - (BOOL)removeFromStylable:(id<MLNStylable>)mapView error:(NSError *__nullable *__nullable)outError;

@@ -20,7 +20,7 @@ import androidx.annotation.UiThread;
 import androidx.collection.LongSparseArray;
 import timber.log.Timber;
 
-import com.mapbox.android.gestures.AndroidGesturesManager;
+import org.maplibre.android.gestures.AndroidGesturesManager;
 import org.maplibre.android.MapStrictMode;
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.R;
