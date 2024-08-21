@@ -92,33 +92,37 @@ PositionedIcon PositionedIcon::shapeIcon(const ImagePosition& image,
     return PositionedIcon{image, top, bottom, left, right, collisionPadding};
 }
 
-Box PositionedIcon::applyTextFit(const PositionedIcon& shapedIcon) {
-    auto iconLeft = shapedIcon.left();
-    auto iconTop = shapedIcon.top();
-    auto iconWidth = shapedIcon.right() - iconLeft;
-    auto iconHeight = shapedIcon.bottom() - iconTop;
+PositionedIcon PositionedIcon::applyTextFit() const {
+    if (!_image.textFitWidth && !_image.textFitHeight) {
+        return *this;
+    }
+    auto width = _right - _left;
+    auto height = _bottom - _top;
 
-    auto contentWidth = shapedIcon.image().content->right - shapedIcon.image().content->left;
-    auto contentHeight = shapedIcon.image().content->bottom - shapedIcon.image().content->top;
-    auto textFitWidth = shapedIcon.image().textFitWidth;
-    auto textFitHeight = shapedIcon.image().textFitHeight;
+    auto contentWidth = _image.content->right - _image.content->left;
+    auto contentHeight = _image.content->bottom - _image.content->top;
+    auto textFitWidth = _image.textFitWidth.value();
+    auto textFitHeight = _image.textFitHeight.value();
     auto contentAspectRatio = contentWidth / contentHeight;
+    auto newLeft = _left;
+    auto newRight = _right;
+    auto newTop = _top;
+    auto newBottom = _bottom;
 
     if (textFitHeight == style::TextFit::proportional) {
-        if ((textFitWidth == style::TextFit::stretchOnly && (iconWidth / iconHeight) < contentAspectRatio) || textFitWidth == style::TextFit::proportional) {
-            float newIconWidth = std::ceil(iconHeight * contentAspectRatio);
-            iconLeft *= newIconWidth / iconWidth;
-            iconWidth = newIconWidth;
+        if ((textFitWidth == style::TextFit::stretchOnly && (width / height) < contentAspectRatio) || textFitWidth == style::TextFit::proportional) {
+            float newIconWidth = std::ceil(height * contentAspectRatio);
+            newLeft *= newIconWidth / width;
+            newRight = _left + newIconWidth;
         }
     } else if (textFitWidth == style::TextFit::proportional) {
-        if (textFitHeight == style::TextFit::stretchOnly && contentAspectRatio != 0 && (iconWidth / iconHeight) > contentAspectRatio) {
-            float newIconHeight = std::ceil(iconWidth / contentAspectRatio);
-            iconTop *= newIconHeight / iconHeight;
-            iconHeight = newIconHeight;
+        if (textFitHeight == style::TextFit::stretchOnly && contentAspectRatio != 0 && (width / height) > contentAspectRatio) {
+            float newIconHeight = std::ceil(width / contentAspectRatio);
+            newTop *= newIconHeight / height;
+            newBottom = _top + newIconHeight;
         }
     }
-
-    return {iconLeft, iconTop, iconLeft + iconWidth, iconTop + iconHeight};
+    return PositionedIcon{_image, newTop, newBottom, newLeft, newRight, _collisionPadding};
 }
 
 void PositionedIcon::fitIconToText(const Shaping& shapedText,

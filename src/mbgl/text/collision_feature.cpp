@@ -7,22 +7,86 @@ namespace mbgl {
 
 CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
                                    const Anchor& anchor,
-                                   const Box box,
-                                   const std::optional<Padding>& collisionPadding,
+                                   const Shaping& shapedText,
                                    const float boxScale,
                                    const float padding,
                                    const style::SymbolPlacementType placement,
-                                   IndexedSubfeature indexedFeature_,
+                                   const RefIndexedSubfeature& indexedFeature_,
                                    const float overscaling,
                                    const float rotate)
     : indexedFeature(std::move(indexedFeature_)),
       alongLine(placement != style::SymbolPlacementType::Point) {
-    if (box.x1 == 0 && box.x2 == 0 && box.y1 == 0 && box.y2 == 0) return;
-    
-    float y1 = box.y1 * boxScale - padding;
-    float y2 = box.y2 * boxScale + padding;
-    float x1 = box.x1 * boxScale - padding;
-    float x2 = box.x2 * boxScale + padding;
+    initialize(line,
+               anchor,
+               shapedText.top,
+               shapedText.bottom,
+               shapedText.left,
+               shapedText.right,
+               std::nullopt,
+               boxScale,
+               padding,
+               overscaling,
+               rotate);
+}
+
+CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
+                                   const Anchor& anchor,
+                                   std::optional<PositionedIcon> shapedIcon,
+                                   const float boxScale,
+                                   const float padding,
+                                   const RefIndexedSubfeature& indexedFeature_,
+                                   const float rotate)
+    : indexedFeature(std::move(indexedFeature_)),
+      alongLine(false) {
+    if (shapedIcon) {
+        auto image = shapedIcon->image();
+        auto icon = *shapedIcon;
+        if (image.content && (image.textFitWidth || image.textFitHeight)) {
+            icon = shapedIcon->applyTextFit();
+        }
+        initialize(line,
+                   anchor,
+                   icon.top(),
+                   icon.bottom(),
+                   icon.left(),
+                   icon.right(),
+                   shapedIcon->collisionPadding(),
+                   boxScale,
+                   padding,
+                   1,
+                   rotate);
+    } else {
+        initialize(line,
+                   anchor,
+                   0,
+                   0,
+                   0,
+                   0,
+                   std::nullopt,
+                   boxScale,
+                   padding,
+                   1,
+                   rotate);
+    }
+}
+
+void CollisionFeature::initialize(const GeometryCoordinates& line,
+                                  const Anchor& anchor,
+                                  float top,
+                                  float bottom,
+                                  float left,
+                                  float right,
+                                  const std::optional<Padding>& collisionPadding,
+                                  float boxScale,
+                                  float padding,
+                                  float overscaling,
+                                  float rotate) {
+    if (top == 0 && bottom == 0 && left == 0 && right == 0) return;
+
+    float y1 = top * boxScale - padding;
+    float y2 = bottom * boxScale + padding;
+    float x1 = left * boxScale - padding;
+    float x2 = right * boxScale + padding;
 
     if (collisionPadding) {
         x1 -= collisionPadding->left * boxScale;

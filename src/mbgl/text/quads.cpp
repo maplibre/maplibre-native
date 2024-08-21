@@ -76,13 +76,6 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
     const uint16_t imageWidth = image.paddedRect.w - 2 * border;
     const uint16_t imageHeight = image.paddedRect.h - 2 * border;
 
-    Box iconBox = {
-        shapedIcon.left(),
-        shapedIcon.top(),
-        shapedIcon.right(),
-        shapedIcon.bottom()
-    };
-
     const ImageStretches stretchXFull{{0.0f, imageWidth}};
     const ImageStretches stretchYFull{{0.0f, imageHeight}};
     const ImageStretches& stretchX = !image.stretchX.empty() ? image.stretchX : stretchXFull;
@@ -101,13 +94,15 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
     float fixedContentWidth = fixedWidth;
     float fixedOffsetY = 0;
     float fixedContentHeight = fixedHeight;
+    
+    auto icon = shapedIcon;
 
     if (hasIconTextFit && image.content) {
         auto& content = *image.content;
         auto contentWidth = content.right - content.left;
         auto contentHeight = content.bottom - content.top ;
-        if (image.textFitWidth.has_value() || image.textFitHeight.has_value()) {
-            iconBox = PositionedIcon::applyTextFit(shapedIcon);
+        if (image.textFitWidth || image.textFitHeight) {
+            icon = shapedIcon.applyTextFit();
         }
         stretchOffsetX = sumWithinRange(stretchX, 0, content.left);
         stretchOffsetY = sumWithinRange(stretchY, 0, content.top);
@@ -127,10 +122,10 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
         matrix = std::array<float, 4>{{angle_cos, -angle_sin, angle_sin, angle_cos}};
     }
     
-    auto iconLeft = iconBox.x1;
-    auto iconTop = iconBox.y1;
-    auto iconWidth = iconBox.x2 - iconLeft;
-    auto iconHeight = iconBox.y2 - iconTop;
+    auto iconLeft = icon.left();
+    auto iconTop = icon.top();
+    auto iconWidth = icon.right() - iconLeft;
+    auto iconHeight = icon.bottom() - iconTop;
 
     auto makeBox = [&](Cut left, Cut top, Cut right, Cut bottom) {
         const float leftEm = getEmOffset(

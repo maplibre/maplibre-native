@@ -22,13 +22,6 @@ struct AnchorAlignment {
     float verticalAlign;
 };
 
-struct Box {
-    float x1;
-    float y1;
-    float x2;
-    float y2;
-};
-
 // Choose the justification that matches the direction of the TextAnchor
 style::TextJustifyType getAnchorJustification(style::SymbolAnchorType anchor);
 
@@ -71,15 +64,6 @@ public:
     static PositionedIcon shapeIcon(const ImagePosition&,
                                     const std::array<float, 2>& iconOffset,
                                     style::SymbolAnchorType iconAnchor);
-    
-    /**
-     * Called after a PositionedIcon has already been run through fitIconToText,
-     * but needs further adjustment to apply textFitWidth and textFitHeight.
-     * @param shapedIcon - The icon that will be adjusted.
-     * @returns Extents of the shapedIcon with text fit adjustments if necessary.
-     */
-    static Box applyTextFit(const PositionedIcon& shapedIcon);
-
 
     // Updates shaped icon's bounds based on shaped text's bounds and provided
     // layout properties.
@@ -88,6 +72,10 @@ public:
                        const std::array<float, 4>& padding,
                        const std::array<float, 2>& iconOffset,
                        float fontScale);
+    
+    // Called after a PositionedIcon has already been run through fitIconToText,
+    // but needs further adjustment to apply textFitWidth and textFitHeight.
+    PositionedIcon applyTextFit() const;
 
     const ImagePosition& image() const { return _image; }
     float top() const { return _top; }
