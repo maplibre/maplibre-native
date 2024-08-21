@@ -13,6 +13,7 @@ cc_library(
     name = "testlib",
     srcs = select({
         "@platforms//os:ios": glob(["src/mbgl/test/*.cpp"]),
+        "@platforms//os:linux": glob(["src/mbgl/test/*.cpp"]),
         "//conditions:default": glob(
             ["src/mbgl/test/*.cpp"],
             exclude = ["src/mbgl/test/http_server.cpp"],
@@ -40,6 +41,7 @@ cc_library(
         "//:mbgl-core",
     ] + select({
         "@platforms//os:ios": ["//vendor:httplib"],
+        "@platforms//os:linux": ["//vendor:httplib"],
         "//conditions:default": [],
     }),
 )
