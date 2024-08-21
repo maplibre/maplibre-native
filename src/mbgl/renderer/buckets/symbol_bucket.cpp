@@ -352,6 +352,12 @@ void SymbolBucket::updateVertices(const Placement& placement,
         dynamicUploaded = false;
         uploaded = false;
     }
+
+    if (!uploaded) {
+        text.updateModified();
+        icon.updateModified();
+        sdfIcon.updateModified();
+    }
 }
 
 } // namespace mbgl

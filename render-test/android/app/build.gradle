@@ -1,6 +1,8 @@
 apply plugin: 'com.android.application'
 
 android {
+    ndkVersion '27.0.12077973'
+
     sourceSets {
         test {
             assets.srcDirs += ['../../../metrics']
@@ -54,9 +56,8 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.4'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
-    androidTestImplementation 'androidx.test:rules:1.5.0'
+    implementation libs.supportConstraintLayout
+    androidTestImplementation libs.testRunner
+    androidTestImplementation libs.testEspressoCore
+    androidTestImplementation libs.testRules
 }

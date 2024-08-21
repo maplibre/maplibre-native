@@ -47,7 +47,7 @@ public:
                             const std::optional<std::string>&,
                             const std::optional<std::string>&) override;
 
-    void enableCache(bool) override;
+    void setCacheEnabled(bool) override;
     void reduceMemoryUse() override;
     void dumpDebugLogs() const override;
 

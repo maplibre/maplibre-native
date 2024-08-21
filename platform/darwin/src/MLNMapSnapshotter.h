@@ -227,7 +227,7 @@ typedef void (^MLNMapSnapshotCompletionHandler)(MLNMapSnapshot *_Nullable snapsh
 
  #### Related examples
  TODO: Create a static map snapshot, learn how to use the
- `MLNMapSnapshotter` to generate a static image based on an `MLNMapView`
+ ``MLNMapSnapshotter`` to generate a static image based on an ``MLNMapSnapshotter``
  object's style, camera, and view bounds.
  */
 MLN_EXPORT
@@ -267,7 +267,7 @@ MLN_EXPORT
 /**
  Starts the snapshot creation and executes the specified blocks with the result
  on the specified queue. Use this option if you want to add custom drawing on
- top of the resulting `MLNMapSnapshot`.
+ top of the resulting ``MLNMapSnapshot``.
 
  @param overlayHandler The block to call after the base map finishes drawing but
     before certain built-in overlays draw. The block can use Core Graphics to

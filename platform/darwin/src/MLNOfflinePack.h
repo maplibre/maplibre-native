@@ -16,28 +16,28 @@ typedef NS_ENUM(NSInteger, MLNOfflinePackState) {
    It is unknown whether the pack is inactive, active, or complete.
 
    This is the initial state of a pack. The state of a pack becomes known by
-   the time the shared `MLNOfflineStorage` object sends the first
-   `MLNOfflinePackProgressChangedNotification` about the pack. For inactive
+   the time the shared ``MLNOfflineStorage`` object sends the first
+   ``MLNOfflinePackProgressChangedNotification`` about the pack. For inactive
    packs, you must explicitly request a progress update using the
-   `-[MLNOfflinePack requestProgress]` method.
+   ``MLNOfflinePack/requestProgress`` method.
 
-   An invalid pack always has a state of `MLNOfflinePackStateInvalid`, never
-   `MLNOfflinePackStateUnknown`.
+   An invalid pack always has a state of ``MLNOfflinePackStateInvalid``, never
+   ``MLNOfflinePackState/MLNOfflinePackStateUnknown``.
    */
   MLNOfflinePackStateUnknown = 0,
   /**
    The pack is incomplete and is not currently downloading.
 
    This is the initial state of a pack that is created using the
-   `-[MLNOfflineStorage addPackForRegion:withContext:completionHandler:]`
-   method, as well as after the `-[MLNOfflinePack suspend]` method is
+   ``MLNOfflineStorage/addPackForRegion:withContext:completionHandler:``
+   method, as well as after the ``MLNOfflinePack/suspend`` method is
    called.
    */
   MLNOfflinePackStateInactive = 1,
   /**
    The pack is incomplete and is currently downloading.
 
-   This is the state of a pack after the `-[MLNOfflinePack resume]` method is
+   This is the state of a pack after the ``MLNOfflinePack/resume`` method is
    called.
    */
   MLNOfflinePackStateActive = 2,
@@ -47,7 +47,7 @@ typedef NS_ENUM(NSInteger, MLNOfflinePackState) {
   MLNOfflinePackStateComplete = 3,
   /**
    The pack has been removed using the
-   `-[MLNOfflineStorage removePack:withCompletionHandler:]` method. Sending
+   ``MLNOfflineStorage/removePack:withCompletionHandler:`` method. Sending
    any message to the pack will raise an exception.
    */
   MLNOfflinePackStateInvalid = 4,
@@ -97,12 +97,12 @@ typedef struct __attribute__((objc_boxable)) MLNOfflinePackProgress {
 } MLNOfflinePackProgress;
 
 /**
- An `MLNOfflinePack` represents a collection of resources necessary for viewing
+ An ``MLNOfflinePack`` represents a collection of resources necessary for viewing
  a region offline to a local database.
 
- To create an instance of `MLNOfflinePack`, use the
- `+[MLNOfflineStorage addPackForRegion:withContext:completionHandler:]` method.
- A pack created using `-[MLNOfflinePack init]` is immediately invalid.
+ To create an instance of ``MLNOfflinePack``, use the
+ ``MLNOfflineStorage/addPackForRegion:withContext:completionHandler:`` method.
+ A pack created using `MLNOfflinePack/init` is immediately invalid.
 
  ### Example
  ```swift
@@ -158,11 +158,12 @@ MLN_EXPORT
  The pack’s current state.
 
  The state of an inactive or completed pack is computed lazily and is set to
- `MLNOfflinePackStateUnknown` by default. To request the pack’s status, use the
+ ``MLNOfflinePackState/MLNOfflinePackStateUnknown`` by default. To request the pack’s status, use
+ the
  `-requestProgress` method. To get notified when the state becomes known and
  when it changes, observe KVO change notifications on this pack’s `state` key
  path. Alternatively, you can add an observer for
- `MLNOfflinePackProgressChangedNotification`s about this pack that come from the
+ ``MLNOfflinePackProgressChangedNotification``s about this pack that come from the
  default notification center.
  */
 @property (nonatomic, readonly) MLNOfflinePackState state;
@@ -175,7 +176,7 @@ MLN_EXPORT
  `-requestProgress` method. To get notified when the progress becomes
  known and when it changes, observe KVO change notifications on this pack’s
  `state` key path. Alternatively, you can add an observer for
- `MLNOfflinePackProgressChangedNotification`s about this pack that come from the
+ ``MLNOfflinePackProgressChangedNotification``s about this pack that come from the
  default notification center.
  */
 @property (nonatomic, readonly) MLNOfflinePackProgress progress;
@@ -211,9 +212,9 @@ MLN_EXPORT
 
  The state and progress of an inactive or completed pack are computed lazily. If
  you need the state or progress of a pack whose `state` property is currently
- set to `MLNOfflinePackStateUnknown`, observe KVO change notifications on this
+ set to ``MLNOfflinePackState/MLNOfflinePackStateUnknown``, observe KVO change notifications on this
  pack’s `state` key path, then call this method. Alternatively, you can add an
- observer for `MLNOfflinePackProgressChangedNotification` about this pack that
+ observer for ``MLNOfflinePackProgressChangedNotification`` about this pack that
  come from the default notification center.
  */
 - (void)requestProgress;

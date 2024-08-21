@@ -20,7 +20,7 @@ const MLNExceptionName MLNInvalidOfflinePackException = @"MLNInvalidOfflinePackE
  Assert that the current offline pack is valid.
 
  This macro should be used at the beginning of any public-facing instance method
- of `MLNOfflinePack`. For private methods, an assertion is more appropriate.
+ of ``MLNOfflinePack``. For private methods, an assertion is more appropriate.
  */
 #define MLNAssertOfflinePackIsValid() \
     do { \
