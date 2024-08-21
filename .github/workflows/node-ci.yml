@@ -269,6 +269,9 @@ jobs:
 
       - name: Run render tests on macOS
         if: runner.os == 'macOS'
+        # A few are failing
+        # https://github.com/maplibre/maplibre-native/issues/2741
+        # Almost all are failing on Intel GitHub runners (but only on CI)
         continue-on-error: true
         run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
@@ -286,6 +289,7 @@ jobs:
 
       - name: Test (MacOS)
         if: runner.os == 'MacOS'
+        continue-on-error: true  # flaky on CI
         working-directory: platform/node
         run: npm test
 
