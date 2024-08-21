@@ -233,6 +233,7 @@ std::optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex(std::s
     return std::nullopt;
 }
 
+#if MLN_SYMBOL_GUARDS
 bool SymbolInstance::check(std::string_view source) const {
     return !isFailed && check(check01, 1, source) && check(check02, 2, source) && check(check03, 3, source) &&
            check(check04, 4, source) && check(check05, 5, source) && check(check06, 6, source) &&
@@ -299,5 +300,7 @@ void SymbolInstance::forceFailInternal() {
         check12 = check13 = check14 = check15 = check16 = check17 = check18 = check19 = check20 = check21 = check22 =
             check23 = check24 = check25 = check26 = check27 = check28 = check29 = 0;
 }
+
+#endif // MLN_SYMBOL_GUARDS
 
 } // namespace mbgl

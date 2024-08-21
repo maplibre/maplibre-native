@@ -12,9 +12,11 @@
 
 #if MLN_SYMBOL_GUARDS
 #define __SYM_GUARD_LOC__ __SOURCE_LOCATION__
+#define SYM_GUARD_VALUE(N) std::size_t check##N = checkVal;
 #else
 #define __SYM_GUARD_LOC__ \
     std::string_view {}
+#define SYM_GUARD_VALUE(N)
 #endif
 
 namespace mbgl {
@@ -101,6 +103,7 @@ public:
     const std::optional<SymbolQuads>& verticalIconQuads(std::string_view source = {}) const;
     void releaseSharedData();
 
+#if MLN_SYMBOL_GUARDS
     /// Check all guard blocks
     bool check(std::string_view source = {}) const;
     /// Check that an index is in the valid range
@@ -112,6 +115,12 @@ public:
                       std::string_view source = {}) const;
     /// Mark this item as failed (due to some external check) so that it cannot be used later
     void forceFail() const;
+#else
+    bool check(std::string_view = {}) const { return true; }
+    bool checkIndex(const std::optional<std::size_t>&, std::size_t, std::string_view = {}) const { return true; }
+    bool checkIndexes(std::size_t, std::size_t, std::size_t, std::string_view = {}) const { return true; }
+    void forceFail() const {}
+#endif
 
     const Anchor& getAnchor(std::string_view source = {}) const {
         check(source);
@@ -265,74 +274,80 @@ public:
     static constexpr uint32_t invalidCrossTileID = std::numeric_limits<uint32_t>::max();
 
 protected:
+#if MLN_SYMBOL_GUARDS
     bool check(std::size_t v, int n, std::string_view source) const;
     bool checkKey(std::string_view source) const;
     void forceFailInternal(); // this is just to avoid warnings about the values never being set
+#else
+    bool checkKey(std::string_view) const { return true; }
+#endif
 
 private:
     std::shared_ptr<SymbolInstanceSharedData> sharedData;
 
     static constexpr std::size_t checkVal = static_cast<std::size_t>(0x123456780ABCDEFFULL);
 
-    std::size_t check01 = checkVal;
+    SYM_GUARD_VALUE(01)
     Anchor anchor;
-    std::size_t check02 = checkVal;
+    SYM_GUARD_VALUE(02)
     SymbolContent symbolContent;
-    std::size_t check03 = checkVal;
+    SYM_GUARD_VALUE(03)
 
     std::size_t rightJustifiedGlyphQuadsSize;
-    std::size_t check04 = checkVal;
+    SYM_GUARD_VALUE(04)
     std::size_t centerJustifiedGlyphQuadsSize;
-    std::size_t check05 = checkVal;
+    SYM_GUARD_VALUE(05)
     std::size_t leftJustifiedGlyphQuadsSize;
-    std::size_t check06 = checkVal;
+    SYM_GUARD_VALUE(06)
     std::size_t verticalGlyphQuadsSize;
-    std::size_t check07 = checkVal;
+    SYM_GUARD_VALUE(07)
     std::size_t iconQuadsSize;
-    std::size_t check08 = checkVal;
+    SYM_GUARD_VALUE(08)
 
     CollisionFeature textCollisionFeature;
-    std::size_t check09 = checkVal;
+    SYM_GUARD_VALUE(09)
     CollisionFeature iconCollisionFeature;
-    std::size_t check10 = checkVal;
+    SYM_GUARD_VALUE(10)
     std::optional<CollisionFeature> verticalTextCollisionFeature = std::nullopt;
-    std::size_t check11 = checkVal;
+    SYM_GUARD_VALUE(11)
     std::optional<CollisionFeature> verticalIconCollisionFeature = std::nullopt;
-    std::size_t check12 = checkVal;
+    SYM_GUARD_VALUE(12)
     WritingModeType writingModes;
-    std::size_t check13 = checkVal;
+    SYM_GUARD_VALUE(13)
     std::size_t layoutFeatureIndex; // Index into the set of features included at layout time
-    std::size_t check14 = checkVal;
+    SYM_GUARD_VALUE(14)
     std::size_t dataFeatureIndex; // Index into the underlying tile data feature set
-    std::size_t check15 = checkVal;
+    SYM_GUARD_VALUE(15)
     std::array<float, 2> textOffset;
-    std::size_t check16 = checkVal;
+    SYM_GUARD_VALUE(16)
     std::array<float, 2> iconOffset;
-    std::size_t check17 = checkVal;
+    SYM_GUARD_VALUE(17)
     std::u16string key;
-    std::size_t check18 = checkVal;
-    std::size_t check19 = checkVal;
+    SYM_GUARD_VALUE(18)
+    SYM_GUARD_VALUE(19)
     std::optional<size_t> placedRightTextIndex;
-    std::size_t check20 = checkVal;
+    SYM_GUARD_VALUE(20)
     std::optional<size_t> placedCenterTextIndex;
-    std::size_t check21 = checkVal;
+    SYM_GUARD_VALUE(21)
     std::optional<size_t> placedLeftTextIndex;
-    std::size_t check22 = checkVal;
+    SYM_GUARD_VALUE(22)
     std::optional<size_t> placedVerticalTextIndex;
-    std::size_t check23 = checkVal;
+    SYM_GUARD_VALUE(23)
     std::optional<size_t> placedIconIndex;
-    std::size_t check24 = checkVal;
+    SYM_GUARD_VALUE(24)
     std::optional<size_t> placedVerticalIconIndex;
-    std::size_t check25 = checkVal;
+    SYM_GUARD_VALUE(25)
     float textBoxScale;
-    std::size_t check26 = checkVal;
+    SYM_GUARD_VALUE(26)
     std::array<float, 2> variableTextOffset;
-    std::size_t check27 = checkVal;
+    SYM_GUARD_VALUE(27)
     bool singleLine;
-    std::size_t check28 = checkVal;
+    SYM_GUARD_VALUE(28)
     uint32_t crossTileID = 0;
-    std::size_t check29 = checkVal;
+    SYM_GUARD_VALUE(29)
+#if MLN_SYMBOL_GUARDS
     mutable bool isFailed = false;
+#endif
 };
 
 using SymbolInstanceReferences = std::vector<std::reference_wrapper<const SymbolInstance>>;
