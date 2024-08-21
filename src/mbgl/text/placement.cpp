@@ -462,7 +462,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                     }
 
                     if (placedFeature.first) {
-                        assert(symbolInstance.getCrossTileID(__SYM_GUARD_LOC__) != 0u);
+                        assert(symbolInstance.getCrossTileID() != 0u);
                         std::optional<style::TextVariableAnchorType> prevAnchor;
 
                         // If this label was placed in the previous
@@ -1059,7 +1059,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
                 markUsedJustification(bucket, prevOffset->second.anchor, symbolInstance, previousOrientation);
             }
         }
-        if (symbolInstance.hasIcon(__SYM_GUARD_LOC__)) {
+        if (symbolInstance.hasIcon()) {
             size_t iconOpacityVerticesSize = 0u;
             const auto& opacityVertex = SymbolIconProgram::opacityVertex(opacityState.icon.placed,
                                                                          opacityState.icon.opacity);

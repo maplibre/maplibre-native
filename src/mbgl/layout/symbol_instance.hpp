@@ -90,17 +90,17 @@ public:
                    bool allowVerticalPlacement,
                    SymbolContent iconType = SymbolContent::None);
 
-    std::optional<size_t> getDefaultHorizontalPlacedTextIndex(std::string_view source = {}) const;
-    const GeometryCoordinates& line(std::string_view source = {}) const;
-    const SymbolQuads& rightJustifiedGlyphQuads(std::string_view source = {}) const;
-    const SymbolQuads& leftJustifiedGlyphQuads(std::string_view source = {}) const;
-    const SymbolQuads& centerJustifiedGlyphQuads(std::string_view source = {}) const;
-    const SymbolQuads& verticalGlyphQuads(std::string_view source = {}) const;
-    bool hasText(std::string_view source = {}) const;
-    bool hasIcon(std::string_view source = {}) const;
-    bool hasSdfIcon(std::string_view source = {}) const;
-    const std::optional<SymbolQuads>& iconQuads(std::string_view source = {}) const;
-    const std::optional<SymbolQuads>& verticalIconQuads(std::string_view source = {}) const;
+    std::optional<size_t> getDefaultHorizontalPlacedTextIndex() const;
+    const GeometryCoordinates& line() const;
+    const SymbolQuads& rightJustifiedGlyphQuads() const;
+    const SymbolQuads& leftJustifiedGlyphQuads() const;
+    const SymbolQuads& centerJustifiedGlyphQuads() const;
+    const SymbolQuads& verticalGlyphQuads() const;
+    bool hasText() const;
+    bool hasIcon() const;
+    bool hasSdfIcon() const;
+    const std::optional<SymbolQuads>& iconQuads() const;
+    const std::optional<SymbolQuads>& verticalIconQuads() const;
     void releaseSharedData();
 
 #if MLN_SYMBOL_GUARDS
@@ -122,154 +122,49 @@ public:
     void forceFail() const {}
 #endif
 
-    const Anchor& getAnchor(std::string_view source = {}) const {
-        check(source);
-        return anchor;
-    }
-    std::size_t getRightJustifiedGlyphQuadsSize(std::string_view source = {}) const {
-        check(source);
-        return rightJustifiedGlyphQuadsSize;
-    }
-    std::size_t getCenterJustifiedGlyphQuadsSize(std::string_view source = {}) const {
-        check(source);
-        return centerJustifiedGlyphQuadsSize;
-    }
-    std::size_t getLeftJustifiedGlyphQuadsSize(std::string_view source = {}) const {
-        check(source);
-        return leftJustifiedGlyphQuadsSize;
-    }
-    std::size_t getVerticalGlyphQuadsSize(std::string_view source = {}) const {
-        check(source);
-        return verticalGlyphQuadsSize;
-    }
-    std::size_t getIconQuadsSize(std::string_view source = {}) const {
-        check(source);
-        return iconQuadsSize;
-    }
-    const CollisionFeature& getTextCollisionFeature(std::string_view source = {}) const {
-        check(source);
-        return textCollisionFeature;
-    }
-    const CollisionFeature& getIconCollisionFeature(std::string_view source = {}) const {
-        check(source);
-        return iconCollisionFeature;
-    }
-    const std::optional<CollisionFeature>& getVerticalTextCollisionFeature(std::string_view source = {}) const {
-        check(source);
+    const Anchor& getAnchor() const { return anchor; }
+    std::size_t getRightJustifiedGlyphQuadsSize() const { return rightJustifiedGlyphQuadsSize; }
+    std::size_t getCenterJustifiedGlyphQuadsSize() const { return centerJustifiedGlyphQuadsSize; }
+    std::size_t getLeftJustifiedGlyphQuadsSize() const { return leftJustifiedGlyphQuadsSize; }
+    std::size_t getVerticalGlyphQuadsSize() const { return verticalGlyphQuadsSize; }
+    std::size_t getIconQuadsSize() const { return iconQuadsSize; }
+    const CollisionFeature& getTextCollisionFeature() const { return textCollisionFeature; }
+    const CollisionFeature& getIconCollisionFeature() const { return iconCollisionFeature; }
+    const std::optional<CollisionFeature>& getVerticalTextCollisionFeature() const {
         return verticalTextCollisionFeature;
     }
-    const std::optional<CollisionFeature>& getVerticalIconCollisionFeature(std::string_view source = {}) const {
-        check(source);
+    const std::optional<CollisionFeature>& getVerticalIconCollisionFeature() const {
         return verticalIconCollisionFeature;
     }
-    WritingModeType getWritingModes(std::string_view source = {}) const {
-        check(source);
-        return writingModes;
-    }
-    std::size_t getLayoutFeatureIndex(std::string_view source = {}) const {
-        check(source);
-        return layoutFeatureIndex;
-    }
-    std::size_t getDataFeatureIndex(std::string_view source = {}) const {
-        check(source);
-        return dataFeatureIndex;
-    }
-    std::array<float, 2> getTextOffset(std::string_view source = {}) const {
-        check(source);
-        return textOffset;
-    }
-    std::array<float, 2> getIconOffset(std::string_view source = {}) const {
-        check(source);
-        return iconOffset;
-    }
-    const std::u16string& getKey(std::string_view source = {}) const {
-        check(source);
-        checkKey(source);
-        return key;
-    }
-    std::optional<size_t> getPlacedRightTextIndex(std::string_view source = {}) const {
-        check(source);
-        return placedRightTextIndex;
-    }
-    std::optional<size_t> getPlacedCenterTextIndex(std::string_view source = {}) const {
-        check(source);
-        return placedCenterTextIndex;
-    }
-    std::optional<size_t> getPlacedLeftTextIndex(std::string_view source = {}) const {
-        check(source);
-        return placedLeftTextIndex;
-    }
-    std::optional<size_t> getPlacedVerticalTextIndex(std::string_view source = {}) const {
-        check(source);
-        return placedVerticalTextIndex;
-    }
-    std::optional<size_t> getPlacedIconIndex(std::string_view source = {}) const {
-        check(source);
-        return placedIconIndex;
-    }
-    std::optional<size_t> getPlacedVerticalIconIndex(std::string_view source = {}) const {
-        check(source);
-        return placedVerticalIconIndex;
-    }
-    float getTextBoxScale(std::string_view source = {}) const {
-        check(source);
-        return textBoxScale;
-    }
-    std::array<float, 2> getVariableTextOffset(std::string_view source = {}) const {
-        check(source);
-        return variableTextOffset;
-    }
-    bool getSingleLine(std::string_view source = {}) const {
-        check(source);
-        return singleLine;
-    }
+    WritingModeType getWritingModes() const { return writingModes; }
+    std::size_t getLayoutFeatureIndex() const { return layoutFeatureIndex; }
+    std::size_t getDataFeatureIndex() const { return dataFeatureIndex; }
+    std::array<float, 2> getTextOffset() const { return textOffset; }
+    std::array<float, 2> getIconOffset() const { return iconOffset; }
+    const std::u16string& getKey() const { return key; }
+    std::optional<size_t> getPlacedRightTextIndex() const { return placedRightTextIndex; }
+    std::optional<size_t> getPlacedCenterTextIndex() const { return placedCenterTextIndex; }
+    std::optional<size_t> getPlacedLeftTextIndex() const { return placedLeftTextIndex; }
+    std::optional<size_t> getPlacedVerticalTextIndex() const { return placedVerticalTextIndex; }
+    std::optional<size_t> getPlacedIconIndex() const { return placedIconIndex; }
+    std::optional<size_t> getPlacedVerticalIconIndex() const { return placedVerticalIconIndex; }
+    float getTextBoxScale() const { return textBoxScale; }
+    std::array<float, 2> getVariableTextOffset() const { return variableTextOffset; }
+    bool getSingleLine() const { return singleLine; }
 
-    uint32_t getCrossTileID(std::string_view source = {}) const {
-        check(source);
-        return crossTileID;
-    }
-    void setCrossTileID(uint32_t x, std::string_view source = {}) {
-        check(source);
-        crossTileID = x;
-    }
+    uint32_t getCrossTileID() const { return crossTileID; }
+    void setCrossTileID(uint32_t x) { crossTileID = x; }
 
-    std::optional<size_t>& refPlacedRightTextIndex(std::string_view source = {}) {
-        check(source);
-        return placedRightTextIndex;
-    }
-    std::optional<size_t>& refPlacedCenterTextIndex(std::string_view source = {}) {
-        check(source);
-        return placedCenterTextIndex;
-    }
-    std::optional<size_t>& refPlacedLeftTextIndex(std::string_view source = {}) {
-        check(source);
-        return placedLeftTextIndex;
-    }
-    std::optional<size_t>& refPlacedVerticalTextIndex(std::string_view source = {}) {
-        check(source);
-        return placedVerticalTextIndex;
-    }
-    std::optional<size_t>& refPlacedIconIndex(std::string_view source = {}) {
-        check(source);
-        return placedIconIndex;
-    }
-    std::optional<size_t>& refPlacedVerticalIconIndex(std::string_view source = {}) {
-        check(source);
-        return placedVerticalIconIndex;
-    }
+    std::optional<size_t>& refPlacedRightTextIndex() { return placedRightTextIndex; }
+    std::optional<size_t>& refPlacedCenterTextIndex() { return placedCenterTextIndex; }
+    std::optional<size_t>& refPlacedLeftTextIndex() { return placedLeftTextIndex; }
+    std::optional<size_t>& refPlacedVerticalTextIndex() { return placedVerticalTextIndex; }
+    std::optional<size_t>& refPlacedIconIndex() { return placedIconIndex; }
+    std::optional<size_t>& refPlacedVerticalIconIndex() { return placedVerticalIconIndex; }
 
-    void setPlacedRightTextIndex(std::optional<size_t> x, std::string_view source = {}) {
-        check(source);
-        placedRightTextIndex = x;
-    }
-    void setPlacedCenterTextIndex(std::optional<size_t> x, std::string_view source = {}) {
-        check(source);
-        placedCenterTextIndex = x;
-    }
-    void setPlacedLeftTextIndex(std::optional<size_t> x, std::string_view source = {}) {
-        check(source);
-        placedLeftTextIndex = x;
-    }
+    void setPlacedRightTextIndex(std::optional<size_t> x) { placedRightTextIndex = x; }
+    void setPlacedCenterTextIndex(std::optional<size_t> x) { placedCenterTextIndex = x; }
+    void setPlacedLeftTextIndex(std::optional<size_t> x) { placedLeftTextIndex = x; }
 
     static constexpr uint32_t invalidCrossTileID = std::numeric_limits<uint32_t>::max();
 

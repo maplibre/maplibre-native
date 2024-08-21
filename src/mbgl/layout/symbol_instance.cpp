@@ -129,7 +129,7 @@ SymbolInstance::SymbolInstance(Anchor& anchor_,
     if (!sharedData->empty()) symbolContent |= SymbolContent::Text;
     if (allowVerticalPlacement && shapedTextOrientations.vertical) {
         const float verticalPointLabelAngle = 90.0f;
-        verticalTextCollisionFeature = CollisionFeature(line({}),
+        verticalTextCollisionFeature = CollisionFeature(line(),
                                                         anchor,
                                                         shapedTextOrientations.vertical,
                                                         textBoxScale_,
@@ -164,59 +164,49 @@ SymbolInstance::SymbolInstance(Anchor& anchor_,
     }
 }
 
-const GeometryCoordinates& SymbolInstance::line(std::string_view source) const {
-    check(source);
+const GeometryCoordinates& SymbolInstance::line() const {
     assert(sharedData);
     return sharedData->line;
 }
 
-const SymbolQuads& SymbolInstance::rightJustifiedGlyphQuads(std::string_view source) const {
-    check(source);
+const SymbolQuads& SymbolInstance::rightJustifiedGlyphQuads() const {
     assert(sharedData);
     return sharedData->rightJustifiedGlyphQuads;
 }
 
-const SymbolQuads& SymbolInstance::leftJustifiedGlyphQuads(std::string_view source) const {
-    check(source);
+const SymbolQuads& SymbolInstance::leftJustifiedGlyphQuads() const {
     assert(sharedData);
     return sharedData->leftJustifiedGlyphQuads;
 }
 
-const SymbolQuads& SymbolInstance::centerJustifiedGlyphQuads(std::string_view source) const {
-    check(source);
+const SymbolQuads& SymbolInstance::centerJustifiedGlyphQuads() const {
     assert(sharedData);
     return sharedData->centerJustifiedGlyphQuads;
 }
 
-const SymbolQuads& SymbolInstance::verticalGlyphQuads(std::string_view source) const {
-    check(source);
+const SymbolQuads& SymbolInstance::verticalGlyphQuads() const {
     assert(sharedData);
     return sharedData->verticalGlyphQuads;
 }
 
-const std::optional<SymbolQuads>& SymbolInstance::iconQuads(std::string_view source) const {
-    check(source);
+const std::optional<SymbolQuads>& SymbolInstance::iconQuads() const {
     assert(sharedData);
     return sharedData->iconQuads;
 }
 
-bool SymbolInstance::hasText(std::string_view source) const {
-    check(source);
+bool SymbolInstance::hasText() const {
     return (symbolContent & SymbolContent::Text);
 }
 
-bool SymbolInstance::hasIcon(std::string_view source) const {
-    check(source);
-    return (symbolContent & SymbolContent::IconRGBA) || hasSdfIcon(source);
+bool SymbolInstance::hasIcon() const {
+    return (symbolContent & SymbolContent::IconRGBA) || hasSdfIcon();
 }
 
-bool SymbolInstance::hasSdfIcon(std::string_view source) const {
-    check(source);
+bool SymbolInstance::hasSdfIcon() const {
     return (symbolContent & SymbolContent::IconSDF);
 }
 
-const std::optional<SymbolQuads>& SymbolInstance::verticalIconQuads(std::string_view source) const {
-    check(source);
+const std::optional<SymbolQuads>& SymbolInstance::verticalIconQuads() const {
     assert(sharedData);
     return sharedData->verticalIconQuads;
 }
@@ -225,8 +215,7 @@ void SymbolInstance::releaseSharedData() {
     sharedData.reset();
 }
 
-std::optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex(std::string_view source) const {
-    check(source);
+std::optional<size_t> SymbolInstance::getDefaultHorizontalPlacedTextIndex() const {
     if (placedRightTextIndex) return placedRightTextIndex;
     if (placedCenterTextIndex) return placedCenterTextIndex;
     if (placedLeftTextIndex) return placedLeftTextIndex;
@@ -244,7 +233,7 @@ bool SymbolInstance::check(std::string_view source) const {
            check(check19, 19, source) && check(check20, 20, source) && check(check21, 21, source) &&
            check(check22, 22, source) && check(check23, 23, source) && check(check24, 24, source) &&
            check(check25, 25, source) && check(check26, 26, source) && check(check27, 27, source) &&
-           check(check28, 28, source) && check(check29, 29, source);
+           check(check28, 28, source) && check(check29, 29, source) && checkKey(source);
 }
 
 bool SymbolInstance::checkIndexes(std::size_t textCount,
@@ -254,8 +243,8 @@ bool SymbolInstance::checkIndexes(std::size_t textCount,
     return !isFailed && checkIndex(placedRightTextIndex, textCount, source) &&
            checkIndex(placedCenterTextIndex, textCount, source) && checkIndex(placedLeftTextIndex, textCount, source) &&
            checkIndex(placedVerticalTextIndex, textCount, source) &&
-           checkIndex(placedIconIndex, hasSdfIcon({}) ? sdfSize : iconSize, source) &&
-           checkIndex(placedVerticalIconIndex, hasSdfIcon({}) ? sdfSize : iconSize, source);
+           checkIndex(placedIconIndex, hasSdfIcon() ? sdfSize : iconSize, source) &&
+           checkIndex(placedVerticalIconIndex, hasSdfIcon() ? sdfSize : iconSize, source);
 }
 
 bool SymbolInstance::check(std::size_t v, int n, std::string_view source) const {
@@ -269,7 +258,7 @@ bool SymbolInstance::check(std::size_t v, int n, std::string_view source) const 
 }
 
 bool SymbolInstance::checkKey(std::string_view source) const {
-    if (!isFailed && key.size() > 1000) { // largest observed value=62
+    if (!isFailed && key.size() > 10000) { // largest observed value=62
         isFailed = true;
         Log::Error(
             Event::Crash,

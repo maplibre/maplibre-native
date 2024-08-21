@@ -47,7 +47,7 @@ void TileLayerIndex::findMatches(SymbolBucket& bucket,
     if (bucket.bucketLeaderID != bucketLeaderId) return;
 
     for (auto& symbolInstance : symbolInstances) {
-        if (symbolInstance.getCrossTileID(__SYM_GUARD_LOC__)) {
+        if (symbolInstance.getCrossTileID() || !symbolInstance.check(__SYM_GUARD_LOC__)) {
             // already has a match, skip
             continue;
         }
@@ -145,7 +145,7 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
         // For overscaled tiles the viewport might be showing only a small part of the tile,
         // so we filter out the off-screen symbols to improve the performance.
         for (auto& symbolInstance : bucket.symbolInstances) {
-            if (isInVewport(tileMatrix, symbolInstance.getAnchor(__SYM_GUARD_LOC__).point)) {
+            if (symbolInstance.check(__SYM_GUARD_LOC__) && isInVewport(tileMatrix, symbolInstance.getAnchor().point)) {
                 symbolInstance.setCrossTileID(0u);
             } else {
                 symbolInstance.setCrossTileID(SymbolInstance::invalidCrossTileID);
@@ -179,7 +179,7 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
     }
 
     for (auto& symbolInstance : bucket.symbolInstances) {
-        if (!symbolInstance.getCrossTileID(__SYM_GUARD_LOC__)) {
+        if (symbolInstance.check(__SYM_GUARD_LOC__) && !symbolInstance.getCrossTileID()) {
             // symbol did not match any known symbol, assign a new id
             symbolInstance.setCrossTileID(++maxCrossTileID);
             thisZoomUsedCrossTileIDs.insert(symbolInstance.getCrossTileID());

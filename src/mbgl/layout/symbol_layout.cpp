@@ -849,19 +849,13 @@ void SymbolLayout::createBucket(const ImagePositions&,
                 iconSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical)
                                        ? pi_v<float> / 2
                                        : 0.0f;
-                iconSymbol.vertexStartIndex = addSymbols(iconBuffer,
-                                                         sizeData,
-                                                         iconQuads,
-                                                         symbolInstance.getAnchor(__SYM_GUARD_LOC__),
-                                                         iconSymbol,
-                                                         feature.sortKey);
+                iconSymbol.vertexStartIndex = addSymbols(
+                    iconBuffer, sizeData, iconQuads, symbolInstance.getAnchor(), iconSymbol, feature.sortKey);
             };
 
-            placeIcon(*symbolInstance.iconQuads(__SYM_GUARD_LOC__),
-                      symbolInstance.refPlacedIconIndex(),
-                      WritingModeType::None);
+            placeIcon(*symbolInstance.iconQuads(), symbolInstance.refPlacedIconIndex(), WritingModeType::None);
 
-            if (symbolInstance.verticalIconQuads(__SYM_GUARD_LOC__)) {
+            if (symbolInstance.verticalIconQuads()) {
                 placeIcon(*symbolInstance.verticalIconQuads(),
                           symbolInstance.refPlacedVerticalIconIndex(),
                           WritingModeType::Vertical);
@@ -869,12 +863,8 @@ void SymbolLayout::createBucket(const ImagePositions&,
             }
 
             for (auto& pair : bucket->paintProperties) {
-                pair.second.iconBinders.populateVertexVectors(feature,
-                                                              iconBuffer.vertices().elements(),
-                                                              symbolInstance.getDataFeatureIndex(__SYM_GUARD_LOC__),
-                                                              {},
-                                                              {},
-                                                              canonical);
+                pair.second.iconBinders.populateVertexVectors(
+                    feature, iconBuffer.vertices().elements(), symbolInstance.getDataFeatureIndex(), {}, {}, canonical);
             }
         }
 
@@ -885,7 +875,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                 lastAddedSection = addSymbolGlyphQuads(*bucket,
                                                        symbolInstance,
                                                        feature,
-                                                       symbolInstance.getWritingModes(__SYM_GUARD_LOC__),
+                                                       symbolInstance.getWritingModes(),
                                                        placedTextIndex,
                                                        symbolInstance.rightJustifiedGlyphQuads(),
                                                        canonical,
@@ -894,7 +884,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                 symbolInstance.setPlacedCenterTextIndex(placedTextIndex);
                 symbolInstance.setPlacedLeftTextIndex(placedTextIndex);
             } else {
-                if (symbolInstance.getRightJustifiedGlyphQuadsSize(__SYM_GUARD_LOC__)) {
+                if (symbolInstance.getRightJustifiedGlyphQuadsSize()) {
                     lastAddedSection = addSymbolGlyphQuads(*bucket,
                                                            symbolInstance,
                                                            feature,
@@ -904,7 +894,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                            canonical,
                                                            lastAddedSection);
                 }
-                if (symbolInstance.getCenterJustifiedGlyphQuadsSize(__SYM_GUARD_LOC__)) {
+                if (symbolInstance.getCenterJustifiedGlyphQuadsSize()) {
                     lastAddedSection = addSymbolGlyphQuads(*bucket,
                                                            symbolInstance,
                                                            feature,
@@ -914,7 +904,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                            canonical,
                                                            lastAddedSection);
                 }
-                if (symbolInstance.getLeftJustifiedGlyphQuadsSize(__SYM_GUARD_LOC__)) {
+                if (symbolInstance.getLeftJustifiedGlyphQuadsSize()) {
                     lastAddedSection = addSymbolGlyphQuads(*bucket,
                                                            symbolInstance,
                                                            feature,
@@ -925,7 +915,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                            lastAddedSection);
                 }
             }
-            if ((symbolInstance.getWritingModes(__SYM_GUARD_LOC__) & WritingModeType::Vertical) &&
+            if ((symbolInstance.getWritingModes() & WritingModeType::Vertical) &&
                 symbolInstance.getVerticalGlyphQuadsSize()) {
                 lastAddedSection = addSymbolGlyphQuads(*bucket,
                                                        symbolInstance,
@@ -980,7 +970,7 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
     const bool hasFormatSectionOverrides = bucket.hasFormatSectionOverrides();
     const auto& placedIconIndex = writingMode == WritingModeType::Vertical ? symbolInstance.getPlacedVerticalIconIndex()
                                                                            : symbolInstance.getPlacedIconIndex();
-    bucket.text.placedSymbols.emplace_back(symbolInstance.getAnchor(__SYM_GUARD_LOC__).point,
+    bucket.text.placedSymbols.emplace_back(symbolInstance.getAnchor().point,
                                            symbolInstance.getAnchor().segment.value_or(0u),
                                            sizeData.min,
                                            sizeData.max,
@@ -1001,12 +991,8 @@ std::size_t SymbolLayout::addSymbolGlyphQuads(SymbolBucket& bucket,
             }
             lastAddedSection = symbolQuad.sectionIndex;
         }
-        const std::size_t index = addSymbol(bucket.text,
-                                            sizeData,
-                                            symbolQuad,
-                                            symbolInstance.getAnchor(__SYM_GUARD_LOC__),
-                                            placedSymbol,
-                                            feature.sortKey);
+        const std::size_t index = addSymbol(
+            bucket.text, sizeData, symbolQuad, symbolInstance.getAnchor(), placedSymbol, feature.sortKey);
         if (firstSymbol) {
             placedSymbol.vertexStartIndex = index;
             firstSymbol = false;
@@ -1169,7 +1155,7 @@ void SymbolLayout::addToDebugBuffers(SymbolBucket& bucket) {
                 auto index = static_cast<uint16_t>(segment.vertexLength);
 
                 collisionBuffer.vertices().emplace_back(
-                    CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor(__SYM_GUARD_LOC__).point, tl));
+                    CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, tl));
                 collisionBuffer.vertices().emplace_back(
                     CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, tr));
                 collisionBuffer.vertices().emplace_back(
@@ -1202,14 +1188,16 @@ void SymbolLayout::addToDebugBuffers(SymbolBucket& bucket) {
                 segment.indexLength += indexLength;
             }
         };
-        populateCollisionBox(symbolInstance.getTextCollisionFeature(__SYM_GUARD_LOC__), true /*isText*/);
+        symbolInstance.check(__SYM_GUARD_LOC__);
+        populateCollisionBox(symbolInstance.getTextCollisionFeature(), true /*isText*/);
         if (symbolInstance.getVerticalTextCollisionFeature()) {
             populateCollisionBox(*symbolInstance.getVerticalTextCollisionFeature(), true /*isText*/);
         }
-        if (symbolInstance.getVerticalIconCollisionFeature(__SYM_GUARD_LOC__)) {
+        if (symbolInstance.getVerticalIconCollisionFeature()) {
             populateCollisionBox(*symbolInstance.getVerticalIconCollisionFeature(), false /*isText*/);
         }
-        populateCollisionBox(symbolInstance.getIconCollisionFeature(__SYM_GUARD_LOC__), false /*isText*/);
+        populateCollisionBox(symbolInstance.getIconCollisionFeature(), false /*isText*/);
+        symbolInstance.check(__SYM_GUARD_LOC__);
     }
 }
 

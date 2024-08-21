@@ -263,34 +263,35 @@ void SymbolBucket::sortFeatures(const float angle) {
     // position. The index array buffer is rewritten to reference the
     // (unchanged) vertices in the sorted order.
     for (const SymbolInstance& symbolInstance : getSortedSymbols(angle)) {
-        if (!symbolInstance.check(__SYM_GUARD_LOC__)) continue;
-        if (!symbolInstance.checkIndexes(
-                text.placedSymbols.size(), icon.placedSymbols.size(), sdfIcon.placedSymbols.size(), "sortFeatures"))
+        if (!symbolInstance.check(__SYM_GUARD_LOC__) ||
+            !symbolInstance.checkIndexes(
+                text.placedSymbols.size(), icon.placedSymbols.size(), sdfIcon.placedSymbols.size(), "sortFeatures")) {
             continue;
+        }
         symbolsSortOrder->push_back(symbolInstance.getDataFeatureIndex());
 
-        if (symbolInstance.getPlacedRightTextIndex(__SYM_GUARD_LOC__)) {
+        if (symbolInstance.getPlacedRightTextIndex()) {
             addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.getPlacedRightTextIndex()]);
         }
 
-        if (symbolInstance.getPlacedCenterTextIndex(__SYM_GUARD_LOC__) && !symbolInstance.getSingleLine()) {
+        if (symbolInstance.getPlacedCenterTextIndex() && !symbolInstance.getSingleLine()) {
             addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.getPlacedCenterTextIndex()]);
         }
 
-        if (symbolInstance.getPlacedLeftTextIndex(__SYM_GUARD_LOC__) && !symbolInstance.getSingleLine()) {
+        if (symbolInstance.getPlacedLeftTextIndex() && !symbolInstance.getSingleLine()) {
             addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.getPlacedLeftTextIndex()]);
         }
 
-        if (symbolInstance.getPlacedVerticalTextIndex(__SYM_GUARD_LOC__)) {
+        if (symbolInstance.getPlacedVerticalTextIndex()) {
             addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.getPlacedVerticalTextIndex()]);
         }
 
-        auto& iconBuffer = symbolInstance.hasSdfIcon(__SYM_GUARD_LOC__) ? sdfIcon : icon;
+        auto& iconBuffer = symbolInstance.hasSdfIcon() ? sdfIcon : icon;
         if (symbolInstance.getPlacedIconIndex()) {
             addPlacedSymbol(iconBuffer.triangles, iconBuffer.placedSymbols[*symbolInstance.getPlacedIconIndex()]);
         }
 
-        if (symbolInstance.getPlacedVerticalIconIndex(__SYM_GUARD_LOC__)) {
+        if (symbolInstance.getPlacedVerticalIconIndex()) {
             addPlacedSymbol(iconBuffer.triangles,
                             iconBuffer.placedSymbols[*symbolInstance.getPlacedVerticalIconIndex()]);
         }
