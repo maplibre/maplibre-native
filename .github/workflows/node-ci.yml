@@ -78,7 +78,7 @@ jobs:
             arch: x86_64
           - runs-on: [self-hosted, linux, ARM64]
             arch: arm64
-          - runs-on: macos-14
+          - runs-on: macos-13-xlarge
             arch: arm64
           - runs-on: macos-13
             arch: x86_64
