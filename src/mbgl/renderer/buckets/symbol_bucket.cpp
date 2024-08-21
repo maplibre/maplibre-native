@@ -327,12 +327,14 @@ SymbolInstanceReferences SymbolBucket::getSortedSymbols(const float angle) const
 }
 
 SymbolInstanceReferences SymbolBucket::getSymbols(const std::optional<SortKeyRange>& range) const {
-    if (!range) return SymbolInstanceReferences(symbolInstances.begin(), symbolInstances.end());
-    assert(range->start < range->end);
-    assert(range->end <= symbolInstances.size());
-    auto begin = symbolInstances.begin() + range->start;
-    auto end = symbolInstances.begin() + range->end;
-    return SymbolInstanceReferences(begin, end);
+    assert(!range || range->start < range->end);
+    assert(!range || range->end <= symbolInstances.size());
+    if (!range || range->start >= range->end || range->end > symbolInstances.size()) {
+        return {symbolInstances.begin(), symbolInstances.end()};
+    }
+    using offset_t = decltype(symbolInstances)::difference_type;
+    return {symbolInstances.begin() + static_cast<offset_t>(range->start),
+            symbolInstances.begin() + static_cast<offset_t>(range->end)};
 }
 
 bool SymbolBucket::check(std::string_view source) {
@@ -346,17 +348,16 @@ bool SymbolBucket::check(std::string_view source) {
         return false;
     }
 
-    bool success = true;
     std::ostringstream ss;
     for (std::size_t i = 0; i < symbolInstances.size(); ++i) {
         ss << source << " instance " << i;
         if (!symbolInstances[i].check(ss.str())) {
-            success = false;
+            return false;
         }
         ss.str({});
         ss.clear();
     }
-    return success;
+    return true;
 }
 
 bool SymbolBucket::hasFormatSectionOverrides() const {
