@@ -1,4 +1,5 @@
 import express from "express";
+import path from "node:path";
 
 // This needs to be here to make sure the pipe stays open.
 // We're waiting until the stdin pipe gets closed (e.g. because the parent
@@ -165,7 +166,7 @@ app.get('/load/:number(\\d+)', function(req, res) {
 });
 
 app.get('/online/:style(*)', function(req, res) {
-    const file = (__dirname + "/../fixtures/map/online/" + req.params.style).replace("storage/../", "");
+    const file = path.join(import.meta.dirname, "../fixtures/map/online", req.params.style);
     res.sendFile(file); // Set disposition and send it.
     // res.status(200).send();
     // res.send('Request ' + req.params.style);
