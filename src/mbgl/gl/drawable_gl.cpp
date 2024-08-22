@@ -171,13 +171,14 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         auto indexBufferResource{
             uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
         auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(),
-                                                                std::move(indexBufferResource));
+                                                              std::move(indexBufferResource));
         auto buffer = std::make_unique<IndexBufferGL>(std::move(indexBuffer));
         impl->indexes->setBuffer(std::move(buffer));
     }
 
     // Build the vertex attributes and bindings, if necessary
-    if (impl->attributeBindings.empty() || (vertexAttributes && vertexAttributes->isModifiedAfter(attributeUpdateTime))) {
+    if (impl->attributeBindings.empty() ||
+        (vertexAttributes && vertexAttributes->isModifiedAfter(attributeUpdateTime))) {
         MLN_TRACE_ZONE(build attributes);
 
         // Apply drawable values to shader defaults
@@ -189,14 +190,14 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 
         std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
         impl->attributeBindings = uploadPass.buildAttributeBindings(impl->vertexCount,
-                                                          impl->vertexType,
-                                                          vertexAttributeIndex,
-                                                          impl->vertexData,
-                                                          defaults,
-                                                          overrides,
-                                                          usage,
-                                                          attributeUpdateTime,
-                                                          vertexBuffers);
+                                                                    impl->vertexType,
+                                                                    vertexAttributeIndex,
+                                                                    impl->vertexData,
+                                                                    defaults,
+                                                                    overrides,
+                                                                    usage,
+                                                                    attributeUpdateTime,
+                                                                    vertexBuffers);
 
         impl->attributeBuffers = std::move(vertexBuffers);
     }
@@ -228,7 +229,9 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         }
     }
 
-    const auto needsUpload = [](const auto& texture) { return texture && texture->needsUpload(); };
+    const auto needsUpload = [](const auto& texture) {
+        return texture && texture->needsUpload();
+    };
     if (std::any_of(textures.begin(), textures.end(), needsUpload)) {
         uploadTextures();
     }
