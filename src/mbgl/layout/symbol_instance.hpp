@@ -178,6 +178,8 @@ protected:
 #endif
 
 private:
+    // clang complains about excessive padding here
+    // NOLINTBEGIN
     std::shared_ptr<SymbolInstanceSharedData> sharedData;
 
     static constexpr std::size_t checkVal = static_cast<std::size_t>(0x123456780ABCDEFFULL);
@@ -243,6 +245,7 @@ private:
 #if MLN_SYMBOL_GUARDS
     mutable bool isFailed = false;
 #endif
+    // NOLINTEND
 };
 
 using SymbolInstanceReferences = std::vector<std::reference_wrapper<const SymbolInstance>>;
