@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <thread>
 #include <unordered_set>
 
 namespace mbgl {
