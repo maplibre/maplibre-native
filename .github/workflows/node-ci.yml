@@ -148,6 +148,7 @@ jobs:
           node-version-file: '.nvmrc'
 
       - name: npm ci
+        working-directory: platform/node
         run: npm ci --ignore-scripts
 
       - name: Set up msvc dev cmd (Windows)
