@@ -17,7 +17,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 1) in vec4 in_color;
@@ -110,7 +110,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_outline_color)
 layout(location = 1) in vec4 in_color;
@@ -216,14 +216,14 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 1) in mediump vec4 in_pattern_from;
+layout(location = 1) in mediump uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 2) in mediump vec4 in_pattern_to;
+layout(location = 2) in mediump uvec4 in_pattern_to;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
@@ -411,14 +411,14 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Vulka
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 1) in mediump vec4 in_pattern_from;
+layout(location = 1) in mediump uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 2) in mediump vec4 in_pattern_to;
+layout(location = 2) in mediump uvec4 in_pattern_to;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
@@ -615,8 +615,8 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_pos_normal;
-layout(location = 1) in vec4 in_data;
+layout(location = 0) in ivec2 in_pos_normal;
+layout(location = 1) in uvec4 in_data;
 
 layout(set = 0, binding = 1) uniform FillOutlineTriangulatedDrawableUBO {
     mat4 matrix;
@@ -714,8 +714,8 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec4 in_normal_ed;
+layout(location = 0) in ivec2 in_position;
+layout(location = 1) in ivec4 in_normal_ed;
 
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 2) in vec4 in_color;
@@ -856,8 +856,8 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vul
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec4 in_normal_ed;
+layout(location = 0) in ivec2 in_position;
+layout(location = 1) in ivec4 in_normal_ed;
 
 #if !defined(HAS_UNIFORM_u_base)
 layout(location = 2) in vec2 in_base;
@@ -868,11 +868,11 @@ layout(location = 3) in vec2 in_height;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 4) in vec4 in_pattern_from;
+layout(location = 4) in uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 5) in vec4 in_pattern_to;
+layout(location = 5) in uvec4 in_pattern_to;
 #endif
 
 layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {

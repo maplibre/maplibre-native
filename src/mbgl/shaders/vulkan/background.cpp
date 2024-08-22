@@ -8,7 +8,7 @@ const std::array<UniformBlockInfo, 2> ShaderSource<BuiltIn::BackgroundShader, gf
     UniformBlockInfo{false, true, sizeof(BackgroundLayerUBO), idBackgroundLayerUBO},
 };
 const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Vulkan>::attributes = {
-    AttributeInfo{0, gfx::AttributeDataType::Float3, idBackgroundPosVertexAttribute},
+    AttributeInfo{0, gfx::AttributeDataType::Short2, idBackgroundPosVertexAttribute},
 };
 
 const std::array<UniformBlockInfo, 3>
@@ -19,7 +19,7 @@ const std::array<UniformBlockInfo, 3>
 };
 const std::array<AttributeInfo, 1>
     ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Vulkan>::attributes = {
-        AttributeInfo{0, gfx::AttributeDataType::Float3, idBackgroundPosVertexAttribute},
+        AttributeInfo{0, gfx::AttributeDataType::Short2, idBackgroundPosVertexAttribute},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Vulkan>::textures =
     {TextureInfo{0, idBackgroundImageTexture}};

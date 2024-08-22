@@ -17,7 +17,7 @@ struct ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 layout(set = 0, binding = 1) uniform DebugUBO {
     mat4 matrix;
