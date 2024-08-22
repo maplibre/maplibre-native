@@ -1,6 +1,12 @@
 
 ## main
 
+## 5.4.1-pre.0
+* [Note] This is a OpenGL-2 release. It does not include metal support.
+* Fix crash that happened with some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)).
+* Upgrade NAN to 2.19 to support Node 22 (https://github.com/maplibre/maplibre-native/pull/2426)
+* Add Node 22 binary build and publish (https://github.com/maplibre/maplibre-native/pull/2553)
+
 ## 5.4.0
 
 * [Note] This is a OpenGL-2 release. It does not include metal support.
