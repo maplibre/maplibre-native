@@ -284,10 +284,10 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         vertexStride += static_cast<uint32_t>(stride);
     };
     // This version is called when the attribute is available, but isn't being used by the shader
-    const auto missingAttr = [&](const size_t, auto& missingAttr) -> void {
+    const auto onMissingAttr = [&](const size_t, auto& missingAttr) -> void {
         missingAttr->setDirty(false);
     };
-    defaults.resolve(overrides, resolveAttr, missingAttr);
+    defaults.resolve(overrides, resolveAttr, onMissingAttr);
 
     assert(vertexStride * vertexCount <= allData.size());
 
