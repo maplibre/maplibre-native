@@ -1,6 +1,12 @@
 
 ## main
 
+## 6.0.0-pre.0
+* [Note] This is the first release that is back on the main branch.
+* This is the first release that uses Metal for rendering for macOS. This is a graphics API from Apple that replaces OpenGL (ES) on Apple platforms.
+* This is the first release that uses OpenGL ES 3.0 for Windows and Linux.
+* macOS binary is now built on macOS 14.
+
 ## 5.4.1-pre.0
 * [Note] This is a OpenGL-2 release. It does not include metal support.
 * Fix crash that happened with some PBF files ([Issue](https://github.com/maplibre/maplibre-native/issues/795), [PR](https://github.com/maplibre/maplibre-native/pull/2460)).
