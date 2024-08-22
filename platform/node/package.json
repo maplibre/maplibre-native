@@ -38,7 +38,7 @@
     "csscolorparser": "~1.0.3",
     "d3-queue": "3.0.7",
     "diff": "5.2.0",
-    "ejs": "^3.1.9",
+    "ejs": "^3.1.10",
     "esm": "~3.2.25",
     "express": "^4.19.2",
     "json-stringify-pretty-compact": "^4.0.0",
