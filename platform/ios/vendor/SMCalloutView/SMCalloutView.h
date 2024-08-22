@@ -129,7 +129,7 @@ extern NSTimeInterval const kMLNSMCalloutViewRepositionDelayForUIScrollView;
  @brief Present a callout layer in the `layer` and pointing at the given rect of the `layer` bounds
  
  @discussion Same as the view-based presentation, but inserts the callout into a CALayer hierarchy instead.
- @note Be aware that you'll have to direct your own touches to any accessory views, since CALayer doesn't relay touch events.
+ > Note: Be aware that you'll have to direct your own touches to any accessory views, since CALayer doesn't relay touch events.
  
  @param rect @c CGRect to present the view from
  @param layer layer to 'constrain' the @c constrainedLayer to

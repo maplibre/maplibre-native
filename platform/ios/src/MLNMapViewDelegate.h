@@ -9,9 +9,9 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNUserLocationAnnotationViewStyle;
 
 /**
- The `MLNMapViewDelegate` protocol defines a set of optional methods that you
+ The ``MLNMapViewDelegate`` protocol defines a set of optional methods that you
  can use to receive map-related update messages. Because many map operations
- require the `MLNMapView` class to load data asynchronously, the map view calls
+ require the ``MLNMapView`` class to load data asynchronously, the map view calls
  these methods to notify your application when specific operations complete. The
  map view also uses these methods to request information about annotations
  displayed on the map, such as the styles and interaction modes to apply to
@@ -73,7 +73,8 @@ NS_ASSUME_NONNULL_BEGIN
  @return A Boolean value indicating whether the map view should stay at
  `oldCamera` or transition to `newCamera`.
 
- @note If this method is implemented `-mapView:shouldChangeFromCamera:toCamera:` will not be called.
+ > Note: If this method is implemented `-mapView:shouldChangeFromCamera:toCamera:` will not be
+ called.
  */
 - (BOOL)mapView:(MLNMapView *)mapView
     shouldChangeFromCamera:(MLNMapCamera *)oldCamera
@@ -102,7 +103,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param animated Whether the change will cause an animated effect on the map.
  @param reason The reason for the camera change.
 
- @note If this method is implemented `-mapView:regionWillChangeAnimated:` will not be called.
+ > Note: If this method is implemented `-mapView:regionWillChangeAnimated:` will not be called.
  */
 - (void)mapView:(MLNMapView *)mapView
     regionWillChangeWithReason:(MLNCameraChangeReason)reason
@@ -113,7 +114,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  This method is called as the currently displayed map camera changes as part of
  an animation, whether due to a user gesture or due to a call to a method such
- as `-[MLNMapView setCamera:animated:]`. This method can be called before
+ as ``MLNMapView/setCamera:animated:``. This method can be called before
  `-mapViewDidFinishLoadingMap:` is called.
 
  During the animation, this method may be called many times to report updates to
@@ -134,7 +135,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  This method is called as the currently displayed map camera changes as part of
  an animation, whether due to a user gesture or due to a call to a method such
- as `-[MLNMapView setCamera:animated:]`. This method can be called before
+ as ``MLNMapView/setCamera:animated:``. This method can be called before
  `-mapViewDidFinishLoadingMap:` is called.
 
  During the animation, this method may be called many times to report updates to
@@ -144,7 +145,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param mapView The map view whose viewpoint is changing.
  @param reason The reason for the camera change.
 
- @note If this method is implemented `-mapViewRegionIsChanging:` will not be called.
+ > Note: If this method is implemented `-mapViewRegionIsChanging:` will not be called.
  */
 - (void)mapView:(MLNMapView *)mapView regionIsChangingWithReason:(MLNCameraChangeReason)reason;
 
@@ -174,7 +175,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param animated Whether the change caused an animated effect on the map.
  @param reason The reason for the camera change.
 
- @note If this method is implemented `-mapView:regionDidChangeAnimated:` will not be called.
+ > Note: If this method is implemented `-mapView:regionDidChangeAnimated:` will not be called.
  */
 - (void)mapView:(MLNMapView *)mapView
     regionDidChangeWithReason:(MLNCameraChangeReason)reason
@@ -301,7 +302,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  Tells the delegate that the `mapView` is missing an image. The image should be added synchronously
- with `-[MLNStyle setImage:forName:]` to be rendered on the current zoom level. When loading icons
+ with ``MLNStyle/setImage:forName:`` to be rendered on the current zoom level. When loading icons
  asynchronously, you can load a placeholder image and replace it when your image has loaded.
 
  @param mapView The map view that is loading the image.
@@ -362,8 +363,8 @@ NS_ASSUME_NONNULL_BEGIN
  While the `showsUserLocation` property is set to `YES`, this method is called
  whenever a new location update is received by the map view. This method is also
  called if the map view’s user tracking mode is set to
- `MLNUserTrackingModeFollowWithHeading` and the heading changes, or if it is set
- to `MLNUserTrackingModeFollowWithCourse` and the course changes.
+ ``MLNUserTrackingMode/MLNUserTrackingModeFollowWithHeading`` and the heading changes, or if it is
+ set to ``MLNUserTrackingMode/MLNUserTrackingModeFollowWithCourse`` and the course changes.
 
  This method is not called if the application is currently running in the
  background. If you want to receive location updates while running in the
@@ -407,8 +408,8 @@ NS_ASSUME_NONNULL_BEGIN
  When unimplemented, the user location annotation is aligned within the center of
  the map view with respect to the content insets.
 
- This method will override any values set by `MLNMapView.userLocationVerticalAlignment`
- or `-[MLNMapView setUserLocationVerticalAlignment:animated:]`.
+ This method will override any values set by ``MLNMapView/userLocationVerticalAlignment``
+ or ``MLNMapView/setUserLocationVerticalAlignment:animated:``.
 
  @param mapView The map view that is tracking the user's location.
  */
@@ -452,7 +453,7 @@ NS_ASSUME_NONNULL_BEGIN
  TODO: Annotation models
  TODO: Add annotation views and images
  TODO: Mark a place on the map with an image, learn to specify which
- image should be used for `MLNAnnotation` objects that have been added to
+ image should be used for ``MLNAnnotation`` objects that have been added to
  your map
  */
 - (nullable MLNAnnotationImage *)mapView:(MLNMapView *)mapView
@@ -490,7 +491,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  #### Related examples
  TODO: Annotation models, learn how to modify the outline color of an
- `MLNShape` object that has been added to your map as an annotation.
+ ``MLNShape`` object that has been added to your map as an annotation.
  */
 - (UIColor *)mapView:(MLNMapView *)mapView strokeColorForShapeAnnotation:(MLNShape *)annotation;
 
@@ -509,7 +510,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  #### Related examples
  TODO: Add a polygon annotation, learn how to modify the color of a an
- `MLNPolygon` at runtime.
+ ``MLNPolygon`` at runtime.
  */
 - (UIColor *)mapView:(MLNMapView *)mapView fillColorForPolygonAnnotation:(MLNPolygon *)annotation;
 
@@ -525,7 +526,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  #### Related examples
  TODO: Add a line annotation from GeoJSON, learn how to modify the
- line width of an `MLNPolylineFeature` on your map.
+ line width of an ``MLNPolylineFeature`` on your map.
  */
 - (CGFloat)mapView:(MLNMapView *)mapView lineWidthForPolylineAnnotation:(MLNPolyline *)annotation;
 
@@ -544,8 +545,8 @@ NS_ASSUME_NONNULL_BEGIN
  and draw more quickly than annotation views.
 
  The user location annotation view can also be customized via this method. When
- `annotation` is an instance of `MLNUserLocation` (or equal to the map view’s
- `userLocation` property), return an instance of `MLNUserLocationAnnotationView`
+ `annotation` is an instance of ``MLNUserLocation`` (or equal to the map view’s
+ `userLocation` property), return an instance of ``MLNUserLocationAnnotationView``
  (or a subclass thereof).
 
  @param mapView The map view that requested the annotation view.
@@ -556,7 +557,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  #### Related examples
  TODO: Add annotation views and images, learn how to specify what
- `MLNViewAnnotation` to use for a given `MLNPointAnnotation` object on your
+ ``MLNAnnotation`` to use for a given ``MLNAnnotation`` object on your
  map.
  */
 - (nullable MLNAnnotationView *)mapView:(MLNMapView *)mapView
@@ -570,7 +571,7 @@ NS_ASSUME_NONNULL_BEGIN
  implement this method to animate the addition of the annotation views.
 
  @param mapView The map view to which the annotation views were added.
- @param annotationViews An array of `MLNAnnotationView` objects representing the
+ @param annotationViews An array of ``MLNAnnotationView`` objects representing the
     views that were added.
  */
 - (void)mapView:(MLNMapView *)mapView
@@ -684,7 +685,7 @@ NS_ASSUME_NONNULL_BEGIN
  TODO: Add annotation views and images
  TODO: Display custom views as callouts
  TODO: Default callout usage, learn how to show callouts for
- `MLNAnnotation` objects.
+ ``MLNAnnotation`` objects.
  */
 - (BOOL)mapView:(MLNMapView *)mapView annotationCanShowCallout:(id<MLNAnnotation>)annotation;
 
@@ -700,12 +701,12 @@ NS_ASSUME_NONNULL_BEGIN
 
  @param mapView The map view that requested the callout view.
  @param annotation The object representing the annotation.
- @return A view conforming to the `MLNCalloutView` protocol, or `nil` to use the
+ @return A view conforming to the ``MLNCalloutView`` protocol, or `nil` to use the
     default callout view.
 
  #### Related examples
  TODO: Display custom views as callouts, learn how to customize an
- `MLNAnnotation` object's `MLNCalloutView`.
+ ``MLNAnnotation`` object's ``MLNAnnotation``.
  */
 - (nullable id<MLNCalloutView>)mapView:(MLNMapView *)mapView
               calloutViewForAnnotation:(id<MLNAnnotation>)annotation;
@@ -788,7 +789,7 @@ NS_ASSUME_NONNULL_BEGIN
  If your custom accessory views are not descendants of the `UIControl` class,
  the map view does not call this method. If the annotation has a custom callout
  view via the `-mapView:calloutViewForAnnotation:` method, you can specify the
- custom accessory views using the `MLNCalloutView` protocol’s
+ custom accessory views using the ``MLNCalloutView`` protocol’s
  `leftAccessoryView` and `rightAccessoryView` properties.
 
  @param mapView The map view containing the specified annotation.
@@ -810,7 +811,7 @@ NS_ASSUME_NONNULL_BEGIN
  opposed to the callout’s left or right accessory view. If the annotation has a
  custom callout view via the `-mapView:calloutViewForAnnotation:` method, this
  method is only called whenever the callout view calls its delegate’s
- `-[MLNCalloutViewDelegate calloutViewTapped:]` method.
+ ``MLNCalloutViewDelegate/calloutViewTapped:`` method.
 
  If this method is present on the delegate, the standard callout view’s body
  momentarily highlights when the user taps it, whether or not this method does
@@ -821,7 +822,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  #### Related examples
  TODO: Display custom views as callouts, learn how to trigger an
- action when an `MLNAnnotation`s `MLNCalloutView` is tapped.
+ action when an ``MLNAnnotation``s ``MLNAnnotation`` is tapped.
  */
 - (void)mapView:(MLNMapView *)mapView tapOnCalloutForAnnotation:(id<MLNAnnotation>)annotation;
 

@@ -371,7 +371,7 @@ global.propertyDoc = function (propertyName, property, layerType, kind) {
             let layoutProperties = spec[`layout_${layerType}`] || [];
             let paintProperties = spec[`paint_${layerType}`] || [];
             if (symbol in layoutProperties || symbol in paintProperties) {
-                return '`MLN' + camelize(layerType) + 'StyleLayer.' + camelizeWithLeadingLowercase(symbol) + '`';
+                return '``MLN' + camelize(layerType) + 'StyleLayer/' + camelizeWithLeadingLowercase(symbol) + '``';
             }
         }
         if ('values' in property && Object.keys(property.values).indexOf(symbol) !== -1) {
@@ -508,11 +508,11 @@ global.describeType = function (property) {
                 case 'translate':
                     return '`CGVector`';
                 case 'position':
-                    return '`MLNSphericalPosition`';
+                    return '``MLNSphericalPosition``';
                 case 'anchor':
-                    return '`MLNTextAnchor` array';
+                    return '``MLNTextAnchor`` array';
                 case 'mode':
-                    return '`MLNTextWritingMode` array';
+                    return '``MLNTextWritingMode`` array';
                 default:
                     return 'array';
             }
@@ -593,7 +593,7 @@ global.describeValue = function (value, property, layerType) {
                 case 'translate':
                     return 'an `NSValue` object containing a `CGVector` struct set to' + ` ${formatNumber(value[0])}${units} rightward and ${formatNumber(value[1])}${units} downward`;
                 case 'position':
-                    return 'an `MLNSphericalPosition` struct set to' + ` ${formatNumber(value[0])} radial, ${formatNumber(value[1])} azimuthal and ${formatNumber(value[2])} polar`;
+                    return 'an ``MLNSphericalPosition`` struct set to' + ` ${formatNumber(value[0])} radial, ${formatNumber(value[1])} azimuthal and ${formatNumber(value[2])} polar`;
                 default:
                     return 'the array `' + value.join('`, `') + '`';
             }

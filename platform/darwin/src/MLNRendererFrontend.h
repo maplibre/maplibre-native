@@ -63,6 +63,11 @@ class MLNRenderFrontend : public mbgl::RendererFrontend {
     renderer->setTileCacheEnabled(enable);
   }
 
+  bool getTileCacheEnabled() {
+    if (!renderer) return false;
+    return renderer->getTileCacheEnabled();
+  }
+
   void reduceMemoryUse() {
     if (!renderer) return;
     renderer->reduceMemoryUse();

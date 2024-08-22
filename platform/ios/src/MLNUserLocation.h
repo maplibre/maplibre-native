@@ -9,7 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  The MLNUserLocation class defines a specific type of annotation that identifies
  the user’s current location. You do not create instances of this class
- directly. Instead, you retrieve an existing `MLNUserLocation` object from the
+ directly. Instead, you retrieve an existing ``MLNUserLocation`` object from the
  `userLocation` property of the map view displayed in your application.
 
  #### Related examples
@@ -38,8 +38,8 @@ MLN_EXPORT
  The heading of the user location. (read-only)
 
  This property is `nil` if the user location tracking mode is not
- `MLNUserTrackingModeFollowWithHeading` or if
- `MLNMapView.showsUserHeadingIndicator` is disabled.
+ ``MLNUserTrackingMode/MLNUserTrackingModeFollowWithHeading`` or if
+ ``MLNMapView/showsUserHeadingIndicator`` is disabled.
  */
 @property (nonatomic, readonly, nullable) CLHeading *heading;
 
