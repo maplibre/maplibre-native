@@ -2,7 +2,7 @@
 ## main
 
 ## 6.0.0-pre.0
-* [Note] This is the first release this is back on the main branch.
+* [Note] This is the first release that is back on the main branch.
 * This is the first release that uses Metal for rendering for MacOS. This is a graphics API from Apple that replaces OpenGL ES on Apple platforms.
 * This is the first release that uses OpenGL ES 3.0 for Windows and Linux.
 * MacOS binary is now built on MacOS-14.
