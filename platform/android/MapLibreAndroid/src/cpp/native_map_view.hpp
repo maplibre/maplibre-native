@@ -296,7 +296,30 @@ public:
 
     void triggerRepaint(JNIEnv&);
 
-private:
+    // Shader compilation
+    void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
+    void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type) override;
+    void onPostCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type) override;
+    void onShaderCompileFailed(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type) override;
+
+    // Glyph requests
+    void onGlyphsLoaded(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
+    void onGlyphsError(const mbgl::FontStack&, const mbgl::GlyphRange&, std::exception_ptr) override;
+    void onGlyphsRequested(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
+
+    // Tile requests
+    void onTileRequested(const mbgl::OverscaledTileID&) override;
+    void onTileLoadedFromNetwork(const mbgl::OverscaledTileID&) override;
+    void onTileLoadedFromDisk(const mbgl::OverscaledTileID&) override;
+    void onTileFailedToLoad(const mbgl::OverscaledTileID&) override;
+    void onTileFinishedLoading(const mbgl::OverscaledTileID&) override;
+
+    // Sprite requests
+    void onSpriteLoaded(const std::optional<mbgl::style::Sprite>&) override;
+    void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
+    void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
+
+  private:
     std::unique_ptr<AndroidRendererFrontend> rendererFrontend;
 
     JavaVM* vm = nullptr;
