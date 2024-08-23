@@ -371,12 +371,12 @@ TEST(Annotations, QueryRenderedFeatures) {
     ASSERT_NEAR(points[1].y, point1.y, 1e-8);
 
     auto features = test.frontend.getRenderer()->queryRenderedFeatures(point0);
-    EXPECT_EQ(features.size(), 1u);
+    ASSERT_EQ(features.size(), 1u);
     EXPECT_EQ(features[0].id.is<NullValue>(), false);
     EXPECT_EQ(features[0].id, uint64_t(0));
 
     auto features2 = test.frontend.getRenderer()->queryRenderedFeatures(point1);
-    EXPECT_EQ(features2.size(), 1u);
+    ASSERT_EQ(features2.size(), 1u);
     EXPECT_EQ(features[0].id.is<NullValue>(), false);
     EXPECT_EQ(features2[0].id, uint64_t(1));
 }

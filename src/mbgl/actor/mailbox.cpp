@@ -1,6 +1,7 @@
 #include <mbgl/actor/mailbox.hpp>
 #include <mbgl/actor/message.hpp>
 #include <mbgl/actor/scheduler.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/scoped.hpp>
 
 #include <cassert>
@@ -75,6 +76,7 @@ bool Mailbox::isOpen() const {
 }
 
 void Mailbox::push(std::unique_ptr<Message> message) {
+    MLN_TRACE_FUNC()
     auto idleState = State::Idle;
     while (!state.compare_exchange_strong(idleState, State::Processing)) {
         if (state == State::Abandoned) {
@@ -88,6 +90,7 @@ void Mailbox::push(std::unique_ptr<Message> message) {
         }
     }};
 
+    MLN_TRACE_ZONE(push lock)
     std::lock_guard<std::mutex> pushingLock(pushingMutex);
 
     if (closed) {
@@ -95,12 +98,20 @@ void Mailbox::push(std::unique_ptr<Message> message) {
         return;
     }
 
-    std::lock_guard<std::mutex> queueLock(queueMutex);
-    bool wasEmpty = queue.empty();
-    queue.push(std::move(message));
-    auto guard = weakScheduler.lock();
-    if (wasEmpty && weakScheduler) {
-        weakScheduler->schedule(schedulerTag, makeClosure(shared_from_this()));
+    bool wasEmpty = false;
+    {
+        MLN_TRACE_ZONE(queue lock)
+        std::lock_guard<std::mutex> queueLock(queueMutex);
+        wasEmpty = queue.empty();
+        queue.push(std::move(message));
+    }
+
+    if (wasEmpty) {
+        auto guard = weakScheduler.lock();
+        if (weakScheduler) {
+            MLN_TRACE_ZONE(schedule)
+            weakScheduler->schedule(schedulerTag, makeClosure(shared_from_this()));
+        }
     }
 }
 
@@ -125,7 +136,7 @@ void Mailbox::receive() {
     }
 
     std::unique_ptr<Message> message;
-    bool wasEmpty;
+    bool wasEmpty = false;
 
     {
         std::lock_guard<std::mutex> queueLock(queueMutex);

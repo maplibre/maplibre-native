@@ -152,4 +152,13 @@ static MLNMapView *mapView;
     [self waitForExpectations:@[expectation] timeout:1];
 }
 
+- (void)testTileCache {
+    mapView.tileCacheEnabled = NO;
+    XCTAssertEqual(mapView.tileCacheEnabled, NO);
+    
+    mapView.tileCacheEnabled = YES;
+    XCTAssertEqual(mapView.tileCacheEnabled, YES);
+}
+
+
 @end

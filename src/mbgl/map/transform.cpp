@@ -12,9 +12,11 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
 
-#include <cmath>
 #include <cstdio>
 #include <utility>
+#include <numbers>
+
+using namespace std::numbers;
 
 namespace mbgl {
 
@@ -25,8 +27,8 @@ static double _normalizeAngle(double angle, double anchorAngle) {
         return 0;
     }
 
-    angle = util::wrap(angle, -M_PI, M_PI);
-    if (angle == -M_PI) angle = M_PI;
+    angle = util::wrap(angle, -pi, pi);
+    if (angle == -pi) angle = pi;
     double diff = std::abs(angle - anchorAngle);
     if (std::abs(angle - util::M2PI - anchorAngle) < diff) {
         angle -= util::M2PI;
@@ -142,13 +144,13 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     startTransition(
         camera,
         animation,
-        [=](double t) {
+        [=, this](double t) {
             Point<double> framePoint = util::interpolate(startPoint, endPoint, t);
             LatLng frameLatLng = Projection::unproject(framePoint, state.zoomScale(startZoom));
             double frameZoom = util::interpolate(startZoom, zoom, t);
             state.setLatLngZoom(frameLatLng, frameZoom);
             if (bearing != startBearing) {
-                state.setBearing(util::wrap(util::interpolate(startBearing, bearing, t), -M_PI, M_PI));
+                state.setBearing(util::wrap(util::interpolate(startBearing, bearing, t), -pi, pi));
             }
             if (padding != startEdgeInsets) {
                 // Interpolate edge insets
@@ -299,7 +301,7 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
     startTransition(
         camera,
         animation,
-        [=](double k) {
+        [=, this](double k) {
             /// s: The distance traveled along the flight path, measured in
             /// ρ-screenfuls.
             double s = k * S;
@@ -319,7 +321,7 @@ void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& anima
             LatLng frameLatLng = Projection::unproject(framePoint, startScale);
             state.setLatLngZoom(frameLatLng, frameZoom);
             if (bearing != startBearing) {
-                state.setBearing(util::wrap(util::interpolate(startBearing, bearing, k), -M_PI, M_PI));
+                state.setBearing(util::wrap(util::interpolate(startBearing, bearing, k), -pi, pi));
             }
 
             if (padding != startEdgeInsets) {
@@ -646,7 +648,7 @@ double Transform::getMaxPitchForEdgeInsets(const EdgeInsets& insets) const {
     // clipping plane.
     const double tangentOfFovAboveCenterAngle = 1.03 * (height / 2.0 + centerOffsetY) / (1.5 * height);
     const double fovAboveCenter = std::atan(tangentOfFovAboveCenterAngle);
-    return M_PI * 0.5 - fovAboveCenter;
+    return pi * 0.5 - fovAboveCenter;
     // e.g. Maximum pitch of 60 degrees is when perspective center's offset from
     // the top is 84% of screen height.
 }

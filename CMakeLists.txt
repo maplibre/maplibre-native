@@ -120,7 +120,7 @@ target_link_libraries(
 
 cmake_policy(SET CMP0063 NEW)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_C_EXTENSIONS OFF)
@@ -1166,22 +1166,16 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_block_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/uniform_buffer_gl.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_attribute_gl.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_drawable_layer_factory.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.hpp
         )
     endif()
 endif()
 
-if(MBGL_WITH_METAL)
+if(MLN_WITH_METAL)
     message(STATUS "Configuring Metal renderer backend")
     target_compile_definitions(
         mbgl-core
-        PRIVATE
-            MBGL_RENDER_BACKEND_METAL=1
+        PRIVATE MLN_RENDER_BACKEND_METAL=1
+        PUBLIC
             "MLN_USE_UNORDERED_DENSE=$<BOOL:${MLN_USE_UNORDERED_DENSE}>"
     )
     list(APPEND 
@@ -1251,28 +1245,33 @@ if(MBGL_WITH_METAL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_attribute.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/mtl/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/shader_program.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/background.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/background_pattern.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/circle.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/collision_box.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/collision_circle.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/clipping_mask.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/custom_symbol_icon.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/debug.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill_extrusion.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/fill_extrusion_pattern.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/heatmap.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/heatmap_texture.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/hillshade.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/hillshade_prepare.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/line.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/raster.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_icon.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_sdf.cpp
-            ${PROJECT_SOURCE_DIR}src/mbgl/shaders/mtl/symbol_text_and_icon.cpp
-    ]
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/background.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/background_pattern.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/circle.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/collision_box.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/collision_circle.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/clipping_mask.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/custom_symbol_icon.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/debug.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/fill.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/fill_extrusion.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/fill_extrusion_pattern.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/heatmap.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/heatmap_texture.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/hillshade_prepare.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/line.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/raster.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_icon.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_sdf.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/mtl/symbol_text_and_icon.cpp
     )
+
+    find_library(METAL_FRAMEWORK Metal)
+    if (METAL_FRAMEWORK)
+        target_link_libraries(mbgl-core PRIVATE ${METAL_FRAMEWORK})
+    endif()
+    
 endif()
 
 if(MLN_WITH_VULKAN)
@@ -1352,16 +1351,17 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/raster.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/symbol.cpp
     )
+endif()
 
-    #TODO merge with MLN_DRAWABLE_RENDERER? These are added only for GL path
+if(MLN_DRAWABLE_RENDERER)
     list(APPEND 
-        SRC_FILES
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_drawable_layer_factory.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.hpp
+    SRC_FILES
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_drawable_layer_factory.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_drawable_layer_impl.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_drawable_layer.hpp
     )
 endif()
 
@@ -1380,6 +1380,16 @@ set_source_files_properties(
     PROPERTIES
     COMPILE_FLAGS
     $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wno-deprecated-declarations>
+)
+
+# gcc 12 compiler bug, remove when fixed
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105651
+set_source_files_properties(
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/compound_expression.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/font_stack.cpp
+    PROPERTIES
+    COMPILE_FLAGS
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER:$<CXX_COMPILER_VERSION>,12.0.0>,$<VERSION_LESS:$<CXX_COMPILER_VERSION>,13.0.0>>:-Wno-restrict>
 )
 
 source_group(TREE ${PROJECT_SOURCE_DIR}/include FILES ${INCLUDE_FILES})
@@ -1429,6 +1439,8 @@ include(${PROJECT_SOURCE_DIR}/vendor/tracy.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
+
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/unordered_dense)
 set_target_properties(
@@ -1459,6 +1471,7 @@ target_link_libraries(
         mbgl-vendor-unique_resource
         mbgl-vendor-vector-tile
         mbgl-vendor-wagyu
+        $<$<BOOL:${MLN_WITH_METAL}>:mbgl-vendor-metal-cpp>
     PUBLIC
         Mapbox::Base
         Mapbox::Base::Extras::expected-lite
@@ -1497,6 +1510,7 @@ export(TARGETS
     mbgl-vendor-unique_resource
     mbgl-vendor-vector-tile
     mbgl-vendor-wagyu
+    mbgl-vendor-metal-cpp
     unordered_dense
 
     FILE MapboxCoreTargets.cmake
@@ -1543,6 +1557,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL Android)
     include(${PROJECT_SOURCE_DIR}/platform/android/android.cmake)
 elseif(CMAKE_SYSTEM_NAME STREQUAL Linux)
     include(${PROJECT_SOURCE_DIR}/platform/linux/linux.cmake)
+elseif(CMAKE_SYSTEM_NAME STREQUAL Darwin)
+    include(${PROJECT_SOURCE_DIR}/platform/macos/macos.cmake)
 elseif(WIN32)
     include(${PROJECT_SOURCE_DIR}/platform/windows/windows.cmake)
 else()

@@ -252,6 +252,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Remove render layers for removed layers.
     for (const auto& entry : layerDiff.removed) {
+        MLN_TRACE_ZONE(remove layer);
         const auto hit = renderLayers.find(entry.first);
         if (hit != renderLayers.end()) {
 #if MLN_DRAWABLE_RENDERER
@@ -263,6 +264,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Create render layers for newly added layers.
     for (const auto& entry : layerDiff.added) {
+        MLN_TRACE_ZONE(add layer);
         auto renderLayer = LayerManager::get()->createRenderLayer(entry.second);
         renderLayer->transition(transitionParameters);
         renderLayers.emplace(entry.first, std::move(renderLayer));
@@ -270,6 +272,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Update render layers for changed layers.
     for (const auto& entry : layerDiff.changed) {
+        MLN_TRACE_ZONE(change layer);
         if (const auto& renderLayer = renderLayers.at(entry.first)) {
             const auto& newLayer = entry.second.after;
 
@@ -305,11 +308,19 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     // Update layers for class and zoom changes.
     std::unordered_set<std::string> constantsMaskChanged;
     for (RenderLayer& layer : orderedLayers) {
+        MLN_TRACE_ZONE(update layer);
         const std::string& id = layer.getID();
-        const bool layerAddedOrChanged = layerDiff.added.count(id) || layerDiff.changed.count(id);
+        const bool layerAddedOrChanged = layerDiff.added.contains(id) || layerDiff.changed.contains(id);
         evaluationParameters.layerChanged = layerAddedOrChanged;
         evaluationParameters.hasCrossfade = layer.hasCrossfade();
-        if (layerAddedOrChanged || zoomChanged || evaluationParameters.hasCrossfade || layer.hasTransition()) {
+
+        // Only re-evaluate on change of zoom if the style has some reference to it
+        using Dependency = expression::Dependency;
+        const bool zoomChangedAndMatters = zoomChanged && !layerAddedOrChanged &&
+                                           (layer.getStyleDependencies() & Dependency::Zoom);
+
+        if (layerAddedOrChanged || zoomChangedAndMatters || evaluationParameters.hasCrossfade ||
+            layer.hasTransition()) {
             const auto previousMask = layer.evaluatedProperties->constantsMask();
             layer.evaluate(evaluationParameters);
             if (previousMask != layer.evaluatedProperties->constantsMask()) {
@@ -328,9 +339,10 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Create render sources for newly added sources.
     for (const auto& entry : sourceDiff.added) {
+        MLN_TRACE_ZONE(create source);
         std::unique_ptr<RenderSource> renderSource = RenderSource::create(entry.second, threadPool);
         renderSource->setObserver(this);
-        renderSource->enableCache(tileCacheEnabled);
+        renderSource->setCacheEnabled(tileCacheEnabled);
         renderSources.emplace(entry.first, std::move(renderSource));
     }
     transformState = updateParameters->transformState;
@@ -376,7 +388,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             if (layerInfo->source != LayerTypeInfo::Source::NotRequired) {
                 if (layer.baseImpl->source == sourceImpl->id) {
                     const std::string& layerId = layer.getID();
-                    sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff || constantsMaskChanged.count(layerId) ||
+                    sourceNeedsRelayout = (sourceNeedsRelayout || hasImageDiff ||
+                                           constantsMaskChanged.contains(layerId) ||
                                            hasLayoutDifference(layerDiff, layerId));
                     if (layerIsVisible) {
                         filteredLayersForSource.push_back(layer.evaluatedProperties);
@@ -431,6 +444,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     // Prepare. Update all matrices and generate data that we should upload to the GPU.
     for (const auto& entry : renderSources) {
+        MLN_TRACE_ZONE(prepare source);
         if (entry.second->isEnabled()) {
             entry.second->prepare(
                 {renderTreeParameters->transformParams, updateParameters->debugOptions, *imageManager});
@@ -439,9 +453,8 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
 
     auto opaquePassCutOffEstimation = layerRenderItems.size();
     for (auto& renderItem : layerRenderItems) {
-        MLN_TRACE_ZONE(prepare layer)
-
         RenderLayer& renderLayer = renderItem.layer;
+        MLN_TRACE_ZONE(prepare layer)
         MLN_ZONE_STR(renderLayer.getID())
 
         renderLayer.prepare(
@@ -464,6 +477,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     std::set<std::string> usedSymbolLayers;
     const auto longitude = static_cast<float>(updateParameters->transformState.getLatLng().longitude());
     for (auto it = layersNeedPlacement.crbegin(); it != layersNeedPlacement.crend(); ++it) {
+        MLN_TRACE_ZONE(placement layer);
         RenderLayer& layer = *it;
         auto result = crossTileSymbolIndex.addLayer(layer, longitude);
         if (isMapModeContinuous) {
@@ -474,7 +488,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     if (isMapModeContinuous) {
-        MLN_TRACE_ZONE(placement)
+        MLN_TRACE_ZONE(placement);
 
         std::optional<Duration> placementUpdatePeriodOverride;
         if (symbolBucketsAdded && !tiltedView) {
@@ -510,7 +524,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             updateParameters->timePoint);
         renderTreeParameters->needsRepaint = hasTransitions(updateParameters->timePoint);
     } else {
-        MLN_TRACE_ZONE(placement)
+        MLN_TRACE_ZONE(placement);
 
         renderTreeParameters->placementChanged = symbolBucketsChanged = !layersNeedPlacement.empty();
         if (renderTreeParameters->placementChanged) {
@@ -525,6 +539,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     }
 
     if (!renderTreeParameters->needsRepaint && renderTreeParameters->loaded) {
+        MLN_TRACE_ZONE(reduce);
         // Notify observer about unused images when map is fully loaded
         // and there are no ongoing transitions.
         imageManager->reduceMemoryUseIfCacheSizeExceedsLimit();
@@ -754,8 +769,12 @@ void RenderOrchestrator::setTileCacheEnabled(bool enable) {
     tileCacheEnabled = enable;
 
     for (const auto& entry : renderSources) {
-        entry.second->enableCache(enable);
+        entry.second->setCacheEnabled(enable);
     }
+}
+
+bool RenderOrchestrator::getTileCacheEnabled() const {
+    return tileCacheEnabled;
 }
 
 void RenderOrchestrator::reduceMemoryUse() {

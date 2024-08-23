@@ -17,11 +17,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.mapbox.android.gestures.AndroidGesturesManager
-import com.mapbox.android.gestures.MoveGestureDetector
-import com.mapbox.android.gestures.RotateGestureDetector
-import com.mapbox.android.gestures.ShoveGestureDetector
-import com.mapbox.android.gestures.StandardScaleGestureDetector
+import org.maplibre.android.gestures.AndroidGesturesManager
+import org.maplibre.android.gestures.MoveGestureDetector
+import org.maplibre.android.gestures.RotateGestureDetector
+import org.maplibre.android.gestures.ShoveGestureDetector
+import org.maplibre.android.gestures.StandardScaleGestureDetector
 import org.maplibre.android.annotations.Marker
 import org.maplibre.android.annotations.MarkerOptions
 import org.maplibre.android.camera.CameraUpdateFactory

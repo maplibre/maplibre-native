@@ -137,10 +137,6 @@ struct SegmentGroup {
     bool operator<(const SegmentGroup& other) const { return renderable < other.renderable; }
 };
 
-namespace {
-const SegmentVector<SymbolTextAttributes> emptySegmentVector;
-}
-
 #if MLN_LEGACY_RENDERER
 
 template <typename DrawFn>
@@ -725,6 +721,8 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 #if MLN_DRAWABLE_RENDERER
 
 namespace {
+
+const SegmentVector<SymbolTextAttributes> emptySegmentVector;
 
 template <typename TText, typename TIcon>
 const auto& getProperty(const SymbolBucket::PaintProperties& paintProps, bool isText) {
@@ -1346,7 +1344,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                     auto drawData = std::make_unique<gfx::SymbolDrawableData>(
                         /*.isHalo=*/isHalo,
-                        /*.bucketVaraiblePlacement=*/bucket.hasVariablePlacement,
+                        /*.bucketVariablePlacement=*/bucket.hasVariablePlacement,
                         /*.symbolType=*/renderable.type,
                         /*.pitchAlignment=*/values.pitchAlignment,
                         /*.rotationAlignment=*/values.rotationAlignment,

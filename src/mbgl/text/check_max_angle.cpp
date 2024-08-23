@@ -2,7 +2,10 @@
 #include <mbgl/geometry/anchor.hpp>
 #include <mbgl/util/math.hpp>
 
+#include <numbers>
 #include <queue>
+
+using namespace std::numbers;
 
 namespace mbgl {
 
@@ -55,7 +58,7 @@ bool checkMaxAngle(const GeometryCoordinates& line,
 
         double angleDelta = util::angle_to(prev, current) - util::angle_to(current, next);
         // restrict angle to -pi..pi range
-        angleDelta = std::fabs(std::fmod(angleDelta + 3 * M_PI, M_PI * 2) - M_PI);
+        angleDelta = std::fabs(std::fmod(angleDelta + 3 * pi, pi * 2) - pi);
 
         recentCorners.emplace(anchorDistance, static_cast<float>(angleDelta));
         recentAngleDelta += static_cast<float>(angleDelta);

@@ -1,9 +1,10 @@
 #include <mbgl/util/bounding_volumes.hpp>
 
 #include <gtest/gtest.h>
-#include <cmath>
 #include <algorithm>
+#include <numbers>
 
+using namespace std::numbers;
 using namespace mbgl;
 
 TEST(BoundingVolumes, CreateAabb) {
@@ -62,7 +63,7 @@ TEST(BoundingVolumes, AabbAabbIntersection) {
 TEST(BoundingVolumes, CreateFrustumFromProjectionMatrix) {
     mat4 projMatrix;
     mat4 invProjMatrix;
-    matrix::perspective(projMatrix, M_PI_2, 1.0, 0.1, 100.0);
+    matrix::perspective(projMatrix, pi / 2, 1.0, 0.1, 100.0);
     matrix::invert(invProjMatrix, projMatrix);
 
     const util::Frustum frustum = util::Frustum::fromInvProjMatrix(invProjMatrix, 1.0, 0.0, false);
@@ -123,7 +124,7 @@ static util::Frustum createTestFrustum(
 }
 
 TEST(BoundingVolumes, AabbFullyInsideFrustum) {
-    const util::Frustum frustum = createTestFrustum(M_PI_2, 1.0, 0.1, 100.0, -5.0, 0.0);
+    const util::Frustum frustum = createTestFrustum(pi / 2, 1.0, 0.1, 100.0, -5.0, 0.0);
 
     const std::array<util::AABB, 3> aabbArray = {
         util::AABB({-1, -1, 0}, {1, 1, 0}), util::AABB({-5, -5, 0}, {5, 5, 0}), util::AABB({-5, -5, 0}, {-4, -2, 0})};
@@ -134,7 +135,7 @@ TEST(BoundingVolumes, AabbFullyInsideFrustum) {
 }
 
 TEST(BoundingVolumes, AabbIntersectsFrustum) {
-    const util::Frustum frustum = createTestFrustum(M_PI_2, 1.0, 0.1, 100.0, -5.0, 0.0);
+    const util::Frustum frustum = createTestFrustum(pi / 2, 1.0, 0.1, 100.0, -5.0, 0.0);
 
     const std::array<util::AABB, 2> aabbArray = {util::AABB({-6, -6, 0}, {6, 6, 0}),
                                                  util::AABB({-6, -6, 0}, {-5, -5, 0})};
@@ -144,7 +145,7 @@ TEST(BoundingVolumes, AabbIntersectsFrustum) {
 }
 
 TEST(BoundingVolumes, AabbIntersectsFrustumEdgeCase) {
-    const util::Frustum frustum = createTestFrustum(M_PI_2, 1.0, 0.1, 100.0, -5.0, M_PI_4);
+    const util::Frustum frustum = createTestFrustum(pi / 2, 1.0, 0.1, 100.0, -5.0, pi / 4);
     const util::AABB aabb({-10, 10, 0}, {10, 12, 0});
 
     // Intersection test should report intersection even though shapes are separate

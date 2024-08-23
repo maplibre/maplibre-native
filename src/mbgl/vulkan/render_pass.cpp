@@ -8,8 +8,8 @@
 namespace mbgl {
 namespace vulkan {
 
-RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor)
-    : descriptor(descriptor),
+RenderPass::RenderPass(CommandEncoder& commandEncoder_, const char* name, const gfx::RenderPassDescriptor& descriptor_)
+    : descriptor(descriptor_),
       commandEncoder(commandEncoder_) {
     auto& resource = descriptor.renderable.getResource<RenderableResource>();
 
