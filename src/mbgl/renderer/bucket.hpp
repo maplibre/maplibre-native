@@ -76,9 +76,9 @@ public:
 #endif
 
 #if MLN_SYMBOL_GUARDS
-    virtual bool check(std::source_location = std::source_location::current()) { return true; }
+    virtual bool check(std::source_location) { return true; }
 #else
-    bool check() { return true; }
+    bool check(std::string_view = {}) { return true; }
 #endif
 
     const std::optional<std::thread::id>& getRenderThreadID() const { return renderThreadID; }

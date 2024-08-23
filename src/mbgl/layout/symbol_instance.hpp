@@ -18,6 +18,29 @@
 #define SYM_GUARD_VALUE(N)
 #endif
 
+// A temporary shim for partial C++20 support
+#if MLN_SYMBOL_GUARDS
+#if __cplusplus <= 201703L || !__has_builtin(__builtin_source_location)
+namespace std {
+struct source_location {
+    const char* fileName_;
+    const char* functionName_;
+    unsigned line_;
+
+    constexpr uint_least32_t line() const noexcept { return line_; }
+    constexpr uint_least32_t column() const noexcept { return 0; }
+    constexpr const char* file_name() const noexcept { return fileName_; }
+    constexpr const char* function_name() const noexcept { return functionName_; }
+};
+}
+#define SYM_GUARD_LOC std::source_location{__FILE__, __FUNCTION__, __LINE__}
+#else
+#define SYM_GUARD_LOC std::source_location::current()
+#endif
+#else
+#define SYM_GUARD_LOC {}
+#endif
+
 namespace mbgl {
 
 class Anchor;
@@ -107,22 +130,22 @@ public:
 
 #if MLN_SYMBOL_GUARDS
     /// Check all guard blocks
-    bool check(const std::source_location& = std::source_location::current()) const;
+    bool check(const std::source_location&) const;
     /// Check that an index is in the valid range
     bool checkIndex(const std::optional<std::size_t>& index,
                     std::size_t size,
-                    const std::source_location& = std::source_location::current()) const;
+                    const std::source_location&) const;
     /// Check all indexes
     bool checkIndexes(std::size_t textCount,
                       std::size_t iconSize,
                       std::size_t sdfSize,
-                      const std::source_location& = std::source_location::current()) const;
+                      const std::source_location&) const;
     /// Mark this item as failed (due to some external check) so that it cannot be used later
     void forceFail() const;
 #else
-    bool check() const { return true; }
-    bool checkIndex(const std::optional<std::size_t>&, std::size_t) const { return true; }
-    bool checkIndexes(std::size_t, std::size_t, std::size_t) const { return true; }
+    bool check(std::string_view = {}) const { return true; }
+    bool checkIndex(const std::optional<std::size_t>&, std::size_t, std::string_view = {}) const { return true; }
+    bool checkIndexes(std::size_t, std::size_t, std::size_t, std::string_view = {}) const { return true; }
     void forceFail() const {}
 #endif
 

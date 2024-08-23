@@ -16,7 +16,7 @@ TileLayerIndex::TileLayerIndex(OverscaledTileID coord_,
       bucketInstanceId(bucketInstanceId_),
       bucketLeaderId(std::move(bucketLeaderId_)) {
     for (const SymbolInstance& symbolInstance : symbolInstances) {
-        if (!symbolInstance.check() || symbolInstance.getCrossTileID() == SymbolInstance::invalidCrossTileID) {
+        if (!symbolInstance.check(SYM_GUARD_LOC) || symbolInstance.getCrossTileID() == SymbolInstance::invalidCrossTileID) {
             continue;
         }
         indexedSymbolInstances[symbolInstance.getKey()].emplace_back(symbolInstance.getCrossTileID(),
@@ -46,7 +46,7 @@ void TileLayerIndex::findMatches(SymbolBucket& bucket,
     if (bucket.bucketLeaderID != bucketLeaderId) return;
 
     for (auto& symbolInstance : symbolInstances) {
-        if (symbolInstance.getCrossTileID() || !symbolInstance.check()) {
+        if (symbolInstance.getCrossTileID() || !symbolInstance.check(SYM_GUARD_LOC)) {
             // already has a match, skip
             continue;
         }
@@ -144,7 +144,7 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
         // For overscaled tiles the viewport might be showing only a small part of the tile,
         // so we filter out the off-screen symbols to improve the performance.
         for (auto& symbolInstance : bucket.symbolInstances) {
-            if (symbolInstance.check() && isInVewport(tileMatrix, symbolInstance.getAnchor().point)) {
+            if (symbolInstance.check(SYM_GUARD_LOC) && isInVewport(tileMatrix, symbolInstance.getAnchor().point)) {
                 symbolInstance.setCrossTileID(0u);
             } else {
                 symbolInstance.setCrossTileID(SymbolInstance::invalidCrossTileID);
@@ -178,7 +178,7 @@ bool CrossTileSymbolLayerIndex::addBucket(const OverscaledTileID& tileID,
     }
 
     for (auto& symbolInstance : bucket.symbolInstances) {
-        if (symbolInstance.check() && !symbolInstance.getCrossTileID()) {
+        if (symbolInstance.check(SYM_GUARD_LOC) && !symbolInstance.getCrossTileID()) {
             // symbol did not match any known symbol, assign a new id
             symbolInstance.setCrossTileID(++maxCrossTileID);
             thisZoomUsedCrossTileIDs.insert(symbolInstance.getCrossTileID());

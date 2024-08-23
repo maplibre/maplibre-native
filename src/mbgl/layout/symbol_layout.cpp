@@ -817,7 +817,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                  iconsInText);
 
     for (SymbolInstance& symbolInstance : bucket->symbolInstances) {
-        if (!symbolInstance.check()) {
+        if (!symbolInstance.check(SYM_GUARD_LOC)) {
             continue;
         }
 
@@ -859,7 +859,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                 placeIcon(*symbolInstance.verticalIconQuads(),
                           symbolInstance.refPlacedVerticalIconIndex(),
                           WritingModeType::Vertical);
-                symbolInstance.check();
+                symbolInstance.check(SYM_GUARD_LOC);
             }
 
             for (auto& pair : bucket->paintProperties) {
@@ -926,7 +926,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                                                        canonical,
                                                        lastAddedSection);
             }
-            symbolInstance.check();
+            symbolInstance.check(SYM_GUARD_LOC);
             assert(lastAddedSection); // True, as hasText == true;
             updatePaintPropertiesForSection(*bucket, feature, *lastAddedSection, canonical);
         }
@@ -1188,7 +1188,7 @@ void SymbolLayout::addToDebugBuffers(SymbolBucket& bucket) {
                 segment.indexLength += indexLength;
             }
         };
-        symbolInstance.check();
+        symbolInstance.check(SYM_GUARD_LOC);
         populateCollisionBox(symbolInstance.getTextCollisionFeature(), true /*isText*/);
         if (symbolInstance.getVerticalTextCollisionFeature()) {
             populateCollisionBox(*symbolInstance.getVerticalTextCollisionFeature(), true /*isText*/);
@@ -1197,7 +1197,7 @@ void SymbolLayout::addToDebugBuffers(SymbolBucket& bucket) {
             populateCollisionBox(*symbolInstance.getVerticalIconCollisionFeature(), false /*isText*/);
         }
         populateCollisionBox(symbolInstance.getIconCollisionFeature(), false /*isText*/);
-        symbolInstance.check();
+        symbolInstance.check(SYM_GUARD_LOC);
     }
 }
 
