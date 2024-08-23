@@ -1532,7 +1532,9 @@
           "ios": "2.0.0"
         },
         "data-driven styling": {
-          "js": "2.2.0"
+          "js": "2.2.0",
+          "android": "https://github.com/maplibre/maplibre-native/issues/2754",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/2754"
         }
       },
       "expression": {
@@ -1769,7 +1771,9 @@
           "ios": "3.4.0"
         },
         "`viewport-glyph` value": {
-          "js": "2.1.8"
+          "js": "2.1.8",
+          "android": "https://github.com/maplibre/maplibre-native/issues/250",
+          "ios": "https://github.com/maplibre/maplibre-native/issues/250"
         }
       },
       "expression": {
