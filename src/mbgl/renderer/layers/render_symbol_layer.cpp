@@ -489,7 +489,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
         assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
-        if (!bucket.check()) {
+        if (!static_cast<Bucket&>(bucket).check()) {
             continue;
         }
 
@@ -697,7 +697,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 
     for (const RenderTile& renderTile : *renderTiles) {
         auto* bucket = static_cast<SymbolBucket*>(renderTile.getBucket(*baseImpl));
-        if (bucket && bucket->bucketLeaderID == getID() && bucket->Bucket::check()) {
+        if (bucket && bucket->bucketLeaderID == getID() && static_cast<Bucket*>(bucket)->check()) {
             // Only place this layer if it's the "group leader" for the bucket
             const Tile* tile = params.source->getRenderedTile(renderTile.id);
             assert(tile);

@@ -1170,7 +1170,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
     }
 
     bucket.sortFeatures(static_cast<float>(state.getBearing()));
-    bucket.Bucket::check();
+    static_cast<Bucket&>(bucket).check();
 
     const auto retainedData = retainedQueryData.find(bucket.bucketInstanceId);
     if (retainedData != retainedQueryData.end()) {
