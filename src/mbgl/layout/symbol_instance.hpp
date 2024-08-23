@@ -6,12 +6,13 @@
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/util/bitmask_operations.hpp>
 
+#include <source_location>
+
 #if !defined(MLN_SYMBOL_GUARDS)
 #define MLN_SYMBOL_GUARDS 1
 #endif
 
 #if MLN_SYMBOL_GUARDS
-#include <source_location>
 #define SYM_GUARD_VALUE(N) std::uint64_t check##N = checkVal;
 #else
 #define SYM_GUARD_VALUE(N)
