@@ -1381,8 +1381,8 @@ void NativeMapView::onGlyphsLoaded(const FontStack& stack, const GlyphRange& ran
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onGlyphsLoaded = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(*_env,
-    "onGlyphsLoaded");
+    static auto onGlyphsLoaded = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(
+        *_env, "onGlyphsLoaded");
 
     auto fontStack = jni::Array<jni::String>::New(*_env, stack.size());
     for (std::size_t i = 0; i < stack.size(); i++) {
@@ -1400,8 +1400,8 @@ void NativeMapView::onGlyphsError(const FontStack& stack, const GlyphRange& rang
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onGlyphsError = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(*_env,
-    "onGlyphsError");
+    static auto onGlyphsError = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(
+        *_env, "onGlyphsError");
 
     auto fontStack = jni::Array<jni::String>::New(*_env, stack.size());
     for (std::size_t i = 0; i < stack.size(); i++) {
@@ -1419,8 +1419,8 @@ void NativeMapView::onGlyphsRequested(const FontStack& stack, const GlyphRange& 
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onGlyphsRequested = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(*_env,
-    "onGlyphsRequested");
+    static auto onGlyphsRequested = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(
+        *_env, "onGlyphsRequested");
 
     auto fontStack = jni::Array<jni::String>::New(*_env, stack.size());
     for (std::size_t i = 0; i < stack.size(); i++) {
@@ -1530,8 +1530,9 @@ void NativeMapView::onTileFinishedLoading(const OverscaledTileID& id, const std:
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileFinishedLoading = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint, jni::String)>(
-        *_env, "onTileFinishedLoading");
+    static auto onTileFinishedLoading =
+        javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint, jni::String)>(*_env,
+                                                                                           "onTileFinishedLoading");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
         weakReference.Call(*_env,

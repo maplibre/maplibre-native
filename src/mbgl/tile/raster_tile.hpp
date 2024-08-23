@@ -17,7 +17,10 @@ class Layer;
 
 class RasterTile final : public Tile {
 public:
-    RasterTile(const OverscaledTileID&, const std::string&, const TileParameters&, const Tileset&,
+    RasterTile(const OverscaledTileID&,
+               const std::string&,
+               const TileParameters&,
+               const Tileset&,
                TileObserver* observer = nullptr);
     ~RasterTile() override;
 
