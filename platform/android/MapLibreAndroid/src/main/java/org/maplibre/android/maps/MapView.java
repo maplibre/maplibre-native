@@ -914,7 +914,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   public void addOnPreCompileShaderListener(MapView.OnPreCompileShaderListener callback) {
     mapChangeReceiver.addOnPreCompileShaderListener(callback);
   }
-  
+
   /**
    * Removes a callback that's invoked before a shader is compiled.
    *
@@ -959,7 +959,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   public void removeOnShaderCompileFailedListener(MapView.OnShaderCompileFailedListener callback) {
     mapChangeReceiver.removeOnShaderCompileFailedListener(callback);
   }
-  
+
   /**
    * Set a callback that's invoked after a range of glyphs are loaded.
    *
@@ -1086,6 +1086,24 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     mapChangeReceiver.removeOnTileFailedToLoadListener(callback);
   }
 
+  /**
+   * Set a callback that's invoked when client processing of a tile begins.
+   *
+   * @param listener The callback that's invoked when client processing of a tile begins
+   */
+  public void addOnTileStartLoadingListener(MapView.OnTileStartLoadingListener callback) {
+    mapChangeReceiver.addOnTileStartLoadingListener(callback);
+  }
+
+  /**
+   * Removes a callback that's invoked when client processing of a tile begins.
+   *
+   * @param listener The callback that's invoked when client processing of a tile begins
+   */
+  public void removeOnTileStartLoadingListener(MapView.OnTileStartLoadingListener callback) {
+    mapChangeReceiver.removeOnTileStartLoadingListener(callback);
+  }
+  
   /**
    * Set a callback that's invoked after a tile is fully loaded and processed by the client.
    *
@@ -1385,8 +1403,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     /**
      * Called before a shader is compiled.
      *
-     * @param id of a shader type enumeration. See `mbgl::shaders::BuiltIn` for a list of possible values.
-     * @param type of graphics backend the shader is being compiled for. See `mbgl::gfx::Backend::Type` for a list of possible values.
+     * @param id of a shader type enumeration. See `mbgl::shaders::BuiltIn` for a list
+     * of possible values.
+     * @param type of graphics backend the shader is being compiled for. See
+     * `mbgl::gfx::Backend::Type` for a list of possible values.
      */
     void onPreCompileShader(int id, int type);
   }
@@ -1401,8 +1421,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     /**
      * Called after a shader is compiled.
      *
-     * @param id of a shader type enumeration. See `mbgl::shaders::BuiltIn` for a list of possible values.
-     * @param type of graphics backend the shader is being compiled for. See `mbgl::gfx::Backend::Type` for a list of possible values.
+     * @param id of a shader type enumeration. See `mbgl::shaders::BuiltIn` for a list
+     * of possible values.
+     * @param type of graphics backend the shader is being compiled for. See
+     * `mbgl::gfx::Backend::Type` for a list of possible values.
      */
     void onPostCompileShader(int id, int type);
   }
@@ -1417,8 +1439,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     /**
      * Called when a shader fails to compile.
      *
-     * @param id of a shader type enumeration. See `mbgl::shaders::BuiltIn` for a list of possible values.
-     * @param type of graphics backend the shader is being compiled for. See `mbgl::gfx::Backend::Type` for a list of possible values.
+     * @param id of a shader type enumeration. See `mbgl::shaders::BuiltIn` for a list
+     * of possible values.
+     * @param type of graphics backend the shader is being compiled for. See
+     * `mbgl::gfx::Backend::Type` for a list of possible values.
      */
     void onShaderCompileFailed(int id, int type);
   }
@@ -1437,7 +1461,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * @param rangeStart of glyph indices being loaded.
      * @param rangeEnd of glyph indices being loaded.
      */
-    void onGlyphsLoaded(@NonNull List<String> stack, int rangeStart, int rangeEnd);
+    void onGlyphsLoaded(@NonNull String[] stack, int rangeStart, int rangeEnd);
   }
 
   /**
@@ -1454,7 +1478,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * @param rangeStart of glyph indices that failed to load.
      * @param rangeEnd of glyph indices that failed to load.
      */
-    void onGlyphsError(@NonNull List<String> stack, int rangeStart, int rangeEnd);
+    void onGlyphsError(@NonNull String[] stack, int rangeStart, int rangeEnd);
   }
 
   /**
@@ -1471,7 +1495,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * @param rangeStart of glyph indices that are being requested.
      * @param rangeEnd of glyph indices that are being requested.
      */
-    void onGlyphsRequested(@NonNull List<String> stack, int rangeStart, int rangeEnd);
+    void onGlyphsRequested(@NonNull String[] stack, int rangeStart, int rangeEnd);
   }
 
   /**
@@ -1547,6 +1571,25 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   /**
+   * Interface definition for a callback to be invoked when client processing of a tile begins.
+   * <p>
+   * {@link MapView#addOnTileStartLoadingListener(OnTileStartLoadingListener)}
+   * </p>
+   */
+  public interface OnTileStartLoadingListener {
+    /**
+     * Called when client processing of a tile begins.
+     *
+     * @param x coordinate of the tile.
+     * @param y coordinate of the tile.
+     * @param z coordinate of the tile.
+     * @param overscaledZ coordinate of the tile.
+     * @param sourceID of the tile.
+     */
+    void onTileStartLoading(int x, int y, int z, int overscaledZ, String sourceID);
+  }
+
+  /**
    * Interface definition for a callback to be invoked after a tile is fully loaded and processed by the client.
    * <p>
    * {@link MapView#addOnTileFinishedLoadingListener(OnTileFinishedLoadingListener)}
@@ -1560,8 +1603,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * @param y coordinate of the tile.
      * @param z coordinate of the tile.
      * @param overscaledZ coordinate of the tile.
+     * @param sourceID of the tile.
      */
-    void onTileFinishedLoading(int x, int y, int z, int overscaledZ);
+    void onTileFinishedLoading(int x, int y, int z, int overscaledZ, String sourceID);
   }
 
   /**
@@ -1595,7 +1639,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      */
     void onSpriteError(@NonNull String id, @NonNull String url);
   }
-  
+
   /**
    * Interface definition for a callback to be invoked after a sprite is requested.
    * <p>

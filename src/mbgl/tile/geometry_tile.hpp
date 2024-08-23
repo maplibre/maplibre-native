@@ -126,6 +126,7 @@ private:
     const MapMode mode;
 
     bool showCollisionBoxes;
+    bool notifiedInitiallyLoaded{false};
 
     enum class FadeState {
         Loaded,

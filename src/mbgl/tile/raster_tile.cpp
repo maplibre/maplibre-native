@@ -15,14 +15,18 @@
 namespace mbgl {
 
 RasterTile::RasterTile(const OverscaledTileID& id_,
+                       const std::string& sourceID_,
                        const TileParameters& parameters,
                        const Tileset& tileset,
                        TileObserver* observer_)
     : Tile(Kind::Raster, id_, observer_),
+      sourceID(sourceID_),
       loader(*this, id_, parameters, tileset),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(parameters.threadPool, ActorRef<RasterTile>(*this, mailbox)) {}
+      worker(parameters.threadPool, ActorRef<RasterTile>(*this, mailbox)) {
+    observer->onTileStartLoading(*this, sourceID);
+}
 
 RasterTile::~RasterTile() {
     markObsolete();
@@ -66,7 +70,7 @@ void RasterTile::onParsed(std::unique_ptr<RasterBucket> result, const uint64_t r
         observer->onTileChanged(*this);
 
         if (!pending) {
-            observer->onTileFinishedLoading(*this);
+            observer->onTileFinishedLoading(*this, sourceID);
         }
     }
 }

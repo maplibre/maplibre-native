@@ -15,10 +15,12 @@
 namespace mbgl {
 
 RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_,
+                             const std::string& sourceID_,
                              const TileParameters& parameters,
                              const Tileset& tileset,
                              TileObserver* observer_)
     : Tile(Kind::RasterDEM, id_, observer_),
+      sourceID(sourceID_),
       loader(*this, id_, parameters, tileset),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
@@ -33,6 +35,8 @@ RasterDEMTile::RasterDEMTile(const OverscaledTileID& id_,
         // this tile doesn't have lower neighboring tiles so marked those as backfilled
         neighboringTiles = neighboringTiles | DEMTileNeighbors::NoLower;
     }
+
+    observer->onTileStartLoading(*this, sourceID);
 }
 
 RasterDEMTile::~RasterDEMTile() {
@@ -77,7 +81,7 @@ void RasterDEMTile::onParsed(std::unique_ptr<HillshadeBucket> result, const uint
         observer->onTileChanged(*this);
 
         if (!pending) {
-            observer->onTileFinishedLoading(*this);
+            observer->onTileFinishedLoading(*this, sourceID);
         }
     }
 }

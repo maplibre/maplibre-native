@@ -55,6 +55,8 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     = new CopyOnWriteArrayList<>();
   private final List<MapView.OnTileFailedToLoadListener> onTileFailedToLoadList
     = new CopyOnWriteArrayList<>();
+  private final List<MapView.OnTileStartLoadingListener> onTileStartLoadingList
+    = new CopyOnWriteArrayList<>();
   private final List<MapView.OnTileFinishedLoadingListener> onTileFinishedLoadingList
     = new CopyOnWriteArrayList<>();
   private final List<MapView.OnSpriteLoadedListener> onSpriteLoadedList
@@ -326,7 +328,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   }
 
   @Override
-  public void onGlyphsLoaded(List<String> stack, int rangeStart, int rangeEnd) {
+  public void onGlyphsLoaded(String[] stack, int rangeStart, int rangeEnd) {
     try {
       if (!onGlyphsLoadedList.isEmpty()) {
         for (MapView.OnGlyphsLoadedListener listener : onGlyphsLoadedList) {
@@ -340,7 +342,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   }
 
   @Override
-  public void onGlyphsError(List<String> stack, int rangeStart, int rangeEnd) {
+  public void onGlyphsError(String[] stack, int rangeStart, int rangeEnd) {
     try {
       if (!onGlyphsErrorList.isEmpty()) {
         for (MapView.OnGlyphsErrorListener listener : onGlyphsErrorList) {
@@ -354,7 +356,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   }
 
   @Override
-  public void onGlyphsRequested(List<String> stack, int rangeStart, int rangeEnd) {
+  public void onGlyphsRequested(String[] stack, int rangeStart, int rangeEnd) {
     try {
       if (!onGlyphsRequestedList.isEmpty()) {
         for (MapView.OnGlyphsRequestedListener listener : onGlyphsRequestedList) {
@@ -424,11 +426,25 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   }
 
   @Override
-  public void onTileFinishedLoading(int x, int y, int z, int overscaledZ) {
+  public void onTileStartLoading(int x, int y, int z, int overscaledZ, String sourceID) {
+    try {
+      if (!onTileStartLoadingList.isEmpty()) {
+        for (MapView.OnTileStartLoadingListener listener : onTileStartLoadingList) {
+          listener.onTileStartLoading(x, y, z, overscaledZ, sourceID);
+        }
+      }
+    } catch (Throwable err) {
+      Logger.e(TAG, "Exception in onTileStartLoading", err);
+      throw err;
+    }
+  }
+
+  @Override
+  public void onTileFinishedLoading(int x, int y, int z, int overscaledZ, String sourceID) {
     try {
       if (!onTileFinishedLoadingList.isEmpty()) {
         for (MapView.OnTileFinishedLoadingListener listener : onTileFinishedLoadingList) {
-          listener.onTileFinishedLoading(x, y, z, overscaledZ);
+          listener.onTileFinishedLoading(x, y, z, overscaledZ, sourceID);
         }
       }
     } catch (Throwable err) {
@@ -639,6 +655,10 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onTileFailedToLoadList.add(callback);
   }
 
+  public void addOnTileStartLoadingListener(MapView.OnTileStartLoadingListener callback) {
+    onTileStartLoadingList.add(callback);
+  }
+
   public void addOnTileFinishedLoadingListener(MapView.OnTileFinishedLoadingListener callback) {
     onTileFinishedLoadingList.add(callback);
   }
@@ -695,6 +715,10 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onTileFailedToLoadList.remove(callback);
   }
 
+  public void removeOnTileStartLoadingListener(MapView.OnTileStartLoadingListener callback) {
+    onTileStartLoadingList.remove(callback);
+  }
+
   public void removeOnTileFinishedLoadingListener(MapView.OnTileFinishedLoadingListener callback) {
     onTileFinishedLoadingList.remove(callback);
   }
@@ -706,7 +730,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void removeOnSpriteErrorListener(MapView.OnSpriteErrorListener callback) {
     onSpriteErrorList.remove(callback);
   }
-  
+
   public void removeOnSpriteRequestedListener(MapView.OnSpriteRequestedListener callback) {
     onSpriteRequestedList.remove(callback);
   }
@@ -737,6 +761,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onTileLoadedFromNetworkList.clear();
     onTileLoadedFromDiskList.clear();
     onTileFailedToLoadList.clear();
+    onTileStartLoadingList.clear();
     onTileFinishedLoadingList.clear();
     onSpriteLoadedList.clear();
     onSpriteErrorList.clear();

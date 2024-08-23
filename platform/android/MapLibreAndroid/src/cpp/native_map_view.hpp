@@ -312,7 +312,8 @@ public:
     void onTileLoadedFromNetwork(const mbgl::OverscaledTileID&) override;
     void onTileLoadedFromDisk(const mbgl::OverscaledTileID&) override;
     void onTileFailedToLoad(const mbgl::OverscaledTileID&) override;
-    void onTileFinishedLoading(const mbgl::OverscaledTileID&) override;
+    void onTileStartLoading(const mbgl::OverscaledTileID&, const std::string&) override;
+    void onTileFinishedLoading(const mbgl::OverscaledTileID&, const std::string&) override;
 
     // Sprite requests
     void onSpriteLoaded(const std::optional<mbgl::style::Sprite>&) override;

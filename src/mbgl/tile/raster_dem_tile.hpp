@@ -61,7 +61,8 @@ class Layer;
 
 class RasterDEMTile final : public Tile {
 public:
-    RasterDEMTile(const OverscaledTileID&, const TileParameters&, const Tileset&, TileObserver* observer = nullptr);
+    RasterDEMTile(const OverscaledTileID&, const std::string&, const TileParameters&, const Tileset&,
+                  TileObserver* observer = nullptr);
     ~RasterDEMTile() override;
 
     std::unique_ptr<TileRenderData> createRenderData() override;
@@ -91,6 +92,7 @@ public:
 private:
     void markObsolete();
 
+    std::string sourceID;
     TileLoader<RasterDEMTile> loader;
 
     TaggedScheduler threadPool;

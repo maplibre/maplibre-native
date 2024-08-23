@@ -187,7 +187,9 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
       mode(parameters.mode),
-      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
+      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {
+    observer->onTileStartLoading(*this, sourceID);
+}
 
 GeometryTile::~GeometryTile() {
     MLN_TRACE_FUNC()
@@ -304,8 +306,9 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
 
     observer->onTileChanged(*this);
 
-    if (!pending) {
-        observer->onTileFinishedLoading(*this);
+    if (!pending && !notifiedInitiallyLoaded) {
+        notifiedInitiallyLoaded = true;
+        observer->onTileFinishedLoading(*this, sourceID);
     }
 }
 

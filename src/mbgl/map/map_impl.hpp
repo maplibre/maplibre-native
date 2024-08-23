@@ -65,7 +65,8 @@ public:
     void onTileLoadedFromNetwork(const OverscaledTileID&) final;
     void onTileLoadedFromDisk(const OverscaledTileID&) final;
     void onTileFailedToLoad(const OverscaledTileID&) final;
-    void onTileFinishedLoading(const OverscaledTileID&) final;
+    void onTileStartLoading(const OverscaledTileID&, const std::string&) final;
+    void onTileFinishedLoading(const OverscaledTileID&, const std::string&) final;
 
     // Map
     void jumpTo(const CameraOptions&);

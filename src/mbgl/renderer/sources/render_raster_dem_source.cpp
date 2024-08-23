@@ -36,7 +36,7 @@ void RenderRasterDEMSource::updateInternal(const Tileset& tileset,
                        tileset.zoomRange,
                        tileset.bounds,
                        [&](const OverscaledTileID& tileID, TileObserver* observer_) {
-                           return std::make_unique<RasterDEMTile>(tileID, parameters, tileset, observer_);
+                           return std::make_unique<RasterDEMTile>(tileID, baseImpl->id, parameters, tileset, observer_);
                        });
     algorithm::updateTileMasks(tilePyramid.getRenderedTiles());
 }

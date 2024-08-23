@@ -86,7 +86,8 @@ public:
     virtual void onTileLoadedFromNetwork(const OverscaledTileID&) {}
     virtual void onTileLoadedFromDisk(const OverscaledTileID&) {}
     virtual void onTileFailedToLoad(const OverscaledTileID&) {}
-    virtual void onTileFinishedLoading(const OverscaledTileID&) {} // Client-side tile processing
+    virtual void onTileStartLoading(const OverscaledTileID&, const std::string&) {}
+    virtual void onTileFinishedLoading(const OverscaledTileID&, const std::string&) {}
 
     // Sprite requests
     virtual void onSpriteLoaded(const std::optional<style::Sprite>&) {}

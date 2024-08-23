@@ -1377,66 +1377,60 @@ void NativeMapView::onShaderCompileFailed(shaders::BuiltIn id, gfx::Backend::Typ
 
 // Glyph requests
 void NativeMapView::onGlyphsLoaded(const FontStack& stack, const GlyphRange& range) {
-    /*assert(vm != nullptr);
+    assert(vm != nullptr);
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onGlyphsLoaded = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(*_env,
     "onGlyphsLoaded");
 
-    std::size_t index = 0;
-    auto jstrings = jni::Array<jni::String>::New(*_env, stack.size());
-    for (auto& font : stack) {
-        jstrings.Set(*_env, index, jni::Make<jni::String>(*_env, font));
-        index++;
+    auto fontStack = jni::Array<jni::String>::New(*_env, stack.size());
+    for (std::size_t i = 0; i < stack.size(); i++) {
+        fontStack.Set(*_env, i, jni::Make<jni::String>(*_env, stack.at(i)));
     }
 
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(*_env, onGlyphsLoaded, jstrings, range.first, range.second);
-    }*/
+        weakReference.Call(*_env, onGlyphsLoaded, fontStack, range.first, range.second);
+    }
 }
 
 void NativeMapView::onGlyphsError(const FontStack& stack, const GlyphRange& range, std::exception_ptr) {
-    /*assert(vm != nullptr);
+    assert(vm != nullptr);
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onGlyphsError = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(*_env,
     "onGlyphsError");
 
-    std::size_t index = 0;
-    auto jstrings = jni::Array<jni::String>::New(*_env, stack.size());
-    for (auto& font : stack) {
-        jstrings.Set(*_env, index, jni::Make<jni::String>(*_env, font));
-        index++;
+    auto fontStack = jni::Array<jni::String>::New(*_env, stack.size());
+    for (std::size_t i = 0; i < stack.size(); i++) {
+        fontStack.Set(*_env, i, jni::Make<jni::String>(*_env, stack.at(i)));
     }
 
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(*_env, onGlyphsError, jstrings, range.first, range.second);
-    }*/
+        weakReference.Call(*_env, onGlyphsError, fontStack, range.first, range.second);
+    }
 }
 
 void NativeMapView::onGlyphsRequested(const FontStack& stack, const GlyphRange& range) {
-    /*assert(vm != nullptr);
+    assert(vm != nullptr);
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onGlyphsRequested = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(*_env,
     "onGlyphsRequested");
 
-    std::size_t index = 0;
-    auto jstrings = jni::Array<jni::String>::New(*_env, stack.size());
-    for (auto& font : stack) {
-        jstrings.Set(*_env, index, jni::Make<jni::String>(*_env, font));
-        index++;
+    auto fontStack = jni::Array<jni::String>::New(*_env, stack.size());
+    for (std::size_t i = 0; i < stack.size(); i++) {
+        fontStack.Set(*_env, i, jni::Make<jni::String>(*_env, stack.at(i)));
     }
 
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(*_env, onGlyphsRequested, jstrings, range.first, range.second);
-    }*/
+        weakReference.Call(*_env, onGlyphsRequested, fontStack, range.first, range.second);
+    }
 }
 
 // Tile requests
@@ -1512,12 +1506,31 @@ void NativeMapView::onTileFailedToLoad(const OverscaledTileID& id) {
     }
 }
 
-void NativeMapView::onTileFinishedLoading(const OverscaledTileID& id) {
+void NativeMapView::onTileStartLoading(const OverscaledTileID& id, const std::string& sourceID) {
     assert(vm != nullptr);
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileFinishedLoading = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(
+    static auto onTileStartLoading = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint, jni::String)>(
+        *_env, "onTileStartLoading");
+    auto weakReference = javaPeer.get(*_env);
+    if (weakReference) {
+        weakReference.Call(*_env,
+                           onTileStartLoading,
+                           static_cast<jni::jint>(id.canonical.x),
+                           static_cast<jni::jint>(id.canonical.y),
+                           static_cast<jni::jint>(id.canonical.z),
+                           static_cast<jni::jint>(id.overscaledZ),
+                           jni::Make<jni::String>(*_env, sourceID));
+    }
+}
+
+void NativeMapView::onTileFinishedLoading(const OverscaledTileID& id, const std::string& sourceID) {
+    assert(vm != nullptr);
+
+    android::UniqueEnv _env = android::AttachEnv();
+    static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
+    static auto onTileFinishedLoading = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint, jni::String)>(
         *_env, "onTileFinishedLoading");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
@@ -1526,7 +1539,8 @@ void NativeMapView::onTileFinishedLoading(const OverscaledTileID& id) {
                            static_cast<jni::jint>(id.canonical.x),
                            static_cast<jni::jint>(id.canonical.y),
                            static_cast<jni::jint>(id.canonical.z),
-                           static_cast<jni::jint>(id.overscaledZ));
+                           static_cast<jni::jint>(id.overscaledZ),
+                           jni::Make<jni::String>(*_env, sourceID));
     }
 }
 

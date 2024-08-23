@@ -92,8 +92,12 @@ public:
         delegate.invoke(&RendererObserver::onTileFailedToLoad, id);
     }
 
-    void onTileFinishedLoading(const mbgl::OverscaledTileID& id) override {
-        delegate.invoke(&RendererObserver::onTileFinishedLoading, id);
+    void onTileStartLoading(const mbgl::OverscaledTileID& id, const std::string& sourceID) override {
+        delegate.invoke(&RendererObserver::onTileStartLoading, id, sourceID);
+    }
+
+    void onTileFinishedLoading(const mbgl::OverscaledTileID& id, const std::string& sourceID) override {
+        delegate.invoke(&RendererObserver::onTileFinishedLoading, id, sourceID);
     }
 
 private:

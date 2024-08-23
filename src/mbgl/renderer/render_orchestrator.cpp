@@ -1065,8 +1065,12 @@ void RenderOrchestrator::onTileFailedToLoad(RenderSource&, const OverscaledTileI
     observer->onTileFailedToLoad(id);
 }
 
-void RenderOrchestrator::onTileFinishedLoading(RenderSource&, const OverscaledTileID& id) {
-    observer->onTileFinishedLoading(id);
+void RenderOrchestrator::onTileStartLoading(RenderSource&, const OverscaledTileID& id, const std::string& sourceID) {
+    observer->onTileStartLoading(id, sourceID);
+}
+
+void RenderOrchestrator::onTileFinishedLoading(RenderSource&, const OverscaledTileID& id, const std::string& sourceID) {
+    observer->onTileFinishedLoading(id, sourceID);
 };
 
 void RenderOrchestrator::onStyleImageMissing(const std::string& id, const std::function<void()>& done) {

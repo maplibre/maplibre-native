@@ -94,8 +94,12 @@ void RenderSource::onTileFailedToLoad(Tile& tile) {
     observer->onTileFailedToLoad(*this, tile.id);
 }
 
-void RenderSource::onTileFinishedLoading(Tile& tile) {
-    observer->onTileFinishedLoading(*this, tile.id);
+void RenderSource::onTileStartLoading(Tile& tile, const std::string& sourceID) {
+    observer->onTileStartLoading(*this, tile.id, sourceID);
+}
+
+void RenderSource::onTileFinishedLoading(Tile& tile, const std::string& sourceID) {
+    observer->onTileFinishedLoading(*this, tile.id, sourceID);
 }
 
 bool RenderSource::isEnabled() const {

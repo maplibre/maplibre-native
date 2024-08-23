@@ -284,8 +284,12 @@ void Map::Impl::onTileFailedToLoad(const OverscaledTileID& id) {
     observer.onTileFailedToLoad(id);
 }
 
-void Map::Impl::onTileFinishedLoading(const OverscaledTileID& id) {
-    observer.onTileFinishedLoading(id);
+void Map::Impl::onTileStartLoading(const OverscaledTileID& id, const std::string& sourceID) {
+    observer.onTileStartLoading(id, sourceID);
+}
+
+void Map::Impl::onTileFinishedLoading(const OverscaledTileID& id, const std::string& sourceID) {
+    observer.onTileFinishedLoading(id, sourceID);
 }
 
 } // namespace mbgl

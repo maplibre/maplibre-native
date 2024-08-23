@@ -178,7 +178,8 @@ private:
     void onTileLoadedFromNetwork(RenderSource&, const OverscaledTileID&) override;
     void onTileLoadedFromDisk(RenderSource&, const OverscaledTileID&) override;
     void onTileFailedToLoad(RenderSource&, const OverscaledTileID&) override;
-    void onTileFinishedLoading(RenderSource&, const OverscaledTileID&) override;
+    void onTileStartLoading(RenderSource&, const OverscaledTileID&, const std::string&) override;
+    void onTileFinishedLoading(RenderSource&, const OverscaledTileID&, const std::string&) override;
 
     // ImageManagerObserver implementation
     void onStyleImageMissing(const std::string&, const std::function<void()>&) override;

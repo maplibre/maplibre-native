@@ -1209,21 +1209,21 @@ final class NativeMapView implements NativeMap {
   }
 
   @Keep
-  private void onGlyphsLoaded(List<String> stack, int rangeStart, int rangeEnd) {
+  private void onGlyphsLoaded(String[] stack, int rangeStart, int rangeEnd) {
     if (stateCallback != null) {
       stateCallback.onGlyphsLoaded(stack, rangeStart, rangeEnd);
     }
   }
 
   @Keep
-  private void onGlyphsError(List<String> stack, int rangeStart, int rangeEnd) {
+  private void onGlyphsError(String[] stack, int rangeStart, int rangeEnd) {
     if (stateCallback != null) {
       stateCallback.onGlyphsError(stack, rangeStart, rangeEnd);
     }
   }
 
   @Keep
-  private void onGlyphsRequested(List<String> stack, int rangeStart, int rangeEnd) {
+  private void onGlyphsRequested(String[] stack, int rangeStart, int rangeEnd) {
     if (stateCallback != null) {
       stateCallback.onGlyphsRequested(stack, rangeStart, rangeEnd);
     }
@@ -1258,9 +1258,16 @@ final class NativeMapView implements NativeMap {
   }
 
   @Keep
-  private void onTileFinishedLoading(int x, int y, int z, int overscaledZ) {
+  private void onTileStartLoading(int x, int y, int z, int overscaledZ, String sourceID) {
     if (stateCallback != null) {
-      stateCallback.onTileFinishedLoading(x, y, z, overscaledZ);
+      stateCallback.onTileStartLoading(x, y, z, overscaledZ, sourceID);
+    }
+  }
+
+  @Keep
+  private void onTileFinishedLoading(int x, int y, int z, int overscaledZ, String sourceID) {
+    if (stateCallback != null) {
+      stateCallback.onTileFinishedLoading(x, y, z, overscaledZ, sourceID);
     }
   }
 
@@ -1716,11 +1723,11 @@ final class NativeMapView implements NativeMap {
 
     void onShaderCompileFailed(int id, int type);
 
-    void onGlyphsLoaded(List<String> stack, int rangeStart, int rangeEnd);
+    void onGlyphsLoaded(String[] stack, int rangeStart, int rangeEnd);
 
-    void onGlyphsError(List<String> stack, int rangeStart, int rangeEnd);
+    void onGlyphsError(String[] stack, int rangeStart, int rangeEnd);
 
-    void onGlyphsRequested(List<String> stack, int rangeStart, int rangeEnd);
+    void onGlyphsRequested(String[] stack, int rangeStart, int rangeEnd);
 
     void onTileRequested(int x, int y, int z, int overscaledZ);
 
@@ -1730,7 +1737,9 @@ final class NativeMapView implements NativeMap {
 
     void onTileFailedToLoad(int x, int y, int z, int overscaledZ);
 
-    void onTileFinishedLoading(int x, int y, int z, int overscaledZ);
+    void onTileStartLoading(int x, int y, int z, int overscaledZ, String sourceID);
+
+    void onTileFinishedLoading(int x, int y, int z, int overscaledZ, String sourceID);
 
     void onSpriteLoaded(String id, String url);
     
