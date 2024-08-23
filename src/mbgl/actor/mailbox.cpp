@@ -90,27 +90,29 @@ void Mailbox::push(std::unique_ptr<Message> message) {
         }
     }};
 
-    // MLN_TRACE_ZONE(push lock)
-    std::lock_guard<std::mutex> pushingLock(pushingMutex);
-
-    if (closed) {
-        state = State::Abandoned;
-        return;
-    }
-
-    bool wasEmpty = false;
     {
-        MLN_TRACE_ZONE(queue lock)
-        std::lock_guard<std::mutex> queueLock(queueMutex);
-        wasEmpty = queue.empty();
-        queue.push(std::move(message));
-    }
+        MLN_TRACE_ZONE(push_lock)
+        std::lock_guard<std::mutex> pushingLock(pushingMutex);
 
-    if (wasEmpty) {
-        auto guard = weakScheduler.lock();
-        if (weakScheduler) {
-            MLN_TRACE_ZONE(schedule)
-            weakScheduler->schedule(schedulerTag, makeClosure(shared_from_this()));
+        if (closed) {
+            state = State::Abandoned;
+            return;
+        }
+
+        bool wasEmpty = false;
+        {
+            MLN_TRACE_ZONE(queue_lock)
+            std::lock_guard<std::mutex> queueLock(queueMutex);
+            wasEmpty = queue.empty();
+            queue.push(std::move(message));
+        }
+
+        if (wasEmpty) {
+            auto guard = weakScheduler.lock();
+            if (weakScheduler) {
+                MLN_TRACE_ZONE(schedule)
+                weakScheduler->schedule(schedulerTag, makeClosure(shared_from_this()));
+            }
         }
     }
 }
