@@ -49,6 +49,8 @@ global.expressionType = function (property) {
             return 'StringType';
         case 'color':
             return `ColorType`;
+        case 'variableAnchorOffsetCollection':
+            return `VariableAnchorOffsetCollectionType`;
         case 'formatted':
             return `FormattedType`;
         case 'array':
@@ -58,6 +60,9 @@ global.expressionType = function (property) {
 };
 
 global.evaluatedType = function (property) {
+  if (/text-variable-anchor-offset/.test(property.name)) {
+    return 'VariableAnchorOffsetCollection';
+  }
   if (/-translate-anchor$/.test(property.name)) {
     return 'TranslateAnchorType';
   }
@@ -190,6 +195,7 @@ global.defaultValue = function (property) {
   case 'formatted':
   case 'string':
   case 'resolvedImage':
+  case 'variableAnchorOffsetCollection':
     return property.default ? `{${JSON.stringify(property.default)}}` : '{}';
   case 'enum':
     if (property.default === undefined) {

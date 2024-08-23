@@ -179,6 +179,8 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
             return `@"'${_.last(_.keys(property.values))}'"`;
         case 'color':
             return '@"%@", [MLNColor redColor]';
+        case 'variableAnchorOffsetCollection':
+            return `@"{"top": [1, 2]}"`;
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -224,6 +226,7 @@ global.mbglTestValue = function (property, layerType) {
         case 'formatted':
         case 'string':
         case 'resolvedImage':
+        case 'variableAnchorOffsetCollection':
             return `"${_.startCase(propertyName)}"`;
         case 'enum': {
             let type = camelize(originalPropertyName(property));
@@ -311,6 +314,7 @@ global.testHelperMessage = function (property, layerType, isFunction) {
         case 'formatted':
         case 'string':
         case 'resolvedImage':
+        case 'variableAnchorOffsetCollection':
             return 'testString' + fnSuffix;
         case 'enum':
             let objCType = global.objCType(layerType, property.name);
@@ -495,6 +499,7 @@ global.describeType = function (property) {
         case 'formatted':
         case 'string':
         case 'resolvedImage':
+        case 'variableAnchorOffsetCollection':
             return 'string';
         case 'enum':
             return '`MLN' + camelize(property.name) + '`';
@@ -544,6 +549,7 @@ global.describeValue = function (value, property, layerType) {
         case 'formatted':
         case 'string':
         case 'resolvedImage':
+        case 'variableAnchorOffsetCollection':
             if (value === '') {
                 return 'the empty string';
             }
@@ -631,6 +637,7 @@ global.propertyType = function (property) {
         case 'formatted':
         case 'string':
         case 'resolvedImage':
+        case 'variableAnchorOffsetCollection':
             return 'NSString *';
         case 'enum':
             return 'NSValue *';
@@ -684,6 +691,8 @@ global.valueTransformerArguments = function (property) {
             return [mbglType(property), 'NSValue *', mbglType(property), `MLN${camelize(property.name)}`];
         case 'color':
             return ['mbgl::Color', objCType];
+        case 'variableAnchorOffsetCollection':
+            return ['mbgl::VariableAnchorOffsetCollection', objCType];
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -739,6 +748,8 @@ global.mbglType = function(property) {
         }
         case 'color':
             return 'mbgl::Color';
+        case 'variableAnchorOffsetCollection':
+            return 'mbgl::VariableAnchorOffsetCollection';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':

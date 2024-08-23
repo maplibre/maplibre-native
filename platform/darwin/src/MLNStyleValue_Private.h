@@ -218,6 +218,12 @@ class MLNStyleValueTransformer {
   // Color
   void getMBGLValue(MLNColor *rawValue, mbgl::Color &mbglValue) { mbglValue = rawValue.mgl_color; }
 
+  // VariableAnchorOffsetCollection
+  void getMBGLValue(NSString *rawValue, mbgl::VariableAnchorOffsetCollection &mbglValue) {
+    mbgl::VariableAnchorOffsetCollection anchorOffset{};
+    mbglValue = anchorOffset;
+  }
+
   // Image
   void getMBGLValue(NSString *rawValue, mbgl::style::expression::Image &mbglValue) {
     mbglValue = mbgl::style::expression::Image(rawValue.UTF8String);
@@ -295,6 +301,12 @@ class MLNStyleValueTransformer {
     return [MLNColor mgl_colorWithColor:mbglStopValue];
   }
 
+  // VariableAnchorOffsetCollection
+  static NSArray<NSExpression *> *toMLNRawStyleValue(const mbgl::VariableAnchorOffsetCollection mbglStopValue) {
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:mbglStopValue.getSize()];
+    return array;
+  }
+  
   // Image
   static NSString *toMLNRawStyleValue(const mbgl::style::expression::Image &mbglImageValue) {
     return @(mbglImageValue.id().c_str());

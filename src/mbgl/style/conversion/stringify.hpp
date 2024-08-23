@@ -9,6 +9,7 @@
 #include <mbgl/util/feature.hpp>
 #include <mbgl/util/ignore.hpp>
 #include <mbgl/util/rapidjson.hpp>
+#include <mbgl/util/variable_anchor_offset_collection.hpp>
 
 #include <array>
 #include <vector>
@@ -56,6 +57,11 @@ void stringify(Writer& writer, const T& v) {
 template <class Writer>
 void stringify(Writer& writer, const Color& v) {
     writer.String(v.stringify());
+}
+
+template <class Writer>
+void stringify(Writer& writer, const VariableAnchorOffsetCollection& v) {
+  writer.String(v.stringify());
 }
 
 template <class Writer>

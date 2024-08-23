@@ -72,6 +72,22 @@ EvaluationResult toColor(const Value& colorValue) {
         });
 }
 
+EvaluationResult toVariableAnchorOffsetCollection(const Value& value) {
+    return value.match(
+        [&](const VariableAnchorOffsetCollection& anchorOffset) -> EvaluationResult { return anchorOffset; },
+        [&](const std::string& anchorOffsetString) -> EvaluationResult {
+            const std::optional<VariableAnchorOffsetCollection> result = VariableAnchorOffsetCollection::parse(anchorOffsetString);
+            if (result) {
+                return *result;
+            } else {
+                return EvaluationError{"Could not parse variableAnchorOffsetCollection from value '" + anchorOffsetString + "'"};
+            }
+        },
+        [&](const auto&) -> EvaluationResult {
+            return EvaluationError{"Could not parse variableAnchorOffsetCollection from value '" + stringify(value) + "'"};
+        });
+}
+
 EvaluationResult toFormatted(const Value& formattedValue) {
     return Formatted(toString(formattedValue).c_str());
 }
@@ -89,6 +105,8 @@ CoerceFunction getCoerceFunction(const type::Type& t) {
         return toBoolean;
     } else if (t.is<type::ColorType>()) {
         return toColor;
+    } else if (t.is<type::VariableAnchorOffsetCollectionType>()) {
+        return toVariableAnchorOffsetCollection;
     } else if (t.is<type::NumberType>()) {
         return toNumber;
     } else if (t.is<type::StringType>()) {

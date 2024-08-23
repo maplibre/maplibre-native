@@ -131,6 +131,7 @@ template std::optional<PropertyExpression<LineJoinType>> convertFunctionToExpres
                                                                                                    Error&,
                                                                                                    bool);
 template std::optional<PropertyExpression<Color>> convertFunctionToExpression<Color>(const Convertible&, Error&, bool);
+template std::optional<PropertyExpression<VariableAnchorOffsetCollection>> convertFunctionToExpression<VariableAnchorOffsetCollection>(const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<Position>> convertFunctionToExpression<Position>(const Convertible&,
                                                                                            Error&,
                                                                                            bool);
@@ -241,6 +242,13 @@ std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,
         },
         [&](const type::ColorType&) -> std::optional<std::unique_ptr<Expression>> {
             auto result = convert<Color>(value, error);
+            if (!result) {
+                return std::nullopt;
+            }
+            return literal(*result);
+        },
+        [&](const type::VariableAnchorOffsetCollectionType&) -> std::optional<std::unique_ptr<Expression>> {
+            auto result = convert<VariableAnchorOffsetCollection>(value, error);
             if (!result) {
                 return std::nullopt;
             }
@@ -778,6 +786,9 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
             },
             [&](const type::ColorType&) -> std::optional<std::unique_ptr<Expression>> {
                 return toColor(get(literal(*property)), defaultExpr());
+            },
+            [&](const type::VariableAnchorOffsetCollectionType&) -> std::optional<std::unique_ptr<Expression>> {
+                return toVariableAnchorOffsetCollection(get(literal(*property)), defaultExpr());
             },
             [&](const type::Array& array) -> std::optional<std::unique_ptr<Expression>> {
                 return assertion(array, get(literal(*property)), defaultExpr());

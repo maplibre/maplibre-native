@@ -126,6 +126,18 @@ public:
 };
 
 template <>
+struct Interpolator<VariableAnchorOffsetCollection> {
+public:
+  VariableAnchorOffsetCollection operator()(const VariableAnchorOffsetCollection& a, const VariableAnchorOffsetCollection& b, const float t) noexcept {
+        return {};
+    }
+
+  VariableAnchorOffsetCollection operator()(const VariableAnchorOffsetCollection& a, const VariableAnchorOffsetCollection& b, const double t) noexcept {
+        return {};
+    }
+};
+
+template <>
 struct Interpolator<style::Rotation> {
 public:
     style::Rotation operator()(const style::Rotation& a, const style::Rotation& b, const double t) noexcept {

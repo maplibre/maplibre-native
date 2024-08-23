@@ -228,13 +228,6 @@ bool SymbolLayout::hasSymbolInstances() const {
 
 namespace {
 
-// The radial offset is to the edge of the text box
-// In the horizontal direction, the edge of the text box is where glyphs start
-// But in the vertical direction, the glyphs appear to "start" at the baseline
-// We don't actually load baseline data, but we assume an offset of ONE_EM - 17
-// (see "yOffset" in shaping.js)
-const float baselineOffset = 7.0f;
-
 // We don't care which shaping we get because this is used for collision
 // purposes and all the justifications have the same collision box.
 const Shaping& getDefaultHorizontalShaping(const ShapedTextOrientations& shapedTextOrientations) {
@@ -258,101 +251,7 @@ Shaping& shapingForTextJustifyType(ShapedTextOrientations& shapedTextOrientation
     }
 }
 
-std::array<float, 2> evaluateRadialOffset(style::SymbolAnchorType anchor, float radialOffset) {
-    std::array<float, 2> result{{0.0f, 0.0f}};
-    if (radialOffset < 0.0f) radialOffset = 0.0f; // Ignore negative offset.
-    // solve for r where r^2 + r^2 = radialOffset^2
-    const float sqrt2 = 1.41421356237f;
-    const float hypotenuse = radialOffset / sqrt2;
-
-    switch (anchor) {
-        case SymbolAnchorType::TopRight:
-        case SymbolAnchorType::TopLeft:
-            result[1] = hypotenuse - baselineOffset;
-            break;
-        case SymbolAnchorType::BottomRight:
-        case SymbolAnchorType::BottomLeft:
-            result[1] = -hypotenuse + baselineOffset;
-            break;
-        case SymbolAnchorType::Bottom:
-            result[1] = -radialOffset + baselineOffset;
-            break;
-        case SymbolAnchorType::Top:
-            result[1] = radialOffset - baselineOffset;
-            break;
-        default:
-            break;
-    }
-
-    switch (anchor) {
-        case SymbolAnchorType::TopRight:
-        case SymbolAnchorType::BottomRight:
-            result[0] = -hypotenuse;
-            break;
-        case SymbolAnchorType::TopLeft:
-        case SymbolAnchorType::BottomLeft:
-            result[0] = hypotenuse;
-            break;
-        case SymbolAnchorType::Left:
-            result[0] = radialOffset;
-            break;
-        case SymbolAnchorType::Right:
-            result[0] = -radialOffset;
-            break;
-        default:
-            break;
-    }
-
-    return result;
-}
-
 } // namespace
-
-// static
-std::array<float, 2> SymbolLayout::evaluateVariableOffset(style::SymbolAnchorType anchor, std::array<float, 2> offset) {
-    if (offset[1] == INVALID_OFFSET_VALUE) {
-        return evaluateRadialOffset(anchor, offset[0]);
-    }
-    std::array<float, 2> result{{0.0f, 0.0f}};
-    offset[0] = std::abs(offset[0]);
-    offset[1] = std::abs(offset[1]);
-
-    switch (anchor) {
-        case SymbolAnchorType::TopRight:
-        case SymbolAnchorType::TopLeft:
-        case SymbolAnchorType::Top:
-            result[1] = offset[1] - baselineOffset;
-            break;
-        case SymbolAnchorType::BottomRight:
-        case SymbolAnchorType::BottomLeft:
-        case SymbolAnchorType::Bottom:
-            result[1] = -offset[1] + baselineOffset;
-            break;
-        case SymbolAnchorType::Center:
-        case SymbolAnchorType::Left:
-        case SymbolAnchorType::Right:
-            break;
-    }
-
-    switch (anchor) {
-        case SymbolAnchorType::TopRight:
-        case SymbolAnchorType::BottomRight:
-        case SymbolAnchorType::Right:
-            result[0] = -offset[0];
-            break;
-        case SymbolAnchorType::TopLeft:
-        case SymbolAnchorType::BottomLeft:
-        case SymbolAnchorType::Left:
-            result[0] = offset[0];
-            break;
-        case SymbolAnchorType::Center:
-        case SymbolAnchorType::Top:
-        case SymbolAnchorType::Bottom:
-            break;
-    }
-
-    return result;
-}
 
 void SymbolLayout::prepareSymbols(const GlyphMap& glyphMap,
                                   const GlyphPositions& glyphPositions,
@@ -417,7 +316,7 @@ void SymbolLayout::prepareSymbols(const GlyphMap& glyphMap,
                     // `text-radial-offset` together but doesn't actually
                     // specify what happens if you use both. We go with the
                     // radial offset.
-                    textOffset = evaluateRadialOffset(textAnchor, radialOffset * util::ONE_EM);
+                    textOffset = VariableAnchorOffsetCollection::evaluateRadialOffset(textAnchor, radialOffset * util::ONE_EM);
                 } else {
                     textOffset = {{layout->evaluate<TextOffset>(zoom, feature, canonicalID)[0] * util::ONE_EM,
                                    layout->evaluate<TextOffset>(zoom, feature, canonicalID)[1] * util::ONE_EM}};
@@ -569,7 +468,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
     std::array<float, 2> variableTextOffset;
     if (!textRadialOffset.isUndefined()) {
         variableTextOffset = {
-            {layout->evaluate<TextRadialOffset>(zoom, feature, canonicalID) * util::ONE_EM, INVALID_OFFSET_VALUE}};
+            {layout->evaluate<TextRadialOffset>(zoom, feature, canonicalID) * util::ONE_EM, VariableAnchorOffsetCollection::INVALID_OFFSET_VALUE}};
     } else {
         variableTextOffset = {{layout->evaluate<TextOffset>(zoom, feature, canonicalID)[0] * util::ONE_EM,
                                layout->evaluate<TextOffset>(zoom, feature, canonicalID)[1] * util::ONE_EM}};

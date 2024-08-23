@@ -113,6 +113,22 @@ std::optional<Color> Converter<Color>::operator()(const Convertible& value, Erro
     return *color;
 }
 
+std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetCollection>::operator()(const Convertible& value, Error& error) const {
+    std::optional<std::string> string = toString(value);
+    if (!string) {
+        error.message = "value must be a string";
+        return std::nullopt;
+    }
+
+    std::optional<VariableAnchorOffsetCollection> variableAnchorOffset = VariableAnchorOffsetCollection::parse(*string);
+    if (!variableAnchorOffset) {
+        error.message = "value must be a valid variable anchor offset";
+        return std::nullopt;
+    }
+
+    return *variableAnchorOffset;
+}
+
 template <size_t N>
 std::optional<std::array<float, N>> Converter<std::array<float, N>>::operator()(const Convertible& value,
                                                                                 Error& error) const {
