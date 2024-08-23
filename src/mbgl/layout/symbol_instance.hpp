@@ -12,7 +12,7 @@
 
 #if MLN_SYMBOL_GUARDS
 #define __SYM_GUARD_LOC__ __SOURCE_LOCATION__
-#define SYM_GUARD_VALUE(N) std::size_t check##N = checkVal;
+#define SYM_GUARD_VALUE(N) std::uint64_t check##N = checkVal;
 #else
 #define __SYM_GUARD_LOC__ \
     std::string_view {}
@@ -64,6 +64,11 @@ struct SymbolInstanceSharedData {
     std::optional<SymbolQuads> iconQuads;
     std::optional<SymbolQuads> verticalIconQuads;
 };
+
+#if MLN_SYMBOL_GUARDS
+// with guard values, clang-tidy complains about excessive packing
+#pragma pack(push, 4)
+#endif
 
 class SymbolInstance {
 public:
@@ -178,11 +183,9 @@ protected:
 #endif
 
 private:
-    // clang complains about excessive padding here
-    // NOLINTBEGIN
     std::shared_ptr<SymbolInstanceSharedData> sharedData;
 
-    static constexpr std::size_t checkVal = static_cast<std::size_t>(0x123456780ABCDEFFULL);
+    static constexpr std::uint64_t checkVal = 0x123456780ABCDEFFULL;
 
     SYM_GUARD_VALUE(01)
     Anchor anchor;
@@ -221,32 +224,34 @@ private:
     SYM_GUARD_VALUE(17)
     std::u16string key;
     SYM_GUARD_VALUE(18)
-    SYM_GUARD_VALUE(19)
     std::optional<size_t> placedRightTextIndex;
-    SYM_GUARD_VALUE(20)
+    SYM_GUARD_VALUE(19)
     std::optional<size_t> placedCenterTextIndex;
-    SYM_GUARD_VALUE(21)
+    SYM_GUARD_VALUE(20)
     std::optional<size_t> placedLeftTextIndex;
-    SYM_GUARD_VALUE(22)
+    SYM_GUARD_VALUE(21)
     std::optional<size_t> placedVerticalTextIndex;
-    SYM_GUARD_VALUE(23)
+    SYM_GUARD_VALUE(22)
     std::optional<size_t> placedIconIndex;
-    SYM_GUARD_VALUE(24)
+    SYM_GUARD_VALUE(23)
     std::optional<size_t> placedVerticalIconIndex;
-    SYM_GUARD_VALUE(25)
+    SYM_GUARD_VALUE(24)
     float textBoxScale;
-    SYM_GUARD_VALUE(26)
+    SYM_GUARD_VALUE(25)
     std::array<float, 2> variableTextOffset;
-    SYM_GUARD_VALUE(27)
+    SYM_GUARD_VALUE(26)
     bool singleLine;
-    SYM_GUARD_VALUE(28)
+    SYM_GUARD_VALUE(27)
     uint32_t crossTileID = 0;
-    SYM_GUARD_VALUE(29)
+    SYM_GUARD_VALUE(28)
 #if MLN_SYMBOL_GUARDS
     mutable bool isFailed = false;
 #endif
-    // NOLINTEND
 };
+
+#if MLN_SYMBOL_GUARDS
+#pragma pack(pop)
+#endif
 
 using SymbolInstanceReferences = std::vector<std::reference_wrapper<const SymbolInstance>>;
 

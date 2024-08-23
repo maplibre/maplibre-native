@@ -287,7 +287,7 @@ void SymbolInstance::forceFail() const {
 void SymbolInstance::forceFailInternal() {
     check01 = check02 = check03 = check04 = check05 = check06 = check07 = check08 = check09 = check10 = check11 =
         check12 = check13 = check14 = check15 = check16 = check17 = check18 = check19 = check20 = check21 = check22 =
-            check23 = check24 = check25 = check26 = check27 = check28 = check29 = 0;
+            check23 = check24 = check25 = check26 = check27 = check28 = 0;
 }
 
 #endif // MLN_SYMBOL_GUARDS
