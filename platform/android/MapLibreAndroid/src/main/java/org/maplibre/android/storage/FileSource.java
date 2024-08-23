@@ -203,7 +203,7 @@ public class FileSource {
     @Override
     protected Void doInBackground(Context... contexts) {
       getResourcesCachePath(contexts[0]);
-      getInternalCachePath(context[0]);
+      getInternalCachePath(contexts[0]);
     }
   }
 
