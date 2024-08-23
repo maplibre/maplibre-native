@@ -489,7 +489,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
         assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
-        if (!bucket.check(__SYM_GUARD_LOC__)) {
+        if (!bucket.check()) {
             continue;
         }
 
@@ -697,7 +697,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 
     for (const RenderTile& renderTile : *renderTiles) {
         auto* bucket = static_cast<SymbolBucket*>(renderTile.getBucket(*baseImpl));
-        if (bucket && bucket->bucketLeaderID == getID() && bucket->check(__SYM_GUARD_LOC__)) {
+        if (bucket && bucket->bucketLeaderID == getID() && bucket->Bucket::check()) {
             // Only place this layer if it's the "group leader" for the bucket
             const Tile* tile = params.source->getRenderedTile(renderTile.id);
             assert(tile);
@@ -1064,7 +1064,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto* optRenderData = getRenderDataForPass(tile, passes);
         if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData() ||
-            !optRenderData->bucket->check(__SYM_GUARD_LOC__)) {
+            !optRenderData->bucket->check()) {
             removeTile(passes, tileID);
             continue;
         }

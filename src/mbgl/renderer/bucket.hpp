@@ -1,9 +1,10 @@
 #pragma once
 
-#include <mbgl/tile/geometry_tile_data.hpp>
-#include <mbgl/style/image_impl.hpp>
+#include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
+#include <mbgl/style/image_impl.hpp>
 #include <mbgl/style/layer_impl.hpp>
+#include <mbgl/tile/geometry_tile_data.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/util/identity.hpp>
@@ -74,7 +75,11 @@ public:
     const util::SimpleIdentity& getID() const { return bucketID; }
 #endif
 
-    virtual bool check(std::string_view) { return true; }
+#if MLN_SYMBOL_GUARDS
+    virtual bool check(std::source_location = std::source_location::current()) { return true; }
+#else
+    bool check() { return true; }
+#endif
 
     const std::optional<std::thread::id>& getRenderThreadID() const { return renderThreadID; }
     void setRenderThreadID(std::optional<std::thread::id> id) { renderThreadID = id; }

@@ -305,7 +305,7 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
     if (layoutResult) {
         for (const auto& data : layoutResult->layerRenderData) {
             if (data.second.bucket) {
-                data.second.bucket->check(__SYM_GUARD_LOC__);
+                data.second.bucket->check();
             }
         }
     }
@@ -315,7 +315,7 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
     if (layoutResult) {
         for (const auto& data : layoutResult->layerRenderData) {
             if (data.second.bucket) {
-                data.second.bucket->check(__SYM_GUARD_LOC__);
+                data.second.bucket->check();
             }
         }
     }

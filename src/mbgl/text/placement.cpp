@@ -249,7 +249,7 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
                          collisionGroups.get(params.sourceId),
                          getAvoidEdges(symbolBucket, renderTile.matrix)};
     for (const SymbolInstance& symbol : getSortedSymbols(params, ctx.pixelRatio)) {
-        if (!symbol.check(__SYM_GUARD_LOC__)) continue;
+        if (!symbol.check()) continue;
         if (seenCrossTileIDs.contains(symbol.getCrossTileID())) continue;
         placeSymbol(symbol, ctx);
 
@@ -272,7 +272,7 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
 
 JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, const PlacementContext& ctx) {
     static const JointPlacement kUnplaced(false, false, false);
-    if (!symbolInstance.check(__SYM_GUARD_LOC__)) return kUnplaced;
+    if (!symbolInstance.check()) return kUnplaced;
     if (symbolInstance.getCrossTileID() == SymbolInstance::invalidCrossTileID) return kUnplaced;
 
     if (ctx.getRenderTile().holdForFade()) {
@@ -621,7 +621,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
         collisionCircles[&symbolInstance.getTextCollisionFeature()] = textBoxes;
     }
 
-    if (!symbolInstance.check(__SYM_GUARD_LOC__)) {
+    if (!symbolInstance.check()) {
         return kUnplaced;
     }
 
@@ -998,7 +998,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
         true);
 
     for (SymbolInstance& symbolInstance : bucket.symbolInstances) {
-        if (!symbolInstance.check(__SYM_GUARD_LOC__)) continue;
+        if (!symbolInstance.check()) continue;
         bool isDuplicate = seenCrossTileIDs.contains(symbolInstance.getCrossTileID());
 
         auto it = opacities.find(symbolInstance.getCrossTileID());
@@ -1014,8 +1014,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
         if (symbolInstance.hasText() || symbolInstance.hasIcon()) {
             if (!symbolInstance.checkIndexes(bucket.text.placedSymbols.size(),
                                              bucket.icon.placedSymbols.size(),
-                                             bucket.sdfIcon.placedSymbols.size(),
-                                             "Placement::updateBucketOpacities"))
+                                             bucket.sdfIcon.placedSymbols.size()))
                 return;
         }
         if (symbolInstance.hasText()) {
@@ -1171,7 +1170,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
     }
 
     bucket.sortFeatures(static_cast<float>(state.getBearing()));
-    bucket.check(__SYM_GUARD_LOC__);
+    bucket.Bucket::check();
 
     const auto retainedData = retainedQueryData.find(bucket.bucketInstanceId);
     if (retainedData != retainedQueryData.end()) {
@@ -1219,8 +1218,7 @@ void Placement::markUsedJustification(SymbolBucket& bucket,
         const std::optional<size_t> index = justificationToIndex(justify, symbolInstance, orientation);
         if (index) {
             assert(bucket.text.placedSymbols.size() > *index);
-            if (!symbolInstance.checkIndex(index, bucket.text.placedSymbols.size(), "Placement::markUsedJustification"))
-                continue;
+            if (!symbolInstance.checkIndex(index, bucket.text.placedSymbols.size())) continue;
             if (autoIndex && *index != *autoIndex) {
                 // There are multiple justifications and this one isn't it: shift offscreen
                 bucket.text.placedSymbols.at(*index).crossTileID = 0u;
@@ -1242,10 +1240,8 @@ void Placement::markUsedOrientation(SymbolBucket& bucket,
                               ? std::optional<style::TextWritingModeType>(orientation)
                               : std::nullopt;
 
-    if (!symbolInstance.checkIndexes(bucket.text.placedSymbols.size(),
-                                     bucket.icon.placedSymbols.size(),
-                                     bucket.sdfIcon.placedSymbols.size(),
-                                     "markUsedOrientation")) {
+    if (!symbolInstance.checkIndexes(
+            bucket.text.placedSymbols.size(), bucket.icon.placedSymbols.size(), bucket.sdfIcon.placedSymbols.size())) {
         return;
     }
 
@@ -1594,7 +1590,7 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
     };
 
     for (const SymbolInstance& symbol : symbolInstances) {
-        if (!symbol.check(__SYM_GUARD_LOC__)) {
+        if (!symbol.check()) {
             continue;
         }
         const auto intersectStatus = symbolIntersectsTileEdges(symbol);

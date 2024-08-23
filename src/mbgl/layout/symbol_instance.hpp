@@ -11,11 +11,9 @@
 #endif
 
 #if MLN_SYMBOL_GUARDS
-#define __SYM_GUARD_LOC__ __SOURCE_LOCATION__
+#include <source_location>
 #define SYM_GUARD_VALUE(N) std::uint64_t check##N = checkVal;
 #else
-#define __SYM_GUARD_LOC__ \
-    std::string_view {}
 #define SYM_GUARD_VALUE(N)
 #endif
 
@@ -65,10 +63,8 @@ struct SymbolInstanceSharedData {
     std::optional<SymbolQuads> verticalIconQuads;
 };
 
-#if MLN_SYMBOL_GUARDS
-// with guard values, clang-tidy complains about excessive packing
-#pragma pack(push, 4)
-#endif
+// With guards, clang complains about excessive padding here
+// NOLINTBEGIN(clang-analyzer-optin.performance.Padding)
 
 class SymbolInstance {
 public:
@@ -110,20 +106,22 @@ public:
 
 #if MLN_SYMBOL_GUARDS
     /// Check all guard blocks
-    bool check(std::string_view source = {}) const;
+    bool check(const std::source_location& = std::source_location::current()) const;
     /// Check that an index is in the valid range
-    bool checkIndex(const std::optional<std::size_t>& index, std::size_t size, std::string_view source = {}) const;
+    bool checkIndex(const std::optional<std::size_t>& index,
+                    std::size_t size,
+                    const std::source_location& = std::source_location::current()) const;
     /// Check all indexes
     bool checkIndexes(std::size_t textCount,
                       std::size_t iconSize,
                       std::size_t sdfSize,
-                      std::string_view source = {}) const;
+                      const std::source_location& = std::source_location::current()) const;
     /// Mark this item as failed (due to some external check) so that it cannot be used later
     void forceFail() const;
 #else
-    bool check(std::string_view = {}) const { return true; }
-    bool checkIndex(const std::optional<std::size_t>&, std::size_t, std::string_view = {}) const { return true; }
-    bool checkIndexes(std::size_t, std::size_t, std::size_t, std::string_view = {}) const { return true; }
+    bool check() const { return true; }
+    bool checkIndex(const std::optional<std::size_t>&, std::size_t) const { return true; }
+    bool checkIndexes(std::size_t, std::size_t, std::size_t) const { return true; }
     void forceFail() const {}
 #endif
 
@@ -175,8 +173,8 @@ public:
 
 protected:
 #if MLN_SYMBOL_GUARDS
-    bool check(std::uint64_t v, int n, std::string_view source) const;
-    bool checkKey(std::string_view source) const;
+    bool check(std::uint64_t v, int n, const std::source_location&) const;
+    bool checkKey(const std::source_location&) const;
     void forceFailInternal(); // this is just to avoid warnings about the values never being set
 #else
     bool checkKey(std::string_view) const { return true; }
@@ -249,9 +247,7 @@ private:
 #endif
 };
 
-#if MLN_SYMBOL_GUARDS
-#pragma pack(pop)
-#endif
+// NOLINTEND(clang-analyzer-optin.performance.Padding)
 
 using SymbolInstanceReferences = std::vector<std::reference_wrapper<const SymbolInstance>>;
 

@@ -263,9 +263,9 @@ void SymbolBucket::sortFeatures(const float angle) {
     // position. The index array buffer is rewritten to reference the
     // (unchanged) vertices in the sorted order.
     for (const SymbolInstance& symbolInstance : getSortedSymbols(angle)) {
-        if (!symbolInstance.check(__SYM_GUARD_LOC__) ||
+        if (!symbolInstance.check() ||
             !symbolInstance.checkIndexes(
-                text.placedSymbols.size(), icon.placedSymbols.size(), sdfIcon.placedSymbols.size(), "sortFeatures")) {
+                text.placedSymbols.size(), icon.placedSymbols.size(), sdfIcon.placedSymbols.size())) {
             continue;
         }
         symbolsSortOrder->push_back(symbolInstance.getDataFeatureIndex());
@@ -328,7 +328,8 @@ SymbolInstanceReferences SymbolBucket::getSymbols(const std::optional<SortKeyRan
             symbolInstances.begin() + static_cast<offset_t>(range->end)};
 }
 
-bool SymbolBucket::check(std::string_view source) {
+#if MLN_SYMBOL_GUARDS
+bool SymbolBucket::check(std::source_location source) {
     if (text.vertices().elements() != text.dynamicVertices().elements() ||
         text.vertices().elements() != text.opacityVertices().elements() ||
         icon.vertices().elements() != icon.dynamicVertices().elements() ||
@@ -339,17 +340,14 @@ bool SymbolBucket::check(std::string_view source) {
         return false;
     }
 
-    std::ostringstream ss;
     for (std::size_t i = 0; i < symbolInstances.size(); ++i) {
-        ss << source << " instance " << i;
-        if (!symbolInstances[i].check(ss.str())) {
+        if (!symbolInstances[i].check(source)) {
             return false;
         }
-        ss.str({});
-        ss.clear();
     }
     return true;
 }
+#endif
 
 bool SymbolBucket::hasFormatSectionOverrides() const {
     if (!hasFormatSectionOverrides_) {
