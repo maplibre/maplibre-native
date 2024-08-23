@@ -90,10 +90,8 @@ void Mailbox::push(std::unique_ptr<Message> message) {
         }
     }};
 
-    {
-        MLN_TRACE_ZONE(push lock)
-        std::lock_guard<std::mutex> pushingLock(pushingMutex);
-    }
+    // MLN_TRACE_ZONE(push lock)
+    std::lock_guard<std::mutex> pushingLock(pushingMutex);
 
     if (closed) {
         state = State::Abandoned;
