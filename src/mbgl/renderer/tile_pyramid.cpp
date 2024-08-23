@@ -23,6 +23,7 @@ namespace mbgl {
 using namespace style;
 
 static TileObserver nullObserver;
+static const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
 
 TilePyramid::TilePyramid(const TaggedScheduler& threadPool_)
     : cache(threadPool_),
@@ -196,12 +197,19 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             retainTileFn,
             [](const UnwrappedTileID&, Tile&) {},
             panTiles,
+            emptyPrefetchedTiles,
             zoomRange,
             maxParentTileOverscaleFactor);
     }
 
-    algorithm::updateRenderables(
-        getTileFn, createTileFn, retainTileFn, renderTileFn, idealTiles, zoomRange, maxParentTileOverscaleFactor);
+    algorithm::updateRenderables(getTileFn,
+                                 createTileFn,
+                                 retainTileFn,
+                                 renderTileFn,
+                                 idealTiles,
+                                 tiles,
+                                 zoomRange,
+                                 maxParentTileOverscaleFactor);
 
     for (auto previouslyRenderedTile : previouslyRenderedTiles) {
         Tile& tile = previouslyRenderedTile.second;
@@ -389,7 +397,7 @@ std::vector<Feature> TilePyramid::querySourceFeatures(const SourceQueryOptions& 
     return result;
 }
 
-void TilePyramid::enableCache(bool enable) {
+void TilePyramid::setCacheEnabled(bool enable) {
     cacheEnabled = enable;
 }
 

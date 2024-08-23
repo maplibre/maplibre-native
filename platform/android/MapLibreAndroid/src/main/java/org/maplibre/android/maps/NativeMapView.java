@@ -620,14 +620,6 @@ final class NativeMapView implements NativeMap {
   }
 
   @Override
-  public void setTileCacheEnabled(boolean enabled) {
-    if (checkState("setTileCacheEnabled")) {
-      return;
-    }
-    nativeSetTileCacheEnabled(enabled);
-  }
-
-  @Override
   public void onLowMemory() {
     if (checkState("onLowMemory")) {
       return;
@@ -815,6 +807,21 @@ final class NativeMapView implements NativeMap {
     return nativeGetPrefetchZoomDelta();
   }
 
+  @Override
+  public void setTileCacheEnabled(boolean enabled) {
+    if (checkState("setTileCacheEnabled")) {
+      return;
+    }
+    nativeSetTileCacheEnabled(enabled);
+  }
+
+  @Override
+  public boolean getTileCacheEnabled() {
+    if (checkState("getTileCacheEnabled")) {
+      return false;
+    }
+    return nativeGetTileCacheEnabled();
+  }
   // Runtime style Api
 
   @Override
@@ -1446,9 +1453,6 @@ final class NativeMapView implements NativeMap {
                                                        double direction, long duration);
 
   @Keep
-  private native void nativeSetTileCacheEnabled(boolean enabled);
-
-  @Keep
   private native void nativeOnLowMemory();
 
   @Keep
@@ -1614,6 +1618,12 @@ final class NativeMapView implements NativeMap {
 
   @Keep
   private native void nativeSetPrefetchZoomDelta(int delta);
+
+  @Keep
+  private native void nativeSetTileCacheEnabled(boolean enabled);
+
+  @Keep
+  private native boolean nativeGetTileCacheEnabled();
 
   @Keep
   private native int nativeGetPrefetchZoomDelta();

@@ -2,13 +2,13 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/** Options for `MLNAttributedExpression.attributes`. */
+/** Options for ``MLNAttributedExpression/attributes``. */
 typedef NSString *MLNAttributedExpressionKey NS_TYPED_ENUM;
 
 /** The font name string array expression used to format the text. */
 FOUNDATION_EXTERN MLN_EXPORT MLNAttributedExpressionKey const MLNFontNamesAttribute;
 
-/** The font scale number expression relative to `MLNSymbolStyleLayer.textFontSize` used to format
+/** The font scale number expression relative to ``MLNSymbolStyleLayer/textFontSize`` used to format
  * the text. */
 FOUNDATION_EXTERN MLN_EXPORT MLNAttributedExpressionKey const MLNFontScaleAttribute;
 
@@ -16,7 +16,7 @@ FOUNDATION_EXTERN MLN_EXPORT MLNAttributedExpressionKey const MLNFontScaleAttrib
 FOUNDATION_EXTERN MLN_EXPORT MLNAttributedExpressionKey const MLNFontColorAttribute;
 
 /**
- An `MLNAttributedExpression` object associates text formatting attibutes (such as font size or
+ An ``MLNAttributedExpression`` object associates text formatting attibutes (such as font size or
  font names) to an `NSExpression`.
 
  ### Example
@@ -44,9 +44,9 @@ MLN_EXPORT
  The formatting attributes dictionary.
  Key | Value Type
  --- | ---
- `MLNFontNamesAttribute` | An `NSExpression` evaluating to an `NSString` array.
- `MLNFontScaleAttribute` | An `NSExpression` evaluating to an `NSNumber` value.
- `MLNFontColorAttribute` | An `NSExpression` evaluating to an `UIColor`.
+ ``MLNFontNamesAttribute`` | An `NSExpression` evaluating to an `NSString` array.
+ ``MLNFontScaleAttribute`` | An `NSExpression` evaluating to an `NSNumber` value.
+ ``MLNFontColorAttribute`` | An `NSExpression` evaluating to an `UIColor`.
 
  */
 @property (strong, nonatomic, readonly)
@@ -56,22 +56,22 @@ MLN_EXPORT
  The formatting attributes dictionary.
  Key | Value Type
  --- | ---
- `MLNFontNamesAttribute` | An `NSExpression` evaluating to an `NSString` array.
- `MLNFontScaleAttribute` | An `NSExpression` evaluating to an `NSNumber` value.
- `MLNFontColorAttribute` | An `NSExpression` evaluating to an `NSColor` on macos.
+ ``MLNFontNamesAttribute`` | An `NSExpression` evaluating to an `NSString` array.
+ ``MLNFontScaleAttribute`` | An `NSExpression` evaluating to an `NSNumber` value.
+ ``MLNFontColorAttribute`` | An `NSExpression` evaluating to an `NSColor` on macos.
  */
 @property (strong, nonatomic, readonly)
     NSDictionary<MLNAttributedExpressionKey, NSExpression *> *attributes;
 #endif
 
 /**
- Returns an `MLNAttributedExpression` object initialized with an expression and no attribute
+ Returns an ``MLNAttributedExpression`` object initialized with an expression and no attribute
  information.
  */
 - (instancetype)initWithExpression:(NSExpression *)expression;
 
 /**
- Returns an `MLNAttributedExpression` object initialized with an expression and text format
+ Returns an ``MLNAttributedExpression`` object initialized with an expression and text format
  attributes.
  */
 - (instancetype)
@@ -79,7 +79,7 @@ MLN_EXPORT
             attributes:(nonnull NSDictionary<MLNAttributedExpressionKey, NSExpression *> *)attrs;
 
 /**
- Creates an `MLNAttributedExpression` object initialized with an expression and the format
+ Creates an ``MLNAttributedExpression`` object initialized with an expression and the format
  attributes for font names and font size.
  */
 + (instancetype)attributedExpression:(NSExpression *)expression
@@ -87,7 +87,7 @@ MLN_EXPORT
                            fontScale:(nullable NSNumber *)fontScale;
 
 /**
- Creates an `MLNAttributedExpression` object initialized with an expression and the format
+ Creates an ``MLNAttributedExpression`` object initialized with an expression and the format
  attributes dictionary.
  */
 + (instancetype)

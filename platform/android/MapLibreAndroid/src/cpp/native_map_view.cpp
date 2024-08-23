@@ -676,10 +676,6 @@ jni::Local<jni::Array<jni::jlong>> NativeMapView::addMarkers(jni::JNIEnv& env,
     return result;
 }
 
-void NativeMapView::setTileCacheEnabled(JNIEnv&, jni::jboolean enabled) {
-    rendererFrontend->setTileCacheEnabled(enabled);
-}
-
 void NativeMapView::onLowMemory(JNIEnv&) {
     rendererFrontend->reduceMemoryUse();
 }
@@ -1215,6 +1211,14 @@ jni::jint NativeMapView::getPrefetchZoomDelta(JNIEnv&) {
     return jni::jint(map->getPrefetchZoomDelta());
 }
 
+void NativeMapView::setTileCacheEnabled(JNIEnv&, jni::jboolean enabled) {
+    rendererFrontend->setTileCacheEnabled(enabled);
+}
+
+jni::jboolean NativeMapView::getTileCacheEnabled(JNIEnv&) {
+    return jni::jboolean(rendererFrontend->getTileCacheEnabled());
+}
+
 mbgl::Map& NativeMapView::getMap() {
     return *map;
 }
@@ -1288,7 +1292,6 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::setDebug, "nativeSetDebug"),
         METHOD(&NativeMapView::getDebug, "nativeGetDebug"),
         METHOD(&NativeMapView::isFullyLoaded, "nativeIsFullyLoaded"),
-        METHOD(&NativeMapView::setTileCacheEnabled, "nativeSetTileCacheEnabled"),
         METHOD(&NativeMapView::onLowMemory, "nativeOnLowMemory"),
         METHOD(&NativeMapView::getMetersPerPixelAtLatitude, "nativeGetMetersPerPixelAtLatitude"),
         METHOD(&NativeMapView::projectedMetersForLatLng, "nativeProjectedMetersForLatLng"),
@@ -1333,6 +1336,8 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
         METHOD(&NativeMapView::getPrefetchTiles, "nativeGetPrefetchTiles"),
         METHOD(&NativeMapView::setPrefetchZoomDelta, "nativeSetPrefetchZoomDelta"),
         METHOD(&NativeMapView::getPrefetchZoomDelta, "nativeGetPrefetchZoomDelta"),
+        METHOD(&NativeMapView::setTileCacheEnabled, "nativeSetTileCacheEnabled"),
+        METHOD(&NativeMapView::getTileCacheEnabled, "nativeGetTileCacheEnabled"),
         METHOD(&NativeMapView::triggerRepaint, "nativeTriggerRepaint"));
 }
 

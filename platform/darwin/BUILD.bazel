@@ -334,7 +334,7 @@ js_binary(
         "//:style-code",
         "//:style-spec",
     ],
-    entry_point = "scripts/generate-style-code.js",
+    entry_point = "scripts/generate-style-code.mjs",
 )
 
 js_library(

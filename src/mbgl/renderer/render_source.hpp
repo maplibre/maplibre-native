@@ -101,7 +101,7 @@ public:
                                     const std::optional<std::string>&,
                                     const std::optional<std::string>&) {}
 
-    virtual void enableCache(bool) {};
+    virtual void setCacheEnabled(bool) {};
 
     virtual void reduceMemoryUse() = 0;
 

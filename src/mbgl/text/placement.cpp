@@ -151,7 +151,7 @@ public:
     std::optional<CollisionBoundaries> avoidEdges;
 };
 
-// PlacementController implemenation
+// PlacementController implementation
 
 PlacementController::PlacementController()
     : placement(makeMutable<Placement>()) {}
@@ -249,7 +249,7 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
                          collisionGroups.get(params.sourceId),
                          getAvoidEdges(symbolBucket, renderTile.matrix)};
     for (const SymbolInstance& symbol : getSortedSymbols(params, ctx.pixelRatio)) {
-        if (seenCrossTileIDs.count(symbol.crossTileID) != 0u) continue;
+        if (seenCrossTileIDs.contains(symbol.crossTileID)) continue;
         placeSymbol(symbol, ctx);
 
         // Prevent a flickering issue while zooming out.
@@ -754,12 +754,12 @@ Point<float> calculateVariableRenderShift(style::SymbolAnchorType anchor,
                                           std::array<float, 2> textOffset,
                                           float textBoxScale,
                                           float renderTextSize) {
-    AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
-    float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
-    float shiftY = -(alignment.verticalAlign - 0.5f) * height;
-    auto variablOffset = SymbolLayout::evaluateVariableOffset(anchor, textOffset);
-    return {(shiftX / textBoxScale + variablOffset[0]) * renderTextSize,
-            (shiftY / textBoxScale + variablOffset[1]) * renderTextSize};
+    const AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
+    const float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
+    const float shiftY = -(alignment.verticalAlign - 0.5f) * height;
+    const auto variableOffset = SymbolLayout::evaluateVariableOffset(anchor, textOffset);
+    return {(shiftX / textBoxScale + variableOffset[0]) * renderTextSize,
+            (shiftY / textBoxScale + variableOffset[1]) * renderTextSize};
 }
 } // namespace
 
@@ -983,7 +983,7 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
         true);
 
     for (SymbolInstance& symbolInstance : bucket.symbolInstances) {
-        bool isDuplicate = seenCrossTileIDs.count(symbolInstance.crossTileID) > 0;
+        bool isDuplicate = seenCrossTileIDs.contains(symbolInstance.crossTileID);
 
         auto it = opacities.find(symbolInstance.crossTileID);
         auto opacityState = defaultOpacityState;
@@ -1414,7 +1414,7 @@ void TilePlacement::placeLayers(const RenderLayerReferences& layers) {
         const SymbolInstance& symbol = intersection.symbol;
         const PlacementContext& ctx = intersection.ctx;
         currentIntersectionPriority = intersection.priority;
-        if (seenCrossTileIDs.count(symbol.crossTileID) != 0u) continue;
+        if (seenCrossTileIDs.contains(symbol.crossTileID)) continue;
         JointPlacement placement = placeSymbol(symbol, ctx);
         if (shouldRetryPlacement(placement, ctx)) continue;
         seenCrossTileIDs.insert(symbol.crossTileID);
