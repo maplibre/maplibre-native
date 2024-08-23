@@ -102,7 +102,7 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
         auto contentWidth = content.right - content.left;
         auto contentHeight = content.bottom - content.top ;
         if (image.textFitWidth || image.textFitHeight) {
-            icon = shapedIcon.applyTextFit();
+            icon = icon.applyTextFit();
         }
         stretchOffsetX = sumWithinRange(stretchX, 0, content.left);
         stretchOffsetY = sumWithinRange(stretchY, 0, content.top);

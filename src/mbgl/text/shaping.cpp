@@ -113,14 +113,18 @@ PositionedIcon PositionedIcon::applyTextFit() const {
         if ((textFitWidth == style::TextFit::stretchOnly && (width / height) < contentAspectRatio) || textFitWidth == style::TextFit::proportional) {
             float newIconWidth = std::ceil(height * contentAspectRatio);
             newLeft *= newIconWidth / width;
-            newRight = _left + newIconWidth;
+            newRight = newLeft + newIconWidth;
         }
     } else if (textFitWidth == style::TextFit::proportional) {
         if (textFitHeight == style::TextFit::stretchOnly && contentAspectRatio != 0 && (width / height) > contentAspectRatio) {
             float newIconHeight = std::ceil(width / contentAspectRatio);
             newTop *= newIconHeight / height;
-            newBottom = _top + newIconHeight;
+            newBottom = newTop + newIconHeight;
         }
+    } else {
+        // If neither textFitHeight nor textFitWidth are proportional then
+        // there is no effect since the content rectangle should be precisely
+        // matched to the content
     }
     return PositionedIcon{_image, newTop, newBottom, newLeft, newRight, _collisionPadding};
 }
