@@ -233,7 +233,7 @@ bool SymbolInstance::check(std::string_view source) const {
            check(check19, 19, source) && check(check20, 20, source) && check(check21, 21, source) &&
            check(check22, 22, source) && check(check23, 23, source) && check(check24, 24, source) &&
            check(check25, 25, source) && check(check26, 26, source) && check(check27, 27, source) &&
-           check(check28, 28, source) && check(check29, 29, source) && checkKey(source);
+           check(check28, 28, source) && checkKey(source);
 }
 
 bool SymbolInstance::checkIndexes(std::size_t textCount,
@@ -247,7 +247,7 @@ bool SymbolInstance::checkIndexes(std::size_t textCount,
            checkIndex(placedVerticalIconIndex, hasSdfIcon() ? sdfSize : iconSize, source);
 }
 
-bool SymbolInstance::check(std::size_t v, int n, std::string_view source) const {
+bool SymbolInstance::check(std::uint64_t v, int n, std::string_view source) const {
     if (!isFailed && v != checkVal && !source.empty()) {
         isFailed = true;
         Log::Error(Event::Crash,

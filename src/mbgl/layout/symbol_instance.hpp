@@ -175,7 +175,7 @@ public:
 
 protected:
 #if MLN_SYMBOL_GUARDS
-    bool check(std::size_t v, int n, std::string_view source) const;
+    bool check(std::uint64_t v, int n, std::string_view source) const;
     bool checkKey(std::string_view source) const;
     void forceFailInternal(); // this is just to avoid warnings about the values never being set
 #else
