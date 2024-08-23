@@ -1381,8 +1381,9 @@ void NativeMapView::onGlyphsLoaded(const FontStack& stack, const GlyphRange& ran
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onGlyphsLoaded = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(*_env, "onGlyphsLoaded");
-    
+    static auto onGlyphsLoaded = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(*_env,
+    "onGlyphsLoaded");
+
     std::size_t index = 0;
     auto jstrings = jni::Array<jni::String>::New(*_env, stack.size());
     for (auto& font : stack) {
@@ -1401,8 +1402,9 @@ void NativeMapView::onGlyphsError(const FontStack& stack, const GlyphRange& rang
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onGlyphsError = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(*_env, "onGlyphsError");
-    
+    static auto onGlyphsError = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(*_env,
+    "onGlyphsError");
+
     std::size_t index = 0;
     auto jstrings = jni::Array<jni::String>::New(*_env, stack.size());
     for (auto& font : stack) {
@@ -1421,7 +1423,8 @@ void NativeMapView::onGlyphsRequested(const FontStack& stack, const GlyphRange& 
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onGlyphsRequested = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(*_env, "onGlyphsRequested");
+    static auto onGlyphsRequested = javaClass.GetMethod<void(jni::Array<jni::String>, jni::jint, jni::jint)>(*_env,
+    "onGlyphsRequested");
 
     std::size_t index = 0;
     auto jstrings = jni::Array<jni::String>::New(*_env, stack.size());
@@ -1442,14 +1445,16 @@ void NativeMapView::onTileRequested(const OverscaledTileID& id) {
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileRequested = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(*_env, "onTileRequested");
+    static auto onTileRequested = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(
+        *_env, "onTileRequested");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(*_env, onTileRequested,
-            static_cast<jni::jint>(id.canonical.x),
-            static_cast<jni::jint>(id.canonical.y),
-            static_cast<jni::jint>(id.canonical.z),
-            static_cast<jni::jint>(id.overscaledZ));
+        weakReference.Call(*_env,
+                           onTileRequested,
+                           static_cast<jni::jint>(id.canonical.x),
+                           static_cast<jni::jint>(id.canonical.y),
+                           static_cast<jni::jint>(id.canonical.z),
+                           static_cast<jni::jint>(id.overscaledZ));
     }
 }
 
@@ -1458,14 +1463,16 @@ void NativeMapView::onTileLoadedFromNetwork(const OverscaledTileID& id) {
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileLoadedFromNetwork = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(*_env, "onTileLoadedFromNetwork");
+    static auto onTileLoadedFromNetwork = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(
+        *_env, "onTileLoadedFromNetwork");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(*_env, onTileLoadedFromNetwork,
-            static_cast<jni::jint>(id.canonical.x),
-            static_cast<jni::jint>(id.canonical.y),
-            static_cast<jni::jint>(id.canonical.z),
-            static_cast<jni::jint>(id.overscaledZ));
+        weakReference.Call(*_env,
+                           onTileLoadedFromNetwork,
+                           static_cast<jni::jint>(id.canonical.x),
+                           static_cast<jni::jint>(id.canonical.y),
+                           static_cast<jni::jint>(id.canonical.z),
+                           static_cast<jni::jint>(id.overscaledZ));
     }
 }
 
@@ -1474,14 +1481,16 @@ void NativeMapView::onTileLoadedFromDisk(const OverscaledTileID& id) {
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileLoadedFromDisk = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(*_env, "onTileLoadedFromDisk");
+    static auto onTileLoadedFromDisk = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(
+        *_env, "onTileLoadedFromDisk");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(*_env, onTileLoadedFromDisk,
-            static_cast<jni::jint>(id.canonical.x),
-            static_cast<jni::jint>(id.canonical.y),
-            static_cast<jni::jint>(id.canonical.z),
-            static_cast<jni::jint>(id.overscaledZ));
+        weakReference.Call(*_env,
+                           onTileLoadedFromDisk,
+                           static_cast<jni::jint>(id.canonical.x),
+                           static_cast<jni::jint>(id.canonical.y),
+                           static_cast<jni::jint>(id.canonical.z),
+                           static_cast<jni::jint>(id.overscaledZ));
     }
 }
 
@@ -1490,14 +1499,16 @@ void NativeMapView::onTileFailedToLoad(const OverscaledTileID& id) {
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileFailedToLoad = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(*_env, "onTileFailedToLoad");
+    static auto onTileFailedToLoad = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(
+        *_env, "onTileFailedToLoad");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(*_env, onTileFailedToLoad,
-            static_cast<jni::jint>(id.canonical.x),
-            static_cast<jni::jint>(id.canonical.y),
-            static_cast<jni::jint>(id.canonical.z),
-            static_cast<jni::jint>(id.overscaledZ));
+        weakReference.Call(*_env,
+                           onTileFailedToLoad,
+                           static_cast<jni::jint>(id.canonical.x),
+                           static_cast<jni::jint>(id.canonical.y),
+                           static_cast<jni::jint>(id.canonical.z),
+                           static_cast<jni::jint>(id.overscaledZ));
     }
 }
 
@@ -1506,14 +1517,16 @@ void NativeMapView::onTileFinishedLoading(const OverscaledTileID& id) {
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileFinishedLoading = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(*_env, "onTileFinishedLoading");
+    static auto onTileFinishedLoading = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(
+        *_env, "onTileFinishedLoading");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(*_env, onTileFinishedLoading,
-            static_cast<jni::jint>(id.canonical.x),
-            static_cast<jni::jint>(id.canonical.y),
-            static_cast<jni::jint>(id.canonical.z),
-            static_cast<jni::jint>(id.overscaledZ));
+        weakReference.Call(*_env,
+                           onTileFinishedLoading,
+                           static_cast<jni::jint>(id.canonical.x),
+                           static_cast<jni::jint>(id.canonical.y),
+                           static_cast<jni::jint>(id.canonical.z),
+                           static_cast<jni::jint>(id.overscaledZ));
     }
 }
 
@@ -1526,7 +1539,10 @@ void NativeMapView::onSpriteLoaded(const std::optional<style::Sprite>& sprite) {
     static auto onSpriteLoaded = javaClass.GetMethod<void(jni::String, jni::String)>(*_env, "onSpriteLoaded");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference && sprite) {
-        weakReference.Call(*_env, onSpriteLoaded, jni::Make<jni::String>(*_env, sprite->id), jni::Make<jni::String>(*_env, sprite->spriteURL));
+        weakReference.Call(*_env,
+                           onSpriteLoaded,
+                           jni::Make<jni::String>(*_env, sprite->id),
+                           jni::Make<jni::String>(*_env, sprite->spriteURL));
     } else {
         weakReference.Call(*_env, onSpriteLoaded, jni::Make<jni::String>(*_env, ""), jni::Make<jni::String>(*_env, ""));
     }
@@ -1540,7 +1556,10 @@ void NativeMapView::onSpriteError(const std::optional<style::Sprite>& sprite, st
     static auto onSpriteError = javaClass.GetMethod<void(jni::String, jni::String)>(*_env, "onSpriteError");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference && sprite) {
-        weakReference.Call(*_env, onSpriteError, jni::Make<jni::String>(*_env, sprite->id), jni::Make<jni::String>(*_env, sprite->spriteURL));
+        weakReference.Call(*_env,
+                           onSpriteError,
+                           jni::Make<jni::String>(*_env, sprite->id),
+                           jni::Make<jni::String>(*_env, sprite->spriteURL));
     } else {
         weakReference.Call(*_env, onSpriteError, jni::Make<jni::String>(*_env, ""), jni::Make<jni::String>(*_env, ""));
     }
@@ -1554,9 +1573,13 @@ void NativeMapView::onSpriteRequested(const std::optional<style::Sprite>& sprite
     static auto onSpriteRequested = javaClass.GetMethod<void(jni::String, jni::String)>(*_env, "onSpriteRequested");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference && sprite) {
-        weakReference.Call(*_env, onSpriteRequested, jni::Make<jni::String>(*_env, sprite->id), jni::Make<jni::String>(*_env, sprite->spriteURL));
+        weakReference.Call(*_env,
+                           onSpriteRequested,
+                           jni::Make<jni::String>(*_env, sprite->id),
+                           jni::Make<jni::String>(*_env, sprite->spriteURL));
     } else {
-        weakReference.Call(*_env, onSpriteRequested, jni::Make<jni::String>(*_env, ""), jni::Make<jni::String>(*_env, ""));
+        weakReference.Call(
+            *_env, onSpriteRequested, jni::Make<jni::String>(*_env, ""), jni::Make<jni::String>(*_env, ""));
     }
 }
 

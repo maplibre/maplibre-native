@@ -319,7 +319,7 @@ public:
     void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
     void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
 
-  private:
+private:
     std::unique_ptr<AndroidRendererFrontend> rendererFrontend;
 
     JavaVM* vm = nullptr;
