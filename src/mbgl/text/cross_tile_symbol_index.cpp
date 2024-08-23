@@ -16,7 +16,8 @@ TileLayerIndex::TileLayerIndex(OverscaledTileID coord_,
       bucketInstanceId(bucketInstanceId_),
       bucketLeaderId(std::move(bucketLeaderId_)) {
     for (const SymbolInstance& symbolInstance : symbolInstances) {
-        if (!symbolInstance.check(SYM_GUARD_LOC) || symbolInstance.getCrossTileID() == SymbolInstance::invalidCrossTileID) {
+        if (!symbolInstance.check(SYM_GUARD_LOC) ||
+            symbolInstance.getCrossTileID() == SymbolInstance::invalidCrossTileID) {
             continue;
         }
         indexedSymbolInstances[symbolInstance.getKey()].emplace_back(symbolInstance.getCrossTileID(),

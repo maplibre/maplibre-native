@@ -32,13 +32,17 @@ struct source_location {
     constexpr const char* file_name() const noexcept { return fileName_; }
     constexpr const char* function_name() const noexcept { return functionName_; }
 };
-}
-#define SYM_GUARD_LOC std::source_location{__FILE__, __FUNCTION__, __LINE__}
+} // namespace std
+#define SYM_GUARD_LOC                    \
+    std::source_location {               \
+        __FILE__, __FUNCTION__, __LINE__ \
+    }
 #else
 #define SYM_GUARD_LOC std::source_location::current()
 #endif
 #else
-#define SYM_GUARD_LOC {}
+#define SYM_GUARD_LOC \
+    {}
 #endif
 
 namespace mbgl {
@@ -132,9 +136,7 @@ public:
     /// Check all guard blocks
     bool check(const std::source_location&) const;
     /// Check that an index is in the valid range
-    bool checkIndex(const std::optional<std::size_t>& index,
-                    std::size_t size,
-                    const std::source_location&) const;
+    bool checkIndex(const std::optional<std::size_t>& index, std::size_t size, const std::source_location&) const;
     /// Check all indexes
     bool checkIndexes(std::size_t textCount,
                       std::size_t iconSize,

@@ -1241,8 +1241,10 @@ void Placement::markUsedOrientation(SymbolBucket& bucket,
                               ? std::optional<style::TextWritingModeType>(orientation)
                               : std::nullopt;
 
-    if (!symbolInstance.checkIndexes(
-            bucket.text.placedSymbols.size(), bucket.icon.placedSymbols.size(), bucket.sdfIcon.placedSymbols.size(), SYM_GUARD_LOC)) {
+    if (!symbolInstance.checkIndexes(bucket.text.placedSymbols.size(),
+                                     bucket.icon.placedSymbols.size(),
+                                     bucket.sdfIcon.placedSymbols.size(),
+                                     SYM_GUARD_LOC)) {
         return;
     }
 
