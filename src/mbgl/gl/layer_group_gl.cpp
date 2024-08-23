@@ -28,8 +28,10 @@ void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
-    MLN_TRACE_FUNC()
-    MLN_ZONE_STR(name)
+    {
+        MLN_TRACE_FUNC()
+        MLN_ZONE_STR(name)
+    }
 
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled()) {
