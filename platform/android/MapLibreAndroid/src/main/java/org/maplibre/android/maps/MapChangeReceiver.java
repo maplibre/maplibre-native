@@ -35,33 +35,33 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     = new CopyOnWriteArrayList<>();
   private final List<MapView.OnCanRemoveUnusedStyleImageListener> onCanRemoveUnusedStyleImageListenerList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onPreCompileShaderListener> onPreCompileShaderList
+  private final List<MapView.OnPreCompileShaderListener> onPreCompileShaderList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onPostCompileShaderListener> onPostCompileShaderList
+  private final List<MapView.OnPostCompileShaderListener> onPostCompileShaderList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onShaderCompileFailedListener> onShaderCompileFailedList
+  private final List<MapView.OnShaderCompileFailedListener> onShaderCompileFailedList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onGlyphsLoadedListener> onGlyphsLoadedList
+  private final List<MapView.OnGlyphsLoadedListener> onGlyphsLoadedList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onGlyphsErrorListener> onGlyphsErrorList
+  private final List<MapView.OnGlyphsErrorListener> onGlyphsErrorList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onGlyphsRequestedListener> onGlyphsRequestedList
+  private final List<MapView.OnGlyphsRequestedListener> onGlyphsRequestedList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onTileRequestedListener> onTileRequestedList
+  private final List<MapView.OnTileRequestedListener> onTileRequestedList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onTileLoadedFromNetworkListener> onTileLoadedFromNetworkList
+  private final List<MapView.OnTileLoadedFromNetworkListener> onTileLoadedFromNetworkList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onTileLoadedFromDiskListener> onTileLoadedFromDiskList
+  private final List<MapView.OnTileLoadedFromDiskListener> onTileLoadedFromDiskList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onTileFailedToLoadListener> onTileFailedToLoadList
+  private final List<MapView.OnTileFailedToLoadListener> onTileFailedToLoadList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onTileFinishedLoadingListener> onTileFinishedLoadingList
+  private final List<MapView.OnTileFinishedLoadingListener> onTileFinishedLoadingList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onSpriteLoadedListener> onSpriteLoadedList
+  private final List<MapView.OnSpriteLoadedListener> onSpriteLoadedList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onSpriteErrorListener> onSpriteErrorList
+  private final List<MapView.OnSpriteErrorListener> onSpriteErrorList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.onSpriteRequestedListener> onSpriteRequestedList
+  private final List<MapView.OnSpriteRequestedListener> onSpriteRequestedList
     = new CopyOnWriteArrayList<>();
 
   @Override
@@ -287,7 +287,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onPreCompileShader(int id, int type) {
     try {
       if (!onPreCompileShaderList.isEmpty()) {
-        for (MapView.onPreCompileShaderListener listener : onPreCompileShaderList) {
+        for (MapView.OnPreCompileShaderListener listener : onPreCompileShaderList) {
           listener.onPreCompileShader(id, type);
         }
       }
@@ -301,7 +301,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onPostCompileShader(int id, int type) {
     try {
       if (!onPostCompileShaderList.isEmpty()) {
-        for (MapView.onPostCompileShaderListener listener : onPostCompileShaderList) {
+        for (MapView.OnPostCompileShaderListener listener : onPostCompileShaderList) {
           listener.onPostCompileShader(id, type);
         }
       }
@@ -315,7 +315,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onShaderCompileFailed(int id, int type) {
     try {
       if (!onShaderCompileFailedList.isEmpty()) {
-        for (MapView.onShaderCompileFailedListener listener : onShaderCompileFailedList) {
+        for (MapView.OnShaderCompileFailedListener listener : onShaderCompileFailedList) {
           listener.onShaderCompileFailed(id, type);
         }
       }
@@ -329,7 +329,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onGlyphsLoaded(List<String> stack, int rangeStart, int rangeEnd) {
     try {
       if (!onGlyphsLoadedList.isEmpty()) {
-        for (MapView.onGlyphsLoadedListener listener : onGlyphsLoadedList) {
+        for (MapView.OnGlyphsLoadedListener listener : onGlyphsLoadedList) {
           listener.onGlyphsLoaded(stack, rangeStart, rangeEnd);
         }
       }
@@ -343,7 +343,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onGlyphsError(List<String> stack, int rangeStart, int rangeEnd) {
     try {
       if (!onGlyphsErrorList.isEmpty()) {
-        for (MapView.onGlyphsErrorListener listener : onGlyphsErrorList) {
+        for (MapView.OnGlyphsErrorListener listener : onGlyphsErrorList) {
           listener.onGlyphsError(stack, rangeStart, rangeEnd);
         }
       }
@@ -357,7 +357,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onGlyphsRequested(List<String> stack, int rangeStart, int rangeEnd) {
     try {
       if (!onGlyphsRequestedList.isEmpty()) {
-        for (MapView.onGlyphsRequestedListener listener : onGlyphsRequestedList) {
+        for (MapView.OnGlyphsRequestedListener listener : onGlyphsRequestedList) {
           listener.onGlyphsRequested(stack, rangeStart, rangeEnd);
         }
       }
@@ -371,7 +371,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onTileRequested(int x, int y, int z, int overscaledZ) {
     try {
       if (!onTileRequestedList.isEmpty()) {
-        for (MapView.onTileRequestedListener listener : onTileRequestedList) {
+        for (MapView.OnTileRequestedListener listener : onTileRequestedList) {
           listener.onTileRequested(x, y, z, overscaledZ);
         }
       }
@@ -385,7 +385,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onTileLoadedFromNetwork(int x, int y, int z, int overscaledZ) {
     try {
       if (!onTileLoadedFromNetworkList.isEmpty()) {
-        for (MapView.onTileLoadedFromNetworkListener listener : onTileLoadedFromNetworkList) {
+        for (MapView.OnTileLoadedFromNetworkListener listener : onTileLoadedFromNetworkList) {
           listener.onTileLoadedFromNetwork(x, y, z, overscaledZ);
         }
       }
@@ -399,7 +399,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onTileLoadedFromDisk(int x, int y, int z, int overscaledZ) {
     try {
       if (!onTileLoadedFromDiskList.isEmpty()) {
-        for (MapView.onTileLoadedFromDiskListener listener : onTileLoadedFromDiskList) {
+        for (MapView.OnTileLoadedFromDiskListener listener : onTileLoadedFromDiskList) {
           listener.onTileLoadedFromDisk(x, y, z, overscaledZ);
         }
       }
@@ -413,7 +413,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onTileFailedToLoad(int x, int y, int z, int overscaledZ) {
     try {
       if (!onTileFailedToLoadList.isEmpty()) {
-        for (MapView.onTileFailedToLoadListener listener : onTileFailedToLoadList) {
+        for (MapView.OnTileFailedToLoadListener listener : onTileFailedToLoadList) {
           listener.onTileFailedToLoad(x, y, z, overscaledZ);
         }
       }
@@ -427,7 +427,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onTileFinishedLoading(int x, int y, int z, int overscaledZ) {
     try {
       if (!onTileFinishedLoadingList.isEmpty()) {
-        for (MapView.onTileFinishedLoadingListener listener : onTileFinishedLoadingList) {
+        for (MapView.OnTileFinishedLoadingListener listener : onTileFinishedLoadingList) {
           listener.onTileFinishedLoading(x, y, z, overscaledZ);
         }
       }
@@ -441,7 +441,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onSpriteLoaded(String id, String url) {
     try {
       if (!onSpriteLoadedList.isEmpty()) {
-        for (MapView.onSpriteLoadedListener listener : onSpriteLoadedList) {
+        for (MapView.OnSpriteLoadedListener listener : onSpriteLoadedList) {
           listener.onSpriteLoaded(id, url);
         }
       }
@@ -455,7 +455,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onSpriteError(String id, String url) {
     try {
       if (!onSpriteErrorList.isEmpty()) {
-        for (MapView.onSpriteErrorListener listener : onSpriteErrorList) {
+        for (MapView.OnSpriteErrorListener listener : onSpriteErrorList) {
           listener.onSpriteError(id, url);
         }
       }
@@ -469,7 +469,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   public void onSpriteRequested(String id, String url) {
     try {
       if (!onSpriteRequestedList.isEmpty()) {
-        for (MapView.onSpriteRequestedListener listener : onSpriteRequestedList) {
+        for (MapView.OnSpriteRequestedListener listener : onSpriteRequestedList) {
           listener.onSpriteRequested(id, url);
         }
       }
@@ -599,115 +599,115 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onCanRemoveUnusedStyleImageListenerList.remove(listener);
   }
 
-  public void addOnPreCompileShaderListener(MapView.onPreCompileShaderListener callback) {
+  public void addOnPreCompileShaderListener(MapView.OnPreCompileShaderListener callback) {
     onPreCompileShaderList.add(callback);
   }
 
-  public void addOnPostCompileShaderListener(MapView.onPostCompileShaderListener callback) {
+  public void addOnPostCompileShaderListener(MapView.OnPostCompileShaderListener callback) {
     onPostCompileShaderList.add(callback);
   }
 
-  public void addOnShaderCompileFailedListener(MapView.onShaderCompileFailedListener callback) {
+  public void addOnShaderCompileFailedListener(MapView.OnShaderCompileFailedListener callback) {
     onShaderCompileFailedList.add(callback);
   }
 
-  public void addOnGlyphsLoadedListener(MapView.onGlyphsLoadedListener callback) {
+  public void addOnGlyphsLoadedListener(MapView.OnGlyphsLoadedListener callback) {
     onGlyphsLoadedList.add(callback);
   }
 
-  public void addOnGlyphsErrorListener(MapView.onGlyphsErrorListener callback) {
+  public void addOnGlyphsErrorListener(MapView.OnGlyphsErrorListener callback) {
     onGlyphsErrorList.add(callback);
   }
 
-  public void addOnGlyphsRequestedListener(MapView.onGlyphsRequestedListener callback) {
+  public void addOnGlyphsRequestedListener(MapView.OnGlyphsRequestedListener callback) {
     onGlyphsRequestedList.add(callback);
   }
 
-  public void addOnTileRequestedListener(MapView.onTileRequestedListener callback) {
+  public void addOnTileRequestedListener(MapView.OnTileRequestedListener callback) {
     onTileRequestedList.add(callback);
   }
 
-  public void addOnTileLoadedFromNetworkListener(MapView.onTileLoadedFromNetworkListener callback) {
+  public void addOnTileLoadedFromNetworkListener(MapView.OnTileLoadedFromNetworkListener callback) {
     onTileLoadedFromNetworkList.add(callback);
   }
 
-  public void addOnTileLoadedFromDiskListener(MapView.onTileLoadedFromDiskListener callback) {
+  public void addOnTileLoadedFromDiskListener(MapView.OnTileLoadedFromDiskListener callback) {
     onTileLoadedFromDiskList.add(callback);
   }
 
-  public void addOnTileFailedToLoadListener(MapView.onTileFailedToLoadListener callback) {
+  public void addOnTileFailedToLoadListener(MapView.OnTileFailedToLoadListener callback) {
     onTileFailedToLoadList.add(callback);
   }
 
-  public void addOnTileFinishedLoadingListener(MapView.onTileFinishedLoadingListener callback) {
+  public void addOnTileFinishedLoadingListener(MapView.OnTileFinishedLoadingListener callback) {
     onTileFinishedLoadingList.add(callback);
   }
 
-  public void addOnSpriteLoadedListener(MapView.onSpriteLoadedListener callback) {
+  public void addOnSpriteLoadedListener(MapView.OnSpriteLoadedListener callback) {
     onSpriteLoadedList.add(callback);
   }
 
-  public void addOnSpriteErrorListener(MapView.onSpriteErrorListener callback) {
+  public void addOnSpriteErrorListener(MapView.OnSpriteErrorListener callback) {
     onSpriteErrorList.add(callback);
   }
 
-  public void addOnSpriteRequestedListener(MapView.onSpriteRequestedListener callback) {
+  public void addOnSpriteRequestedListener(MapView.OnSpriteRequestedListener callback) {
     onSpriteRequestedList.add(callback);
   }
 
-  public void removeOnPreCompileShaderListener(MapView.onPreCompileShaderListener callback) {
+  public void removeOnPreCompileShaderListener(MapView.OnPreCompileShaderListener callback) {
     onPreCompileShaderList.remove(callback);
   }
 
-  public void removeOnPostCompileShaderListener(MapView.onPostCompileShaderListener callback) {
+  public void removeOnPostCompileShaderListener(MapView.OnPostCompileShaderListener callback) {
     onPostCompileShaderList.remove(callback);
   }
 
-  public void removeOnShaderCompileFailedListener(MapView.onShaderCompileFailedListener callback) {
+  public void removeOnShaderCompileFailedListener(MapView.OnShaderCompileFailedListener callback) {
     onShaderCompileFailedList.remove(callback);
   }
 
-  public void removeOnGlyphsLoadedListener(MapView.onGlyphsLoadedListener callback) {
+  public void removeOnGlyphsLoadedListener(MapView.OnGlyphsLoadedListener callback) {
     onGlyphsLoadedList.remove(callback);
   }
 
-  public void removeOnGlyphsErrorListener(MapView.onGlyphsErrorListener callback) {
+  public void removeOnGlyphsErrorListener(MapView.OnGlyphsErrorListener callback) {
     onGlyphsErrorList.remove(callback);
   }
 
-  public void removeOnGlyphsRequestedListener(MapView.onGlyphsRequestedListener callback) {
+  public void removeOnGlyphsRequestedListener(MapView.OnGlyphsRequestedListener callback) {
     onGlyphsRequestedList.remove(callback);
   }
 
-  public void removeOnTileRequestedListener(MapView.onTileRequestedListener callback) {
+  public void removeOnTileRequestedListener(MapView.OnTileRequestedListener callback) {
     onTileRequestedList.remove(callback);
   }
 
-  public void removeOnTileLoadedFromNetworkListener(MapView.onTileLoadedFromNetworkListener callback) {
+  public void removeOnTileLoadedFromNetworkListener(MapView.OnTileLoadedFromNetworkListener callback) {
     onTileLoadedFromNetworkList.remove(callback);
   }
 
-  public void removeOnTileLoadedFromDiskListener(MapView.onTileLoadedFromDiskListener callback) {
+  public void removeOnTileLoadedFromDiskListener(MapView.OnTileLoadedFromDiskListener callback) {
     onTileLoadedFromDiskList.remove(callback);
   }
 
-  public void removeOnTileFailedToLoadListener(MapView.onTileFailedToLoadListener callback) {
+  public void removeOnTileFailedToLoadListener(MapView.OnTileFailedToLoadListener callback) {
     onTileFailedToLoadList.remove(callback);
   }
 
-  public void removeOnTileFinishedLoadingListener(MapView.onTileFinishedLoadingListener callback) {
+  public void removeOnTileFinishedLoadingListener(MapView.OnTileFinishedLoadingListener callback) {
     onTileFinishedLoadingList.remove(callback);
   }
 
-  public void removeOnSpriteLoadedListener(MapView.onSpriteLoadedListener callback) {
+  public void removeOnSpriteLoadedListener(MapView.OnSpriteLoadedListener callback) {
     onSpriteLoadedList.remove(callback);
   }
 
-  public void removeOnSpriteErrorListener(MapView.onSpriteErrorListener callback) {
+  public void removeOnSpriteErrorListener(MapView.OnSpriteErrorListener callback) {
     onSpriteErrorList.remove(callback);
   }
   
-  public void removeOnSpriteRequestedListener(MapView.onSpriteRequestedListener callback) {
+  public void removeOnSpriteRequestedListener(MapView.OnSpriteRequestedListener callback) {
     onSpriteRequestedList.remove(callback);
   }
 

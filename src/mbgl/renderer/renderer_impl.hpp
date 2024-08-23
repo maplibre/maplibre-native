@@ -32,11 +32,6 @@ public:
     void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type) override;
     void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type) override;
 
-    // ContextObserver
-    void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type) override;
-    void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type) override;
-    void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type) override;
-
 private:
     friend class Renderer;
 
