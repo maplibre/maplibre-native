@@ -1103,7 +1103,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   public void removeOnTileStartLoadingListener(MapView.OnTileStartLoadingListener callback) {
     mapChangeReceiver.removeOnTileStartLoadingListener(callback);
   }
-  
+
   /**
    * Set a callback that's invoked after a tile is fully loaded and processed by the client.
    *

@@ -1752,7 +1752,7 @@ final class NativeMapView implements NativeMap {
     void onTileFinishedLoading(int x, int y, int z, int overscaledZ, String sourceID);
 
     void onSpriteLoaded(String id, String url);
-    
+
     void onSpriteError(String id, String url);
 
     void onSpriteRequested(String id, String url);
