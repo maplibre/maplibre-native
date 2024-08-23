@@ -20,7 +20,7 @@
 
 // A temporary shim for partial C++20 support
 #if MLN_SYMBOL_GUARDS
-#if __cplusplus <= 201703L || !__has_builtin(__builtin_source_location)
+#if defined(__clang__) && (__cplusplus <= 201703L || !__has_builtin(__builtin_source_location))
 namespace std {
 struct source_location {
     const char* fileName_;

@@ -489,7 +489,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
         assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
-        if (!static_cast<Bucket&>(bucket).check()) {
+        if (!static_cast<Bucket&>(bucket).check(SYM_GUARD_LOC)) {
             continue;
         }
 
