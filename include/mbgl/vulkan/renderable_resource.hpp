@@ -16,6 +16,12 @@ protected:
     ~RenderableResource() override = default;
 
 public:
+
+    virtual void swap(){
+        // Renderable resources that require a swap function to be called
+        // explicitly can override this method.
+    }
+
     const vk::Extent2D& getExtent() const { return extent; }
     const vk::UniqueRenderPass& getRenderPass() const { return renderPass; }
     virtual const vk::UniqueFramebuffer& getFramebuffer() const = 0;

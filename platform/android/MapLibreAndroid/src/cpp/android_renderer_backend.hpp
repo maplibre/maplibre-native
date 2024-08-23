@@ -30,8 +30,8 @@ public:
     virtual void resizeFramebuffer(int width, int height);
     virtual PremultipliedImage readFramebuffer();
 
+    gfx::Renderable::SwapBehaviour getSwapBehavior() const { return swapBehaviour; }
     virtual void setSwapBehavior(gfx::Renderable::SwapBehaviour swapBehaviour);
-    virtual void swap();
 
 protected:
     gfx::Renderable::SwapBehaviour swapBehaviour = gfx::Renderable::SwapBehaviour::NoFlush;

@@ -24,6 +24,8 @@ public:
 
     void createPlatformSurface() override {}
     void bind() override {}
+
+    void swap() override { static_cast<Context&>(backend.getContext()).waitFrame(); }
 };
 
 HeadlessBackend::HeadlessBackend(const Size size_,
@@ -67,10 +69,6 @@ gfx::Renderable& HeadlessBackend::getDefaultRenderable() {
         resource = std::make_unique<HeadlessRenderableResource>(*this);
     }
     return *this;
-}
-
-void HeadlessBackend::swap() {
-    static_cast<Context&>(*context).waitFrame();
 }
 
 PremultipliedImage HeadlessBackend::readStillImage() {
