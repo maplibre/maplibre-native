@@ -6,8 +6,8 @@ import assert from "assert";
 
 import { readAndCompile, writeIfModified, camelize, unhyphenate } from "../../../scripts/style-code.mjs";
 
+import styleSpec from "../../../scripts/style-spec.mjs";
 import cocoaConventions from './style-spec-cocoa-conventions-v8.json' with { type: "json" };
-import styleSpec from '../../../scripts/style-spec-reference/v8.json' with { type: "json" };
 import styleSpecOverrides from './style-spec-overrides-v8.json' with { type: "json" };
 
 function setupGlobalEjsHelpers() {
@@ -635,6 +635,7 @@ global.enumName = function (property) {
 };
 
 global.propertyType = function (property) {
+    console.log(property)
     switch (property.type) {
         case 'boolean':
             return 'NSNumber *';
@@ -806,9 +807,6 @@ const layerH = readAndCompile('platform/darwin/src/MLNStyleLayer.h.ejs', root);
 const layerPrivateH = readAndCompile('platform/darwin/src/MLNStyleLayer_Private.h.ejs', root);
 const layerM = readAndCompile('platform/darwin/src/MLNStyleLayer.mm.ejs', root);
 const testLayers = readAndCompile('platform/darwin/test/MLNStyleLayerTests.mm.ejs', root);
-const forStyleAuthorsMD = readAndCompile('platform/darwin/docs/guides/For_Style_Authors.md.ejs', root);
-const ddsGuideMD = readAndCompile('platform/darwin/docs/guides/Migrating_to_Expressions.md.ejs', root);
-const templatesMD = readAndCompile('platform/darwin/docs/guides/Tile_URL_Templates.md.ejs', root);
 
 const lightH = readAndCompile('platform/darwin/src/MLNLight.h.ejs', root);
 const lightM = readAndCompile('platform/darwin/src/MLNLight.mm.ejs', root);
@@ -895,66 +893,10 @@ for (var layer of layers) {
         duplicatePlatformDecls(layerH(layer)), outLocation);
     writeIfModified(`platform/darwin/src/${prefix}${camelize(layer.type)}${suffix}_Private.h`,
         duplicatePlatformDecls(layerPrivateH(layer)),  outLocation);
+    if (layer.type == 'line')
+    console.log(JSON.stringify(layer, null, 2), layer.type);
     writeIfModified(`platform/darwin/src/${prefix}${camelize(layer.type)}${suffix}.mm`,
         layerM(layer),  outLocation);
     writeIfModified(`platform/darwin/test/${prefix}${camelize(layer.type)}${suffix}Tests.mm`,
         testLayers(layer), outLocation);
 }
-
-// Extract examples for guides from unit tests.
-/*let examplesSrc = fs.readFileSync('platform/darwin/test/MLNDocumentationGuideTests.swift', 'utf8');
-const exampleRegex = /func test([\w$]+)\s*\(\)\s*\{[^]*?\n([ \t]+)\/\/#-example-code\n([^]+?)\n\2\/\/#-end-example-code\n/gm;
-
-let examples = {};
-let match;
-while ((match = exampleRegex.exec(examplesSrc)) !== null) {
-    let testMethodName = match[1],
-        indentation = match[2],
-        exampleCode = match[3];
-
-    // Trim leading whitespace from the example code.
-    exampleCode = exampleCode.replace(new RegExp('^' + indentation, 'gm'), '');
-
-    examples[testMethodName] = exampleCode;
-}
-
-global.guideExample = function (guide, exampleId, os) {
-    // Get the contents of the test method whose name matches the symbol path.
-    let testMethodName = `${guide}$${exampleId}`;
-    let example = examples[testMethodName];
-    if (!example) {
-        console.error(`MLNDocumentationExampleTests.test${testMethodName}() not found.`);
-        process.exit(1);
-    }
-
-    // Resolve conditional compilation blocks.
-    example = example.replace(/^(\s*)#if\s+os\((iOS|macOS)\)\n([^]*?)(?:^\1#else\n([^]*?))?^\1#endif\b\n?/gm,
-                              function (m, indentation, ifOs, ifCase, elseCase) {
-      return (os === ifOs ? ifCase : elseCase).replace(new RegExp('^    ', 'gm'), '');
-    }).replace(/\n$/, '');
-
-    return '```swift\n' + example + '\n```';
-};
-
-writeIfModified(`platform/ios/docs/guides/For Style Authors.md`, forStyleAuthorsMD({
-    os: 'iOS',
-    renamedProperties: renamedPropertiesByLayerType,
-    layers: layers,
-}), outLocation);
-writeIfModified(`platform/macos/docs/guides/For Style Authors.md`, forStyleAuthorsMD({
-    os: 'macOS',
-    renamedProperties: renamedPropertiesByLayerType,
-    layers: layers,
-}), outLocation);
-writeIfModified(`platform/ios/docs/guides/Migrating to Expressions.md`, ddsGuideMD({
-    os: 'iOS',
-}), outLocation);
-writeIfModified(`platform/macos/docs/guides/Migrating to Expressions.md`, ddsGuideMD({
-    os: 'macOS',
-}), outLocation);
-writeIfModified(`platform/ios/docs/guides/Tile URL Templates.md`, templatesMD({
-    os: 'iOS',
-}), outLocation);
-writeIfModified(`platform/macos/docs/guides/Tile URL Templates.md`, templatesMD({
-    os: 'macOS',
-}), rooutLocationot);*/

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import ejs from "ejs";
-import spec from "../../../scripts/style-spec.mjs";
+import spec from "./android-style-spec-overrides.mjs";
 import _ from "lodash";
 
 // FIXME: https://github.com/mapbox/mapbox-gl-native/issues/15008
