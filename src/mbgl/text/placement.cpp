@@ -9,7 +9,6 @@
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/math.hpp>
-#include <mbgl/util/variable_anchor_offset_collection.hpp>
 
 #include <list>
 #include <utility>
@@ -230,7 +229,7 @@ Point<float> calculateVariableLayoutOffset(style::SymbolAnchorType anchor,
     AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
     float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
     float shiftY = -(alignment.verticalAlign - 0.5f) * height;
-    auto variableOffset = VariableAnchorOffsetCollection::evaluateVariableOffset(anchor, offset);
+    auto variableOffset = SymbolLayout::evaluateVariableOffset(anchor, offset);
     Point<float> shift{shiftX + variableOffset[0] * textBoxScale, shiftY + variableOffset[1] * textBoxScale};
     if (rotateWithMap) {
         shift = util::rotate(shift, pitchWithMap ? bearing : -bearing);
