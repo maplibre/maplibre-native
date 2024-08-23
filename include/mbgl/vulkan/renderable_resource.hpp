@@ -16,8 +16,7 @@ protected:
     ~RenderableResource() override = default;
 
 public:
-
-    virtual void swap(){
+    virtual void swap() {
         // Renderable resources that require a swap function to be called
         // explicitly can override this method.
     }
