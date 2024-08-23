@@ -201,9 +201,7 @@ std::set<std::string> ImageManager::getAvailableImages() const {
     MLN_TRACE_FUNC()
     std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
 
-    {
-        MLN_TRACE_ZONE(copy)
-    }
+    { MLN_TRACE_ZONE(copy) }
     return availableImages;
 }
 

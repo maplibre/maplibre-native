@@ -89,7 +89,7 @@ void Mailbox::push(std::unique_ptr<Message> message) {
             state = State::Idle;
         }
     }};
-    
+
     {
         MLN_TRACE_ZONE(push lock)
         std::lock_guard<std::mutex> pushingLock(pushingMutex);
