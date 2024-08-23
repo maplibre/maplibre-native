@@ -893,8 +893,6 @@ for (var layer of layers) {
         duplicatePlatformDecls(layerH(layer)), outLocation);
     writeIfModified(`platform/darwin/src/${prefix}${camelize(layer.type)}${suffix}_Private.h`,
         duplicatePlatformDecls(layerPrivateH(layer)),  outLocation);
-    if (layer.type == 'line')
-    console.log(JSON.stringify(layer, null, 2), layer.type);
     writeIfModified(`platform/darwin/src/${prefix}${camelize(layer.type)}${suffix}.mm`,
         layerM(layer),  outLocation);
     writeIfModified(`platform/darwin/test/${prefix}${camelize(layer.type)}${suffix}Tests.mm`,
