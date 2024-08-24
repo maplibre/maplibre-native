@@ -20,14 +20,16 @@ using namespace std::numbers;
 
 namespace mbgl {
 
+namespace {
+
 /** Converts the given angle (in radians) to be numerically close to the anchor
  * angle, allowing it to be interpolated properly without sudden jumps. */
-static double _normalizeAngle(double angle, double anchorAngle) {
+double _normalizeAngle(double angle, double anchorAngle) {
     if (std::isnan(angle) || std::isnan(anchorAngle)) {
         return 0;
     }
 
-    angle = util::wrap(angle, -pi, pi);
+    angle = mbgl::util::wrap(angle, -pi, pi);
     if (angle == -pi) angle = pi;
     double diff = std::abs(angle - anchorAngle);
     if (std::abs(angle - util::M2PI - anchorAngle) < diff) {
@@ -39,6 +41,8 @@ static double _normalizeAngle(double angle, double anchorAngle) {
 
     return angle;
 }
+
+} // namespace
 
 Transform::Transform(MapObserver& observer_, ConstrainMode constrainMode, ViewportMode viewportMode)
     : observer(observer_),
@@ -90,7 +94,7 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
     Duration duration = animation.duration.value_or(Duration::zero());
     if (state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero()) {
         // reuse flyTo, without exaggerated animation, to achieve constant ground speed.
-        return flyTo(camera, animation, true);
+        flyTo(camera, animation, true);
     }
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     LatLng startLatLng = getLatLng(LatLng::Unwrapped);
