@@ -70,7 +70,7 @@ public:
         : VertexVectorBase(other),
           v(other.v) {}
     VertexVector(VertexVector<V>&& other)
-        : VertexVectorBase(std::move(other)),
+        : VertexVectorBase(static_cast<VertexVectorBase&&>(other)),
           v(std::move(other.v)) {}
     ~VertexVector() override = default;
 
