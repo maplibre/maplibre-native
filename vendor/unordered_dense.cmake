@@ -1,4 +1,8 @@
-add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/unordered_dense SYSTEM)
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.25")
+    add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/unordered_dense SYSTEM)
+else()
+    add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/unordered_dense)
+endif()
 
 set_target_properties(
     unordered_dense
