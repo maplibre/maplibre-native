@@ -130,8 +130,10 @@ public:
     /// @tparam T Derived type, inheriting `gfx::Shader`
     /// @param to Location to store the shader
     /// @return True if 'to' has a valid program object, false otherwise.
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    bool populate(std::shared_ptr<T>& to) noexcept {
+    template <typename T>
+    bool populate(std::shared_ptr<T>& to) noexcept
+        requires(is_shader_v<T>)
+    {
         if (to) {
             return true;
         }
