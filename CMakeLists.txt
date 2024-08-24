@@ -1437,20 +1437,10 @@ include(${PROJECT_SOURCE_DIR}/vendor/polylabel.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/protozero.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/tracy.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/unordered_dense.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
-
-
-add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/unordered_dense)
-set_target_properties(
-    unordered_dense
-    PROPERTIES
-        INTERFACE_MAPBOX_NAME "unordered_dense"
-        INTERFACE_MAPBOX_URL "https://github.com/martinus/unordered_dense"
-        INTERFACE_MAPBOX_AUTHOR "Martin Leitner-Ankerl"
-        INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/unordered_dense/LICENSE
-)
 
 target_link_libraries(
     mbgl-core
