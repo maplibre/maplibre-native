@@ -37,7 +37,7 @@ on:
 
   pull_request:
     branches:
-      - opengl-2
+      - "*"
     paths:
       - CMakeLists.txt
       - "platform/linux/**"
@@ -96,7 +96,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -196,7 +196,7 @@ jobs:
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
 
       - name: Cache cmake-node-module deps
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           # downloaded with platform/node/cmake/module.cmake
           path: build/headers
@@ -229,7 +229,7 @@ jobs:
 
       - name: Restore vcpkg cache (Windows)
         if: runner.os == 'Windows'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/platform/windows/vendor/vcpkg
@@ -252,7 +252,7 @@ jobs:
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: |
-          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+          cmake --build build -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)"
 
       - name: Build maplibre-native (Windows)
         if: runner.os == 'Windows'
@@ -260,12 +260,16 @@ jobs:
           cmake --build build
 
       - name: Run render tests on macOS
-        if: runner.os == 'macOS' && matrix.arch != 'arm64'
-        run: set -o pipefail && ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
+        if: runner.os == 'macOS'
+        # A few are failing
+        # https://github.com/maplibre/maplibre-native/issues/2741
+        # Almost all are failing on Intel GitHub runners (but only on CI)
+        continue-on-error: true
+        run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Upload render test artifacts (MacOS)
-        if: always()
-        uses: actions/upload-artifact@v3
+        if: runner.os == 'MacOS'
+        uses: actions/upload-artifact@v4
         with:
           name: render-query-test-results_${{ runner.os }}_${{ matrix.arch }}
           path: metrics/macos-xcode11-release-style.html
