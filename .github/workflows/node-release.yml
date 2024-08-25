@@ -13,7 +13,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -65,7 +65,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -165,7 +165,7 @@ jobs:
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
 
       - name: Cache cmake-node-module deps
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           # downloaded with platform/node/cmake/module.cmake
           path: build/headers
@@ -198,7 +198,7 @@ jobs:
 
       - name: Restore vcpkg cache (Windows)
         if: runner.os == 'Windows'
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/platform/windows/vendor/vcpkg
@@ -221,7 +221,7 @@ jobs:
       - name: Build maplibre-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: |
-          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+          cmake --build build -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)"
 
       - name: Build maplibre-native (Windows)
         if: runner.os == 'Windows'
@@ -258,7 +258,7 @@ jobs:
         shell: bash
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -311,7 +311,7 @@ jobs:
         if: ${{ steps.prepare_release.outputs.prerelease == 'false' }}
         working-directory: platform/node
         run: |
-          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
@@ -320,7 +320,7 @@ jobs:
         if: ${{ steps.prepare_release.outputs.prerelease == 'true' }}
         working-directory: platform/node
         run: |
-          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm config set //registry.npmjs.org/:_authToken "${NPM_TOKEN}"
           npm publish --tag next --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
