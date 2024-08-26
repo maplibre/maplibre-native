@@ -1444,11 +1444,10 @@ void NativeMapView::onTileAction(mbgl::TileOperation op, const OverscaledTileID&
     assert(vm != nullptr);
 
     android::UniqueEnv _env = android::AttachEnv();
-    static auto &javaClass = jni::Class<NativeMapView>::Singleton(*_env);
+    static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
     static auto onTileAction = javaClass.GetMethod<void(
-            jni::Object<mbgl::android::TileOperation>, jni::jint, jni::jint, jni::jint,
-            jni::jint, jni::jint, jni::String)>(
-            *_env, "onTileAction");
+        jni::Object<mbgl::android::TileOperation>, jni::jint, jni::jint, jni::jint, jni::jint, jni::jint, jni::String)>(
+        *_env, "onTileAction");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
         weakReference.Call(*_env,

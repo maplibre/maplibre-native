@@ -1713,15 +1713,8 @@ TEST(Map, TEST_REQUIRES_SERVER(ObserveTileLifecycle)) {
         frontend,
         observer,
         std::make_shared<MainResourceLoader>(
-            ResourceOptions()
-                .withCachePath(":memory:")
-                .withAssetPath("test/fixtures/api/assets"),
-            ClientOptions()
-        ),
-        MapOptions()
-            .withMapMode(MapMode::Static)
-            .withSize(frontend.getSize()
-        ));
+            ResourceOptions().withCachePath(":memory:").withAssetPath("test/fixtures/api/assets"), ClientOptions()),
+        MapOptions().withMapMode(MapMode::Static).withSize(frontend.getSize()));
 
     map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
     map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(1));
@@ -1768,11 +1761,11 @@ TEST(Map, TEST_REQUIRES_SERVER(ObserveTileLifecycle)) {
                     break;
                 }
                 case TileOperation::Cancelled: {
-                    EXPECT_THAT(stage, testing::AnyOf(
-                        TileOperation::Requested,
-                        TileOperation::LoadFromNetwork,
-                        TileOperation::LoadFromCache,
-                        TileOperation::StartParse));
+                    EXPECT_THAT(stage,
+                                testing::AnyOf(TileOperation::Requested,
+                                               TileOperation::LoadFromNetwork,
+                                               TileOperation::LoadFromCache,
+                                               TileOperation::StartParse));
                     stage = TileOperation::Cancelled;
                     didAction = true;
                     break;

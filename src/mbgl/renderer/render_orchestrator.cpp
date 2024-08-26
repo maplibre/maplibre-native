@@ -1068,7 +1068,10 @@ void RenderOrchestrator::onTileChanged(RenderSource&, const OverscaledTileID&) {
     observer->onInvalidate();
 }
 
-void RenderOrchestrator::onTileAction(RenderSource&, TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
+void RenderOrchestrator::onTileAction(RenderSource&,
+                                      TileOperation op,
+                                      const OverscaledTileID& id,
+                                      const std::string& sourceID) {
     observer->onTileAction(op, id, sourceID);
 }
 
