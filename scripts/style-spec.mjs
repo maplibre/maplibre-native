@@ -1,4 +1,4 @@
-import referenceSpec from '@maplibre/maplibre-gl-style-spec/dist/latest.json' with { type: "json" };
+import referenceSpec from './style-spec-reference/v8.json' with { type: "json" };
 
 // https://github.com/maplibre/maplibre-native/issues/2368
 referenceSpec['layout_symbol']['icon-padding']['type'] = 'number';
