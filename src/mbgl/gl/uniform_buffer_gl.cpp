@@ -66,7 +66,7 @@ UniformBufferGL::UniformBufferGL(const UniformBufferGL& other)
       uniqueDebugId(generateDebugId()),
 #endif
       managedBuffer(other.managedBuffer.allocator, this) {
-    MLN_TRACE_ALLOC_CONST_BUFFER(uniqueDebugId, other.size)
+    MLN_TRACE_ALLOC_CONST_BUFFER(uniqueDebugId, other.size);
     managedBuffer.setOwner(this);
     if (other.isManagedAllocation) {
         managedBuffer.allocate(other.managedBuffer.getContents().data(), other.size);
