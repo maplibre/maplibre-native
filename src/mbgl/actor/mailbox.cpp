@@ -20,7 +20,7 @@ Mailbox::Mailbox(const TaggedScheduler& scheduler_)
 void Mailbox::open(const TaggedScheduler& scheduler_) {
     assert(!weakScheduler);
     schedulerTag = scheduler_.tag;
-    return open(*scheduler_.get());
+    open(*scheduler_.get());
 }
 
 void Mailbox::open(Scheduler& scheduler_) {
