@@ -3,11 +3,6 @@ import ejs from "ejs";
 import spec from "./android-style-spec-overrides.mjs";
 import _ from "lodash";
 
-// FIXME: https://github.com/mapbox/mapbox-gl-native/issues/15008
-//delete spec.layout_circle["circle-sort-key"]
-//delete spec.layout_line["line-sort-key"]
-//delete spec.layout_fill["fill-sort-key"]
-
 import { writeIfModified, camelize, snakeCaseUpper, iff, camelizeWithLeadingLowercase } from "../../../scripts/style-code.mjs";
 
 function setupGlobalEjsHelpers() {
@@ -270,7 +265,6 @@ global.defaultValueJava = function(property) {
                 }
               case 'number':
                 var isDouble = /location$/.test(property.name)
-                console.log(isDouble)
                 var result = 'new ' + (isDouble ? 'Double' : 'Float') + '[] {';
                 for (var i = 0; i < property.length; i++) {
                     result += isDouble ? '0.0' : '0f';
