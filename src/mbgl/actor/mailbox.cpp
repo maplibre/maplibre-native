@@ -149,6 +149,7 @@ void Mailbox::push(std::unique_ptr<Message> message) {
             scheduleToRecieve();
         }
     }
+}
 
     void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag) {
         auto guard = weakScheduler.lock();
