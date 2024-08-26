@@ -446,7 +446,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The color of the icon. This can only be used with sdf icons.
+   * The color of the icon. This can only be used with SDF icons.
    *
    * @param value a int color value
    * @return property wrapper around String color
@@ -456,7 +456,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The color of the icon. This can only be used with sdf icons.
+   * The color of the icon. This can only be used with SDF icons.
    *
    * @param value a String value
    * @return property wrapper around String
@@ -466,7 +466,7 @@ public class PropertyFactory {
   }
 
   /**
-   * The color of the icon. This can only be used with sdf icons.
+   * The color of the icon. This can only be used with SDF icons.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -506,7 +506,8 @@ public class PropertyFactory {
   }
 
   /**
-   * Distance of halo to the icon outline.
+   * Distance of halo to the icon outline. 
+The unit is in density-independent pixels only for SDF sprites that were created with a blur radius of 8, multiplied by the display density. I.e., the radius needs to be 16 for `@2x` sprites, etc.
    *
    * @param value a Float value
    * @return property wrapper around Float
@@ -516,7 +517,8 @@ public class PropertyFactory {
   }
 
   /**
-   * Distance of halo to the icon outline.
+   * Distance of halo to the icon outline. 
+The unit is in density-independent pixels only for SDF sprites that were created with a blur radius of 8, multiplied by the display density. I.e., the radius needs to be 16 for `@2x` sprites, etc.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -1406,7 +1408,7 @@ public class PropertyFactory {
   }
 
   /**
-   * Fade duration when a new tile is added.
+   * Fade duration when a new tile is added, or when a video is started or its coordinates are updated.
    *
    * @param value a Float value
    * @return property wrapper around Float
@@ -1416,7 +1418,7 @@ public class PropertyFactory {
   }
 
   /**
-   * Fade duration when a new tile is added.
+   * Fade duration when a new tile is added, or when a video is started or its coordinates are updated.
    *
    * @param expression an expression statement
    * @return property wrapper around an expression statement
@@ -1806,7 +1808,7 @@ public class PropertyFactory {
   }
 
   /**
-   * If true, the symbols will not cross tile edges to avoid mutual collisions. Recommended in layers that don't have enough padding in the vector tile to prevent collisions, or if it is a point symbol layer placed after a line symbol layer. When using a client that supports global collision detection, like Mapbox GL JS version 0.42.0 or greater, enabling this property is not needed to prevent clipped labels at tile boundaries.
+   * If true, the symbols will not cross tile edges to avoid mutual collisions. Recommended in layers that don't have enough padding in the vector tile to prevent collisions, or if it is a point symbol layer placed after a line symbol layer. When using a client that supports global collision detection, like MapLibre GL JS version 0.42.0 or greater, enabling this property is not needed to prevent clipped labels at tile boundaries.
    *
    * @param value a Boolean value
    * @return property wrapper around Boolean
@@ -1816,7 +1818,7 @@ public class PropertyFactory {
   }
 
   /**
-   * If true, the symbols will not cross tile edges to avoid mutual collisions. Recommended in layers that don't have enough padding in the vector tile to prevent collisions, or if it is a point symbol layer placed after a line symbol layer. When using a client that supports global collision detection, like Mapbox GL JS version 0.42.0 or greater, enabling this property is not needed to prevent clipped labels at tile boundaries.
+   * If true, the symbols will not cross tile edges to avoid mutual collisions. Recommended in layers that don't have enough padding in the vector tile to prevent collisions, or if it is a point symbol layer placed after a line symbol layer. When using a client that supports global collision detection, like MapLibre GL JS version 0.42.0 or greater, enabling this property is not needed to prevent clipped labels at tile boundaries.
    *
    * @param value a Boolean value
    * @return property wrapper around Boolean
@@ -1846,7 +1848,7 @@ public class PropertyFactory {
   }
 
   /**
-   * Controls the order in which overlapping symbols in the same layer are rendered
+   * Determines whether overlapping symbols in the same layer are rendered in the order that they appear in the data source or by their y-position relative to the viewport. To control the order and prioritization of symbols otherwise, use {@link PropertyFactory#symbolSortKey}.
    *
    * @param value a String value
    * @return property wrapper around String
@@ -1856,7 +1858,7 @@ public class PropertyFactory {
   }
 
   /**
-   * Controls the order in which overlapping symbols in the same layer are rendered
+   * Determines whether overlapping symbols in the same layer are rendered in the order that they appear in the data source or by their y-position relative to the viewport. To control the order and prioritization of symbols otherwise, use {@link PropertyFactory#symbolSortKey}.
    *
    * @param value a String value
    * @return property wrapper around String
@@ -2046,7 +2048,7 @@ public class PropertyFactory {
   }
 
   /**
-   * Size of the additional area around the icon bounding box used for detecting symbol collisions.
+   * Size of additional area round the icon bounding box used for detecting symbol collisions.
    *
    * @param value a Float value
    * @return property wrapper around Float
@@ -2056,7 +2058,7 @@ public class PropertyFactory {
   }
 
   /**
-   * Size of the additional area around the icon bounding box used for detecting symbol collisions.
+   * Size of additional area round the icon bounding box used for detecting symbol collisions.
    *
    * @param value a Float value
    * @return property wrapper around Float
