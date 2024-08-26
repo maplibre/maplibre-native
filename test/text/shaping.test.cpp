@@ -105,7 +105,6 @@ TEST(Shaping, ZWSP) {
 }
 
 void setupShapedText(Shaping& shapedText, float textSize) {
-    float fontScale = 4;
     auto glyph = PositionedGlyph(32,
                                  0.0f,
                                  0.0f,
@@ -126,13 +125,13 @@ void testApplyTextFit(const mapbox::Bin& rectangle,
                       const std::optional<style::TextFit> textFitWidth,
                       const std::optional<style::TextFit> textFitHeight,
                       const Shaping& shapedText,
-                      float textSize,
                       float fontScale,
                       float expectedRight,
                       float expectedBottom) {
     ImagePosition image = {rectangle,
                            style::Image::Impl("test",
-                                              PremultipliedImage({rectangle.w, rectangle.h}),
+                                              PremultipliedImage({static_cast<uint32_t>(rectangle.w),
+                                                                  static_cast<uint32_t>(rectangle.h)}),
                                               1.0f,
                                               false,
                                               {},
@@ -177,7 +176,6 @@ TEST(Shaping, applyTextFit) {
                              std::nullopt,
                              std::nullopt, 
                              shapedText,
-                             textSize,
                              fontScale,
                              expectedImageSize,
                              expectedImageSize);
@@ -191,7 +189,6 @@ TEST(Shaping, applyTextFit) {
                              style::TextFit::stretchOrShrink,
                              style::TextFit::stretchOrShrink,
                              shapedText,
-                             textSize,
                              fontScale,
                              expectedImageSize,
                              expectedImageSize);
@@ -205,8 +202,7 @@ TEST(Shaping, applyTextFit) {
                              horizontalContent,
                              style::TextFit::stretchOnly,
                              style::TextFit::proportional,
-                             shapedText, 
-                             textSize,
+                             shapedText,
                              fontScale,
                              expectedImageSize * 9,
                              expectedImageSize);
@@ -229,7 +225,6 @@ TEST(Shaping, applyTextFit) {
                              style::TextFit::proportional,
                              style::TextFit::stretchOnly,
                              shapedText,
-                             textSize,
                              fontScale,
                              expectedImageSize,
                              expectedImageSize * 9);
