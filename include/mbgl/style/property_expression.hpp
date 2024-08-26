@@ -90,7 +90,9 @@ public:
         const expression::EvaluationResult result = expression->evaluate(context);
         if (result) {
             const std::optional<T> typed = expression::fromExpressionValue<T>(*result);
-            return typed ? *typed : defaultValue ? *defaultValue : finalDefaultValue;
+            if (typed) {
+                return *typed;
+            }
         }
         return defaultValue ? *defaultValue : finalDefaultValue;
     }

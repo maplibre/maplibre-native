@@ -193,15 +193,15 @@ const std::optional<SymbolQuads>& SymbolInstance::iconQuads() const {
 }
 
 bool SymbolInstance::hasText() const {
-    return static_cast<bool>(symbolContent & SymbolContent::Text);
+    return symbolContent & SymbolContent::Text;
 }
 
 bool SymbolInstance::hasIcon() const {
-    return static_cast<bool>(symbolContent & SymbolContent::IconRGBA) || hasSdfIcon();
+    return symbolContent & SymbolContent::IconRGBA || hasSdfIcon();
 }
 
 bool SymbolInstance::hasSdfIcon() const {
-    return static_cast<bool>(symbolContent & SymbolContent::IconSDF);
+    return symbolContent & SymbolContent::IconSDF;
 }
 
 const std::optional<SymbolQuads>& SymbolInstance::verticalIconQuads() const {

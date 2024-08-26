@@ -22,7 +22,7 @@ public:
     
     void setBackendSize(mbgl::Size size_) {
         size = size_;
-        swapchain->setDrawableSize({size.width, size.height});
+        swapchain->setDrawableSize({static_cast<CGFloat>(size.width), static_cast<CGFloat>(size.height)});
         buffersInvalid = true;
     }
     

@@ -364,7 +364,6 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
             assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
             renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
         } else {
-            const auto* shaderMTL = static_cast<const ShaderProgram*>(shader.get());
             auto& context = renderPass.getCommandEncoder().getContext();
             renderPass.bindVertex(context.getEmptyBuffer(), /*offset=*/0, attributeIndex);
         }
@@ -382,7 +381,6 @@ void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
             if (buffer && buffer->get()) {
                 renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
             } else {
-                const auto* shaderMTL = static_cast<const ShaderProgram*>(shader.get());
                 auto& context = renderPass.getCommandEncoder().getContext();
                 renderPass.bindVertex(context.getEmptyBuffer(), /*offset=*/0, attributeIndex);
             }
