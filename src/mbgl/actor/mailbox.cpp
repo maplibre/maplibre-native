@@ -20,7 +20,7 @@ Mailbox::Mailbox(const TaggedScheduler& scheduler_)
 void Mailbox::open(const TaggedScheduler& scheduler_) {
     assert(!weakScheduler);
     schedulerTag = scheduler_.tag;
-    return open(*scheduler_.get());
+    open(*scheduler_.get());
 }
 
 void Mailbox::open(Scheduler& scheduler_) {
@@ -38,10 +38,7 @@ void Mailbox::open(Scheduler& scheduler_) {
     weakScheduler = scheduler_.makeWeakPtr();
 
     if (!queue.empty()) {
-        auto guard = weakScheduler.lock();
-        if (weakScheduler) {
-            weakScheduler->schedule(makeClosure(shared_from_this()));
-        }
+        scheduleToRecieve();
     }
 }
 
@@ -107,13 +104,9 @@ void Mailbox::push(std::unique_ptr<Message> message) {
             queue.push(std::move(message));
         }
 
-        if (wasEmpty) {
-            auto guard = weakScheduler.lock();
-            if (weakScheduler) {
-                MLN_TRACE_ZONE(schedule);
-                weakScheduler->schedule(schedulerTag, makeClosure(shared_from_this()));
-            }
-        }
+    if (wasEmpty) {
+        MLN_TRACE_ZONE(schedule);
+        scheduleToRecieve(schedulerTag);
     }
 }
 
@@ -153,25 +146,25 @@ void Mailbox::receive() {
     // If there are more messages in the queue and the scheduler
     // is still active, create a new task to handle the next one
     if (!wasEmpty) {
-        auto guard = weakScheduler.lock();
-        if (weakScheduler) {
-            weakScheduler->schedule(makeClosure(shared_from_this()));
+        scheduleToRecieve();
+    }
+}
+
+void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag) {
+    auto guard = weakScheduler.lock();
+    if (weakScheduler) {
+        std::weak_ptr<Mailbox> mailbox = shared_from_this();
+        auto setToRecieve = [mbox = std::move(mailbox)]() {
+            if (auto locked = mbox.lock()) {
+                locked->receive();
+            }
+        };
+        if (tag) {
+            weakScheduler->schedule(*tag, std::move(setToRecieve));
+        } else {
+            weakScheduler->schedule(std::move(setToRecieve));
         }
     }
-}
-
-// static
-void Mailbox::maybeReceive(const std::weak_ptr<Mailbox>& mailbox) {
-    if (auto locked = mailbox.lock()) {
-        locked->receive();
-    }
-}
-
-// static
-std::function<void()> Mailbox::makeClosure(std::weak_ptr<Mailbox> mailbox) {
-    return [mailbox = std::move(mailbox)]() {
-        maybeReceive(mailbox);
-    };
 }
 
 } // namespace mbgl

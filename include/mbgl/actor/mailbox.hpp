@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <queue>
 
 #include <mapbox/std/weak.hpp>
@@ -39,10 +40,8 @@ public:
     void push(std::unique_ptr<Message>);
     void receive();
 
-    static void maybeReceive(const std::weak_ptr<Mailbox>&);
-    static std::function<void()> makeClosure(std::weak_ptr<Mailbox>);
-
 private:
+    void scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag = std::nullopt);
     enum class State : uint32_t {
         Idle = 0,
         Processing,

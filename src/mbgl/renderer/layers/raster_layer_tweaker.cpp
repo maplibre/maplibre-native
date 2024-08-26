@@ -24,8 +24,10 @@ void RasterLayerTweaker::execute([[maybe_unused]] LayerGroupBase& layerGroup,
         spin = util::deg2radf(spin);
         const float s = std::sin(spin);
         const float c = std::cos(spin);
-        std::array<float, 4> spin_weights = {
-            {(2 * c + 1) / 3, (-std::sqrt(3.0f) * s - c + 1) / 3, (std::sqrt(3.0f) * s - c + 1) / 3, 0}};
+        std::array<float, 4> spin_weights = {{(2 * c + 1) / 3,
+                                              (-std::numbers::sqrt3_v<float> * s - c + 1) / 3,
+                                              (std::numbers::sqrt3_v<float> * s - c + 1) / 3,
+                                              0}};
         return spin_weights;
     };
     const auto saturationFactor = [](float saturation) -> float {
