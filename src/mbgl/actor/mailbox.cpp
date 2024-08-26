@@ -109,45 +109,45 @@ void Mailbox::push(std::unique_ptr<Message> message) {
             scheduleToRecieve(schedulerTag);
         }
     }
+}
 
-    void Mailbox::receive() {
-        auto idleState = State::Idle;
-        while (!state.compare_exchange_strong(idleState, State::Processing)) {
-            if (state == State::Abandoned) {
-                return;
-            }
-        }
-
-        Scoped activityFlag{[this]() {
-            if (state == State::Processing) {
-                state = State::Idle;
-            }
-        }};
-        std::lock_guard<std::recursive_mutex> receivingLock(receivingMutex);
-
-        if (closed) {
-            state = State::Abandoned;
+void Mailbox::receive() {
+    auto idleState = State::Idle;
+    while (!state.compare_exchange_strong(idleState, State::Processing)) {
+        if (state == State::Abandoned) {
             return;
         }
+    }
 
-        std::unique_ptr<Message> message;
-        bool wasEmpty = false;
-
-        {
-            std::lock_guard<std::mutex> queueLock(queueMutex);
-            assert(!queue.empty());
-            message = std::move(queue.front());
-            queue.pop();
-            wasEmpty = queue.empty();
+    Scoped activityFlag{[this]() {
+        if (state == State::Processing) {
+            state = State::Idle;
         }
+    }};
+    std::lock_guard<std::recursive_mutex> receivingLock(receivingMutex);
 
-        (*message)();
+    if (closed) {
+        state = State::Abandoned;
+        return;
+    }
 
-        // If there are more messages in the queue and the scheduler
-        // is still active, create a new task to handle the next one
-        if (!wasEmpty) {
-            scheduleToRecieve();
-        }
+    std::unique_ptr<Message> message;
+    bool wasEmpty = false;
+
+    {
+        std::lock_guard<std::mutex> queueLock(queueMutex);
+        assert(!queue.empty());
+        message = std::move(queue.front());
+        queue.pop();
+        wasEmpty = queue.empty();
+    }
+
+    (*message)();
+
+    // If there are more messages in the queue and the scheduler
+    // is still active, create a new task to handle the next one
+    if (!wasEmpty) {
+        scheduleToRecieve();
     }
 }
 
