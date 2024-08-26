@@ -88,6 +88,16 @@ jobs:
         run: npm install --ignore-scripts
         working-directory: platform/android
 
+      - name: run platform/android/scripts/generate-style-code.mjs
+        run: node scripts/generate-style-code.mjs
+        working-directory: platform/android
+
+      - uses: pre-commit/action@v3.0.1
+
+      - uses: infotroph/tree-is-clean@v1
+        with:
+          check_untracked: true
+
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.job }}
