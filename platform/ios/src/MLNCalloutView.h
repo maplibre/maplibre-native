@@ -10,17 +10,17 @@ NS_ASSUME_NONNULL_BEGIN
  A protocol for a `UIView` subclass that displays information about a selected
  annotation near that annotation.
 
- To receive updates from an object that conforms to the `MLNCalloutView` protocol,
- use the optional methods available in the `MLNCalloutViewDelegate` protocol.
+ To receive updates from an object that conforms to the ``MLNCalloutView`` protocol,
+ use the optional methods available in the ``MLNCalloutViewDelegate`` protocol.
 
  #### Related examples
  TODO: Display custom views as callouts by customizing an
- `MLNCalloutView`.
+ ``MLNCalloutView``.
  */
 @protocol MLNCalloutView <NSObject>
 
 /**
- An object conforming to the `MLNAnnotation` protocol whose details this callout
+ An object conforming to the ``MLNAnnotation`` protocol whose details this callout
  view displays.
  */
 @property (nonatomic, strong) id<MLNAnnotation> representedObject;
@@ -38,7 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) UIView *rightAccessoryView;
 
 /**
- An object conforming to the `MLNCalloutViewDelegate` method that receives
+ An object conforming to the ``MLNCalloutViewDelegate`` method that receives
  messages related to the callout view’s interactive subviews.
  */
 @property (nonatomic, weak) id<MLNCalloutViewDelegate> delegate;
@@ -83,7 +83,7 @@ NS_ASSUME_NONNULL_BEGIN
  but the left and right margins from a minimum width that the callout should have.
 
  @param rect Rect that the callout is presented from. This should be the same as the one passed in
- `-[MLNCalloutView presentCalloutFromRect:inView:constrainedToRect:animated:]`
+ ``MLNCalloutView/presentCalloutFromRect:inView:constrainedToRect:animated:``
  @return `UIEdgeInsets` representing the margins. Values should be negative.
  */
 - (UIEdgeInsets)marginInsetsHintForPresentationFromRect:(CGRect)rect
@@ -108,9 +108,9 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /**
- The `MLNCalloutViewDelegate` protocol defines a set of optional methods that
+ The ``MLNCalloutViewDelegate`` protocol defines a set of optional methods that
  you can use to receive messages from an object that conforms to the
- `MLNCalloutView` protocol. The callout view uses these methods to inform the
+ ``MLNCalloutView`` protocol. The callout view uses these methods to inform the
  delegate that the user has interacted with the the callout view.
  */
 @protocol MLNCalloutViewDelegate <NSObject>

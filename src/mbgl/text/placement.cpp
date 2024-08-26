@@ -151,7 +151,7 @@ public:
     std::optional<CollisionBoundaries> avoidEdges;
 };
 
-// PlacementController implemenation
+// PlacementController implementation
 
 PlacementController::PlacementController()
     : placement(makeMutable<Placement>()) {}
@@ -754,12 +754,12 @@ Point<float> calculateVariableRenderShift(style::SymbolAnchorType anchor,
                                           std::array<float, 2> textOffset,
                                           float textBoxScale,
                                           float renderTextSize) {
-    AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
-    float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
-    float shiftY = -(alignment.verticalAlign - 0.5f) * height;
-    auto variablOffset = SymbolLayout::evaluateVariableOffset(anchor, textOffset);
-    return {(shiftX / textBoxScale + variablOffset[0]) * renderTextSize,
-            (shiftY / textBoxScale + variablOffset[1]) * renderTextSize};
+    const AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
+    const float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
+    const float shiftY = -(alignment.verticalAlign - 0.5f) * height;
+    const auto variableOffset = SymbolLayout::evaluateVariableOffset(anchor, textOffset);
+    return {(shiftX / textBoxScale + variableOffset[0]) * renderTextSize,
+            (shiftY / textBoxScale + variableOffset[1]) * renderTextSize};
 }
 } // namespace
 

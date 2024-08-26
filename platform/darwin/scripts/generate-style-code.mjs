@@ -1,14 +1,27 @@
-#!/usr/bin/env node
-'use strict';
+import { ArgumentParser } from "argparse";
+import path from "node:path";
+import _ from "lodash";
+import colorParser from "csscolorparser";
+import assert from "assert";
 
-const { ArgumentParser } = require("argparse");
-const fs = require('fs');
-const path = require('path');
-const _ = require('lodash');
-const colorParser = require('csscolorparser');
-const assert = require('assert');
+import { readAndCompile, writeIfModified, camelize, unhyphenate } from "../../../scripts/style-code.mjs";
 
-require('../../../scripts/style-code');
+import cocoaConventions from './style-spec-cocoa-conventions-v8.json' with { type: "json" };
+import styleSpec from '../../../scripts/style-spec-reference/v8.json' with { type: "json" };
+import styleSpecOverrides from './style-spec-overrides-v8.json' with { type: "json" };
+
+function setupGlobalEjsHelpers() {
+    const funcs = {
+      camelize,
+      unhyphenate
+    };
+    for (const [funcName, func] of Object.entries(funcs)) {
+      // @ts-ignore
+      global[funcName] = func;
+    }
+  }
+  
+  setupGlobalEjsHelpers();
 
 // Parse command line
 const args = (() => {
@@ -22,11 +35,10 @@ const args = (() => {
     return parser.parse_args();
 })();
 
-const cocoaConventions = require('./style-spec-cocoa-conventions-v8.json');
 const prefix = 'MLN';
 const suffix = 'StyleLayer';
 
-let spec = _.merge(require('../../../scripts/style-spec-reference/v8'), require('./style-spec-overrides-v8.json'));
+let spec = _.merge(styleSpec, styleSpecOverrides);
 
 class ConventionOverride {
     constructor(val) {
@@ -371,7 +383,7 @@ global.propertyDoc = function (propertyName, property, layerType, kind) {
             let layoutProperties = spec[`layout_${layerType}`] || [];
             let paintProperties = spec[`paint_${layerType}`] || [];
             if (symbol in layoutProperties || symbol in paintProperties) {
-                return '`MLN' + camelize(layerType) + 'StyleLayer.' + camelizeWithLeadingLowercase(symbol) + '`';
+                return '``MLN' + camelize(layerType) + 'StyleLayer/' + camelizeWithLeadingLowercase(symbol) + '``';
             }
         }
         if ('values' in property && Object.keys(property.values).indexOf(symbol) !== -1) {
@@ -508,11 +520,11 @@ global.describeType = function (property) {
                 case 'translate':
                     return '`CGVector`';
                 case 'position':
-                    return '`MLNSphericalPosition`';
+                    return '``MLNSphericalPosition``';
                 case 'anchor':
-                    return '`MLNTextAnchor` array';
+                    return '``MLNTextAnchor`` array';
                 case 'mode':
-                    return '`MLNTextWritingMode` array';
+                    return '``MLNTextWritingMode`` array';
                 default:
                     return 'array';
             }
@@ -593,7 +605,7 @@ global.describeValue = function (value, property, layerType) {
                 case 'translate':
                     return 'an `NSValue` object containing a `CGVector` struct set to' + ` ${formatNumber(value[0])}${units} rightward and ${formatNumber(value[1])}${units} downward`;
                 case 'position':
-                    return 'an `MLNSphericalPosition` struct set to' + ` ${formatNumber(value[0])} radial, ${formatNumber(value[1])} azimuthal and ${formatNumber(value[2])} polar`;
+                    return 'an ``MLNSphericalPosition`` struct set to' + ` ${formatNumber(value[0])} radial, ${formatNumber(value[1])} azimuthal and ${formatNumber(value[2])} polar`;
                 default:
                     return 'the array `' + value.join('`, `') + '`';
             }
@@ -787,7 +799,7 @@ const lightProperties = Object.keys(spec['light']).reduce((memo, name) => {
 const lightDoc = spec['light-cocoa-doc'];
 const lightType = 'light';
 
-const root = path.dirname(path.dirname(path.dirname(__dirname)));
+const root = path.dirname(path.dirname(path.dirname(import.meta.dirname)));
 const outLocation = args.out ? args.out : root;
 
 const layerH = readAndCompile('platform/darwin/src/MLNStyleLayer.h.ejs', root);

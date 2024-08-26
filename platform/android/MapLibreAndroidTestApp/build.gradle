@@ -29,15 +29,6 @@ android {
         multiDexEnabled = true
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
     nativeBuild(["example-custom-layer"])
     packagingOptions {
         resources {
@@ -92,11 +83,14 @@ android {
     }
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 dependencies {
     implementation project(':MapLibreAndroid')
     implementation libs.maplibreJavaTurf
 
-    implementation libs.supportAppcompatV7
     implementation libs.supportRecyclerView
     implementation libs.supportDesign
     implementation libs.supportConstraintLayout
@@ -107,6 +101,9 @@ dependencies {
     implementation libs.timber
 
     implementation libs.okhttp3
+
+    implementation libs.kotlinxCoroutinesCore
+    implementation libs.kotlinxCoroutinesAndroid
 
     debugImplementation libs.leakCanary
 

@@ -9,6 +9,7 @@
 #include <mbgl/gl/vertex_buffer_resource.hpp>
 #include <mbgl/gl/index_buffer_resource.hpp>
 #include <mbgl/gl/texture_resource.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 
 #if MLN_DRAWABLE_RENDERER
@@ -43,7 +44,7 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
 }
 
 void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {
-    commandEncoder.context.vertexBuffer = static_cast<gl::VertexBufferResource&>(resource).buffer;
+    commandEncoder.context.vertexBuffer = static_cast<gl::VertexBufferResource&>(resource).getBuffer();
     MBGL_CHECK_ERROR(glBufferSubData(GL_ARRAY_BUFFER, 0, size, data));
 }
 
@@ -151,11 +152,12 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
         if (auto* rawData = static_cast<VertexBufferGL*>(vec->getBuffer()); rawData && rawData->resource) {
             auto& resource = static_cast<gl::VertexBufferResource&>(*rawData->resource);
 
-            // If it's changed, update it
-            if (rawBufSize <= resource.byteSize) {
-                if (vec->getDirty()) {
+            // If the already-allocated buffer is large enough, we can re-use it
+            if (rawBufSize <= resource.getByteSize()) {
+                // If the source changed, update the buffer contents
+                if (vec->isModifiedAfter(resource.getLastUpdated())) {
                     updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
-                    vec->setDirty(false);
+                    resource.setLastUpdated(vec->getLastModified());
                 }
                 return rawData->resource;
             }
@@ -165,7 +167,6 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
             auto buffer = std::make_unique<VertexBufferGL>();
             buffer->resource = createVertexBufferResource(rawBufPtr, rawBufSize, usage, /*persistent=*/false);
             vec->setBuffer(std::move(buffer));
-            vec->setDirty(false);
             return static_cast<VertexBufferGL*>(vec->getBuffer())->resource;
         }
     }
@@ -190,7 +191,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::VertexAttributeArray& defaults,
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
+    const std::chrono::duration<double> lastUpdate,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) {
+    MLN_TRACE_FUNC();
     AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
 
@@ -217,6 +220,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
 
     // For each attribute in the program, with the corresponding default and optional override...
     const auto resolveAttr = [&](const size_t id, auto& defaultAttr, auto& overrideAttr) -> void {
+        MLN_TRACE_ZONE(binding);
         auto& effectiveAttr = overrideAttr ? *overrideAttr : defaultAttr;
         const auto& defaultGL = static_cast<const VertexAttributeGL&>(defaultAttr);
         const auto stride = defaultAttr.getStride();
@@ -245,10 +249,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         }
 
         // Get the raw data for the values in the desired format
-        const auto& rawData = VertexAttributeGL::getRaw(effectiveAttr, defaultGL.getGLType());
-        if (rawData.empty()) {
-            VertexAttributeGL::getRaw(effectiveAttr, defaultGL.getGLType());
-        }
+        const auto& rawData = VertexAttributeGL::getRaw(effectiveAttr, defaultGL.getGLType(), lastUpdate);
 
         if (rawData.size() == stride * vertexCount) {
             // The override provided a value for each vertex, append it as-is
@@ -268,6 +269,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
             return;
         }
 
+        overrideAttr->setDirty(false);
+
         bindings[index] = {
             /*.attribute = */ {defaultAttr.getDataType(), offset},
             /* vertexStride = */ static_cast<uint32_t>(stride),
@@ -280,7 +283,11 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         // The vertex stride is the sum of the attribute strides
         vertexStride += static_cast<uint32_t>(stride);
     };
-    defaults.resolve(overrides, resolveAttr);
+    // This version is called when the attribute is available, but isn't being used by the shader
+    const auto missingAttr = [&](const size_t, auto& missingAttr) -> void {
+        missingAttr->setDirty(false);
+    };
+    defaults.resolve(overrides, resolveAttr, missingAttr);
 
     assert(vertexStride * vertexCount <= allData.size());
 
