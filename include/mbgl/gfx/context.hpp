@@ -154,9 +154,9 @@ public:
 
     /// `emplaceOrUpdateUniformBuffer` with type inference
     template <typename T>
-    std::enable_if_t<!std::is_pointer_v<T>, bool> emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr,
-                                                                               const T* data,
-                                                                               bool persistent = false) {
+    bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr, const T* data, bool persistent = false)
+        requires(!std::is_pointer_v<T>)
+    {
         return emplaceOrUpdateUniformBuffer(ptr, data, sizeof(T), persistent);
     }
 

@@ -22,7 +22,7 @@ std::size_t hash(Args&&... args) noexcept {
 
 namespace detail {
 template <typename TIter>
-using TIterVal = std::enable_if_t<std::is_integral<typename TIter::value_type>::value, typename TIter::value_type>;
+using TIterVal = std::enable_if_t<std::is_integral_v<typename TIter::value_type>, typename TIter::value_type>;
 } // namespace detail
 
 template <typename T>

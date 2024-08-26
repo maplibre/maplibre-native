@@ -191,12 +191,12 @@ public:
     }
 
     template <std::size_t I = 0, typename... Tp>
-    inline typename std::enable_if<I == sizeof...(Tp), void>::type set(std::size_t, std::tuple<Tp...>, std::size_t) {}
+    inline typename std::enable_if_t<I == sizeof...(Tp), void> set(std::size_t, std::tuple<Tp...>, std::size_t) {}
 
     /// Set item value
     template <std::size_t I = 0, typename... Tp>
-        inline typename std::enable_if <
-        I<sizeof...(Tp), void>::type set(std::size_t i, std::tuple<Tp...> tuple, std::size_t tupleIndex) {
+        inline typename std::enable_if_t <
+        I<sizeof...(Tp), void> set(std::size_t i, std::tuple<Tp...> tuple, std::size_t tupleIndex) {
         if (tupleIndex == 0) {
             set(i, std::get<I>(tuple).a1);
         } else {
