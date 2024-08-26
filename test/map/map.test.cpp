@@ -1705,7 +1705,7 @@ TEST(Map, TEST_REQUIRES_SERVER(ObserveTileLifecycle)) {
     StubMapObserver observer;
     observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
         if (sourceID != "mapbox") return;
-        tileOps.emplace_back(id, sourceID, op);
+        tileOps.push_back(TileEntry{id, sourceID, op});
     };
 
     HeadlessFrontend frontend{{512, 512}, 1};
@@ -1785,25 +1785,4 @@ TEST(Map, TEST_REQUIRES_SERVER(ObserveTileLifecycle)) {
 
         EXPECT_THAT(stage, testing::AnyOf(TileOperation::EndParse, TileOperation::Cancelled));
     }
-
-    /*ASSERT_THAT(tileOps, testing::ElementsAre(
-        TileEntry{OverscaledTileID{1, 0, 1, 0, 0}, "mapbox", TileOp::Requested},
-        TileEntry{OverscaledTileID{1, 0, 1, 0, 1}, "mapbox", TileOp::Requested},
-        TileEntry{OverscaledTileID{1, 0, 1, 1, 0}, "mapbox", TileOp::Requested},
-        TileEntry{OverscaledTileID{1, 0, 1, 1, 1}, "mapbox", TileOp::Requested},
-        TileEntry{OverscaledTileID{0, 0, 0, 0, 0}, "mapbox", TileOp::Requested},
-        TileEntry{OverscaledTileID{1, 0, 1, 0, 0}, "mapbox", TileOp::LoadFromNetwork},
-        TileEntry{OverscaledTileID{1, 0, 1, 0, 0}, "mapbox", TileOp::StartParse},
-        TileEntry{OverscaledTileID{1, 0, 1, 0, 1}, "mapbox", TileOp::LoadFromNetwork},
-        TileEntry{OverscaledTileID{1, 0, 1, 0, 1}, "mapbox", TileOp::StartParse},
-        TileEntry{OverscaledTileID{1, 0, 1, 1, 0}, "mapbox", TileOp::LoadFromNetwork},
-        TileEntry{OverscaledTileID{1, 0, 1, 1, 0}, "mapbox", TileOp::StartParse},
-        TileEntry{OverscaledTileID{1, 0, 1, 1, 1}, "mapbox", TileOp::LoadFromNetwork},
-        TileEntry{OverscaledTileID{1, 0, 1, 1, 1}, "mapbox", TileOp::StartParse},
-        TileEntry{OverscaledTileID{1, 0, 1, 0, 0}, "mapbox", TileOp::EndParse},
-        TileEntry{OverscaledTileID{1, 0, 1, 0, 1}, "mapbox", TileOp::EndParse},
-        TileEntry{OverscaledTileID{1, 0, 1, 1, 0}, "mapbox", TileOp::EndParse},
-        TileEntry{OverscaledTileID{1, 0, 1, 1, 1}, "mapbox", TileOp::EndParse},
-        TileEntry{OverscaledTileID{0, 0, 0, 0, 0}, "mapbox", TileOp::EndParse}
-    ));*/
 }
