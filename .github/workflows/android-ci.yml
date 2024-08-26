@@ -97,6 +97,13 @@ jobs:
         working-directory: .
 
       - uses: pre-commit/action@v3.0.1
+        continue-on-error: false  # this can mean files are modified, which is not an error
+        with:
+          extra_args: clang-format --all-files
+
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: clang-format --all-files
 
       - uses: infotroph/tree-is-clean@v1
         with:
