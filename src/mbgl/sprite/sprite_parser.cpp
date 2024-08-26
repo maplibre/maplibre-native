@@ -152,16 +152,13 @@ std::optional<style::ImageContent> getContent(const JSValue& value, const char* 
     return std::nullopt;
 }
 
-std::optional<style::TextFit> parseTextFit(const std::string& value) {
-    static const std::unordered_map<std::string, style::TextFit> textFitMap = {
-        {"stretchOrShrink", style::TextFit::stretchOrShrink},
-        {"stretchOnly", style::TextFit::stretchOnly},
-        {"proportional", style::TextFit::proportional}
-    };
-
-    auto it = textFitMap.find(value);
-    if (it != textFitMap.end()) {
-        return it->second;
+std::optional<style::TextFit> parseTextFit(const std::string_view& value) {
+    if (value == "stretchOrShrink") {
+        return style::TextFit::stretchOrShrink;
+    } else if (value == "stretchOnly") {
+        return style::TextFit::stretchOnly;
+    } else if (value == "proportional") {
+        return style::TextFit::proportional;
     } else {
         return std::nullopt;
     }
@@ -171,7 +168,7 @@ std::optional<style::TextFit> getTextFit(const JSValue& value, const char* prope
     if (value.HasMember(property)) {
         auto& v = value[property];
         if (v.IsString()) {
-            return parseTextFit(v.GetString());
+            return parseTextFit(std::string_view(v.GetString(), v.GetStringLength()));
         } else {
             Log::Warning(Event::Sprite,
                          std::string("Invalid sprite image '") + name + "': value of '" + property +
