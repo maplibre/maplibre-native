@@ -1,9 +1,16 @@
 import fs from "node:fs";
+import path from "node:path";
 import ejs from "ejs";
 import spec from "./android-style-spec-overrides.mjs";
 import _ from "lodash";
 
 import { writeIfModified, camelize, snakeCaseUpper, iff, camelizeWithLeadingLowercase } from "../../../scripts/style-code.mjs";
+
+if (!import.meta.dirname) throw new Error("import.meta.dirname is undefined");
+
+function absPath(relativePath) {
+  return path.join(import.meta.dirname, "..", relativePath);
+}
 
 function setupGlobalEjsHelpers() {
   const funcs = {
@@ -409,14 +416,14 @@ global.supportsPropertyFunction = function (property) {
 // Template processing //
 
 // Java + JNI Light (Peer model)
-const lightJava = ejs.compile(fs.readFileSync('MapLibreAndroid/src/main/java/org/maplibre/android/style/light/light.java.ejs', 'utf8'), {strict: true});
-const lightJavaUnitTests = ejs.compile(fs.readFileSync('MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/light.junit.ejs', 'utf8'), {strict: true});
-writeIfModified(`MapLibreAndroid/src/main/java/org/maplibre/android/style/light/Light.java`, lightJava({properties: lightProperties}));
-writeIfModified(`MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/LightTest.java`, lightJavaUnitTests({properties: lightProperties}));
+const lightJava = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/light/light.java.ejs'), 'utf8'), {strict: true});
+const lightJavaUnitTests = ejs.compile(fs.readFileSync(absPath('MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/light.junit.ejs'), 'utf8'), {strict: true});
+writeIfModified(absPath(`MapLibreAndroid/src/main/java/org/maplibre/android/style/light/Light.java`), lightJava({properties: lightProperties}));
+writeIfModified(absPath(`MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/LightTest.java`), lightJavaUnitTests({properties: lightProperties}));
 
 // Java
-const layerJava = ejs.compile(fs.readFileSync('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/layer.java.ejs', 'utf8'), {strict: true});
-const layerJavaUnitTests = ejs.compile(fs.readFileSync('MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/layer.junit.ejs', 'utf8'), {strict: true});
+const layerJava = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/layer.java.ejs'), 'utf8'), {strict: true});
+const layerJavaUnitTests = ejs.compile(fs.readFileSync(absPath('MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/testapp/style/layer.junit.ejs'), 'utf8'), {strict: true});
 
 for (const layer of layers) {
   var srcDir = 'MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/'
@@ -426,39 +433,39 @@ for (const layer of layers) {
     testDir = 'MapLibreAndroidTestApp/src/androidTest/java/org/maplibre/android/location/'
   }
 
-  writeIfModified(srcDir + `${camelize(layer.type)}Layer.java`, layerJava(layer));
-  writeIfModified(testDir + `${camelize(layer.type)}LayerTest.java`, layerJavaUnitTests(layer));
+  writeIfModified(absPath(srcDir + `${camelize(layer.type)}Layer.java`), layerJava(layer));
+  writeIfModified(absPath(testDir + `${camelize(layer.type)}LayerTest.java`), layerJavaUnitTests(layer));
 }
 
 // Jni
-const layerHpp = ejs.compile(fs.readFileSync('MapLibreAndroid/src/cpp/style/layers/layer.hpp.ejs', 'utf8'), {strict: true});
-const layerCpp = ejs.compile(fs.readFileSync('MapLibreAndroid/src/cpp/style/layers/layer.cpp.ejs', 'utf8'), {strict: true});
+const layerHpp = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/cpp/style/layers/layer.hpp.ejs'), 'utf8'), {strict: true});
+const layerCpp = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/cpp/style/layers/layer.cpp.ejs'), 'utf8'), {strict: true});
 
 for (const layer of layers) {
   const layerFileName = layer.type.replace('-', '_');
 
-  writeIfModified(`MapLibreAndroid/src/cpp/style/layers/${layerFileName}_layer.hpp`, layerHpp(layer));
-  writeIfModified(`MapLibreAndroid/src/cpp/style/layers/${layerFileName}_layer.cpp`, layerCpp(layer));
+  writeIfModified(absPath(`MapLibreAndroid/src/cpp/style/layers/${layerFileName}_layer.hpp`), layerHpp(layer));
+  writeIfModified(absPath(`MapLibreAndroid/src/cpp/style/layers/${layerFileName}_layer.cpp`), layerCpp(layer));
 }
 
 // Java PropertyFactory
-const propertyFactoryTemplate = ejs.compile(fs.readFileSync('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/property_factory.java.ejs', 'utf8'), {strict: true});
+const propertyFactoryTemplate = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/property_factory.java.ejs'), 'utf8'), {strict: true});
 
-var propertyFactorySrcDir = 'MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/PropertyFactory.java'
+const propertyFactorySrcDir = absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/PropertyFactory.java')
 writeIfModified(
     propertyFactorySrcDir,
     propertyFactoryTemplate({layoutProperties: layoutProperties, paintProperties: paintProperties, locationIndicator: false})
 );
 
-var locationPropertyFactorySrcDir = 'MapLibreAndroid/src/main/java/org/maplibre/android/location/LocationPropertyFactory.java'
+const locationPropertyFactorySrcDir = absPath('MapLibreAndroid/src/main/java/org/maplibre/android/location/LocationPropertyFactory.java')
 writeIfModified(
     locationPropertyFactorySrcDir,
     propertyFactoryTemplate({layoutProperties: locationLayoutProperties, paintProperties: locationPaintProperties, locationIndicator: true})
 );
 
 // Java Property
-const enumPropertyJavaTemplate = ejs.compile(fs.readFileSync('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/property.java.ejs', 'utf8'), {strict: true});
+const enumPropertyJavaTemplate = ejs.compile(fs.readFileSync(absPath('MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/property.java.ejs'), 'utf8'), {strict: true});
 writeIfModified(
-    `MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/Property.java`,
+    absPath(`MapLibreAndroid/src/main/java/org/maplibre/android/style/layers/Property.java`),
     enumPropertyJavaTemplate({properties: enumProperties})
 );

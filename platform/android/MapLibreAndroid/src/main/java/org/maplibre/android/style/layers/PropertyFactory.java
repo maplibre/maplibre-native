@@ -507,7 +507,6 @@ public class PropertyFactory {
 
   /**
    * Distance of halo to the icon outline. 
-
 The unit is in density-independent pixels only for SDF sprites that were created with a blur radius of 8, multiplied by the display density. I.e., the radius needs to be 16 for `@2x` sprites, etc.
    *
    * @param value a Float value
@@ -519,7 +518,6 @@ The unit is in density-independent pixels only for SDF sprites that were created
 
   /**
    * Distance of halo to the icon outline. 
-
 The unit is in density-independent pixels only for SDF sprites that were created with a blur radius of 8, multiplied by the display density. I.e., the radius needs to be 16 for `@2x` sprites, etc.
    *
    * @param expression an expression statement

@@ -84,13 +84,17 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
       - name: npm install
         run: npm install --ignore-scripts
-        working-directory: platform/android
+        working-directory: .
 
       - name: run platform/android/scripts/generate-style-code.mjs
-        run: node scripts/generate-style-code.mjs
-        working-directory: platform/android
+        run: node platform/android/scripts/generate-style-code.mjs
+        working-directory: .
 
       - uses: pre-commit/action@v3.0.1
 
