@@ -7,6 +7,11 @@ import assert from "assert";
 import { readAndCompile, writeIfModified, camelize, unhyphenate } from "../../../scripts/style-code.mjs";
 
 import styleSpec from "../../../scripts/style-spec.mjs";
+
+delete styleSpec.layer.type.values["location-indicator"];
+delete styleSpec["layout_location-indicator"]
+delete styleSpec["paint_location-indicator"];
+
 import cocoaConventions from './style-spec-cocoa-conventions-v8.json' with { type: "json" };
 import styleSpecOverrides from './style-spec-overrides-v8.json' with { type: "json" };
 
@@ -635,7 +640,6 @@ global.enumName = function (property) {
 };
 
 global.propertyType = function (property) {
-    console.log(property)
     switch (property.type) {
         case 'boolean':
             return 'NSNumber *';
