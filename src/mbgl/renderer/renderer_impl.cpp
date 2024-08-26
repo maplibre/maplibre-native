@@ -542,7 +542,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 
     frameCount += 1;
-    MLN_END_FRAME()
+    MLN_END_FRAME();
 }
 
 void Renderer::Impl::reduceMemoryUse() {
