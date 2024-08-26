@@ -267,8 +267,7 @@ std::array<float, 2> evaluateRadialOffset(style::SymbolAnchorType anchor, float 
     std::array<float, 2> result{{0.0f, 0.0f}};
     radialOffset = std::max(radialOffset, 0.0f); // Ignore negative offset.
     // solve for r where r^2 + r^2 = radialOffset^2
-    constexpr float sqrt2 = std::numbers::sqrt2_v<float>;
-    const float hypotenuse = radialOffset / sqrt2;
+    const float hypotenuse = radialOffset / std::numbers::sqrt2_v<float>;
 
     switch (anchor) {
         case SymbolAnchorType::TopRight:

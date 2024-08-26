@@ -9,7 +9,6 @@
 #include <mbgl/util/containers.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
-#include <mbgl/shaders/layer_ubo.hpp>
 #include <mbgl/util/monotonic_timer.hpp>
 #include <chrono>
 #endif // MLN_RENDER_BACKEND_METAL
