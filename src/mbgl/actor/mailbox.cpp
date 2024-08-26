@@ -151,21 +151,21 @@ void Mailbox::push(std::unique_ptr<Message> message) {
     }
 }
 
-    void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag) {
-        auto guard = weakScheduler.lock();
-        if (weakScheduler) {
-            std::weak_ptr<Mailbox> mailbox = shared_from_this();
-            auto setToRecieve = [mbox = std::move(mailbox)]() {
-                if (auto locked = mbox.lock()) {
-                    locked->receive();
-                }
-            };
-            if (tag) {
-                weakScheduler->schedule(*tag, std::move(setToRecieve));
-            } else {
-                weakScheduler->schedule(std::move(setToRecieve));
+void Mailbox::scheduleToRecieve(const std::optional<util::SimpleIdentity>& tag) {
+    auto guard = weakScheduler.lock();
+    if (weakScheduler) {
+        std::weak_ptr<Mailbox> mailbox = shared_from_this();
+        auto setToRecieve = [mbox = std::move(mailbox)]() {
+            if (auto locked = mbox.lock()) {
+                locked->receive();
             }
+        };
+        if (tag) {
+            weakScheduler->schedule(*tag, std::move(setToRecieve));
+        } else {
+            weakScheduler->schedule(std::move(setToRecieve));
         }
     }
+}
 
 } // namespace mbgl
