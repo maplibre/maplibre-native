@@ -3,6 +3,7 @@
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/font_stack.hpp>
 #include <mbgl/text/glyph_range.hpp>
+#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/gfx/backend.hpp>
 #include <mbgl/shaders/shader_source.hpp>
 
@@ -70,12 +71,7 @@ public:
     virtual void onGlyphsRequested(const FontStack&, const GlyphRange&) {}
 
     // Tile loading
-    virtual void onTileRequested(const OverscaledTileID&) {}
-    virtual void onTileLoadedFromNetwork(const OverscaledTileID&) {}
-    virtual void onTileLoadedFromDisk(const OverscaledTileID&) {}
-    virtual void onTileFailedToLoad(const OverscaledTileID&) {}
-    virtual void onTileStartLoading(const OverscaledTileID&, const std::string&) {}
-    virtual void onTileFinishedLoading(const OverscaledTileID&, const std::string&) {}
+    virtual void onTileAction(TileOperation, const OverscaledTileID&, const std::string&) {}
 };
 
 } // namespace mbgl

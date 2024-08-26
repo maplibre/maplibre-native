@@ -95,8 +95,6 @@ public:
     void performedFadePlacement() override;
     std::shared_ptr<FeatureIndex> getFeatureIndex() const;
 
-    const std::string sourceID;
-
     void setFeatureState(const LayerFeatureStates&) override;
 
 protected:
@@ -105,6 +103,12 @@ protected:
 
     // Used to signal the worker that it should abandon parsing this tile as soon as possible.
     std::atomic<bool> obsolete{false};
+
+    // Flag to indicate the tile has received initial data
+    bool hasEverSetData{false};
+
+    // Flag to indicate the tile has completed inital loading
+    bool notifiedInitiallyLoaded{false};
 
 private:
     void markObsolete();
@@ -126,7 +130,6 @@ private:
     const MapMode mode;
 
     bool showCollisionBoxes;
-    bool notifiedInitiallyLoaded{false};
 
     enum class FadeState {
         Loaded,

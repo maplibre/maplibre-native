@@ -1,6 +1,7 @@
 package org.maplibre.android.maps;
 
 import org.maplibre.android.log.Logger;
+import org.maplibre.android.tile.TileOperation;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -47,17 +48,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     = new CopyOnWriteArrayList<>();
   private final List<MapView.OnGlyphsRequestedListener> onGlyphsRequestedList
     = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnTileRequestedListener> onTileRequestedList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnTileLoadedFromNetworkListener> onTileLoadedFromNetworkList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnTileLoadedFromDiskListener> onTileLoadedFromDiskList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnTileFailedToLoadListener> onTileFailedToLoadList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnTileStartLoadingListener> onTileStartLoadingList
-    = new CopyOnWriteArrayList<>();
-  private final List<MapView.OnTileFinishedLoadingListener> onTileFinishedLoadingList
+  private final List<MapView.OnTileActionListener> onTileActionList
     = new CopyOnWriteArrayList<>();
   private final List<MapView.OnSpriteLoadedListener> onSpriteLoadedList
     = new CopyOnWriteArrayList<>();
@@ -370,85 +361,15 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   }
 
   @Override
-  public void onTileRequested(int x, int y, int z, int overscaledZ) {
+  public void onTileAction(TileOperation op, int x, int y, int z, int wrap, int overscaledZ, String sourceID) {
     try {
-      if (!onTileRequestedList.isEmpty()) {
-        for (MapView.OnTileRequestedListener listener : onTileRequestedList) {
-          listener.onTileRequested(x, y, z, overscaledZ);
+      if (!onTileActionList.isEmpty()) {
+        for (MapView.OnTileActionListener listener : onTileActionList) {
+          listener.onTileAction(op, x, y, z, wrap, overscaledZ, sourceID);
         }
       }
     } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onTileRequested", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onTileLoadedFromNetwork(int x, int y, int z, int overscaledZ) {
-    try {
-      if (!onTileLoadedFromNetworkList.isEmpty()) {
-        for (MapView.OnTileLoadedFromNetworkListener listener : onTileLoadedFromNetworkList) {
-          listener.onTileLoadedFromNetwork(x, y, z, overscaledZ);
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onTileLoadedFromNetwork", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onTileLoadedFromDisk(int x, int y, int z, int overscaledZ) {
-    try {
-      if (!onTileLoadedFromDiskList.isEmpty()) {
-        for (MapView.OnTileLoadedFromDiskListener listener : onTileLoadedFromDiskList) {
-          listener.onTileLoadedFromDisk(x, y, z, overscaledZ);
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onTileLoadedFromDisk", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onTileFailedToLoad(int x, int y, int z, int overscaledZ) {
-    try {
-      if (!onTileFailedToLoadList.isEmpty()) {
-        for (MapView.OnTileFailedToLoadListener listener : onTileFailedToLoadList) {
-          listener.onTileFailedToLoad(x, y, z, overscaledZ);
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onTileFailedToLoad", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onTileStartLoading(int x, int y, int z, int overscaledZ, String sourceID) {
-    try {
-      if (!onTileStartLoadingList.isEmpty()) {
-        for (MapView.OnTileStartLoadingListener listener : onTileStartLoadingList) {
-          listener.onTileStartLoading(x, y, z, overscaledZ, sourceID);
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onTileStartLoading", err);
-      throw err;
-    }
-  }
-
-  @Override
-  public void onTileFinishedLoading(int x, int y, int z, int overscaledZ, String sourceID) {
-    try {
-      if (!onTileFinishedLoadingList.isEmpty()) {
-        for (MapView.OnTileFinishedLoadingListener listener : onTileFinishedLoadingList) {
-          listener.onTileFinishedLoading(x, y, z, overscaledZ, sourceID);
-        }
-      }
-    } catch (Throwable err) {
-      Logger.e(TAG, "Exception in onTileFinishedLoading", err);
+      Logger.e(TAG, "Exception in onTileAction", err);
       throw err;
     }
   }
@@ -639,28 +560,8 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onGlyphsRequestedList.add(callback);
   }
 
-  public void addOnTileRequestedListener(MapView.OnTileRequestedListener callback) {
-    onTileRequestedList.add(callback);
-  }
-
-  public void addOnTileLoadedFromNetworkListener(MapView.OnTileLoadedFromNetworkListener callback) {
-    onTileLoadedFromNetworkList.add(callback);
-  }
-
-  public void addOnTileLoadedFromDiskListener(MapView.OnTileLoadedFromDiskListener callback) {
-    onTileLoadedFromDiskList.add(callback);
-  }
-
-  public void addOnTileFailedToLoadListener(MapView.OnTileFailedToLoadListener callback) {
-    onTileFailedToLoadList.add(callback);
-  }
-
-  public void addOnTileStartLoadingListener(MapView.OnTileStartLoadingListener callback) {
-    onTileStartLoadingList.add(callback);
-  }
-
-  public void addOnTileFinishedLoadingListener(MapView.OnTileFinishedLoadingListener callback) {
-    onTileFinishedLoadingList.add(callback);
+  public void addOnTileActionListener(MapView.OnTileActionListener callback) {
+    onTileActionList.add(callback);
   }
 
   public void addOnSpriteLoadedListener(MapView.OnSpriteLoadedListener callback) {
@@ -699,28 +600,8 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onGlyphsRequestedList.remove(callback);
   }
 
-  public void removeOnTileRequestedListener(MapView.OnTileRequestedListener callback) {
-    onTileRequestedList.remove(callback);
-  }
-
-  public void removeOnTileLoadedFromNetworkListener(MapView.OnTileLoadedFromNetworkListener callback) {
-    onTileLoadedFromNetworkList.remove(callback);
-  }
-
-  public void removeOnTileLoadedFromDiskListener(MapView.OnTileLoadedFromDiskListener callback) {
-    onTileLoadedFromDiskList.remove(callback);
-  }
-
-  public void removeOnTileFailedToLoadListener(MapView.OnTileFailedToLoadListener callback) {
-    onTileFailedToLoadList.remove(callback);
-  }
-
-  public void removeOnTileStartLoadingListener(MapView.OnTileStartLoadingListener callback) {
-    onTileStartLoadingList.remove(callback);
-  }
-
-  public void removeOnTileFinishedLoadingListener(MapView.OnTileFinishedLoadingListener callback) {
-    onTileFinishedLoadingList.remove(callback);
+  public void removeOnTileActionListener(MapView.OnTileActionListener callback) {
+    onTileActionList.remove(callback);
   }
 
   public void removeOnSpriteLoadedListener(MapView.OnSpriteLoadedListener callback) {
@@ -757,12 +638,7 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
     onGlyphsLoadedList.clear();
     onGlyphsErrorList.clear();
     onGlyphsRequestedList.clear();
-    onTileRequestedList.clear();
-    onTileLoadedFromNetworkList.clear();
-    onTileLoadedFromDiskList.clear();
-    onTileFailedToLoadList.clear();
-    onTileStartLoadingList.clear();
-    onTileFinishedLoadingList.clear();
+    onTileActionList.clear();
     onSpriteLoadedList.clear();
     onSpriteErrorList.clear();
     onSpriteRequestedList.clear();

@@ -18,7 +18,7 @@ class Layer;
 class RasterTile final : public Tile {
 public:
     RasterTile(const OverscaledTileID&,
-               const std::string&,
+               std::string,
                const TileParameters&,
                const Tileset&,
                TileObserver* observer = nullptr);
@@ -44,7 +44,6 @@ public:
 private:
     void markObsolete();
 
-    std::string sourceID;
     TileLoader<RasterTile> loader;
 
     TaggedScheduler threadPool;
@@ -58,6 +57,8 @@ private:
     std::shared_ptr<RasterBucket> bucket;
 
     std::atomic<bool> obsolete{false};
+    bool notifiedInitiallyLoaded{false};
+    bool hasEverSetData{false};
 };
 
 } // namespace mbgl

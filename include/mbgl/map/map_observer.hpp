@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/image.hpp>
@@ -82,12 +83,7 @@ public:
     virtual void onGlyphsRequested(const FontStack&, const GlyphRange&) {}
 
     // Tile requests
-    virtual void onTileRequested(const OverscaledTileID&) {}
-    virtual void onTileLoadedFromNetwork(const OverscaledTileID&) {}
-    virtual void onTileLoadedFromDisk(const OverscaledTileID&) {}
-    virtual void onTileFailedToLoad(const OverscaledTileID&) {}
-    virtual void onTileStartLoading(const OverscaledTileID&, const std::string&) {}
-    virtual void onTileFinishedLoading(const OverscaledTileID&, const std::string&) {}
+    virtual void onTileAction(TileOperation, const OverscaledTileID&, const std::string&) {}
 
     // Sprite requests
     virtual void onSpriteLoaded(const std::optional<style::Sprite>&) {}

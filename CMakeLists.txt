@@ -378,6 +378,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/text/glyph.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/text/glyph_range.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_id.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_operation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_necessity.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/async_request.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/async_task.hpp

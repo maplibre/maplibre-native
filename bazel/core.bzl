@@ -800,6 +800,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/text/glyph.hpp",
     "include/mbgl/text/glyph_range.hpp",
     "include/mbgl/tile/tile_id.hpp",
+    "include/mbgl/tile/tile_operation.hpp",
     "include/mbgl/tile/tile_necessity.hpp",
     "include/mbgl/util/async_request.hpp",
     "include/mbgl/util/async_task.hpp",

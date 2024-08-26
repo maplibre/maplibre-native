@@ -53,6 +53,7 @@
 #include "map_renderer.hpp"
 #include "run_loop_impl.hpp"
 #include "style/light.hpp"
+#include "tile/tile_operation.hpp"
 
 namespace mbgl {
 namespace android {
@@ -1439,112 +1440,24 @@ void NativeMapView::onGlyphsRequested(const FontStack& stack, const GlyphRange& 
 }
 
 // Tile requests
-void NativeMapView::onTileRequested(const OverscaledTileID& id) {
+void NativeMapView::onTileAction(mbgl::TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
     assert(vm != nullptr);
 
     android::UniqueEnv _env = android::AttachEnv();
-    static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileRequested = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(
-        *_env, "onTileRequested");
+    static auto &javaClass = jni::Class<NativeMapView>::Singleton(*_env);
+    static auto onTileAction = javaClass.GetMethod<void(
+            jni::Object<mbgl::android::TileOperation>, jni::jint, jni::jint, jni::jint,
+            jni::jint, jni::jint, jni::String)>(
+            *_env, "onTileAction");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
         weakReference.Call(*_env,
-                           onTileRequested,
+                           onTileAction,
+                           mbgl::android::TileOperation::Create(*_env, op),
                            static_cast<jni::jint>(id.canonical.x),
                            static_cast<jni::jint>(id.canonical.y),
                            static_cast<jni::jint>(id.canonical.z),
-                           static_cast<jni::jint>(id.overscaledZ));
-    }
-}
-
-void NativeMapView::onTileLoadedFromNetwork(const OverscaledTileID& id) {
-    assert(vm != nullptr);
-
-    android::UniqueEnv _env = android::AttachEnv();
-    static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileLoadedFromNetwork = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(
-        *_env, "onTileLoadedFromNetwork");
-    auto weakReference = javaPeer.get(*_env);
-    if (weakReference) {
-        weakReference.Call(*_env,
-                           onTileLoadedFromNetwork,
-                           static_cast<jni::jint>(id.canonical.x),
-                           static_cast<jni::jint>(id.canonical.y),
-                           static_cast<jni::jint>(id.canonical.z),
-                           static_cast<jni::jint>(id.overscaledZ));
-    }
-}
-
-void NativeMapView::onTileLoadedFromDisk(const OverscaledTileID& id) {
-    assert(vm != nullptr);
-
-    android::UniqueEnv _env = android::AttachEnv();
-    static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileLoadedFromDisk = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(
-        *_env, "onTileLoadedFromDisk");
-    auto weakReference = javaPeer.get(*_env);
-    if (weakReference) {
-        weakReference.Call(*_env,
-                           onTileLoadedFromDisk,
-                           static_cast<jni::jint>(id.canonical.x),
-                           static_cast<jni::jint>(id.canonical.y),
-                           static_cast<jni::jint>(id.canonical.z),
-                           static_cast<jni::jint>(id.overscaledZ));
-    }
-}
-
-void NativeMapView::onTileFailedToLoad(const OverscaledTileID& id) {
-    assert(vm != nullptr);
-
-    android::UniqueEnv _env = android::AttachEnv();
-    static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileFailedToLoad = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint)>(
-        *_env, "onTileFailedToLoad");
-    auto weakReference = javaPeer.get(*_env);
-    if (weakReference) {
-        weakReference.Call(*_env,
-                           onTileFailedToLoad,
-                           static_cast<jni::jint>(id.canonical.x),
-                           static_cast<jni::jint>(id.canonical.y),
-                           static_cast<jni::jint>(id.canonical.z),
-                           static_cast<jni::jint>(id.overscaledZ));
-    }
-}
-
-void NativeMapView::onTileStartLoading(const OverscaledTileID& id, const std::string& sourceID) {
-    assert(vm != nullptr);
-
-    android::UniqueEnv _env = android::AttachEnv();
-    static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileStartLoading = javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint, jni::String)>(
-        *_env, "onTileStartLoading");
-    auto weakReference = javaPeer.get(*_env);
-    if (weakReference) {
-        weakReference.Call(*_env,
-                           onTileStartLoading,
-                           static_cast<jni::jint>(id.canonical.x),
-                           static_cast<jni::jint>(id.canonical.y),
-                           static_cast<jni::jint>(id.canonical.z),
-                           static_cast<jni::jint>(id.overscaledZ),
-                           jni::Make<jni::String>(*_env, sourceID));
-    }
-}
-
-void NativeMapView::onTileFinishedLoading(const OverscaledTileID& id, const std::string& sourceID) {
-    assert(vm != nullptr);
-
-    android::UniqueEnv _env = android::AttachEnv();
-    static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onTileFinishedLoading =
-        javaClass.GetMethod<void(jni::jint, jni::jint, jni::jint, jni::jint, jni::String)>(*_env,
-                                                                                           "onTileFinishedLoading");
-    auto weakReference = javaPeer.get(*_env);
-    if (weakReference) {
-        weakReference.Call(*_env,
-                           onTileFinishedLoading,
-                           static_cast<jni::jint>(id.canonical.x),
-                           static_cast<jni::jint>(id.canonical.y),
-                           static_cast<jni::jint>(id.canonical.z),
+                           static_cast<jni::jint>(id.wrap),
                            static_cast<jni::jint>(id.overscaledZ),
                            jni::Make<jni::String>(*_env, sourceID));
     }

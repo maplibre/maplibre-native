@@ -62,7 +62,7 @@ class Layer;
 class RasterDEMTile final : public Tile {
 public:
     RasterDEMTile(const OverscaledTileID&,
-                  const std::string&,
+                  std::string,
                   const TileParameters&,
                   const Tileset&,
                   TileObserver* observer = nullptr);
@@ -95,7 +95,6 @@ public:
 private:
     void markObsolete();
 
-    std::string sourceID;
     TileLoader<RasterDEMTile> loader;
 
     TaggedScheduler threadPool;
@@ -110,6 +109,8 @@ private:
     std::shared_ptr<HillshadeBucket> bucket;
 
     bool obsolete = false;
+    bool notifiedInitiallyLoaded{false};
+    bool hasEverSetData{false};
 };
 
 } // namespace mbgl

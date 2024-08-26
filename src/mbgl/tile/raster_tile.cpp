@@ -15,21 +15,23 @@
 namespace mbgl {
 
 RasterTile::RasterTile(const OverscaledTileID& id_,
-                       const std::string& sourceID_,
+                       std::string sourceID_,
                        const TileParameters& parameters,
                        const Tileset& tileset,
                        TileObserver* observer_)
-    : Tile(Kind::Raster, id_, observer_),
-      sourceID(sourceID_),
+    : Tile(Kind::Raster, id_, std::move(sourceID_), observer_),
       loader(*this, id_, parameters, tileset),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(parameters.threadPool, ActorRef<RasterTile>(*this, mailbox)) {
-    observer->onTileStartLoading(*this, sourceID);
-}
+      worker(parameters.threadPool, ActorRef<RasterTile>(*this, mailbox)) {}
 
 RasterTile::~RasterTile() {
     markObsolete();
+
+    if (!notifiedInitiallyLoaded) {
+        // This tile never finished loading or was abandoned, emit a cancellation event
+        observer->onTileAction(*this, TileOperation::Cancelled);
+    }
 
     // The bucket has resources that need to be released on the render thread.
     if (bucket) {
@@ -55,6 +57,12 @@ void RasterTile::setData(const std::shared_ptr<const std::string>& data) {
     if (!obsolete) {
         pending = true;
         ++correlationID;
+
+        if (!hasEverSetData) {
+            hasEverSetData = true;
+            observer->onTileAction(*this, TileOperation::StartParse);
+        }
+
         worker.self().invoke(&RasterTileWorker::parse, data, correlationID);
     }
 }
@@ -69,8 +77,9 @@ void RasterTile::onParsed(std::unique_ptr<RasterBucket> result, const uint64_t r
         renderable = static_cast<bool>(bucket);
         observer->onTileChanged(*this);
 
-        if (!pending) {
-            observer->onTileFinishedLoading(*this, sourceID);
+        if (!notifiedInitiallyLoaded) {
+            notifiedInitiallyLoaded = true;
+            observer->onTileAction(*this, TileOperation::EndParse);
         }
     }
 }

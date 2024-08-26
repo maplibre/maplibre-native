@@ -1,3 +1,5 @@
+#include <gmock/gmock.h>
+
 #include <mbgl/test/util.hpp>
 #include <mbgl/test/stub_file_source.hpp>
 #include <mbgl/test/stub_map_observer.hpp>
@@ -1683,4 +1685,132 @@ TEST(Map, InvalidUTF8InTile) {
     };
 
     test.runLoop.run();
+}
+
+TEST(Map, TEST_REQUIRES_SERVER(ObserveTileLifecycle)) {
+    util::RunLoop runLoop;
+
+    struct TileEntry {
+        OverscaledTileID id;
+        std::string sourceID;
+        TileOperation op;
+
+        bool operator==(const TileEntry& other) const noexcept {
+            return id == other.id && sourceID == other.sourceID && op == other.op;
+        }
+    };
+
+    std::vector<TileEntry> tileOps;
+
+    StubMapObserver observer;
+    observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
+        if (sourceID != "mapbox") return;
+        tileOps.emplace_back(id, sourceID, op);
+    };
+
+    HeadlessFrontend frontend{{512, 512}, 1};
+    MapAdapter map(
+        frontend,
+        observer,
+        std::make_shared<MainResourceLoader>(
+            ResourceOptions()
+                .withCachePath(":memory:")
+                .withAssetPath("test/fixtures/api/assets"),
+            ClientOptions()
+        ),
+        MapOptions()
+            .withMapMode(MapMode::Static)
+            .withSize(frontend.getSize()
+        ));
+
+    map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
+    map.jumpTo(CameraOptions().withCenter(LatLng{0.0, 0.0}).withZoom(1));
+
+    frontend.render(map);
+
+    const std::vector<OverscaledTileID> expectedTiles = {
+        OverscaledTileID{0, 0, 0, 0, 0},
+        OverscaledTileID{1, 0, 1, 0, 0},
+        OverscaledTileID{1, 0, 1, 0, 1},
+        OverscaledTileID{1, 0, 1, 1, 0},
+        OverscaledTileID{1, 0, 1, 1, 1},
+    };
+
+    for (auto& tile : expectedTiles) {
+        TileOperation stage;
+        bool didAction = false;
+
+        for (auto& op : tileOps) {
+            if (op.id != tile) continue;
+            switch (op.op) {
+                case TileOperation::Requested: {
+                    EXPECT_EQ(didAction, false);
+                    stage = TileOperation::Requested;
+                    didAction = true;
+                    break;
+                }
+                case TileOperation::LoadFromNetwork: {
+                    EXPECT_EQ(stage, TileOperation::Requested);
+                    stage = TileOperation::LoadFromNetwork;
+                    didAction = true;
+                    break;
+                }
+                case TileOperation::LoadFromCache: {
+                    EXPECT_EQ(stage, TileOperation::Requested);
+                    stage = TileOperation::LoadFromCache;
+                    didAction = true;
+                    break;
+                }
+                case TileOperation::StartParse: {
+                    EXPECT_THAT(stage, testing::AnyOf(TileOperation::LoadFromNetwork, TileOperation::LoadFromCache));
+                    stage = TileOperation::StartParse;
+                    didAction = true;
+                    break;
+                }
+                case TileOperation::Cancelled: {
+                    EXPECT_THAT(stage, testing::AnyOf(
+                        TileOperation::Requested,
+                        TileOperation::LoadFromNetwork,
+                        TileOperation::LoadFromCache,
+                        TileOperation::StartParse));
+                    stage = TileOperation::Cancelled;
+                    didAction = true;
+                    break;
+                }
+                case TileOperation::EndParse: {
+                    EXPECT_EQ(stage, TileOperation::StartParse);
+                    stage = TileOperation::EndParse;
+                    didAction = true;
+                    break;
+                }
+                case TileOperation::Error: {
+                    ADD_FAILURE();
+                    break;
+                }
+            }
+        }
+
+        EXPECT_THAT(stage, testing::AnyOf(TileOperation::EndParse, TileOperation::Cancelled));
+    }
+
+    /*ASSERT_THAT(tileOps, testing::ElementsAre(
+        TileEntry{OverscaledTileID{1, 0, 1, 0, 0}, "mapbox", TileOp::Requested},
+        TileEntry{OverscaledTileID{1, 0, 1, 0, 1}, "mapbox", TileOp::Requested},
+        TileEntry{OverscaledTileID{1, 0, 1, 1, 0}, "mapbox", TileOp::Requested},
+        TileEntry{OverscaledTileID{1, 0, 1, 1, 1}, "mapbox", TileOp::Requested},
+        TileEntry{OverscaledTileID{0, 0, 0, 0, 0}, "mapbox", TileOp::Requested},
+        TileEntry{OverscaledTileID{1, 0, 1, 0, 0}, "mapbox", TileOp::LoadFromNetwork},
+        TileEntry{OverscaledTileID{1, 0, 1, 0, 0}, "mapbox", TileOp::StartParse},
+        TileEntry{OverscaledTileID{1, 0, 1, 0, 1}, "mapbox", TileOp::LoadFromNetwork},
+        TileEntry{OverscaledTileID{1, 0, 1, 0, 1}, "mapbox", TileOp::StartParse},
+        TileEntry{OverscaledTileID{1, 0, 1, 1, 0}, "mapbox", TileOp::LoadFromNetwork},
+        TileEntry{OverscaledTileID{1, 0, 1, 1, 0}, "mapbox", TileOp::StartParse},
+        TileEntry{OverscaledTileID{1, 0, 1, 1, 1}, "mapbox", TileOp::LoadFromNetwork},
+        TileEntry{OverscaledTileID{1, 0, 1, 1, 1}, "mapbox", TileOp::StartParse},
+        TileEntry{OverscaledTileID{1, 0, 1, 0, 0}, "mapbox", TileOp::EndParse},
+        TileEntry{OverscaledTileID{1, 0, 1, 0, 1}, "mapbox", TileOp::EndParse},
+        TileEntry{OverscaledTileID{1, 0, 1, 1, 0}, "mapbox", TileOp::EndParse},
+        TileEntry{OverscaledTileID{1, 0, 1, 1, 1}, "mapbox", TileOp::EndParse},
+        TileEntry{OverscaledTileID{0, 0, 0, 0, 0}, "mapbox", TileOp::EndParse}
+    ));*/
 }

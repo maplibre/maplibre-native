@@ -37,6 +37,7 @@ import org.maplibre.android.maps.widgets.CompassView;
 import org.maplibre.android.net.ConnectivityReceiver;
 import org.maplibre.android.storage.FileSource;
 import org.maplibre.android.utils.BitmapUtils;
+import org.maplibre.android.tile.TileOperation;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -1015,111 +1016,21 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   /**
-   * Set a callback that's invoked after a tile is requested.
+   * Set a callback that's invoked after a tile action occurs.
    *
-   * @param listener The callback that's invoked after a tile is requested
+   * @param listener The callback that's invoked after a tile action occurs
    */
-  public void addOnTileRequestedListener(MapView.OnTileRequestedListener callback) {
-    mapChangeReceiver.addOnTileRequestedListener(callback);
+  public void addOnTileActionListener(MapView.OnTileActionListener callback) {
+    mapChangeReceiver.addOnTileActionListener(callback);
   }
 
   /**
-   * Removes a callback that's invoked after a tile is requested.
+   * Remove's a callback that's invoked after a tile action occurs.
    *
-   * @param listener The callback that's invoked after a tile is requested
+   * @param listener The callback that's invoked after a tile action occurs
    */
-  public void removeOnTileRequestedListener(MapView.OnTileRequestedListener callback) {
-    mapChangeReceiver.removeOnTileRequestedListener(callback);
-  }
-
-  /**
-   * Set a callback that's invoked after a tile is loaded from the network.
-   *
-   * @param listener The callback that's invoked after a tile is loaded from the network
-   */
-  public void addOnTileLoadedFromNetworkListener(MapView.OnTileLoadedFromNetworkListener callback) {
-    mapChangeReceiver.addOnTileLoadedFromNetworkListener(callback);
-  }
-
-  /**
-   * Removes a callback that's invoked after a tile is loaded from the network.
-   *
-   * @param listener The callback that's invoked after a tile is loaded from the network
-   */
-  public void removeOnTileLoadedFromNetworkListener(MapView.OnTileLoadedFromNetworkListener callback) {
-    mapChangeReceiver.removeOnTileLoadedFromNetworkListener(callback);
-  }
-
-  /**
-   * Set a callback that's invoked after a tile is loaded from the disk cache.
-   *
-   * @param listener The callback that's invoked after a tile is loaded from the disk cache
-   */
-  public void addOnTileLoadedFromDiskListener(MapView.OnTileLoadedFromDiskListener callback) {
-    mapChangeReceiver.addOnTileLoadedFromDiskListener(callback);
-  }
-
-  /**
-   * Removes a callback that's invoked after a tile is loaded from the disk cache.
-   *
-   * @param listener The callback that's invoked after a tile is loaded from the disk cache
-   */
-  public void removeOnTileLoadedFromDiskListener(MapView.OnTileLoadedFromDiskListener callback) {
-    mapChangeReceiver.removeOnTileLoadedFromDiskListener(callback);
-  }
-
-  /**
-   * Set a callback that's invoked after a tile fails to load
-   *
-   * @param listener The callback that's invoked after a tile fails to load
-   */
-  public void addOnTileFailedToLoadListener(MapView.OnTileFailedToLoadListener callback) {
-    mapChangeReceiver.addOnTileFailedToLoadListener(callback);
-  }
-
-  /**
-   * Removes a callback that's invoked after a tile fails to load
-   *
-   * @param listener The callback that's invoked after a tile fails to load
-   */
-  public void removeOnTileFailedToLoadListener(MapView.OnTileFailedToLoadListener callback) {
-    mapChangeReceiver.removeOnTileFailedToLoadListener(callback);
-  }
-
-  /**
-   * Set a callback that's invoked when client processing of a tile begins.
-   *
-   * @param listener The callback that's invoked when client processing of a tile begins
-   */
-  public void addOnTileStartLoadingListener(MapView.OnTileStartLoadingListener callback) {
-    mapChangeReceiver.addOnTileStartLoadingListener(callback);
-  }
-
-  /**
-   * Removes a callback that's invoked when client processing of a tile begins.
-   *
-   * @param listener The callback that's invoked when client processing of a tile begins
-   */
-  public void removeOnTileStartLoadingListener(MapView.OnTileStartLoadingListener callback) {
-    mapChangeReceiver.removeOnTileStartLoadingListener(callback);
-  }
-
-  /**
-   * Set a callback that's invoked after a tile is fully loaded and processed by the client.
-   *
-   * @param listener The callback that's invoked after a tile is fully loaded and processed by the client
-   */
-  public void addOnTileFinishedLoadingListener(MapView.OnTileFinishedLoadingListener callback) {
-    mapChangeReceiver.addOnTileFinishedLoadingListener(callback);
-  }
-
-  /**
-   * Removes a callback that's invoked after a tile is fully loaded and processed by the client.
-   *
-   * @param listener The callback that's invoked after a tile is fully loaded and processed by the client
-   */
-  public void removeOnTileFinishedLoadingListener(MapView.OnTileFinishedLoadingListener callback) {
-    mapChangeReceiver.removeOnTileFinishedLoadingListener(callback);
+  public void removeOnTileActionListener(MapView.OnTileActionListener callback) {
+    mapChangeReceiver.removeOnTileActionListener(callback);
   }
 
   /**
@@ -1499,113 +1410,24 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
   }
 
   /**
-   * Interface definition for a callback to be invoked after a tile is requested.
+   * Interface definition for a callback to be invoked after a tile action occurs.
    * <p>
-   * {@link MapView#addOnTileRequestedListener(OnTileRequestedListener)}
+   * {@link MapView#addOnTileActionListener(OnTileActionListener)}
    * </p>
    */
-  public interface OnTileRequestedListener {
+  public interface OnTileActionListener {
     /**
-     * Called when a tile is requested.
+     * Called when a tile action occurs.
      *
+     * @param op identifying the tile action that occurred.
      * @param x coordinate of the tile.
      * @param y coordinate of the tile.
      * @param z coordinate of the tile.
-     * @param overscaledZ coordinate of the tile.
-     */
-    void onTileRequested(int x, int y, int z, int overscaledZ);
-  }
-
-  /**
-   * Interface definition for a callback to be invoked after a tile is loaded from the network.
-   * <p>
-   * {@link MapView#addOnTileLoadedFromNetworkListener(OnTileLoadedFromNetworkListener)}
-   * </p>
-   */
-  public interface OnTileLoadedFromNetworkListener {
-    /**
-     * Called when a tile is loaded from the network.
-     *
-     * @param x coordinate of the tile.
-     * @param y coordinate of the tile.
-     * @param z coordinate of the tile.
-     * @param overscaledZ coordinate of the tile.
-     */
-    void onTileLoadedFromNetwork(int x, int y, int z, int overscaledZ);
-  }
-
-  /**
-   * Interface definition for a callback to be invoked after a tile is loaded from the disk cache.
-   * <p>
-   * {@link MapView#addOnTileLoadedFromDiskListener(OnTileLoadedFromDiskListener)}
-   * </p>
-   */
-  public interface OnTileLoadedFromDiskListener {
-    /**
-     * Called when a tile is loaded from the disk cache.
-     *
-     * @param x coordinate of the tile.
-     * @param y coordinate of the tile.
-     * @param z coordinate of the tile.
-     * @param overscaledZ coordinate of the tile.
-     */
-    void onTileLoadedFromDisk(int x, int y, int z, int overscaledZ);
-  }
-
-  /**
-   * Interface definition for a callback to be invoked after a tile fails to load.
-   * <p>
-   * {@link MapView#addOnTileFailedToLoadListener(OnTileFailedToLoadListener)}
-   * </p>
-   */
-  public interface OnTileFailedToLoadListener {
-    /**
-     * Called when a tile fails to load.
-     *
-     * @param x coordinate of the tile.
-     * @param y coordinate of the tile.
-     * @param z coordinate of the tile.
-     * @param overscaledZ coordinate of the tile.
-     */
-    void onTileFailedToLoad(int x, int y, int z, int overscaledZ);
-  }
-
-  /**
-   * Interface definition for a callback to be invoked when client processing of a tile begins.
-   * <p>
-   * {@link MapView#addOnTileStartLoadingListener(OnTileStartLoadingListener)}
-   * </p>
-   */
-  public interface OnTileStartLoadingListener {
-    /**
-     * Called when client processing of a tile begins.
-     *
-     * @param x coordinate of the tile.
-     * @param y coordinate of the tile.
-     * @param z coordinate of the tile.
+     * @param wrap coordinate of the tile.
      * @param overscaledZ coordinate of the tile.
      * @param sourceID of the tile.
      */
-    void onTileStartLoading(int x, int y, int z, int overscaledZ, String sourceID);
-  }
-
-  /**
-   * Interface definition for a callback to be invoked after a tile is fully loaded and processed by the client.
-   * <p>
-   * {@link MapView#addOnTileFinishedLoadingListener(OnTileFinishedLoadingListener)}
-   * </p>
-   */
-  public interface OnTileFinishedLoadingListener {
-    /**
-     * Called when a tile is fully loaded and processed by the client.
-     *
-     * @param x coordinate of the tile.
-     * @param y coordinate of the tile.
-     * @param z coordinate of the tile.
-     * @param overscaledZ coordinate of the tile.
-     * @param sourceID of the tile.
-     */
-    void onTileFinishedLoading(int x, int y, int z, int overscaledZ, String sourceID);
+    void onTileAction(TileOperation op, int x, int y, int z, int wrap, int overscaledZ, String sourceID);
   }
 
   /**

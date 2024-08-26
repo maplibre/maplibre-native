@@ -12,6 +12,7 @@
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/util/size.hpp>
+#include <mbgl/tile/tile_operation.hpp>
 
 namespace mbgl {
 
@@ -61,12 +62,7 @@ public:
     void onGlyphsLoaded(const FontStack&, const GlyphRange&) final;
     void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) final;
     void onGlyphsRequested(const FontStack&, const GlyphRange&) final;
-    void onTileRequested(const OverscaledTileID&) final;
-    void onTileLoadedFromNetwork(const OverscaledTileID&) final;
-    void onTileLoadedFromDisk(const OverscaledTileID&) final;
-    void onTileFailedToLoad(const OverscaledTileID&) final;
-    void onTileStartLoading(const OverscaledTileID&, const std::string&) final;
-    void onTileFinishedLoading(const OverscaledTileID&, const std::string&) final;
+    void onTileAction(TileOperation op, const OverscaledTileID&, const std::string&) final;
 
     // Map
     void jumpTo(const CameraOptions&);

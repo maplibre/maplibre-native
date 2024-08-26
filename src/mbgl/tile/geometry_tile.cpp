@@ -170,9 +170,8 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
                            std::string sourceID_,
                            const TileParameters& parameters,
                            TileObserver* observer_)
-    : Tile(Kind::Geometry, id_, observer_),
+    : Tile(Kind::Geometry, id_, std::move(sourceID_), observer_),
       ImageRequestor(parameters.imageManager),
-      sourceID(std::move(sourceID_)),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
       worker(parameters.threadPool, // Scheduler reference for the Actor retainer
@@ -188,9 +187,7 @@ GeometryTile::GeometryTile(const OverscaledTileID& id_,
       glyphManager(parameters.glyphManager),
       imageManager(parameters.imageManager),
       mode(parameters.mode),
-      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {
-    observer->onTileStartLoading(*this, sourceID);
-}
+      showCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision) {}
 
 GeometryTile::~GeometryTile() {
     MLN_TRACE_FUNC()
@@ -199,6 +196,11 @@ GeometryTile::~GeometryTile() {
 
     glyphManager->removeRequestor(*this);
     imageManager->removeRequestor(*this);
+
+    if (!notifiedInitiallyLoaded) {
+        // This tile never finished loading or was abandoned, emit a cancellation event
+        observer->onTileAction(*this, TileOperation::Cancelled);
+    }
 
     if (layoutResult) {
         threadPool.runOnRenderThread(
@@ -225,6 +227,11 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
 
     if (obsolete) {
         return;
+    }
+
+    if (!hasEverSetData) {
+        hasEverSetData = true;
+        observer->onTileAction(*this, TileOperation::StartParse);
     }
 
     // Mark the tile as pending again if it was complete before to prevent
@@ -311,7 +318,7 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
 
     if (!pending && !notifiedInitiallyLoaded) {
         notifiedInitiallyLoaded = true;
-        observer->onTileFinishedLoading(*this, sourceID);
+        observer->onTileAction(*this, TileOperation::EndParse);
     }
 }
 

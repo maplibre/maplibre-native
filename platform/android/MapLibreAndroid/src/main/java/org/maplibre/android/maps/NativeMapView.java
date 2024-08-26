@@ -37,6 +37,7 @@ import org.maplibre.android.style.light.Light;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.utils.BitmapUtils;
+import org.maplibre.android.tile.TileOperation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1237,44 +1238,9 @@ final class NativeMapView implements NativeMap {
   }
 
   @Keep
-  private void onTileRequested(int x, int y, int z, int overscaledZ) {
+  private void onTileAction(TileOperation op, int x, int y, int z, int wrap, int overscaledZ, String sourceID) {
     if (stateCallback != null) {
-      stateCallback.onTileRequested(x, y, z, overscaledZ);
-    }
-  }
-
-  @Keep
-  private void onTileLoadedFromNetwork(int x, int y, int z, int overscaledZ) {
-    if (stateCallback != null) {
-      stateCallback.onTileLoadedFromNetwork(x, y, z, overscaledZ);
-    }
-  }
-
-  @Keep
-  private void onTileLoadedFromDisk(int x, int y, int z, int overscaledZ) {
-    if (stateCallback != null) {
-      stateCallback.onTileLoadedFromDisk(x, y, z, overscaledZ);
-    }
-  }
-
-  @Keep
-  private void onTileFailedToLoad(int x, int y, int z, int overscaledZ) {
-    if (stateCallback != null) {
-      stateCallback.onTileFailedToLoad(x, y, z, overscaledZ);
-    }
-  }
-
-  @Keep
-  private void onTileStartLoading(int x, int y, int z, int overscaledZ, String sourceID) {
-    if (stateCallback != null) {
-      stateCallback.onTileStartLoading(x, y, z, overscaledZ, sourceID);
-    }
-  }
-
-  @Keep
-  private void onTileFinishedLoading(int x, int y, int z, int overscaledZ, String sourceID) {
-    if (stateCallback != null) {
-      stateCallback.onTileFinishedLoading(x, y, z, overscaledZ, sourceID);
+      stateCallback.onTileAction(op, x, y, z, wrap, overscaledZ, sourceID);
     }
   }
 
@@ -1739,17 +1705,7 @@ final class NativeMapView implements NativeMap {
 
     void onGlyphsRequested(String[] stack, int rangeStart, int rangeEnd);
 
-    void onTileRequested(int x, int y, int z, int overscaledZ);
-
-    void onTileLoadedFromNetwork(int x, int y, int z, int overscaledZ);
-
-    void onTileLoadedFromDisk(int x, int y, int z, int overscaledZ);
-
-    void onTileFailedToLoad(int x, int y, int z, int overscaledZ);
-
-    void onTileStartLoading(int x, int y, int z, int overscaledZ, String sourceID);
-
-    void onTileFinishedLoading(int x, int y, int z, int overscaledZ, String sourceID);
+    void onTileAction(TileOperation op, int x, int y, int z, int wrap, int overscaledZ, String sourceID);
 
     void onSpriteLoaded(String id, String url);
 

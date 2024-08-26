@@ -5,6 +5,7 @@
 #include <mbgl/map/map.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/storage/network_status.hpp>
 
 #include "annotation/marker.hpp"
@@ -310,12 +311,7 @@ public:
     void onGlyphsRequested(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
 
     // Tile requests
-    void onTileRequested(const mbgl::OverscaledTileID&) override;
-    void onTileLoadedFromNetwork(const mbgl::OverscaledTileID&) override;
-    void onTileLoadedFromDisk(const mbgl::OverscaledTileID&) override;
-    void onTileFailedToLoad(const mbgl::OverscaledTileID&) override;
-    void onTileStartLoading(const mbgl::OverscaledTileID&, const std::string&) override;
-    void onTileFinishedLoading(const mbgl::OverscaledTileID&, const std::string&) override;
+    void onTileAction(mbgl::TileOperation, const mbgl::OverscaledTileID&, const std::string&) override;
 
     // Sprite requests
     void onSpriteLoaded(const std::optional<mbgl::style::Sprite>&) override;

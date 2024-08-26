@@ -78,28 +78,8 @@ void RenderSource::onTileError(Tile& tile, std::exception_ptr error) {
     observer->onTileError(*this, tile.id, error);
 }
 
-void RenderSource::onTileRequested(Tile& tile) {
-    observer->onTileRequested(*this, tile.id);
-}
-
-void RenderSource::onTileLoadedFromNetwork(Tile& tile) {
-    observer->onTileLoadedFromNetwork(*this, tile.id);
-}
-
-void RenderSource::onTileLoadedFromDisk(Tile& tile) {
-    observer->onTileLoadedFromDisk(*this, tile.id);
-}
-
-void RenderSource::onTileFailedToLoad(Tile& tile) {
-    observer->onTileFailedToLoad(*this, tile.id);
-}
-
-void RenderSource::onTileStartLoading(Tile& tile, const std::string& sourceID) {
-    observer->onTileStartLoading(*this, tile.id, sourceID);
-}
-
-void RenderSource::onTileFinishedLoading(Tile& tile, const std::string& sourceID) {
-    observer->onTileFinishedLoading(*this, tile.id, sourceID);
+void RenderSource::onTileAction(Tile& tile, TileOperation op) {
+    observer->onTileAction(*this, op, tile.id, tile.sourceID);
 }
 
 bool RenderSource::isEnabled() const {

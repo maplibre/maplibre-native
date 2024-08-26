@@ -1,5 +1,6 @@
 #include "android_renderer_frontend.hpp"
 
+#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
@@ -76,28 +77,8 @@ public:
         delegate.invoke(&RendererObserver::onGlyphsRequested, stack, range);
     }
 
-    void onTileRequested(const mbgl::OverscaledTileID& id) override {
-        delegate.invoke(&RendererObserver::onTileRequested, id);
-    }
-
-    void onTileLoadedFromNetwork(const mbgl::OverscaledTileID& id) override {
-        delegate.invoke(&RendererObserver::onTileLoadedFromNetwork, id);
-    }
-
-    void onTileLoadedFromDisk(const mbgl::OverscaledTileID& id) override {
-        delegate.invoke(&RendererObserver::onTileLoadedFromDisk, id);
-    }
-
-    void onTileFailedToLoad(const mbgl::OverscaledTileID& id) override {
-        delegate.invoke(&RendererObserver::onTileFailedToLoad, id);
-    }
-
-    void onTileStartLoading(const mbgl::OverscaledTileID& id, const std::string& sourceID) override {
-        delegate.invoke(&RendererObserver::onTileStartLoading, id, sourceID);
-    }
-
-    void onTileFinishedLoading(const mbgl::OverscaledTileID& id, const std::string& sourceID) override {
-        delegate.invoke(&RendererObserver::onTileFinishedLoading, id, sourceID);
+    void onTileAction(TileOperation op, const OverscaledTileID& id, const std::string& sourceID) override {
+        delegate.invoke(&RendererObserver::onTileAction, op, id, sourceID);
     }
 
 private:

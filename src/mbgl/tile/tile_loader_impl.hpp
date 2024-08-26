@@ -108,7 +108,7 @@ void TileLoader<T>::loadFromCache() {
 
     if (!requested) {
         requested = true;
-        tile.onTileRequested();
+        tile.onTileAction(TileOperation::Requested);
     }
 
     resource.loadingMethod = Resource::LoadingMethod::CacheOnly;
@@ -165,13 +165,13 @@ template <typename T>
 void TileLoader<T>::loadedData(const Response& res, Resource::LoadingMethod method) {
     if (res.error && res.error->reason != Response::Error::Reason::NotFound) {
         tile.setError(std::make_exception_ptr(std::runtime_error(res.error->message)));
-        tile.onTileFailedToLoad();
+        tile.onTileAction(TileOperation::Error);
         return;
     }
     if (method == Resource::LoadingMethod::NetworkOnly) {
-        tile.onTileLoadedFromNetwork();
+        tile.onTileAction(TileOperation::LoadFromNetwork);
     } else if (method == Resource::LoadingMethod::CacheOnly) {
-        tile.onTileLoadedFromDisk();
+        tile.onTileAction(TileOperation::LoadFromCache);
     }
 
     if (res.notModified) {
@@ -198,7 +198,7 @@ void TileLoader<T>::loadFromNetwork() {
 
     if (!requested) {
         requested = true;
-        tile.onTileRequested();
+        tile.onTileAction(TileOperation::Requested);
     }
 
     // Instead of using Resource::LoadingMethod::All, we're first doing a

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/tile/tile_id.hpp>
+#include <mbgl/tile/tile_operation.hpp>
 
 namespace mbgl {
 
@@ -10,10 +11,7 @@ class TileLoaderObserver {
 public:
     virtual ~TileLoaderObserver() = default;
 
-    virtual void onTileRequested() {};
-    virtual void onTileLoadedFromNetwork() {};
-    virtual void onTileLoadedFromDisk() {};
-    virtual void onTileFailedToLoad() {};
+    virtual void onTileAction(TileOperation) {}
 };
 
 } // namespace mbgl

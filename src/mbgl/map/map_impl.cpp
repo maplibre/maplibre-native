@@ -268,28 +268,8 @@ void Map::Impl::onGlyphsRequested(const FontStack& fontStack, const GlyphRange& 
     observer.onGlyphsRequested(fontStack, ranges);
 }
 
-void Map::Impl::onTileRequested(const OverscaledTileID& id) {
-    observer.onTileRequested(id);
-}
-
-void Map::Impl::onTileLoadedFromNetwork(const OverscaledTileID& id) {
-    observer.onTileLoadedFromNetwork(id);
-}
-
-void Map::Impl::onTileLoadedFromDisk(const OverscaledTileID& id) {
-    observer.onTileLoadedFromDisk(id);
-}
-
-void Map::Impl::onTileFailedToLoad(const OverscaledTileID& id) {
-    observer.onTileFailedToLoad(id);
-}
-
-void Map::Impl::onTileStartLoading(const OverscaledTileID& id, const std::string& sourceID) {
-    observer.onTileStartLoading(id, sourceID);
-}
-
-void Map::Impl::onTileFinishedLoading(const OverscaledTileID& id, const std::string& sourceID) {
-    observer.onTileFinishedLoading(id, sourceID);
+void Map::Impl::onTileAction(TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
+    observer.onTileAction(op, id, sourceID);
 }
 
 } // namespace mbgl

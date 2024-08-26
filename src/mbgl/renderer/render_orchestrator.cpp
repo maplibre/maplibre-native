@@ -1068,29 +1068,9 @@ void RenderOrchestrator::onTileChanged(RenderSource&, const OverscaledTileID&) {
     observer->onInvalidate();
 }
 
-void RenderOrchestrator::onTileRequested(RenderSource&, const OverscaledTileID& id) {
-    observer->onTileRequested(id);
+void RenderOrchestrator::onTileAction(RenderSource&, TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
+    observer->onTileAction(op, id, sourceID);
 }
-
-void RenderOrchestrator::onTileLoadedFromNetwork(RenderSource&, const OverscaledTileID& id) {
-    observer->onTileLoadedFromNetwork(id);
-}
-
-void RenderOrchestrator::onTileLoadedFromDisk(RenderSource&, const OverscaledTileID& id) {
-    observer->onTileLoadedFromDisk(id);
-}
-
-void RenderOrchestrator::onTileFailedToLoad(RenderSource&, const OverscaledTileID& id) {
-    observer->onTileFailedToLoad(id);
-}
-
-void RenderOrchestrator::onTileStartLoading(RenderSource&, const OverscaledTileID& id, const std::string& sourceID) {
-    observer->onTileStartLoading(id, sourceID);
-}
-
-void RenderOrchestrator::onTileFinishedLoading(RenderSource&, const OverscaledTileID& id, const std::string& sourceID) {
-    observer->onTileFinishedLoading(id, sourceID);
-};
 
 void RenderOrchestrator::onStyleImageMissing(const std::string& id, const std::function<void()>& done) {
     MLN_TRACE_FUNC()

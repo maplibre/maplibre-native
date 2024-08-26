@@ -57,7 +57,7 @@ public:
     Tile(const Tile&) = delete;
     Tile& operator=(const Tile&) = delete;
 
-    Tile(Kind, OverscaledTileID, TileObserver* observer = nullptr);
+    Tile(Kind, OverscaledTileID, std::string, TileObserver* observer = nullptr);
     ~Tile() override;
 
     virtual std::unique_ptr<TileRenderData> createRenderData() = 0;
@@ -137,13 +137,11 @@ public:
     void dumpDebugLogs() const;
 
     // TileLoaderObserver
-    void onTileRequested() override;
-    void onTileLoadedFromNetwork() override;
-    void onTileLoadedFromDisk() override;
-    void onTileFailedToLoad() override;
+    void onTileAction(TileOperation op) override;
 
     const Kind kind;
     OverscaledTileID id;
+    const std::string sourceID;
     std::optional<Timestamp> modified;
     std::optional<Timestamp> expires;
     // Indicates whether this tile is used for the currently visible layers on
