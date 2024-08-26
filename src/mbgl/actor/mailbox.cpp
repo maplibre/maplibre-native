@@ -76,7 +76,7 @@ bool Mailbox::isOpen() const {
 }
 
 void Mailbox::push(std::unique_ptr<Message> message) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     auto idleState = State::Idle;
     while (!state.compare_exchange_strong(idleState, State::Processing)) {
         if (state == State::Abandoned) {
@@ -91,7 +91,7 @@ void Mailbox::push(std::unique_ptr<Message> message) {
     }};
 
     {
-        MLN_TRACE_ZONE(push_lock)
+        MLN_TRACE_ZONE(push_lock);
         std::lock_guard<std::mutex> pushingLock(pushingMutex);
 
         if (closed) {
@@ -101,7 +101,7 @@ void Mailbox::push(std::unique_ptr<Message> message) {
 
         bool wasEmpty = false;
         {
-            MLN_TRACE_ZONE(queue_lock)
+            MLN_TRACE_ZONE(queue_lock);
             std::lock_guard<std::mutex> queueLock(queueMutex);
             wasEmpty = queue.empty();
             queue.push(std::move(message));
@@ -110,7 +110,7 @@ void Mailbox::push(std::unique_ptr<Message> message) {
         if (wasEmpty) {
             auto guard = weakScheduler.lock();
             if (weakScheduler) {
-                MLN_TRACE_ZONE(schedule)
+                MLN_TRACE_ZONE(schedule);
                 weakScheduler->schedule(schedulerTag, makeClosure(shared_from_this()));
             }
         }

@@ -25,32 +25,32 @@ const void* castGpuIdToTracyPtr(GpuId id) {
     "MLN_RENDER_BACKEND_OPENGL is not defined. MLN_RENDER_BACKEND_OPENGL is expected to be defined in CMake and Bazel"
 #endif
 
-#define MLN_TRACE_FUNC() ZoneScoped;
-#define MLN_TRACE_ZONE(label) ZoneScopedN(#label);
+#define MLN_TRACE_FUNC() ZoneScoped
+#define MLN_TRACE_ZONE(label) ZoneScopedN(#label)
 
-#define MLN_ZONE_TEXT(text, size) ZoneText(text, size);
-#define MLN_ZONE_STR(str) ZoneText(str.c_str(), str.size());
-#define MLN_ZONE_VALUE(n) ZoneValue(n);
+#define MLN_ZONE_TEXT(text, size) ZoneText(text, size)
+#define MLN_ZONE_STR(str) ZoneText(str.c_str(), str.size())
+#define MLN_ZONE_VALUE(n) ZoneValue(n)
 
 constexpr const char* tracyTextureMemoryLabel = "Texture Memory";
-#define MLN_TRACE_ALLOC_TEXTURE(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyTextureMemoryLabel);
-#define MLN_TRACE_FREE_TEXTURE(id) TracyFreeN(castGpuIdToTracyPtr(id), tracyTextureMemoryLabel);
+#define MLN_TRACE_ALLOC_TEXTURE(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyTextureMemoryLabel)
+#define MLN_TRACE_FREE_TEXTURE(id) TracyFreeN(castGpuIdToTracyPtr(id), tracyTextureMemoryLabel)
 
 constexpr const char* tracyRenderTargetMemoryLabel = "Render Target Memory";
-#define MLN_TRACE_ALLOC_RT(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyRenderTargetMemoryLabel);
-#define MLN_TRACE_FREE_RT(id) TracyFreeN(castGpuIdToTracyPtr(id), tracyRenderTargetMemoryLabel);
+#define MLN_TRACE_ALLOC_RT(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyRenderTargetMemoryLabel)
+#define MLN_TRACE_FREE_RT(id) TracyFreeN(castGpuIdToTracyPtr(id), tracyRenderTargetMemoryLabel)
 
 constexpr const char* tracyVertexMemoryLabel = "Vertex Buffer Memory";
-#define MLN_TRACE_ALLOC_VERTEX_BUFFER(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyVertexMemoryLabel);
-#define MLN_TRACE_FREE_VERTEX_BUFFER(id) TracyFreeN(castGpuIdToTracyPtr(id), tracyVertexMemoryLabel);
+#define MLN_TRACE_ALLOC_VERTEX_BUFFER(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyVertexMemoryLabel)
+#define MLN_TRACE_FREE_VERTEX_BUFFER(id) TracyFreeN(castGpuIdToTracyPtr(id), tracyVertexMemoryLabel)
 
 constexpr const char* tracyIndexMemoryLabel = "Index Buffer Memory";
-#define MLN_TRACE_ALLOC_INDEX_BUFFER(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyIndexMemoryLabel);
-#define MLN_TRACE_FREE_INDEX_BUFFER(id) TracyFreeN(castGpuIdToTracyPtr(id), tracyIndexMemoryLabel);
+#define MLN_TRACE_ALLOC_INDEX_BUFFER(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyIndexMemoryLabel)
+#define MLN_TRACE_FREE_INDEX_BUFFER(id) TracyFreeN(castGpuIdToTracyPtr(id), tracyIndexMemoryLabel)
 
 constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
-#define MLN_TRACE_ALLOC_CONST_BUFFER(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyConstMemoryLabel);
-#define MLN_TRACE_FREE_CONST_BUFFER(id) TracyFreeN(castGpuIdToTracyPtr(id), tracyConstMemoryLabel);
+#define MLN_TRACE_ALLOC_CONST_BUFFER(id, size) TracyAllocN(castGpuIdToTracyPtr(id), size, tracyConstMemoryLabel)
+#define MLN_TRACE_FREE_CONST_BUFFER(id) TracyFreeN(castGpuIdToTracyPtr(id), tracyConstMemoryLabel)
 
 // Only OpenGL is currently considered for GPU profiling
 // Metal and other APIs need to be handled separately
@@ -70,9 +70,9 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 
 #include "tracy/TracyOpenGL.hpp"
 
-#define MLN_TRACE_GL_CONTEXT() TracyGpuContext;
-#define MLN_TRACE_GL_ZONE(label) TracyGpuZone(#label);
-#define MLN_TRACE_FUNC_GL() TracyGpuZone(__FUNCTION__);
+#define MLN_TRACE_GL_CONTEXT() TracyGpuContext
+#define MLN_TRACE_GL_ZONE(label) TracyGpuZone(#label)
+#define MLN_TRACE_FUNC_GL() TracyGpuZone(__FUNCTION__)
 
 #define MLN_END_FRAME()  \
     do {                 \

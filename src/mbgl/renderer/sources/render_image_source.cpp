@@ -90,7 +90,7 @@ std::unique_ptr<RenderItem> RenderImageSource::createRenderItem() {
 }
 
 void RenderImageSource::prepare(const SourcePrepareParameters& parameters) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     assert(!renderData);
     if (!isLoaded()) {
         renderData = std::make_unique<ImageSourceRenderData>(bucket, std::vector<mat4>{}, baseImpl->id);

@@ -108,7 +108,7 @@ public:
     }
 
     void runRenderJobs(const util::SimpleIdentity tag, bool closeQueue = false) override {
-        MLN_TRACE_FUNC()
+        MLN_TRACE_FUNC();
         std::shared_ptr<RenderQueue> queue;
         std::unique_lock<std::mutex> lock(taggedRenderQueueLock);
 
@@ -132,7 +132,7 @@ public:
             auto fn = std::move(queue->queue.front());
             queue->queue.pop();
             if (fn) {
-                MLN_TRACE_ZONE(render job)
+                MLN_TRACE_ZONE(render job);
                 fn();
             }
         }

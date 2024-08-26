@@ -1634,7 +1634,7 @@ bool TilePlacement::shouldRetryPlacement(const JointPlacement& placement, const 
 // static
 Mutable<Placement> Placement::create(std::shared_ptr<const UpdateParameters> updateParameters_,
                                      std::optional<Immutable<Placement>> prevPlacement) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     assert(updateParameters_);
     switch (updateParameters_->mode) {
         case MapMode::Continuous:

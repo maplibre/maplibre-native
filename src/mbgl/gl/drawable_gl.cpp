@@ -23,7 +23,7 @@ DrawableGL::~DrawableGL() {
 }
 
 void DrawableGL::draw(PaintParameters& parameters) const {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     if (isCustom) {
         return;
@@ -150,11 +150,11 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 #ifdef MLN_TRACY_ENABLE
     {
         auto str = name + "/" + (tileID ? util::toString(*tileID) : std::string());
-        MLN_ZONE_STR(str)
+        MLN_ZONE_STR(str);
     }
 #endif
 
@@ -165,7 +165,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                         }));
 
     if (build) {
-        MLN_TRACE_ZONE(build attributes)
+        MLN_TRACE_ZONE(build attributes);
         auto& context = uploadPass.getContext();
         auto& glContext = static_cast<gl::Context&>(context);
         constexpr auto usage = gfx::BufferUsageType::StaticDraw;
@@ -194,7 +194,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
             impl->indexes->updateModified();
         }
         if (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime)) {
-            MLN_TRACE_ZONE(build indexes)
+            MLN_TRACE_ZONE(build indexes);
             auto indexBufferResource{
                 uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
             auto indexBuffer = std::make_unique<gfx::IndexBuffer>(impl->indexes->elements(),
@@ -206,7 +206,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 
         // Create a VAO for each group of vertexes described by a segment
         for (const auto& seg : impl->segments) {
-            MLN_TRACE_ZONE(segment)
+            MLN_TRACE_ZONE(segment);
             auto& glSeg = static_cast<DrawSegmentGL&>(*seg);
             const auto& mlSeg = glSeg.getSegment();
 
@@ -257,7 +257,7 @@ gfx::StencilMode DrawableGL::makeStencilMode(PaintParameters& parameters) const 
 }
 
 void DrawableGL::uploadTextures() const {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     for (const auto& texture : textures) {
         if (texture) {
             texture->upload();
