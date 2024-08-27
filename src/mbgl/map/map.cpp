@@ -314,7 +314,7 @@ void Map::setBounds(const BoundOptions& options) {
         impl->transform.setMinZoom(*options.minZoom);
         if (impl->transform.getZoom() < *options.minZoom) {
             changeCamera = true;
-            cameraOptions.withZoom(*options.minZoom);
+            cameraOptions.withZoom(options.minZoom);
         }
     }
 
@@ -322,7 +322,7 @@ void Map::setBounds(const BoundOptions& options) {
         impl->transform.setMaxZoom(*options.maxZoom);
         if (impl->transform.getZoom() > *options.maxZoom) {
             changeCamera = true;
-            cameraOptions.withZoom(*options.maxZoom);
+            cameraOptions.withZoom(options.maxZoom);
         }
     }
 
@@ -330,7 +330,7 @@ void Map::setBounds(const BoundOptions& options) {
         impl->transform.setMaxPitch(*options.maxPitch);
         if (impl->transform.getPitch() > impl->transform.getState().getMaxPitch()) {
             changeCamera = true;
-            cameraOptions.withPitch(*options.maxPitch);
+            cameraOptions.withPitch(options.maxPitch);
         }
     }
 
@@ -338,7 +338,7 @@ void Map::setBounds(const BoundOptions& options) {
         impl->transform.setMinPitch(*options.minPitch);
         if (impl->transform.getPitch() < impl->transform.getState().getMinPitch()) {
             changeCamera = true;
-            cameraOptions.withPitch(*options.minPitch);
+            cameraOptions.withPitch(options.minPitch);
         }
     }
 

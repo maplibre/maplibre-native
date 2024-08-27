@@ -1,14 +1,32 @@
-#!/usr/bin/env node
-'use strict';
+import { ArgumentParser } from "argparse";
+import path from "node:path";
+import _ from "lodash";
+import colorParser from "csscolorparser";
+import assert from "assert";
 
-const { ArgumentParser } = require("argparse");
-const fs = require('fs');
-const path = require('path');
-const _ = require('lodash');
-const colorParser = require('csscolorparser');
-const assert = require('assert');
+import { readAndCompile, writeIfModified, camelize, unhyphenate } from "../../../scripts/style-code.mjs";
 
-require('../../../scripts/style-code');
+import styleSpec from "../../../scripts/style-spec.mjs";
+
+delete styleSpec.layer.type.values["location-indicator"];
+delete styleSpec["layout_location-indicator"]
+delete styleSpec["paint_location-indicator"];
+
+import cocoaConventions from './style-spec-cocoa-conventions-v8.json' with { type: "json" };
+import styleSpecOverrides from './style-spec-overrides-v8.json' with { type: "json" };
+
+function setupGlobalEjsHelpers() {
+    const funcs = {
+      camelize,
+      unhyphenate
+    };
+    for (const [funcName, func] of Object.entries(funcs)) {
+      // @ts-ignore
+      global[funcName] = func;
+    }
+  }
+  
+  setupGlobalEjsHelpers();
 
 // Parse command line
 const args = (() => {
@@ -22,11 +40,10 @@ const args = (() => {
     return parser.parse_args();
 })();
 
-const cocoaConventions = require('./style-spec-cocoa-conventions-v8.json');
 const prefix = 'MLN';
 const suffix = 'StyleLayer';
 
-let spec = _.merge(require('../../../scripts/style-spec-reference/v8'), require('./style-spec-overrides-v8.json'));
+let spec = _.merge(styleSpec, styleSpecOverrides);
 
 class ConventionOverride {
     constructor(val) {
@@ -787,16 +804,13 @@ const lightProperties = Object.keys(spec['light']).reduce((memo, name) => {
 const lightDoc = spec['light-cocoa-doc'];
 const lightType = 'light';
 
-const root = path.dirname(path.dirname(path.dirname(__dirname)));
+const root = path.dirname(path.dirname(path.dirname(import.meta.dirname)));
 const outLocation = args.out ? args.out : root;
 
 const layerH = readAndCompile('platform/darwin/src/MLNStyleLayer.h.ejs', root);
 const layerPrivateH = readAndCompile('platform/darwin/src/MLNStyleLayer_Private.h.ejs', root);
 const layerM = readAndCompile('platform/darwin/src/MLNStyleLayer.mm.ejs', root);
 const testLayers = readAndCompile('platform/darwin/test/MLNStyleLayerTests.mm.ejs', root);
-const forStyleAuthorsMD = readAndCompile('platform/darwin/docs/guides/For_Style_Authors.md.ejs', root);
-const ddsGuideMD = readAndCompile('platform/darwin/docs/guides/Migrating_to_Expressions.md.ejs', root);
-const templatesMD = readAndCompile('platform/darwin/docs/guides/Tile_URL_Templates.md.ejs', root);
 
 const lightH = readAndCompile('platform/darwin/src/MLNLight.h.ejs', root);
 const lightM = readAndCompile('platform/darwin/src/MLNLight.mm.ejs', root);
@@ -888,61 +902,3 @@ for (var layer of layers) {
     writeIfModified(`platform/darwin/test/${prefix}${camelize(layer.type)}${suffix}Tests.mm`,
         testLayers(layer), outLocation);
 }
-
-// Extract examples for guides from unit tests.
-/*let examplesSrc = fs.readFileSync('platform/darwin/test/MLNDocumentationGuideTests.swift', 'utf8');
-const exampleRegex = /func test([\w$]+)\s*\(\)\s*\{[^]*?\n([ \t]+)\/\/#-example-code\n([^]+?)\n\2\/\/#-end-example-code\n/gm;
-
-let examples = {};
-let match;
-while ((match = exampleRegex.exec(examplesSrc)) !== null) {
-    let testMethodName = match[1],
-        indentation = match[2],
-        exampleCode = match[3];
-
-    // Trim leading whitespace from the example code.
-    exampleCode = exampleCode.replace(new RegExp('^' + indentation, 'gm'), '');
-
-    examples[testMethodName] = exampleCode;
-}
-
-global.guideExample = function (guide, exampleId, os) {
-    // Get the contents of the test method whose name matches the symbol path.
-    let testMethodName = `${guide}$${exampleId}`;
-    let example = examples[testMethodName];
-    if (!example) {
-        console.error(`MLNDocumentationExampleTests.test${testMethodName}() not found.`);
-        process.exit(1);
-    }
-
-    // Resolve conditional compilation blocks.
-    example = example.replace(/^(\s*)#if\s+os\((iOS|macOS)\)\n([^]*?)(?:^\1#else\n([^]*?))?^\1#endif\b\n?/gm,
-                              function (m, indentation, ifOs, ifCase, elseCase) {
-      return (os === ifOs ? ifCase : elseCase).replace(new RegExp('^    ', 'gm'), '');
-    }).replace(/\n$/, '');
-
-    return '```swift\n' + example + '\n```';
-};
-
-writeIfModified(`platform/ios/docs/guides/For Style Authors.md`, forStyleAuthorsMD({
-    os: 'iOS',
-    renamedProperties: renamedPropertiesByLayerType,
-    layers: layers,
-}), outLocation);
-writeIfModified(`platform/macos/docs/guides/For Style Authors.md`, forStyleAuthorsMD({
-    os: 'macOS',
-    renamedProperties: renamedPropertiesByLayerType,
-    layers: layers,
-}), outLocation);
-writeIfModified(`platform/ios/docs/guides/Migrating to Expressions.md`, ddsGuideMD({
-    os: 'iOS',
-}), outLocation);
-writeIfModified(`platform/macos/docs/guides/Migrating to Expressions.md`, ddsGuideMD({
-    os: 'macOS',
-}), outLocation);
-writeIfModified(`platform/ios/docs/guides/Tile URL Templates.md`, templatesMD({
-    os: 'iOS',
-}), outLocation);
-writeIfModified(`platform/macos/docs/guides/Tile URL Templates.md`, templatesMD({
-    os: 'macOS',
-}), rooutLocationot);*/
