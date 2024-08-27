@@ -10,68 +10,27 @@
 
 ### ✨ Features and improvements
 
+- Toggle tile cache final API ([#2723](https://github.com/maplibre/maplibre-native/pull/2723)).  
+    This is a new API on `MapLibreMap`: `setTileCacheEnabled()` and `getTileCacheEnabled()`. This tile cache is used to cache tiles on different zoom levels, disabling it will reduce memory usage.
+- Add `getOfflineRegion` Kotlin API ([#2516](https://github.com/maplibre/maplibre-native/pull/2516)). This is the first (code) contribution from [@JRWilding](https://github.com/JRWilding)! 🎉
+- Bump NDK version to 27.0.12077973, replace `ALooper_pollAll` with `ALooper_pollOnce` ([#2663](https://github.com/maplibre/maplibre-native/pull/2663)).
+- Remove OkHttp3 ProGuard rules ([#2665](https://github.com/maplibre/maplibre-native/pull/2665)).
+- Use C++20 ([#2659](https://github.com/maplibre/maplibre-native/pull/2659)).
+- Reuse prefetched tiles to avoid empty screen ([#2668](https://github.com/maplibre/maplibre-native/pull/2668)).
+- Update Android Dependencies, use [maplibre-gestures-android](https://github.com/maplibre/maplibre-gestures-android) ([#2714](https://github.com/maplibre/maplibre-native/pull/2714)).
+- Update dependency gradle to v8.10 ([#2721](https://github.com/maplibre/maplibre-native/pull/2721)).
+- Cleanup `mbgl/actor/mailbox*` implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)). 
+- Use latest MapLibre Style Spec ([#2756](https://github.com/maplibre/maplibre-native/pull/2756)).  
+  This PR adds two new APIs to `TransitionOptions` of `LocationIndicatorLayer`: `getBearingTransition()` and `setBearingTransition()`.
+- Use timestamps for attribute updates ([#2629](https://github.com/maplibre/maplibre-native/pull/2629)).
+
 ### 🐞 Bug fixes
 
-- Fix docker support for Mac aarch64 ([#2655](https://github.com/maplibre/maplibre-native/pull/2655)).
-- Avoid style warnings on trace points ([#2656](https://github.com/maplibre/maplibre-native/pull/2656)).
-- [pre-commit.ci] pre-commit autoupdate ([#2644](https://github.com/maplibre/maplibre-native/pull/2644)).
-- Refactor expression.test.cpp to use std::filesystem ([#2649](https://github.com/maplibre/maplibre-native/pull/2649)).
-- Replace platform-specific code with std::filesystem in MBTiles test ([#2634](https://github.com/maplibre/maplibre-native/pull/2634)).
-- Use path.string() to fix Windows ([#2658](https://github.com/maplibre/maplibre-native/pull/2658)).
-- [pre-commit.ci] pre-commit autoupdate ([#2660](https://github.com/maplibre/maplibre-native/pull/2660)).
-- Feature/documentation maplibre map options ([#2646](https://github.com/maplibre/maplibre-native/pull/2646)).
-- Bump the dependencies group across 1 directory with 21 updates ([#2657](https://github.com/maplibre/maplibre-native/pull/2657)).
-- Fixing deprecation messages (issue 1607) ([#2654](https://github.com/maplibre/maplibre-native/pull/2654)).
-- Comment out test in testPlaceFeatureValues ([#2666](https://github.com/maplibre/maplibre-native/pull/2666)).
-- Add all Android roots to Dependabot ([#2669](https://github.com/maplibre/maplibre-native/pull/2669)).
-- Do not evaluate tracy.cmake when MLN_USE_TRACY is false ([#2664](https://github.com/maplibre/maplibre-native/pull/2664)).
-- Remove OkHttp3 ProGuard rules ([#2665](https://github.com/maplibre/maplibre-native/pull/2665)).
-- Use GitHub's OIDC provider to authenticate with AWS ([#2672](https://github.com/maplibre/maplibre-native/pull/2672)).
-- Add id-token permission to ios-device-test.yml ([#2674](https://github.com/maplibre/maplibre-native/pull/2674)).
-- Prepare MapLibre Native iOS 6.5.3 release ([#2673](https://github.com/maplibre/maplibre-native/pull/2673)).
-- Skip macos-ci based on paths ([#2676](https://github.com/maplibre/maplibre-native/pull/2676)).
-- Bump NDK version to 27.0.12077973, replace `ALooper_pollAll` with `ALooper_pollOnce` ([#2663](https://github.com/maplibre/maplibre-native/pull/2663)).
-- Vulkan renderer backend ([#2564](https://github.com/maplibre/maplibre-native/pull/2564)).
-- tests for longest-common-subsequence-based diff code ([#2662](https://github.com/maplibre/maplibre-native/pull/2662)).
-- Bump the dependencies group across 1 directory with 2 updates ([#2584](https://github.com/maplibre/maplibre-native/pull/2584)).
-- Support alternate naming for GL extensions ([#2679](https://github.com/maplibre/maplibre-native/pull/2679)).
 - Fix crash when feature contains invalid UTF-8 data ([#2693](https://github.com/maplibre/maplibre-native/pull/2693)).
-- Update dependency gradle to v8.9 ([#2596](https://github.com/maplibre/maplibre-native/pull/2596)).
-- Bazel updates ([#2696](https://github.com/maplibre/maplibre-native/pull/2696)).
-- Minor cleanup in aspiring actor ([#2688](https://github.com/maplibre/maplibre-native/pull/2688)).
-- Disable flaky Vulkan render test ([#2697](https://github.com/maplibre/maplibre-native/pull/2697)).
-- Make sure Codecov reports line coverage ([#2698](https://github.com/maplibre/maplibre-native/pull/2698)).
-- Release MapLibre Native iOS 6.5.4 ([#2700](https://github.com/maplibre/maplibre-native/pull/2700)).
-- Release MapLibre Native iOS 6.5.4 ([#2702](https://github.com/maplibre/maplibre-native/pull/2702)).
-- Add `getOfflineRegion` Kotlin API ([#2516](https://github.com/maplibre/maplibre-native/pull/2516)).
-- Do not use custom shell node-ci ([#2708](https://github.com/maplibre/maplibre-native/pull/2708)).
-- Update GTest to v1.15.2 ([#2710](https://github.com/maplibre/maplibre-native/pull/2710)).
 - Fix accidental regression conditional layer evaluation ([#2705](https://github.com/maplibre/maplibre-native/pull/2705)).
-- Use C++20 ([#2659](https://github.com/maplibre/maplibre-native/pull/2659)).
-- Use official Americana style URL ([#2635](https://github.com/maplibre/maplibre-native/pull/2635)).
-- Replace `M_PI` with `std::numbers:pi` ([#2713](https://github.com/maplibre/maplibre-native/pull/2713)).
-- Reuse prefetched tiles to avoid empty screen ([#2668](https://github.com/maplibre/maplibre-native/pull/2668)).
-- Scheduling optimizations and tracing ([#2722](https://github.com/maplibre/maplibre-native/pull/2722)).
-- Update dependency gradle to v8.10 ([#2721](https://github.com/maplibre/maplibre-native/pull/2721)).
-- Update Android Dependencies, use maplibre-gestures-android ([#2714](https://github.com/maplibre/maplibre-native/pull/2714)).
-- Use timestamps for attribute updates ([#2629](https://github.com/maplibre/maplibre-native/pull/2629)).
-- Fix a bunch of internal links in iOS documentation ([#2738](https://github.com/maplibre/maplibre-native/pull/2738)).
-- Toggle tile cache final API ([#2723](https://github.com/maplibre/maplibre-native/pull/2723)).
-- Add back CMake build config for macOS ([#2729](https://github.com/maplibre/maplibre-native/pull/2729)).
-- [node][main] Cherry pick node 22 publish and readme from opengl-2 branch ([#2745](https://github.com/maplibre/maplibre-native/pull/2745)).
-- [node][main] Release node v6.0.0-pre.0 ([#2747](https://github.com/maplibre/maplibre-native/pull/2747)).
-- [node][main] Add macos-14 back to node publish ([#2749](https://github.com/maplibre/maplibre-native/pull/2749)).
-- [node][main] fix npm ci to run in platform/node  ([#2751](https://github.com/maplibre/maplibre-native/pull/2751)).
-- [node][main] Release node v6.0.0-pre.1 ([#2752](https://github.com/maplibre/maplibre-native/pull/2752)).
-- Use ESM in Node.js code generation scripts ([#2739](https://github.com/maplibre/maplibre-native/pull/2739)).
-- Remove unused allowsVerticalWritingMode field ([#2765](https://github.com/maplibre/maplibre-native/pull/2765)).
-- ensure ReentrantLock is unlocked after being locked, and on same thread ([#2759](https://github.com/maplibre/maplibre-native/pull/2759)).
-- Cleanup mbgl/actor/mailbox* implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
-- Apply some clang-tidy 18 fixes ([#2762](https://github.com/maplibre/maplibre-native/pull/2762)).
-- Use latest MapLibre Style Spec ([#2756](https://github.com/maplibre/maplibre-native/pull/2756)).
-- Add guard blocks and checks to `SymbolInstance` ([#2744](https://github.com/maplibre/maplibre-native/pull/2744)).
-- Add semicolon after Tracy preprocessor macros ([#2753](https://github.com/maplibre/maplibre-native/pull/2753)).
-- Fix update time not being set when only drawable indexes are set ([#2743](https://github.com/maplibre/maplibre-native/pull/2743)).
+- Ensure `ReentrantLock` is unlocked after being locked, and on same thread ([#2759](https://github.com/maplibre/maplibre-native/pull/2759)). This is the first (code) contributon from [@westnordost](https://github.com/westnordost)! 🎉
+- Add guard blocks and checks to `SymbolInstance` ([#2744](https://github.com/maplibre/maplibre-native/pull/2744)).  
+  This fixes an exceedingly rare crash that a user is seeing in the field. The fix is not pretty, but we hope to better understand the problem in the future (see [this open issue](https://github.com/maplibre/maplibre-native/issues/2350)).
 
 ## 11.1.0
 
