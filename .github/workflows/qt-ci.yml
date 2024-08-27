@@ -19,7 +19,6 @@ on:
       - "metrics/**"
       - "platform/default/**"
       - "platform/qt/**"
-      - "platform/node/**"
       - "render-test/**"
       - "scripts/**"
       - "src/**"
