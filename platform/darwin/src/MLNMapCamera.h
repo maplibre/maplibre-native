@@ -7,7 +7,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- An `MLNMapCamera` object represents a viewpoint from which the user observes
+ An ``MLNMapCamera`` object represents a viewpoint from which the user observes
  some point on an ``MLNMapView``.
 
  #### Related examples

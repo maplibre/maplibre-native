@@ -84,9 +84,30 @@ jobs:
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
       - name: npm install
         run: npm install --ignore-scripts
-        working-directory: platform/android
+        working-directory: .
+
+      - name: run platform/android/scripts/generate-style-code.mjs
+        run: node platform/android/scripts/generate-style-code.mjs
+        working-directory: .
+
+      - uses: pre-commit/action@v3.0.1
+        continue-on-error: true  # this can mean files are modified, which is not an error
+        with:
+          extra_args: clang-format --all-files
+
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: clang-format --all-files
+
+      - uses: infotroph/tree-is-clean@v1
+        with:
+          check_untracked: true
 
       - uses: hendrikmuhs/ccache-action@v1.2
         with:

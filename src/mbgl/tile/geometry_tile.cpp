@@ -302,7 +302,23 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
         atlasTextures = std::make_shared<TileAtlasTextures>();
     }
 
+    if (layoutResult) {
+        for (const auto& data : layoutResult->layerRenderData) {
+            if (data.second.bucket) {
+                data.second.bucket->check(SYM_GUARD_LOC);
+            }
+        }
+    }
+
     observer->onTileChanged(*this);
+
+    if (layoutResult) {
+        for (const auto& data : layoutResult->layerRenderData) {
+            if (data.second.bucket) {
+                data.second.bucket->check(SYM_GUARD_LOC);
+            }
+        }
+    }
 }
 
 void GeometryTile::onError(std::exception_ptr err, const uint64_t resultCorrelationID) {
