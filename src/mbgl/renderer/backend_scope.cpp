@@ -23,7 +23,7 @@ BackendScope::BackendScope(RendererBackend& backend_, ScopeType scopeType_)
       nextScope(nullptr),
       backend(backend_),
       scopeType(scopeType_) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     if (priorScope) {
         assert(priorScope->nextScope == nullptr);
@@ -37,7 +37,7 @@ BackendScope::BackendScope(RendererBackend& backend_, ScopeType scopeType_)
 }
 
 BackendScope::~BackendScope() {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     assert(nextScope == nullptr);
     deactivate();
@@ -53,7 +53,7 @@ BackendScope::~BackendScope() {
 }
 
 void BackendScope::activate() {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     if (scopeType == ScopeType::Explicit && !(priorScope && this->backend == priorScope->backend) &&
         !(nextScope && this->backend == nextScope->backend)) {
