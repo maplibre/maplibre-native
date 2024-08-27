@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 
  The `object` is the ``MLNOfflinePack`` object whose progress changed. The
  `userInfo` dictionary contains the pack’s current state in the
- `MLNOfflinePackUserInfoKeyState` key and details about the pack’s current
+ ``MLNOfflinePackUserInfoKeyState`` key and details about the pack’s current
  progress in the ``MLNOfflinePackUserInfoKeyProgress`` key. You may also consult
  the ``MLNOfflinePack/state`` and ``MLNOfflinePack/progress`` properties, which
  provide the same values.
@@ -34,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 FOUNDATION_EXTERN MLN_EXPORT const NSNotificationName MLNOfflinePackProgressChangedNotification;
 
 /**
- Posted by the shared `MLNOfflineStorage` object whenever an `MLNOfflinePack`
+ Posted by the shared ``MLNOfflineStorage`` object whenever an ``MLNOfflineStorage``
  object encounters an error while downloading. The error may be recoverable and
  may not warrant the user’s attention. For example, the pack’s implementation
  may attempt to re-request failed resources based on an exponential backoff
@@ -42,7 +42,7 @@ FOUNDATION_EXTERN MLN_EXPORT const NSNotificationName MLNOfflinePackProgressChan
 
  The `object` is the ``MLNOfflinePack`` object that encountered the error. The
  `userInfo` dictionary contains the error object in the
- `MLNOfflinePackUserInfoKeyError` key.
+ ``MLNOfflinePackUserInfoKeyError`` key.
  */
 FOUNDATION_EXTERN MLN_EXPORT const NSNotificationName MLNOfflinePackErrorNotification;
 
@@ -52,7 +52,7 @@ FOUNDATION_EXTERN MLN_EXPORT const NSNotificationName MLNOfflinePackErrorNotific
 
  The `object` is the ``MLNOfflinePack`` object that reached the tile limit in the
  course of downloading. The `userInfo` dictionary contains the tile limit in the
- `MLNOfflinePackUserInfoKeyMaximumCount` key.
+ ``MLNOfflinePackUserInfoKeyMaximumCount`` key.
 
  Once this limit is reached, no instance of ``MLNOfflinePack`` can download
  additional tiles until already downloaded tiles are removed by
@@ -70,24 +70,24 @@ typedef NSString *MLNOfflinePackUserInfoKey NS_EXTENSIBLE_STRING_ENUM;
  The key for an `NSNumber` object that indicates an offline pack’s current
  state. This key is used in the `userInfo` dictionary of an
  ``MLNOfflinePackProgressChangedNotification`` notification. Call `-integerValue`
- on the object to receive the `MLNOfflinePackState`-typed state.
+ on the object to receive the ``MLNOfflinePackState``-typed state.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNOfflinePackUserInfoKey MLNOfflinePackUserInfoKeyState;
 
 /**
  The key for an `NSValue` object that indicates an offline pack’s current
  progress. This key is used in the `userInfo` dictionary of an
- `MLNOfflinePackProgressChangedNotification` notification. Call
+ ``MLNOfflinePackProgressChangedNotification`` notification. Call
  `-MLNOfflinePackProgressValue` on the object to receive the
- `MLNOfflinePackProgress`-typed progress.
+ ``MLNOfflinePackProgress``-typed progress.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNOfflinePackUserInfoKey MLNOfflinePackUserInfoKeyProgress;
 
 /**
  The key for an `NSError` object that is encountered in the course of
  downloading an offline pack. This key is used in the `userInfo` dictionary of
- an `MLNOfflinePackErrorNotification` notification. The error’s domain is
- `MLNErrorDomain`. See `MLNErrorCode` for possible error codes.
+ an ``MLNOfflinePackErrorNotification`` notification. The error’s domain is
+ ``MLNErrorDomain``. See ``MLNErrorDomain`` for possible error codes.
  */
 FOUNDATION_EXTERN MLN_EXPORT const MLNOfflinePackUserInfoKey MLNOfflinePackUserInfoKeyError;
 
@@ -293,10 +293,10 @@ MLN_EXPORT
  The resulting pack is added to the shared offline storage object’s `packs`
  property, then the `completion` block is executed with that pack passed in.
 
- The pack has an initial state of `MLNOfflinePackStateInactive`. To begin
- downloading resources, call `-[MLNOfflinePack resume]` on the pack from within
+ The pack has an initial state of ``MLNOfflinePackState/MLNOfflinePackStateInactive``. To begin
+ downloading resources, call ``MLNOfflinePack/resume`` on the pack from within
  the completion handler. To monitor download progress, add an observer for
- `MLNOfflinePackProgressChangedNotification`s about that pack.
+ ``MLNOfflinePackProgressChangedNotification``s about that pack.
 
  To detect when any call to this method results in a new pack, observe KVO
  change notifications on the shared offline storage object’s `packs` key path.

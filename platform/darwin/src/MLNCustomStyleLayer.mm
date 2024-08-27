@@ -20,7 +20,7 @@
 class MLNCustomLayerHost;
 
 /**
- An `MLNCustomStyleLayer` is a style layer that is rendered by OpenGL / Metal code that
+ An ``MLNCustomStyleLayer`` is a style layer that is rendered by OpenGL / Metal code that
  you provide.
 
  By default, this class does nothing. You can subclass this class to provide
@@ -29,10 +29,10 @@ class MLNCustomLayerHost;
  `-drawInMapView:withContext:` methods.
 
  You can access an existing MLNCustomStyleLayer using the
- `-[MLNStyle layerWithIdentifier:]` method if you know its identifier;
- otherwise, find it using the `MLNStyle.layers` property. You can also create a
+ ``MLNStyle/layerWithIdentifier:`` method if you know its identifier;
+ otherwise, find it using the ``MLNStyle/layers`` property. You can also create a
  new MLNCustomStyleLayer and add it to the style using a method such as
- `-[MLNStyle addLayer:]`.
+ ``MLNStyle/addLayer:``.
 
  @warning This API is undocumented and therefore unsupported. It may change at
     any time without notice.
@@ -59,8 +59,8 @@ class MLNCustomLayerHost;
  Returns an MLNCustomStyleLayer style layer object initialized with the given identifier.
 
  After initializing and configuring the style layer, add it to a map view’s
- style using the `-[MLNStyle addLayer:]` or
- `-[MLNStyle insertLayer:belowLayer:]` method.
+ style using the ``MLNStyle/addLayer:`` or
+ ``MLNStyle/insertLayer:belowLayer:`` method.
 
  @param identifier A string that uniquely identifies the layer in the style to
     which it is added.

@@ -1,7 +1,10 @@
-const referenceSpec = require('../scripts/style-spec-reference/v8');
+import styleSpec from "../../../scripts/style-spec.mjs";
 
-referenceSpec.layer.type.values["location-indicator"] = {};
-referenceSpec["layout_location-indicator"] = {
+/** @type {any} */
+let modifiedReferenceSpec = styleSpec;
+
+modifiedReferenceSpec.layer.type.values["location-indicator"] = {};
+modifiedReferenceSpec["layout_location-indicator"] = {
     "top-image": {
         "type": "resolvedImage",
         "property-type": "data-constant",
@@ -37,7 +40,7 @@ referenceSpec["layout_location-indicator"] = {
     }
 };
 
-referenceSpec["paint_location-indicator"] = {
+modifiedReferenceSpec["paint_location-indicator"] = {
     "perspective-compensation": {
         "type": "number",
         "default": "0.85",
@@ -65,7 +68,6 @@ referenceSpec["paint_location-indicator"] = {
     },
     "bearing": {
         "type": "number",
-        "default": "0",
         "default": 0,
         "period": 360,
         "units": "degrees",
@@ -176,21 +178,7 @@ referenceSpec["paint_location-indicator"] = {
         },
         "transition": true,
         "doc": "The color for drawing the accuracy radius border. To adjust transparency, set the alpha component of the color accordingly."
-    },
-    "bearing": {
-        "type": "number",
-        "default": "0",
-        "default": 0,
-        "period": 360,
-        "units": "degrees",
-        "property-type": "data-constant",
-        "expression": {
-            "interpolated": false,
-            "parameters": [ ]
-        },
-        "transition": false,
-        "doc": "The bearing of the location indicator."
     }
 };
 
-var spec = module.exports = referenceSpec
+export default modifiedReferenceSpec;

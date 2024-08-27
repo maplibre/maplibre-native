@@ -240,7 +240,6 @@ const BufferResource& Context::getEmptyBuffer() {
 const BufferResource& Context::getTileVertexBuffer() {
     if (!tileVertexBuffer) {
         const auto vertices = RenderStaticData::tileVertices();
-        constexpr auto vertexSize = sizeof(decltype(vertices)::Vertex::a1);
         tileVertexBuffer.emplace(createBuffer(vertices.data(),
                                               vertices.bytes(),
                                               gfx::BufferUsageType::StaticDraw,

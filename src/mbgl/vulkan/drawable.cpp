@@ -187,8 +187,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         if (impl->instanceBindings != instanceBindings_) {
             impl->instanceBindings = std::move(instanceBindings_);
         }
-
-        attributeUpdateTime = util::MonotonicTimer::now();
     }
 
     if (buildAttribs || buildInstanceBuffer) {
@@ -201,6 +199,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     if (texturesNeedUpload) {
         uploadTextures(uploadPass);
     }
+
+    attributeUpdateTime = util::MonotonicTimer::now();
 }
 
 void Drawable::draw(PaintParameters& parameters) const {

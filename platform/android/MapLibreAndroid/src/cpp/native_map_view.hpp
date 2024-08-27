@@ -192,8 +192,6 @@ public:
 
     jni::Local<jni::Array<jni::jlong>> addMarkers(jni::JNIEnv&, const jni::Array<jni::Object<Marker>>&);
 
-    void setTileCacheEnabled(JNIEnv&, jni::jboolean);
-
     void onLowMemory(JNIEnv& env);
 
     void setDebug(JNIEnv&, jni::jboolean);
@@ -291,6 +289,10 @@ public:
     void setPrefetchZoomDelta(JNIEnv&, jni::jint);
 
     jni::jint getPrefetchZoomDelta(JNIEnv&);
+
+    void setTileCacheEnabled(JNIEnv&, jni::jboolean);
+
+    jni::jboolean getTileCacheEnabled(JNIEnv&);
 
     mbgl::Map& getMap();
 

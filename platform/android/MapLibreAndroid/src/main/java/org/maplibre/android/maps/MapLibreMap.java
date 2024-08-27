@@ -324,6 +324,26 @@ public final class MapLibreMap {
     return nativeMapView.getPrefetchZoomDelta();
   }
 
+  /**
+   * Indicating whether the map may cache tiles for different zoom levels or not.
+   *
+   * @param enabled true causes the map view to consume more memory and have a smoother user
+   * experience when zoom in/out. The default value of this property is `true`.
+   */
+  public void setTileCacheEnabled(boolean enabled) {
+    nativeMapView.setTileCacheEnabled(enabled);
+  }
+
+  /**
+   * Check whether tile cache is enabled or not.
+   *
+   * @return true if enabled
+   * @see MapLibreMap#setTileCacheEnabled(boolean)
+   */
+  public boolean getTileCacheEnabled() {
+    return nativeMapView.getTileCacheEnabled();
+  }
+
   //
   // MinZoom
   //
@@ -2503,19 +2523,5 @@ public final class MapLibreMap {
     for (OnDeveloperAnimationListener listener : developerAnimationStartedListeners) {
       listener.onDeveloperAnimationStarted();
     }
-  }
-
-  //
-  // Tile cache
-  //
-
-  /**
-   * Indicating whether the map may cache tiles for different zoom levels or not.
-   *
-   * @param enabled true causes the map view to consume more memory and have a smoother user
-   * experience when zoom in/out. The default value of this property is `true`.
-   */
-  public void experimental_setTileCacheEnabled(boolean enabled) {
-    nativeMapView.setTileCacheEnabled(enabled);
   }
 }

@@ -26,7 +26,7 @@ void RenderAnnotationSource::update(Immutable<style::Source::Impl> baseImpl_,
                                     const bool needsRendering,
                                     const bool needsRelayout,
                                     const TileParameters& parameters) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     std::swap(baseImpl, baseImpl_);
 

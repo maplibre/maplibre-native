@@ -1,23 +1,30 @@
 module(name = "maplibre")
 
 bazel_dep(name = "apple_support", version = "1.16.0", repo_name = "build_bazel_apple_support")
-bazel_dep(name = "aspect_rules_js", version = "1.42.3")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "platforms", version = "0.0.10")
 bazel_dep(name = "rules_apple", version = "3.7.0", repo_name = "build_bazel_rules_apple")
 bazel_dep(name = "rules_swift", version = "2.1.1", repo_name = "build_bazel_rules_swift")
 bazel_dep(name = "rules_xcodeproj", version = "2.5.2")
+bazel_dep(name = "aspect_rules_js", version = "2.0.0")
+bazel_dep(name = "rules_nodejs", version = "6.2.0")
 
-npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm")
+node = use_extension("@rules_nodejs//nodejs:extensions.bzl", "node", dev_dependency = True)
+node.toolchain(node_version = "20.14.0")
+
+npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)
 npm.npm_translate_lock(
     name = "npm",
     data = ["package.json"],
     pnpm_lock = "//:pnpm-lock.yaml",
-    update_pnpm_lock = True,
+    verify_node_modules_ignored = "//:.bazelignore",
 )
 use_repo(npm, "npm")
 
 pnpm = use_extension("@aspect_rules_js//npm:extensions.bzl", "pnpm")
+
+# Allows developers to use the matching pnpm version, for example:
+# bazel run -- @pnpm --dir /home/runner/work/rules_js/rules_js install
 use_repo(pnpm, "pnpm")
 
 provisioning_profile_repository = use_extension("@build_bazel_rules_apple//apple:apple.bzl", "provisioning_profile_repository_extension")
