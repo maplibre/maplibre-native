@@ -2431,7 +2431,7 @@ public:
                            : NSMaxXEdge);
 
         // The following will do nothing if the positioning rect is not on-screen. See
-        // `-[MLNMapView updateAnnotationCallouts]` for presenting the callout when the selected
+        // ``MLNMapView/updateAnnotationCallouts`` for presenting the callout when the selected
         // annotation comes back on-screen.
         [callout showRelativeToRect:positioningRect ofView:self preferredEdge:edge];
     }

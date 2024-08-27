@@ -6,7 +6,7 @@
 namespace mbgl {
 
 void TileCache::setSize(size_t size_) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     size = size_;
 
@@ -40,7 +40,7 @@ struct CaptureWrapper {
 } // namespace
 
 void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     tile->cancel();
 
@@ -66,7 +66,7 @@ void TileCache::deferredRelease(std::unique_ptr<Tile>&& tile) {
 }
 
 void TileCache::add(const OverscaledTileID& key, std::unique_ptr<Tile>&& tile) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     if (!tile->isRenderable() || !size) {
         deferredRelease(std::move(tile));

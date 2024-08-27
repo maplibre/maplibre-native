@@ -88,7 +88,7 @@ static NSString * const MLNRendererConfigurationTests_collisionBehaviorKey = @"M
     
     MLNRendererConfiguration *config = [[MLNRendererConfiguration alloc] init];
     
-    // `MLNIdeographicFontFamilyName` set to bool value `YES`
+    // ``MLNIdeographicFontFamilyName`` set to bool value `YES`
     {
         NSString *localFontFamilyName = [config localFontFamilyNameWithInfoDictionaryObject:@(YES)];
         
@@ -101,19 +101,19 @@ static NSString * const MLNRendererConfigurationTests_collisionBehaviorKey = @"M
         XCTAssertEqualObjects(localFontFamilyName, systemFontFamilyName, @"Local font family name should match default system font name when setting `YES`");
     }
     
-    // `MLNIdeographicFontFamilyName` set to bool value `NO`
+    // ``MLNIdeographicFontFamilyName`` set to bool value `NO`
     {
         NSString *localFontFamilyName = [config localFontFamilyNameWithInfoDictionaryObject:@(NO)];
         XCTAssertNil(localFontFamilyName, @"Client rendering font should use remote font when setting `NO`");
     }
     
-    // `MLNIdeographicFontFamilyName` set to a valid font string value
+    // ``MLNIdeographicFontFamilyName`` set to a valid font string value
     {
         NSString *localFontFamilyName = [config localFontFamilyNameWithInfoDictionaryObject:@"PingFang TC"];
         XCTAssertEqualObjects(localFontFamilyName, @"PingFang TC", @"Local font family name should match a custom valid font name");
     }
     
-    // `MLNIdeographicFontFamilyName` set to an invalid font string value
+    // ``MLNIdeographicFontFamilyName`` set to an invalid font string value
     {
         NSString *localFontFamilyName = [config localFontFamilyNameWithInfoDictionaryObject:@"test font"];
         
@@ -126,20 +126,20 @@ static NSString * const MLNRendererConfigurationTests_collisionBehaviorKey = @"M
         XCTAssertNotEqualObjects(localFontFamilyName, systemFontFamilyName, @"Local font family name should not be validated by MLNRenderConfiguration");
     }
     
-    // `MLNIdeographicFontFamilyName` set to a valid font family names array value
+    // ``MLNIdeographicFontFamilyName`` set to a valid font family names array value
     {
         NSString *localFontFamilyName = [config localFontFamilyNameWithInfoDictionaryObject:@[@"test font 1", @"PingFang TC", @"test font 2"]];
         XCTAssertEqualObjects(localFontFamilyName, @"test font 1\nPingFang TC\ntest font 2");
     }
     
-    // `MLNIdeographicFontFamilyName` set to an invalid font family names array value
+    // ``MLNIdeographicFontFamilyName`` set to an invalid font family names array value
     {
         NSString *localFontFamilyName = [config localFontFamilyNameWithInfoDictionaryObject:@[@"test font 1", @"test font 2", @"test font 3"]];
 
         XCTAssertEqualObjects(localFontFamilyName, @"test font 1\ntest font 2\ntest font 3", @"Local font family name should not be validated by MLNRendererConfiguration");
     }
     
-    // `MLNIdeographicFontFamilyName` set to an invalid value type: NSDictionary, NSNumber, NSData, etc.
+    // ``MLNIdeographicFontFamilyName`` set to an invalid value type: NSDictionary, NSNumber, NSData, etc.
     {
         NSString *localFontFamilyName = [config localFontFamilyNameWithInfoDictionaryObject:[@"test font 1" dataUsingEncoding:NSUTF8StringEncoding]];
         

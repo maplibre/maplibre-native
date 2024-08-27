@@ -277,14 +277,9 @@ android-license:
 .PHONY: android-ndk-stack
 android-ndk-stack: android-ndk-stack-arm-v7
 
-# Updates Android's vendor submodules
-.PHONY: android-update-vendor
-android-update-vendor:
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none updateVendorSubmodules
-
 # Run android nitpick script
 .PHONY: run-android-nitpick
-run-android-nitpick: android-update-vendor
+run-android-nitpick:
 	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=none androidNitpick
 
 # Creates a dependency graph using Graphviz

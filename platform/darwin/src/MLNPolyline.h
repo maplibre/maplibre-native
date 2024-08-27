@@ -10,7 +10,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- An `MLNPolyline` object represents a shape consisting of two or more vertices,
+ An ``MLNPolyline`` object represents a shape consisting of two or more vertices,
  specified as `CLLocationCoordinate2D` instances, and the line segments that
  connect them. For example, you could use an polyline to represent a road or the
  path along which something moves.
@@ -60,7 +60,7 @@ MLN_EXPORT
 @interface MLNPolyline : MLNMultiPoint <MLNOverlay>
 
 /**
- Creates and returns an `MLNPolyline` object from the specified set of
+ Creates and returns an ``MLNPolyline`` object from the specified set of
  coordinates.
 
  @param coords The array of coordinates defining the shape. The data in this
@@ -77,10 +77,10 @@ MLN_EXPORT
  An ``MLNMultiPolyline`` object represents a shape consisting of one or more
  polylines. For example, you could use a multipolyline shape to represent both
  sides of a divided highway (dual carriageway), excluding the median (central
- reservation): each carriageway would be a distinct `MLNPolyline` object.
+ reservation): each carriageway would be a distinct ``MLNPolyline`` object.
 
  You can add multipolyline shapes to the map by adding them to an
- ``MLNShapeSource`` object. Configure the appearance of an `MLNShapeSource`’s or
+ ``MLNShapeSource`` object. Configure the appearance of an ``MLNShapeSource``’s or
  ``MLNVectorTileSource``’s multipolylines collectively using an
  ``MLNLineStyleLayer`` or ``MLNSymbolStyleLayer`` object.
 
