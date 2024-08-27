@@ -110,13 +110,13 @@ void ThreadedSchedulerBase::schedule(std::function<void()>&& fn) {
 }
 
 void ThreadedSchedulerBase::schedule(const util::SimpleIdentity tag, std::function<void()>&& fn) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     assert(fn);
     if (!fn) return;
 
     std::shared_ptr<Queue> q;
     {
-        MLN_TRACE_ZONE(queue)
+        MLN_TRACE_ZONE(queue);
         std::lock_guard<std::mutex> lock(taggedQueueLock);
 
         // find or insert
@@ -127,11 +127,11 @@ void ThreadedSchedulerBase::schedule(const util::SimpleIdentity tag, std::functi
         }
         q = result.first->second;
 
-        MLN_ZONE_VALUE(taggedQueue.size())
+        MLN_ZONE_VALUE(taggedQueue.size());
     }
 
     {
-        MLN_TRACE_ZONE(push)
+        MLN_TRACE_ZONE(push);
         std::lock_guard<std::mutex> lock(q->lock);
         q->queue.push(std::move(fn));
         taskCount++;

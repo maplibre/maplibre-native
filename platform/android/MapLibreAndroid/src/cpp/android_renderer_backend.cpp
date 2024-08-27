@@ -18,7 +18,5 @@ void AndroidRendererBackend::setSwapBehavior(gfx::Renderable::SwapBehaviour swap
     swapBehaviour = swapBehaviour_;
 }
 
-void AndroidRendererBackend::swap() {}
-
 } // namespace android
 } // namespace mbgl

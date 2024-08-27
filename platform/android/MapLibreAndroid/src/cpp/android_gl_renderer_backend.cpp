@@ -22,7 +22,12 @@ public:
         backend.setViewport(0, 0, backend.getSize());
     }
 
-    void swap() override { backend.swap(); }
+    void swap() override {
+        const auto& swapBehaviour = static_cast<AndroidGLRendererBackend&>(backend).getSwapBehavior();
+        if (swapBehaviour == gfx::Renderable::SwapBehaviour::Flush) {
+            static_cast<gl::Context&>(backend.getContext()).finish();
+        }
+    }
 
 private:
     AndroidGLRendererBackend& backend;
@@ -61,12 +66,6 @@ void AndroidGLRendererBackend::updateAssumedState() {
 void AndroidGLRendererBackend::markContextLost() {
     if (context) {
         getContext<gl::Context>().setCleanupOnDestruction(false);
-    }
-}
-
-void AndroidGLRendererBackend::swap() {
-    if (swapBehaviour == SwapBehaviour::Flush) {
-        static_cast<gl::Context&>(getContext()).finish();
     }
 }
 

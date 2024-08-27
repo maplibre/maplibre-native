@@ -28,6 +28,12 @@ public:
     }
 
     void bind() override {}
+    void swap() override {
+        const auto& swapBehaviour = static_cast<AndroidVulkanRendererBackend&>(backend).getSwapBehavior();
+        if (swapBehaviour == gfx::Renderable::SwapBehaviour::Flush) {
+            static_cast<vulkan::Context&>(backend.getContext()).waitFrame();
+        }
+    }
 
 private:
 };
@@ -52,12 +58,6 @@ void AndroidVulkanRendererBackend::resizeFramebuffer(int width, int height) {
     size = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
     if (context) {
         static_cast<vulkan::Context&>(*context).requestSurfaceUpdate();
-    }
-}
-
-void AndroidVulkanRendererBackend::swap() {
-    if (swapBehaviour == SwapBehaviour::Flush) {
-        static_cast<vulkan::Context&>(getContext()).waitFrame();
     }
 }
 

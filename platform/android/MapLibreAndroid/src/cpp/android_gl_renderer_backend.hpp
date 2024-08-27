@@ -24,8 +24,6 @@ public:
     void resizeFramebuffer(int width, int height) override;
     PremultipliedImage readFramebuffer() override;
 
-    void swap() override;
-
     // mbgl::gfx::RendererBackend implementation
 public:
     mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }

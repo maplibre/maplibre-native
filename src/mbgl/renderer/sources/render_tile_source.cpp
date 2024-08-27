@@ -409,8 +409,8 @@ std::unique_ptr<RenderItem> RenderTileSource::createRenderItem() {
 }
 
 void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
-    MLN_TRACE_FUNC()
-    MLN_ZONE_STR(baseImpl->id)
+    MLN_TRACE_FUNC();
+    MLN_ZONE_STR(baseImpl->id);
     bearing = static_cast<float>(parameters.transform.state.getBearing());
     filteredRenderTiles = nullptr;
     renderTilesSortedByY = nullptr;
