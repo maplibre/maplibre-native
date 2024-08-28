@@ -103,7 +103,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     std::string defineStr;
     std::vector<const NS::Object*> rawDefines;
     rawDefines.reserve(2 * numDefines);
-    const auto addDefine = [&rawDefines](const auto& pair) {
+    const auto addDefine = [&rawDefines, &defineStr](const auto& pair) {
         const auto* nsKey = NS::String::string(pair.first.data(), NS::UTF8StringEncoding);
         const auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
         rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size() / 2), nsKey);
@@ -168,7 +168,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
         fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
         if (!fragmentFunction) {
             Log::Error(Event::Shader, name + " missing fragment function " + fragmentName.data());
-            observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal, additionalDefines);
+            observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal, defineStr);
             assert(false);
             return nullptr;
         }
