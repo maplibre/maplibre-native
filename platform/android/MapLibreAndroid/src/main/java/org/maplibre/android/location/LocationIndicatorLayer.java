@@ -135,6 +135,27 @@ class LocationIndicatorLayer extends Layer {
   }
 
   /**
+   * Get the Bearing property transition options
+   *
+   * @return transition options for Double
+   */
+  @NonNull
+  public TransitionOptions getBearingTransition() {
+    checkThread();
+    return nativeGetBearingTransition();
+  }
+
+  /**
+   * Set the Bearing property transition options
+   *
+   * @param options transition options for Double
+   */
+  public void setBearingTransition(@NonNull TransitionOptions options) {
+    checkThread();
+    nativeSetBearingTransition(options.getDuration(), options.getDelay());
+  }
+
+  /**
    * Get the Location property
    *
    * @return property wrapper value around Double[]
@@ -422,6 +443,13 @@ class LocationIndicatorLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetBearing();
+
+  @NonNull
+  @Keep
+  private native TransitionOptions nativeGetBearingTransition();
+
+  @Keep
+  private native void nativeSetBearingTransition(long duration, long delay);
 
   @NonNull
   @Keep

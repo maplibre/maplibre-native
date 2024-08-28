@@ -6,7 +6,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MLNSettings (Private)
 
-/// Returns the shared instance of the `MLNSettings` class.
+/// Returns the shared instance of the ``MLNSettings`` class.
 @property (class, nonatomic, readonly) MLNSettings *sharedSettings;
 
 /// The current global access token.

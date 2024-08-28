@@ -160,6 +160,13 @@ if(MLN_WITH_VULKAN)
     )
 endif()
 
+if(MLN_WITH_METAL)
+    target_compile_definitions(
+        mbgl-test
+        PRIVATE MLN_RENDER_BACKEND_METAL=1
+    )
+endif()
+
 if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Android)
     message("Target platform does not support HTTP tests or dependencies not found.")
 

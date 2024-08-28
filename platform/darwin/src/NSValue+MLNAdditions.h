@@ -86,7 +86,7 @@ NS_ASSUME_NONNULL_BEGIN
 // MARK: Working with Offline Map Values
 
 /**
- Creates a new value object containing the given `MLNOfflinePackProgress`
+ Creates a new value object containing the given ``MLNOfflinePackProgress``
  structure.
 
  @param progress The value for the new object.
@@ -95,14 +95,14 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSValue *)valueWithMLNOfflinePackProgress:(MLNOfflinePackProgress)progress;
 
 /**
- The `MLNOfflinePackProgress` structure representation of the value.
+ The ``MLNOfflinePackProgress`` structure representation of the value.
  */
 @property (readonly) MLNOfflinePackProgress MLNOfflinePackProgressValue;
 
 // MARK: Working with Transition Values
 
 /**
- Creates a new value object containing the given `MLNTransition`
+ Creates a new value object containing the given ``MLNTransition``
  structure.
 
  @param transition The value for the new object.
@@ -111,12 +111,12 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSValue *)valueWithMLNTransition:(MLNTransition)transition;
 
 /**
- The `MLNTransition` structure representation of the value.
+ The ``MLNTransition`` structure representation of the value.
  */
 @property (readonly) MLNTransition MLNTransitionValue;
 
 /**
- Creates a new value object containing the given `MLNSphericalPosition`
+ Creates a new value object containing the given ``MLNSphericalPosition``
  structure.
 
  @param lightPosition The value for the new object.
@@ -125,12 +125,12 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)valueWithMLNSphericalPosition:(MLNSphericalPosition)lightPosition;
 
 /**
- The `MLNSphericalPosition` structure representation of the value.
+ The ``MLNSphericalPosition`` structure representation of the value.
  */
 @property (readonly) MLNSphericalPosition MLNSphericalPositionValue;
 
 /**
- Creates a new value object containing the given `MLNLightAnchor`
+ Creates a new value object containing the given ``MLNLightAnchor``
  enum.
 
  @param lightAnchor The value for the new object.
@@ -139,7 +139,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (NSValue *)valueWithMLNLightAnchor:(MLNLightAnchor)lightAnchor;
 
 /**
- The `MLNLightAnchor` enum representation of the value.
+ The ``MLNLightAnchor`` enum representation of the value.
  */
 @property (readonly) MLNLightAnchor MLNLightAnchorValue;
 

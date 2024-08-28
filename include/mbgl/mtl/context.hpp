@@ -127,7 +127,7 @@ public:
     virtual bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr&,
                                               const void* data,
                                               std::size_t size,
-                                              bool persistent);
+                                              bool persistent) override;
 
     /// Get an empty buffer to act as a placeholder
     const BufferResource& getEmptyBuffer();

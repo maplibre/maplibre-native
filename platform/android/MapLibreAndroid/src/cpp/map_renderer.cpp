@@ -64,7 +64,7 @@ ActorRef<Renderer> MapRenderer::actor() const {
 }
 
 void MapRenderer::schedule(std::function<void()>&& scheduled) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     try {
         // Create a runnable
         android::UniqueEnv _env = android::AttachEnv();
@@ -78,7 +78,7 @@ void MapRenderer::schedule(std::function<void()>&& scheduled) {
         static auto queueEvent = javaClass.GetMethod<void(jni::Object<MapRendererRunnable>)>(*_env, "queueEvent");
         auto weakReference = javaPeer.get(*_env);
         if (weakReference) {
-            MLN_TRACE_ZONE(java)
+            MLN_TRACE_ZONE(java);
             weakReference.Call(*_env, queueEvent, peer);
         }
 

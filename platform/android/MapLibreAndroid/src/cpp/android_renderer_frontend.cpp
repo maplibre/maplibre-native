@@ -79,7 +79,7 @@ void AndroidRendererFrontend::setObserver(RendererObserver& observer) {
 }
 
 void AndroidRendererFrontend::update(std::shared_ptr<UpdateParameters> params) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     updateParams = std::move(params);
     updateAsyncTask->send();
 }
@@ -90,6 +90,10 @@ const TaggedScheduler& AndroidRendererFrontend::getThreadPool() const {
 
 void AndroidRendererFrontend::setTileCacheEnabled(bool enabled) {
     mapRenderer.actor().invoke(&Renderer::setTileCacheEnabled, enabled);
+}
+
+bool AndroidRendererFrontend::getTileCacheEnabled() const {
+    return mapRenderer.actor().ask(&Renderer::getTileCacheEnabled).get();
 }
 
 void AndroidRendererFrontend::reduceMemoryUse() {

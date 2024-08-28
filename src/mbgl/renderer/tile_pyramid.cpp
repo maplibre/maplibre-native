@@ -23,7 +23,7 @@ namespace mbgl {
 using namespace style;
 
 static TileObserver nullObserver;
-static std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
+static const std::map<OverscaledTileID, std::unique_ptr<Tile>> emptyPrefetchedTiles;
 
 TilePyramid::TilePyramid(const TaggedScheduler& threadPool_)
     : cache(threadPool_),
@@ -398,7 +398,7 @@ std::vector<Feature> TilePyramid::querySourceFeatures(const SourceQueryOptions& 
     return result;
 }
 
-void TilePyramid::enableCache(bool enable) {
+void TilePyramid::setCacheEnabled(bool enable) {
     cacheEnabled = enable;
 }
 

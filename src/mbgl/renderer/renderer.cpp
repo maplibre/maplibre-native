@@ -30,7 +30,7 @@ void Renderer::setObserver(RendererObserver* observer) {
 }
 
 void Renderer::render(const std::shared_ptr<UpdateParameters>& updateParameters) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     assert(updateParameters);
     if (auto renderTree = impl->orchestrator.createRenderTree(updateParameters)) {
         renderTree->prepare();
@@ -136,6 +136,10 @@ const std::vector<PlacedSymbolData>& Renderer::getPlacedSymbolsData() const {
 
 void Renderer::setTileCacheEnabled(bool enable) {
     impl->orchestrator.setTileCacheEnabled(enable);
+}
+
+bool Renderer::getTileCacheEnabled() const {
+    return impl->orchestrator.getTileCacheEnabled();
 }
 
 void Renderer::reduceMemoryUse() {
