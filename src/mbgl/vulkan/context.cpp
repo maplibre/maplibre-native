@@ -232,7 +232,6 @@ void Context::endFrame() {
 }
 
 void Context::submitFrame() {
-
     const auto& frame = frameResources[frameResourceIndex];
     frame.commandBuffer->end();
 
