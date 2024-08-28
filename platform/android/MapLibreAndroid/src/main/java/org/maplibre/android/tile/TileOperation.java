@@ -2,7 +2,7 @@ package org.maplibre.android.tile;
 
 public enum TileOperation {
     RequestedFromCache,
-    RequestedFromNetwork.,
+    RequestedFromNetwork,
     LoadFromNetwork,
     LoadFromCache,
     StartParse,
