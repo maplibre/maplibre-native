@@ -42,15 +42,6 @@ export function unhyphenate (/** @type {string} **/ str) {
  return str.replace(/-/g, " ");
 };
 
-// Write out a list of files that this script is modifying so that we can check
-/** @type {string[]} **/
-let files = [];
-process.on('exit', function() {
-  const list = path.join(path.dirname(process.argv[1]), path.basename(process.argv[1], '.js') + '.list');
-  console.log(`Writing files that this script modifies to: ${list}`);
-  fs.writeFileSync(list, files.join("\n"));
-});
-
 /**
  * 
  * @param {string} filename 
@@ -67,7 +58,6 @@ export function writeIfModified(filename, newContent, output) {
     fs.mkdirSync(info.dir, {recursive: true});
   }
 
-  files.push(filename);
   try {
     const oldContent = fs.readFileSync(filename, 'utf8');
     if (oldContent == newContent) {
