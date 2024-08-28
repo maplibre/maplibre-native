@@ -1783,10 +1783,7 @@ TEST(Map, ObserveTileLifecycle) {
 
     // We expect to see a valid lifecycle for every tile in this list.
     const std::vector<OverscaledTileID> expectedTiles = {
-        {10, 0, 10, 163, 395},
-        {10, 0, 10, 163, 396},
-        {10, 0, 10, 164, 395},
-        {10, 0, 10, 164, 396},
+        {10, 0, 10, 163, 395}, {10, 0, 10, 163, 396}, {10, 0, 10, 164, 395}, {10, 0, 10, 164, 396},
         // Lower zooms can also be seen, but not always, so we
         // ignore them.
     };
