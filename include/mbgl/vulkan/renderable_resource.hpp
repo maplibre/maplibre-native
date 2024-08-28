@@ -43,6 +43,8 @@ protected:
 
     void initDepthStencil();
 
+    void swap() override;
+
 public:
     virtual void createPlatformSurface() = 0;
     virtual std::vector<const char*> getDeviceExtensions() { return {}; }
