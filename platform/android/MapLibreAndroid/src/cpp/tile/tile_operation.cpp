@@ -22,6 +22,8 @@ jni::Local<jni::Object<TileOperation>> TileOperation::Create(jni::JNIEnv& env, m
             return _class.Get(env, _class.GetStaticField<jni::Object<TileOperation>>(env, "Error"));
         case mbgl::TileOperation::Cancelled:
             return _class.Get(env, _class.GetStaticField<jni::Object<TileOperation>>(env, "Cancelled"));
+        case mbgl::TileOperation::NullOp:
+            return _class.Get(env, _class.GetStaticField<jni::Object<TileOperation>>(env, "NullOp"));
     }
 }
 

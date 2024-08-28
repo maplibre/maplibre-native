@@ -8,5 +8,6 @@ public enum TileOperation {
     StartParse,
     EndParse,
     Error,
-    Cancelled
+    Cancelled,
+    NullOp,
 }

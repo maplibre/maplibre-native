@@ -41,7 +41,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
     for (const auto& define : additionalDefines) {
         defineStr += "#define " + define.first + " " + define.second + "\n";
     }
-    observer->onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
+    observer.onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 
     constexpr auto targetClientVersion = glslang::EShTargetVulkan_1_0;
     constexpr auto targetLanguageVersion = glslang::EShTargetSpv_1_0;
