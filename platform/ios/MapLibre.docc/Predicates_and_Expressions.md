@@ -1,5 +1,7 @@
 # Predicates and expressions
 
+Using `NSPredicate` with MapLibre iOS
+
 Style layers use predicates and expressions to determine what to display and how
 to format it. _Predicates_ are represented by the same `NSPredicate` class that
 filters results from Core Data or items in an `NSArray` in Objective-C.
@@ -11,8 +13,7 @@ syntax supported by this SDK. For a more general introduction to predicates and
 expressions, consult the
 _[Predicate Programming Guide](https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/Predicates/AdditionalChapters/Introduction.html)_
 in Apple developer documentation. For additional detail on how this SDK has
-extended the `NSExpression` class, consult the [`NSExpression(MLNAdditions)`](./Categories/NSExpression(MLNAdditions).html)
-section of this documentation.
+extended the `NSExpression` class, see the [`NSExpression+MLNAdditions.h`](https://github.com/maplibre/maplibre-native/blob/main/platform/darwin/src/NSExpression%2BMLNAdditions.h) header.
 
 ## Using predicates to filter vector data
 
@@ -144,28 +145,11 @@ polygon.
 The following special attributes are also available on features that are produced
 as a result of clustering multiple point features together in a shape source:
 
-<table>
-<thead>
-<tr><th>Attribute</th><th>Type</th><th>Meaning</th></tr>
-</thead>
-<tbody>
-<tr>
-   <td><code>cluster</code></td>
-   <td>Bool</td>
-   <td>True if the feature is a point cluster. If the attribute is false (or not present) then the  feature should not be considered a cluster.</td>
-</tr>
-<tr>
-   <td><code>cluster_id</code></td>
-   <td>Number</td>
-   <td>Identifier for the point cluster.</td>
-</tr>
-<tr>
-   <td><code>point_count</code></td>
-   <td>Number</td>
-   <td>The number of point features in a given cluster.</td>
-</tr>
-</tbody>
-</table>
+| Attribute   | Type   | Meaning                                                                                                                                  |
+|-------------|--------|------------------------------------------------------------------------------------------------------------------------------------------|
+| cluster     | Bool   | True if the feature is a point cluster. If the attribute is false (or not present) then the  feature should not be considered a cluster. |
+| cluster_id  | Number | Identifier for the point cluster.                                                                                                        |
+| point_count | Number | The number of point features in a given cluster.                                                                                         |
 
 Some characters may not be used directly as part of a key path in a format
 string. For example, if a feature’s attribute is named `ISO 3166-1:2006`, an
@@ -220,7 +204,7 @@ Initializer parameter | Format string syntax
 `length:`             | `length('Wapakoneta')`
 `castObject:toType:`  | `CAST(ele, 'NSString')`<br>`CAST(ele, 'NSNumber')`
 
-A number of [Mapbox-specific functions](#mapbox-specific-functions) are also
+A number of [MapLibre-specific functions](#MapLibre-specific-functions) are also
 available.
 
 The following predefined functions are **not** supported:
@@ -339,7 +323,7 @@ The following variables are defined by this SDK for use with style layers:
 
 In addition to these variables, you can define your own variables and refer to
 them elsewhere in the expression. The syntax for defining a variable makes use
-of a [Mapbox-specific function](#mapbox-specific-functions) that takes an
+of a [MapLibre-specific function](#MapLibre-specific-functions) that takes an
 `NSDictionary` as an argument:
 
 ```objc
@@ -350,7 +334,7 @@ of a [Mapbox-specific function](#mapbox-specific-functions) that takes an
 NSExpression(format: "MLN_LET(floorCount, 2, $floorCount + 1)")
 ```
 
-## Mapbox-specific functions
+## MapLibre-specific functions
 
 For compatibility with the MapLibre Style Spec, the following functions
 are defined by this SDK. When setting a style layer property, you can call these
@@ -552,7 +536,7 @@ operator in the MapLibre Style Spec.
 Returns the straight-line distance from the evaluated object to the given shape.
 
 This function corresponds to the
-[`distance`](https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#distance)
+[`distance`](https://maplibre.org/maplibre-style-spec/expressions/#distance)
 operator in the MapLibre Style Spec.
 
 ### `mgl_coalesce:`
