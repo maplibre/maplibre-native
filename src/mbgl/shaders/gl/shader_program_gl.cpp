@@ -119,7 +119,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
     const std::string& fragmentSource,
     const std::string& additionalDefines) noexcept(false) {
     try {
-        context.getObserver().onPreCompileShader(programParameters.getProgramType(), gfx::Backend::Type::OpenGL);
+        context.getObserver().onPreCompileShader(programParameters.getProgramType(), gfx::Backend::Type::OpenGL, additionalDefines);
 
         // throws on compile error
         auto vertProg = context.createShader(
@@ -139,7 +139,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
              fragmentSource.c_str()});
         auto program = context.createProgram(vertProg, fragProg, firstAttribName.data());
 
-        context.getObserver().onPostCompileShader(programParameters.getProgramType(), gfx::Backend::Type::OpenGL);
+        context.getObserver().onPostCompileShader(programParameters.getProgramType(), gfx::Backend::Type::OpenGL, additionalDefines);
 
         UniformBlockArrayGL uniformBlocks;
         for (const auto& blockInfo : uniformBlocksInfo) {
@@ -183,7 +183,7 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
         return std::make_shared<ShaderProgramGL>(
             std::move(program), std::move(uniformBlocks), std::move(attrs), std::move(samplerLocations));
     } catch (const std::exception& e) {
-        context.getObserver().onShaderCompileFailed(programParameters.getProgramType(), gfx::Backend::Type::OpenGL);
+        context.getObserver().onShaderCompileFailed(programParameters.getProgramType(), gfx::Backend::Type::OpenGL, additionalDefines);
         std::rethrow_exception(std::current_exception());
     }
 }

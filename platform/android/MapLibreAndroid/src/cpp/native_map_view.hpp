@@ -301,9 +301,9 @@ public:
 
     // Shader compilation
     void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
-    void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type) override;
-    void onPostCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type) override;
-    void onShaderCompileFailed(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type) override;
+    void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
+    void onPostCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
+    void onShaderCompileFailed(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
 
     // Glyph requests
     void onGlyphsLoaded(const mbgl::FontStack&, const mbgl::GlyphRange&) override;

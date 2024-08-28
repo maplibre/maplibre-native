@@ -50,21 +50,21 @@ public:
         }
     }
 
-    void onPreCompileShader(shaders::BuiltIn id, gfx::Backend::Type type) final {
+    void onPreCompileShader(shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) final {
         if (onPreCompileShaderCallback) {
-            onPreCompileShaderCallback(id, type);
+            onPreCompileShaderCallback(id, type, additionalDefines);
         }
     }
 
-    void onPostCompileShader(shaders::BuiltIn id, gfx::Backend::Type type) final {
+    void onPostCompileShader(shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) final {
         if (onPostCompileShaderCallback) {
-            onPostCompileShaderCallback(id, type);
+            onPostCompileShaderCallback(id, type, additionalDefines);
         }
     }
 
-    void onShaderCompileFailed(shaders::BuiltIn id, gfx::Backend::Type type) final {
+    void onShaderCompileFailed(shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) final {
         if (onShaderCompileFailedCallback) {
-            onShaderCompileFailedCallback(id, type);
+            onShaderCompileFailedCallback(id, type, additionalDefines);
         }
     }
 
@@ -99,9 +99,9 @@ public:
     std::function<void(RenderFrameStatus)> didFinishRenderingFrameCallback;
     std::function<void()> didBecomeIdleCallback;
     std::function<void(gfx::ShaderRegistry&)> onRegisterShadersCallback;
-    std::function<void(shaders::BuiltIn, gfx::Backend::Type)> onPreCompileShaderCallback;
-    std::function<void(shaders::BuiltIn, gfx::Backend::Type)> onPostCompileShaderCallback;
-    std::function<void(shaders::BuiltIn, gfx::Backend::Type)> onShaderCompileFailedCallback;
+    std::function<void(shaders::BuiltIn, gfx::Backend::Type, const std::string&)> onPreCompileShaderCallback;
+    std::function<void(shaders::BuiltIn, gfx::Backend::Type, const std::string&)> onPostCompileShaderCallback;
+    std::function<void(shaders::BuiltIn, gfx::Backend::Type, const std::string&)> onShaderCompileFailedCallback;
     std::function<void(const FontStack&, const GlyphRange&)> onGlyphsLoadedCallback;
     std::function<void(const FontStack&, const GlyphRange&, std::exception_ptr)> onGlyphsErrorCallback;
     std::function<void(const FontStack&, const GlyphRange&)> onGlyphsRequestedCallback;

@@ -1345,39 +1345,42 @@ void NativeMapView::registerNative(jni::JNIEnv& env) {
 void NativeMapView::onRegisterShaders(gfx::ShaderRegistry&) {};
 
 // Shader compilation
-void NativeMapView::onPreCompileShader(shaders::BuiltIn id, gfx::Backend::Type type) {
+void NativeMapView::onPreCompileShader(shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
     assert(vm != nullptr);
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onPreCompileShader = javaClass.GetMethod<void(jni::jint, jni::jint)>(*_env, "onPreCompileShader");
+    static auto onPreCompileShader = javaClass.GetMethod<void(jni::jint, jni::jint, jni::String)>(*_env, "onPreCompileShader");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(*_env, onPreCompileShader, static_cast<jni::jint>(id), static_cast<jni::jint>(type));
+        weakReference.Call(*_env, onPreCompileShader, static_cast<jni::jint>(id), static_cast<jni::jint>(type),
+            jni::Make<jni::String>(additionalDefines));
     }
 }
 
-void NativeMapView::onPostCompileShader(shaders::BuiltIn id, gfx::Backend::Type type) {
+void NativeMapView::onPostCompileShader(shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
     assert(vm != nullptr);
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onPostCompileShader = javaClass.GetMethod<void(jni::jint, jni::jint)>(*_env, "onPostCompileShader");
+    static auto onPostCompileShader = javaClass.GetMethod<void(jni::jint, jni::jint, jni::String)>(*_env, "onPostCompileShader");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(*_env, onPostCompileShader, static_cast<jni::jint>(id), static_cast<jni::jint>(type));
+        weakReference.Call(*_env, onPostCompileShader, static_cast<jni::jint>(id), static_cast<jni::jint>(type),
+            jni::Make<jni::String>(additionalDefines));
     }
 }
 
-void NativeMapView::onShaderCompileFailed(shaders::BuiltIn id, gfx::Backend::Type type) {
+void NativeMapView::onShaderCompileFailed(shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
     assert(vm != nullptr);
 
     android::UniqueEnv _env = android::AttachEnv();
     static auto& javaClass = jni::Class<NativeMapView>::Singleton(*_env);
-    static auto onShaderCompileFailed = javaClass.GetMethod<void(jni::jint, jni::jint)>(*_env, "onShaderCompileFailed");
+    static auto onShaderCompileFailed = javaClass.GetMethod<void(jni::jint, jni::jint, jni::String)>(*_env, "onShaderCompileFailed");
     auto weakReference = javaPeer.get(*_env);
     if (weakReference) {
-        weakReference.Call(*_env, onShaderCompileFailed, static_cast<jni::jint>(id), static_cast<jni::jint>(type));
+        weakReference.Call(*_env, onShaderCompileFailed, static_cast<jni::jint>(id), static_cast<jni::jint>(type),
+            jni::Make<jni::String>(additionalDefines));
     }
 }
 

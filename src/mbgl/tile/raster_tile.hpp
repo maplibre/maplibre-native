@@ -54,8 +54,6 @@ private:
     std::shared_ptr<RasterBucket> bucket;
 
     std::atomic<bool> obsolete{false};
-    bool notifiedInitiallyLoaded{false};
-    bool hasEverSetData{false};
 };
 
 } // namespace mbgl

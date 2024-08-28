@@ -106,8 +106,6 @@ private:
     std::shared_ptr<HillshadeBucket> bucket;
 
     bool obsolete = false;
-    bool notifiedInitiallyLoaded{false};
-    bool hasEverSetData{false};
 };
 
 } // namespace mbgl

@@ -53,16 +53,16 @@ public:
         delegate.invoke(&RendererObserver::onRemoveUnusedStyleImages, ids);
     }
 
-    void onPreCompileShader(mbgl::shaders::BuiltIn id, mbgl::gfx::Backend::Type type) override {
-        delegate.invoke(&RendererObserver::onPreCompileShader, id, type);
+    void onPreCompileShader(mbgl::shaders::BuiltIn id, mbgl::gfx::Backend::Type type, const std::string& additionalDefines) override {
+        delegate.invoke(&RendererObserver::onPreCompileShader, id, type, additionalDefines);
     }
 
-    void onPostCompileShader(mbgl::shaders::BuiltIn id, mbgl::gfx::Backend::Type type) override {
-        delegate.invoke(&RendererObserver::onPostCompileShader, id, type);
+    void onPostCompileShader(mbgl::shaders::BuiltIn id, mbgl::gfx::Backend::Type type, const std::string& additionalDefines) override {
+        delegate.invoke(&RendererObserver::onPostCompileShader, id, type, additionalDefines);
     }
 
-    void onShaderCompileFailed(mbgl::shaders::BuiltIn id, mbgl::gfx::Backend::Type type) override {
-        delegate.invoke(&RendererObserver::onShaderCompileFailed, id, type);
+    void onShaderCompileFailed(mbgl::shaders::BuiltIn id, mbgl::gfx::Backend::Type type, const std::string& additionalDefines) override {
+        delegate.invoke(&RendererObserver::onShaderCompileFailed, id, type, additionalDefines);
     }
 
     void onGlyphsLoaded(const mbgl::FontStack& stack, const mbgl::GlyphRange& range) override {

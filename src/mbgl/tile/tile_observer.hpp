@@ -14,7 +14,7 @@ public:
 
     virtual void onTileChanged(Tile&) {}
     virtual void onTileError(Tile&, std::exception_ptr) {}
-    virtual void onTileAction(Tile&, TileOperation) {}
+    virtual void onTileAction(OverscaledTileID, std::string, TileOperation) {}
 };
 
 } // namespace mbgl

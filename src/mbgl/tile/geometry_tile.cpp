@@ -197,9 +197,9 @@ GeometryTile::~GeometryTile() {
     glyphManager->removeRequestor(*this);
     imageManager->removeRequestor(*this);
 
-    if (!notifiedInitiallyLoaded) {
+    if (pending) {
         // This tile never finished loading or was abandoned, emit a cancellation event
-        observer->onTileAction(*this, TileOperation::Cancelled);
+        observer->onTileAction(id, sourceID, TileOperation::Cancelled);
     }
 
     if (layoutResult) {
@@ -229,9 +229,8 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
         return;
     }
 
-    if (!hasEverSetData) {
-        hasEverSetData = true;
-        observer->onTileAction(*this, TileOperation::StartParse);
+    if (data_) {
+        observer->onTileAction(id, sourceID, TileOperation::StartParse);
     }
 
     // Mark the tile as pending again if it was complete before to prevent
@@ -249,6 +248,8 @@ void GeometryTile::reset() {
     // Mark the tile as pending again if it was complete before to prevent
     // signaling a complete state despite pending parse operations.
     pending = true;
+
+    observer->onTileAction(id, sourceID, TileOperation::Cancelled);
 
     ++correlationID;
     worker.self().invoke(&GeometryTileWorker::reset, correlationID);
@@ -316,9 +317,8 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
 
     observer->onTileChanged(*this);
 
-    if (!pending && !notifiedInitiallyLoaded) {
-        notifiedInitiallyLoaded = true;
-        observer->onTileAction(*this, TileOperation::EndParse);
+    if (!pending) {
+        observer->onTileAction(id, sourceID, TileOperation::EndParse);
     }
 }
 

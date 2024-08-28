@@ -104,12 +104,6 @@ protected:
     // Used to signal the worker that it should abandon parsing this tile as soon as possible.
     std::atomic<bool> obsolete{false};
 
-    // Flag to indicate the tile has received initial data
-    bool hasEverSetData{false};
-
-    // Flag to indicate the tile has completed inital loading
-    bool notifiedInitiallyLoaded{false};
-
 private:
     void markObsolete();
 

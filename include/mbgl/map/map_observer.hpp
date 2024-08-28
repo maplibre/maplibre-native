@@ -73,9 +73,9 @@ public:
     virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
 
     // Shaders compilation
-    virtual void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type) {}
-    virtual void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type) {}
-    virtual void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type) {}
+    virtual void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) {}
+    virtual void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) {}
+    virtual void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type, const std::string&) {}
 
     // Glyph requests
     virtual void onGlyphsLoaded(const FontStack&, const GlyphRange&) {}

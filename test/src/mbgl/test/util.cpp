@@ -22,12 +22,12 @@ void checkImage(const std::string& base,
                 const PremultipliedImage& actual,
                 double imageThreshold,
                 double pixelThreshold) {
-#if !TEST_READ_ONLY
-    if (getenv("UPDATE")) {
+//#if !TEST_READ_ONLY
+    //if (getenv("UPDATE")) {
         util::write_file(base + "/expected.png", encodePNG(actual));
-        return;
-    }
-#endif
+        //return;
+    //}
+//#endif
 
     std::string expected_image;
     try {

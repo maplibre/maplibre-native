@@ -94,14 +94,13 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
                                            const std::string_view fragmentName,
                                            const ProgramParameters& programParameters,
                                            const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
-    observer->onPreCompileShader(shaderID, gfx::Backend::Type::Metal);
-
     const auto pool = NS::TransferPtr(NS::AutoreleasePool::alloc()->init());
 
     // No NSMutableDictionary?
     const auto& programDefines = programParameters.getDefines();
     const auto numDefines = programDefines.size() + additionalDefines.size();
 
+    std::string defineStr;
     std::vector<const NS::Object*> rawDefines;
     rawDefines.reserve(2 * numDefines);
     const auto addDefine = [&rawDefines](const auto& pair) {
@@ -109,9 +108,12 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
         const auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
         rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size() / 2), nsKey);
         rawDefines.insert(rawDefines.end(), nsVal);
+        defineStr += "#define " + pair.first + " " + pair.second + "\n";
     };
     std::for_each(programDefines.begin(), programDefines.end(), addDefine);
     std::for_each(additionalDefines.begin(), additionalDefines.end(), addDefine);
+
+    observer->onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 
     const auto nsDefines = NS::Dictionary::dictionary(
         &rawDefines[numDefines], rawDefines.data(), static_cast<NS::UInteger>(numDefines));
@@ -145,7 +147,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
         const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();
         Log::Error(Event::Shader, name + " compile failed" + errStr);
-        observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal);
+        observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal, defineStr);
         assert(false);
         return nullptr;
     }
@@ -154,7 +156,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
     MTLFunctionPtr vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
-        observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal);
+        observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal, defineStr);
         assert(false);
         return nullptr;
     }
@@ -166,7 +168,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
         fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
         if (!fragmentFunction) {
             Log::Error(Event::Shader, name + " missing fragment function " + fragmentName.data());
-            observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal);
+            observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal, additionalDefines);
             assert(false);
             return nullptr;
         }
@@ -174,7 +176,7 @@ UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
 
     auto shader = std::make_unique<ShaderProgram>(
         std::move(name), backend, std::move(vertexFunction), std::move(fragmentFunction));
-    observer->onPostCompileShader(shaderID, gfx::Backend::Type::Metal);
+    observer->onPostCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 
     return shader;
 }

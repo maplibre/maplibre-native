@@ -244,16 +244,16 @@ void Map::Impl::onRegisterShaders(gfx::ShaderRegistry& registry) {
     observer.onRegisterShaders(registry);
 }
 
-void Map::Impl::onPreCompileShader(shaders::BuiltIn shaderID, gfx::Backend::Type type) {
-    observer.onPreCompileShader(shaderID, type);
+void Map::Impl::onPreCompileShader(shaders::BuiltIn shaderID, gfx::Backend::Type type, const std::string& additionalDefines) {
+    observer.onPreCompileShader(shaderID, type, additionalDefines);
 }
 
-void Map::Impl::onPostCompileShader(shaders::BuiltIn shaderID, gfx::Backend::Type type) {
-    observer.onPostCompileShader(shaderID, type);
+void Map::Impl::onPostCompileShader(shaders::BuiltIn shaderID, gfx::Backend::Type type, const std::string& additionalDefines) {
+    observer.onPostCompileShader(shaderID, type, additionalDefines);
 }
 
-void Map::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID, gfx::Backend::Type type) {
-    observer.onShaderCompileFailed(shaderID, type);
+void Map::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID, gfx::Backend::Type type, const std::string& additionalDefines) {
+    observer.onShaderCompileFailed(shaderID, type, additionalDefines);
 }
 
 void Map::Impl::onGlyphsLoaded(const FontStack& fontStack, const GlyphRange& ranges) {

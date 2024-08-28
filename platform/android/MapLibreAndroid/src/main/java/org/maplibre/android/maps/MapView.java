@@ -1318,8 +1318,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * of possible values.
      * @param type of graphics backend the shader is being compiled for. See
      * `mbgl::gfx::Backend::Type` for a list of possible values.
+     * @param additionalDefines that specify the permutaion of the shader.
      */
-    void onPreCompileShader(int id, int type);
+    void onPreCompileShader(int id, int type, String additionalDefines);
   }
 
   /**
@@ -1336,8 +1337,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * of possible values.
      * @param type of graphics backend the shader is being compiled for. See
      * `mbgl::gfx::Backend::Type` for a list of possible values.
+     * @param additionalDefines that specify the permutation of the shader.
      */
-    void onPostCompileShader(int id, int type);
+    void onPostCompileShader(int id, int type, String additionalDefines);
   }
 
   /**
@@ -1354,8 +1356,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
      * of possible values.
      * @param type of graphics backend the shader is being compiled for. See
      * `mbgl::gfx::Backend::Type` for a list of possible values.
+     * @param additionalDefines that specify the permutation of the shader.
      */
-    void onShaderCompileFailed(int id, int type);
+    void onShaderCompileFailed(int id, int type, String additionalDefines);
   }
 
   /**

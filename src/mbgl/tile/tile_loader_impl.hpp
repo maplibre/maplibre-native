@@ -106,10 +106,7 @@ void TileLoader<T>::loadFromCache() {
         return;
     }
 
-    if (!requested) {
-        requested = true;
-        tile.onTileAction(TileOperation::Requested);
-    }
+    tile.onTileAction(TileOperation::RequestedFromCache);
 
     resource.loadingMethod = Resource::LoadingMethod::CacheOnly;
     request = fileSource->request(resource, [this, shared_{shared}](const Response& res) {
@@ -196,10 +193,7 @@ void TileLoader<T>::loadFromNetwork() {
         return;
     }
 
-    if (!requested) {
-        requested = true;
-        tile.onTileAction(TileOperation::Requested);
-    }
+    tile.onTileAction(TileOperation::RequestedFromNetwork);
 
     // Instead of using Resource::LoadingMethod::All, we're first doing a
     // CacheOnly, and then a NetworkOnly request.

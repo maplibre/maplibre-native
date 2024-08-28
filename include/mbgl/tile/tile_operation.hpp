@@ -3,12 +3,14 @@
 
 namespace mbgl {
 enum class TileOperation : uint8_t {
-    Requested,
+    RequestedFromCache,
+    RequestedFromNetwork,
     LoadFromNetwork,
     LoadFromCache,
     StartParse,
     EndParse,
     Error,
     Cancelled,
+    NullOp,
 };
 } // namespace mbgl

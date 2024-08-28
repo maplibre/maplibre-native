@@ -56,9 +56,9 @@ public:
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
     void onRegisterShaders(gfx::ShaderRegistry&) final;
 
-    void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type) final;
-    void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type) final;
-    void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type) final;
+    void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) final;
+    void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) final;
+    void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type, const std::string&) final;
     void onGlyphsLoaded(const FontStack&, const GlyphRange&) final;
     void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) final;
     void onGlyphsRequested(const FontStack&, const GlyphRange&) final;

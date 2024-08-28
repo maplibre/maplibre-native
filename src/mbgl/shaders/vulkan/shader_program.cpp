@@ -37,16 +37,17 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
     : ShaderProgramBase(),
       shaderName(name),
       backend(backend_) {
+    std::string defineStr = programParameters.getDefinesString() + "\n\n";
+    for (const auto& define : additionalDefines) {
+        defineStr += "#define " + define.first + " " + define.second + "\n";
+    }
+    observer->onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
+
     constexpr auto targetClientVersion = glslang::EShTargetVulkan_1_0;
     constexpr auto targetLanguageVersion = glslang::EShTargetSpv_1_0;
     constexpr auto defaultVersion = 450;
     constexpr auto messages = EShMsgSpvRules | EShMsgVulkanRules;
     const auto defaultResources = GetDefaultResources();
-
-    std::string defineStr = programParameters.getDefinesString() + "\n\n";
-    for (const auto& define : additionalDefines) {
-        defineStr += "#define " + define.first + " " + define.second + "\n";
-    }
 
     const auto compileGlsl = [&](const EShLanguage& language, const std::string_view& data, const char* prelude) {
         glslang::TShader glslShader(language);
@@ -63,7 +64,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
 
         if (!glslShader.parse(defaultResources, defaultVersion, ENoProfile, false, true, messages)) {
             mbgl::Log::Error(mbgl::Event::Shader, shaderName + " - " + glslShader.getInfoLog());
-            observer.onShaderCompileFailed(shaderID, gfx::Backend::Type::Vulkan);
+            observer.onShaderCompileFailed(shaderID, gfx::Backend::Type::Vulkan, defineStr);
             return std::vector<uint32_t>();
         }
 
@@ -72,7 +73,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
 
         if (!glslProgram.link(messages)) {
             mbgl::Log::Error(mbgl::Event::Shader, shaderName + " - " + glslProgram.getInfoLog());
-            observer.onShaderCompileFailed(shaderID, gfx::Backend::Type::Vulkan);
+            observer.onShaderCompileFailed(shaderID, gfx::Backend::Type::Vulkan, defineStr);
             return std::vector<uint32_t>();
         }
 
@@ -104,6 +105,8 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
 
     backend.setDebugName(vertexShader.get(), shaderName + ".vert");
     backend.setDebugName(fragmentShader.get(), shaderName + ".frag");
+
+    observer->onPostCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 }
 
 ShaderProgram::~ShaderProgram() noexcept = default;

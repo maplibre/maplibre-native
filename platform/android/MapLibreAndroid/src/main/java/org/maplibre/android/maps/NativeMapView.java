@@ -1196,23 +1196,23 @@ final class NativeMapView implements NativeMap {
   }
 
   @Keep
-  private void onPreCompileShader(int id, int type) {
+  private void onPreCompileShader(int id, int type, String additionalDefines) {
     if (stateCallback != null) {
-      stateCallback.onPreCompileShader(id, type);
+      stateCallback.onPreCompileShader(id, type, additionalDefines);
     }
   }
 
   @Keep
-  private void onPostCompileShader(int id, int type) {
+  private void onPostCompileShader(int id, int type, String additionalDefines) {
     if (stateCallback != null) {
-      stateCallback.onPostCompileShader(id, type);
+      stateCallback.onPostCompileShader(id, type, additionalDefines);
     }
   }
 
   @Keep
-  private void onShaderCompileFailed(int id, int type) {
+  private void onShaderCompileFailed(int id, int type, String additionalDefines) {
     if (stateCallback != null) {
-      stateCallback.onShaderCompileFailed(id, type);
+      stateCallback.onShaderCompileFailed(id, type, additionalDefines);
     }
   }
 
@@ -1693,11 +1693,11 @@ final class NativeMapView implements NativeMap {
 
     boolean onCanRemoveUnusedStyleImage(String imageId);
 
-    void onPreCompileShader(int id, int type);
+    void onPreCompileShader(int id, int type, String additionalDefines);
 
-    void onPostCompileShader(int id, int type);
+    void onPostCompileShader(int id, int type, String additionalDefines);
 
-    void onShaderCompileFailed(int id, int type);
+    void onShaderCompileFailed(int id, int type, String additionalDefines);
 
     void onGlyphsLoaded(String[] stack, int rangeStart, int rangeEnd);
 

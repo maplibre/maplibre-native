@@ -78,8 +78,8 @@ void RenderSource::onTileError(Tile& tile, std::exception_ptr error) {
     observer->onTileError(*this, tile.id, error);
 }
 
-void RenderSource::onTileAction(Tile& tile, TileOperation op) {
-    observer->onTileAction(*this, op, tile.id, tile.sourceID);
+void RenderSource::onTileAction(OverscaledTileID id, std::string sourceID, TileOperation op) {
+    observer->onTileAction(*this, op, id, sourceID);
 }
 
 bool RenderSource::isEnabled() const {

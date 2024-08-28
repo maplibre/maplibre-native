@@ -277,11 +277,11 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   }
 
   @Override
-  public void onPreCompileShader(int id, int type) {
+  public void onPreCompileShader(int id, int type, String additionalDefines) {
     try {
       if (!onPreCompileShaderList.isEmpty()) {
         for (MapView.OnPreCompileShaderListener listener : onPreCompileShaderList) {
-          listener.onPreCompileShader(id, type);
+          listener.onPreCompileShader(id, type, additionalDefines);
         }
       }
     } catch (Throwable err) {
@@ -291,11 +291,11 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   }
 
   @Override
-  public void onPostCompileShader(int id, int type) {
+  public void onPostCompileShader(int id, int type, String additionalDefines) {
     try {
       if (!onPostCompileShaderList.isEmpty()) {
         for (MapView.OnPostCompileShaderListener listener : onPostCompileShaderList) {
-          listener.onPostCompileShader(id, type);
+          listener.onPostCompileShader(id, type, additionalDefines);
         }
       }
     } catch (Throwable err) {
@@ -305,11 +305,11 @@ class MapChangeReceiver implements NativeMapView.StateCallback {
   }
 
   @Override
-  public void onShaderCompileFailed(int id, int type) {
+  public void onShaderCompileFailed(int id, int type, String additionalDefines) {
     try {
       if (!onShaderCompileFailedList.isEmpty()) {
         for (MapView.OnShaderCompileFailedListener listener : onShaderCompileFailedList) {
-          listener.onShaderCompileFailed(id, type);
+          listener.onShaderCompileFailed(id, type, additionalDefines);
         }
       }
     } catch (Throwable err) {

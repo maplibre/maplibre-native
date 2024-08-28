@@ -28,9 +28,9 @@ public:
     virtual ~Impl();
 
     // ContextObserver
-    void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type) override;
-    void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type) override;
-    void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type) override;
+    void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) override;
+    void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) override;
+    void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type, const std::string&) override;
 
 private:
     friend class Renderer;

@@ -64,7 +64,7 @@ float Tile::getQueryPadding(const std::unordered_map<std::string, const RenderLa
 void Tile::querySourceFeatures(std::vector<Feature>&, const SourceQueryOptions&) {}
 
 void Tile::onTileAction(TileOperation op) {
-    observer->onTileAction(*this, op);
+    observer->onTileAction(id, sourceID, op);
 };
 
 } // namespace mbgl
