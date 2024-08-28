@@ -1360,7 +1360,7 @@ void NativeMapView::onPreCompileShader(shaders::BuiltIn id,
                            onPreCompileShader,
                            static_cast<jni::jint>(id),
                            static_cast<jni::jint>(type),
-                           jni::Make<jni::String>(additionalDefines));
+                           jni::Make<jni::String>(*_env, additionalDefines));
     }
 }
 
@@ -1379,7 +1379,7 @@ void NativeMapView::onPostCompileShader(shaders::BuiltIn id,
                            onPostCompileShader,
                            static_cast<jni::jint>(id),
                            static_cast<jni::jint>(type),
-                           jni::Make<jni::String>(additionalDefines));
+                           jni::Make<jni::String>(*_env, additionalDefines));
     }
 }
 
@@ -1398,7 +1398,7 @@ void NativeMapView::onShaderCompileFailed(shaders::BuiltIn id,
                            onShaderCompileFailed,
                            static_cast<jni::jint>(id),
                            static_cast<jni::jint>(type),
-                           jni::Make<jni::String>(additionalDefines));
+                           jni::Make<jni::String>(*_env, additionalDefines));
     }
 }
 
