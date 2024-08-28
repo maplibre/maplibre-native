@@ -218,6 +218,11 @@ void SurfaceRenderableResource::initDepthStencil() {
     backend.setDebugName(depthAllocation->imageView.get(), "SwapchainDepthImageView");
 }
 
+void SurfaceRenderableResource::swap() {
+    auto& context = static_cast<Context&>(backend.getContext());
+    context.submitFrame();
+}
+
 const vk::Image SurfaceRenderableResource::getAcquiredImage() const {
     if (surface) {
         return swapchainImages[acquiredImageIndex];
@@ -242,8 +247,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
                                    .setViewType(vk::ImageViewType::e2D)
                                    .setFormat(colorFormat)
                                    .setComponents(vk::ComponentMapping()) // defaults to vk::ComponentSwizzle::eIdentity
-                                   .setSubresourceRange(
-                                       vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+                                   .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
     for (const auto& image : swapchainImages) {
         imageViewCreateInfo.setImage(image);

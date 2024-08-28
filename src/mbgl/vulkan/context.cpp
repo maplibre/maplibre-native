@@ -228,6 +228,11 @@ void Context::beginFrame() {
 }
 
 void Context::endFrame() {
+    frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
+}
+
+void Context::submitFrame() {
+
     const auto& frame = frameResources[frameResourceIndex];
     frame.commandBuffer->end();
 
@@ -271,8 +276,6 @@ void Context::endFrame() {
             requestSurfaceUpdate();
         }
     }
-
-    frameResourceIndex = (frameResourceIndex + 1) % frameResources.size();
 
     backend.endFrameCapture();
 }

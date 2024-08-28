@@ -29,6 +29,8 @@ public:
 
     void bind() override {}
     void swap() override {
+        vulkan::SurfaceRenderableResource::swap();
+
         const auto& swapBehaviour = static_cast<AndroidVulkanRendererBackend&>(backend).getSwapBehavior();
         if (swapBehaviour == gfx::Renderable::SwapBehaviour::Flush) {
             static_cast<vulkan::Context&>(backend.getContext()).waitFrame();

@@ -54,6 +54,7 @@ public:
 
     void beginFrame() override;
     void endFrame() override;
+    void submitFrame();
     void waitFrame() const;
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
