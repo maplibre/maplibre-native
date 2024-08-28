@@ -184,7 +184,7 @@ std::size_t RenderLayer::removeAllDrawables() {
 }
 
 void RenderLayer::updateRenderTileIDs() {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     if (!renderTiles || renderTiles->empty()) {
         renderTileIDs.clear();
