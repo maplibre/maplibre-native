@@ -68,15 +68,21 @@ Renderer::Impl::~Impl() {
     assert(gfx::BackendScope::exists());
 };
 
-void Renderer::Impl::onPreCompileShader(shaders::BuiltIn shaderID, gfx::Backend::Type type, const std::string& additionalDefines) {
+void Renderer::Impl::onPreCompileShader(shaders::BuiltIn shaderID,
+                                        gfx::Backend::Type type,
+                                        const std::string& additionalDefines) {
     observer->onPreCompileShader(shaderID, type, additionalDefines);
 }
 
-void Renderer::Impl::onPostCompileShader(shaders::BuiltIn shaderID, gfx::Backend::Type type, const std::string& additionalDefines) {
+void Renderer::Impl::onPostCompileShader(shaders::BuiltIn shaderID,
+                                         gfx::Backend::Type type,
+                                         const std::string& additionalDefines) {
     observer->onPostCompileShader(shaderID, type, additionalDefines);
 }
 
-void Renderer::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID, gfx::Backend::Type type, const std::string& additionalDefines) {
+void Renderer::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID,
+                                           gfx::Backend::Type type,
+                                           const std::string& additionalDefines) {
     observer->onShaderCompileFailed(shaderID, type, additionalDefines);
 }
 

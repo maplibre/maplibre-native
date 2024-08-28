@@ -62,7 +62,9 @@ public:
         }
     }
 
-    void onShaderCompileFailed(shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) final {
+    void onShaderCompileFailed(shaders::BuiltIn id,
+                               gfx::Backend::Type type,
+                               const std::string& additionalDefines) final {
         if (onShaderCompileFailedCallback) {
             onShaderCompileFailedCallback(id, type, additionalDefines);
         }

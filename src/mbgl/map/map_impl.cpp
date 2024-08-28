@@ -244,15 +244,21 @@ void Map::Impl::onRegisterShaders(gfx::ShaderRegistry& registry) {
     observer.onRegisterShaders(registry);
 }
 
-void Map::Impl::onPreCompileShader(shaders::BuiltIn shaderID, gfx::Backend::Type type, const std::string& additionalDefines) {
+void Map::Impl::onPreCompileShader(shaders::BuiltIn shaderID,
+                                   gfx::Backend::Type type,
+                                   const std::string& additionalDefines) {
     observer.onPreCompileShader(shaderID, type, additionalDefines);
 }
 
-void Map::Impl::onPostCompileShader(shaders::BuiltIn shaderID, gfx::Backend::Type type, const std::string& additionalDefines) {
+void Map::Impl::onPostCompileShader(shaders::BuiltIn shaderID,
+                                    gfx::Backend::Type type,
+                                    const std::string& additionalDefines) {
     observer.onPostCompileShader(shaderID, type, additionalDefines);
 }
 
-void Map::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID, gfx::Backend::Type type, const std::string& additionalDefines) {
+void Map::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID,
+                                      gfx::Backend::Type type,
+                                      const std::string& additionalDefines) {
     observer.onShaderCompileFailed(shaderID, type, additionalDefines);
 }
 

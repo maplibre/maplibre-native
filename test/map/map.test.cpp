@@ -1717,12 +1717,14 @@ TEST(Map, ObserveTileLifecycle) {
         std::lock_guard<std::mutex> lock(tileMutex);
         tileOps.push_back(TileEntry{id, sourceID, op});
     };
-    observer.onPreCompileShaderCallback = [&](shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
-        shaderOps.push_back(ShaderEntry{id, type, additionalDefines, false});
-    };
-    observer.onPostCompileShaderCallback = [&](shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
-        shaderOps.push_back(ShaderEntry{id, type, additionalDefines, true});
-    };
+    observer.onPreCompileShaderCallback =
+        [&](shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
+            shaderOps.push_back(ShaderEntry{id, type, additionalDefines, false});
+        };
+    observer.onPostCompileShaderCallback =
+        [&](shaders::BuiltIn id, gfx::Backend::Type type, const std::string& additionalDefines) {
+            shaderOps.push_back(ShaderEntry{id, type, additionalDefines, true});
+        };
 
     HeadlessFrontend frontend{{512, 512}, 1};
     MapAdapter map(
@@ -1743,23 +1745,25 @@ TEST(Map, ObserveTileLifecycle) {
 
     auto img = frontend.render(map).image;
     test::checkImage("test/fixtures/map/tile_lifecycle", img, 0.0002, 0.1);
-        
+
     std::unordered_map<std::string, bool> seen;
     for (auto& shader : shaderOps) {
         auto shaderStr = std::to_string(static_cast<size_t>(shader.id)) + shader.defines;
         auto it = seen.find(shaderStr);
         if (it != seen.end()) continue;
         seen.insert({shaderStr, true});
-        Log::Info(Event::General, std::to_string(static_cast<size_t>(shader.id)) + " " + std::to_string(std::hash<std::string>()(shader.defines)));
+        Log::Info(Event::General,
+                  std::to_string(static_cast<size_t>(shader.id)) + " " +
+                      std::to_string(std::hash<std::string>()(shader.defines)));
     }
-    
+
     // We expect to see a valid shader lifecycle for every entry in this list.
     const std::vector<std::pair<shaders::BuiltIn, size_t>> expectedShaders = {
         {shaders::BuiltIn::FillShader, 16114602744458825542ULL},
         {shaders::BuiltIn::FillOutlineShader, 16114602744458825542ULL},
     };
 
-    for (const auto& [id, defineHash]  : expectedShaders) {
+    for (const auto& [id, defineHash] : expectedShaders) {
         bool seenPreEvent = false;
 
         for (const auto& op : shaderOps) {
@@ -1779,21 +1783,21 @@ TEST(Map, ObserveTileLifecycle) {
 
     // We expect to see a valid lifecycle for every tile in this list.
     const std::vector<OverscaledTileID> expectedTiles = {
-        {10, 0, 10, 163, 395 },
-        {10, 0, 10, 163, 396 },
-        {10, 0, 10, 164, 395 },
-        {10, 0, 10, 164, 396 },
-        {9, 0, 9, 81, 197 },
-        {9, 0, 9, 81, 198 },
-        {9, 0, 9, 82, 197 },
-        {9, 0, 9, 82, 198 },
-        {8, 0, 8, 40, 98 },
-        {8, 0, 8, 40, 99 },
-        {8, 0, 8, 41, 98 },
-        {8, 0, 8, 41, 99 },
-        {7, 0, 7, 20, 49 },
-        {6, 0, 6, 10, 24 },
-        {5, 0, 5, 5, 12 },
+        {10, 0, 10, 163, 395},
+        {10, 0, 10, 163, 396},
+        {10, 0, 10, 164, 395},
+        {10, 0, 10, 164, 396},
+        {9, 0, 9, 81, 197},
+        {9, 0, 9, 81, 198},
+        {9, 0, 9, 82, 197},
+        {9, 0, 9, 82, 198},
+        {8, 0, 8, 40, 98},
+        {8, 0, 8, 40, 99},
+        {8, 0, 8, 41, 98},
+        {8, 0, 8, 41, 99},
+        {7, 0, 7, 20, 49},
+        {6, 0, 6, 10, 24},
+        {5, 0, 5, 5, 12},
         // Lower zooms can also be seen, but not always, so we
         // ignore them.
     };
@@ -1810,11 +1814,10 @@ TEST(Map, ObserveTileLifecycle) {
                     break;
                 }
                 case TileOperation::RequestedFromNetwork: {
-                    EXPECT_THAT(stage, testing::AnyOf(
-                        TileOperation::StartParse,
-                        TileOperation::EndParse,
-                        TileOperation::RequestedFromCache
-                    ));
+                    EXPECT_THAT(
+                        stage,
+                        testing::AnyOf(
+                            TileOperation::StartParse, TileOperation::EndParse, TileOperation::RequestedFromCache));
                     stage = TileOperation::RequestedFromNetwork;
                     break;
                 }
@@ -1844,14 +1847,15 @@ TEST(Map, ObserveTileLifecycle) {
                     break;
                 }
                 case TileOperation::EndParse: {
-                    // The tile loader will try the cache first. If a cache hit is found, it starts parsing it while loading
-                    // from the network. In the event data the cache is invalid, the network request will return newer data
-                    // and update the geometry tile worker, which was already parsing the cached data.
+                    // The tile loader will try the cache first. If a cache hit is found, it starts parsing it while
+                    // loading from the network. In the event data the cache is invalid, the network request will return
+                    // newer data and update the geometry tile worker, which was already parsing the cached data.
                     EXPECT_THAT(stage, testing::AnyOf(TileOperation::StartParse, TileOperation::LoadFromNetwork));
                     stage = TileOperation::EndParse;
                     break;
                 }
-                case TileOperation::NullOp: [[fallthrough]];
+                case TileOperation::NullOp:
+                    [[fallthrough]];
                 case TileOperation::Error: {
                     ADD_FAILURE();
                     break;
