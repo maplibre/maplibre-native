@@ -874,6 +874,18 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activity.FeatureOverviewActivity" />
+        </activity> <!-- Telemetry -->
+        <activity
+            android:name="org.maplibre.android.testapp.activity.telemetry.ObserverActivity"
+            android:description="@string/description_observer_activity"
+            android:exported="true"
+            android:label="@string/activity_observer_activity" >
+            <meta-data
+                android:name="@string/category"
+                android:value="@string/category_telemetry" />
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activity.FeatureOverviewActivity" />
         </activity> <!-- TextureView -->
         <activity
             android:name=".activity.textureview.TextureViewDebugModeActivity"
