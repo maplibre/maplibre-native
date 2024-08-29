@@ -52,12 +52,19 @@ const struct Test {
     }
 } diffTest;
 
+std::vector<OverscaledTileID> tileIDs(const RenderTiles& tiles) {
+    std::vector<OverscaledTileID> ids;
+    std::ranges::transform(
+        *tiles, std::back_inserter(ids), [](const RenderTile& tile) { return tile.getOverscaledTileID(); });
+    return ids;
+}
+
 } // namespace
 
 TEST(TileDiff, Empty) {
     RenderTiles a = std::make_shared<RenderTiles::element_type>();
     RenderTiles b = std::make_shared<RenderTiles::element_type>();
-    auto result = diffTiles(a, b);
+    auto result = diffTiles(tileIDs(a), b);
     EXPECT_EQ(0, result.added.size());
     EXPECT_EQ(0, result.removed.size());
     EXPECT_EQ(0, result.remainder.size());
@@ -67,7 +74,7 @@ TEST(TileDiff, Add) {
     const auto a = diffTest.renderTilesByIndex(std::vector<int>{0, 1});
     const auto b = diffTest.renderTilesByIndex(std::vector<int>{0, 1, 2, 3});
 
-    const auto result = diffTiles(a, b);
+    const auto result = diffTiles(tileIDs(a), b);
     EXPECT_EQ(2, result.added.size());
     EXPECT_EQ(&result.added[0].get(), &diffTest.renderTiles[3]);
     EXPECT_EQ(&result.added[1].get(), &diffTest.renderTiles[2]);
@@ -80,7 +87,7 @@ TEST(TileDiff, Add) {
 TEST(TileDiff, Remove) {
     const auto a = diffTest.renderTilesByIndex(std::vector<int>{0, 1, 2, 3});
     const auto b = diffTest.renderTilesByIndex(std::vector<int>{0, 1});
-    const auto result = diffTiles(a, b);
+    const auto result = diffTiles(tileIDs(a), b);
     EXPECT_EQ(0, result.added.size());
     EXPECT_EQ(2, result.removed.size());
     EXPECT_EQ(result.removed[0].toUnwrapped(), diffTest.tileIDs[3]);
@@ -92,12 +99,12 @@ TEST(TileDiff, Equal) {
     const auto a = diffTest.renderTilesByIndex(std::vector<int>{0, 1, 2, 3});
     const auto b = diffTest.renderTilesByIndex(std::vector<int>{0, 1, 2, 3});
 
-    const auto result1 = diffTiles(a, b);
+    const auto result1 = diffTiles(tileIDs(a), b);
     EXPECT_EQ(0, result1.added.size());
     EXPECT_EQ(0, result1.removed.size());
     EXPECT_EQ(4, result1.remainder.size());
 
-    const auto result2 = diffTiles(b, a);
+    const auto result2 = diffTiles(tileIDs(b), a);
     EXPECT_EQ(0, result2.added.size());
     EXPECT_EQ(0, result2.removed.size());
     EXPECT_EQ(4, result2.remainder.size());
@@ -108,7 +115,7 @@ TEST(TileDiff, New) {
     const auto a = diffTest.renderTilesByIndex(std::vector<int>{3});
     const auto b = diffTest.renderTilesByIndex(std::vector<int>{4});
 
-    const auto result = diffTiles(a, b);
+    const auto result = diffTiles(tileIDs(a), b);
     EXPECT_EQ(0, result.added.size());
     EXPECT_EQ(0, result.removed.size());
     EXPECT_EQ(1, result.remainder.size());

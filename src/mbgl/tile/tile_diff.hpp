@@ -18,7 +18,7 @@ struct TileDifference {
     std::vector<RenderTiles::element_type::value_type> remainder;
 };
 
-/// @brief Compute the differences in tile IDs between two containers of `RenderTile`
-TileDifference diffTiles(const RenderTiles&, const RenderTiles&);
+/// @brief Find the diferences between a previous set of tile IDs and a new set of `RenderTile`s
+TileDifference diffTiles(const std::vector<OverscaledTileID>&, const RenderTiles&);
 
 } // namespace mbgl

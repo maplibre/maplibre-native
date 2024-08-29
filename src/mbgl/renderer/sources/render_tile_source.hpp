@@ -56,13 +56,28 @@ public:
     void dumpDebugLogs() const override;
 
 protected:
+    /// Must be called before updating the tile pyramid by derived classes overriding `update`
+    void onTilePyramidWillUpdate();
+
+    /// Must be called after updating the tile pyramid by derived classes overriding `update`
+    void onTilePyramidUpdated();
+
     RenderTileSource(Immutable<style::Source::Impl>, const TaggedScheduler&);
     TilePyramid tilePyramid;
+
+    // Note that while `renderTiles` is owned by a `shared_ptr`, its elements
+    // contain bare references to `Tile` objects owned by `tilePyramid`.
     Immutable<std::vector<RenderTile>> renderTiles;
-    RenderTiles previousRenderTiles;
-    mutable std::shared_ptr<TileDifference> renderTileDiff;
+    bool renderTilesValid = false;
+
+    // cached view of `renderTiles`, excluding those held for fading
     mutable RenderTiles filteredRenderTiles;
+    // cached view of `renderTiles`, sorted by the Y tile coordinate
     mutable RenderTiles renderTilesSortedByY;
+
+    // The IDs of tiles in the previous state of `renderTiles`, and the differences with the current state
+    std::vector<OverscaledTileID> previousRenderTiles;
+    mutable std::shared_ptr<TileDifference> renderTileDiff;
 
 private:
     float bearing = 0.0F;
@@ -87,6 +102,7 @@ protected:
 
 private:
     uint8_t getMaxZoom() const final;
+
     void update(Immutable<style::Source::Impl>,
                 const std::vector<Immutable<style::LayerProperties>>&,
                 bool needsRendering,

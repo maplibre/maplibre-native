@@ -388,8 +388,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
 RenderTileSource::RenderTileSource(Immutable<style::Source::Impl> impl_, const TaggedScheduler& threadPool_)
     : RenderSource(std::move(impl_)),
       tilePyramid(threadPool_),
-      renderTiles(makeMutable<std::vector<RenderTile>>()),
-      previousRenderTiles(std::make_shared<RenderTiles::element_type>()) {
+      renderTiles(makeMutable<std::vector<RenderTile>>()) {
     tilePyramid.setObserver(this);
 }
 
@@ -403,23 +402,55 @@ std::unique_ptr<RenderItem> RenderTileSource::createRenderItem() {
     return std::make_unique<TileSourceRenderItem>(renderTiles, baseImpl->id);
 }
 
+void RenderTileSource::onTilePyramidWillUpdate() {
+    // The tile pyramid may be updated multiple times between construction of `renderTiles`, and we only want
+    // to do this once as the second one would always start with an empty set.  Specifically, this happens when
+    // `RenderOrchestrator::createRenderTree` returns early because the style is loading.
+    if (renderTilesValid) {
+        // Capture the filtered render tile set before updating the tile pyramid.
+        // Once that happens, the tile references in the `RenderTile`s will be invalid.
+        previousRenderTiles.clear();
+        renderTileDiff.reset();
+        if (auto filtered = getRenderTiles(); !filtered->empty()) {
+            previousRenderTiles.reserve(filtered->size());
+            std::ranges::transform(*filtered, std::back_inserter(previousRenderTiles), [](const RenderTile& tile) {
+                return tile.getOverscaledTileID();
+            });
+        }
+    }
+}
+
+void RenderTileSource::onTilePyramidUpdated() {
+    // The tiles referenced by these `RenderTile` objects may have been destroyed.
+    // Replace with an empty set to ensure that the now-unsafe references are not reachable
+    renderTilesValid = false;
+    renderTiles = makeMutable<std::vector<RenderTile>>();
+    // cached views on `renderTiles` are now invalid
+    filteredRenderTiles.reset();
+    renderTilesSortedByY.reset();
+}
+
 void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
     MLN_TRACE_FUNC();
     MLN_ZONE_STR(baseImpl->id);
     bearing = static_cast<float>(parameters.transform.state.getBearing());
 
+    // `renderTiles` contains references to `Tile` objects in `RenderTree` which have been deleted by
+    // the recent call to `TilePyramid::update`, which makes it unsafe to call `getRenderTiles()` here.
+    // If a previous diff is still present, a derived class' `update` probably didn't call `preUpdate`.
+    assert(!renderTileDiff);
+
     auto tiles = makeMutable<std::vector<RenderTile>>();
     tiles->reserve(tilePyramid.getRenderedTiles().size());
     for (auto& [tileID, tileRef] : tilePyramid.getRenderedTiles()) {
-        tiles->emplace_back(tileID, tileRef);
-        tiles->back().prepare(parameters);
+        tiles->emplace_back(tileID, tileRef).prepare(parameters);
     }
     featureState.coalesceChanges(*tiles);
 
-    renderTileDiff.reset();
     renderTilesSortedByY.reset();
-    previousRenderTiles = getRenderTiles();
+    filteredRenderTiles.reset();
     renderTiles = std::move(tiles);
+    renderTilesValid = true;
 }
 
 void RenderTileSource::updateFadingTiles() {
@@ -542,22 +573,33 @@ void RenderTileSetSource::update(Immutable<style::Source::Impl> baseImpl_,
     enabled = needsRendering;
 
     const auto& implTileset = getTileset();
-    // In Continuous mode, keep the existing tiles if the new cachedTileset is
-    // not yet available, thus providing smart style transitions without
-    // flickering. In other modes, allow clearing the tile pyramid first, before
-    // the early return in order to avoid render tests being flaky.
+    // In Continuous mode, keep the existing tiles if the new `cachedTileset` is not yet available, thus providing smart
+    // style transitions without flickering. In other modes, allow clearing the tile pyramid first, before the early
+    // return in order to avoid render tests being flaky.
     bool canUpdateTileset = implTileset || parameters.mode != MapMode::Continuous;
+    bool didStartUpdate = false;
     if (canUpdateTileset && cachedTileset != implTileset) {
         cachedTileset = implTileset;
+
+        didStartUpdate = true;
+        onTilePyramidWillUpdate();
 
         // TODO: this removes existing buckets, and will cause flickering.
         // Should instead refresh tile data in place.
         tilePyramid.clearAll();
     }
 
-    if (!cachedTileset) return;
+    if (cachedTileset) {
+        if (!didStartUpdate) {
+            didStartUpdate = true;
+            onTilePyramidWillUpdate();
+        }
+        updateInternal(*cachedTileset, layers, needsRendering, needsRelayout, parameters);
+    }
 
-    updateInternal(*cachedTileset, layers, needsRendering, needsRelayout, parameters);
+    if (didStartUpdate) {
+        onTilePyramidUpdated();
+    }
 }
 
 } // namespace mbgl
