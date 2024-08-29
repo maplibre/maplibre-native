@@ -96,6 +96,9 @@ private:
     void transitionToShaderReadLayout(const vk::UniqueCommandBuffer&);
     void transitionToGeneralLayout(const vk::UniqueCommandBuffer&);
 
+    uint32_t getMipLevels() const;
+    void generateMips(const vk::UniqueCommandBuffer& buffer);
+
 private:
     Context& context;
 

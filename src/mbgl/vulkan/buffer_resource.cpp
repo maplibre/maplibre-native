@@ -164,9 +164,5 @@ std::size_t BufferResource::getVulkanBufferOffset() const noexcept {
     return context.getCurrentFrameResourceIndex() * bufferWindowSize;
 }
 
-std::size_t BufferResource::getVulkanBufferSize() const noexcept {
-    return bufferWindowSize > 0 ? bufferWindowSize : size;
-}
-
 } // namespace vulkan
 } // namespace mbgl

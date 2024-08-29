@@ -5,12 +5,18 @@
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/timer.hpp>
-#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
-#include <mbgl/style/layers/location_indicator_layer.hpp>
-#endif
 
 #include <utility>
 #include <optional>
+
+#if (defined(MLN_RENDER_BACKEND_OPENGL) || defined(MLN_RENDER_BACKEND_VULKAN)) && \
+    !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
+#define ENABLE_LOCATION_INDICATOR
+#endif
+
+#ifdef ENABLE_LOCATION_INDICATOR
+#include <mbgl/style/layers/location_indicator_layer.hpp>
+#endif
 
 struct GLFWwindow;
 class GLFWBackend;
@@ -160,7 +166,7 @@ private:
     mbgl::ResourceOptions mapResourceOptions;
     mbgl::ClientOptions mapClientOptions;
 
-#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_CUSTOM_DISABLE_ALL)
+#ifdef ENABLE_LOCATION_INDICATOR
     bool puckFollowsCameraCenter = false;
     mbgl::style::LocationIndicatorLayer *puck = nullptr;
 #endif

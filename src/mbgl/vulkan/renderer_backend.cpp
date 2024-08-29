@@ -12,6 +12,7 @@
 #include <mbgl/shaders/vulkan/circle.hpp>
 #include <mbgl/shaders/vulkan/clipping_mask.hpp>
 #include <mbgl/shaders/vulkan/collision.hpp>
+#include <mbgl/shaders/vulkan/common.hpp>
 #include <mbgl/shaders/vulkan/debug.hpp>
 #include <mbgl/shaders/vulkan/fill.hpp>
 #include <mbgl/shaders/vulkan/heatmap.hpp>
@@ -509,9 +510,15 @@ void RendererBackend::initDevice() {
         // physicalDeviceProperties.limits.lineWidthRange;
         // physicalDeviceProperties.limits.lineWidthGranularity;
     } else {
-        mbgl::Log::Error(mbgl::Event::Render, "Wide line support not available");
+        mbgl::Log::Error(mbgl::Event::Render, "Feature not available: wideLines");
     }
 #endif
+
+    if (supportedDeviceFeatures.samplerAnisotropy) {
+        physicalDeviceFeatures.setSamplerAnisotropy(true);
+    } else {
+        mbgl::Log::Error(mbgl::Event::Render, "Feature not available: samplerAnisotropy");
+    }
 
     auto createInfo = vk::DeviceCreateInfo()
                           .setQueueCreateInfos(queueCreateInfos)
@@ -596,6 +603,8 @@ void RendererBackend::initShaders(gfx::ShaderRegistry& shaders, const ProgramPar
                   shaders::BuiltIn::ClippingMaskProgram,
                   shaders::BuiltIn::CollisionBoxShader,
                   shaders::BuiltIn::CollisionCircleShader,
+                  shaders::BuiltIn::CommonShader,
+                  shaders::BuiltIn::CommonTexturedShader,
                   shaders::BuiltIn::CustomSymbolIconShader,
                   shaders::BuiltIn::DebugShader,
                   shaders::BuiltIn::FillShader,
