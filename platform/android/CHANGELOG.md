@@ -3,6 +3,7 @@
 ## main
 
 ### ✨ Features and improvements
+- Added `zoomBy()`, `getZoom()` and `setZoom` to `MapLibreMap` 
 
 ### 🐞 Bug fixes
 
