@@ -1818,10 +1818,23 @@ TEST(Map, ObserveTileLifecycle) {
                     break;
                 }
                 case TileOperation::EndParse: {
-                    // The tile loader will try the cache first. If a cache hit is found, it starts parsing it while
-                    // loading from the network. In the event data the cache is invalid, the network request will return
-                    // newer data and update the geometry tile worker, which was already parsing the cached data.
-                    EXPECT_THAT(stage, testing::AnyOf(TileOperation::StartParse, TileOperation::LoadFromNetwork));
+                    // The following are both possible:
+                    // * RequestedFromCache -> LoadFromCache -> StartParse -> RequestedFromNetwork -> EndParse ->
+                    //   LoadFromNetwork -> StartParse -> EndParse
+                    // The parsing stage is initiated by the cached version. The network request doesn't arrive
+                    // until after the cached version has completed parsing. A new parsing task is spawned, resulting
+                    // in a pair of Start and EndParse events.
+                    //
+                    // * RequestedFromCache -> LoadFromCache -> StartParse ->
+                    //   RequestedFromNetwork -> LoadFromNetwork -> EndParse
+                    // The parsing stage is initiated by the cached version before being interrupted
+                    // by data from a new version downloaded over the network. This interruption doesn't cancel the
+                    // ongoing parsing task, so ::EndParse will end up being emitted only once by completion of the
+                    // newer tile's data.
+                    EXPECT_THAT(stage,
+                                testing::AnyOf(TileOperation::StartParse,
+                                               TileOperation::LoadFromNetwork,
+                                               TileOperation::RequestedFromNetwork));
                     stage = TileOperation::EndParse;
                     break;
                 }
