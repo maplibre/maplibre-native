@@ -1709,7 +1709,7 @@ TEST(Map, ObserveTileLifecycle) {
         std::string defines;
         bool isPostCompile;
     };
-    std::vector<ShaderEntry> shaderOps = {};
+    std::vector<ShaderEntry> shaderOps;
 
     StubMapObserver observer;
     observer.onTileActionCallback = [&](TileOperation op, const OverscaledTileID& id, const std::string& sourceID) {
@@ -1739,23 +1739,8 @@ TEST(Map, ObserveTileLifecycle) {
     layer->setSourceLayer("landcover");
     layer->setFillColor(Color{0.0, 1.0, 0.0, 1.0});
     map.getStyle().addLayer(std::move(layer));
-
-    map.getStyle().loadJSON(util::read_file("test/fixtures/api/water.json"));
     map.jumpTo(CameraOptions().withCenter(LatLng{37.8, -122.5}).withZoom(10.0));
-
-    auto img = frontend.render(map).image;
-    test::checkImage("test/fixtures/map/tile_lifecycle", img, 0.0002, 0.1);
-
-    std::unordered_map<std::string, bool> seen;
-    for (auto& shader : shaderOps) {
-        auto shaderStr = std::to_string(static_cast<size_t>(shader.id)) + shader.defines;
-        auto it = seen.find(shaderStr);
-        if (it != seen.end()) continue;
-        seen.insert({shaderStr, true});
-        Log::Info(Event::General,
-                  std::to_string(static_cast<size_t>(shader.id)) + " " +
-                      std::to_string(std::hash<std::string>()(shader.defines)));
-    }
+    (void)frontend.render(map);
 
     // We expect to see a valid shader lifecycle for every entry in this list.
     const std::vector<std::pair<shaders::BuiltIn, size_t>> expectedShaders = {

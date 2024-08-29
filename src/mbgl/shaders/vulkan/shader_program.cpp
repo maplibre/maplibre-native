@@ -106,7 +106,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
     backend.setDebugName(vertexShader.get(), shaderName + ".vert");
     backend.setDebugName(fragmentShader.get(), shaderName + ".frag");
 
-    observer->onPostCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
+    observer.onPostCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 }
 
 ShaderProgram::~ShaderProgram() noexcept = default;
