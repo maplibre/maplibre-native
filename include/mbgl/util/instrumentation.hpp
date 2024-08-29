@@ -93,7 +93,7 @@ constexpr const char* tracyConstMemoryLabel = "Constant Buffer Memory";
 #define MLN_TRACE_GL_CONTEXT() ((void)0)
 #define MLN_TRACE_GL_ZONE(label) ((void)0)
 #define MLN_TRACE_FUNC_GL() ((void)0)
-#define MLN_END_FRAME() FrameMark;
+#define MLN_END_FRAME() FrameMark
 
 #endif // MLN_RENDER_BACKEND_OPENGL
 
