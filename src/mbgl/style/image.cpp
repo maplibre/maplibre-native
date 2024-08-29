@@ -14,8 +14,15 @@ Image::Image(std::string id,
              const std::optional<ImageContent>& content,
              const std::optional<TextFit>& textFitWidth,
              const std::optional<TextFit>& textFitHeight)
-    : baseImpl(makeMutable<Impl>(
-          std::move(id), std::move(image), pixelRatio, sdf, std::move(stretchX), std::move(stretchY), content, textFitWidth, textFitHeight)) {}
+    : baseImpl(makeMutable<Impl>(std::move(id),
+                                 std::move(image),
+                                 pixelRatio,
+                                 sdf,
+                                 std::move(stretchX),
+                                 std::move(stretchY),
+                                 content,
+                                 textFitWidth,
+                                 textFitHeight)) {}
 
 std::string Image::getID() const {
     return baseImpl->id;

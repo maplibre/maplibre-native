@@ -128,25 +128,19 @@ void testApplyTextFit(const mapbox::Bin& rectangle,
                       float fontScale,
                       float expectedRight,
                       float expectedBottom) {
-    ImagePosition image = {rectangle,
-                           style::Image::Impl("test",
-                                              PremultipliedImage({static_cast<uint32_t>(rectangle.w),
-                                                                  static_cast<uint32_t>(rectangle.h)}),
-                                              1.0f,
-                                              false,
-                                              {},
-                                              {},
-                                              content,
-                                              textFitWidth,
-                                              textFitHeight)};
-    auto shapedIcon = PositionedIcon::shapeIcon(image,
-                                                {0, 0},
-                                                style::SymbolAnchorType::TopLeft);
-    shapedIcon.fitIconToText(shapedText,
-                             style::IconTextFitType::Both,
-                             {0, 0, 0, 0},
-                             {0, 0},
-                             fontScale);
+    ImagePosition image = {
+        rectangle,
+        style::Image::Impl("test",
+                           PremultipliedImage({static_cast<uint32_t>(rectangle.w), static_cast<uint32_t>(rectangle.h)}),
+                           1.0f,
+                           false,
+                           {},
+                           {},
+                           content,
+                           textFitWidth,
+                           textFitHeight)};
+    auto shapedIcon = PositionedIcon::shapeIcon(image, {0, 0}, style::SymbolAnchorType::TopLeft);
+    shapedIcon.fitIconToText(shapedText, style::IconTextFitType::Both, {0, 0, 0, 0}, {0, 0}, fontScale);
     auto icon = shapedIcon.applyTextFit();
     ASSERT_EQ(icon.top(), 0);
     ASSERT_EQ(icon.left(), 0);
@@ -171,10 +165,10 @@ TEST(Shaping, applyTextFit) {
         {
             // applyTextFit: not specified
             // No change should happen
-            testApplyTextFit(horizontalRectangle, 
+            testApplyTextFit(horizontalRectangle,
                              horizontalContent,
                              std::nullopt,
-                             std::nullopt, 
+                             std::nullopt,
                              shapedText,
                              fontScale,
                              expectedImageSize,
@@ -184,7 +178,7 @@ TEST(Shaping, applyTextFit) {
         {
             // applyTextFit: both stretchOrShrink
             // No change should happen
-            testApplyTextFit(horizontalRectangle, 
+            testApplyTextFit(horizontalRectangle,
                              horizontalContent,
                              style::TextFit::stretchOrShrink,
                              style::TextFit::stretchOrShrink,
@@ -198,7 +192,7 @@ TEST(Shaping, applyTextFit) {
             // applyTextFit: stretchOnly, proportional
             // Since textFitWidth is stretchOnly, it should be returned to
             // the aspect ratio of the content rectangle (9:1) aspect ratio so 144x16.
-            testApplyTextFit(horizontalRectangle, 
+            testApplyTextFit(horizontalRectangle,
                              horizontalContent,
                              style::TextFit::stretchOnly,
                              style::TextFit::proportional,
@@ -220,7 +214,7 @@ TEST(Shaping, applyTextFit) {
             // applyTextFit: stretchOnly, proportional
             // Since textFitWidth is stretchOnly, it should be returned to
             // the aspect ratio of the content rectangle (9:1) aspect ratio so 144x16.
-            testApplyTextFit(verticalRectangle, 
+            testApplyTextFit(verticalRectangle,
                              verticalContent,
                              style::TextFit::proportional,
                              style::TextFit::stretchOnly,

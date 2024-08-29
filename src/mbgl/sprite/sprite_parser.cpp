@@ -49,8 +49,15 @@ std::unique_ptr<style::Image> createStyleImage(const std::string& id,
     PremultipliedImage::copy(image, dstImage, {static_cast<uint32_t>(srcX), static_cast<uint32_t>(srcY)}, {0, 0}, size);
 
     try {
-        return std::make_unique<style::Image>(
-            id, std::move(dstImage), static_cast<float>(ratio), sdf, std::move(stretchX), std::move(stretchY), content, textFitWidth, textFitHeight);
+        return std::make_unique<style::Image>(id,
+                                              std::move(dstImage),
+                                              static_cast<float>(ratio),
+                                              sdf,
+                                              std::move(stretchX),
+                                              std::move(stretchY),
+                                              content,
+                                              textFitWidth,
+                                              textFitHeight);
     } catch (const util::StyleImageException& ex) {
         Log::Error(Event::Sprite, std::string("Can't create image with invalid metadata: ") + ex.what());
         return nullptr;
@@ -170,9 +177,9 @@ std::optional<style::TextFit> getTextFit(const JSValue& value, const char* prope
         if (v.IsString()) {
             return parseTextFit(std::string_view(v.GetString(), v.GetStringLength()));
         } else {
-            Log::Warning(Event::Sprite,
-                         std::string("Invalid sprite image '") + name + "': value of '" + property +
-                         "' must be a string");
+            Log::Warning(
+                Event::Sprite,
+                std::string("Invalid sprite image '") + name + "': value of '" + property + "' must be a string");
         }
     }
 

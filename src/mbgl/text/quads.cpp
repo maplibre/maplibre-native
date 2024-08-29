@@ -94,13 +94,13 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
     float fixedContentWidth = fixedWidth;
     float fixedOffsetY = 0;
     float fixedContentHeight = fixedHeight;
-    
+
     auto icon = shapedIcon;
 
     if (hasIconTextFit && image.content) {
         auto& content = *image.content;
         auto contentWidth = content.right - content.left;
-        auto contentHeight = content.bottom - content.top ;
+        auto contentHeight = content.bottom - content.top;
         if (image.textFitWidth || image.textFitHeight) {
             icon = icon.applyTextFit();
         }
@@ -121,27 +121,23 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
         const float angle_cos = std::cos(angle);
         matrix = std::array<float, 4>{{angle_cos, -angle_sin, angle_sin, angle_cos}};
     }
-    
+
     auto iconLeft = icon.left();
     auto iconTop = icon.top();
     auto iconWidth = icon.right() - iconLeft;
     auto iconHeight = icon.bottom() - iconTop;
 
     auto makeBox = [&](Cut left, Cut top, Cut right, Cut bottom) {
-        const float leftEm = getEmOffset(
-            left.stretch - stretchOffsetX, stretchContentWidth, iconWidth, iconLeft);
+        const float leftEm = getEmOffset(left.stretch - stretchOffsetX, stretchContentWidth, iconWidth, iconLeft);
         const float leftPx = getPxOffset(left.fixed - fixedOffsetX, fixedContentWidth, left.stretch, stretchWidth);
 
-        const float topEm = getEmOffset(
-            top.stretch - stretchOffsetY, stretchContentHeight, iconHeight, iconTop);
+        const float topEm = getEmOffset(top.stretch - stretchOffsetY, stretchContentHeight, iconHeight, iconTop);
         const float topPx = getPxOffset(top.fixed - fixedOffsetY, fixedContentHeight, top.stretch, stretchHeight);
 
-        const float rightEm = getEmOffset(
-            right.stretch - stretchOffsetX, stretchContentWidth, iconWidth, iconLeft);
+        const float rightEm = getEmOffset(right.stretch - stretchOffsetX, stretchContentWidth, iconWidth, iconLeft);
         const float rightPx = getPxOffset(right.fixed - fixedOffsetX, fixedContentWidth, right.stretch, stretchWidth);
 
-        const float bottomEm = getEmOffset(
-            bottom.stretch - stretchOffsetY, stretchContentHeight, iconHeight, iconTop);
+        const float bottomEm = getEmOffset(bottom.stretch - stretchOffsetY, stretchContentHeight, iconHeight, iconTop);
         const float bottomPx = getPxOffset(
             bottom.fixed - fixedOffsetY, fixedContentHeight, bottom.stretch, stretchHeight);
 

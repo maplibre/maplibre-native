@@ -72,7 +72,7 @@ public:
                        const std::array<float, 4>& padding,
                        const std::array<float, 2>& iconOffset,
                        float fontScale);
-    
+
     // Called after a PositionedIcon has already been run through fitIconToText,
     // but needs further adjustment to apply textFitWidth and textFitHeight.
     PositionedIcon applyTextFit() const;

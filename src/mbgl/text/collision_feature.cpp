@@ -56,17 +56,7 @@ CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
                    1,
                    rotate);
     } else {
-        initialize(line,
-                   anchor,
-                   0,
-                   0,
-                   0,
-                   0,
-                   std::nullopt,
-                   boxScale,
-                   padding,
-                   1,
-                   rotate);
+        initialize(line, anchor, 0, 0, 0, 0, std::nullopt, boxScale, padding, 1, rotate);
     }
 }
 

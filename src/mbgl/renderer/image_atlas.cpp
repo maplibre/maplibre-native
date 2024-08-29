@@ -15,7 +15,7 @@ ImagePosition::ImagePosition(const mapbox::Bin& bin, const style::Image::Impl& i
       stretchY(image.stretchY),
       content(image.content),
       textFitWidth(image.textFitWidth),
-      textFitHeight(image.textFitHeight){}
+      textFitHeight(image.textFitHeight) {}
 
 namespace {
 
