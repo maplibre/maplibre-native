@@ -52,7 +52,9 @@ using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
 using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
 #endif
 
-static ContextObserver nullObserver;
+namespace {
+    ContextObserver nullObserver;
+}
 
 class Context {
 protected:

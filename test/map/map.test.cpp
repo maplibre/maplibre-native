@@ -1695,10 +1695,6 @@ TEST(Map, ObserveTileLifecycle) {
         OverscaledTileID id;
         std::string sourceID;
         TileOperation op;
-
-        bool operator==(const TileEntry& other) const noexcept {
-            return id == other.id && sourceID == other.sourceID && op == other.op;
-        }
     };
     std::mutex tileMutex;
     std::vector<TileEntry> tileOps;
