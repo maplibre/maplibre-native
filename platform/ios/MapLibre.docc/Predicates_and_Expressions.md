@@ -1,5 +1,7 @@
 # Predicates and expressions
 
+Using `NSPredicate` with MapLibre iOS
+
 Style layers use predicates and expressions to determine what to display and how
 to format it. _Predicates_ are represented by the same `NSPredicate` class that
 filters results from Core Data or items in an `NSArray` in Objective-C.
@@ -11,8 +13,7 @@ syntax supported by this SDK. For a more general introduction to predicates and
 expressions, consult the
 _[Predicate Programming Guide](https://developer.apple.com/library/content/documentation/Cocoa/Conceptual/Predicates/AdditionalChapters/Introduction.html)_
 in Apple developer documentation. For additional detail on how this SDK has
-extended the `NSExpression` class, consult the [`NSExpression(MLNAdditions)`](./Categories/NSExpression(MLNAdditions).html)
-section of this documentation.
+extended the `NSExpression` class, see the [`NSExpression+MLNAdditions.h`](https://github.com/maplibre/maplibre-native/blob/main/platform/darwin/src/NSExpression%2BMLNAdditions.h) header.
 
 ## Using predicates to filter vector data
 
@@ -144,28 +145,11 @@ polygon.
 The following special attributes are also available on features that are produced
 as a result of clustering multiple point features together in a shape source:
 
-<table>
-<thead>
-<tr><th>Attribute</th><th>Type</th><th>Meaning</th></tr>
-</thead>
-<tbody>
-<tr>
-   <td><code>cluster</code></td>
-   <td>Bool</td>
-   <td>True if the feature is a point cluster. If the attribute is false (or not present) then the  feature should not be considered a cluster.</td>
-</tr>
-<tr>
-   <td><code>cluster_id</code></td>
-   <td>Number</td>
-   <td>Identifier for the point cluster.</td>
-</tr>
-<tr>
-   <td><code>point_count</code></td>
-   <td>Number</td>
-   <td>The number of point features in a given cluster.</td>
-</tr>
-</tbody>
-</table>
+| Attribute   | Type   | Meaning                                                                                                                                  |
+|-------------|--------|------------------------------------------------------------------------------------------------------------------------------------------|
+| cluster     | Bool   | True if the feature is a point cluster. If the attribute is false (or not present) then the  feature should not be considered a cluster. |
+| cluster_id  | Number | Identifier for the point cluster.                                                                                                        |
+| point_count | Number | The number of point features in a given cluster.                                                                                         |
 
 Some characters may not be used directly as part of a key path in a format
 string. For example, if a feature’s attribute is named `ISO 3166-1:2006`, an
@@ -220,7 +204,7 @@ Initializer parameter | Format string syntax
 `length:`             | `length('Wapakoneta')`
 `castObject:toType:`  | `CAST(ele, 'NSString')`<br>`CAST(ele, 'NSNumber')`
 
-A number of [Mapbox-specific functions](#mapbox-specific-functions) are also
+A number of [MapLibre-specific functions](#MapLibre-specific-functions) are also
 available.
 
 The following predefined functions are **not** supported:
@@ -259,87 +243,17 @@ expression.
 
 The following variables are defined by this SDK for use with style layers:
 
-<table>
-<thead>
-<tr><th>Variable</th><th>Type</th><th>Meaning</th></tr>
-</thead>
-<tbody>
-<tr>
-   <td><code>$featureIdentifier</code></td>
-   <td>
-      Any
-      <a href="working-with-geojson-data.html#about-geojson-deserialization">GeoJSON data type</a>
-   </td>
-   <td>
-      A value that uniquely identifies the feature in the containing source.
-      This variable corresponds to the
-      <code>NSExpression.featureIdentifierVariableExpression</code> property.
-   </td>
-</tr>
-<tr>
-   <td><code>$geometryType</code></td>
-   <td>String</td>
-   <td>
-       The type of geometry represented by the feature. A feature’s type is one
-       of the following strings:
-       <ul>
-           <li>
-               <code>Point</code> for point features, corresponding to the
-               <code>MLNPointAnnotation</code> class
-           </li>
-           <li>
-               <code>LineString</code> for polyline features, corresponding to
-               the <code>MLNPolyline</code> class
-           </li>
-           <li>
-               <code>Polygon</code> for polygon features, corresponding to the
-               <code>MLNPolygon</code> class
-           </li>
-       </ul>
-       This variable corresponds to the
-       <code>NSExpression.geometryTypeVariableExpression</code> property.
-   </td>
-</tr>
-<tr>
-   <td><code>$heatmapDensity</code></td>
-   <td>Number</td>
-   <td>
-      The
-      <a href="https://en.wikipedia.org/wiki/Kernel_density_estimation">kernel density estimation</a>
-      of a screen point in a heatmap layer; in other words, a relative measure
-      of how many data points are crowded around a particular pixel. This
-      variable can only be used with the <code>heatmapColor</code> property.
-      This variable corresponds to the
-      <code>NSExpression.heatmapDensityVariableExpression</code> property.
-   </td>
-</tr>
-<tr>
-   <td><code>$zoomLevel</code></td>
-   <td>Number</td>
-   <td>
-      The current zoom level. In style layout and paint properties, this
-      variable may only appear as the target of a top-level interpolation or
-      step expression. This variable corresponds to the
-      <code>NSExpression.zoomLevelVariableExpression</code> property.
-   </td>
-</tr>
-<tr>
-   <td><code>$lineProgress</code></td>
-   <td>Number</td>
-   <td>
-      A number that indicates the relative distance along a line at a given
-      point along the line. This variable evaluates to 0 at the beginning of the
-      line and 1 at the end of the line. It can only be used with the
-      `MLNLineStyleLayer.lineGradient` property. It corresponds to the
-      <code>NSExpression.lineProgressVariableExpression</code> property.
-   </td>
-</tr>
-</tbody>
-</table>
+| Variable | Type | Meaning |
+| --- | --- | --- |
+| `$featureIdentifier` | Any GeoJSON data type | A value that uniquely identifies the feature in the containing source. This variable corresponds to the `NSExpression.featureIdentifierVariableExpression` property. |
+| `$geometryType` | String | The type of geometry represented by the feature. A feature’s type is one of the following strings:<br><br>*   `Point` for point features, corresponding to the `MLNPointAnnotation` class<br>*   `LineString` for polyline features, corresponding to the ``MLNPolyline`` class<br>*   `Polygon` for polygon features, corresponding to the ``MLNPolygon`` class<br><br>This variable corresponds to the `NSExpression.geometryTypeVariableExpression` property. |
+| `$heatmapDensity` | Number | The [kernel density estimation](https://en.wikipedia.org/wiki/Kernel_density_estimation) of a screen point in a heatmap layer; in other words, a relative measure of how many data points are crowded around a particular pixel. This variable can only be used with the `heatmapColor` property. This variable corresponds to the `NSExpression.heatmapDensityVariableExpression` property. |
+| `$zoomLevel` | Number | The current zoom level. In style layout and paint properties, this variable may only appear as the target of a top-level interpolation or step expression. This variable corresponds to the `NSExpression.zoomLevelVariableExpression` property. |
+| `$lineProgress` | Number | A number that indicates the relative distance along a line at a given point along the line. This variable evaluates to 0 at the beginning of the line and 1 at the end of the line. It can only be used with the ``MLNLineStyleLayer/lineGradient`` property. It corresponds to the `NSExpression.lineProgressVariableExpression` property. |
 
 In addition to these variables, you can define your own variables and refer to
 them elsewhere in the expression. The syntax for defining a variable makes use
-of a [Mapbox-specific function](#mapbox-specific-functions) that takes an
+of a [MapLibre-specific function](#MapLibre-specific-functions) that takes an
 `NSDictionary` as an argument:
 
 ```objc
@@ -350,7 +264,9 @@ of a [Mapbox-specific function](#mapbox-specific-functions) that takes an
 NSExpression(format: "MLN_LET(floorCount, 2, $floorCount + 1)")
 ```
 
-## Mapbox-specific functions
+## MapLibre-specific functions
+
+> Warning: Due to a change in iOS 15.5, some of these stopped working. See [#331](https://github.com/maplibre/maplibre-native/issues/331) for more information and workarounds.
 
 For compatibility with the MapLibre Style Spec, the following functions
 are defined by this SDK. When setting a style layer property, you can call these
@@ -358,60 +274,50 @@ functions just like the predefined functions above, using either the
 `+[NSExpression expressionForFunction:arguments:]` method or a convenient format
 string syntax:
 
-### `mgl_does:have:`
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_does:have:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_does:have:(SELF, '🧀🍔')</code> or <code>mgl_does:have:(%@, '🧀🍔')</code></dd>
-</dl>
+
+### mgl_does:have:
+
+**Selector:** `mgl_does:have:`
+
+**Format string syntax:** `mgl_does:have:(SELF, '🧀🍔')` or `mgl_does:have:(%@, '🧀🍔')`
 
 Returns a Boolean value indicating whether the dictionary has a value for the
 key or whether the evaluated object (`SELF`) has a value for the feature
 attribute. Compared to the [`mgl_has:`](#code-mgl_has-code) custom function,
-that function’s target is instead passed in as the first argument to this
+that function's target is instead passed in as the first argument to this
 function. Both functions are equivalent to the syntax `key != NIL` or
 `%@[key] != NIL` but can be used outside of a predicate.
 
-### `mgl_interpolate:withCurveType:parameters:stops:`
+### mgl_interpolate:withCurveType:parameters:stops:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_interpolate:withCurveType:parameters:stops:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_interpolate:withCurveType:parameters:stops:(x, 'linear', nil, %@)</code></dd>
-</dl>
+**Selector:** `mgl_interpolate:withCurveType:parameters:stops:`
+
+**Format string syntax:** `mgl_interpolate:withCurveType:parameters:stops:(x, 'linear', nil, %@)`
 
 Produces continuous, smooth results by interpolating between pairs of input and
-output values (“stops”). Compared to the
+output values ("stops"). Compared to the
 [`mgl_interpolateWithCurveType:parameters:stops:`](#code-mgl_interpolatewithcurvetype-parameters-stops-code)
-custom function, the input expression (that function’s target) is instead passed
+custom function, the input expression (that function's target) is instead passed
 in as the first argument to this function.
 
-### `mgl_step:from:stops:`
+### mgl_step:from:stops:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_step:from:stops:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_step:from:stops:(x, 11, %@)</code></dd>
-</dl>
+**Selector:** `mgl_step:from:stops:`
+
+**Format string syntax:** `mgl_step:from:stops:(x, 11, %@)`
 
 Produces discrete, stepped results by evaluating a piecewise-constant function
 defined by pairs of input and output values ("stops"). Compared to the
 [`mgl_stepWithMinimum:stops:`](#code-mgl_stepwithminimum-stops-code) custom
-function, the input expression (that function’s target) is instead passed in as
+function, the input expression (that function's target) is instead passed in as
 the first argument to this function.
 
-### `mgl_join:`
+### mgl_join:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_join:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_join({'Old', 'MacDonald'})</code></dd>
-</dl>
+**Selector:** `mgl_join:`
+
+**Format string syntax:** `mgl_join({'Old', 'MacDonald'})`
 
 Returns the result of concatenating together all the elements of an array in
 order. Compared to the
@@ -419,14 +325,11 @@ order. Compared to the
 function, this function takes only one argument, which is an aggregate
 expression containing the strings to concatenate.
 
-### `mgl_acos:`
+### mgl_acos:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_acos:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_acos(1)</code></dd>
-</dl>
+**Selector:** `mgl_acos:`
+
+**Format string syntax:** `mgl_acos(1)`
 
 Returns the arccosine of the number.
 
@@ -434,14 +337,11 @@ This function corresponds to the
 [`acos`](https://maplibre.org/maplibre-style-spec/expressions/#acos)
 operator in the MapLibre Style Spec.
 
-### `mgl_asin:`
+### mgl_asin:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_asin:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_asin(0)</code></dd>
-</dl>
+**Selector:** `mgl_asin:`
+
+**Format string syntax:** `mgl_asin(0)`
 
 Returns the arcsine of the number.
 
@@ -449,14 +349,11 @@ This function corresponds to the
 [`asin`](https://maplibre.org/maplibre-style-spec/expressions/#asin)
 operator in the MapLibre Style Spec.
 
-### `mgl_atan:`
+### mgl_atan:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_atan:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_atan(20)</code></dd>
-</dl>
+**Selector:** `mgl_atan:`
+
+**Format string syntax:** `mgl_atan(20)`
 
 Returns the arctangent of the number.
 
@@ -464,14 +361,11 @@ This function corresponds to the
 [`atan`](https://maplibre.org/maplibre-style-spec/expressions/#atan)
 operator in the MapLibre Style Spec.
 
-### `mgl_cos:`
+### mgl_cos:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_cos:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_cos(0)</code></dd>
-</dl>
+**Selector:** `mgl_cos:`
+
+**Format string syntax:** `mgl_cos(0)`
 
 Returns the cosine of the number.
 
@@ -479,14 +373,11 @@ This function corresponds to the
 [`cos`](https://maplibre.org/maplibre-style-spec/expressions/#cos)
 operator in the MapLibre Style Spec.
 
-### `mgl_log2:`
+### mgl_log2:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_log2:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_log2(1024)</code></dd>
-</dl>
+**Selector:** `mgl_log2:`
+
+**Format string syntax:** `mgl_log2(1024)`
 
 Returns the base-2 logarithm of the number.
 
@@ -494,14 +385,11 @@ This function corresponds to the
 [`log2`](https://maplibre.org/maplibre-style-spec/expressions/#log2)
 operator in the MapLibre Style Spec.
 
-### `mgl_round:`
+### mgl_round:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_round:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_round(1.5)</code></dd>
-</dl>
+**Selector:** `mgl_round:`
+
+**Format string syntax:** `mgl_round(1.5)`
 
 Returns the number rounded to the nearest integer. If the number is halfway
 between two integers, this function rounds it away from zero.
@@ -510,14 +398,11 @@ This function corresponds to the
 [`round`](https://maplibre.org/maplibre-style-spec/expressions/#round)
 operator in the MapLibre Style Spec.
 
-### `mgl_sin:`
+### mgl_sin:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_sin:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_sin(0)</code></dd>
-</dl>
+**Selector:** `mgl_sin:`
+
+**Format string syntax:** `mgl_sin(0)`
 
 Returns the sine of the number.
 
@@ -525,14 +410,11 @@ This function corresponds to the
 [`sin`](https://maplibre.org/maplibre-style-spec/expressions/#sin)
 operator in the MapLibre Style Spec.
 
-### `mgl_tan:`
+### mgl_tan:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_tan:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_tan(0)</code></dd>
-</dl>
+**Selector:** `mgl_tan:`
+
+**Format string syntax:** `mgl_tan(0)`
 
 Returns the tangent of the number.
 
@@ -540,29 +422,23 @@ This function corresponds to the
 [`tan`](https://maplibre.org/maplibre-style-spec/expressions/#tan)
 operator in the MapLibre Style Spec.
 
-### `mgl_distanceFrom:`
+### mgl_distanceFrom:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_distanceFrom:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_distanceFrom(%@)</code> with an <code>MLNShape</code></dd>
-</dl>
+**Selector:** `mgl_distanceFrom:`
+
+**Format string syntax:** `mgl_distanceFrom(%@)` with an `MLNShape`
 
 Returns the straight-line distance from the evaluated object to the given shape.
 
 This function corresponds to the
-[`distance`](https://docs.mapbox.com/mapbox-gl-js/style-spec/expressions/#distance)
+[`distance`](https://maplibre.org/maplibre-style-spec/expressions/#distance)
 operator in the MapLibre Style Spec.
 
-### `mgl_coalesce:`
+### mgl_coalesce:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_coalesce:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_coalesce({x, y, z})</code></dd>
-</dl>
+**Selector:** `mgl_coalesce:`
+
+**Format string syntax:** `mgl_coalesce({x, y, z})`
 
 Returns the first non-`nil` value from an array of expressions.
 
@@ -570,14 +446,11 @@ This function corresponds to the
 [`coalesce`](https://maplibre.org/maplibre-style-spec/expressions/#coalesce)
 operator in the MapLibre Style Spec.
 
-### `mgl_attributed:`
+### mgl_attributed:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_attributed:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>mgl_attributed({x, y, z})</code></dd>
-</dl>
+**Selector:** `mgl_attributed:`
+
+**Format string syntax:** `mgl_attributed({x, y, z})`
 
 Concatenates and returns the array of `MLNAttributedExpression` objects, for use 
 with the `MLNSymbolStyleLayer.text` property.
@@ -594,20 +467,15 @@ This function corresponds to the
 [`format`](https://maplibre.org/maplibre-style-spec/expressions/#types-format)
 operator in the MapLibre Style Spec.
 
-### `MLN_LET`
+### MLN_LET
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>MLN_LET:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>MLN_LET('age', uppercase('old'), 'name', uppercase('MacDonald'), mgl_join({$age, $name}))</code></dd>
-<dt>Arguments:</dt>
-<dd>
-   Any number of variable names interspersed with their assigned
-   <code>NSExpression</code> values, followed by an <code>NSExpression</code>
-   that may contain references to those variables.
-</dd>
-</dl>
+**Selector:** `MLN_LET:`
+
+**Format string syntax:** `MLN_LET('age', uppercase('old'), 'name', uppercase('MacDonald'), mgl_join({$age, $name}))`
+
+**Arguments:** Any number of variable names interspersed with their assigned
+`NSExpression` values, followed by an `NSExpression`
+that may contain references to those variables.
 
 Returns the result of evaluating an expression with the given variable values.
 Compared to the
@@ -615,24 +483,19 @@ Compared to the
 function, this function takes the variable names and values inline before the
 expression that contains references to those variables.
 
-### `MLN_MATCH`
+### MLN_MATCH
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>MLN_MATCH:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>MLN_MATCH(x, 0, 'zero match', 1, 'one match', 2, 'two match', 'default')</code></dd>
-<dt>Arguments:</dt>
-<dd>
-   An input expression, then any number of argument pairs, followed by a default
-   expression. Each argument pair consists of a constant value followed by an
-   expression to produce as a result of matching that constant value.
-   If the input value is an aggregate expression, then any of the constant values within
-   that aggregate expression result in the following argument. This is shorthand for
-   specifying an argument pair for each of the constant values within that aggregate
-   expression. It is not possible to match the aggregate expression itself.
-</dd>
-</dl>
+**Selector:** `MLN_MATCH:`
+
+**Format string syntax:** `MLN_MATCH(x, 0, 'zero match', 1, 'one match', 2, 'two match', 'default')`
+
+**Arguments:** An input expression, then any number of argument pairs, followed by a default
+expression. Each argument pair consists of a constant value followed by an
+expression to produce as a result of matching that constant value.
+If the input value is an aggregate expression, then any of the constant values within
+that aggregate expression result in the following argument. This is shorthand for
+specifying an argument pair for each of the constant values within that aggregate
+expression. It is not possible to match the aggregate expression itself.
 
 Returns the result of matching the input expression against the given constant
 values.
@@ -643,24 +506,19 @@ method and the
 [`match`](https://maplibre.org/maplibre-style-spec/expressions/#match)
 operator in the MapLibre Style Spec.
 
-### `MLN_IF`
+### MLN_IF
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>MLN_IF:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>MLN_IF(1 = 2, YES, 2 = 2, YES, NO)</code></dd>
-<dt>Arguments:</dt>
-<dd>
-   Alternating <code>NSPredicate</code> conditionals and resulting expressions,
-   followed by a default expression.
-</dd>
-</dl>
+**Selector:** `MLN_IF:`
+
+**Format string syntax:** `MLN_IF(1 = 2, YES, 2 = 2, YES, NO)`
+
+**Arguments:** Alternating `NSPredicate` conditionals and resulting expressions,
+followed by a default expression.
 
 Returns the first expression that meets the condition; otherwise, the default
 value. Unlike
 `+[NSExpression expressionForConditional:trueExpression:falseExpression:]` or
-the `TERNARY()` syntax, this function can accept multiple “if else” conditions
+the `TERNARY()` syntax, this function can accept multiple "if else" conditions
 and is supported on iOS 8._x_ and macOS 10.10._x_; however, each conditional
 passed into this function must be wrapped in a constant expression.
 
@@ -670,18 +528,13 @@ method and the
 [`case`](https://maplibre.org/maplibre-style-spec/expressions/#case)
 operator in the MapLibre Style Spec.
 
-### `MLN_FUNCTION`
+### MLN_FUNCTION
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>MLN_FUNCTION:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>MLN_FUNCTION('typeof', mystery)</code></dd>
-<dt>Arguments:</dt>
-<dd>
-   Any arguments required by the expression operator.
-</dd>
-</dl>
+**Selector:** `MLN_FUNCTION:`
+
+**Format string syntax:** `MLN_FUNCTION('typeof', mystery)`
+
+**Arguments:** Any arguments required by the expression operator.
 
 An expression exactly as defined by the
 [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/expressions/).
@@ -694,7 +547,7 @@ The following custom functions are also available with the
 
 Some of these functions are defined as methods on their respective target
 classes, but you should not call them directly outside the context of an
-expression, because the result may differ from the evaluated expression’s result
+expression, because the result may differ from the evaluated expression's result
 or may result in undefined behavior.
 
 The MapLibre Style Spec defines some operators for which no custom
@@ -702,46 +555,33 @@ function is available. To use these operators in an `NSExpression`, call the
 [`MLN_FUNCTION()`](#code-mgl_function-code) function with the same arguments
 that the operator expects.
 
-### `boolValue`
+### boolValue
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>boolValue</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>FUNCTION(1, 'boolValue')</code></dd>
-<dt>Target:</dt>
-<dd>
-   An <code>NSExpression</code> that evaluates to a number or string.
-</dd>
-<dt>Arguments:</dt>
-<dd>None.</dd>
-</dl>
+**Selector:** `boolValue`
 
-A Boolean representation of the target: <code>FALSE</code> when then input is an
-empty string, 0, <code>FALSE</code>, <code>NIL</code>, or <code>NaN</code>,
-otherwise <code>TRUE</code>.
+**Format string syntax:** `FUNCTION(1, 'boolValue')`
 
-### `mgl_has:`
+**Target:** An `NSExpression` that evaluates to a number or string.
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_has:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>FUNCTION($featureAttributes, 'mgl_has:', '🧀🍔')</code></dd>
-<dt>Target:</dt>
-<dd>
-   An <code>NSExpression</code> that evaluates to an <code>NSDictionary</code>
-   or the evaluated object (<code>SELF</code>).
-</dd>
-<dt>Arguments:</dt>
-<dd>
-   An <code>NSExpression</code> that evaluates to an <code>NSString</code>
-   representing the key to look up in the dictionary or the feature attribute to
-   look up in the evaluated object (see <code>MLNFeature.attributes</code>).
-</dd>
-</dl>
+**Arguments:** None.
 
-<code>true</code> if the dictionary has a value for the key or if the evaluated
+A Boolean representation of the target: `FALSE` when then input is an
+empty string, 0, `FALSE`, `NIL`, or `NaN`, otherwise `TRUE`.
+
+### mgl_has:
+
+**Selector:** `mgl_has:`
+
+**Format string syntax:** `FUNCTION($featureAttributes, 'mgl_has:', '🧀🍔')`
+
+**Target:** An `NSExpression` that evaluates to an `NSDictionary`
+or the evaluated object (`SELF`).
+
+**Arguments:** An `NSExpression` that evaluates to an `NSString`
+representing the key to look up in the dictionary or the feature attribute to
+look up in the evaluated object (see `MLNFeature.attributes`).
+
+`true` if the dictionary has a value for the key or if the evaluated
 object has a value for the feature attribute.
 
 This function corresponds to the
@@ -752,28 +592,19 @@ without the `FUNCTION()` operator. You can also check whether an object has an
 attribute by comparing the key path to `NIL`, for example `cheeseburger != NIL`
 or `burger.cheese != NIL`
 
-### `mgl_expressionWithContext:`
+### mgl_expressionWithContext:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_expressionWithContext:</code></dd>
-<dt>Format string syntax:</dt>
-<dd>
-   <code>FUNCTION($ios + $macos, 'mgl_expressionWithContext:', %@)</code> with
-   a dictionary containing <code>ios</code> and <code>macos</code> keys
-</dd>
-<dt>Target:</dt>
-<dd>
-   An <code>NSExpression</code> that may contain references to the variables
-   defined in the context dictionary.
-</dd>
-<dt>Arguments:</dt>
-<dd>
-   An <code>NSDictionary</code> with <code>NSString</code>s as keys and
-   <code>NSExpression</code>s as values. Each key is a variable name and each
-   value is the variable’s value within the target expression.
-</dd>
-</dl>
+**Selector:** `mgl_expressionWithContext:`
+
+**Format string syntax:** `FUNCTION($ios + $macos, 'mgl_expressionWithContext:', %@)` with
+a dictionary containing `ios` and `macos` keys
+
+**Target:** An `NSExpression` that may contain references to the variables
+defined in the context dictionary.
+
+**Arguments:** An `NSDictionary` with `NSString`s as keys and
+`NSExpression`s as values. Each key is a variable name and each
+value is the variable's value within the target expression.
 
 The target expression with variable subexpressions replaced with the values
 defined in the context dictionary.
@@ -784,48 +615,33 @@ operator in the MapLibre Style Spec. See also the
 [`MLN_LET`](#code-mgl_let-code) function, which is used on its own without the
 `FUNCTION()` operator.
 
-### `mgl_interpolateWithCurveType:parameters:stops:`
+### mgl_interpolateWithCurveType:parameters:stops:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_interpolateWithCurveType:parameters:stops:</code></dd>
-<dt>Format string syntax:</dt>
-<dd>
-   <code>FUNCTION($zoomLevel, 'mgl_interpolateWithCurveType:parameters:stops:', 'linear', NIL, %@)</code>
-   with a dictionary containing zoom levels or other constant values as keys
-</dd>
-<dt>Target:</dt>
-<dd>
-   An <code>NSExpression</code> that evaluates to a number and contains a
-   variable or key path expression.
-</dd>
-<dt>Arguments:</dt>
-<dd>
-   The first argument is one of the following strings denoting curve types:
-   <code>linear</code>, <code>exponential</code>, or <code>cubic-bezier</code>.
+**Selector:** `mgl_interpolateWithCurveType:parameters:stops:`
 
-   The second argument is an expression providing parameters for the curve:
+**Format string syntax:** `FUNCTION($zoomLevel, 'mgl_interpolateWithCurveType:parameters:stops:', 'linear', NIL, %@)`
+with a dictionary containing zoom levels or other constant values as keys
 
-   <ul>
-      <li>If the curve type is <code>linear</code>, the argument is <code>NIL</code>.</li>
-      <li>
-         If the curve type is <code>exponential</code>, the argument is an
-         expression that evaluates to a number, specifying the base of the
-         exponential interpolation.
-      </li>
-      <li>
-         If the curve type is <code>cubic-bezier</code>, the argument is an
-         array or aggregate expression containing four expressions, each
-         evaluating to a number. The four numbers are control points for the
-         cubic Bézier curve.
-      </li>
-   </ul>
+**Target:** An `NSExpression` that evaluates to a number and contains a
+variable or key path expression.
 
-   The third argument is an <code>NSDictionary</code> object representing the
-   interpolation’s stops, with numeric zoom levels as keys and expressions as
-   values.
-</dd>
-</dl>
+**Arguments:** The first argument is one of the following strings denoting curve types:
+`linear`, `exponential`, or `cubic-bezier`.
+
+The second argument is an expression providing parameters for the curve:
+
+* If the curve type is `linear`, the argument is `NIL`.
+* If the curve type is `exponential`, the argument is an
+  expression that evaluates to a number, specifying the base of the
+  exponential interpolation.
+* If the curve type is `cubic-bezier`, the argument is an
+  array or aggregate expression containing four expressions, each
+  evaluating to a number. The four numbers are control points for the
+  cubic Bézier curve.
+
+The third argument is an `NSDictionary` object representing the
+interpolation's stops, with numeric zoom levels as keys and expressions as
+values.
 
 A value interpolated along the continuous mathematical function defined by the
 arguments, with the target as the input to the function.
@@ -844,36 +660,50 @@ operator in the MapLibre Style Spec. See also the
 [`mgl_interpolate:withCurveType:parameters:stops:`](#code-mgl_interpolate-withcurvetype-parameters-stops-code)
 function, which is used on its own without the `FUNCTION()` operator.
 
-### `mgl_numberWithFallbackValues:`
+### mgl_numberWithFallbackValues:
 
-<dl>
-<dt>Selector:</dt>
-<dd>
-   <code>mgl_numberWithFallbackValues:</code>,
-   <code>doubleValue</code>,
-   <code>floatValue</code>, or
-   <code>decimalValue</code>
-</dd>
-<dt>Format string syntax:</dt>
-<dd><code>FUNCTION(ele, 'mgl_numberWithFallbackValues:', 0)</code></dd>
-<dt>Target:</dt>
-<dd>
-   An <code>NSExpression</code> that evaluates to a Boolean value, number, or
-   string.
-</dd>
-<dt>Arguments:</dt>
-<dd>
-   Zero or more <code>NSExpression</code>s, each evaluating to a Boolean value
-   or string.
-</dd>
-</dl>
+**Selector:** `mgl_numberWithFallbackValues:`,
+`doubleValue`,
+`floatValue`, or
+`decimalValue`
+
+**Format string syntax:** `FUNCTION(ele, 'mgl_numberWithFallbackValues:', 0)`
+
+**Target:** An `NSExpression` that evaluates to a Boolean value, number, or
+string.
+
+**Arguments:** Zero or more `NSExpression`s, each evaluating to a Boolean value
+or string.
 
 A numeric representation of the target:
 
-* If the target is <code>NIL</code> or <code>FALSE</code>, the result is 0.
+* If the target is `NIL` or `FALSE`, the result is 0.
+* If the target is true, the result is 1.
+* If the target is a string, it is converted to a number as specified by the
+
+**Selector:**
+`mgl_numberWithFallbackValues:`,
+`doubleValue`,
+`floatValue`, or
+`decimalValue`
+
+**Format string syntax:**
+`FUNCTION(ele, 'mgl_numberWithFallbackValues:', 0)`
+
+**Target:**
+An `NSExpression` that evaluates to a Boolean value, number, or
+string.
+
+**Arguments:**
+Zero or more `NSExpression`s, each evaluating to a Boolean value
+or string.
+
+A numeric representation of the target:
+
+* If the target is `NIL` or `FALSE`, the result is 0.
 * If the target is true, the result is 1.
   * If the target is a string, it is converted to a number as specified by the
-    “[ToNumber Applied to the String Type](https://tc39.github.io/ecma262/#sec-tonumber-applied-to-the-string-type)”
+    "[ToNumber Applied to the String Type](https://tc39.github.io/ecma262/#sec-tonumber-applied-to-the-string-type)"
     algorithm of the ECMAScript Language Specification.
   * If multiple values are provided, each one is evaluated in order until the
     first successful conversion is obtained.
@@ -884,35 +714,30 @@ operator in the MapLibre Style Spec. You can also cast a value to a
 number by passing the value and the string `NSNumber` into the `CAST()`
 operator.
 
-### `mgl_stepWithMinimum:stops:`
+### mgl_stepWithMinimum:stops:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>mgl_stepWithMinimum:stops:</code></dd>
-<dt>Format string syntax:</dt>
-<dd>
-   <code>FUNCTION($zoomLevel, 'mgl_stepWithMinimum:stops:', 0, %@)</code> with
-   a dictionary with zoom levels or other constant values as keys
-</dd>
-<dt>Target:</dt>
-<dd>
-   An <code>NSExpression</code> that evaluates to a number and contains a
-   variable or key path expression.
-</dd>
-<dt>Arguments:</dt>
-<dd>
-   The first argument is an expression that evaluates to a number, specifying
-   the minimum value in case the target is less than any of the stops in the
-   second argument.
+**Selector:**
+`mgl_stepWithMinimum:stops:`
 
-   The second argument is an <code>NSDictionary</code> object representing the
-   interpolation’s stops, with numeric zoom levels as keys and expressions as
-   values.
-</dd>
-</dl>
+**Format string syntax:**
+`FUNCTION($zoomLevel, 'mgl_stepWithMinimum:stops:', 0, %@)` with
+a dictionary with zoom levels or other constant values as keys
+
+**Target:**
+An `NSExpression` that evaluates to a number and contains a
+variable or key path expression.
+
+**Arguments:**
+The first argument is an expression that evaluates to a number, specifying
+the minimum value in case the target is less than any of the stops in the
+second argument.
+
+The second argument is an `NSDictionary` object representing the
+interpolation's stops, with numeric zoom levels as keys and expressions as
+values.
 
 The output value of the stop whose key is just less than the evaluated target,
-or the minimum value if the target is less than the least of the stops’ keys.
+or the minimum value if the target is less than the least of the stops' keys.
 
 The input expression is matched against the keys in the stop dictionary. The
 keys may be feature attribute values, zoom levels, or heatmap densities. The
@@ -926,18 +751,19 @@ method and the
 [`step`](https://maplibre.org/maplibre-style-spec/expressions/#step)
 operator in the MapLibre Style Spec.
 
-### `stringByAppendingString:`
+### stringByAppendingString:
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>stringByAppendingString:</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>FUNCTION('Old', 'stringByAppendingString:', 'MacDonald')</code></dd>
-<dt>Target:</dt>
-<dd>An <code>NSExpression</code> that evaluates to a string.</dd>
-<dt>Arguments:</dt>
-<dd>One or more <code>NSExpression</code>s, each evaluating to a string.</dd>
-</dl>
+**Selector:**
+`stringByAppendingString:`
+
+**Format string syntax:**
+`FUNCTION('Old', 'stringByAppendingString:', 'MacDonald')`
+
+**Target:**
+An `NSExpression` that evaluates to a string.
+
+**Arguments:**
+One or more `NSExpression`s, each evaluating to a string.
 
 The target string with each of the argument strings appended in order.
 
@@ -949,21 +775,20 @@ operator in the MapLibre Style Spec. See also the
 [`mgl_join:`](#code-mgl_join-code) function, which concatenates multiple
 expressions and is used on its own without the `FUNCTION()` operator.
 
-### `stringValue`
+### stringValue
 
-<dl>
-<dt>Selector:</dt>
-<dd><code>stringValue</code></dd>
-<dt>Format string syntax:</dt>
-<dd><code>FUNCTION(ele, 'stringValue')</code></dd>
-<dt>Target:</dt>
-<dd>
-   An <code>NSExpression</code> that evaluates to a Boolean value, number, or
-   string.
-</dd>
-<dt>Arguments:</dt>
-<dd>None.</dd>
-</dl>
+**Selector:**
+`stringValue`
+
+**Format string syntax:**
+`FUNCTION(ele, 'stringValue')`
+
+**Target:**
+An `NSExpression` that evaluates to a Boolean value, number, or
+string.
+
+**Arguments:**
+None.
 
 A string representation of the target:
 
