@@ -5,6 +5,7 @@ namespace mbgl {
 
     std::optional<Padding> Padding::parse(const std::string& /*s*/) {
         //BUGBUG wip
+        assert(false);
         return {};
     }
 

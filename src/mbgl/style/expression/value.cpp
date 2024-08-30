@@ -55,8 +55,9 @@ void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& 
                 },
                 [&](const std::string& s) { writer.String(s); },
                 [&](const Color& c) { writer.String(c.stringify()); },
-                // BUGBUG is this correct?
-                [&](const Padding& p) { writer.String(p.toString()); },
+                [&](const Padding& p) {
+                    writer.String(p.toString());
+                },
                 [&](const Collator&) {
                     // Collators are excluded from constant folding and there's no Literal parser
                     // for them so there shouldn't be any way to serialize this value.

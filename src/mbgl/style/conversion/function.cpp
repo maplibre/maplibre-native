@@ -210,6 +210,7 @@ enum class FunctionType {
 bool interpolatable(type::Type type) noexcept {
     return type.match([&](const type::NumberType&) { return true; },
                       [&](const type::ColorType&) { return true; },
+                      [&](const type::PaddingType&) { return true; },
                       [&](const type::Array& array) { return array.N && array.itemType == type::Number; },
                       [&](const auto&) { return false; });
 }
@@ -248,8 +249,11 @@ std::optional<std::unique_ptr<Expression>> convertLiteral(type::Type type,
             return literal(*result);
         },
         [&](const type::PaddingType&) -> std::optional<std::unique_ptr<Expression>> {
-            // BUGBUG wip
-            return std::nullopt;
+            auto result = convert<Padding>(value, error);
+            if (!result) {
+                return std::nullopt;
+            }
+            return literal(*result);
         },
         [&](const type::Array& array) -> std::optional<std::unique_ptr<Expression>> {
             if (!isArray(value)) {
@@ -783,6 +787,9 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
             },
             [&](const type::ColorType&) -> std::optional<std::unique_ptr<Expression>> {
                 return toColor(get(literal(*property)), defaultExpr());
+            },
+            [&](const type::PaddingType&) -> std::optional<std::unique_ptr<Expression>> {
+                return toPadding(get(literal(*property)), defaultExpr());
             },
             [&](const type::Array& array) -> std::optional<std::unique_ptr<Expression>> {
                 return assertion(array, get(literal(*property)), defaultExpr());

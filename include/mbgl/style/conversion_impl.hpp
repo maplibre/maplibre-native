@@ -368,7 +368,6 @@ template <typename T>
 StyleProperty makeStyleProperty(const PropertyValue<T>& value) {
     return value.match([](const Undefined&) -> StyleProperty { return {}; },
                        [](const Color& c) -> StyleProperty { return {makeValue(c), StyleProperty::Kind::Expression}; },
-                       // BUGBUG figure this out
                        [](const Padding& p) -> StyleProperty { return {makeValue(p), StyleProperty::Kind::Expression}; },
                        [](const PropertyExpression<T>& fn) -> StyleProperty {
                            return {fn.getExpression().serialize(), StyleProperty::Kind::Expression};

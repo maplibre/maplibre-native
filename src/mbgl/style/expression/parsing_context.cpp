@@ -134,6 +134,7 @@ constexpr const auto expressionRegistry = mapbox::eternal::hash_map<mapbox::eter
      {"string", Assertion::parse},
      {"to-boolean", Coercion::parse},
      {"to-color", Coercion::parse},
+     {"to-padding", Coercion::parse},
      {"to-number", Coercion::parse},
      {"to-string", Coercion::parse},
      {"var", Var::parse},
