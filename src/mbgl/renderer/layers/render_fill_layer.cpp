@@ -453,7 +453,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         const auto& tileID = tile.getOverscaledTileID();
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
-            return;
+            continue;
         }
 
         const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
