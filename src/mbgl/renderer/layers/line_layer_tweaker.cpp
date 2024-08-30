@@ -193,7 +193,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     0};
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
 
-                // TODO: Share?
                 const auto lineInterpolationUBO = LineInterpolationUBO{
                     /*color_t =*/std::get<0>(binders->get<LineColor>()->interpolationFactor(zoom)),
                     /*blur_t =*/std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
@@ -215,7 +214,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     0};
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
 
-                // TODO: share?
                 const auto lineGradientInterpolationUBO = LineGradientInterpolationUBO{
                     /*blur_t =*/std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
                     /*opacity_t =*/std::get<0>(binders->get<LineOpacity>()->interpolationFactor(zoom)),
@@ -245,7 +243,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /*fade =*/crossfade.t};
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
 
-                // TODO: share?
                 const auto linePatternInterpolationUBO = LinePatternInterpolationUBO{
                     /*blur_t =*/std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
                     /*opacity_t =*/std::get<0>(binders->get<LineOpacity>()->interpolationFactor(zoom)),
@@ -257,7 +254,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     0};
                 drawableUniforms.createOrUpdate(idLineInterpolationUBO, &linePatternInterpolationUBO, context);
 
-                // TODO: share by tile?
                 const auto linePatternTilePropertiesUBO = LinePatternTilePropertiesUBO{
                     /*pattern_from =*/patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
                     /*pattern_to =*/patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0}};
@@ -302,7 +298,6 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         0};
                     drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
 
-                    // TODO: share?
                     const auto lineSDFInterpolationUBO = LineSDFInterpolationUBO{
                         /*color_t =*/std::get<0>(binders->get<LineColor>()->interpolationFactor(zoom)),
                         /*blur_t =*/std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),

@@ -725,8 +725,8 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 #if MLN_DRAWABLE_RENDERER
 
 namespace {
-constexpr auto posOffsetAttribName = "a_pos_offset";
 const SegmentVector<SymbolTextAttributes> emptySegmentVector;
+constexpr auto posOffsetAttribName = "a_pos_offset";
 
 void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const bool isText,
@@ -1088,7 +1088,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             propertiesAsUniforms.first.clear();
             propertiesAsUniforms.second.clear();
 
-            const auto& evaluated = getEvaluated<SymbolLayerProperties>(renderData.layerProperties);
             updateTileDrawable(drawable, bucket, bucketPaintProperties, evaluated);
             return true;
         };
