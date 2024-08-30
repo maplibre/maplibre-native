@@ -53,7 +53,7 @@ using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
 #endif
 
 namespace {
-    ContextObserver nullObserver;
+ContextObserver nullObserver;
 }
 
 class Context {
