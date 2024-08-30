@@ -67,8 +67,9 @@ void FileSource::setTileServerOptions(jni::JNIEnv& _env, const jni::Object<TileS
 }
 
 jni::Local<jni::String> FileSource::getApiKey(jni::JNIEnv& env) {
-    if (auto* token = onlineSource->getProperty(mbgl::API_KEY_KEY).getString()) {
-        return jni::Make<jni::String>(env, *token);
+    auto token = onlineSource->getProperty(mbgl::API_KEY_KEY).get<std::string>();
+    if (!token.empty()) {
+        return jni::Make<jni::String>(env, token);
     }
 
     ThrowNew(env, jni::FindClass(env, "java/lang/IllegalStateException"), "Online functionality is disabled.");
