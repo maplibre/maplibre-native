@@ -726,6 +726,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 
 namespace {
 constexpr auto posOffsetAttribName = "a_pos_offset";
+const SegmentVector<SymbolTextAttributes> emptySegmentVector;
 
 void updateTileAttributes(const SymbolBucket::Buffer& buffer,
                           const bool isText,
