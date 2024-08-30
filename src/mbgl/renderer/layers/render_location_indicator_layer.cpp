@@ -1141,7 +1141,6 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         };
 
         // create circle drawable
-
         const auto getCircleDrawable = [&](const auto& name, auto& vertexAttrib) -> gfx::UniqueDrawable& {
             auto& drawable = builder->getCurrentDrawable(true);
 
@@ -1185,7 +1184,6 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             {
-                //auto vertexAttrib = context.createVertexAttributeArray();
                 auto& drawable = getCircleDrawable("locationAccuracyCircleOutline", vertexAttrib);
 
                 std::vector<gfx::Drawable::UniqueDrawSegment> drawSegments;
@@ -1241,20 +1239,8 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             auto& circleVertexAttrs = circleDrawable.getVertexAttributes();
             if (const auto& attr = circleVertexAttrs->set(shaders::idCommonPosVertexAttribute)) {
                 
-                attr->setSharedRawData(std::shared_ptr<VertexVector>(verts),
-                                       0,
-                                       0,
-                                       sizeof(RenderLocationIndicatorImpl::vec2),
-                                       gfx::AttributeDataType::Float2);
-            }
-
-            auto& circleOutlineVertexAttrs = circleOutlineDrawable.getVertexAttributes();
-            if (const auto& attr = circleOutlineVertexAttrs->set(shaders::idCommonPosVertexAttribute)) {
-                attr->setSharedRawData(std::shared_ptr<VertexVector>(verts),
-                                       0,
-                                       0,
-                                       sizeof(RenderLocationIndicatorImpl::vec2),
-                                       gfx::AttributeDataType::Float2);
+                attr->setSharedRawData(
+                    verts, 0, 0, sizeof(RenderLocationIndicatorImpl::vec2), gfx::AttributeDataType::Float2);
             }
         }
 
