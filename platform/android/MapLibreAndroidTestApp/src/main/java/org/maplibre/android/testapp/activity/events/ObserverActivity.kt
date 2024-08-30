@@ -1,4 +1,4 @@
-package org.maplibre.android.testapp.activity.telemetry
+package org.maplibre.android.testapp.activity.events
 
 import android.app.ActivityManager
 import android.os.Build
