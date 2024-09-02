@@ -133,7 +133,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::Presen
         swapchainCreateInfo.setImageSharingMode(vk::SharingMode::eExclusive);
     }
 
-    swapchainCreateInfo.setPreTransform(capabilities.currentTransform);
+    swapchainCreateInfo.setPreTransform(vk::SurfaceTransformFlagBitsKHR::eIdentity);
     swapchainCreateInfo.setClipped(VK_TRUE);
 
     if (capabilities.supportedCompositeAlpha & vk::CompositeAlphaFlagBitsKHR::eInherit) {

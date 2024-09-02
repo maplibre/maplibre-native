@@ -205,10 +205,11 @@ void Context::beginFrame() {
             if (acquireImageResult.result == vk::Result::eSuccess) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
             } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
-                // request an update and restart frame
-                requestSurfaceUpdate();
-                beginFrame();
-                return;
+                renderableResource.setAcquiredImageIndex(acquireImageResult.value);
+                // TODO implement pre-rotation transform for surface orientation
+                //requestSurfaceUpdate();
+                //beginFrame();
+                //return;
             }
 
         } catch (const vk::OutOfDateKHRError& e) {
@@ -269,7 +270,8 @@ void Context::submitFrame() {
             const auto& presentQueue = backend.getPresentQueue();
             const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
             if (presentResult == vk::Result::eSuboptimalKHR) {
-                requestSurfaceUpdate();
+                // TODO implement pre-rotation transform for surface orientation
+                //requestSurfaceUpdate();
             }
         } catch (const vk::OutOfDateKHRError& e) {
             requestSurfaceUpdate();
