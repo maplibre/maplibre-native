@@ -43,7 +43,7 @@ jobs:
       - name: Get all iOS files that have changed
         if: github.event_name != 'workflow_dispatch'
         id: changed-files-yaml
-        uses: tj-actions/changed-files@v44
+        uses: tj-actions/changed-files@v45
         with:
           files_yaml_from_source_file: .github/changed-files.yml
 
@@ -223,7 +223,7 @@ jobs:
 
       - name: VERSION file changed
         id: version-file-ios-changed
-        uses: tj-actions/changed-files@v44
+        uses: tj-actions/changed-files@v45
         with:
           files: platform/ios/VERSION
 
