@@ -14,14 +14,14 @@ fragment = "1.8.2"
 annotation = "1.8.2"
 leakCanary = "2.14"
 junit = "4.13.2"
-mockito = "5.12.0"
+mockito = "5.13.0"
 mockk = "1.13.12"
 robolectric = "4.13"
 timber = "5.0.1"
 okhttp = "4.12.0"
-kotlin = "2.0.10"
+kotlin = "2.0.20"
 licenses = "0.9.8"
-lint = "31.5.2"
+lint = "31.6.0"
 appcenter = "1.5"
 commonsIO = "2.16.1"
 assertj = "3.26.3"
@@ -33,7 +33,7 @@ androidxTestCoreKtx = "1.5.0"
 kotlinxSerializationJson = "1.6.0"
 kotlinxCoroutines = { strictly = "[1.0, 2.0[" }
 
-androidGradlePlugin = "8.5.2"
+androidGradlePlugin = "8.6.0"
 
 [libraries]
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
@@ -81,7 +81,7 @@ gradleNexus = { group = "io.github.gradle-nexus", name = "publish-plugin", versi
 
 androidxTestExtJUnit = { group = "androidx.test.ext", name = "junit", version = "1.2.1" }
 androidxTestCoreKtx = { group = "androidx.test", name = "core-ktx", version = "1.6.1" }
-kotlinxSerializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.7.1" }
+kotlinxSerializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.7.2" }
 
 androidGradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin"}
 
@@ -89,6 +89,6 @@ androidGradlePlugin = { group = "com.android.tools.build", name = "gradle", vers
 [plugins]
 nexusPublishPlugin = { id = "io.github.gradle-nexus.publish-plugin", version = "2.0.0" }
 kotlinter = { id = "org.jmailen.kotlinter", version = "4.4.1" }
-kotlinAndroid = { id = "org.jetbrains.kotlin.android", version = "2.0.10" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version = "2.0.20" }
 dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
-kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.0.10" }
+kotlinPluginSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.0.20" }
