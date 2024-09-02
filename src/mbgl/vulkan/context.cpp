@@ -207,9 +207,9 @@ void Context::beginFrame() {
             } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
                 // TODO implement pre-rotation transform for surface orientation
-                //requestSurfaceUpdate();
-                //beginFrame();
-                //return;
+                // requestSurfaceUpdate();
+                // beginFrame();
+                // return;
             }
 
         } catch (const vk::OutOfDateKHRError& e) {
@@ -271,7 +271,7 @@ void Context::submitFrame() {
             const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
             if (presentResult == vk::Result::eSuboptimalKHR) {
                 // TODO implement pre-rotation transform for surface orientation
-                //requestSurfaceUpdate();
+                // requestSurfaceUpdate();
             }
         } catch (const vk::OutOfDateKHRError& e) {
             requestSurfaceUpdate();
