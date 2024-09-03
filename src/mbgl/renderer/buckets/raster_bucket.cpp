@@ -113,6 +113,9 @@ void RasterBucket::setMask(TileMask&& mask_) {
         segment.vertexLength += vertexLength;
         segment.indexLength += 6;
     }
+
+    vertices.updateModified();
+    indices.updateModified();
 }
 
 bool RasterBucket::hasData() const {
