@@ -406,6 +406,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/instrumentation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/interpolate.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/logging.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/lru_cache.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/noncopyable.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/platform.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/premultiply.hpp
@@ -1102,6 +1103,8 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderbuffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderbuffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/resource_pool.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/resource_pool.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/state.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.hpp

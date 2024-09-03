@@ -89,16 +89,6 @@ filegroup(
 )
 
 filegroup(
-    name = "docs_ejs_templates",
-    srcs = [
-        "docs/guides/For_Style_Authors.md.ejs",
-        "docs/guides/Migrating_to_Expressions.md.ejs",
-        "docs/guides/Tile_URL_Templates.md.ejs",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
     name = "generator_data",
     srcs = [
         "src/MLNLight.h.ejs",
@@ -112,7 +102,6 @@ filegroup(
 js_run_binary(
     name = "generated_code",
     srcs = [
-        ":docs_ejs_templates",
         ":generator_data",
         ":test_ejs_templates",
     ],
