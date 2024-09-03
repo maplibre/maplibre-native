@@ -12,7 +12,7 @@
 
 namespace mbgl {
 
-class TileDifference;
+struct TileDifference;
 
 /**
  * @brief Base class for render sources that provide render tiles.

@@ -30,7 +30,7 @@ class RenderTile;
 class Scheduler;
 class SourceQueryOptions;
 class Tile;
-class TileDifference;
+struct TileDifference;
 class TileParameters;
 class TransformParameters;
 class TransformState;
