@@ -3,6 +3,7 @@
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/platform/gl_functions.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 #include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gfx/texture.hpp>
@@ -70,46 +71,30 @@ size_t Texture2D::numChannels() const noexcept {
     }
 }
 
-void Texture2D::createObject() noexcept {
+void Texture2D::allocateTexture() noexcept {
+    MLN_TRACE_FUNC();
+
     // Create a new texture object
-    assert(!textureResource);
-    auto obj = context.createUniqueTexture();
-    const auto storageSize = gl::TextureResource::getStorageSize(size, pixelFormat, channelType);
-    context.renderingStats().memTextures += storageSize;
+    auto obj = context.createUniqueTexture(size, pixelFormat, channelType);
 
     // @TODO: TextureResource is still needed while we have legacy rendering pathways
-    textureResource = std::make_unique<gl::TextureResource>(std::move(obj), storageSize);
+    textureResource = std::make_unique<gl::TextureResource>(std::move(obj));
 }
 
-void Texture2D::createStorage(const void* data) noexcept {
-    assert(textureResource);
+void Texture2D::updateTextureData(const void* data) noexcept {
+    MLN_TRACE_FUNC();
+    if (data) {
+        uploadSubRegion(data, size, 0, 0);
+    }
 
-    // Create backing storage for our texture object
-    using namespace platform;
-
-    // Bind to TU 0 and upload
-    context.activeTextureUnit = 0;
-    context.texture[0] = getTextureID();
-    context.pixelStoreUnpack = {1};
-    MBGL_CHECK_ERROR(glTexImage2D(GL_TEXTURE_2D,
-                                  0,
-                                  Enum<gfx::TexturePixelType>::sizedFor(pixelFormat, channelType),
-                                  size.width,
-                                  size.height,
-                                  0,
-                                  Enum<gfx::TexturePixelType>::to(pixelFormat),
-                                  Enum<gfx::TextureChannelDataType>::to(channelType),
-                                  data));
     storageDirty = false;
     updateSamplerConfiguration();
 }
 
 void Texture2D::create() noexcept {
-    if (!textureResource) {
-        createObject();
-    }
+    allocateTexture();
     if (storageDirty) {
-        createStorage();
+        updateTextureData();
     }
 }
 
@@ -184,19 +169,10 @@ void Texture2D::upload(const void* pixelData, const Size& size_) noexcept {
     if (!textureResource || storageDirty || size_ == Size{0, 0} || size_ != size) {
         size = size_;
 
-        // Create the texture object if we don't already have one
-        if (!textureResource) {
-            createObject();
-        }
-
-        createStorage(pixelData);
-
-    } else {
-        if (pixelData) {
-            // Upload to existing memory
-            uploadSubRegion(pixelData, size, 0, 0);
-        }
+        // Create the texture object if we don't already have one or if storage is dirty
+        allocateTexture();
     }
+    updateTextureData(pixelData);
 }
 
 void Texture2D::uploadSubRegion(const void* pixelData, const Size& size_, uint16_t xOffset, uint16_t yOffset) noexcept {
