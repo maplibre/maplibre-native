@@ -35,7 +35,11 @@ public class TextureViewMapRenderer extends MapRenderer {
     super(context, localIdeographFontFamily);
     this.textureView = textureView;
     this.translucentSurface = translucentSurface;
-    renderThread = new TextureViewRenderThread(textureView, this);
+
+  }
+
+  public void setRenderThread(TextureViewRenderThread thread) {
+    renderThread = thread;
     renderThread.setName("TextureViewRenderer");
     renderThread.start();
   }

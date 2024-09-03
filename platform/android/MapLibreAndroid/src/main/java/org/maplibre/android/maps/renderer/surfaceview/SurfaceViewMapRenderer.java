@@ -1,28 +1,36 @@
 package org.maplibre.android.maps.renderer.surfaceview;
 
 import android.content.Context;
+import android.view.Surface;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+
 import org.maplibre.android.maps.renderer.MapRenderer;
 
+/**
+ * The {@link SurfaceViewMapRenderer} encapsulates the render thread and
+ * {@link MapLibreSurfaceView} specifics to render the map.
+ *
+ * @see MapRenderer
+ */
 public class SurfaceViewMapRenderer extends MapRenderer {
 
   @NonNull
-  private final MapLibreSurfaceView surfaceView;
+  protected final MapLibreSurfaceView surfaceView;
 
   public SurfaceViewMapRenderer(Context context,
-                                @NonNull MapLibreSurfaceView surfaceView,
+                                MapLibreSurfaceView surfaceView,
                                 String localIdeographFontFamily) {
     super(context, localIdeographFontFamily);
     this.surfaceView = surfaceView;
-    this.surfaceView.setRenderer(this);
-    this.surfaceView.setDetachedListener(new MapLibreSurfaceView.OnSurfaceViewDetachedListener() {
+
+    surfaceView.setDetachedListener(new MapLibreSurfaceView.OnSurfaceViewDetachedListener() {
       @Override
       public void onSurfaceViewDetached() {
-        // because the render thread is destroyed when the view is detached from window,
+        // because the GL thread is destroyed when the view is detached from window,
         // we need to ensure releasing the native renderer as well.
-        // This avoids releasing it only when the view is being recreated, which is already on a new thread,
+        // This avoids releasing it only when the view is being recreated, which is already on a new GL thread,
         // and leads to JNI crashes like https://github.com/mapbox/mapbox-gl-native/issues/14618
         nativeReset();
       }
@@ -59,21 +67,18 @@ public class SurfaceViewMapRenderer extends MapRenderer {
     super.onResume();
   }
 
-  public void onSurfaceCreated() {
-    super.onSurfaceCreated(this.surfaceView.getHolder().getSurface());
+  public void onSurfaceCreated(Surface surface) {
+    super.onSurfaceCreated(surface);
   }
 
-  @Override
-  protected void onSurfaceDestroyed() {
+  public void onSurfaceDestroyed() {
     super.onSurfaceDestroyed();
   }
 
-  @Override
   public void onSurfaceChanged(int width, int height) {
     super.onSurfaceChanged(width, height);
   }
 
-  @Override
   public void onDrawFrame() {
     super.onDrawFrame();
   }

@@ -1,6 +1,5 @@
 package org.maplibre.android.maps.renderer.textureview;
 
-import android.graphics.SurfaceTexture;
 import android.view.TextureView;
 
 import androidx.annotation.NonNull;
@@ -11,7 +10,6 @@ import org.maplibre.android.log.Logger;
 import org.maplibre.android.maps.renderer.egl.EGLConfigChooser;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGL11;
@@ -26,31 +24,12 @@ import javax.microedition.khronos.opengles.GL10;
  * ui thread and the render thread it creates. Also, the EGL and GL contexts
  * are managed from here.
  */
-class TextureViewRenderThread extends Thread implements TextureView.SurfaceTextureListener {
+public class GLTextureViewRenderThread extends TextureViewRenderThread {
 
-  private static final String TAG = "Mbgl-TextureViewRenderThread";
-
-  @NonNull
-  private final TextureViewMapRenderer mapRenderer;
   @NonNull
   private final EGLHolder eglHolder;
 
-  // Lock used for synchronization
-  private final Object lock = new Object();
-
-  // Guarded by lock
-  private final ArrayList<Runnable> eventQueue = new ArrayList<>();
-  @Nullable
-  private SurfaceTexture surface;
-  private int width;
-  private int height;
-  private boolean requestRender;
-  private boolean sizeChanged;
-  private boolean paused;
   private boolean destroyContext;
-  private boolean destroySurface;
-  private boolean shouldExit;
-  private boolean exited;
 
   /**
    * Create a render thread for the given TextureView / Maprenderer combination.
@@ -59,133 +38,9 @@ class TextureViewRenderThread extends Thread implements TextureView.SurfaceTextu
    * @param mapRenderer the MapRenderer
    */
   @UiThread
-  TextureViewRenderThread(@NonNull TextureView textureView, @NonNull TextureViewMapRenderer mapRenderer) {
-    textureView.setOpaque(!mapRenderer.isTranslucentSurface());
-    textureView.setSurfaceTextureListener(this);
-    this.mapRenderer = mapRenderer;
+  public GLTextureViewRenderThread(@NonNull TextureView textureView, @NonNull TextureViewMapRenderer mapRenderer) {
+    super(textureView, mapRenderer);
     this.eglHolder = new EGLHolder(new WeakReference<>(textureView), mapRenderer.isTranslucentSurface());
-  }
-
-  // SurfaceTextureListener methods
-
-  @UiThread
-  @Override
-  public void onSurfaceTextureAvailable(final SurfaceTexture surface, final int width, final int height) {
-    synchronized (lock) {
-      this.surface = surface;
-      this.width = width;
-      this.height = height;
-      this.requestRender = true;
-      lock.notifyAll();
-    }
-  }
-
-  @Override
-  @UiThread
-  public void onSurfaceTextureSizeChanged(SurfaceTexture surface, final int width, final int height) {
-    synchronized (lock) {
-      this.width = width;
-      this.height = height;
-      this.sizeChanged = true;
-      this.requestRender = true;
-      lock.notifyAll();
-    }
-  }
-
-  @Override
-  @UiThread
-  public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-    synchronized (lock) {
-      this.surface = null;
-      this.destroySurface = true;
-      this.requestRender = false;
-      lock.notifyAll();
-    }
-    return true;
-  }
-
-  @Override
-  @UiThread
-  public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-    // Ignored
-  }
-
-  // MapRenderer delegate methods
-
-  /**
-   * May be called from any thread
-   */
-  void requestRender() {
-    synchronized (lock) {
-      requestRender = true;
-      lock.notifyAll();
-    }
-  }
-
-  /**
-   * May be called from any thread
-   */
-  void queueEvent(@NonNull Runnable runnable) {
-    if (runnable == null) {
-      throw new IllegalArgumentException("runnable must not be null");
-    }
-    synchronized (lock) {
-      eventQueue.add(runnable);
-      lock.notifyAll();
-    }
-  }
-
-  /**
-   * Wait for the queue to be empty.
-   * @param timeoutMillis Maximum time to wait, in milliseconds
-   * @return The number of items remaining in the queue
-   */
-  @UiThread
-  void waitForEmpty() {
-    synchronized (lock) {
-      // Wait for the queue to be empty
-      while (!this.eventQueue.isEmpty()) {
-        try {
-          lock.wait(0);
-        } catch (InterruptedException ex) {
-          Thread.currentThread().interrupt();
-        }
-      }
-    }
-  }
-
-  @UiThread
-  void onPause() {
-    synchronized (lock) {
-      this.paused = true;
-      lock.notifyAll();
-    }
-  }
-
-  @UiThread
-  void onResume() {
-    synchronized (lock) {
-      this.paused = false;
-      lock.notifyAll();
-    }
-  }
-
-
-  @UiThread
-  void onDestroy() {
-    synchronized (lock) {
-      this.shouldExit = true;
-      lock.notifyAll();
-
-      // Wait for the thread to exit
-      while (!this.exited) {
-        try {
-          lock.wait();
-        } catch (InterruptedException ex) {
-          Thread.currentThread().interrupt();
-        }
-      }
-    }
   }
 
   // Thread implementation
@@ -227,7 +82,7 @@ class TextureViewRenderThread extends Thread implements TextureView.SurfaceTextu
               break;
             }
 
-            if (surface != null && !paused && requestRender) {
+            if (surfaceTexture != null && !paused && requestRender) {
 
               w = width;
               h = height;
@@ -279,8 +134,8 @@ class TextureViewRenderThread extends Thread implements TextureView.SurfaceTextu
               continue;
             }
           }
-          mapRenderer.onSurfaceCreated(gl, eglHolder.eglConfig);
-          mapRenderer.onSurfaceChanged(gl, w, h);
+          mapRenderer.onSurfaceCreated(null);
+          mapRenderer.onSurfaceChanged(w, h);
           continue;
         }
 
@@ -289,12 +144,12 @@ class TextureViewRenderThread extends Thread implements TextureView.SurfaceTextu
           synchronized (lock) {
             eglHolder.createSurface();
           }
-          mapRenderer.onSurfaceChanged(gl, w, h);
+          mapRenderer.onSurfaceChanged(w, h);
           continue;
         }
 
         if (sizeChanged) {
-          mapRenderer.onSurfaceChanged(gl, w, h);
+          mapRenderer.onSurfaceChanged(w, h);
           sizeChanged = false;
           continue;
         }
@@ -305,7 +160,7 @@ class TextureViewRenderThread extends Thread implements TextureView.SurfaceTextu
         }
 
         // Time to render a frame
-        mapRenderer.onDrawFrame(gl);
+        mapRenderer.onDrawFrame();
 
         // Swap and check the result
         int swapError = eglHolder.swap();
@@ -315,7 +170,7 @@ class TextureViewRenderThread extends Thread implements TextureView.SurfaceTextu
           case EGL11.EGL_CONTEXT_LOST:
             Logger.w(TAG, "Context lost. Waiting for re-aquire");
             synchronized (lock) {
-              surface = null;
+              surfaceTexture = null;
               destroySurface = true;
               destroyContext = true;
             }
@@ -325,7 +180,7 @@ class TextureViewRenderThread extends Thread implements TextureView.SurfaceTextu
             // Probably lost the surface. Clear the current one and
             // wait for a new one to be set
             synchronized (lock) {
-              surface = null;
+              surfaceTexture = null;
               destroySurface = true;
             }
         }

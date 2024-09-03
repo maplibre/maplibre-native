@@ -3,26 +3,23 @@ package org.maplibre.android.maps.renderer.surfaceview;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Callback2 {
+public abstract class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Callback2 {
 
-  private static final String TAG = "MapLibreSurfaceView";
-  private static final RenderThreadManager renderThreadManager = new RenderThreadManager();
+  protected static final String TAG = "MapLibreSurfaceView";
+  protected static final RenderThreadManager renderThreadManager = new RenderThreadManager();
 
-  private final WeakReference<MapLibreSurfaceView> viewWeakReference = new WeakReference<>(this);
-  private SurfaceViewMapRenderer renderer;
-  private RenderThread renderThread;
-  private OnSurfaceViewDetachedListener detachedListener;
+  protected SurfaceViewMapRenderer renderer;
+  protected RenderThread renderThread;
+  protected OnSurfaceViewDetachedListener detachedListener;
 
-  private boolean detached;
+  protected boolean detached;
 
   /**
    * The renderer only renders
@@ -115,7 +112,8 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
   public void setRenderer(SurfaceViewMapRenderer renderer) {
     checkRenderThreadState();
     this.renderer = renderer;
-    renderThread = new RenderThread(viewWeakReference);
+
+    createRenderThread();
     renderThread.start();
   }
 
@@ -255,7 +253,7 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
       if (renderThread != null) {
         renderMode = renderThread.getRenderMode();
       }
-      renderThread = new RenderThread(viewWeakReference);
+      createRenderThread();
       if (renderMode != RENDERMODE_CONTINUOUSLY) {
         renderThread.setRenderMode(renderMode);
       }
@@ -285,15 +283,14 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
    * All potentially blocking synchronization is done through the
    * sRenderThreadManager object. This avoids multiple-lock ordering issues.
    */
-  static class RenderThread extends Thread {
-    RenderThread(WeakReference<MapLibreSurfaceView> surfaceViewWeakRef) {
+  abstract static class RenderThread extends Thread {
+    RenderThread() {
       super();
       width = 0;
       height = 0;
       requestRender = true;
       renderMode = RENDERMODE_CONTINUOUSLY;
       wantRenderNotification = false;
-      mSurfaceViewWeakRef = surfaceViewWeakRef;
     }
 
     @Override
@@ -309,157 +306,16 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
       }
     }
 
-    private void guardedRun() throws InterruptedException {
-      wantRenderNotification = false;
+    protected abstract void guardedRun() throws InterruptedException;
 
-      boolean sizeChanged = false;
-      boolean initSurface = false;
-      boolean destroySurface = false;
-      boolean wantRenderNotification = false;
-      boolean doRenderNotification = false;
-      int w = 0;
-      int h = 0;
-      Runnable event = null;
-      Runnable finishDrawingRunnable = null;
-
-      while (true) {
-        synchronized (renderThreadManager) {
-          while (true) {
-            if (shouldExit) {
-              return;
-            }
-
-            if (!eventQueue.isEmpty()) {
-              event = eventQueue.remove(0);
-              break;
-            }
-
-            // Update the pause state.
-            if (paused != requestPaused) {
-              paused = requestPaused;
-              renderThreadManager.notifyAll();
-            }
-
-            if (paused && graphicsSurfaceCreated) {
-              MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
-              if (view != null) {
-                destroySurface = true;
-                graphicsSurfaceCreated = false;
-              }
-              renderThreadManager.notifyAll();
-            }
-
-            // lost surface
-            if (!hasSurface && !waitingForSurface) {
-              MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
-              if (view != null) {
-                destroySurface = true;
-                graphicsSurfaceCreated = false;
-              }
-              waitingForSurface = true;
-              renderThreadManager.notifyAll();
-            }
-
-            // acquired surface
-            if (hasSurface && waitingForSurface) {
-              MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
-              if (view != null) {
-                initSurface = true;
-                graphicsSurfaceCreated = true;
-              }
-              waitingForSurface = false;
-              renderThreadManager.notifyAll();
-            }
-
-            if (doRenderNotification) {
-              this.wantRenderNotification = false;
-              doRenderNotification = false;
-              renderComplete = true;
-              renderThreadManager.notifyAll();
-            }
-
-            if (this.finishDrawingRunnable != null) {
-              finishDrawingRunnable = this.finishDrawingRunnable;
-              this.finishDrawingRunnable = null;
-            }
-
-            // Ready to draw?
-            if (readyToDraw()) {
-              if (this.sizeChanged) {
-                sizeChanged = true;
-                w = width;
-                h = height;
-                this.wantRenderNotification = true;
-                this.sizeChanged = false;
-              }
-              requestRender = false;
-              renderThreadManager.notifyAll();
-              if (this.wantRenderNotification) {
-                wantRenderNotification = true;
-              }
-              break;
-            } else {
-              if (finishDrawingRunnable != null) {
-                Log.w(TAG, "Warning, !readyToDraw() but waiting for "
-                  + "draw finished! Early reporting draw finished.");
-                finishDrawingRunnable.run();
-                finishDrawingRunnable = null;
-              }
-            }
-            // By design, this is the only place in a RenderThread thread where we wait().
-            renderThreadManager.wait();
-          }
-        } // end of synchronized(sRenderThreadManager)
-
-        if (event != null) {
-          event.run();
-          event = null;
-          continue;
-        }
-
-        MapLibreSurfaceView view = mSurfaceViewWeakRef.get();
-
-        if (destroySurface) {
-          if (view != null) {
-            view.renderer.onSurfaceDestroyed();
-            destroySurface = false;
-          }
-        }
-
-        if (initSurface) {
-          if (view != null) {
-            view.renderer.onSurfaceCreated();
-            initSurface = false;
-          }
-        }
-
-        if (sizeChanged) {
-          if (view != null) {
-            view.renderer.onSurfaceChanged(w, h);
-            sizeChanged = false;
-          }
-        }
-
-        if (view != null) {
-          view.renderer.onDrawFrame();
-          if (finishDrawingRunnable != null) {
-            finishDrawingRunnable.run();
-            finishDrawingRunnable = null;
-          }
-        }
-
-        if (wantRenderNotification) {
-          doRenderNotification = true;
-          wantRenderNotification = false;
-        }
-      }
+    protected boolean readyToDraw() {
+      return (!paused) && hasSurface
+              && (width > 0) && (height > 0)
+              && (requestRender || (renderMode == RENDERMODE_CONTINUOUSLY));
     }
 
-    private boolean readyToDraw() {
-      return (!paused)
-        && (width > 0) && (height > 0)
-        && hasSurface
-        && (requestRender || (renderMode == RENDERMODE_CONTINUOUSLY));
+    public boolean ableToDraw() {
+      return readyToDraw();
     }
 
     public void setRenderMode(int renderMode) {
@@ -583,7 +439,7 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 
         // Wait for thread to react to resize and render a frame
         while (!exited && !paused && !renderComplete
-          && readyToDraw()) {
+          && ableToDraw()) {
           try {
             renderThreadManager.wait();
           } catch (InterruptedException ex) {
@@ -639,40 +495,34 @@ public class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Ca
 
     // Once the thread is started, all accesses to the following member
     // variables are protected by the sRenderThreadManager monitor
-    private boolean shouldExit;
-    private boolean exited;
-    private boolean requestPaused;
-    private boolean paused;
-    private boolean hasSurface;
-    private boolean waitingForSurface;
-    private boolean graphicsSurfaceCreated;
-    private int width;
-    private int height;
-    private int renderMode;
-    private boolean requestRender;
-    private boolean wantRenderNotification;
-    private boolean renderComplete;
-    private ArrayList<Runnable> eventQueue = new ArrayList<>();
-    private boolean sizeChanged = true;
-    private Runnable finishDrawingRunnable = null;
+    protected boolean shouldExit;
+    protected boolean exited;
+    protected boolean requestPaused;
+    protected boolean paused;
+    protected boolean hasSurface;
+    protected boolean waitingForSurface;
+    protected int width;
+    protected int height;
+    protected int renderMode;
+    protected boolean requestRender;
+    protected boolean wantRenderNotification;
+    protected boolean renderComplete;
+    protected ArrayList<Runnable> eventQueue = new ArrayList<>();
+    protected boolean sizeChanged = true;
+    protected Runnable finishDrawingRunnable = null;
     // End of member variables protected by the sRenderThreadManager monitor.
-
-    /**
-     * Set once at thread construction time, nulled out when the parent view is garbage
-     * called. This weak reference allows the SurfaceView to be garbage collected while
-     * the RenderThread is still alive.
-     */
-    private WeakReference<MapLibreSurfaceView> mSurfaceViewWeakRef;
 
   }
 
-  private void checkRenderThreadState() {
+  protected abstract void createRenderThread();
+
+  protected void checkRenderThreadState() {
     if (renderThread != null) {
       throw new IllegalStateException("setRenderer has already been called for this instance.");
     }
   }
 
-  private static class RenderThreadManager {
+  protected static class RenderThreadManager {
 
     synchronized void threadExiting(RenderThread thread) {
       thread.exited = true;
