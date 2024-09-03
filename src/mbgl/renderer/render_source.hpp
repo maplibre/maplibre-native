@@ -121,6 +121,7 @@ protected:
 
     void onTileChanged(Tile&) override;
     void onTileError(Tile&, std::exception_ptr) final;
+    void onTileAction(OverscaledTileID, std::string, TileOperation) override;
 };
 
 } // namespace mbgl

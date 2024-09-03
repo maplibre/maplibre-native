@@ -72,6 +72,7 @@
     <string name="description_map_snapshotter_local_style">Show how to load a local style with a Snapshot</string>
     <string name="description_camera_animator">Use Android SDK Animators to animate camera position changes</string>
     <string name="description_symbol_generator">Use Android SDK Views as symbols</string>
+    <string name="description_observer_activity">Use map observers to log map event information</string>
     <string name="description_textureview_debug">Use TextureView to render the map</string>
     <string name="description_textureview_resize">Resize a map rendered on a TextureView</string>
     <string name="description_textureview_animate">Animate a map rendered on a TextureView</string>

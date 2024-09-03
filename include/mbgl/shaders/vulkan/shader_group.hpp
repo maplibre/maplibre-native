@@ -61,7 +61,7 @@ public:
             addAdditionalDefines(propertiesAsUniforms, additionalDefines);
 
             auto& context = static_cast<Context&>(gfxContext);
-            shader = context.createProgram(shaderName, vert, frag, programParameters, additionalDefines);
+            shader = context.createProgram(ShaderID, shaderName, vert, frag, programParameters, additionalDefines);
             assert(shader);
             if (!shader || !registerShader(shader, shaderName)) {
                 assert(false);
