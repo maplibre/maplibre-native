@@ -46,13 +46,6 @@ task unzip(dependsOn: download, type: Copy) {
 //        srcDirs += ["${VVL_JNILIB_DIR}"]
 //}
 
-// add vvl download as an application dependency.
-dependencies {
-    def ARM64_VVL_FILE = "${VVL_JNILIB_DIR}/arm64-v8a/${VVL_SO_NAME}"
-    if(!file("${ARM64_VVL_FILE}").exists()) {
-        implementation files("${ARM64_VVL_FILE}") {
-            builtBy 'unzip'
-        }
-    }
+android.sourceSets.vulkan.jniLibs {
+	srcDir(tasks.unzip)
 }
-
