@@ -325,6 +325,14 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
 
     observer->onTileChanged(*this);
 
+    if (layoutResult) {
+        for (const auto& data : layoutResult->layerRenderData) {
+            if (data.second.bucket) {
+                data.second.bucket->check(SYM_GUARD_LOC);
+            }
+        }
+    }
+    
     if (!pending) {
         observer->onTileAction(id, sourceID, TileOperation::EndParse);
     }

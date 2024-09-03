@@ -70,7 +70,7 @@ public:
     virtual bool onCanRemoveUnusedStyleImage(const std::string&) { return true; }
     // Observe this event to easily mutate or observe shaders as soon
     // as the registry becomes available.
-    virtual void onRegisterShaders(gfx::ShaderRegistry&) {};
+    virtual void onRegisterShaders(gfx::ShaderRegistry&) {}
 
     // Shaders compilation
     virtual void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) {}
