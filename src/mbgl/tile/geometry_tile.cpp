@@ -332,7 +332,7 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
             }
         }
     }
-    
+
     if (!pending) {
         observer->onTileAction(id, sourceID, TileOperation::EndParse);
     }
