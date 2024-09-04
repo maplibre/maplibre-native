@@ -36,7 +36,12 @@ Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Color>::o
 
 Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Padding>::operator()(jni::JNIEnv& env,
                                                                                             const Padding& value) const {
-    return jni::Make<jni::String>(env, mbgl::style::expression::stringify(value));
+    const auto values = value.toArray();
+    auto result = jni::Array<jni::Float>::New(env, values.size());
+    for (size_t i = 0; i < values.size(); i++) {
+        result.Set(env, i, jni::Box(env, values[i]));
+    }
+    return result;
 }
 
 Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, style::expression::Formatted>::operator()(

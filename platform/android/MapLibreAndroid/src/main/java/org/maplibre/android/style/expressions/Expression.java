@@ -3689,6 +3689,18 @@ public class Expression {
   }
 
   /**
+   * Converts input value to a padding.
+   *
+   * BUGBUG add more details, figure out link to style spec.
+   *
+   * @param input expression input
+   * @return expression
+   */
+  public static Expression toPadding(@NonNull Expression input) {
+    return new Expression("to-padding", input);
+  }
+
+  /**
    * Binds input to named variables,
    * which can then be referenced in the result expression using {@link #var(String)} or {@link #var(Expression)}.
    *
