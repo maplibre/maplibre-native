@@ -166,10 +166,12 @@ const LayerRenderData* GeometryTileRenderData::getLayerRenderData(const style::L
    that could flag the tile as non-pending too early.
  */
 
-GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, const TileParameters& parameters)
-    : Tile(Kind::Geometry, id_),
+GeometryTile::GeometryTile(const OverscaledTileID& id_,
+                           std::string sourceID_,
+                           const TileParameters& parameters,
+                           TileObserver* observer_)
+    : Tile(Kind::Geometry, id_, std::move(sourceID_), observer_),
       ImageRequestor(parameters.imageManager),
-      sourceID(std::move(sourceID_)),
       threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
       worker(parameters.threadPool, // Scheduler reference for the Actor retainer
@@ -194,6 +196,11 @@ GeometryTile::~GeometryTile() {
 
     glyphManager->removeRequestor(*this);
     imageManager->removeRequestor(*this);
+
+    if (pending) {
+        // This tile never finished loading or was abandoned, emit a cancellation event
+        observer->onTileAction(id, sourceID, TileOperation::Cancelled);
+    }
 
     if (layoutResult) {
         threadPool.runOnRenderThread(
@@ -222,6 +229,10 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
         return;
     }
 
+    if (data_) {
+        observer->onTileAction(id, sourceID, TileOperation::StartParse);
+    }
+
     // Mark the tile as pending again if it was complete before to prevent
     // signaling a complete state despite pending parse operations.
     pending = true;
@@ -237,6 +248,8 @@ void GeometryTile::reset() {
     // Mark the tile as pending again if it was complete before to prevent
     // signaling a complete state despite pending parse operations.
     pending = true;
+
+    observer->onTileAction(id, sourceID, TileOperation::Cancelled);
 
     ++correlationID;
     worker.self().invoke(&GeometryTileWorker::reset, correlationID);
@@ -318,6 +331,10 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
                 data.second.bucket->check(SYM_GUARD_LOC);
             }
         }
+    }
+
+    if (!pending) {
+        observer->onTileAction(id, sourceID, TileOperation::EndParse);
     }
 }
 

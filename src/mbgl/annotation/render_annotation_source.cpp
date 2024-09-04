@@ -34,19 +34,19 @@ void RenderAnnotationSource::update(Immutable<style::Source::Impl> baseImpl_,
 
     onTilePyramidWillUpdate();
 
-    tilePyramid.update(
-        layers,
-        needsRendering,
-        needsRelayout,
-        parameters,
-        *baseImpl,
-        util::tileSize_I,
-        // Zoom level 16 is typically sufficient for annotations.
-        // See https://github.com/mapbox/mapbox-gl-native/issues/10197
-        {0, 16},
-        std::nullopt,
-        [&](const OverscaledTileID& tileID) { return std::make_unique<AnnotationTile>(tileID, parameters); });
-
+    tilePyramid.update(layers,
+                       needsRendering,
+                       needsRelayout,
+                       parameters,
+                       *baseImpl,
+                       util::tileSize_I,
+                       // Zoom level 16 is typically sufficient for annotations.
+                       // See https://github.com/mapbox/mapbox-gl-native/issues/10197
+                       {0, 16},
+                       std::nullopt,
+                       [&](const OverscaledTileID& tileID, TileObserver* observer_) {
+                           return std::make_unique<AnnotationTile>(tileID, parameters, observer_);
+                       });
     onTilePyramidUpdated();
 }
 
