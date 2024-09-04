@@ -126,10 +126,15 @@ android {
     buildFeatures {
         buildConfig true
     }
-}
 
-kotlin {
-    jvmToolchain(11)
+    compileOptions {
+        sourceCompatibility = 11
+        targetCompatibility = 11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 licenseReport {
