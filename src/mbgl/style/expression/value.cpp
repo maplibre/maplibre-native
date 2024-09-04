@@ -39,7 +39,6 @@ type::Type typeOf(const Value& value) {
 std::string toString(const Value& value) {
     return value.match([](const NullValue&) { return std::string(); },
                        [](const Color& c) { return c.stringify(); }, // avoid quoting
-                       [](const Padding& p) { return p.toString(); },
                        [](const Formatted& f) { return f.toString(); },
                        [](const Image& i) { return i.id(); },
                        [](const std::string& s) { return s; }, // avoid quoting
@@ -55,9 +54,7 @@ void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& 
                 },
                 [&](const std::string& s) { writer.String(s); },
                 [&](const Color& c) { writer.String(c.stringify()); },
-                [&](const Padding& p) {
-                    writer.String(p.toString());
-                },
+                [&](const Padding& p) { mbgl::style::conversion::stringify(writer, p); },
                 [&](const Collator&) {
                     // Collators are excluded from constant folding and there's no Literal parser
                     // for them so there shouldn't be any way to serialize this value.

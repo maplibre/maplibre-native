@@ -44,13 +44,9 @@ public:
         return top != 0 || right != 0 || bottom != 0 || left != 0;
     }
 
-    static std::optional<Padding> parse(const std::string&);
-    std::string toString() const;
+    std::array<float, 4> toArray() const;
 
-    // BUGBUG wip
-//    std::array<double, 4> toArray() const;
-//    operator std::array<float, 4>() const { return {r, g, b, a}; }
-//    mbgl::Value toObject() const;
+    // Used by ValueFactory<Padding>::make()
     mbgl::Value serialize() const;
 };
 

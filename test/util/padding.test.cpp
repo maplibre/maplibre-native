@@ -40,7 +40,7 @@ TEST(Padding, Interpolate) {
 
     // Parse expression from JSON, use different initializers to ensure expansion is handled correctly.
     {
-        auto json = R"(["interpolate", ["linear"], ["zoom"], 0, ["to-padding", ["literal", 0]], 1, ["to-padding", ["literal",[8, 16, -32]]]])";
+        auto json = R"(["interpolate", ["linear"], ["zoom"], 0, ["to-padding", 0], 1, ["to-padding", ["literal",[8, 16, -32]]]])";
         PropertyExpression<Padding> expr(createExpression(json));
 
         auto result = expr.evaluate(0.5f);
@@ -91,11 +91,4 @@ TEST(Padding, Function) {
         EXPECT_EQ(Padding(3), evalInContext(expr, {{"foo", 3}}));
         EXPECT_EQ(Padding(3, 7, 9, 11), evalInContext(expr, {{"bar", 3}}));
     }
-}
-
-//BUGBUG
-//TEST(Stringify, Padding) {
-TEST(Padding, Stringify) {
-    auto x = stringify(Padding(3, 7, 9, 11));
-    ASSERT_EQ(x, "[3.0,7.0,9.0,11.0]");
 }

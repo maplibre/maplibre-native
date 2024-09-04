@@ -2,6 +2,7 @@
 #include "collection.hpp"
 #include "../style/formatted.hpp"
 
+#include <mbgl/style/conversion/stringify.hpp>
 #include <mbgl/util/string.hpp>
 
 namespace mbgl {
@@ -35,7 +36,7 @@ Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Color>::o
 
 Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Padding>::operator()(jni::JNIEnv& env,
                                                                                             const Padding& value) const {
-    return jni::Make<jni::String>(env, value.toString());
+    return jni::Make<jni::String>(env, mbgl::style::expression::stringify(value));
 }
 
 Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, style::expression::Formatted>::operator()(

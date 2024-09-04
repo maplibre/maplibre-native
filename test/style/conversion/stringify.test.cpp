@@ -131,3 +131,7 @@ TEST(Stringify, Layout) {
     layout.get<IconPadding>() = { 2.f };
     ASSERT_EQ(stringify(layout), "{\"icon-padding\":2.0,\"symbol-avoid-edges\":true}");
 }
+
+TEST(Stringify, Padding) {
+    ASSERT_EQ("[3.5,7.0,9.0,11.0]", stringify(Padding(3.5, 7, 9, 11)));
+}
