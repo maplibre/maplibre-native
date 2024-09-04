@@ -35,7 +35,12 @@ set(ENABLE_HLSL OFF)
 set(ENABLE_GLSLANG_BINARIES OFF)
 set(GLSLANG_TESTS_DEFAULT OFF)
 set(ENABLE_PCH OFF)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/glslang SYSTEM)
+
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.25")
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/glslang SYSTEM)
+else()
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/glslang)
+endif()
 
 get_target_property(glslang_inc glslang INTERFACE_INCLUDE_DIRECTORIES)
 set_target_properties(glslang PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES ${glslang_inc})

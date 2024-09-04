@@ -28,7 +28,12 @@ class TileAtlasTextures;
 
 class GeometryTile : public Tile, public GlyphRequestor, public ImageRequestor {
 public:
-    GeometryTile(const OverscaledTileID&, std::string sourceID, const TileParameters&);
+    const std::thread::id renderThreadID = std::this_thread::get_id();
+
+    GeometryTile(const OverscaledTileID&,
+                 std::string sourceID,
+                 const TileParameters&,
+                 TileObserver* observer = nullptr);
 
     ~GeometryTile() override;
 
@@ -91,8 +96,6 @@ public:
     void markRenderedPreviously() override;
     void performedFadePlacement() override;
     std::shared_ptr<FeatureIndex> getFeatureIndex() const;
-
-    const std::string sourceID;
 
     void setFeatureState(const LayerFeatureStates&) override;
 

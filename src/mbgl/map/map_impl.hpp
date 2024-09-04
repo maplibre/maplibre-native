@@ -12,6 +12,7 @@
 #include <mbgl/style/source.hpp>
 #include <mbgl/style/style.hpp>
 #include <mbgl/util/size.hpp>
+#include <mbgl/tile/tile_operation.hpp>
 
 namespace mbgl {
 
@@ -40,6 +41,9 @@ public:
     void onStyleLoading() final;
     void onStyleLoaded() final;
     void onStyleError(std::exception_ptr) final;
+    void onSpriteLoaded(const std::optional<style::Sprite>&) final;
+    void onSpriteError(const std::optional<style::Sprite>&, std::exception_ptr) final;
+    void onSpriteRequested(const std::optional<style::Sprite>&) final;
 
     // RendererObserver
     void onInvalidate() final;
@@ -51,6 +55,14 @@ public:
     void onStyleImageMissing(const std::string&, const std::function<void()>&) final;
     void onRemoveUnusedStyleImages(const std::vector<std::string>&) final;
     void onRegisterShaders(gfx::ShaderRegistry&) final;
+
+    void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) final;
+    void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) final;
+    void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type, const std::string&) final;
+    void onGlyphsLoaded(const FontStack&, const GlyphRange&) final;
+    void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) final;
+    void onGlyphsRequested(const FontStack&, const GlyphRange&) final;
+    void onTileAction(TileOperation op, const OverscaledTileID&, const std::string&) final;
 
     // Map
     void jumpTo(const CameraOptions&);

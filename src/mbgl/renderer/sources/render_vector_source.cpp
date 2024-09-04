@@ -28,8 +28,8 @@ void RenderVectorSource::updateInternal(const Tileset& tileset,
                        util::tileSize_I,
                        tileset.zoomRange,
                        tileset.bounds,
-                       [&](const OverscaledTileID& tileID) {
-                           return std::make_unique<VectorTile>(tileID, baseImpl->id, parameters, tileset);
+                       [&](const OverscaledTileID& tileID, TileObserver* observer_) {
+                           return std::make_unique<VectorTile>(tileID, baseImpl->id, parameters, tileset, observer_);
                        });
 }
 

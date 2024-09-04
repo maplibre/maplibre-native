@@ -87,7 +87,8 @@ BufferResource Context::createBuffer(
 // `NS::Object::sendMessage`, and the alignment rules are different.  We assume that, because
 // `NS::Object` does not use virtual methods and only serves as a way for C++ code to store
 // and pass ObjC `id`s to `objc_msgSend`, this won't cause any real problems.
-UniqueShaderProgram Context::createProgram(std::string name,
+UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
+                                           std::string name,
                                            const std::string_view source,
                                            const std::string_view vertexName,
                                            const std::string_view fragmentName,
@@ -99,16 +100,20 @@ UniqueShaderProgram Context::createProgram(std::string name,
     const auto& programDefines = programParameters.getDefines();
     const auto numDefines = programDefines.size() + additionalDefines.size();
 
+    std::string defineStr;
     std::vector<const NS::Object*> rawDefines;
     rawDefines.reserve(2 * numDefines);
-    const auto addDefine = [&rawDefines](const auto& pair) {
+    const auto addDefine = [&rawDefines, &defineStr](const auto& pair) {
         const auto* nsKey = NS::String::string(pair.first.data(), NS::UTF8StringEncoding);
         const auto* nsVal = NS::String::string(pair.second.data(), NS::UTF8StringEncoding);
         rawDefines.insert(std::next(rawDefines.begin(), rawDefines.size() / 2), nsKey);
         rawDefines.insert(rawDefines.end(), nsVal);
+        defineStr += "#define " + pair.first + " " + pair.second + "\n";
     };
     std::for_each(programDefines.begin(), programDefines.end(), addDefine);
     std::for_each(additionalDefines.begin(), additionalDefines.end(), addDefine);
+
+    observer->onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 
     const auto nsDefines = NS::Dictionary::dictionary(
         &rawDefines[numDefines], rawDefines.data(), static_cast<NS::UInteger>(numDefines));
@@ -142,6 +147,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
         const auto errPtr = error ? error->localizedDescription()->utf8String() : nullptr;
         const auto errStr = (errPtr && errPtr[0]) ? ": " + std::string(errPtr) : std::string();
         Log::Error(Event::Shader, name + " compile failed" + errStr);
+        observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal, defineStr);
         assert(false);
         return nullptr;
     }
@@ -150,6 +156,7 @@ UniqueShaderProgram Context::createProgram(std::string name,
     MTLFunctionPtr vertexFunction = NS::TransferPtr(library->newFunction(nsVertName));
     if (!vertexFunction) {
         Log::Error(Event::Shader, name + " missing vertex function " + vertexName.data());
+        observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal, defineStr);
         assert(false);
         return nullptr;
     }
@@ -161,13 +168,17 @@ UniqueShaderProgram Context::createProgram(std::string name,
         fragmentFunction = NS::TransferPtr(library->newFunction(nsFragName));
         if (!fragmentFunction) {
             Log::Error(Event::Shader, name + " missing fragment function " + fragmentName.data());
+            observer->onShaderCompileFailed(shaderID, gfx::Backend::Type::Metal, defineStr);
             assert(false);
             return nullptr;
         }
     }
 
-    return std::make_unique<ShaderProgram>(
+    auto shader = std::make_unique<ShaderProgram>(
         std::move(name), backend, std::move(vertexFunction), std::move(fragmentFunction));
+    observer->onPostCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
+
+    return shader;
 }
 
 MTLTexturePtr Context::createMetalTexture(MTLTextureDescriptorPtr textureDescriptor) const {
@@ -240,7 +251,6 @@ const BufferResource& Context::getEmptyBuffer() {
 const BufferResource& Context::getTileVertexBuffer() {
     if (!tileVertexBuffer) {
         const auto vertices = RenderStaticData::tileVertices();
-        constexpr auto vertexSize = sizeof(decltype(vertices)::Vertex::a1);
         tileVertexBuffer.emplace(createBuffer(vertices.data(),
                                               vertices.bytes(),
                                               gfx::BufferUsageType::StaticDraw,

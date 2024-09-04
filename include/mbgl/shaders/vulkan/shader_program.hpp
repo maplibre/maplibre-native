@@ -51,12 +51,14 @@ using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 
 class ShaderProgram final : public gfx::ShaderProgramBase {
 public:
-    ShaderProgram(const std::string& name,
+    ShaderProgram(shaders::BuiltIn shaderID,
+                  const std::string& name,
                   const std::string_view& vertex,
                   const std::string_view& fragment,
                   const ProgramParameters& programParameters,
                   const mbgl::unordered_map<std::string, std::string>& additionalDefines,
-                  RendererBackend& backend);
+                  RendererBackend& backend,
+                  gfx::ContextObserver& observer);
     ~ShaderProgram() noexcept override;
 
     static constexpr std::string_view Name{"GenericVulkanShader"};

@@ -13,10 +13,12 @@ std::function<void()> Scheduler::bindOnce(std::function<void()> fn) {
     };
 }
 
-static auto& current() {
+namespace {
+auto& current() {
     static util::ThreadLocal<Scheduler> scheduler;
     return scheduler;
 }
+} // namespace
 
 void Scheduler::SetCurrent(Scheduler* scheduler) {
     current().set(scheduler);
