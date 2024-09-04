@@ -49,10 +49,9 @@ You can use this view directly in a SwiftUI View hierarcy, for example:
 
 ```swift
 struct MyApp: App {
-
     var body: some Scene {
         WindowGroup {
-            MapLibreMapView().edgesIgnoringSafeArea(.all)
+            SimpleMap().edgesIgnoringSafeArea(.all)
         }
     }
 }
