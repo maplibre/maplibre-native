@@ -46,6 +46,9 @@ void RasterBucket::clear() {
     vertices.clear();
     indices.clear();
 
+    vertices.updateModified();
+    indices.updateModified();
+
     uploaded = false;
 }
 
