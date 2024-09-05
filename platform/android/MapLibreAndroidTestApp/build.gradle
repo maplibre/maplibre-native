@@ -89,6 +89,7 @@ kotlin {
 
 dependencies {
     implementation project(':MapLibreAndroid')
+    implementation project(':MapLibreAndroidTestApp:androidautoapp')
     implementation libs.maplibreJavaTurf
 
     implementation libs.supportRecyclerView

@@ -1,4 +1,4 @@
-include ':MapLibreAndroid', ':MapLibreAndroidTestApp', ':MapLibreAndroidLint'
+include ':MapLibreAndroid', ':MapLibreAndroidTestApp', ':MapLibreAndroidTestApp:androidautoapp', ':MapLibreAndroidLint'
 
 rootProject.name = "MapLibre Native for Android"
 
