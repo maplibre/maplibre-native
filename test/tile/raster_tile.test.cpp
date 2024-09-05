@@ -43,7 +43,7 @@ public:
 
 TEST(RasterTile, setError) {
     RasterTileTest test;
-    RasterTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.setError(std::make_exception_ptr(std::runtime_error("test")));
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -52,7 +52,7 @@ TEST(RasterTile, setError) {
 
 TEST(RasterTile, onError) {
     RasterTileTest test;
-    RasterTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.onError(std::make_exception_ptr(std::runtime_error("test")), 0);
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -61,7 +61,7 @@ TEST(RasterTile, onError) {
 
 TEST(RasterTile, onParsed) {
     RasterTileTest test;
-    RasterTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.onParsed(std::make_unique<RasterBucket>(PremultipliedImage{}), 0);
     EXPECT_TRUE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -85,7 +85,7 @@ TEST(RasterTile, onParsed) {
 
 TEST(RasterTile, onParsedEmpty) {
     RasterTileTest test;
-    RasterTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.onParsed(nullptr, 0);
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());

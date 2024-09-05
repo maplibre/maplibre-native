@@ -29,11 +29,9 @@ template <class Object>
 class EstablishedActor {
 public:
     // Construct the Object from a parameter pack `args` (i.e. `Object(args...)`)
-    template <typename U = Object,
-              class... Args,
-              typename std::enable_if_t<std::is_constructible_v<U, Args...> ||
-                                        std::is_constructible_v<U, ActorRef<U>, Args...>>* = nullptr>
+    template <typename U = Object, class... Args>
     EstablishedActor(Scheduler& scheduler, AspiringActor<Object>& parent_, Args&&... args)
+        requires(std::is_constructible_v<U, Args...> || std::is_constructible_v<U, ActorRef<U>, Args...>)
         : parent(parent_) {
         emplaceObject(std::forward<Args>(args)...);
         parent.mailbox->open(scheduler);

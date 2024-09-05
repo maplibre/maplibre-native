@@ -61,47 +61,23 @@ std::unique_ptr<gfx::Context> RendererBackend::createContext() {
 
 PremultipliedImage RendererBackend::readFramebuffer(const Size& size) {
     return PremultipliedImage(size);
-    // return getContext<mtl::Context>().readFramebuffer<PremultipliedImage>(size);
 }
 
-void RendererBackend::assumeFramebufferBinding(const mtl::FramebufferID fbo) {
-    /*getContext<mtl::Context>().bindFramebuffer.setCurrentValue(fbo);
-    if (fbo != ImplicitFramebufferBinding) {
-        assert(mtl::value::BindFramebuffer::Get() == getContext<mtl::Context>().bindFramebuffer.getCurrentValue());
-    }*/
-}
+void RendererBackend::assumeFramebufferBinding(const mtl::FramebufferID fbo) {}
 
-void RendererBackend::assumeViewport(int32_t x, int32_t y, const Size& size) {
-    /*getContext<mtl::Context>().viewport.setCurrentValue({x, y, size});
-    assert(mtl::value::Viewport::Get() == getContext<mtl::Context>().viewport.getCurrentValue());*/
-}
+void RendererBackend::assumeViewport(int32_t x, int32_t y, const Size& size) {}
 
-void RendererBackend::assumeScissorTest(bool enabled) {
-    /*getContext<mtl::Context>().scissorTest.setCurrentValue(enabled);
-    assert(mtl::value::ScissorTest::Get() == getContext<mtl::Context>().scissorTest.getCurrentValue());*/
-}
+void RendererBackend::assumeScissorTest(bool enabled) {}
 
 bool RendererBackend::implicitFramebufferBound() {
     return false;
-    // return getContext<mtl::Context>().bindFramebuffer.getCurrentValue() == ImplicitFramebufferBinding;
 }
 
-void RendererBackend::setFramebufferBinding(const mtl::FramebufferID fbo) {
-    /*getContext<mtl::Context>().bindFramebuffer = fbo;
-    if (fbo != ImplicitFramebufferBinding) {
-        assert(mtl::value::BindFramebuffer::Get() == getContext<mtl::Context>().bindFramebuffer.getCurrentValue());
-    }*/
-}
+void RendererBackend::setFramebufferBinding(const mtl::FramebufferID fbo) {}
 
-void RendererBackend::setViewport(int32_t x, int32_t y, const Size& size) {
-    /*getContext<mtl::Context>().viewport = {x, y, size};
-    assert(mtl::value::Viewport::Get() == getContext<mtl::Context>().viewport.getCurrentValue());*/
-}
+void RendererBackend::setViewport(int32_t x, int32_t y, const Size& size) {}
 
-void RendererBackend::setScissorTest(bool enabled) {
-    /*getContext<mtl::Context>().scissorTest = enabled;
-    assert(mtl::value::ScissorTest::Get() == getContext<mtl::Context>().scissorTest.getCurrentValue());*/
-}
+void RendererBackend::setScissorTest(bool enabled) {}
 
 /// @brief Register a list of types with a shader registry instance
 /// @tparam ...ShaderID Pack of BuiltIn:: shader IDs

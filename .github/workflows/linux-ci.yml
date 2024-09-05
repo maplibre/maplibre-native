@@ -208,6 +208,10 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
       - name: Start server
         run: |
           npm install

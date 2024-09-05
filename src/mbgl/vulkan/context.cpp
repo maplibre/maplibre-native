@@ -252,12 +252,15 @@ BufferResource Context::createBuffer(const void* data, std::size_t size, std::ui
     return BufferResource(const_cast<Context&>(*this), data, size, usage, persistent);
 }
 
-UniqueShaderProgram Context::createProgram(std::string name,
+UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
+                                           std::string name,
                                            const std::string_view vertex,
                                            const std::string_view fragment,
                                            const ProgramParameters& programParameters,
                                            const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
-    return std::make_unique<ShaderProgram>(name, vertex, fragment, programParameters, additionalDefines, backend);
+    auto program = std::make_unique<ShaderProgram>(
+        shaderID, name, vertex, fragment, programParameters, additionalDefines, backend, *observer);
+    return program;
 }
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {

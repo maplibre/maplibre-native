@@ -111,6 +111,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/token.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/url.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/lru_cache.test.cpp
 )
 
 # MapSnapshotter uses headless backend that is rendering image on a background thread. QT / macOS adaptation for headless backend creates
@@ -135,6 +136,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/test/gl/context.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/gl_functions.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/object.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/gl/resource_pool.test.cpp
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
     )

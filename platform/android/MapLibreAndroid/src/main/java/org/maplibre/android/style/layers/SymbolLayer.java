@@ -683,7 +683,7 @@ public class SymbolLayer extends Layer {
   }
 
   /**
-   * The color of the icon. This can only be used with sdf icons.
+   * The color of the icon. This can only be used with SDF icons.
    *
    * @return int representation of a rgba string color
    * @throws RuntimeException thrown if property isn't a value

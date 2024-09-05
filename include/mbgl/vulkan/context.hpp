@@ -60,7 +60,8 @@ public:
 
     BufferResource createBuffer(const void* data, std::size_t size, std::uint32_t usage, bool persistent) const;
 
-    UniqueShaderProgram createProgram(std::string name,
+    UniqueShaderProgram createProgram(shaders::BuiltIn shaderID,
+                                      std::string name,
                                       const std::string_view vertex,
                                       const std::string_view fragment,
                                       const ProgramParameters& programParameters,

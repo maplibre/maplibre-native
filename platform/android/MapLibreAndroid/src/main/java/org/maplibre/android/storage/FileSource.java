@@ -199,13 +199,16 @@ public class FileSource {
   @UiThread
   public static void initializeFileDirsPaths(Context context) {
     ThreadUtils.checkThread(TAG);
-    lockPathLoaders();
-    if (resourcesCachePath == null || internalCachePath == null) {
-      fileDirsPathsAsync(context, (path1, path2) -> {
-        resourcesCachePath = path1;
-        internalCachePath = path2;
-        return Unit.INSTANCE;
-      });
+    new FileDirsPathsTask().execute(context);
+  }
+
+  private static class FileDirsPathsTask extends AsyncTask<Context, Void, Void> {
+
+    @Override
+    protected Void doInBackground(Context... contexts) {
+      getResourcesCachePath(contexts[0]);
+      getInternalCachePath(contexts[0]);
+      return null;
     }
   }
 
@@ -320,16 +323,6 @@ public class FileSource {
       return false;
     }
     return new File(path).canWrite();
-  }
-
-  private static void lockPathLoaders() {
-    internalCachePathLoaderLock.lock();
-    resourcesCachePathLoaderLock.lock();
-  }
-
-  static void unlockPathLoaders() {
-    resourcesCachePathLoaderLock.unlock();
-    internalCachePathLoaderLock.unlock();
   }
 
   @Keep

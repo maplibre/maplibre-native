@@ -16,10 +16,6 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
 
-#if MLN_RENDER_BACKEND_METAL
-#include <mbgl/shaders/mtl/fill.hpp>
-#endif
-
 namespace mbgl {
 
 using namespace style;

@@ -8,7 +8,7 @@ using namespace mbgl;
 using namespace std::numbers;
 
 namespace mbgl {
-constexpr inline bool operator==(const Anchor& rhs, const Anchor& lhs) {
+constexpr bool operator==(const Anchor& rhs, const Anchor& lhs) {
     return rhs.point == lhs.point && rhs.angle == lhs.angle && rhs.segment == lhs.segment;
 }
 } // namespace mbgl

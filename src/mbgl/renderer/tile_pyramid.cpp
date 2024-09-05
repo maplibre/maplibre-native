@@ -59,7 +59,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
                          const uint16_t tileSize,
                          const Range<uint8_t> zoomRange,
                          std::optional<LatLngBounds> bounds,
-                         std::function<std::unique_ptr<Tile>(const OverscaledTileID&)> createTile) {
+                         std::function<std::unique_ptr<Tile>(const OverscaledTileID&, TileObserver*)> createTile) {
     // If we need a relayout, abandon any cached tiles; they're now stale.
     if (needsRelayout) {
         cache.clear();
@@ -172,9 +172,8 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         }
         std::unique_ptr<Tile> tile = cache.pop(tileID);
         if (!tile) {
-            tile = createTile(tileID);
+            tile = createTile(tileID, observer);
             if (!tile) return nullptr;
-            tile->setObserver(observer);
             tile->setLayers(layers);
         }
 

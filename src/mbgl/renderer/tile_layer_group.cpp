@@ -1,8 +1,6 @@
 #include <mbgl/renderer/layer_group.hpp>
 
 #include <mbgl/gfx/upload_pass.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_orchestrator.hpp>
 
 #include <unordered_map>
 #include <set>
