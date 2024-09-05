@@ -759,6 +759,33 @@ public final class MapLibreMap {
     nativeMapView.moveBy(x, y, duration);
   }
 
+  /**
+   * Zooms the camera by the specified amount.
+   * @param zoomAddition      The amount to add to the current zoom level.
+   * @param focalPoint        The point around which to zoom.
+   */
+  public void zoomBy(double zoomAddition, @NonNull PointF focalPoint) {
+    notifyDeveloperAnimationListeners();
+    nativeMapView.setZoom(nativeMapView.getZoom() + zoomAddition, focalPoint, 0);
+  }
+
+  /**
+   * Returns the current zoom level.
+   */
+  public double getZoom() {
+    return nativeMapView.getZoom();
+  }
+
+  /**
+   * Zooms the camera to the specified level.
+   * @param zoom              The zoom level to which the camera should move.
+   * @param focalPoint        The point around which to zoom.
+   */
+  public void setZoom(double zoom, @NonNull PointF focalPoint) {
+    notifyDeveloperAnimationListeners();
+    nativeMapView.setZoom(zoom, focalPoint, 0);
+  }
+
   //
   //  Reset North
   //
