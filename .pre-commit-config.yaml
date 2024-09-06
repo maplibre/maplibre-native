@@ -11,7 +11,7 @@ repos:
     files: '.*\.(hpp|cpp|h)'
     exclude: '(vendor/.*|darwin/include/mbgl/storage/reachability.h)'
 - repo: https://github.com/keith/pre-commit-buildifier
-  rev: 7.1.2
+  rev: 7.3.1
   hooks:
     - id: buildifier
 - repo: https://github.com/Mateusz-Grzelinski/actionlint-py

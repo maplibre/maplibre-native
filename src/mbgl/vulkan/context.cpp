@@ -205,10 +205,11 @@ void Context::beginFrame() {
             if (acquireImageResult.result == vk::Result::eSuccess) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
             } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
-                // request an update and restart frame
-                requestSurfaceUpdate();
-                beginFrame();
-                return;
+                renderableResource.setAcquiredImageIndex(acquireImageResult.value);
+                // TODO implement pre-rotation transform for surface orientation
+                // requestSurfaceUpdate();
+                // beginFrame();
+                // return;
             }
 
         } catch (const vk::OutOfDateKHRError& e) {
@@ -269,7 +270,8 @@ void Context::submitFrame() {
             const auto& presentQueue = backend.getPresentQueue();
             const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
             if (presentResult == vk::Result::eSuboptimalKHR) {
-                requestSurfaceUpdate();
+                // TODO implement pre-rotation transform for surface orientation
+                // requestSurfaceUpdate();
             }
         } catch (const vk::OutOfDateKHRError& e) {
             requestSurfaceUpdate();
@@ -288,12 +290,15 @@ BufferResource Context::createBuffer(const void* data, std::size_t size, std::ui
     return BufferResource(const_cast<Context&>(*this), data, size, usage, persistent);
 }
 
-UniqueShaderProgram Context::createProgram(std::string name,
+UniqueShaderProgram Context::createProgram(shaders::BuiltIn shaderID,
+                                           std::string name,
                                            const std::string_view vertex,
                                            const std::string_view fragment,
                                            const ProgramParameters& programParameters,
                                            const mbgl::unordered_map<std::string, std::string>& additionalDefines) {
-    return std::make_unique<ShaderProgram>(name, vertex, fragment, programParameters, additionalDefines, backend);
+    auto program = std::make_unique<ShaderProgram>(
+        shaderID, name, vertex, fragment, programParameters, additionalDefines, backend, *observer);
+    return program;
 }
 
 gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
