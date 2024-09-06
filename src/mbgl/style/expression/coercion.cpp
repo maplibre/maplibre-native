@@ -72,16 +72,12 @@ EvaluationResult toColor(const Value& colorValue) {
         });
 }
 
+// TODO (Yingfang) need evaluate the expression value to mbgl value
 EvaluationResult toVariableAnchorOffsetCollection(const Value& value) {
     return value.match(
         [&](const VariableAnchorOffsetCollection& anchorOffset) -> EvaluationResult { return anchorOffset; },
         [&](const std::string& anchorOffsetString) -> EvaluationResult {
-            const std::optional<VariableAnchorOffsetCollection> result = VariableAnchorOffsetCollection::parse(anchorOffsetString);
-            if (result) {
-                return *result;
-            } else {
-                return EvaluationError{"Could not parse variableAnchorOffsetCollection from value '" + anchorOffsetString + "'"};
-            }
+            return EvaluationError{"Could not parse variableAnchorOffsetCollection from value '" + anchorOffsetString + "'"};
         },
         [&](const auto&) -> EvaluationResult {
             return EvaluationError{"Could not parse variableAnchorOffsetCollection from value '" + stringify(value) + "'"};

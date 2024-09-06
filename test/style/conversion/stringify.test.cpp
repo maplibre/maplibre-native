@@ -58,6 +58,13 @@ TEST(Stringify, Color) {
     ASSERT_EQ(stringify(Color::blue()), "\"rgba(0,0,255,1)\"");
 }
 
+TEST(Stringify, VariableAnchorOffsetCollection) {
+    std::array<float, 2> offset = { 1, 1 };
+    std::map<SymbolAnchorType, std::array<float, 2>> test;
+    test[SymbolAnchorType::Left] = offset;
+    ASSERT_EQ(stringify(VariableAnchorOffsetCollection(test)), "[\"left\",[1.0,1.0]]");
+}
+
 TEST(Stringify, Array) {
     ASSERT_EQ(stringify(std::array<float, 2>{{1, 2}}), "[1.0,2.0]");
 }

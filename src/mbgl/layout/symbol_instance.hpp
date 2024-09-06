@@ -73,7 +73,7 @@ public:
                    float overscaling,
                    float iconRotation,
                    float textRotation,
-                   const std::array<float, 2>& variableTextOffset,
+                   const std::optional<VariableAnchorOffsetCollection>& textVariableAnchorOffset,
                    bool allowVerticalPlacement,
                    SymbolContent iconType = SymbolContent::None);
 
@@ -120,7 +120,7 @@ public:
     std::optional<size_t> placedIconIndex;
     std::optional<size_t> placedVerticalIconIndex;
     float textBoxScale;
-    std::array<float, 2> variableTextOffset;
+    std::optional<VariableAnchorOffsetCollection> textVariableAnchorOffset;
     bool singleLine;
     uint32_t crossTileID = 0;
 

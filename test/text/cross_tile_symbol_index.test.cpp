@@ -2,6 +2,7 @@
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/test/util.hpp>
 #include <mbgl/text/cross_tile_symbol_index.hpp>
+#include <mbgl/util/variable_anchor_offset_collection.hpp>
 
 using namespace mbgl;
 
@@ -15,6 +16,8 @@ SymbolInstance makeSymbolInstance(float x, float y, std::u16string key) {
     std::array<float, 2> textOffset{{0.0f, 0.0f}};
     std::array<float, 2> iconOffset{{0.0f, 0.0f}};
     std::array<float, 2> variableTextOffset{{0.0f, 0.0f}};
+    AnchorOffsetMap anchorOffsets = {{ style::SymbolAnchorType::Left, variableTextOffset }};
+    VariableAnchorOffsetCollection variableAnchorOffsetCollection(anchorOffsets);
     style::SymbolPlacementType placementType = style::SymbolPlacementType::Point;
 
     auto sharedData = std::make_shared<SymbolInstanceSharedData>(std::move(line),
@@ -48,7 +51,7 @@ SymbolInstance makeSymbolInstance(float x, float y, std::u16string key) {
                           0.0f,
                           0.0f,
                           0.0f,
-                          variableTextOffset,
+                          variableAnchorOffsetCollection,
                           false);
 }
 

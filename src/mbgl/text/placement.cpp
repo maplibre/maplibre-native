@@ -70,6 +70,7 @@ class PlacementContext {
     std::reference_wrapper<const SymbolBucket> bucket;
     std::reference_wrapper<const RenderTile> renderTile;
     std::reference_wrapper<const TransformState> state;
+    std::vector<style::TextVariableAnchorType> textVariableAnchors;
 
 public:
     PlacementContext(const SymbolBucket& bucket_,
@@ -87,7 +88,18 @@ public:
           collisionGroup(std::move(collisionGroup_)),
           partiallyEvaluatedTextSize(bucket_.textSizeBinder->evaluateForZoom(placementZoom)),
           partiallyEvaluatedIconSize(bucket_.iconSizeBinder->evaluateForZoom(placementZoom)),
-          avoidEdges(std::move(avoidEdges_)) {}
+          avoidEdges(std::move(avoidEdges_)) {
+              auto textVariableAnchorOffset = getLayout().get<TextVariableAnchorOffset>();
+              auto variableAnchorOffset = textVariableAnchorOffset.evaluate(placementZoom);
+              if (!variableAnchorOffset.empty()) {
+                  for (const auto anchorOffset: variableAnchorOffset.getOffsets()) {
+                      textVariableAnchors.push_back(anchorOffset.first);
+                  }
+              }
+              else {
+                  textVariableAnchors = std::move(getLayout().get<TextVariableAnchor>());
+              }
+          }
 
     const SymbolBucket& getBucket() const { return bucket.get(); }
     const style::SymbolLayoutProperties::PossiblyEvaluated& getLayout() const { return *getBucket().layout; }
@@ -98,7 +110,7 @@ public:
     const TransformState& getTransformState() const { return state; }
 
     const std::vector<style::TextVariableAnchorType>& getVariableTextAnchors() const {
-        return getLayout().get<style::TextVariableAnchor>();
+        return textVariableAnchors;
     }
 
     float pixelsToTileUnits;
@@ -229,8 +241,7 @@ Point<float> calculateVariableLayoutOffset(style::SymbolAnchorType anchor,
     AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
     float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
     float shiftY = -(alignment.verticalAlign - 0.5f) * height;
-    auto variableOffset = SymbolLayout::evaluateVariableOffset(anchor, offset);
-    Point<float> shift{shiftX + variableOffset[0] * textBoxScale, shiftY + variableOffset[1] * textBoxScale};
+    Point<float> shift{shiftX + offset[0] * textBoxScale, shiftY + offset[1] * textBoxScale};
     if (rotateWithMap) {
         shift = util::rotate(shift, pitchWithMap ? bearing : -bearing);
     }
@@ -409,11 +420,13 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                     // so this code would not be reached
                     // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
                     auto anchor = variableTextAnchors[i % anchorsSize];
+                    auto textVariableAnchorOffset = symbolInstance.textVariableAnchorOffset->getOffsets();
+                    auto variableTextOffset = textVariableAnchorOffset[anchor];
                     const bool allowOverlap = (i >= anchorsSize);
                     shift = calculateVariableLayoutOffset(anchor,
                                                           width,
                                                           height,
-                                                          symbolInstance.variableTextOffset,
+                                                          variableTextOffset,
                                                           textBoxScale,
                                                           ctx.rotateTextWithMap,
                                                           ctx.pitchTextWithMap,
@@ -478,8 +491,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
 
                         variableOffsets.insert(std::make_pair(
                             symbolInstance.crossTileID,
-                            VariableOffset{
-                                symbolInstance.variableTextOffset, width, height, anchor, textBoxScale, prevAnchor}));
+                            VariableOffset{variableTextOffset, width, height, anchor, textBoxScale, prevAnchor}));
 
                         if (bucket.allowVerticalPlacement) {
                             placedOrientations.emplace(symbolInstance.crossTileID, orientation);
@@ -757,9 +769,8 @@ Point<float> calculateVariableRenderShift(style::SymbolAnchorType anchor,
     const AnchorAlignment alignment = AnchorAlignment::getAnchorAlignment(anchor);
     const float shiftX = -(alignment.horizontalAlign - 0.5f) * width;
     const float shiftY = -(alignment.verticalAlign - 0.5f) * height;
-    const auto variableOffset = SymbolLayout::evaluateVariableOffset(anchor, textOffset);
-    return {(shiftX / textBoxScale + variableOffset[0]) * renderTextSize,
-            (shiftY / textBoxScale + variableOffset[1]) * renderTextSize};
+    return {(shiftX / textBoxScale + textOffset[0]) * renderTextSize,
+            (shiftY / textBoxScale + textOffset[1]) * renderTextSize};
 }
 } // namespace
 
@@ -769,7 +780,11 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
     using namespace style;
     const auto& layout = *bucket.layout;
     const bool alongLine = layout.get<SymbolPlacement>() != SymbolPlacementType::Point;
-    const bool hasVariableAnchors = !layout.get<TextVariableAnchor>().empty() && bucket.hasTextData();
+    auto textVariableAnchorOffset = layout.get<TextVariableAnchorOffset>();
+    auto variableAnchorOffset = textVariableAnchorOffset.evaluate(placementZoom);
+    
+    const bool hasVariableAnchors = (!layout.get<TextVariableAnchor>().empty() || !variableAnchorOffset.empty())
+                                     && bucket.hasTextData();
     const bool updateTextFitIcon = layout.get<IconTextFit>() != IconTextFitType::None &&
                                    (bucket.allowVerticalPlacement || hasVariableAnchors) &&
                                    (bucket.hasIconData() || bucket.hasSdfIconData());
@@ -1522,10 +1537,14 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
             if (variableAnchor) {
                 float width = textCollisionBox.x2 - textCollisionBox.x1;
                 float height = textCollisionBox.y2 - textCollisionBox.y1;
+                
+                auto textVariableAnchorOffset = symbol.textVariableAnchorOffset->getOffsets();
+                auto variableTextOffset = textVariableAnchorOffset[*variableAnchor];
+                
                 offset = calculateVariableLayoutOffset(*variableAnchor,
                                                        width,
                                                        height,
-                                                       symbol.variableTextOffset,
+                                                       variableTextOffset,
                                                        symbol.textBoxScale,
                                                        rotateTextWithMap,
                                                        pitchTextWithMap,
@@ -1540,10 +1559,14 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
             if (variableAnchor && variableIconPlacement) {
                 float width = iconCollisionBox.x2 - iconCollisionBox.x1;
                 float height = iconCollisionBox.y2 - iconCollisionBox.y1;
+                
+                auto textVariableAnchorOffset = symbol.textVariableAnchorOffset->getOffsets();
+                auto variableTextOffset = textVariableAnchorOffset[*variableAnchor];
+                
                 offset = calculateVariableLayoutOffset(*variableAnchor,
                                                        width,
                                                        height,
-                                                       symbol.variableTextOffset,
+                                                       variableTextOffset,
                                                        symbol.textBoxScale,
                                                        rotateTextWithMap,
                                                        pitchTextWithMap,

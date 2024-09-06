@@ -218,7 +218,7 @@ struct TextVariableAnchor : LayoutProperty<std::vector<TextVariableAnchorType>> 
 
 struct TextVariableAnchorOffset : DataDrivenLayoutProperty<VariableAnchorOffsetCollection> {
     static constexpr const char *name() { return "text-variable-anchor-offset"; }
-    static VariableAnchorOffsetCollection defaultValue() { return ; }
+    static VariableAnchorOffsetCollection defaultValue() { return {}; }
 };
 
 struct TextWritingMode : LayoutProperty<std::vector<TextWritingModeType>> {

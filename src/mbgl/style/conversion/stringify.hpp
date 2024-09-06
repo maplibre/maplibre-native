@@ -61,7 +61,17 @@ void stringify(Writer& writer, const Color& v) {
 
 template <class Writer>
 void stringify(Writer& writer, const VariableAnchorOffsetCollection& v) {
-  writer.String(v.stringify());
+    writer.StartArray();
+    
+    for (const auto& pair : v.getOffsets()) {
+        writer.String(Enum<SymbolAnchorType>::toString(pair.first));
+        writer.StartArray();
+        writer.Double(pair.second[0]);
+        writer.Double(pair.second[1]);
+        writer.EndArray();
+    }
+    
+    writer.EndArray();
 }
 
 template <class Writer>
