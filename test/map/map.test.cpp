@@ -1771,6 +1771,7 @@ TEST(Map, ObserveTileLifecycle) {
 
     for (const auto& tile : expectedTiles) {
         TileOperation stage = TileOperation::NullOp;
+        bool parsing = false;
 
         for (const auto& op : tileOps) {
             if (op.id != tile) continue;
@@ -1781,6 +1782,7 @@ TEST(Map, ObserveTileLifecycle) {
                     break;
                 }
                 case TileOperation::RequestedFromNetwork: {
+                    // Parsing happens concurrently with the file source request and can start and stop between requests
                     EXPECT_THAT(
                         stage,
                         testing::AnyOf(
@@ -1789,7 +1791,11 @@ TEST(Map, ObserveTileLifecycle) {
                     break;
                 }
                 case TileOperation::LoadFromNetwork: {
-                    EXPECT_THAT(stage, TileOperation::RequestedFromNetwork);
+                    // Parsing happens concurrently with the file source request and can start and stop between requests
+                    EXPECT_THAT(
+                        stage,
+                        testing::AnyOf(
+                            TileOperation::StartParse, TileOperation::EndParse, TileOperation::RequestedFromNetwork));
                     stage = TileOperation::LoadFromNetwork;
                     break;
                 }
@@ -1800,7 +1806,9 @@ TEST(Map, ObserveTileLifecycle) {
                 }
                 case TileOperation::StartParse: {
                     EXPECT_THAT(stage, testing::AnyOf(TileOperation::LoadFromNetwork, TileOperation::LoadFromCache));
+                    EXPECT_FALSE(parsing); // We must not already be parsing when seeing this marker.
                     stage = TileOperation::StartParse;
+                    parsing = true;
                     break;
                 }
                 case TileOperation::Cancelled: {
@@ -1831,6 +1839,8 @@ TEST(Map, ObserveTileLifecycle) {
                                 testing::AnyOf(TileOperation::StartParse,
                                                TileOperation::LoadFromNetwork,
                                                TileOperation::RequestedFromNetwork));
+                    EXPECT_TRUE(parsing); // We must have been parsing to see the EndParse marker.
+                    parsing = false;
                     stage = TileOperation::EndParse;
                     break;
                 }
