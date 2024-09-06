@@ -196,6 +196,14 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
             return `@"'${_.last(_.keys(property.values))}'"`;
         case 'color':
             return '@"%@", [MLNColor redColor]';
+        case 'padding':
+            // BUGBUG copy-paste
+            if (arraysAsStructs) {
+                let iosValue = '[NSValue valueWithUIEdgeInsets:UIEdgeInsetsMake(1, 1, 1, 1)]'.indent(indent * 4);
+                let macosValue = '[NSValue valueWithEdgeInsets:NSEdgeInsetsMake(1, 1, 1, 1)]'.indent(indent * 4);
+                return `@"%@",\n#if TARGET_OS_IPHONE\n${iosValue}\n#else\n${macosValue}\n#endif\n${''.indent((indent - 1) * 4)}`;
+            }
+            return '@"{1, 1, 1, 1}"';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -261,6 +269,8 @@ global.mbglTestValue = function (property, layerType) {
         }
         case 'color':
             return '{ 1, 0, 0, 1 }';
+        case 'padding':
+            return '{ 1, 1, 1, 1 }';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -335,6 +345,8 @@ global.testHelperMessage = function (property, layerType, isFunction) {
             return `testEnum${fnSuffix}:${objCEnum} type:@encode(${objCType})`;
         case 'color':
             return 'testColor' + fnSuffix;
+        case 'padding':
+            return 'testPaddingType' + fnSuffix;
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -517,6 +529,8 @@ global.describeType = function (property) {
             return '`MLN' + camelize(property.name) + '`';
         case 'color':
             return '`UIColor`';
+        case 'padding':
+            return '`UIEdgeInsets`';
         case 'array':
             switch (arrayType(property)) {
                 case 'padding':
@@ -540,7 +554,7 @@ global.describeType = function (property) {
 }
 
 global.describeValue = function (value, property, layerType) {
-    if (Array.isArray(value) && property.type !== 'array' && property.type !== 'enum') {
+    if (Array.isArray(value) && property.type !== 'array' && property.type !== 'enum' && property.type !== 'padding') {
         switch (value[0]) {
             case 'interpolate': {
                 let curveType = value[1][0];
@@ -595,6 +609,15 @@ global.describeValue = function (value, property, layerType) {
                 return '`UIColor.whiteColor`';
             }
             return 'a `UIColor`' + ` object whose RGB value is ${formatNumber(color.r)}, ${formatNumber(color.g)}, ${formatNumber(color.b)} and whose alpha value is ${formatNumber(color.a)}`;
+
+        // BUGBUG? 
+        case 'padding':
+            // if (value[0] === 0 && value[1] === 0 && value[2] === 0 && value[3] === 0) {
+            //     return 'an `NSValue` object containing `UIEdgeInsetsZero`';
+            // }
+            // return 'an `NSValue` object containing a `UIEdgeInsets` struct set to' + ` ${formatNumber(value[0])}em on the top, ${formatNumber(value[3])}em on the left, ${formatNumber(value[2])}em on the bottom, and ${formatNumber(value[1])}em on the right`;
+            return 'an `NSValue` object containing a `UIEdgeInsets`';
+
         case 'array':
             let units = property.units || '';
             if (units) {
@@ -653,6 +676,8 @@ global.propertyType = function (property) {
             return 'NSValue *';
         case 'color':
             return 'MLNColor *';
+        case 'padding':
+            return 'NSValue *';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -701,6 +726,8 @@ global.valueTransformerArguments = function (property) {
             return [mbglType(property), 'NSValue *', mbglType(property), `MLN${camelize(property.name)}`];
         case 'color':
             return ['mbgl::Color', objCType];
+        case 'padding':
+            return ['mbgl::Padding', objCType];
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -756,6 +783,8 @@ global.mbglType = function(property) {
         }
         case 'color':
             return 'mbgl::Color';
+        case 'padding':
+            return 'mbgl::Padding';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
