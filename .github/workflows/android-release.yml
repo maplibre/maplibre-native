@@ -23,6 +23,11 @@ jobs:
       BUILDTYPE: Release
       IS_LOCAL_DEVELOPMENT: false
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
       - name: Map renderer input
         id: backend_lowercase
         run: |
@@ -31,11 +36,6 @@ jobs:
           elif [ "${{ github.event.inputs.renderer }}" = "Vulkan" ]; then
             echo "backend_lowercase=vulkan" >> "$GITHUB_ENV"
           fi
-
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
 
       - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
 
