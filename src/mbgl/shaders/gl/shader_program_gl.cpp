@@ -185,10 +185,13 @@ std::shared_ptr<ShaderProgramGL> ShaderProgramGL::create(
             addAttr(attrs, attributesInfo[location].id, location, length, size, glType);
         }
 
-      auto uboIndexLocation = MBGL_CHECK_ERROR(glGetUniformLocation(program, "u_ubo_index"));
+        auto uboIndexLocation = MBGL_CHECK_ERROR(glGetUniformLocation(program, "u_ubo_index"));
 
-      return std::make_shared<ShaderProgramGL>(
-          std::move(program), std::move(uniformBlocks), std::move(attrs), std::move(samplerLocations), uboIndexLocation);
+        return std::make_shared<ShaderProgramGL>(std::move(program),
+                                                 std::move(uniformBlocks),
+                                                 std::move(attrs),
+                                                 std::move(samplerLocations),
+                                                 uboIndexLocation);
     } catch (const std::exception& e) {
         context.getObserver().onShaderCompileFailed(
             programParameters.getProgramType(), gfx::Backend::Type::OpenGL, additionalDefines);
