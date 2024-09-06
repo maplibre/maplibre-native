@@ -265,8 +265,8 @@ jobs:
       - name: Build Render Test App
         run: |
           ./gradlew assemble${{ matrix.flavor }} assemble${{ matrix.flavor }}AndroidTest
-          cp app/build/outputs/apk/${{ matrix.flavor }}/release/app-${{ matrix.flavor }}-release.apk RenderTestsApp-${{ matrix.flavor }}.apk
-          cp app/build/outputs/apk/androidTest/${{ matrix.flavor }}/release/app-${{ matrix.flavor }}-release-androidTest.apk RenderTests-${{ matrix.flavor }}.apk
+          cp app/build/outputs/apk/${{ matrix.flavor }}/debug/app-${{ matrix.flavor }}-debug.apk RenderTestsApp-${{ matrix.flavor }}.apk
+          cp app/build/outputs/apk/androidTest/${{ matrix.flavor }}/debug/app-${{ matrix.flavor }}-debug-androidTest.apk RenderTests-${{ matrix.flavor }}.apk
         working-directory: ./render-test/android
 
       - name: Store Render Test .apk files
@@ -277,23 +277,6 @@ jobs:
           path: |
             ./render-test/android/RenderTestsApp-${{ matrix.flavor }}.apk
             ./render-test/android/RenderTests-${{ matrix.flavor }}.apk
-
-      # these two can be (and should be) removed once merged into main
-      - name: Copy render tests and render test app
-        if: matrix.flavor == 'opengl'
-        run: |
-          cp ./render-test/android/RenderTestsApp-opengl.apk ./render-test/android/RenderTestsApp.apk
-          cp ./render-test/android/RenderTests-opengl.apk ./render-test/android/RenderTests.apk
-
-      - name: Store Render Test .apk files
-        if: matrix.flavor == 'opengl'
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-render-tests
-          if-no-files-found: error
-          path: |
-            ./render-test/android/RenderTestsApp.apk
-            ./render-test/android/RenderTests.apk
 
   android-ci-result:
     runs-on: ubuntu-latest
