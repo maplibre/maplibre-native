@@ -37,6 +37,7 @@ import org.maplibre.android.style.light.Light;
 import org.maplibre.android.style.sources.CannotAddSourceException;
 import org.maplibre.android.style.sources.Source;
 import org.maplibre.android.utils.BitmapUtils;
+import org.maplibre.android.tile.TileOperation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1194,6 +1195,76 @@ final class NativeMapView implements NativeMap {
     }
   }
 
+  @Keep
+  private void onPreCompileShader(int id, int type, String additionalDefines) {
+    if (stateCallback != null) {
+      stateCallback.onPreCompileShader(id, type, additionalDefines);
+    }
+  }
+
+  @Keep
+  private void onPostCompileShader(int id, int type, String additionalDefines) {
+    if (stateCallback != null) {
+      stateCallback.onPostCompileShader(id, type, additionalDefines);
+    }
+  }
+
+  @Keep
+  private void onShaderCompileFailed(int id, int type, String additionalDefines) {
+    if (stateCallback != null) {
+      stateCallback.onShaderCompileFailed(id, type, additionalDefines);
+    }
+  }
+
+  @Keep
+  private void onGlyphsLoaded(String[] stack, int rangeStart, int rangeEnd) {
+    if (stateCallback != null) {
+      stateCallback.onGlyphsLoaded(stack, rangeStart, rangeEnd);
+    }
+  }
+
+  @Keep
+  private void onGlyphsError(String[] stack, int rangeStart, int rangeEnd) {
+    if (stateCallback != null) {
+      stateCallback.onGlyphsError(stack, rangeStart, rangeEnd);
+    }
+  }
+
+  @Keep
+  private void onGlyphsRequested(String[] stack, int rangeStart, int rangeEnd) {
+    if (stateCallback != null) {
+      stateCallback.onGlyphsRequested(stack, rangeStart, rangeEnd);
+    }
+  }
+
+  @Keep
+  private void onTileAction(TileOperation op, int x, int y, int z, int wrap, int overscaledZ, String sourceID) {
+    if (stateCallback != null) {
+      stateCallback.onTileAction(op, x, y, z, wrap, overscaledZ, sourceID);
+    }
+  }
+
+  @Keep
+  private void onSpriteLoaded(String id, String url) {
+    if (stateCallback != null) {
+      stateCallback.onSpriteLoaded(id, url);
+    }
+  }
+
+  @Keep
+  private void onSpriteError(String id, String url) {
+    if (stateCallback != null) {
+      stateCallback.onSpriteError(id, url);
+    }
+  }
+
+  @Keep
+  private void onSpriteRequested(String id, String url) {
+    if (stateCallback != null) {
+      stateCallback.onSpriteRequested(id, url);
+    }
+  }
+
   //
   // JNI methods
   //
@@ -1621,5 +1692,25 @@ final class NativeMapView implements NativeMap {
     void onStyleImageMissing(String imageId);
 
     boolean onCanRemoveUnusedStyleImage(String imageId);
+
+    void onPreCompileShader(int id, int type, String additionalDefines);
+
+    void onPostCompileShader(int id, int type, String additionalDefines);
+
+    void onShaderCompileFailed(int id, int type, String additionalDefines);
+
+    void onGlyphsLoaded(String[] stack, int rangeStart, int rangeEnd);
+
+    void onGlyphsError(String[] stack, int rangeStart, int rangeEnd);
+
+    void onGlyphsRequested(String[] stack, int rangeStart, int rangeEnd);
+
+    void onTileAction(TileOperation op, int x, int y, int z, int wrap, int overscaledZ, String sourceID);
+
+    void onSpriteLoaded(String id, String url);
+
+    void onSpriteError(String id, String url);
+
+    void onSpriteRequested(String id, String url);
   }
 }

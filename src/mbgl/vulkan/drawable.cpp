@@ -247,7 +247,7 @@ void Drawable::draw(PaintParameters& parameters) const {
         // update pipeline info with per segment modifiers
         impl->pipelineInfo.setDrawMode(seg->getMode());
 
-        impl->pipelineInfo.setDynamicValues(commandBuffer);
+        impl->pipelineInfo.setDynamicValues(context.getBackend(), commandBuffer);
 
         const auto& pipeline = shaderImpl.getPipeline(impl->pipelineInfo);
         commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());

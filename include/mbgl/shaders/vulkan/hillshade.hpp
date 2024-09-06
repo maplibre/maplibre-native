@@ -17,8 +17,8 @@ struct ShaderSource<BuiltIn::HillshadePrepareShader, gfx::Backend::Type::Vulkan>
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_texture_position;
+layout(location = 0) in ivec2 in_position;
+layout(location = 1) in ivec2 in_texture_position;
 
 layout(set = 0, binding = 1) uniform HillshadePrepareDrawableUBO {
     mat4 matrix;
@@ -135,8 +135,8 @@ struct ShaderSource<BuiltIn::HillshadeShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_texture_position;
+layout(location = 0) in ivec2 in_position;
+layout(location = 1) in ivec2 in_texture_position;
 
 layout(set = 0, binding = 1) uniform HillshadeDrawableUBO {
     mat4 matrix;

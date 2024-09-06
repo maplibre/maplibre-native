@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/renderer/render_orchestrator.hpp>
+#include <mbgl/gfx/context_observer.hpp>
 
 #if MLN_RENDER_BACKEND_METAL
 #include <mbgl/mtl/mtl_fwd.hpp>
@@ -21,10 +22,15 @@ class RendererBackend;
 class ShadeRegistry;
 } // namespace gfx
 
-class Renderer::Impl {
+class Renderer::Impl : public gfx::ContextObserver {
 public:
     Impl(gfx::RendererBackend&, float pixelRatio_, const std::optional<std::string>& localFontFamily_);
-    ~Impl();
+    virtual ~Impl();
+
+    // ContextObserver
+    void onPreCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) override;
+    void onPostCompileShader(shaders::BuiltIn, gfx::Backend::Type, const std::string&) override;
+    void onShaderCompileFailed(shaders::BuiltIn, gfx::Backend::Type, const std::string&) override;
 
 private:
     friend class Renderer;

@@ -10,19 +10,22 @@ namespace mbgl {
 namespace vulkan {
 
 bool ImageAllocation::create(const VmaAllocationCreateInfo& allocInfo, const vk::ImageCreateInfo& imageInfo) {
+    VkImage image_;
     VkResult result = vmaCreateImage(
-        allocator, reinterpret_cast<const VkImageCreateInfo*>(&imageInfo), &allocInfo, &image, &allocation, nullptr);
+        allocator, reinterpret_cast<const VkImageCreateInfo*>(&imageInfo), &allocInfo, &image_, &allocation, nullptr);
 
     if (result != VK_SUCCESS) {
         return false;
     }
 
+    image = vk::Image(image_);
     return true;
 }
 
 void ImageAllocation::destroy() {
     imageView.reset();
-    vmaDestroyImage(allocator, image, allocation);
+    vmaDestroyImage(allocator, VkImage(image), allocation);
+    image = nullptr;
 }
 
 void ImageAllocation::setName([[maybe_unused]] const std::string& name) const {
