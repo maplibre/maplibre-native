@@ -6,12 +6,10 @@
 namespace mbgl {
 
 // A set of four numbers representing padding around a box.
-// Create instances from bare arrays or numeric values using
-// the static method `Padding.parse`. //BUGBUG verify
 //
-// BUGBUG add: A single number is accepted for backwards-compatibility, and treated the
-// same as a one-element array — padding applied to all sides.
-// Padding values are in CSS order: top, right, bottom, left.
+// A single number is accepted and treated the same as a one-element
+// array - padding applied to all sides. Padding values are in CSS order:
+// top, right, bottom, left.
 class Padding {
 public:
     Padding() = default;

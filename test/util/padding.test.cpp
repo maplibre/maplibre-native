@@ -92,3 +92,10 @@ TEST(Padding, Function) {
         EXPECT_EQ(Padding(3, 7, 9, 11), evalInContext(expr, {{"bar", 3}}));
     }
 }
+
+TEST(Padding, OperatorBool) {
+    Padding padding(0, 0, 0, 0);
+    EXPECT_FALSE(padding);
+    padding.left = 1;
+    EXPECT_TRUE(padding);
+}
