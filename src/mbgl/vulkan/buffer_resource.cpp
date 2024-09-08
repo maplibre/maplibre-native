@@ -10,19 +10,27 @@ namespace mbgl {
 namespace vulkan {
 
 bool BufferAllocation::create(const VmaAllocationCreateInfo& allocInfo, const vk::BufferCreateInfo& bufferInfo) {
-    VkResult result = vmaCreateBuffer(
-        allocator, reinterpret_cast<const VkBufferCreateInfo*>(&bufferInfo), &allocInfo, &buffer, &allocation, nullptr);
+    VkBuffer buffer_;
+    VkResult result = vmaCreateBuffer(allocator,
+                                      reinterpret_cast<const VkBufferCreateInfo*>(&bufferInfo),
+                                      &allocInfo,
+                                      &buffer_,
+                                      &allocation,
+                                      nullptr);
 
     if (result != VK_SUCCESS) {
         return false;
     }
 
+    buffer = vk::Buffer(buffer_);
     return true;
 }
 
 void BufferAllocation::destroy() {
     if (mappedBuffer) vmaUnmapMemory(allocator, allocation);
-    vmaDestroyBuffer(allocator, buffer, allocation);
+    vmaDestroyBuffer(allocator, VkBuffer(buffer), allocation);
+
+    buffer = nullptr;
     mappedBuffer = nullptr;
 }
 

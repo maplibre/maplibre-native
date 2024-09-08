@@ -10,6 +10,7 @@
 #include <optional>
 
 #include <jni/jni.hpp>
+#include <android/native_window.h>
 
 namespace mbgl {
 
@@ -25,6 +26,11 @@ class UpdateParameters;
 namespace android {
 
 class AndroidRendererBackend;
+
+class AndroidSurface {
+public:
+    static constexpr auto Name() { return "android/view/Surface"; };
+};
 
 /**
  * The MapRenderer is a peer class that encapsulates the actions
@@ -105,7 +111,7 @@ private:
     // Renders a frame.
     void render(JNIEnv&);
 
-    void onSurfaceCreated(JNIEnv&);
+    void onSurfaceCreated(JNIEnv&, const jni::Object<AndroidSurface>& surface);
 
     void onSurfaceChanged(JNIEnv&, jint width, jint height);
 
@@ -132,12 +138,14 @@ private:
     std::unique_ptr<AndroidRendererBackend> backend;
     std::unique_ptr<Renderer> renderer;
     std::unique_ptr<ActorRef<Renderer>> rendererRef;
+    std::unique_ptr<ANativeWindow, std::function<void(ANativeWindow*)>> window;
 
     std::shared_ptr<UpdateParameters> updateParameters;
     std::mutex updateMutex;
 
     bool framebufferSizeChanged = false;
     std::atomic<bool> destroyed{false};
+    bool swapBehaviorFlush{true};
 
     std::unique_ptr<SnapshotCallback> snapshotCallback;
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};

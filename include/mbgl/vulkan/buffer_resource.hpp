@@ -14,25 +14,16 @@ class Context;
 struct BufferAllocation {
     const VmaAllocator& allocator;
     VmaAllocation allocation{};
-    VkBuffer buffer{};
+    vk::Buffer buffer{};
     void* mappedBuffer{};
 
     BufferAllocation() = delete;
     BufferAllocation(BufferAllocation&) = delete;
     BufferAllocation& operator=(const BufferAllocation& other) = delete;
+    BufferAllocation(BufferAllocation&& other) = default;
 
     BufferAllocation(const VmaAllocator& allocator_)
         : allocator(allocator_) {}
-
-    BufferAllocation(BufferAllocation&& other) noexcept
-        : allocator(other.allocator),
-          allocation(other.allocation),
-          buffer(other.buffer),
-          mappedBuffer(other.mappedBuffer) {
-        other.buffer = nullptr;
-        other.allocation = nullptr;
-        other.mappedBuffer = nullptr;
-    }
 
     ~BufferAllocation() { destroy(); }
 
@@ -63,7 +54,7 @@ public:
     const void* contents() const noexcept { return (raw.empty() ? nullptr : raw.data()); }
 
     Context& getContext() const noexcept { return context; }
-    const VkBuffer& getVulkanBuffer() const noexcept { return bufferAllocation->buffer; }
+    const vk::Buffer& getVulkanBuffer() const noexcept { return bufferAllocation->buffer; }
     std::size_t getVulkanBufferOffset() const noexcept;
     std::size_t getVulkanBufferSize() const noexcept;
 

@@ -1,46 +1,40 @@
 #pragma once
 
+#include <mbgl/gfx/backend.hpp>
+#include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/gfx/renderable.hpp>
-#include <mbgl/gl/renderer_backend.hpp>
+#include <mbgl/util/image.hpp>
+
+#include <android/native_window.h>
 
 namespace mbgl {
 namespace android {
 
-class AndroidRendererBackend : public gl::RendererBackend, public mbgl::gfx::Renderable {
+class AndroidRendererBackend {
 public:
-    AndroidRendererBackend(const TaggedScheduler& threadPool);
-    ~AndroidRendererBackend() override;
+    AndroidRendererBackend() = default;
+    AndroidRendererBackend(const AndroidRendererBackend&) = delete;
+    AndroidRendererBackend& operator=(const AndroidRendererBackend&) = delete;
+    virtual ~AndroidRendererBackend() = default;
 
-    void updateViewPort();
+    static std::unique_ptr<AndroidRendererBackend> Create(ANativeWindow* window) {
+        return mbgl::gfx::Backend::Create<AndroidRendererBackend, ANativeWindow*>(window);
+    }
+    virtual mbgl::gfx::RendererBackend& getImpl() = 0;
+
+    virtual void updateViewPort();
 
     // Ensures the current context is not cleaned up when destroyed
-    void markContextLost();
+    virtual void markContextLost();
 
-    void resizeFramebuffer(int width, int height);
-    PremultipliedImage readFramebuffer();
+    virtual void resizeFramebuffer(int width, int height);
+    virtual PremultipliedImage readFramebuffer();
 
-    void setSwapBehavior(SwapBehaviour swapBehaviour);
-    void swap();
-
-private:
-    SwapBehaviour swapBehaviour = SwapBehaviour::NoFlush;
-
-    // mbgl::gfx::RendererBackend implementation
-public:
-    mbgl::gfx::Renderable& getDefaultRenderable() override { return *this; }
+    gfx::Renderable::SwapBehaviour getSwapBehavior() const { return swapBehaviour; }
+    virtual void setSwapBehavior(gfx::Renderable::SwapBehaviour swapBehaviour);
 
 protected:
-    void activate() override {
-        // no-op
-    }
-    void deactivate() override {
-        // no-op
-    }
-
-    // mbgl::gl::RendererBackend implementation
-protected:
-    mbgl::gl::ProcAddress getExtensionFunctionPointer(const char*) override;
-    void updateAssumedState() override;
+    gfx::Renderable::SwapBehaviour swapBehaviour = gfx::Renderable::SwapBehaviour::NoFlush;
 };
 
 } // namespace android

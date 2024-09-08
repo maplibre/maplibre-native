@@ -227,11 +227,27 @@ jobs:
           ./test/android/app-release-androidTest.apk
 
   android-build-render-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor: [opengl, vulkan]
     runs-on: ubuntu-latest
     needs:
       - pre_job
     if: needs.pre_job.outputs.should_skip != 'true'
     steps:
+      - name: Free Disk Space (Ubuntu)
+        if: startsWith(runner.name, 'GitHub Actions')
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
+
       - uses: actions/checkout@v4
         with:
           submodules: recursive
@@ -248,12 +264,29 @@ jobs:
 
       - name: Build Render Test App
         run: |
-          ./gradlew assemble assembleAndroidTest
-          cp app/build/outputs/apk/release/app-release.apk RenderTestsApp.apk
-          cp app/build/outputs/apk/androidTest/release/app-release-androidTest.apk RenderTests.apk
+          ./gradlew assemble${{ matrix.flavor }} assemble${{ matrix.flavor }}AndroidTest
+          cp app/build/outputs/apk/${{ matrix.flavor }}/release/app-${{ matrix.flavor }}-release.apk RenderTestsApp-${{ matrix.flavor }}.apk
+          cp app/build/outputs/apk/androidTest/${{ matrix.flavor }}/release/app-${{ matrix.flavor }}-release-androidTest.apk RenderTests-${{ matrix.flavor }}.apk
         working-directory: ./render-test/android
 
       - name: Store Render Test .apk files
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-render-tests-${{ matrix.flavor }}
+          if-no-files-found: error
+          path: |
+            ./render-test/android/RenderTestsApp-${{ matrix.flavor }}.apk
+            ./render-test/android/RenderTests-${{ matrix.flavor }}.apk
+
+      # these two can be (and should be) removed once merged into main
+      - name: Copy render tests and render test app
+        if: matrix.flavor == 'opengl'
+        run: |
+          cp ./render-test/android/RenderTestsApp-opengl.apk ./render-test/android/RenderTestsApp.apk
+          cp ./render-test/android/RenderTests-opengl.apk ./render-test/android/RenderTests.apk
+
+      - name: Store Render Test .apk files
+        if: matrix.flavor == 'opengl'
         uses: actions/upload-artifact@v4
         with:
           name: android-render-tests
