@@ -1698,6 +1698,12 @@ TEST(Map, ObserveTileLifecycle) {
     };
     std::mutex tileMutex;
     std::vector<TileEntry> tileOps;
+    // We expect to see a valid lifecycle for every tile in this list.
+    const std::vector<OverscaledTileID> expectedTiles = {
+        {10, 0, 10, 163, 395}, {10, 0, 10, 163, 396}, {10, 0, 10, 164, 395}, {10, 0, 10, 164, 396},
+        // Lower zooms can also be seen, but not always, so we
+        // ignore them.
+    };
 
     struct ShaderEntry {
         shaders::BuiltIn id;
@@ -1762,18 +1768,12 @@ TEST(Map, ObserveTileLifecycle) {
         }
     }
 
-    // We expect to see a valid lifecycle for every tile in this list.
-    const std::vector<OverscaledTileID> expectedTiles = {
-        {10, 0, 10, 163, 395}, {10, 0, 10, 163, 396}, {10, 0, 10, 164, 395}, {10, 0, 10, 164, 396},
-        // Lower zooms can also be seen, but not always, so we
-        // ignore them.
-    };
-
     for (const auto& tile : expectedTiles) {
         TileOperation stage = TileOperation::NullOp;
         bool parsing = false;
 
-        for (const auto& op : tileOps) {
+        for (size_t i = 0; i < tileOps.size(); i++) {
+            const auto& op = tileOps[i];
             if (op.id != tile) continue;
             switch (op.op) {
                 case TileOperation::RequestedFromCache: {
@@ -1783,10 +1783,10 @@ TEST(Map, ObserveTileLifecycle) {
                 }
                 case TileOperation::RequestedFromNetwork: {
                     // Parsing happens concurrently with the file source request and can start and stop between requests
-                    EXPECT_THAT(
-                        stage,
-                        testing::AnyOf(
-                            TileOperation::StartParse, TileOperation::EndParse, TileOperation::RequestedFromCache));
+                    EXPECT_THAT(stage,
+                                testing::AnyOf(TileOperation::StartParse,
+                                               TileOperation::EndParse,
+                                               TileOperation::LoadFromCache));
                     stage = TileOperation::RequestedFromNetwork;
                     break;
                 }
@@ -1800,12 +1800,15 @@ TEST(Map, ObserveTileLifecycle) {
                     break;
                 }
                 case TileOperation::LoadFromCache: {
-                    EXPECT_EQ(stage, TileOperation::RequestedFromCache);
+                    EXPECT_THAT(stage, testing::AnyOf(TileOperation::RequestedFromCache, TileOperation::StartParse));
                     stage = TileOperation::LoadFromCache;
                     break;
                 }
                 case TileOperation::StartParse: {
-                    EXPECT_THAT(stage, testing::AnyOf(TileOperation::LoadFromNetwork, TileOperation::LoadFromCache));
+                    // Parsing is expected to be started early during the request process by a call to `setLayers`
+                    EXPECT_THAT(stage,
+                                testing::AnyOf(TileOperation::RequestedFromCache,
+                                               TileOperation::RequestedFromNetwork));
                     EXPECT_FALSE(parsing); // We must not already be parsing when seeing this marker.
                     stage = TileOperation::StartParse;
                     parsing = true;
