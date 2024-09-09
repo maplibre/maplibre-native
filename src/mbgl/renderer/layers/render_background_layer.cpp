@@ -1,4 +1,5 @@
 #include <mbgl/renderer/layers/render_background_layer.hpp>
+
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/map/transform_state.hpp>
@@ -9,22 +10,21 @@
 #include <mbgl/renderer/render_pass.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/renderer/upload_parameters.hpp>
-#include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/style/layer_properties.hpp>
-#include <mbgl/util/tile_cover.hpp>
+#include <mbgl/style/layers/background_layer_impl.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/tile_cover.hpp>
 
 #if MLN_DRAWABLE_RENDERER
-#include <mbgl/renderer/layers/background_layer_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/background_layer_tweaker.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #endif
-
-#include <unordered_set>
 
 namespace mbgl {
 
@@ -216,7 +216,7 @@ static constexpr std::string_view BackgroundPatternShaderName = "BackgroundPatte
 void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
                                    gfx::Context& context,
                                    const TransformState& state,
-                                   const std::shared_ptr<UpdateParameters>&,
+                                   const std::shared_ptr<UpdateParameters>& params,
                                    [[maybe_unused]] const RenderTree& renderTree,
                                    [[maybe_unused]] UniqueChangeRequestVec& changes) {
     const auto zoom = state.getIntegerZoom();
@@ -324,6 +324,8 @@ void RenderBackgroundLayer::update(gfx::ShaderRegistry& shaders,
             ++stats.drawablesAdded;
         }
     }
+
+    captureRenderTiles(params->frameCount);
 }
 #endif
 

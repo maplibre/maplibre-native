@@ -120,6 +120,8 @@ public:
 
     const TaggedScheduler& getThreadPool() const { return frontend.getThreadPool(); }
 
+    std::uint64_t getFrameCount() const { return frontend.getFrameCount(); }
+
 private:
     PremultipliedImage stillImage;
     bool hasPendingStillImageRequest = false;
@@ -160,6 +162,10 @@ public:
 
     const mbgl::TaggedScheduler& getThreadPool() const override {
         return renderer->actor().ask(&SnapshotterRenderer::getThreadPool).get();
+    }
+
+    std::uint64_t getFrameCount() const override {
+        return renderer ? renderer->actor().ask(&SnapshotterRenderer::getFrameCount).get() : 0;
     }
 
 private:

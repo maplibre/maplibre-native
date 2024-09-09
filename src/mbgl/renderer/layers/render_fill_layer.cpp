@@ -1,3 +1,5 @@
+#include <mbgl/renderer/layers/render_fill_layer.hpp>
+
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
@@ -7,7 +9,6 @@
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/renderer/layers/render_fill_layer.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
@@ -26,8 +27,9 @@
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/renderer/layers/fill_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/fill_layer_tweaker.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
@@ -313,7 +315,7 @@ void commonInit(gfx::DrawableBuilder& builder) {
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState&,
-                             const std::shared_ptr<UpdateParameters>&,
+                             const std::shared_ptr<UpdateParameters>& params,
                              const RenderTree&,
                              UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {
@@ -368,7 +370,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     constexpr auto renderPass = RenderPass::Translucent;
 
     // Remove drawables for removed tiles
-    for (const auto& tileID : renderTileDiff->removed) {
+    for (const auto& tileID : renderTileDiff->diff.removed) {
         removeTile(renderPass, tileID);
     }
 
@@ -402,7 +404,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     // Update tiles that weren't added or removed
     using RenderTileRefVec = std::vector<RenderTiles::element_type::value_type>;
     RenderTileRefVec resetTileIDs;
-    for (const RenderTile& tile : renderTileDiff->remainder) {
+    for (const RenderTile& tile : renderTileDiff->diff.remainder) {
         const auto& tileID = tile.getOverscaledTileID();
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
@@ -448,8 +450,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     // Do these actually need to be in order?  If not we can loop over `ranges::join_view(...)`
     std::vector<std::reference_wrapper<const RenderTile>> compositeTiles;
-    compositeTiles.reserve(renderTileDiff->added.size() + resetTileIDs.size());
-    std::ranges::copy(renderTileDiff->added, std::back_inserter(compositeTiles));
+    compositeTiles.reserve(renderTileDiff->diff.added.size() + resetTileIDs.size());
+    std::ranges::copy(renderTileDiff->diff.added, std::back_inserter(compositeTiles));
     std::ranges::copy(resetTileIDs, std::back_inserter(compositeTiles));
     std::ranges::sort(compositeTiles, [](const RenderTile& a, const RenderTile& b) {
         return a.getOverscaledTileID() < b.getOverscaledTileID();
@@ -733,6 +735,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
     }
+
+    captureRenderTiles(params->frameCount);
 }
 #endif
 

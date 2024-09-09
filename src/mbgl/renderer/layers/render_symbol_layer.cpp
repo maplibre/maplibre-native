@@ -23,16 +23,17 @@
 #include <mbgl/util/math.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/collision_drawable_data.hpp>
 #include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/symbol_drawable_data.hpp>
-#include <mbgl/gfx/collision_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/collision_layer_tweaker.hpp>
 #include <mbgl/renderer/layers/symbol_layer_tweaker.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
-#include <mbgl/renderer/layers/collision_layer_tweaker.hpp>
 #endif // MLN_DRAWABLE_RENDERER
 
 #include <cmath>
@@ -906,7 +907,7 @@ std::size_t RenderSymbolLayer::removeAllDrawables() {
 void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
-                               const std::shared_ptr<UpdateParameters>&,
+                               const std::shared_ptr<UpdateParameters>& params,
                                const RenderTree&,
                                UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
@@ -1322,6 +1323,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
     }
+
+    captureRenderTiles(params->frameCount);
 }
 
 #endif // MLN_DRAWABLE_RENDERER

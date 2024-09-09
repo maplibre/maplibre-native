@@ -409,11 +409,13 @@ void RenderTileSource::onTilePyramidWillUpdate() {
     if (renderTilesValid) {
         // Capture the filtered render tile set before updating the tile pyramid.
         // Once that happens, the tile references in the `RenderTile`s will be invalid.
+        renderTilesValid = false;
         previousRenderTiles.clear();
         renderTileDiff.reset();
+        renderTilesPrevFrame = renderTilesCurFrame;
         if (auto filtered = getRenderTiles(); !filtered->empty()) {
             previousRenderTiles.reserve(filtered->size());
-            std::ranges::transform(*filtered, std::back_inserter(previousRenderTiles), [](const RenderTile& tile) {
+            std::ranges::transform(*filtered, std::back_inserter(previousRenderTiles), [&](const RenderTile& tile) {
                 return tile.getOverscaledTileID();
             });
         }
@@ -437,14 +439,14 @@ void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
 
     // `renderTiles` contains references to `Tile` objects in `RenderTree` which have been deleted by
     // the recent call to `TilePyramid::update`, which makes it unsafe to call `getRenderTiles()` here.
-    // If a previous diff is still present, a derived class' `update` probably didn't call `preUpdate`.
-    assert(!renderTileDiff);
+    onTilePyramidWillUpdate();
 
     auto tiles = makeMutable<std::vector<RenderTile>>();
     tiles->reserve(tilePyramid.getRenderedTiles().size());
     for (auto& [tileID, tileRef] : tilePyramid.getRenderedTiles()) {
         tiles->emplace_back(tileID, tileRef).prepare(parameters);
     }
+    renderTilesCurFrame = parameters.frameCount;
     featureState.coalesceChanges(*tiles);
 
     renderTilesSortedByY.reset();
@@ -475,9 +477,10 @@ RenderTiles RenderTileSource::getRenderTiles() const {
     return filteredRenderTiles;
 }
 
-std::shared_ptr<TileDifference> RenderTileSource::getRenderTileDiff() const {
+std::shared_ptr<FrameTileDifference> RenderTileSource::getRenderTileDiff() const {
     if (!renderTileDiff) {
-        renderTileDiff = std::make_shared<TileDifference>(diffTiles(previousRenderTiles, getRenderTiles()));
+        renderTileDiff = std::make_shared<FrameTileDifference>(
+            renderTilesPrevFrame, renderTilesCurFrame, diffTiles(previousRenderTiles, getRenderTiles()));
     }
     return renderTileDiff;
 }

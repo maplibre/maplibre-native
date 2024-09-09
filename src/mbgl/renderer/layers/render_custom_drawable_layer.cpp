@@ -1,18 +1,21 @@
+#include <mbgl/renderer/layers/render_custom_drawable_layer.hpp>
+
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/style/layers/custom_drawable_layer.hpp>
-#include <mbgl/style/layers/custom_drawable_layer_impl.hpp>
-#include <mbgl/renderer/layers/render_custom_drawable_layer.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
+#include <mbgl/style/layers/custom_drawable_layer.hpp>
+#include <mbgl/style/layers/custom_drawable_layer_impl.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/context.hpp>
-#include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #endif
 
 namespace mbgl {
@@ -82,6 +85,8 @@ void RenderCustomDrawableLayer::update(gfx::ShaderRegistry& shaders,
             *this, layerGroup, shaders, context, state, updateParameters, renderTree, changes);
         host->update(interface);
     }
+
+    captureRenderTiles(updateParameters->frameCount);
 }
 
 #endif

@@ -1,25 +1,29 @@
+#include <mbgl/renderer/layers/render_custom_layer.hpp>
+
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/style/layers/custom_layer_impl.hpp>
-#include <mbgl/renderer/layers/render_custom_layer.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/math/angles.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
+#include <mbgl/style/layers/custom_layer_impl.hpp>
 #include <mbgl/util/mat4.hpp>
 
 #if MLN_LEGACY_RENDERER
-#include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/gl/context.hpp>
 #include <mbgl/gl/renderable_resource.hpp>
+#include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/style/layers/custom_layer_render_parameters.hpp>
 #endif
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/context.hpp>
-#include <mbgl/renderer/layer_group.hpp>
-#include <mbgl/gfx/drawable_custom_layer_host_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/gfx/drawable_custom_layer_host_tweaker.hpp>
+#include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
+#include <mbgl/renderer/update_parameters.hpp>
 
 #if !MLN_LEGACY_RENDERER
 // TODO: platform agnostic error checks
@@ -108,7 +112,7 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
 void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                [[maybe_unused]] const TransformState& state,
-                               const std::shared_ptr<UpdateParameters>&,
+                               const std::shared_ptr<UpdateParameters>& params,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     // create layer group
@@ -151,6 +155,8 @@ void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
         localLayerGroup->addDrawable(std::move(drawable));
         ++stats.drawablesAdded;
     }
+
+    captureRenderTiles(params->frameCount);
 }
 #endif
 

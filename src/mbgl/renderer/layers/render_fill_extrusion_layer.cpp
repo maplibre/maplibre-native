@@ -25,6 +25,7 @@
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/fill_extrusion_layer_tweaker.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
@@ -271,7 +272,7 @@ bool RenderFillExtrusionLayer::queryIntersectsFeature(const GeometryCoordinates&
 void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                                       gfx::Context& context,
                                       const TransformState&,
-                                      const std::shared_ptr<UpdateParameters>&,
+                                      const std::shared_ptr<UpdateParameters>& params,
                                       const RenderTree&,
                                       UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
@@ -495,6 +496,8 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
         }
         finish(*colorBuilder);
     }
+
+    captureRenderTiles(params->frameCount);
 }
 
 #endif // MLN_DRAWABLE_RENDERER

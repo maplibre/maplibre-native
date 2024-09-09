@@ -5,6 +5,7 @@
 #include <mbgl/renderer/source_state.hpp>
 #include <mbgl/renderer/tile_pyramid.hpp>
 #include <mbgl/style/sources/vector_source_impl.hpp>
+#include <mbgl/tile/tile_diff.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/context.hpp>
@@ -12,7 +13,16 @@
 
 namespace mbgl {
 
-struct TileDifference;
+struct FrameTileDifference {
+    FrameTileDifference(std::uint64_t prevFrame_, std::uint64_t curFrame_, TileDifference diff_)
+        : prevFrame(prevFrame_),
+          curFrame(curFrame_),
+          diff(std::move(diff_)) {}
+
+    std::uint64_t prevFrame;
+    std::uint64_t curFrame;
+    TileDifference diff;
+};
 
 /**
  * @brief Base class for render sources that provide render tiles.
@@ -29,7 +39,7 @@ public:
     bool hasFadingTiles() const override;
 
     RenderTiles getRenderTiles() const override;
-    std::shared_ptr<TileDifference> getRenderTileDiff() const override;
+    std::shared_ptr<FrameTileDifference> getRenderTileDiff() const override;
     RenderTiles getRenderTilesSortedByYPosition() const override;
     const Tile* getRenderedTile(const UnwrappedTileID&) const override;
     Immutable<std::vector<RenderTile>> getRawRenderTiles() const override { return renderTiles; }
@@ -69,6 +79,8 @@ protected:
     // contain bare references to `Tile` objects owned by `tilePyramid`.
     Immutable<std::vector<RenderTile>> renderTiles;
     bool renderTilesValid = false;
+    std::uint64_t renderTilesPrevFrame = 0;
+    std::uint64_t renderTilesCurFrame = 0;
 
     // cached view of `renderTiles`, excluding those held for fading
     mutable RenderTiles filteredRenderTiles;
@@ -77,7 +89,7 @@ protected:
 
     // The IDs of tiles in the previous state of `renderTiles`, and the differences with the current state
     std::vector<OverscaledTileID> previousRenderTiles;
-    mutable std::shared_ptr<TileDifference> renderTileDiff;
+    mutable std::shared_ptr<FrameTileDifference> renderTileDiff;
 
 private:
     float bearing = 0.0F;

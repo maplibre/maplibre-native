@@ -4,21 +4,22 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/gfx/shader_registry.hpp>
-#include <mbgl/programs/programs.hpp>
 #include <mbgl/programs/circle_program.hpp>
+#include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/buckets/circle_bucket.hpp>
-#include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/style/layers/circle_layer_impl.hpp>
 #include <mbgl/tile/tile.hpp>
-#include <mbgl/util/math.hpp>
-#include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/containers.hpp>
+#include <mbgl/util/intersection_tests.hpp>
+#include <mbgl/util/math.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/renderer/layers/circle_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/circle_layer_tweaker.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
@@ -275,7 +276,7 @@ using namespace shaders;
 void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState&,
-                               const std::shared_ptr<UpdateParameters>&,
+                               const std::shared_ptr<UpdateParameters>& params,
                                const RenderTree&,
                                UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {
@@ -401,6 +402,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             ++stats.drawablesAdded;
         }
     }
+
+    captureRenderTiles(params->frameCount);
 }
 #endif
 

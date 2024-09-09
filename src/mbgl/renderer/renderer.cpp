@@ -152,4 +152,8 @@ void Renderer::clearData() {
     impl->orchestrator.clearData();
 }
 
+std::uint64_t Renderer::getFrameCount() const {
+    return impl->frameCount;
+}
+
 } // namespace mbgl

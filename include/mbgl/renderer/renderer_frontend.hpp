@@ -33,6 +33,8 @@ public:
 
     virtual const TaggedScheduler& getThreadPool() const = 0;
 
+    virtual std::uint64_t getFrameCount() const = 0;
+
 protected:
 };
 

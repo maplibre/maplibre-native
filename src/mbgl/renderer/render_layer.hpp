@@ -87,6 +87,7 @@ public:
     PatternAtlas& patternAtlas;
     LineAtlas& lineAtlas;
     const TransformState& state;
+    const std::uint64_t frameCount;
 };
 
 class RenderLayer {
@@ -277,10 +278,6 @@ protected:
 protected:
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;
-    std::shared_ptr<TileDifference> renderTileDiff;
-
-    // Retains ownership of tiles
-    Immutable<std::vector<RenderTile>> renderTilesOwner;
 
     // Stores what render passes this layer is currently enabled for. This depends on the
     // evaluated StyleProperties object and is updated accordingly.
@@ -289,6 +286,9 @@ protected:
     LayerPlacementData placementData;
 
 #if MLN_DRAWABLE_RENDERER
+    // Retains ownership of tiles
+    Immutable<std::vector<RenderTile>> renderTilesOwner;
+
     // will need to be overriden to handle their activation.
     LayerGroupBasePtr layerGroup;
 
@@ -302,6 +302,12 @@ protected:
     using RenderTileIDMap = util::TinyUnorderedMap<OverscaledTileID, util::SimpleIdentity, LinearTileIDs>;
     RenderTileIDMap renderTileIDs;
     RenderTileIDMap newRenderTileIDs;
+
+    std::vector<OverscaledTileID> previousRenderTiles;
+    std::shared_ptr<FrameTileDifference> renderTileDiff;
+    std::uint64_t prevUpdateFrame = 0;
+
+    void captureRenderTiles(std::uint64_t frameCount);
 #endif
 
     // Current layer index as specified by the layerIndexChanged event

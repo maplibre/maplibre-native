@@ -4,6 +4,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/style/color_ramp_property_value.hpp>
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/layer_properties.hpp>
@@ -12,6 +13,7 @@
 #include <mbgl/tile/tile_diff.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/util.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layer_group.hpp>
@@ -23,8 +25,13 @@ using namespace style;
 
 RenderLayer::RenderLayer(Immutable<style::LayerProperties> properties)
     : evaluatedProperties(std::move(properties)),
-      baseImpl(evaluatedProperties->baseImpl),
-      renderTilesOwner(makeMutable<std::vector<RenderTile>>()) {}
+      baseImpl(evaluatedProperties->baseImpl)
+#if MLN_DRAWABLE_RENDERER
+      ,
+      renderTilesOwner(makeMutable<std::vector<RenderTile>>())
+#endif
+{
+}
 
 void RenderLayer::transition(const TransitionParameters& parameters, Immutable<style::Layer::Impl> newImpl) {
     baseImpl = std::move(newImpl);
@@ -61,11 +68,21 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     assert(params.source);
     assert(params.source->isEnabled());
     renderTiles = params.source->getRenderTiles();
-    renderTilesOwner = params.source->getRawRenderTiles();
-    renderTileDiff = params.source->getRenderTileDiff();
     addRenderPassesFromTiles();
 
 #if MLN_DRAWABLE_RENDERER
+    renderTilesOwner = params.source->getRawRenderTiles();
+    renderTileDiff = params.source->getRenderTileDiff();
+
+    // In some circumstances, the tiles can be updated multiple times between layer updates, in which
+    // case the source diff isn't sufficient to catch up, so we need to re-calculate for this layer.
+
+    if (renderTileDiff &&
+        (renderTileDiff->curFrame != params.frameCount || renderTileDiff->prevFrame != prevUpdateFrame)) {
+        renderTileDiff = std::make_shared<FrameTileDifference>(
+            prevUpdateFrame, params.frameCount, diffTiles(previousRenderTiles, renderTiles));
+    }
+
     updateRenderTileIDs();
 #endif // MLN_DRAWABLE_RENDERER
 }
@@ -75,6 +92,14 @@ std::optional<Color> RenderLayer::getSolidBackground() const {
 }
 
 #if MLN_DRAWABLE_RENDERER
+void RenderLayer::captureRenderTiles(std::uint64_t frameCount) {
+    previousRenderTiles.clear();
+    std::ranges::transform(*renderTiles, std::back_inserter(previousRenderTiles), [&](const RenderTile& tile) {
+        return tile.getOverscaledTileID();
+    });
+    prevUpdateFrame = frameCount;
+}
+
 void RenderLayer::layerChanged(const TransitionParameters&,
                                const Immutable<style::Layer::Impl>&,
                                UniqueChangeRequestVec&) {

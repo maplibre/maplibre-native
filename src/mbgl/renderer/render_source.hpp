@@ -19,6 +19,7 @@
 namespace mbgl {
 
 class CollisionIndex;
+struct FrameTileDifference;
 class ImageManager;
 class ImageSourceRenderData;
 class PaintParameters;
@@ -30,7 +31,6 @@ class RenderTile;
 class Scheduler;
 class SourceQueryOptions;
 class Tile;
-struct TileDifference;
 class TileParameters;
 class TransformParameters;
 class TransformState;
@@ -41,6 +41,7 @@ class UploadPass;
 
 class SourcePrepareParameters {
 public:
+    const std::uint64_t frameCount;
     const TransformParameters& transform;
     const MapDebugOptions& debugOptions;
     const ImageManager& imageManager;
@@ -71,7 +72,7 @@ public:
     // excluding tiles hold for fade; returns nullptr otherwise.
     virtual RenderTiles getRenderTiles() const { return nullptr; }
     // If supported, returns a description of the tile IDs which were added and removed in the last `prepare`
-    virtual std::shared_ptr<TileDifference> getRenderTileDiff() const { return nullptr; }
+    virtual std::shared_ptr<FrameTileDifference> getRenderTileDiff() const { return nullptr; }
     // If supported, returns a shared list of RenderTiles, sorted in opposite y
     // position, so tiles with overlapping symbols are drawn on top of each other,
     // with lower symbols being drawn on top of higher symbols; returns nullptr otherwise.

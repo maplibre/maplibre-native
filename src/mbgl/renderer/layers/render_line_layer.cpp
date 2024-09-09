@@ -27,6 +27,7 @@
 #include <mbgl/gfx/line_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/layers/line_layer_tweaker.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
@@ -644,6 +645,8 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
     }
+
+    captureRenderTiles(parameters->frameCount);
 }
 #endif
 

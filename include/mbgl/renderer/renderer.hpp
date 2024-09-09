@@ -113,6 +113,8 @@ public:
     void reduceMemoryUse();
     void clearData();
 
+    std::uint64_t getFrameCount() const;
+
 private:
     class Impl;
     std::unique_ptr<Impl> impl;
