@@ -94,10 +94,12 @@ std::optional<Color> RenderLayer::getSolidBackground() const {
 #if MLN_DRAWABLE_RENDERER
 void RenderLayer::captureRenderTiles(std::uint64_t frameCount) {
     previousRenderTiles.clear();
-    std::ranges::transform(*renderTiles, std::back_inserter(previousRenderTiles), [&](const RenderTile& tile) {
-        return tile.getOverscaledTileID();
-    });
-    prevUpdateFrame = frameCount;
+    if (renderTiles) {
+        std::ranges::transform(*renderTiles, std::back_inserter(previousRenderTiles), [&](const RenderTile& tile) {
+            return tile.getOverscaledTileID();
+        });
+        prevUpdateFrame = frameCount;
+    }
 }
 
 void RenderLayer::layerChanged(const TransitionParameters&,
