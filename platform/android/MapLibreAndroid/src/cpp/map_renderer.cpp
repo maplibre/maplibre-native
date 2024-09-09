@@ -159,6 +159,10 @@ void MapRenderer::requestSnapshot(SnapshotCallback callback) {
             }));
 }
 
+std::uint32_t MapRenderer::getFrameCount() const {
+    return renderer ? renderer->getFrameCount() : 0;
+}
+
 // Called on OpenGL thread //
 
 void MapRenderer::resetRenderer() {

@@ -83,6 +83,8 @@ public:
     AndroidRendererBackend& getRendererBackend() const { return *backend; }
     const TaggedScheduler& getThreadPool() const { return threadPool; }
 
+    std::uint32_t getFrameCount() const;
+
 protected:
     // Called from the GL Thread //
 

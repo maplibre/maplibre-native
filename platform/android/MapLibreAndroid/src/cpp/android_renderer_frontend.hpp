@@ -58,6 +58,8 @@ public:
     bool getTileCacheEnabled() const;
     void reduceMemoryUse();
 
+    std::uint64_t getFrameCount() const override { return mapRenderer.getFrameCount(); }
+
 private:
     MapRenderer& mapRenderer;
     util::RunLoop* mapRunLoop;

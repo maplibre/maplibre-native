@@ -53,3 +53,7 @@ mbgl::Renderer* GLFWRendererFrontend::getRenderer() {
     assert(renderer);
     return renderer.get();
 }
+
+std::uint64_t GLFWRendererFrontend::getFrameCount() const {
+    return renderer ? renderer->getFrameCount() : 0;
+}
