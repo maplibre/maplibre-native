@@ -91,6 +91,18 @@ if(MLN_WITH_EGL)
                 WL_EGL_PLATFORM
         )
     endif()
+elseif(MLN_WITH_VULKAN)
+    target_include_directories(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/vendor/Vulkan-Headers/include
+    )
+
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+    )
 else()
     find_package(OpenGL REQUIRED GLX)
     target_sources(

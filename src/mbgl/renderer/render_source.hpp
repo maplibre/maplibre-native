@@ -101,7 +101,7 @@ public:
                                     const std::optional<std::string>&,
                                     const std::optional<std::string>&) {}
 
-    virtual void enableCache(bool) {};
+    virtual void setCacheEnabled(bool) {};
 
     virtual void reduceMemoryUse() = 0;
 
@@ -121,6 +121,7 @@ protected:
 
     void onTileChanged(Tile&) override;
     void onTileError(Tile&, std::exception_ptr) final;
+    void onTileAction(OverscaledTileID, std::string, TileOperation) override;
 };
 
 } // namespace mbgl

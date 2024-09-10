@@ -33,8 +33,8 @@ public:
             ref.invoke(&FileSourceRequest::setResponse, res);
         };
 
-        auto requestFromNetwork = [=](const Resource& res,
-                                      std::unique_ptr<AsyncRequest> parent) -> std::unique_ptr<AsyncRequest> {
+        auto requestFromNetwork = [=, this](const Resource& res,
+                                            std::unique_ptr<AsyncRequest> parent) -> std::unique_ptr<AsyncRequest> {
             if (!onlineFileSource || !onlineFileSource->canRequest(resource)) {
                 return parent;
             }
@@ -43,7 +43,7 @@ public:
             std::shared_ptr<AsyncRequest> parentKeepAlive = std::move(parent);
 
             MBGL_TIMING_START(watch);
-            return onlineFileSource->request(res, [=, ptr = parentKeepAlive](const Response& response) {
+            return onlineFileSource->request(res, [=, ptr = parentKeepAlive, this](const Response& response) {
                 if (databaseFileSource) {
                     databaseFileSource->forward(res, response, nullptr);
                 }
@@ -79,7 +79,7 @@ public:
                 tasks[req] = databaseFileSource->request(resource, callback);
             } else {
                 // Cache request with fallback to network with cache control
-                tasks[req] = databaseFileSource->request(resource, [=](const Response& response) {
+                tasks[req] = databaseFileSource->request(resource, [=, this](const Response& response) {
                     Resource res = resource;
 
                     // Resource is in the cache

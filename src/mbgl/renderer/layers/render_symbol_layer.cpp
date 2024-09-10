@@ -137,10 +137,6 @@ struct SegmentGroup {
     bool operator<(const SegmentGroup& other) const { return renderable < other.renderable; }
 };
 
-namespace {
-const SegmentVector<SymbolTextAttributes> emptySegmentVector;
-}
-
 #if MLN_LEGACY_RENDERER
 
 template <typename DrawFn>
@@ -493,6 +489,10 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
         assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
+        if (!static_cast<Bucket&>(bucket).check(SYM_GUARD_LOC)) {
+            continue;
+        }
+
         // Prevent a flickering issue when a symbol is moved.
         // bucket.justReloaded = false;
 
@@ -697,7 +697,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 
     for (const RenderTile& renderTile : *renderTiles) {
         auto* bucket = static_cast<SymbolBucket*>(renderTile.getBucket(*baseImpl));
-        if (bucket && bucket->bucketLeaderID == getID()) {
+        if (bucket && bucket->bucketLeaderID == getID() && static_cast<Bucket*>(bucket)->check(SYM_GUARD_LOC)) {
             // Only place this layer if it's the "group leader" for the bucket
             const Tile* tile = params.source->getRenderedTile(renderTile.id);
             assert(tile);
@@ -725,6 +725,8 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 #if MLN_DRAWABLE_RENDERER
 
 namespace {
+
+const SegmentVector<SymbolTextAttributes> emptySegmentVector;
 
 template <typename TText, typename TIcon>
 const auto& getProperty(const SymbolBucket::PaintProperties& paintProps, bool isText) {
@@ -1063,7 +1065,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& tileID = tile.getOverscaledTileID();
 
         const auto* optRenderData = getRenderDataForPass(tile, passes);
-        if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
+        if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData() ||
+            !optRenderData->bucket->check(SYM_GUARD_LOC)) {
             removeTile(passes, tileID);
             continue;
         }
@@ -1351,7 +1354,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
 
                     auto drawData = std::make_unique<gfx::SymbolDrawableData>(
                         /*.isHalo=*/isHalo,
-                        /*.bucketVaraiblePlacement=*/bucket.hasVariablePlacement,
+                        /*.bucketVariablePlacement=*/bucket.hasVariablePlacement,
                         /*.symbolType=*/renderable.type,
                         /*.pitchAlignment=*/values.pitchAlignment,
                         /*.rotationAlignment=*/values.rotationAlignment,

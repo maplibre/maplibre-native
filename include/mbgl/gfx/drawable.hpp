@@ -5,9 +5,10 @@
 #include <mbgl/gfx/uniform_buffer.hpp>
 #include <mbgl/tile/tile_id.hpp>
 #include <mbgl/util/color.hpp>
-#include <mbgl/util/identity.hpp>
-#include <mbgl/util/traits.hpp>
 #include <mbgl/util/containers.hpp>
+#include <mbgl/util/identity.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
+#include <mbgl/util/traits.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -97,7 +98,7 @@ public:
     int32_t getLineWidth() const { return lineWidth; }
 
     /// Set line width
-    void setLineWidth(int32_t value) { lineWidth = value; }
+    virtual void setLineWidth(int32_t value) { lineWidth = value; }
 
     /// @brief Get the texture at the given internal ID.
     const gfx::Texture2DPtr& getTexture(size_t id) const;
@@ -122,7 +123,7 @@ public:
     bool getEnableColor() const { return enableColor; }
 
     /// Set whether to render to the color target
-    void setEnableColor(bool value) { enableColor = value; }
+    virtual void setEnableColor(bool value) { enableColor = value; }
 
     /// Whether to do stenciling (based on the Tile ID or 3D)
     bool getEnableStencil() const { return enableStencil; }
@@ -175,7 +176,7 @@ public:
     const gfx::CullFaceMode& getCullFaceMode() const;
 
     /// Set cull face mode
-    void setCullFaceMode(const gfx::CullFaceMode&);
+    virtual void setCullFaceMode(const gfx::CullFaceMode&);
 
     /// Get color mode
     const gfx::ColorMode& getColorMode() const;
@@ -244,6 +245,8 @@ public:
     /// Set origin point
     void setOrigin(std::optional<Point<double>> p) { origin = std::move(p); }
 
+    const std::chrono::duration<double> createTime = util::MonotonicTimer::now();
+
 protected:
     bool enabled = true;
     bool enableColor = true;
@@ -264,6 +267,7 @@ protected:
     UniqueDrawableData drawableData{};
     gfx::VertexAttributeArrayPtr vertexAttributes;
     gfx::VertexAttributeArrayPtr instanceAttributes;
+    std::chrono::duration<double> attributeUpdateTime = util::MonotonicTimer::now();
 
     struct Impl;
     std::unique_ptr<Impl> impl;

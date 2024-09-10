@@ -106,6 +106,10 @@ public:
     // |sortKeyRange| is `std::nullopt`.
     SymbolInstanceReferences getSymbols(const std::optional<SortKeyRange>& sortKeyRange = std::nullopt) const;
 
+#if MLN_SYMBOL_GUARDS
+    bool check(std::source_location) override;
+#endif
+
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     const std::string bucketLeaderID;
     float sortedAngle = std::numeric_limits<float>::max();
@@ -147,6 +151,22 @@ public:
             sharedDynamicVertices->release();
             sharedOpacityVertices->release();
         }
+
+        void updateModified() {
+            if (sharedVertices) {
+                sharedVertices->updateModified();
+            }
+            if (sharedDynamicVertices) {
+                sharedDynamicVertices->updateModified();
+            }
+            if (sharedOpacityVertices) {
+                sharedOpacityVertices->updateModified();
+            }
+            if (sharedTriangles) {
+                sharedTriangles->updateModified();
+            }
+        }
+
         std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
         VertexVector& vertices() { return *sharedVertices; }
         const VertexVector& vertices() const { return *sharedVertices; }

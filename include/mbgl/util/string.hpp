@@ -78,9 +78,7 @@ inline std::string toString(long double t, bool decimal = false) {
     return toString(static_cast<double>(t), decimal);
 }
 
-inline std::string toString(std::thread::id threadId) {
-    return (std::ostringstream() << threadId).str();
-}
+std::string toString(const std::thread::id &);
 
 std::string toString(const std::exception_ptr &);
 

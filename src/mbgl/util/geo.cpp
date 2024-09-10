@@ -6,13 +6,16 @@
 #include <mbgl/util/tile_range.hpp>
 
 #include <cmath>
+#include <numbers>
+
+using namespace std::numbers;
 
 namespace mbgl {
 
 namespace {
 
 double lat_(const uint8_t z, const int64_t y) noexcept {
-    const double n = M_PI - 2.0 * M_PI * y / std::pow(2.0, z);
+    const double n = pi - 2.0 * pi * y / std::pow(2.0, z);
     return util::rad2deg(std::atan(0.5 * (std::exp(n) - std::exp(-n))));
 }
 

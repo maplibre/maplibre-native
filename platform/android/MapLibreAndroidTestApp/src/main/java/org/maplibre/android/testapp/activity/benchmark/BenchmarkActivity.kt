@@ -36,8 +36,6 @@ import org.maplibre.android.testapp.utils.BenchmarkResults
 import org.maplibre.android.testapp.utils.FrameTimeStore
 import java.io.File
 
-import java.util.*
-
 data class BenchmarkInputData(
     val styleNames: List<String>,
     val styleURLs: List<String>,
@@ -115,22 +113,10 @@ class BenchmarkActivity : AppCompatActivity() {
     //    <item>Americana</item>
     //  </array>
     //  <array name="benchmark_style_urls">
-    //    <item>https://zelonewolf.github.io/openstreetmap-americana/style.json</item>
+    //    <item>https://americanamap.org/style.json</item>
     // </array>
     // ```
     private lateinit var inputData: BenchmarkInputData
-
-    @SuppressLint("DiscouragedApi")
-    private fun getStringFromResources(name: String): String {
-        return try {
-            resources.getString(applicationContext.resources.getIdentifier(
-                name,
-                "string",
-                applicationContext.packageName))
-        } catch (e: Throwable) {
-            ""
-        }
-    }
 
     @SuppressLint("DiscouragedApi")
     private fun getArrayFromResources(name: String): Array<String> {

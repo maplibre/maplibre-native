@@ -7,9 +7,9 @@
 namespace mbgl {
 
 struct ZoomHistory {
-    float lastZoom;
-    float lastFloorZoom;
-    float lastIntegerZoom;
+    float lastZoom = 0;
+    float lastFloorZoom = 0;
+    float lastIntegerZoom = 0;
     TimePoint lastIntegerZoomTime;
     bool first = true;
 

@@ -2,6 +2,7 @@ package org.maplibre.android.maps
 
 import android.content.Context
 import android.graphics.PointF
+import android.view.View
 import androidx.test.annotation.UiThreadTest
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
@@ -446,6 +447,10 @@ class NativeMapViewTest : AppCenter() {
         
         override fun waitForEmpty() {
             // no-op
+        }
+
+        override fun getView(): View? {
+            return null;
         }
     }
 }

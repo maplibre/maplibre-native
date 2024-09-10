@@ -35,9 +35,10 @@ constexpr bool diff(Color actual, Color expected, float e = 1.0e-6) {
 
 #if MLN_RENDER_BACKEND_METAL && !defined(NDEBUG)
 template <typename Result>
-std::optional<Result> LineLayerTweaker::gpuEvaluate(const LinePaintProperties::PossiblyEvaluated& evaluated,
-                                                    const PaintParameters& parameters,
-                                                    const std::size_t index) const {
+std::optional<Result> LineLayerTweaker::gpuEvaluate(
+    [[maybe_unused]] const LinePaintProperties::PossiblyEvaluated& evaluated,
+    const PaintParameters& parameters,
+    const std::size_t index) const {
     if (const auto& gpu = gpuExpressions[index]) {
         const float effectiveZoom = (gpu->options & gfx::GPUOptions::IntegerZoom)
                                         ? parameters.state.getIntegerZoom()

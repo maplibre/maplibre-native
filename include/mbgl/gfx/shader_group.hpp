@@ -93,8 +93,10 @@ public:
     /// This variant looks up shaders only by type name.
     /// @tparam T Derived type, inheriting `gfx::Shader`
     /// @return T or nullptr if not found in the group
-    template <typename T, typename std::enable_if_t<is_shader_v<T>, bool>* = nullptr>
-    std::shared_ptr<T> get() noexcept {
+    template <typename T>
+    std::shared_ptr<T> get() noexcept
+        requires(is_shader_v<T>)
+    {
         auto shader = getShader(std::string(T::Name));
         if (!shader || shader->typeName() != T::Name) {
             return nullptr;

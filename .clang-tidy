@@ -1,5 +1,5 @@
 ---
-Checks: >
+Checks: [
     android-*,	
     boost-*,
     bugprone-*,
@@ -108,7 +108,9 @@ Checks: >
     -readability-static-definition-in-anonymous-namespace,
     -readability-suspicious-call-argument,
     -readability-uppercase-literal-suffix,
-    -readability-use-anyofallof
+    -readability-use-anyofallof,
+    -modernize-loop-convert # since C++20 this complains about reverse loops with iterators, but good ranges support only landed in clang 15
+]
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
 CheckOptions:	

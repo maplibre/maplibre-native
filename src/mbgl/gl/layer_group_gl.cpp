@@ -10,6 +10,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/shaders/gl/shader_program_gl.hpp>
 #include <mbgl/util/convert.hpp>
+#include <mbgl/util/instrumentation.hpp>
 
 namespace mbgl {
 namespace gl {
@@ -20,6 +21,9 @@ TileLayerGroupGL::TileLayerGroupGL(int32_t layerIndex_, std::size_t initialCapac
     : TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)) {}
 
 void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
+    MLN_TRACE_FUNC();
+    MLN_ZONE_STR(name);
+
     if (!enabled) {
         return;
     }
@@ -49,6 +53,8 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         return;
     }
 
+    MLN_TRACE_FUNC();
+
     auto& context = static_cast<gl::Context&>(parameters.context);
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
@@ -60,6 +66,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
     gfx::StencilMode stencilMode3d;
 
     if (getDrawableCount()) {
+        MLN_TRACE_ZONE(clip masks);
 #if !defined(NDEBUG)
         const auto label_clip = getName() + (getName().empty() ? "" : "-") + "tile-clip-masks";
         const auto debugGroupClip = parameters.encoder->createDebugGroup(label_clip.c_str());
@@ -148,6 +155,7 @@ void TileLayerGroupGL::bindUniformBuffers() const {
 }
 
 void TileLayerGroupGL::unbindUniformBuffers() const {
+    MLN_TRACE_FUNC();
     for (size_t id = 0; id < uniformBuffers.allocatedSize(); id++) {
         const auto& uniformBuffer = uniformBuffers.get(id);
         if (!uniformBuffer) continue;

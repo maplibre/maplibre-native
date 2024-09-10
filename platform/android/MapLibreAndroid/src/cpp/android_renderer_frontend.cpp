@@ -1,12 +1,14 @@
 #include "android_renderer_frontend.hpp"
 
+#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/renderer_observer.hpp>
 #include <mbgl/util/async_task.hpp>
-#include <mbgl/util/thread.hpp>
-#include <mbgl/util/run_loop.hpp>
 #include <mbgl/util/geojson.hpp>
+#include <mbgl/util/instrumentation.hpp>
+#include <mbgl/util/run_loop.hpp>
+#include <mbgl/util/thread.hpp>
 
 #include "android_renderer_backend.hpp"
 
@@ -51,6 +53,40 @@ public:
         delegate.invoke(&RendererObserver::onRemoveUnusedStyleImages, ids);
     }
 
+    void onPreCompileShader(mbgl::shaders::BuiltIn id,
+                            mbgl::gfx::Backend::Type type,
+                            const std::string& additionalDefines) override {
+        delegate.invoke(&RendererObserver::onPreCompileShader, id, type, additionalDefines);
+    }
+
+    void onPostCompileShader(mbgl::shaders::BuiltIn id,
+                             mbgl::gfx::Backend::Type type,
+                             const std::string& additionalDefines) override {
+        delegate.invoke(&RendererObserver::onPostCompileShader, id, type, additionalDefines);
+    }
+
+    void onShaderCompileFailed(mbgl::shaders::BuiltIn id,
+                               mbgl::gfx::Backend::Type type,
+                               const std::string& additionalDefines) override {
+        delegate.invoke(&RendererObserver::onShaderCompileFailed, id, type, additionalDefines);
+    }
+
+    void onGlyphsLoaded(const mbgl::FontStack& stack, const mbgl::GlyphRange& range) override {
+        delegate.invoke(&RendererObserver::onGlyphsLoaded, stack, range);
+    }
+
+    void onGlyphsError(const mbgl::FontStack& stack, const mbgl::GlyphRange& range, std::exception_ptr ex) override {
+        delegate.invoke(&RendererObserver::onGlyphsError, stack, range, ex);
+    }
+
+    void onGlyphsRequested(const mbgl::FontStack& stack, const mbgl::GlyphRange& range) override {
+        delegate.invoke(&RendererObserver::onGlyphsRequested, stack, range);
+    }
+
+    void onTileAction(TileOperation op, const OverscaledTileID& id, const std::string& sourceID) override {
+        delegate.invoke(&RendererObserver::onTileAction, op, id, sourceID);
+    }
+
 private:
     std::shared_ptr<Mailbox> mailbox;
     ActorRef<RendererObserver> delegate;
@@ -78,6 +114,7 @@ void AndroidRendererFrontend::setObserver(RendererObserver& observer) {
 }
 
 void AndroidRendererFrontend::update(std::shared_ptr<UpdateParameters> params) {
+    MLN_TRACE_FUNC();
     updateParams = std::move(params);
     updateAsyncTask->send();
 }
@@ -88,6 +125,10 @@ const TaggedScheduler& AndroidRendererFrontend::getThreadPool() const {
 
 void AndroidRendererFrontend::setTileCacheEnabled(bool enabled) {
     mapRenderer.actor().invoke(&Renderer::setTileCacheEnabled, enabled);
+}
+
+bool AndroidRendererFrontend::getTileCacheEnabled() const {
+    return mapRenderer.actor().ask(&Renderer::getTileCacheEnabled).get();
 }
 
 void AndroidRendererFrontend::reduceMemoryUse() {

@@ -16,10 +16,6 @@
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/std.hpp>
 
-#if MLN_RENDER_BACKEND_METAL
-#include <mbgl/shaders/mtl/fill.hpp>
-#endif
-
 namespace mbgl {
 
 using namespace style;
@@ -87,6 +83,7 @@ void FillLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         }
 
         auto& drawableUniforms = drawable.mutableUniformBuffers();
+
         switch (static_cast<RenderFillLayer::FillVariant>(drawable.getType())) {
             case RenderFillLayer::FillVariant::Fill: {
                 const FillDrawableUBO drawableUBO = {/*.matrix=*/util::cast<float>(matrix)};

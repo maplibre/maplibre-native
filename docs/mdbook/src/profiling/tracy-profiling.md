@@ -31,7 +31,7 @@ The macro records the timestamps at the start and end of the code scope. The par
 ~~~
 // code is not instrumented
 {
-  MLN_TRACE_ZONE(EmptyZone); // Records from here until the end of the scope
+  MLN_TRACE_ZONE(EmptyZone) // Records from here until the end of the scope
   // code here is instrumented
 }
 // other here not instrumented

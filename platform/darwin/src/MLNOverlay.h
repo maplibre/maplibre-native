@@ -7,7 +7,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MLNOverlay` protocol defines a specific type of annotation that represents
+ The ``MLNOverlay`` protocol defines a specific type of annotation that represents
  both a point and an area on a map. Overlay objects are essentially data objects
  that contain the geographic data needed to represent the map area. Overlays can
  take the form of a polyline or polygon.

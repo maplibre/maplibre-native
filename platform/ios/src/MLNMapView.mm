@@ -306,7 +306,7 @@ const CGFloat MLNAnnotationImagePaddingForCallout = 1;
 const CGSize MLNAnnotationAccessibilityElementMinimumSize = CGSizeMake(10, 10);
 
 /// The number of view annotations (excluding the user location view) that must
-/// be descendents of `MLNMapView` before presentsWithTransaction is enabled.
+/// be descendents of ``MLNMapView`` before presentsWithTransaction is enabled.
 static const NSUInteger MLNPresentsWithTransactionAnnotationCount = 0;
 
 /// An indication that the requested annotation was not found or is nonexistent.
@@ -451,7 +451,7 @@ public:
     MLNAnnotationTagContextMap _annotationContextsByAnnotationTag;
     MLNAnnotationObjectTagMap _annotationTagsByAnnotation;
 
-    /// Tag of the selected annotation. If the user location annotation is selected, this ivar is set to `MLNAnnotationTagNotFound`.
+    /// Tag of the selected annotation. If the user location annotation is selected, this ivar is set to ``MLNAnnotationTagNotFound``.
     MLNAnnotationTag _selectedAnnotationTag;
 
     BOOL _userLocationAnnotationIsSelected;
@@ -3149,6 +3149,16 @@ static void *windowScreenContext = &windowScreenContext;
     return self.mbglMap.getPrefetchZoomDelta() > 0 ? YES : NO;
 }
 
+- (void)setTileCacheEnabled:(BOOL)enabled
+{
+    _rendererFrontend->setTileCacheEnabled(enabled);
+}
+
+- (BOOL)tileCacheEnabled
+{
+    return _rendererFrontend->getTileCacheEnabled();
+}
+
 // MARK: - Accessibility -
 
 - (NSString *)accessibilityValue
@@ -5440,7 +5450,7 @@ static void *windowScreenContext = &windowScreenContext;
         // marginInsetsHintForPresentationFromRect: - in this case we need to
         // ensure that partially off-screen annotations are NOT moved into view.
         //
-        // We may want to create (and fallback to) an `MLNMapViewDelegate` version
+        // We may want to create (and fallback to) an ``MLNMapViewDelegate`` version
         // of the `-[MLNCalloutView marginInsetsHintForPresentationFromRect:]
         // protocol method.
         bounds = CGRectInset(bounds, -calloutPositioningRect.size.width, -calloutPositioningRect.size.height);
@@ -7338,12 +7348,6 @@ static void *windowScreenContext = &windowScreenContext;
 
 - (MLNBackendResource)backendResource {
     return _mbglView->getObject();
-}
-
-// MARK: Tile Cache
-
-- (void)experimental_setTileCacheEnabled:(BOOL)enabled {
-    _rendererFrontend->setTileCacheEnabled(enabled);
 }
 
 @end

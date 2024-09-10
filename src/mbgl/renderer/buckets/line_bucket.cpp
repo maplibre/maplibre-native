@@ -168,6 +168,9 @@ void LineBucket::update(const FeatureStates& states,
     if (it != paintPropertyBinders.end()) {
         it->second.updateVertexVectors(states, layer, imagePositions);
         uploaded = false;
+
+        sharedVertices->updateModified();
+        sharedTriangles->updateModified();
     }
 }
 

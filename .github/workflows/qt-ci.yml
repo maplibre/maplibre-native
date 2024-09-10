@@ -82,7 +82,7 @@ jobs:
             build_type: RelWithDebInfo
             qt_version: 5.15.2
             qt_target: desktop
-            deployment_target: 10.13
+            deployment_target: 10.15
             deployment_arch: "x86_64"
             compiler: ""
           - name: macOS
@@ -207,7 +207,7 @@ jobs:
           toolset: ${{ matrix.compiler_version }}
 
       - name: Setup ninja
-        uses: seanmiddleditch/gha-setup-ninja@v4
+        uses: seanmiddleditch/gha-setup-ninja@v5
 
       - name: Download Qt
         uses: jurplel/install-qt-action@v4

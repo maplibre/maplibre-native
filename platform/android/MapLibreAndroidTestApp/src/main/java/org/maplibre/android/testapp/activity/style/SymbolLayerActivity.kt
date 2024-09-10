@@ -33,8 +33,6 @@ import org.maplibre.android.style.sources.Source
 import org.maplibre.android.testapp.R
 import org.maplibre.android.utils.BitmapUtils
 import timber.log.Timber
-import java.util.Arrays
-import java.util.Objects
 import java.util.Random
 
 /**
@@ -80,7 +78,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
                 Timber.e("Adding image with id: %s", id)
                 val androidIcon =
                     BitmapUtils.getBitmapFromDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_android_2, null))
-                style.addImage(id!!, Objects.requireNonNull(androidIcon)!!)
+                style.addImage(id!!, androidIcon!!)
             }
         }
     }
@@ -156,7 +154,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
         maplibreMap.setStyle(
             Style.Builder()
                 .fromUri("asset://streets.json")
-                .withImage("Car", Objects.requireNonNull(carBitmap)!!, false)
+                .withImage("Car", carBitmap!!, false)
                 .withSources(markerSource, mapboxSignSource, numberFormatSource)
                 .withLayers(markerSymbolLayer, mapboxSignSymbolLayer, numberFormatSymbolLayer)
         )
@@ -170,7 +168,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
         val screenLoc = maplibreMap.projection.toScreenLocation(point)
         val markerFeatures = maplibreMap.queryRenderedFeatures(screenLoc, MARKER_LAYER)
         if (!markerFeatures.isEmpty()) {
-            for (feature in Objects.requireNonNull(markerCollection!!.features())!!) {
+            for (feature in markerCollection!!.features()!!) {
                 if (feature.getStringProperty(ID_FEATURE_PROPERTY)
                     == markerFeatures[0].getStringProperty(ID_FEATURE_PROPERTY)
                 ) {
@@ -230,7 +228,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
 
     private fun toggleTextFont() {
         if (markerSymbolLayer != null) {
-            if (Arrays.equals(markerSymbolLayer!!.textFont.getValue(), NORMAL_FONT_STACK)) {
+            if (markerSymbolLayer!!.textFont.getValue().contentEquals(NORMAL_FONT_STACK)) {
                 markerSymbolLayer!!.setProperties(PropertyFactory.textFont(BOLD_FONT_STACK))
             } else {
                 markerSymbolLayer!!.setProperties(PropertyFactory.textFont(NORMAL_FONT_STACK))
@@ -312,7 +310,7 @@ class SymbolLayerActivity : AppCompatActivity(), OnMapClickListener, OnMapReadyC
 
     public override fun onDestroy() {
         super.onDestroy()
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             maplibreMap.removeOnMapClickListener(this)
         }
         mapView.onDestroy()

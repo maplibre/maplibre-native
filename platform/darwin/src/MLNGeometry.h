@@ -6,11 +6,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/** Defines the area spanned by an `MLNCoordinateBounds`. */
+/** Defines the area spanned by an ``MLNCoordinateBounds``. */
 typedef struct __attribute__((objc_boxable)) MLNCoordinateSpan {
-  /** Latitudes spanned by an `MLNCoordinateBounds`. */
+  /** Latitudes spanned by an ``MLNCoordinateBounds``. */
   CLLocationDegrees latitudeDelta;
-  /** Longitudes spanned by an `MLNCoordinateBounds`. */
+  /** Longitudes spanned by an ``MLNCoordinateBounds``. */
   CLLocationDegrees longitudeDelta;
 } MLNCoordinateSpan;
 
@@ -33,7 +33,7 @@ typedef struct MLNMatrix4 {
 } MLNMatrix4;
 
 /**
- Creates a new `MLNCoordinateSpan` from the given latitudinal and longitudinal
+ Creates a new ``MLNCoordinateSpan`` from the given latitudinal and longitudinal
  deltas.
  */
 NS_INLINE MLNCoordinateSpan MLNCoordinateSpanMake(CLLocationDegrees latitudeDelta,
@@ -45,7 +45,7 @@ NS_INLINE MLNCoordinateSpan MLNCoordinateSpanMake(CLLocationDegrees latitudeDelt
 }
 
 /**
- Creates a new `MLNMapPoint` from the given X and Y coordinates, and zoom level.
+ Creates a new ``MLNMapPoint`` from the given X and Y coordinates, and zoom level.
  */
 NS_INLINE MLNMapPoint MLNMapPointMake(CGFloat x, CGFloat y, CGFloat zoomLevel) {
   MLNMapPoint point;
@@ -78,7 +78,7 @@ typedef struct __attribute__((objc_boxable)) MLNCoordinateBounds {
 
 /**
  A quadrilateral area as measured on a two-dimensional map projection.
- `MLNCoordinateQuad` differs from `MLNCoordinateBounds` in that it allows
+ ``MLNCoordinateQuad`` differs from ``MLNCoordinateQuad`` in that it allows
  representation of non-axis aligned bounds and non-rectangular quadrilaterals.
  The coordinates are described in counter clockwise order from top left.
  */
@@ -94,7 +94,7 @@ typedef struct MLNCoordinateQuad {
 } MLNCoordinateQuad;
 
 /**
- Creates a new `MLNCoordinateBounds` structure from the given southwest and
+ Creates a new ``MLNCoordinateBounds`` structure from the given southwest and
  northeast coordinates.
  */
 NS_INLINE MLNCoordinateBounds MLNCoordinateBoundsMake(CLLocationCoordinate2D sw,
@@ -106,7 +106,7 @@ NS_INLINE MLNCoordinateBounds MLNCoordinateBoundsMake(CLLocationCoordinate2D sw,
 }
 
 /**
- Creates a new `MLNCoordinateQuad` structure from the given top left,
+ Creates a new ``MLNCoordinateQuad`` structure from the given top left,
   bottom left, bottom right, and top right coordinates.
  */
 NS_INLINE MLNCoordinateQuad MLNCoordinateQuadMake(CLLocationCoordinate2D topLeft,
@@ -122,7 +122,7 @@ NS_INLINE MLNCoordinateQuad MLNCoordinateQuadMake(CLLocationCoordinate2D topLeft
 }
 
 /**
- Creates a new `MLNCoordinateQuad` structure from the given `MLNCoordinateBounds`.
+ Creates a new ``MLNCoordinateQuad`` structure from the given ``MLNCoordinateQuad``.
  The returned quad uses the bounds' northeast coordinate as the top right, and the
   southwest coordinate at the bottom left.
  */
@@ -156,7 +156,7 @@ NS_INLINE BOOL MLNCoordinateBoundsIntersectsCoordinateBounds(MLNCoordinateBounds
 
  #### Related examples
  TODO: Restrict map panning to an area, learn how to use
- `MLNCoordinateInCoordinateBounds` to determine if a point is within, or
+ ``MLNCoordinateInCoordinateBounds`` to determine if a point is within, or
  intersects, a given bounding box.
  */
 NS_INLINE BOOL MLNCoordinateInCoordinateBounds(CLLocationCoordinate2D coordinate,
@@ -189,7 +189,7 @@ NS_INLINE MLNCoordinateBounds MLNCoordinateBoundsOffset(MLNCoordinateBounds boun
 /**
  Returns `YES` if the coordinate bounds covers no area.
 
- @note A bounds may be empty but have a non-zero coordinate span (e.g., when its
+ > Note: A bounds may be empty but have a non-zero coordinate span (e.g., when its
     northeast point lies due north of its southwest point).
  */
 NS_INLINE BOOL MLNCoordinateBoundsIsEmpty(MLNCoordinateBounds bounds) {

@@ -6,21 +6,15 @@
 namespace mbgl {
 namespace mtl {
 
-class UniformBlockArray;
-
 class UniformBlock final : public gfx::UniformBlock {
-    // Can only be created by UniformBlockArray
-private:
-    friend UniformBlockArray;
-
+public:
     UniformBlock(int index_, std::size_t size_)
         : gfx::UniformBlock(index_, size_) {}
     UniformBlock(const UniformBlock& other)
         : gfx::UniformBlock(other) {}
     UniformBlock(UniformBlock&& other)
         : gfx::UniformBlock(std::move(other)) {}
-
-public:
+    ~UniformBlock() override = default;
     void bindBuffer(const gfx::UniformBuffer& uniformBuffer) override;
     void unbindBuffer() override;
 
@@ -54,10 +48,10 @@ public:
 
 private:
     std::unique_ptr<gfx::UniformBlock> create(int index, std::size_t size) override {
-        return std::unique_ptr<gfx::UniformBlock>(new UniformBlock(index, size));
+        return std::make_unique<UniformBlock>(index, size);
     }
     std::unique_ptr<gfx::UniformBlock> copy(const gfx::UniformBlock& uniformBlocks) override {
-        return std::unique_ptr<gfx::UniformBlock>(new UniformBlock(static_cast<const UniformBlock&>(uniformBlocks)));
+        return std::make_unique<UniformBlock>(static_cast<const UniformBlock&>(uniformBlocks));
     }
 };
 

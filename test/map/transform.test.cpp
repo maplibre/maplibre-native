@@ -7,6 +7,9 @@
 #include <mbgl/util/geo.hpp>
 #include <mbgl/util/quaternion.hpp>
 
+#include <numbers>
+
+using namespace std::numbers;
 using namespace mbgl;
 
 TEST(Transform, InvalidZoom) {
@@ -263,7 +266,7 @@ TEST(Transform, Anchor) {
     ASSERT_NE(latLng.longitude(), transform.getLatLng().longitude());
 
     transform.jumpTo(CameraOptions().withCenter(latLng).withZoom(10.0).withBearing(-45.0));
-    ASSERT_DOUBLE_EQ(M_PI_4, transform.getBearing());
+    ASSERT_DOUBLE_EQ(pi / 4, transform.getBearing());
     ASSERT_DOUBLE_EQ(latLng.latitude(), transform.getLatLng().latitude());
     ASSERT_DOUBLE_EQ(latLng.longitude(), transform.getLatLng().longitude());
 
@@ -946,12 +949,12 @@ TEST(Transform, FreeCameraOptionsInvalidOrientation) {
     EXPECT_EQ(Quaternion::identity.m, transform.getFreeCameraOptions().orientation);
 
     // Gimbal lock. Both forward and up vectors are on xy-plane
-    options.orientation = Quaternion::fromAxisAngle(vec3{{0.0, 1.0, 0.0}}, M_PI_2).m;
+    options.orientation = Quaternion::fromAxisAngle(vec3{{0.0, 1.0, 0.0}}, pi / 2).m;
     transform.setFreeCameraOptions(options);
     EXPECT_EQ(Quaternion::identity.m, transform.getFreeCameraOptions().orientation);
 
     // Camera is upside down
-    options.orientation = Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, M_PI_2 + M_PI_4).m;
+    options.orientation = Quaternion::fromAxisAngle(vec3{{1.0, 0.0, 0.0}}, pi / 2 + pi / 4).m;
     transform.setFreeCameraOptions(options);
     EXPECT_EQ(Quaternion::identity.m, transform.getFreeCameraOptions().orientation);
 }
@@ -1058,8 +1061,8 @@ TEST(Transform, FreeCameraOptionsOrientationRoll) {
     FreeCameraOptions options;
     transform.resize({100, 100});
 
-    const auto orientationWithoutRoll = Quaternion::fromEulerAngles(-M_PI_4, 0.0, 0.0);
-    const auto orientationWithRoll = orientationWithoutRoll.multiply(Quaternion::fromEulerAngles(0.0, 0.0, M_PI_4));
+    const auto orientationWithoutRoll = Quaternion::fromEulerAngles(-pi / 4, 0.0, 0.0);
+    const auto orientationWithRoll = orientationWithoutRoll.multiply(Quaternion::fromEulerAngles(0.0, 0.0, pi / 4));
 
     options.orientation = orientationWithRoll.m;
     transform.setFreeCameraOptions(options);
