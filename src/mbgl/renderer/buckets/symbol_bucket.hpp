@@ -178,7 +178,7 @@ public:
 
     Buffer icon;
     Buffer sdfIcon;
-    
+
     using CollisionVertexVector = gfx::VertexVector<gfx::Vertex<CollisionBoxLayoutAttributes>>;
     using CollisionDynamicVertexVector = gfx::VertexVector<gfx::Vertex<CollisionBoxDynamicAttributes>>;
 

@@ -256,7 +256,7 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     for (auto& pair : tiles) {
         pair.second->setShowCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision);
     }
-    
+
     // Initialize renderable tiles and update the contained layer render data.
     for (auto& entry : renderedTiles) {
         Tile& tile = entry.second;

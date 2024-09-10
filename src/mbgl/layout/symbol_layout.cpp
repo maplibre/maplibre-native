@@ -990,7 +990,7 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
                                const Anchor& labelAnchor,
                                PlacedSymbol& placedSymbol,
                                float sortKey) {
-    /**/constexpr const uint16_t vertexLength = 4;
+    constexpr const uint16_t vertexLength = 4;
 
     const auto& tl = symbol.tl;
     const auto& tr = symbol.tr;

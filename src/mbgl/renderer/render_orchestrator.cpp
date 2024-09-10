@@ -524,7 +524,7 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
             sourceRenderItems.emplace_back(entry.second->createRenderItem());
         }
     }
-    
+
     return std::make_unique<RenderTreeImpl>(std::move(renderTreeParameters),
                                             std::move(layerRenderItems),
                                             std::move(sourceRenderItems),
@@ -956,7 +956,7 @@ void RenderOrchestrator::updateLayers(gfx::ShaderRegistry& shaders,
     };
 
     const auto& items = renderTree.getLayerRenderItemMap();
-    
+
     std::vector<std::unique_ptr<ChangeRequest>> changes;
     changes.reserve(items.size() * 3);
 

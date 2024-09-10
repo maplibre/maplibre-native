@@ -410,7 +410,6 @@ void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
         tiles->emplace_back(entry.first, entry.second);
         tiles->back().prepare(parameters);
     }
-    
     featureState.coalesceChanges(*tiles);
     renderTiles = std::move(tiles);
 }
