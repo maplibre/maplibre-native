@@ -265,8 +265,8 @@ jobs:
       - name: Build Render Test App
         run: |
           ./gradlew assemble${{ matrix.flavor }} assemble${{ matrix.flavor }}AndroidTest
-          cp app/build/outputs/apk/${{ matrix.flavor }}/debug/app-${{ matrix.flavor }}-debug.apk RenderTestsApp-${{ matrix.flavor }}.apk
-          cp app/build/outputs/apk/androidTest/${{ matrix.flavor }}/debug/app-${{ matrix.flavor }}-debug-androidTest.apk RenderTests-${{ matrix.flavor }}.apk
+          cp app/build/outputs/apk/${{ matrix.flavor }}/release/app-${{ matrix.flavor }}-release.apk RenderTestsApp-${{ matrix.flavor }}.apk
+          cp app/build/outputs/apk/androidTest/${{ matrix.flavor }}/release/app-${{ matrix.flavor }}-release-androidTest.apk RenderTests-${{ matrix.flavor }}.apk
         working-directory: ./render-test/android
 
       - name: Store Render Test .apk files

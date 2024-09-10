@@ -58,5 +58,19 @@ void android_main(struct android_app* app) {
         mbgl::Log::Info(mbgl::Event::General, "All tests are finished!");
         changeState(env, app, result);
     }
-    ANativeActivity_finish(app->activity);
+    while (true) {
+        auto result = ALooper_pollOnce(0, &outFd, &outEvents, reinterpret_cast<void**>(&source));
+        if (result == ALOOPER_POLL_ERROR) {
+            throw std::runtime_error("ALooper_pollOnce returned an error");
+        }
+
+        if (source != nullptr) {
+            source->process(app, source);
+        }
+        if (app->destroyRequested != 0) {
+            app->activity->vm->DetachCurrentThread();
+            mbgl::Log::Info(mbgl::Event::General, "Close the App!");
+            return;
+        }
+    }
 }
