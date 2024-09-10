@@ -1822,6 +1822,7 @@ TEST(Map, ObserveTileLifecycle) {
                                                TileOperation::LoadFromCache,
                                                TileOperation::StartParse));
                     stage = TileOperation::Cancelled;
+                    parsing = false;
                     break;
                 }
                 case TileOperation::EndParse: {
@@ -1857,5 +1858,6 @@ TEST(Map, ObserveTileLifecycle) {
         }
 
         EXPECT_THAT(stage, testing::AnyOf(TileOperation::EndParse, TileOperation::Cancelled));
+        EXPECT_FALSE(parsing);
     }
 }
