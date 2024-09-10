@@ -17,7 +17,7 @@ struct ShaderSource<BuiltIn::FillShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 1) in vec4 in_color;
@@ -110,7 +110,7 @@ struct ShaderSource<BuiltIn::FillOutlineShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_outline_color)
 layout(location = 1) in vec4 in_color;
@@ -216,14 +216,14 @@ struct ShaderSource<BuiltIn::FillPatternShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 1) in mediump vec4 in_pattern_from;
+layout(location = 1) in mediump uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 2) in mediump vec4 in_pattern_to;
+layout(location = 2) in mediump uvec4 in_pattern_to;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
@@ -411,14 +411,14 @@ struct ShaderSource<BuiltIn::FillOutlinePatternShader, gfx::Backend::Type::Vulka
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 1) in mediump vec4 in_pattern_from;
+layout(location = 1) in mediump uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 2) in mediump vec4 in_pattern_to;
+layout(location = 2) in mediump uvec4 in_pattern_to;
 #endif
 
 #if !defined(HAS_UNIFORM_u_opacity)
@@ -615,8 +615,8 @@ struct ShaderSource<BuiltIn::FillOutlineTriangulatedShader, gfx::Backend::Type::
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_pos_normal;
-layout(location = 1) in vec4 in_data;
+layout(location = 0) in ivec2 in_pos_normal;
+layout(location = 1) in uvec4 in_data;
 
 layout(set = 0, binding = 1) uniform FillOutlineTriangulatedDrawableUBO {
     mat4 matrix;
@@ -641,10 +641,12 @@ void main() {
     // We store these in the least significant bit of in_pos_normal
     mediump vec2 normal = in_pos_normal - 2.0 * pos;
     frag_normal = vec2(normal.x, normal.y * 2.0 - 1.0);
+    frag_normal.y *= -1.0;
 
     // these transformations used to be applied in the JS and native code bases.
     // moved them into the shader for clarity and simplicity.
-    float halfwidth = drawable.width / 2.0;
+    float width = 1.0;
+    float halfwidth = width / 2.0;
     float outset = halfwidth + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
 
     // Scale the extrusion vector down to a normal and then up by the line width
@@ -652,17 +654,15 @@ void main() {
     mediump vec2 dist = outset * a_extrude * LINE_NORMAL_SCALE;
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
-    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0) + projected_extrude;
+    gl_Position = drawable.matrix * vec4(pos, 0.0, 1.0) + projected_extrude;
+    gl_Position.y *= -1.0;
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
-    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * drawable.units_to_pixels);
+    float extrude_length_with_perspective = length(projected_extrude.xy / gl_Position.w * global.units_to_pixels);
 
-    frag_width = outset;
-    frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective
-    
-    gl_Position.y *= -1.0;
-
+    frag_width2 = outset;
+    frag_gamma_scale = extrude_length_without_perspective / extrude_length_with_perspective;
 }
 )";
 
@@ -698,7 +698,7 @@ void main() {
     const float blur2 = (1.0 / DEVICE_PIXEL_RATIO) * frag_gamma_scale;
     const float alpha = clamp(min(dist + blur2, frag_width2 - dist) / blur2, 0.0, 1.0);
 
-    out_color = props.outline_color * (alpha * props.opacit));
+    out_color = props.outline_color * alpha * props.opacity;
 }
 )";
 };
@@ -714,8 +714,8 @@ struct ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec4 in_normal_ed;
+layout(location = 0) in ivec2 in_position;
+layout(location = 1) in ivec4 in_normal_ed;
 
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 2) in vec4 in_color;
@@ -856,8 +856,8 @@ struct ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vul
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec4 in_normal_ed;
+layout(location = 0) in ivec2 in_position;
+layout(location = 1) in ivec4 in_normal_ed;
 
 #if !defined(HAS_UNIFORM_u_base)
 layout(location = 2) in vec2 in_base;
@@ -868,11 +868,11 @@ layout(location = 3) in vec2 in_height;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 4) in vec4 in_pattern_from;
+layout(location = 4) in uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 5) in vec4 in_pattern_to;
+layout(location = 5) in uvec4 in_pattern_to;
 #endif
 
 layout(set = 0, binding = 1) uniform FillExtrusionDrawableUBO {

@@ -1,4 +1,5 @@
 export BUILDTYPE ?= Debug
+export RENDERER ?= drawable
 export IS_LOCAL_DEVELOPMENT ?= true
 export TARGET_BRANCH ?= main
 
@@ -11,6 +12,12 @@ else ifeq ($(BUILDTYPE), Sanitize)
 else ifeq ($(BUILDTYPE), Debug)
 else
   $(error BUILDTYPE must be Debug, Sanitize, Release or RelWithDebInfo)
+endif
+
+ifeq ($(RENDERER), drawable)
+else ifeq ($(RENDERER), vulkan)
+else
+  $(error RENDERER must be 'drawable' (OpenGL) or 'vulkan')
 endif
 
 buildtype := $(shell echo "$(BUILDTYPE)" | tr "[A-Z]" "[a-z]")
@@ -70,7 +77,7 @@ android-benchmark-$1:
 # Build SDK for for specified abi
 .PHONY: android-lib-$1
 android-lib-$1:
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=$2 :MapLibreAndroid:assemble$(BUILDTYPE)
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=$2 :MapLibreAndroid:assemble$(RENDERER)$(BUILDTYPE)
 
 # Build test app and SDK for for specified abi
 .PHONY: android-$1
@@ -217,11 +224,12 @@ run-android-unit-test-%:
 
 # Builds a release package and .tar.gz with debug symbols of the Android SDK
 .PHONY: apackage
-apackage: 
+apackage:
+	echo "Building for $(RENDERER)"
 	make android-lib-arm-v7 && make android-lib-arm-v8 && make android-lib-x86 && make android-lib-x86-64
-	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=all assembleDrawable$(BUILDTYPE)
+	$(MLN_ANDROID_GRADLE) -Pmaplibre.abis=all assemble$(RENDERER)$(BUILDTYPE)
 	mkdir -p build
-	tar -czvf build/debug-symbols.tar.gz -C MapLibreAndroid/build/intermediates/library_jni/drawableRelease/copyDrawableReleaseJniLibsProjectOnly/jni .
+	tar -czvf build/debug-symbols.tar.gz -C MapLibreAndroid/build/intermediates/library_jni/*/*JniLibsProjectOnly/jni .
 
 # Build test app instrumentation tests apk and test app apk for all abi's
 .PHONY: android-ui-test

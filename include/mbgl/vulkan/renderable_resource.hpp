@@ -16,6 +16,11 @@ protected:
     ~RenderableResource() override = default;
 
 public:
+    virtual void swap() {
+        // Renderable resources that require a swap function to be called
+        // explicitly can override this method.
+    }
+
     const vk::Extent2D& getExtent() const { return extent; }
     const vk::UniqueRenderPass& getRenderPass() const { return renderPass; }
     virtual const vk::UniqueFramebuffer& getFramebuffer() const = 0;
@@ -34,9 +39,11 @@ protected:
     ~SurfaceRenderableResource() override;
 
     void initColor(uint32_t w, uint32_t h);
-    void initSwapchain(uint32_t w, uint32_t h);
+    void initSwapchain(uint32_t w, uint32_t h, vk::PresentModeKHR presentMode = vk::PresentModeKHR::eFifo);
 
     void initDepthStencil();
+
+    void swap() override;
 
 public:
     virtual void createPlatformSurface() = 0;

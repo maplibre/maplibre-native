@@ -16,10 +16,18 @@ jobs:
       matrix:
         test: [
           {
-            artifactName: android-render-tests,
-            testFile: RenderTests.apk,
-            appFile: RenderTestsApp.apk,
-            name: "Android Render Tests",
+            artifactName: android-render-tests-opengl,
+            testFile: RenderTests-opengl.apk,
+            appFile: RenderTestsApp-opengl.apk,
+            name: "Android Render Tests (OpenGL)",
+            # Google Pixel 7 Pro
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564"
+          },
+          {
+            artifactName: android-render-tests-vulkan,
+            testFile: RenderTests-vulkan.apk,
+            appFile: RenderTestsApp-vulkan.apk,
+            name: "Android Render Tests (Vulkan)",
             # Google Pixel 7 Pro
             devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564"
           },

@@ -4,9 +4,20 @@
 
 ### ✨ Features and improvements
 
-- Added new map observer events: onPreCompileShader, onPostCompileShader, onShaderCompileFailed, onGlyphsLoaded, onGlyphsError, onGlyphsRequested, onTileAction, onSpriteLoaded, onSpriteError, onSpriteRequested ([#2694](https://github.com/maplibre/maplibre-native/pull/2694)).
+### 🐞 Bug fixes
+
+## 11.3.0
+
+### ✨ Features and improvements
+
+- Added new map observer events: `onPreCompileShader`, `onPostCompileShader`, `onShaderCompileFailed`, `onGlyphsLoaded`, `onGlyphsError`, `onGlyphsRequested`, `onTileAction`, `onSpriteLoaded`, `onSpriteError`, `onSpriteRequested` ([#2694](https://github.com/maplibre/maplibre-native/pull/2694)).
+- Correct and revise OpenGL texture pooling ([#2709](https://github.com/maplibre/maplibre-native/pull/2709)).
+- Update Android dependencies ([#2794](https://github.com/maplibre/maplibre-native/pull/2794)).
+- Make project compatible again with Java 11, based on feedback from @alasram ([#2799](https://github.com/maplibre/maplibre-native/pull/2799)).
 
 ### 🐞 Bug fixes
+
+- Fix raster masking bug ([#2798](https://github.com/maplibre/maplibre-native/pull/2798)).
 
 ## 11.2.0
 

@@ -1,6 +1,5 @@
 [versions]
 mapLibreServices = "6.0.1"
-maplibreGestures = "0.0.1"
 appCompat = "1.7.0"
 constraintLayout = "2.1.4"
 interpolator = "1.0.0"
@@ -40,7 +39,7 @@ kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-cor
 kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 kotlinxCoroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 maplibreJavaGeoJSON = { group = "org.maplibre.gl", name = "android-sdk-geojson", version.ref = "mapLibreServices" }
-maplibreGestures = { group = "org.maplibre.gl", name = "maplibre-android-gestures", version.ref = "maplibreGestures" }
+maplibreGestures = { group = "org.maplibre.gl", name = "maplibre-android-gestures", version = "0.0.3" }
 maplibreJavaTurf = { group = "org.maplibre.gl", name = "android-sdk-turf", version.ref = "mapLibreServices" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
