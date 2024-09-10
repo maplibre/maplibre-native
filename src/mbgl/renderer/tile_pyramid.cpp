@@ -134,10 +134,6 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
             idealTiles = {idealTiles[0]};
         }
     }
-    
-    std::stringstream ss1;
-    ss1 << "\ntilePyramidIdealTiles: " << idealTiles.size();
-    Log::Debug(Event::General, ss1.str());
 
     // Stores a list of all the tiles that we're definitely going to retain.
     // There are two kinds of tiles we need: the ideal tiles determined by the
@@ -223,7 +219,6 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
         auto conservativeCacheSize = static_cast<size_t>(
             std::max(static_cast<double>(parameters.transformState.getSize().width) / tileSize, 1.0) *
             std::max(static_cast<double>(parameters.transformState.getSize().height) / tileSize, 1.0) *
-            //1);
             (parameters.transformState.getMaxZoom() - parameters.transformState.getMinZoom() + 1) * 0.5);
         cache.setSize(conservativeCacheSize);
     } else {
@@ -261,10 +256,6 @@ void TilePyramid::update(const std::vector<Immutable<style::LayerProperties>>& l
     for (auto& pair : tiles) {
         pair.second->setShowCollisionBoxes(parameters.debugOptions & MapDebugOptions::Collision);
     }
-
-    std::stringstream ss;
-    ss << "\ntilePyramidRenderedTiles: " << renderedTiles.size();
-    Log::Debug(Event::General, ss.str());
     
     // Initialize renderable tiles and update the contained layer render data.
     for (auto& entry : renderedTiles) {

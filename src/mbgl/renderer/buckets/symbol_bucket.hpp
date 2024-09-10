@@ -84,7 +84,6 @@ public:
 
     void upload(gfx::UploadPass&) override;
     bool hasData() const override;
-    bool needsUpload() const override;
     size_t getMemSize() const override;
     std::pair<uint32_t, bool> registerAtCrossTileIndex(CrossTileSymbolLayerIndex&, const RenderTile&) override;
     void place(Placement&, const BucketPlacementData&, std::set<uint32_t>&) override;
@@ -147,7 +146,6 @@ public:
             sharedVertices->release();
             sharedDynamicVertices->release();
             sharedOpacityVertices->release();
-            sharedTriangles->release();
         }
         std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
         VertexVector& vertices() { return *sharedVertices; }
@@ -174,16 +172,12 @@ public:
         std::optional<OpacityVertexBuffer> opacityVertexBuffer;
         std::optional<gfx::IndexBuffer> indexBuffer;
 #endif // MLN_LEGACY_RENDERER
-    } text3;
+    } text;
 
     std::unique_ptr<SymbolSizeBinder> iconSizeBinder;
 
     Buffer icon;
     Buffer sdfIcon;
-
-    /*Buffer text2;
-    Buffer icon2;
-    Buffer sdfIcon2;*/
     
     using CollisionVertexVector = gfx::VertexVector<gfx::Vertex<CollisionBoxLayoutAttributes>>;
     using CollisionDynamicVertexVector = gfx::VertexVector<gfx::Vertex<CollisionBoxDynamicAttributes>>;

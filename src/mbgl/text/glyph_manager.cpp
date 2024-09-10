@@ -107,7 +107,7 @@ void GlyphManager::processResponse(const Response& res, const FontStack& fontSta
                 return;
             }
 
-            /**/for (auto& glyph : glyphs) {
+            for (auto& glyph : glyphs) {
                 auto id = glyph.id;
                 if (!localGlyphRasterizer->canRasterizeGlyph(fontStack, id)) {
                     entry.glyphs.erase(id);

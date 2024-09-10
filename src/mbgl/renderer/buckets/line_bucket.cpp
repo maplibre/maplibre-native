@@ -38,7 +38,7 @@ void LineBucket::addFeature(const GeometryTileFeature& feature,
                             const PatternLayerMap& patternDependencies,
                             std::size_t index,
                             const CanonicalTileID& canonical) {
-    /**/for (auto& line : geometryCollection) {
+    for (auto& line : geometryCollection) {
         addGeometry(line, feature, canonical);
     }
 

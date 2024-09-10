@@ -149,7 +149,7 @@ ParseResult ParsingContext::parse(const Convertible& value,
                                   const std::optional<TypeAnnotationOption>& typeAnnotationOption) {
     ParseResult parsed;
 
-    /**/if (isArray(value)) {
+    if (isArray(value)) {
         const std::size_t length = arrayLength(value);
         if (length == 0) {
             error(

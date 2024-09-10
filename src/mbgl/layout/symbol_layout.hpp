@@ -83,19 +83,13 @@ private:
     void addToDebugBuffers(SymbolBucket&);
 
     // Adds placed items to the buffer.
-    size_t addSymbolText(SymbolBucket::Buffer&,
+    size_t addSymbol(SymbolBucket::Buffer&,
                      Range<float> sizeData,
                      const SymbolQuad&,
                      const Anchor& labelAnchor,
                      PlacedSymbol& placedSymbol,
                      float sortKey);
-    size_t addSymbolIcon(SymbolBucket::Buffer&,
-                     Range<float> sizeData,
-                     const SymbolQuad&,
-                     const Anchor& labelAnchor,
-                     PlacedSymbol& placedSymbol,
-                     float sortKey);
-    size_t addSymbolIcons(SymbolBucket::Buffer&,
+    size_t addSymbols(SymbolBucket::Buffer&,
                       Range<float> sizeData,
                       const SymbolQuads&,
                       const Anchor& labelAnchor,

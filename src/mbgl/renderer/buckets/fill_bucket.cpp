@@ -42,7 +42,7 @@ void FillBucket::addFeature(const GeometryTileFeature& feature,
                             std::size_t index,
                             const CanonicalTileID& canonical) {
     // generate buffers
-    /**/gfx::generateFillAndOutineBuffers(geometry,
+    gfx::generateFillAndOutineBuffers(geometry,
                                       vertices,
                                       triangles,
                                       triangleSegments,

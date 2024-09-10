@@ -861,7 +861,7 @@ void updateTileDrawable(gfx::Drawable& drawable,
     const auto tileUBO = buildTileUBO(bucket, drawData, currentZoom);
     drawableUniforms.createOrUpdate(idSymbolTilePropsUBO, &tileUBO, context);
 
-    const auto& buffer = isText ? bucket.text3 : (sdfIcons ? bucket.sdfIcon : bucket.icon);
+    const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
     const auto vertexCount = buffer.vertices().elements();
 
     drawable.setVertices({}, vertexCount, gfx::AttributeDataType::Short4);
@@ -973,8 +973,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                const std::shared_ptr<UpdateParameters>&,
                                const RenderTree& /*renderTree*/,
                                UniqueChangeRequestVec& changes) {
-    //return;
-    
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
         removeAllDrawables();
         return;
@@ -1059,11 +1057,11 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     collisionBuilder->setRenderPass(passes);
     collisionBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
     collisionBuilder->setColorMode(gfx::ColorMode::alphaBlended());
-    
+
     StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
         const auto& tileID = tile.getOverscaledTileID();
-        
+
         const auto* optRenderData = getRenderDataForPass(tile, passes);
         if (!optRenderData || !optRenderData->bucket || !optRenderData->bucket->hasData()) {
             removeTile(passes, tileID);
@@ -1207,7 +1205,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             addRenderables(bucket.sdfIcon, SymbolType::IconSDF);
         }
         if (bucket.hasTextData() && atlases->glyph) {
-            addRenderables(bucket.text3, SymbolType::Text);
+            addRenderables(bucket.text, SymbolType::Text);
         }
 
         addCollisionDrawables(false /*isText*/, bucket.hasIconCollisionBoxData(), bucket.hasIconCollisionCircleData());
@@ -1236,7 +1234,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         const auto& tile = renderable.tile;
         const auto tileID = tile.id.overscaleTo(renderable.overscaledZ);
         const auto& bucket = static_cast<const SymbolBucket&>(*renderable.renderData.bucket);
-        const auto& buffer = isText ? bucket.text3 : (sdfIcons ? bucket.sdfIcon : bucket.icon);
+        const auto& buffer = isText ? bucket.text : (sdfIcons ? bucket.sdfIcon : bucket.icon);
 
         if (!buffer.sharedTriangles->elements()) {
             continue;

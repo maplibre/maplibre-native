@@ -410,16 +410,9 @@ void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
         tiles->emplace_back(entry.first, entry.second);
         tiles->back().prepare(parameters);
     }
-    /*std::stringstream ss1;
-    ss1 << "\nsourcePrepareTilePyramidRenderTiles: " << tiles->size();
-    Log::Debug(Event::General, ss1.str());*/
     
     featureState.coalesceChanges(*tiles);
     renderTiles = std::move(tiles);
-    
-    /*std::stringstream ss2;
-    ss2 << "\nsourcePrepareRenderTiles: " << renderTiles->size();
-    Log::Debug(Event::General, ss2.str());*/
 }
 
 void RenderTileSource::updateFadingTiles() {
@@ -441,9 +434,6 @@ RenderTiles RenderTileSource::getRenderTiles() const {
         }
         filteredRenderTiles = std::move(result);
     }
-    /*std::stringstream ss;
-    ss << "\nfilteredRenderTiles: " << filteredRenderTiles->size();
-    Log::Debug(Event::General, ss.str());*/
     return filteredRenderTiles;
 }
 

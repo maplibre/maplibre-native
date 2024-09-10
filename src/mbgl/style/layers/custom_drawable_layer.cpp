@@ -363,7 +363,6 @@ bool CustomDrawableLayerHost::Interface::updateBuilder(BuilderType type,
 };
 
 bool CustomDrawableLayerHost::Interface::addPolyline(const LineString<double>& coordinates) {
-    //return true;
     switch (lineOptions.shaderType) {
         case LineShaderType::Classic: {
             // TODO: build classic polyline with Geo coordinates
@@ -386,7 +385,6 @@ bool CustomDrawableLayerHost::Interface::addPolyline(const LineString<double>& c
 }
 
 bool CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& coordinates) {
-    return true;
     switch (lineOptions.shaderType) {
         case LineShaderType::Classic: {
             // build classic polyline with Tile coordinates
@@ -407,7 +405,6 @@ bool CustomDrawableLayerHost::Interface::addPolyline(const GeometryCoordinates& 
 }
 
 bool CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geometry) {
-    //return true;
     // build fill
     if (!updateBuilder(BuilderType::Fill, "custom-fill", fillShaderDefault())) return false;
 
@@ -445,7 +442,6 @@ bool CustomDrawableLayerHost::Interface::addFill(const GeometryCollection& geome
 }
 
 bool CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& point) {
-    //return true;
     // build symbol
     if (!updateBuilder(BuilderType::Symbol, "custom-symbol", symbolShaderDefault())) return false;
 

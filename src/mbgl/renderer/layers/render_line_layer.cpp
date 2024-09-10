@@ -361,8 +361,6 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                              [[maybe_unused]] const std::shared_ptr<UpdateParameters>& parameters,
                              [[maybe_unused]] const RenderTree& renderTree,
                              [[maybe_unused]] UniqueChangeRequestVec& changes) {
-    //return;
-    
     if (!renderTiles || renderTiles->empty()) {
         removeAllDrawables();
         return;

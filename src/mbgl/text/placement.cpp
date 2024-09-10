@@ -263,13 +263,11 @@ void Placement::placeSymbolBucket(const BucketPlacementData& params, std::set<ui
     retainedQueryData.emplace(
         std::piecewise_construct,
         std::forward_as_tuple(symbolBucket.bucketInstanceId),
-                              
         std::forward_as_tuple(symbolBucket.bucketInstanceId, params.featureIndex, ctx.getOverscaledID()));
 }
 
 JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, const PlacementContext& ctx) {
     static const JointPlacement kUnplaced(false, false, false);
-    //return kUnplaced;
     if (symbolInstance.crossTileID == SymbolInstance::invalidCrossTileID()) return kUnplaced;
 
     if (ctx.getRenderTile().holdForFade()) {
@@ -294,7 +292,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
     Point<float> shift{0.0f, 0.0f};
     std::optional<size_t> horizontalTextIndex = symbolInstance.getDefaultHorizontalPlacedTextIndex();
     if (horizontalTextIndex) {
-        const PlacedSymbol& placedSymbol = bucket.text3.placedSymbols.at(*horizontalTextIndex);
+        const PlacedSymbol& placedSymbol = bucket.text.placedSymbols.at(*horizontalTextIndex);
         const float fontSize = evaluateSizeForFeature(ctx.partiallyEvaluatedTextSize, placedSymbol);
 
         const auto updatePreviousOrientationIfNotPlaced = [&](bool isPlaced) {
@@ -807,8 +805,8 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
         if (bucket.hasTextData() && layout.get<TextRotationAlignment>() == AlignmentType::Map) {
             const bool pitchWithMap = layout.get<style::TextPitchAlignment>() == style::AlignmentType::Map;
             const bool keepUpright = layout.get<style::TextKeepUpright>();
-            reprojectLineLabels(bucket.text3.dynamicVertices(),
-                                bucket.text3.placedSymbols,
+            reprojectLineLabels(bucket.text.dynamicVertices(),
+                                bucket.text.placedSymbols,
                                 tile.matrix,
                                 pitchWithMap,
                                 true /*rotateWithMap*/,
@@ -819,7 +817,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
             result = true;
         }
     } else if (hasVariableAnchors) {
-        bucket.text3.sharedDynamicVertices->clear();
+        bucket.text.sharedDynamicVertices->clear();
         bucket.hasVariablePlacement = false;
 
         const auto partiallyEvaluatedSize = bucket.textSizeBinder->evaluateForZoom(static_cast<float>(state.getZoom()));
@@ -832,8 +830,8 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
             tile.matrix, pitchWithMap, rotateWithMap, state, pixelsToTileUnits);
         std::unordered_map<std::size_t, std::pair<std::size_t, Point<float>>> placedTextShifts;
 
-        for (std::size_t i = 0; i < bucket.text3.placedSymbols.size(); ++i) {
-            const PlacedSymbol& symbol = bucket.text3.placedSymbols[i];
+        for (std::size_t i = 0; i < bucket.text.placedSymbols.size(); ++i) {
+            const PlacedSymbol& symbol = bucket.text.placedSymbols[i];
             std::optional<VariableOffset> variableOffset;
             const bool skipOrientation = bucket.allowVerticalPlacement && !symbol.placedOrientation;
             if (!symbol.hidden && symbol.crossTileID != 0u && !skipOrientation) {
@@ -848,7 +846,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
                 // These symbols are from a justification that is not being
                 // used, or a label that wasn't placed so we don't need to do
                 // the extra math to figure out what incremental shift to apply.
-                hideGlyphs(symbol.glyphOffsets.size(), bucket.text3.dynamicVertices());
+                hideGlyphs(symbol.glyphOffsets.size(), bucket.text.dynamicVertices());
             } else {
                 const Point<float> tileAnchor = symbol.anchorPoint;
                 const auto projectedAnchor = project(tileAnchor, pitchWithMap ? tile.matrix : labelPlaneMatrix);
@@ -891,7 +889,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
                 }
 
                 for (std::size_t j = 0; j < symbol.glyphOffsets.size(); ++j) {
-                    addDynamicAttributes(shiftedAnchor, symbol.angle, bucket.text3.dynamicVertices());
+                    addDynamicAttributes(shiftedAnchor, symbol.angle, bucket.text.dynamicVertices());
                 }
             }
         }
@@ -935,7 +933,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
             }
         };
 
-        updateDynamicVertices(bucket.text3);
+        updateDynamicVertices(bucket.text);
         // When text box is rotated, icon-text-fit icon must be rotated as well.
         if (updateTextFitIcon) {
             updateDynamicVertices(bucket.icon);
@@ -951,9 +949,7 @@ bool Placement::updateBucketDynamicVertices(SymbolBucket& bucket,
 void Placement::updateBucketOpacities(SymbolBucket& bucket,
                                       const TransformState& state,
                                       std::set<uint32_t>& seenCrossTileIDs) const {
-    //return;
-    
-    if (bucket.hasTextData()) bucket.text3.sharedOpacityVertices->clear();
+    if (bucket.hasTextData()) bucket.text.sharedOpacityVertices->clear();
     if (bucket.hasIconData()) bucket.icon.sharedOpacityVertices->clear();
     if (bucket.hasSdfIconData()) bucket.sdfIcon.sharedOpacityVertices->clear();
     if (bucket.hasIconCollisionBoxData()) bucket.iconCollisionBox->dynamicVertices().clear();
@@ -1002,25 +998,25 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
                                                                             opacityState.text.opacity);
             if (symbolInstance.placedRightTextIndex) {
                 textOpacityVerticesSize += symbolInstance.rightJustifiedGlyphQuadsSize * 4;
-                PlacedSymbol& placed = bucket.text3.placedSymbols[*symbolInstance.placedRightTextIndex];
+                PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.placedRightTextIndex];
                 placed.hidden = opacityState.isHidden();
             }
             if (symbolInstance.placedCenterTextIndex && !symbolInstance.singleLine) {
                 textOpacityVerticesSize += symbolInstance.centerJustifiedGlyphQuadsSize * 4;
-                PlacedSymbol& placed = bucket.text3.placedSymbols[*symbolInstance.placedCenterTextIndex];
+                PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.placedCenterTextIndex];
                 placed.hidden = opacityState.isHidden();
             }
             if (symbolInstance.placedLeftTextIndex && !symbolInstance.singleLine) {
                 textOpacityVerticesSize += symbolInstance.leftJustifiedGlyphQuadsSize * 4;
-                PlacedSymbol& placed = bucket.text3.placedSymbols[*symbolInstance.placedLeftTextIndex];
+                PlacedSymbol& placed = bucket.text.placedSymbols[*symbolInstance.placedLeftTextIndex];
                 placed.hidden = opacityState.isHidden();
             }
             if (symbolInstance.placedVerticalTextIndex) {
                 textOpacityVerticesSize += symbolInstance.verticalGlyphQuadsSize * 4;
-                bucket.text3.placedSymbols[*symbolInstance.placedVerticalTextIndex].hidden = opacityState.isHidden();
+                bucket.text.placedSymbols[*symbolInstance.placedVerticalTextIndex].hidden = opacityState.isHidden();
             }
 
-            bucket.text3.opacityVertices().extend(textOpacityVerticesSize, opacityVertex);
+            bucket.text.opacityVertices().extend(textOpacityVerticesSize, opacityVertex);
 
             style::TextWritingModeType previousOrientation = style::TextWritingModeType::Horizontal;
             if (bucket.allowVerticalPlacement) {
@@ -1186,8 +1182,6 @@ void Placement::markUsedJustification(SymbolBucket& bucket,
                                       style::TextVariableAnchorType placedAnchor,
                                       const SymbolInstance& symbolInstance,
                                       style::TextWritingModeType orientation) const {
-    //return;
-    
     style::TextJustifyType anchorJustify = getAnchorJustification(placedAnchor);
     assert(anchorJustify != style::TextJustifyType::Auto);
     const std::optional<size_t>& autoIndex = justificationToIndex(anchorJustify, symbolInstance, orientation);
@@ -1195,13 +1189,13 @@ void Placement::markUsedJustification(SymbolBucket& bucket,
     for (auto& justify : justifyTypes) {
         const std::optional<size_t> index = justificationToIndex(justify, symbolInstance, orientation);
         if (index) {
-            assert(bucket.text3.placedSymbols.size() > *index);
+            assert(bucket.text.placedSymbols.size() > *index);
             if (autoIndex && *index != *autoIndex) {
                 // There are multiple justifications and this one isn't it: shift offscreen
-                bucket.text3.placedSymbols.at(*index).crossTileID = 0u;
+                bucket.text.placedSymbols.at(*index).crossTileID = 0u;
             } else {
                 // Either this is the chosen justification or the justification is hardwired: use this one
-                bucket.text3.placedSymbols.at(*index).crossTileID = symbolInstance.crossTileID;
+                bucket.text.placedSymbols.at(*index).crossTileID = symbolInstance.crossTileID;
             }
         }
     }
@@ -1210,8 +1204,6 @@ void Placement::markUsedJustification(SymbolBucket& bucket,
 void Placement::markUsedOrientation(SymbolBucket& bucket,
                                     style::TextWritingModeType orientation,
                                     const SymbolInstance& symbolInstance) const {
-    //return;
-    
     auto horizontal = orientation == style::TextWritingModeType::Horizontal
                           ? std::optional<style::TextWritingModeType>(orientation)
                           : std::nullopt;
@@ -1220,19 +1212,19 @@ void Placement::markUsedOrientation(SymbolBucket& bucket,
                         : std::nullopt;
 
     if (symbolInstance.placedRightTextIndex) {
-        bucket.text3.placedSymbols.at(*symbolInstance.placedRightTextIndex).placedOrientation = horizontal;
+        bucket.text.placedSymbols.at(*symbolInstance.placedRightTextIndex).placedOrientation = horizontal;
     }
 
     if (symbolInstance.placedCenterTextIndex && !symbolInstance.singleLine) {
-        bucket.text3.placedSymbols.at(*symbolInstance.placedCenterTextIndex).placedOrientation = horizontal;
+        bucket.text.placedSymbols.at(*symbolInstance.placedCenterTextIndex).placedOrientation = horizontal;
     }
 
     if (symbolInstance.placedLeftTextIndex && !symbolInstance.singleLine) {
-        bucket.text3.placedSymbols.at(*symbolInstance.placedLeftTextIndex).placedOrientation = horizontal;
+        bucket.text.placedSymbols.at(*symbolInstance.placedLeftTextIndex).placedOrientation = horizontal;
     }
 
     if (symbolInstance.placedVerticalTextIndex) {
-        bucket.text3.placedSymbols.at(*symbolInstance.placedVerticalTextIndex).placedOrientation = vertical;
+        bucket.text.placedSymbols.at(*symbolInstance.placedVerticalTextIndex).placedOrientation = vertical;
     }
 
     auto& iconBuffer = symbolInstance.hasSdfIcon() ? bucket.sdfIcon : bucket.icon;

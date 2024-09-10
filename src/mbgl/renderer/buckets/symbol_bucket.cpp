@@ -62,20 +62,10 @@ SymbolBucket::SymbolBucket(Immutable<style::SymbolLayoutProperties::PossiblyEval
                                                   {RenderSymbolLayer::textPaintProperties(evaluated), zoom}}));
     }
     SymbolBucket::count ++;
-    /*std::stringstream ss;
-    ss << "\naddBucket: " << SymbolBucket::count;
-    Log::Debug(Event::General, ss.str());*/
 }
 
 SymbolBucket::~SymbolBucket() {
     SymbolBucket::count --;
-    /*std::stringstream ss;
-    ss << "\nremoveBucket: " << SymbolBucket::count;
-    Log::Debug(Event::General, ss.str());*/
-    if (SymbolBucket::count <= 2) {
-        SymbolBucket::count += 1;
-        SymbolBucket::count -= 1;
-    }
     auto pos = std::find(SymbolBucket::list.begin(), SymbolBucket::list.end(), this);
     if (pos != SymbolBucket::list.end()) {
         SymbolBucket::list.erase(pos);
@@ -207,13 +197,8 @@ void SymbolBucket::upload([[maybe_unused]] gfx::UploadPass& uploadPass) {
 }
 
 bool SymbolBucket::hasData() const {
-    //return false;
     return hasTextData() || hasIconData() || hasSdfIconData() || hasIconCollisionBoxData() ||
            hasTextCollisionBoxData() || hasIconCollisionCircleData() || hasTextCollisionCircleData();
-}
-
-bool SymbolBucket::needsUpload() const {
-    return hasData() && !uploaded;
 }
 
 size_t SymbolBucket::getMemSize() const {
@@ -229,12 +214,12 @@ size_t SymbolBucket::getMemSize() const {
         memSize += featureSortOrder->size() * sizeof(std::size_t);
     }
     
-    memSize += text3.vertices().bytes();
-    memSize += text3.dynamicVertices().bytes();
-    memSize += text3.opacityVertices().bytes();
-    memSize += text3.triangles.bytes();
-    memSize += text3.segments.size() * sizeof(SymbolTextAttributes);
-    memSize += text3.placedSymbols.size() * sizeof(PlacedSymbol);
+    memSize += text.vertices().bytes();
+    memSize += text.dynamicVertices().bytes();
+    memSize += text.opacityVertices().bytes();
+    memSize += text.triangles.bytes();
+    memSize += text.segments.size() * sizeof(SymbolTextAttributes);
+    memSize += text.placedSymbols.size() * sizeof(PlacedSymbol);
     
     memSize += icon.vertices().bytes();
     memSize += icon.dynamicVertices().bytes();
@@ -275,16 +260,11 @@ size_t SymbolBucket::getMemSize() const {
         memSize += iconCollisionCircle->triangles.bytes();
         memSize += iconCollisionCircle->segments.size() * sizeof(CollisionBoxProgram::AttributeList);
     }
-    
-    //memSize = 1;
-    
     return memSize;
 }
 
 bool SymbolBucket::hasTextData() const {
-    //return false;
-    //return !text2.triangles.empty();
-    return !text3.segments.empty();
+    return !text.segments.empty();
 }
 
 bool SymbolBucket::hasIconData() const {
@@ -324,8 +304,6 @@ void addPlacedSymbol(gfx::IndexVector<gfx::Triangles>& triangles, const PlacedSy
 }
 
 void SymbolBucket::sortFeatures(const float angle) {
-    //return;
-    
     if (!sortFeaturesByY) {
         return;
     }
@@ -340,14 +318,14 @@ void SymbolBucket::sortFeatures(const float angle) {
     // The current approach to sorting doesn't sort across text and icon
     // segments so don't try. Sorting within segments separately seemed not to
     // be worth the complexity.
-    if (text3.segments.size() > 1 || (icon.segments.size() > 1 || sdfIcon.segments.size() > 1)) {
+    if (text.segments.size() > 1 || (icon.segments.size() > 1 || sdfIcon.segments.size() > 1)) {
         return;
     }
 
     sortUploaded = false;
     uploaded = false;
 
-    text3.triangles.clear();
+    text.triangles.clear();
     icon.triangles.clear();
     sdfIcon.triangles.clear();
 
@@ -361,19 +339,19 @@ void SymbolBucket::sortFeatures(const float angle) {
         symbolsSortOrder->push_back(symbolInstance.dataFeatureIndex);
 
         if (symbolInstance.placedRightTextIndex) {
-            addPlacedSymbol(text3.triangles, text3.placedSymbols[*symbolInstance.placedRightTextIndex]);
+            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.placedRightTextIndex]);
         }
 
         if (symbolInstance.placedCenterTextIndex && !symbolInstance.singleLine) {
-            addPlacedSymbol(text3.triangles, text3.placedSymbols[*symbolInstance.placedCenterTextIndex]);
+            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.placedCenterTextIndex]);
         }
 
         if (symbolInstance.placedLeftTextIndex && !symbolInstance.singleLine) {
-            addPlacedSymbol(text3.triangles, text3.placedSymbols[*symbolInstance.placedLeftTextIndex]);
+            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.placedLeftTextIndex]);
         }
 
         if (symbolInstance.placedVerticalTextIndex) {
-            addPlacedSymbol(text3.triangles, text3.placedSymbols[*symbolInstance.placedVerticalTextIndex]);
+            addPlacedSymbol(text.triangles, text.placedSymbols[*symbolInstance.placedVerticalTextIndex]);
         }
 
         auto& iconBuffer = symbolInstance.hasSdfIcon() ? sdfIcon : icon;

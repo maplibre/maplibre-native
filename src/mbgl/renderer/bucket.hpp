@@ -55,7 +55,7 @@ public:
 
     virtual float getQueryRadius(const RenderLayer&) const { return 0; };
 
-    virtual bool needsUpload() const { return hasData() && !uploaded; }
+    bool needsUpload() const { return hasData() && !uploaded; }
     virtual size_t getMemSize() const { return 0; }
 
     // The following methods are implemented by buckets that require cross-tile indexing and placement.
