@@ -13,6 +13,7 @@
 
 namespace mbgl {
 
+#if MLN_DRAWABLE_RENDERER
 struct FrameTileDifference {
     FrameTileDifference(std::uint64_t prevFrame_, std::uint64_t curFrame_, TileDifference diff_)
         : prevFrame(prevFrame_),
@@ -23,6 +24,7 @@ struct FrameTileDifference {
     std::uint64_t curFrame;
     TileDifference diff;
 };
+#endif
 
 /**
  * @brief Base class for render sources that provide render tiles.
