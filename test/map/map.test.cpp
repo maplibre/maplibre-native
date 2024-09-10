@@ -1784,9 +1784,8 @@ TEST(Map, ObserveTileLifecycle) {
                 case TileOperation::RequestedFromNetwork: {
                     // Parsing happens concurrently with the file source request and can start and stop between requests
                     EXPECT_THAT(stage,
-                                testing::AnyOf(TileOperation::StartParse,
-                                               TileOperation::EndParse,
-                                               TileOperation::LoadFromCache));
+                                testing::AnyOf(
+                                    TileOperation::StartParse, TileOperation::EndParse, TileOperation::LoadFromCache));
                     stage = TileOperation::RequestedFromNetwork;
                     break;
                 }
@@ -1807,8 +1806,7 @@ TEST(Map, ObserveTileLifecycle) {
                 case TileOperation::StartParse: {
                     // Parsing is expected to be started early during the request process by a call to `setLayers`
                     EXPECT_THAT(stage,
-                                testing::AnyOf(TileOperation::RequestedFromCache,
-                                               TileOperation::RequestedFromNetwork));
+                                testing::AnyOf(TileOperation::RequestedFromCache, TileOperation::RequestedFromNetwork));
                     EXPECT_FALSE(parsing); // We must not already be parsing when seeing this marker.
                     stage = TileOperation::StartParse;
                     parsing = true;
