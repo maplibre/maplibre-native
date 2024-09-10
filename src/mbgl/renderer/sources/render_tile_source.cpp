@@ -410,6 +410,7 @@ std::unique_ptr<RenderItem> RenderTileSource::createRenderItem() {
 }
 
 void RenderTileSource::onTilePyramidWillUpdate() {
+#if MLN_DRAWABLE_RENDERER
     // The tile pyramid may be updated multiple times between construction of `renderTiles`, and we only want
     // to do this once as the second one would always start with an empty set.  Specifically, this happens when
     // `RenderOrchestrator::createRenderTree` returns early because the style is loading.
@@ -427,9 +428,11 @@ void RenderTileSource::onTilePyramidWillUpdate() {
             });
         }
     }
+#endif
 }
 
 void RenderTileSource::onTilePyramidUpdated() {
+#if MLN_DRAWABLE_RENDERER
     // The tiles referenced by these `RenderTile` objects may have been destroyed.
     // Replace with an empty set to ensure that the now-unsafe references are not reachable
     renderTilesValid = false;
@@ -437,6 +440,7 @@ void RenderTileSource::onTilePyramidUpdated() {
     // cached views on `renderTiles` are now invalid
     filteredRenderTiles.reset();
     renderTilesSortedByY.reset();
+#endif
 }
 
 void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
@@ -453,13 +457,16 @@ void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
     for (auto& [tileID, tileRef] : tilePyramid.getRenderedTiles()) {
         tiles->emplace_back(tileID, tileRef).prepare(parameters);
     }
-    renderTilesCurFrame = parameters.frameCount;
     featureState.coalesceChanges(*tiles);
 
     renderTilesSortedByY.reset();
     filteredRenderTiles.reset();
     renderTiles = std::move(tiles);
+
+#if MLN_DRAWABLE_RENDERER
     renderTilesValid = true;
+    renderTilesCurFrame = parameters.frameCount;
+#endif
 }
 
 void RenderTileSource::updateFadingTiles() {
@@ -484,6 +491,7 @@ RenderTiles RenderTileSource::getRenderTiles() const {
     return filteredRenderTiles;
 }
 
+#if MLN_DRAWABLE_RENDERER
 std::shared_ptr<FrameTileDifference> RenderTileSource::getRenderTileDiff() const {
     if (!renderTileDiff) {
         renderTileDiff = std::make_shared<FrameTileDifference>(
@@ -491,6 +499,7 @@ std::shared_ptr<FrameTileDifference> RenderTileSource::getRenderTileDiff() const
     }
     return renderTileDiff;
 }
+#endif
 
 RenderTiles RenderTileSource::getRenderTilesSortedByYPosition() const {
     if (!renderTilesSortedByY) {

@@ -39,10 +39,13 @@ public:
     bool hasFadingTiles() const override;
 
     RenderTiles getRenderTiles() const override;
-    std::shared_ptr<FrameTileDifference> getRenderTileDiff() const override;
     RenderTiles getRenderTilesSortedByYPosition() const override;
     const Tile* getRenderedTile(const UnwrappedTileID&) const override;
     Immutable<std::vector<RenderTile>> getRawRenderTiles() const override { return renderTiles; }
+
+#if MLN_DRAWABLE_RENDERER
+    std::shared_ptr<FrameTileDifference> getRenderTileDiff() const override;
+#endif
 
     std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,
@@ -78,18 +81,20 @@ protected:
     // Note that while `renderTiles` is owned by a `shared_ptr`, its elements
     // contain bare references to `Tile` objects owned by `tilePyramid`.
     Immutable<std::vector<RenderTile>> renderTiles;
+#if MLN_DRAWABLE_RENDERER
     bool renderTilesValid = false;
     std::uint64_t renderTilesPrevFrame = 0;
     std::uint64_t renderTilesCurFrame = 0;
+
+    // The IDs of tiles in the previous state of `renderTiles`, and the differences with the current state
+    std::vector<OverscaledTileID> previousRenderTiles;
+    mutable std::shared_ptr<FrameTileDifference> renderTileDiff;
+#endif
 
     // cached view of `renderTiles`, excluding those held for fading
     mutable RenderTiles filteredRenderTiles;
     // cached view of `renderTiles`, sorted by the Y tile coordinate
     mutable RenderTiles renderTilesSortedByY;
-
-    // The IDs of tiles in the previous state of `renderTiles`, and the differences with the current state
-    std::vector<OverscaledTileID> previousRenderTiles;
-    mutable std::shared_ptr<FrameTileDifference> renderTileDiff;
 
 private:
     float bearing = 0.0F;

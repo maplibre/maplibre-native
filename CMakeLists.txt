@@ -210,6 +210,8 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/collision_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/collision_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_diff.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_diff.hpp
     )
 
     target_compile_definitions(
@@ -921,8 +923,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_cache.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_cache.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_diff.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_diff.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_id_hash.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_id_io.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_loader.hpp
