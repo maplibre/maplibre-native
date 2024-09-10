@@ -519,7 +519,6 @@ void RendererBackend::initDevice() {
     } else {
         mbgl::Log::Error(mbgl::Event::Render, "Feature not available: samplerAnisotropy");
     }
-#endif
 
     auto createInfo = vk::DeviceCreateInfo()
                           .setQueueCreateInfos(queueCreateInfos)
