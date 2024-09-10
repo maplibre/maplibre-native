@@ -17,7 +17,6 @@
 #include <mbgl/style/layers/fill_layer_impl.hpp>
 #include <mbgl/tile/geometry_tile.hpp>
 #include <mbgl/tile/tile.hpp>
-#include <mbgl/tile/tile_diff.hpp>
 #include <mbgl/util/convert.hpp>
 #include <mbgl/util/intersection_tests.hpp>
 #include <mbgl/util/logging.hpp>
@@ -33,6 +32,7 @@
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/tile/tile_diff.hpp>
 #endif
 
 #include <ranges>

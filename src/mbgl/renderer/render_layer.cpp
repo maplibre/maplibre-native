@@ -10,13 +10,13 @@
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/tile/tile.hpp>
-#include <mbgl/tile/tile_diff.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/util.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/tile/tile_diff.hpp>
 #endif
 
 namespace mbgl {

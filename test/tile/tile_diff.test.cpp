@@ -1,3 +1,4 @@
+#if MLN_DRAWABLE_RENDERER
 #include <mbgl/test/util.hpp>
 #include <mbgl/test/stub_file_source.hpp>
 #include <mbgl/tile/tile.hpp>
@@ -121,3 +122,4 @@ TEST(TileDiff, New) {
     EXPECT_EQ(1, result.remainder.size());
     EXPECT_EQ(&result.remainder[0].get(), &diffTest.renderTiles[4]);
 }
+#endif

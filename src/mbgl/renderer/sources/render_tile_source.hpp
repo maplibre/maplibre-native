@@ -5,10 +5,10 @@
 #include <mbgl/renderer/source_state.hpp>
 #include <mbgl/renderer/tile_pyramid.hpp>
 #include <mbgl/style/sources/vector_source_impl.hpp>
-#include <mbgl/tile/tile_diff.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/tile/tile_diff.hpp>
 #endif
 
 namespace mbgl {
