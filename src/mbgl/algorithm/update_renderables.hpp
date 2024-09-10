@@ -69,7 +69,7 @@ void updateRenderables(GetTileFn getTile,
             } else {
                 // Check all four actual child tiles.
                 for (const auto& childTileID : idealDataTileID.canonical.children()) {
-                    const OverscaledTileID childDataTileID(overscaledZ, idealDataTileID.wrap, childTileID);
+                    const OverscaledTileID childDataTileID(overscaledZ, idealRenderTileID.wrap, childTileID);
                     tile = getTile(childDataTileID);
                     if (tile && tile->isRenderable()) {
                         retainTile(*tile, TileNecessity::Optional);
