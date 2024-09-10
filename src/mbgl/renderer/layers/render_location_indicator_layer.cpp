@@ -15,11 +15,8 @@
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
-#include <mbgl/gl/context.hpp>
-#include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/map/transform_state.hpp>
 #include <mbgl/math/angles.hpp>
-#include <mbgl/platform/gl_functions.hpp>
 #include <mbgl/renderer/bucket.hpp>
 #include <mbgl/renderer/layers/render_location_indicator_layer.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
@@ -29,11 +26,25 @@
 #include <mbgl/util/mat4.hpp>
 
 #include <mapbox/eternal.hpp>
+#include <mbgl/renderer/image_manager.hpp>
+
+#if MLN_RENDER_BACKEND_OPENGL
+
+#include <mbgl/platform/gl_functions.hpp>
+#include <mbgl/gl/context.hpp>
+#include <mbgl/gl/renderable_resource.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/texture.hpp>
 #include <mbgl/gl/texture_resource.hpp>
 #include <mbgl/gl/types.hpp>
-#include <mbgl/renderer/image_manager.hpp>
+
+#else
+
+#define MBGL_CHECK_ERROR(x) \
+    while (0) {             \
+    }
+
+#endif
 
 #include <numbers>
 
@@ -75,6 +86,7 @@ struct LocationIndicatorRenderParameters {
     std::string puckHatImagePath;
 };
 
+#if MLN_RENDER_BACKEND_OPENGL
 class RenderLocationIndicatorImpl {
 protected:
     struct vec2 {
@@ -756,6 +768,25 @@ public:
 };
 
 bool RenderLocationIndicatorImpl::anisotropicFilteringAvailable = false;
+#else
+
+class RenderLocationIndicatorImpl {
+public:
+    RenderLocationIndicatorImpl(std::string) {}
+
+    void release() {}
+    void updateFeature() {}
+    void updatePuckGeometry([[maybe_unused]] const mbgl::LocationIndicatorRenderParameters& params) {}
+
+public:
+    mbgl::LocationIndicatorRenderParameters parameters;
+    std::shared_ptr<mbgl::Feature> feature;
+    std::shared_ptr<mapbox::geometry::polygon<int64_t>> featureEnvelope;
+    static bool anisotropicFilteringAvailable;
+};
+
+bool RenderLocationIndicatorImpl::anisotropicFilteringAvailable = false;
+#endif
 
 using namespace style;
 namespace {
@@ -845,6 +876,7 @@ void RenderLocationIndicatorLayer::prepare(const LayerPrepareParameters& p) {
     renderImpl->updatePuckGeometry(renderImpl->parameters);
 }
 
+#if MLN_RENDER_BACKEND_OPENGL
 void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
     auto& glContext = static_cast<gl::Context&>(paintParameters.context);
 
@@ -862,6 +894,8 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
     paintParameters.backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
     glContext.setDirtyState();
 }
+
+#endif
 
 void RenderLocationIndicatorLayer::populateDynamicRenderFeatureIndex(DynamicFeatureIndex& index) const {
     renderImpl->updateFeature();

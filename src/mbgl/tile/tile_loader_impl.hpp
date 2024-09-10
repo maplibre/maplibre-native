@@ -106,6 +106,8 @@ void TileLoader<T>::loadFromCache() {
         return;
     }
 
+    tile.onTileAction(TileOperation::RequestedFromCache);
+
     resource.loadingMethod = Resource::LoadingMethod::CacheOnly;
     request = fileSource->request(resource, [this, shared_{shared}](const Response& res) {
         do {
@@ -128,7 +130,7 @@ void TileLoader<T>::loadFromCache() {
                     resource.priorEtag = res.etag;
                     resource.priorData = res.data;
                 } else {
-                    loadedData(res);
+                    loadedData(res, Resource::LoadingMethod::CacheOnly);
                 }
 
                 if (necessity == TileNecessity::Required) {
@@ -157,10 +159,19 @@ void TileLoader<T>::makeOptional() {
 }
 
 template <typename T>
-void TileLoader<T>::loadedData(const Response& res) {
+void TileLoader<T>::loadedData(const Response& res, Resource::LoadingMethod method) {
     if (res.error && res.error->reason != Response::Error::Reason::NotFound) {
         tile.setError(std::make_exception_ptr(std::runtime_error(res.error->message)));
-    } else if (res.notModified) {
+        tile.onTileAction(TileOperation::Error);
+        return;
+    }
+    if (method == Resource::LoadingMethod::NetworkOnly) {
+        tile.onTileAction(TileOperation::LoadFromNetwork);
+    } else if (method == Resource::LoadingMethod::CacheOnly) {
+        tile.onTileAction(TileOperation::LoadFromCache);
+    }
+
+    if (res.notModified) {
         resource.priorExpires = res.expires;
         // Do not notify the tile; when we get this message, it already has the
         // current version of the data.
@@ -182,6 +193,8 @@ void TileLoader<T>::loadFromNetwork() {
         return;
     }
 
+    tile.onTileAction(TileOperation::RequestedFromNetwork);
+
     // Instead of using Resource::LoadingMethod::All, we're first doing a
     // CacheOnly, and then a NetworkOnly request.
     resource.loadingMethod = Resource::LoadingMethod::NetworkOnly;
@@ -196,7 +209,7 @@ void TileLoader<T>::loadFromNetwork() {
                 if (shared_->aborted) return;
 
                 request.reset();
-                loadedData(res);
+                loadedData(res, Resource::LoadingMethod::NetworkOnly);
                 break;
             }
         } while (!shared_->aborted);

@@ -5,6 +5,7 @@
 #include <mbgl/map/map.hpp>
 #include <mbgl/util/noncopyable.hpp>
 #include <mbgl/util/run_loop.hpp>
+#include <mbgl/tile/tile_operation.hpp>
 #include <mbgl/storage/network_status.hpp>
 
 #include "annotation/marker.hpp"
@@ -297,6 +298,25 @@ public:
     mbgl::Map& getMap();
 
     void triggerRepaint(JNIEnv&);
+
+    // Shader compilation
+    void onRegisterShaders(mbgl::gfx::ShaderRegistry&) override;
+    void onPreCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
+    void onPostCompileShader(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
+    void onShaderCompileFailed(mbgl::shaders::BuiltIn, mbgl::gfx::Backend::Type, const std::string&) override;
+
+    // Glyph requests
+    void onGlyphsLoaded(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
+    void onGlyphsError(const mbgl::FontStack&, const mbgl::GlyphRange&, std::exception_ptr) override;
+    void onGlyphsRequested(const mbgl::FontStack&, const mbgl::GlyphRange&) override;
+
+    // Tile requests
+    void onTileAction(mbgl::TileOperation, const mbgl::OverscaledTileID&, const std::string&) override;
+
+    // Sprite requests
+    void onSpriteLoaded(const std::optional<mbgl::style::Sprite>&) override;
+    void onSpriteError(const std::optional<mbgl::style::Sprite>&, std::exception_ptr) override;
+    void onSpriteRequested(const std::optional<mbgl::style::Sprite>&) override;
 
 private:
     std::unique_ptr<AndroidRendererFrontend> rendererFrontend;

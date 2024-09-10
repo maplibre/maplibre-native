@@ -2,6 +2,15 @@ name: android-release
 
 on:
   workflow_dispatch:
+    inputs:
+      renderer:
+        description: 'Select renderering backend'
+        required: true
+        default: 'OpenGL'
+        type: choice
+        options:
+          - OpenGL
+          - Vulkan
 
 jobs:
   build:
@@ -18,6 +27,15 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+      - name: Map renderer input
+        id: backend_lowercase
+        run: |
+          if [ "${{ github.event.inputs.renderer }}" = "OpenGL" ]; then
+            echo "backend_lowercase=drawable" >> "$GITHUB_ENV"
+          elif [ "${{ github.event.inputs.renderer }}" = "Vulkan" ]; then
+            echo "backend_lowercase=vulkan" >> "$GITHUB_ENV"
+          fi
 
       - run: echo "cmake.dir=$(dirname "$(dirname "$(command -v cmake)")")" >> local.properties
 
@@ -97,6 +115,8 @@ jobs:
 
       - name: Build package
         run: make apackage
+        env:
+          RENDERER: ${{ env.backend_lowercase }}
 
       - name: Build release Test App
         run: |
@@ -119,6 +139,18 @@ jobs:
           echo version_tag="$( git describe --tags --match=android-v*.*.* --abbrev=0 )" >> "$GITHUB_OUTPUT"
         shell: bash
 
+      - name: Check if version is valid semver
+        id: check_version
+        run: |
+          version_tag="${{ steps.prepare_release.outputs.version_tag }}"
+          if [[ $version_tag =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Valid semver: $version_tag"
+            echo "prerelease=false" >> "$GITHUB_ENV"
+          else
+            echo "Invalid semver: $version_tag"
+            echo "prerelease=true" >> "$GITHUB_ENV"
+          fi
+
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
@@ -129,7 +161,7 @@ jobs:
           release_name: ${{steps.prepare_release.outputs.version_tag }}
           body_path: ${{ steps.prepare_release.outputs.release_notes }}
           draft: false
-          prerelease: false
+          prerelease: ${{ env.prerelease }}
 
       - name: Upload aar
         id: upload-release-asset
@@ -138,7 +170,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-drawable-release.aar
+          asset_path: platform/android/MapLibreAndroid/build/outputs/aar/MapLibreAndroid-${{ env.backend_lowercase }}-release.aar
           asset_name: MapLibreAndroid-release.aar
           asset_content_type: application/zip
 
@@ -172,3 +204,4 @@ jobs:
           SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
           SONATYPE_STAGING_PROFILE_ID: ${{ secrets.SONATYPE_STAGING_PROFILE_ID }}
+          RENDERER: ${{ env.backend_lowercase }}

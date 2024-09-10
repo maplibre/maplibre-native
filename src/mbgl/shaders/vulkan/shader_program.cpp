@@ -26,25 +26,28 @@ namespace mbgl {
 
 namespace vulkan {
 
-ShaderProgram::ShaderProgram(const std::string& name,
+ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
+                             const std::string& name,
                              const std::string_view& vertex,
                              const std::string_view& fragment,
                              const ProgramParameters& programParameters,
                              const mbgl::unordered_map<std::string, std::string>& additionalDefines,
-                             RendererBackend& backend_)
+                             RendererBackend& backend_,
+                             gfx::ContextObserver& observer)
     : ShaderProgramBase(),
       shaderName(name),
       backend(backend_) {
+    std::string defineStr = programParameters.getDefinesString() + "\n\n";
+    for (const auto& define : additionalDefines) {
+        defineStr += "#define " + define.first + " " + define.second + "\n";
+    }
+    observer.onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
+
     constexpr auto targetClientVersion = glslang::EShTargetVulkan_1_0;
     constexpr auto targetLanguageVersion = glslang::EShTargetSpv_1_0;
     constexpr auto defaultVersion = 450;
     constexpr auto messages = EShMsgSpvRules | EShMsgVulkanRules;
     const auto defaultResources = GetDefaultResources();
-
-    std::string defineStr = programParameters.getDefinesString() + "\n\n";
-    for (const auto& define : additionalDefines) {
-        defineStr += "#define " + define.first + " " + define.second + "\n";
-    }
 
     const auto compileGlsl = [&](const EShLanguage& language, const std::string_view& data, const char* prelude) {
         glslang::TShader glslShader(language);
@@ -61,6 +64,7 @@ ShaderProgram::ShaderProgram(const std::string& name,
 
         if (!glslShader.parse(defaultResources, defaultVersion, ENoProfile, false, true, messages)) {
             mbgl::Log::Error(mbgl::Event::Shader, shaderName + " - " + glslShader.getInfoLog());
+            observer.onShaderCompileFailed(shaderID, gfx::Backend::Type::Vulkan, defineStr);
             return std::vector<uint32_t>();
         }
 
@@ -69,6 +73,7 @@ ShaderProgram::ShaderProgram(const std::string& name,
 
         if (!glslProgram.link(messages)) {
             mbgl::Log::Error(mbgl::Event::Shader, shaderName + " - " + glslProgram.getInfoLog());
+            observer.onShaderCompileFailed(shaderID, gfx::Backend::Type::Vulkan, defineStr);
             return std::vector<uint32_t>();
         }
 
@@ -100,6 +105,8 @@ ShaderProgram::ShaderProgram(const std::string& name,
 
     backend.setDebugName(vertexShader.get(), shaderName + ".vert");
     backend.setDebugName(fragmentShader.get(), shaderName + ".frag");
+
+    observer.onPostCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 }
 
 ShaderProgram::~ShaderProgram() noexcept = default;
@@ -178,7 +185,7 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
     // vk::DynamicState::eDepthBias,
     // vk::DynamicState::eDepthBounds,
 
-    const auto& dynamicValues = pipelineInfo.getDynamicStates();
+    const auto& dynamicValues = pipelineInfo.getDynamicStates(backend);
     const vk::PipelineDynamicStateCreateInfo dynamicState({}, dynamicValues);
 
     const auto& device = backend.getDevice();

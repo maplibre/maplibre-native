@@ -58,6 +58,9 @@ mbgl::Size GLFWVulkanBackend::getSize() const {
 
 void GLFWVulkanBackend::setSize(const mbgl::Size newSize) {
     size = newSize;
+
+    auto& contextImpl = static_cast<mbgl::vulkan::Context&>(*context);
+    contextImpl.requestSurfaceUpdate();
 }
 
 std::vector<const char*> GLFWVulkanBackend::getInstanceExtensions() {

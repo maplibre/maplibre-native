@@ -1,14 +1,13 @@
 package org.maplibre.android.maps.renderer.textureview;
 
 import android.content.Context;
+import android.view.Surface;
 import android.view.TextureView;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 
 import org.maplibre.android.maps.renderer.MapRenderer;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
 
 /**
  * The {@link TextureViewMapRenderer} encapsulates the GL thread and
@@ -19,6 +18,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class TextureViewMapRenderer extends MapRenderer {
   private TextureViewRenderThread renderThread;
   private boolean translucentSurface;
+  private TextureView textureView;
 
   /**
    * Create a {@link MapRenderer} for the given {@link TextureView}
@@ -33,26 +33,36 @@ public class TextureViewMapRenderer extends MapRenderer {
                                 String localIdeographFontFamily,
                                 boolean translucentSurface) {
     super(context, localIdeographFontFamily);
+    this.textureView = textureView;
     this.translucentSurface = translucentSurface;
-    renderThread = new TextureViewRenderThread(textureView, this);
+
+  }
+
+  public void setRenderThread(TextureViewRenderThread thread) {
+    renderThread = thread;
     renderThread.setName("TextureViewRenderer");
     renderThread.start();
   }
 
-  /**
-   * Overridden to provide package access
-   */
   @Override
-  protected void onSurfaceCreated(GL10 gl, EGLConfig config) {
-    super.onSurfaceCreated(gl, config);
+  public View getView() {
+    return this.textureView;
   }
 
   /**
    * Overridden to provide package access
    */
   @Override
-  protected void onSurfaceChanged(GL10 gl, int width, int height) {
-    super.onSurfaceChanged(gl, width, height);
+  protected void onSurfaceCreated(Surface surface) {
+    super.onSurfaceCreated(surface);
+  }
+
+  /**
+   * Overridden to provide package access
+   */
+  @Override
+  protected void onSurfaceChanged(int width, int height) {
+    super.onSurfaceChanged(width, height);
   }
 
   /**
@@ -67,8 +77,8 @@ public class TextureViewMapRenderer extends MapRenderer {
    * Overridden to provide package access
    */
   @Override
-  protected void onDrawFrame(GL10 gl) {
-    super.onDrawFrame(gl);
+  protected void onDrawFrame() {
+    super.onDrawFrame();
   }
 
   /**

@@ -403,6 +403,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setEnableColor(false);
                 builder->setRenderPass(drawPass);
                 builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                builder->setDrawPriority(0);
                 if (tweaker) {
                     builder->addTweaker(tweaker);
                 }
@@ -417,6 +418,7 @@ void RenderFillExtrusionLayer::update(gfx::ShaderRegistry& shaders,
                 builder->setColorMode(gfx::ColorMode::alphaBlended());
                 builder->setRenderPass(drawPass);
                 builder->setCullFaceMode(gfx::CullFaceMode::backCCW());
+                builder->setDrawPriority(1);
                 if (tweaker) {
                     builder->addTweaker(tweaker);
                 }

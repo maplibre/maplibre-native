@@ -17,7 +17,7 @@ struct ShaderSource<BuiltIn::CircleShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 1) in vec4 in_color;
