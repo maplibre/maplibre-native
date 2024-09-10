@@ -1772,6 +1772,7 @@ TEST(Map, ObserveTileLifecycle) {
         TileOperation stage = TileOperation::NullOp;
         bool parsing = false;
 
+        // NOLINTNEXTLINE
         for (size_t i = 0; i < tileOps.size(); i++) {
             const auto& op = tileOps[i];
             if (op.id != tile) continue;
