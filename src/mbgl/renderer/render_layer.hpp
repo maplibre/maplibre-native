@@ -276,6 +276,9 @@ protected:
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;
 
+    // Retains ownership of tiles
+    Immutable<std::vector<RenderTile>> renderTilesOwner;
+
     // Stores what render passes this layer is currently enabled for. This depends on the
     // evaluated StyleProperties object and is updated accordingly.
     RenderPass passes = RenderPass::None;
