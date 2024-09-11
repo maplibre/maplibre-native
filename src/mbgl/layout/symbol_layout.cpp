@@ -406,8 +406,8 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
         
         AnchorOffsetMap anchorOffsets;
         for (auto anchor : variableTextAnchor) {
-            variableTextOffset = SymbolLayout::evaluateVariableOffset(anchor, variableTextOffset);
-            anchorOffsets[anchor] = std::array<float, 2>{ variableTextOffset[0], variableTextOffset[1] };
+            auto offset = SymbolLayout::evaluateVariableOffset(anchor, variableTextOffset);
+            anchorOffsets[anchor] = std::array<float, 2>{ offset[0], offset[1] };
         }
         
         return VariableAnchorOffsetCollection(anchorOffsets);
