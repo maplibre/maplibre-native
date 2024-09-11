@@ -70,7 +70,7 @@ void SurfaceRenderableResource::initColor(uint32_t w, uint32_t h) {
     }
 }
 
-void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
+void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::PresentModeKHR presentMode) {
     const auto& physicalDevice = backend.getPhysicalDevice();
     const auto& device = backend.getDevice();
 
@@ -83,7 +83,16 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     if (formatIt == formats.end()) throw std::runtime_error("No suitable swapchain format found");
 
     // only vk::PresentModeKHR::eFifo (vsync on) is guaranteed
-    // TODO check for vk::PresentModeKHR::eImmediate when uncapped
+    if (presentMode != vk::PresentModeKHR::eFifo) {
+        const std::vector<vk::PresentModeKHR>& presentModes = physicalDevice.getSurfacePresentModesKHR(surface.get());
+        if (std::find(presentModes.begin(), presentModes.end(), presentMode) == presentModes.end()) {
+            mbgl::Log::Error(
+                mbgl::Event::Render,
+                "Requested PresentModeKHR not available (" + std::to_string(static_cast<int>(presentMode)) + ")");
+
+            presentMode = vk::PresentModeKHR::eFifo;
+        }
+    }
 
     // pick surface size
     const vk::SurfaceCapabilitiesKHR& capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get());
@@ -105,7 +114,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
                                    .setMinImageCount(swapchainImageCount)
                                    .setImageFormat(formatIt->format)
                                    .setImageColorSpace(formatIt->colorSpace)
-                                   .setPresentMode(vk::PresentModeKHR::eFifo)
+                                   .setPresentMode(presentMode)
                                    .setImageExtent(extent)
                                    .setImageArrayLayers(1)
                                    .setImageUsage(vk::ImageUsageFlagBits::eColorAttachment);
@@ -114,7 +123,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
     int32_t presentQueueIndex = backend.getPresentQueueIndex();
 
     if (graphicsQueueIndex != presentQueueIndex) {
-        // TODO if this scenario is widespred and performance is a problem (shouldn't be the case on most hardware)
+        // TODO if this scenario is widespread and performance is a problem (shouldn't be the case on most hardware)
         // rework to vk::SharingMode::eExclusive + queue ownership
         swapchainCreateInfo.setImageSharingMode(vk::SharingMode::eConcurrent);
         const std::array<uint32_t, 2> queueIndices = {static_cast<uint32_t>(graphicsQueueIndex),
@@ -124,7 +133,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h) {
         swapchainCreateInfo.setImageSharingMode(vk::SharingMode::eExclusive);
     }
 
-    swapchainCreateInfo.setPreTransform(capabilities.currentTransform);
+    swapchainCreateInfo.setPreTransform(vk::SurfaceTransformFlagBitsKHR::eIdentity);
     swapchainCreateInfo.setClipped(VK_TRUE);
 
     if (capabilities.supportedCompositeAlpha & vk::CompositeAlphaFlagBitsKHR::eInherit) {
@@ -209,6 +218,11 @@ void SurfaceRenderableResource::initDepthStencil() {
     backend.setDebugName(depthAllocation->imageView.get(), "SwapchainDepthImageView");
 }
 
+void SurfaceRenderableResource::swap() {
+    auto& context = static_cast<Context&>(backend.getContext());
+    context.submitFrame();
+}
+
 const vk::Image SurfaceRenderableResource::getAcquiredImage() const {
     if (surface) {
         return swapchainImages[acquiredImageIndex];
@@ -233,8 +247,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
                                    .setViewType(vk::ImageViewType::e2D)
                                    .setFormat(colorFormat)
                                    .setComponents(vk::ComponentMapping()) // defaults to vk::ComponentSwizzle::eIdentity
-                                   .setSubresourceRange(
-                                       vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+                                   .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
     for (const auto& image : swapchainImages) {
         imageViewCreateInfo.setImage(image);
@@ -267,7 +280,7 @@ void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
                                      .setSamples(vk::SampleCountFlagBits::e1)
                                      .setLoadOp(vk::AttachmentLoadOp::eClear)
                                      .setStoreOp(vk::AttachmentStoreOp::eDontCare)
-                                     .setStencilLoadOp(vk::AttachmentLoadOp::eDontCare)
+                                     .setStencilLoadOp(vk::AttachmentLoadOp::eClear)
                                      .setStencilStoreOp(vk::AttachmentStoreOp::eDontCare)
                                      .setInitialLayout(vk::ImageLayout::eUndefined)
                                      .setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
@@ -337,7 +350,7 @@ void SurfaceRenderableResource::recreateSwapchain() {
 }
 
 const vk::UniqueFramebuffer& SurfaceRenderableResource::getFramebuffer() const {
-    return swapchainFramebuffers[backend.getContext<Context&>().getCurrentFrameResourceIndex()];
+    return swapchainFramebuffers[acquiredImageIndex];
 }
 
 } // namespace vulkan

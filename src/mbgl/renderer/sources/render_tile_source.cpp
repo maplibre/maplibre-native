@@ -28,6 +28,13 @@
 #include <mbgl/renderer/layer_tweaker.hpp>
 
 #include <unordered_set>
+
+#if MLN_RENDER_BACKEND_METAL || (MLN_RENDER_BACKEND_VULKAN && defined(__ANDROID__))
+#define MLN_ENABLE_POLYLINE_DRAWABLES 1
+#else
+#define MLN_ENABLE_POLYLINE_DRAWABLES 0
+#endif
+
 #endif
 
 namespace mbgl {
@@ -81,7 +88,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         return builder;
     }();
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_ENABLE_POLYLINE_DRAWABLES
     // initialize polyline builder
     gfx::ShaderPtr polylineShader;
     const auto createPolylineShader = [&]() -> gfx::ShaderPtr {
@@ -185,7 +192,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
         }
     };
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_ENABLE_POLYLINE_DRAWABLES
     // function to add polylines drawable
     const auto addPolylineDrawable = [&](TileLayerGroup* tileLayerGroup, const RenderTile& tile) {
         class PolylineDrawableTweaker : public gfx::DrawableTweaker {
@@ -364,7 +371,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
                                     0,
                                     0};
             if (0 == updateDrawables(tileLayerGroup, tileID, debugUBO) && tile.getNeedsRendering()) {
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_ENABLE_POLYLINE_DRAWABLES
                 addPolylineDrawable(tileLayerGroup, tile);
 #else
                 addDrawable(tileLayerGroup,

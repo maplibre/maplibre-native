@@ -19,6 +19,7 @@
 #include <mbgl/shaders/vulkan/line.hpp>
 #include <mbgl/shaders/vulkan/raster.hpp>
 #include <mbgl/shaders/vulkan/symbol.hpp>
+#include <mbgl/shaders/vulkan/widevector.hpp>
 
 #include <cassert>
 #include <string>
@@ -443,13 +444,15 @@ void RendererBackend::initDevice() {
 
         const auto& queues = candidate.getQueueFamilyProperties();
 
+        // Use to test on specific GPU type (if multiple)
+        // if (candidate.getProperties().deviceType != vk::PhysicalDeviceType::eIntegratedGpu) return false;
+
         for (auto i = 0u; i < queues.size(); ++i) {
             const auto& queue = queues[i];
 
             if (queue.queueCount == 0) continue;
 
             if (queue.queueFlags & vk::QueueFlagBits::eGraphics) graphicsQueueIndex = i;
-
             if (surface && candidate.getSurfaceSupportKHR(i, surface)) presentQueueIndex = i;
 
             if (graphicsQueueIndex != -1 && (!surface || presentQueueIndex != -1)) break;
@@ -476,9 +479,9 @@ void RendererBackend::initDevice() {
             }
         }
 
-        physicalDeviceProperties = physicalDevice.getProperties();
-
         if (!physicalDevice) throw std::runtime_error("No suitable GPU found");
+
+        physicalDeviceProperties = physicalDevice.getProperties();
     };
 
     pickPhysicalDevice();
@@ -492,12 +495,15 @@ void RendererBackend::initDevice() {
     if (surface && graphicsQueueIndex != presentQueueIndex)
         queueCreateInfos.emplace_back(vk::DeviceQueueCreateFlags(), presentQueueIndex, 1, &queuePriority);
 
-    const auto& supportedDeviceFeatures = physicalDevice.getFeatures();
+    [[maybe_unused]] const auto& supportedDeviceFeatures = physicalDevice.getFeatures();
+    physicalDeviceFeatures = vk::PhysicalDeviceFeatures();
 
-    vk::PhysicalDeviceFeatures enabledDeviceFeatures;
-
+    // TODO
+    // - WideLines disabled on Android (20.77% device coverage https://vulkan.gpuinfo.org/listfeaturescore10.php)
+    // - Rework this to a dynamic toggle based on MLN_TRIANGULATE_FILL_OUTLINES/MLN_ENABLE_POLYLINE_DRAWABLES
+#if !defined(__ANDROID__) && !defined(__apple__)
     if (supportedDeviceFeatures.wideLines) {
-        enabledDeviceFeatures.setWideLines(true);
+        physicalDeviceFeatures.setWideLines(true);
 
         // more wideLines info
         // physicalDeviceProperties.limits.lineWidthRange;
@@ -505,12 +511,13 @@ void RendererBackend::initDevice() {
     } else {
         mbgl::Log::Error(mbgl::Event::Render, "Wide line support not available");
     }
+#endif
 
     auto createInfo = vk::DeviceCreateInfo()
                           .setQueueCreateInfos(queueCreateInfos)
                           .setEnabledExtensionCount(static_cast<uint32_t>(extensions.size()))
                           .setPpEnabledExtensionNames(extensions.data())
-                          .setPEnabledFeatures(&enabledDeviceFeatures);
+                          .setPEnabledFeatures(&physicalDeviceFeatures);
 
     // this is not needed for newer implementations
     createInfo.setPEnabledLayerNames(layers);
@@ -528,11 +535,12 @@ void RendererBackend::initSwapchain() {
     const auto& renderable = getDefaultRenderable();
     auto& renderableResource = renderable.getResource<SurfaceRenderableResource>();
     const auto& size = renderable.getSize();
-    renderableResource.init(size.width, size.height);
 
-    if (renderableResource.getPlatformSurface()) {
-        maxFrames = renderableResource.getImageCount();
-    }
+    // use triple buffering if rendering to a surface
+    // no buffering when using headless
+    maxFrames = renderableResource.getPlatformSurface() ? 3 : 1;
+
+    renderableResource.init(size.width, size.height);
 }
 
 void RendererBackend::initCommandPool() {

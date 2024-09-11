@@ -68,6 +68,7 @@ void main() {
 
     // these transformations used to be applied in the JS and native code bases.
     // moved them into the shader for clarity and simplicity.
+    float u_width = 1.0;
     float halfwidth = u_width / 2.0;
     float outset = halfwidth + (halfwidth == 0.0 ? 0.0 : ANTIALIASING);
 
