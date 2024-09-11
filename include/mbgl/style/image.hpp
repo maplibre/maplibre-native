@@ -14,7 +14,7 @@ namespace style {
 using ImageStretch = std::pair<float, float>;
 using ImageStretches = std::vector<ImageStretch>;
 
-enum class TextFit : uint8_t {
+enum class TextFit {
     stretchOrShrink,
     stretchOnly,
     proportional
