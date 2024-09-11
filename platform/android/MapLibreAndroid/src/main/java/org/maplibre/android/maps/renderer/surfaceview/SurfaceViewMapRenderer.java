@@ -112,4 +112,20 @@ public class SurfaceViewMapRenderer extends MapRenderer {
   public void waitForEmpty() {
     surfaceView.waitForEmpty();
   }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void setRenderingRefreshMode(MapRenderer.RenderingRefreshMode mode) {
+    surfaceView.setRenderingRefreshMode(mode);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MapRenderer.RenderingRefreshMode getRenderingRefreshMode() {
+    return surfaceView.getRenderingRefreshMode();
+  }
 }

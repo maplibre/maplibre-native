@@ -11,6 +11,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.maplibre.android.maps.*
 import org.maplibre.android.maps.MapLibreMap.OnCameraMoveListener
 import org.maplibre.android.maps.MapLibreMap.OnFpsChangedListener
+import org.maplibre.android.maps.renderer.MapRenderer
 import org.maplibre.android.style.layers.Layer
 import org.maplibre.android.style.layers.Property
 import org.maplibre.android.style.layers.PropertyFactory
@@ -29,6 +30,7 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
     private var actionBarDrawerToggle: ActionBarDrawerToggle? = null
     private var currentStyleIndex = 0
     private var isReportFps = true
+    private var isContinuousRendering = false
     private var fpsView: TextView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -167,6 +169,13 @@ open class DebugModeActivity : AppCompatActivity(), OnMapReadyCallback, OnFpsCha
             mapView.setMaximumFps(30)
         } else if (itemId == R.id.menu_action_limit_to_60_fps) {
             mapView.setMaximumFps(60)
+        } else if (itemId == R.id.menu_action_toggle_continuous_rendering) {
+            isContinuousRendering = !isContinuousRendering
+            if (isContinuousRendering) {
+                mapView.setRenderingRefreshMode(MapRenderer.RenderingRefreshMode.CONTINUOUS)
+            } else {
+                mapView.setRenderingRefreshMode(MapRenderer.RenderingRefreshMode.WHEN_DIRTY)
+            }
         }
         return actionBarDrawerToggle!!.onOptionsItemSelected(item) || super.onOptionsItemSelected(
             item
