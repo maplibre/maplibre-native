@@ -21,8 +21,7 @@ using namespace style::expression;
 using namespace style::expression::dsl;
 using namespace std::string_literals;
 
-
-TEST(Padding, Interpolate) {
+TEST(Padding, InterpolateExpression) {
     // Use DLS methods to create an expression
     {
         auto expr = PropertyExpression<Padding>(
@@ -38,7 +37,7 @@ TEST(Padding, Interpolate) {
         EXPECT_EQ(Padding(4.0), result);
     }
 
-    // Parse expression from JSON, use different initializers to ensure expansion is handled correctly.
+    // Parse expression from JSON, verify that expansion from number/array is handled correctly.
     {
         auto json = R"(["interpolate", ["linear"], ["zoom"], 0, ["to-padding", 0], 1, ["to-padding", ["literal",[8, 16, -32]]]])";
         PropertyExpression<Padding> expr(createExpression(json));

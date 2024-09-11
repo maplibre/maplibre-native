@@ -793,16 +793,35 @@ public class ExpressionTest extends EspressoTest {
       SymbolLayer layer = new SymbolLayer("layer", "source");
       maplibreMap.getStyle().addLayer(layer);
 
-      Expression input = interpolate(
-              exponential(0.5f), zoom(),
-              stop(-0.1, toPadding(get("padding"))),
-              stop(0, toPadding(get("padding")))
-      );
+      // Automatic usage with iconPadding property
+      {
+          Expression input = get("value");
+          layer.setProperties(iconPadding(input));
 
-      layer.setProperties(iconPadding(input));
+          Expression expectedOuput = toPadding(input);
+          Expression output = layer.getIconPadding().getExpression();
+          assertNotNull(output);
+          assertArrayEquals("Expression should match", expectedOuput.toArray(), output.toArray());
+      }
 
-      Expression output = layer.getIconPadding().getExpression();
-      assertArrayEquals("Expression should match", input.toArray(), output.toArray());
+      // Same within interpolate expression
+      {
+        Expression input = interpolate(
+                exponential(0.5f), zoom(),
+                stop(-0.1, get("value")),
+                stop(0, get("value"))
+        );
+        layer.setProperties(iconPadding(input));
+
+        Expression expectedOutput = interpolate(
+                exponential(0.5f), zoom(),
+                stop(-0.1, toPadding(get("value"))),
+                stop(0, toPadding(get("value")))
+        );
+        Expression output = layer.getIconPadding().getExpression();
+        assertNotNull(output);
+        assertArrayEquals("Expression should match", expectedOutput.toArray(), output.toArray());
+      }
     });
   }
 
