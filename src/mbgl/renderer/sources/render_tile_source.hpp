@@ -78,7 +78,7 @@ protected:
     /// Must be called after updating the tile pyramid by derived classes overriding `update`
     void onTilePyramidUpdated();
 
-    class TilePyramidUpdateHelper;
+    struct TilePyramidUpdateHelper;
 
     RenderTileSource(Immutable<style::Source::Impl>, const TaggedScheduler&);
     TilePyramid tilePyramid;
