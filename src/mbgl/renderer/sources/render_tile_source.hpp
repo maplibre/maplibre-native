@@ -108,7 +108,8 @@ private:
 
 /// Eases the use of notification methods when updates are conditional
 struct RenderTileSource::TilePyramidUpdateHelper : public util::noncopyable {
-    TilePyramidUpdateHelper(RenderTileSource& src) : renderTileSource(src) {}
+    TilePyramidUpdateHelper(RenderTileSource& src)
+        : renderTileSource(src) {}
 
     void start() {
         if (!started) {
