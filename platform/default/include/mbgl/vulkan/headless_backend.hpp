@@ -20,8 +20,6 @@ public:
     PremultipliedImage readStillImage() override;
     RendererBackend* getRendererBackend() override;
 
-    void swap();
-
     class Impl {
     public:
         virtual ~Impl() = default;

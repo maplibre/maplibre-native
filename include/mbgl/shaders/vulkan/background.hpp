@@ -17,7 +17,7 @@ struct ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 layout(set = 0, binding = 1) uniform BackgroundDrawableUBO {
     mat4 matrix;
@@ -61,7 +61,7 @@ struct ShaderSource<BuiltIn::BackgroundPatternShader, gfx::Backend::Type::Vulkan
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 layout(set = 0, binding = 1) uniform BackgroundPatternDrawableUBO {
     mat4 matrix;
