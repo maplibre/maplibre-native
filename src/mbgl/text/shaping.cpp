@@ -96,18 +96,18 @@ PositionedIcon PositionedIcon::applyTextFit() const {
     if (!_image.textFitWidth && !_image.textFitHeight) {
         return *this;
     }
-    auto width = _right - _left;
-    auto height = _bottom - _top;
+    const float width = _right - _left;
+    const float height = _bottom - _top;
 
-    auto contentWidth = _image.content->right - _image.content->left;
-    auto contentHeight = _image.content->bottom - _image.content->top;
-    auto textFitWidth = _image.textFitWidth.value();
-    auto textFitHeight = _image.textFitHeight.value();
-    auto contentAspectRatio = contentWidth / contentHeight;
-    auto newLeft = _left;
-    auto newRight = _right;
-    auto newTop = _top;
-    auto newBottom = _bottom;
+    const float contentWidth = _image.content->right - _image.content->left;
+    const float contentHeight = _image.content->bottom - _image.content->top;
+    const float contentAspectRatio = contentWidth / contentHeight;
+    const auto textFitWidth = _image.textFitWidth.value();
+    const auto textFitHeight = _image.textFitHeight.value();
+    float newLeft = _left;
+    float newRight = _right;
+    float newTop = _top;
+    float newBottom = _bottom;
 
     if (textFitHeight == style::TextFit::proportional) {
         if ((textFitWidth == style::TextFit::stretchOnly && (width / height) < contentAspectRatio) ||

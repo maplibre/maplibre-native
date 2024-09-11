@@ -105,15 +105,15 @@ TEST(Shaping, ZWSP) {
 }
 
 void setupShapedText(Shaping& shapedText, float textSize) {
-    auto glyph = PositionedGlyph(32,
-                                 0.0f,
-                                 0.0f,
-                                 false,
-                                 0,
-                                 1.0,
-                                 /*texRect*/ {},
-                                 /*metrics*/ {},
-                                 /*imageID*/ std::nullopt);
+    const auto glyph = PositionedGlyph(32,
+                                       0.0f,
+                                       0.0f,
+                                       false,
+                                       0,
+                                       1.0,
+                                       /*texRect*/ {},
+                                       /*metrics*/ {},
+                                       /*imageID*/ std::nullopt);
     shapedText.right = textSize;
     shapedText.bottom = textSize;
     shapedText.positionedLines.emplace_back();
@@ -141,7 +141,7 @@ void testApplyTextFit(const mapbox::Bin& rectangle,
                            textFitHeight)};
     auto shapedIcon = PositionedIcon::shapeIcon(image, {0, 0}, style::SymbolAnchorType::TopLeft);
     shapedIcon.fitIconToText(shapedText, style::IconTextFitType::Both, {0, 0, 0, 0}, {0, 0}, fontScale);
-    auto icon = shapedIcon.applyTextFit();
+    const auto& icon = shapedIcon.applyTextFit();
     ASSERT_EQ(icon.top(), 0);
     ASSERT_EQ(icon.left(), 0);
     ASSERT_EQ(icon.right(), expectedRight);
@@ -159,8 +159,8 @@ TEST(Shaping, applyTextFit) {
         // applyTextFitHorizontal
         // This set of tests against applyTextFit starts with a 100x20 image with a 5,5,95,15 content box
         // that has been fitted to a 4*4 text with scale 4, resulting in a 16*16 image.
-        auto horizontalRectangle = mapbox::Bin(-1, 100, 20, -1, -1, 0, 0);
-        style::ImageContent horizontalContent = {5, 5, 95, 15};
+        const auto horizontalRectangle = mapbox::Bin(-1, 100, 20, -1, -1, 0, 0);
+        const style::ImageContent horizontalContent = {5, 5, 95, 15};
 
         {
             // applyTextFit: not specified
@@ -207,8 +207,8 @@ TEST(Shaping, applyTextFit) {
         // applyTextFitVertical
         // This set of tests against applyTextFit starts with a 20x100 image with a 5,5,15,95 content box
         // that has been fitted to a 4*4 text with scale 4, resulting in a 16*16 image.
-        auto verticalRectangle = mapbox::Bin(-1, 20, 100, -1, -1, 0, 0);
-        style::ImageContent verticalContent = {5, 5, 15, 95};
+        const auto verticalRectangle = mapbox::Bin(-1, 20, 100, -1, -1, 0, 0);
+        const style::ImageContent verticalContent = {5, 5, 15, 95};
 
         {
             // applyTextFit: stretchOnly, proportional

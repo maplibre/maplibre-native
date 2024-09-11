@@ -98,9 +98,9 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
     auto icon = shapedIcon;
 
     if (hasIconTextFit && image.content) {
-        auto& content = *image.content;
-        auto contentWidth = content.right - content.left;
-        auto contentHeight = content.bottom - content.top;
+        const auto& content = *image.content;
+        const auto contentWidth = content.right - content.left;
+        const auto contentHeight = content.bottom - content.top;
         if (image.textFitWidth || image.textFitHeight) {
             icon = icon.applyTextFit();
         }
@@ -122,10 +122,10 @@ SymbolQuads getIconQuads(const PositionedIcon& shapedIcon,
         matrix = std::array<float, 4>{{angle_cos, -angle_sin, angle_sin, angle_cos}};
     }
 
-    auto iconLeft = icon.left();
-    auto iconTop = icon.top();
-    auto iconWidth = icon.right() - iconLeft;
-    auto iconHeight = icon.bottom() - iconTop;
+    const float iconLeft = icon.left();
+    const float iconTop = icon.top();
+    const float iconWidth = icon.right() - iconLeft;
+    const float iconHeight = icon.bottom() - iconTop;
 
     auto makeBox = [&](Cut left, Cut top, Cut right, Cut bottom) {
         const float leftEm = getEmOffset(left.stretch - stretchOffsetX, stretchContentWidth, iconWidth, iconLeft);

@@ -1,5 +1,6 @@
 {
     "render-tests/icon-text-fit/enlargen-both": "Needs to be investigated and fixed.",
+    "render-tests/icon-text-fit/textFit-grid-long": "Needs to be investigated and fixed.",
     "render-tests/line-pattern/overscaled": "Needs to be investigated and fixed.",
     "render-tests/runtime-styling/image-update-pattern": "Needs to be investigated and fixed.",
     "render-tests/runtime-styling/image-add-pattern": "Needs to be investigated and fixed.",

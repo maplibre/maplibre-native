@@ -173,7 +173,7 @@ std::optional<style::TextFit> parseTextFit(const std::string_view& value) {
 
 std::optional<style::TextFit> getTextFit(const JSValue& value, const char* property, const char* name) {
     if (value.HasMember(property)) {
-        auto& v = value[property];
+        const auto& v = value[property];
         if (v.IsString()) {
             return parseTextFit(std::string_view(v.GetString(), v.GetStringLength()));
         } else {

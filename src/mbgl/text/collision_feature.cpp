@@ -39,7 +39,7 @@ CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
     : indexedFeature(std::move(indexedFeature_)),
       alongLine(false) {
     if (shapedIcon) {
-        auto image = shapedIcon->image();
+        const auto& image = shapedIcon->image();
         auto icon = *shapedIcon;
         if (image.content && (image.textFitWidth || image.textFitHeight)) {
             icon = shapedIcon->applyTextFit();

@@ -589,3 +589,25 @@ TEST(Sprite, SpriteParsingNullRatio) {
                   "sprite",
               }));
 }
+
+TEST(Sprite, SpriteParsingTextFit) {
+    FixtureLog log;
+
+    const auto image_1x = util::read_file("test/fixtures/annotations/emerald.png");
+
+    const auto images = parseSprite("default", image_1x, R"JSON({
+        "image": {
+            "width": 16,
+            "height": 16,
+            "x": 0,
+            "y": 0,
+            "pixelRatio": 1,
+            "textFitWidth": "stretchOrShrink",
+            "textFitHeight": "proportional"
+        }
+    })JSON");
+    EXPECT_EQ(1u, images.size());
+    EXPECT_EQ("image", images[0]->id);
+    EXPECT_EQ(style::TextFit::stretchOrShrink, images[0]->textFitWidth);
+    EXPECT_EQ(style::TextFit::proportional, images[0]->textFitHeight);
+}
