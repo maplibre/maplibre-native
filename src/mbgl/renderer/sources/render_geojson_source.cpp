@@ -83,14 +83,14 @@ void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
 
     enabled = needsRendering;
 
-    bool didStartUpdate = false;
+    TilePyramidUpdateHelper helper{*this};
 
     auto data_ = impl().getData().lock();
     if (data.lock() != data_) {
         data = data_;
         if (parameters.mode != MapMode::Continuous) {
             onTilePyramidWillUpdate();
-            didStartUpdate = true;
+            helper.start();
 
             // Clearing the tile pyramid in order to avoid render tests being flaky.
             tilePyramid.clearAll();
@@ -106,15 +106,10 @@ void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
     }
 
     if (!data_) {
-        if (didStartUpdate) {
-            onTilePyramidUpdated();
-        }
         return;
     }
 
-    if (!didStartUpdate) {
-        onTilePyramidWillUpdate();
-    }
+    helper.start();
 
     tilePyramid.update(layers,
                        needsRendering,
@@ -127,8 +122,6 @@ void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
                        [&, data_](const OverscaledTileID& tileID, TileObserver* observer_) {
                            return std::make_unique<GeoJSONTile>(tileID, impl().id, parameters, data_, observer_);
                        });
-
-    onTilePyramidUpdated();
 }
 
 mapbox::util::variant<Value, FeatureCollection> RenderGeoJSONSource::queryFeatureExtensions(

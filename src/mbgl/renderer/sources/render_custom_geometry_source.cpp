@@ -22,7 +22,7 @@ void RenderCustomGeometrySource::update(Immutable<style::Source::Impl> baseImpl_
                                         const bool needsRendering,
                                         const bool needsRelayout,
                                         const TileParameters& parameters) {
-    bool didStartUpdate = false;
+    TilePyramidUpdateHelper helper{*this};
 
     if (baseImpl != baseImpl_) {
         std::swap(baseImpl, baseImpl_);
@@ -32,9 +32,7 @@ void RenderCustomGeometrySource::update(Immutable<style::Source::Impl> baseImpl_
         auto newImpl = staticImmutableCast<style::CustomGeometrySource::Impl>(baseImpl);
         auto currentImpl = staticImmutableCast<style::CustomGeometrySource::Impl>(baseImpl_);
         if (*newImpl != *currentImpl) {
-            didStartUpdate = true;
-            onTilePyramidWillUpdate();
-
+            helper.start();
             tilePyramid.clearAll();
         }
     }
@@ -43,16 +41,10 @@ void RenderCustomGeometrySource::update(Immutable<style::Source::Impl> baseImpl_
 
     auto tileLoader = impl().getTileLoader();
     if (!tileLoader) {
-        if (didStartUpdate) {
-            onTilePyramidUpdated();
-        }
         return;
     }
 
-    if (!didStartUpdate) {
-        onTilePyramidWillUpdate();
-    }
-
+    helper.start();
     tilePyramid.update(layers,
                        needsRendering,
                        needsRelayout,
@@ -65,8 +57,6 @@ void RenderCustomGeometrySource::update(Immutable<style::Source::Impl> baseImpl_
                            return std::make_unique<CustomGeometryTile>(
                                tileID, impl().id, parameters, impl().getTileOptions(), *tileLoader, observer_);
                        });
-
-    onTilePyramidUpdated();
 }
 
 } // namespace mbgl

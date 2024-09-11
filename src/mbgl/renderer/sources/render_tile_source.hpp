@@ -5,6 +5,7 @@
 #include <mbgl/renderer/source_state.hpp>
 #include <mbgl/renderer/tile_pyramid.hpp>
 #include <mbgl/style/sources/vector_source_impl.hpp>
+#include <mbgl/util/noncopyable.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/context.hpp>
@@ -77,6 +78,8 @@ protected:
     /// Must be called after updating the tile pyramid by derived classes overriding `update`
     void onTilePyramidUpdated();
 
+    class TilePyramidUpdateHelper;
+
     RenderTileSource(Immutable<style::Source::Impl>, const TaggedScheduler&);
     TilePyramid tilePyramid;
 
@@ -101,6 +104,27 @@ protected:
 private:
     float bearing = 0.0F;
     SourceFeatureState featureState;
+};
+
+/// Eases the use of notification methods when updates are conditional
+struct RenderTileSource::TilePyramidUpdateHelper : public util::noncopyable {
+    TilePyramidUpdateHelper(RenderTileSource& src) : renderTileSource(src) {}
+
+    void start() {
+        if (!started) {
+            started = true;
+            renderTileSource.onTilePyramidWillUpdate();
+        }
+    }
+    ~TilePyramidUpdateHelper() {
+        if (started) {
+            renderTileSource.onTilePyramidUpdated();
+        }
+    }
+
+private:
+    RenderTileSource& renderTileSource;
+    bool started = false;
 };
 
 /**

@@ -595,13 +595,13 @@ void RenderTileSetSource::update(Immutable<style::Source::Impl> baseImpl_,
     // In Continuous mode, keep the existing tiles if the new `cachedTileset` is not yet available, thus providing smart
     // style transitions without flickering. In other modes, allow clearing the tile pyramid first, before the early
     // return in order to avoid render tests being flaky.
-    bool canUpdateTileset = implTileset || parameters.mode != MapMode::Continuous;
-    bool didStartUpdate = false;
+    const bool canUpdateTileset = implTileset || parameters.mode != MapMode::Continuous;
+
+    TilePyramidUpdateHelper helper{*this};
     if (canUpdateTileset && cachedTileset != implTileset) {
         cachedTileset = implTileset;
 
-        didStartUpdate = true;
-        onTilePyramidWillUpdate();
+        helper.start();
 
         // TODO: this removes existing buckets, and will cause flickering.
         // Should instead refresh tile data in place.
@@ -609,15 +609,8 @@ void RenderTileSetSource::update(Immutable<style::Source::Impl> baseImpl_,
     }
 
     if (cachedTileset) {
-        if (!didStartUpdate) {
-            didStartUpdate = true;
-            onTilePyramidWillUpdate();
-        }
+        helper.start();
         updateInternal(*cachedTileset, layers, needsRendering, needsRelayout, parameters);
-    }
-
-    if (didStartUpdate) {
-        onTilePyramidUpdated();
     }
 }
 
