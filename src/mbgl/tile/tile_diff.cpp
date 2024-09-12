@@ -1,4 +1,5 @@
 #include <mbgl/tile/tile_diff.hpp>
+#include <mbgl/util/std.hpp>
 
 namespace mbgl {
 namespace util {
@@ -44,21 +45,6 @@ struct OverscaledLess {
         return lhs.getOverscaledTileID() < rhs;
     }
 };
-/// Output iterator that inserts elements in order into a target sorted container
-template <typename TTarget, typename TComp>
-struct OrderedInsert {
-    TTarget& target;
-    TComp compare;
-    template <typename TItem>
-    void operator()(const TItem& id) {
-        target.insert(std::upper_bound(target.begin(), target.end(), id, compare), id);
-    }
-};
-/// Type inference for `OrderedInsert`
-template <typename TComp, typename TTarget>
-auto make_ordered_insert(TTarget& target, TComp compare) {
-    return OrderedInsert<TTarget, TComp>{target, std::move(compare)};
-}
 
 // Add just the right-hand (new) side
 struct RightInserter {
@@ -71,19 +57,18 @@ struct RightInserter {
 } // namespace
 
 TileDifference diffTiles(const std::vector<OverscaledTileID>& a, const RenderTiles& b) {
-    // `RenderTiles` is sorted, but by their `UnwrappedTileID` rather than `OverscaledTileID` (the
-    // key type in the map used in `TilePyramid::renderedTiles`).  Since the overscaled-z is compared
-    // first, the order can be different, so we have to pull out the overscaled ID (from the contained
-    // `Tile`) and sort by that.
+    // `RenderTiles` is sorted, but by their `UnwrappedTileID` rather than `OverscaledTileID` (the key type in
+    // the map used by `TilePyramid::renderedTiles`).  Since the overscaled-z is compared first, the order can
+    // be different, so we have to pull out the overscaled ID from the contained `Tile` and sort by that.
     std::vector<OverscaledTileID> sortedA;
     sortedA.reserve(a.size());
-    std::for_each(a.begin(), a.end(), make_ordered_insert(sortedA, std::less<OverscaledTileID>{}));
-    assert(std::is_sorted(sortedA.begin(), sortedA.end(), std::less<OverscaledTileID>{}));
+    std::ranges::copy(a, util::make_ordered_inserter(sortedA));
+    assert(std::ranges::is_sorted(sortedA, std::less<OverscaledTileID>{}));
 
     std::vector<RenderTiles::element_type::value_type> sortedB;
-    sortedB.reserve(std::distance(b->begin(), b->end()));
-    std::for_each(b->begin(), b->end(), make_ordered_insert(sortedB, OverscaledLess{}));
-    assert(std::is_sorted(sortedB.begin(), sortedB.end(), OverscaledLess{}));
+    sortedB.reserve(b->size());
+    std::ranges::copy(*b, util::make_ordered_inserter(sortedB, OverscaledLess{}));
+    assert(std::ranges::is_sorted(sortedB, OverscaledLess{}));
 
     TileDifference result;
     result.remainder.reserve(std::max(sortedA.size(), sortedB.size()));

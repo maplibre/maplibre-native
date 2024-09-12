@@ -307,4 +307,14 @@ bool RenderLayer::applyColorRamp(const style::ColorRampPropertyValue& colorValue
     return true;
 }
 
+RenderLayer::RenderTileRefVec RenderLayer::combineRenderTiles(const RenderTileRefVec& a, const RenderTileRefVec& b) {
+    // Do these actually need to be in order?  If not we can just loop over `std::ranges::join_view(...)`
+    RenderTileRefVec result;
+    result.reserve(a.size() + b.size());
+    assert(std::ranges::is_sorted(a, &RenderTile::lessByUnwrappedTileID));
+    assert(std::ranges::is_sorted(b, &RenderTile::lessByUnwrappedTileID));
+    std::ranges::merge(a, b, std::back_inserter(result), &RenderTile::lessByUnwrappedTileID);
+    return result;
+}
+
 } // namespace mbgl

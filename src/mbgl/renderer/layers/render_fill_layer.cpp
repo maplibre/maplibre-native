@@ -448,17 +448,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 
-    // Do these actually need to be in order?  If not we can loop over `ranges::join_view(...)`
-    std::vector<std::reference_wrapper<const RenderTile>> compositeTiles;
-    compositeTiles.reserve(renderTileDiff->diff.added.size() + resetTileIDs.size());
-    std::ranges::copy(renderTileDiff->diff.added, std::back_inserter(compositeTiles));
-    std::ranges::copy(resetTileIDs, std::back_inserter(compositeTiles));
-    std::ranges::sort(compositeTiles, [](const RenderTile& a, const RenderTile& b) {
-        return a.getOverscaledTileID() < b.getOverscaledTileID();
-    });
-
     // Create drawables for tiles that are new or need to be re-created
-    for (const RenderTile& tile : compositeTiles) {
+    for (const RenderTile& tile : combineRenderTiles(renderTileDiff->diff.added, resetTileIDs)) {
         const auto& tileID = tile.getOverscaledTileID();
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {

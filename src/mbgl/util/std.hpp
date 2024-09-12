@@ -1,5 +1,7 @@
 #pragma once
 
+#include <concepts>
+#include <iterator>
 #include <memory>
 #include <type_traits>
 #include <utility>
@@ -21,6 +23,45 @@ void erase_if(Container& container, ForwardIterator it, Predicate pred) {
 template <typename Container, typename Predicate>
 void erase_if(Container& container, Predicate pred) {
     erase_if(container, container.begin(), pred);
+}
+
+namespace detail {
+/// Output iterator that inserts elements into an already-ordered container in order
+template <typename TTarget, typename TComp>
+struct OrderedInserter {
+    typedef std::output_iterator_tag iterator_category;
+    typedef std::ptrdiff_t difference_type;
+
+    std::reference_wrapper<TTarget> target;
+    TComp compare;
+
+    template <typename T>
+    void operator=(T&& item) {
+        const auto it = std::upper_bound(target.get().begin(), target.get().end(), item, compare);
+        target.get().insert(it, std::forward<T>(item));
+    }
+    OrderedInserter& operator*() { return *this; }
+    OrderedInserter& operator++() { return *this; }
+    OrderedInserter& operator++(int) { return *this; }
+    OrderedInserter& operator--() { return *this; }
+    OrderedInserter& operator--(int) { return *this; }
+};
+} // namespace detail
+
+/// Type inference for `OrderedInserter`, default comparator
+template <typename T>
+auto make_ordered_inserter(T& target) {
+    static_assert(std::movable<detail::OrderedInserter<T, std::less<typename T::value_type>>>);
+    static_assert(std::weakly_incrementable<detail::OrderedInserter<T, std::less<typename T::value_type>>>);
+    return detail::OrderedInserter<T, std::less<typename T::value_type>>{target, {}};
+}
+
+/// Type inference for `OrderedInserter`, custom  comparator
+template <typename TTarget, typename TComp>
+auto make_ordered_inserter(TTarget& target, TComp compare) {
+    static_assert(std::movable<detail::OrderedInserter<TTarget, TComp>>);
+    static_assert(std::weakly_incrementable<detail::OrderedInserter<TTarget, TComp>>);
+    return detail::OrderedInserter<TTarget, TComp>{target, std::forward<TComp>(compare)};
 }
 
 } // namespace util

@@ -273,9 +273,12 @@ protected:
 
 #endif // MLN_DRAWABLE_RENDERER
 
+protected:
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
 
-protected:
+    using RenderTileRefVec = std::vector<std::reference_wrapper<const RenderTile>>;
+    static RenderTileRefVec combineRenderTiles(const RenderTileRefVec&, const RenderTileRefVec&);
+
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;
 
