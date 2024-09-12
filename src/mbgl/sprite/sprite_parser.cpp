@@ -178,11 +178,9 @@ std::optional<style::TextFit> getTextFit(const JSValue& value, const char* prope
             const auto& valueString = v.GetString();
             const auto textFit = parseTextFit(std::string_view(valueString));
             if (!textFit.has_value()) {
-                Log::Warning(
-                        Event::Sprite,
-                        std::string("Invalid sprite image '") + name + "': value of '" + property +
-                            "' is an invalid value '" + valueString + "'");
-
+                Log::Warning(Event::Sprite,
+                             std::string("Invalid sprite image '") + name + "': value of '" + property +
+                                 "' is an invalid value '" + valueString + "'");
             }
             return textFit;
         } else {
