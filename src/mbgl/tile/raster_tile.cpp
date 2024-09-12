@@ -55,13 +55,13 @@ void RasterTile::setMetadata(std::optional<Timestamp> modified_, std::optional<T
 
 void RasterTile::setData(const std::shared_ptr<const std::string>& data) {
     if (!obsolete) {
-        pending = true;
         ++correlationID;
 
-        if (data) {
+        if (!pending) {
             observer->onTileAction(id, sourceID, TileOperation::StartParse);
         }
 
+        pending = true;
         worker.self().invoke(&RasterTileWorker::parse, data, correlationID);
     }
 }
@@ -72,10 +72,10 @@ void RasterTile::onParsed(std::unique_ptr<RasterBucket> result, const uint64_t r
         loaded = true;
         if (resultCorrelationID == correlationID) {
             pending = false;
+            observer->onTileAction(id, sourceID, TileOperation::EndParse);
         }
         renderable = static_cast<bool>(bucket);
         observer->onTileChanged(*this);
-        observer->onTileAction(id, sourceID, TileOperation::EndParse);
     }
 }
 
@@ -83,6 +83,7 @@ void RasterTile::onError(std::exception_ptr err, const uint64_t resultCorrelatio
     loaded = true;
     if (resultCorrelationID == correlationID) {
         pending = false;
+        observer->onTileAction(id, sourceID, TileOperation::Error);
     }
     observer->onTileError(*this, std::move(err));
 }
@@ -111,6 +112,9 @@ void RasterTile::cancel() {
 
 void RasterTile::markObsolete() {
     obsolete = true;
+    if (pending) {
+        observer->onTileAction(id, sourceID, TileOperation::Cancelled);
+    }
     pending = false;
     mailbox->abandon();
 }
