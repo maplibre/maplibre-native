@@ -175,7 +175,16 @@ std::optional<style::TextFit> getTextFit(const JSValue& value, const char* prope
     if (value.HasMember(property)) {
         const auto& v = value[property];
         if (v.IsString()) {
-            return parseTextFit(std::string_view(v.GetString(), v.GetStringLength()));
+            const auto& valueString = v.GetString();
+            const auto textFit = parseTextFit(std::string_view(valueString));
+            if (!textFit.has_value()) {
+                Log::Warning(
+                        Event::Sprite,
+                        std::string("Invalid sprite image '") + name + "': value of '" + property +
+                            "' is an invalid value '" + valueString + "'");
+
+            }
+            return textFit;
         } else {
             Log::Warning(
                 Event::Sprite,
