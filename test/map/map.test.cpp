@@ -1772,6 +1772,7 @@ TEST(Map, ObserveTileLifecycle) {
         TileOperation stage = TileOperation::NullOp;
         bool parsing = false;
 
+        // Suppressing warning-as-error to use range-based for. Index is desired for debugging context.
         // NOLINTNEXTLINE
         for (size_t i = 0; i < tileOps.size(); i++) {
             const auto& op = tileOps[i];

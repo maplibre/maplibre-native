@@ -245,14 +245,18 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
 void GeometryTile::reset() {
     MLN_TRACE_FUNC();
 
+    // If there is pending work, indicate that work has been cancelled.
+    // Clear the pending status.
     if (pending) {
         observer->onTileAction(id, sourceID, TileOperation::Cancelled);
         pending = false;
     }
 
-    // Mark the tile as pending again if it was complete before to prevent
-    // signaling a complete state despite pending parse operations.
+    // Reset the tile to an unloaded state to avoid signaling completion
+    // after clearing the tile's pending status.
+    loaded = false;
 
+    // Reset the worker to the `NeedsParse` state.
     ++correlationID;
     worker.self().invoke(&GeometryTileWorker::reset, correlationID);
 }
