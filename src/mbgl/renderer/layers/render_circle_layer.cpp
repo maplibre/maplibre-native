@@ -343,7 +343,7 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
     // Create drawables for tiles that are new or need to be re-created
     for (const RenderTile& tile : combineRenderTiles(renderTileDiff->diff.added, resetTiles)) {
         const auto& tileID = tile.getOverscaledTileID();
-        
+
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
             continue;

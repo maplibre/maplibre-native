@@ -313,15 +313,14 @@ void commonInit(gfx::DrawableBuilder& builder) {
 gfx::DrawableTweakerPtr& getAtlasTweaker(gfx::DrawableTweakerPtr& atlasTweaker, const RenderTile& tile) {
     if (!atlasTweaker) {
         if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
-            atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
-                atlases,
-                std::nullopt,
-                idFillImageTexture,
-                /*isText*/ false,
-                /*sdfIcons*/ true, // to force linear filter
-                /*rotationAlignment_*/ AlignmentType::Auto,
-                /*iconScaled*/ false,
-                /*textSizeIsZoomConstant_*/ false);
+            atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
+                                                                         std::nullopt,
+                                                                         idFillImageTexture,
+                                                                         /*isText*/ false,
+                                                                         /*sdfIcons*/ true, // to force linear filter
+                                                                         /*rotationAlignment_*/ AlignmentType::Auto,
+                                                                         /*iconScaled*/ false,
+                                                                         /*textSizeIsZoomConstant_*/ false);
         }
     }
     return atlasTweaker;

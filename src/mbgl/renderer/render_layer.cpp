@@ -77,9 +77,8 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     // In some circumstances, the tiles can be updated multiple times between layer updates, in which case
     // the source's last change isn't sufficient to catch up.  This is treated the same as when this layer
     // has just been added, and the changes are calculated from the last time this layer was updated, if any.
-    if (!renderTileDiff || !prevUpdateFrame ||
-         renderTileDiff->curFrame != params.frameCount ||
-         renderTileDiff->prevFrame != *prevUpdateFrame) {
+    if (!renderTileDiff || !prevUpdateFrame || renderTileDiff->curFrame != params.frameCount ||
+        renderTileDiff->prevFrame != *prevUpdateFrame) {
         renderTileDiff = std::make_shared<FrameTileDifference>(
             *prevUpdateFrame, params.frameCount, diffTiles(previousRenderTiles, renderTiles));
     }
