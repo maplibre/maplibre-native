@@ -17,7 +17,9 @@ public:
          bool sdf = false,
          ImageStretches stretchX = {},
          ImageStretches stretchY = {},
-         std::optional<ImageContent> content = std::nullopt);
+         std::optional<ImageContent> content = std::nullopt,
+         std::optional<TextFit> textFitWidth = std::nullopt,
+         std::optional<TextFit> textFitHeight = std::nullopt);
 
     const std::string id;
 
@@ -35,6 +37,13 @@ public:
 
     // The space where text can be fit into this image.
     const std::optional<ImageContent> content;
+
+    // If `icon-text-fit` is used in a layer with this image, this option defines constraints on the horizontal scaling
+    // of the image.
+    const std::optional<TextFit> textFitWidth;
+    // If `icon-text-fit` is used in a layer with this image, this option defines constraints on the vertical scaling of
+    // the image.
+    const std::optional<TextFit> textFitHeight;
 };
 
 } // namespace style
