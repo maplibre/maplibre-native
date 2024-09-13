@@ -11,7 +11,9 @@
 #endif // MLN_DRAWABLE_RENDERER
 
 namespace mbgl {
-
+namespace gfx {
+class DrawableBuilder;
+}
 namespace style {
 
 // {icon,text}-specific paint-property packs for use in the symbol Programs.
@@ -132,6 +134,19 @@ private:
 
 #if MLN_LEGACY_RENDERER
     void render(PaintParameters&) override;
+#else
+    const std::shared_ptr<TileLayerGroup>& getCollisionTileLayerGroup(gfx::Context&, UniqueChangeRequestVec&);
+    gfx::DrawableBuilder& getCollisionBuilder(gfx::Context&, std::unique_ptr<gfx::DrawableBuilder>&) const;
+    void addCollisionDrawables(gfx::Context&,
+                               const SymbolBucket&,
+                               const style::SymbolPaintProperties::PossiblyEvaluated&,
+                               UniqueChangeRequestVec&,
+                               std::unique_ptr<gfx::DrawableBuilder>& collisionBuilder,
+                               std::string_view layerCollisionPrefix,
+                               const OverscaledTileID& tileID,
+                               const bool isText,
+                               const bool hasCollisionBox,
+                               const bool hasCollisionCircle);
 #endif // MLN_LEGACY_RENDERER
 
     void prepare(const LayerPrepareParameters&) override;

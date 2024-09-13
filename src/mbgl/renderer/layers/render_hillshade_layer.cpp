@@ -109,10 +109,7 @@ bool RenderHillshadeLayer::hasCrossfade() const {
 void RenderHillshadeLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTiles();
     maxzoom = params.source->getMaxZoom();
-
-#if MLN_DRAWABLE_RENDERER
-    updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
+    updateRenderTileIDs(params);
 }
 
 #if MLN_LEGACY_RENDERER

@@ -69,22 +69,7 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     assert(params.source->isEnabled());
     renderTiles = params.source->getRenderTiles();
     addRenderPassesFromTiles();
-
-#if MLN_DRAWABLE_RENDERER
-    renderTilesOwner = params.source->getRawRenderTiles();
-    renderTileDiff = params.source->getRenderTileDiff();
-
-    // In some circumstances, the tiles can be updated multiple times between layer updates, in which case
-    // the source's last change isn't sufficient to catch up.  This is treated the same as when this layer
-    // has just been added, and the changes are calculated from the last time this layer was updated, if any.
-    if (!renderTileDiff || !prevUpdateFrame || renderTileDiff->curFrame != params.frameCount ||
-        renderTileDiff->prevFrame != *prevUpdateFrame) {
-        renderTileDiff = std::make_shared<FrameTileDifference>(
-            *prevUpdateFrame, params.frameCount, diffTiles(previousRenderTiles, renderTiles));
-    }
-
-    updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
+    updateRenderTileIDs(params);
 }
 
 std::optional<Color> RenderLayer::getSolidBackground() const {
@@ -210,7 +195,7 @@ std::size_t RenderLayer::removeAllDrawables() {
     return 0;
 }
 
-void RenderLayer::updateRenderTileIDs() {
+void RenderLayer::updateRenderTileIDs(const LayerPrepareParameters& params) {
     MLN_TRACE_FUNC();
 
     if (!renderTiles || renderTiles->empty()) {
@@ -225,6 +210,18 @@ void RenderLayer::updateRenderTileIDs() {
 
     renderTileIDs.swap(newRenderTileIDs);
     newRenderTileIDs.clear();
+
+    renderTilesOwner = params.source->getRawRenderTiles();
+    renderTileDiff = params.source->getRenderTileDiff();
+
+    // In some circumstances, the tiles can be updated multiple times between layer updates, in which case
+    // the source's last change isn't sufficient to catch up.  This is treated the same as when this layer
+    // has just been added, and the changes are calculated from the last time this layer was updated, if any.
+    if (!renderTileDiff || !prevUpdateFrame || renderTileDiff->curFrame != params.frameCount ||
+        renderTileDiff->prevFrame != *prevUpdateFrame) {
+        renderTileDiff = std::make_shared<FrameTileDifference>(
+            *prevUpdateFrame, params.frameCount, diffTiles(previousRenderTiles, renderTiles));
+    }
 }
 
 bool RenderLayer::hasRenderTile(const OverscaledTileID& tileID) const {

@@ -108,10 +108,7 @@ void RenderRasterLayer::prepare(const LayerPrepareParameters& params) {
     imageData = params.source->getImageRenderData();
     // It is possible image data is not available until the source loads it.
     assert(renderTiles || imageData || !params.source->isEnabled());
-
-#if MLN_DRAWABLE_RENDERER
-    updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
+    updateRenderTileIDs(params);
 }
 
 #if MLN_LEGACY_RENDERER

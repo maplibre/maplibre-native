@@ -254,7 +254,7 @@ protected:
     virtual std::size_t removeAllDrawables();
 
     /// Update `renderTileIDs` from `renderTiles`
-    void updateRenderTileIDs();
+    void updateRenderTileIDs(const LayerPrepareParameters&);
 
     /// Whether a given tile ID is present in the current cover set (`renderTiles`)
     bool hasRenderTile(const OverscaledTileID&) const;
