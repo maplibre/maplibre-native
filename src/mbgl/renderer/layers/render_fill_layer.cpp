@@ -402,18 +402,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     };
 
     // Update tiles that weren't added or removed
-    using RenderTileRefVec = std::vector<RenderTiles::element_type::value_type>;
-    RenderTileRefVec resetTileIDs;
+    RenderTileRefVec resetTiles;
     for (const RenderTile& tile : renderTileDiff->diff.remainder) {
         const auto& tileID = tile.getOverscaledTileID();
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
             removeTile(renderPass, tileID);
-
-            if (renderData && !renderData->bucket) {
-                // We'll need to treat this tile as an add
-                resetTileIDs.push_back(tile);
-            }
             continue;
         }
 
@@ -425,7 +419,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             removeTile(renderPass, tileID);
 
             // We'll need to treat this tile as an add
-            resetTileIDs.push_back(tile);
+            resetTiles.push_back(tile);
             continue;
         }
         setRenderTileBucketID(tileID, bucket.getID());
@@ -444,12 +438,12 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             // Existing drawable was updated
         } else {
             // Existing drawable is obsolete, build a new one
-            resetTileIDs.push_back(tile);
+            resetTiles.push_back(tile);
         }
     }
 
     // Create drawables for tiles that are new or need to be re-created
-    for (const RenderTile& tile : combineRenderTiles(renderTileDiff->diff.added, resetTileIDs)) {
+    for (const RenderTile& tile : combineRenderTiles(renderTileDiff->diff.added, resetTiles)) {
         const auto& tileID = tile.getOverscaledTileID();
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
         if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {

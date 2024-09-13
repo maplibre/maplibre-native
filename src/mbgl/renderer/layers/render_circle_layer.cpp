@@ -313,13 +313,16 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         return;
     }
 
-    stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf(
-        [&](gfx::Drawable& drawable) { return drawable.getTileID() && !hasRenderTile(*drawable.getTileID()); });
+    // Remove drawables for removed tiles
+    for (const auto& tileID : renderTileDiff->diff.removed) {
+        removeTile(renderPass, tileID);
+    }
 
     const auto& evaluated = static_cast<const CircleLayerProperties&>(*evaluatedProperties).evaluated;
     StringIDSetsPair propertiesAsUniforms;
+    RenderTileRefVec resetTiles;
 
-    for (const RenderTile& tile : *renderTiles) {
+    for (const RenderTile& tile : renderTileDiff->diff.remainder) {
         const auto& tileID = tile.getOverscaledTileID();
 
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
@@ -328,28 +331,29 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
             continue;
         }
 
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != renderData->bucket->getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(renderPass, tileID);
+            resetTiles.push_back(tile);
+            continue;
+        }
+    }
+
+    // Create drawables for tiles that are new or need to be re-created
+    for (const RenderTile& tile : combineRenderTiles(renderTileDiff->diff.added, resetTiles)) {
+        const auto& tileID = tile.getOverscaledTileID();
+        
+        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
+        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
+            continue;
+        }
+
         auto& bucket = static_cast<CircleBucket&>(*renderData->bucket);
         const auto vertexCount = bucket.vertices.elements();
         auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
 
-        const auto prevBucketID = getRenderTileBucketID(tileID);
-        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
-            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
-            removeTile(renderPass, tileID);
-        }
         setRenderTileBucketID(tileID, bucket.getID());
-
-        // If there are already drawables for this tile, update their UBOs and move on to the next tile.
-        auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
-            return true;
-        };
-        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
-            continue;
-        }
 
         propertiesAsUniforms.first.clear();
         propertiesAsUniforms.second.clear();
@@ -382,10 +386,8 @@ void RenderCircleLayer::update(gfx::ShaderRegistry& shaders,
         circleBuilder->setDepthType(gfx::DepthMaskType::ReadOnly);
         circleBuilder->setColorMode(gfx::ColorMode::alphaBlended());
         circleBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-
         circleBuilder->setRenderPass(renderPass);
         circleBuilder->setVertexAttributes(std::move(circleVertexAttrs));
-
         circleBuilder->setRawVertices({}, vertexCount, gfx::AttributeDataType::Short2);
         circleBuilder->setSegments(
             gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());

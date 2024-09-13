@@ -308,7 +308,7 @@ protected:
 
     std::vector<OverscaledTileID> previousRenderTiles;
     std::shared_ptr<FrameTileDifference> renderTileDiff;
-    std::uint64_t prevUpdateFrame = 0;
+    std::optional<std::uint64_t> prevUpdateFrame;
 
     void captureRenderTiles(std::uint64_t frameCount);
 #endif
