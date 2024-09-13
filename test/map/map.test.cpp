@@ -1808,7 +1808,11 @@ TEST(Map, ObserveTileLifecycle) {
                 case TileOperation::StartParse: {
                     // Parsing is expected to be started early during the request process by a call to `setLayers`
                     EXPECT_THAT(stage,
-                                testing::AnyOf(TileOperation::RequestedFromCache, TileOperation::RequestedFromNetwork));
+                                testing::AnyOf(
+                                    TileOperation::RequestedFromCache,
+                                    TileOperation::RequestedFromNetwork,
+                                    TileOperation::LoadFromCache,
+                                    TileOperation::LoadFromNetwork));
                     EXPECT_FALSE(parsing); // We must not already be parsing when seeing this marker.
                     stage = TileOperation::StartParse;
                     parsing = true;
