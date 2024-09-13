@@ -310,6 +310,23 @@ void commonInit(gfx::DrawableBuilder& builder) {
     builder.setEnableStencil(true);
 }
 
+gfx::DrawableTweakerPtr& getAtlasTweaker(gfx::DrawableTweakerPtr& atlasTweaker, const RenderTile& tile) {
+    if (!atlasTweaker) {
+        if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
+            atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                atlases,
+                std::nullopt,
+                idFillImageTexture,
+                /*isText*/ false,
+                /*sdfIcons*/ true, // to force linear filter
+                /*rotationAlignment_*/ AlignmentType::Auto,
+                /*iconScaled*/ false,
+                /*textSizeIsZoomConstant_*/ false);
+        }
+    }
+    return atlasTweaker;
+}
+
 } // namespace
 
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
@@ -328,10 +345,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
+            assert(false);
             return;
         }
     }
-    auto* fillTileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+    auto& fillTileLayerGroup = static_cast<TileLayerGroup&>(*layerGroup);
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
     if (!outlineTriangulatedShaderGroup) {
@@ -374,7 +392,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         removeTile(renderPass, tileID);
     }
 
-    fillTileLayerGroup->setStencilTiles(renderTiles);
+    fillTileLayerGroup.setStencilTiles(renderTiles);
 
     StringIDSetsPair propertiesAsUniforms;
 
@@ -456,22 +474,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         setRenderTileBucketID(tileID, bucket.getID());
 
         gfx::DrawableTweakerPtr atlasTweaker;
-        auto getAtlasTweaker = [&]() {
-            if (!atlasTweaker) {
-                if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
-                    atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
-                        atlases,
-                        std::nullopt,
-                        idFillImageTexture,
-                        /*isText*/ false,
-                        /*sdfIcons*/ true, // to force linear filter
-                        /*rotationAlignment_*/ AlignmentType::Auto,
-                        /*iconScaled*/ false,
-                        /*textSizeIsZoomConstant_*/ false);
-                }
-            }
-            return atlasTweaker;
-        };
 
         const auto vertexCount = bucket.vertices.elements();
         auto vertexAttrs = buildVertexAttrs(bucket, binders, evaluated);
@@ -482,7 +484,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             drawable->setLayerTweaker(layerTweaker);
             drawable->setBinders(renderData->bucket, &binders);
             drawable->setRenderTile(renderTilesOwner, &tile);
-            fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+            fillTileLayerGroup.addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         };
 
@@ -674,11 +676,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
             if (patternBuilder) {
                 patternBuilder->clearTweakers();
-                patternBuilder->addTweaker(getAtlasTweaker());
+                patternBuilder->addTweaker(getAtlasTweaker(atlasTweaker, tile));
             }
             if (doOutline && outlinePatternBuilder) {
                 outlinePatternBuilder->clearTweakers();
-                outlinePatternBuilder->addTweaker(getAtlasTweaker());
+                outlinePatternBuilder->addTweaker(getAtlasTweaker(atlasTweaker, tile));
             }
 
             const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
