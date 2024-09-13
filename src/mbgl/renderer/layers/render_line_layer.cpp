@@ -358,8 +358,24 @@ float RenderLineLayer::getLineWidth(const GeometryTileFeature& feature,
 #if MLN_DRAWABLE_RENDERER
 namespace {
 
-inline void setSegments(std::unique_ptr<gfx::DrawableBuilder>& builder, const LineBucket& bucket) {
-    builder->setSegments(gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
+inline void setSegments(gfx::DrawableBuilder& builder, const LineBucket& bucket) {
+    builder.setSegments(gfx::Triangles(), bucket.sharedTriangles, bucket.segments.data(), bucket.segments.size());
+}
+
+std::unique_ptr<gfx::DrawableBuilder> createLineBuilder(gfx::Context& context,
+                                                        const std::string& name,
+                                                        gfx::ShaderPtr shader,
+                                                        const RenderPass renderPass) {
+    std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(name);
+    builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
+    builder->setRenderPass(renderPass);
+    builder->setSubLayerIndex(0);
+    builder->setDepthType(gfx::DepthMaskType::ReadOnly);
+    builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
+                                                                : gfx::ColorMode::unblended());
+    builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+    builder->setEnableStencil(true);
+    return builder;
 }
 
 } // namespace
@@ -380,10 +396,11 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
+            assert(false);
             return;
         }
     }
-    auto* tileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+    auto& tileLayerGroup = static_cast<TileLayerGroup&>(*layerGroup);
 
     if (!layerTweaker) {
         auto tweaker = std::make_shared<LineLayerTweaker>(getID(), evaluatedProperties);
@@ -398,31 +415,12 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
     const RenderPass renderPass = static_cast<RenderPass>(evaluatedProperties->renderPasses &
                                                           ~mbgl::underlying_type(RenderPass::Opaque));
 
-    stats.drawablesRemoved += tileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
-        // If the render pass has changed or the tile has  dropped out of the cover set, remove it.
-        const auto& tileID = drawable.getTileID();
-        if (drawable.getRenderPass() != passes || (tileID && !hasRenderTile(*tileID))) {
-            return true;
-        }
-        return false;
-    });
+    // Remove drawables for removed tiles
+    for (const auto& tileID : renderTileDiff->diff.removed) {
+        removeTile(renderPass, tileID);
+    }
 
-    auto createLineBuilder = [&](const std::string& name,
-                                 gfx::ShaderPtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
-        std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder(name);
-        builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
-        builder->setRenderPass(renderPass);
-        builder->setSubLayerIndex(0);
-        builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-        builder->setColorMode(renderPass == RenderPass::Translucent ? gfx::ColorMode::alphaBlended()
-                                                                    : gfx::ColorMode::unblended());
-        builder->setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder->setEnableStencil(true);
-
-        return builder;
-    };
-
-    auto addAttributes =
+    const auto addAttributes =
         [&](gfx::DrawableBuilder& builder, const LineBucket& bucket, gfx::VertexAttributeArrayPtr&& vertexAttrs) {
             const auto vertexCount = bucket.vertices.elements();
             builder.setRawVertices({}, vertexCount, gfx::AttributeDataType::Short4);
@@ -446,44 +444,45 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             builder.setVertexAttributes(std::move(vertexAttrs));
         };
 
-    tileLayerGroup->setStencilTiles(renderTiles);
+    tileLayerGroup.setStencilTiles(renderTiles);
 
+    // Update tiles that weren't added or removed
+    RenderTileRefVec resetTiles;
+    for (const RenderTile& tile : renderTileDiff->diff.remainder) {
+        const auto& tileID = tile.getOverscaledTileID();
+        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
+        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
+            removeTile(renderPass, tileID);
+            continue;
+        }
+
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != renderData->bucket->getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(renderPass, tileID);
+            resetTiles.push_back(tile);
+        }
+    }
+
+    // Create drawables for tiles that are new or need to be re-created
     StringIDSetsPair propertiesAsUniforms;
-    for (const RenderTile& tile : *renderTiles) {
+    for (const RenderTile& tile : combineRenderTiles(renderTileDiff->diff.added, resetTiles)) {
         const auto& tileID = tile.getOverscaledTileID();
 
         const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
-        if (!renderData) {
-            removeTile(renderPass, tileID);
+        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
             continue;
         }
 
         auto& bucket = static_cast<LineBucket&>(*renderData->bucket);
         if (!bucket.sharedTriangles->elements()) {
-            removeTile(renderPass, tileID);
             continue;
         }
 
         auto& paintPropertyBinders = bucket.paintPropertyBinders.at(getID());
         const auto& evaluated = getEvaluated<LineLayerProperties>(renderData->layerProperties);
 
-        const auto prevBucketID = getRenderTileBucketID(tileID);
-        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
-            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
-            removeTile(renderPass, tileID);
-        }
         setRenderTileBucketID(tileID, bucket.getID());
-
-        auto updateExisting = [&](gfx::Drawable& drawable) {
-            if (drawable.getLayerTweaker() != layerTweaker) {
-                // This drawable was produced on a previous style/bucket, and should not be updated.
-                return false;
-            }
-            return true;
-        };
-        if (updateTile(renderPass, tileID, std::move(updateExisting))) {
-            continue;
-        }
 
         const auto addDrawable = [&](std::unique_ptr<gfx::Drawable>&& drawable, LineLayerTweaker::LineType type) {
             drawable->setTileID(tileID);
@@ -496,7 +495,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             const auto capType = roundCap ? LinePatternCap::Round : LinePatternCap::Square;
             drawable->setData(std::make_unique<gfx::LineDrawableData>(capType));
 
-            tileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+            tileLayerGroup.addDrawable(renderPass, tileID, std::move(drawable));
             ++stats.drawablesAdded;
         };
 
@@ -528,11 +527,11 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 continue;
             }
 
-            auto builder = createLineBuilder("lineSDF", std::move(shader));
+            const auto builder = createLineBuilder(context, "lineSDF", std::move(shader), renderPass);
 
             // vertices, attributes and segments
             addAttributes(*builder, bucket, std::move(vertexAttrs));
-            setSegments(builder, bucket);
+            setSegments(*builder, bucket);
 
             builder->flush(context);
             for (auto& drawable : builder->clearDrawables()) {
@@ -552,7 +551,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 continue;
             }
 
-            auto builder = createLineBuilder("linePattern", std::move(shader));
+            const auto builder = createLineBuilder(context, "linePattern", std::move(shader), renderPass);
 
             // vertices and attributes
             addAttributes(*builder, bucket, std::move(vertexAttrs));
@@ -573,7 +572,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
                 builder->addTweaker(iconTweaker);
 
-                setSegments(builder, bucket);
+                setSegments(*builder, bucket);
 
                 builder->flush(context);
                 for (auto& drawable : builder->clearDrawables()) {
@@ -595,7 +594,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 continue;
             }
 
-            auto builder = createLineBuilder("lineGradient", std::move(shader));
+            const auto builder = createLineBuilder(context, "lineGradient", std::move(shader), renderPass);
 
             // vertices and attributes
             addAttributes(*builder, bucket, std::move(vertexAttrs));
@@ -612,7 +611,7 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
             if (colorRampTexture2D) {
                 builder->setTexture(colorRampTexture2D, idLineImageTexture);
 
-                setSegments(builder, bucket);
+                setSegments(*builder, bucket);
 
                 builder->flush(context);
                 for (auto& drawable : builder->clearDrawables()) {
@@ -633,11 +632,11 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
                 continue;
             }
 
-            auto builder = createLineBuilder("line", std::move(shader));
+            const auto builder = createLineBuilder(context, "line", std::move(shader), renderPass);
 
             // vertices, attributes and segments
             addAttributes(*builder, bucket, std::move(vertexAttrs));
-            setSegments(builder, bucket);
+            setSegments(*builder, bucket);
 
             builder->flush(context);
             for (auto& drawable : builder->clearDrawables()) {
