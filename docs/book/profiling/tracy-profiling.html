@@ -190,7 +190,7 @@ Tracy computational overhead is very low but by default it keeps all instrumenta
 <p>The file <code>include/mbgl/util/instrumentation.hpp</code> defines the following instrumentation macros:</p>
 <h5 id="mln_trace_zonelabel"><a class="header" href="#mln_trace_zonelabel"><code>MLN_TRACE_ZONE(label)</code></a></h5>
 <p>The macro records the timestamps at the start and end of the code scope. The parameter label is a user defined name for the zone. Example:</p>
-<pre><code>// code is not instrumented
+<pre><code class="language-cpp">// code is not instrumented
 {
   MLN_TRACE_ZONE(EmptyZone) // Records from here until the end of the scope
   // code here is instrumented
@@ -199,7 +199,7 @@ Tracy computational overhead is very low but by default it keeps all instrumenta
 </code></pre>
 <h5 id="mln_trace_func"><a class="header" href="#mln_trace_func"><code>MLN_TRACE_FUNC()</code></a></h5>
 <p>The macro is meant to be placed at the start of a function and expands to:</p>
-<pre><code>MLN_TRACE_ZONE(__FUNCTION__)
+<pre><code class="language-cpp">MLN_TRACE_ZONE(__FUNCTION__)
 </code></pre>
 <h5 id="gpu-instrumentation"><a class="header" href="#gpu-instrumentation">GPU instrumentation</a></h5>
 <p>OpenGL is also supported in MapLibre native. Tracy support is currently missing for other APIs such as Metal and need to be added separately.</p>
@@ -229,7 +229,7 @@ Tracy computational overhead is very low but by default it keeps all instrumenta
 <p>Make sure you generate the MapLibre project with the option <code>MLN_USE_TRACY</code> enabled.</p>
 <p>As an example, the glfw sample is used.</p>
 <p>With CMake, in MapLibre repository root do</p>
-<pre><code># generate project
+<pre><code class="language-bash"># generate project
 cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=OFF -DMLN_WITH_COVERAGE=OFF -DMLN_DRAWABLE_RENDERER=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON -DMLN_USE_TRACY=ON
 # build
 cmake --build build --target mbgl-glfw -j 8
@@ -237,19 +237,21 @@ cmake --build build --target mbgl-glfw -j 8
 ./build/platform/glfw/mbgl-glfw --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --benchmark
 </code></pre>
 <p>with Bazel</p>
-<pre><code># build and run
+<pre><code class="language-bash"># build and run
 bazel run //platform/glfw:glfw_app -- --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --benchmark
 </code></pre>
 <p>In the Tracy Profiler hit the connect button (or select the glfw application from the list of applications that are running Tracy Client). Profile then optimize the code.</p>
 <h4 id="connecting-the-profiler-to-a-maplibre-android-application"><a class="header" href="#connecting-the-profiler-to-a-maplibre-android-application">Connecting the profiler to a MapLibre Android application</a></h4>
 <p>The Android application communicates instrumentation data to the profiler (Tracy server) on the network using port 8086 by default. You can expose the port to the profiler using Android Debug Bridge by running the command:</p>
-<pre><code>adb forward tcp:8086 tcp:8086
+<pre><code class="language-bash">adb forward tcp:8086 tcp:8086
 </code></pre>
 <h4 id="more-information-and-advanced-usage-in-tracy"><a class="header" href="#more-information-and-advanced-usage-in-tracy">More information and advanced usage in Tracy</a></h4>
-<p><a href="https://github.com/wolfpld/tracy/">Tracy Github page</a></p>
-<p><a href="https://github.com/wolfpld/tracy/releases/latest/download/tracy.pdf">Tracy user guide</a></p>
-<p><a href="https://www.youtube.com/watch?v=fB5B46lbapc">Tracy demo on Youtube</a></p>
-<p><a href="https://www.youtube.com/watch?v=ghXk3Bk5F2U&amp;t=37s">Tracy CppCon presentation on Youtube</a></p>
+<ul>
+<li><a href="https://github.com/wolfpld/tracy/">Tracy Github page</a></li>
+<li><a href="https://github.com/wolfpld/tracy/releases/latest/download/tracy.pdf">Tracy user guide</a></li>
+<li><a href="https://www.youtube.com/watch?v=fB5B46lbapc">Tracy demo on Youtube</a></li>
+<li><a href="https://www.youtube.com/watch?v=ghXk3Bk5F2U&amp;t=37s">Tracy CppCon presentation on Youtube</a></li>
+</ul>
 
                     </main>
 

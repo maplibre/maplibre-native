@@ -176,8 +176,8 @@
                     <main>
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p><em><a href="https://github.com/maplibre/maplibre-native">MapLibre Native</a></em> is a community led fork of <em>Mapbox GL Native</em>. It's a C++ library that powers
-vector maps in native applications on multiple platforms by taking stylesheets that conform to the <em>MapLibre Style Specification,</em> a fork of the
-MapLibre Style Spec. Since it is derived from Mapbox's original work it also uses <em>Mapbox Vector Tile Specification</em> as its choice of vector tile format.</p>
+vector maps in native applications on multiple platforms by taking stylesheets that conform to the <em><a href="https://maplibre.org/maplibre-style-spec/">MapLibre Style Specification</a></em>, a fork of the
+Mapbox Style Spec. Since it is derived from Mapbox's original work it also uses <em>Mapbox Vector Tile Specification</em> as its choice of vector tile format.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="design"><a class="header" href="#design">Design</a></h1>
 <p>This section is dedicated to documenting current state of MapLibre Native. <a href="design/./archictural-problems-and-recommendations.html">Architectural Problems and Recommendations</a> section notes recommendations for future improvements from an architectural perspective.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="ten-thousand-foot-view"><a class="header" href="#ten-thousand-foot-view">Ten Thousand Foot View</a></h1>
@@ -1340,31 +1340,31 @@ class MainActivity : AppCompatActivity() {
 <p><code>Annotation</code> is an overlay on top of a Map. In package
 <code>org.maplibre.android.annotations</code>, it has the following subclasses:</p>
 <ol>
-<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-marker/index.html">Marker</a></li>
-<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polyline/index.html">Polyline</a></li>
-<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polygon/index.html">Polygon</a></li>
+<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-marker/index.html">Marker</a></li>
+<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-polyline/index.html">Polyline</a></li>
+<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-polygon/index.html">Polygon</a></li>
 </ol>
 <p>A Marker shows an icon image at a geographical location. By default, marker uses
 a <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroid/src/main/res/drawable-xxxhdpi/maplibre_marker_icon_default.png">provided image</a> as its icon.</p>
 <p><img src="https://raw.githubusercontent.com/maplibre/maplibre-native/main/test/fixtures/sprites/default_marker.png" alt="marker image" /></p>
-<p>Or, the icon can be customized using <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-icon-factory/index.html">IconFactory</a> to generate an
-<a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-icon/index.html">Icon</a> using a provided image.</p>
-<p>For more customization, please read the documentation about <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-marker-options/index.html">MarkerOptions</a>.</p>
+<p>Or, the icon can be customized using <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-icon-factory/index.html">IconFactory</a> to generate an
+<a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-icon/index.html">Icon</a> using a provided image.</p>
+<p>For more customization, please read the documentation about <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-marker-options/index.html">MarkerOptions</a>.</p>
 <p>In this showcase, we continue the code from the <a href="android/./getting-started-guide.html">Quickstart</a>,
 rename Activity into <code>JsonApiActivity</code>,
 and pull the GeoJSON data from a free and public API.
 Then add markers to the map with GeoJSON:</p>
 <ol>
-<li>
-<p>In your module Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>), add
-<code>okhttp</code> to simplify code for making HTTP requests.</p>
+<li>In your module Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>), add
+<code>okhttp</code> to simplify code for making HTTP requests.</li>
+</ol>
 <pre><code class="language-gradle">dependencies {
     ...
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     ...
 }
 </code></pre>
-</li>
+<ol start="2">
 <li>
 <p>Sync your Android project the with Gradle files.</p>
 </li>
@@ -1494,16 +1494,16 @@ If we successfully get the response, call <code>addMarkersToMap()</code> on the 
     }
 </code></pre>
 <ol start="7">
-<li>Here is the final result. For the full contents of <code>JsonApiActivity</code>, please visit source code of <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt">Test APP</a></li>
+<li>Here is the final result. For the full contents of <code>JsonApiActivity</code>, please visit source code of our <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt">Test App</a>.</li>
 </ol>
 <div style="align: center">
   <img src="https://github.com/maplibre/maplibre-native/assets/19887090/00446249-9b19-4a48-8a46-00d4c5a2f981" alt="Screenshot with the map in demotile style">
 </div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="locationcomponent"><a class="header" href="#locationcomponent">LocationComponent</a></h1>
-<p>This guide will demonstrate how to utilize the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component/index.html">LocationComponent</a> to represent the user's current location.</p>
+<p>This guide will demonstrate how to utilize the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component/index.html">LocationComponent</a> to represent the user's current location.</p>
 <ol>
 <li>
-<p>When implementing the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component/index.html">LocationComponent</a>, the application should request location permissions.</p>
+<p>When implementing the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component/index.html">LocationComponent</a>, the application should request location permissions.</p>
 <p>Declare the need for foreground location in the <code>AndroidManifest.xml</code> file.</p>
 <p>For more information, please refer to the <a href="https://developer.android.com/training/location/permissions">Android Developer Documentation</a>.</p>
 </li>
@@ -1549,7 +1549,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 </code></pre>
 <ol start="3">
 <li>
-<p>In the <code>checkPermissions()</code> method, the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.permissions/-permissions-manager/index.html">PermissionManager</a> is used to request location permissions at runtime and handle the callbacks for permission granting or rejection.</p>
+<p>In the <code>checkPermissions()</code> method, the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location.permissions/-permissions-manager/index.html">PermissionManager</a> is used to request location permissions at runtime and handle the callbacks for permission granting or rejection.</p>
 <p>Additionally, you should pass the results of <code>Activity.onRequestPermissionResult()</code> to it.</p>
 <p>If the permissions are granted, call <code>mapView.getMapAsync(this)</code> to register the activity as a listener for onMapReady event.</p>
 </li>
@@ -1590,15 +1590,15 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 </code></pre>
 <ol start="4">
 <li>
-<p>In the <code>onMapReady()</code> method, first set the style and then handle the user's location using the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component/index.html">LocationComponent</a>.</p>
-<p>To configure the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component/index.html">LocationComponent</a>, developers should use <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html">LocationComponentOptions</a>.</p>
+<p>In the <code>onMapReady()</code> method, first set the style and then handle the user's location using the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component/index.html">LocationComponent</a>.</p>
+<p>To configure the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component/index.html">LocationComponent</a>, developers should use <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component-options/index.html">LocationComponentOptions</a>.</p>
 <p>In this demonstration, we create an instance of this class.</p>
 <p>In this method:</p>
 <ul>
 <li>Use the annotation <code>@SuppressLint("MissingPermission")</code> to suppress warnings related to missing location access permissions.</li>
 <li>In <code>setStyle(),</code> you can utilize other public and token-free styles like <a href="https://demotiles.maplibre.org/style.json">demotiles</a> instead of the <a href="https://github.com/maplibre/maplibre-native/tree/main/src/mbgl/util/tile_server_options.cpp">predefined styles</a>.</li>
-<li>For the builder of <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html">LocationComponentOptions</a>, use <code>pulseEnabled(true)</code> to enable the pulse animation, which enhances awareness of the user's location.</li>
-<li>Use method <code>buildLocationComponentActivationOptions()</code> to set <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-activation-options/index.html">LocationComponentActivationOptions</a>, then activate <code>locatinoComponent</code> with it.</li>
+<li>For the builder of <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component-options/index.html">LocationComponentOptions</a>, use <code>pulseEnabled(true)</code> to enable the pulse animation, which enhances awareness of the user's location.</li>
+<li>Use method <code>buildLocationComponentActivationOptions()</code> to set <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component-activation-options/index.html">LocationComponentActivationOptions</a>, then activate <code>locatinoComponent</code> with it.</li>
 <li>To apply options, make sure you call <code>activateLocationComponent()</code> of <code>locationComponent</code>. You can also set <code>locationComponent</code>'s various properties like <code>isLocationComponentEnabled</code> , <code>cameraMode</code> , etc...</li>
 <li><code>CameraMode.TRACKING</code><sup class="footnote-reference"><a href="#1">1</a></sup> means that when the user's location is updated, the camera will reposition accordingly.</li>
 <li><code>locationComponent!!.forceLocationUpdate(lastLocation)</code> updates the the user's last known location.</li>
@@ -1624,11 +1624,11 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
     }
 </code></pre>
 <ol start="5">
-<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-activation-options/index.html">LocationComponentActivationOptions</a> is used to hold the style, <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html">LocationComponentOptions</a> and other locating behaviors.
+<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component-activation-options/index.html">LocationComponentActivationOptions</a> is used to hold the style, <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component-options/index.html">LocationComponentOptions</a> and other locating behaviors.
 <ul>
-<li>It can also be used to configure how to obtain the current location, such as <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.engine/-location-engine/index.html">LocationEngine</a> and intervals.</li>
+<li>It can also be used to configure how to obtain the current location, such as <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location.engine/-location-engine/index.html">LocationEngine</a> and intervals.</li>
 <li>In this demonstration, it sets 750ms as the fastest interval for location updates, providing high accuracy location results (but with higher power consumption).</li>
-<li>For more information, please visit the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-activation-options/index.html">documentation page</a>.</li>
+<li>For more information, please visit the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component-activation-options/index.html">documentation page</a>.</li>
 </ul>
 </li>
 </ol>
@@ -1650,7 +1650,7 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
     }
 </code></pre>
 <ol start="6">
-<li>For further customization, you can also utilize the <code>foregroundTintColor()</code> and <code>pulseColor()</code> methods on the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html">LocationComponentOptions</a> builder:</li>
+<li>For further customization, you can also utilize the <code>foregroundTintColor()</code> and <code>pulseColor()</code> methods on the <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component-options/index.html">LocationComponentOptions</a> builder:</li>
 </ol>
 <pre><code class="language-kotlin">val locationComponentOptions =
     LocationComponentOptions.builder(this@BasicLocationPulsingCircleActivity)
@@ -1661,16 +1661,16 @@ class BasicLocationPulsingCircleActivity : AppCompatActivity(), OnMapReadyCallba
 </code></pre>
 <ol start="7">
 <li>
-<p>Here is the final results with different color configurations. For the complete content of this demo, please refer to the source code of the <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test APP</a> <sup class="footnote-reference"><a href="#2">2</a></sup>.</p>
+<p>Here is the final results with different color configurations. For the complete content of this demo, please refer to the source code of the <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test App</a> <sup class="footnote-reference"><a href="#2">2</a></sup>.</p>
 <p><img src="https://github.com/maplibre/maplibre-native/assets/19887090/03dfc87b-111b-4dd0-b4a3-d89e30ed6b63" alt="result" /></p>
 </li>
 </ol>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
-<p>A variety of <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.modes/-camera-mode/index.html">camera modes</a> determine how the camera will track the user location.<br />
+<p>A variety of <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location.modes/-camera-mode/index.html">camera modes</a> determine how the camera will track the user location.<br />
 They provide the right context to your users at the correct time.</p>
 </div>
 <div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
-<p>In <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test APP</a>, it also uses menu items to manage user location icon.</p>
+<p>Menu items to manage user location icon are used in the <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt">Test App</a>, too.</p>
 </div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="maplibre-configuration"><a class="header" href="#maplibre-configuration">MapLibre Configuration</a></h1>
 <p>This guide will explain various ways to create a map.</p>
@@ -2070,7 +2070,7 @@ Tracy computational overhead is very low but by default it keeps all instrumenta
 <p>The file <code>include/mbgl/util/instrumentation.hpp</code> defines the following instrumentation macros:</p>
 <h5 id="mln_trace_zonelabel"><a class="header" href="#mln_trace_zonelabel"><code>MLN_TRACE_ZONE(label)</code></a></h5>
 <p>The macro records the timestamps at the start and end of the code scope. The parameter label is a user defined name for the zone. Example:</p>
-<pre><code>// code is not instrumented
+<pre><code class="language-cpp">// code is not instrumented
 {
   MLN_TRACE_ZONE(EmptyZone) // Records from here until the end of the scope
   // code here is instrumented
@@ -2079,7 +2079,7 @@ Tracy computational overhead is very low but by default it keeps all instrumenta
 </code></pre>
 <h5 id="mln_trace_func"><a class="header" href="#mln_trace_func"><code>MLN_TRACE_FUNC()</code></a></h5>
 <p>The macro is meant to be placed at the start of a function and expands to:</p>
-<pre><code>MLN_TRACE_ZONE(__FUNCTION__)
+<pre><code class="language-cpp">MLN_TRACE_ZONE(__FUNCTION__)
 </code></pre>
 <h5 id="gpu-instrumentation"><a class="header" href="#gpu-instrumentation">GPU instrumentation</a></h5>
 <p>OpenGL is also supported in MapLibre native. Tracy support is currently missing for other APIs such as Metal and need to be added separately.</p>
@@ -2109,7 +2109,7 @@ Tracy computational overhead is very low but by default it keeps all instrumenta
 <p>Make sure you generate the MapLibre project with the option <code>MLN_USE_TRACY</code> enabled.</p>
 <p>As an example, the glfw sample is used.</p>
 <p>With CMake, in MapLibre repository root do</p>
-<pre><code># generate project
+<pre><code class="language-bash"># generate project
 cmake -B build -GNinja -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMLN_WITH_CLANG_TIDY=OFF -DMLN_WITH_COVERAGE=OFF -DMLN_DRAWABLE_RENDERER=ON -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON -DMLN_USE_TRACY=ON
 # build
 cmake --build build --target mbgl-glfw -j 8
@@ -2117,19 +2117,21 @@ cmake --build build --target mbgl-glfw -j 8
 ./build/platform/glfw/mbgl-glfw --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --benchmark
 </code></pre>
 <p>with Bazel</p>
-<pre><code># build and run
+<pre><code class="language-bash"># build and run
 bazel run //platform/glfw:glfw_app -- --style https://raw.githubusercontent.com/maplibre/demotiles/gh-pages/style.json --benchmark
 </code></pre>
 <p>In the Tracy Profiler hit the connect button (or select the glfw application from the list of applications that are running Tracy Client). Profile then optimize the code.</p>
 <h4 id="connecting-the-profiler-to-a-maplibre-android-application"><a class="header" href="#connecting-the-profiler-to-a-maplibre-android-application">Connecting the profiler to a MapLibre Android application</a></h4>
 <p>The Android application communicates instrumentation data to the profiler (Tracy server) on the network using port 8086 by default. You can expose the port to the profiler using Android Debug Bridge by running the command:</p>
-<pre><code>adb forward tcp:8086 tcp:8086
+<pre><code class="language-bash">adb forward tcp:8086 tcp:8086
 </code></pre>
 <h4 id="more-information-and-advanced-usage-in-tracy"><a class="header" href="#more-information-and-advanced-usage-in-tracy">More information and advanced usage in Tracy</a></h4>
-<p><a href="https://github.com/wolfpld/tracy/">Tracy Github page</a></p>
-<p><a href="https://github.com/wolfpld/tracy/releases/latest/download/tracy.pdf">Tracy user guide</a></p>
-<p><a href="https://www.youtube.com/watch?v=fB5B46lbapc">Tracy demo on Youtube</a></p>
-<p><a href="https://www.youtube.com/watch?v=ghXk3Bk5F2U&amp;t=37s">Tracy CppCon presentation on Youtube</a></p>
+<ul>
+<li><a href="https://github.com/wolfpld/tracy/">Tracy Github page</a></li>
+<li><a href="https://github.com/wolfpld/tracy/releases/latest/download/tracy.pdf">Tracy user guide</a></li>
+<li><a href="https://www.youtube.com/watch?v=fB5B46lbapc">Tracy demo on Youtube</a></li>
+<li><a href="https://www.youtube.com/watch?v=ghXk3Bk5F2U&amp;t=37s">Tracy CppCon presentation on Youtube</a></li>
+</ul>
 
                     </main>
 

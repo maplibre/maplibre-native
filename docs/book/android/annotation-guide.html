@@ -178,31 +178,31 @@
 <p><code>Annotation</code> is an overlay on top of a Map. In package
 <code>org.maplibre.android.annotations</code>, it has the following subclasses:</p>
 <ol>
-<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-marker/index.html">Marker</a></li>
-<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polyline/index.html">Polyline</a></li>
-<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-polygon/index.html">Polygon</a></li>
+<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-marker/index.html">Marker</a></li>
+<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-polyline/index.html">Polyline</a></li>
+<li><a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-polygon/index.html">Polygon</a></li>
 </ol>
 <p>A Marker shows an icon image at a geographical location. By default, marker uses
 a <a href="https://github.com/maplibre/maplibre-native/blob/main/platform/android/MapLibreAndroid/src/main/res/drawable-xxxhdpi/maplibre_marker_icon_default.png">provided image</a> as its icon.</p>
 <p><img src="https://raw.githubusercontent.com/maplibre/maplibre-native/main/test/fixtures/sprites/default_marker.png" alt="marker image" /></p>
-<p>Or, the icon can be customized using <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-icon-factory/index.html">IconFactory</a> to generate an
-<a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-icon/index.html">Icon</a> using a provided image.</p>
-<p>For more customization, please read the documentation about <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.annotations/-marker-options/index.html">MarkerOptions</a>.</p>
+<p>Or, the icon can be customized using <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-icon-factory/index.html">IconFactory</a> to generate an
+<a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-icon/index.html">Icon</a> using a provided image.</p>
+<p>For more customization, please read the documentation about <a href="https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.annotations/-marker-options/index.html">MarkerOptions</a>.</p>
 <p>In this showcase, we continue the code from the <a href="./getting-started-guide.html">Quickstart</a>,
 rename Activity into <code>JsonApiActivity</code>,
 and pull the GeoJSON data from a free and public API.
 Then add markers to the map with GeoJSON:</p>
 <ol>
-<li>
-<p>In your module Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>), add
-<code>okhttp</code> to simplify code for making HTTP requests.</p>
+<li>In your module Gradle file (usually <code>&lt;project&gt;/&lt;app-module&gt;/build.gradle</code>), add
+<code>okhttp</code> to simplify code for making HTTP requests.</li>
+</ol>
 <pre><code class="language-gradle">dependencies {
     ...
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     ...
 }
 </code></pre>
-</li>
+<ol start="2">
 <li>
 <p>Sync your Android project the with Gradle files.</p>
 </li>
@@ -332,7 +332,7 @@ If we successfully get the response, call <code>addMarkersToMap()</code> on the 
     }
 </code></pre>
 <ol start="7">
-<li>Here is the final result. For the full contents of <code>JsonApiActivity</code>, please visit source code of <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt">Test APP</a></li>
+<li>Here is the final result. For the full contents of <code>JsonApiActivity</code>, please visit source code of our <a href="https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt">Test App</a>.</li>
 </ol>
 <div style="align: center">
   <img src="https://github.com/maplibre/maplibre-native/assets/19887090/00446249-9b19-4a48-8a46-00d4c5a2f981" alt="Screenshot with the map in demotile style">
