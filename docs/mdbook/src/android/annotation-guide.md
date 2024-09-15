@@ -26,14 +26,13 @@ Then add markers to the map with GeoJSON:
 1. In your module Gradle file (usually `<project>/<app-module>/build.gradle`), add
    `okhttp` to simplify code for making HTTP requests.
 
-
-    ```gradle
-    dependencies {
-        ...
-        implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-        ...
-    }
-    ```
+ ```gradle
+ dependencies {
+     ...
+     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
+     ...
+ }
+ ```
 
 2. Sync your Android project the with Gradle files.
 
@@ -69,7 +68,7 @@ Then add markers to the map with GeoJSON:
 {{#include ../../../../platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/annotation/JsonApiActivity.kt:addMarkers}}
 ```
 
-7. Here is the final result. For the full contents of `JsonApiActivity`, please visit source code of [Test APP]
+7. Here is the final result. For the full contents of `JsonApiActivity`, please visit source code of our [Test App].
 
 <div style="align: center">
   <img src="https://github.com/maplibre/maplibre-native/assets/19887090/00446249-9b19-4a48-8a46-00d4c5a2f981" alt="Screenshot with the map in demotile style">

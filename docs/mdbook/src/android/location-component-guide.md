@@ -78,14 +78,14 @@ val locationComponentOptions =
        .build()
 ```
 
-7. Here is the final results with different color configurations. For the complete content of this demo, please refer to the source code of the [Test APP] [^2].
+7. Here is the final results with different color configurations. For the complete content of this demo, please refer to the source code of the [Test App] [^2].
 
    ![result](https://github.com/maplibre/maplibre-native/assets/19887090/03dfc87b-111b-4dd0-b4a3-d89e30ed6b63)
 
 
 [^1]: A variety of [camera modes] determine how the camera will track the user location.  
       They provide the right context to your users at the correct time.  
-[^2]: In [Test APP], it also uses menu items to manage user location icon.  
+[^2]: Menu items to manage user location icon are used in the [Test App], too.  
 
 [LocationComponent]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component/index.html
 [Android Developer Documentation]: https://developer.android.com/training/location/permissions
