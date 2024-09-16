@@ -270,7 +270,8 @@ protected:
     /// @return true if updated, false if the tile ID is not present in the set of tiles to be rendered or the ID is
     /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
-
+#else
+    void updateRenderTileIDs(const LayerPrepareParameters&) {}
 #endif // MLN_DRAWABLE_RENDERER
 
 protected:
