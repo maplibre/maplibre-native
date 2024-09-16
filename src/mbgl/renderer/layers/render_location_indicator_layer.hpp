@@ -5,9 +5,6 @@
 #include <mbgl/style/layers/location_indicator_layer_impl.hpp>
 #include <mbgl/style/layers/location_indicator_layer_properties.hpp>
 
-// TODO update MLN_RENDER_BACKEND_OPENGL/MLN_RENDER_BACKEND_VULKAN guards
-// with legacy/drawable
-
 namespace mbgl {
 class RenderLocationIndicatorImpl;
 class RenderLocationIndicatorLayer final : public RenderLayer {
