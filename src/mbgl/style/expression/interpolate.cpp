@@ -234,7 +234,7 @@ ParseResult createInterpolate(type::Type type,
         },
         [&](const type::PaddingType&) -> ParseResult {
             return ParseResult(
-                    std::make_unique<InterpolateImpl<Padding>>(type, interpolator, std::move(input), std::move(stops)));
+                std::make_unique<InterpolateImpl<Padding>>(type, interpolator, std::move(input), std::move(stops)));
         },
         [&](const type::Array& arrayType) -> ParseResult {
             if (arrayType.itemType != type::Number || !arrayType.N) {

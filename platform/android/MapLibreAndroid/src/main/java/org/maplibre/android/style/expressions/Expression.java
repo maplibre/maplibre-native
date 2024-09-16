@@ -3694,17 +3694,6 @@ public class Expression {
    * If the input is a number or an array of numbers padding is created following
    * the same pattern as CSS padding. See <a href="https://maplibre.org/maplibre-style-spec/types/#padding">Style specification</a>.
    * Otherwise, the expression is an error.
-   * <p>
-   * Example usage:
-   * </p>
-   * <pre>
-   * {@code
-   * SymbolLayer symbolLayer = new SymbolLayer("layer-id", "source-id");
-   * symbolLayer.setProperties(
-   *     textField(get("key-to-number-value"))
-   * );
-   * }
-   * </pre>
    *
    * @param input expression input
    * @return expression

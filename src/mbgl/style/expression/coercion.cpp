@@ -74,28 +74,28 @@ EvaluationResult toColor(const Value& colorValue) {
 
 EvaluationResult toPadding(const Value& paddingValue) {
     return paddingValue.match(
-            [](const Padding& padding) -> EvaluationResult { return padding; },
-            [&](const std::vector<Value>& components) -> EvaluationResult {
-                const std::size_t len = components.size();
-                const bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) -> bool {
-                    return item.template is<double>();
-                });
-                if ((len >= 1 && len <= 4) && isNumeric) {
-                    float componentsAsFloats[4] = { 0 };
-                    for (std::size_t i = 0; i < len; i++) {
-                        componentsAsFloats[i] = static_cast<float>(components[i].template get<double>());
-                    }
-                    return Padding(std::span<float>(componentsAsFloats, len));
-                } else {
-                    return EvaluationError{"Invalid padding value " + stringify(paddingValue) +
-                                           ": expected an array containing from one to four "
-                                           "numeric values."};
-                }
-            },
-            [](const double number) -> EvaluationResult { return Padding(static_cast<float>(number)); },
-            [&](const auto&) -> EvaluationResult {
-                return EvaluationError{"Could not parse padding from value '" + stringify(paddingValue) + "'"};
+        [](const Padding& padding) -> EvaluationResult { return padding; },
+        [&](const std::vector<Value>& components) -> EvaluationResult {
+            const std::size_t len = components.size();
+            const bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) -> bool {
+                return item.template is<double>();
             });
+            if ((len >= 1 && len <= 4) && isNumeric) {
+                float componentsAsFloats[4] = {0};
+                for (std::size_t i = 0; i < len; i++) {
+                    componentsAsFloats[i] = static_cast<float>(components[i].template get<double>());
+                }
+                return Padding(std::span<float>(componentsAsFloats, len));
+            } else {
+                return EvaluationError{"Invalid padding value " + stringify(paddingValue) +
+                                       ": expected an array containing from one to four "
+                                       "numeric values."};
+            }
+        },
+        [](const double number) -> EvaluationResult { return Padding(static_cast<float>(number)); },
+        [&](const auto&) -> EvaluationResult {
+            return EvaluationError{"Could not parse padding from value '" + stringify(paddingValue) + "'"};
+        });
 }
 
 EvaluationResult toFormatted(const Value& formattedValue) {

@@ -366,13 +366,14 @@ Value makeValue(T&& arg) {
 
 template <typename T>
 StyleProperty makeStyleProperty(const PropertyValue<T>& value) {
-    return value.match([](const Undefined&) -> StyleProperty { return {}; },
-                       [](const Color& c) -> StyleProperty { return {makeValue(c), StyleProperty::Kind::Expression}; },
-                       [](const Padding& p) -> StyleProperty { return {makeValue(p), StyleProperty::Kind::Expression}; },
-                       [](const PropertyExpression<T>& fn) -> StyleProperty {
-                           return {fn.getExpression().serialize(), StyleProperty::Kind::Expression};
-                       },
-                       [](const auto& t) -> StyleProperty { return {makeValue(t), StyleProperty::Kind::Constant}; });
+    return value.match(
+        [](const Undefined&) -> StyleProperty { return {}; },
+        [](const Color& c) -> StyleProperty { return {makeValue(c), StyleProperty::Kind::Expression}; },
+        [](const Padding& p) -> StyleProperty { return {makeValue(p), StyleProperty::Kind::Expression}; },
+        [](const PropertyExpression<T>& fn) -> StyleProperty {
+            return {fn.getExpression().serialize(), StyleProperty::Kind::Expression};
+        },
+        [](const auto& t) -> StyleProperty { return {makeValue(t), StyleProperty::Kind::Constant}; });
 }
 
 inline StyleProperty makeStyleProperty(const TransitionOptions& value) {

@@ -793,7 +793,7 @@ public class ExpressionTest extends EspressoTest {
       SymbolLayer layer = new SymbolLayer("layer", "source");
       maplibreMap.getStyle().addLayer(layer);
 
-      // Automatic usage with iconPadding property
+      // Automatic usage with iconPadding property, analogous to testGetExpressionWrapping()
       {
           Expression input = get("value");
           layer.setProperties(iconPadding(input));

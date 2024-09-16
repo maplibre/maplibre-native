@@ -268,7 +268,7 @@ global.defaultValueJava = function(property) {
       case 'color':
         return '"rgba(255,128,0,0.7)"';
       case 'padding':
-        return '{ 3.0f, 5.0f, 7.0f, 9.0f }';
+        return '{ 2.0f, 2.0f, 2.0f, 2.0f }';
       case 'array':
              switch (property.value) {
               case 'string':

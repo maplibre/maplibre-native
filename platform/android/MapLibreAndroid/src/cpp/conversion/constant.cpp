@@ -34,8 +34,8 @@ Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Color>::o
     return jni::Make<jni::String>(env, value.stringify());
 }
 
-Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Padding>::operator()(jni::JNIEnv& env,
-                                                                                            const Padding& value) const {
+Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Padding>::operator()(
+    jni::JNIEnv& env, const Padding& value) const {
     const auto values = value.toArray();
     auto result = jni::Array<jni::Float>::New(env, values.size());
     for (size_t i = 0; i < values.size(); i++) {

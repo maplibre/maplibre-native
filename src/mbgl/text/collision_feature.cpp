@@ -24,7 +24,7 @@ CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
                shapedText.right,
                std::nullopt,
                boxScale,
-               { padding },
+               {padding},
                overscaling,
                rotate);
 }

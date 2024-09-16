@@ -128,12 +128,18 @@ public:
 template <>
 struct Interpolator<Padding> {
 public:
-    Padding operator()(const Padding& a, const Padding& b, const float t) noexcept {
-        return {interpolate(a.top, b.top, t), interpolate(a.right, b.right, t), interpolate(a.bottom, b.bottom, t), interpolate(a.left, b.left, t)};
+    Padding operator()(const Padding& a, const Padding& b, const float t) const noexcept {
+        return {interpolate(a.top, b.top, t),
+                interpolate(a.right, b.right, t),
+                interpolate(a.bottom, b.bottom, t),
+                interpolate(a.left, b.left, t)};
     }
 
-    Padding operator()(const Padding& a, const Padding& b, const double t) noexcept {
-        return {interpolate(a.top, b.top, t), interpolate(a.right, b.right, t), interpolate(a.bottom, b.bottom, t), interpolate(a.left, b.left, t)};
+    Padding operator()(const Padding& a, const Padding& b, const double t) const noexcept {
+        return {interpolate(a.top, b.top, t),
+                interpolate(a.right, b.right, t),
+                interpolate(a.bottom, b.bottom, t),
+                interpolate(a.left, b.left, t)};
     }
 };
 

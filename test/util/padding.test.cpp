@@ -8,7 +8,6 @@
 #include <mbgl/style/expression/dsl.hpp>
 #include <mbgl/style/property_expression.hpp>
 
-
 #include <mbgl/style/conversion/function.hpp>
 #include <mbgl/style/conversion/property_value.hpp>
 #include <mbgl/style/conversion_impl.hpp>
@@ -25,13 +24,7 @@ TEST(Padding, InterpolateExpression) {
     // Use DLS methods to create an expression
     {
         auto expr = PropertyExpression<Padding>(
-                interpolate(
-                        linear(),
-                        zoom(),
-                        0.0,
-                        literal(Padding(0.0)),
-                        1.0,
-                        literal(Padding(8.0))));
+            interpolate(linear(), zoom(), 0.0, literal(Padding(0.0)), 1.0, literal(Padding(8.0))));
 
         auto result = expr.evaluate(0.5f);
         EXPECT_EQ(Padding(4.0), result);
@@ -39,7 +32,8 @@ TEST(Padding, InterpolateExpression) {
 
     // Parse expression from JSON, verify that expansion from number/array is handled correctly.
     {
-        auto json = R"(["interpolate", ["linear"], ["zoom"], 0, ["to-padding", 0], 1, ["to-padding", ["literal",[8, 16, -32]]]])";
+        auto json =
+            R"(["interpolate", ["linear"], ["zoom"], 0, ["to-padding", 0], 1, ["to-padding", ["literal",[8, 16, -32]]]])";
         PropertyExpression<Padding> expr(createExpression(json));
 
         auto result = expr.evaluate(0.5f);
@@ -50,11 +44,12 @@ TEST(Padding, InterpolateExpression) {
 TEST(Padding, Function) {
     auto fromFunction = [](const char* json) {
         conversion::Error error;
-        auto function = conversion::convertJSON<PropertyValue<Padding>>(json, error, /*allowDataExpressions*/ true, /*convertTokens*/ false);
+        auto function = conversion::convertJSON<PropertyValue<Padding>>(
+            json, error, /*allowDataExpressions*/ true, /*convertTokens*/ false);
         return function->asExpression();
     };
 
-    auto evalInContext = [](const auto& expr, const PropertyMap& properties){
+    auto evalInContext = [](const auto& expr, const PropertyMap& properties) {
         StubGeometryTileFeature feature{{}, FeatureType::Unknown, {}, properties};
         EvaluationContext context{0, &feature};
         auto a = expr.evaluate(context);
@@ -77,7 +72,8 @@ TEST(Padding, Function) {
     }
     // categorical
     {
-        auto expr = fromFunction(R"({"type": "categorical", "property": "foo", "stops": [[0, 2], [1, 4]], "default": 6})");
+        auto expr = fromFunction(
+            R"({"type": "categorical", "property": "foo", "stops": [[0, 2], [1, 4]], "default": 6})");
         EXPECT_EQ(Padding(2), evalInContext(expr, {{"foo", 0}}));
         EXPECT_EQ(Padding(4), evalInContext(expr, {{"foo", 1}}));
         EXPECT_EQ(Padding(6), evalInContext(expr, {{"foo", 2}}));
@@ -86,7 +82,7 @@ TEST(Padding, Function) {
     // identity
     {
         auto expr = fromFunction(R"({"type": "identity", "property": "foo", "default": [3, 7, 9, 11]})");
-        EXPECT_EQ(Padding(2, 4, 6, 4), evalInContext(expr, {{"foo", std::vector<mbgl::Value>({ 2, 4, 6 })}}));
+        EXPECT_EQ(Padding(2, 4, 6, 4), evalInContext(expr, {{"foo", std::vector<mbgl::Value>({2, 4, 6})}}));
         EXPECT_EQ(Padding(3), evalInContext(expr, {{"foo", 3}}));
         EXPECT_EQ(Padding(3, 7, 9, 11), evalInContext(expr, {{"bar", 3}}));
     }
@@ -97,4 +93,23 @@ TEST(Padding, OperatorBool) {
     EXPECT_FALSE(padding);
     padding.left = 1;
     EXPECT_TRUE(padding);
+}
+
+TEST(Padding, OperatorEqual) {
+    auto a = Padding({{ 3.5f, 9 }});
+    auto b = Padding(3.5, 9, 3.5, 9);
+    EXPECT_TRUE(a == b);
+    EXPECT_FALSE(a != b);
+
+    a.left = 7;
+    EXPECT_FALSE(a == b);
+    EXPECT_TRUE(a != b);
+}
+
+TEST(Padding, OperatorMultiply) {
+    auto padding = Padding(1, 2, 3, 4) * 2;
+    EXPECT_EQ(Padding(2, 4, 6, 8), padding);
+
+    padding = padding * 0.0;
+    EXPECT_EQ(Padding(0), padding);
 }

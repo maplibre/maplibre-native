@@ -208,12 +208,11 @@ ParseResult ParsingContext::parse(const Convertible& value,
         } else if ((*expected == type::Color || *expected == type::Formatted || *expected == type::Image) &&
                    (actual == type::Value || actual == type::String)) {
             parsed = {annotate(
-                    std::move(*parsed), std::move(*expected),
-                    typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
-        } else if (*expected == type::Padding && (actual == type::Value || actual == type::Number || actual.is<type::Array>())) {
+                std::move(*parsed), std::move(*expected), typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
+        } else if (*expected == type::Padding &&
+                   (actual == type::Value || actual == type::Number || actual.is<type::Array>())) {
             parsed = {annotate(
-                    std::move(*parsed), std::move(*expected),
-                    typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
+                std::move(*parsed), std::move(*expected), typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
         } else {
             checkType((*parsed)->getType());
             if (!errors->empty()) {
