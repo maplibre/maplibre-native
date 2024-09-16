@@ -278,23 +278,6 @@ jobs:
             ./render-test/android/RenderTestsApp-${{ matrix.flavor }}.apk
             ./render-test/android/RenderTests-${{ matrix.flavor }}.apk
 
-      # these two can be (and should be) removed once merged into main
-      - name: Copy render tests and render test app
-        if: matrix.flavor == 'opengl'
-        run: |
-          cp ./render-test/android/RenderTestsApp-opengl.apk ./render-test/android/RenderTestsApp.apk
-          cp ./render-test/android/RenderTests-opengl.apk ./render-test/android/RenderTests.apk
-
-      - name: Store Render Test .apk files
-        if: matrix.flavor == 'opengl'
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-render-tests
-          if-no-files-found: error
-          path: |
-            ./render-test/android/RenderTestsApp.apk
-            ./render-test/android/RenderTests.apk
-
   android-ci-result:
     runs-on: ubuntu-latest
     if: needs.pre_job.outputs.should_skip != 'true' && always()

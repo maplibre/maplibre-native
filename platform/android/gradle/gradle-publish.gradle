@@ -44,7 +44,7 @@ afterEvaluate {
                 artifactId project.ext.mapLibreArtifactId
                 version this.version
                 
-                from components.drawableRelease               
+                from components."${System.getenv('RENDERER')?.toLowerCase() == 'vulkan' ? 'vulkanRelease' : 'drawableRelease'}"
 
                 pom {
                     name = project.ext.mapLibreArtifactTitle
