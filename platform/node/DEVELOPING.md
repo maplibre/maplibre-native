@@ -80,4 +80,4 @@ npm test
 To clean up your pull request and prepare it for merging, update your local `main` branch, then run `git rebase -i main` from your pull request branch to squash/fixup commits as needed. When your work is ready to be merged, you can run `git merge --ff-only YOUR_BRANCH` from `main` or click the green merge button in the GitHub UI, which will automatically squash your branch down into a single commit before merging it.
 
 ## Publishing
-See [`platform/node/RELEASE.md`](RELEASE.md) for instructions on publishing a node release.
+See [`RELEASE.md`](RELEASE.md) for instructions on publishing a node release.
