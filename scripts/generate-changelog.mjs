@@ -2,6 +2,7 @@
 
 import { simpleGit } from "simple-git";
 import * as fs from "node:fs";
+import { Octokit } from "@octokit/rest";
 
 /**
  * @returns {never}
@@ -27,6 +28,9 @@ function getTagLastVersion() {
 const tagLastVersion = getTagLastVersion();
 
 const git = simpleGit();
+const octokit = new Octokit({
+  auth: process.env.GITHUB_ACCESS_TOKEN
+});
 
 /**
  *
@@ -65,7 +69,41 @@ function formatMessageToMarkdownLink(message) {
 
 const commitLastVersion = await getCommit(tagLastVersion);
 
+// Load all closed pull requests
+const pulls = await octokit.paginate(octokit.pulls.list, {
+  owner: "maplibre",
+  repo: "maplibre-native",
+  state: "closed",
+  per_page: 100,
+});
+
+/**
+ * @type {Map<string, typeof pulls[0]>}[] }>}
+ */
+const pullRequestsMap = new Map();
+pulls.forEach(pr => {
+  if (pr.merge_commit_sha) {
+    pullRequestsMap.set(pr.merge_commit_sha, pr);
+  }
+});
+
 const logs = await git.log({ from: commitLastVersion });
+
 for await (const logEntry of logs.all.toReversed()) {
-  console.log(`- ${formatMessageToMarkdownLink(logEntry.message)}.`);
+  const pr = pullRequestsMap.get(logEntry.hash);
+
+  const log = () => console.log(`- ${formatMessageToMarkdownLink(logEntry.message)}.`);
+
+
+  if (!pr) {
+    log();
+    continue;
+  }
+
+  // only log changelog entry when PR has corresponding platform label (or none)
+  const hasLabel = (/** @type {string} **/ label) =>  pr.labels.some(({name}) => name === label);
+
+  if (!hasLabel("ios") && !hasLabel("android") && !hasLabel("node")) log();
+  else if (platform === "android" && hasLabel("android")) log();
+  else if (platform === "ios" && hasLabel("ios")) log();
 }

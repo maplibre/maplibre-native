@@ -176,7 +176,7 @@ jobs:
         if: failure() && env.run_device_test == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: test-artifacts
+          name: "Test Artifacts ${{ matrix.test.name }}"
           path: test_artifacts.zip
 
       - name: Generate another token (previous one could have expired)

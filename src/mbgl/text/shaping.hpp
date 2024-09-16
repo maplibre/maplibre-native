@@ -73,6 +73,10 @@ public:
                        const std::array<float, 2>& iconOffset,
                        float fontScale);
 
+    // Called after a PositionedIcon has already been run through fitIconToText,
+    // but needs further adjustment to apply textFitWidth and textFitHeight.
+    PositionedIcon applyTextFit() const;
+
     const ImagePosition& image() const { return _image; }
     float top() const { return _top; }
     float bottom() const { return _bottom; }

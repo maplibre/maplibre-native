@@ -145,12 +145,13 @@ private:
     std::shared_ptr<UpdateParameters> updateParameters;
     std::mutex updateMutex;
 
-    bool framebufferSizeChanged = false;
     std::atomic<bool> destroyed{false};
-    bool swapBehaviorFlush{true};
 
     std::unique_ptr<SnapshotCallback> snapshotCallback;
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
+
+    bool framebufferSizeChanged = false;
+    bool swapBehaviorFlush = false;
 };
 
 } // namespace android
