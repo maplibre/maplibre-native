@@ -520,7 +520,9 @@ public:
         bearingChanged |= setTextureFromImageID(params.puckImagePath, texPuck, params);
         bearingChanged |= setTextureFromImageID(params.puckShadowImagePath, texShadow, params);
         bearingChanged |= setTextureFromImageID(params.puckHatImagePath, texPuckHat, params);
-#else
+#endif
+
+#if MLN_RENDER_BACKEND_VULKAN
         bearingChanged |= setTextureFromImageID(params.puckShadowImagePath, shadowDrawableInfo.textureInfo, params);
         bearingChanged |= setTextureFromImageID(params.puckImagePath, puckDrawableInfo.textureInfo, params);
         bearingChanged |= setTextureFromImageID(params.puckHatImagePath, hatDrawableInfo.textureInfo, params);
@@ -726,7 +728,9 @@ protected:
                                   M_SQRT2 * 0.5 * horizontalScaleFactor;
         const double hatRadius = ((texPuckHat) ? texPuckHat->width / texPuckHat->pixelRatio : 0.0) *
                                  params.puckHatScale * M_SQRT2 * 0.5 * horizontalScaleFactor;
-#else
+#endif
+
+#if MLN_RENDER_BACKEND_VULKAN
         const double shadowScale = shadowDrawableInfo.textureInfo.width / shadowDrawableInfo.textureInfo.pixelRatio;
         const double shadowRadius = shadowScale * params.puckShadowScale * M_SQRT2 * 0.5 * horizontalScaleFactor;
 
@@ -1041,7 +1045,9 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
     paintParameters.backend.getDefaultRenderable().getResource<gl::RenderableResource>().bind();
     glContext.setDirtyState();
 }
-#else
+#endif
+
+#if MLN_RENDER_BACKEND_VULKAN
 
 void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
                                           gfx::Context& context,

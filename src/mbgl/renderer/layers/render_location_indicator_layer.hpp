@@ -40,7 +40,7 @@ private:
     std::unique_ptr<RenderLocationIndicatorImpl> renderImpl;
     style::LocationIndicatorPaintProperties::Unevaluated unevaluated;
 
-#if MLN_DRAWABLE_RENDERER
+#if MLN_RENDER_BACKEND_VULKAN
     // Drawable shaders
     gfx::ShaderProgramBasePtr quadShader;
     gfx::ShaderProgramBasePtr circleShader;
