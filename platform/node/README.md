@@ -243,4 +243,4 @@ mbgl.on('message', function(msg) {
 
 ## Contributing
 
-See [DEVELOPING.md](DEVELOPING.md) for instructions on building this module for development.
+See [DEVELOPING.md](https://github.com/maplibre/maplibre-native/blob/main/platform/node/DEVELOPING.md) for instructions on building this module for development.
