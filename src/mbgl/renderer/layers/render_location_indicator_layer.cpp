@@ -42,7 +42,7 @@
 
 #endif
 
-#if MLN_RENDER_BACKEND_VULKAN
+#if !MLN_RENDER_BACKEND_OPENGL
 
 #include <mbgl/gfx/vertex_attribute.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
@@ -419,7 +419,7 @@ public:
 
 #endif
 
-#if MLN_RENDER_BACKEND_VULKAN
+#if !MLN_RENDER_BACKEND_OPENGL
     struct TextureInfo {
         std::shared_ptr<gfx::Texture2D> texture;
         std::optional<Immutable<style::Image::Impl>> image;
@@ -494,9 +494,7 @@ public:
         texCoordsBuffer.release();
         simpleShader.release();
         texturedShader.release();
-#endif
-
-#if MLN_RENDER_BACKEND_VULKAN
+#else
         shadowDrawableInfo.reset();
         puckDrawableInfo.reset();
         hatDrawableInfo.reset();
@@ -520,9 +518,7 @@ public:
         bearingChanged |= setTextureFromImageID(params.puckImagePath, texPuck, params);
         bearingChanged |= setTextureFromImageID(params.puckShadowImagePath, texShadow, params);
         bearingChanged |= setTextureFromImageID(params.puckHatImagePath, texPuckHat, params);
-#endif
-
-#if MLN_RENDER_BACKEND_VULKAN
+#else
         bearingChanged |= setTextureFromImageID(params.puckShadowImagePath, shadowDrawableInfo.textureInfo, params);
         bearingChanged |= setTextureFromImageID(params.puckImagePath, puckDrawableInfo.textureInfo, params);
         bearingChanged |= setTextureFromImageID(params.puckHatImagePath, hatDrawableInfo.textureInfo, params);
@@ -556,9 +552,7 @@ public:
         featureEnvelope->clear();
 #if MLN_RENDER_BACKEND_OPENGL
         if (!texPuck || !texPuck->isValid()) return;
-#endif
-
-#if MLN_RENDER_BACKEND_VULKAN
+#else
         if (!puckDrawableInfo.textureInfo.texture) return;
 
         auto& puckGeometry = puckDrawableInfo.geometry;
@@ -598,8 +592,9 @@ protected:
     }
 
     void updateRadius(const mbgl::LocationIndicatorRenderParameters& params) {
-#if MLN_RENDER_BACKEND_VULKAN
+#if !MLN_RENDER_BACKEND_OPENGL
         auto& circle = circleDrawableInfo.geometry;
+        circleDrawableInfo.dirty = true;
 #endif
 
         const TransformState& s = *params.state;
@@ -617,10 +612,6 @@ protected:
             circle[i] = vec2(project(LatLng(poc.y, poc.x), s) - center);
         }
         radiusChanged = false;
-
-#if MLN_RENDER_BACKEND_VULKAN
-        circleDrawableInfo.dirty = true;
-#endif
     }
 
     // Size in "map pixels" for a screen pixel
@@ -728,9 +719,7 @@ protected:
                                   M_SQRT2 * 0.5 * horizontalScaleFactor;
         const double hatRadius = ((texPuckHat) ? texPuckHat->width / texPuckHat->pixelRatio : 0.0) *
                                  params.puckHatScale * M_SQRT2 * 0.5 * horizontalScaleFactor;
-#endif
-
-#if MLN_RENDER_BACKEND_VULKAN
+#else
         const double shadowScale = shadowDrawableInfo.textureInfo.width / shadowDrawableInfo.textureInfo.pixelRatio;
         const double shadowRadius = shadowScale * params.puckShadowScale * M_SQRT2 * 0.5 * horizontalScaleFactor;
 
@@ -743,6 +732,10 @@ protected:
         auto& shadowGeometry = shadowDrawableInfo.geometry;
         auto& puckGeometry = puckDrawableInfo.geometry;
         auto& hatGeometry = hatDrawableInfo.geometry;
+
+        shadowDrawableInfo.dirty = true;
+        puckDrawableInfo.dirty = true;
+        hatDrawableInfo.dirty = true;
 #endif
 
         for (unsigned long i = 0; i < 4; ++i) {
@@ -760,12 +753,6 @@ protected:
             hatGeometry[i] = vec2(hatOffset +
                                   (verticalShift * (tilt * params.puckLayersDisplacement * horizontalScaleFactor)));
         }
-
-#if MLN_RENDER_BACKEND_VULKAN
-        shadowDrawableInfo.dirty = true;
-        puckDrawableInfo.dirty = true;
-        hatDrawableInfo.dirty = true;
-#endif
     }
 
 #if MLN_RENDER_BACKEND_OPENGL
@@ -891,7 +878,7 @@ protected:
     bool initialized = false;
     bool dirtyFeature = true;
 
-#if MLN_RENDER_BACKEND_VULKAN
+#if !MLN_RENDER_BACKEND_OPENGL
 
 public:
     struct QuadDrawableInfo {
@@ -1047,7 +1034,7 @@ void RenderLocationIndicatorLayer::render(PaintParameters& paintParameters) {
 }
 #endif
 
-#if MLN_RENDER_BACKEND_VULKAN
+#if !MLN_RENDER_BACKEND_OPENGL
 
 void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
                                           gfx::Context& context,

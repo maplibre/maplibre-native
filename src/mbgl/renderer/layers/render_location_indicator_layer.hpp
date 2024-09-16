@@ -12,7 +12,7 @@ public:
     explicit RenderLocationIndicatorLayer(Immutable<style::LocationIndicatorLayer::Impl>);
     ~RenderLocationIndicatorLayer() override;
 
-#if MLN_RENDER_BACKEND_VULKAN
+#if !MLN_RENDER_BACKEND_OPENGL
     void update(gfx::ShaderRegistry &,
                 gfx::Context &,
                 const TransformState &,
@@ -40,7 +40,7 @@ private:
     std::unique_ptr<RenderLocationIndicatorImpl> renderImpl;
     style::LocationIndicatorPaintProperties::Unevaluated unevaluated;
 
-#if MLN_RENDER_BACKEND_VULKAN
+#if !MLN_RENDER_BACKEND_OPENGL
     // Drawable shaders
     gfx::ShaderProgramBasePtr quadShader;
     gfx::ShaderProgramBasePtr circleShader;
