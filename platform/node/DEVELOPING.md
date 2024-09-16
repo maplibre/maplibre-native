@@ -5,7 +5,7 @@ This document explains how to build the [Node.js](https://nodejs.org/) bindings 
 ## Building
 
 To develop these bindings, you’ll need to build them from source. Building requires the prerequisites listed in either
-the [macOS](../macos/INSTALL.md#requirements) or [Linux](../linux/README.md#prerequisites) install documentation, depending
+the [macOS](../macos/INSTALL.md#requirements), [Linux](../linux/README.md#prerequisites), or [Windows](../windows/README.md#prerequisites) install documentation, depending
 on the target platform.
 
 First you'll need to install dependencies:
@@ -27,17 +27,20 @@ brew install \
 
 ```bash
 sudo apt-get install -y \
-  ccache \
+  build-essential \
+  clang \
   cmake \
+  ccache \
   ninja-build \
   pkg-config \
-  xvfb \
   libcurl4-openssl-dev \
   libglfw3-dev \
   libuv1-dev \
-  g++-10 \
-  libc++-9-dev \
-  libc++abi-9-dev
+  libpng-dev \
+  libicu-dev \
+  libjpeg-turbo8-dev \
+  libwebp-dev \
+  xvfb
 /usr/sbin/update-ccache-symlinks
 ```
 
@@ -48,20 +51,20 @@ To compile the Node.js bindings and install module dependencies, from the reposi
 #### MacOS
 
 ```bash
-cmake . -B build -G Ninja -DMLN_WITH_NODE=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Debug -DMLN_WITH_COVERAGE=ON
+cmake . -B build -G Ninja -DMLN_WITH_NODE=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Release -DMLN_WITH_OPENGL=OFF -DMLN_WITH_METAL=ON -DMLN_LEGACY_RENDERER=OFF -DMLN_DRAWABLE_RENDERER=ON -DMLN_WITH_WERROR=OFF
 ```
 
 #### Linux
 
 ```bash
-cmake . -B build -G Ninja -DMLN_WITH_NODE=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+cmake . -B build -G Ninja -DMLN_WITH_NODE=ON -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=gcc-12 -DCMAKE_CXX_COMPILER=g++-12
 ```
 
 ### Building
 
 Finally, build:
 ```bash
-cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+cmake --build build -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)"
 ```
 
 ## Testing
@@ -79,19 +82,20 @@ To clean up your pull request and prepare it for merging, update your local `mai
 ## Publishing
 
 To publish a new version of the package:
-- [ ] make a commit in the release branch which includes:
-    - [ ] an updated version number in [`package.json`](../../package.json#L3)
+- [ ] make a commit in 'platform/node/' which includes:
+    - [ ] an updated version number in [`platform/node/package.json`](package.json#L3)
     - [ ] an entry in [`platform/node/CHANGELOG.md`](CHANGELOG.md) describing the changes in the release
-- [ ] run `git tag node-v{VERSION}` where `{VERSION}` matches the version in `package.json`, e.g. `git tag node-v3.3.2`
-- [ ] run `git push && git push --tags`
+- [ ] create a PR to merge your changes into main. A release will be published and a tag will be created automatically once merged.
 
-The CI builds for tag pushes will check if the tag matches the version listed in `package.json`, and if so, will run with `BUILDTYPE=Release` and publish a binary with `node-pre-gyp`.
+The node-release CI publishes when the version listed in `package.json` has not yet been published to npm. If a new version is found it will run with `BUILDTYPE=Release` and publish a binary with `node-pre-gyp`.
 
-Once binaries have been published for Linux and macOS (which can be verified with `./node_modules/.bin/node-pre-gyp info`), you can run a quick final check to ensure they're being fetched properly by simply running `rm -rf lib && npm install`.
-
-If everything looks good:
-- [ ] run `mbx npm publish`
+Once binaries have been published (which can be verified with `./node_modules/.bin/node-pre-gyp info`), you can run a quick final check to ensure they're being fetched properly by simply running `rm -rf lib && npm install`.
 
 ### Preleases
 
-Publishing a prerelease binary can be useful for testing downstream integrations - the workflow is pretty much the same except that you'll be making your version number commit and `git tag node-v{VERSION}` (like `git tag node-v3.3.2-pre.1`) on a pull request branch before merging it rather than on `main`.
+Publishing a prerelease binary can be useful for testing downstream integrations - the workflow is the same except that you need to make sure the release version ends in with the preid 'pre', so that the workflow will automatically publish as a prerelease. 
+
+For example, running the following command , replacing <update_type> with one of the semantic versioning release types (prerelease, prepatch, preminor, premajor):
+```bash
+npm version <update_type> --preid pre --no-git-tag-version
+```
