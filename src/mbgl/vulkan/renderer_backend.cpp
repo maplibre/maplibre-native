@@ -186,7 +186,8 @@ void RendererBackend::initFrameCapture() {
 void RendererBackend::startFrameCapture() {
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
     if (g_rdoc_api) {
-        g_rdoc_api->StartFrameCapture(nullptr, nullptr);
+        RENDERDOC_DevicePointer devicePtr = RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(instance->operator VkInstance_T*());
+        g_rdoc_api->StartFrameCapture(devicePtr, nullptr);
     }
 #endif
 }
@@ -194,7 +195,8 @@ void RendererBackend::startFrameCapture() {
 void RendererBackend::endFrameCapture() {
 #ifdef ENABLE_RENDERDOC_FRAME_CAPTURE
     if (g_rdoc_api) {
-        g_rdoc_api->EndFrameCapture(nullptr, nullptr);
+        RENDERDOC_DevicePointer devicePtr = RENDERDOC_DEVICEPOINTER_FROM_VKINSTANCE(instance->operator VkInstance_T*());
+        g_rdoc_api->EndFrameCapture(devicePtr, nullptr);
     }
 #endif
 }
