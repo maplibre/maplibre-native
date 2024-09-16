@@ -1,0 +1,51 @@
+//apply plugin: 'com.android.application'
+/**
+ * Download validation layer binary release zip file from Khronos github repo
+ *    https://github.com/KhronosGroup/Vulkan-ValidationLayers/releases
+ *
+ * To use this script, add the following to your module's build.gradle:
+ *     ext.vvl_version='your-new-version'
+ *     apply from: "${PATH-TO-THIS}/download_vvl.gradle"
+ * To update to a new version:
+ *   - change the ext.vvl_version to a new version string.
+ *   - delete directory pointed by ${VVL_JNILIB_DIR}.
+ *   - sync gradle script in IDE and rebuild project.
+ *
+ * Note: binary release can also be manually downloaded and put it into
+ *       the default jniLibs directory at app/src/main/jniLibs.
+ */
+
+// get the validation layer version.
+def VVL_VER = "1.3.290.0" 
+if (ext.has("vvl_version")) {
+    VVL_VER = ext.vvl_version
+}
+
+// declare local variables shared between downloading and unzipping.
+def VVL_SITE ="https://github.com/KhronosGroup/Vulkan-ValidationLayers"
+def VVL_LIB_ROOT= "$projectDir" //rootDir.absolutePath.toString() + ""
+def VVL_JNILIB_DIR="${VVL_LIB_ROOT}/src/vulkanDebug/jniLibs"
+def VVL_SO_NAME = "libVkLayer_khronos_validation.so"
+
+// download the release zip file to ${VVL_LIB_ROOT}/
+task download {
+    def VVL_ZIP_NAME = "releases/download/vulkan-sdk-${VVL_VER}/android-binaries-${VVL_VER}.zip"
+    mkdir "${VVL_LIB_ROOT}"
+    def f = new File("${VVL_LIB_ROOT}/android-binaries-${VVL_VER}.zip")
+    new URL("${VVL_SITE}/${VVL_ZIP_NAME}")
+        .withInputStream { i -> f.withOutputStream { it << i } }
+}
+
+// unzip the downloaded VVL zip archive to the ${VVL_JNILIB_DIR} for APK packaging.
+task unzip(dependsOn: download, type: Copy) {
+    from zipTree(file("${VVL_LIB_ROOT}/android-binaries-${VVL_VER}.zip"))
+    into file("${VVL_JNILIB_DIR}")
+}
+
+//android.sourceSets.vulkan.jniLibs {
+//        srcDirs += ["${VVL_JNILIB_DIR}"]
+//}
+
+android.sourceSets.vulkan.jniLibs {
+	srcDir(tasks.unzip)
+}

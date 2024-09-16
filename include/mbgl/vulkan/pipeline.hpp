@@ -82,8 +82,8 @@ public:
     void updateVertexInputHash();
     std::size_t hash() const;
 
-    void setDynamicValues(const vk::UniqueCommandBuffer& buffer) const;
-    std::vector<vk::DynamicState> getDynamicStates() const;
+    void setDynamicValues(const RendererBackend& backend, const vk::UniqueCommandBuffer& buffer) const;
+    std::vector<vk::DynamicState> getDynamicStates(const RendererBackend& backend) const;
 
 protected:
     std::size_t vertexInputHash{0};

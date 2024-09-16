@@ -78,6 +78,24 @@ android {
                 }
             }
         }
+        create("vulkan") {
+            dimension = "renderer"
+            externalNativeBuild {
+                cmake {
+                    arguments "-DMLN_LEGACY_RENDERER=OFF", "-DMLN_DRAWABLE_RENDERER=ON"
+                    arguments "-DMLN_WITH_OPENGL=OFF", "-DMLN_WITH_VULKAN=ON"
+                }
+            }
+        }
+    }
+
+    sourceSets {
+        legacy {
+            java.srcDirs += ['src/opengl/java/']
+        }
+        drawable {
+            java.srcDirs += ['src/opengl/java/']
+        }
     }
 
     // build native libraries
@@ -126,10 +144,15 @@ android {
     buildFeatures {
         buildConfig true
     }
-}
 
-kotlin {
-    jvmToolchain(17)
+    compileOptions {
+        sourceCompatibility = 11
+        targetCompatibility = 11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
+    }
 }
 
 licenseReport {
@@ -150,6 +173,10 @@ configurations {
     all*.exclude group: 'commons-logging', module: 'commons-logging'
     all*.exclude group: 'commons-collections', module: 'commons-collections'
 }
+
+// Download validation layers from
+// https://github.com/KhronosGroup/Vulkan-ValidationLayers
+apply from: "${rootDir}/gradle/download-vulkan-validation.gradle"
 
 apply from: "${rootDir}/gradle/gradle-checkstyle.gradle"
 apply from: "${rootDir}/gradle/gradle-dependencies-graph.gradle"

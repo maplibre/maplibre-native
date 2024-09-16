@@ -717,11 +717,13 @@ struct InterpolationUniform {
     static constexpr auto name() { return concat_literals<&Attr::name, &string_literal<'_', 't'>::value>::value(); }
 };
 
+class PaintPropertyBindersBase {};
+
 template <class Ps>
 class PaintPropertyBinders;
 
 template <class... Ps>
-class PaintPropertyBinders<TypeList<Ps...>> {
+class PaintPropertyBinders<TypeList<Ps...>> : public PaintPropertyBindersBase {
 private:
     template <class T, class PossiblyEvaluatedType, class... As>
     struct Detail;
@@ -774,7 +776,7 @@ public:
 
     void setPatternParameters(const std::optional<ImagePosition>& posA,
                               const std::optional<ImagePosition>& posB,
-                              const CrossfadeParameters& crossfade) const {
+                              const CrossfadeParameters& crossfade) {
         util::ignore({(binders.template get<Ps>()->setPatternParameters(posA, posB, crossfade), 0)...});
     }
 

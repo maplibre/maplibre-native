@@ -17,8 +17,8 @@ struct ShaderSource<BuiltIn::LineShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_pos_normal;
-layout(location = 1) in vec4 in_data;
+layout(location = 0) in ivec2 in_pos_normal;
+layout(location = 1) in uvec4 in_data;
 
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 2) in vec4 in_color;
@@ -248,8 +248,8 @@ struct ShaderSource<BuiltIn::LineGradientShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_pos_normal;
-layout(location = 1) in vec4 in_data;
+layout(location = 0) in ivec2 in_pos_normal;
+layout(location = 1) in uvec4 in_data;
 
 #if !defined(HAS_UNIFORM_u_blur)
 layout(location = 2) in vec2 in_blur;
@@ -466,8 +466,8 @@ struct ShaderSource<BuiltIn::LinePatternShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_pos_normal;
-layout(location = 1) in vec4 in_data;
+layout(location = 0) in ivec2 in_pos_normal;
+layout(location = 1) in uvec4 in_data;
 
 #if !defined(HAS_UNIFORM_u_blur)
 layout(location = 2) in vec2 in_blur;
@@ -490,11 +490,11 @@ layout(location = 6) in vec2 in_width;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_from)
-layout(location = 7) in vec4 in_pattern_from;
+layout(location = 7) in uvec4 in_pattern_from;
 #endif
 
 #if !defined(HAS_UNIFORM_u_pattern_to)
-layout(location = 8) in vec4 in_pattern_to;
+layout(location = 8) in uvec4 in_pattern_to;
 #endif
 
 layout(set = 0, binding = 1) uniform LineDrawableUBO {
@@ -777,8 +777,8 @@ struct ShaderSource<BuiltIn::LineSDFShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_pos_normal;
-layout(location = 1) in vec4 in_data;
+layout(location = 0) in ivec2 in_pos_normal;
+layout(location = 1) in uvec4 in_data;
 
 #if !defined(HAS_UNIFORM_u_color)
 layout(location = 2) in vec4 in_color;

@@ -4,9 +4,34 @@
 
 ### ✨ Features and improvements
 
-- Added new map observer events: onPreCompileShader, onPostCompileShader, onShaderCompileFailed, onGlyphsLoaded, onGlyphsError, onGlyphsRequested, onTileAction, onSpriteLoaded, onSpriteError, onSpriteRequested ([#2694](https://github.com/maplibre/maplibre-native/pull/2694)).
+### 🐞 Bug fixes
+
+## 11.4.0
+
+### ✨ Features and improvements
+
+- Add `textFitWidth` and `textFitHeight` properties to sprites ([#2780](https://github.com/maplibre/maplibre-native/pull/2780)).
+  More information can be found in the [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/sprite/#text-fit-properties).
+- Move UBO updates from render layers to tweakers ([#2703](https://github.com/maplibre/maplibre-native/pull/2703)).
+- Improve tile lifecycle determinism  ([#2819](https://github.com/maplibre/maplibre-native/pull/2819)).
+- Make sure swapBehavior is NoFlush ([#2827](https://github.com/maplibre/maplibre-native/pull/2827)).
 
 ### 🐞 Bug fixes
+
+- Ensure that all depth values are rendered before any color values ([#2811](https://github.com/maplibre/maplibre-native/pull/2811)).
+
+## 11.3.0
+
+### ✨ Features and improvements
+
+- Added new map observer events: `onPreCompileShader`, `onPostCompileShader`, `onShaderCompileFailed`, `onGlyphsLoaded`, `onGlyphsError`, `onGlyphsRequested`, `onTileAction`, `onSpriteLoaded`, `onSpriteError`, `onSpriteRequested` ([#2694](https://github.com/maplibre/maplibre-native/pull/2694)).
+- Correct and revise OpenGL texture pooling ([#2709](https://github.com/maplibre/maplibre-native/pull/2709)).
+- Update Android dependencies ([#2794](https://github.com/maplibre/maplibre-native/pull/2794)).
+- Make project compatible again with Java 11, based on feedback from @alasram ([#2799](https://github.com/maplibre/maplibre-native/pull/2799)).
+
+### 🐞 Bug fixes
+
+- Fix raster masking bug ([#2798](https://github.com/maplibre/maplibre-native/pull/2798)).
 
 ## 11.2.0
 

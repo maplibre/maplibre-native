@@ -185,7 +185,7 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
     // vk::DynamicState::eDepthBias,
     // vk::DynamicState::eDepthBounds,
 
-    const auto& dynamicValues = pipelineInfo.getDynamicStates();
+    const auto& dynamicValues = pipelineInfo.getDynamicStates(backend);
     const vk::PipelineDynamicStateCreateInfo dynamicState({}, dynamicValues);
 
     const auto& device = backend.getDevice();

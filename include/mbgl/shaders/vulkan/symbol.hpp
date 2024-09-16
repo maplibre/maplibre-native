@@ -17,9 +17,9 @@ struct ShaderSource<BuiltIn::SymbolIconShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
         
-layout(location = 0) in vec4 in_pos_offset;
-layout(location = 1) in vec4 in_data;
-layout(location = 2) in vec4 in_pixeloffset;
+layout(location = 0) in ivec4 in_pos_offset;
+layout(location = 1) in uvec4 in_data;
+layout(location = 2) in ivec4 in_pixeloffset;
 layout(location = 3) in vec3 in_projected_pos;
 layout(location = 4) in float in_fade_opacity;
 
@@ -196,9 +196,9 @@ struct ShaderSource<BuiltIn::SymbolSDFIconShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
         
-layout(location = 0) in vec4 in_pos_offset;
-layout(location = 1) in vec4 in_data;
-layout(location = 2) in vec4 in_pixeloffset;
+layout(location = 0) in ivec4 in_pos_offset;
+layout(location = 1) in uvec4 in_data;
+layout(location = 2) in ivec4 in_pixeloffset;
 layout(location = 3) in vec3 in_projected_pos;
 layout(location = 4) in float in_fade_opacity;
 
@@ -496,8 +496,8 @@ struct ShaderSource<BuiltIn::SymbolTextAndIconShader, gfx::Backend::Type::Vulkan
 #define SDF 1.0
 #define ICON 0.0
 
-layout(location = 0) in vec4 in_pos_offset;
-layout(location = 1) in vec4 in_data;
+layout(location = 0) in ivec4 in_pos_offset;
+layout(location = 1) in uvec4 in_data;
 layout(location = 2) in vec3 in_projected_pos;
 layout(location = 3) in float in_fade_opacity;
 

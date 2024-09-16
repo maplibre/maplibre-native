@@ -18,12 +18,16 @@
 
 namespace mbgl {
 
+class Bucket;
 class Color;
-class PaintParameters;
 class LayerTweaker;
+class PaintParameters;
+class PaintPropertyBindersBase;
 enum class RenderPass : uint8_t;
+class RenderTile;
 
 using LayerTweakerPtr = std::shared_ptr<LayerTweaker>;
+using RenderTiles = std::shared_ptr<const std::vector<std::reference_wrapper<const RenderTile>>>;
 
 namespace gfx {
 
@@ -244,6 +248,17 @@ public:
 
     /// Set origin point
     void setOrigin(std::optional<Point<double>> p) { origin = std::move(p); }
+
+    /// Get the property binders used for property updates
+    PaintPropertyBindersBase* getBinders();
+    const PaintPropertyBindersBase* getBinders() const;
+
+    /// Set the property binders used for property updates
+    void setBinders(std::shared_ptr<Bucket>, PaintPropertyBindersBase*);
+
+    const RenderTile* getRenderTile() const;
+    const std::shared_ptr<Bucket>& getBucket() const;
+    void setRenderTile(Immutable<std::vector<RenderTile>>, const RenderTile*);
 
     const std::chrono::duration<double> createTime = util::MonotonicTimer::now();
 

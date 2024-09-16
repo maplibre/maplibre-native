@@ -229,7 +229,7 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
         return;
     }
 
-    if (data_) {
+    if (!pending) {
         observer->onTileAction(id, sourceID, TileOperation::StartParse);
     }
 
@@ -245,12 +245,18 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
 void GeometryTile::reset() {
     MLN_TRACE_FUNC();
 
-    // Mark the tile as pending again if it was complete before to prevent
-    // signaling a complete state despite pending parse operations.
-    pending = true;
+    // If there is pending work, indicate that work has been cancelled.
+    // Clear the pending status.
+    if (pending) {
+        observer->onTileAction(id, sourceID, TileOperation::Cancelled);
+        pending = false;
+    }
 
-    observer->onTileAction(id, sourceID, TileOperation::Cancelled);
+    // Reset the tile to an unloaded state to avoid signaling completion
+    // after clearing the tile's pending status.
+    loaded = false;
 
+    // Reset the worker to the `NeedsParse` state.
     ++correlationID;
     worker.self().invoke(&GeometryTileWorker::reset, correlationID);
 }
@@ -266,7 +272,10 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
 
     // Mark the tile as pending again if it was complete before to prevent
     // signaling a complete state despite pending parse operations.
-    pending = true;
+    if (!pending) {
+        pending = true;
+        observer->onTileAction(id, sourceID, TileOperation::StartParse);
+    }
 
     std::vector<Immutable<LayerProperties>> impls;
     impls.reserve(layers.size());
@@ -308,6 +317,7 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
     renderable = true;
     if (resultCorrelationID == correlationID) {
         pending = false;
+        observer->onTileAction(id, sourceID, TileOperation::EndParse);
     }
 
     layoutResult = std::move(result);
@@ -332,16 +342,13 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
             }
         }
     }
-
-    if (!pending) {
-        observer->onTileAction(id, sourceID, TileOperation::EndParse);
-    }
 }
 
 void GeometryTile::onError(std::exception_ptr err, const uint64_t resultCorrelationID) {
     loaded = true;
     if (resultCorrelationID == correlationID) {
         pending = false;
+        observer->onTileAction(id, sourceID, TileOperation::Error);
     }
     observer->onTileError(*this, std::move(err));
 }

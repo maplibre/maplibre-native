@@ -195,6 +195,30 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/util/default_style.hpp
             ${PROJECT_SOURCE_DIR}/util/tile_server_options.hpp)
 
+if(MLN_WITH_OPENGL)
+    target_sources(
+        maplibre PRIVATE
+            ${PROJECT_SOURCE_DIR}/android_gl_renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/android_gl_renderer_backend.hpp
+    )
+    target_compile_definitions(
+        maplibre
+            PRIVATE MLN_RENDER_BACKEND_OPENGL=1
+    )
+endif()
+
+if(MLN_WITH_VULKAN)
+    target_sources(
+        maplibre PRIVATE
+            ${PROJECT_SOURCE_DIR}/android_vulkan_renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/android_vulkan_renderer_backend.hpp
+    )
+    target_compile_definitions(
+        maplibre
+            PRIVATE MLN_RENDER_BACKEND_VULKAN=1
+    )
+endif()
+
 target_include_directories(
   maplibre
   PRIVATE ${PROJECT_SOURCE_DIR}

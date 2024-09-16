@@ -22,7 +22,7 @@ struct ShaderSource<BuiltIn::ClippingMaskProgram, gfx::Backend::Type::Vulkan> {
     static constexpr std::array<TextureInfo, 0> textures{};
 
     static constexpr auto vertex = R"(
-        layout(location = 0) in vec2 position;
+        layout(location = 0) in ivec2 position;
 
         layout(push_constant) uniform constants {
             mat4 matrix;
