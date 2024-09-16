@@ -273,7 +273,7 @@ void Texture2D::createTexture() {
             imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eTransferDst |
                          vk::ImageUsageFlagBits::eSampled;
             imageTiling = vk::ImageTiling::eOptimal;
-            
+
             if (samplerState.mipmapped) {
                 imageUsage |= vk::ImageUsageFlagBits::eTransferSrc;
             }
@@ -527,9 +527,8 @@ uint32_t Texture2D::getMipLevels() const {
 }
 
 void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
-    
     const uint32_t mipLevels = getMipLevels();
-    
+
     if (mipLevels <= 1) {
         return;
     }
@@ -561,7 +560,12 @@ void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
                               .setSrcSubresource({vk::ImageAspectFlagBits::eColor, i - 1, 0, 1})
                               .setDstSubresource({vk::ImageAspectFlagBits::eColor, i, 0, 1});
 
-        buffer->blitImage(imageAllocation->image, barrier.newLayout, imageAllocation->image, barrier.oldLayout, blit, vk::Filter::eLinear);
+        buffer->blitImage(imageAllocation->image,
+                          barrier.newLayout,
+                          imageAllocation->image,
+                          barrier.oldLayout,
+                          blit,
+                          vk::Filter::eLinear);
 
         barrier.setOldLayout(vk::ImageLayout::eTransferSrcOptimal)
             .setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)

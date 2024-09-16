@@ -441,7 +441,7 @@ public:
             height = img->image.size.height;
         }
 
-        void reset() { 
+        void reset() {
             texture.reset();
             image.reset();
             pixelRatio = 1.0f;
@@ -456,7 +456,7 @@ public:
                                const mbgl::LocationIndicatorRenderParameters& params) {
         bool updated = false;
         const Immutable<style::Image::Impl>* sharedImage = nullptr;
-        
+
         if (!imagePath.empty() && params.imageManager) {
             sharedImage = params.imageManager->getSharedImage(imagePath);
         }
@@ -888,7 +888,7 @@ protected:
     bool dirtyFeature = true;
 
 #if MLN_RENDER_BACKEND_VULKAN
-    
+
 public:
     struct QuadDrawableInfo {
         std::optional<std::reference_wrapper<gfx::Drawable>> drawable;
@@ -1049,7 +1049,6 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
                                           const std::shared_ptr<UpdateParameters>&,
                                           const RenderTree&,
                                           UniqueChangeRequestVec& changes) {
-    
     const auto drawPasses = RenderPass::Translucent;
 
     // If the result is transparent or missing, just remove any existing drawables and stop
@@ -1089,7 +1088,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
     if (localLayerGroup->getDrawableCount() == 0) {
         // create empty drawable using a builder
         const gfx::UniqueDrawableBuilder& builder = context.createDrawableBuilder(getID());
-        
+
         const auto createQuadGeometry = [&](gfx::Drawable& drawable, const auto& geometry) {
             auto vertexAttrs = context.createVertexAttributeArray();
 
@@ -1120,7 +1119,6 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
 
         const auto createQuadDrawable = [&](RenderLocationIndicatorImpl::QuadDrawableInfo& drawableInfo,
                                             std::string&& name) {
-
             auto& drawable = builder->getCurrentDrawable(true);
 
             drawable->setName(name);
@@ -1235,10 +1233,9 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             for (const auto& elem : geometry) {
                 verts->emplace_back(elem);
             }
-            
+
             auto& circleVertexAttrs = circleDrawable.getVertexAttributes();
             if (const auto& attr = circleVertexAttrs->set(shaders::idCommonPosVertexAttribute)) {
-                
                 attr->setSharedRawData(
                     verts, 0, 0, sizeof(RenderLocationIndicatorImpl::vec2), gfx::AttributeDataType::Float2);
             }
@@ -1285,8 +1282,11 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             if (info.textureInfo.image) {
                 if (!info.textureInfo.texture) {
                     info.textureInfo.texture = context.createTexture2D();
-                    info.textureInfo.texture->setSamplerConfiguration(
-                        {gfx::TextureFilterType::Linear, gfx::TextureWrapType::Clamp, gfx::TextureWrapType::Clamp, 16, true});
+                    info.textureInfo.texture->setSamplerConfiguration({gfx::TextureFilterType::Linear,
+                                                                       gfx::TextureWrapType::Clamp,
+                                                                       gfx::TextureWrapType::Clamp,
+                                                                       16,
+                                                                       true});
                 }
 
                 info.textureInfo.texture->upload(info.textureInfo.image->get()->image);
