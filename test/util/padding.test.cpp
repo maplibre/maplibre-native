@@ -96,7 +96,7 @@ TEST(Padding, OperatorBool) {
 }
 
 TEST(Padding, OperatorEqual) {
-    auto a = Padding({{ 3.5f, 9 }});
+    auto a = Padding({{3.5f, 9}});
     auto b = Padding(3.5, 9, 3.5, 9);
     EXPECT_TRUE(a == b);
     EXPECT_FALSE(a != b);
