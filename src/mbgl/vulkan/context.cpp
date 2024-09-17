@@ -305,8 +305,8 @@ gfx::UniqueDrawableBuilder Context::createDrawableBuilder(std::string name) {
     return std::make_unique<DrawableBuilder>(std::move(name));
 }
 
-gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent) {
-    return std::make_shared<UniformBuffer>(createBuffer(data, size, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, persistent));
+gfx::UniformBufferPtr Context::createUniformBuffer(const void* data, std::size_t size, bool persistent, bool ssbo) {
+    return std::make_shared<UniformBuffer>(createBuffer(data, size, ssbo ? VK_BUFFER_USAGE_STORAGE_BUFFER_BIT : VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, persistent));
 }
 
 gfx::ShaderProgramBasePtr Context::getGenericShader(gfx::ShaderRegistry& shaders, const std::string& name) {
@@ -331,7 +331,7 @@ bool Context::emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& buffer,
         buffer->update(data, size);
         return false;
     } else {
-        buffer = createUniformBuffer(data, size, persistent);
+        buffer = createUniformBuffer(data, size, persistent, false);
         return true;
     }
 }
@@ -485,14 +485,14 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
 const std::unique_ptr<BufferResource>& Context::getDummyVertexBuffer() {
     if (!dummyVertexBuffer)
         dummyVertexBuffer = std::make_unique<BufferResource>(
-            *this, nullptr, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, false);
+            *this, nullptr, 16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
     return dummyVertexBuffer;
 }
 
 const std::unique_ptr<BufferResource>& Context::getDummyUniformBuffer() {
     if (!dummyUniformBuffer)
         dummyUniformBuffer = std::make_unique<BufferResource>(
-            *this, nullptr, 16, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, false);
+            *this, nullptr, 16, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, false);
     return dummyUniformBuffer;
 }
 

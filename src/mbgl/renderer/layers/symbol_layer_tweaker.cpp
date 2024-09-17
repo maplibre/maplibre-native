@@ -229,21 +229,21 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
     const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
     if (!drawableBuffer || drawableBuffer->getSize() < drawableUBOVectorSize) {
-        drawableBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize);
+        drawableBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize, false, true);
     } else {
         drawableBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
     }
 
     const size_t tilePropsUBOVectorSize = sizeof(SymbolTilePropsUBO) * tilePropsUBOVector.size();
     if (!tilePropsBuffer || tilePropsBuffer->getSize() < tilePropsUBOVectorSize) {
-        tilePropsBuffer = context.createUniformBuffer(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
+        tilePropsBuffer = context.createUniformBuffer(tilePropsUBOVector.data(), tilePropsUBOVectorSize, false, true);
     } else {
         tilePropsBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
     }
 
     const size_t interpolateUBOVectorSize = sizeof(SymbolInterpolateUBO) * interpolateUBOVector.size();
     if (!interpolateBuffer || interpolateBuffer->getSize() < interpolateUBOVectorSize) {
-        interpolateBuffer = context.createUniformBuffer(interpolateUBOVector.data(), interpolateUBOVectorSize);
+        interpolateBuffer = context.createUniformBuffer(interpolateUBOVector.data(), interpolateUBOVectorSize, false, true);
     } else {
         interpolateBuffer->update(interpolateUBOVector.data(), interpolateUBOVectorSize);
     }
