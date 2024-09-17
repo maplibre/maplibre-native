@@ -158,14 +158,8 @@ jobs:
           externalData: ${{ env.external_data_arn }}
           testSpecArn: ${{ matrix.test.testSpecArn }}
 
-      - name: Upload benchmark results to S3
-        if: always() && env.run_device_test == 'true' && matrix.test.name == 'Android Benchmark'
-        run: |
-          npm install
-          node scripts/aws-device-farm/download-benchmark-results.mjs ${{ steps.aws_device_farm_run.outputs.runArn }}
-
-      - name: Log Test Spec Output
-        if: failure() && env.run_device_test == 'true'
+      - name: Store Test Artifacts
+        if: (matrix.test.name == 'Android Benchmark' || failure()) && env.run_device_test == 'true'
         run: |
           npm install
           temp_dir="$(mktemp -d)"
@@ -173,7 +167,7 @@ jobs:
           zip -r test_artifacts.zip "$temp_dir"
 
       - name: Upload Test Artifacts
-        if: failure() && env.run_device_test == 'true'
+        if: (matrix.test.name == 'Android Benchmark' || failure()) && env.run_device_test == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: "Test Artifacts ${{ matrix.test.name }}"
