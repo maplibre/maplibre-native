@@ -460,7 +460,9 @@ void RenderHillshadeLayer::update(gfx::ShaderRegistry& shaders,
             segments = &bucket.segments;
         }
 
-        hillshadeBuilder = context.createDrawableBuilder("hillshade");
+        if (!hillshadeBuilder) {
+            hillshadeBuilder = context.createDrawableBuilder("hillshade");
+        }
 
         gfx::VertexAttributeArrayPtr hillshadeVertexAttrs;
         auto buildVertexAttributes = [&] {

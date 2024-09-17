@@ -166,7 +166,8 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     if (impl->indexes) {
         impl->indexes->updateModified();
     }
-    if (impl->indexes && (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime))) {
+    if (impl->indexes &&
+        (!impl->indexes->getBuffer() || !attributeUpdateTime || impl->indexes->isModifiedAfter(*attributeUpdateTime))) {
         MLN_TRACE_ZONE(build indexes);
         auto indexBufferResource{
             uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
@@ -178,7 +179,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
 
     // Build the vertex attributes and bindings, if necessary
     if (impl->attributeBindings.empty() ||
-        (vertexAttributes && vertexAttributes->isModifiedAfter(attributeUpdateTime))) {
+        (vertexAttributes && (!attributeUpdateTime || vertexAttributes->isModifiedAfter(*attributeUpdateTime)))) {
         MLN_TRACE_ZONE(build attributes);
 
         // Apply drawable values to shader defaults

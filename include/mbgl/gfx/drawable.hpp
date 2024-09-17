@@ -192,7 +192,12 @@ public:
     const gfx::VertexAttributeArrayPtr& getVertexAttributes() const noexcept { return vertexAttributes; }
 
     /// Set vertex attribute array
-    void setVertexAttributes(gfx::VertexAttributeArrayPtr value) noexcept { vertexAttributes = std::move(value); }
+    void setVertexAttributes(gfx::VertexAttributeArrayPtr value) noexcept {
+        vertexAttributes = std::move(value);
+        // The attribute bindings need to be rebuilt, we can't rely on the update
+        // time check as these new values may not have been modified recently.
+        attributeUpdateTime.reset();
+    }
 
     /// Get the instance attributes
     const gfx::VertexAttributeArrayPtr& getInstanceAttributes() const noexcept { return instanceAttributes; }
@@ -261,6 +266,7 @@ public:
     void setRenderTile(Immutable<std::vector<RenderTile>>, const RenderTile*);
 
     const std::chrono::duration<double> createTime = util::MonotonicTimer::now();
+    std::optional<std::chrono::duration<double>> getAttributeUpdateTime() const { return attributeUpdateTime; }
 
 protected:
     bool enabled = true;
@@ -282,7 +288,7 @@ protected:
     UniqueDrawableData drawableData{};
     gfx::VertexAttributeArrayPtr vertexAttributes;
     gfx::VertexAttributeArrayPtr instanceAttributes;
-    std::chrono::duration<double> attributeUpdateTime = util::MonotonicTimer::now();
+    std::optional<std::chrono::duration<double>> attributeUpdateTime;
 
     struct Impl;
     std::unique_ptr<Impl> impl;
