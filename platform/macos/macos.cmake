@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "14.3")
 
 # Override default CMake NATIVE_ARCH_ACTUAL
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20893
@@ -38,6 +38,21 @@ if(MLN_WITH_METAL)
         PRIVATE
             ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/mtl/headless_backend.cpp
     )
+endif()
+
+if(MLN_WITH_VULKAN)
+    if(NOT VULKAN_SDK)
+        message(FATAL_ERROR "VULKAN_SDK variable is not set. Please set it when configuring Vulkan on macOS.")
+    endif()
+
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+    )
+    include_directories("${VULKAN_SDK}/include")
+    set(CMAKE_INSTALL_RPATH "${VULKAN_SDK}/lib")
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif()
 
 target_sources(

@@ -102,7 +102,11 @@ std::vector<const char*> RendererBackend::getLayers() {
 }
 
 std::vector<const char*> RendererBackend::getInstanceExtensions() {
-    return {};
+    return {
+#ifdef __APPLE__ // https://github.com/KhronosGroup/MoltenVK/blob/main/Docs/MoltenVK_Runtime_UserGuide.md#install
+        "VK_KHR_portability_subset", "VK_KHR_get_physical_device_properties2", "VK_KHR_portability_enumeration"
+#endif
+    };
 }
 
 std::vector<const char*> RendererBackend::getDeviceExtensions() {
