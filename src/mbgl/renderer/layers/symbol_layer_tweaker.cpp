@@ -194,7 +194,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     if (layerGroup.getDrawableCount() > 60) {
         assert(false);
     }
-    
+
     const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
     if (!drawableBuffer || drawableBuffer->getSize() < drawableUBOVectorSize) {
         drawableBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize);
