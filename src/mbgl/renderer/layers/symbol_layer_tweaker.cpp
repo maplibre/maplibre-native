@@ -99,7 +99,6 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idSymbolEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
-
     int i = 0;
     std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
 
@@ -205,11 +204,11 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         drawableUniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
         drawableUniforms.createOrUpdate(idSymbolTilePropsUBO, &tileUBO, context);
         drawableUniforms.set(idSymbolInterpolateUBO, getInterpUBO(tileID, isText, paintProperties));
-        
+
         drawable.setUBOIndex(i);
         i++;
     });
-  
+
     if (layerGroup.getDrawableCount() > 60) {
         assert(false);
     }
