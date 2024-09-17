@@ -89,20 +89,7 @@ public:
                      const style::SymbolPlacementType placement,
                      const RefIndexedSubfeature& indexedFeature_,
                      const float overscaling,
-                     const float rotate)
-        : CollisionFeature(line,
-                           anchor,
-                           shapedText.top,
-                           shapedText.bottom,
-                           shapedText.left,
-                           shapedText.right,
-                           std::nullopt,
-                           boxScale,
-                           padding,
-                           placement,
-                           indexedFeature_,
-                           overscaling,
-                           rotate) {}
+                     const float rotate);
 
     // for icons
     // Icons collision features are always SymbolPlacementType::Point, which
@@ -118,40 +105,24 @@ public:
                      const float boxScale,
                      const float padding,
                      const RefIndexedSubfeature& indexedFeature_,
-                     const float rotate)
-        : CollisionFeature(line,
-                           anchor,
-                           (shapedIcon ? shapedIcon->top() : 0),
-                           (shapedIcon ? shapedIcon->bottom() : 0),
-                           (shapedIcon ? shapedIcon->left() : 0),
-                           (shapedIcon ? shapedIcon->right() : 0),
-                           (shapedIcon ? shapedIcon->collisionPadding() : std::optional<Padding>{std::nullopt}),
-                           boxScale,
-                           padding,
-                           style::SymbolPlacementType::Point,
-                           indexedFeature_,
-                           1,
-                           rotate) {}
-
-    CollisionFeature(const GeometryCoordinates& line,
-                     const Anchor&,
-                     float top,
-                     float bottom,
-                     float left,
-                     float right,
-                     const std::optional<Padding>& collisionPadding,
-                     float boxScale,
-                     float padding,
-                     style::SymbolPlacementType,
-                     IndexedSubfeature,
-                     float overscaling,
-                     float rotate);
+                     const float rotate);
 
     std::vector<CollisionBox> boxes;
     IndexedSubfeature indexedFeature;
     bool alongLine;
 
 private:
+    void initialize(const GeometryCoordinates& line,
+                    const Anchor& anchor,
+                    float top,
+                    float bottom,
+                    float left,
+                    float right,
+                    const std::optional<Padding>& collisionPadding,
+                    float boxScale,
+                    float padding,
+                    float overscaling,
+                    float rotate);
     void bboxifyLabel(const GeometryCoordinates& line,
                       GeometryCoordinate& anchorPoint,
                       std::size_t segment,
