@@ -1,8 +1,6 @@
 uniform sampler2D u_texture;
 
-uniform highp int u_ubo_index;
-
-struct SymbolTilePropsUBO {
+layout (std140) uniform SymbolTilePropsUBO {
     bool u_is_text;
     bool u_is_halo;
     bool u_pitch_with_map;
@@ -11,10 +9,6 @@ struct SymbolTilePropsUBO {
     highp float u_size_t; // used to interpolate between zoom stops when size is a composite function
     highp float u_size; // used when size is both zoom and feature constant
     bool tileprops_pad1;
-};
-
-layout (std140) uniform SymbolTilePropsUBOVector {
-    SymbolTilePropsUBO tilepropsUBO[60];
 };
 
 layout (std140) uniform SymbolEvaluatedPropsUBO {
@@ -38,8 +32,6 @@ in float v_fade_opacity;
 #pragma mapbox: define lowp float opacity
 
 void main() {
-    bool u_is_text = tilepropsUBO[u_ubo_index].u_is_text;
-
     highp float u_opacity = u_is_text ? u_text_opacity : u_icon_opacity;
 
     #pragma mapbox: initialize lowp float opacity

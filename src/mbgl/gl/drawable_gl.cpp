@@ -36,9 +36,6 @@ void DrawableGL::draw(PaintParameters& parameters) const {
         if (shaderGL.getGLProgramID() != context.program.getCurrentValue()) {
             context.program = shaderGL.getGLProgramID();
         }
-        if (shaderGL.getUBOIndexLocation() >= 0 && uboIndex >= 0) {
-            mbgl::gl::bindUniform(shaderGL.getUBOIndexLocation(), uboIndex);
-        }
     }
     if (!shader || context.program.getCurrentValue() == 0) {
         mbgl::Log::Warning(Event::General, "Missing shader for drawable " + util::toString(getID()) + "/" + getName());
