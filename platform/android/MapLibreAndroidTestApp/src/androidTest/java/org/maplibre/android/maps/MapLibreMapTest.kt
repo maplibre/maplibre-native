@@ -19,6 +19,7 @@ import org.maplibre.android.annotations.PolylineOptions
 import org.maplibre.android.exceptions.InvalidMarkerPositionException
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap.InfoWindowAdapter
+import org.maplibre.android.maps.renderer.MapRenderer.RenderingRefreshMode
 import org.maplibre.android.testapp.R
 import org.maplibre.android.testapp.activity.EspressoTest
 
@@ -477,6 +478,19 @@ class MapLibreMapTest : EspressoTest() {
 
             maplibreMap.tileCacheEnabled = true
             assertTrue(maplibreMap.tileCacheEnabled == true)
+        }
+    }
+
+    @Test
+    fun testRenderingRefreshMode() {
+        validateTestSetup()
+        rule.runOnUiThread {
+            mapView = rule.getActivity().findViewById(R.id.mapView)
+            // Default RenderingRefreshMode is WHEN_DIRTY
+            assertTrue(mapView.getRenderingRefreshMode() == RenderingRefreshMode.WHEN_DIRTY)
+            // Switch to CONTINUOUS rendering
+            mapView.setRenderingRefreshMode(RenderingRefreshMode.CONTINUOUS)
+            assertTrue(mapView.getRenderingRefreshMode() == RenderingRefreshMode.CONTINUOUS)
         }
     }
 
