@@ -122,7 +122,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             return result.first->second.ubo;
         };
 #endif
-    
+
     const auto camDist = state.getCameraToCenterDistance();
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
         if (!drawable.getTileID() || !drawable.getData()) {
@@ -197,20 +197,20 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         const auto& sizeBinder = isText ? bucket->textSizeBinder : bucket->iconSizeBinder;
         const auto size = sizeBinder->evaluateForZoom(currentZoom);
-            
+
 #if MLN_RENDER_BACKEND_METAL
-        tilePropsUBOVector[i] = SymbolTilePropsUBO{
+        tilePropsUBOVector[i] = SymbolTilePropsUBO {
 #else
         const auto tileUBO = SymbolTilePropsUBO{
 #endif
             /* .is_text = */ isText,
-            /* .is_halo = */ symbolData.isHalo,
-            /* .pitch_with_map = */ (symbolData.pitchAlignment == style::AlignmentType::Map),
-            /* .is_size_zoom_constant = */ size.isZoomConstant,
-            /* .is_size_feature_constant = */ size.isFeatureConstant,
-            /* .size_t = */ size.sizeT,
-            /* .size = */ size.size,
-            /* .padding = */ 0,
+                /* .is_halo = */ symbolData.isHalo,
+                /* .pitch_with_map = */ (symbolData.pitchAlignment == style::AlignmentType::Map),
+                /* .is_size_zoom_constant = */ size.isZoomConstant,
+                /* .is_size_feature_constant = */ size.isFeatureConstant,
+                /* .size_t = */ size.sizeT,
+                /* .size = */ size.size,
+                /* .padding = */ 0,
         };
 
 #if MLN_RENDER_BACKEND_METAL
