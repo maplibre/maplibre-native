@@ -215,6 +215,13 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     auto& shaderImpl = static_cast<mbgl::vulkan::ShaderProgram&>(*shader);
 
+    commandBuffer->pushConstants(
+        context.getPushConstantPipelineLayout().get(),
+        vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
+        0,
+        sizeof(uboIndex),
+        &uboIndex);
+
     if (!bindAttributes(encoder)) return;
     if (!bindDescriptors(encoder)) return;
 

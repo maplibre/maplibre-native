@@ -24,7 +24,7 @@ private:
     gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
     gfx::UniformBufferPtr drawableBuffer;
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
     gfx::UniformBufferPtr tilePropsBuffer;
     gfx::UniformBufferPtr interpolateBuffer;
 #else

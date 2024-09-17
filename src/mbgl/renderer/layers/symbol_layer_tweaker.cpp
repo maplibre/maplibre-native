@@ -99,7 +99,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idSymbolEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
     int i = 0;
     std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
     std::vector<SymbolTilePropsUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
@@ -178,7 +178,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         // Unpitched point labels need to have their rotation applied after projection
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
         drawableUBOVector[i] = {
 #else
         const SymbolDrawableUBO drawableUBO = {
@@ -198,7 +198,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         const auto& sizeBinder = isText ? bucket->textSizeBinder : bucket->iconSizeBinder;
         const auto size = sizeBinder->evaluateForZoom(currentZoom);
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
         tilePropsUBOVector[i] = SymbolTilePropsUBO {
 #else
         const auto tileUBO = SymbolTilePropsUBO{
@@ -213,7 +213,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
                 /* .padding = */ 0,
         };
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
         interpolateUBOVector[i] = buildInterpUBO(paintProperties, isText, zoom);
 
         drawable.setUBOIndex(i);
@@ -226,7 +226,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 #endif
     });
 
-#if MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
     const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
     if (!drawableBuffer || drawableBuffer->getSize() < drawableUBOVectorSize) {
         drawableBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize);

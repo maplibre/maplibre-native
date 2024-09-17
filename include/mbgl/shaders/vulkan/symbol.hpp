@@ -27,7 +27,11 @@ layout(location = 4) in float in_fade_opacity;
 layout(location = 5) in vec2 in_opacity;
 #endif    
 
-layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -36,9 +40,13 @@ layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
     float gamma_scale;
 	bool rotate_symbol;
     vec2 pad;
-} drawable;
+};
 
-layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
+layout(std140, set = 0, binding = 2) readonly buffer SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawable_ubo[];
+} drawable_vector;
+
+struct SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     bool pitch_with_map;
@@ -47,21 +55,32 @@ layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
     float size_t;
     float size;
     float padding;
-} tile;
+};
 
-layout(set = 0, binding = 3) uniform SymbolInterpolateUBO {
+layout(std140, set = 0, binding = 3) readonly buffer SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tile_ubo[];
+} tile_vector;
+
+struct SymbolInterpolateUBO {
     float fill_color_t;
     float halo_color_t;
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
     float pad1, pad2, pad3;
-} interp;
+};
+
+layout(std140, set = 0, binding = 4) readonly buffer SymbolInterpolateUBOVector {
+    SymbolInterpolateUBO interp_ubo[];
+} interp_vector;
 
 layout(location = 0) out mediump vec2 frag_tex;
 layout(location = 1) out mediump float frag_opacity;
 
 void main() {
+    const SymbolDrawableUBO drawable = drawable_vector.drawable_ubo[constant.ubo_index];
+    const SymbolTilePropsUBO tile = tile_vector.tile_ubo[constant.ubo_index];
+    const SymbolInterpolateUBO interp = interp_vector.interp_ubo[constant.ubo_index];
 
     const vec2 a_pos = in_pos_offset.xy;
     const vec2 a_offset = in_pos_offset.zw;
@@ -140,7 +159,11 @@ layout(location = 1) in mediump float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     bool pitch_with_map;
@@ -149,7 +172,11 @@ layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
     float size_t;
     float size;
     float padding;
-} tile;
+};
+
+layout(std140, set = 0, binding = 3) readonly buffer SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tile_ubo[];
+} tile_vector;
 
 layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
@@ -173,6 +200,8 @@ void main() {
     out_color = vec4(1.0);
     return;
 #endif
+
+    const SymbolTilePropsUBO tile = tile_vector.tile_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_opacity)
     const float opacity = (tile.is_text ? props.text_opacity : props.icon_opacity) * frag_opacity;
@@ -222,7 +251,11 @@ layout(location = 8) in vec2 in_halo_width;
 layout(location = 9) in vec2 in_halo_blur;
 #endif  
 
-layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -231,9 +264,13 @@ layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
     float gamma_scale;
 	bool rotate_symbol;
     vec2 pad;
-} drawable;
+};
 
-layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
+layout(std140, set = 0, binding = 2) readonly buffer SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawable_ubo[];
+} drawable_vector;
+
+struct SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     bool pitch_with_map;
@@ -242,16 +279,24 @@ layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
     float size_t;
     float size;
     float padding;
-} tile;
+};
 
-layout(set = 0, binding = 3) uniform SymbolInterpolateUBO {
+layout(std140, set = 0, binding = 3) readonly buffer SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tile_ubo[];
+} tile_vector;
+
+struct SymbolInterpolateUBO {
     float fill_color_t;
     float halo_color_t;
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
     float pad1, pad2, pad3;
-} interp;
+};
+
+layout(std140, set = 0, binding = 4) readonly buffer SymbolInterpolateUBOVector {
+    SymbolInterpolateUBO interp_ubo[];
+} interp_vector;
 
 layout(location = 0) out mediump vec2 frag_tex;
 layout(location = 1) out mediump float frag_fade_opacity;
@@ -279,6 +324,9 @@ layout(location = 8) out mediump float frag_halo_blur;
 #endif
 
 void main() {
+    const SymbolDrawableUBO drawable = drawable_vector.drawable_ubo[constant.ubo_index];
+    const SymbolTilePropsUBO tile = tile_vector.tile_ubo[constant.ubo_index];
+    const SymbolInterpolateUBO interp = interp_vector.interp_ubo[constant.ubo_index];
 
     const vec2 a_pos = in_pos_offset.xy;
     const vec2 a_offset = in_pos_offset.zw;
@@ -396,7 +444,11 @@ layout(location = 8) in mediump float frag_halo_blur;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -405,9 +457,13 @@ layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
     float gamma_scale;
 	bool rotate_symbol;
     vec2 pad;
-} drawable;
+};
 
-layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
+layout(std140, set = 0, binding = 2) readonly buffer SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawable_ubo[];
+} drawable_vector;
+
+struct SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     bool pitch_with_map;
@@ -416,7 +472,11 @@ layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
     float size_t;
     float size;
     float padding;
-} tile;
+};
+
+layout(std140, set = 0, binding = 3) readonly buffer SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tile_ubo[];
+} tile_vector;
 
 layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
@@ -441,6 +501,9 @@ void main() {
     out_color = vec4(1.0);
     return;
 #endif
+
+    const SymbolDrawableUBO drawable = drawable_vector.drawable_ubo[constant.ubo_index];
+    const SymbolTilePropsUBO tile = tile_vector.tile_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_fill_color)
     const vec4 fill_color = tile.is_text ? props.text_fill_color : props.icon_fill_color;
@@ -521,7 +584,11 @@ layout(location = 7) in vec2 in_halo_width;
 layout(location = 8) in vec2 in_halo_blur;
 #endif  
 
-layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -530,9 +597,13 @@ layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
     float gamma_scale;
 	bool rotate_symbol;
     vec2 pad;
-} drawable;
+};
 
-layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
+layout(std140, set = 0, binding = 2) readonly buffer SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawable_ubo[];
+} drawable_vector;
+
+struct SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     bool pitch_with_map;
@@ -541,16 +612,24 @@ layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
     float size_t;
     float size;
     float padding;
-} tile;
+};
 
-layout(set = 0, binding = 3) uniform SymbolInterpolateUBO {
+layout(std140, set = 0, binding = 3) readonly buffer SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tile_ubo[];
+} tile_vector;
+
+struct SymbolInterpolateUBO {
     float fill_color_t;
     float halo_color_t;
     float opacity_t;
     float halo_width_t;
     float halo_blur_t;
     float pad1, pad2, pad3;
-} interp;
+};
+
+layout(std140, set = 0, binding = 4) readonly buffer SymbolInterpolateUBOVector {
+    SymbolInterpolateUBO interp_ubo[];
+} interp_vector;
 
 layout(location = 0) out mediump vec2 frag_tex;
 layout(location = 1) out mediump float frag_fade_opacity;
@@ -580,6 +659,9 @@ layout(location = 8) out mediump float frag_halo_blur;
 layout(location = 9) out int frag_is_icon;
 
 void main() {
+    const SymbolDrawableUBO drawable = drawable_vector.drawable_ubo[constant.ubo_index];
+    const SymbolTilePropsUBO tile = tile_vector.tile_ubo[constant.ubo_index];
+    const SymbolInterpolateUBO interp = interp_vector.interp_ubo[constant.ubo_index];
 
     const vec2 a_pos = in_pos_offset.xy;
     const vec2 a_offset = in_pos_offset.zw;
@@ -702,7 +784,11 @@ layout(location = 9) flat in int frag_is_icon;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
+layout(push_constant) uniform Constants {
+    int ubo_index;
+} constant;
+
+struct SymbolDrawableUBO {
     mat4 matrix;
     mat4 label_plane_matrix;
     mat4 coord_matrix;
@@ -711,9 +797,13 @@ layout(set = 0, binding = 1) uniform SymbolDrawableUBO {
     float gamma_scale;
 	bool rotate_symbol;
     vec2 pad;
-} drawable;
+};
 
-layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
+layout(std140, set = 0, binding = 2) readonly buffer SymbolDrawableUBOVector {
+    SymbolDrawableUBO drawable_ubo[];
+} drawable_vector;
+
+struct SymbolTilePropsUBO {
     bool is_text;
     bool is_halo;
     bool pitch_with_map;
@@ -722,7 +812,11 @@ layout(set = 0, binding = 2) uniform SymbolTilePropsUBO {
     float size_t;
     float size;
     float padding;
-} tile;
+};
+
+layout(std140, set = 0, binding = 3) readonly buffer SymbolTilePropsUBOVector {
+    SymbolTilePropsUBO tile_ubo[];
+} tile_vector;
 
 layout(set = 0, binding = 4) uniform SymbolEvaluatedPropsUBO {
     vec4 text_fill_color;
@@ -747,6 +841,9 @@ void main() {
     out_color = vec4(1.0);
     return;
 #endif
+
+    const SymbolDrawableUBO drawable = drawable_vector.drawable_ubo[constant.ubo_index];
+    const SymbolTilePropsUBO tile = tile_vector.tile_ubo[constant.ubo_index];
 
 #if defined(HAS_UNIFORM_u_fill_color)
     const vec4 fill_color = tile.is_text ? props.text_fill_color : props.icon_fill_color;
