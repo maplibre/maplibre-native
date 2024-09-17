@@ -243,7 +243,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     const size_t interpolateUBOVectorSize = sizeof(SymbolInterpolateUBO) * interpolateUBOVector.size();
     if (!interpolateBuffer || interpolateBuffer->getSize() < interpolateUBOVectorSize) {
-        interpolateBuffer = context.createUniformBuffer(interpolateUBOVector.data(), interpolateUBOVectorSize, false, true);
+        interpolateBuffer = context.createUniformBuffer(
+            interpolateUBOVector.data(), interpolateUBOVectorSize, false, true);
     } else {
         interpolateBuffer->update(interpolateUBOVector.data(), interpolateUBOVectorSize);
     }
