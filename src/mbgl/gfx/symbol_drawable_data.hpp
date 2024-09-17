@@ -1,7 +1,6 @@
 #pragma once
 
 #include <mbgl/gfx/drawable_data.hpp>
-#include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/util/tiny_unordered_map.hpp>
 
@@ -20,16 +19,14 @@ struct SymbolDrawableData : public DrawableData {
                        const style::AlignmentType pitchAlignment_,
                        const style::AlignmentType rotationAlignment_,
                        const style::SymbolPlacementType placement_,
-                       const style::IconTextFitType textFit_,
-                       const SymbolBucket* bucket_)
+                       const style::IconTextFitType textFit_)
         : isHalo(isHalo_),
           bucketVariablePlacement(bucketVariablePlacement_),
           symbolType(symbolType_),
           pitchAlignment(pitchAlignment_),
           rotationAlignment(rotationAlignment_),
           placement(placement_),
-          textFit(textFit_),
-          bucket(bucket_) {}
+          textFit(textFit_) {}
     ~SymbolDrawableData() override = default;
 
     const bool isHalo;
@@ -39,7 +36,6 @@ struct SymbolDrawableData : public DrawableData {
     const style::AlignmentType rotationAlignment;
     const style::SymbolPlacementType placement;
     const style::IconTextFitType textFit;
-    const SymbolBucket* bucket;
 };
 
 using UniqueSymbolDrawableData = std::unique_ptr<SymbolDrawableData>;

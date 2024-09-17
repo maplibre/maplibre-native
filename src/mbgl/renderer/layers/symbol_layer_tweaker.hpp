@@ -23,22 +23,8 @@ public:
 private:
     gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
     gfx::UniformBufferPtr drawableBuffer;
-
-    // Interpolation UBOs are shared by drawables of the same type (text/icon) in each tile
-    struct InterpUBOKey {
-        UnwrappedTileID tileID;
-        bool isText;
-
-        bool operator==(const InterpUBOKey& other) const { return isText == other.isText && tileID == other.tileID; }
-    };
-    struct InterpUBOValue {
-        gfx::UniformBufferPtr ubo;
-        uint64_t updatedFrame = 0;
-    };
-    struct InterpUBOHash {
-        size_t operator()(const InterpUBOKey& k) const { return util::hash(k.tileID, k.isText); }
-    };
-    mbgl::unordered_map<InterpUBOKey, InterpUBOValue, InterpUBOHash> interpUBOs;
+    gfx::UniformBufferPtr tilePropsBuffer;
+    gfx::UniformBufferPtr interpolateBuffer;
 };
 
 } // namespace mbgl

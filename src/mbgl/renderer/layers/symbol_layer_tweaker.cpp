@@ -101,23 +101,8 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
     int i = 0;
     std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
-
-    const auto getInterpUBO =
-        [&](const UnwrappedTileID& tileID, bool isText, const SymbolBucket::PaintProperties& paintProps) {
-            auto result = interpUBOs.insert(
-                std::make_pair(InterpUBOKey{tileID, isText}, InterpUBOValue{{}, parameters.frameCount}));
-            if (result.second) {
-                // new item inserted
-                const auto interpolateBuf = buildInterpUBO(paintProps, isText, zoom);
-                result.first->second.ubo = context.createUniformBuffer(&interpolateBuf, sizeof(interpolateBuf));
-            } else if (result.first->second.updatedFrame < parameters.frameCount) {
-                // existing item found, but hasn't been updated this frame
-                const auto interpolateBuf = buildInterpUBO(paintProps, isText, zoom);
-                result.first->second.ubo->update(&interpolateBuf, sizeof(interpolateBuf));
-                result.first->second.updatedFrame = parameters.frameCount;
-            }
-            return result.first->second.ubo;
-        };
+    std::vector<SymbolTilePropsUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+    std::vector<SymbolInterpolateUBO> interpolateUBOVector(layerGroup.getDrawableCount());
 
     const auto camDist = state.getCameraToCenterDistance();
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -189,7 +174,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         const auto& sizeBinder = isText ? bucket->textSizeBinder : bucket->iconSizeBinder;
         const auto size = sizeBinder->evaluateForZoom(currentZoom);
-        const auto tileUBO = SymbolTilePropsUBO{
+        tilePropsUBOVector[i] = SymbolTilePropsUBO{
             /* .is_text = */ isText,
             /* .is_halo = */ symbolData.isHalo,
             /* .pitch_with_map = */ (symbolData.pitchAlignment == style::AlignmentType::Map),
@@ -200,10 +185,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             /* .padding = */ 0,
         };
 
-        auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
-        drawableUniforms.createOrUpdate(idSymbolTilePropsUBO, &tileUBO, context);
-        drawableUniforms.set(idSymbolInterpolateUBO, getInterpUBO(tileID, isText, paintProperties));
+        interpolateUBOVector[i] = buildInterpUBO(paintProperties, isText, zoom);
 
         drawable.setUBOIndex(i);
         i++;
@@ -212,26 +194,31 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     if (layerGroup.getDrawableCount() > 60) {
         assert(false);
     }
-
+    
     const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
     if (!drawableBuffer || drawableBuffer->getSize() < drawableUBOVectorSize) {
         drawableBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize);
     } else {
         drawableBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
     }
-    layerUniforms.set(idSymbolDrawableUBO, drawableBuffer);
 
-    // Regularly remove UBOs which are not being updated
-    constexpr int pruneFrameInterval = 10;
-    if ((parameters.frameCount % pruneFrameInterval) == 0) {
-        for (auto i = interpUBOs.begin(); i != interpUBOs.end();) {
-            if (i->second.updatedFrame < parameters.frameCount) {
-                i = interpUBOs.erase(i);
-            } else {
-                i++;
-            }
-        }
+    const size_t tilePropsUBOVectorSize = sizeof(SymbolTilePropsUBO) * tilePropsUBOVector.size();
+    if (!tilePropsBuffer || tilePropsBuffer->getSize() < tilePropsUBOVectorSize) {
+        tilePropsBuffer = context.createUniformBuffer(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
+    } else {
+        tilePropsBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
     }
+
+    const size_t interpolateUBOVectorSize = sizeof(SymbolInterpolateUBO) * interpolateUBOVector.size();
+    if (!interpolateBuffer || interpolateBuffer->getSize() < interpolateUBOVectorSize) {
+        interpolateBuffer = context.createUniformBuffer(interpolateUBOVector.data(), interpolateUBOVectorSize);
+    } else {
+        interpolateBuffer->update(interpolateUBOVector.data(), interpolateUBOVectorSize);
+    }
+
+    layerUniforms.set(idSymbolDrawableUBO, drawableBuffer);
+    layerUniforms.set(idSymbolTilePropsUBO, tilePropsBuffer);
+    layerUniforms.set(idSymbolInterpolateUBO, interpolateBuffer);
 }
 
 } // namespace mbgl
