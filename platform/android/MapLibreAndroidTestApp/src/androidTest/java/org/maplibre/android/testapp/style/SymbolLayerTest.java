@@ -422,7 +422,7 @@ public class SymbolLayerTest extends BaseLayerTest {
     assertNull(layer.getIconPadding().getValue());
 
     // Set and Get
-    Float[] propertyValue = { 3.0f, 5.0f, 7.0f, 9.0f };
+    Float[] propertyValue = {2.0f, 2.0f, 2.0f, 2.0f};
     layer.setProperties(iconPadding(propertyValue));
     assertEquals(layer.getIconPadding().getValue(), propertyValue);
   }
