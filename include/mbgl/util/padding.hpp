@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/util/feature.hpp>
+#include <array>
 #include <span>
 
 namespace mbgl {
