@@ -14,7 +14,8 @@ namespace vulkan {
 
 const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAttribute& attrib_,
                                                                   UploadPass& uploadPass,
-                                                                  const gfx::BufferUsageType usage, bool forceUpdate) {
+                                                                  const gfx::BufferUsageType usage,
+                                                                  bool forceUpdate) {
     if (!attrib_.getBuffer()) {
         auto& attrib = static_cast<VertexAttribute&>(attrib_);
         if (attrib.sharedRawData) {

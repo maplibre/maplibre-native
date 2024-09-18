@@ -116,8 +116,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
     // We need either raw index data or a buffer already created from them.
     // We can have a buffer and no indexes, but only if it's not marked dirty.
-    if (!impl->indexes || (impl->indexes->empty() &&
-                           (!impl->indexes->getBuffer() || !attributeUpdateTime || impl->indexes->isModifiedAfter(*attributeUpdateTime)))) {
+    if (!impl->indexes || (impl->indexes->empty() && (!impl->indexes->getBuffer() || !attributeUpdateTime ||
+                                                      impl->indexes->isModifiedAfter(*attributeUpdateTime)))) {
         assert(!"Missing index data");
         return;
     }
@@ -134,7 +134,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         impl->indexes->setBuffer(std::move(buffer));
     }
 
-    const bool buildAttribs = !vertexAttributes || !attributeUpdateTime || vertexAttributes->isModifiedAfter(*attributeUpdateTime) ||
+    const bool buildAttribs = !vertexAttributes || !attributeUpdateTime ||
+                              vertexAttributes->isModifiedAfter(*attributeUpdateTime) ||
                               impl->pipelineInfo.inputAttributes.empty();
 
     if (buildAttribs) {
@@ -166,7 +167,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     // build instance buffer
-    const bool buildInstanceBuffer = (instanceAttributes && (!attributeUpdateTime || instanceAttributes->isModifiedAfter(*attributeUpdateTime)));
+    const bool buildInstanceBuffer =
+        (instanceAttributes && (!attributeUpdateTime || instanceAttributes->isModifiedAfter(*attributeUpdateTime)));
 
     if (buildInstanceBuffer) {
         // Build instance attribute buffers

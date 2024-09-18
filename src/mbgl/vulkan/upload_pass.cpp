@@ -85,7 +85,7 @@ static const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 
 const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec,
                                                              const gfx::BufferUsageType usage,
-							     bool forceUpdate) {
+                                                             bool forceUpdate) {
     if (vec) {
         const auto* rawBufPtr = vec->getRawData();
         const auto rawBufSize = vec->getRawCount() * vec->getRawSize();
@@ -96,8 +96,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
 
             // If it's changed, update it
             if (rawBufSize <= resource.getSizeInBytes()) {
-                if (forceUpdate ||
-				vec->isModifiedAfter(resource.getLastUpdated())) {
+                if (forceUpdate || vec->isModifiedAfter(resource.getLastUpdated())) {
                     updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
                     resource.setLastUpdated(vec->getLastModified());
                 }
@@ -165,7 +164,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         assert(effectiveAttr.getStride() > 0);
 
         // Otherwise, turn the data managed by the attribute into a buffer.
-        if (const auto& buffer = VertexAttribute::getBuffer(effectiveAttr, *this, gfx::BufferUsageType::StaticDraw, !lastUpdate)) {
+        if (const auto& buffer = VertexAttribute::getBuffer(
+                effectiveAttr, *this, gfx::BufferUsageType::StaticDraw, !lastUpdate)) {
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getDataType(), /*offset=*/0},
                 /*.vertexStride = */ static_cast<uint32_t>(effectiveAttr.getStride()),

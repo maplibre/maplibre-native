@@ -24,7 +24,7 @@ public:
     static const gfx::UniqueVertexBufferResource& getBuffer(gfx::VertexAttribute&,
                                                             UploadPass&,
                                                             const gfx::BufferUsageType,
-							    bool forceUpdate);
+                                                            bool forceUpdate);
 };
 
 /// Stores a collection of vertex attributes by name
