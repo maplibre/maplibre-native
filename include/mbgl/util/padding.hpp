@@ -7,8 +7,6 @@
 namespace mbgl {
 
 // A set of four numbers representing padding around a box.
-//
-//
 struct Padding {
     // Empty/zero padding on all sides.
     Padding() = default;
@@ -59,20 +57,13 @@ struct Padding {
 
     explicit operator bool() const { return top != 0 || right != 0 || bottom != 0 || left != 0; }
 
+    bool operator==(const Padding&) const = default;
+
     std::array<float, 4> toArray() const;
 
     // Used by ValueFactory<Padding>::make()
     mbgl::Value serialize() const;
 };
-
-inline bool operator==(const Padding& paddingA, const Padding& paddingB) {
-    return paddingA.top == paddingB.top && paddingA.right == paddingB.right && paddingA.bottom == paddingB.bottom &&
-           paddingA.left == paddingB.left;
-}
-
-inline bool operator!=(const Padding& paddingA, const Padding& paddingB) {
-    return !(paddingA == paddingB);
-}
 
 inline Padding operator*(const Padding& padding, float scale) {
     return {padding.top * scale, padding.right * scale, padding.bottom * scale, padding.left * scale};
