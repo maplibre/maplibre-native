@@ -100,6 +100,34 @@ void Drawable::setCullFaceMode(const gfx::CullFaceMode& mode) {
     impl->pipelineInfo.setCullMode(mode);
 }
 
+void Drawable::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
+                                      std::size_t vertexCount,
+                                      gfx::DrawMode mode,
+                                      gfx::IndexVectorBasePtr indexes,
+                                      const SegmentBase* segments,
+                                      std::size_t segmentCount) {
+    gfx::Drawable::setVertexAttributes(std::move(vertices));
+    impl->vertexCount = vertexCount;
+
+    std::vector<std::unique_ptr<Drawable::DrawSegment>> drawSegs;
+    drawSegs.reserve(segmentCount);
+    for (std::size_t i = 0; i < segmentCount; ++i) {
+        const auto& seg = segments[i];
+        auto segCopy = SegmentBase{
+            // no copy constructor
+            seg.vertexOffset,
+            seg.indexOffset,
+            seg.vertexLength,
+            seg.indexLength,
+            seg.sortKey,
+        };
+        drawSegs.push_back(std::make_unique<Drawable::DrawSegment>(mode, std::move(segCopy)));
+    }
+
+    impl->indexes = std::move(indexes);
+    impl->segments = std::move(drawSegs);
+}
+
 void Drawable::upload(gfx::UploadPass& uploadPass_) {
     if (isCustom) {
         return;
