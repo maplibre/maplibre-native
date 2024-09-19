@@ -458,15 +458,24 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (type == FillVariant::FillOutlineTriangulated) {
                 const auto updated = drawable.getAttributeUpdateTime();
                 if (!updated || bucket.lineVertices.getLastModified() > *updated) {
-                    drawable.setVertexAttributes(getTriangulatedAttributes());
-                    drawable.setVertices({}, lineVertexCount, gfx::AttributeDataType::Short2);
+                    drawable.updateVertexAttributes(getTriangulatedAttributes(),
+                                                    lineVertexCount,
+                                                    gfx::Triangles(),
+                                                    bucket.sharedLineIndexes,
+                                                    bucket.lineSegments.data(),
+                                                    bucket.lineSegments.size());
                 }
                 return true;
             }
 #endif
 
-            drawable.setVertexAttributes(vertexAttrs);
-            drawable.setVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
+            drawable.updateVertexAttributes(vertexAttrs,
+                                            fillVertexCount,
+                                            gfx::Triangles(),
+                                            bucket.sharedTriangles,
+                                            bucket.triangleSegments.data(),
+                                            bucket.triangleSegments.size());
+
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {

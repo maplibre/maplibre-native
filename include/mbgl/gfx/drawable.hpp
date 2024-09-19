@@ -25,6 +25,7 @@ class PaintParameters;
 class PaintPropertyBindersBase;
 enum class RenderPass : uint8_t;
 class RenderTile;
+class SegmentBase;
 
 using LayerTweakerPtr = std::shared_ptr<LayerTweaker>;
 using RenderTiles = std::shared_ptr<const std::vector<std::reference_wrapper<const RenderTile>>>;
@@ -198,6 +199,14 @@ public:
         // time check as these new values may not have been modified recently.
         attributeUpdateTime.reset();
     }
+
+    /// Update vertices, indices, and segments
+    virtual void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
+                                        std::size_t vertexCount,
+                                        gfx::DrawMode,
+                                        gfx::IndexVectorBasePtr,
+                                        const SegmentBase* segments,
+                                        std::size_t segmentCount) = 0;
 
     /// Get the instance attributes
     const gfx::VertexAttributeArrayPtr& getInstanceAttributes() const noexcept { return instanceAttributes; }

@@ -86,6 +86,36 @@ void DrawableGL::setIndexData(gfx::IndexVectorBasePtr indexes, std::vector<Uniqu
     impl->segments = std::move(segments);
 }
 
+void DrawableGL::updateVertexAttributes(gfx::VertexAttributeArrayPtr vertices,
+                                        std::size_t vertexCount,
+                                        gfx::DrawMode mode,
+                                        gfx::IndexVectorBasePtr indexes,
+                                        const SegmentBase* segments,
+                                        std::size_t segmentCount) {
+    gfx::Drawable::setVertexAttributes(std::move(vertices));
+    impl->vertexCount = vertexCount;
+
+    std::vector<std::unique_ptr<Drawable::DrawSegment>> drawSegs;
+    drawSegs.reserve(segmentCount);
+    for (std::size_t i = 0; i < segmentCount; ++i) {
+        const auto& seg = segments[i];
+        auto segCopy = SegmentBase{
+            // no copy constructor
+            seg.vertexOffset,
+            seg.indexOffset,
+            seg.vertexLength,
+            seg.indexLength,
+            seg.sortKey,
+        };
+        auto drawSeg = std::make_unique<DrawableGL::DrawSegmentGL>(
+            mode, std::move(segCopy), VertexArray{{nullptr, false}});
+        drawSegs.push_back(std::move(drawSeg));
+    }
+
+    impl->indexes = std::move(indexes);
+    impl->segments = std::move(drawSegs);
+}
+
 void DrawableGL::setVertices(std::vector<uint8_t>&& data, std::size_t count, gfx::AttributeDataType type_) {
     impl->vertexData = std::move(data);
     impl->vertexCount = count;
