@@ -53,8 +53,13 @@ void android_main(struct android_app* app) {
             return result;
         };
 
+#if MLN_RENDER_BACKEND_VULKAN
+        auto result = runTestWithManifest("/metrics/android-vulkan-render-test-runner-metrics.json");
+        result = runTestWithManifest("/metrics/android-vulkan-render-test-runner-style.json") && result;
+#else
         auto result = runTestWithManifest("/metrics/android-render-test-runner-metrics.json");
         result = runTestWithManifest("/metrics/android-render-test-runner-style.json") && result;
+#endif
         mbgl::Log::Info(mbgl::Event::General, "All tests are finished!");
         changeState(env, app, result);
     }
