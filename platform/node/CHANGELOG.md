@@ -1,6 +1,10 @@
 
 ## main
 
+## 6.0.1-pre.0
+* Add `textFitWidth` and `textFitHeight` properties to sprites ([#2780](https://github.com/maplibre/maplibre-native/pull/2780)).
+  More information can be found in the [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/sprite/#text-fit-properties).
+
 ## 6.0.0
 * [Note] This is the first release that is back on the main branch.
 * This is the first release that uses Metal for rendering for macOS. This is a graphics API from Apple that replaces OpenGL (ES) on Apple platforms.
