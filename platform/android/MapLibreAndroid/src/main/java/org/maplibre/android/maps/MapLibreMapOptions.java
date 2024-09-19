@@ -94,7 +94,7 @@ public class MapLibreMapOptions implements Parcelable {
 
   private boolean crossSourceCollisions = true;
 
-  private boolean multiThreadedGpuResourceUploadEnabled = false;
+  private boolean multiThreadedGpuResourceUploadEnabled = true;
 
   /**
    * Creates a new MapLibreMapOptions object.

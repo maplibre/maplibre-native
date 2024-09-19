@@ -155,7 +155,6 @@ gl::ResourceUploadThreadPool& RendererBackend::getResourceUploadThreadPool() {
         throw std::runtime_error("Parallel resource upload is not supported on this backend");
     }
     if (!resourceUploadThreadPool) {
-        initFreeThreadedUpload();
         resourceUploadThreadPool = std::make_unique<gl::ResourceUploadThreadPool>(*this);
     }
     return *resourceUploadThreadPool;

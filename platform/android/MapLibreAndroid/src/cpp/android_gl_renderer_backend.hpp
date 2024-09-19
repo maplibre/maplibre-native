@@ -26,9 +26,8 @@ public:
     void resizeFramebuffer(int width, int height) override;
     PremultipliedImage readFramebuffer() override;
 
-    bool supportFreeThreadedUpload() const override;
+    bool supportFreeThreadedUpload() override;
     std::shared_ptr<gl::UploadThreadContext> createUploadThreadContext() override;
-    void initFreeThreadedUpload() override;
 
     // mbgl::gfx::RendererBackend implementation
 public:
@@ -46,6 +45,9 @@ protected:
 protected:
     mbgl::gl::ProcAddress getExtensionFunctionPointer(const char*) override;
     void updateAssumedState() override;
+
+private:
+    void initFreeThreadedUpload();
 
 private:
     int eglClientVersion = 0;

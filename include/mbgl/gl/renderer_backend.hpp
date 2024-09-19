@@ -39,8 +39,7 @@ public:
     void initShaders(gfx::ShaderRegistry&, const ProgramParameters& programParameters) override;
 #endif
 
-    virtual bool supportFreeThreadedUpload() const { return false; }
-    virtual void initFreeThreadedUpload() {}
+    virtual bool supportFreeThreadedUpload() { return false; }
     virtual std::shared_ptr<UploadThreadContext> createUploadThreadContext() { return nullptr; }
     gl::ResourceUploadThreadPool& getResourceUploadThreadPool();
 

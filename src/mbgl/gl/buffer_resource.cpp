@@ -110,10 +110,8 @@ void BufferResource::wait() {
     }
     assert(asyncUploadCommands.data.empty());
     assert(asyncUploadCommands.type == BufferAsyncUploadCommandType::None);
-#ifdef MLN_RENDER_BACKEND_USE_UPLOAD_GL_FENCE
     gpuFence.gpuWait();
     gpuFence.reset();
-#endif
     asyncUploadIssued = false;
     asyncUploadRequested = false;
 }
@@ -138,11 +136,7 @@ void BufferResource::issueAsyncUpload() {
             assert(false);
             break;
     }
-#ifdef MLN_RENDER_BACKEND_USE_UPLOAD_GL_FENCE
     gpuFence.insert();
-#else
-    MBGL_CHECK_ERROR(glFlush());
-#endif
 
     cmd.type = BufferAsyncUploadCommandType::None;
     cmd.dataSize = 0;

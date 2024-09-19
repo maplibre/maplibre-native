@@ -7,8 +7,6 @@
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/string.hpp>
 
-#include <sys/system_properties.h>
-
 #include <cassert>
 #include <mutex>
 #include <stdexcept>
@@ -20,24 +18,6 @@ namespace {
 std::mutex& getEglMutex() {
     static std::mutex eglMutex;
     return eglMutex;
-}
-
-std::string androidSysProp(const char* key) {
-    assert(strlen(key) < PROP_NAME_MAX);
-    if (__system_property_find(key) == nullptr) {
-        return "";
-    }
-    char prop[PROP_VALUE_MAX + 1];
-    __system_property_get(key, prop);
-    return prop;
-}
-
-bool inEmulator() {
-    return androidSysProp("ro.kernel.qemu") == "1" || androidSysProp("ro.boot.qemu") == "1" ||
-           androidSysProp("ro.hardware.egl") == "emulation" ||
-           util::contains(androidSysProp("ro.build.fingerprint"), "emu") ||
-           util::contains(androidSysProp("ro.build.product"), "emu") ||
-           util::contains(androidSysProp("ro.product.device"), "emu");
 }
 
 } // namespace
@@ -66,22 +46,10 @@ private:
 
 AndroidGLRendererBackend::AndroidGLRendererBackend(bool multiThreadedGpuResourceUpload_)
     : gl::RendererBackend(gfx::ContextMode::Unique),
-      mbgl::gfx::Renderable({64, 64}, std::make_unique<AndroidGLRenderableResource>(*this)) {
-    if (multiThreadedGpuResourceUpload_) {
-        if (inEmulator()) {
-            mbgl::Log::Error(mbgl::Event::OpenGL,
-                             "Multi-threaded GPU resource upload is not supported in the emulator");
-        } else {
-            multiThreadedGpuResourceUpload = true;
-        }
-    }
-}
+      mbgl::gfx::Renderable({64, 64}, std::make_unique<AndroidGLRenderableResource>(*this)),
+      multiThreadedGpuResourceUpload(multiThreadedGpuResourceUpload_) {}
 
 AndroidGLRendererBackend::~AndroidGLRendererBackend() {
-    if (eglWaitClient() == EGL_FALSE) {
-        auto err = "eglWaitClient failed. Error code " + std::to_string(eglGetError());
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
-    }
     destroyResourceUploadThreadPool();
 }
 
@@ -115,8 +83,13 @@ void AndroidGLRendererBackend::markContextLost() {
     }
 }
 
-bool AndroidGLRendererBackend::supportFreeThreadedUpload() const {
-    return multiThreadedGpuResourceUpload;
+bool AndroidGLRendererBackend::supportFreeThreadedUpload() {
+    if (multiThreadedGpuResourceUpload) {
+        initFreeThreadedUpload();
+        return eglClientVersion >= 3;
+    } else {
+        return false;
+    }
 }
 
 std::shared_ptr<gl::UploadThreadContext> AndroidGLRendererBackend::createUploadThreadContext() {
@@ -140,35 +113,35 @@ void AndroidGLRendererBackend::initFreeThreadedUpload() {
     eglMainCtx = eglGetCurrentContext();
     if (eglMainCtx == EGL_NO_CONTEXT) {
         constexpr const char* err = "eglGetCurrentContext returned EGL_NO_CONTEXT";
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Error(Event::OpenGL, err);
         throw std::runtime_error(err);
     }
 
     eglDsply = eglGetCurrentDisplay();
     if (eglDsply == EGL_NO_DISPLAY) {
         constexpr const char* err = "eglGetCurrentDisplay returned EGL_NO_DISPLAY";
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Error(Event::OpenGL, err);
         throw std::runtime_error(err);
     }
 
     eglSurf = eglGetCurrentSurface(EGL_READ);
     if (eglSurf == EGL_NO_SURFACE) {
         constexpr const char* err = "eglGetCurrentSurface returned EGL_NO_SURFACE";
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Error(Event::OpenGL, err);
         throw std::runtime_error(err);
     }
 
     EGLSurface writeSurf = eglGetCurrentSurface(EGL_DRAW);
     if (eglSurf != writeSurf) {
         constexpr const char* err = "EGL_READ and EGL_DRAW surfaces are different";
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Error(Event::OpenGL, err);
         throw std::runtime_error(err);
     }
 
     int config_id = 0;
     if (eglQueryContext(eglDsply, eglMainCtx, EGL_CONFIG_ID, &config_id) == EGL_FALSE) {
         auto err = "eglQueryContext for EGL_CONFIG_ID failed. Error code " + std::to_string(eglGetError());
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Error(Event::OpenGL, err);
         throw std::runtime_error(err);
     }
 
@@ -176,25 +149,34 @@ void AndroidGLRendererBackend::initFreeThreadedUpload() {
     const EGLint attribs[] = {EGL_CONFIG_ID, config_id, EGL_NONE};
     if (eglChooseConfig(eglDsply, attribs, nullptr, 0, &config_count) == EGL_FALSE) {
         auto err = "eglChooseConfig failed to query config_count. Error code " + std::to_string(eglGetError());
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Error(Event::OpenGL, err);
         throw std::runtime_error(err);
     }
     if (config_count != 1) {
         auto err = "eglChooseConfig returned multiple configs: " + std::to_string(config_count);
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Error(Event::OpenGL, err);
         throw std::runtime_error(err);
     }
 
     if (eglChooseConfig(eglDsply, attribs, &eglConfig, 1, &config_count) == EGL_FALSE) {
         auto err = "eglChooseConfig failed to query config. Error code " + std::to_string(eglGetError());
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Error(Event::OpenGL, err);
         throw std::runtime_error(err);
     }
 
     if (eglQueryContext(eglDsply, eglMainCtx, EGL_CONTEXT_CLIENT_VERSION, &eglClientVersion) == EGL_FALSE) {
         auto err = "eglQueryContext for client version failed. Error code " + std::to_string(eglGetError());
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Error(Event::OpenGL, err);
         throw std::runtime_error(err);
+    }
+    Log::Debug(Event::OpenGL, "Running MapLibre Native with OpenGL ES version " + std::to_string(eglClientVersion));
+    if (eglClientVersion < 3) {
+        // Fence sync objects are not supported with OpenGL ES 2.0. They may be supported as
+        // extensions but we simply require core OpenGL ES 3.0 to be available to enable shared contexts
+        Log::Error(
+            Event::OpenGL,
+            "Multithreaded resource uploads is not supported with OpenGL ES " + std::to_string(eglClientVersion));
+        multiThreadedGpuResourceUpload = false;
     }
 }
 
@@ -218,11 +200,10 @@ AndroidUploadThreadContext::~AndroidUploadThreadContext() {
     }
 
     if (ctx == sharedContext) {
-        mbgl::Log::Error(mbgl::Event::OpenGL, "AndroidUploadThreadContext::destroyContext() must be explicitly called");
+        Log::Error(Event::OpenGL, "AndroidUploadThreadContext::destroyContext() must be explicitly called");
     } else {
-        mbgl::Log::Error(mbgl::Event::OpenGL, "Unexpected context bound to an Upload thread");
+        Log::Error(Event::OpenGL, "Unexpected context bound to an Upload thread");
     }
-    assert(ctx == EGL_NO_CONTEXT);
 }
 
 void AndroidUploadThreadContext::createContext() {
@@ -235,24 +216,28 @@ void AndroidUploadThreadContext::createContext() {
     assert(sharedContext == EGL_NO_CONTEXT);
     assert(surface == EGL_NO_SURFACE);
 
+#ifdef MLN_EGL_DEBUG
+    int attribs[] = {EGL_CONTEXT_CLIENT_VERSION, clientVersion, EGL_CONTEXT_OPENGL_DEBUG, EGL_TRUE, EGL_NONE};
+#else
     int attribs[] = {EGL_CONTEXT_CLIENT_VERSION, clientVersion, EGL_NONE};
+#endif
     sharedContext = eglCreateContext(display, config, mainContext, attribs);
     if (sharedContext == EGL_NO_CONTEXT) {
         auto err = "eglCreateContext returned EGL_NO_CONTEXT. Error code " + std::to_string(eglGetError());
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Error(Event::OpenGL, err);
         throw std::runtime_error(err);
     }
 
     surface = eglCreatePbufferSurface(display, config, nullptr);
     if (surface == EGL_NO_SURFACE) {
         auto err = "eglCreatePbufferSurface failed. Error code " + std::to_string(eglGetError());
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Error(Event::OpenGL, err);
         throw std::runtime_error(err);
     }
 
     if (eglMakeCurrent(display, surface, surface, sharedContext) == EGL_FALSE) {
         auto err = "eglMakeCurrent for shared context failed. Error code " + std::to_string(eglGetError());
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Error(Event::OpenGL, err);
         throw std::runtime_error(err);
     }
     MLN_TRACE_GL_CONTEXT();
@@ -263,35 +248,37 @@ void AndroidUploadThreadContext::destroyContext() {
 
     const std::lock_guard<std::mutex> lock(getEglMutex());
 
+    // On Mali drivers EGL shared contexts functions fail when the main context is destroyed before the
+    // shared contexts. i.e. FinalizerDaemon is run after the main context is destroyed.
+
     if (eglWaitClient() == EGL_FALSE) {
         auto err = "eglWaitClient failed. Error code " + std::to_string(eglGetError());
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Warning(Event::OpenGL, err);
     }
 
     auto ctx = eglGetCurrentContext();
     if (ctx == EGL_NO_CONTEXT) {
         constexpr const char* err =
             "AndroidUploadThreadContext::destroyContext() expects a persistently bound EGL shared context";
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Warning(Event::OpenGL, err);
     } else if (ctx != sharedContext) {
         constexpr const char* err =
             "AndroidUploadThreadContext::destroyContext(): expects a single EGL context to be used in each Upload "
             "thread";
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Warning(Event::OpenGL, err);
     }
-    assert(ctx == sharedContext);
 
     if (eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT) == EGL_FALSE) {
         auto err = "eglMakeCurrent with EGL_NO_CONTEXT failed. Error code " + std::to_string(eglGetError());
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Warning(Event::OpenGL, err);
     }
     if (eglDestroyContext(display, sharedContext) == EGL_FALSE) {
         auto err = "eglDestroyContext failed. Error code " + std::to_string(eglGetError());
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Warning(Event::OpenGL, err);
     }
     if (eglDestroySurface(display, surface) == EGL_FALSE) {
         auto err = "eglDestroySurface failed. Error code " + std::to_string(eglGetError());
-        mbgl::Log::Error(mbgl::Event::OpenGL, err);
+        Log::Warning(Event::OpenGL, err);
     }
 
     display = EGL_NO_DISPLAY;

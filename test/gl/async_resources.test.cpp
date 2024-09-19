@@ -33,7 +33,7 @@ public:
     BackendWithMockedSharedContexts()
         : gl::HeadlessBackend({32, 32}) {}
 
-    bool supportFreeThreadedUpload() const override { return true; }
+    bool supportFreeThreadedUpload() override { return true; }
 
     std::shared_ptr<gl::UploadThreadContext> createUploadThreadContext() override;
 };
