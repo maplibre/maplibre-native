@@ -1,13 +1,17 @@
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
 include ':MapLibreAndroid', ':MapLibreAndroidTestApp', ':MapLibreAndroidLint'
 
 rootProject.name = "MapLibre Native for Android"
 
 def renderTestProjectDir = new File(rootDir, '../../render-test/android')
 includeBuild(renderTestProjectDir) {
-    name ="Render Test App"
+    name ="renderTestApp"
 }
 
 def cppTestProjectDir = new File(rootDir, '../../test/android')
 includeBuild(cppTestProjectDir) {
-    name ="C++ Unit Test App"
+    name ="cppUnitTestsApp"
 }

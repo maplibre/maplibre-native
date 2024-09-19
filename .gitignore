@@ -56,3 +56,5 @@ __generated__
 cache.sqlite
 cache.sqlite-journal
 out.png
+/test/android/app/.cxx
+/test/android/app/build

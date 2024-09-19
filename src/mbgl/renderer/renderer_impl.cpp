@@ -68,14 +68,34 @@ Renderer::Impl::~Impl() {
     assert(gfx::BackendScope::exists());
 };
 
+void Renderer::Impl::onPreCompileShader(shaders::BuiltIn shaderID,
+                                        gfx::Backend::Type type,
+                                        const std::string& additionalDefines) {
+    observer->onPreCompileShader(shaderID, type, additionalDefines);
+}
+
+void Renderer::Impl::onPostCompileShader(shaders::BuiltIn shaderID,
+                                         gfx::Backend::Type type,
+                                         const std::string& additionalDefines) {
+    observer->onPostCompileShader(shaderID, type, additionalDefines);
+}
+
+void Renderer::Impl::onShaderCompileFailed(shaders::BuiltIn shaderID,
+                                           gfx::Backend::Type type,
+                                           const std::string& additionalDefines) {
+    observer->onShaderCompileFailed(shaderID, type, additionalDefines);
+}
+
 void Renderer::Impl::setObserver(RendererObserver* observer_) {
     observer = observer_ ? observer_ : &nullObserver();
 }
 
 void Renderer::Impl::render(const RenderTree& renderTree,
                             [[maybe_unused]] const std::shared_ptr<UpdateParameters>& updateParameters) {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     auto& context = backend.getContext();
+    context.setObserver(this);
+
 #if MLN_RENDER_BACKEND_METAL
     if constexpr (EnableMetalCapture) {
         const auto& mtlBackend = static_cast<mtl::RendererBackend&>(backend);
@@ -278,13 +298,14 @@ void Renderer::Impl::render(const RenderTree& renderTree,
             const auto debugGroup(parameters.encoder->createDebugGroup("common-3d"));
             parameters.pass = RenderPass::Pass3D;
 
-            if (!parameters.staticData.depthRenderbuffer ||
-                parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
-                parameters.staticData.depthRenderbuffer =
-                    parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
-                        parameters.staticData.backendSize);
-            }
-            parameters.staticData.depthRenderbuffer->setShouldClear(true);
+            // TODO is this needed?
+            // if (!parameters.staticData.depthRenderbuffer ||
+            //    parameters.staticData.depthRenderbuffer->getSize() != parameters.staticData.backendSize) {
+            //    parameters.staticData.depthRenderbuffer =
+            //        parameters.context.createRenderbuffer<gfx::RenderbufferPixelType::Depth>(
+            //            parameters.staticData.backendSize);
+            //}
+            // parameters.staticData.depthRenderbuffer->setShouldClear(true);
         }
     };
 
@@ -541,7 +562,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     }
 
     frameCount += 1;
-    MLN_END_FRAME()
+    MLN_END_FRAME();
 }
 
 void Renderer::Impl::reduceMemoryUse() {

@@ -31,6 +31,8 @@ jobs:
       should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.linux_any_modified != 'true' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Get all Linux files that have changed
         if: github.event_name != 'workflow_dispatch'
@@ -50,7 +52,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        renderer: [legacy, drawable]
+        renderer: [legacy, drawable, vulkan]
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -83,13 +85,17 @@ jobs:
             libpng-dev \
             libglfw3-dev \
             libwebp-dev \
-            libopengl0
+            libopengl0 \
+            mesa-vulkan-drivers
 
       - if: matrix.renderer == 'drawable'
         run: echo renderer_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> "$GITHUB_ENV"
 
       - if: matrix.renderer == 'legacy'
         run: echo renderer_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
+
+      - if: matrix.renderer == 'vulkan'
+        run: echo renderer_flag_cmake="-DMLN_DRAWABLE_RENDERER=ON -DMLN_LEGACY_RENDERER=OFF -DMLN_WITH_VULKAN=ON -DMLN_WITH_OPENGL=OFF" >> "$GITHUB_ENV"
 
       - name: Build MapLibre Native Core
         env:
@@ -143,6 +149,7 @@ jobs:
       - run: chmod +x build/mbgl-test-runner
 
       - name: Run C++ tests
+        continue-on-error: ${{ matrix.renderer == 'vulkan' }}
         run: xvfb-run -a build/mbgl-test-runner
 
       # render tests
@@ -201,6 +208,10 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+
       - name: Start server
         run: |
           npm install
@@ -211,6 +222,7 @@ jobs:
           xvfb-run -a \
             bazel coverage --combined_report=lcov  --instrumentation_filter="//:mbgl-core" \
             --test_output=errors --local_test_jobs=1 \
+            --repo_env=GCOV="$PWD/.github/scripts/gcov_wrapper" \
             --test_env=DISPLAY --test_env=XAUTHORITY --copt="-DCI_BUILD" \
             //test:core //render-test:render-test //expression-test:test
           echo coverage_report="$(bazel info output_path)"/_coverage/_coverage_report.dat >> "$GITHUB_ENV"

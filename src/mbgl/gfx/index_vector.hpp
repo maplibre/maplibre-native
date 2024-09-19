@@ -2,6 +2,7 @@
 
 #include <mbgl/gfx/draw_mode.hpp>
 #include <mbgl/util/ignore.hpp>
+#include <mbgl/util/monotonic_timer.hpp>
 
 #include <memory>
 #include <vector>
@@ -40,8 +41,15 @@ public:
     void setBuffer(std::unique_ptr<IndexBufferBase>&& value) { buffer = std::move(value); }
 #endif // MLN_DRAWABLE_RENDERER
 
-    bool getDirty() const { return dirty; }
-    void setDirty(bool value = true) { dirty = value; }
+    std::chrono::duration<double> getLastModified() const { return lastModified; }
+    bool isModifiedAfter(std::chrono::duration<double> t) const { return t < lastModified; }
+
+    void updateModified() {
+        if (dirty) {
+            lastModified = util::MonotonicTimer::now();
+            dirty = false;
+        }
+    }
 
     bool isReleased() const { return released; }
 
@@ -99,6 +107,8 @@ protected:
 #endif // MLN_DRAWABLE_RENDERER
     bool dirty = true;
     bool released = false;
+
+    std::chrono::duration<double> lastModified = util::MonotonicTimer::now();
 };
 
 using IndexVectorBasePtr = std::shared_ptr<IndexVectorBase>;
@@ -113,6 +123,7 @@ public:
         static_assert(sizeof...(args) % groupSize == 0, "wrong buffer element count");
         assert(!released);
         util::ignore({(v.emplace_back(std::forward<Args>(args)), 0)...});
+        dirty = true;
     }
 };
 

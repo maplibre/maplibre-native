@@ -4,6 +4,37 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.6.0
+
+- Add `textFitWidth` and `textFitHeight` properties to sprites ([#2780](https://github.com/maplibre/maplibre-native/pull/2780)).
+  More information can be found in the [MapLibre Style Spec](https://maplibre.org/maplibre-style-spec/sprite/#text-fit-properties).
+- Toggle tile cache final API ([#2723](https://github.com/maplibre/maplibre-native/pull/2723)).
+  Using this API can reduce memory usage at the cost of having to parse tile data again when the zoom level changes.
+- Fixed annotation delay in demo app for 120Hz devices ([#2775](https://github.com/maplibre/maplibre-native/pull/2775)).
+  Some users reported synchronization issues when panning the map. The issue is only present on devices with ProMotion (120Hz) displays and can be fixed by updating the Info.plist for your app (see [Apple documentation](https://developer.apple.com/documentation/quartzcore/optimizing_promotion_refresh_rates_for_iphone_13_pro_and_ipad_pro?language=objc)). 
+- Use timestamps for attribute updates ([#2629](https://github.com/maplibre/maplibre-native/pull/2629)).
+- Reuse prefetched tiles to avoid empty screen ([#2668](https://github.com/maplibre/maplibre-native/pull/2668)).
+- Cleanup mbgl/actor/mailbox* implementation for repetition in ensuring valid weakScheduler exists before usage ([#2733](https://github.com/maplibre/maplibre-native/pull/2733)).
+- Fix raster masking bug ([#2798](https://github.com/maplibre/maplibre-native/pull/2798)).
+- Ensure that all depth values are rendered before any color values ([#2811](https://github.com/maplibre/maplibre-native/pull/2811)).
+- Move UBO updates from render layers to tweakers ([#2703](https://github.com/maplibre/maplibre-native/pull/2703)).
+- Fix update time not being set when only drawable indexes are set ([#2743](https://github.com/maplibre/maplibre-native/pull/2743)).
+- Add guard blocks and checks to `SymbolInstance` ([#2744](https://github.com/maplibre/maplibre-native/pull/2744)).
+- Fix accidental regression conditional layer evaluation ([#2705](https://github.com/maplibre/maplibre-native/pull/2705)).
+- Use C++20 ([#2659](https://github.com/maplibre/maplibre-native/pull/2659)).
+
+## 6.5.4
+
+- Fix crash when feature contains invalid UTF-8 data ([#2693](https://github.com/maplibre/maplibre-native/pull/2693)).
+- Bazel updates ([#2696](https://github.com/maplibre/maplibre-native/pull/2696)).
+
+## 6.5.3
+
+- Disabled iOS 14 metal options ([#2620](https://github.com/maplibre/maplibre-native/pull/2620)).
+- Don't unbind texture units in release builds ([#2630](https://github.com/maplibre/maplibre-native/pull/2630)).
+- Avoid re-creating fill extrusion drawables unnecessarily ([#2624](https://github.com/maplibre/maplibre-native/pull/2624)).
+- Take locks before signaling thread condition variables ([#2636](https://github.com/maplibre/maplibre-native/pull/2636)).
+
 ## 6.5.2
 
 - Fix Cocoapods release ([#2599](https://github.com/maplibre/maplibre-native/pull/2599)).

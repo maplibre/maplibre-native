@@ -192,18 +192,19 @@ void ImageManager::reduceMemoryUse() {
 
 void ImageManager::reduceMemoryUseIfCacheSizeExceedsLimit() {
     if (requestedImagesCacheSize > util::DEFAULT_ON_DEMAND_IMAGES_CACHE_SIZE) {
-        MLN_TRACE_FUNC()
+        MLN_TRACE_FUNC();
         reduceMemoryUse();
     }
 }
 
 std::set<std::string> ImageManager::getAvailableImages() const {
-    std::set<std::string> copy;
+    MLN_TRACE_FUNC();
+    std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
+
     {
-        std::lock_guard<std::recursive_mutex> readWriteLock(rwLock);
-        copy = availableImages;
+        MLN_TRACE_ZONE(copy);
+        return availableImages;
     }
-    return copy;
 }
 
 void ImageManager::clear() {
@@ -309,9 +310,7 @@ void ImageManager::notify(ImageRequestor& requestor, const ImageRequestPair& pai
 }
 
 void ImageManager::dumpDebugLogs() const {
-    std::ostringstream ss;
-    ss << "ImageManager::loaded: " << loaded;
-    Log::Info(Event::General, ss.str());
+    Log::Info(Event::General, "ImageManager::loaded: " + std::string(loaded ? "1" : "0"));
 }
 
 ImageRequestor::ImageRequestor(std::shared_ptr<ImageManager> imageManager_)

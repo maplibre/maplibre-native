@@ -191,13 +191,13 @@ void Drawable::draw(PaintParameters& parameters) const {
     bindUniformBuffers(renderPass);
     bindTextures(renderPass);
 
-    if (!impl->indexes->getBuffer() || impl->indexes->getDirty()) {
+    if (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime)) {
         assert(!"Index buffer not uploaded");
         return;
     }
 
     const auto* indexBuffer = getMetalBuffer(impl->indexes);
-    if (!indexBuffer || impl->indexes->getDirty()) {
+    if (!indexBuffer || impl->indexes->isModifiedAfter(attributeUpdateTime)) {
         assert(!"Index buffer not uploaded");
         return;
     }
@@ -364,7 +364,6 @@ void Drawable::bindAttributes(RenderPass& renderPass) const noexcept {
             assert(binding->vertexStride * impl->vertexCount <= getBufferSize(binding->vertexBufferResource));
             renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
         } else {
-            const auto* shaderMTL = static_cast<const ShaderProgram*>(shader.get());
             auto& context = renderPass.getCommandEncoder().getContext();
             renderPass.bindVertex(context.getEmptyBuffer(), /*offset=*/0, attributeIndex);
         }
@@ -382,7 +381,6 @@ void Drawable::bindInstanceAttributes(RenderPass& renderPass) const noexcept {
             if (buffer && buffer->get()) {
                 renderPass.bindVertex(buffer->get(), /*offset=*/0, attributeIndex);
             } else {
-                const auto* shaderMTL = static_cast<const ShaderProgram*>(shader.get());
                 auto& context = renderPass.getCommandEncoder().getContext();
                 renderPass.bindVertex(context.getEmptyBuffer(), /*offset=*/0, attributeIndex);
             }
@@ -526,14 +524,19 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     auto& context = static_cast<Context&>(contextBase);
     constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
+    if (impl->indexes) {
+        impl->indexes->updateModified();
+    }
+
     // We need either raw index data or a buffer already created from them.
     // We can have a buffer and no indexes, but only if it's not marked dirty.
-    if (!impl->indexes || (impl->indexes->empty() && (!impl->indexes->getBuffer() || impl->indexes->getDirty()))) {
+    if (!impl->indexes || (impl->indexes->empty() &&
+                           (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime)))) {
         assert(!"Missing index data");
         return;
     }
 
-    if (impl->indexes->getDirty()) {
+    if (!impl->indexes->getBuffer() || impl->indexes->isModifiedAfter(attributeUpdateTime)) {
         // Create or update a buffer for the index data.  We don't update any
         // existing buffer because it may still be in use by the previous frame.
         auto indexBufferResource{uploadPass.createIndexBufferResource(
@@ -543,10 +546,10 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         auto buffer = std::make_unique<IndexBuffer>(std::move(indexBuffer));
 
         impl->indexes->setBuffer(std::move(buffer));
-        impl->indexes->setDirty(false);
     }
 
-    const bool buildAttribs = !vertexAttributes || vertexAttributes->isDirty() || !impl->vertexDesc;
+    const bool buildAttribs = !vertexAttributes || vertexAttributes->isModifiedAfter(attributeUpdateTime) ||
+                              !impl->vertexDesc;
 
     if (buildAttribs) {
 #if !defined(NDEBUG)
@@ -566,6 +569,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                     shader->getVertexAttributes(),
                                                                     *vertexAttributes,
                                                                     usage,
+                                                                    attributeUpdateTime,
                                                                     vertexBuffers);
         impl->attributeBuffers = std::move(vertexBuffers);
 
@@ -626,7 +630,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     }
 
     // build instance buffer
-    const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isDirty());
+    const bool buildInstanceBuffer = (instanceAttributes && instanceAttributes->isModifiedAfter(attributeUpdateTime));
 
     if (buildInstanceBuffer) {
         // Build instance attribute buffers
@@ -638,6 +642,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                    shader->getInstanceAttributes(),
                                                                    *instanceAttributes,
                                                                    usage,
+                                                                   attributeUpdateTime,
                                                                    instanceBuffers);
         impl->instanceBuffers = std::move(instanceBuffers);
 
@@ -655,6 +660,8 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
     if (texturesNeedUpload) {
         uploadTextures(uploadPass);
     }
+
+    attributeUpdateTime = util::MonotonicTimer::now();
 }
 
 } // namespace mtl

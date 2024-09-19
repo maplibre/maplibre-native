@@ -17,6 +17,8 @@ import org.maplibre.android.style.sources.CustomGeometrySource
 import org.maplibre.android.style.sources.GeometryTileProvider
 import org.maplibre.android.testapp.R
 import java.util.*
+import kotlin.math.ceil
+import kotlin.math.floor
 
 /**
  * Test activity showcasing using CustomGeometrySource to create a grid overlay on the map.
@@ -56,30 +58,30 @@ class GridSourceActivity : AppCompatActivity(), OnMapReadyCallback {
             } else {
                 20.0
             }
-            var gridLines: MutableList<Any?> = ArrayList<Any?>()
-            var y = Math.ceil(bounds.latitudeNorth / gridSpacing) * gridSpacing
-            while (y >= Math.floor(bounds.latitudeSouth / gridSpacing) * gridSpacing) {
+            var gridLines: MutableList<List<Point>> = mutableListOf()
+            var y = ceil(bounds.latitudeNorth / gridSpacing) * gridSpacing
+            while (y >= floor(bounds.latitudeSouth / gridSpacing) * gridSpacing) {
                 gridLines.add(
-                    Arrays.asList(
+                    listOf(
                         Point.fromLngLat(bounds.longitudeWest, y),
                         Point.fromLngLat(bounds.longitudeEast, y)
                     )
                 )
                 y -= gridSpacing
             }
-            features.add(Feature.fromGeometry(MultiLineString.fromLngLats(gridLines as MutableList<MutableList<Point>>)))
-            gridLines = ArrayList<Any?>()
-            var x = Math.floor(bounds.longitudeWest / gridSpacing) * gridSpacing
-            while (x <= Math.ceil(bounds.longitudeEast / gridSpacing) * gridSpacing) {
+            features.add(Feature.fromGeometry(MultiLineString.fromLngLats(gridLines)))
+            gridLines = mutableListOf()
+            var x = floor(bounds.longitudeWest / gridSpacing) * gridSpacing
+            while (x <= ceil(bounds.longitudeEast / gridSpacing) * gridSpacing) {
                 gridLines.add(
-                    Arrays.asList(
+                    listOf(
                         Point.fromLngLat(x, bounds.latitudeSouth),
                         Point.fromLngLat(x, bounds.latitudeNorth)
                     )
                 )
                 x += gridSpacing
             }
-            features.add(Feature.fromGeometry(MultiLineString.fromLngLats(gridLines as MutableList<MutableList<Point>>)))
+            features.add(Feature.fromGeometry(MultiLineString.fromLngLats(gridLines)))
             return FeatureCollection.fromFeatures(features)
         }
     }

@@ -108,23 +108,23 @@ public final class Property {
   @Retention(RetentionPolicy.SOURCE)
   public @interface SYMBOL_PLACEMENT {}
 
-  // SYMBOL_Z_ORDER: Controls the order in which overlapping symbols in the same layer are rendered
+  // SYMBOL_Z_ORDER: Determines whether overlapping symbols in the same layer are rendered in the order that they appear in the data source or by their y-position relative to the viewport. To control the order and prioritization of symbols otherwise, use `symbol-sort-key`.
 
   /**
-   * If symbol sort key is set, sort based on that. Otherwise sort symbols by their y-position relative to the viewport.
+   * Sorts symbols by symbol sort key if set. Otherwise, sorts symbols by their y-position relative to the viewport if {@link ICON_ALLOW_OVERLAP} or {@link TEXT_ALLOW_OVERLAP} is set to {@link TRUE} or {@link ICON_IGNORE_PLACEMENT} or {@link TEXT_IGNORE_PLACEMENT} is {@link FALSE}.
    */
   public static final String SYMBOL_Z_ORDER_AUTO = "auto";
   /**
-   * Symbols will be sorted by their y-position relative to the viewport.
+   * Sorts symbols by their y-position relative to the viewport if {@link ICON_ALLOW_OVERLAP} or {@link TEXT_ALLOW_OVERLAP} is set to {@link TRUE} or {@link ICON_IGNORE_PLACEMENT} or {@link TEXT_IGNORE_PLACEMENT} is {@link FALSE}.
    */
   public static final String SYMBOL_Z_ORDER_VIEWPORT_Y = "viewport-y";
   /**
-   * Symbols will be rendered in the same order as the source data with no sorting applied.
+   * Sorts symbols by symbol sort key if set. Otherwise, no sorting is applied; symbols are rendered in the same order as the source data.
    */
   public static final String SYMBOL_Z_ORDER_SOURCE = "source";
 
   /**
-   * Controls the order in which overlapping symbols in the same layer are rendered
+   * Determines whether overlapping symbols in the same layer are rendered in the order that they appear in the data source or by their y-position relative to the viewport. To control the order and prioritization of symbols otherwise, use `symbol-sort-key`.
    */
   @StringDef({
       SYMBOL_Z_ORDER_AUTO,

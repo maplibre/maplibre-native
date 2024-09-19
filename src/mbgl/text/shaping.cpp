@@ -92,6 +92,45 @@ PositionedIcon PositionedIcon::shapeIcon(const ImagePosition& image,
     return PositionedIcon{image, top, bottom, left, right, collisionPadding};
 }
 
+PositionedIcon PositionedIcon::applyTextFit() const {
+    if (!_image.textFitWidth && !_image.textFitHeight) {
+        return *this;
+    }
+    const float width = _right - _left;
+    const float height = _bottom - _top;
+
+    const float contentWidth = _image.content->right - _image.content->left;
+    const float contentHeight = _image.content->bottom - _image.content->top;
+    const float contentAspectRatio = contentWidth / contentHeight;
+    const auto textFitWidth = _image.textFitWidth.value();
+    const auto textFitHeight = _image.textFitHeight.value();
+    float newLeft = _left;
+    float newRight = _right;
+    float newTop = _top;
+    float newBottom = _bottom;
+
+    if (textFitHeight == style::TextFit::proportional) {
+        if ((textFitWidth == style::TextFit::stretchOnly && (width / height) < contentAspectRatio) ||
+            textFitWidth == style::TextFit::proportional) {
+            float newIconWidth = std::ceil(height * contentAspectRatio);
+            newLeft *= newIconWidth / width;
+            newRight = newLeft + newIconWidth;
+        }
+    } else if (textFitWidth == style::TextFit::proportional) {
+        if (textFitHeight == style::TextFit::stretchOnly && contentAspectRatio != 0 &&
+            (width / height) > contentAspectRatio) {
+            float newIconHeight = std::ceil(width / contentAspectRatio);
+            newTop *= newIconHeight / height;
+            newBottom = newTop + newIconHeight;
+        }
+    } else {
+        // If neither textFitHeight nor textFitWidth are proportional then
+        // there is no effect since the content rectangle should be precisely
+        // matched to the content
+    }
+    return PositionedIcon{_image, newTop, newBottom, newLeft, newRight, _collisionPadding};
+}
+
 void PositionedIcon::fitIconToText(const Shaping& shapedText,
                                    const style::IconTextFitType textFit,
                                    const std::array<float, 4>& padding,

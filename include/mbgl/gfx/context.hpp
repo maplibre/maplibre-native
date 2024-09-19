@@ -3,6 +3,7 @@
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/gfx/backend.hpp>
 #include <mbgl/gfx/command_encoder.hpp>
+#include <mbgl/gfx/context_observer.hpp>
 #include <mbgl/gfx/draw_scope.hpp>
 #include <mbgl/gfx/program.hpp>
 #include <mbgl/gfx/renderbuffer.hpp>
@@ -51,10 +52,15 @@ using UniqueDrawableBuilder = std::unique_ptr<DrawableBuilder>;
 using VertexAttributeArrayPtr = std::shared_ptr<VertexAttributeArray>;
 #endif
 
+namespace {
+ContextObserver nullObserver;
+}
+
 class Context {
 protected:
     Context(uint32_t maximumVertexBindingCount_)
-        : maximumVertexBindingCount(maximumVertexBindingCount_) {}
+        : maximumVertexBindingCount(maximumVertexBindingCount_),
+          observer(&nullObserver) {}
 
 public:
     static constexpr const uint32_t minimumRequiredVertexBindingCount = 8;
@@ -65,6 +71,8 @@ public:
     Context& operator=(Context&& other) = delete;
     Context& operator=(const Context& other) = delete;
     virtual ~Context() = default;
+
+    virtual void setObserver(ContextObserver* observer_) { observer = observer_ ? observer_ : &nullObserver; }
 
     virtual void beginFrame() = 0;
     virtual void endFrame() = 0;
@@ -148,9 +156,9 @@ public:
 
     /// `emplaceOrUpdateUniformBuffer` with type inference
     template <typename T>
-    std::enable_if_t<!std::is_pointer_v<T>, bool> emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr,
-                                                                               const T* data,
-                                                                               bool persistent = false) {
+    bool emplaceOrUpdateUniformBuffer(gfx::UniformBufferPtr& ptr, const T* data, bool persistent = false)
+        requires(!std::is_pointer_v<T>)
+    {
         return emplaceOrUpdateUniformBuffer(ptr, data, sizeof(T), persistent);
     }
 
@@ -173,6 +181,7 @@ protected:
     virtual std::unique_ptr<DrawScopeResource> createDrawScopeResource() = 0;
 
     gfx::RenderingStats stats;
+    ContextObserver* observer;
 };
 
 } // namespace gfx

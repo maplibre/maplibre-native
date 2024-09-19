@@ -43,7 +43,7 @@ public:
 
 TEST(RasterDEMTile, setError) {
     RasterDEMTileTest test;
-    RasterDEMTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterDEMTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.setError(std::make_exception_ptr(std::runtime_error("test")));
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -52,7 +52,7 @@ TEST(RasterDEMTile, setError) {
 
 TEST(RasterDEMTile, onError) {
     RasterDEMTileTest test;
-    RasterDEMTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterDEMTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.onError(std::make_exception_ptr(std::runtime_error("test")), 0);
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -61,7 +61,7 @@ TEST(RasterDEMTile, onError) {
 
 TEST(RasterDEMTile, onParsed) {
     RasterDEMTileTest test;
-    RasterDEMTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterDEMTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.onParsed(std::make_unique<HillshadeBucket>(PremultipliedImage({16, 16}), Tileset::DEMEncoding::Mapbox), 0);
     EXPECT_TRUE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());
@@ -85,7 +85,7 @@ TEST(RasterDEMTile, onParsed) {
 
 TEST(RasterDEMTile, onParsedEmpty) {
     RasterDEMTileTest test;
-    RasterDEMTile tile(OverscaledTileID(0, 0, 0), test.tileParameters, test.tileset);
+    RasterDEMTile tile(OverscaledTileID(0, 0, 0), "testSource", test.tileParameters, test.tileset);
     tile.onParsed(nullptr, 0);
     EXPECT_FALSE(tile.isRenderable());
     EXPECT_TRUE(tile.isLoaded());

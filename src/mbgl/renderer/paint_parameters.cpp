@@ -16,6 +16,12 @@
 #include <mbgl/shaders/mtl/clipping_mask.hpp>
 #endif // MLN_RENDER_BACKEND_METAL
 
+#if MLN_RENDER_BACKEND_VULKAN
+#include <mbgl/vulkan/render_pass.hpp>
+#include <mbgl/shaders/vulkan/clipping_mask.hpp>
+#include <mbgl/vulkan/context.hpp>
+#endif // MLN_RENDER_BACKEND_VULKAN
+
 namespace mbgl {
 
 TransformParameters::TransformParameters(const TransformState& state_)
@@ -140,6 +146,11 @@ void PaintParameters::clearStencil() {
                          0}};
     mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBO);
     context.renderingStats().stencilClears++;
+#elif MLN_RENDER_BACKEND_VULKAN
+    const auto& vulkanRenderPass = static_cast<vulkan::RenderPass&>(*renderPass);
+    vulkanRenderPass.clearStencil();
+
+    context.renderingStats().stencilClears++;
 #else // !MLN_RENDER_BACKEND_METAL
     context.clearStencilBuffer(0b00000000);
 #endif
@@ -181,7 +192,7 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         }
 
         tileUBOs.emplace_back(shaders::ClipUBO{/*.matrix=*/util::cast<float>(matrixForTile(tileID)),
-                                               /*.stencil_ref=*/stencilID,
+                                               /*.stencil_ref=*/static_cast<uint32_t>(stencilID),
                                                /*.pad=*/0,
                                                0,
                                                0});
@@ -196,6 +207,39 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
         mtlContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
 
         mtlContext.renderingStats().stencilUpdates++;
+    }
+
+#elif MLN_RENDER_BACKEND_VULKAN
+
+    std::vector<shaders::ClipUBO> tileUBOs;
+    for (const auto& tileRef : *renderTiles) {
+        const auto& tileID = tileRef.get().id;
+
+        const uint32_t stencilID = nextStencilID;
+        const auto result = tileClippingMaskIDs.insert(std::make_pair(tileID, stencilID));
+        if (result.second) {
+            // inserted
+            nextStencilID++;
+        } else {
+            // already present
+            continue;
+        }
+
+        if (tileUBOs.empty()) {
+            tileUBOs.reserve(count);
+        }
+
+        tileUBOs.emplace_back(shaders::ClipUBO{util::cast<float>(matrixForTile(tileID)), stencilID});
+    }
+
+    if (!tileUBOs.empty()) {
+#if !defined(NDEBUG)
+        const auto debugGroup = renderPass->createDebugGroup("tile-clip-masks");
+#endif
+
+        auto& vulkanContext = static_cast<vulkan::Context&>(context);
+        vulkanContext.renderTileClippingMasks(*renderPass, staticData, tileUBOs);
+        vulkanContext.renderingStats().stencilUpdates++;
     }
 
 #else  // !MLN_RENDER_BACKEND_METAL

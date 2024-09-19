@@ -5,10 +5,42 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'platform/macos/**'
+      - 'platform/darwin/**'
+      - '.github/workflows/macos-ci.yml'
+      - 'bin/**'
+      - 'include/**'
+      - 'platform/default/**'
+      - 'src/**'
+      - 'vendor/**'
+      - '.gitmodules'
+      - '!**/*.md'
+      - 'WORKSPACE'
+      - 'BUILD.bazel'
+      - '.bazelrc'
+      - '.bazelversion'
+      - 'pnpm-lock.yaml'
 
   pull_request:
     branches:
       - main
+    paths:
+      - 'platform/macos/**'
+      - 'platform/darwin/**'
+      - '.github/workflows/macos-ci.yml'
+      - 'bin/**'
+      - 'include/**'
+      - 'platform/default/**'
+      - 'src/**'
+      - 'vendor/**'
+      - '.gitmodules'
+      - '!**/*.md'
+      - 'WORKSPACE'
+      - 'BUILD.bazel'
+      - '.bazelrc'
+      - '.bazelversion'
+      - 'pnpm-lock.yaml'
 
 concurrency:
   # cancel jobs on PRs only
@@ -48,5 +80,3 @@ jobs:
       
       - name: Generate Xcode project for macOS
         run: bazel run //platform/macos:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
-        
-        

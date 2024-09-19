@@ -78,23 +78,23 @@ val locationComponentOptions =
        .build()
 ```
 
-7. Here is the final results with different color configurations. For the complete content of this demo, please refer to the source code of the [Test APP] [^2].
+7. Here is the final results with different color configurations. For the complete content of this demo, please refer to the source code of the [Test App] [^2].
 
    ![result](https://github.com/maplibre/maplibre-native/assets/19887090/03dfc87b-111b-4dd0-b4a3-d89e30ed6b63)
 
 
 [^1]: A variety of [camera modes] determine how the camera will track the user location.  
       They provide the right context to your users at the correct time.  
-[^2]: In [Test APP], it also uses menu items to manage user location icon.  
+[^2]: Menu items to manage user location icon are used in the [Test App], too.  
 
-[LocationComponent]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component/index.html
+[LocationComponent]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component/index.html
 [Android Developer Documentation]: https://developer.android.com/training/location/permissions
-[onMapReadyCallback]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.maps/-on-map-ready-callback/index.html
-[PermissionManager]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.permissions/-permissions-manager/index.html
-[LocationComponentOptions]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-options/index.html
+[onMapReadyCallback]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.maps/-on-map-ready-callback/index.html
+[PermissionManager]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location.permissions/-permissions-manager/index.html
+[LocationComponentOptions]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component-options/index.html
 [demotiles]: https://demotiles.maplibre.org/style.json
 [predefined styles]: https://github.com/maplibre/maplibre-native/tree/main/src/mbgl/util/tile_server_options.cpp
-[LocationComponentActivationOptions]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location/-location-component-activation-options/index.html
-[LocationEngine]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.engine/-location-engine/index.html
+[LocationComponentActivationOptions]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location/-location-component-activation-options/index.html
+[LocationEngine]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location.engine/-location-engine/index.html
 [Test APP]: https://github.com/maplibre/maplibre-native/tree/main/platform/android/MapLibreAndroidTestApp/src/main/java/org/maplibre/android/testapp/activity/location/BasicLocationPulsingCircleActivity.kt
-[camera modes]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20for%20-android/com.mapbox.mapboxsdk.location.modes/-camera-mode/index.html
+[camera modes]: https://maplibre.org/maplibre-native/android/api/-map-libre%20-native%20-android/org.maplibre.android.location.modes/-camera-mode/index.html

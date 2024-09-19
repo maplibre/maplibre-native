@@ -8,27 +8,27 @@ NS_ASSUME_NONNULL_BEGIN
 
 MLN_EXPORT
 /**
- `MLNImageSource` is a content source that is used for a georeferenced raster
+ ``MLNImageSource`` is a content source that is used for a georeferenced raster
  image to be shown on the map. The georeferenced image scales and rotates as the
  user zooms and rotates the map. Images may also be used as icons or patterns
  in a style layer. To register an image for use as an icon or pattern,
- use the `-[MLNStyle setImage:forName:]` method. To configure a point
- annotation’s image, use the `MLNAnnotationImage` class.
+ use the ``MLNStyle/setImage:forName:`` method. To configure a point
+ annotation’s image, use the ``MLNAnnotationImage`` class.
 
  The geographic location of the raster image content, supplied with
- `MLNCoordinateQuad`, can be non-axis aligned.
- `MLNImageSource` supports raster content from `NSURL`, `NSImage` (macOS), or
+ ``MLNCoordinateQuad``, can be non-axis aligned.
+ ``MLNImageSource`` supports raster content from `NSURL`, `NSImage` (macOS), or
  `UIImage` (iOS).
- An image source is added to an `MLNStyle` object along with one or more
- `MLNRasterStyleLayer` objects. Use a raster style layer to control the
+ An image source is added to an ``MLNStyle`` object along with one or more
+ ``MLNRasterStyleLayer`` objects. Use a raster style layer to control the
  appearance of content supplied by the image source.
 
  Each
  <a href="https://maplibre.org/maplibre-style-spec/#sources-image"><code>image</code></a>
  source defined by the style JSON file is represented at runtime by an
- `MLNImageSource` object that you can use to initialize new style layers. You
+ ``MLNImageSource`` object that you can use to initialize new style layers. You
  can also add and remove sources dynamically using methods such as
- `-[MLNStyle addSource:]` and `-[MLNStyle sourceWithIdentifier:]`.
+ ``MLNStyle/addSource:`` and ``MLNStyle/sourceWithIdentifier:``.
 
  ### Example
 
@@ -43,7 +43,7 @@ MLN_EXPORT
  ```
 
  #### Related examples
- TODO: Add an image, learn how to add an image to your map using `MLNImageSource`.
+ TODO: Add an image, learn how to add an image to your map using ``MLNImageSource``.
  */
 MLN_EXPORT
 @interface MLNImageSource : MLNSource

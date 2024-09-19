@@ -9,7 +9,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- Returns an array of `MLNFeature` objects converted from the given vector of
+ Returns an array of ``MLNFeature`` objects converted from the given vector of
  vector tile features.
  */
 MLN_EXPORT
@@ -17,7 +17,7 @@ NSArray<MLNShape<MLNFeature> *> *MLNFeaturesFromMBGLFeatures(
     const std::vector<mbgl::Feature> &features);
 
 /**
- Returns an array of `MLNFeature` objects converted from the given vector of
+ Returns an array of ``MLNFeature`` objects converted from the given vector of
  vector tile features.
  */
 MLN_EXPORT
@@ -25,13 +25,13 @@ NSArray<MLNShape<MLNFeature> *> *MLNFeaturesFromMBGLFeatures(
     const std::vector<mbgl::GeoJSONFeature> &features);
 
 /**
- Returns an `MLNFeature` object converted from the given mbgl::GeoJSONFeature
+ Returns an ``MLNFeature`` object converted from the given mbgl::GeoJSONFeature
  */
 MLN_EXPORT
 id<MLNFeature> MLNFeatureFromMBGLFeature(const mbgl::GeoJSONFeature &feature);
 
 /**
- Returns an `MLNShape` representing the given geojson. The shape can be
+ Returns an ``MLNShape`` representing the given geojson. The shape can be
  a feature, a collection of features, or a geometry.
  */
 MLNShape *MLNShapeFromGeoJSON(const mapbox::geojson::geojson &geojson);
@@ -45,7 +45,7 @@ mbgl::GeoJSONFeature mbglFeature(mbgl::GeoJSONFeature feature, id identifier,
                                  NSDictionary *attributes);
 
 /**
- Returns an `NSDictionary` representation of an `MLNFeature`.
+ Returns an `NSDictionary` representation of an ``MLNFeature``.
  */
 NSDictionary<NSString *, id> *NSDictionaryFeatureForGeometry(NSDictionary *geometry,
                                                              NSDictionary *attributes,

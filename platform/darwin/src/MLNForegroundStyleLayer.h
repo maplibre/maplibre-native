@@ -8,13 +8,13 @@ NS_ASSUME_NONNULL_BEGIN
 @class MLNSource;
 
 /**
- `MLNForegroundStyleLayer` is an abstract superclass for style layers whose
- content is defined by an `MLNSource` object.
+ ``MLNForegroundStyleLayer`` is an abstract superclass for style layers whose
+ content is defined by an ``MLNSource`` object.
 
- Create instances of `MLNRasterStyleLayer`, `MLNHillshadeStyleLayer`, and the
- concrete subclasses of `MLNVectorStyleLayer` in order to use
- `MLNForegroundStyleLayer`'s methods. Do not create instances of
- `MLNForegroundStyleLayer` directly, and do not create your own subclasses of
+ Create instances of ``MLNRasterStyleLayer``, ``MLNRasterStyleLayer``, and the
+ concrete subclasses of ``MLNVectorStyleLayer`` in order to use
+ ``MLNForegroundStyleLayer``'s methods. Do not create instances of
+ ``MLNForegroundStyleLayer`` directly, and do not create your own subclasses of
  this class.
  */
 MLN_EXPORT

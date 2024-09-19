@@ -29,15 +29,6 @@ android {
         multiDexEnabled = true
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-
     nativeBuild(["example-custom-layer"])
     packagingOptions {
         resources {
@@ -74,6 +65,9 @@ android {
         create("drawable") {
             dimension = "renderer"
         }
+        create("vulkan") {
+            dimension = "renderer"
+        }
     }
 
     buildFeatures {
@@ -92,11 +86,14 @@ android {
     }
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 dependencies {
     implementation project(':MapLibreAndroid')
     implementation libs.maplibreJavaTurf
 
-    implementation libs.supportAppcompatV7
     implementation libs.supportRecyclerView
     implementation libs.supportDesign
     implementation libs.supportConstraintLayout
@@ -107,6 +104,9 @@ dependencies {
     implementation libs.timber
 
     implementation libs.okhttp3
+
+    implementation libs.kotlinxCoroutinesCore
+    implementation libs.kotlinxCoroutinesAndroid
 
     debugImplementation libs.leakCanary
 
@@ -120,7 +120,7 @@ dependencies {
     androidTestImplementation libs.appCenter
     androidTestImplementation libs.androidxTestExtJUnit
     androidTestImplementation libs.androidxTestCoreKtx
-
+    androidTestImplementation libs.kotlinxCoroutinesTest
 }
 
 apply from: "${rootDir}/gradle/gradle-make.gradle"
