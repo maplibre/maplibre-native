@@ -5,12 +5,12 @@
 #include <mbgl/util/geometry.hpp>
 
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 namespace mbgl {
 
-using AnchorOffsetMap = std::map<style::SymbolAnchorType, std::array<float, 2>>;
+using AnchorOffsetPair = std::pair<style::SymbolAnchorType, std::array<float, 2>>;
 
 class VariableAnchorOffsetCollection {
     
@@ -27,14 +27,15 @@ public:
         anchorOffsets = std::move(other.anchorOffsets);
     }
   
-    VariableAnchorOffsetCollection(const AnchorOffsetMap& values) {
+    VariableAnchorOffsetCollection(const std::vector<AnchorOffsetPair>& values) {
         anchorOffsets = std::move(values);
     }
 
     std::string toString() const;
     mbgl::Value serialize() const;
     bool empty() const;
-    AnchorOffsetMap getOffsets() const;
+    std::vector<AnchorOffsetPair> getOffsets() const;
+    std::array<float, 2> getOffsetByAnchor(const style::SymbolAnchorType& anchorType) const;
 
     // Copy assignment operator
     VariableAnchorOffsetCollection& operator=(VariableAnchorOffsetCollection& other) {
@@ -59,7 +60,7 @@ public:
     }
 
 private:
-    AnchorOffsetMap anchorOffsets;
+    std::vector<AnchorOffsetPair> anchorOffsets;
 };
 
 } // namespace mbgl

@@ -16,7 +16,7 @@ SymbolInstance makeSymbolInstance(float x, float y, std::u16string key) {
     std::array<float, 2> textOffset{{0.0f, 0.0f}};
     std::array<float, 2> iconOffset{{0.0f, 0.0f}};
     std::array<float, 2> variableTextOffset{{0.0f, 0.0f}};
-    AnchorOffsetMap anchorOffsets = {{ style::SymbolAnchorType::Left, variableTextOffset }};
+    std::vector<AnchorOffsetPair> anchorOffsets = {{ style::SymbolAnchorType::Left, variableTextOffset }};
     VariableAnchorOffsetCollection variableAnchorOffsetCollection(anchorOffsets);
     style::SymbolPlacementType placementType = style::SymbolPlacementType::Point;
 

@@ -60,8 +60,8 @@ TEST(Stringify, Color) {
 
 TEST(Stringify, VariableAnchorOffsetCollection) {
     std::array<float, 2> offset = { 1, 1 };
-    std::map<SymbolAnchorType, std::array<float, 2>> test;
-    test[SymbolAnchorType::Left] = offset;
+    std::vector<AnchorOffsetPair> test;
+    test.emplace_back(AnchorOffsetPair{SymbolAnchorType::Left, offset});
     ASSERT_EQ(stringify(VariableAnchorOffsetCollection(test)), "[\"left\",[1.0,1.0]]");
 }
 

@@ -124,7 +124,7 @@ std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetColl
         return std::nullopt;
     }
     
-    AnchorOffsetMap collection;
+    std::vector<AnchorOffsetPair> collection;
     for (size_t index = 0; index < arraySize; index += 2) {
         Convertible offsetValue = arrayMember(value, index + 1);
         std::optional<SymbolAnchorType> anchor = Converter<SymbolAnchorType>{}(arrayMember(value, index), error);
@@ -151,7 +151,9 @@ std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetColl
             return std::nullopt;
         }
         
-        collection[anchor.value()] = std::array<float, 2>{ xOffset.value(), yOffset.value() };
+        auto anchorType = anchor.value();
+        auto offset = std::array<float, 2>{ xOffset.value(), yOffset.value() };
+        collection.emplace_back(AnchorOffsetPair{anchorType, offset});
     }
     
     return VariableAnchorOffsetCollection(collection);

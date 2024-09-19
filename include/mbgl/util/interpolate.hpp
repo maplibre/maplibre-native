@@ -139,7 +139,7 @@ public:
             throw std::runtime_error("Cannot interpolate values of different length. from: " + a.toString() + ", to: " + b.toString());
         }
         
-        AnchorOffsetMap offsetMap;
+        std::vector<AnchorOffsetPair> offsetMap;
         for (auto index = 0; index < aOffsets.size(); index++) {
             auto aPair = std::next(aOffsets.begin(), index);
             auto bPair = std::next(bOffsets.begin(), index);
@@ -147,7 +147,9 @@ public:
                 throw std::runtime_error("Cannot interpolate values containing mismatched anchors. index:" + util::toString(index) + "from: " + Enum<style::SymbolAnchorType>::toString(aPair->first) + ", to:" + Enum<style::SymbolAnchorType>::toString(bPair->first));
             }
             
-            offsetMap[aPair->first] = std::array<float, 2>{ interpolate(aPair->second[0], bPair->second[0], t), interpolate(aPair->second[1], bPair->second[1], t) };
+            auto offset = std::array<float, 2>{ interpolate(aPair->second[0], bPair->second[0], t), interpolate(aPair->second[1], bPair->second[1], t) };
+            AnchorOffsetPair anchorOffset = {aPair->first, offset};
+            offsetMap.emplace_back(anchorOffset);
         }
         
         return VariableAnchorOffsetCollection(offsetMap);

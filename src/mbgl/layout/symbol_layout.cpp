@@ -364,11 +364,11 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
     // If style specifies text-variable-anchor-offset, just return it
     std::array<float, 2> variableTextOffset;
     if (!textVariableAnchorOffset.isUndefined()) {
-        AnchorOffsetMap anchorOffsets;
+        std::vector<AnchorOffsetPair> anchorOffsets;
         auto variableAnchorOffset = layout->evaluate<TextVariableAnchorOffset>(zoom, feature, canonicalID);
         
         // Convert offsets from EM to PX, and apply baseline shift
-        for (const auto anchorOffset: variableAnchorOffset.getOffsets()) {
+        for (const auto& anchorOffset: variableAnchorOffset.getOffsets()) {
             variableTextOffset = {{anchorOffset.second[0] * util::ONE_EM, anchorOffset.second[1] * util::ONE_EM}};
             switch (anchorOffset.first) {
                 case SymbolAnchorType::TopRight:
@@ -387,7 +387,8 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
                     break;
             }
             
-            anchorOffsets[anchorOffset.first] = std::array<float, 2>{ variableTextOffset[0], variableTextOffset[1] };
+            AnchorOffsetPair convertedAnchorOffset = {anchorOffset.first, std::array<float, 2>{ variableTextOffset[0], variableTextOffset[1] }};
+            anchorOffsets.emplace_back(convertedAnchorOffset);
         }
         
         return VariableAnchorOffsetCollection(anchorOffsets);
@@ -404,16 +405,28 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
                                    layout->evaluate<TextOffset>(zoom, feature, canonicalID)[1] * util::ONE_EM}};
         }
         
-        AnchorOffsetMap anchorOffsets;
+        std::vector<AnchorOffsetPair> anchorOffsets;
         for (auto anchor : variableTextAnchor) {
             auto offset = SymbolLayout::evaluateVariableOffset(anchor, variableTextOffset);
-            anchorOffsets[anchor] = std::array<float, 2>{ offset[0], offset[1] };
+            anchorOffsets.emplace_back(AnchorOffsetPair{anchor, offset});
         }
         
         return VariableAnchorOffsetCollection(anchorOffsets);
     }
     
     return std::nullopt;
+}
+
+std::vector<style::TextVariableAnchorType> SymbolLayout::getTextVariableAnchors(const SymbolFeature& feature) {
+    std::vector<style::TextVariableAnchorType> textVariableAnchors;
+    auto textVariableAnchorOffset = getTextVariableAnchorOffset(feature);
+    if (textVariableAnchorOffset) {
+        for (const auto &anchorOffset: textVariableAnchorOffset->getOffsets()) {
+            textVariableAnchors.push_back(anchorOffset.first);
+        }
+    }
+    
+    return textVariableAnchors;
 }
 
 void SymbolLayout::prepareSymbols(const GlyphMap& glyphMap,
@@ -466,8 +479,7 @@ void SymbolLayout::prepareSymbols(const GlyphMap& glyphMap,
                 return result;
             };
 
-            const std::vector<style::TextVariableAnchorType> variableTextAnchor = layout->evaluate<TextVariableAnchor>(
-                zoom, feature, canonicalID);
+            const std::vector<style::TextVariableAnchorType> variableTextAnchor = getTextVariableAnchors(feature);
             const SymbolAnchorType textAnchor = layout->evaluate<TextAnchor>(zoom, feature, canonicalID);
             if (variableTextAnchor.empty()) {
                 // Layers with variable anchors use the `text-radial-offset`

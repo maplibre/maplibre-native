@@ -115,6 +115,8 @@ private:
     
     // Helper to support both text-variable-anchor and text-variable-anchor-offset. Offset values converted from EMs to PXs
     std::optional<VariableAnchorOffsetCollection> getTextVariableAnchorOffset(const SymbolFeature&);
+    
+    std::vector<style::TextVariableAnchorType> getTextVariableAnchors(const SymbolFeature&);
 
     // Stores the layer so that we can hold on to GeometryTileFeature instances
     // in SymbolFeature, which may reference data from this object.

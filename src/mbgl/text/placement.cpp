@@ -92,7 +92,7 @@ public:
               auto textVariableAnchorOffset = getLayout().get<TextVariableAnchorOffset>();
               auto variableAnchorOffset = textVariableAnchorOffset.evaluate(placementZoom);
               if (!variableAnchorOffset.empty()) {
-                  for (const auto anchorOffset: variableAnchorOffset.getOffsets()) {
+                  for (const auto& anchorOffset: variableAnchorOffset.getOffsets()) {
                       textVariableAnchors.push_back(anchorOffset.first);
                   }
               }
@@ -421,7 +421,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                     // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
                     auto anchor = variableTextAnchors[i % anchorsSize];
                     auto textVariableAnchorOffset = symbolInstance.textVariableAnchorOffset->getOffsets();
-                    auto variableTextOffset = textVariableAnchorOffset[anchor];
+                    auto variableTextOffset = symbolInstance.textVariableAnchorOffset->getOffsetByAnchor(anchor);
                     const bool allowOverlap = (i >= anchorsSize);
                     shift = calculateVariableLayoutOffset(anchor,
                                                           width,
@@ -976,10 +976,13 @@ void Placement::updateBucketOpacities(SymbolBucket& bucket,
     if (bucket.hasTextCollisionCircleData()) bucket.textCollisionCircle->dynamicVertices().clear();
 
     const JointOpacityState duplicateOpacityState(false, false, true);
-
+    
+    auto textVariableAnchorOffset = bucket.layout->get<TextVariableAnchorOffset>();
+    auto variableAnchorOffset = textVariableAnchorOffset.evaluate(placementZoom);
+    
     const bool textAllowOverlap = bucket.layout->get<style::TextAllowOverlap>();
     const bool iconAllowOverlap = bucket.layout->get<style::IconAllowOverlap>();
-    const bool variablePlacement = !bucket.layout->get<style::TextVariableAnchor>().empty();
+    const bool variablePlacement = !bucket.layout->get<style::TextVariableAnchor>().empty() || !variableAnchorOffset.empty();
     const bool rotateWithMap = bucket.layout->get<style::TextRotationAlignment>() == style::AlignmentType::Map;
     const bool pitchWithMap = bucket.layout->get<style::TextPitchAlignment>() == style::AlignmentType::Map;
     const bool hasIconTextFit = bucket.layout->get<style::IconTextFit>() != style::IconTextFitType::None;
@@ -1538,8 +1541,7 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
                 float width = textCollisionBox.x2 - textCollisionBox.x1;
                 float height = textCollisionBox.y2 - textCollisionBox.y1;
                 
-                auto textVariableAnchorOffset = symbol.textVariableAnchorOffset->getOffsets();
-                auto variableTextOffset = textVariableAnchorOffset[*variableAnchor];
+                auto variableTextOffset = symbol.textVariableAnchorOffset->getOffsetByAnchor(*variableAnchor);
                 
                 offset = calculateVariableLayoutOffset(*variableAnchor,
                                                        width,
@@ -1560,8 +1562,7 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
                 float width = iconCollisionBox.x2 - iconCollisionBox.x1;
                 float height = iconCollisionBox.y2 - iconCollisionBox.y1;
                 
-                auto textVariableAnchorOffset = symbol.textVariableAnchorOffset->getOffsets();
-                auto variableTextOffset = textVariableAnchorOffset[*variableAnchor];
+                auto variableTextOffset = symbol.textVariableAnchorOffset->getOffsetByAnchor(*variableAnchor);
                 
                 offset = calculateVariableLayoutOffset(*variableAnchor,
                                                        width,

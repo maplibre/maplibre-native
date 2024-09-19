@@ -14,8 +14,18 @@ bool VariableAnchorOffsetCollection::empty() const {
     return anchorOffsets.size() == 0;
 };
 
-AnchorOffsetMap VariableAnchorOffsetCollection::getOffsets() const {
+std::vector<AnchorOffsetPair> VariableAnchorOffsetCollection::getOffsets() const {
     return anchorOffsets;
+}
+
+std::array<float, 2> VariableAnchorOffsetCollection::getOffsetByAnchor(const SymbolAnchorType& anchorType) const {
+    for (const auto& pair: anchorOffsets) {
+        if (anchorType == pair.first) {
+            return pair.second;
+        }
+    }
+    
+    return {0, 0};
 }
 
 std::string VariableAnchorOffsetCollection::toString() const {
