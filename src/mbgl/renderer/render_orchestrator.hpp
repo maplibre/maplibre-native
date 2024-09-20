@@ -62,9 +62,7 @@ public:
     ~RenderOrchestrator() override;
 
 #if MLN_RENDER_BACKEND_OPENGL
-    void enableAndroidEmulatorGoldfishMitigation(bool enable) {
-        androidGoldfishMitigationEnabled = enable;
-    }
+    void enableAndroidEmulatorGoldfishMitigation(bool enable) { androidGoldfishMitigationEnabled = enable; }
 #endif
 
     void markContextLost() { contextLost = true; };

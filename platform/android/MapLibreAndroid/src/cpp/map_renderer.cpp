@@ -31,7 +31,7 @@ bool inEmulator() {
     return androidSysProp("ro.kernel.qemu") == "1" || androidSysProp("ro.boot.qemu") == "1" ||
            androidSysProp("ro.hardware.egl") == "emulation";
 }
-}
+} // namespace
 #endif
 
 namespace mbgl {

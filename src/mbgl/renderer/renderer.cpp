@@ -153,9 +153,9 @@ void Renderer::clearData() {
 }
 
 #if MLN_RENDER_BACKEND_OPENGL
-    void Renderer::enableAndroidEmulatorGoldfishMitigation(bool enable) {
-        impl->orchestrator.enableAndroidEmulatorGoldfishMitigation(enable);
-    }
+void Renderer::enableAndroidEmulatorGoldfishMitigation(bool enable) {
+    impl->orchestrator.enableAndroidEmulatorGoldfishMitigation(enable);
+}
 #endif
 
 } // namespace mbgl
