@@ -455,40 +455,41 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
 
             switch (static_cast<FillVariant>(drawable.getType())) {
-            case FillVariant::Fill:
-            case FillVariant::FillPattern:
-                drawable.updateVertexAttributes(vertexAttrs,
-                                                fillVertexCount,
-                                                gfx::Triangles(),
-                                                bucket.sharedTriangles,
-                                                bucket.triangleSegments.data(),
-                                                bucket.triangleSegments.size());
-                break;
-            case FillVariant::FillOutline:
-            case FillVariant::FillOutlinePattern:
-                drawable.updateVertexAttributes(vertexAttrs,
-                                                fillVertexCount,
-                                                gfx::Lines(lineWidth),
-                                                bucket.sharedBasicLineIndexes,
-                                                bucket.basicLineSegments.data(),
-                                                bucket.basicLineSegments.size());
-                break;
-#if MLN_TRIANGULATE_FILL_OUTLINES
-            case FillVariant::FillOutlineTriangulated:
-                if (const auto updated = drawable.getAttributeUpdateTime(); !updated || bucket.lineVertices.getLastModified() > *updated) {
-                    drawable.updateVertexAttributes(getTriangulatedAttributes(),
-                                                    lineVertexCount,
+                case FillVariant::Fill:
+                case FillVariant::FillPattern:
+                    drawable.updateVertexAttributes(vertexAttrs,
+                                                    fillVertexCount,
                                                     gfx::Triangles(),
-                                                    bucket.sharedLineIndexes,
-                                                    bucket.lineSegments.data(),
-                                                    bucket.lineSegments.size());
-                }
-                break;
+                                                    bucket.sharedTriangles,
+                                                    bucket.triangleSegments.data(),
+                                                    bucket.triangleSegments.size());
+                    break;
+                case FillVariant::FillOutline:
+                case FillVariant::FillOutlinePattern:
+                    drawable.updateVertexAttributes(vertexAttrs,
+                                                    fillVertexCount,
+                                                    gfx::Lines(lineWidth),
+                                                    bucket.sharedBasicLineIndexes,
+                                                    bucket.basicLineSegments.data(),
+                                                    bucket.basicLineSegments.size());
+                    break;
+#if MLN_TRIANGULATE_FILL_OUTLINES
+                case FillVariant::FillOutlineTriangulated:
+                    if (const auto updated = drawable.getAttributeUpdateTime();
+                        !updated || bucket.lineVertices.getLastModified() > *updated) {
+                        drawable.updateVertexAttributes(getTriangulatedAttributes(),
+                                                        lineVertexCount,
+                                                        gfx::Triangles(),
+                                                        bucket.sharedLineIndexes,
+                                                        bucket.lineSegments.data(),
+                                                        bucket.lineSegments.size());
+                    }
+                    break;
 #endif
-            default:
-                Log::Error(Event::General, "Invalid fill type " + util::toString(drawable.getType()));
-                assert(false);
-                return false;
+                default:
+                    Log::Error(Event::General, "Invalid fill type " + util::toString(drawable.getType()));
+                    assert(false);
+                    return false;
             }
 
             return true;
