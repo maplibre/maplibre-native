@@ -15,9 +15,10 @@ else
 endif
 
 ifeq ($(RENDERER), drawable)
+else ifeq ($(RENDERER), legacy)
 else ifeq ($(RENDERER), vulkan)
 else
-  $(error RENDERER must be 'drawable' (OpenGL) or 'vulkan')
+  $(error RENDERER must be 'legacy' (OpenGL), 'drawable' (OpenGL) or 'vulkan')
 endif
 
 buildtype := $(shell echo "$(BUILDTYPE)" | tr "[A-Z]" "[a-z]")

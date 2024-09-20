@@ -18,10 +18,6 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.putJsonObject
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.maplibre.android.BuildConfig.GIT_REVISION
 import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
@@ -39,7 +35,6 @@ import java.io.File
 data class BenchmarkInputData(
     val styleNames: List<String>,
     val styleURLs: List<String>,
-    val resultsAPI: String = ""
 ) {
     init {
         if (styleNames.size != styleURLs.size)
@@ -47,10 +42,6 @@ data class BenchmarkInputData(
     }
 }
 
-/**
- * Prepares JSON payload that is sent to the API that collects benchmark results.
- * See https://github.com/maplibre/ci-runners
- */
 @SuppressLint("NewApi")
 fun jsonPayload(styleNames: List<String>, fpsResults: BenchmarkResults, encodingTimeResults: BenchmarkResults, renderingTimeResults: BenchmarkResults): JsonObject {
     return buildJsonObject {
@@ -141,14 +132,12 @@ class BenchmarkActivity : AppCompatActivity() {
             val jsonElement = Json.parseToJsonElement(jsonFileContents)
             val styleNames = jsonElement.jsonObject["styleNames"]?.jsonArray?.map { it.jsonPrimitive.content }
             val styleURLs = jsonElement.jsonObject["styleURLs"]?.jsonArray?.map { it.jsonPrimitive.content }
-            val resultsAPI = jsonElement.jsonObject["resultsAPI"]?.jsonPrimitive?.content
-            if (styleNames == null || styleURLs == null || resultsAPI == null) {
+            if (styleNames == null || styleURLs == null) {
                 throw Error("${jsonFile.name} is missing elements")
             }
             return BenchmarkInputData(
                 styleNames = styleNames.toList(),
-                styleURLs = styleURLs.toList(),
-                resultsAPI = resultsAPI
+                styleURLs = styleURLs.toList()
             )
         } else {
             Logger.i(TAG, "${jsonFile.name} not found, reading from developer-config.xml")
@@ -166,8 +155,20 @@ class BenchmarkActivity : AppCompatActivity() {
 
         // return default
         return BenchmarkInputData(
-            styleNames = listOf("MapLibre Demotiles"),
-            styleURLs = listOf("https://demotiles.maplibre.org/style.json")
+            styleNames = listOf(
+                "AWS Open Data Standard Light",
+                "Facebook Light",
+                "Americana",
+                "Protomaps Light",
+                "Versatiles Colorful"
+            ),
+            styleURLs = listOf(
+                "https://maps.geo.us-east-2.amazonaws.com/maps/v0/maps/OpenDataStyle/style-descriptor?key=v1.public.eyJqdGkiOiI1NjY5ZTU4My0yNWQwLTQ5MjctODhkMS03OGUxOTY4Y2RhMzgifR_7GLT66TNRXhZJ4KyJ-GK1TPYD9DaWuc5o6YyVmlikVwMaLvEs_iqkCIydspe_vjmgUVsIQstkGoInXV_nd5CcmqRMMa-_wb66SxDdbeRDvmmkpy2Ow_LX9GJDgL2bbiCws0wupJPFDwWCWFLwpK9ICmzGvNcrPbX5uczOQL0N8V9iUvziA52a1WWkZucIf6MUViFRf3XoFkyAT15Ll0NDypAzY63Bnj8_zS8bOaCvJaQqcXM9lrbTusy8Ftq8cEbbK5aMFapXRjug7qcrzUiQ5sr0g23qdMvnKJQFfo7JuQn8vwAksxrQm6A0ByceEXSfyaBoVpFcTzEclxUomhY.NjAyMWJkZWUtMGMyOS00NmRkLThjZTMtODEyOTkzZTUyMTBi",
+                "https://external.xx.fbcdn.net/maps/vt/style/canterbury_1_0/?locale=en_US",
+                "https://americanamap.org/style.json",
+                "https://api.protomaps.com/styles/v2/light.json?key=e761cc7daedf832a",
+                "https://tiles.versatiles.org/assets/styles/colorful.json",
+            )
         )
     }
 
@@ -313,28 +314,16 @@ class BenchmarkActivity : AppCompatActivity() {
         mapView.onLowMemory()
     }
 
-    private fun sendResults() {
-        val api = inputData.resultsAPI
-        if (api.isEmpty()) {
-            Logger.i(TAG, "Not sending results to API")
-            return
-        }
-
-        val client = OkHttpClient()
-
+    private fun storeResults() {
         val payload = jsonPayload(inputData.styleNames, fpsResults, encodingTimeResults, renderingTimeResults)
-        Logger.i(TAG, "Sending JSON payload to API: $payload")
 
-        val request = Request.Builder()
-            .url(api)
-            .post(
-                Json.encodeToString(payload).toRequestBody("application/json".toMediaType()))
-            .build()
-        client.newCall(request).execute()
+        val dataDir = this.filesDir
+        val benchmarkResultsFile = File(dataDir, "benchmark_results.json")
+        benchmarkResultsFile.writeText(Json.encodeToString(payload))
     }
 
     private fun benchmarkDone() {
-        sendResults()
+        storeResults()
         setResult(Activity.RESULT_OK)
         finish()
     }

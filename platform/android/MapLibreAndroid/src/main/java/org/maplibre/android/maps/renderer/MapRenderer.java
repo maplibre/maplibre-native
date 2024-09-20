@@ -30,7 +30,24 @@ public abstract class MapRenderer implements MapRendererScheduler {
 
   private static final String TAG = "Mbgl-MapRenderer";
 
-  // Holds the pointer to the native peer after initialisation
+  /**
+   * Rendering presentation refresh mode.
+   */
+  public enum RenderingRefreshMode {
+    /**
+     * The map is rendered only in response to an event that affects the rendering of the map.
+     * This mode is preferred to improve battery life and overall system performance
+     */
+    WHEN_DIRTY,
+
+    /**
+     * The map is repeatedly re-rendered at the refresh rate of the display.
+     * This mode is preferred when benchmarking the rendering
+     */
+    CONTINUOUS,
+  }
+
+  // Holds the pointer to the native peer after initialization
   private long nativePtr = 0;
   private double expectedRenderTime = 0;
   private MapLibreMap.OnFpsChangedListener onFpsChangedListener;
@@ -57,7 +74,7 @@ public abstract class MapRenderer implements MapRendererScheduler {
   public MapRenderer(@NonNull Context context, String localIdeographFontFamily) {
     float pixelRatio = context.getResources().getDisplayMetrics().density;
 
-    // Initialise native peer
+    // Initialize native peer
     nativeInitialize(this, pixelRatio, localIdeographFontFamily);
   }
 
@@ -82,6 +99,10 @@ public abstract class MapRenderer implements MapRendererScheduler {
   public void onDestroy() {
     // Implement if needed
   }
+
+  public abstract void setRenderingRefreshMode(RenderingRefreshMode mode);
+
+  public abstract RenderingRefreshMode getRenderingRefreshMode();
 
   public void setOnFpsChangedListener(MapLibreMap.OnFpsChangedListener listener) {
     onFpsChangedListener = listener;
