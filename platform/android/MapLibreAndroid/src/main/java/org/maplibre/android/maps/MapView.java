@@ -140,10 +140,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     // add accessibility support
     setContentDescription(context.getString(R.string.maplibre_mapActionDescription));
     setWillNotDraw(false);
-    initialiseDrawingSurface(options);
+    initializeDrawingSurface(options);
   }
 
-  private void initialiseMap() {
+  private void initializeMap() {
     Context context = getContext();
 
     // callback for focal point invalidation
@@ -305,7 +305,7 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     }
   }
 
-  private void initialiseDrawingSurface(MapLibreMapOptions options) {
+  private void initializeDrawingSurface(MapLibreMapOptions options) {
     mapRenderer = MapRenderer.create(options, getContext(), () -> MapView.this.onSurfaceCreated());
     renderView = mapRenderer.getView();
 
@@ -321,9 +321,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     post(new Runnable() {
       @Override
       public void run() {
-        // Initialise only when not destroyed and only once
+        // Initialize only when not destroyed and only once
         if (!destroyed && maplibreMap == null) {
-          MapView.this.initialiseMap();
+          MapView.this.initializeMap();
           maplibreMap.onStart();
         }
       }
@@ -463,6 +463,34 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     } else {
       throw new IllegalStateException("Calling MapView#setMaximumFps before mapRenderer is created.");
     }
+  }
+
+  /**
+   * Set the rendering refresh mode and wake up the render thread if it is sleeping.
+   *
+   * @param mode can be:
+   * {@link MapRenderer.RenderingRefreshMode#CONTINUOUS} or {@link MapRenderer.RenderingRefreshMode#WHEN_DIRTY}
+   * default is {@link MapRenderer.RenderingRefreshMode#WHEN_DIRTY}
+   */
+  public void setRenderingRefreshMode(MapRenderer.RenderingRefreshMode mode) {
+    if (mapRenderer != null) {
+      mapRenderer.setRenderingRefreshMode(mode);
+    } else {
+      throw new IllegalStateException("Calling MapView#setRenderingRefreshMode before mapRenderer is created.");
+    }
+  }
+
+  /**
+   * Get the rendering refresh mode
+   *
+   * @return one of the MapRenderer.RenderingRefreshMode modes
+   * @see #setRenderingRefreshMode
+   */
+  public MapRenderer.RenderingRefreshMode getRenderingRefreshMode() {
+    if (mapRenderer == null) {
+      throw new IllegalStateException("Calling MapView#getRenderingRefreshMode before mapRenderer is created.");
+    }
+    return mapRenderer.getRenderingRefreshMode();
   }
 
   /**

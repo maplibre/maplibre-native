@@ -437,6 +437,8 @@ class NativeMapViewTest : AppCenter() {
 
     class DummyRenderer(context: Context) : MapRenderer(context, null) {
 
+        private var renderingRefreshMode: RenderingRefreshMode = RenderingRefreshMode.WHEN_DIRTY
+
         override fun requestRender() {
             // no-op
         }
@@ -451,6 +453,14 @@ class NativeMapViewTest : AppCenter() {
 
         override fun getView(): View? {
             return null;
+        }
+
+        override fun setRenderingRefreshMode(mode : RenderingRefreshMode) {
+            renderingRefreshMode = mode
+        }
+
+        override fun getRenderingRefreshMode() : RenderingRefreshMode{
+            return renderingRefreshMode
         }
     }
 }

@@ -248,6 +248,10 @@ add_library(
     ${PROJECT_SOURCE_DIR}/platform/android/MapLibreAndroid/src/cpp/http_file_source.cpp
 )
 
+if(MLN_WITH_VULKAN)
+    target_compile_definitions(mbgl-render-test-runner PRIVATE "MLN_RENDER_BACKEND_VULKAN=1")
+endif()
+
 target_include_directories(
     mbgl-render-test-runner
     PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue ${PROJECT_SOURCE_DIR}/platform/android/src ${PROJECT_SOURCE_DIR}/src
