@@ -795,13 +795,13 @@ public class ExpressionTest extends EspressoTest {
 
       // Automatic usage with iconPadding property, analogous to testGetExpressionWrapping()
       {
-          Expression input = get("value");
-          layer.setProperties(iconPadding(input));
+        Expression input = get("value");
+        layer.setProperties(iconPadding(input));
 
-          Expression expectedOuput = toPadding(input);
-          Expression output = layer.getIconPadding().getExpression();
-          assertNotNull(output);
-          assertArrayEquals("Expression should match", expectedOuput.toArray(), output.toArray());
+        Expression expectedOuput = toPadding(input);
+        Expression output = layer.getIconPadding().getExpression();
+        assertNotNull(output);
+        assertArrayEquals("Expression should match", expectedOuput.toArray(), output.toArray());
       }
 
       // Same within interpolate expression
