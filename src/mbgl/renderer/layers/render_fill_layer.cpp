@@ -351,6 +351,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
     const auto layerPrefix = getID() + "/";
     constexpr auto renderPass = RenderPass::Translucent;
+    constexpr auto lineWidth = 2.0f;
 
     const auto commonInit = [&](gfx::DrawableBuilder& builder) {
         builder.setCullFaceMode(gfx::CullFaceMode::disabled());
@@ -453,11 +454,28 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 return false;
             }
 
+            switch (static_cast<FillVariant>(drawable.getType())) {
+            case FillVariant::Fill:
+            case FillVariant::FillPattern:
+                drawable.updateVertexAttributes(vertexAttrs,
+                                                fillVertexCount,
+                                                gfx::Triangles(),
+                                                bucket.sharedTriangles,
+                                                bucket.triangleSegments.data(),
+                                                bucket.triangleSegments.size());
+                break;
+            case FillVariant::FillOutline:
+            case FillVariant::FillOutlinePattern:
+                drawable.updateVertexAttributes(vertexAttrs,
+                                                fillVertexCount,
+                                                gfx::Lines(lineWidth),
+                                                bucket.sharedBasicLineIndexes,
+                                                bucket.basicLineSegments.data(),
+                                                bucket.basicLineSegments.size());
+                break;
 #if MLN_TRIANGULATE_FILL_OUTLINES
-            const auto type = static_cast<FillVariant>(drawable.getType());
-            if (type == FillVariant::FillOutlineTriangulated) {
-                const auto updated = drawable.getAttributeUpdateTime();
-                if (!updated || bucket.lineVertices.getLastModified() > *updated) {
+            case FillVariant::FillOutlineTriangulated:
+                if (const auto updated = drawable.getAttributeUpdateTime(); !updated || bucket.lineVertices.getLastModified() > *updated) {
                     drawable.updateVertexAttributes(getTriangulatedAttributes(),
                                                     lineVertexCount,
                                                     gfx::Triangles(),
@@ -465,16 +483,13 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                                     bucket.lineSegments.data(),
                                                     bucket.lineSegments.size());
                 }
-                return true;
-            }
+                break;
 #endif
-
-            drawable.updateVertexAttributes(vertexAttrs,
-                                            fillVertexCount,
-                                            gfx::Triangles(),
-                                            bucket.sharedTriangles,
-                                            bucket.triangleSegments.data(),
-                                            bucket.triangleSegments.size());
+            default:
+                Log::Error(Event::General, "Invalid fill type " + util::toString(drawable.getType()));
+                assert(false);
+                return false;
+            }
 
             return true;
         };
@@ -559,7 +574,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline")) {
                     commonInit(*builder);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                    builder->setLineWidth(2.0f);
+                    builder->setLineWidth(lineWidth);
                     builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setRenderPass(RenderPass::Translucent);
@@ -597,7 +612,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     if (bucket.sharedBasicLineIndexes->elements()) {
                         outlineBuilder->setShader(outlineShader);
                         outlineBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
-                        outlineBuilder->setSegments(gfx::Lines(2),
+                        outlineBuilder->setSegments(gfx::Lines(lineWidth),
                                                     bucket.sharedBasicLineIndexes,
                                                     bucket.basicLineSegments.data(),
                                                     bucket.basicLineSegments.size());
@@ -609,7 +624,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             if (doOutline && outlineBuilder && bucket.sharedBasicLineIndexes->elements()) {
                 outlineBuilder->setShader(outlineShader);
                 outlineBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
-                outlineBuilder->setSegments(gfx::Lines(2),
+                outlineBuilder->setSegments(gfx::Lines(lineWidth),
                                             bucket.sharedBasicLineIndexes,
                                             bucket.basicLineSegments.data(),
                                             bucket.basicLineSegments.size());
@@ -648,7 +663,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (auto builder = context.createDrawableBuilder(layerPrefix + "fill-outline-pattern")) {
                     commonInit(*builder);
                     builder->setShader(outlineShader);
-                    builder->setLineWidth(2.0f);
+                    builder->setLineWidth(lineWidth);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(2);
@@ -686,7 +701,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 outlinePatternBuilder->setShader(outlineShader);
                 outlinePatternBuilder->setRenderPass(renderPass);
                 outlinePatternBuilder->setRawVertices({}, fillVertexCount, gfx::AttributeDataType::Short2);
-                outlinePatternBuilder->setSegments(gfx::Lines(2),
+                outlinePatternBuilder->setSegments(gfx::Lines(lineWidth),
                                                    bucket.sharedBasicLineIndexes,
                                                    bucket.basicLineSegments.data(),
                                                    bucket.basicLineSegments.size());
