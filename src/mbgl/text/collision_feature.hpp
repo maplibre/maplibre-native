@@ -103,7 +103,7 @@ public:
                      const Anchor& anchor,
                      std::optional<PositionedIcon> shapedIcon,
                      const float boxScale,
-                     const float padding,
+                     const Padding& padding,
                      const RefIndexedSubfeature& indexedFeature_,
                      const float rotate);
 
@@ -120,7 +120,7 @@ private:
                     float right,
                     const std::optional<Padding>& collisionPadding,
                     float boxScale,
-                    float padding,
+                    const Padding& padding,
                     float overscaling,
                     float rotate);
     void bboxifyLabel(const GeometryCoordinates& line,
