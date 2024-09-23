@@ -175,6 +175,16 @@ global.testImplementation = function (property, layerType, isFunction) {
 
 global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
     let propertyName = originalPropertyName(property);
+
+    const paddingTestValue = () => {
+        if (arraysAsStructs) {
+            let iosValue = '[NSValue valueWithUIEdgeInsets:UIEdgeInsetsMake(1, 1, 1, 1)]'.indent(indent * 4);
+            let macosValue = '[NSValue valueWithEdgeInsets:NSEdgeInsetsMake(1, 1, 1, 1)]'.indent(indent * 4);
+            return `@"%@",\n#if TARGET_OS_IPHONE\n${iosValue}\n#else\n${macosValue}\n#endif\n${''.indent((indent - 1) * 4)}`;
+        }
+        return '@"{1, 1, 1, 1}"';
+    }
+
     switch (property.type) {
         case 'boolean':
             return property.default ? '@"false"' : '@"true"';
@@ -196,6 +206,8 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
             return `@"'${_.last(_.keys(property.values))}'"`;
         case 'color':
             return '@"%@", [MLNColor redColor]';
+        case 'padding':
+            return paddingTestValue();
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -203,12 +215,7 @@ global.objCTestValue = function (property, layerType, arraysAsStructs, indent) {
                 case 'font':
                     return `@"{'${_.startCase(propertyName)}', '${_.startCase(_.reverse(propertyName.split('')).join(''))}'}"`;
                 case 'padding': {
-                    if (arraysAsStructs) {
-                        let iosValue = '[NSValue valueWithUIEdgeInsets:UIEdgeInsetsMake(1, 1, 1, 1)]'.indent(indent * 4);
-                        let macosValue = '[NSValue valueWithEdgeInsets:NSEdgeInsetsMake(1, 1, 1, 1)]'.indent(indent * 4);
-                        return `@"%@",\n#if TARGET_OS_IPHONE\n${iosValue}\n#else\n${macosValue}\n#endif\n${''.indent((indent - 1) * 4)}`;
-                    }
-                    return '@"{1, 1, 1, 1}"';
+                    return paddingTestValue();
                 }
                 case 'offset':
                 case 'translate': {
@@ -261,6 +268,8 @@ global.mbglTestValue = function (property, layerType) {
         }
         case 'color':
             return '{ 1, 0, 0, 1 }';
+        case 'padding':
+            return '{ 1, 1, 1, 1 }';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -335,6 +344,8 @@ global.testHelperMessage = function (property, layerType, isFunction) {
             return `testEnum${fnSuffix}:${objCEnum} type:@encode(${objCType})`;
         case 'color':
             return 'testColor' + fnSuffix;
+        case 'padding':
+            return 'testPaddingType' + fnSuffix;
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -517,6 +528,8 @@ global.describeType = function (property) {
             return '`MLN' + camelize(property.name) + '`';
         case 'color':
             return '`UIColor`';
+        case 'padding':
+            return '`UIEdgeInsets`';
         case 'array':
             switch (arrayType(property)) {
                 case 'padding':
@@ -540,7 +553,7 @@ global.describeType = function (property) {
 }
 
 global.describeValue = function (value, property, layerType) {
-    if (Array.isArray(value) && property.type !== 'array' && property.type !== 'enum') {
+    if (Array.isArray(value) && property.type !== 'array' && property.type !== 'enum' && property.type !== 'padding') {
         switch (value[0]) {
             case 'interpolate': {
                 let curveType = value[1][0];
@@ -551,6 +564,21 @@ global.describeValue = function (value, property, layerType) {
             default:
                 throw new Error(`No description available for ${value[0]} expression in ${property.name} of ${layerType}.`);
         }
+    }
+
+    const describePadding = () => {
+        let units = property.units || '';
+        if (units) {
+            units = ` ${units}`.replace(/pixel/, 'point');
+        }
+
+        if (value.every(num => num === 0)) {
+            return 'an `NSValue` object containing `UIEdgeInsetsZero`';
+        }
+        if (value.length === 1) {
+            return 'an `NSValue` object containing a `UIEdgeInsets` struct set to' + ` ${formatNumber(value[0])}${units} on all sides`;
+        }
+        return 'an `NSValue` object containing a `UIEdgeInsets` struct set to' + ` ${formatNumber(value[0])}${units} on the top, ${formatNumber(value[3])}${units} on the left, ${formatNumber(value[2])}${units} on the bottom, and ${formatNumber(value[1])}${units} on the right`;
     }
 
     switch (property.type) {
@@ -595,6 +623,10 @@ global.describeValue = function (value, property, layerType) {
                 return '`UIColor.whiteColor`';
             }
             return 'a `UIColor`' + ` object whose RGB value is ${formatNumber(color.r)}, ${formatNumber(color.g)}, ${formatNumber(color.b)} and whose alpha value is ${formatNumber(color.a)}`;
+
+        case 'padding':
+            return describePadding();
+
         case 'array':
             let units = property.units || '';
             if (units) {
@@ -602,10 +634,7 @@ global.describeValue = function (value, property, layerType) {
             }
             switch (arrayType(property)) {
                 case 'padding':
-                    if (value[0] === 0 && value[1] === 0 && value[2] === 0 && value[3] === 0) {
-                        return 'an `NSValue` object containing `UIEdgeInsetsZero`';
-                    }
-                    return 'an `NSValue` object containing a `UIEdgeInsets` struct set to' + ` ${formatNumber(value[0])}${units} on the top, ${formatNumber(value[3])}${units} on the left, ${formatNumber(value[2])}${units} on the bottom, and ${formatNumber(value[1])}${units} on the right`;
+                    return describePadding();
                 case 'offset':
                 case 'translate':
                     return 'an `NSValue` object containing a `CGVector` struct set to' + ` ${formatNumber(value[0])}${units} rightward and ${formatNumber(value[1])}${units} downward`;
@@ -653,6 +682,8 @@ global.propertyType = function (property) {
             return 'NSValue *';
         case 'color':
             return 'MLNColor *';
+        case 'padding':
+            return 'NSValue *';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -701,6 +732,8 @@ global.valueTransformerArguments = function (property) {
             return [mbglType(property), 'NSValue *', mbglType(property), `MLN${camelize(property.name)}`];
         case 'color':
             return ['mbgl::Color', objCType];
+        case 'padding':
+            return ['mbgl::Padding', objCType];
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':
@@ -756,6 +789,8 @@ global.mbglType = function(property) {
         }
         case 'color':
             return 'mbgl::Color';
+        case 'padding':
+            return 'mbgl::Padding';
         case 'array':
             switch (arrayType(property)) {
                 case 'dasharray':

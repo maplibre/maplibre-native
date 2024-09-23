@@ -5,6 +5,7 @@ import android.graphics.PixelFormat;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import org.maplibre.android.maps.renderer.MapRenderer;
 
 import androidx.annotation.NonNull;
 
@@ -20,24 +21,6 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
   protected OnSurfaceViewDetachedListener detachedListener;
 
   protected boolean detached;
-
-  /**
-   * The renderer only renders
-   * when the surface is created, or when {@link #requestRender} is called.
-   *
-   * @see #getRenderMode()
-   * @see #setRenderMode(int)
-   * @see #requestRender()
-   */
-  public static final int RENDERMODE_WHEN_DIRTY = 0;
-  /**
-   * The renderer is called
-   * continuously to re-render the scene.
-   *
-   * @see #getRenderMode()
-   * @see #setRenderMode(int)
-   */
-  public static final int RENDERMODE_CONTINUOUSLY = 1;
 
   /**
    * Standard View constructor. In order to render something, you
@@ -104,7 +87,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
    * <li>{@link #onResume()}
    * <li>{@link #queueEvent(Runnable)}
    * <li>{@link #requestRender()}
-   * <li>{@link #setRenderMode(int)}
+   * <li>{@link #setRenderingRefreshMode(MapRenderer.RenderingRefreshMode)}
    * </ul>
    *
    * @param renderer the renderer to use to perform drawing.
@@ -118,21 +101,20 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
   }
 
   /**
-   * Set the rendering mode. When renderMode is
-   * RENDERMODE_CONTINUOUSLY, the renderer is called
-   * repeatedly to re-render the scene. When renderMode
-   * is RENDERMODE_WHEN_DIRTY, the renderer only rendered when the surface
-   * is created, or when {@link #requestRender} is called. Defaults to RENDERMODE_CONTINUOUSLY.
+   * Set the rendering refresh mode to CONTINUOUS or WHEN_DIRTY.
+   * Defaults to MapRenderer.RenderingRefreshMode.WHEN_DIRTY.
+   * The renderer is called repeatedly to re-render the scene in continuous mode otherwise
+   * the renderer is called when the surface is created, or when {@link #requestRender} is called.
    * <p>
-   * Using RENDERMODE_WHEN_DIRTY can improve battery life and overall system performance
+   * Using WHEN_DIRTY can improve battery life and overall system performance
    * by allowing the GPU and CPU to idle when the view does not need to be updated.
    * <p>
    * This method can only be called after {@link #setRenderer(SurfaceViewMapRenderer)}
    *
-   * @param renderMode one of the RENDERMODE_X constants
+   * @param mode one of the MapRenderer.RenderingRefreshMode constants
    */
-  public void setRenderMode(int renderMode) {
-    renderThread.setRenderMode(renderMode);
+  public void setRenderingRefreshMode(MapRenderer.RenderingRefreshMode mode) {
+    renderThread.setRenderingRefreshMode(mode);
   }
 
   /**
@@ -141,14 +123,14 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
    *
    * @return the current rendering mode.
    */
-  public int getRenderMode() {
-    return renderThread.getRenderMode();
+  public MapRenderer.RenderingRefreshMode getRenderingRefreshMode() {
+    return renderThread.getRenderingRefreshMode();
   }
 
   /**
    * Request that the renderer render a frame.
    * This method is typically used when the render mode has been set to
-   * RENDERMODE_WHEN_DIRTY, so that frames are only rendered on demand.
+   * MapRenderer.RenderingRefreshMode.WHEN_DIRTY, so that frames are only rendered on demand.
    * May be called
    * from any thread. Must not be called before a renderer has been set.
    */
@@ -249,13 +231,13 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
   protected void onAttachedToWindow() {
     super.onAttachedToWindow();
     if (detached && (renderer != null)) {
-      int renderMode = RENDERMODE_CONTINUOUSLY;
+      MapRenderer.RenderingRefreshMode renderMode = MapRenderer.RenderingRefreshMode.WHEN_DIRTY;
       if (renderThread != null) {
-        renderMode = renderThread.getRenderMode();
+        renderMode = renderThread.getRenderingRefreshMode();
       }
       createRenderThread();
-      if (renderMode != RENDERMODE_CONTINUOUSLY) {
-        renderThread.setRenderMode(renderMode);
+      if (renderMode != MapRenderer.RenderingRefreshMode.WHEN_DIRTY) {
+        renderThread.setRenderingRefreshMode(renderMode);
       }
       renderThread.start();
     }
@@ -289,7 +271,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
       width = 0;
       height = 0;
       requestRender = true;
-      renderMode = RENDERMODE_CONTINUOUSLY;
+      renderMode = MapRenderer.RenderingRefreshMode.WHEN_DIRTY;
       wantRenderNotification = false;
     }
 
@@ -311,24 +293,21 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
     protected boolean readyToDraw() {
       return (!paused) && hasSurface
               && (width > 0) && (height > 0)
-              && (requestRender || (renderMode == RENDERMODE_CONTINUOUSLY));
+              && (requestRender || (renderMode == MapRenderer.RenderingRefreshMode.CONTINUOUS));
     }
 
     public boolean ableToDraw() {
       return readyToDraw();
     }
 
-    public void setRenderMode(int renderMode) {
-      if ( !((RENDERMODE_WHEN_DIRTY <= renderMode) && (renderMode <= RENDERMODE_CONTINUOUSLY)) ) {
-        throw new IllegalArgumentException("renderMode");
-      }
+    public void setRenderingRefreshMode(MapRenderer.RenderingRefreshMode mode) {
       synchronized (renderThreadManager) {
-        this.renderMode = renderMode;
+        this.renderMode = mode;
         renderThreadManager.notifyAll();
       }
     }
 
-    public int getRenderMode() {
+    public MapRenderer.RenderingRefreshMode getRenderingRefreshMode() {
       synchronized (renderThreadManager) {
         return renderMode;
       }
@@ -503,7 +482,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
     protected boolean waitingForSurface;
     protected int width;
     protected int height;
-    protected int renderMode;
+    protected MapRenderer.RenderingRefreshMode renderMode;
     protected boolean requestRender;
     protected boolean wantRenderNotification;
     protected boolean renderComplete;

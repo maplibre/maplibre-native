@@ -24,7 +24,7 @@ CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
                shapedText.right,
                std::nullopt,
                boxScale,
-               padding,
+               {padding},
                overscaling,
                rotate);
 }
@@ -33,7 +33,7 @@ CollisionFeature::CollisionFeature(const GeometryCoordinates& line,
                                    const Anchor& anchor,
                                    std::optional<PositionedIcon> shapedIcon,
                                    const float boxScale,
-                                   const float padding,
+                                   const Padding& padding,
                                    const RefIndexedSubfeature& indexedFeature_,
                                    const float rotate)
     : indexedFeature(std::move(indexedFeature_)),
@@ -68,15 +68,15 @@ void CollisionFeature::initialize(const GeometryCoordinates& line,
                                   float right,
                                   const std::optional<Padding>& collisionPadding,
                                   float boxScale,
-                                  float padding,
+                                  const Padding& padding,
                                   float overscaling,
                                   float rotate) {
     if (top == 0 && bottom == 0 && left == 0 && right == 0) return;
 
-    float y1 = top * boxScale - padding;
-    float y2 = bottom * boxScale + padding;
-    float x1 = left * boxScale - padding;
-    float x2 = right * boxScale + padding;
+    float y1 = top * boxScale - padding.top;
+    float y2 = bottom * boxScale + padding.bottom;
+    float x1 = left * boxScale - padding.left;
+    float x2 = right * boxScale + padding.right;
 
     if (collisionPadding) {
         x1 -= collisionPadding->left * boxScale;

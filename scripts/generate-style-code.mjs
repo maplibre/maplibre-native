@@ -56,6 +56,8 @@ function expressionType(property) {
             return 'StringType';
         case 'color':
             return `ColorType`;
+        case 'padding':
+            return `PaddingType`;
         case 'formatted':
             return `FormattedType`;
         case 'array':
@@ -104,6 +106,8 @@ function evaluatedType(property) {
     return (isLightProperty(property) ? 'Light' : '') + `${camelize(property.name)}Type`;
   case 'color':
     return `Color`;
+  case 'padding':
+    return `Padding`;
   case 'array':
     if (property.length) {
       return `std::array<${evaluatedType({type: property.value, name: property.name})}, ${property.length}>`;
@@ -248,6 +252,7 @@ function defaultValue(property) {
       return `{ ${color} }`;
     }
   case 'array':
+  case 'padding':
     const defaults = (property.default || []).map((/** @type {any} **/ e) => defaultValue({ type: property.value, default: e }));
     if (property.length) {
       return `{{${defaults.join(', ')}}}`;
