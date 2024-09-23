@@ -16,13 +16,7 @@ public:
     explicit GLFWVulkanRenderableResource(GLFWVulkanBackend& backend_)
         : SurfaceRenderableResource(backend_) {}
 
-    std::vector<const char*> getDeviceExtensions() override {
-        return {VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-#ifdef __APPLE__ // https://github.com/KhronosGroup/MoltenVK/issues/1626#issuecomment-1166309712
-                VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME
-#endif
-        };
-    }
+    std::vector<const char*> getDeviceExtensions() override { return {VK_KHR_SWAPCHAIN_EXTENSION_NAME}; }
 
     void createPlatformSurface() override {
         auto& glfwBackend = static_cast<GLFWVulkanBackend&>(backend);

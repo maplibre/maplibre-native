@@ -41,17 +41,22 @@ if(MLN_WITH_METAL)
 endif()
 
 if(MLN_WITH_VULKAN)
-    if(NOT VULKAN_SDK)
-        message(FATAL_ERROR "VULKAN_SDK variable is not set. Please set it when configuring Vulkan on macOS.")
-    endif()
+    find_package(Vulkan REQUIRED)
 
     target_sources(
         mbgl-core
         PRIVATE
             ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
     )
-    include_directories("${VULKAN_SDK}/include")
-    set(CMAKE_INSTALL_RPATH "${VULKAN_SDK}/lib")
+
+    if(Vulkan_FOUND)
+        get_filename_component(Vulkan_LIBRARY_DIR ${Vulkan_LIBRARY} DIRECTORY)
+        set(CMAKE_INSTALL_RPATH ${Vulkan_LIBRARY_DIR})
+    else()
+        set(CMAKE_INSTALL_RPATH "/usr/local/lib/")
+        message(STATUS "Vulkan SDK not found! Using default homebrew install path")
+    endif()
+
     set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif()
 

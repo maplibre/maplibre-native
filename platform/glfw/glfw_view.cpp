@@ -215,7 +215,7 @@ GLFWView::GLFWView(bool fullscreen_,
     bool capFrameRate = !benchmark; // disable VSync in benchmark mode
     backend = GLFWBackend::Create(window, capFrameRate);
 
-#ifdef __APPLE__
+#if defined(__APPLE__) && !defined(MLN_RENDER_BACKEND_VULKAN)
     int fbW, fbH;
     glfwGetFramebufferSize(window, &fbW, &fbH);
     backend->setSize({static_cast<uint32_t>(fbW), static_cast<uint32_t>(fbH)});
