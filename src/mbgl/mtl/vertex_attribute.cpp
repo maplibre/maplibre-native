@@ -14,11 +14,12 @@ namespace mtl {
 
 const gfx::UniqueVertexBufferResource& VertexAttribute::getBuffer(gfx::VertexAttribute& attrib_,
                                                                   UploadPass& uploadPass,
-                                                                  const gfx::BufferUsageType usage) {
+                                                                  const gfx::BufferUsageType usage,
+                                                                  bool forceUpdate) {
     if (!attrib_.getBuffer()) {
         auto& attrib = static_cast<VertexAttribute&>(attrib_);
         if (attrib.sharedRawData) {
-            return uploadPass.getBuffer(attrib.sharedRawData, usage);
+            return uploadPass.getBuffer(attrib.sharedRawData, usage, forceUpdate);
         } else {
             if (!attrib.rawData.empty()) {
                 auto buffer = uploadPass.createVertexBufferResource(

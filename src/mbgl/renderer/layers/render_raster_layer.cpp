@@ -377,7 +377,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
 
             assert(!!drawable ^ !!builder);
             if (drawable) {
-                drawable->setVertexAttributes(vertexAttrs);
+                drawable->updateVertexAttributes(
+                    vertexAttrs, vertices->elements(), gfx::Triangles(), indices, segments->data(), segments->size());
             } else if (builder) {
                 builder->setVertexAttributes(vertexAttrs);
                 builder->setRawVertices({}, vertices->elements(), gfx::AttributeDataType::Short2);

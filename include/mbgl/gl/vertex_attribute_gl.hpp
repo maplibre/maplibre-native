@@ -35,7 +35,7 @@ public:
 
     static const std::vector<std::uint8_t>& getRaw(gfx::VertexAttribute& attr,
                                                    platform::GLenum,
-                                                   std::chrono::duration<double> lastUpdate);
+                                                   std::optional<std::chrono::duration<double>> lastUpdate);
 
 private:
     static int getSize(platform::GLenum glType);

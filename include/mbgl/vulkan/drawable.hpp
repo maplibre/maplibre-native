@@ -44,6 +44,13 @@ public:
     void setLineWidth(int32_t value) override;
     void setCullFaceMode(const gfx::CullFaceMode&) override;
 
+    void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
+                                std::size_t vertexCount,
+                                gfx::DrawMode,
+                                gfx::IndexVectorBasePtr,
+                                const SegmentBase* segments,
+                                std::size_t segmentCount) override;
+
 protected:
     void buildVulkanInputBindings() noexcept;
 
