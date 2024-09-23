@@ -39,6 +39,7 @@ private:
     std::atomic<std::size_t> pendingItems;
     std::queue<std::function<void()>> m_taskQueue;
     mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace QMapLibre
