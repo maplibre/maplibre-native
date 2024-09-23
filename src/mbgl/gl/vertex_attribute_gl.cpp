@@ -155,11 +155,11 @@ std::size_t VertexAttributeGL::getStride() const {
 
 const std::vector<std::uint8_t>& VertexAttributeGL::getRaw(gfx::VertexAttribute& attr,
                                                            platform::GLenum type,
-                                                           std::chrono::duration<double> lastUpdate) {
+                                                           std::optional<std::chrono::duration<double>> lastUpdate) {
     const auto count = attr.getCount();
     const auto stride_ = getStride(type);
     auto& rawData = attr.getRawData();
-    if (attr.isModifiedAfter(lastUpdate) || rawData.size() != count * stride_) {
+    if (!lastUpdate || attr.isModifiedAfter(*lastUpdate) || rawData.size() != count * stride_) {
         rawData.resize(stride_ * count);
 
         if (!rawData.empty()) {

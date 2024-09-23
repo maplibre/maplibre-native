@@ -148,10 +148,12 @@ private:
     std::atomic<bool> destroyed{false};
 
     std::unique_ptr<SnapshotCallback> snapshotCallback;
-    mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
 
     bool framebufferSizeChanged = false;
     bool swapBehaviorFlush = false;
+
+    mapbox::base::WeakPtrFactory<Scheduler> weakFactory{this};
+    // Do not add members here, see `WeakPtrFactory`
 };
 
 } // namespace android

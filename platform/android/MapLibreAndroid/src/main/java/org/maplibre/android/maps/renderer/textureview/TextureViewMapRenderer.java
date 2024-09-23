@@ -132,4 +132,22 @@ public class TextureViewMapRenderer extends MapRenderer {
   public boolean isTranslucentSurface() {
     return translucentSurface;
   }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void setRenderingRefreshMode(MapRenderer.RenderingRefreshMode mode) {
+    throw new RuntimeException("setRenderingRefreshMode is not supported for TextureViewMapRenderer. "
+                                + "Use SurfaceViewMapRenderer to set the rendering refresh mode.");
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public MapRenderer.RenderingRefreshMode getRenderingRefreshMode() {
+    throw new RuntimeException("getRenderingRefreshMode is not supported for TextureViewMapRenderer. "
+                                + "Use SurfaceViewMapRenderer to set the rendering refresh mode.");
+  }
 }

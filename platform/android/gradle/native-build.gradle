@@ -40,6 +40,7 @@ ext.nativeBuild = { nativeTargets ->
                         arguments "-DANDROID_TOOLCHAIN=clang"
                         arguments "-DANDROID_STL=" + stl
                         arguments "-DANDROID_CPP_FEATURES=exceptions"
+                        arguments "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
 
                         // Enable ccache if the user has installed it.
                         if (file("/usr/bin/ccache").exists()) {

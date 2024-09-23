@@ -6,8 +6,7 @@ import androidx.annotation.NonNull;
 import org.maplibre.android.maps.renderer.egl.EGLConfigChooser;
 import org.maplibre.android.maps.renderer.egl.EGLContextFactory;
 import org.maplibre.android.maps.renderer.egl.EGLWindowSurfaceFactory;
-
-import static android.opengl.GLSurfaceView.RENDERMODE_WHEN_DIRTY;
+import org.maplibre.android.maps.renderer.MapRenderer;
 
 public class GLSurfaceViewMapRenderer extends SurfaceViewMapRenderer {
 
@@ -20,7 +19,7 @@ public class GLSurfaceViewMapRenderer extends SurfaceViewMapRenderer {
     surfaceView.setEGLWindowSurfaceFactory(new EGLWindowSurfaceFactory());
     surfaceView.setEGLConfigChooser(new EGLConfigChooser());
     surfaceView.setRenderer(this);
-    surfaceView.setRenderMode(RENDERMODE_WHEN_DIRTY);
+    surfaceView.setRenderingRefreshMode(MapRenderer.RenderingRefreshMode.WHEN_DIRTY);
     surfaceView.setPreserveEGLContextOnPause(true);
   }
 }
