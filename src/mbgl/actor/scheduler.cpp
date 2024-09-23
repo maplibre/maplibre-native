@@ -15,7 +15,7 @@ std::function<void()> Scheduler::bindOnce(std::function<void()> fn) {
 
 namespace {
 
-thread_local Scheduler *localScheduler;
+thread_local Scheduler* localScheduler;
 } // namespace
 
 void Scheduler::SetCurrent(Scheduler* scheduler) {
