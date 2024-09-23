@@ -220,7 +220,7 @@ void RenderLayer::updateRenderTileIDs(const LayerPrepareParameters& params) {
     if (!renderTileDiff || !prevUpdateFrame || renderTileDiff->curFrame != params.frameCount ||
         renderTileDiff->prevFrame != *prevUpdateFrame) {
         renderTileDiff = std::make_shared<FrameTileDifference>(
-            *prevUpdateFrame, params.frameCount, diffTiles(previousRenderTiles, renderTiles));
+            prevUpdateFrame ? *prevUpdateFrame : 0, params.frameCount, diffTiles(previousRenderTiles, renderTiles));
     }
 }
 

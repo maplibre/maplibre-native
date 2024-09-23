@@ -155,8 +155,6 @@ void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
         localLayerGroup->addDrawable(std::move(drawable));
         ++stats.drawablesAdded;
     }
-
-    captureRenderTiles(params->frameCount);
 }
 #endif
 
