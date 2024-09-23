@@ -14,8 +14,8 @@ target_include_directories(
 set_target_properties(
     mbgl-vendor-metal-cpp
     PROPERTIES
-        INTERFACE_MAPBOX_NAME "metal-cpp"
-        INTERFACE_MAPBOX_URL "https://developer.apple.com/metal/cpp/"
-        INTERFACE_MAPBOX_AUTHOR "Apple"
-        INTERFACE_MAPBOX_LICENSE ${CMAKE_CURRENT_LIST_DIR}/metal-cpp/LICENSE.txt
+        INTERFACE_MAPLIBRE_NAME "metal-cpp"
+        INTERFACE_MAPLIBRE_URL "https://developer.apple.com/metal/cpp/"
+        INTERFACE_MAPLIBRE_AUTHOR "Apple"
+        INTERFACE_MAPLIBRE_LICENSE ${CMAKE_CURRENT_LIST_DIR}/metal-cpp/LICENSE.txt
 )
