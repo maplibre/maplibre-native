@@ -8,6 +8,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/range.hpp>
 #include <mbgl/util/string.hpp>
+#include <mbgl/util/variable_anchor_offset_collection.hpp>
 
 #include <array>
 #include <vector>
@@ -131,7 +132,7 @@ public:
 template <>
 struct Interpolator<VariableAnchorOffsetCollection> {
 public:
-    VariableAnchorOffsetCollection operator()(const VariableAnchorOffsetCollection& a, const VariableAnchorOffsetCollection& b, const float t) noexcept {
+    VariableAnchorOffsetCollection operator()(const VariableAnchorOffsetCollection& a, const VariableAnchorOffsetCollection& b, const float t) {
         auto aOffsets = a.getOffsets();
         auto bOffsets = b.getOffsets();
         if (aOffsets.size() != bOffsets.size())
@@ -140,7 +141,7 @@ public:
         }
         
         std::vector<AnchorOffsetPair> offsetMap;
-        for (auto index = 0; index < aOffsets.size(); index++) {
+        for (size_t index = 0; index < aOffsets.size(); index++) {
             auto aPair = std::next(aOffsets.begin(), index);
             auto bPair = std::next(bOffsets.begin(), index);
             if (aPair->first != bPair->first) {

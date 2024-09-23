@@ -1806,12 +1806,12 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
     if (property == Property::TextVariableAnchorOffset) {
         Error error;
         const auto& typedValue =
-            convert<PropertyValue<VariableAnchorOffsetCollection>(value, error, false, false);
+            convert<PropertyValue<VariableAnchorOffsetCollection>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
 
-        setTextVariableAnchor(*typedValue);
+        setTextVariableAnchorOffset(*typedValue);
         return std::nullopt;
     }
     if (property == Property::TextWritingMode) {

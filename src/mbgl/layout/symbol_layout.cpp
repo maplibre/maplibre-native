@@ -395,7 +395,6 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
     }
     
     const std::vector<TextVariableAnchorType> variableTextAnchor = layout->evaluate<TextVariableAnchor>(zoom, feature, canonicalID);
-    const SymbolAnchorType textAnchor = layout->evaluate<TextAnchor>(zoom, feature, canonicalID);
     if (!variableTextAnchor.empty()) {
         if (!textRadialOffset.isUndefined()) {
             variableTextOffset = {
@@ -419,9 +418,9 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
 
 std::vector<style::TextVariableAnchorType> SymbolLayout::getTextVariableAnchors(const SymbolFeature& feature) {
     std::vector<style::TextVariableAnchorType> textVariableAnchors;
-    auto textVariableAnchorOffset = getTextVariableAnchorOffset(feature);
-    if (textVariableAnchorOffset) {
-        for (const auto &anchorOffset: textVariableAnchorOffset->getOffsets()) {
+    auto variableAnchorOffsets = getTextVariableAnchorOffset(feature);
+    if (variableAnchorOffsets) {
+        for (const auto &anchorOffset: variableAnchorOffsets->getOffsets()) {
             textVariableAnchors.push_back(anchorOffset.first);
         }
     }
@@ -640,7 +639,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
     const float textMaxAngle = util::deg2radf(layout->get<TextMaxAngle>());
     const float iconRotation = layout->evaluate<IconRotate>(zoom, feature, canonicalID);
     const float textRotation = layout->evaluate<TextRotate>(zoom, feature, canonicalID);
-    auto textVariableAnchorOffset = getTextVariableAnchorOffset(feature);
+    auto variableAnchorOffsets = getTextVariableAnchorOffset(feature);
 
     const SymbolPlacementType textPlacement = layout->get<TextRotationAlignment>() != AlignmentType::Map
                                                   ? SymbolPlacementType::Point
@@ -698,7 +697,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
                                          overscaling,
                                          iconRotation,
                                          textRotation,
-                                         textVariableAnchorOffset,
+                                         variableAnchorOffsets,
                                          allowVerticalPlacement,
                                          iconType);
 
