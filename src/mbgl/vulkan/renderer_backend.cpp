@@ -104,7 +104,7 @@ std::vector<const char*> RendererBackend::getLayers() {
 std::vector<const char*> RendererBackend::getInstanceExtensions() {
     return {
 #ifdef __APPLE__
-    "VK_KHR_portability_enumeration"
+        "VK_KHR_portability_enumeration"
 #endif
     };
 }
