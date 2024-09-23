@@ -49,7 +49,10 @@ public:
     std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();
     VertexVector& vertices = *sharedVertices;
 
-    gfx::IndexVector<gfx::Triangles> indices;
+    using IndexVector = gfx::IndexVector<gfx::Triangles>;
+    std::shared_ptr<IndexVector> sharedIndices = std::make_shared<IndexVector>();
+    IndexVector& indices = *sharedIndices;
+
     SegmentVector<HillshadeAttributes> segments;
 
 #if MLN_LEGACY_RENDERER

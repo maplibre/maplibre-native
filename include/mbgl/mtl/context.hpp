@@ -130,9 +130,6 @@ public:
                                               std::size_t size,
                                               bool persistent) override;
 
-    /// Get an empty buffer to act as a placeholder
-    const BufferResource& getEmptyBuffer();
-
     /// Get a reusable buffer containing the standard fixed tile vertices (+/- `util::EXTENT`)
     const BufferResource& getTileVertexBuffer();
 

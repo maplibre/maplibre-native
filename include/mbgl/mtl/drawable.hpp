@@ -57,6 +57,13 @@ public:
     void setSubLayerIndex(int32_t) override;
     void setDepthType(gfx::DepthMaskType) override;
 
+    void updateVertexAttributes(gfx::VertexAttributeArrayPtr,
+                                std::size_t vertexCount,
+                                gfx::DrawMode,
+                                gfx::IndexVectorBasePtr,
+                                const SegmentBase* segments,
+                                std::size_t segmentCount) override;
+
 protected:
     // For testing only.
     Drawable(std::unique_ptr<Impl>);
