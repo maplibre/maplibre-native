@@ -19,6 +19,6 @@ TEST(STD, orderedInsert) {
     EXPECT_TRUE(std::ranges::is_sorted(result));
 
     result.clear();
-    std::ranges::copy(values, make_ordered_inserter(result, std::greater<int>()));
-    EXPECT_TRUE(std::ranges::is_sorted(result, std::greater<int>()));
+    std::ranges::copy(values, make_ordered_inserter(result, std::greater<>()));
+    EXPECT_TRUE(std::ranges::is_sorted(result, std::greater<>()));
 }
