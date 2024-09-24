@@ -12,6 +12,7 @@
 #include <mbgl/tile/tile.hpp>
 #include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/std.hpp>
 #include <mbgl/util/util.hpp>
 
 #if MLN_DRAWABLE_RENDERER
@@ -308,9 +309,10 @@ RenderLayer::RenderTileRefVec RenderLayer::combineRenderTiles(const RenderTileRe
     // Do these actually need to be in order?  If not we can just loop over `std::ranges::join_view(...)`
     RenderTileRefVec result;
     result.reserve(a.size() + b.size());
-    assert(std::ranges::is_sorted(a, &RenderTile::lessByUnwrappedTileID));
+    assert(std::ranges::is_sorted(a, &RenderTile::lessByOverscaledTileID));
     assert(std::ranges::is_sorted(b, &RenderTile::lessByUnwrappedTileID));
-    std::ranges::merge(a, b, std::back_inserter(result), &RenderTile::lessByUnwrappedTileID);
+    std::ranges::copy(b, std::back_inserter(result));
+    std::ranges::copy(a, util::make_ordered_inserter(result, &RenderTile::lessByUnwrappedTileID));
     return result;
 }
 

@@ -278,7 +278,11 @@ protected:
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
 
     using RenderTileRefVec = std::vector<std::reference_wrapper<const RenderTile>>;
-    static RenderTileRefVec combineRenderTiles(const RenderTileRefVec&, const RenderTileRefVec&);
+    /// Merge two sets of tile IDs
+    /// @param a Tile IDs from `TileDiff`, ordered by their overscaled tile ID
+    /// @param b Tile IDs from `RenderTiles`, ordered by their unwrapped tile ID
+    /// @return The combined set of IDs, ordered by unwrapped tile ID
+    static RenderTileRefVec combineRenderTiles(const RenderTileRefVec& a, const RenderTileRefVec& b);
 
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;

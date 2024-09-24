@@ -51,17 +51,19 @@ struct OrderedInserter {
 /// Type inference for `OrderedInserter`, default comparator
 template <typename T>
 auto make_ordered_inserter(T& target) {
-    static_assert(std::movable<detail::OrderedInserter<T, std::less<typename T::value_type>>>);
-    static_assert(std::weakly_incrementable<detail::OrderedInserter<T, std::less<typename T::value_type>>>);
-    return detail::OrderedInserter<T, std::less<typename T::value_type>>{target, {}};
+    using namespace detail;
+    static_assert(std::movable<OrderedInserter<T, std::less<typename T::value_type>>>);
+    static_assert(std::weakly_incrementable<OrderedInserter<T, std::less<typename T::value_type>>>);
+    return OrderedInserter<T, std::less<typename T::value_type>>{target, {}};
 }
 
 /// Type inference for `OrderedInserter`, custom  comparator
 template <typename TTarget, typename TComp>
 auto make_ordered_inserter(TTarget& target, TComp compare) {
-    static_assert(std::movable<detail::OrderedInserter<TTarget, TComp>>);
-    static_assert(std::weakly_incrementable<detail::OrderedInserter<TTarget, TComp>>);
-    return detail::OrderedInserter<TTarget, TComp>{target, std::forward<TComp>(compare)};
+    using namespace detail;
+    static_assert(std::movable<OrderedInserter<TTarget, TComp>>);
+    static_assert(std::weakly_incrementable<OrderedInserter<TTarget, TComp>>);
+    return OrderedInserter<TTarget, TComp>{target, std::forward<TComp>(compare)};
 }
 
 } // namespace util
