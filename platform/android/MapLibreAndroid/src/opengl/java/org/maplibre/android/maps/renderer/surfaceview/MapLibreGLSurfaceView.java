@@ -116,7 +116,7 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
 
   @Override
   protected void createRenderThread() {
-    renderThread = new GLThread(viewWeakReference);
+    renderThread = new GLThread(viewWeakReference, renderThreadManager);
   }
 
   /**
@@ -323,8 +323,8 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
    * sGLThreadManager object. This avoids multiple-lock ordering issues.
    */
   static class GLThread extends MapLibreSurfaceView.RenderThread {
-    GLThread(WeakReference<MapLibreGLSurfaceView> surfaceViewWeakRef) {
-      super();
+    GLThread(WeakReference<MapLibreGLSurfaceView> surfaceViewWeakRef, RenderThreadManager aRenderThreadManager) {
+      super(aRenderThreadManager);
 
       mSurfaceViewWeakRef = surfaceViewWeakRef;
     }
