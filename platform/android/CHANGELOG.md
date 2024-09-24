@@ -6,6 +6,10 @@
 
 ### 🐞 Bug fixes
 
+## 11.5.1
+
+This version reverts adding support for `icon-padding`. This change inadvertently introduced an incompatible API. This feature will come back in a future version with a backwards-compatible API.
+
 ## 11.5.0
 
 ### ✨ Features and improvements
