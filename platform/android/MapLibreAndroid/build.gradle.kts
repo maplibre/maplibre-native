@@ -157,7 +157,7 @@ configurations.all {
     exclude(group = "commons-logging", module = "commons-logging")
     exclude(group = "commons-collections", module = "commons-collections")
 }
-/ Download validation layers from
+// Download validation layers from
 // https://github.com/KhronosGroup/Vulkan-ValidationLayers
 
 apply(from = "${rootDir}/gradle/download-vulkan-validation.gradle.kts")
