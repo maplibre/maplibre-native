@@ -9,6 +9,16 @@ namespace mbgl {
 class RenderLocationIndicatorImpl;
 class RenderLocationIndicatorLayer final : public RenderLayer {
 public:
+
+    enum class LocationIndicatorComponentType : uint8_t {
+        Circle,
+        CircleOutline,
+        PuckShadow,
+        Puck,
+        PuckHat,
+        Undefined = 255
+    };
+
     explicit RenderLocationIndicatorLayer(Immutable<style::LocationIndicatorLayer::Impl>);
     ~RenderLocationIndicatorLayer() override;
 

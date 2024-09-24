@@ -53,6 +53,7 @@
 #include <mbgl/gfx/drawable_tweaker.hpp>
 #include <mbgl/gfx/texture2d.hpp>
 #include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/renderer/layers/location_indicator_layer_tweaker.hpp>
 
 #endif
 
@@ -1076,6 +1077,12 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         }
     }
 
+    if (!layerTweaker) {
+        layerTweaker = std::make_shared<LocationIndicatorLayerTweaker>(
+            getID(), evaluatedProperties, renderImpl->getProjectionCircle(), renderImpl->getProjectionPuck());
+        layerGroup->addLayerTweaker(layerTweaker);
+    }
+
     auto* localLayerGroup = static_cast<LayerGroup*>(layerGroup.get());
 
     if (localLayerGroup->getDrawableCount() == 0) {
@@ -1110,9 +1117,11 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             drawable.setIndexData(indices.vector(), std::move(drawSegments));
         };
 
-        const auto createQuadDrawable = [&](RenderLocationIndicatorImpl::QuadDrawableInfo& drawableInfo,
-                                            std::string&& name) {
+        const auto createQuadDrawable = [&](RenderLocationIndicatorImpl::QuadDrawableInfo & drawableInfo,
+                                            std::string&& name,
+                                            LocationIndicatorComponentType type) {
             auto& drawable = builder->getCurrentDrawable(true);
+            drawable->setType(static_cast<uint8_t>(type));
 
             drawable->setName(name);
             drawable->setRenderPass(drawPasses);
@@ -1155,6 +1164,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
 
             {
                 auto& drawable = getCircleDrawable("locationAccuracyCircle", vertexAttrib);
+                drawable->setType(static_cast<uint8_t>(LocationIndicatorComponentType::Circle));
 
                 std::vector<gfx::Drawable::UniqueDrawSegment> drawSegments;
                 std::vector<uint16_t> indices;
@@ -1176,6 +1186,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
 
             {
                 auto& drawable = getCircleDrawable("locationAccuracyCircleOutline", vertexAttrib);
+                drawable->setType(static_cast<uint8_t>(LocationIndicatorComponentType::CircleOutline));
 
                 std::vector<gfx::Drawable::UniqueDrawSegment> drawSegments;
                 std::vector<uint16_t> indices;
@@ -1196,9 +1207,9 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         };
 
         createCircleDrawable();
-        createQuadDrawable(renderImpl->shadowDrawableInfo, "locationShadow");
-        createQuadDrawable(renderImpl->puckDrawableInfo, "locationPuck");
-        createQuadDrawable(renderImpl->hatDrawableInfo, "locationPuckHat");
+        createQuadDrawable(renderImpl->shadowDrawableInfo, "locationShadow", LocationIndicatorComponentType::PuckShadow);
+        createQuadDrawable(renderImpl->puckDrawableInfo, "locationPuck", LocationIndicatorComponentType::Puck);
+        createQuadDrawable(renderImpl->hatDrawableInfo, "locationPuckHat", LocationIndicatorComponentType::PuckHat);
     };
 
     const auto updateCircleDrawable = [&]() {
@@ -1233,27 +1244,10 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
                     verts, 0, 0, sizeof(RenderLocationIndicatorImpl::vec2), gfx::AttributeDataType::Float2);
             }
         }
-
-        // update uniforms
-        shaders::CommonUBO commonUBO = {/* .matrix */ util::cast<float>(renderImpl->getProjectionCircle()),
-                                        /* .color */ renderImpl->parameters.errorRadiusColor};
-
-        auto& drawableUniforms = circleDrawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(shaders::idCommonUBO, &commonUBO, context);
-
-        commonUBO.color = renderImpl->parameters.errorRadiusBorderColor;
-        auto& outlineDrawableUniforms = circleOutlineDrawable.mutableUniformBuffers();
-        outlineDrawableUniforms.createOrUpdate(shaders::idCommonUBO, &commonUBO, context);
     };
-
-    const shaders::CommonUBO ubo = {/* .matrix */ util::cast<float>(renderImpl->getProjectionPuck()),
-                                    /* .color */ Color::black()};
 
     const auto updateQuadDrawable = [&](RenderLocationIndicatorImpl::QuadDrawableInfo& info) {
         auto& drawable = info.getDrawable();
-
-        auto& drawableUniforms = drawable.mutableUniformBuffers();
-        drawableUniforms.createOrUpdate(shaders::idCommonUBO, &ubo, context);
 
         if (info.dirty) {
             auto vertexAttrs = drawable.getVertexAttributes();
