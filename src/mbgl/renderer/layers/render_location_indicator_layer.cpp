@@ -1117,7 +1117,7 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
             drawable.setIndexData(indices.vector(), std::move(drawSegments));
         };
 
-        const auto createQuadDrawable = [&](RenderLocationIndicatorImpl::QuadDrawableInfo & drawableInfo,
+        const auto createQuadDrawable = [&](RenderLocationIndicatorImpl::QuadDrawableInfo& drawableInfo,
                                             std::string&& name,
                                             LocationIndicatorComponentType type) {
             auto& drawable = builder->getCurrentDrawable(true);
@@ -1207,7 +1207,8 @@ void RenderLocationIndicatorLayer::update(gfx::ShaderRegistry& shaders,
         };
 
         createCircleDrawable();
-        createQuadDrawable(renderImpl->shadowDrawableInfo, "locationShadow", LocationIndicatorComponentType::PuckShadow);
+        createQuadDrawable(
+            renderImpl->shadowDrawableInfo, "locationShadow", LocationIndicatorComponentType::PuckShadow);
         createQuadDrawable(renderImpl->puckDrawableInfo, "locationPuck", LocationIndicatorComponentType::Puck);
         createQuadDrawable(renderImpl->hatDrawableInfo, "locationPuckHat", LocationIndicatorComponentType::PuckHat);
     };

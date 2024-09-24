@@ -8,7 +8,6 @@
 namespace mbgl {
 
 void LocationIndicatorLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters& params) {
-
     if (layerGroup.empty()) {
         return;
     }
