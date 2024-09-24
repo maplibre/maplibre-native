@@ -101,6 +101,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/projection.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/rotation.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/run_loop.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/std.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/string.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/string_indexer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/text_conversions.test.cpp
