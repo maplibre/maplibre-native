@@ -22,7 +22,7 @@ jobs:
         run: ./gradlew dokkaHtml
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.6.3
+        uses: JamesIves/github-pages-deploy-action@v4.6.4
         with:
           branch: gh-pages
           folder: platform/android/MapLibreAndroid/build/dokka/html
