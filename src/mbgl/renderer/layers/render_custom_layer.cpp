@@ -112,7 +112,7 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
 void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                [[maybe_unused]] const TransformState& state,
-                               const std::shared_ptr<UpdateParameters>& params,
+                               const std::shared_ptr<UpdateParameters>&,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     // create layer group
