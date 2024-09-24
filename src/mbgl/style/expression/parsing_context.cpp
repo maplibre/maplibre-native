@@ -134,7 +134,6 @@ constexpr const auto expressionRegistry = mapbox::eternal::hash_map<mapbox::eter
      {"string", Assertion::parse},
      {"to-boolean", Coercion::parse},
      {"to-color", Coercion::parse},
-     {"to-padding", Coercion::parse},
      {"to-number", Coercion::parse},
      {"to-string", Coercion::parse},
      {"var", Var::parse},
@@ -207,10 +206,6 @@ ParseResult ParsingContext::parse(const Convertible& value,
                 std::move(*parsed), std::move(*expected), typeAnnotationOption.value_or(TypeAnnotationOption::assert))};
         } else if ((*expected == type::Color || *expected == type::Formatted || *expected == type::Image) &&
                    (actual == type::Value || actual == type::String)) {
-            parsed = {annotate(
-                std::move(*parsed), std::move(*expected), typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
-        } else if (*expected == type::Padding &&
-                   (actual == type::Value || actual == type::Number || actual.is<type::Array>())) {
             parsed = {annotate(
                 std::move(*parsed), std::move(*expected), typeAnnotationOption.value_or(TypeAnnotationOption::coerce))};
         } else {

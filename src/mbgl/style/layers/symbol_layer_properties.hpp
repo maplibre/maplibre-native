@@ -51,9 +51,9 @@ struct IconOptional : LayoutProperty<bool> {
     static bool defaultValue() { return false; }
 };
 
-struct IconPadding : DataDrivenLayoutProperty<Padding> {
+struct IconPadding : LayoutProperty<float> {
     static constexpr const char *name() { return "icon-padding"; }
-    static Padding defaultValue() { return {2}; }
+    static float defaultValue() { return 2.f; }
 };
 
 struct IconPitchAlignment : LayoutProperty<AlignmentType> {

@@ -1,5 +1,13 @@
 import referenceSpec from './style-spec-reference/v8.json' with { type: "json" };
 
+// https://github.com/maplibre/maplibre-native/issues/2368
+referenceSpec['layout_symbol']['icon-padding']['type'] = 'number';
+// @ts-ignore
+referenceSpec['layout_symbol']['icon-padding']['default'] = 2;
+
+// https://github.com/maplibre/maplibre-native/issues/2754
+referenceSpec['layout_symbol']['icon-padding']['property-type'] = 'data constant';
+
 /** @type {any} */
 let modifiedReferenceSpec = referenceSpec;
 

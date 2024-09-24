@@ -201,7 +201,7 @@ class MLNStyleValueTransformer {
     }
   }
 
-  // Padding as array<float, 4>
+  // Padding
   void getMBGLValue(id rawValue, std::array<float, 4> &mbglValue) {
     if ([rawValue isKindOfClass:[NSValue class]]) {
       mbglValue = [rawValue mgl_paddingArrayValue];
@@ -212,27 +212,6 @@ class MLNStyleValueTransformer {
       getMBGLValue(array[2], mbglValue[2]);
       getMBGLValue(array[3], mbglValue[3]);
       getMBGLValue(array[4], mbglValue[4]);
-    }
-  }
-
-  // Padding type (supports numbers and float arrays w/ sizes 1 to 4)
-  void getMBGLValue(id rawValue, mbgl::Padding &mbglValue) {
-    if ([rawValue isKindOfClass:[NSNumber class]]) {
-      NSNumber *number = (NSNumber *)rawValue;
-      mbglValue = mbgl::Padding(number.floatValue);
-    } else if ([rawValue isKindOfClass:[NSArray class]]) {
-      NSArray *array = (NSArray *)rawValue;
-      if (array.count < 1 || array.count > 4) {
-        [NSException raise:NSInvalidArgumentException
-                    format:@"Padding array should have from 1 to 4 elements."];
-      }
-      std::array<float, 4> values;
-      for (size_t i = 0; i < array.count; ++i) {
-        getMBGLValue(array[i], values[i]);
-      }
-      mbglValue = mbgl::Padding(std::span<float>(values.begin(), array.count));
-    } else if ([rawValue isKindOfClass:[NSValue class]]) {
-      mbglValue = mbgl::Padding([rawValue mgl_paddingArrayValue]);
     }
   }
 
@@ -306,14 +285,9 @@ class MLNStyleValueTransformer {
     return [NSValue mgl_valueWithOffsetArray:mbglStopValue];
   }
 
-  // Padding as array<float, 4>
+  // Padding
   static NSValue *toMLNRawStyleValue(const std::array<float, 4> &mbglStopValue) {
     return [NSValue mgl_valueWithPaddingArray:mbglStopValue];
-  }
-
-  // Padding type
-  static NSValue *toMLNRawStyleValue(const mbgl::Padding &mbglStopValue) {
-    return [NSValue mgl_valueWithPaddingArray:mbglStopValue.toArray()];
   }
 
   // Color

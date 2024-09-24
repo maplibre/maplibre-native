@@ -2,7 +2,6 @@
 #include "collection.hpp"
 #include "../style/formatted.hpp"
 
-#include <mbgl/style/conversion/stringify.hpp>
 #include <mbgl/util/string.hpp>
 
 namespace mbgl {
@@ -32,16 +31,6 @@ Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, std::stri
 Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Color>::operator()(jni::JNIEnv& env,
                                                                                           const Color& value) const {
     return jni::Make<jni::String>(env, value.stringify());
-}
-
-Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Padding>::operator()(
-    jni::JNIEnv& env, const Padding& value) const {
-    const auto values = value.toArray();
-    auto result = jni::Array<jni::Float>::New(env, values.size());
-    for (size_t i = 0; i < values.size(); i++) {
-        result.Set(env, i, jni::Box(env, values[i]));
-    }
-    return result;
 }
 
 Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, style::expression::Formatted>::operator()(

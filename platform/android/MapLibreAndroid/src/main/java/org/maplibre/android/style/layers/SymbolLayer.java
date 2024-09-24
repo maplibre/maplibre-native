@@ -316,13 +316,13 @@ public class SymbolLayer extends Layer {
   /**
    * Get the IconPadding property
    *
-   * @return property wrapper value around Float[]
+   * @return property wrapper value around Float
    */
   @NonNull
   @SuppressWarnings("unchecked")
-  public PropertyValue<Float[]> getIconPadding() {
+  public PropertyValue<Float> getIconPadding() {
     checkThread();
-    return (PropertyValue<Float[]>) new PropertyValue("icon-padding", nativeGetIconPadding());
+    return (PropertyValue<Float>) new PropertyValue("icon-padding", nativeGetIconPadding());
   }
 
   /**

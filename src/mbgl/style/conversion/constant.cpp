@@ -113,28 +113,6 @@ std::optional<Color> Converter<Color>::operator()(const Convertible& value, Erro
     return *color;
 }
 
-std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, Error& error) const {
-    std::optional<Padding> result;
-    if (isArray(value)) {
-        if (arrayLength(value) > 0 && arrayLength(value) <= 4) {
-            auto vector = Converter<std::vector<float>>{}(value, error);
-            if (vector) {
-                result = Padding(*vector);
-            }
-        }
-    } else {
-        std::optional<float> number = toNumber(value);
-        if (number) {
-            result = Padding(*number);
-        }
-    }
-
-    if (!result) {
-        error.message = "value must be a number or an array of numbers (between 1 and 4 elements)";
-    }
-    return result;
-}
-
 template <size_t N>
 std::optional<std::array<float, N>> Converter<std::array<float, N>>::operator()(const Convertible& value,
                                                                                 Error& error) const {

@@ -44,12 +44,6 @@ struct ColorType {
     bool operator==(const ColorType&) const { return true; }
 };
 
-struct PaddingType {
-    constexpr PaddingType() = default;
-    std::string getName() const { return "padding"; }
-    bool operator==(const PaddingType&) const { return true; }
-};
-
 struct ObjectType {
     constexpr ObjectType() = default;
     std::string getName() const { return "object"; }
@@ -91,7 +85,6 @@ constexpr NumberType Number;
 constexpr StringType String;
 constexpr BooleanType Boolean;
 constexpr ColorType Color;
-constexpr PaddingType Padding;
 constexpr ValueType Value;
 constexpr ObjectType Object;
 constexpr CollatorType Collator;
@@ -106,7 +99,6 @@ using Type = variant<NullType,
                      BooleanType,
                      StringType,
                      ColorType,
-                     PaddingType,
                      ObjectType,
                      ValueType,
                      mapbox::util::recursive_wrapper<Array>,

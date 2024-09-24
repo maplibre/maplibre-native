@@ -119,8 +119,6 @@ global.propertyType = function propertyType(property) {
         return 'String';
       case 'color':
         return 'String';
-      case 'padding':
-        return 'Float[]'
       case 'array':
         return `${propertyType({type:property.value, name: property.name})}[]`;
       default:
@@ -195,8 +193,6 @@ global.propertyNativeType = function (property) {
     return `${camelize(property.name)}Type`;
   case 'color':
     return `Color`;
-  case 'padding':
-    return 'Padding';
   case 'array':
     if (property.length) {
       return `std::array<${propertyType({type: property.value})}, ${property.length}>`;
@@ -233,8 +229,6 @@ global.defaultExpressionJava = function(property) {
         return "string";
       case 'color':
         return 'toColor';
-      case 'padding':
-        return 'toPadding';
       case 'array':
         return "array";
       default: return "string";
@@ -267,8 +261,6 @@ global.defaultValueJava = function(property) {
         return snakeCaseUpper(property.name) + "_" + snakeCaseUpper(Object.keys(property.values)[0]);
       case 'color':
         return '"rgba(255,128,0,0.7)"';
-      case 'padding':
-        return '{2.0f, 2.0f, 2.0f, 2.0f}';
       case 'array':
              switch (property.value) {
               case 'string':
