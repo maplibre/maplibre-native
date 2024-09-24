@@ -29,8 +29,8 @@ namespace detail {
 /// Output iterator that inserts elements into an already-ordered container in order
 template <typename TTarget, typename TComp>
 struct OrderedInserter {
-    typedef std::output_iterator_tag iterator_category;
-    typedef std::ptrdiff_t difference_type;
+    using iterator_category = std::output_iterator_tag;
+    using difference_type = std::ptrdiff_t;
 
     std::reference_wrapper<TTarget> target;
     TComp compare;
@@ -52,9 +52,9 @@ struct OrderedInserter {
 template <typename T>
 auto make_ordered_inserter(T& target) {
     using namespace detail;
-    static_assert(std::movable<OrderedInserter<T, std::less<typename T::value_type>>>);
-    static_assert(std::weakly_incrementable<OrderedInserter<T, std::less<typename T::value_type>>>);
-    return OrderedInserter<T, std::less<typename T::value_type>>{target, {}};
+    static_assert(std::movable<OrderedInserter<T, std::less<>>>);
+    static_assert(std::weakly_incrementable<OrderedInserter<T, std::less<>>>);
+    return OrderedInserter<T, std::less<>>{target, {}};
 }
 
 /// Type inference for `OrderedInserter`, custom  comparator
