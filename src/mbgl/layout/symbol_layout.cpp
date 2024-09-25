@@ -359,8 +359,9 @@ std::array<float, 2> SymbolLayout::evaluateVariableOffset(style::SymbolAnchorTyp
     return result;
 }
 
-std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAnchorOffset(const SymbolFeature& feature)
-{
+std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAnchorOffset(const SymbolFeature& feature) {
+    std::optional<VariableAnchorOffsetCollection> result;
+
     // If style specifies text-variable-anchor-offset, just return it
     std::array<float, 2> variableTextOffset;
     if (!textVariableAnchorOffset.isUndefined()) {
@@ -390,32 +391,40 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
             AnchorOffsetPair convertedAnchorOffset = {anchorOffset.first, std::array<float, 2>{ variableTextOffset[0], variableTextOffset[1] }};
             anchorOffsets.emplace_back(convertedAnchorOffset);
         }
-        
-        return VariableAnchorOffsetCollection(anchorOffsets);
-    }
-    
-    const std::vector<TextVariableAnchorType> variableTextAnchor = layout->evaluate<TextVariableAnchor>(zoom, feature, canonicalID);
-    if (!variableTextAnchor.empty()) {
-        if (!textRadialOffset.isUndefined()) {
-            variableTextOffset = {
-                {layout->evaluate<TextRadialOffset>(zoom, feature, canonicalID) * util::ONE_EM, INVALID_OFFSET_VALUE}};
-        } else {
-            variableTextOffset = {{layout->evaluate<TextOffset>(zoom, feature, canonicalID)[0] * util::ONE_EM,
-                                   layout->evaluate<TextOffset>(zoom, feature, canonicalID)[1] * util::ONE_EM}};
+
+        result = VariableAnchorOffsetCollection(anchorOffsets);
+    } else {
+        const std::vector<TextVariableAnchorType> variableTextAnchor = layout->evaluate<TextVariableAnchor>(
+            zoom, feature, canonicalID);
+        // BUGBUG unused
+        // const SymbolAnchorType textAnchor = layout->evaluate<TextAnchor>(zoom, feature, canonicalID);
+        if (!variableTextAnchor.empty()) {
+            if (!textRadialOffset.isUndefined()) {
+                variableTextOffset = {{layout->evaluate<TextRadialOffset>(zoom, feature, canonicalID) * util::ONE_EM,
+                                       INVALID_OFFSET_VALUE}};
+            } else {
+                variableTextOffset = {{layout->evaluate<TextOffset>(zoom, feature, canonicalID)[0] * util::ONE_EM,
+                                       layout->evaluate<TextOffset>(zoom, feature, canonicalID)[1] * util::ONE_EM}};
+            }
+
+            std::vector<AnchorOffsetPair> anchorOffsets;
+            for (auto anchor : variableTextAnchor) {
+                auto offset = SymbolLayout::evaluateVariableOffset(anchor, variableTextOffset);
+                anchorOffsets.emplace_back(AnchorOffsetPair{anchor, offset});
+            }
+
+            result = VariableAnchorOffsetCollection(anchorOffsets);
         }
-        
-        std::vector<AnchorOffsetPair> anchorOffsets;
-        for (auto anchor : variableTextAnchor) {
-            auto offset = SymbolLayout::evaluateVariableOffset(anchor, variableTextOffset);
-            anchorOffsets.emplace_back(AnchorOffsetPair{anchor, offset});
-        }
-        
-        return VariableAnchorOffsetCollection(anchorOffsets);
     }
-    
-    return std::nullopt;
+
+    if (result.has_value() && result->empty()) {
+        result.reset();
+    }
+
+    return result;
 }
 
+// BUGBUG why this method is necessary?
 std::vector<style::TextVariableAnchorType> SymbolLayout::getTextVariableAnchors(const SymbolFeature& feature) {
     std::vector<style::TextVariableAnchorType> textVariableAnchors;
     auto variableAnchorOffsets = getTextVariableAnchorOffset(feature);

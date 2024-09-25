@@ -19,14 +19,16 @@ std::vector<AnchorOffsetPair> VariableAnchorOffsetCollection::getOffsets() const
 }
 
 std::array<float, 2> VariableAnchorOffsetCollection::getOffsetByAnchor(const SymbolAnchorType& anchorType) const {
-    for (const auto& pair: anchorOffsets) {
+    for (const auto& pair : anchorOffsets) {
         if (anchorType == pair.first) {
             return pair.second;
         }
     }
-    
+
     return {0, 0};
 }
+
+// BUGBUG check why we need both toString() and serialize()
 
 std::string VariableAnchorOffsetCollection::toString() const {
     rapidjson::StringBuffer buffer;
@@ -49,10 +51,10 @@ mbgl::Value VariableAnchorOffsetCollection::serialize() const {
     std::vector<mbgl::Value> serialized;
     for (const auto& pair : anchorOffsets) {
         serialized.emplace_back(Enum<SymbolAnchorType>::toString(pair.first));
-        std::vector<mbgl::Value> offset { pair.second[0], pair.second[1] };
+        std::vector<mbgl::Value> offset{pair.second[0], pair.second[1]};
         serialized.emplace_back(offset);
     }
-    
+
     return serialized;
 }
 } // namespace mbgl

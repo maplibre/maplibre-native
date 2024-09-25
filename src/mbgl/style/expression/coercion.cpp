@@ -72,15 +72,62 @@ EvaluationResult toColor(const Value& colorValue) {
         });
 }
 
-// TODO (Yingfang) need evaluate the expression value to mbgl value
+//// TODO (Yingfang) need evaluate the expression value to mbgl value
 EvaluationResult toVariableAnchorOffsetCollection(const Value& value) {
     return value.match(
         [&](const VariableAnchorOffsetCollection& anchorOffset) -> EvaluationResult { return anchorOffset; },
+        [&](const std::vector<Value>& components) -> EvaluationResult {
+            // BUGBUG move out? Shorten / edit.
+            if (components.size() % 2 != 0) {
+                return EvaluationError{"Invalid variableAnchorOffsetCollection value " + stringify(components) +
+                                       ": expected an array containing an even number of values."};
+            }
+
+            std::vector<AnchorOffsetPair> anchorOffsets;
+            for (std::size_t i = 0; i < components.size(); i += 2) {
+                const auto& anchorTypeValue = components[i];
+                const auto& offsetArray = components[i + 1];
+
+                if (!anchorTypeValue.is<std::string>()) {
+                    return EvaluationError{"Invalid variableAnchorOffsetCollection value " + stringify(components) +
+                                           ": expected a string value as the first element of each pair."};
+                }
+
+                if (!offsetArray.is<std::vector<Value>>()) {
+                    return EvaluationError{"Invalid variableAnchorOffsetCollection value " + stringify(components) +
+                                           ": expected an array value as the second element of each pair."};
+                }
+
+                if (offsetArray.get<std::vector<Value>>().size() != 2) {
+                    return EvaluationError{"Invalid variableAnchorOffsetCollection value " + stringify(components) +
+                                           ": expected an array value with two elements as the second element of each "
+                                           "pair."};
+                }
+
+                const std::string& anchorTypeString = anchorTypeValue.get<std::string>();
+                const auto anchorType = Enum<SymbolAnchorType>::toEnum(anchorTypeString);
+                if (!anchorType) {
+                    return EvaluationError{"Invalid variableAnchorOffsetCollection value " + stringify(components) +
+                                           ": unknown anchor type '" + anchorTypeString + "'"};
+                }
+
+                const auto& offsetComponents = offsetArray.get<std::vector<Value>>();
+                const float x = offsetComponents[0].template get<double>();
+                const float y = offsetComponents[1].template get<double>();
+
+                anchorOffsets.emplace_back(*anchorType, std::array<float, 2>{{x, y}});
+            }
+
+            return VariableAnchorOffsetCollection{anchorOffsets};
+        },
+
         [&](const std::string& anchorOffsetString) -> EvaluationResult {
-            return EvaluationError{"Could not parse variableAnchorOffsetCollection from value '" + anchorOffsetString + "'"};
+            return EvaluationError{"Could not parse variableAnchorOffsetCollection from value '" + anchorOffsetString +
+                                   "'"};
         },
         [&](const auto&) -> EvaluationResult {
-            return EvaluationError{"Could not parse variableAnchorOffsetCollection from value '" + stringify(value) + "'"};
+            return EvaluationError{"Could not parse variableAnchorOffsetCollection from value '" + stringify(value) +
+                                   "'"};
         });
 }
 
@@ -151,6 +198,9 @@ std::string Coercion::getOperator() const {
                              [](const type::ColorType&) -> std::string_view { return "to-color"; },
                              [](const type::NumberType&) -> std::string_view { return "to-number"; },
                              [](const type::StringType&) -> std::string_view { return "to-string"; },
+                             [](const type::VariableAnchorOffsetCollectionType&) -> std::string_view {
+                                 return "to-variableanchoroffsetcollection";
+                             },
                              [](const auto&) noexcept -> std::string_view {
                                  assert(false);
                                  return "";
@@ -160,10 +210,12 @@ std::string Coercion::getOperator() const {
 
 using namespace mbgl::style::conversion;
 ParseResult Coercion::parse(const Convertible& value, ParsingContext& ctx) {
-    static std::unordered_map<std::string, type::Type> types{{"to-boolean", type::Boolean},
-                                                             {"to-color", type::Color},
-                                                             {"to-number", type::Number},
-                                                             {"to-string", type::String}};
+    static std::unordered_map<std::string, type::Type> types{
+        {"to-boolean", type::Boolean},
+        {"to-color", type::Color},
+        {"to-number", type::Number},
+        {"to-string", type::String},
+        {"to-variableanchoroffsetcollection", type::VariableAnchorOffsetCollection}};
 
     std::size_t length = arrayLength(value);
 

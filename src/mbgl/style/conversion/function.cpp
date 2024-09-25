@@ -131,7 +131,8 @@ template std::optional<PropertyExpression<LineJoinType>> convertFunctionToExpres
                                                                                                    Error&,
                                                                                                    bool);
 template std::optional<PropertyExpression<Color>> convertFunctionToExpression<Color>(const Convertible&, Error&, bool);
-template std::optional<PropertyExpression<VariableAnchorOffsetCollection>> convertFunctionToExpression<VariableAnchorOffsetCollection>(const Convertible&, Error&, bool);
+template std::optional<PropertyExpression<VariableAnchorOffsetCollection>>
+convertFunctionToExpression<VariableAnchorOffsetCollection>(const Convertible&, Error&, bool);
 template std::optional<PropertyExpression<Position>> convertFunctionToExpression<Position>(const Convertible&,
                                                                                            Error&,
                                                                                            bool);
@@ -210,6 +211,7 @@ enum class FunctionType {
 bool interpolatable(type::Type type) noexcept {
     return type.match([&](const type::NumberType&) { return true; },
                       [&](const type::ColorType&) { return true; },
+                      [&](const type::VariableAnchorOffsetCollectionType&) { return true; },
                       [&](const type::Array& array) { return array.N && array.itemType == type::Number; },
                       [&](const auto&) { return false; });
 }
