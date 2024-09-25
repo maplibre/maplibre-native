@@ -324,7 +324,7 @@ public class MapLibreGLSurfaceView extends MapLibreSurfaceView {
    */
   static class GLThread extends MapLibreSurfaceView.RenderThread {
     GLThread(WeakReference<MapLibreGLSurfaceView> surfaceViewWeakRef) {
-      super();
+      super(surfaceViewWeakRef.get().renderThreadManager);
 
       mSurfaceViewWeakRef = surfaceViewWeakRef;
     }

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 public abstract class MapLibreSurfaceView extends SurfaceView implements SurfaceHolder.Callback2 {
 
   protected static final String TAG = "MapLibreSurfaceView";
-  protected static final RenderThreadManager renderThreadManager = new RenderThreadManager();
+  protected final RenderThreadManager renderThreadManager = new RenderThreadManager();
 
   protected SurfaceViewMapRenderer renderer;
   protected RenderThread renderThread;
@@ -266,13 +266,14 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
    * sRenderThreadManager object. This avoids multiple-lock ordering issues.
    */
   abstract static class RenderThread extends Thread {
-    RenderThread() {
+    RenderThread(RenderThreadManager aRenderThreadManager) {
       super();
       width = 0;
       height = 0;
       requestRender = true;
       renderMode = MapRenderer.RenderingRefreshMode.WHEN_DIRTY;
       wantRenderNotification = false;
+      renderThreadManager = aRenderThreadManager;
     }
 
     @Override
@@ -489,6 +490,7 @@ public abstract class MapLibreSurfaceView extends SurfaceView implements Surface
     protected ArrayList<Runnable> eventQueue = new ArrayList<>();
     protected boolean sizeChanged = true;
     protected Runnable finishDrawingRunnable = null;
+    protected RenderThreadManager renderThreadManager = null;
     // End of member variables protected by the sRenderThreadManager monitor.
 
   }
