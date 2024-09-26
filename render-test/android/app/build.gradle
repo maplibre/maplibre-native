@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-//apply from: "${rootDir}/../../platform/android/gradle/download-vulkan-validation.gradle"
+//apply from: "${rootDir}/../../platform/android/gradle/download-vulkan-validation.gradle.kts"
 
 android {
     ndkVersion '27.0.12077973'
