@@ -76,6 +76,8 @@ EvaluationResult toColor(const Value& colorValue) {
 EvaluationResult toVariableAnchorOffsetCollection(const Value& value) {
     return value.match(
         [&](const VariableAnchorOffsetCollection& anchorOffset) -> EvaluationResult { return anchorOffset; },
+        // BUGBUG handle Value? It is also annotated w/ coerse in ParsingContext::parse(). See how other cases handle
+        // it.
         [&](const std::vector<Value>& components) -> EvaluationResult {
             // BUGBUG move out? Shorten / edit.
             if (components.size() % 2 != 0) {
@@ -119,11 +121,6 @@ EvaluationResult toVariableAnchorOffsetCollection(const Value& value) {
             }
 
             return VariableAnchorOffsetCollection{anchorOffsets};
-        },
-
-        [&](const std::string& anchorOffsetString) -> EvaluationResult {
-            return EvaluationError{"Could not parse variableAnchorOffsetCollection from value '" + anchorOffsetString +
-                                   "'"};
         },
         [&](const auto&) -> EvaluationResult {
             return EvaluationError{"Could not parse variableAnchorOffsetCollection from value '" + stringify(value) +

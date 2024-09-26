@@ -69,7 +69,11 @@ using namespace style;
 bool hasVariableTextAnchors(const style::SymbolLayoutProperties::PossiblyEvaluated& layout) {
     if (layout.get<TextVariableAnchor>().empty()) {
         const auto tvao = layout.get<TextVariableAnchorOffset>();
-        return !tvao.isConstant() || tvao.constant() != std::nullopt;
+        if (!tvao.isConstant()) {
+            return true;
+        }
+        const auto constValue = tvao.constant();
+        return constValue && !constValue->empty();
     }
 
     return true;

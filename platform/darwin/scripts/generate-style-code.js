@@ -499,7 +499,6 @@ global.describeType = function (property) {
         case 'formatted':
         case 'string':
         case 'resolvedImage':
-        case 'variableAnchorOffsetCollection':
             return 'string';
         case 'enum':
             return '`MLN' + camelize(property.name) + '`';
@@ -522,6 +521,8 @@ global.describeType = function (property) {
                     return 'array';
             }
             break;
+        case 'variableAnchorOffsetCollection':
+            return 'interleaved `MLNTextAnchor` and `CGVector` array';
         default:
             throw new Error(`unknown type for ${property.name}`);
     }
@@ -549,7 +550,6 @@ global.describeValue = function (value, property, layerType) {
         case 'formatted':
         case 'string':
         case 'resolvedImage':
-        case 'variableAnchorOffsetCollection':
             if (value === '') {
                 return 'the empty string';
             }
@@ -603,6 +603,8 @@ global.describeValue = function (value, property, layerType) {
                 default:
                     return 'the array `' + value.join('`, `') + '`';
             }
+        case 'variableAnchorOffsetCollection':
+            return 'array of interleaved `MLNTextAnchor` and `CGVector` values';
         default:
             throw new Error(`unknown type for ${property.name}`);
     }
@@ -637,7 +639,6 @@ global.propertyType = function (property) {
         case 'formatted':
         case 'string':
         case 'resolvedImage':
-        case 'variableAnchorOffsetCollection':
             return 'NSString *';
         case 'enum':
             return 'NSValue *';
@@ -660,6 +661,8 @@ global.propertyType = function (property) {
                 default:
                     throw new Error(`unknown array type for ${property.name}`);
             }
+        case 'variableAnchorOffsetCollection':
+            return 'NSArray<NSValue *> *';
         default:
             throw new Error(`unknown type for ${property.name}`);
     }

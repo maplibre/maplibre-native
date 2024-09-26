@@ -12,24 +12,22 @@ namespace mbgl {
 
 using AnchorOffsetPair = std::pair<style::SymbolAnchorType, std::array<float, 2>>;
 
+// BUGBUG consider changing data types here. Current impl using extra
+// heap allocs due to vector
 class VariableAnchorOffsetCollection {
-    
 public:
     VariableAnchorOffsetCollection() = default;
 
     // Copy constructor
-    VariableAnchorOffsetCollection(const VariableAnchorOffsetCollection& other) {
-        anchorOffsets = other.anchorOffsets;
-    }
+    VariableAnchorOffsetCollection(const VariableAnchorOffsetCollection& other) { anchorOffsets = other.anchorOffsets; }
 
     // Move constructor
     VariableAnchorOffsetCollection(VariableAnchorOffsetCollection&& other) noexcept {
         anchorOffsets = std::move(other.anchorOffsets);
     }
-  
-    VariableAnchorOffsetCollection(const std::vector<AnchorOffsetPair>& values) {
-        anchorOffsets = std::move(values);
-    }
+
+    // BUGBUG add overload to take advantage of std::move.
+    VariableAnchorOffsetCollection(const std::vector<AnchorOffsetPair>& values) { anchorOffsets = values; }
 
     std::string toString() const;
     mbgl::Value serialize() const;
@@ -42,7 +40,7 @@ public:
         if (this != &other) {
             anchorOffsets = other.anchorOffsets;
         }
-      
+
         return *this;
     }
 
@@ -51,13 +49,11 @@ public:
         if (this != &other) {
             anchorOffsets = std::move(other.anchorOffsets);
         }
-      
+
         return *this;
     }
 
-    bool operator==(const VariableAnchorOffsetCollection& other) const {
-        return anchorOffsets == other.anchorOffsets;
-    }
+    bool operator==(const VariableAnchorOffsetCollection& other) const { return anchorOffsets == other.anchorOffsets; }
 
 private:
     std::vector<AnchorOffsetPair> anchorOffsets;

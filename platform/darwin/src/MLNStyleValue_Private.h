@@ -220,9 +220,35 @@ class MLNStyleValueTransformer {
 
   // TODO (Yingfang) need convert raw value to mbgl value
   // VariableAnchorOffsetCollection
-  void getMBGLValue(NSString *rawValue, mbgl::VariableAnchorOffsetCollection &mbglValue) {
-    mbgl::VariableAnchorOffsetCollection anchorOffset{};
-    mbglValue = anchorOffset;
+  void getMBGLValue(id rawValue, mbgl::VariableAnchorOffsetCollection &mbglValue) {
+    // BUGBUG
+    // mbgl::style::SymbolAnchorType x {0};
+    //  getMBGLValue<mbgl::style::SymbolAnchorType, mbgl::style::SymbolAnchorType>(rawValue, x);
+
+    if ([rawValue isKindOfClass:[NSArray class]]) {
+      NSArray *array = (NSArray *)rawValue;
+      if (array.count % 2 != 0) {
+        [NSException raise:NSInvalidArgumentException
+                    format:@"VariableTextAnchorOffset array should have even number of elements."];
+      }
+
+      std::vector<mbgl::AnchorOffsetPair> anchorOffsets;
+      for (NSUInteger i = 0; i < array.count; i += 2) {
+        if (![array[i] isKindOfClass:[NSString class]]) {
+          [NSException raise:NSInvalidArgumentException
+                      format:@"VariableTextAnchorOffset array should specify valid anchor values."];
+        }
+
+        auto anchor =
+            *mbgl::Enum<mbgl::style::SymbolAnchorType>::toEnum([(NSString *)array[i] UTF8String]);
+        std::array<float, 2> offsetArray;
+        getMBGLValue(array[i + 1], offsetArray);
+
+        anchorOffsets.emplace_back(anchor, offsetArray);
+      }
+
+      mbglValue = mbgl::VariableAnchorOffsetCollection(std::move(anchorOffsets));
+    }
   }
 
   // Image
@@ -304,11 +330,20 @@ class MLNStyleValueTransformer {
 
   // TODO (Yingfang) need convert mbgl value to NSArray
   // VariableAnchorOffsetCollection
-  static NSArray<NSExpression *> *toMLNRawStyleValue(const mbgl::VariableAnchorOffsetCollection mbglStopValue) {
+  static NSArray<NSExpression *> *toMLNRawStyleValue(
+      const mbgl::VariableAnchorOffsetCollection mbglStopValue) {
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:0];
+    for (const auto &anchorOffset : mbglStopValue.getOffsets()) {
+      NSString *anchor = toMLNRawStyleValue(anchorOffset.first);
+      NSValue *offset = [NSValue mgl_valueWithOffsetArray:anchorOffset.second];
+
+      // BUGBUG inline
+      [array addObject:[NSExpression expressionForConstantValue:anchor]];
+      [array addObject:[NSExpression expressionForConstantValue:offset]];
+    }
     return array;
   }
-  
+
   // Image
   static NSString *toMLNRawStyleValue(const mbgl::style::expression::Image &mbglImageValue) {
     return @(mbglImageValue.id().c_str());
