@@ -90,6 +90,8 @@ public:
     const std::optional<SymbolQuads>& verticalIconQuads() const;
     void releaseSharedData();
 
+    std::vector<style::SymbolAnchorType> getTextAnchors() const;
+
 private:
     std::shared_ptr<SymbolInstanceSharedData> sharedData;
 

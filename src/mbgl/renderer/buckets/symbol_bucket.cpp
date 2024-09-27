@@ -327,6 +327,27 @@ bool SymbolBucket::hasFormatSectionOverrides() const {
     return *hasFormatSectionOverrides_;
 }
 
+bool SymbolBucket::hasVariableTextAnchors() const {
+    auto hasTextVariableAnchorOffset = [&]() -> bool {
+        auto tvao = layout->get<TextVariableAnchorOffset>();
+        const bool hasAnchorOffset = tvao.match([](const auto&) { return true; });
+        if (hasAnchorOffset) {
+            if (tvao.isConstant()) {
+                const auto constValue = tvao.constant();
+                return constValue && !constValue->empty();
+            }
+            // return true for expression
+            else {
+                return true;
+            }
+        }
+        
+        return false;
+    };
+    
+    return hasTextVariableAnchorOffset() || !layout->get<TextVariableAnchor>().empty();
+}
+
 std::pair<uint32_t, bool> SymbolBucket::registerAtCrossTileIndex(CrossTileSymbolLayerIndex& index,
                                                                  const RenderTile& renderTile) {
     bool firstTimeAdded = index.addBucket(renderTile.getOverscaledTileID(), renderTile.matrix, *this);

@@ -204,6 +204,17 @@ bool SymbolInstance::hasSdfIcon() const {
     return static_cast<bool>(symbolContent & SymbolContent::IconSDF);
 }
 
+std::vector<style::SymbolAnchorType> SymbolInstance::getTextAnchors() const {
+    std::vector<style::SymbolAnchorType> result;
+    if (textVariableAnchorOffset) {
+        for (const auto& anchorOffset : textVariableAnchorOffset->getOffsets()) {
+            result.push_back(anchorOffset.first);
+        }
+    }
+
+    return result;
+}
+
 const std::optional<SymbolQuads>& SymbolInstance::verticalIconQuads() const {
     assert(sharedData);
     return sharedData->verticalIconQuads;

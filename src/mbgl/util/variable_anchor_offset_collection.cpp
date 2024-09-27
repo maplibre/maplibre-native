@@ -28,8 +28,7 @@ std::array<float, 2> VariableAnchorOffsetCollection::getOffsetByAnchor(const Sym
     return {0, 0};
 }
 
-// BUGBUG check why we need both toString() and serialize()
-
+// Avoid quoting when convert to string in expression
 std::string VariableAnchorOffsetCollection::toString() const {
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
