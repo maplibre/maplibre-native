@@ -286,6 +286,7 @@ protected:
 protected:
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
 
+#if MLN_DRAWABLE_RENDERER
     using RenderTileRefVec = std::vector<std::reference_wrapper<const RenderTile>>;
     /// An iterable range consisting of the two sets of tiles combined
     // TODO: replace with `std::ranges::views::concat` when available
@@ -293,6 +294,7 @@ protected:
         using RangePair = std::array<std::ranges::ref_view<const RenderTileRefVec>, 2>;
         return std::ranges::join_view(RangePair{std::views::all(a), std::views::all(b)});
     }
+#endif
 
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;
