@@ -36,7 +36,7 @@ public:
     std::array<float, 2> getOffsetByAnchor(const style::SymbolAnchorType& anchorType) const;
 
     // Copy assignment operator
-    VariableAnchorOffsetCollection& operator=(VariableAnchorOffsetCollection& other) {
+    VariableAnchorOffsetCollection& operator=(const VariableAnchorOffsetCollection& other) {
         if (this != &other) {
             anchorOffsets = other.anchorOffsets;
         }

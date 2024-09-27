@@ -15,6 +15,7 @@
 #import <mbgl/style/transition_options.hpp>
 #import <mbgl/style/types.hpp>
 #import "MLNConversion.h"
+#import "MLNSymbolStyleLayer.h"
 
 #import <mbgl/util/enum.hpp>
 #include <mbgl/util/interpolate.hpp>
@@ -221,10 +222,6 @@ class MLNStyleValueTransformer {
   // TODO (Yingfang) need convert raw value to mbgl value
   // VariableAnchorOffsetCollection
   void getMBGLValue(id rawValue, mbgl::VariableAnchorOffsetCollection &mbglValue) {
-    // BUGBUG
-    // mbgl::style::SymbolAnchorType x {0};
-    //  getMBGLValue<mbgl::style::SymbolAnchorType, mbgl::style::SymbolAnchorType>(rawValue, x);
-
     if ([rawValue isKindOfClass:[NSArray class]]) {
       NSArray *array = (NSArray *)rawValue;
       if (array.count % 2 != 0) {
@@ -234,13 +231,9 @@ class MLNStyleValueTransformer {
 
       std::vector<mbgl::AnchorOffsetPair> anchorOffsets;
       for (NSUInteger i = 0; i < array.count; i += 2) {
-        if (![array[i] isKindOfClass:[NSString class]]) {
-          [NSException raise:NSInvalidArgumentException
-                      format:@"VariableTextAnchorOffset array should specify valid anchor values."];
-        }
+        mbgl::style::SymbolAnchorType anchor{0};
+        getMBGLValue<mbgl::style::SymbolAnchorType, MLNTextAnchor>(array[i], anchor);
 
-        auto anchor =
-            *mbgl::Enum<mbgl::style::SymbolAnchorType>::toEnum([(NSString *)array[i] UTF8String]);
         std::array<float, 2> offsetArray;
         getMBGLValue(array[i + 1], offsetArray);
 
@@ -278,9 +271,8 @@ class MLNStyleValueTransformer {
   }
 
   // Enumerations
-  template <typename MBGLEnum = MBGLType,
+  template <typename MBGLEnum = MBGLType, typename MLNEnum = ObjCEnum,
             class = typename std::enable_if<std::is_enum<MBGLEnum>::value>::type,
-            typename MLNEnum = ObjCEnum,
             class = typename std::enable_if<std::is_enum<MLNEnum>::value>::type>
   void getMBGLValue(id rawValue, MBGLEnum &mbglValue) {
     if ([rawValue isKindOfClass:[NSString class]]) {

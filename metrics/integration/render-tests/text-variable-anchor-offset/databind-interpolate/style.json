@@ -14,15 +14,15 @@
           "type": "FeatureCollection",
           "features": [{
             "type": "Feature",
-            "properties": { },
+            "properties": { "x": 0},
             "geometry": { "type": "Point", "coordinates": [-30, 0] }
            }, {
             "type": "Feature",
-            "properties": { "tvao": ["top", [0, -4.5]] },
+            "properties": { "tvao": ["top", [0, -4.5]], "x": 5},
             "geometry": { "type": "Point", "coordinates": [0, 0] }
            }, {
             "type": "Feature",
-            "properties": { "tvao": ["right", [4.5, 0]] },
+            "properties": { "tvao": ["right", [4.5, 0]], "x": 10},
             "geometry": { "type": "Point", "coordinates": [30, 0] }
            }
           ]
@@ -46,7 +46,7 @@
           "text-field": "Label",
           "text-size": 10,
           "text-justify": "auto",
-          "text-variable-anchor-offset": ["coalesce", ["get", "tvao"], ["literal", ["left", [-4.5, 0]]]],
+          "text-variable-anchor-offset": ["interpolate", ["linear"], ["get", "x"],  1, ["literal", ["top", [-3, -3]]], 10, ["literal", ["top", [3, 3]]]],
           "text-font": [
             "Open Sans Semibold",
             "Arial Unicode MS Bold"

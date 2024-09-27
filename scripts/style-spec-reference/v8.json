@@ -1961,8 +1961,8 @@
         },
         "data-driven styling": {
           "js": "3.3.0",
-          "ios": "https://github.com/maplibre/maplibre-native/issues/2358",
-          "android": "https://github.com/maplibre/maplibre-native/issues/2358"
+          "ios": "0.999",
+          "android": "0.999"
         }
       },
       "expression": {
