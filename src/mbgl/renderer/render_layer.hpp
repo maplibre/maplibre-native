@@ -11,7 +11,16 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/change_request.hpp>
 #include <mbgl/util/tiny_unordered_map.hpp>
+
+#if defined(__APPLE_CC__)
+// Partial C++20 support
+#define _LIBCPP_ENABLE_EXPERIMENTAL
+#include <ranges>
+#undef _LIBCPP_ENABLE_EXPERIMENTAL
+#else
+#include <ranges>
 #endif // MLN_DRAWABLE_RENDERER
+#endif
 
 #include <list>
 #include <memory>
@@ -278,11 +287,12 @@ protected:
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
 
     using RenderTileRefVec = std::vector<std::reference_wrapper<const RenderTile>>;
-    /// Merge two sets of tile IDs
-    /// @param a Tile IDs from `TileDiff`, ordered by their overscaled tile ID
-    /// @param b Tile IDs from `RenderTiles`, ordered by their unwrapped tile ID
-    /// @return The combined set of IDs, ordered by unwrapped tile ID
-    static RenderTileRefVec combineRenderTiles(const RenderTileRefVec& a, const RenderTileRefVec& b);
+    /// An iterable range consisting of the two sets of tiles combined
+    // TODO: replace with `std::ranges::views::concat` when available
+    static auto combineRenderTiles(const RenderTileRefVec& a, const RenderTileRefVec& b) {
+        using RangePair = std::array<std::ranges::ref_view<const RenderTileRefVec>, 2>;
+        return std::ranges::join_view(RangePair{std::views::all(a), std::views::all(b)});
+    }
 
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;
