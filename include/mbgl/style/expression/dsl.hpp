@@ -42,7 +42,8 @@ std::unique_ptr<Expression> string(std::unique_ptr<Expression>, std::unique_ptr<
 std::unique_ptr<Expression> boolean(std::unique_ptr<Expression>, std::unique_ptr<Expression> def = nullptr);
 
 std::unique_ptr<Expression> toColor(std::unique_ptr<Expression>, std::unique_ptr<Expression> def = nullptr);
-std::unique_ptr<Expression> toVariableAnchorOffsetCollection(std::unique_ptr<Expression>, std::unique_ptr<Expression> def = nullptr);
+std::unique_ptr<Expression> toVariableAnchorOffset(std::unique_ptr<Expression>,
+                                                   std::unique_ptr<Expression> def = nullptr);
 std::unique_ptr<Expression> toString(std::unique_ptr<Expression>, std::unique_ptr<Expression> def = nullptr);
 std::unique_ptr<Expression> toFormatted(std::unique_ptr<Expression>, std::unique_ptr<Expression> def = nullptr);
 std::unique_ptr<Expression> toImage(std::unique_ptr<Expression>, std::unique_ptr<Expression> def = nullptr);

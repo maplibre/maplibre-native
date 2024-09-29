@@ -790,7 +790,7 @@ std::optional<std::unique_ptr<Expression>> convertFunctionToExpression(type::Typ
                 return toColor(get(literal(*property)), defaultExpr());
             },
             [&](const type::VariableAnchorOffsetCollectionType&) -> std::optional<std::unique_ptr<Expression>> {
-                return toVariableAnchorOffsetCollection(get(literal(*property)), defaultExpr());
+                return toVariableAnchorOffset(get(literal(*property)), defaultExpr());
             },
             [&](const type::Array& array) -> std::optional<std::unique_ptr<Expression>> {
                 return assertion(array, get(literal(*property)), defaultExpr());

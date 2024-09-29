@@ -390,8 +390,7 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
                 anchorOffsets.emplace_back(AnchorOffsetPair{anchorOffset.first, variableTextOffset});
             }
 
-            result = VariableAnchorOffsetCollection(anchorOffsets);
-            
+            result = VariableAnchorOffsetCollection(std::move(anchorOffsets));
         }
     } else {
         const std::vector<TextVariableAnchorType> variableTextAnchor = layout->evaluate<TextVariableAnchor>(
@@ -413,7 +412,7 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
                 anchorOffsets.emplace_back(AnchorOffsetPair{anchor, offset});
             }
 
-            result = VariableAnchorOffsetCollection(anchorOffsets);
+            result = VariableAnchorOffsetCollection(std::move(anchorOffsets));
         }
     }
 
@@ -631,7 +630,7 @@ void SymbolLayout::addFeature(const std::size_t layoutFeatureIndex,
     const float textMaxAngle = util::deg2radf(layout->get<TextMaxAngle>());
     const float iconRotation = layout->evaluate<IconRotate>(zoom, feature, canonicalID);
     const float textRotation = layout->evaluate<TextRotate>(zoom, feature, canonicalID);
-    auto variableAnchorOffsets = getTextVariableAnchorOffset(feature);
+    const auto variableAnchorOffsets = getTextVariableAnchorOffset(feature);
 
     const SymbolPlacementType textPlacement = layout->get<TextRotationAlignment>() != AlignmentType::Map
                                                   ? SymbolPlacementType::Point

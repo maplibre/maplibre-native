@@ -113,17 +113,18 @@ std::optional<Color> Converter<Color>::operator()(const Convertible& value, Erro
     return *color;
 }
 
-std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetCollection>::operator()(const Convertible& value, Error& error) const {
+std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetCollection>::operator()(
+    const Convertible& value, Error& error) const {
     if (!isArray(value)) {
         error.message = "value must be an array";
         return std::nullopt;
     }
-    
+
     const auto arraySize = arrayLength(value);
     if (arraySize < 1 || arraySize % 2 != 0) {
         return std::nullopt;
     }
-    
+
     std::vector<AnchorOffsetPair> collection;
     for (size_t index = 0; index < arraySize; index += 2) {
         Convertible offsetValue = arrayMember(value, index + 1);
@@ -133,7 +134,7 @@ std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetColl
             error.message = "anchor must be a valid anchor value";
             return std::nullopt;
         }
-        
+
         if (!isArray(offsetValue)) {
             error.message = "anchor offset must be an array";
             return std::nullopt;
@@ -150,13 +151,13 @@ std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetColl
             error.message = "anchor offset must have two numbers";
             return std::nullopt;
         }
-        
+
         auto anchorType = anchor.value();
-        auto offset = std::array<float, 2>{ xOffset.value(), yOffset.value() };
+        auto offset = std::array<float, 2>{xOffset.value(), yOffset.value()};
         collection.emplace_back(AnchorOffsetPair{anchorType, offset});
     }
-    
-    return VariableAnchorOffsetCollection(collection);
+
+    return VariableAnchorOffsetCollection(std::move(collection));
 }
 
 template <size_t N>

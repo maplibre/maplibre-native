@@ -113,8 +113,8 @@ private:
                                          std::size_t sectionIndex,
                                          const CanonicalTileID& canonical);
 
-    // Helper to support both text-variable-anchor and text-variable-anchor-offset. Offset values converted from EMs to
-    // PXs
+    // Helper to support both text-variable-anchor and text-variable-anchor-offset.
+    // Offset values converted from EMs to PXs.
     std::optional<VariableAnchorOffsetCollection> getTextVariableAnchorOffset(const SymbolFeature&);
 
     // Stores the layer so that we can hold on to GeometryTileFeature instances

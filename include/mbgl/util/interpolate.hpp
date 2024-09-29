@@ -147,13 +147,13 @@ public:
             if (aPair->first != bPair->first) {
                 throw std::runtime_error("Cannot interpolate values containing mismatched anchors. index:" + util::toString(index) + "from: " + Enum<style::SymbolAnchorType>::toString(aPair->first) + ", to:" + Enum<style::SymbolAnchorType>::toString(bPair->first));
             }
-            
-            auto offset = std::array<float, 2>{ interpolate(aPair->second[0], bPair->second[0], t), interpolate(aPair->second[1], bPair->second[1], t) };
-            AnchorOffsetPair anchorOffset = {aPair->first, offset};
-            offsetMap.emplace_back(anchorOffset);
+
+            auto offset = std::array<float, 2>{interpolate(aPair->second[0], bPair->second[0], t),
+                                               interpolate(aPair->second[1], bPair->second[1], t)};
+            offsetMap.emplace_back(aPair->first, offset);
         }
-        
-        return VariableAnchorOffsetCollection(offsetMap);
+
+        return VariableAnchorOffsetCollection(std::move(offsetMap));
     }
 };
 

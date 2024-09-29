@@ -219,6 +219,7 @@ class MLNStyleValueTransformer {
   // Color
   void getMBGLValue(MLNColor *rawValue, mbgl::Color &mbglValue) { mbglValue = rawValue.mgl_color; }
 
+  // VariableAnchorOffsetCollection
   void getMBGLValue(id rawValue, mbgl::VariableAnchorOffsetCollection &mbglValue) {
     if ([rawValue isKindOfClass:[NSArray class]]) {
       NSArray *array = (NSArray *)rawValue;
@@ -318,6 +319,7 @@ class MLNStyleValueTransformer {
     return [MLNColor mgl_colorWithColor:mbglStopValue];
   }
 
+  // VariableAnchorOffsetCollection
   static NSArray<NSExpression *> *toMLNRawStyleValue(
       const mbgl::VariableAnchorOffsetCollection mbglStopValue) {
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:0];

@@ -1,6 +1,7 @@
 #include <mbgl/util/variable_anchor_offset_collection.hpp>
-#include <mbgl/util/enum.hpp>
 #include <mbgl/style/conversion/stringify.hpp>
+#include <mbgl/style/expression/value.hpp>
+#include <mbgl/util/enum.hpp>
 
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
@@ -9,6 +10,7 @@ namespace mbgl {
 
 using namespace std;
 using namespace style;
+using namespace style::expression;
 
 bool VariableAnchorOffsetCollection::empty() const {
     return anchorOffsets.size() == 0;
@@ -56,4 +58,5 @@ mbgl::Value VariableAnchorOffsetCollection::serialize() const {
 
     return serialized;
 }
+
 } // namespace mbgl

@@ -2,7 +2,6 @@
     "version": 8,
     "metadata": {
       "test": {
-        "collisionDebug": true,
         "width": 240,
         "height": 100
       }
@@ -18,11 +17,11 @@
             "geometry": { "type": "Point", "coordinates": [-30, 0] }
            }, {
             "type": "Feature",
-            "properties": { "tvao": ["top", [0, -4.5]], "x": 5},
+            "properties": { "x": 5},
             "geometry": { "type": "Point", "coordinates": [0, 0] }
            }, {
             "type": "Feature",
-            "properties": { "tvao": ["right", [4.5, 0]], "x": 10},
+            "properties": { "x": 10},
             "geometry": { "type": "Point", "coordinates": [30, 0] }
            }
           ]

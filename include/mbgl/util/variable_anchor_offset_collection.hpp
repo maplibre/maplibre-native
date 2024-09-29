@@ -26,8 +26,7 @@ public:
         anchorOffsets = std::move(other.anchorOffsets);
     }
 
-    // BUGBUG add overload to take advantage of std::move.
-    VariableAnchorOffsetCollection(const std::vector<AnchorOffsetPair>& values) { anchorOffsets = values; }
+    VariableAnchorOffsetCollection(std::vector<AnchorOffsetPair>&& values) { anchorOffsets = std::move(values); }
 
     std::string toString() const;
     mbgl::Value serialize() const;
@@ -40,7 +39,6 @@ public:
         if (this != &other) {
             anchorOffsets = other.anchorOffsets;
         }
-
         return *this;
     }
 
@@ -49,7 +47,6 @@ public:
         if (this != &other) {
             anchorOffsets = std::move(other.anchorOffsets);
         }
-
         return *this;
     }
 
