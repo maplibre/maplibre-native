@@ -72,7 +72,6 @@ EvaluationResult toColor(const Value& colorValue) {
         });
 }
 
-//// TODO (Yingfang) need evaluate the expression value to mbgl value
 EvaluationResult toVariableAnchorOffsetCollection(const Value& value) {
     return value.match(
         [&](const VariableAnchorOffsetCollection& anchorOffset) -> EvaluationResult { return anchorOffset; },

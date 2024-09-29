@@ -139,8 +139,8 @@ private:
     style::TextSize::UnevaluatedType textSize;
     style::IconSize::UnevaluatedType iconSize;
     style::TextRadialOffset::UnevaluatedType textRadialOffset;
-    style::TextVariableAnchorOffset::UnevaluatedType
-        textVariableAnchorOffset; // BUGBUG Why copy it here? it's not really doing anything.
+    // Use this to check if there is text-variable-anchor-offset in the layout
+    style::TextVariableAnchorOffset::UnevaluatedType textVariableAnchorOffset;
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     std::vector<SymbolFeature> features;
 
