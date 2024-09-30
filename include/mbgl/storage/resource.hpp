@@ -95,6 +95,7 @@ public:
     // Includes auxiliary data if this is a tile request.
     std::optional<TileData> tileData;
 
+    std::optional<std::pair<uint64_t, uint64_t>> dataRange = std::nullopt;
     std::optional<Timestamp> priorModified = std::nullopt;
     std::optional<Timestamp> priorExpires = std::nullopt;
     std::optional<std::string> priorEtag = std::nullopt;

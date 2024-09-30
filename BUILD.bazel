@@ -129,6 +129,7 @@ cc_library(
         "//vendor:eternal",
         "//vendor:mapbox-base",
         "//vendor:parsedate",
+        "//vendor:pmtiles",
         "//vendor:polylabel",
         "//vendor:protozero",
         "//vendor:unique_resource",
