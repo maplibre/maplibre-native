@@ -233,9 +233,10 @@ public class <%- camelize(type) %>LayerTest extends BaseLayerTest {
     layer.setProperties(<%- camelizeWithLeadingLowercase(property.name) %>(propertyValue));
     assertEquals(layer.get<%- camelize(property.name) %>().getValue(), propertyValue);
 <% if (property.type === 'padding') { -%>
-    // Single number overload
-    layer.setProperties(<%- camelizeWithLeadingLowercase(property.name) %>(3.0f));
-    assertEquals(layer.get<%- camelize(property.name) %>().getValue(), new Float[]{3.0f, 3.0f, 3.0f, 3.0f});
+    // Single number value can be used too for backward compatibility
+    Float number = propertyValue[0] + 1.0f;
+    layer.setProperties(<%- camelizeWithLeadingLowercase(property.name) %>(number));
+    assertEquals(layer.get<%- camelize(property.name) %>().getValue(), new Float[]{number, number, number, number});
 <% } -%>
 <% if (property.tokens) { -%>
 
