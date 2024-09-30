@@ -30,6 +30,7 @@ namespace mbgl {
 
 LayerRenderData* GeometryTile::LayoutResult::getLayerRenderData(const style::Layer::Impl& layerImpl) {
     MLN_TRACE_FUNC();
+    MLN_ZONE_STR(layerImpl.id);
 
     auto it = layerRenderData.find(layerImpl.id);
     if (it == layerRenderData.end()) {
@@ -165,14 +166,17 @@ const LayerRenderData* GeometryTileRenderData::getLayerRenderData(const style::L
    that could flag the tile as non-pending too early.
  */
 
-GeometryTile::GeometryTile(const OverscaledTileID& id_, std::string sourceID_, const TileParameters& parameters)
-    : Tile(Kind::Geometry, id_),
+GeometryTile::GeometryTile(const OverscaledTileID& id_,
+                           std::string sourceID_,
+                           const TileParameters& parameters,
+                           TileObserver* observer_)
+    : Tile(Kind::Geometry, id_, std::move(sourceID_), observer_),
       ImageRequestor(parameters.imageManager),
-      sourceID(std::move(sourceID_)),
-      threadPool(Scheduler::GetBackground()),
+      threadPool(parameters.threadPool),
       mailbox(std::make_shared<Mailbox>(*Scheduler::GetCurrent())),
-      worker(threadPool,
+      worker(parameters.threadPool, // Scheduler reference for the Actor retainer
              ActorRef<GeometryTile>(*this, mailbox),
+             parameters.threadPool,
              id_,
              sourceID,
              obsolete,
@@ -193,8 +197,13 @@ GeometryTile::~GeometryTile() {
     glyphManager->removeRequestor(*this);
     imageManager->removeRequestor(*this);
 
+    if (pending) {
+        // This tile never finished loading or was abandoned, emit a cancellation event
+        observer->onTileAction(id, sourceID, TileOperation::Cancelled);
+    }
+
     if (layoutResult) {
-        threadPool->runOnRenderThread(
+        threadPool.runOnRenderThread(
             [layoutResult_{std::move(layoutResult)}, atlasTextures_{std::move(atlasTextures)}]() {});
     }
 }
@@ -220,6 +229,10 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
         return;
     }
 
+    if (!pending) {
+        observer->onTileAction(id, sourceID, TileOperation::StartParse);
+    }
+
     // Mark the tile as pending again if it was complete before to prevent
     // signaling a complete state despite pending parse operations.
     pending = true;
@@ -232,10 +245,18 @@ void GeometryTile::setData(std::unique_ptr<const GeometryTileData> data_) {
 void GeometryTile::reset() {
     MLN_TRACE_FUNC();
 
-    // Mark the tile as pending again if it was complete before to prevent
-    // signaling a complete state despite pending parse operations.
-    pending = true;
+    // If there is pending work, indicate that work has been cancelled.
+    // Clear the pending status.
+    if (pending) {
+        observer->onTileAction(id, sourceID, TileOperation::Cancelled);
+        pending = false;
+    }
 
+    // Reset the tile to an unloaded state to avoid signaling completion
+    // after clearing the tile's pending status.
+    loaded = false;
+
+    // Reset the worker to the `NeedsParse` state.
     ++correlationID;
     worker.self().invoke(&GeometryTileWorker::reset, correlationID);
 }
@@ -251,12 +272,17 @@ void GeometryTile::setLayers(const std::vector<Immutable<LayerProperties>>& laye
 
     // Mark the tile as pending again if it was complete before to prevent
     // signaling a complete state despite pending parse operations.
-    pending = true;
+    if (!pending) {
+        pending = true;
+        observer->onTileAction(id, sourceID, TileOperation::StartParse);
+    }
 
     std::vector<Immutable<LayerProperties>> impls;
     impls.reserve(layers.size());
 
     for (const auto& layer : layers) {
+        MLN_TRACE_ZONE(layer);
+        MLN_ZONE_STR(layer->baseImpl->id);
         // Skip irrelevant layers.
         const auto& layerImpl = *layer->baseImpl;
         assert(layerImpl.getTypeInfo()->source != LayerTypeInfo::Source::NotRequired);
@@ -291,6 +317,7 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
     renderable = true;
     if (resultCorrelationID == correlationID) {
         pending = false;
+        observer->onTileAction(id, sourceID, TileOperation::EndParse);
     }
 
     layoutResult = std::move(result);
@@ -298,13 +325,30 @@ void GeometryTile::onLayout(std::shared_ptr<LayoutResult> result, const uint64_t
         atlasTextures = std::make_shared<TileAtlasTextures>();
     }
 
+    if (layoutResult) {
+        for (const auto& data : layoutResult->layerRenderData) {
+            if (data.second.bucket) {
+                data.second.bucket->check(SYM_GUARD_LOC);
+            }
+        }
+    }
+
     observer->onTileChanged(*this);
+
+    if (layoutResult) {
+        for (const auto& data : layoutResult->layerRenderData) {
+            if (data.second.bucket) {
+                data.second.bucket->check(SYM_GUARD_LOC);
+            }
+        }
+    }
 }
 
 void GeometryTile::onError(std::exception_ptr err, const uint64_t resultCorrelationID) {
     loaded = true;
     if (resultCorrelationID == correlationID) {
         pending = false;
+        observer->onTileAction(id, sourceID, TileOperation::Error);
     }
     observer->onTileError(*this, std::move(err));
 }

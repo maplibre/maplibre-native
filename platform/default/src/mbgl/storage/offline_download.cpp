@@ -273,7 +273,7 @@ void OfflineDownload::activateDownload() {
                     sourceResource.setPriority(Resource::Priority::Low);
                     sourceResource.setUsage(Resource::Usage::Offline);
 
-                    ensureResource(std::move(sourceResource), [=](const Response& sourceResponse) {
+                    ensureResource(std::move(sourceResource), [=, this](const Response& sourceResponse) {
                         style::conversion::Error error;
                         std::optional<Tileset> tileset = style::conversion::convertJSON<Tileset>(*sourceResponse.data,
                                                                                                  error);
@@ -467,7 +467,7 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
     assert(resource.usage == Resource::Usage::Offline);
 
     auto workRequestsIt = requests.insert(requests.begin(), nullptr);
-    *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=]() {
+    *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=, this]() {
         requests.erase(workRequestsIt);
         auto res = resource;
         const auto resourceKind = res.kind;
@@ -517,7 +517,7 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
         }
 
         auto fileRequestsIt = requests.insert(requests.begin(), nullptr);
-        *fileRequestsIt = onlineFileSource.request(res, [=](const Response& onlineResponse) {
+        *fileRequestsIt = onlineFileSource.request(res, [=, this](const Response& onlineResponse) {
             if (onlineResponse.error) {
                 observer->responseError(*onlineResponse.error);
                 if (onlineResponse.error->reason == Response::Error::Reason::NotFound) {

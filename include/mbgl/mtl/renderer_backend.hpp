@@ -32,7 +32,7 @@ public:
 
     const MTLDevicePtr& getDevice() const { return device; }
     const MTLCommandQueuePtr& getCommandQueue() const { return commandQueue; }
-    const bool isBaseVertexInstanceDrawingSupported() const { return baseVertexInstanceDrawingSupported; }
+    bool isBaseVertexInstanceDrawingSupported() const { return baseVertexInstanceDrawingSupported; }
 
 protected:
     std::unique_ptr<gfx::Context> createContext() override;

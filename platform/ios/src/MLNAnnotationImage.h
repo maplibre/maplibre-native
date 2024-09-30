@@ -5,14 +5,14 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- The `MLNAnnotationImage` class is responsible for presenting point-based
+ The ``MLNAnnotationImage`` class is responsible for presenting point-based
  annotations visually on a map view. Annotation image objects wrap `UIImage`
  objects and may be recycled later and put into a reuse queue that is maintained
  by the map view.
 
  #### Related examples
  TODO: Mark a place on the map with an image, learn how use an image
- as a marker using `MLNAnnotationImage`.
+ as a marker using ``MLNAnnotationImage``.
  */
 MLN_EXPORT
 @interface MLNAnnotationImage : NSObject <NSSecureCoding>

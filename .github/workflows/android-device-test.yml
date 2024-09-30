@@ -16,12 +16,23 @@ jobs:
       matrix:
         test: [
           {
-            artifactName: android-render-tests,
-            testFile: RenderTests.apk,
-            appFile: RenderTestsApp.apk,
-            name: "Android Render Tests",
+            artifactName: android-render-tests-opengl,
+            testFile: RenderTests-opengl.apk,
+            appFile: RenderTestsApp-opengl.apk,
+            name: "Android Render Tests (OpenGL)",
             # Google Pixel 7 Pro
             devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564"
+          },
+          {
+            artifactName: android-render-tests-vulkan,
+            testFile: RenderTests-vulkan.apk,
+            appFile: RenderTestsApp-vulkan.apk,
+            name: "Android Render Tests (Vulkan)",
+            # Google Pixel 7 Pro
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564",
+            # android-render-test.yml
+            # see https://github.com/maplibre/ci-runners/tree/main/aws-device-farm/custom-test-envs
+            testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/c1fc7d3e-dfe3-4a31-9ee0-7b0f71b08872"
           },
           {
             artifactName: benchmarkAPKs,
@@ -29,8 +40,9 @@ jobs:
             appFile: "MapLibreAndroidTestApp-drawable-release.apk",
             name: "Android Benchmark",
             testFilter: "org.maplibre.android.benchmark.Benchmark",
-            # top devices, query with `aws list-device-pools --arn <project_arn>`
-            devicePool: "arn:aws:devicefarm:us-west-2::devicepool:082d10e5-d7d7-48a5-ba5c-b33d66efa1f5",
+            # Google Pixel 7 Pro
+            # query with `aws list-device-pools --arn <project_arn>`
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564",
             # benchmark-android.yaml
             # see https://github.com/maplibre/ci-runners/tree/main/aws-device-farm/custom-test-envs
             testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/14862afb-cf88-44aa-9f1e-5131cbb22f01"
@@ -43,9 +55,18 @@ jobs:
             # Google Pixel 7 Pro
             devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564",
             testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/09e0738e-c91e-4c5f-81e6-06a06cc340d8"
+          },
+          {
+            artifactName: android-cpp-tests,
+            testFile: app-release-androidTest.apk,
+            appFile: app-debug.apk,
+            name: "Android C++ Unit Tests",
+            # Google Pixel 7 Pro
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564"
           }
         ]
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'maplibre' && github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v4
 
@@ -88,7 +109,6 @@ jobs:
           echo "run_device_test=true" >> "$GITHUB_ENV"
 
       - uses: LouisBrunner/checks-action@v2.0.0
-        if: env.run_device_test == 'true'
         id: create_check
         with:
           token: ${{ steps.generate_token.outputs.token }}
@@ -132,26 +152,29 @@ jobs:
           testFilter: ${{ matrix.test.testFilter }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_ROLE_TO_ASSUME: ${{ vars.AWS_ROLE_TO_ASSUME }}
+          AWS_ROLE_TO_ASSUME: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
           AWS_DEVICE_FARM_PROJECT_ARN: ${{ vars.AWS_DEVICE_FARM_PROJECT_ARN }}
           AWS_DEVICE_FARM_DEVICE_POOL_ARN: ${{ matrix.test.devicePool }}
           externalData: ${{ env.external_data_arn }}
           testSpecArn: ${{ matrix.test.testSpecArn }}
 
-      - name: Upload benchmark results to S3
-        if: always() && env.run_device_test == 'true' && matrix.test.name == 'Android Benchmark'
+      - name: Store Test Artifacts
+        if: (matrix.test.name == 'Android Benchmark' || failure()) && env.run_device_test == 'true'
         run: |
-          npm install --ignore-scripts
-          node scripts/aws-device-farm/download-benchmark-results.mjs ${{ steps.aws_device_farm_run.outputs.runArn }}
+          npm install
+          temp_dir="$(mktemp -d)"
+          node scripts/aws-device-farm/store-test-artifacts.mjs ${{ steps.aws_device_farm_run.outputs.runArn }} "$temp_dir"
+          zip -r test_artifacts.zip "$temp_dir"
 
-      - name: Log Test Spec Output
-        if: failure() && env.run_device_test == 'true'
-        run: |
-          npm install --ignore-scripts
-          node scripts/aws-device-farm/log-test-spec-output.mjs ${{ steps.aws_device_farm_run.outputs.runArn }}
+      - name: Upload Test Artifacts
+        if: (matrix.test.name == 'Android Benchmark' || failure()) && env.run_device_test == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: "Test Artifacts ${{ matrix.test.name }}"
+          path: test_artifacts.zip
 
       - name: Generate another token (previous one could have expired)
-        if: always() && env.run_device_test == 'true'
+        if: always()
         id: generate_token_2
         uses: tibdex/github-app-token@v2
         with:
@@ -159,7 +182,7 @@ jobs:
           private_key: ${{ secrets.MAPLIBRE_NATIVE_BOT_PRIVATE_KEY }}
 
       - uses: LouisBrunner/checks-action@v2.0.0
-        if: always() && env.run_device_test == 'true'
+        if: always()
         with:
           token: ${{ steps.generate_token_2.outputs.token }}
           check_id: ${{ steps.create_check.outputs.check_id }}

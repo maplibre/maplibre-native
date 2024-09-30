@@ -3,7 +3,6 @@ package org.maplibre.android.testapp.activity.camera
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import org.maplibre.android.maps.MapView
-import org.maplibre.android.maps.MapView.OnDidFinishLoadingStyleListener
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.OnMapClickListener
 import org.maplibre.android.maps.OnMapReadyCallback
@@ -17,7 +16,7 @@ class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private val clickListener = OnMapClickListener {
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             maplibreMap.setStyle(Style.Builder().fromUri(TestStyles.getPredefinedStyleWithFallback("Outdoor")))
         }
         true
@@ -26,12 +25,10 @@ class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maxmin_zoom)
-        mapView = findViewById<MapView>(R.id.mapView)
+        mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
-        mapView.addOnDidFinishLoadingStyleListener(
-            OnDidFinishLoadingStyleListener { Timber.d("Style Loaded") }
-        )
+        mapView.addOnDidFinishLoadingStyleListener { Timber.d("Style Loaded") }
     }
 
     override fun onMapReady(map: MapLibreMap) {
@@ -69,7 +66,7 @@ class MaxMinZoomActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (maplibreMap != null) {
+        if (this::maplibreMap.isInitialized) {
             maplibreMap.removeOnMapClickListener(clickListener)
         }
         mapView.onDestroy()

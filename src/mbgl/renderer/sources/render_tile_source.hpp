@@ -29,6 +29,7 @@ public:
     RenderTiles getRenderTiles() const override;
     RenderTiles getRenderTilesSortedByYPosition() const override;
     const Tile* getRenderedTile(const UnwrappedTileID&) const override;
+    Immutable<std::vector<RenderTile>> getRawRenderTiles() const override { return renderTiles; }
 
     std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,
@@ -47,11 +48,12 @@ public:
                             const std::optional<std::string>&,
                             const std::optional<std::string>&) override;
 
+    void setCacheEnabled(bool) override;
     void reduceMemoryUse() override;
     void dumpDebugLogs() const override;
 
 protected:
-    RenderTileSource(Immutable<style::Source::Impl>, std::shared_ptr<Scheduler>);
+    RenderTileSource(Immutable<style::Source::Impl>, const TaggedScheduler&);
     TilePyramid tilePyramid;
     Immutable<std::vector<RenderTile>> renderTiles;
     mutable RenderTiles filteredRenderTiles;
@@ -67,7 +69,7 @@ private:
  */
 class RenderTileSetSource : public RenderTileSource {
 protected:
-    RenderTileSetSource(Immutable<style::Source::Impl>, std::shared_ptr<Scheduler>);
+    RenderTileSetSource(Immutable<style::Source::Impl>, const TaggedScheduler&);
     ~RenderTileSetSource() override;
 
     virtual void updateInternal(const Tileset&,

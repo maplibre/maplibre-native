@@ -1,3 +1,4 @@
+#include <mbgl/actor/scheduler.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
 #include <mbgl/gfx/renderer_backend.hpp>
 #include <mbgl/renderer/renderer.hpp>
@@ -33,6 +34,10 @@ class MLNRenderFrontend : public mbgl::RendererFrontend {
     }
   }
 
+  const mbgl::TaggedScheduler& getThreadPool() const override {
+    return mbglBackend.getThreadPool();
+  }
+
   void setObserver(mbgl::RendererObserver& observer) override {
     if (!renderer) return;
     renderer->setObserver(&observer);
@@ -52,6 +57,16 @@ class MLNRenderFrontend : public mbgl::RendererFrontend {
   }
 
   mbgl::Renderer* getRenderer() { return renderer.get(); }
+
+  void setTileCacheEnabled(bool enable) {
+    if (!renderer) return;
+    renderer->setTileCacheEnabled(enable);
+  }
+
+  bool getTileCacheEnabled() {
+    if (!renderer) return false;
+    return renderer->getTileCacheEnabled();
+  }
 
   void reduceMemoryUse() {
     if (!renderer) return;

@@ -1,15 +1,38 @@
 #include "map_renderer.hpp"
 
-#include <mbgl/renderer/renderer.hpp>
 #include <mbgl/gfx/backend_scope.hpp>
-#include <mbgl/util/run_loop.hpp>
+#include <mbgl/renderer/renderer.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/run_loop.hpp>
 
 #include <string>
+#include <android/native_window_jni.h>
 
 #include "attach_env.hpp"
 #include "android_renderer_backend.hpp"
 #include "map_renderer_runnable.hpp"
+
+#if MLN_RENDER_BACKEND_OPENGL
+#include <sys/system_properties.h>
+
+namespace {
+std::string androidSysProp(const char* key) {
+    assert(strlen(key) < PROP_NAME_MAX);
+    if (__system_property_find(key) == nullptr) {
+        return "";
+    }
+    char prop[PROP_VALUE_MAX + 1];
+    __system_property_get(key, prop);
+    return prop;
+}
+
+bool inEmulator() {
+    return androidSysProp("ro.kernel.qemu") == "1" || androidSysProp("ro.boot.qemu") == "1" ||
+           androidSysProp("ro.hardware.egl") == "emulation";
+}
+} // namespace
+#endif
 
 namespace mbgl {
 namespace android {
@@ -22,6 +45,7 @@ MapRenderer::MapRenderer(jni::JNIEnv& _env,
       pixelRatio(pixelRatio_),
       localIdeographFontFamily(localIdeographFontFamily_ ? jni::Make<std::string>(_env, localIdeographFontFamily_)
                                                          : std::optional<std::string>{}),
+      threadPool(Scheduler::GetBackground(), {}),
       mailboxData(this) {}
 
 MapRenderer::MailboxData::MailboxData(Scheduler* scheduler_)
@@ -61,6 +85,7 @@ ActorRef<Renderer> MapRenderer::actor() const {
 }
 
 void MapRenderer::schedule(std::function<void()>&& scheduled) {
+    MLN_TRACE_FUNC();
     try {
         // Create a runnable
         android::UniqueEnv _env = android::AttachEnv();
@@ -74,6 +99,7 @@ void MapRenderer::schedule(std::function<void()>&& scheduled) {
         static auto queueEvent = javaClass.GetMethod<void(jni::Object<MapRendererRunnable>)>(*_env, "queueEvent");
         auto weakReference = javaPeer.get(*_env);
         if (weakReference) {
+            MLN_TRACE_ZONE(java);
             weakReference.Call(*_env, queueEvent, peer);
         }
 
@@ -84,20 +110,17 @@ void MapRenderer::schedule(std::function<void()>&& scheduled) {
     }
 }
 
-std::size_t MapRenderer::waitForEmpty(Milliseconds timeout) {
+void MapRenderer::waitForEmpty([[maybe_unused]] const util::SimpleIdentity tag) {
     try {
         android::UniqueEnv _env = android::AttachEnv();
         static auto& javaClass = jni::Class<MapRenderer>::Singleton(*_env);
-        static auto waitForEmpty = javaClass.GetMethod<jni::jint(jni::jlong)>(*_env, "waitForEmpty");
+        static auto waitForEmpty = javaClass.GetMethod<void()>(*_env, "waitForEmpty");
         if (auto weakReference = javaPeer.get(*_env)) {
-            return weakReference.Call(*_env, waitForEmpty, static_cast<int64_t>(timeout.count()));
+            return weakReference.Call(*_env, waitForEmpty);
         }
-        // If the peer is already cleaned up, there's nothing to wait for
-        return 0;
     } catch (...) {
         Log::Error(Event::Android, "MapRenderer::waitForEmpty failed");
         jni::ThrowJavaError(*android::AttachEnv(), std::current_exception());
-        return 0;
     }
 }
 
@@ -161,7 +184,7 @@ void MapRenderer::requestSnapshot(SnapshotCallback callback) {
 
 void MapRenderer::resetRenderer() {
     renderer.reset();
-    backend.reset();
+    swapBehaviorFlush = false;
 }
 
 void MapRenderer::scheduleSnapshot(std::unique_ptr<SnapshotCallback> callback) {
@@ -183,7 +206,8 @@ void MapRenderer::render(JNIEnv&) {
     }
 
     // Activate the backend
-    gfx::BackendScope backendGuard{*backend};
+    assert(backend);
+    gfx::BackendScope backendGuard{backend->getImpl()};
 
     // Ensure that the "current" scheduler on the render thread is
     // this scheduler.
@@ -203,12 +227,9 @@ void MapRenderer::render(JNIEnv&) {
     }
 }
 
-void MapRenderer::onSurfaceCreated(JNIEnv&) {
+void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface>& surface) {
     // Lock as the initialization can come from the main thread or the GL thread first
     std::lock_guard<std::mutex> lock(initialisationMutex);
-
-    // The GL context is already active if get a new surface.
-    gfx::BackendScope backendGuard{*backend, gfx::BackendScope::ScopeType::Implicit};
 
     // The android system will have already destroyed the underlying
     // GL resources if this is not the first initialization and an
@@ -219,11 +240,29 @@ void MapRenderer::onSurfaceCreated(JNIEnv&) {
     // Reset in opposite order
     renderer.reset();
     backend.reset();
+    window.reset();
+
+    if (surface) {
+        window = std::unique_ptr<ANativeWindow, std::function<void(ANativeWindow*)>>(
+            ANativeWindow_fromSurface(&env, reinterpret_cast<jobject>(surface.get())),
+            [](ANativeWindow* window_) { ANativeWindow_release(window_); });
+    }
 
     // Create the new backend and renderer
-    backend = std::make_unique<AndroidRendererBackend>();
-    renderer = std::make_unique<Renderer>(*backend, pixelRatio, localIdeographFontFamily);
+    backend = AndroidRendererBackend::Create(window.get());
+    renderer = std::make_unique<Renderer>(backend->getImpl(), pixelRatio, localIdeographFontFamily);
     rendererRef = std::make_unique<ActorRef<Renderer>>(*renderer, mailboxData.getMailbox());
+
+#if MLN_RENDER_BACKEND_OPENGL
+    // If we're running the emulator with the OpenGL backend, we're going to crash eventually,
+    // unless we enable this mitigation.
+    if (inEmulator()) {
+        renderer->enableAndroidEmulatorGoldfishMitigation(true);
+    }
+#endif
+
+    backend->setSwapBehavior(swapBehaviorFlush ? gfx::Renderable::SwapBehaviour::Flush
+                                               : gfx::Renderable::SwapBehaviour::NoFlush);
 
     // Set the observer on the new Renderer implementation
     if (rendererObserver) {
@@ -234,7 +273,8 @@ void MapRenderer::onSurfaceCreated(JNIEnv&) {
 void MapRenderer::onSurfaceChanged(JNIEnv& env, jint width, jint height) {
     if (!renderer) {
         // In case the surface has been destroyed (due to app back-grounding)
-        onSurfaceCreated(env);
+        jni::jobject* nullObj = nullptr;
+        onSurfaceCreated(env, jni::Object<AndroidSurface>(nullObj));
     }
 
     backend->resizeFramebuffer(width, height);
@@ -251,10 +291,16 @@ void MapRenderer::onRendererReset(JNIEnv&) {
 // needs to be called on GL thread
 void MapRenderer::onSurfaceDestroyed(JNIEnv&) {
     resetRenderer();
+    window.reset();
 }
 
 void MapRenderer::setSwapBehaviorFlush(JNIEnv&, jboolean flush) {
-    backend->setSwapBehavior(flush ? gfx::Renderable::SwapBehaviour::Flush : gfx::Renderable::SwapBehaviour::NoFlush);
+    swapBehaviorFlush = flush;
+
+    if (backend) {
+        backend->setSwapBehavior(flush ? gfx::Renderable::SwapBehaviour::Flush
+                                       : gfx::Renderable::SwapBehaviour::NoFlush);
+    }
 }
 
 // Static methods //

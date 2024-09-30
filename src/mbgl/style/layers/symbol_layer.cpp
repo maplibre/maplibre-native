@@ -168,15 +168,15 @@ void SymbolLayer::setIconOptional(const PropertyValue<bool>& value) {
     baseImpl = std::move(impl_);
     observer->onLayerChanged(*this);
 }
-PropertyValue<float> SymbolLayer::getDefaultIconPadding() {
+PropertyValue<Padding> SymbolLayer::getDefaultIconPadding() {
     return IconPadding::defaultValue();
 }
 
-const PropertyValue<float>& SymbolLayer::getIconPadding() const {
+const PropertyValue<Padding>& SymbolLayer::getIconPadding() const {
     return impl().layout.get<IconPadding>();
 }
 
-void SymbolLayer::setIconPadding(const PropertyValue<float>& value) {
+void SymbolLayer::setIconPadding(const PropertyValue<Padding>& value) {
     if (value == getIconPadding()) return;
     auto impl_ = mutableImpl();
     impl_->layout.get<IconPadding>() = value;
@@ -1628,39 +1628,15 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
             return std::nullopt;
         }
     }
-    if (property == Property::IconPadding || property == Property::SymbolSpacing ||
-        property == Property::TextLineHeight || property == Property::TextMaxAngle ||
-        property == Property::TextPadding) {
+    if (property == Property::IconPadding) {
         Error error;
-        const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
+        const auto& typedValue = convert<PropertyValue<Padding>>(value, error, true, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::IconPadding) {
-            setIconPadding(*typedValue);
-            return std::nullopt;
-        }
-
-        if (property == Property::SymbolSpacing) {
-            setSymbolSpacing(*typedValue);
-            return std::nullopt;
-        }
-
-        if (property == Property::TextLineHeight) {
-            setTextLineHeight(*typedValue);
-            return std::nullopt;
-        }
-
-        if (property == Property::TextMaxAngle) {
-            setTextMaxAngle(*typedValue);
-            return std::nullopt;
-        }
-
-        if (property == Property::TextPadding) {
-            setTextPadding(*typedValue);
-            return std::nullopt;
-        }
+        setIconPadding(*typedValue);
+        return std::nullopt;
     }
     if (property == Property::IconPitchAlignment || property == Property::IconRotationAlignment ||
         property == Property::TextPitchAlignment || property == Property::TextRotationAlignment) {
@@ -1719,6 +1695,34 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
 
         setSymbolPlacement(*typedValue);
         return std::nullopt;
+    }
+    if (property == Property::SymbolSpacing || property == Property::TextLineHeight ||
+        property == Property::TextMaxAngle || property == Property::TextPadding) {
+        Error error;
+        const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
+        if (!typedValue) {
+            return error;
+        }
+
+        if (property == Property::SymbolSpacing) {
+            setSymbolSpacing(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::TextLineHeight) {
+            setTextLineHeight(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::TextMaxAngle) {
+            setTextMaxAngle(*typedValue);
+            return std::nullopt;
+        }
+
+        if (property == Property::TextPadding) {
+            setTextPadding(*typedValue);
+            return std::nullopt;
+        }
     }
     if (property == Property::SymbolZOrder) {
         Error error;

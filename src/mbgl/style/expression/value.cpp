@@ -12,6 +12,7 @@ type::Type typeOf(const Value& value) {
                        [&](double) -> type::Type { return type::Number; },
                        [&](const std::string&) -> type::Type { return type::String; },
                        [&](const Color&) -> type::Type { return type::Color; },
+                       [&](const Padding&) -> type::Type { return type::Padding; },
                        [&](const Collator&) -> type::Type { return type::Collator; },
                        [&](const Formatted&) -> type::Type { return type::Formatted; },
                        [&](const Image&) -> type::Type { return type::Image; },
@@ -53,6 +54,7 @@ void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& 
                 },
                 [&](const std::string& s) { writer.String(s); },
                 [&](const Color& c) { writer.String(c.stringify()); },
+                [&](const Padding& p) { mbgl::style::conversion::stringify(writer, p); },
                 [&](const Collator&) {
                     // Collators are excluded from constant folding and there's no Literal parser
                     // for them so there shouldn't be any way to serialize this value.
@@ -123,6 +125,7 @@ Value ValueConverter<mbgl::Value>::toExpressionValue(const mbgl::Value& value) {
 mbgl::Value ValueConverter<mbgl::Value>::fromExpressionValue(const Value& value) {
     return value.match(
         [&](const Color& color) -> mbgl::Value { return color.serialize(); },
+        [&](const Padding& padding) -> mbgl::Value { return padding.serialize(); },
         [&](const Collator&) -> mbgl::Value {
             // fromExpressionValue can't be used for Collator values,
             // because they have no meaningful representation as an mbgl::Value
@@ -307,6 +310,10 @@ type::Type valueTypeToExpressionType<std::string>() {
 template <>
 type::Type valueTypeToExpressionType<Color>() {
     return type::Color;
+}
+template <>
+type::Type valueTypeToExpressionType<Padding>() {
+    return type::Padding;
 }
 template <>
 type::Type valueTypeToExpressionType<Collator>() {

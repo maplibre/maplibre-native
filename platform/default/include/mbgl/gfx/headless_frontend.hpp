@@ -37,6 +37,7 @@ public:
 
     void reset() override;
     void update(std::shared_ptr<UpdateParameters>) override;
+    const TaggedScheduler& getThreadPool() const override;
     void setObserver(RendererObserver&) override;
 
     double getFrameTime() const;

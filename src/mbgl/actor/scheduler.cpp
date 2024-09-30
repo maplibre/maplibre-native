@@ -13,17 +13,17 @@ std::function<void()> Scheduler::bindOnce(std::function<void()> fn) {
     };
 }
 
-static auto& current() {
-    static util::ThreadLocal<Scheduler> scheduler;
-    return scheduler;
-};
+namespace {
+
+thread_local Scheduler* localScheduler;
+} // namespace
 
 void Scheduler::SetCurrent(Scheduler* scheduler) {
-    current().set(scheduler);
+    localScheduler = scheduler;
 }
 
 Scheduler* Scheduler::GetCurrent() {
-    return current().get();
+    return localScheduler;
 }
 
 // static

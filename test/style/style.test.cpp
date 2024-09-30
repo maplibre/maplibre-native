@@ -23,7 +23,7 @@ TEST(Style, Properties) {
     util::RunLoop loop;
 
     auto fileSource = std::make_shared<StubFileSource>();
-    Style::Impl style{fileSource, 1.0};
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
 
     style.loadJSON(R"STYLE({"name": "Test"})STYLE");
     ASSERT_EQ("Test", style.getName());
@@ -65,7 +65,7 @@ TEST(Style, DuplicateSource) {
     util::RunLoop loop;
 
     auto fileSource = std::make_shared<StubFileSource>();
-    Style::Impl style{fileSource, 1.0};
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
 
     style.loadJSON(util::read_file("test/fixtures/resources/style-unused-sources.json"));
 
@@ -85,7 +85,7 @@ TEST(Style, RemoveSourceInUse) {
     FixtureLog log;
 
     auto fileSource = std::make_shared<StubFileSource>();
-    Style::Impl style{fileSource, 1.0};
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
 
     style.loadJSON(util::read_file("test/fixtures/resources/style-unused-sources.json"));
     style.addSource(std::make_unique<VectorSource>("sourceId", "mptiler://tiles/contours"));
@@ -113,7 +113,7 @@ TEST(Style, RemoveSourceInUse) {
 TEST(Style, SourceImplsOrder) {
     util::RunLoop loop;
     auto fileSource = std::make_shared<StubFileSource>();
-    Style::Impl style{fileSource, 1.0};
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
 
     style.addSource(std::make_unique<VectorSource>("c", "mptiler://tiles/contours"));
     style.addSource(std::make_unique<VectorSource>("b", "mptiler://tiles/contours"));
@@ -135,7 +135,7 @@ TEST(Style, SourceImplsOrder) {
 TEST(Style, AddRemoveImage) {
     util::RunLoop loop;
     auto fileSource = std::make_shared<StubFileSource>();
-    Style::Impl style{fileSource, 1.0};
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
     style.addImage(std::make_unique<style::Image>("one", PremultipliedImage({16, 16}), 2.0f));
     style.addImage(std::make_unique<style::Image>("two", PremultipliedImage({16, 16}), 2.0f));
     style.addImage(std::make_unique<style::Image>("three", PremultipliedImage({16, 16}), 2.0f));
@@ -152,7 +152,7 @@ TEST(Style, AddRemoveRemoveImage) {
     // regression test for https://github.com/mapbox/mapbox-gl-native/pull/16391
     util::RunLoop loop;
     auto fileSource = std::make_shared<StubFileSource>();
-    Style::Impl style{fileSource, 1.0};
+    Style::Impl style{fileSource, 1.0, {Scheduler::GetBackground(), {}}};
     style.addImage(std::make_unique<style::Image>("one", PremultipliedImage({16, 16}), 2.0f));
     style.addImage(std::make_unique<style::Image>("two", PremultipliedImage({16, 16}), 2.0f));
     style.addImage(std::make_unique<style::Image>("three", PremultipliedImage({16, 16}), 2.0f));

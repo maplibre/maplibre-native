@@ -34,9 +34,6 @@
 [submodule "vendor/cpp-httplib"]
 	path = vendor/cpp-httplib
 	url = https://github.com/yhirose/cpp-httplib.git
-[submodule "platform/android/vendor/mapbox-gestures-android"]
-	path = platform/android/vendor/mapbox-gestures-android
-	url = https://github.com/mapbox/mapbox-gestures-android.git
 [submodule "docs/doxygen/doxygen-awesome-css"]
 	path = docs/doxygen/doxygen-awesome-css
 	url = https://github.com/jothepro/doxygen-awesome-css.git
@@ -49,3 +46,12 @@
 [submodule "vendor/unordered_dense"]
 	path = vendor/unordered_dense
 	url = https://github.com/martinus/unordered_dense.git
+[submodule "vendor/Vulkan-Headers"]
+	path = vendor/Vulkan-Headers
+	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+[submodule "vendor/VulkanMemoryAllocator"]
+	path = vendor/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+[submodule "vendor/glslang"]
+	path = vendor/glslang
+	url = https://github.com/KhronosGroup/glslang.git

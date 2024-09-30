@@ -9,8 +9,8 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol MLNMapSnapshotterDelegate;
 
 /**
- An overlay that is placed within a `MLNMapSnapshot`.
- To access this object, use `-[MLNMapSnapshotter startWithOverlayHandler:completionHandler:]`.
+ An overlay that is placed within a ``MLNMapSnapshot``.
+ To access this object, use ``MLNMapSnapshotter/startWithOverlayHandler:completionHandler:``.
  */
 
 MLN_EXPORT
@@ -53,12 +53,12 @@ MLN_EXPORT
 A block provided during the snapshot drawing process, enabling the ability to
 draw custom overlays rendered with Core Graphics.
 
- @param snapshotOverlay The `MLNMapSnapshotOverlay` provided during snapshot drawing.
+ @param snapshotOverlay The ``MLNMapSnapshotOverlay`` provided during snapshot drawing.
  */
 typedef void (^MLNMapSnapshotOverlayHandler)(MLNMapSnapshotOverlay *snapshotOverlay);
 
 /**
- The options to use when creating images with the `MLNMapSnapshotter`.
+ The options to use when creating images with the ``MLNMapSnapshotter``.
  */
 MLN_EXPORT
 @interface MLNMapSnapshotOptions : NSObject <NSCopying>
@@ -78,6 +78,12 @@ MLN_EXPORT
 // MARK: - Configuring the Map
 
 /**
+ :nodoc:
+ Whether to include the MapLibre logo. Note this is not required.
+ */
+@property (nonatomic, readwrite) BOOL showsLogo;
+
+/**
  URL of the map style to snapshot.
  */
 @property (nonatomic, readonly) NSURL *styleURL;
@@ -94,9 +100,9 @@ MLN_EXPORT
 /**
  A camera representing the viewport visible in the snapshot.
 
- If this property is non-nil and the `coordinateBounds` property is set to a
+ If this property is non-nil and the ``coordinateBounds`` property is set to a
  non-empty coordinate bounds, the camera’s center coordinate and altitude are
- ignored in favor of the `coordinateBounds` property.
+ ignored in favor of the ``coordinateBounds`` property.
  */
 @property (nonatomic) MLNMapCamera *camera;
 
@@ -170,7 +176,7 @@ MLN_EXPORT
 /**
  A block to processes the result or error of a snapshot request.
 
- @param snapshot The `MLNMapSnapshot` that was generated or `nil` if an error
+ @param snapshot The ``MLNMapSnapshot`` that was generated or `nil` if an error
     occurred.
  @param error The error that occured or `nil` when successful.
  */
@@ -178,10 +184,10 @@ typedef void (^MLNMapSnapshotCompletionHandler)(MLNMapSnapshot *_Nullable snapsh
                                                 NSError *_Nullable error);
 
 /**
- An `MLNMapSnapshotter` generates static raster images of the map. Each snapshot
- image depicts a portion of a map defined by an `MLNMapSnapshotOptions` object
- you provide. The snapshotter generates an `MLNMapSnapshot` object
- asynchronously, calling `MLNMapSnapshotterDelegate` methods if defined, then
+ An ``MLNMapSnapshotter`` generates static raster images of the map. Each snapshot
+ image depicts a portion of a map defined by an ``MLNMapSnapshotOptions`` object
+ you provide. The snapshotter generates an ``MLNMapSnapshot`` object
+ asynchronously, calling ``MLNMapSnapshotterDelegate`` methods if defined, then
  passing it into a completion handler once tiles and other resources needed for
  the snapshot are finished loading.
 
@@ -190,9 +196,9 @@ typedef void (^MLNMapSnapshotCompletionHandler)(MLNMapSnapshot *_Nullable snapsh
  snapshot at a time. If you need to generate multiple snapshots concurrently,
  create multiple snapshotter objects.
 
- For an interactive map, use the `MLNMapView` class. Both `MLNMapSnapshotter`
- and `MLNMapView` are compatible with offline packs managed by the
- `MLNOfflineStorage` class.
+ For an interactive map, use the ``MLNMapView`` class. Both ``MLNMapSnapshotter``
+ and ``MLNMapView`` are compatible with offline packs managed by the
+ ``MLNOfflineStorage`` class.
 
  From a snapshot, you can obtain an image and convert geographic coordinates to
  the image’s coordinate space in order to superimpose markers and overlays. If
@@ -221,7 +227,7 @@ typedef void (^MLNMapSnapshotCompletionHandler)(MLNMapSnapshot *_Nullable snapsh
 
  #### Related examples
  TODO: Create a static map snapshot, learn how to use the
- `MLNMapSnapshotter` to generate a static image based on an `MLNMapView`
+ ``MLNMapSnapshotter`` to generate a static image based on an ``MLNMapSnapshotter``
  object's style, camera, and view bounds.
  */
 MLN_EXPORT
@@ -261,7 +267,7 @@ MLN_EXPORT
 /**
  Starts the snapshot creation and executes the specified blocks with the result
  on the specified queue. Use this option if you want to add custom drawing on
- top of the resulting `MLNMapSnapshot`.
+ top of the resulting ``MLNMapSnapshot``.
 
  @param overlayHandler The block to call after the base map finishes drawing but
     before certain built-in overlays draw. The block can use Core Graphics to
@@ -277,7 +283,7 @@ MLN_EXPORT
  Cancels the snapshot creation request, if any.
 
  Once you call this method, you cannot resume the snapshot. In order to obtain
- the snapshot, create a new `MLNMapSnapshotter` object.
+ the snapshot, create a new ``MLNMapSnapshotter`` object.
  */
 - (void)cancel;
 
@@ -308,21 +314,14 @@ MLN_EXPORT
 /**
  The style displayed in the resulting snapshot.
 
- Unlike the `MLNMapSnapshotOptions.styleURL` property, this property is set to
+ Unlike the ``MLNMapSnapshotOptions/styleURL`` property, this property is set to
  an object that allows you to manipulate every aspect of the style locally.
 
  This property is set to `nil` until the style finishes loading. If the style
  has failed to load, this property is set to `nil`. Because the style loads
  asynchronously, you should manipulate it in the
- `-[MLNMapSnapshotterDelegate mapSnapshotter:didFinishLoadingStyle:]` method. It
+ ``MLNMapSnapshotterDelegate/mapSnapshotter:didFinishLoadingStyle:`` method. It
  is not possible to manipulate the style before it has finished loading.
-
- @note The default styles provided by Mapbox contain sources and layers with
-    identifiers that will change over time. Applications that use APIs that
-    manipulate a style’s sources and layers must first set the style URL to an
-    explicitly versioned style using a convenience method like
-    `+[MLNStyle outdoorsStyleURLWithVersion:]` or a manually constructed
-    `NSURL`.
  */
 @property (nonatomic, readonly, nullable) MLNStyle *style;
 
@@ -330,7 +329,7 @@ MLN_EXPORT
 
 /**
  Optional methods about significant events when creating a snapshot using an
- `MLNMapSnapshotter` object.
+ ``MLNMapSnapshotter`` object.
  */
 @protocol MLNMapSnapshotterDelegate <NSObject>
 @optional
@@ -352,8 +351,8 @@ MLN_EXPORT
  Tells the delegate that the snapshotter has just finished loading a style.
 
  This method is called in response to
- `-[MLNMapSnapshotter startWithQueue:completionHandler:]` as long as the
- `MLNMapSnapshotter.delegate` property is set. Changes to sources or layers of
+ ``MLNMapSnapshotter/startWithQueue:completionHandler:`` as long as the
+ ``MLNMapSnapshotter/delegate`` property is set. Changes to sources or layers of
  the style being snapshotted do not cause this method to be called.
 
  @param snapshotter The snapshotter that has just loaded a style.

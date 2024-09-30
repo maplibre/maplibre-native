@@ -44,14 +44,5 @@ public:
     }
 };
 
-template <StencilFunctionType F>
-constexpr StencilFunctionType StencilMode::SimpleTest<F>::func;
-
-template <StencilFunctionType F>
-constexpr uint32_t StencilMode::SimpleTest<F>::mask;
-
-template <StencilFunctionType F>
-constexpr StencilFunctionType StencilMode::MaskedTest<F>::func;
-
 } // namespace gfx
 } // namespace mbgl

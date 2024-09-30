@@ -18,7 +18,6 @@ import org.maplibre.geojson.Point
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.MapLibreMap
-import org.maplibre.android.maps.OnMapReadyCallback
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.PropertyFactory
@@ -48,17 +47,15 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_animated_marker)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
-        mapView.getMapAsync(
-            OnMapReadyCallback { map: MapLibreMap ->
-                maplibreMap = map
-                map.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
-                    this.style = style
-                    setupCars()
-                    animateRandomRoutes()
-                    animateTaxi()
-                }
+        mapView.getMapAsync {
+            maplibreMap = it
+            it.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets")) { style: Style? ->
+                this.style = style
+                setupCars()
+                animateRandomRoutes()
+                animateTaxi()
             }
-        )
+        }
     }
 
     private fun setupCars() {
@@ -171,7 +168,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
     }
 
     private val longestDrive: Car?
-        private get() {
+        get() {
             var longestDrive: Car? = null
             for (randomCar in randomCars) {
                 if (longestDrive == null) {
@@ -199,7 +196,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
     }
 
     private val duration: Long
-        private get() = (random.nextInt(DURATION_RANDOM_MAX) + DURATION_BASE).toLong()
+        get() = (random.nextInt(DURATION_RANDOM_MAX) + DURATION_BASE).toLong()
 
     private fun addRandomCars() {
         var latLng: LatLng
@@ -224,7 +221,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         style!!.addSource(randomCarSource!!)
         style!!.addImage(
             RANDOM_CAR_IMAGE_ID,
-            (ResourcesCompat.getDrawable(resources, R.drawable.ic_car_top, null) as BitmapDrawable).bitmap
+            (ResourcesCompat.getDrawable(resources, R.drawable.ic_car_top, theme) as BitmapDrawable).bitmap
         )
         val symbolLayer = SymbolLayer(RANDOM_CAR_LAYER, RANDOM_CAR_SOURCE)
         symbolLayer.withProperties(
@@ -250,7 +247,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         )
         style!!.addImage(
             PASSENGER,
-            (ResourcesCompat.getDrawable(resources, R.drawable.icon_burned, null) as BitmapDrawable).bitmap
+            (ResourcesCompat.getDrawable(resources, R.drawable.icon_burned, theme) as BitmapDrawable).bitmap
         )
         val geoJsonSource = GeoJsonSource(PASSENGER_SOURCE, featureCollection)
         style!!.addSource(geoJsonSource)
@@ -278,7 +275,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         taxi = Car(feature, passenger, duration)
         style!!.addImage(
             TAXI,
-            (ResourcesCompat.getDrawable(resources, R.drawable.ic_taxi_top, null) as BitmapDrawable).bitmap
+            (ResourcesCompat.getDrawable(resources, R.drawable.ic_taxi_top, theme) as BitmapDrawable).bitmap
         )
         taxiSource = GeoJsonSource(TAXI_SOURCE, featureCollection)
         style!!.addSource(taxiSource!!)
@@ -328,11 +325,9 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        for (animator in animators) {
-            if (animator != null) {
-                animator.removeAllListeners()
-                animator.cancel()
-            }
+        animators.forEach {
+            it.removeAllListeners()
+            it.cancel()
         }
         mapView.onDestroy()
     }
@@ -354,7 +349,7 @@ class AnimatedSymbolLayerActivity : AppCompatActivity() {
         }
     }
 
-    private class Car internal constructor(var feature: Feature, next: LatLng?, duration: Long) {
+    private class Car(var feature: Feature, next: LatLng?, duration: Long) {
         var next: LatLng?
         var current: LatLng?
         val duration: Long

@@ -233,6 +233,10 @@ interface NativeMap {
   @IntRange(from = 0)
   int getPrefetchZoomDelta();
 
+  void setTileCacheEnabled(boolean enabled);
+
+  boolean getTileCacheEnabled();
+
   void setGestureInProgress(boolean inProgress);
 
   float getPixelRatio();

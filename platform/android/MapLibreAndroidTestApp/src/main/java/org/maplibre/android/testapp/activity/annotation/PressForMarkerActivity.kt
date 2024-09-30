@@ -25,6 +25,7 @@ class PressForMarkerActivity : AppCompatActivity() {
     private lateinit var mapView: MapView
     private lateinit var maplibreMap: MapLibreMap
     private var markerList: ArrayList<MarkerOptions>? = ArrayList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_press_for_marker)
@@ -45,7 +46,7 @@ class PressForMarkerActivity : AppCompatActivity() {
             }
             maplibreMap.setStyle(TestStyles.getPredefinedStyleWithFallback("Streets"))
             if (savedInstanceState != null) {
-                markerList = savedInstanceState.getParcelableArrayList(STATE_MARKER_LIST)
+                markerList = savedInstanceState.getParcelableArrayList(STATE_MARKER_LIST, MarkerOptions::class.java)
                 if (markerList != null) {
                     maplibreMap.addMarkers(markerList!!)
                 }
@@ -69,11 +70,10 @@ class PressForMarkerActivity : AppCompatActivity() {
     }
 
     private fun resetMap() {
-        if (maplibreMap == null) {
-            return
+        if (this::maplibreMap.isInitialized) {
+            markerList?.clear()
+            maplibreMap.removeAnnotations()
         }
-        markerList!!.clear()
-        maplibreMap.removeAnnotations()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
