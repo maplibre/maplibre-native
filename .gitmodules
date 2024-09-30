@@ -55,3 +55,6 @@
 [submodule "vendor/glslang"]
 	path = vendor/glslang
 	url = https://github.com/KhronosGroup/glslang.git
+[submodule "vendor/PMTiles"]
+	path = vendor/PMTiles
+	url = https://github.com/protomaps/PMTiles.git

@@ -1442,6 +1442,7 @@ include(${PROJECT_SOURCE_DIR}/vendor/earcut.hpp.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/eternal.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/mapbox-base.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/parsedate.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/pmtiles.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/polylabel.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/protozero.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/tracy.cmake)
@@ -1465,6 +1466,7 @@ target_link_libraries(
         mbgl-vendor-earcut.hpp
         mbgl-vendor-eternal
         mbgl-vendor-parsedate
+        mbgl-vendor-pmtiles
         mbgl-vendor-polylabel
         mbgl-vendor-protozero
         mbgl-vendor-unique_resource
@@ -1504,6 +1506,7 @@ export(TARGETS
     mbgl-vendor-earcut.hpp
     mbgl-vendor-eternal
     mbgl-vendor-parsedate
+    mbgl-vendor-pmtiles
     mbgl-vendor-polylabel
     mbgl-vendor-protozero
     mbgl-vendor-unique_resource
