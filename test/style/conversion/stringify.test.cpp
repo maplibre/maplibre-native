@@ -62,7 +62,7 @@ TEST(Stringify, VariableAnchorOffsetCollection) {
     std::array<float, 2> offset = { 1, 1 };
     std::vector<AnchorOffsetPair> test;
     test.emplace_back(AnchorOffsetPair{SymbolAnchorType::Left, offset});
-    ASSERT_EQ(stringify(VariableAnchorOffsetCollection(test)), "[\"left\",[1.0,1.0]]");
+    ASSERT_EQ(stringify(VariableAnchorOffsetCollection(std::move(test))), "[\"left\",[1.0,1.0]]");
 }
 
 TEST(Stringify, Array) {

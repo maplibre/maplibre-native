@@ -28,6 +28,7 @@ public:
 
     VariableAnchorOffsetCollection(std::vector<AnchorOffsetPair>&& values) { anchorOffsets = std::move(values); }
 
+    // Avoid quoting when convert to string in expression
     std::string toString() const;
     mbgl::Value serialize() const;
     bool empty() const;

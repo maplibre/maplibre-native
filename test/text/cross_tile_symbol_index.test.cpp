@@ -17,7 +17,7 @@ SymbolInstance makeSymbolInstance(float x, float y, std::u16string key) {
     std::array<float, 2> iconOffset{{0.0f, 0.0f}};
     std::array<float, 2> variableTextOffset{{0.0f, 0.0f}};
     std::vector<AnchorOffsetPair> anchorOffsets = {{ style::SymbolAnchorType::Left, variableTextOffset }};
-    VariableAnchorOffsetCollection variableAnchorOffsetCollection(anchorOffsets);
+    VariableAnchorOffsetCollection variableAnchorOffsetCollection(std::move(anchorOffsets));
     style::SymbolPlacementType placementType = style::SymbolPlacementType::Point;
 
     auto sharedData = std::make_shared<SymbolInstanceSharedData>(std::move(line),
