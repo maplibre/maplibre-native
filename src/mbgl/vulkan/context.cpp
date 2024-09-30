@@ -131,7 +131,7 @@ void Context::enqueueDeletion(std::function<void(const Context&)>&& function) {
     frameResources[frameResourceIndex].deletionQueue.push_back(std::move(function));
 }
 
-void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) {
+void Context::submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const {
     const vk::CommandBufferAllocateInfo allocateInfo(
         backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, 1);
 
@@ -386,7 +386,10 @@ void Context::clearStencilBuffer(int32_t) {
     assert(false);
 }
 
-void Context::bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {}
+void Context::bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
+    const_cast<Context*>(this)->bindUniformDescriptorSet(
+        DescriptorSetType::Global, globalUniformBuffers, 0, shaders::globalUBOCount);
+}
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
                                       RenderStaticData& staticData,
@@ -513,27 +516,30 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
     return dummyTexture2D;
 }
 
-const vk::UniqueDescriptorSetLayout& Context::getUniformDescriptorSetLayout() {
-    if (!uniformDescriptorSetLayout) {
-        std::vector<vk::DescriptorSetLayoutBinding> bindings;
-        const auto stageFlags = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
-                                vk::ShaderStageFlagBits::eFragment;
-
-        for (size_t i = 0; i < shaders::maxUBOCountPerShader; ++i) {
-            bindings.push_back(vk::DescriptorSetLayoutBinding()
-                                   .setBinding(i)
-                                   .setStageFlags(stageFlags)
-                                   .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-                                   .setDescriptorCount(1));
-        }
-
-        const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
-        uniformDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(
-            descriptorSetLayoutCreateInfo);
-        backend.setDebugName(uniformDescriptorSetLayout.get(), "UniformDescriptorSetLayout");
+const vk::UniqueDescriptorSetLayout& Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
+                                                                              size_t uniformCount,
+                                                                              const std::string& name) {
+    if (layout) {
+        return layout;
     }
 
-    return uniformDescriptorSetLayout;
+    std::vector<vk::DescriptorSetLayoutBinding> bindings;
+    const auto stageFlags = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
+                            vk::ShaderStageFlagBits::eFragment;
+
+    for (size_t i = 0; i < uniformCount; ++i) {
+        bindings.push_back(vk::DescriptorSetLayoutBinding()
+                               .setBinding(i)
+                               .setStageFlags(stageFlags)
+                               .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                               .setDescriptorCount(1));
+    }
+
+    const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
+    layout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
+    backend.setDebugName(layout.get(), name);
+
+    return layout;
 }
 
 const vk::UniqueDescriptorSetLayout& Context::getImageDescriptorSetLayout() {
@@ -558,10 +564,34 @@ const vk::UniqueDescriptorSetLayout& Context::getImageDescriptorSetLayout() {
 
 const std::vector<vk::DescriptorSetLayout>& Context::getDescriptorSetLayouts() {
     if (descriptorSetLayouts.empty()) {
-        descriptorSetLayouts = {getUniformDescriptorSetLayout().get(), getImageDescriptorSetLayout().get()};
+        descriptorSetLayouts = {
+            buildUniformDescriptorSetLayout(
+                globalUniformDescriptorSetLayout, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout")
+                .get(),
+            buildUniformDescriptorSetLayout(
+                layerUniformDescriptorSetLayout, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout")
+                .get(),
+            buildUniformDescriptorSetLayout(
+                drawableUniformDescriptorSetLayout, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout")
+                .get(),
+            getImageDescriptorSetLayout().get()};
     }
 
     return descriptorSetLayouts;
+}
+
+const std::vector<vk::DescriptorSetLayout>& Context::getDrawableDescriptorSetLayouts() {
+    if (drawableDescriptorSetLayouts.empty()) {
+        drawableDescriptorSetLayouts = {drawableUniformDescriptorSetLayout.get(), imageDescriptorSetLayout.get()};
+    }
+
+    return drawableDescriptorSetLayouts;
+}
+
+const vk::DescriptorSetLayout& Context::getDescriptorSetLayout(DescriptorSetType type) {
+    uint32_t index = static_cast<uint32_t>(type);
+    assert(index >= 0 && index < static_cast<uint32_t>(DescriptorSetType::Count));
+    return getDescriptorSetLayouts()[index];
 }
 
 const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
@@ -589,6 +619,71 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     backend.setDebugName(pushConstantPipelineLayout.get(), "PipelineLayout_pushConstants");
 
     return pushConstantPipelineLayout;
+}
+
+void Context::bindUniformDescriptorSet(DescriptorSetType type,
+                                       const gfx::UniformBufferArray& uniforms,
+                                       size_t startID,
+                                       size_t count,
+                                       bool fillGaps) {
+
+    const auto& device = getBackend().getDevice();
+    const auto& descriptorPool = getCurrentDescriptorPool();
+    const auto& descriptorSetLayout = getDescriptorSetLayout(type);
+
+    const auto descriptorAllocInfo =
+        vk::DescriptorSetAllocateInfo().setDescriptorPool(*descriptorPool).setSetLayouts(descriptorSetLayout);
+
+    const auto& descriptorSets = device->allocateDescriptorSets(descriptorAllocInfo);
+
+    bindUniformDescriptorSet(type, descriptorSets[0], uniforms, startID, count);
+
+}
+
+void Context::bindUniformDescriptorSet(DescriptorSetType type,
+                                       const vk::DescriptorSet& descriptorSet,
+                                       const gfx::UniformBufferArray& uniforms,
+                                       size_t startID,
+                                       size_t count,
+                                       bool fillGaps) {
+
+    assert(static_cast<uint32_t>(type) < static_cast<uint32_t>(DescriptorSetType::DrawableImage));
+
+    const auto& device = getBackend().getDevice();
+
+    for (size_t index = 0; index < count; ++index) {
+        vk::DescriptorBufferInfo descriptorBufferInfo;
+
+        if (const auto& uniformBuffer = uniforms.get(startID + index)) {
+            const auto& uniformBufferImpl = static_cast<const UniformBuffer&>(*uniformBuffer);
+            const auto& bufferResource = uniformBufferImpl.getBufferResource();
+            descriptorBufferInfo.setBuffer(bufferResource.getVulkanBuffer())
+                .setOffset(bufferResource.getVulkanBufferOffset())
+                .setRange(bufferResource.getSizeInBytes());
+        } else if (fillGaps) {
+            descriptorBufferInfo.setBuffer(getDummyUniformBuffer()->getVulkanBuffer())
+                .setOffset(0)
+                .setRange(VK_WHOLE_SIZE);
+        } else {
+            continue;
+        }
+
+        const auto writeDescriptorSet = vk::WriteDescriptorSet()
+                                            .setBufferInfo(descriptorBufferInfo)
+                                            .setDescriptorCount(1)
+                                            .setDescriptorType(vk::DescriptorType::eUniformBuffer)
+                                            .setDstBinding(index)
+                                            .setDstSet(descriptorSet);
+
+        device->updateDescriptorSets(writeDescriptorSet, nullptr);
+    }
+
+    auto& frame = frameResources[frameResourceIndex];
+    frame.commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                            getGeneralPipelineLayout().get(),
+                                            static_cast<uint32_t>(type),
+                                            descriptorSet,
+                                            nullptr);
 }
 
 void Context::FrameResources::runDeletionQueue(const Context& context) {

@@ -7,6 +7,7 @@
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/vulkan/drawable.hpp>
 #include <mbgl/vulkan/render_pass.hpp>
+#include <mbgl/vulkan/command_encoder.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/util/convert.hpp>
 
@@ -43,6 +44,7 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
 #endif
 
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
+    auto& context = renderPass.getEncoder().getContext();
 
     bool bindUBOs = false;
     visitDrawables([&](gfx::Drawable& drawable) {
@@ -55,34 +57,13 @@ void LayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         }
 
         if (!bindUBOs) {
-            bindUniformBuffers(renderPass);
+            context.bindUniformDescriptorSet(
+                DescriptorSetType::Layer, uniformBuffers, shaders::layerUBOStartId, shaders::maxUBOCountPerLayer);
             bindUBOs = true;
-        }
-
-        auto& drawableUniforms = drawable.mutableUniformBuffers();
-        for (size_t i = 0; i < uniformBuffers.allocatedSize(); ++i) {
-            if (uniformBuffers.get(i)) {
-                drawableUniforms.set(i, uniformBuffers.get(i));
-            }
         }
 
         drawable.draw(parameters);
     });
-
-    if (bindUBOs) {
-        unbindUniformBuffers(renderPass);
-    }
-}
-
-void LayerGroup::bindUniformBuffers(RenderPass& renderPass) const noexcept {
-    for (size_t id = 0; id < uniformBuffers.allocatedSize(); id++) {
-        const auto& uniformBuffer = uniformBuffers.get(id);
-        if (!uniformBuffer) continue;
-        const auto& buffer = static_cast<UniformBuffer&>(*uniformBuffer);
-        const auto& resource = buffer.getBufferResource();
-        renderPass.bindVertex(resource, 0, id);
-        renderPass.bindFragment(resource, 0, id);
-    }
 }
 
 } // namespace vulkan

@@ -14,10 +14,5 @@ struct alignas(16) HillshadePrepareDrawableUBO {
 };
 static_assert(sizeof(HillshadePrepareDrawableUBO) % 16 == 0);
 
-enum {
-    idHillshadePrepareDrawableUBO = globalUBOCount,
-    hillshadePrepareUBOCount
-};
-
 } // namespace shaders
 } // namespace mbgl

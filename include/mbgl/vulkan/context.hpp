@@ -43,6 +43,14 @@ class Texture2D;
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
 
+enum class DescriptorSetType : uint8_t {
+    Global,
+    Layer,
+    DrawableUniform,
+    DrawableImage,
+    Count,
+};
+
 class Context final : public gfx::Context {
 public:
     Context(RendererBackend&);
@@ -135,16 +143,34 @@ public:
     const std::unique_ptr<BufferResource>& getDummyVertexBuffer();
     const std::unique_ptr<BufferResource>& getDummyUniformBuffer();
     const std::unique_ptr<Texture2D>& getDummyTexture();
-    const vk::UniqueDescriptorSetLayout& getUniformDescriptorSetLayout();
     const vk::UniqueDescriptorSetLayout& getImageDescriptorSetLayout();
+    const vk::UniqueDescriptorSetLayout& buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
+                                                                         size_t uniformCount,
+                                                                         const std::string& name);
+
     const std::vector<vk::DescriptorSetLayout>& getDescriptorSetLayouts();
+    const std::vector<vk::DescriptorSetLayout>& getDrawableDescriptorSetLayouts();
+    const vk::DescriptorSetLayout& getDescriptorSetLayout(DescriptorSetType type);
     const vk::UniquePipelineLayout& getGeneralPipelineLayout();
     const vk::UniquePipelineLayout& getPushConstantPipelineLayout();
+
+    void bindUniformDescriptorSet(DescriptorSetType type,
+                                  const gfx::UniformBufferArray& uniforms,
+                                  size_t startID,
+                                  size_t count,
+                                  bool fillGaps = true);
+
+    void bindUniformDescriptorSet(DescriptorSetType type,
+                                  const vk::DescriptorSet& descriptorSet,
+                                  const gfx::UniformBufferArray& uniforms,
+                                  size_t startID,
+                                  size_t count,
+                                  bool fillGaps = true);
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
     const vk::UniqueDescriptorPool& getCurrentDescriptorPool() const;
     void enqueueDeletion(std::function<void(const Context&)>&& function);
-    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
+    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const;
 
     void requestSurfaceUpdate() { surfaceUpdateRequested = true; }
 
@@ -184,9 +210,12 @@ private:
     std::unique_ptr<BufferResource> dummyVertexBuffer;
     std::unique_ptr<BufferResource> dummyUniformBuffer;
     std::unique_ptr<Texture2D> dummyTexture2D;
-    vk::UniqueDescriptorSetLayout uniformDescriptorSetLayout;
+    vk::UniqueDescriptorSetLayout globalUniformDescriptorSetLayout;
+    vk::UniqueDescriptorSetLayout layerUniformDescriptorSetLayout;
+    vk::UniqueDescriptorSetLayout drawableUniformDescriptorSetLayout;
     vk::UniqueDescriptorSetLayout imageDescriptorSetLayout;
     std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
+    std::vector<vk::DescriptorSetLayout> drawableDescriptorSetLayouts;
     vk::UniquePipelineLayout generalPipelineLayout;
     vk::UniquePipelineLayout pushConstantPipelineLayout;
 

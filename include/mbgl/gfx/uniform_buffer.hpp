@@ -2,6 +2,10 @@
 
 #include <mbgl/shaders/shader_defines.hpp>
 
+#include <memory>
+#include <vector>
+#include <array>
+
 namespace mbgl {
 namespace gfx {
 

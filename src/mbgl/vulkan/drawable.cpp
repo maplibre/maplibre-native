@@ -401,52 +401,26 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
     auto& context = encoder.getContext();
     const auto& device = context.getBackend().getDevice();
     const auto& descriptorPool = context.getCurrentDescriptorPool();
-    const auto& descriptorSetLayouts = context.getDescriptorSetLayouts();
+    const auto& descriptorSetLayouts = context.getDrawableDescriptorSetLayouts();
 
     const auto descriptorAllocInfo =
         vk::DescriptorSetAllocateInfo().setDescriptorPool(*descriptorPool).setSetLayouts(descriptorSetLayouts);
 
     const auto& drawableDescriptorSets = device->allocateDescriptorSets(descriptorAllocInfo);
-    const auto& uniformDescriptorSet = drawableDescriptorSets[0];
 
-    const auto updateUniformDescriptors = [&](const auto& buffer, bool fillGaps) {
-        for (size_t id = 0; id < buffer.allocatedSize(); ++id) {
-            vk::DescriptorBufferInfo descriptorBufferInfo;
+    const auto& drawableUniformDescriptorSet = drawableDescriptorSets[0];
+    const auto& drawableImageDescriptorSet = drawableDescriptorSets[1];
 
-            if (const auto& uniformBuffer = buffer.get(id)) {
-                const auto& uniformBufferImpl = static_cast<const UniformBuffer&>(*uniformBuffer);
-                const auto& bufferResource = uniformBufferImpl.getBufferResource();
-                descriptorBufferInfo.setBuffer(bufferResource.getVulkanBuffer())
-                    .setOffset(bufferResource.getVulkanBufferOffset())
-                    .setRange(bufferResource.getVulkanBufferSize());
-            } else if (fillGaps) {
-                descriptorBufferInfo.setBuffer(context.getDummyUniformBuffer()->getVulkanBuffer())
-                    .setOffset(0)
-                    .setRange(VK_WHOLE_SIZE);
-            } else {
-                continue;
-            }
+    const auto& uniformBufferArray = getUniformBuffers();
 
-            const auto writeDescriptorSet = vk::WriteDescriptorSet()
-                                                .setBufferInfo(descriptorBufferInfo)
-                                                .setDescriptorCount(1)
-                                                .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-                                                .setDstBinding(id)
-                                                .setDstSet(uniformDescriptorSet);
+    context.bindUniformDescriptorSet(DescriptorSetType::DrawableUniform,
+                                     drawableUniformDescriptorSet,
+                                     uniformBufferArray,
+                                     shaders::globalUBOCount,
+                                     shaders::maxUBOCountPerDrawable);
 
-            device->updateDescriptorSets(writeDescriptorSet, nullptr);
-        }
-    };
-    const auto& globalUniforms = context.getGlobalUniformBuffers();
-    for (size_t i = 0; i < globalUniforms.allocatedSize(); ++i) {
-        if (globalUniforms.get(i)) impl->uniformBuffers.set(i, globalUniforms.get(i));
-    }
-
-    updateUniformDescriptors(getUniformBuffers(), true);
-
-    if (drawableDescriptorSets.size() >= 2) {
-        const auto& imageDescriptorSet = drawableDescriptorSets[1];
-
+    // update image set
+    {
         for (size_t id = 0; id < shaders::maxTextureCountPerShader; ++id) {
             const auto& texture = id < textures.size() ? textures[id] : nullptr;
             auto& textureImpl = texture ? static_cast<Texture2D&>(*texture) : *context.getDummyTexture();
@@ -461,17 +435,18 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
                                                 .setDescriptorCount(1)
                                                 .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
                                                 .setDstBinding(id)
-                                                .setDstSet(imageDescriptorSet);
+                                                .setDstSet(drawableImageDescriptorSet);
 
             device->updateDescriptorSets(writeDescriptorSet, nullptr);
         }
     }
 
-    if (drawableDescriptorSets.empty()) return true;
-
     const auto& commandBuffer = encoder.getCommandBuffer();
-    commandBuffer->bindDescriptorSets(
-        vk::PipelineBindPoint::eGraphics, context.getGeneralPipelineLayout().get(), 0, drawableDescriptorSets, nullptr);
+    commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
+                                      context.getGeneralPipelineLayout().get(),
+                                      static_cast<uint32_t>(DescriptorSetType::DrawableImage),
+                                      drawableImageDescriptorSet,
+                                      nullptr);
 
     return true;
 }

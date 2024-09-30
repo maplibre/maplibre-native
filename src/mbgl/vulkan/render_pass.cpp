@@ -71,15 +71,5 @@ void RenderPass::addDebugSignpost(const char* name) {
     commandEncoder.getContext().getBackend().insertDebugLabel(commandEncoder.getCommandBuffer().get(), name);
 }
 
-void RenderPass::bindVertex(const BufferResource& buf, std::size_t offset, std::size_t, std::size_t size) {
-    [[maybe_unused]] const auto actualSize = size ? size : buf.getSizeInBytes() - offset;
-    assert(actualSize <= buf.getSizeInBytes());
-}
-
-void RenderPass::bindFragment(const BufferResource& buf, std::size_t offset, std::size_t, std::size_t size) {
-    [[maybe_unused]] const auto actualSize = size ? size : buf.getSizeInBytes() - offset;
-    assert(actualSize <= buf.getSizeInBytes());
-}
-
 } // namespace vulkan
 } // namespace mbgl

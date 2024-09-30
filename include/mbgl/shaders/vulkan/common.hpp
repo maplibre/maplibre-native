@@ -66,7 +66,12 @@ vec2 get_pattern_pos(const vec2 pixel_coord_upper, const vec2 pixel_coord_lower,
     return (tile_units_to_pixels * pos + offset) / pattern_size;
 }
 
-layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
+#define GLOBAL_SET_INDEX            0
+#define LAYER_SET_INDEX             1
+#define DRAWABLE_UBO_SET_INDEX      2
+#define DRAWABLE_IMAGE_SET_INDEX    3
+
+layout(set = GLOBAL_SET_INDEX, binding = 0) uniform GlobalPaintParamsUBO {
     vec2 pattern_atlas_texsize;
     vec2 units_to_pixels;
     vec2 world_size;
@@ -84,6 +89,11 @@ layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
 
 #define M_PI 3.1415926535897932384626433832795
 #define SDF_PX 8.0
+
+#define GLOBAL_SET_INDEX            0
+#define LAYER_SET_INDEX             1
+#define DRAWABLE_UBO_SET_INDEX      2
+#define DRAWABLE_IMAGE_SET_INDEX    3
 
 layout(set = 0, binding = 0) uniform GlobalPaintParamsUBO {
     vec2 pattern_atlas_texsize;
