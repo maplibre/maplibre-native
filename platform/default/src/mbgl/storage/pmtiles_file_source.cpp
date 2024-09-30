@@ -28,9 +28,9 @@
 #include <zlib.h>
 #endif
 
-#define MAX_DIRECTORY_CACHE_ENTRIES = 100;
-
 namespace {
+const int MAX_DIRECTORY_CACHE_ENTRIES = 100;
+
 bool acceptsURL(const std::string& url) {
     return 0 == url.rfind(mbgl::util::PMTILES_PROTOCOL, 0);
 }
@@ -56,7 +56,7 @@ public:
     void request_tilejson(AsyncRequest* req, const Resource& resource, const ActorRef<FileSourceRequest>& ref) {
         auto url = extract_url(resource.url);
 
-        getMetadata(url, req, [=](std::unique_ptr<Response::Error> error) {
+        getMetadata(url, req, [=, this](std::unique_ptr<Response::Error> error) {
             Response response;
 
             if (error) {
@@ -74,11 +74,10 @@ public:
     void request_tile(AsyncRequest* req, const Resource& resource, ActorRef<FileSourceRequest> ref) {
         auto url = extract_url(resource.url);
 
-        getHeaderAndRootDirectory(url, req, [=](std::unique_ptr<Response::Error> error) {
-            Response response;
-            response.noContent = true;
-
+        getHeaderAndRootDirectory(url, req, [=, this](std::unique_ptr<Response::Error> error) {
             if (error) {
+                Response response;
+                response.noContent = true;
                 response.error = std::move(error);
                 ref.invoke(&FileSourceRequest::setResponse, response);
                 return;
@@ -87,6 +86,8 @@ public:
             pmtiles::headerv3 header = header_cache.at(url);
 
             if (resource.tileData->z < header.min_zoom || resource.tileData->z > header.max_zoom) {
+                Response response;
+                response.noContent = true;
                 ref.invoke(&FileSourceRequest::setResponse, response);
                 return;
             }
@@ -98,6 +99,8 @@ public:
                                                 static_cast<uint32_t>(resource.tileData->x),
                                                 static_cast<uint32_t>(resource.tileData->y));
             } catch (const std::exception& e) {
+                Response response;
+                response.noContent = true;
                 response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
                                                                    std::string("Invalid tile: ") + e.what());
                 ref.invoke(&FileSourceRequest::setResponse, response);
@@ -111,17 +114,18 @@ public:
                 header.root_dir_offset,
                 header.root_dir_bytes,
                 0,
-                [=](std::pair<uint64_t, uint32_t> tileAddress, std::unique_ptr<Response::Error> tileError) {
-                    Response response;
-                    response.noContent = true;
-
+                [=, this](std::pair<uint64_t, uint32_t> tileAddress, std::unique_ptr<Response::Error> tileError) {
                     if (tileError) {
+                        Response response;
+                        response.noContent = true;
                         response.error = std::move(tileError);
                         ref.invoke(&FileSourceRequest::setResponse, response);
                         return;
                     }
 
                     if (tileAddress.first == 0 && tileAddress.second == 0) {
+                        Response response;
+                        response.noContent = true;
                         ref.invoke(&FileSourceRequest::setResponse, response);
                         return;
                     }
@@ -211,7 +215,7 @@ private:
         resource.loadingMethod = Resource::LoadingMethod::Network;
         resource.dataRange = std::make_pair<uint64_t, uint64_t>(0, 16383);
 
-        tasks[req] = getFileSource()->request(resource, [=](const Response& response) {
+        tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {
             if (response.error) {
                 callback(std::make_unique<Response::Error>(
                     response.error->reason,
@@ -252,7 +256,7 @@ private:
             callback(std::unique_ptr<Response::Error>());
         }
 
-        getHeaderAndRootDirectory(url, req, [=](std::unique_ptr<Response::Error> error) {
+        getHeaderAndRootDirectory(url, req, [=, this](std::unique_ptr<Response::Error> error) {
             if (error) {
                 callback(std::move(error));
                 return;
@@ -260,7 +264,7 @@ private:
 
             pmtiles::headerv3 header = header_cache.at(url);
 
-            auto parse_callback = [=](const std::string& data) {
+            auto parse_callback = [=, this](const std::string& data) {
                 Document doc;
                 auto& allocator = doc.GetAllocator();
 
@@ -367,7 +371,7 @@ private:
 
         std::string directory_cache_key = url + "|" + std::to_string(directoryOffset) + "|" +
                                           std::to_string(directoryLength);
-        directory_cache.at(url).emplace(directory_cache_key, pmtiles::deserialize_directory(rootDirectoryData));
+        directory_cache.at(url).emplace(directory_cache_key, pmtiles::deserialize_directory(directoryData));
         directory_cache_control.at(url).emplace_back(directory_cache_key);
 
         if (directory_cache_control.at(url).size() > MAX_DIRECTORY_CACHE_ENTRIES) {
@@ -389,7 +393,8 @@ private:
             if (directory_cache_control.at(url).back() != directory_cache_key) {
                 directory_cache_control.at(url).emplace_back(directory_cache_key);
 
-                for (auto it = directory_cache_control.at(url).begin(); it != directory_cache_control.end(); ++it) {
+                for (auto it = directory_cache_control.at(url).begin(); it != directory_cache_control.at(url).end();
+                     ++it) {
                     if (*it == directory_cache_key) {
                         directory_cache_control.at(url).erase(it);
                         break;
@@ -401,7 +406,7 @@ private:
             return;
         }
 
-        getHeaderAndRootDirectory(url, req, [=](std::unique_ptr<Response::Error> error) {
+        getHeaderAndRootDirectory(url, req, [=, this](std::unique_ptr<Response::Error> error) {
             if (error) {
                 callback(std::move(error));
                 return;
@@ -413,7 +418,7 @@ private:
             resource.loadingMethod = Resource::LoadingMethod::Network;
             resource.dataRange = std::make_pair(directoryOffset, directoryOffset + directoryLength - 1);
 
-            tasks[req] = getFileSource()->request(resource, [=](const Response& response) {
+            tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {
                 if (response.error) {
                     callback(std::make_unique<Response::Error>(
                         response.error->reason,
@@ -455,7 +460,7 @@ private:
                          std::string("Error fetching PMTiles tile address: Maximum directory depth exceeded")));
         }
 
-        fetchDirectory(url, req, directoryOffset, directoryLength, [=](std::unique_ptr<Response::Error> error) {
+        getDirectory(url, req, directoryOffset, directoryLength, [=, this](std::unique_ptr<Response::Error> error) {
             if (error) {
                 callback(std::make_pair(0, 0), std::move(error));
                 return;
