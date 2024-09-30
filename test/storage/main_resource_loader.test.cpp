@@ -764,6 +764,8 @@ TEST(MainResourceLoader, TEST_REQUIRES_SERVER(RespondToStaleCanBeUsedIfConnected
     });
 
     loop.run();
+
+    NetworkStatus::Set(NetworkStatus::Status::Online);
 }
 
 // Test that requests for expired resources have lower priority than requests for new resources

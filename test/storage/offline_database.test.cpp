@@ -465,8 +465,8 @@ TEST(OfflineDatabase, UpdateMetadata) {
 
     OfflineRegionMetadata newmetadata{{4, 5, 6}};
     db.updateMetadata(region->getID(), newmetadata);
-    auto regions = db.listRegions().value();
-    EXPECT_EQ(regions.at(0).getMetadata(), newmetadata);
+    auto newRegion = db.getRegion(region->getID()).value();
+    EXPECT_EQ(newRegion->getMetadata(), newmetadata);
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
