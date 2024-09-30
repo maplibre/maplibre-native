@@ -46,7 +46,8 @@ std::string read_file(const std::string &filename) {
     }
 }
 
-std::optional<std::string> readFile(const std::string &filename, const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
+std::optional<std::string> readFile(const std::string &filename,
+                                    const std::optional<std::pair<uint64_t, uint64_t>> &dataRange) {
     MLN_TRACE_FUNC();
 
     std::ifstream file(filename, std::ios::binary);

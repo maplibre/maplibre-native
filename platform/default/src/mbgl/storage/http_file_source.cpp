@@ -270,7 +270,8 @@ HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, Fil
       callback(std::move(callback_)),
       handle(context->getHandle()) {
     if (resource.dataRange) {
-        const std::string header = std::string("Range: bytes=") + std::to_string(resource.dataRange->first) + std::string("-") + std::to_string(resource.dataRange->second);
+        const std::string header = std::string("Range: bytes=") + std::to_string(resource.dataRange->first) +
+                                   std::string("-") + std::to_string(resource.dataRange->second);
         headers = curl_slist_append(headers, header.c_str());
     }
 
