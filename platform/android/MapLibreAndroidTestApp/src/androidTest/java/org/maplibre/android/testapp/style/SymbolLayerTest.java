@@ -425,6 +425,9 @@ public class SymbolLayerTest extends BaseLayerTest {
     Float[] propertyValue = {2.0f, 2.0f, 2.0f, 2.0f};
     layer.setProperties(iconPadding(propertyValue));
     assertEquals(layer.getIconPadding().getValue(), propertyValue);
+    // Single number overload
+    layer.setProperties(iconPadding(3.0f));
+    assertEquals(layer.getIconPadding().getValue(), new Float[]{3.0f, 3.0f, 3.0f, 3.0f});
   }
 
   @Test
