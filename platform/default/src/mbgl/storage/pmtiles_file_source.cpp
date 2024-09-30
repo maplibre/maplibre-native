@@ -48,14 +48,14 @@ using AsyncTileCallback = std::function<void(std::pair<uint64_t, uint32_t>, std:
 
 class PMTilesFileSource::Impl {
 public:
-    explicit Impl(const ActorRef<Impl> &, const ResourceOptions &resourceOptions_, const ClientOptions &clientOptions_)
+    explicit Impl(const ActorRef<Impl>&, const ResourceOptions& resourceOptions_, const ClientOptions& clientOptions_)
         : resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()) {}
 
     // Generate a tilejson resource from .pmtiles file
     void request_tilejson(AsyncRequest* req, const Resource& resource, const ActorRef<FileSourceRequest>& ref) {
         auto url = extract_url(resource.url);
-        
+
         getMetadata(url, req, [=](std::unique_ptr<Response::Error> error) {
             Response response;
 
@@ -83,7 +83,7 @@ public:
                 ref.invoke(&FileSourceRequest::setResponse, response);
                 return;
             }
-            
+
             pmtiles::headerv3 header = header_cache.at(url);
 
             if (resource.tileData->z < header.min_zoom || resource.tileData->z > header.max_zoom) {
@@ -92,64 +92,71 @@ public:
             }
 
             uint64_t tileID;
-            
+
             try {
-                tileID = pmtiles::zxy_to_tileid(static_cast<uint8_t>(resource.tileData->z), static_cast<uint32_t>(resource.tileData->x), static_cast<uint32_t>(resource.tileData->y));
-            }
-            catch(const std::exception& e)
-            {
-                response.error = std::make_unique<Response::Error>(
-                    Response::Error::Reason::Other,
-                    std::string("Invalid tile: ") + e.what());
+                tileID = pmtiles::zxy_to_tileid(static_cast<uint8_t>(resource.tileData->z),
+                                                static_cast<uint32_t>(resource.tileData->x),
+                                                static_cast<uint32_t>(resource.tileData->y));
+            } catch (const std::exception& e) {
+                response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                                   std::string("Invalid tile: ") + e.what());
                 ref.invoke(&FileSourceRequest::setResponse, response);
                 return;
             }
 
-            getTileAddress(url, req, tileID, header.root_dir_offset, header.root_dir_bytes, 0, [=](std::pair<uint64_t, uint32_t> tileAddress, std::unique_ptr<Response::Error> tileError) {
-                Response response;
-                response.noContent = true;
-
-                if (tileError) {
-                    response.error = std::move(tileError);
-                    ref.invoke(&FileSourceRequest::setResponse, response);
-                    return;
-                }
-
-                if (tileAddress.first == 0 && tileAddress.second == 0) {
-                    ref.invoke(&FileSourceRequest::setResponse, response);
-                    return;
-                }
-                
-                Resource tileResource(Resource::Kind::Source, url);
-                tileResource.loadingMethod = Resource::LoadingMethod::Network;
-                tileResource.dataRange = std::make_pair(tileAddress.first, tileAddress.first + tileAddress.second - 1);
-
-                tasks[req] = getFileSource()->request(tileResource, [=](const Response& tileResponse) {
+            getTileAddress(
+                url,
+                req,
+                tileID,
+                header.root_dir_offset,
+                header.root_dir_bytes,
+                0,
+                [=](std::pair<uint64_t, uint32_t> tileAddress, std::unique_ptr<Response::Error> tileError) {
                     Response response;
                     response.noContent = true;
 
-                    if (tileResponse.error) {
-                        response.error = std::make_unique<Response::Error>(
-                            tileResponse.error->reason,
-                            std::string("Error fetching PMTiles tile: ") + tileResponse.error->message);
+                    if (tileError) {
+                        response.error = std::move(tileError);
                         ref.invoke(&FileSourceRequest::setResponse, response);
                         return;
                     }
 
-                    response.data = tileResponse.data;
-                    response.noContent = false;
-                    response.modified = tileResponse.modified;
-                    response.expires = tileResponse.expires;
-                    response.etag = tileResponse.etag;
-
-                    if (header.tile_compression == pmtiles::COMPRESSION_GZIP) {
-                        response.data = std::make_shared<std::string>(util::decompress(*tileResponse.data));
+                    if (tileAddress.first == 0 && tileAddress.second == 0) {
+                        ref.invoke(&FileSourceRequest::setResponse, response);
+                        return;
                     }
 
-                    ref.invoke(&FileSourceRequest::setResponse, response);
-                    return;
+                    Resource tileResource(Resource::Kind::Source, url);
+                    tileResource.loadingMethod = Resource::LoadingMethod::Network;
+                    tileResource.dataRange = std::make_pair(tileAddress.first,
+                                                            tileAddress.first + tileAddress.second - 1);
+
+                    tasks[req] = getFileSource()->request(tileResource, [=](const Response& tileResponse) {
+                        Response response;
+                        response.noContent = true;
+
+                        if (tileResponse.error) {
+                            response.error = std::make_unique<Response::Error>(
+                                tileResponse.error->reason,
+                                std::string("Error fetching PMTiles tile: ") + tileResponse.error->message);
+                            ref.invoke(&FileSourceRequest::setResponse, response);
+                            return;
+                        }
+
+                        response.data = tileResponse.data;
+                        response.noContent = false;
+                        response.modified = tileResponse.modified;
+                        response.expires = tileResponse.expires;
+                        response.etag = tileResponse.etag;
+
+                        if (header.tile_compression == pmtiles::COMPRESSION_GZIP) {
+                            response.data = std::make_shared<std::string>(util::decompress(*tileResponse.data));
+                        }
+
+                        ref.invoke(&FileSourceRequest::setResponse, response);
+                        return;
+                    });
                 });
-            });
         });
     }
 
@@ -188,9 +195,10 @@ private:
 
     std::shared_ptr<FileSource> getFileSource() {
         if (!fileSource) {
-            fileSource = FileSourceManager::get()->getFileSource(FileSourceType::ResourceLoader, resourceOptions, clientOptions);
+            fileSource = FileSourceManager::get()->getFileSource(
+                FileSourceType::ResourceLoader, resourceOptions, clientOptions);
         }
-        
+
         return fileSource;
     }
 
@@ -208,17 +216,18 @@ private:
                 callback(std::make_unique<Response::Error>(
                     response.error->reason,
                     std::string("Error fetching PMTiles header and root directory: ") + response.error->message));
-                
+
                 return;
             }
-            
+
             try {
                 pmtiles::headerv3 header = pmtiles::deserialize_header(response.data->substr(0, 127));
-                
-                if (header.tile_compression != pmtiles::COMPRESSION_NONE && header.tile_compression != pmtiles::COMPRESSION_GZIP) {
+
+                if (header.tile_compression != pmtiles::COMPRESSION_NONE &&
+                    header.tile_compression != pmtiles::COMPRESSION_GZIP) {
                     throw std::runtime_error("Compression method not supported");
                 }
-                
+
                 header_cache.emplace(url, header);
 
                 std::string directoryData = response.data->substr(header.root_dir_offset, header.root_dir_bytes);
@@ -226,11 +235,11 @@ private:
                 if (header.tile_compression == pmtiles::COMPRESSION_GZIP) {
                     directoryData = util::decompress(directoryData);
                 }
-                
+
                 storeDirectory(url, header.root_dir_offset, header.root_dir_bytes, directoryData);
-                
+
                 callback(std::unique_ptr<Response::Error>());
-            } catch(const std::exception& e) {
+            } catch (const std::exception& e) {
                 callback(std::make_unique<Response::Error>(
                     Response::Error::Reason::Other,
                     std::string("Error parsing PMTiles header and root directory: ") + e.what()));
@@ -319,7 +328,8 @@ private:
             if (header.json_metadata_bytes > 0) {
                 Resource resource(Resource::Kind::Source, url);
                 resource.loadingMethod = Resource::LoadingMethod::Network;
-                resource.dataRange = std::make_pair(header.json_metadata_offset, header.json_metadata_offset + header.json_metadata_bytes - 1);
+                resource.dataRange = std::make_pair(header.json_metadata_offset,
+                                                    header.json_metadata_offset + header.json_metadata_bytes - 1);
 
                 tasks[req] = getFileSource()->request(resource, [=](const Response& responseMetadata) {
                     if (responseMetadata.error) {
@@ -335,7 +345,7 @@ private:
                     if (header.internal_compression == pmtiles::COMPRESSION_GZIP) {
                         data = util::decompress(data);
                     }
-                    
+
                     parse_callback(data);
                 });
 
@@ -346,13 +356,17 @@ private:
         });
     }
 
-    void storeDirectory(const std::string& url, uint64_t directoryOffset, uint64_t directoryLength, const std::string& directoryData) {
+    void storeDirectory(const std::string& url,
+                        uint64_t directoryOffset,
+                        uint64_t directoryLength,
+                        const std::string& directoryData) {
         if (directory_cache.find(url) == directory_cache.end()) {
             directory_cache.emplace(url, std::map<std::string, std::vector<pmtiles::entryv3>>());
             directory_cache_control.emplace(url, std::vector<std::string>());
         }
 
-        std::string directory_cache_key = url + "|" + std::to_string(directoryOffset) + "|" + std::to_string(directoryLength);
+        std::string directory_cache_key = url + "|" + std::to_string(directoryOffset) + "|" +
+                                          std::to_string(directoryLength);
         directory_cache.at(url).emplace(directory_cache_key, pmtiles::deserialize_directory(rootDirectoryData));
         directory_cache_control.at(url).emplace_back(directory_cache_key);
 
@@ -362,12 +376,16 @@ private:
         }
     }
 
-    void getDirectory(const std::string& url, AsyncRequest* req, uint64_t directoryOffset, uint32_t directoryLength, AsyncCallback callback) {
-        std::string directory_cache_key = url + "|" + std::to_string(directoryOffset) + "|" + std::to_string(directoryLength);
+    void getDirectory(const std::string& url,
+                      AsyncRequest* req,
+                      uint64_t directoryOffset,
+                      uint32_t directoryLength,
+                      AsyncCallback callback) {
+        std::string directory_cache_key = url + "|" + std::to_string(directoryOffset) + "|" +
+                                          std::to_string(directoryLength);
 
         if (directory_cache.find(url) != directory_cache.end() &&
             directory_cache.at(url).find(directory_cache_key) != directory_cache.at(url).end()) {
-            
             if (directory_cache_control.at(url).back() != directory_cache_key) {
                 directory_cache_control.at(url).emplace_back(directory_cache_key);
 
@@ -378,11 +396,11 @@ private:
                     }
                 }
             }
-            
+
             callback(std::unique_ptr<Response::Error>());
             return;
         }
-        
+
         getHeaderAndRootDirectory(url, req, [=](std::unique_ptr<Response::Error> error) {
             if (error) {
                 callback(std::move(error));
@@ -410,12 +428,11 @@ private:
                     if (header.tile_compression == pmtiles::COMPRESSION_GZIP) {
                         directoryData = util::decompress(directoryData);
                     }
-                    
+
                     storeDirectory(url, directoryOffset, directoryLength, directoryData);
 
                     callback(std::unique_ptr<Response::Error>());
-                } catch(const std::exception& e)
-                {
+                } catch (const std::exception& e) {
                     callback(std::make_unique<Response::Error>(
                         Response::Error::Reason::Other,
                         std::string(std::string("Error parsing PMTiles directory: ") + e.what())));
@@ -424,11 +441,18 @@ private:
         });
     }
 
-    void getTileAddress(const std::string& url, AsyncRequest* req, uint64_t tileID, uint64_t directoryOffset, uint32_t directoryLength, uint32_t directoryDepth, AsyncTileCallback callback) {
+    void getTileAddress(const std::string& url,
+                        AsyncRequest* req,
+                        uint64_t tileID,
+                        uint64_t directoryOffset,
+                        uint32_t directoryLength,
+                        uint32_t directoryDepth,
+                        AsyncTileCallback callback) {
         if (directoryDepth > 3) {
             callback(std::make_pair<uint64_t, uint32_t>(0, 0),
-                std::make_unique<Response::Error>(Response::Error::Reason::Other,
-                    std::string("Error fetching PMTiles tile address: Maximum directory depth exceeded")));
+                     std::make_unique<Response::Error>(
+                         Response::Error::Reason::Other,
+                         std::string("Error fetching PMTiles tile address: Maximum directory depth exceeded")));
         }
 
         fetchDirectory(url, req, directoryOffset, directoryLength, [=](std::unique_ptr<Response::Error> error) {
@@ -438,7 +462,8 @@ private:
             }
 
             pmtiles::headerv3 header = header_cache.at(url);
-            std::vector<pmtiles::entryv3> directory = directory_cache.at(url).at(url + "|" + std::to_string(directoryOffset) + "|" + std::to_string(directoryLength));
+            std::vector<pmtiles::entryv3> directory = directory_cache.at(url).at(
+                url + "|" + std::to_string(directoryOffset) + "|" + std::to_string(directoryLength));
 
             pmtiles::entryv3 entry = pmtiles::find_tile(directory, tileID);
 
@@ -447,8 +472,14 @@ private:
                     callback(std::make_pair(header.tile_data_offset + entry.offset, entry.length), {});
                     return;
                 }
-                
-                getTileAddress(url, req, tileID, header.leaf_dirs_offset + entry.offset, entry.length, directoryDepth + 1, std::move(callback));
+
+                getTileAddress(url,
+                               req,
+                               tileID,
+                               header.leaf_dirs_offset + entry.offset,
+                               entry.length,
+                               directoryDepth + 1,
+                               std::move(callback));
                 return;
             }
 
