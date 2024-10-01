@@ -26,6 +26,7 @@ void Scheduler::SetCurrent(Scheduler* scheduler) {
 Scheduler* Scheduler::GetCurrent() {
     if (!localScheduler) {
         thread_local util::RunLoop runLoop;
+        SetCurrent(&runLoop);
     }
     return localScheduler;
 }
