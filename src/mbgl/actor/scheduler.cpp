@@ -23,8 +23,8 @@ void Scheduler::SetCurrent(Scheduler* scheduler) {
     localScheduler = scheduler;
 }
 
-Scheduler* Scheduler::GetCurrent() {
-    if (!localScheduler) {
+Scheduler* Scheduler::GetCurrent(bool init) {
+    if (!localScheduler && init) {
         thread_local util::RunLoop runLoop;
         SetCurrent(&runLoop);
     }
