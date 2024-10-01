@@ -55,7 +55,9 @@ TEST(BackendScope, SingleScope) {
         deactivated = true;
     };
 
-    { gfx::BackendScope test{backend}; }
+    {
+        gfx::BackendScope test{backend};
+    }
 
     ASSERT_TRUE(activated);
     ASSERT_TRUE(deactivated);
