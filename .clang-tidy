@@ -109,7 +109,11 @@ Checks: [
     -readability-suspicious-call-argument,
     -readability-uppercase-literal-suffix,
     -readability-use-anyofallof,
-    -modernize-loop-convert # since C++20 this complains about reverse loops with iterators, but good ranges support only landed in clang 15
+    -modernize-loop-convert, # since C++20 this complains about reverse loops with iterators, but good ranges support only landed in clang 15
+    -performance-enum-size,
+    -misc-include-cleaner,
+    -readability-redundant-inline-specifier,
+    -readability-avoid-nested-conditional-operator
 ]
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
