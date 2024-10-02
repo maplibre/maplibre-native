@@ -29,10 +29,16 @@
 #endif
 
 namespace {
-const int MAX_DIRECTORY_CACHE_ENTRIES = 100;
+// https://github.com/protomaps/PMTiles/blob/main/spec/v3/spec.md#3-header
+constexpr int PMTILES_HEADER_OFFSET = 0;
+constexpr int PMTILES_HEADER_LENGTH = 127;
+
+// To avoid allocating lots of memory with PMTiles directory caching,
+// set a limit so it doesn't grow unlimited
+constexpr int MAX_DIRECTORY_CACHE_ENTRIES = 100;
 
 bool acceptsURL(const std::string& url) {
-    return 0 == url.rfind(mbgl::util::PMTILES_PROTOCOL, 0);
+    return url.starts_with(mbgl::util::PMTILES_PROTOCOL);
 }
 
 std::string extract_url(const std::string& url) {
@@ -74,7 +80,7 @@ public:
     void request_tile(AsyncRequest* req, const Resource& resource, ActorRef<FileSourceRequest> ref) {
         auto url = extract_url(resource.url);
 
-        getHeaderAndRootDirectory(url, req, [=, this](std::unique_ptr<Response::Error> error) {
+        getHeader(url, req, [=, this](std::unique_ptr<Response::Error> error) {
             if (error) {
                 Response response;
                 response.noContent = true;
@@ -206,20 +212,20 @@ private:
         return fileSource;
     }
 
-    void getHeaderAndRootDirectory(const std::string& url, AsyncRequest* req, AsyncCallback callback) {
+    void getHeader(const std::string& url, AsyncRequest* req, AsyncCallback callback) {
         if (header_cache.find(url) != header_cache.end()) {
             callback(std::unique_ptr<Response::Error>());
         }
 
         Resource resource(Resource::Kind::Source, url);
         resource.loadingMethod = Resource::LoadingMethod::Network;
-        resource.dataRange = std::make_pair<uint64_t, uint64_t>(0, 16383);
+
+        resource.dataRange = std::make_pair<uint64_t, uint64_t>(PMTILES_HEADER_OFFSET, PMTILES_HEADER_OFFSET + PMTILES_HEADER_LENGTH - 1);
 
         tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {
             if (response.error) {
                 callback(std::make_unique<Response::Error>(
-                    response.error->reason,
-                    std::string("Error fetching PMTiles header and root directory: ") + response.error->message));
+                    response.error->reason, std::string("Error fetching PMTiles header: ") + response.error->message));
 
                 return;
             }
@@ -234,19 +240,10 @@ private:
 
                 header_cache.emplace(url, header);
 
-                std::string directoryData = response.data->substr(header.root_dir_offset, header.root_dir_bytes);
-
-                if (header.tile_compression == pmtiles::COMPRESSION_GZIP) {
-                    directoryData = util::decompress(directoryData);
-                }
-
-                storeDirectory(url, header.root_dir_offset, header.root_dir_bytes, directoryData);
-
                 callback(std::unique_ptr<Response::Error>());
             } catch (const std::exception& e) {
-                callback(std::make_unique<Response::Error>(
-                    Response::Error::Reason::Other,
-                    std::string("Error parsing PMTiles header and root directory: ") + e.what()));
+                callback(std::make_unique<Response::Error>(Response::Error::Reason::Other,
+                                                           std::string("Error parsing PMTiles header: ") + e.what()));
             }
         });
     }
@@ -256,7 +253,7 @@ private:
             callback(std::unique_ptr<Response::Error>());
         }
 
-        getHeaderAndRootDirectory(url, req, [=, this](std::unique_ptr<Response::Error> error) {
+        getHeader(url, req, [=, this](std::unique_ptr<Response::Error> error) {
             if (error) {
                 callback(std::move(error));
                 return;
@@ -406,7 +403,7 @@ private:
             return;
         }
 
-        getHeaderAndRootDirectory(url, req, [=, this](std::unique_ptr<Response::Error> error) {
+        getHeader(url, req, [=, this](std::unique_ptr<Response::Error> error) {
             if (error) {
                 callback(std::move(error));
                 return;
@@ -458,6 +455,8 @@ private:
                      std::make_unique<Response::Error>(
                          Response::Error::Reason::Other,
                          std::string("Error fetching PMTiles tile address: Maximum directory depth exceeded")));
+
+            return;
         }
 
         getDirectory(url, req, directoryOffset, directoryLength, [=, this](std::unique_ptr<Response::Error> error) {
