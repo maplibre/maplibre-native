@@ -16,7 +16,8 @@ namespace mbgl {
 namespace vulkan {
 
 TileLayerGroup::TileLayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::string name_)
-    : mbgl::TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)) {}
+    : mbgl::TileLayerGroup(layerIndex_, initialCapacity, std::move(name_)),
+      uniformBuffers(DescriptorSetType::Layer, shaders::layerUBOStartId, shaders::maxUBOCountPerLayer) {}
 
 void TileLayerGroup::upload(gfx::UploadPass& uploadPass) {
     if (!enabled || !getDrawableCount()) {
@@ -41,7 +42,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
     }
 
     auto& renderPass = static_cast<RenderPass&>(*parameters.renderPass);
-    auto& context = renderPass.getEncoder().getContext();
+    auto& encoder = renderPass.getEncoder();
 
     // `stencilModeFor3D` uses a different stencil mask value each time its called, so if the
     // drawables in this layer use 3D stencil mode, we need to set it up here so that all the
@@ -93,8 +94,7 @@ void TileLayerGroup::render(RenderOrchestrator&, PaintParameters& parameters) {
         }
 
         if (!bindUBOs) {
-            context.bindUniformDescriptorSet(
-                DescriptorSetType::Layer, uniformBuffers, shaders::layerUBOStartId, shaders::maxUBOCountPerLayer);
+            uniformBuffers.bindDescriptorSets(encoder);
             bindUBOs = true;
         }
 

@@ -43,14 +43,6 @@ class Texture2D;
 using UniqueShaderProgram = std::unique_ptr<ShaderProgram>;
 using UniqueVertexBufferResource = std::unique_ptr<VertexBufferResource>;
 
-enum class DescriptorSetType : uint8_t {
-    Global,
-    Layer,
-    DrawableUniform,
-    DrawableImage,
-    Count,
-};
-
 class Context final : public gfx::Context {
 public:
     Context(RendererBackend&);
@@ -149,26 +141,14 @@ public:
                                                                          const std::string& name);
 
     const std::vector<vk::DescriptorSetLayout>& getDescriptorSetLayouts();
-    const std::vector<vk::DescriptorSetLayout>& getDrawableDescriptorSetLayouts();
     const vk::DescriptorSetLayout& getDescriptorSetLayout(DescriptorSetType type);
     const vk::UniquePipelineLayout& getGeneralPipelineLayout();
     const vk::UniquePipelineLayout& getPushConstantPipelineLayout();
 
-    void bindUniformDescriptorSet(DescriptorSetType type,
-                                  const gfx::UniformBufferArray& uniforms,
-                                  size_t startID,
-                                  size_t count,
-                                  bool fillGaps = true);
-
-    void bindUniformDescriptorSet(DescriptorSetType type,
-                                  const vk::DescriptorSet& descriptorSet,
-                                  const gfx::UniformBufferArray& uniforms,
-                                  size_t startID,
-                                  size_t count,
-                                  bool fillGaps = true);
+    void bindDescriptorSet(DescriptorSetType type, const vk::DescriptorSet& descriptorSet);
 
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
-    const vk::UniqueDescriptorPool& getCurrentDescriptorPool() const;
+    const vk::UniqueDescriptorPool& getGlobalDescriptorPool() const;
     void enqueueDeletion(std::function<void(const Context&)>&& function);
     void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const;
 
@@ -177,7 +157,6 @@ public:
 private:
     struct FrameResources {
         vk::UniqueCommandBuffer commandBuffer;
-        vk::UniqueDescriptorPool descriptorPool;
 
         vk::UniqueSemaphore surfaceSemaphore;
         vk::UniqueSemaphore frameSemaphore;
@@ -186,12 +165,10 @@ private:
         std::vector<std::function<void(const Context&)>> deletionQueue;
 
         FrameResources(vk::UniqueCommandBuffer& cb,
-                       vk::UniqueDescriptorPool&& dp,
                        vk::UniqueSemaphore&& surf,
                        vk::UniqueSemaphore&& frame,
                        vk::UniqueFence&& flight)
             : commandBuffer(std::move(cb)),
-              descriptorPool(std::move(dp)),
               surfaceSemaphore(std::move(surf)),
               frameSemaphore(std::move(frame)),
               flightFrameFence(std::move(flight)) {}
@@ -206,6 +183,7 @@ private:
     RendererBackend& backend;
 
     vulkan::UniformBufferArray globalUniformBuffers;
+    vk::UniqueDescriptorPool globalDescriptorPool;
 
     std::unique_ptr<BufferResource> dummyVertexBuffer;
     std::unique_ptr<BufferResource> dummyUniformBuffer;
@@ -215,7 +193,6 @@ private:
     vk::UniqueDescriptorSetLayout drawableUniformDescriptorSetLayout;
     vk::UniqueDescriptorSetLayout imageDescriptorSetLayout;
     std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
-    std::vector<vk::DescriptorSetLayout> drawableDescriptorSetLayouts;
     vk::UniquePipelineLayout generalPipelineLayout;
     vk::UniquePipelineLayout pushConstantPipelineLayout;
 

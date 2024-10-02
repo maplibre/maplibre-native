@@ -1,4 +1,5 @@
 #include <mbgl/shaders/mtl/circle.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace shaders {

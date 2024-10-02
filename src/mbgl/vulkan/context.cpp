@@ -28,7 +28,7 @@
 #include <cstring>
 
 #ifndef MLN_VULKAN_DESCRIPTOR_POOL_SIZE
-#define MLN_VULKAN_DESCRIPTOR_POOL_SIZE 10000
+#define MLN_VULKAN_DESCRIPTOR_POOL_SIZE 30000
 #endif
 
 namespace mbgl {
@@ -48,7 +48,8 @@ public:
 
 Context::Context(RendererBackend& backend_)
     : gfx::Context(vulkan::maximumVertexBindingCount),
-      backend(backend_) {
+      backend(backend_),
+      globalUniformBuffers(DescriptorSetType::Global, 0, shaders::globalUBOCount) {
     if (glslangRefCount++ == 0) {
         glslang::InitializeProcess();
     }
@@ -70,26 +71,28 @@ void Context::initFrameResources() {
     const auto& device = backend.getDevice();
     const auto frameCount = backend.getMaxFrames();
 
-    // command buffers
-    const vk::CommandBufferAllocateInfo allocateInfo(
-        backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, frameCount);
-
-    auto commandBuffers = backend.getDevice()->allocateCommandBuffersUnique(allocateInfo);
-
     // descriptor pool info
     const std::vector<vk::DescriptorPoolSize> poolSizes = {
         {vk::DescriptorType::eUniformBuffer, MLN_VULKAN_DESCRIPTOR_POOL_SIZE},
         {vk::DescriptorType::eCombinedImageSampler, MLN_VULKAN_DESCRIPTOR_POOL_SIZE},
     };
 
-    const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo().setPoolSizes(poolSizes).setMaxSets(
-        MLN_VULKAN_DESCRIPTOR_POOL_SIZE);
+    const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
+                                        .setPoolSizes(poolSizes)
+                                        .setMaxSets(MLN_VULKAN_DESCRIPTOR_POOL_SIZE);
+
+    globalDescriptorPool = device->createDescriptorPoolUnique(descriptorPoolInfo);
+
+    // command buffers
+    const vk::CommandBufferAllocateInfo allocateInfo(
+        backend.getCommandPool().get(), vk::CommandBufferLevel::ePrimary, frameCount);
+
+    auto commandBuffers = backend.getDevice()->allocateCommandBuffersUnique(allocateInfo);
 
     frameResources.reserve(frameCount);
 
     for (uint32_t index = 0; index < frameCount; ++index) {
         frameResources.emplace_back(commandBuffers[index],
-                                    device->createDescriptorPoolUnique(descriptorPoolInfo),
                                     device->createSemaphoreUnique({}),
                                     device->createSemaphoreUnique({}),
                                     device->createFenceUnique(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled)));
@@ -97,7 +100,6 @@ void Context::initFrameResources() {
         const auto& frame = frameResources.back();
 
         backend.setDebugName(frame.commandBuffer.get(), "FrameCommandBuffer_" + std::to_string(index));
-        backend.setDebugName(frame.descriptorPool.get(), "DescriptorPool_" + std::to_string(index));
         backend.setDebugName(frame.frameSemaphore.get(), "FrameSemaphore_" + std::to_string(index));
         backend.setDebugName(frame.surfaceSemaphore.get(), "SurfaceSemaphore_" + std::to_string(index));
         backend.setDebugName(frame.flightFrameFence.get(), "FrameFence_" + std::to_string(index));
@@ -114,12 +116,14 @@ void Context::destroyResources() {
         frame.runDeletionQueue(*this);
     }
 
+    globalUniformBuffers.freeDescriptorSets();
+
     // all resources have unique handles
     frameResources.clear();
 }
 
-const vk::UniqueDescriptorPool& Context::getCurrentDescriptorPool() const {
-    return frameResources[frameResourceIndex].descriptorPool;
+const vk::UniqueDescriptorPool& Context::getGlobalDescriptorPool() const {
+    return globalDescriptorPool;
 }
 
 void Context::enqueueDeletion(std::function<void(const Context&)>&& function) {
@@ -178,7 +182,6 @@ void Context::beginFrame() {
         // we wait for an idle device to recreate the swapchain
         // so it's a good opportunity to delete all queued items
         for (auto& frame : frameResources) {
-            device->resetDescriptorPool(frame.descriptorPool.get());
             frame.runDeletionQueue(*this);
         }
 
@@ -194,7 +197,6 @@ void Context::beginFrame() {
 
     waitFrame();
 
-    device->resetDescriptorPool(getCurrentDescriptorPool().get());
     frame.runDeletionQueue(*this);
 
     if (platformSurface) {
@@ -386,9 +388,9 @@ void Context::clearStencilBuffer(int32_t) {
     assert(false);
 }
 
-void Context::bindGlobalUniformBuffers(gfx::RenderPass&) const noexcept {
-    const_cast<Context*>(this)->bindUniformDescriptorSet(
-        DescriptorSetType::Global, globalUniformBuffers, 0, shaders::globalUBOCount);
+void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
+    auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
+    const_cast<Context*>(this)->globalUniformBuffers.bindDescriptorSets(renderPassImpl.getEncoder());
 }
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
@@ -580,17 +582,9 @@ const std::vector<vk::DescriptorSetLayout>& Context::getDescriptorSetLayouts() {
     return descriptorSetLayouts;
 }
 
-const std::vector<vk::DescriptorSetLayout>& Context::getDrawableDescriptorSetLayouts() {
-    if (drawableDescriptorSetLayouts.empty()) {
-        drawableDescriptorSetLayouts = {drawableUniformDescriptorSetLayout.get(), imageDescriptorSetLayout.get()};
-    }
-
-    return drawableDescriptorSetLayouts;
-}
-
 const vk::DescriptorSetLayout& Context::getDescriptorSetLayout(DescriptorSetType type) {
     uint32_t index = static_cast<uint32_t>(type);
-    assert(index >= 0 && index < static_cast<uint32_t>(DescriptorSetType::Count));
+    assert(index < static_cast<uint32_t>(DescriptorSetType::Count));
     return getDescriptorSetLayouts()[index];
 }
 
@@ -619,71 +613,6 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     backend.setDebugName(pushConstantPipelineLayout.get(), "PipelineLayout_pushConstants");
 
     return pushConstantPipelineLayout;
-}
-
-void Context::bindUniformDescriptorSet(DescriptorSetType type,
-                                       const gfx::UniformBufferArray& uniforms,
-                                       size_t startID,
-                                       size_t count,
-                                       bool fillGaps) {
-
-    const auto& device = getBackend().getDevice();
-    const auto& descriptorPool = getCurrentDescriptorPool();
-    const auto& descriptorSetLayout = getDescriptorSetLayout(type);
-
-    const auto descriptorAllocInfo =
-        vk::DescriptorSetAllocateInfo().setDescriptorPool(*descriptorPool).setSetLayouts(descriptorSetLayout);
-
-    const auto& descriptorSets = device->allocateDescriptorSets(descriptorAllocInfo);
-
-    bindUniformDescriptorSet(type, descriptorSets[0], uniforms, startID, count);
-
-}
-
-void Context::bindUniformDescriptorSet(DescriptorSetType type,
-                                       const vk::DescriptorSet& descriptorSet,
-                                       const gfx::UniformBufferArray& uniforms,
-                                       size_t startID,
-                                       size_t count,
-                                       bool fillGaps) {
-
-    assert(static_cast<uint32_t>(type) < static_cast<uint32_t>(DescriptorSetType::DrawableImage));
-
-    const auto& device = getBackend().getDevice();
-
-    for (size_t index = 0; index < count; ++index) {
-        vk::DescriptorBufferInfo descriptorBufferInfo;
-
-        if (const auto& uniformBuffer = uniforms.get(startID + index)) {
-            const auto& uniformBufferImpl = static_cast<const UniformBuffer&>(*uniformBuffer);
-            const auto& bufferResource = uniformBufferImpl.getBufferResource();
-            descriptorBufferInfo.setBuffer(bufferResource.getVulkanBuffer())
-                .setOffset(bufferResource.getVulkanBufferOffset())
-                .setRange(bufferResource.getSizeInBytes());
-        } else if (fillGaps) {
-            descriptorBufferInfo.setBuffer(getDummyUniformBuffer()->getVulkanBuffer())
-                .setOffset(0)
-                .setRange(VK_WHOLE_SIZE);
-        } else {
-            continue;
-        }
-
-        const auto writeDescriptorSet = vk::WriteDescriptorSet()
-                                            .setBufferInfo(descriptorBufferInfo)
-                                            .setDescriptorCount(1)
-                                            .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-                                            .setDstBinding(index)
-                                            .setDstSet(descriptorSet);
-
-        device->updateDescriptorSets(writeDescriptorSet, nullptr);
-    }
-
-    auto& frame = frameResources[frameResourceIndex];
-    frame.commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                            getGeneralPipelineLayout().get(),
-                                            static_cast<uint32_t>(type),
-                                            descriptorSet,
-                                            nullptr);
 }
 
 void Context::FrameResources::runDeletionQueue(const Context& context) {

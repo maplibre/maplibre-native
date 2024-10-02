@@ -1,5 +1,6 @@
 #include <mbgl/shaders/mtl/fill_extrusion_pattern.hpp>
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace shaders {

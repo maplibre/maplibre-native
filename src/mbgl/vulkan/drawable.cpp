@@ -398,55 +398,16 @@ bool Drawable::bindAttributes(CommandEncoder& encoder) const noexcept {
 bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
     if (!shader) return false;
 
-    auto& context = encoder.getContext();
-    const auto& device = context.getBackend().getDevice();
-    const auto& descriptorPool = context.getCurrentDescriptorPool();
-    const auto& descriptorSetLayouts = context.getDrawableDescriptorSetLayouts();
-
-    const auto descriptorAllocInfo =
-        vk::DescriptorSetAllocateInfo().setDescriptorPool(*descriptorPool).setSetLayouts(descriptorSetLayouts);
-
-    const auto& drawableDescriptorSets = device->allocateDescriptorSets(descriptorAllocInfo);
-
-    const auto& drawableUniformDescriptorSet = drawableDescriptorSets[0];
-    const auto& drawableImageDescriptorSet = drawableDescriptorSets[1];
-
-    const auto& uniformBufferArray = getUniformBuffers();
-
-    context.bindUniformDescriptorSet(DescriptorSetType::DrawableUniform,
-                                     drawableUniformDescriptorSet,
-                                     uniformBufferArray,
-                                     shaders::globalUBOCount,
-                                     shaders::maxUBOCountPerDrawable);
+    // bind uniforms
+    impl->uniformBuffers.bindDescriptorSets(encoder);
 
     // update image set
-    {
-        for (size_t id = 0; id < shaders::maxTextureCountPerShader; ++id) {
-            const auto& texture = id < textures.size() ? textures[id] : nullptr;
-            auto& textureImpl = texture ? static_cast<Texture2D&>(*texture) : *context.getDummyTexture();
-
-            const auto descriptorImageInfo = vk::DescriptorImageInfo()
-                                                 .setImageLayout(textureImpl.getVulkanImageLayout())
-                                                 .setImageView(textureImpl.getVulkanImageView().get())
-                                                 .setSampler(textureImpl.getVulkanSampler());
-
-            const auto writeDescriptorSet = vk::WriteDescriptorSet()
-                                                .setImageInfo(descriptorImageInfo)
-                                                .setDescriptorCount(1)
-                                                .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-                                                .setDstBinding(id)
-                                                .setDstSet(drawableImageDescriptorSet);
-
-            device->updateDescriptorSets(writeDescriptorSet, nullptr);
-        }
+    if (!impl->imageDescriptorSet) {
+        impl->imageDescriptorSet = std::make_unique<ImageDescriptorSet>(encoder.getContext());
     }
 
-    const auto& commandBuffer = encoder.getCommandBuffer();
-    commandBuffer->bindDescriptorSets(vk::PipelineBindPoint::eGraphics,
-                                      context.getGeneralPipelineLayout().get(),
-                                      static_cast<uint32_t>(DescriptorSetType::DrawableImage),
-                                      drawableImageDescriptorSet,
-                                      nullptr);
+    impl->imageDescriptorSet->update(textures);
+    impl->imageDescriptorSet->bind(encoder);
 
     return true;
 }
