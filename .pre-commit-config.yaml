@@ -5,7 +5,7 @@ repos:
     -   id: check-yaml
         args: [--allow-multiple-documents]
 - repo: https://github.com/pre-commit/mirrors-clang-format
-  rev: v18.1.8
+  rev: v19.1.0
   hooks:
   - id: clang-format
     files: '.*\.(hpp|cpp|h)'
@@ -15,12 +15,12 @@ repos:
   hooks:
     - id: buildifier
 - repo: https://github.com/Mateusz-Grzelinski/actionlint-py
-  rev: v1.7.1.15
+  rev: v1.7.2.16
   hooks:
     - id: actionlint
       additional_dependencies: [shellcheck-py]
 - repo: https://github.com/nicklockwood/SwiftFormat
-  rev: "0.54.3"
+  rev: "0.54.5"
   hooks:
     - id: swiftformat
       args: [--swiftversion, "5.8"]
