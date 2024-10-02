@@ -571,8 +571,9 @@ const std::vector<vk::DescriptorSetLayout>& Context::getDescriptorSetLayouts() {
             buildUniformDescriptorSetLayout(
                 layerUniformDescriptorSetLayout, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout")
                 .get(),
-            buildUniformDescriptorSetLayout(
-                drawableUniformDescriptorSetLayout, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout")
+            buildUniformDescriptorSetLayout(drawableUniformDescriptorSetLayout,
+                                            shaders::maxUBOCountPerDrawable,
+                                            "DrawableUniformDescriptorSetLayout")
                 .get(),
             getImageDescriptorSetLayout().get()};
     }
@@ -621,12 +622,8 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     return pushConstantPipelineLayout;
 }
 
-void Context::bindUniformDescriptorSet(DescriptorSetType type,
-                                       const gfx::UniformBufferArray& uniforms,
-                                       size_t startID,
-                                       size_t count,
-                                       bool fillGaps) {
-
+void Context::bindUniformDescriptorSet(
+    DescriptorSetType type, const gfx::UniformBufferArray& uniforms, size_t startID, size_t count, bool fillGaps) {
     const auto& device = getBackend().getDevice();
     const auto& descriptorPool = getCurrentDescriptorPool();
     const auto& descriptorSetLayout = getDescriptorSetLayout(type);
@@ -637,7 +634,6 @@ void Context::bindUniformDescriptorSet(DescriptorSetType type,
     const auto& descriptorSets = device->allocateDescriptorSets(descriptorAllocInfo);
 
     bindUniformDescriptorSet(type, descriptorSets[0], uniforms, startID, count);
-
 }
 
 void Context::bindUniformDescriptorSet(DescriptorSetType type,
@@ -646,7 +642,6 @@ void Context::bindUniformDescriptorSet(DescriptorSetType type,
                                        size_t startID,
                                        size_t count,
                                        bool fillGaps) {
-
     assert(static_cast<uint32_t>(type) < static_cast<uint32_t>(DescriptorSetType::DrawableImage));
 
     const auto& device = getBackend().getDevice();

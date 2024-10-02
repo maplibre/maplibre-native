@@ -122,7 +122,7 @@ static constexpr auto maxUBOCountPerDrawable = layerUBOStartId - globalUBOCount;
 // layer UBOs
 
 #if MLN_RENDER_BACKEND_VULKAN
-#define getLayerStartValue(packedValue)    layerUBOStartId
+#define getLayerStartValue(packedValue) layerUBOStartId
 #else
 #define getLayerStartValue(packedValue) packedValue
 #endif
