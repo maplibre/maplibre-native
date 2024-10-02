@@ -96,9 +96,10 @@ HTTPRequest::HTTPRequest(jni::JNIEnv& env, const Resource& resource_, FileSource
     std::string modifiedStr;
 
     if (resource.dataRange) {
-        dataRangeStr = std::string("bytes=") + std::to_string(resource.dataRange->first) + std::string("-") + std::to_string(resource.dataRange->second);
+        dataRangeStr = std::string("bytes=") + std::to_string(resource.dataRange->first) + std::string("-") +
+                       std::to_string(resource.dataRange->second);
     }
-    
+
     if (resource.priorEtag) {
         etagStr = *resource.priorEtag;
     } else if (resource.priorModified) {
