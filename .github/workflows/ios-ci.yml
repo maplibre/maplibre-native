@@ -109,7 +109,7 @@ jobs:
           set -e
           bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
           build_dir="$(mktemp -d)"
-          xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir" -destination CODE_SIGNING_ALLOWED=NO
+          xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir" CODE_SIGNING_ALLOWED=NO
           render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
           cd "$render_test_app_dir"
           mkdir Payload
