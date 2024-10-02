@@ -669,16 +669,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 finish(*outlineBuilder, FillVariant::FillOutline);
             }
 #endif
-        } else {
+        } else if (patternShaderGroup && (!doOutline || outlinePatternShaderGroup)) {
             // Fill with pattern
-            if ((renderPass & RenderPass::Translucent) == 0) {
-                continue;
-            }
-
-            if (!patternShaderGroup || (doOutline && !outlinePatternShaderGroup)) {
-                continue;
-            }
-
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 patternShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
             const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
