@@ -84,7 +84,7 @@ jobs:
           path: ~/.cache/bazel
 
       - name: Build Example (Swift) App
-        run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
+        run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal --//platform/ios:use_provisioning_profile=False
 
       - name: Check debug symbols
         run: bazel run //platform:check-public-symbols --//:renderer=metal
