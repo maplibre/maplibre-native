@@ -34,7 +34,9 @@ TEST(Actor, Destruction) {
     };
 
     bool destructed = false;
-    { Actor<TestActor> test(Scheduler::GetBackground(), std::ref(destructed)); }
+    {
+        Actor<TestActor> test(Scheduler::GetBackground(), std::ref(destructed));
+    }
 
     EXPECT_TRUE(destructed);
 }

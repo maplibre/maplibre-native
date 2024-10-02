@@ -39,7 +39,7 @@ if($Renderer -eq 'OSMesa' -and -not (Test-Path ([System.IO.Path]::Combine($PWD.P
 {
     New-Item -Name temp -Type Directory | Out-Null
     Invoke-WebRequest https://www.7-zip.org/a/7zr.exe -OutFile ([System.IO.Path]::Combine($PWD.Path, 'temp', '7zr.exe'))
-    (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-(release|development-pack)-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile ([System.IO.Path]::Combine($PWD.Path, 'temp', $_.name)) }
+    (Invoke-WebRequest https://api.github.com/repos/pal1000/mesa-dist-win/releases | ConvertFrom-Json)[0].assets | Where-Object name -match 'mesa3d-.+-(release|devel)-msvc\.7z' | foreach { Invoke-WebRequest $_.browser_download_url -OutFile ([System.IO.Path]::Combine($PWD.Path, 'temp', $_.name)) }
     Get-ChildItem 'temp\*.7z' | foreach { .\temp\7zr.exe x -ovendor\mesa3d $_.FullName }
     Remove-Item temp -Recurse
 }

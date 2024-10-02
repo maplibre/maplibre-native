@@ -246,11 +246,12 @@ jobs:
 
       - name: Configure maplibre-native (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          cmake . -B build \
-            -G Ninja \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache \
+          cmake . -B build `
+            -G Ninja `
+            -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
             -DMLN_WITH_NODE=ON
 
       - name: Build maplibre-native (MacOS/Linux)

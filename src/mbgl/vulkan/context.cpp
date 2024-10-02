@@ -573,8 +573,9 @@ const std::vector<vk::DescriptorSetLayout>& Context::getDescriptorSetLayouts() {
             buildUniformDescriptorSetLayout(
                 layerUniformDescriptorSetLayout, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout")
                 .get(),
-            buildUniformDescriptorSetLayout(
-                drawableUniformDescriptorSetLayout, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout")
+            buildUniformDescriptorSetLayout(drawableUniformDescriptorSetLayout,
+                                            shaders::maxUBOCountPerDrawable,
+                                            "DrawableUniformDescriptorSetLayout")
                 .get(),
             getImageDescriptorSetLayout().get()};
     }
