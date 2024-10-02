@@ -22,6 +22,7 @@ load(
 )
 load("//platform/ios/bazel:macros.bzl", "info_plist")
 load("//platform/ios/bazel:provisioning.bzl", "configure_device_profiles")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 
 configure_device_profiles()
 
@@ -363,4 +364,24 @@ js_library(
         ":ios_sdk_hdrs",
     ],
     visibility = ["//platform:__pkg__"],
+)
+
+bool_flag(
+    name = "use_provisioning_profile",
+    build_setting_default = True,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "without_provisioning_profile",
+    flag_values = {
+        "//platform/ios:use_provisioning_profile": "False"
+    },
+)
+
+config_setting(
+    name = "with_provisioning_profile",
+    flag_values = {
+        "//platform/ios:use_provisioning_profile": "True"
+    },
 )
