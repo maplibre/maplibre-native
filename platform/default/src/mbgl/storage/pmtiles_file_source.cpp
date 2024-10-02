@@ -220,7 +220,8 @@ private:
         Resource resource(Resource::Kind::Source, url);
         resource.loadingMethod = Resource::LoadingMethod::Network;
 
-        resource.dataRange = std::make_pair<uint64_t, uint64_t>(PMTILES_HEADER_OFFSET, PMTILES_HEADER_OFFSET + PMTILES_HEADER_LENGTH - 1);
+        resource.dataRange = std::make_pair<uint64_t, uint64_t>(PMTILES_HEADER_OFFSET,
+                                                                PMTILES_HEADER_OFFSET + PMTILES_HEADER_LENGTH - 1);
 
         tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {
             if (response.error) {
