@@ -60,6 +60,12 @@ jobs:
           distribution: "temurin"
           java-version: "17"
 
+      - name: Get CMake and Ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.24.1
+          ninjaVersion: latest
+
       - name: Cache node modules
         uses: actions/cache@v4
         env:
