@@ -50,7 +50,8 @@ QNetworkRequest HTTPRequest::networkRequest() const {
 #endif
 
     if (m_resource.dataRange) {
-        std::string range = std::string("bytes=") + std::to_string(resource.dataRange->first) + std::string("-") + std::to_string(resource.dataRange->second);
+        std::string range = std::string("bytes=") + std::to_string(m_resource.dataRange->first) + std::string("-") +
+                            std::to_string(m_resource.dataRange->second);
         req.setRawHeader("Range", QByteArray(range.data(), static_cast<int>(range.size())));
     }
 
