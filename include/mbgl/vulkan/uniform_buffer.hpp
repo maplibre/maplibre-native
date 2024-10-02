@@ -31,9 +31,8 @@ public:
     UniformBufferArray(DescriptorSetType type, uint32_t index, uint32_t count)
         : descriptorSetType(type),
           descriptorStartIndex(index),
-          descriptorBindingCount(count)
-    {}
-    
+          descriptorBindingCount(count) {}
+
     UniformBufferArray(UniformBufferArray&& other)
         : gfx::UniformBufferArray(std::move(other)) {}
     UniformBufferArray(const UniformBufferArray&) = delete;

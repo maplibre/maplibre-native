@@ -54,14 +54,11 @@ void DescriptorSet::bind(CommandEncoder& encoder) {
 }
 
 UniformDescriptorSet::UniformDescriptorSet(Context& context_, DescriptorSetType type_)
-    : DescriptorSet(context_, type_) {
-
-}
+    : DescriptorSet(context_, type_) {}
 
 void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
                                   uint32_t uniformStartIndex,
                                   uint32_t descriptorBindingCount) {
-
     allocate();
 
     const uint8_t frameIndex = context.getCurrentFrameResourceIndex();
@@ -98,12 +95,9 @@ void UniformDescriptorSet::update(const gfx::UniformBufferArray& uniforms,
 }
 
 ImageDescriptorSet::ImageDescriptorSet(Context& context_)
-    : DescriptorSet(context_, DescriptorSetType::DrawableImage) {
-
-}
+    : DescriptorSet(context_, DescriptorSetType::DrawableImage) {}
 
 void ImageDescriptorSet::update(const std::array<gfx::Texture2DPtr, shaders::maxTextureCountPerShader>& textures) {
-
     allocate();
 
     const uint8_t frameIndex = context.getCurrentFrameResourceIndex();
