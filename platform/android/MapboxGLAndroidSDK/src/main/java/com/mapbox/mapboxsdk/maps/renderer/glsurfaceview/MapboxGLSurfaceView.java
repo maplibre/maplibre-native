@@ -33,7 +33,7 @@ import static android.opengl.GLSurfaceView.RENDERMODE_CONTINUOUSLY;
 public class MapboxGLSurfaceView extends SurfaceView implements SurfaceHolder.Callback2 {
 
   private static final String TAG = "GLSurfaceView";
-  private static final GLThreadManager glThreadManager = new GLThreadManager();
+  private final GLThreadManager glThreadManager = new GLThreadManager();
 
   private final WeakReference<MapboxGLSurfaceView> viewWeakReference = new WeakReference<>(this);
   private GLThread glThread;
@@ -558,6 +558,7 @@ public class MapboxGLSurfaceView extends SurfaceView implements SurfaceHolder.Ca
       renderMode = RENDERMODE_CONTINUOUSLY;
       wantRenderNotification = false;
       mGLSurfaceViewWeakRef = glSurfaceViewWeakRef;
+      glThreadManager = glSurfaceViewWeakRef.get().glThreadManager;
     }
 
     @Override
@@ -1041,6 +1042,7 @@ public class MapboxGLSurfaceView extends SurfaceView implements SurfaceHolder.Ca
     private ArrayList<Runnable> eventQueue = new ArrayList<>();
     private boolean sizeChanged = true;
     private Runnable finishDrawingRunnable = null;
+    private GLThreadManager glThreadManager = null;
     // End of member variables protected by the sGLThreadManager monitor.
 
     private EglHelper eglHelper;
