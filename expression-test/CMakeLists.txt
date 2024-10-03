@@ -24,7 +24,6 @@ target_link_libraries(
         Mapbox::Base::Extras::args
         mbgl-core
         mbgl-compiler-options
-        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
 set_property(TARGET mbgl-expression-test PROPERTY FOLDER MapLibre)
