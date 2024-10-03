@@ -48,7 +48,8 @@ public:
 
     ~UniformBufferArray() = default;
 
-    const std::shared_ptr<gfx::UniformBuffer>& set(const size_t id, std::shared_ptr<gfx::UniformBuffer> uniformBuffer);
+    const std::shared_ptr<gfx::UniformBuffer>& set(const size_t id,
+                                                   std::shared_ptr<gfx::UniformBuffer> uniformBuffer) override;
 
     void createOrUpdate(
         const size_t id, const void* data, std::size_t size, gfx::Context& context, bool persistent = false) override;
