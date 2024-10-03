@@ -1,4 +1,4 @@
-add_executable(
+sadd_executable(
     mbgl-expression-test
     ${PROJECT_SOURCE_DIR}/expression-test/expression_test_logger.cpp
     ${PROJECT_SOURCE_DIR}/expression-test/expression_test_logger.hpp
@@ -24,6 +24,7 @@ target_link_libraries(
         Mapbox::Base::Extras::args
         mbgl-core
         mbgl-compiler-options
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
 set_property(TARGET mbgl-expression-test PROPERTY FOLDER MapLibre)
