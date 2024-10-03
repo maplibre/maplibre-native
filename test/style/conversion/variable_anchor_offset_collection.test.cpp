@@ -25,9 +25,9 @@ TEST(StyleConversion, VariableAnchorOffsetCollection) {
         auto expr = jsonToExpression(
             R"({"type": "interval", "stops": [[0, ["left", [0, 0]]], [5, ["left", [10, 20]]]]})");
 
-        EXPECT_EQ(VariableAnchorOffsetCollection({{{SymbolAnchorType::Left}, {{0, 0}}}}), expr.evaluate(0));
-        EXPECT_EQ(VariableAnchorOffsetCollection({{{SymbolAnchorType::Left}, {{0, 0}}}}), expr.evaluate(4));
-        EXPECT_EQ(VariableAnchorOffsetCollection({{{SymbolAnchorType::Left}, {{10, 20}}}}), expr.evaluate(5));
+        EXPECT_EQ(VariableAnchorOffsetCollection({{SymbolAnchorType::Left, {0, 0}}}), expr.evaluate(0));
+        EXPECT_EQ(VariableAnchorOffsetCollection({{SymbolAnchorType::Left, {0, 0}}}), expr.evaluate(4));
+        EXPECT_EQ(VariableAnchorOffsetCollection({{SymbolAnchorType::Left, {10, 20}}}), expr.evaluate(5));
     }
     // interpolate expression
     {

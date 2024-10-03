@@ -322,11 +322,10 @@ class MLNStyleValueTransformer {
   // VariableAnchorOffsetCollection
   static NSArray<NSExpression *> *toMLNRawStyleValue(
       const mbgl::VariableAnchorOffsetCollection mbglStopValue) {
-    NSMutableArray *array =
-      [NSMutableArray arrayWithCapacity:mbglStopValue.getOffsets().size() * 2];
-    for (const auto &anchorOffset : mbglStopValue.getOffsets()) {
-      NSString *anchor = toMLNRawStyleValue(anchorOffset.first);
-      NSValue *offset = [NSValue mgl_valueWithOffsetArray:anchorOffset.second];
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:mbglStopValue.size() * 2];
+    for (const auto &anchorOffset : mbglStopValue) {
+      NSString *anchor = toMLNRawStyleValue(anchorOffset.anchorType);
+      NSValue *offset = [NSValue mgl_valueWithOffsetArray:anchorOffset.offset];
       [array addObject:[NSExpression expressionForConstantValue:anchor]];
       [array addObject:[NSExpression expressionForConstantValue:offset]];
     }

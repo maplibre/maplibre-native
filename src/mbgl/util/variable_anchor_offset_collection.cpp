@@ -12,18 +12,10 @@ using namespace std;
 using namespace style;
 using namespace style::expression;
 
-bool VariableAnchorOffsetCollection::empty() const {
-    return anchorOffsets.size() == 0;
-};
-
-std::vector<AnchorOffsetPair> VariableAnchorOffsetCollection::getOffsets() const {
-    return anchorOffsets;
-}
-
 std::array<float, 2> VariableAnchorOffsetCollection::getOffsetByAnchor(const SymbolAnchorType& anchorType) const {
-    for (const auto& pair : anchorOffsets) {
-        if (anchorType == pair.first) {
-            return pair.second;
+    for (const auto& entry : anchorOffsets) {
+        if (anchorType == entry.anchorType) {
+            return entry.offset;
         }
     }
 
@@ -34,11 +26,11 @@ std::string VariableAnchorOffsetCollection::toString() const {
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
     writer.StartArray();
-    for (const auto& pair : anchorOffsets) {
-        writer.String(Enum<SymbolAnchorType>::toString(pair.first));
+    for (const auto& entry : anchorOffsets) {
+        writer.String(Enum<SymbolAnchorType>::toString(entry.anchorType));
         writer.StartArray();
-        writer.Double(pair.second[0]);
-        writer.Double(pair.second[1]);
+        writer.Double(entry.offset[0]);
+        writer.Double(entry.offset[1]);
         writer.EndArray();
     }
 
@@ -49,9 +41,9 @@ std::string VariableAnchorOffsetCollection::toString() const {
 
 mbgl::Value VariableAnchorOffsetCollection::serialize() const {
     std::vector<mbgl::Value> serialized;
-    for (const auto& pair : anchorOffsets) {
-        serialized.emplace_back(Enum<SymbolAnchorType>::toString(pair.first));
-        std::vector<mbgl::Value> offset{pair.second[0], pair.second[1]};
+    for (const auto& entry : anchorOffsets) {
+        serialized.emplace_back(Enum<SymbolAnchorType>::toString(entry.anchorType));
+        std::vector<mbgl::Value> offset{entry.offset[0], entry.offset[1]};
         serialized.emplace_back(offset);
     }
 

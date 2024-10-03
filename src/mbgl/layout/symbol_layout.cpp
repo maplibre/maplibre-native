@@ -368,9 +368,10 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
         auto variableAnchorOffset = layout->evaluate<TextVariableAnchorOffset>(zoom, feature, canonicalID);
         if (!variableAnchorOffset.empty()) {
             // Convert offsets from EM to PX, and apply baseline shift
-            for (const auto& anchorOffset: variableAnchorOffset.getOffsets()) {
-                std::array<float, 2> variableTextOffset = {{anchorOffset.second[0] * util::ONE_EM, anchorOffset.second[1] * util::ONE_EM}};
-                switch (anchorOffset.first) {
+            for (const auto& anchorOffset : variableAnchorOffset) {
+                std::array<float, 2> variableTextOffset = {
+                    {anchorOffset.offset[0] * util::ONE_EM, anchorOffset.offset[1] * util::ONE_EM}};
+                switch (anchorOffset.anchorType) {
                     case SymbolAnchorType::TopRight:
                     case SymbolAnchorType::TopLeft:
                     case SymbolAnchorType::Top:
@@ -386,8 +387,8 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
                     case SymbolAnchorType::Right:
                         break;
                 }
-                
-                anchorOffsets.emplace_back(AnchorOffsetPair{anchorOffset.first, variableTextOffset});
+
+                anchorOffsets.emplace_back(AnchorOffsetPair{anchorOffset.anchorType, variableTextOffset});
             }
 
             result = VariableAnchorOffsetCollection(std::move(anchorOffsets));
@@ -510,8 +511,8 @@ void SymbolLayout::prepareSymbols(const GlyphMap& glyphMap,
                 if (textJustify != TextJustifyType::Auto) {
                     justifications.push_back(textJustify);
                 } else {
-                    for (const auto& anchorOffset : variableAnchorOffsets->getOffsets()) {
-                        justifications.push_back(getAnchorJustification(anchorOffset.first));
+                    for (const auto& anchorOffset : *variableAnchorOffsets) {
+                        justifications.push_back(getAnchorJustification(anchorOffset.anchorType));
                     }
                 }
                 for (TextJustifyType justification : justifications) {

@@ -232,12 +232,12 @@ struct ToValue {
 
     v8::Local<v8::Value> operator()(const mbgl::VariableAnchorOffsetCollection& variableAnchorOffsets) {
         std::vector<Value> components;
-        components.reserve(variableAnchorOffsets.getOffsets().size() * 2);
-        for (const auto& variableAnchorOffset : variableAnchorOffsets.getOffsets()) {
+        components.reserve(variableAnchorOffsets.size() * 2);
+        for (const auto& variableAnchorOffset : variableAnchorOffsets) {
             components.emplace_back(
-                std::string(mbgl::Enum<mbgl::style::SymbolAnchorType>::toString(variableAnchorOffset.first)));
-            components.emplace_back(std::vector<Value>{static_cast<double>(variableAnchorOffset.second[0]),
-                                                       static_cast<double>(variableAnchorOffset.second[1])});
+                std::string(mbgl::Enum<mbgl::style::SymbolAnchorType>::toString(variableAnchorOffset.anchorType)));
+            components.emplace_back(std::vector<Value>{static_cast<double>(variableAnchorOffset.offset[0]),
+                                                       static_cast<double>(variableAnchorOffset.offset[1])});
         }
         return operator()(components);
     }

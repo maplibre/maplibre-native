@@ -10,51 +10,52 @@
 
 namespace mbgl {
 
-using AnchorOffsetPair = std::pair<style::SymbolAnchorType, std::array<float, 2>>;
+struct AnchorOffsetPair {
+    style::SymbolAnchorType anchorType;
+    std::array<float, 2> offset;
 
-// BUGBUG consider changing data types here. Current impl using extra
-// heap allocs due to vector
+    AnchorOffsetPair(style::SymbolAnchorType anchorType_, std::array<float, 2> offset_)
+        : anchorType(anchorType_),
+          offset(offset_) {}
+
+    bool operator==(const AnchorOffsetPair& other) const = default;
+};
+
 class VariableAnchorOffsetCollection {
+private:
+    using CollectionType = std::vector<AnchorOffsetPair>;
+    CollectionType anchorOffsets;
+
 public:
     VariableAnchorOffsetCollection() = default;
 
-    // Copy constructor
-    VariableAnchorOffsetCollection(const VariableAnchorOffsetCollection& other) { anchorOffsets = other.anchorOffsets; }
+    VariableAnchorOffsetCollection(const VariableAnchorOffsetCollection& other) = default;
 
-    // Move constructor
-    VariableAnchorOffsetCollection(VariableAnchorOffsetCollection&& other) noexcept {
-        anchorOffsets = std::move(other.anchorOffsets);
-    }
+    VariableAnchorOffsetCollection(VariableAnchorOffsetCollection&& other) noexcept = default;
 
     VariableAnchorOffsetCollection(std::vector<AnchorOffsetPair>&& values) { anchorOffsets = std::move(values); }
 
-    // Avoid quoting when convert to string in expression
-    std::string toString() const;
-    mbgl::Value serialize() const;
-    bool empty() const;
-    std::vector<AnchorOffsetPair> getOffsets() const;
     std::array<float, 2> getOffsetByAnchor(const style::SymbolAnchorType& anchorType) const;
 
-    // Copy assignment operator
-    VariableAnchorOffsetCollection& operator=(const VariableAnchorOffsetCollection& other) {
-        if (this != &other) {
-            anchorOffsets = other.anchorOffsets;
-        }
-        return *this;
-    }
+    std::string toString() const;
 
-    // Move assignment operator
-    VariableAnchorOffsetCollection& operator=(VariableAnchorOffsetCollection&& other) noexcept {
-        if (this != &other) {
-            anchorOffsets = std::move(other.anchorOffsets);
-        }
-        return *this;
-    }
+    mbgl::Value serialize() const;
 
-    bool operator==(const VariableAnchorOffsetCollection& other) const { return anchorOffsets == other.anchorOffsets; }
+    bool empty() const { return anchorOffsets.size() == 0; }
 
-private:
-    std::vector<AnchorOffsetPair> anchorOffsets;
+    CollectionType::size_type size() const { return anchorOffsets.size(); }
+
+    CollectionType::const_iterator begin() const { return anchorOffsets.begin(); }
+
+    CollectionType::const_iterator end() const { return anchorOffsets.end(); }
+
+    const AnchorOffsetPair& operator[](size_t index) const { return anchorOffsets[index]; }
+
+    VariableAnchorOffsetCollection& operator=(const VariableAnchorOffsetCollection& other) = default;
+
+    VariableAnchorOffsetCollection& operator=(VariableAnchorOffsetCollection&& other) noexcept = default;
+
+    bool operator==(const VariableAnchorOffsetCollection& other) const = default;
 };
 
 } // namespace mbgl

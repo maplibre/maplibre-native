@@ -207,8 +207,8 @@ bool SymbolInstance::hasSdfIcon() const {
 std::vector<style::SymbolAnchorType> SymbolInstance::getTextAnchors() const {
     std::vector<style::SymbolAnchorType> result;
     if (textVariableAnchorOffset) {
-        for (const auto& anchorOffset : textVariableAnchorOffset->getOffsets()) {
-            result.push_back(anchorOffset.first);
+        for (const auto& anchorOffset : *textVariableAnchorOffset) {
+            result.push_back(anchorOffset.anchorType);
         }
     }
 
