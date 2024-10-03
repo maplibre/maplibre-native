@@ -3,6 +3,7 @@ plugins {
     id 'com.android.application'
 }
 
+apply plugin: 'kotlin-android'
 apply from: "${rootDir}/gradle/native-build.gradle"
 
 android {
@@ -16,11 +17,6 @@ android {
         versionName "6.0.1"
         testInstrumentationRunner "com.mapbox.mapboxsdk.InstrumentationRunner"
         multiDexEnabled = true
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     nativeBuild(["example-custom-layer"])
@@ -58,6 +54,15 @@ android {
         checkAllWarnings true
         disable 'MissingTranslation', 'GoogleAppIndexingWarning', 'UnpackedNativeCode', 'IconDipSize', 'TypographyQuotes'
         warningsAsErrors true
+    }
+
+    compileOptions {
+        sourceCompatibility = 11
+        targetCompatibility = 11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
     }
 }
 
