@@ -372,7 +372,7 @@ class GeoJsonSource : Source {
         /**
          * @return The url or null
          */
-        @get:Deprecated("use {@link #getUri()} instead")
+        @Deprecated("use {@link #getUri()} instead")
         get() {
             return getUrlInternal()
         }
