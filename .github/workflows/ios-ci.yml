@@ -107,7 +107,7 @@ jobs:
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
+          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal --//platform/ios:use_provisioning_profile=False"
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir" CODE_SIGNING_ALLOWED=NO
           render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
@@ -134,7 +134,7 @@ jobs:
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run --//:renderer=metal //platform/ios:xcodeproj
+          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal --//platform/ios:use_provisioning_profile=False"
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir" CODE_SIGNING_ALLOWED=NO
           ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"
