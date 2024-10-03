@@ -176,16 +176,25 @@ MapLibre Native can also be built on [Linux](platform/linux/README.md), [Windows
 > [!NOTE]  
 > This section is only relevant for people who want to contribute to MapLibre Native.
 
+MapLibre Native has at its core a C++ library. This is where the bulk of development is currently happening.
+
 To get started with the code base, you need to clone the the repository including all its submodules.
 
+All contributors use pull requests from a private fork. [Fork the project](https://github.com/maplibre/maplibre-native/fork). Then run:
+
 ```bash
-git clone --recurse-submodules https://github.com/maplibre/maplibre-native.git
+git clone --recurse-submodules git@github.com:<YOUR NAME>/maplibre-native.git
+git remote add origin https://github.com/maplibre/maplibre-native.git
 ```
 
-- [Core C++ API Documentation](https://maplibre.org/maplibre-native/cpp/api/) (unstable).
-- [`CONTRIBUTING.md`](CONTRIBUTING.md).
-- [MapLibre Native Markdown Book](https://maplibre.org/maplibre-native/docs/book/design/ten-thousand-foot-view.html): architectural notes.
-- Everyone is free to share knowledge and information on the [wiki](https://github.com/maplibre/maplibre-native/wiki).
+Check out issues labelled as a [good first issue](https://github.com/maplibre/maplibre-native/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+
+## Core
+
+- [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- [MapLibre Native Markdown Book](https://maplibre.org/maplibre-native/docs/book/design/ten-thousand-foot-view.html): architectural notes
+- [GitHub Wiki](https://github.com/maplibre/maplibre-native/wiki): low-friction way to share information with the community
+- [Core C++ API Documentation](https://maplibre.org/maplibre-native/cpp/api/) (unstable)
 
 ## Android
 
@@ -195,13 +204,20 @@ More information: [`platform/android/DEVELOPING.md`](platform/android/DEVELOPING
 
 ## iOS
 
-You need to have 
+You need to use [Bazel](https://bazel.build/) to generate an Xcode project. Install [`bazelisk`](https://formulae.brew.sh/formula/bazelisk) (a wrapper that installs the required Bazel version). Next, use:
 
-More information: [`platform/android/CONTRIBUTING.md`](platform/ios/CONTRIBUTING.md)
+```bash
+bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
+xed platform/ios/MapLibre.xcodeproj
+```
+
+To generate and open the Xcode project.
+
+More information: [`platform/android/CONTRIBUTING.md`](platform/ios/CONTRIBUTING.md).
 
 ## Other Platforms
 
-See [`/platform`](/platform).
+See [`/platform`](/platform) and navigate to the platform you are interested in for more information.
 
 ## Getting Involved
 
