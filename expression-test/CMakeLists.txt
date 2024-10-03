@@ -1,4 +1,4 @@
-sadd_executable(
+add_executable(
     mbgl-expression-test
     ${PROJECT_SOURCE_DIR}/expression-test/expression_test_logger.cpp
     ${PROJECT_SOURCE_DIR}/expression-test/expression_test_logger.hpp
