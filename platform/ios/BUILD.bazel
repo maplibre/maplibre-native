@@ -221,7 +221,10 @@ ios_application(
     ],
     infoplists = ["app/Info.plist"],
     minimum_os_version = "12.0",
-    provisioning_profile = ":xcode_profile",
+    provisioning_profile = select({
+        "//platform/ios:with_provisioning_profile": "xcode_profile",
+        "//platform/ios:without_provisioning_profile": None,
+    }),
     resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
     deps = [
@@ -238,7 +241,10 @@ ios_application(
     ],
     infoplists = ["//platform/ios/benchmark:info_benchmark_plist"],
     minimum_os_version = "12.0",
-    provisioning_profile = "xcode_profile",
+    provisioning_profile = select({
+        "//platform/ios:with_provisioning_profile": "xcode_profile",
+        "//platform/ios:without_provisioning_profile": None,
+    }),
     resources = [
         "//platform/ios/benchmark:bundle_resources",
         "//platform/ios/benchmark/assets:benchmark_assets",

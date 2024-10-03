@@ -50,7 +50,10 @@ ios_application(
         "Info.plist",
     ],
     minimum_os_version = "13.0",
-    provisioning_profile = "//platform/ios:xcode_profile",
+    provisioning_profile = select({
+        "//platform/ios:with_provisioning_profile": "//platform/ios:xcode_profile",
+        "//platform/ios:without_provisioning_profile": None,
+    }),
     deps = [
         "//platform/ios/test/common:test_app_srcs",
     ],
@@ -59,7 +62,10 @@ ios_application(
 ios_unit_test(
     name = "CppUnitTests",
     minimum_os_version = "13.0",
-    provisioning_profile = "//platform/ios:xcode_profile",
+    provisioning_profile = select({
+        "//platform/ios:with_provisioning_profile": "//platform/ios:xcode_profile",
+        "//platform/ios:without_provisioning_profile": None,
+    }),
     test_host = "CppUnitTestsApp",
     visibility = ["@rules_xcodeproj//xcodeproj:generated"],
     deps = [
