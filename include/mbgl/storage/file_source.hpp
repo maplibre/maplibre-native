@@ -25,7 +25,9 @@ enum FileSourceType : uint8_t {
     FileSystem,
     Network,
     Mbtiles,
+#ifdef MLN_WITH_PMTILES
     Pmtiles,
+#endif
     ResourceLoader ///< %Resource loader acts as a proxy and has logic
     /// for request delegation to Asset, Cache, and other
     /// file sources.

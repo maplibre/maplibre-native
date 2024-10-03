@@ -37,12 +37,12 @@ public:
                                   [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
                                       return std::make_unique<MBTilesFileSource>(resourceOptions, clientOptions);
                                   });
-
+#ifdef MLN_WITH_PMTILES
         registerFileSourceFactory(FileSourceType::Pmtiles,
                                   [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
                                       return std::make_unique<PMTilesFileSource>(resourceOptions, clientOptions);
                                   });
-
+#endif
         registerFileSourceFactory(FileSourceType::Network,
                                   [](const ResourceOptions& resourceOptions, const ClientOptions& clientOptions) {
                                       return std::make_unique<OnlineFileSource>(resourceOptions, clientOptions);

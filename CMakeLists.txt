@@ -11,6 +11,7 @@ option(MLN_WITH_OPENGL "Build with OpenGL renderer" ON)
 option(MLN_WITH_EGL "Build with EGL renderer" OFF)
 option(MLN_WITH_VULKAN "Build with Vulkan renderer" OFF)
 option(MLN_WITH_OSMESA "Build with OSMesa (Software) renderer" OFF)
+option(MLN_WITH_PMTILES "Build with PMTiles support" ON)
 option(MLN_WITH_WERROR "Make all compilation warnings errors" ON)
 option(MLN_LEGACY_RENDERER "Include the legacy rendering pathway" ON)
 option(MLN_DRAWABLE_RENDERER "Include the drawable rendering pathway" OFF)
@@ -1466,7 +1467,7 @@ target_link_libraries(
         mbgl-vendor-earcut.hpp
         mbgl-vendor-eternal
         mbgl-vendor-parsedate
-        mbgl-vendor-pmtiles
+        $<$<BOOL:${MLN_WITH_PMTILES}>:mbgl-vendor-pmtiles>
         mbgl-vendor-polylabel
         mbgl-vendor-protozero
         mbgl-vendor-unique_resource
@@ -1529,6 +1530,14 @@ if(MLN_WITH_VULKAN)
             glslang
             SPIRV
             glslang-default-resource-limits
+    )
+endif()
+
+if(MLN_WITH_PMTILES)
+    target_compile_definitions(
+        mbgl-core
+        PUBLIC
+            MLN_WITH_PMTILES
     )
 endif()
 

@@ -17,6 +17,7 @@ namespace mbgl {
 
 class MainResourceLoaderThread {
 public:
+#ifdef MLN_WITH_PMTILES
     MainResourceLoaderThread(std::shared_ptr<FileSource> assetFileSource_,
                              std::shared_ptr<FileSource> databaseFileSource_,
                              std::shared_ptr<FileSource> localFileSource_,
@@ -29,6 +30,18 @@ public:
           onlineFileSource(std::move(onlineFileSource_)),
           mbtilesFileSource(std::move(mbtilesFileSource_)),
           pmtilesFileSource(std::move(pmtilesFileSource_)) {}
+#else
+    MainResourceLoaderThread(std::shared_ptr<FileSource> assetFileSource_,
+                             std::shared_ptr<FileSource> databaseFileSource_,
+                             std::shared_ptr<FileSource> localFileSource_,
+                             std::shared_ptr<FileSource> onlineFileSource_,
+                             std::shared_ptr<FileSource> mbtilesFileSource_)
+        : assetFileSource(std::move(assetFileSource_)),
+          databaseFileSource(std::move(databaseFileSource_)),
+          localFileSource(std::move(localFileSource_)),
+          onlineFileSource(std::move(onlineFileSource_)),
+          mbtilesFileSource(std::move(mbtilesFileSource_)) {}
+#endif
 
     void request(AsyncRequest* req, const Resource& resource, const ActorRef<FileSourceRequest>& ref) {
         auto callback = [ref](const Response& res) {
@@ -72,9 +85,11 @@ public:
         } else if (mbtilesFileSource && mbtilesFileSource->canRequest(resource)) {
             // Local file request
             tasks[req] = mbtilesFileSource->request(resource, callback);
+#ifdef MLN_WITH_PMTILES
         } else if (pmtilesFileSource && pmtilesFileSource->canRequest(resource)) {
             // Local file request
             tasks[req] = pmtilesFileSource->request(resource, callback);
+#endif
         } else if (localFileSource && localFileSource->canRequest(resource)) {
             // Local file request
             tasks[req] = localFileSource->request(resource, callback);
@@ -136,12 +151,15 @@ private:
     const std::shared_ptr<FileSource> localFileSource;
     const std::shared_ptr<FileSource> onlineFileSource;
     const std::shared_ptr<FileSource> mbtilesFileSource;
+#ifdef MLN_WITH_PMTILES
     const std::shared_ptr<FileSource> pmtilesFileSource;
+#endif
     std::map<AsyncRequest*, std::unique_ptr<AsyncRequest>> tasks;
 };
 
 class MainResourceLoader::Impl {
 public:
+#ifdef MLN_WITH_PMTILES
     Impl(const ResourceOptions& resourceOptions_,
          const ClientOptions& clientOptions_,
          std::shared_ptr<FileSource> assetFileSource_,
@@ -168,6 +186,31 @@ public:
               pmtilesFileSource)),
           resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()) {}
+#else
+    Impl(const ResourceOptions& resourceOptions_,
+         const ClientOptions& clientOptions_,
+         std::shared_ptr<FileSource> assetFileSource_,
+         std::shared_ptr<FileSource> databaseFileSource_,
+         std::shared_ptr<FileSource> localFileSource_,
+         std::shared_ptr<FileSource> onlineFileSource_,
+         std::shared_ptr<FileSource> mbtilesFileSource_)
+        : assetFileSource(std::move(assetFileSource_)),
+          databaseFileSource(std::move(databaseFileSource_)),
+          localFileSource(std::move(localFileSource_)),
+          onlineFileSource(std::move(onlineFileSource_)),
+          mbtilesFileSource(std::move(mbtilesFileSource_)),
+          supportsCacheOnlyRequests_(bool(databaseFileSource)),
+          thread(std::make_unique<util::Thread<MainResourceLoaderThread>>(
+              util::makeThreadPrioritySetter(platform::EXPERIMENTAL_THREAD_PRIORITY_WORKER),
+              "ResourceLoaderThread",
+              assetFileSource,
+              databaseFileSource,
+              localFileSource,
+              onlineFileSource,
+              mbtilesFileSource)),
+          resourceOptions(resourceOptions_.clone()),
+          clientOptions(clientOptions_.clone()) {}
+#endif
 
     std::unique_ptr<AsyncRequest> request(const Resource& resource, Callback callback) {
         auto req = std::make_unique<FileSourceRequest>(std::move(callback));
@@ -180,12 +223,20 @@ public:
     }
 
     bool canRequest(const Resource& resource) const {
+#ifdef MLN_WITH_PMTILES
         return (assetFileSource && assetFileSource->canRequest(resource)) ||
                (localFileSource && localFileSource->canRequest(resource)) ||
                (databaseFileSource && databaseFileSource->canRequest(resource)) ||
                (onlineFileSource && onlineFileSource->canRequest(resource)) ||
                (mbtilesFileSource && mbtilesFileSource->canRequest(resource)) ||
                (pmtilesFileSource && pmtilesFileSource->canRequest(resource));
+#else
+        return (assetFileSource && assetFileSource->canRequest(resource)) ||
+               (localFileSource && localFileSource->canRequest(resource)) ||
+               (databaseFileSource && databaseFileSource->canRequest(resource)) ||
+               (onlineFileSource && onlineFileSource->canRequest(resource)) ||
+               (mbtilesFileSource && mbtilesFileSource->canRequest(resource));
+#endif
     }
 
     bool supportsCacheOnlyRequests() const { return supportsCacheOnlyRequests_; }
@@ -202,7 +253,9 @@ public:
         localFileSource->setResourceOptions(options.clone());
         onlineFileSource->setResourceOptions(options.clone());
         mbtilesFileSource->setResourceOptions(options.clone());
+#ifdef MLN_WITH_PMTILES
         pmtilesFileSource->setResourceOptions(options.clone());
+#endif
     }
 
     ResourceOptions getResourceOptions() {
@@ -218,7 +271,9 @@ public:
         localFileSource->setClientOptions(options.clone());
         onlineFileSource->setClientOptions(options.clone());
         mbtilesFileSource->setClientOptions(options.clone());
+#ifdef MLN_WITH_PMTILES
         pmtilesFileSource->setClientOptions(options.clone());
+#endif
     }
 
     ClientOptions getClientOptions() {
@@ -232,7 +287,9 @@ private:
     const std::shared_ptr<FileSource> localFileSource;
     const std::shared_ptr<FileSource> onlineFileSource;
     const std::shared_ptr<FileSource> mbtilesFileSource;
+#ifdef MLN_WITH_PMTILES
     const std::shared_ptr<FileSource> pmtilesFileSource;
+#endif
     const bool supportsCacheOnlyRequests_;
     const std::unique_ptr<util::Thread<MainResourceLoaderThread>> thread;
     mutable std::mutex resourceOptionsMutex;
@@ -241,6 +298,7 @@ private:
     ClientOptions clientOptions;
 };
 
+#ifdef MLN_WITH_PMTILES
 MainResourceLoader::MainResourceLoader(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
     : impl(std::make_unique<Impl>(
           resourceOptions.clone(),
@@ -251,6 +309,17 @@ MainResourceLoader::MainResourceLoader(const ResourceOptions& resourceOptions, c
           FileSourceManager::get()->getFileSource(FileSourceType::Network, resourceOptions, clientOptions),
           FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, resourceOptions, clientOptions),
           FileSourceManager::get()->getFileSource(FileSourceType::Pmtiles, resourceOptions, clientOptions))) {}
+#else
+MainResourceLoader::MainResourceLoader(const ResourceOptions& resourceOptions, const ClientOptions& clientOptions)
+    : impl(std::make_unique<Impl>(
+          resourceOptions.clone(),
+          clientOptions.clone(),
+          FileSourceManager::get()->getFileSource(FileSourceType::Asset, resourceOptions, clientOptions),
+          FileSourceManager::get()->getFileSource(FileSourceType::Database, resourceOptions, clientOptions),
+          FileSourceManager::get()->getFileSource(FileSourceType::FileSystem, resourceOptions, clientOptions),
+          FileSourceManager::get()->getFileSource(FileSourceType::Network, resourceOptions, clientOptions),
+          FileSourceManager::get()->getFileSource(FileSourceType::Mbtiles, resourceOptions, clientOptions))) {}
+#endif
 
 MainResourceLoader::~MainResourceLoader() = default;
 
