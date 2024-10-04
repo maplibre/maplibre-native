@@ -95,6 +95,7 @@ jobs:
           security unlock-keychain -p "$keychain_password" "$keychain_path"
 
           security import "$certificate_path" -P "$p12_password" -k "$keychain_path" -T /usr/bin/codesign -T /usr/bin/security
+          security import "$PWD"/codesign/MapLibre.cer -k "$keychain_path" -T /usr/bin/codesign -T /usr/bin/security
           security set-key-partition-list -S apple-tool:,apple: -k "" "$keychain_path"
 
       - name: Create Bazel config
