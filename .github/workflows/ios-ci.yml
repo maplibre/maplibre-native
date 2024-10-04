@@ -87,19 +87,19 @@ jobs:
         run: |
           private_key="$PWD"/codesign/MapLibre.p12
           cert="$PWD"/codesign/MapLibre.cer
-          keychain_path=~/Desktop/app-signing.keychain-db
-          keychain_password=""
+          # keychain_path=~/Desktop/app-signing.keychain-db
+          # keychain_password=""
           p12_password="maplibre"
 
-          security create-keychain -p "$keychain_password" "$keychain_path"
-          security set-keychain-settings -lut 21600 "$keychain_path"
-          security unlock-keychain -p "$keychain_password" "$keychain_path"
+          # security create-keychain -p "$keychain_password" "$keychain_path"
+          # security set-keychain-settings -lut 21600 "$keychain_path"
+          # security unlock-keychain -p "$keychain_password" "$keychain_path"
 
-          security import "$private_key" -P "$p12_password" -k "$keychain_path" -T /usr/bin/codesign -T /usr/bin/security
-          security import "$PWD"/codesign/MapLibre.cer -k "$keychain_path" -T /usr/bin/codesign -T /usr/bin/security
-          security set-key-partition-list -S apple-tool:,apple: -k "" "$keychain_path"
-          security find-certificate -c "MapLibre" -a -Z "$keychain_path"
-          security add-trusted-cert -d -r trustRoot -k "$keychain_path" -p basic -p codeSign "$cert"
+          security import "$private_key" -P "$p12_password" -T /usr/bin/codesign -T /usr/bin/security
+          security import "$cert" -T /usr/bin/codesign -T /usr/bin/security
+          # security set-key-partition-list -S apple-tool:,apple: -k "" "$keychain_path"
+          # security find-certificate -c "MapLibre" -a -Z "$keychain_path"
+          # security add-trusted-cert -d -r trustRoot -k "$keychain_path" -p basic -p codeSign "$cert"
 
       - name: Create Bazel config
         working-directory: platform/darwin
