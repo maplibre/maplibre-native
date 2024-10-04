@@ -44,14 +44,14 @@ xKgeSHYwMrNQN9OVSWp3fxEkQMc5nESuh8grhg==
   <dict>
     <key>keychain-access-groups</key>
     <array>
-      <string>MapLibre.*</string>    
+      <string>MapLibre</string>    
     </array>
     <key>get-task-allow</key>
     <true/>
     <key>application-identifier</key>
     <string>QMC7N4BDVZ.*</string>
     <key>com.apple.developer.team-identifier</key>
-    <string>MapLibre</string>
+    <string>QMC7N4BDVZ</string>
   </dict>
   <key>ExpirationDate</key>
   <date>2034-10-04T09:54:14Z</date>
