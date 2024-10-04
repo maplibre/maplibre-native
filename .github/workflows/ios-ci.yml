@@ -83,6 +83,9 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
+      - name: Import self-signed certificate
+        run: security import codesign/MapLibre.cer
+
       - name: Build Example (Swift) App
         run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal --//platform/ios:use_provisioning_profile=False
 
@@ -102,12 +105,18 @@ jobs:
       - name: Running iOS UI tests (Address+UB Sanitizer)
         run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=include_clang_rt --copt=-fsanitize=undefined --linkopt=-fsanitize=undefined --copt=-fsanitize-recover=null --linkopt=-fsanitize-recover=null --//platform/ios:use_provisioning_profile=False
 
+      - name: Create Bazel config
+        working-directory: platform/darwin
+        run: |
+          grep -v APPLE_MOBILE_PROVISIONING_PROFILE_NAME bazel/example_config.bzl > bazel/config.bzl
+          echo 'APPLE_MOBILE_PROVISIONING_PROFILE_NAME = "Fake iOS Provisioning Profile"' >> bazel/config.bzl
+
       # render test
 
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal --//platform/ios:use_provisioning_profile=False"
+          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme RenderTest -project MapLibre.xcodeproj -derivedDataPath "$build_dir" CODE_SIGNING_ALLOWED=NO
           render_test_app_dir="$(dirname "$(find "$build_dir" -name RenderTestApp.app)")"
@@ -134,7 +143,7 @@ jobs:
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal --//platform/ios:use_provisioning_profile=False"
+          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir" CODE_SIGNING_ALLOWED=NO
           ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"

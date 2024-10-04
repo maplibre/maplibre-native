@@ -1,0 +1,5 @@
+filegroup(
+    name = "profiles",
+    srcs = ["MapLibre.mobileprovision"],
+    visibility = ["//visibility:public"],
+)

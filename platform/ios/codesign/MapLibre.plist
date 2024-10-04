@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>AppIDName</key>
+  <string>selfsigned: any app</string>
+  <key>ApplicationIdentifierPrefix</key>
+  <array>
+  <string>QMC7N4BDVZ</string>
+  </array>
+  <key>CreationDate</key>
+  <date>2024-10-03T15:19:16Z</date>
+  <key>Platform</key>
+  <array>
+    <string>iOS</string>
+  </array>
+    <key>IsXcodeManaged</key>
+  <true/>
+  <key>DeveloperCertificates</key>
+  <array>
+    <data>MIIDqDCCApCgAwIBAgIBATANBgkqhkiG9w0BAQsFADBqMSkwJwYDVQQDDCBpT1Mg
+VGVhbSBQcm92aXNpb25pbmcgUHJvZmlsZTogKjERMA8GA1UECwwITWFwTGlicmUx
+CzAJBgNVBAYTAk5MMR0wGwYJKoZIhvcNAQkBFg5iYXJ0QGVtZWVsLm5ldDAeFw0y
+NDEwMDQwOTU0MTRaFw0zNDEwMDQwOTU0MTRaMGoxKTAnBgNVBAMMIGlPUyBUZWFt
+IFByb3Zpc2lvbmluZyBQcm9maWxlOiAqMREwDwYDVQQLDAhNYXBMaWJyZTELMAkG
+A1UEBhMCTkwxHTAbBgkqhkiG9w0BCQEWDmJhcnRAZW1lZWwubmV0MIIBIjANBgkq
+hkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyArETEt8Iuk3EuxHySafg2H+HMnv6Xdf
++t3StN/vJ6fRdQ+4GFcnJC/q637GSlKPPExYMiRIeIKUytXgWvX2mhKJqYmA3nyH
+MSxHYFdvAX+FcbQ7tlLNL0NY/QBprZZei8E2CUGcNe9tCdQUPWUJQBg+dd4mNK8V
+jiK7frWUcduuhIOf1Y2To3HSGH33hzCRAVsIE08AkKSOJT6vCQ03DPYzJVEmOvE5
+Km4PIz+5pybwrw1TT31dVupN5Du952avbT59cYrXTR3d31yP2I36QM58ERA2whzt
+/OGnVIEt2uKdpXJwCHevZjYly2azTJIOSrCv1fIhik0cbt1tc2K8GQIDAQABo1kw
+VzAOBgNVHQ8BAf8EBAMCB4AwJgYDVR0lAQH/BBwwGgYIKwYBBQUHAwQGCCsGAQUF
+BwMDBgRVHSUAMB0GA1UdDgQWBBT7mCCAhGL54obe7lDanho11OoWyjANBgkqhkiG
+9w0BAQsFAAOCAQEAiHScAt6sQg214IW6whXKUTMjiJfsB3SyaSuW3Zcnw0EbmXtQ
+hrLZWrG+0SmxmNtXCZyUhcB/8rhzHQ1VcxXckNOeKGu8OMDTLkPbnzPsnIwsIZvp
+qAbFbKFhyrcbm9cuDaG9+x3v0K3XiJerhmJiR4OLBffNUs+Bku0fvUsaAxChW1nf
+TWm2W+AXbIGvkhS0j9b8631wTJKS9ak33WS1ugxZ8XL2udftwt2bzyVomY/fU08H
+27jdSnu98zs+32nukqRbtddrArZrPeNx4ed2Ad9CJDCourNDNQVZacEPZjVz1u7z
+xKgeSHYwMrNQN9OVSWp3fxEkQMc5nESuh8grhg==
+    </data>
+  </array>
+  <key>Entitlements</key>
+  <dict>
+    <key>keychain-access-groups</key>
+    <array>
+      <string>MapLibre.*</string>    
+    </array>
+    <key>get-task-allow</key>
+    <true/>
+    <key>application-identifier</key>
+    <string>QMC7N4BDVZ.*</string>
+    <key>com.apple.developer.team-identifier</key>
+    <string>MapLibre</string>
+  </dict>
+  <key>ExpirationDate</key>
+  <date>2034-10-04T09:54:14Z</date>
+  <key>Name</key>
+  <string>Fake iOS Provisioning Profile</string>
+  <key>ProvisionedDevices</key>
+  <array>
+  </array>
+  <key>LocalProvision</key>
+  <true/>
+  <key>TeamIdentifier</key>
+  <array>
+    <string>QMC7N4BDVZ</string>
+  </array>
+  <key>TeamName</key>
+  <string>MapLibre</string>
+  <key>TimeToLive</key>
+  <integer>3652</integer>
+  <key>UUID</key>
+  <string>CEC20DD6-95A4-40E4-B0D6-48108994172A</string>
+  <key>Version</key>
+  <integer>1</integer>
+</dict>
+</plist>
