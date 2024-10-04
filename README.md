@@ -21,7 +21,7 @@ Add [the latest version](https://central.sonatype.com/artifact/org.maplibre.gl/a
 ```gradle
     dependencies {
         ...
-        implementation 'org.maplibre.gl:android-sdk:11.5.0'
+        implementation 'org.maplibre.gl:android-sdk:11.5.1'
         ...
     }
 ```
