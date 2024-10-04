@@ -85,9 +85,8 @@ jobs:
 
       - name: Import self-signed certificate
         run: |
-          security import codesign/MapLibre.cer
-          security import MapLibre.pem
-          security import codesign/MapLibre.p12 -P '' -A
+          security import codesign/MapLibre.cer -k ~/Library/Keychains/login.keychain -T /usr/bin/codesign -T /usr/bin/security
+          security import codesign/MapLibre.p12 -k ~/Library/Keychains/login.keychain -A -P '' -T /usr/bin/codesign -T /usr/bin/security
 
       - name: Create Bazel config
         working-directory: platform/darwin
