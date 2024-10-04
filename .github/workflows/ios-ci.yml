@@ -85,7 +85,6 @@ jobs:
 
       - name: Import self-signed certificate
         run: |
-          security authorizationdb write com.apple.trust-settings.admin allow
           security import codesign/MapLibre.cer
           security import codesign/MapLibre.p12 -P '' -A
 
