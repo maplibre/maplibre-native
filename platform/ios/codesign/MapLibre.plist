@@ -6,10 +6,10 @@
   <string>selfsigned: any app</string>
   <key>ApplicationIdentifierPrefix</key>
   <array>
-  <string>QMC7N4BDVZ</string>
+  <string>MapLibre</string>
   </array>
   <key>CreationDate</key>
-  <date>2024-10-03T15:19:16Z</date>
+  <date>2024-10-04T14:42:06Z</date>
   <key>Platform</key>
   <array>
     <string>iOS</string>
@@ -18,27 +18,24 @@
   <true/>
   <key>DeveloperCertificates</key>
   <array>
-    <data>MIIDqDCCApCgAwIBAgIBATANBgkqhkiG9w0BAQsFADBqMSkwJwYDVQQDDCBpT1Mg
-VGVhbSBQcm92aXNpb25pbmcgUHJvZmlsZTogKjERMA8GA1UECwwITWFwTGlicmUx
-CzAJBgNVBAYTAk5MMR0wGwYJKoZIhvcNAQkBFg5iYXJ0QGVtZWVsLm5ldDAeFw0y
-NDEwMDQwOTU0MTRaFw0zNDEwMDQwOTU0MTRaMGoxKTAnBgNVBAMMIGlPUyBUZWFt
-IFByb3Zpc2lvbmluZyBQcm9maWxlOiAqMREwDwYDVQQLDAhNYXBMaWJyZTELMAkG
-A1UEBhMCTkwxHTAbBgkqhkiG9w0BCQEWDmJhcnRAZW1lZWwubmV0MIIBIjANBgkq
-hkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyArETEt8Iuk3EuxHySafg2H+HMnv6Xdf
-+t3StN/vJ6fRdQ+4GFcnJC/q637GSlKPPExYMiRIeIKUytXgWvX2mhKJqYmA3nyH
-MSxHYFdvAX+FcbQ7tlLNL0NY/QBprZZei8E2CUGcNe9tCdQUPWUJQBg+dd4mNK8V
-jiK7frWUcduuhIOf1Y2To3HSGH33hzCRAVsIE08AkKSOJT6vCQ03DPYzJVEmOvE5
-Km4PIz+5pybwrw1TT31dVupN5Du952avbT59cYrXTR3d31yP2I36QM58ERA2whzt
-/OGnVIEt2uKdpXJwCHevZjYly2azTJIOSrCv1fIhik0cbt1tc2K8GQIDAQABo1kw
-VzAOBgNVHQ8BAf8EBAMCB4AwJgYDVR0lAQH/BBwwGgYIKwYBBQUHAwQGCCsGAQUF
-BwMDBgRVHSUAMB0GA1UdDgQWBBT7mCCAhGL54obe7lDanho11OoWyjANBgkqhkiG
-9w0BAQsFAAOCAQEAiHScAt6sQg214IW6whXKUTMjiJfsB3SyaSuW3Zcnw0EbmXtQ
-hrLZWrG+0SmxmNtXCZyUhcB/8rhzHQ1VcxXckNOeKGu8OMDTLkPbnzPsnIwsIZvp
-qAbFbKFhyrcbm9cuDaG9+x3v0K3XiJerhmJiR4OLBffNUs+Bku0fvUsaAxChW1nf
-TWm2W+AXbIGvkhS0j9b8631wTJKS9ak33WS1ugxZ8XL2udftwt2bzyVomY/fU08H
-27jdSnu98zs+32nukqRbtddrArZrPeNx4ed2Ad9CJDCourNDNQVZacEPZjVz1u7z
-xKgeSHYwMrNQN9OVSWp3fxEkQMc5nESuh8grhg==
-    </data>
+    <data>MIIDOjCCAiKgAwIBAgIBATANBgkqhkiG9w0BAQsFADAzMREwDwYDVQQDDAhNYXBM
+      aWJyZTERMA8GA1UECwwITWFwTGlicmUxCzAJBgNVBAYTAk5MMB4XDTI0MTAwNDE0
+      MzIyN1oXDTM0MTAwNDE0MzIyN1owMzERMA8GA1UEAwwITWFwTGlicmUxETAPBgNV
+      BAsMCE1hcExpYnJlMQswCQYDVQQGEwJOTDCCASIwDQYJKoZIhvcNAQEBBQADggEP
+      ADCCAQoCggEBAOpoiqWC3/BZakrK3xnYJK427qY0w0kOVaYiT/pI08VkC7yWbw/k
+      qfRfuUgEnshrkVyPreF//6HDfFZe9sQY1C221nOQB3AAdjj/qpwYDSj+s2zEfOCI
+      Owmp0ZqOe4tu0J6F0xK3KL8f6QP1E1upLixB/ExKX3SfCijNZfeCYElKS7q0o7Di
+      BVD2tpZo3oH5lLBsYbEPYUzkGBRsaiddpcNPSvBGLl+hezchSPL/ZqkyiaNWMiHB
+      cMXl2vf5lm/zp0DwWoVIaX0/pg/l2+u1BxqI/18vQYMs47dVmaIFk+UEduKSq04F
+      Qy8PETNfDNTtE3A/gwDGq3erMCpGU8FXmT8CAwEAAaNZMFcwDgYDVR0PAQH/BAQD
+      AgeAMCYGA1UdJQEB/wQcMBoGCCsGAQUFBwMEBggrBgEFBQcDAwYEVR0lADAdBgNV
+      HQ4EFgQUIrw9BmJNI6k3P0lt70p8qU5qbkAwDQYJKoZIhvcNAQELBQADggEBAEEv
+      yheiEYgoZI0jOXzNc7fZBvU9fgMup7mWBPAK/NQxSoPOMq2NlQsfTT8RmYhjyg27
+      vgLB4Tu+/Yj8SiPZYx3HxpKQmlNn8P+ZLyupIP8haiKA50COpmxc1jtkmF/Rpvf4
+      cDoaIoGhkAIZpMBqDKF5Od6FfwBCzHsbQRKbqg3+4KgaSfFYghor7lkatSJiIlr/
+      zjq//mN99RrWBN/HxtI5gguSEalMtJbIWQvZrIrQUAOgwED6uuJri0BHr5uS94I2
+      tkDgpAmlCwzkJX+KWAx6RzE2/V6QLU2UCQvUFWKMRLEieK1bKtbLO8GNoHFsZSS0
+      sESC3dJn9PUkCj1x0+A=</data>
   </array>
   <key>Entitlements</key>
   <dict>
@@ -49,14 +46,14 @@ xKgeSHYwMrNQN9OVSWp3fxEkQMc5nESuh8grhg==
     <key>get-task-allow</key>
     <true/>
     <key>application-identifier</key>
-    <string>QMC7N4BDVZ.*</string>
+    <string>MapLibre.*</string>
     <key>com.apple.developer.team-identifier</key>
-    <string>QMC7N4BDVZ</string>
+    <string>MapLibre</string>
   </dict>
   <key>ExpirationDate</key>
   <date>2034-10-04T09:54:14Z</date>
   <key>Name</key>
-  <string>Fake iOS Provisioning Profile</string>
+  <string>MapLibre</string>
   <key>ProvisionedDevices</key>
   <array>
   </array>
@@ -64,14 +61,14 @@ xKgeSHYwMrNQN9OVSWp3fxEkQMc5nESuh8grhg==
   <true/>
   <key>TeamIdentifier</key>
   <array>
-    <string>QMC7N4BDVZ</string>
+    <string>MapLibre</string>
   </array>
   <key>TeamName</key>
   <string>MapLibre</string>
   <key>TimeToLive</key>
   <integer>3652</integer>
   <key>UUID</key>
-  <string>CEC20DD6-95A4-40E4-B0D6-48108994172A</string>
+  <string>B05AAC58-7963-4EA6-B158-F8E43432EDE7</string>
   <key>Version</key>
   <integer>1</integer>
 </dict>
