@@ -95,6 +95,7 @@ jobs:
           # security set-keychain-settings -lut 21600 "$keychain_path"
           # security unlock-keychain -p "$keychain_password" "$keychain_path"
 
+          security unlock-keychain
           security import "$private_key" -P "$p12_password" -T /usr/bin/codesign -T /usr/bin/security
           security import "$cert" -T /usr/bin/codesign -T /usr/bin/security
           # security set-key-partition-list -S apple-tool:,apple: -k "" "$keychain_path"
