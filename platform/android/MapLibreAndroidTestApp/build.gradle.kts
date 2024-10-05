@@ -33,7 +33,7 @@ android {
 
     nativeBuild(listOf("example-custom-layer"))
 
-    packagingOptions {
+    packaging {
         resources.excludes += listOf("META-INF/LICENSE.txt", "META-INF/NOTICE.txt", "LICENSE.txt")
     }
 

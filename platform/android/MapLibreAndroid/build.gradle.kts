@@ -183,13 +183,13 @@ fun getGitRevision(shortRev: Boolean = true): String {
     val proc = Runtime.getRuntime().exec(cmd)
     return proc.inputStream.bufferedReader().readText().trim()
 }
-
-configurations {
+//in gradle kotlin dsl checkstyle is failing due to this
+/*configurations {
     all {
         exclude(group = "commons-logging", module = "commons-logging")
         exclude(group = "commons-collections", module = "commons-collections")
     }
-}
+}*/
 apply<DownloadVulkanValidationPlugin>()
 
 // intentionally disabled
