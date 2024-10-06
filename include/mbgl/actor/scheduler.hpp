@@ -80,7 +80,8 @@ public:
     virtual void waitForEmpty(const util::SimpleIdentity = util::SimpleIdentity::Empty) = 0;
 
     /// Set/Get the current Scheduler for this thread
-    static Scheduler* GetCurrent();
+    /// @param init initialize if missing
+    static Scheduler* GetCurrent(bool init = true);
     static void SetCurrent(Scheduler*);
 
     /// Get the scheduler for asynchronous tasks. This method

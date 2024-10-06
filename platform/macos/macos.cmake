@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.19)
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "14.3")
 
 # Override default CMake NATIVE_ARCH_ACTUAL
 # https://gitlab.kitware.com/cmake/cmake/-/issues/20893
@@ -38,6 +38,26 @@ if(MLN_WITH_METAL)
         PRIVATE
             ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/mtl/headless_backend.cpp
     )
+endif()
+
+if(MLN_WITH_VULKAN)
+    find_package(Vulkan REQUIRED)
+
+    target_sources(
+        mbgl-core
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/platform/default/src/mbgl/vulkan/headless_backend.cpp
+    )
+
+    if(Vulkan_FOUND)
+        get_filename_component(Vulkan_LIBRARY_DIR ${Vulkan_LIBRARY} DIRECTORY)
+        set(CMAKE_INSTALL_RPATH ${Vulkan_LIBRARY_DIR})
+    else()
+        set(CMAKE_INSTALL_RPATH "/usr/local/lib/")
+        message(STATUS "Vulkan SDK not found! Using default homebrew install path")
+    endif()
+
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 endif()
 
 target_sources(
