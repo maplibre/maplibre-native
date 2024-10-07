@@ -6,14 +6,14 @@ import org.gradle.kotlin.dsl.getByType
 
 open class DownloadVulkanValidationPlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        project.downloadVulkanValidation()
+        project.configureVulkanJniLibs()
     }
 }
 
-internal fun Project.downloadVulkanValidation() = this.extensions.getByType<BaseExtension>().run {
+internal fun Project.configureVulkanJniLibs() = this.extensions.getByType<BaseExtension>().run {
     sourceSets {
         getByName("vulkan") {
-            jniLibs.srcDir(tasks.named("unzip").get().outputs.files.singleFile)
+            jniLibs.srcDir(tasks.named("unzip").get().outputs.files.asFileTree)
         }
     }
 
