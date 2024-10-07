@@ -13,7 +13,7 @@ val vvlJniLibDir = "$vvlLibRoot/src/vulkanDebug/jniLibs"
 val vvlSoName = "libVkLayer_khronos_validation.so"
 
 // Download the release zip file to ${vvlLibRoot}/
-tasks.register("download") {
+val download = tasks.register("download") {
     val vvlZipName = "releases/download/vulkan-sdk-$vvlVersion/android-binaries-$vvlVersion.zip"
     val zipFile = file("$vvlLibRoot/android-binaries-$vvlVersion.zip")
 
@@ -30,9 +30,13 @@ tasks.register("download") {
 }
 
 // Unzip the downloaded VVL zip archive to the ${vvlJniLibDir} for APK packaging.
-tasks.register<Copy>("unzip") {
-    dependsOn("download")
+val unzip = tasks.register<Copy>("unzip") {
+    dependsOn(download)
 
     from(zipTree(file("$vvlLibRoot/android-binaries-$vvlVersion.zip")))
     into(file(vvlJniLibDir))
+}
+
+tasks.named("preBuild") {
+    dependsOn(unzip)
 }
