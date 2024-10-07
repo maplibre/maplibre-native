@@ -496,7 +496,7 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
     if (imageSize == layout.arrayPitch) {
         memcpy(imageData->data.get(), mappedData, imageSize);
     } else {
-        uint32_t rowSize = size.width * getPixelStride();
+        auto rowSize = static_cast<uint32_t>(size.width * getPixelStride());
         for (uint32_t i = 0; i < size.height; ++i) {
             memcpy(imageData->data.get() + rowSize * i, mappedData + layout.rowPitch * i, rowSize);
         }
