@@ -103,6 +103,7 @@ jobs:
       - run: |
           source venv/bin/activate
           pre-commit run clang-format --all-files
+          rm -rf venv
 
       - uses: infotroph/tree-is-clean@v1
         with:
