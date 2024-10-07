@@ -1,11 +1,9 @@
 package org.maplibre.android.testapp.activity.turf
 
 import android.graphics.Color
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.PersistableBundle
+import android.os.*
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.*
 import org.maplibre.geojson.*
 import org.maplibre.android.camera.CameraPosition
 import org.maplibre.android.camera.CameraUpdateFactory
@@ -15,7 +13,7 @@ import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.Style
 import org.maplibre.android.style.expressions.Expression.within
 import org.maplibre.android.style.layers.CircleLayer
-import org.maplibre.android.style.layers.FillLayer
+import org.maplibre.android.style.layers.FillExtrusionLayer
 import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.Property.NONE
 import org.maplibre.android.style.layers.PropertyFactory.*
@@ -23,6 +21,7 @@ import org.maplibre.android.style.layers.SymbolLayer
 import org.maplibre.android.style.sources.GeoJsonOptions
 import org.maplibre.android.style.sources.GeoJsonSource
 import org.maplibre.android.testapp.databinding.ActivityWithinExpressionBinding
+import java.lang.Runnable
 import org.maplibre.android.testapp.styles.TestStyles
 
 /**
@@ -58,7 +57,7 @@ class WithinExpressionActivity : AppCompatActivity() {
             // Wait for the map to become idle before manipulating the style and camera of the map
             mapView.addOnDidBecomeIdleListener(object : MapView.OnDidBecomeIdleListener {
                 override fun onDidBecomeIdle() {
-                    handler.postDelayed(runnable, 2500)
+                    handler.postDelayed(runnable, 500)
                     mapView.removeOnDidBecomeIdleListener(this)
                 }
             })
@@ -67,33 +66,20 @@ class WithinExpressionActivity : AppCompatActivity() {
             setupStyle()
         }
     }
-
+    
+    private var bufferedLineSource: GeoJsonSource? = null
+    private var timerJob: Job? = null
+    private var symbolLayer: SymbolLayer? = null
+    
     private fun setupStyle() {
-        // Assume the route is represented by an array of coordinates.
-        val coordinates = listOf<Point>(
-            Point.fromLngLat(
-                -77.06866264343262,
-                38.90506061276737
-            ),
-            Point.fromLngLat(
-                -77.06283688545227,
-                38.905194197410545
-            ),
-            Point.fromLngLat(
-                -77.06285834312439,
-                38.906429843444094
-            ),
-            Point.fromLngLat(
-                -77.0630407333374,
-                38.90680554236621
-            )
-        )
-
-        // Convert to a LineString
-        val routeLineString = LineString.fromLngLats(coordinates)
-
         // Create buffer around linestring
-        val bufferedRouteGeometry = bufferLineStringGeometry(routeLineString)
+        val bufferedRouteGeometry = bufferLineStringGeometry(outlineCoordinates)
+        
+        bufferedLineSource = GeoJsonSource(
+            FILL_ID,
+            FeatureCollection.fromFeature(Feature.fromGeometry(bufferedRouteGeometry)),
+            GeoJsonOptions().withBuffer(0).withTolerance(0.0f)
+        )
 
         // Setup style with additional layers,
         // using streets as a base style
@@ -103,13 +89,8 @@ class WithinExpressionActivity : AppCompatActivity() {
                 .withSources(
                     GeoJsonSource(
                         POINT_ID,
-                        LineString.fromLngLats(coordinates)
-                    ),
-                    GeoJsonSource(
-                        FILL_ID,
-                        FeatureCollection.fromFeature(Feature.fromGeometry(bufferedRouteGeometry)),
-                        GeoJsonOptions().withBuffer(0).withTolerance(0.0f)
-                    )
+                        LineString.fromLngLats(routeLineCoordinates)
+                    ), bufferedLineSource
                 )
                 .withLayerBelow(
                     LineLayer(LINE_ID, POINT_ID)
@@ -126,6 +107,34 @@ class WithinExpressionActivity : AppCompatActivity() {
                     "poi-label"
                 )
         )
+
+        // Un-comment to repeatedly shuffle the points of the bound as a test of fills and earcut
+/*
+        mapView.addOnDidBecomeIdleListener(object : MapView.OnDidBecomeIdleListener {
+            override fun onDidBecomeIdle() {
+                handler.postDelayed(Runnable {
+                    var shuffleGeometry: (()->Unit)? = null
+                    shuffleGeometry = {
+                        mapView.addOnDidBecomeIdleListener(object : MapView.OnDidBecomeIdleListener {
+                            override fun onDidBecomeIdle() {
+                                handler.postDelayed(Runnable {
+                                    // Duplicate each point and then shuffle to allow for degenerate cases
+                                    val points = outlineCoordinates.flatMap { listOf(it,it,it) }.shuffled()
+                                    val shuffledGeometry = bufferLineStringGeometry(points)
+                                    val features = FeatureCollection.fromFeature(Feature.fromGeometry(shuffledGeometry))
+                                    bufferedLineSource?.setGeoJson(features)
+                                    symbolLayer?.setFilter(within(shuffledGeometry))
+                                }, 100)
+                                mapView.removeOnDidBecomeIdleListener(this)
+                                shuffleGeometry?.let { it() }
+                            }
+                        })
+                    }.also { it() }
+                }, 1000)
+                mapView.removeOnDidBecomeIdleListener(this)
+            }
+        })
+*/
     }
 
     private fun optimizeStyle() {
@@ -133,10 +142,12 @@ class WithinExpressionActivity : AppCompatActivity() {
 
         // Add fill layer to represent buffered LineString
         maplibreMap.style!!.addLayerBelow(
-            FillLayer(FILL_ID, FILL_ID)
+            FillExtrusionLayer(FILL_ID, FILL_ID)
                 .withProperties(
-                    fillOpacity(0.12f),
-                    fillColor(Color.YELLOW)
+                    fillExtrusionOpacity(0.2f),
+                    fillExtrusionColor(Color.YELLOW),
+                    fillExtrusionHeight(100.0f),
+                    fillExtrusionVerticalGradient(true),
                 ),
             LINE_ID
         )
@@ -155,12 +166,13 @@ class WithinExpressionActivity : AppCompatActivity() {
         )
 
         // Show only POI labels inside geometry using within expression
-        val symbolLayer = style.getLayer("poi_z16") as SymbolLayer
-        symbolLayer.setFilter(
-            within(
-                bufferLineStringGeometry()
+        symbolLayer = (style.getLayer("poi_z16") as SymbolLayer).apply {
+            setFilter(
+                within(
+                    bufferLineStringGeometry(outlineCoordinates)
+                )
             )
-        )
+        }
 
         // Hide other types of labels to highlight POI labels
         (style.getLayer("road_label") as SymbolLayer?)?.setProperties(visibility(NONE))
@@ -194,6 +206,8 @@ class WithinExpressionActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        timerJob?.cancel()
+        timerJob = null
         super.onDestroy()
         handler.removeCallbacks(runnable)
         mapView.onDestroy()
@@ -201,73 +215,34 @@ class WithinExpressionActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         super.onSaveInstanceState(outState, outPersistentState)
-        outState?.let {
+        outState.let {
             mapView.onSaveInstanceState(it)
         }
     }
-
-    private fun bufferLineStringGeometry(lineString: LineString? = null): Polygon {
+    
+    private val routeLineCoordinates = listOf<Point>(
+        Point.fromLngLat(-77.06866264343262, 38.90506061276737),
+        Point.fromLngLat(-77.06283688545227, 38.905194197410545),
+        Point.fromLngLat(-77.06285834312439, 38.906429843444094),
+        Point.fromLngLat(-77.0630407333374, 38.90680554236621)
+    )
+    
+    private val outlineCoordinates = listOf<Point>(
+        Point.fromLngLat(-77.06867337226866, 38.90467655551809),
+        Point.fromLngLat(-77.06233263015747, 38.90479344272695),
+        Point.fromLngLat(-77.06234335899353, 38.906463238984344),
+        Point.fromLngLat(-77.06290125846863, 38.907206285691615),
+        Point.fromLngLat(-77.06364154815674, 38.90684728656818),
+        Point.fromLngLat(-77.06326603889465, 38.90637140121084),
+        Point.fromLngLat(-77.06321239471436, 38.905561553883246),
+        Point.fromLngLat(-77.0691454410553, 38.905436318935635),
+        Point.fromLngLat(-77.06912398338318, 38.90466820642439),
+        Point.fromLngLat(-77.06867337226866, 38.90467655551809),
+    )
+    
+    private fun bufferLineStringGeometry(coordinates: List<Point>): Polygon {
         // TODO replace static data by Turf#Buffer: mapbox-java/issues/987
-        return FeatureCollection.fromJson(
-            """
-            {
-              "type": "FeatureCollection",
-              "features": [
-                {
-                  "type": "Feature",
-                  "properties": {},
-                  "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [
-                      [
-                        [
-                          -77.06867337226866,
-                          38.90467655551809
-                        ],
-                        [
-                          -77.06233263015747,
-                          38.90479344272695
-                        ],
-                        [
-                          -77.06234335899353,
-                          38.906463238984344
-                        ],
-                        [
-                          -77.06290125846863,
-                          38.907206285691615
-                        ],
-                        [
-                          -77.06364154815674,
-                          38.90684728656818
-                        ],
-                        [
-                          -77.06326603889465,
-                          38.90637140121084
-                        ],
-                        [
-                          -77.06321239471436,
-                          38.905561553883246
-                        ],
-                        [
-                          -77.0691454410553,
-                          38.905436318935635
-                        ],
-                        [
-                          -77.06912398338318,
-                          38.90466820642439
-                        ],
-                        [
-                          -77.06867337226866,
-                          38.90467655551809
-                        ]
-                      ]
-                    ]
-                  }
-                }
-              ]
-            }
-            """.trimIndent()
-        ).features()!![0].geometry() as Polygon
+        return Polygon.fromLngLats(listOf(coordinates))
     }
 
     companion object {
