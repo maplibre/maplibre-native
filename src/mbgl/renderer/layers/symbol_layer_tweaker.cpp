@@ -99,6 +99,12 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
     auto& layerUniforms = layerGroup.mutableUniformBuffers();
     layerUniforms.set(idSymbolEvaluatedPropsUBO, evaluatedPropsUniformBuffer);
 
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
+    int i = 0;
+    std::vector<SymbolDrawableUBO> drawableUBOVector(layerGroup.getDrawableCount());
+    std::vector<SymbolTilePropsUBO> tilePropsUBOVector(layerGroup.getDrawableCount());
+    std::vector<SymbolInterpolateUBO> interpolateUBOVector(layerGroup.getDrawableCount());
+#else
     const auto getInterpUBO =
         [&](const UnwrappedTileID& tileID, bool isText, const SymbolBucket::PaintProperties& paintProps) {
             auto result = interpUBOs.insert(
@@ -115,6 +121,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             }
             return result.first->second.ubo;
         };
+#endif
 
     const auto camDist = state.getCameraToCenterDistance();
     visitLayerGroupDrawables(layerGroup, [&](gfx::Drawable& drawable) {
@@ -171,7 +178,11 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
         // Unpitched point labels need to have their rotation applied after projection
         const bool rotateInShader = rotateWithMap && !pitchWithMap && !alongLine;
 
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
+        drawableUBOVector[i] = {
+#else
         const SymbolDrawableUBO drawableUBO = {
+#endif
             /*.matrix=*/util::cast<float>(matrix),
             /*.label_plane_matrix=*/util::cast<float>(labelPlaneMatrix),
             /*.coord_matrix=*/util::cast<float>(glCoordMatrix),
@@ -186,23 +197,62 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
 
         const auto& sizeBinder = isText ? bucket->textSizeBinder : bucket->iconSizeBinder;
         const auto size = sizeBinder->evaluateForZoom(currentZoom);
+
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
+        tilePropsUBOVector[i] = SymbolTilePropsUBO {
+#else
         const auto tileUBO = SymbolTilePropsUBO{
+#endif
             /* .is_text = */ isText,
-            /* .is_halo = */ symbolData.isHalo,
-            /* .pitch_with_map = */ (symbolData.pitchAlignment == style::AlignmentType::Map),
-            /* .is_size_zoom_constant = */ size.isZoomConstant,
-            /* .is_size_feature_constant = */ size.isFeatureConstant,
-            /* .size_t = */ size.sizeT,
-            /* .size = */ size.size,
-            /* .padding = */ 0,
+                /* .is_halo = */ symbolData.isHalo,
+                /* .pitch_with_map = */ (symbolData.pitchAlignment == style::AlignmentType::Map),
+                /* .is_size_zoom_constant = */ size.isZoomConstant,
+                /* .is_size_feature_constant = */ size.isFeatureConstant,
+                /* .size_t = */ size.sizeT,
+                /* .size = */ size.size,
+                /* .padding = */ 0,
         };
 
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
+        interpolateUBOVector[i] = buildInterpUBO(paintProperties, isText, zoom);
+
+        drawable.setUBOIndex(i);
+        i++;
+#else
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idSymbolDrawableUBO, &drawableUBO, context);
         drawableUniforms.createOrUpdate(idSymbolTilePropsUBO, &tileUBO, context);
         drawableUniforms.set(idSymbolInterpolateUBO, getInterpUBO(tileID, isText, paintProperties));
+#endif
     });
 
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
+    const size_t drawableUBOVectorSize = sizeof(SymbolDrawableUBO) * drawableUBOVector.size();
+    if (!drawableBuffer || drawableBuffer->getSize() < drawableUBOVectorSize) {
+        drawableBuffer = context.createUniformBuffer(drawableUBOVector.data(), drawableUBOVectorSize, false, true);
+    } else {
+        drawableBuffer->update(drawableUBOVector.data(), drawableUBOVectorSize);
+    }
+
+    const size_t tilePropsUBOVectorSize = sizeof(SymbolTilePropsUBO) * tilePropsUBOVector.size();
+    if (!tilePropsBuffer || tilePropsBuffer->getSize() < tilePropsUBOVectorSize) {
+        tilePropsBuffer = context.createUniformBuffer(tilePropsUBOVector.data(), tilePropsUBOVectorSize, false, true);
+    } else {
+        tilePropsBuffer->update(tilePropsUBOVector.data(), tilePropsUBOVectorSize);
+    }
+
+    const size_t interpolateUBOVectorSize = sizeof(SymbolInterpolateUBO) * interpolateUBOVector.size();
+    if (!interpolateBuffer || interpolateBuffer->getSize() < interpolateUBOVectorSize) {
+        interpolateBuffer = context.createUniformBuffer(
+            interpolateUBOVector.data(), interpolateUBOVectorSize, false, true);
+    } else {
+        interpolateBuffer->update(interpolateUBOVector.data(), interpolateUBOVectorSize);
+    }
+
+    layerUniforms.set(idSymbolDrawableUBO, drawableBuffer);
+    layerUniforms.set(idSymbolTilePropsUBO, tilePropsBuffer);
+    layerUniforms.set(idSymbolInterpolateUBO, interpolateBuffer);
+#else
     // Regularly remove UBOs which are not being updated
     constexpr int pruneFrameInterval = 10;
     if ((parameters.frameCount % pruneFrameInterval) == 0) {
@@ -214,6 +264,7 @@ void SymbolLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParamete
             }
         }
     }
+#endif
 }
 
 } // namespace mbgl
