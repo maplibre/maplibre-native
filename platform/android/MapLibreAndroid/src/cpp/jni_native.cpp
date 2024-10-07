@@ -68,8 +68,6 @@ void registerNatives(JavaVM* vm) {
 
     jni::JNIEnv& env = jni::GetEnv(*vm, jni::jni_version_1_6);
 
-    // For the FileSource
-    static mbgl::util::RunLoop mainRunLoop;
     FileSource::registerNative(env);
 
     // Basic types
