@@ -28,10 +28,12 @@ protected:
 class UniformBufferArray final : public gfx::UniformBufferArray {
 public:
     UniformBufferArray() = delete;
-    UniformBufferArray(DescriptorSetType type, uint32_t index, uint32_t count)
-        : descriptorSetType(type),
-          descriptorStartIndex(index),
-          descriptorBindingCount(count) {}
+    UniformBufferArray(DescriptorSetType descriptorSetType_,
+                       uint32_t descriptorStartIndex_,
+                       uint32_t descriptorBindingCount_)
+        : descriptorSetType(descriptorSetType_),
+          descriptorStartIndex(descriptorStartIndex_),
+          descriptorBindingCount(descriptorBindingCount) {}
 
     UniformBufferArray(UniformBufferArray&& other)
         : gfx::UniformBufferArray(std::move(other)) {}

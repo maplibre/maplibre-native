@@ -408,13 +408,16 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
     // bind uniforms
     impl->uniformBuffers.bindDescriptorSets(encoder);
 
-    // update image set
-    if (!impl->imageDescriptorSet) {
-        impl->imageDescriptorSet = std::make_unique<ImageDescriptorSet>(encoder.getContext());
-    }
+    const auto& shaderImpl = static_cast<const mbgl::vulkan::ShaderProgram&>(*shader);
+    if (shaderImpl.hasTextures()) {
+        // update image set
+        if (!impl->imageDescriptorSet) {
+            impl->imageDescriptorSet = std::make_unique<ImageDescriptorSet>(encoder.getContext());
+        }
 
-    impl->imageDescriptorSet->update(textures);
-    impl->imageDescriptorSet->bind(encoder);
+        impl->imageDescriptorSet->update(textures);
+        impl->imageDescriptorSet->bind(encoder);
+    }
 
     return true;
 }
