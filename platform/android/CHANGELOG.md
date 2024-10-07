@@ -6,6 +6,10 @@
 
 ### 🐞 Bug fixes
 
+## 11.5.2
+
+Try out Gradle-based build config for releases.
+
 ## 11.5.1
 
 ### ✨ Features and improvements
