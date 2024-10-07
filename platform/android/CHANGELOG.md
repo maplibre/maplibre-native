@@ -6,6 +6,17 @@
 
 ### 🐞 Bug fixes
 
+## 11.5.1
+
+### ✨ Features and improvements
+
+- Add `PropertyFactory.iconPadding(Float)` overload for better backcompat ([#2880](https://github.com/maplibre/maplibre-native/pull/2880)).
+
+### 🐞 Bug fixes
+
+- Android renderThreadManager changed to non static ([#2872](https://github.com/maplibre/maplibre-native/pull/2872)).
+- Make sure `Scheduler::GetCurrent()` cannot return a nullptr ([#2887](https://github.com/maplibre/maplibre-native/pull/2887)). This should fix a crash on startup when the library is not initialized on the main thread.
+
 ## 11.5.0
 
 ### ✨ Features and improvements

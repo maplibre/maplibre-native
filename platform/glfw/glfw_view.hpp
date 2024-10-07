@@ -77,9 +77,12 @@ private:
     static void onMouseClick(GLFWwindow *window, int button, int action, int modifiers);
     static void onMouseMove(GLFWwindow *window, double x, double y);
     static void onWindowFocus(GLFWwindow *window, int focused);
+    static void onWindowRefresh(GLFWwindow *window);
 
     // Internal
     void report(float duration);
+
+    void render();
 
     mbgl::Color makeRandomColor() const;
     mbgl::Point<double> makeRandomPoint() const;
