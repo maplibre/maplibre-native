@@ -90,14 +90,19 @@ jobs:
         run: node platform/android/scripts/generate-style-code.mjs
         working-directory: .
 
-      - uses: pre-commit/action@v3.0.1
+      - run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip3 install pre-commit
+      
+      - run: |
+          source venv/bin/activate
+          pre-commit run clang-format --all-files
         continue-on-error: true  # this can mean files are modified, which is not an error
-        with:
-          extra_args: clang-format --all-files
 
-      - uses: pre-commit/action@v3.0.1
-        with:
-          extra_args: clang-format --all-files
+      - run: |
+          source venv/bin/activate
+          pre-commit run clang-format --all-files
 
       - uses: infotroph/tree-is-clean@v1
         with:
