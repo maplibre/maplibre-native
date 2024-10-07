@@ -2,6 +2,10 @@ name: gh-pages-android-api
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: [android-release]
+    types:
+      - completed
 
 jobs:
   gh-pages-android-api:

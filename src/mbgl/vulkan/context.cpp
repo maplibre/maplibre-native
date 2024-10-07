@@ -207,9 +207,11 @@ void Context::beginFrame() {
             } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
                 // TODO implement pre-rotation transform for surface orientation
-                // requestSurfaceUpdate();
-                // beginFrame();
-                // return;
+#if defined(__APPLE__)
+                requestSurfaceUpdate();
+                beginFrame();
+                return;
+#endif
             }
 
         } catch (const vk::OutOfDateKHRError& e) {
@@ -271,7 +273,9 @@ void Context::submitFrame() {
             const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
             if (presentResult == vk::Result::eSuboptimalKHR) {
                 // TODO implement pre-rotation transform for surface orientation
-                // requestSurfaceUpdate();
+#if defined(__APPLE__)
+                requestSurfaceUpdate();
+#endif
             }
         } catch (const vk::OutOfDateKHRError& e) {
             requestSurfaceUpdate();
@@ -439,13 +443,13 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
         clipping.pipelineInfo.inputBindings.push_back(
             vk::VertexInputBindingDescription()
                 .setBinding(0)
-                .setStride(VertexAttribute::getStrideOf(ShaderClass::attributes[0].dataType))
+                .setStride(static_cast<uint32_t>(VertexAttribute::getStrideOf(ShaderClass::attributes[0].dataType)))
                 .setInputRate(vk::VertexInputRate::eVertex));
 
         clipping.pipelineInfo.inputAttributes.push_back(
             vk::VertexInputAttributeDescription()
                 .setBinding(0)
-                .setLocation(ShaderClass::attributes[0].index)
+                .setLocation(static_cast<uint32_t>(ShaderClass::attributes[0].index))
                 .setFormat(PipelineInfo::vulkanFormat(ShaderClass::attributes[0].dataType)));
     }
 
@@ -522,7 +526,7 @@ const vk::UniqueDescriptorSetLayout& Context::getUniformDescriptorSetLayout() {
 
         for (size_t i = 0; i < shaders::maxUBOCountPerShader; ++i) {
             bindings.push_back(vk::DescriptorSetLayoutBinding()
-                                   .setBinding(i)
+                                   .setBinding(static_cast<uint32_t>(i))
                                    .setStageFlags(stageFlags)
                                    .setDescriptorType(vk::DescriptorType::eUniformBuffer)
                                    .setDescriptorCount(1));
@@ -543,7 +547,7 @@ const vk::UniqueDescriptorSetLayout& Context::getImageDescriptorSetLayout() {
 
         for (size_t i = 0; i < shaders::maxTextureCountPerShader; ++i) {
             bindings.push_back(vk::DescriptorSetLayoutBinding()
-                                   .setBinding(i)
+                                   .setBinding(static_cast<uint32_t>(i))
                                    .setStageFlags(vk::ShaderStageFlagBits::eFragment)
                                    .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
                                    .setDescriptorCount(1));

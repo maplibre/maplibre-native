@@ -276,7 +276,7 @@ void Drawable::draw(PaintParameters& parameters) const {
 
     impl->pipelineInfo.setRenderable(renderPass_.getDescriptor().renderable);
 
-    const uint32_t instances = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
+    const auto instances = instanceAttributes ? instanceAttributes->getMaxCount() : 1;
 
     for (const auto& seg : impl->segments) {
         const auto& segment = seg->getSegment();
@@ -290,9 +290,16 @@ void Drawable::draw(PaintParameters& parameters) const {
         commandBuffer->bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline.get());
 
         if (segment.indexLength) {
-            commandBuffer->drawIndexed(segment.indexLength, instances, segment.indexOffset, segment.vertexOffset, 0);
+            commandBuffer->drawIndexed(static_cast<uint32_t>(segment.indexLength),
+                                       static_cast<uint32_t>(instances),
+                                       static_cast<uint32_t>(segment.indexOffset),
+                                       static_cast<int32_t>(segment.vertexOffset),
+                                       0);
         } else {
-            commandBuffer->draw(segment.vertexLength, instances, segment.vertexOffset, 0);
+            commandBuffer->draw(static_cast<uint32_t>(segment.vertexLength),
+                                static_cast<uint32_t>(instances),
+                                static_cast<uint32_t>(segment.vertexOffset),
+                                0);
         }
 
         context.renderingStats().numDrawCalls++;
@@ -351,7 +358,7 @@ void Drawable::buildVulkanInputBindings() noexcept {
             const auto& buffer = vertexBuffer->get();
 
             const auto& buffIt = std::find(uniqueBuffers.begin(), uniqueBuffers.end(), binding->vertexBufferResource);
-            uint32_t bindingIndex = 0;
+            std::size_t bindingIndex = 0;
 
             if (buffIt == uniqueBuffers.end()) {
                 bindingIndex = impl->pipelineInfo.inputBindings.size();
@@ -360,7 +367,7 @@ void Drawable::buildVulkanInputBindings() noexcept {
 
                 // add new buffer binding
                 impl->pipelineInfo.inputBindings.push_back(vk::VertexInputBindingDescription()
-                                                               .setBinding(bindingIndex)
+                                                               .setBinding(static_cast<uint32_t>(bindingIndex))
                                                                .setStride(binding->vertexStride)
                                                                .setInputRate(inputRate));
 
@@ -372,8 +379,8 @@ void Drawable::buildVulkanInputBindings() noexcept {
 
             impl->pipelineInfo.inputAttributes.push_back(
                 vk::VertexInputAttributeDescription()
-                    .setBinding(bindingIndex)
-                    .setLocation(i)
+                    .setBinding(static_cast<uint32_t>(bindingIndex))
+                    .setLocation(static_cast<uint32_t>(i))
                     .setFormat(PipelineInfo::vulkanFormat(binding->attribute.dataType))
                     .setOffset(binding->attribute.offset));
         }
@@ -438,7 +445,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
                                                 .setBufferInfo(descriptorBufferInfo)
                                                 .setDescriptorCount(1)
                                                 .setDescriptorType(vk::DescriptorType::eUniformBuffer)
-                                                .setDstBinding(id)
+                                                .setDstBinding(static_cast<uint32_t>(id))
                                                 .setDstSet(uniformDescriptorSet);
 
             device->updateDescriptorSets(writeDescriptorSet, nullptr);
@@ -467,7 +474,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
                                                 .setImageInfo(descriptorImageInfo)
                                                 .setDescriptorCount(1)
                                                 .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-                                                .setDstBinding(id)
+                                                .setDstBinding(static_cast<uint32_t>(id))
                                                 .setDstSet(imageDescriptorSet);
 
             device->updateDescriptorSets(writeDescriptorSet, nullptr);

@@ -46,7 +46,8 @@ struct source_location {
 #endif
 #else
 #define SYM_GUARD_LOC \
-    {}
+    {                 \
+    }
 #endif
 
 namespace mbgl {

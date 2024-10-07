@@ -25,7 +25,7 @@ public class MapLibreVulkanSurfaceView extends MapLibreSurfaceView {
 
   static class VulkanThread extends MapLibreSurfaceView.RenderThread {
     VulkanThread(WeakReference<MapLibreVulkanSurfaceView> surfaceViewWeakRef) {
-      super();
+      super(surfaceViewWeakRef.get().renderThreadManager);
       mSurfaceViewWeakRef = surfaceViewWeakRef;
     }
 

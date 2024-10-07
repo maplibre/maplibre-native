@@ -266,6 +266,12 @@ target_link_libraries(
         $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
 )
 
+target_link_libraries(
+    mbgl-expression-test
+    PRIVATE
+        $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>
+)
+
 # Disable benchmarks in CI as they run in VM environment
 if(NOT DEFINED ENV{CI})
     add_test(NAME mbgl-benchmark-runner COMMAND mbgl-benchmark-runner WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})

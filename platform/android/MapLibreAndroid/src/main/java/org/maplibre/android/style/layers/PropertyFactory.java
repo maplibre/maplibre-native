@@ -2050,6 +2050,16 @@ The unit is in density-independent pixels only for SDF sprites that were created
   /**
    * Size of additional area round the icon bounding box used for detecting symbol collisions.
    *
+   * @param value a Float value
+   * @return property wrapper around Float
+   */
+  public static PropertyValue<Float> iconPadding(Float value) {
+    return new LayoutPropertyValue<>("icon-padding", value);
+  }
+
+  /**
+   * Size of additional area round the icon bounding box used for detecting symbol collisions.
+   *
    * @param value a Float[] value
    * @return property wrapper around Float[]
    */
