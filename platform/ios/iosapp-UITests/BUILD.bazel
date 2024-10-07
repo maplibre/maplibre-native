@@ -17,7 +17,10 @@ ios_ui_test(
     name = "uitest",
     size = "large",
     minimum_os_version = "12.0",
-    provisioning_profile = "xcode_profile",
+    provisioning_profile = select({
+        "//platform/ios:with_provisioning_profile": "xcode_profile",
+        "//platform/ios:without_provisioning_profile": None,
+    }),
     test_host = "//platform/ios:App",
     visibility = [
         "@rules_xcodeproj//xcodeproj:generated",

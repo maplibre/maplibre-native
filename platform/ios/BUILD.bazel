@@ -1,4 +1,5 @@
 load("@aspect_rules_js//js:defs.bzl", "js_library")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@build_bazel_rules_apple//apple:apple.bzl", "apple_static_xcframework", "apple_xcframework")
 load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application", "ios_framework")
 load("@build_bazel_rules_apple//apple:resources.bzl", "apple_resource_bundle")
@@ -196,7 +197,10 @@ ios_application(
     ],
     infoplists = ["info_app_plist"],
     minimum_os_version = "12.0",
-    provisioning_profile = "xcode_profile",
+    provisioning_profile = select({
+        "//platform/ios:with_provisioning_profile": "xcode_profile",
+        "//platform/ios:without_provisioning_profile": None,
+    }),
     resources = _IOS_APPLICATION_RESOURCES,
     version = ":maplibre_app_version",
     visibility = ["//visibility:public"],
@@ -217,7 +221,10 @@ ios_application(
     ],
     infoplists = ["app/Info.plist"],
     minimum_os_version = "12.0",
-    provisioning_profile = ":xcode_profile",
+    provisioning_profile = select({
+        "//platform/ios:with_provisioning_profile": "xcode_profile",
+        "//platform/ios:without_provisioning_profile": None,
+    }),
     resources = _IOS_APPLICATION_RESOURCES,
     visibility = ["//visibility:public"],
     deps = [
@@ -234,7 +241,10 @@ ios_application(
     ],
     infoplists = ["//platform/ios/benchmark:info_benchmark_plist"],
     minimum_os_version = "12.0",
-    provisioning_profile = "xcode_profile",
+    provisioning_profile = select({
+        "//platform/ios:with_provisioning_profile": "xcode_profile",
+        "//platform/ios:without_provisioning_profile": None,
+    }),
     resources = [
         "//platform/ios/benchmark:bundle_resources",
         "//platform/ios/benchmark/assets:benchmark_assets",
@@ -363,4 +373,24 @@ js_library(
         ":ios_sdk_hdrs",
     ],
     visibility = ["//platform:__pkg__"],
+)
+
+bool_flag(
+    name = "use_provisioning_profile",
+    build_setting_default = True,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "without_provisioning_profile",
+    flag_values = {
+        "//platform/ios:use_provisioning_profile": "False",
+    },
+)
+
+config_setting(
+    name = "with_provisioning_profile",
+    flag_values = {
+        "//platform/ios:use_provisioning_profile": "True",
+    },
 )

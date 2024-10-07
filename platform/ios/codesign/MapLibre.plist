@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>AppIDName</key>
+  <string>selfsigned: any app</string>
+  <key>ApplicationIdentifierPrefix</key>
+  <array>
+  <string>MapLibre</string>
+  </array>
+  <key>CreationDate</key>
+  <date>2024-10-04T14:42:06Z</date>
+  <key>Platform</key>
+  <array>
+    <string>iOS</string>
+  </array>
+    <key>IsXcodeManaged</key>
+  <true/>
+  <key>DeveloperCertificates</key>
+  <array>
+    <data>MIIDOjCCAiKgAwIBAgIBATANBgkqhkiG9w0BAQsFADAzMREwDwYDVQQDDAhNYXBM
+      aWJyZTERMA8GA1UECwwITWFwTGlicmUxCzAJBgNVBAYTAk5MMB4XDTI0MTAwNDE0
+      MzIyN1oXDTM0MTAwNDE0MzIyN1owMzERMA8GA1UEAwwITWFwTGlicmUxETAPBgNV
+      BAsMCE1hcExpYnJlMQswCQYDVQQGEwJOTDCCASIwDQYJKoZIhvcNAQEBBQADggEP
+      ADCCAQoCggEBAOpoiqWC3/BZakrK3xnYJK427qY0w0kOVaYiT/pI08VkC7yWbw/k
+      qfRfuUgEnshrkVyPreF//6HDfFZe9sQY1C221nOQB3AAdjj/qpwYDSj+s2zEfOCI
+      Owmp0ZqOe4tu0J6F0xK3KL8f6QP1E1upLixB/ExKX3SfCijNZfeCYElKS7q0o7Di
+      BVD2tpZo3oH5lLBsYbEPYUzkGBRsaiddpcNPSvBGLl+hezchSPL/ZqkyiaNWMiHB
+      cMXl2vf5lm/zp0DwWoVIaX0/pg/l2+u1BxqI/18vQYMs47dVmaIFk+UEduKSq04F
+      Qy8PETNfDNTtE3A/gwDGq3erMCpGU8FXmT8CAwEAAaNZMFcwDgYDVR0PAQH/BAQD
+      AgeAMCYGA1UdJQEB/wQcMBoGCCsGAQUFBwMEBggrBgEFBQcDAwYEVR0lADAdBgNV
+      HQ4EFgQUIrw9BmJNI6k3P0lt70p8qU5qbkAwDQYJKoZIhvcNAQELBQADggEBAEEv
+      yheiEYgoZI0jOXzNc7fZBvU9fgMup7mWBPAK/NQxSoPOMq2NlQsfTT8RmYhjyg27
+      vgLB4Tu+/Yj8SiPZYx3HxpKQmlNn8P+ZLyupIP8haiKA50COpmxc1jtkmF/Rpvf4
+      cDoaIoGhkAIZpMBqDKF5Od6FfwBCzHsbQRKbqg3+4KgaSfFYghor7lkatSJiIlr/
+      zjq//mN99RrWBN/HxtI5gguSEalMtJbIWQvZrIrQUAOgwED6uuJri0BHr5uS94I2
+      tkDgpAmlCwzkJX+KWAx6RzE2/V6QLU2UCQvUFWKMRLEieK1bKtbLO8GNoHFsZSS0
+      sESC3dJn9PUkCj1x0+A=</data>
+  </array>
+  <key>Entitlements</key>
+  <dict>
+    <key>keychain-access-groups</key>
+    <array>
+      <string>MapLibre</string>    
+    </array>
+    <key>get-task-allow</key>
+    <true/>
+    <key>application-identifier</key>
+    <string>MapLibre.*</string>
+    <key>com.apple.developer.team-identifier</key>
+    <string>MapLibre</string>
+  </dict>
+  <key>ExpirationDate</key>
+  <date>2034-10-04T09:54:14Z</date>
+  <key>Name</key>
+  <string>MapLibre</string>
+  <key>ProvisionedDevices</key>
+  <array>
+  </array>
+  <key>LocalProvision</key>
+  <true/>
+  <key>TeamIdentifier</key>
+  <array>
+    <string>MapLibre</string>
+  </array>
+  <key>TeamName</key>
+  <string>MapLibre</string>
+  <key>TimeToLive</key>
+  <integer>3652</integer>
+  <key>UUID</key>
+  <string>B05AAC58-7963-4EA6-B158-F8E43432EDE7</string>
+  <key>Version</key>
+  <integer>1</integer>
+</dict>
+</plist>

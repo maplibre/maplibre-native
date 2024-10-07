@@ -83,27 +83,18 @@ jobs:
             ${{ runner.os }}-bazel-
           path: ~/.cache/bazel
 
-      - name: Build Example (Swift) App
-        run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal
-
-      - name: Check debug symbols
-        run: bazel run //platform:check-public-symbols --//:renderer=metal
-
-      - name: Lint plist files
-        run: bazel run //platform/ios:lint-plists --//:renderer=metal
-
-      - name: Running iOS tests
-        run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=metal
-
-      # tsan run fails with 'Interceptors are not working. This may be because ThreadSanitizer is loaded too late...'
-      #- name: Running iOS UI tests (Thread Sanitizer)
-      #  run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=tsan
-
-      - name: Running iOS UI tests (Address+UB Sanitizer)
-        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=include_clang_rt --copt=-fsanitize=undefined --linkopt=-fsanitize=undefined --copt=-fsanitize-recover=null --linkopt=-fsanitize-recover=null
+      - name: Create Bazel config
+        working-directory: platform/darwin
+        run: |
+          grep -v -e APPLE_MOBILE_PROVISIONING_PROFILE_NAME -e APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID bazel/example_config.bzl > bazel/config.bzl
+          echo 'APPLE_MOBILE_PROVISIONING_PROFILE_NAME = "MapLibre"' >> bazel/config.bzl
+          echo 'APPLE_MOBILE_PROVISIONING_PROFILE_TEAM_ID = "MapLibre"' >> bazel/config.bzl
+  
+      - name: Unlock login keychain
+        run: security unlock-keychain -p 'ec2-user' ~/Library/Keychains/login.keychain-db
 
       # render test
-
+  
       - name: Build RenderTest .ipa and .xctest for AWS Device Farm
         run: |
           set -e
@@ -129,12 +120,31 @@ jobs:
             ${{ env.render_test_artifacts_dir }}/RenderTest.xctest.zip
             ${{ env.render_test_artifacts_dir }}/RenderTestApp.ipa
 
+      - name: Build Example (Swift) App
+        run: bazel build //platform/ios/app-swift:MapLibreApp --//:renderer=metal --//platform/ios:use_provisioning_profile=False
+
+      - name: Check debug symbols
+        run: bazel run //platform:check-public-symbols --//:renderer=metal
+
+      - name: Lint plist files
+        run: bazel run //platform/ios:lint-plists --//:renderer=metal
+
+      - name: Running iOS tests
+        run: bazel test //platform/ios/test:ios_test --test_output=errors --//:renderer=metal
+
+      # tsan run fails with 'Interceptors are not working. This may be because ThreadSanitizer is loaded too late...'
+      #- name: Running iOS UI tests (Thread Sanitizer)
+      #  run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=tsan
+
+      - name: Running iOS UI tests (Address+UB Sanitizer)
+        run: bazel test //platform/ios/iosapp-UITests:uitest --test_output=errors --//:renderer=metal --features=include_clang_rt --copt=-fsanitize=undefined --linkopt=-fsanitize=undefined --copt=-fsanitize-recover=null --linkopt=-fsanitize-recover=null --//platform/ios:use_provisioning_profile=False
+
       # C++ unit tests
       
       - name: Build CppUnitTests .ipa and .xctest for AWS Device Farm
         run: |
           set -e
-          bazel run --//:renderer=metal //platform/ios:xcodeproj
+          bazel run //platform/ios:xcodeproj --@rules_xcodeproj//xcodeproj:extra_common_flags="--//:renderer=metal"
           build_dir="$(mktemp -d)"
           xcodebuild build-for-testing  -scheme CppUnitTests -project MapLibre.xcodeproj -derivedDataPath "$build_dir"
           ios_cpp_test_app_dir="$(dirname "$(find "$build_dir" -name CppUnitTestsApp.app)")"

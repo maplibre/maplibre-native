@@ -30,7 +30,10 @@ ios_application(
     ],
     infoplists = [":Info.plist"],
     minimum_os_version = "16.0",
-    provisioning_profile = "xcode_profile",
+    provisioning_profile = select({
+        "//platform/ios:with_provisioning_profile": "xcode_profile",
+        "//platform/ios:without_provisioning_profile": None,
+    }),
     resources = [
         "@pois_nps_mbtiles//file",
     ],
