@@ -29,12 +29,20 @@ val download = tasks.register("download") {
     }
 }
 
-// Unzip the downloaded VVL zip archive to the ${vvlJniLibDir} for APK packaging.
 val unzip = tasks.register<Copy>("unzip") {
     dependsOn(download)
 
-    from(zipTree(file("$vvlLibRoot/android-binaries-$vvlVersion.zip")))
+    from(zipTree(file("$vvlLibRoot/android-binaries-$vvlVersion.zip"))) {
+        eachFile {
+            path = path.substringAfter("/")
+        }
+        includeEmptyDirs = false // Optional: Exclude empty directories if not needed
+    }
     into(file(vvlJniLibDir))
+
+    doFirst {
+        mkdir(vvlJniLibDir)
+    }
 }
 
 tasks.named("preBuild") {
