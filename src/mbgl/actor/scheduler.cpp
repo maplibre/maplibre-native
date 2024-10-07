@@ -1,6 +1,7 @@
 #include <mbgl/actor/scheduler.hpp>
 #include <mbgl/util/thread_local.hpp>
 #include <mbgl/util/thread_pool.hpp>
+#include <mbgl/util/run_loop.hpp>
 
 namespace mbgl {
 
@@ -22,7 +23,11 @@ void Scheduler::SetCurrent(Scheduler* scheduler) {
     localScheduler = scheduler;
 }
 
-Scheduler* Scheduler::GetCurrent() {
+Scheduler* Scheduler::GetCurrent(bool init) {
+    if (!localScheduler && init) {
+        thread_local util::RunLoop runLoop;
+        SetCurrent(&runLoop);
+    }
     return localScheduler;
 }
 

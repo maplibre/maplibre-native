@@ -232,7 +232,9 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(SchemaVersion)) {
         db.exec("PRAGMA user_version = 1");
     }
 
-    { OfflineDatabase db(filename, fixture::tileServerOptions); }
+    {
+        OfflineDatabase db(filename, fixture::tileServerOptions);
+    }
 
     EXPECT_EQ(6, databaseUserVersion(filename));
 
@@ -567,7 +569,9 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
         return util::read_file(filename).size();
     };
 
-    { OfflineDatabase db(filename, fixture::tileServerOptions); }
+    {
+        OfflineDatabase db(filename, fixture::tileServerOptions);
+    }
 
     size_t initialSize = util::read_file(filename).size();
     size_t maximumSize = 50 * 1024 * 1024;
@@ -716,7 +720,9 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DeleteRegion)) {
     FixtureLog log;
     deleteDatabaseFiles();
 
-    { OfflineDatabase dbCreate(filename, fixture::tileServerOptions); }
+    {
+        OfflineDatabase dbCreate(filename, fixture::tileServerOptions);
+    }
 
 #ifndef __QT__ // Qt doesn't decrease the size of the database file.
     size_t initialSize = util::read_file(filename).size();
@@ -1015,7 +1021,9 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ClearAmbientCache)) {
     FixtureLog log;
     deleteDatabaseFiles();
 
-    { OfflineDatabase dbCreate(filename, fixture::tileServerOptions); }
+    {
+        OfflineDatabase dbCreate(filename, fixture::tileServerOptions);
+    }
 
 #ifndef __QT__ // Qt doesn't decrease the size of the database file.
     size_t initialSize = util::read_file(filename).size();
