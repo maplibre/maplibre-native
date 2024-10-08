@@ -8,6 +8,12 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### 🐞 Bug fixes
 
+## 10.3.2
+
+### 🐞 Bug fixes
+
+- Android renderThreadManager changed to non static ([#2901](https://github.com/maplibre/maplibre-native/pull/2901)).
+
 ## 10.3.1
 
 This release includes [debug symbols](https://github.com/maplibre/maplibre-native/releases?q=android&expanded=true) on GitHub.
