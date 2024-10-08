@@ -682,6 +682,7 @@ MLN_CORE_HEADERS = [
     "include/mbgl/layermanager/layer_factory.hpp",
     "include/mbgl/layermanager/layer_manager.hpp",
     "include/mbgl/layermanager/line_layer_factory.hpp",
+    "include/mbgl/layermanager/location_indicator_layer_factory.hpp",
     "include/mbgl/layermanager/raster_layer_factory.hpp",
     "include/mbgl/layermanager/symbol_layer_factory.hpp",
     "include/mbgl/map/bound_options.hpp",
@@ -921,7 +922,6 @@ MLN_OPENGL_SOURCE = [
 MLN_OPENGL_HEADERS = [
     "include/mbgl/gl/renderable_resource.hpp",
     "include/mbgl/gl/renderer_backend.hpp",
-    "include/mbgl/layermanager/location_indicator_layer_factory.hpp",
     "include/mbgl/platform/gl_functions.hpp",
 ]
 

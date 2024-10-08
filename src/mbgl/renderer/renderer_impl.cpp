@@ -36,7 +36,7 @@
 constexpr auto EnableMetalCapture = 0;
 constexpr auto CaptureFrameStart = 0; // frames are 0-based
 constexpr auto CaptureFrameCount = 1;
-#else // !MLN_RENDER_BACKEND_METAL
+#elif MLN_RENDER_BACKEND_OPENGL
 #include <mbgl/gl/defines.hpp>
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gl/drawable_gl.hpp>
