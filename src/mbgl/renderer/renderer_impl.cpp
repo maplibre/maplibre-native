@@ -452,9 +452,8 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Renders debug overlays.
         {
             const auto debugGroup(parameters.renderPass->createDebugGroup("debug"));
-            orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) {
-                layerGroup.render(orchestrator, parameters);
-            });
+            orchestrator.visitDebugLayerGroups(
+                [&](LayerGroupBase& layerGroup) { layerGroup.render(orchestrator, parameters); });
         }
     };
 #endif // MLN_DRAWABLE_RENDERER
