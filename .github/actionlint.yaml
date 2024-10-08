@@ -3,6 +3,8 @@ self-hosted-runner:
   labels:
     - macos-14  # can be removed once actionlint is updated
     - ubuntu-24.04  # can be removed once actionlint is updated
+    - MapLibre_Native_Ubuntu_22_04_ARM_8_core
+    - MapLibre_Native_Ubuntu_24_04_x84_16_core
 # Configuration variables in array of strings defined in your repository or
 # organization. `null` means disabling configuration variables check.
 # Empty array means no configuration variable is allowed.

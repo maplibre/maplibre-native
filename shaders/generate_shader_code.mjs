@@ -276,7 +276,7 @@ fs.writeFileSync(path.join(outputRoot, "shader_manifest.hpp"),
 #pragma once
 #include <mbgl/shaders/shader_source.hpp>
 
-#if !MLN_RENDER_BACKEND_METAL
+#if MLN_RENDER_BACKEND_OPENGL
 ${generatedHeaders.join('\n')}
 #endif
 `);
