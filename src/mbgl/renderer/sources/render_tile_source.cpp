@@ -87,8 +87,8 @@ public:
 class PolylineLayerTweaker : public LayerTweaker {
 public:
     PolylineLayerTweaker(const shaders::LineEvaluatedPropsUBO& properties)
-        : linePropertiesUBO(properties),
-          LayerTweaker("debug-polyline", makeMutable<PolylineLayerProperties>()) {}
+        : LayerTweaker("debug-polyline", makeMutable<PolylineLayerProperties>()),
+          linePropertiesUBO(properties) {}
 
     void execute(LayerGroupBase& layerGroup, const PaintParameters& parameters) override {
         auto& layerUniforms = layerGroup.mutableUniformBuffers();
