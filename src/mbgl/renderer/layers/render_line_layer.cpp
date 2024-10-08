@@ -558,19 +558,17 @@ void RenderLineLayer::update(gfx::ShaderRegistry& shaders,
 
             // texture
             if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
-                if (!iconTweaker) {
-                    iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
-                        atlases,
-                        std::nullopt,
-                        idLineImageTexture,
-                        /*isText*/ false,
-                        /*sdfIcons*/ true, // to force linear filter
-                        /*rotationAlignment_*/ AlignmentType::Auto,
-                        /*iconScaled*/ false,
-                        /*textSizeIsZoomConstant_*/ false);
-                }
+                auto iconTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
+                    atlases,
+                    std::nullopt,
+                    idLineImageTexture,
+                    /*isText*/ false,
+                    /*sdfIcons*/ true, // to force linear filter
+                    /*rotationAlignment_*/ AlignmentType::Auto,
+                    /*iconScaled*/ false,
+                    /*textSizeIsZoomConstant_*/ false);
 
-                builder->addTweaker(iconTweaker);
+                builder->addTweaker(std::move(iconTweaker));
 
                 setSegments(builder, bucket);
 
