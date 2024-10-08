@@ -999,6 +999,7 @@ MLN_DRAWABLES_HEADERS = [
     "include/mbgl/shaders/background_layer_ubo.hpp",
     "include/mbgl/shaders/circle_layer_ubo.hpp",
     "include/mbgl/shaders/collision_layer_ubo.hpp",
+    "include/mbgl/shaders/common_ubo.hpp",
     "include/mbgl/shaders/custom_drawable_layer_ubo.hpp",
     "include/mbgl/shaders/debug_layer_ubo.hpp",
     "include/mbgl/shaders/fill_layer_ubo.hpp",
