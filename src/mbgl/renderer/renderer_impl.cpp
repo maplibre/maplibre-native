@@ -519,10 +519,10 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     parameters.renderPass.reset();
 
     const auto startRendering = util::MonotonicTimer::now().count();
+    // present submits render commands
     parameters.encoder->present(parameters.backend.getDefaultRenderable());
     const auto renderingTime = util::MonotonicTimer::now().count() - startRendering;
 
-    // CommandEncoder destructor submits render commands.
     parameters.encoder.reset();
     context.endFrame();
 

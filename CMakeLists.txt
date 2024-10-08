@@ -203,6 +203,8 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/hillshade_prepare_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/line_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/line_layer_tweaker.hpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/location_indicator_layer_tweaker.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/location_indicator_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/raster_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/symbol_layer_tweaker.cpp
@@ -1135,6 +1137,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/background_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/circle_layer_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/collision_layer_ubo.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/common_ubo.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/custom_drawable_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/custom_drawable_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/debug_layer_ubo.hpp
@@ -1353,6 +1356,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/circle.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/clipping_mask.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/collision.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/common.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/debug.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/fill.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/heatmap.cpp

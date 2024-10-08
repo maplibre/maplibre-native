@@ -212,6 +212,11 @@ enum {
 };
 
 enum {
+    idCommonTexture,
+    commonTextureCount
+};
+
+enum {
     idCustomSymbolImageTexture,
     customSymbolTextureCount
 };
@@ -263,6 +268,7 @@ static constexpr auto maxTextureCountPerShader = std::max({static_cast<size_t>(b
                                                            static_cast<size_t>(circleTextureCount),
                                                            static_cast<size_t>(clippingMaskTextureCount),
                                                            static_cast<size_t>(collisionTextureCount),
+                                                           static_cast<size_t>(commonTextureCount),
                                                            static_cast<size_t>(customSymbolTextureCount),
                                                            static_cast<size_t>(debugTextureCount),
                                                            static_cast<size_t>(fillTextureCount),
@@ -306,6 +312,12 @@ enum {
     idCollisionPlacedVertexAttribute,
     idCollisionShiftVertexAttribute,
     collisionVertexAttributeCount
+};
+
+enum {
+    idCommonPosVertexAttribute,
+    idCommonTexVertexAttribute,
+    commonVertexAttributeCount
 };
 
 enum {
@@ -425,6 +437,7 @@ static constexpr auto maxVertexAttributeCountPerShader = std::max({
     static_cast<size_t>(circleVertexAttributeCount),
     static_cast<size_t>(clippingMaskVertexAttributeCount),
     static_cast<size_t>(collisionVertexAttributeCount),
+    static_cast<size_t>(commonVertexAttributeCount),
     static_cast<size_t>(customSymbolVertexAttributeCount),
     static_cast<size_t>(debugVertexAttributeCount),
     static_cast<size_t>(fillVertexAttributeCount),

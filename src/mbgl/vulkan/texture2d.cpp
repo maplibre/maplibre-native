@@ -190,7 +190,11 @@ void Texture2D::uploadSubRegion(const void* pixelData,
 
         buffer->copyBufferToImage(bufferAllocation->buffer, imageAllocation->image, imageLayout, region);
 
-        transitionToShaderReadLayout(buffer);
+        if (samplerState.mipmapped && textureUsage == Texture2DUsage::ShaderInput) {
+            generateMips(buffer);
+        } else {
+            transitionToShaderReadLayout(buffer);
+        }
     };
 
     enqueueCommands(commandBuffer);
@@ -269,6 +273,10 @@ void Texture2D::createTexture() {
             imageUsage = vk::ImageUsageFlags() | vk::ImageUsageFlagBits::eTransferDst |
                          vk::ImageUsageFlagBits::eSampled;
             imageTiling = vk::ImageTiling::eOptimal;
+
+            if (samplerState.mipmapped) {
+                imageUsage |= vk::ImageUsageFlagBits::eTransferSrc;
+            }
             break;
 
         case Texture2DUsage::Attachment:
@@ -287,7 +295,7 @@ void Texture2D::createTexture() {
                                      .setImageType(vk::ImageType::e2D)
                                      .setFormat(format)
                                      .setExtent({size.width, size.height, 1})
-                                     .setMipLevels(1)
+                                     .setMipLevels(getMipLevels())
                                      .setArrayLayers(1)
                                      .setSamples(vk::SampleCountFlagBits::e1)
                                      .setTiling(imageTiling)
@@ -331,7 +339,7 @@ void Texture2D::createTexture() {
                                        .setFormat(format)
                                        .setComponents(imageSwizzle)
                                        .setSubresourceRange(
-                                           vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+                                           {vk::ImageAspectFlagBits::eColor, 0, imageCreateInfo.mipLevels, 0, 1});
 
         imageAllocation->imageView = backend.getDevice()->createImageViewUnique(imageViewCreateInfo);
     }
@@ -357,16 +365,22 @@ void Texture2D::createSampler() {
     const auto addressModeU = vulkanAddressMode(samplerState.wrapU);
     const auto addressModeV = vulkanAddressMode(samplerState.wrapV);
 
-    const auto samplerCreateInfo = vk::SamplerCreateInfo()
-                                       .setMinFilter(filter)
-                                       .setMagFilter(filter)
-                                       .setMipmapMode(vk::SamplerMipmapMode::eNearest)
-                                       .setMinLod(-VK_LOD_CLAMP_NONE)
-                                       .setMaxLod(VK_LOD_CLAMP_NONE)
-                                       .setAddressModeU(addressModeU)
-                                       .setAddressModeV(addressModeV)
-                                       .setAddressModeW(vk::SamplerAddressMode::eRepeat)
-                                       .setAnisotropyEnable(false);
+    auto samplerCreateInfo = vk::SamplerCreateInfo()
+                                 .setMinFilter(filter)
+                                 .setMagFilter(filter)
+                                 .setMinLod(-VK_LOD_CLAMP_NONE)
+                                 .setMaxLod(VK_LOD_CLAMP_NONE)
+                                 .setAddressModeU(addressModeU)
+                                 .setAddressModeV(addressModeV)
+                                 .setAddressModeW(vk::SamplerAddressMode::eRepeat);
+
+    if (samplerState.mipmapped) {
+        samplerCreateInfo.setMipmapMode(vk::SamplerMipmapMode::eLinear);
+    }
+
+    if (samplerState.maxAnisotropy != 1 && context.getBackend().getDeviceFeatures().samplerAnisotropy) {
+        samplerCreateInfo.setAnisotropyEnable(true).setMaxAnisotropy(samplerState.maxAnisotropy);
+    }
 
     sampler = context.getBackend().getDevice()->createSampler(samplerCreateInfo);
 
@@ -400,8 +414,7 @@ void Texture2D::transitionToTransferLayout(const vk::UniqueCommandBuffer& buffer
                              .setDstAccessMask(vk::AccessFlagBits::eTransferWrite)
                              .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                              .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                             .setSubresourceRange(
-                                 vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+                             .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, getMipLevels(), 0, 1});
 
     buffer->pipelineBarrier(
         vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, nullptr, barrier);
@@ -418,8 +431,7 @@ void Texture2D::transitionToShaderReadLayout(const vk::UniqueCommandBuffer& buff
                              .setDstAccessMask(vk::AccessFlagBits::eShaderRead)
                              .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                              .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                             .setSubresourceRange(
-                                 vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+                             .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
     buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
                             vk::PipelineStageFlagBits::eFragmentShader,
@@ -440,8 +452,7 @@ void Texture2D::transitionToGeneralLayout(const vk::UniqueCommandBuffer& buffer)
                              .setDstAccessMask(vk::AccessFlagBits::eMemoryRead)
                              .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
                              .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
-                             .setSubresourceRange(
-                                 vk::ImageSubresourceRange(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1));
+                             .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
 
     buffer->pipelineBarrier(
         vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, nullptr, barrier);
@@ -505,6 +516,89 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
     vmaUnmapMemory(context.getBackend().getAllocator(), imageAllocation->allocation);
 
     return imageData;
+}
+
+uint32_t Texture2D::getMipLevels() const {
+    if (samplerState.mipmapped && size.width > 0 && size.height > 0) {
+        return static_cast<uint32_t>(std::floor(std::log2(std::max(size.width, size.height))) + 1);
+    }
+
+    return 1;
+}
+
+void Texture2D::generateMips(const vk::UniqueCommandBuffer& buffer) {
+    const uint32_t mipLevels = getMipLevels();
+
+    if (mipLevels <= 1) {
+        return;
+    }
+
+    int32_t mipWidth = size.width;
+    int32_t mipHeight = size.height;
+
+    auto barrier = vk::ImageMemoryBarrier()
+                       .setImage(imageAllocation->image)
+                       .setSrcQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                       .setDstQueueFamilyIndex(VK_QUEUE_FAMILY_IGNORED)
+                       .setSubresourceRange({vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1});
+
+    for (uint32_t i = 1; i < mipLevels; ++i) {
+        barrier.subresourceRange.baseMipLevel = i - 1;
+
+        // flip transfer direction
+        barrier.setOldLayout(vk::ImageLayout::eTransferDstOptimal)
+            .setNewLayout(vk::ImageLayout::eTransferSrcOptimal)
+            .setSrcAccessMask(vk::AccessFlagBits::eTransferWrite)
+            .setDstAccessMask(vk::AccessFlagBits::eTransferRead);
+
+        buffer->pipelineBarrier(
+            vk::PipelineStageFlagBits::eTransfer, vk::PipelineStageFlagBits::eTransfer, {}, nullptr, nullptr, barrier);
+
+        const auto blit = vk::ImageBlit()
+                              .setSrcOffsets({vk::Offset3D{0, 0, 0}, {mipWidth, mipHeight, 1}})
+                              .setDstOffsets({vk::Offset3D{0, 0, 0}, {mipWidth / 2, mipHeight / 2, 1}})
+                              .setSrcSubresource({vk::ImageAspectFlagBits::eColor, i - 1, 0, 1})
+                              .setDstSubresource({vk::ImageAspectFlagBits::eColor, i, 0, 1});
+
+        buffer->blitImage(imageAllocation->image,
+                          barrier.newLayout,
+                          imageAllocation->image,
+                          barrier.oldLayout,
+                          blit,
+                          vk::Filter::eLinear);
+
+        barrier.setOldLayout(vk::ImageLayout::eTransferSrcOptimal)
+            .setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
+            .setSrcAccessMask(vk::AccessFlagBits::eTransferRead)
+            .setDstAccessMask(vk::AccessFlagBits::eShaderRead);
+
+        buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                                vk::PipelineStageFlagBits::eFragmentShader,
+                                {},
+                                nullptr,
+                                nullptr,
+                                barrier);
+
+        mipWidth = std::max(1, mipWidth / 2);
+        mipHeight = std::max(1, mipHeight / 2);
+    }
+
+    // transition the last mip
+    barrier.subresourceRange.baseMipLevel = mipLevels - 1;
+
+    barrier.setOldLayout(vk::ImageLayout::eTransferDstOptimal)
+        .setNewLayout(vk::ImageLayout::eShaderReadOnlyOptimal)
+        .setSrcAccessMask(vk::AccessFlagBits::eTransferRead)
+        .setDstAccessMask(vk::AccessFlagBits::eShaderRead);
+
+    buffer->pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                            vk::PipelineStageFlagBits::eFragmentShader,
+                            {},
+                            nullptr,
+                            nullptr,
+                            barrier);
+
+    imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
 }
 
 } // namespace vulkan
