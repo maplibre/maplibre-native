@@ -10,7 +10,7 @@ const std::array<UniformBlockInfo, 2> ShaderSource<BuiltIn::BackgroundShader, gf
     UniformBlockInfo{false, true, sizeof(BackgroundLayerUBO), idBackgroundLayerUBO},
 };
 const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{backgroundDrawableUBOCount + 0, gfx::AttributeDataType::Float3, idBackgroundPosVertexAttribute},
+    AttributeInfo{backgroundUBOCount + 0, gfx::AttributeDataType::Float3, idBackgroundPosVertexAttribute},
 };
 const std::array<TextureInfo, 0> ShaderSource<BuiltIn::BackgroundShader, gfx::Backend::Type::Metal>::textures = {};
 
