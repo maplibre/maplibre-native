@@ -342,7 +342,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
             tileLayerGroup->addLayerTweaker(layerTweaker);
         }
 #endif
-        
+
         // create line tweaker;
         auto tweaker = std::make_shared<PolylineDrawableTweaker>(linePropertiesUBO);
 
