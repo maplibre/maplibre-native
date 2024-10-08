@@ -33,7 +33,7 @@ public:
                        uint32_t descriptorBindingCount_)
         : descriptorSetType(descriptorSetType_),
           descriptorStartIndex(descriptorStartIndex_),
-          descriptorBindingCount(descriptorBindingCount) {}
+          descriptorBindingCount(descriptorBindingCount_) {}
 
     UniformBufferArray(UniformBufferArray&& other)
         : gfx::UniformBufferArray(std::move(other)) {}
