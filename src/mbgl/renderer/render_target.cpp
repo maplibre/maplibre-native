@@ -60,8 +60,8 @@ const LayerGroupBasePtr& RenderTarget::getLayerGroup(const int32_t layerIndex) c
     return (hit == layerGroupsByLayerIndex.end()) ? no_group : hit->second;
 }
 
-void RenderTarget::upload(gfx::UploadPass& uploadPass) {
-    visitLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.upload(uploadPass); }));
+void RenderTarget::issueUpload(gfx::UploadPass& uploadPass) {
+    visitLayerGroups(([&](LayerGroupBase& layerGroup) { layerGroup.issueUpload(uploadPass); }));
 }
 
 void RenderTarget::render(RenderOrchestrator& orchestrator, const RenderTree& renderTree, PaintParameters& parameters) {

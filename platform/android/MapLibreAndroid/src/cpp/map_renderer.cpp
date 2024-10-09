@@ -40,11 +40,13 @@ namespace android {
 MapRenderer::MapRenderer(jni::JNIEnv& _env,
                          const jni::Object<MapRenderer>& obj,
                          jni::jfloat pixelRatio_,
-                         const jni::String& localIdeographFontFamily_)
+                         const jni::String& localIdeographFontFamily_,
+                         jni::jboolean multiThreadedGpuResourceUpload_)
     : javaPeer(_env, obj),
       pixelRatio(pixelRatio_),
       localIdeographFontFamily(localIdeographFontFamily_ ? jni::Make<std::string>(_env, localIdeographFontFamily_)
                                                          : std::optional<std::string>{}),
+      multiThreadedGpuResourceUpload(multiThreadedGpuResourceUpload_),
       threadPool(Scheduler::GetBackground(), {}),
       mailboxData(this) {}
 
@@ -249,7 +251,7 @@ void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface
     }
 
     // Create the new backend and renderer
-    backend = AndroidRendererBackend::Create(window.get());
+    backend = AndroidRendererBackend::Create(window.get(), multiThreadedGpuResourceUpload);
     renderer = std::make_unique<Renderer>(backend->getImpl(), pixelRatio, localIdeographFontFamily);
     rendererRef = std::make_unique<ActorRef<Renderer>>(*renderer, mailboxData.getMailbox());
 
@@ -316,7 +318,7 @@ void MapRenderer::registerNative(jni::JNIEnv& env) {
         env,
         javaClass,
         "nativePtr",
-        jni::MakePeer<MapRenderer, const jni::Object<MapRenderer>&, jni::jfloat, const jni::String&>,
+        jni::MakePeer<MapRenderer, const jni::Object<MapRenderer>&, jni::jfloat, const jni::String&, jni::jboolean>,
         "nativeInitialize",
         "finalize",
         METHOD(&MapRenderer::render, "nativeRender"),

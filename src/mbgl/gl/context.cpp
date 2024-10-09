@@ -793,6 +793,13 @@ void Context::finish() {
     MBGL_CHECK_ERROR(glFinish());
 }
 
+void Context::flushCommands() {
+    MLN_TRACE_FUNC();
+    MLN_TRACE_FUNC_GL();
+
+    MBGL_CHECK_ERROR(glFlush());
+}
+
 #if MLN_DRAWABLE_RENDERER
 std::shared_ptr<gl::Fence> Context::getCurrentFrameFence() const {
     return frameInFlightFence;

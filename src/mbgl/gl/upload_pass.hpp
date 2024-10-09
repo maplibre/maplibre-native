@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mbgl/gfx/upload_pass.hpp>
+#include <mbgl/gl/object.hpp>
 #include <mbgl/gl/types.hpp>
 
 namespace mbgl {
