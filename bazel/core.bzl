@@ -177,6 +177,7 @@ MLN_CORE_SOURCE = [
     "src/mbgl/layermanager/layer_factory.cpp",
     "src/mbgl/layermanager/layer_manager.cpp",
     "src/mbgl/layermanager/line_layer_factory.cpp",
+    "src/mbgl/layermanager/location_indicator_layer_factory.cpp",
     "src/mbgl/layermanager/raster_layer_factory.cpp",
     "src/mbgl/layermanager/symbol_layer_factory.cpp",
     "src/mbgl/layout/circle_layout.hpp",
@@ -303,6 +304,8 @@ MLN_CORE_SOURCE = [
     "src/mbgl/renderer/layers/render_hillshade_layer.hpp",
     "src/mbgl/renderer/layers/render_line_layer.cpp",
     "src/mbgl/renderer/layers/render_line_layer.hpp",
+    "src/mbgl/renderer/layers/render_location_indicator_layer.cpp",
+    "src/mbgl/renderer/layers/render_location_indicator_layer.hpp",
     "src/mbgl/renderer/layers/render_raster_layer.cpp",
     "src/mbgl/renderer/layers/render_raster_layer.hpp",
     "src/mbgl/renderer/layers/render_symbol_layer.cpp",
@@ -913,10 +916,7 @@ MLN_OPENGL_SOURCE = [
     "src/mbgl/gl/vertex_array.hpp",
     "src/mbgl/gl/vertex_buffer_resource.cpp",
     "src/mbgl/gl/vertex_buffer_resource.hpp",
-    "src/mbgl/layermanager/location_indicator_layer_factory.cpp",
     "src/mbgl/platform/gl_functions.cpp",
-    "src/mbgl/renderer/layers/render_location_indicator_layer.cpp",
-    "src/mbgl/renderer/layers/render_location_indicator_layer.hpp",
 ]
 
 MLN_OPENGL_HEADERS = [
@@ -964,6 +964,8 @@ MLN_DRAWABLES_SOURCE = [
     "src/mbgl/renderer/layers/hillshade_prepare_layer_tweaker.hpp",
     "src/mbgl/renderer/layers/line_layer_tweaker.cpp",
     "src/mbgl/renderer/layers/line_layer_tweaker.hpp",
+    "src/mbgl/renderer/layers/location_indicator_layer_tweaker.cpp",
+    "src/mbgl/renderer/layers/location_indicator_layer_tweaker.hpp",
     "src/mbgl/renderer/layers/raster_layer_tweaker.cpp",
     "src/mbgl/renderer/layers/raster_layer_tweaker.hpp",
     "src/mbgl/renderer/layers/symbol_layer_tweaker.cpp",
