@@ -1,7 +1,6 @@
 ext.nativeBuild = { nativeTargets ->
     android {
         ndkVersion androidSdkVersions.ndkVersion
-        buildToolsVersion androidSdkVersions.buildToolsVersion
 
         defaultPublishConfig project.hasProperty("mapbox.buildtype") ? project.getProperty("mapbox.buildtype") : "debug"
 
