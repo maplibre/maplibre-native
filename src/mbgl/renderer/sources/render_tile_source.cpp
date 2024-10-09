@@ -123,7 +123,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     }
 
     auto& context = parameters.context;
-    const auto renderPass = RenderPass::None;
+    const auto renderPass = RenderPass::Translucent;
     auto& shaders = *parameters.staticData.shaders;
 
     // initialize debug builder
@@ -167,7 +167,7 @@ void TileSourceRenderItem::updateDebugDrawables(DebugLayerGroupMap& debugLayerGr
     const auto createPolylineBuilder = [&](gfx::ShaderPtr shader) -> std::unique_ptr<gfx::DrawableBuilder> {
         std::unique_ptr<gfx::DrawableBuilder> builder = context.createDrawableBuilder("debug-polyline-builder");
         builder->setShader(std::static_pointer_cast<gfx::ShaderProgramBase>(shader));
-        builder->setRenderPass(mbgl::RenderPass::Translucent);
+        builder->setRenderPass(renderPass);
         builder->setEnableDepth(false);
         builder->setColorMode(gfx::ColorMode::alphaBlended());
         builder->setCullFaceMode(gfx::CullFaceMode::disabled());

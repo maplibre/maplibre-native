@@ -6,6 +6,8 @@
 #include <mbgl/vulkan/command_encoder.hpp>
 #include <mbgl/util/logging.hpp>
 
+#include <math.h>
+
 namespace mbgl {
 namespace vulkan {
 
