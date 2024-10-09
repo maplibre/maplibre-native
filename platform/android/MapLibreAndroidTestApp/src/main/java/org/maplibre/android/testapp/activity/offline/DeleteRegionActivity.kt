@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import org.maplibre.android.offline.OfflineManager
 import org.maplibre.android.offline.OfflineManager.ListOfflineRegionsCallback
 import org.maplibre.android.offline.OfflineRegion
@@ -100,7 +101,7 @@ class DeleteRegionActivity :
     }
 
     private fun loadOfflineRegions() {
-        OfflineManager.getInstance(this).listOfflineRegions(object : ListOfflineRegionsCallback {
+        OfflineManager.getInstance(this, lifecycleScope).listOfflineRegions(object : ListOfflineRegionsCallback {
             override fun onList(offlineRegions: Array<OfflineRegion>?) {
                 if (offlineRegions != null && offlineRegions.isNotEmpty()) {
                     adapter!!.setOfflineRegions(Arrays.asList(*offlineRegions))
