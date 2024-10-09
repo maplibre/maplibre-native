@@ -1371,8 +1371,8 @@ StyleProperty getLayerProperty(const SymbolLayer& layer, Property property) {
             return makeStyleProperty(layer.getTextTransform());
         case Property::TextVariableAnchor:
             return makeStyleProperty(layer.getTextVariableAnchor());
-      case Property::TextVariableAnchorOffset:
-          return makeStyleProperty(layer.getTextVariableAnchorOffset());
+        case Property::TextVariableAnchorOffset:
+            return makeStyleProperty(layer.getTextVariableAnchorOffset());
         case Property::TextWritingMode:
             return makeStyleProperty(layer.getTextWritingMode());
     }
