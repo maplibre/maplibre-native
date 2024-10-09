@@ -54,7 +54,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
 
         const auto preamble = defineStr + "\n" + prelude;
         const char* shaderData = data.data();
-        const int shaderDataSize = data.size();
+        const int shaderDataSize = static_cast<int>(data.size());
 
         glslShader.setPreamble(preamble.c_str());
         glslShader.setStringsWithLengths(&shaderData, &shaderDataSize, 1);

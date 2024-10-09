@@ -1,5 +1,6 @@
 #pragma once
 
+#include <mbgl/shaders/common_ubo.hpp>
 #include <mbgl/shaders/background_layer_ubo.hpp>
 #include <mbgl/shaders/circle_layer_ubo.hpp>
 #include <mbgl/shaders/collision_layer_ubo.hpp>
@@ -31,6 +32,7 @@ static constexpr auto maxUBOCountPerShader = std::max({static_cast<size_t>(backg
                                                        static_cast<size_t>(circleUBOCount),
                                                        static_cast<size_t>(clippingMaskUBOCount),
                                                        static_cast<size_t>(collisionUBOCount),
+                                                       static_cast<size_t>(commonUBOCount),
                                                        static_cast<size_t>(customSymbolUBOCount),
                                                        static_cast<size_t>(debugUBOCount),
                                                        static_cast<size_t>(fillUBOCount),
@@ -60,6 +62,11 @@ enum {
 
 enum {
     collisionTextureCount
+};
+
+enum {
+    idCommonTexture,
+    commonTextureCount
 };
 
 enum {
@@ -114,6 +121,7 @@ static constexpr auto maxTextureCountPerShader = std::max({static_cast<size_t>(b
                                                            static_cast<size_t>(circleTextureCount),
                                                            static_cast<size_t>(clippingMaskTextureCount),
                                                            static_cast<size_t>(collisionTextureCount),
+                                                           static_cast<size_t>(commonTextureCount),
                                                            static_cast<size_t>(customSymbolTextureCount),
                                                            static_cast<size_t>(debugTextureCount),
                                                            static_cast<size_t>(fillTextureCount),
@@ -157,6 +165,12 @@ enum {
     idCollisionPlacedVertexAttribute,
     idCollisionShiftVertexAttribute,
     collisionVertexAttributeCount
+};
+
+enum {
+    idCommonPosVertexAttribute,
+    idCommonTexVertexAttribute,
+    commonVertexAttributeCount
 };
 
 enum {
@@ -276,6 +290,7 @@ static constexpr auto maxVertexAttributeCountPerShader = std::max({
     static_cast<size_t>(circleVertexAttributeCount),
     static_cast<size_t>(clippingMaskVertexAttributeCount),
     static_cast<size_t>(collisionVertexAttributeCount),
+    static_cast<size_t>(commonVertexAttributeCount),
     static_cast<size_t>(customSymbolVertexAttributeCount),
     static_cast<size_t>(debugVertexAttributeCount),
     static_cast<size_t>(fillVertexAttributeCount),

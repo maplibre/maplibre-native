@@ -63,8 +63,7 @@
 
 using namespace std::numbers;
 
-#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
-#include <mbgl/style/layers/location_indicator_layer.hpp>
+#ifdef ENABLE_LOCATION_INDICATOR
 
 namespace {
 const std::string mbglPuckAssetsPath{MAPBOX_PUCK_ASSETS_PATH};
@@ -209,6 +208,13 @@ GLFWView::GLFWView(bool fullscreen_,
     glfwSetScrollCallback(window, onScroll);
     glfwSetKeyCallback(window, onKey);
     glfwSetWindowFocusCallback(window, onWindowFocus);
+#if defined(__APPLE__) && defined(MLN_RENDER_BACKEND_VULKAN)
+    glfwSetWindowRefreshCallback(window, onWindowRefresh);
+#endif
+
+    // "... applications will typically want to set the swap interval to one"
+    // https://www.glfw.org/docs/latest/quick.html#quick_swap_buffers
+    glfwSwapInterval(1);
 
     glfwGetWindowSize(window, &width, &height);
 
@@ -915,6 +921,16 @@ void GLFWView::onFramebufferResize(GLFWwindow *window, int width, int height) {
     // different pixel ratio. We are forcing a repaint my invalidating the view,
     // which triggers a rerender with the new framebuffer dimensions.
     view->invalidate();
+
+#if defined(__APPLE__) && defined(MLN_RENDER_BACKEND_VULKAN)
+    // Render continuously while resizing
+    // Untested elsewhere
+    view->render();
+
+#if defined(MLN_RENDER_BACKEND_OPENGL)
+    glfwSwapBuffers(window);
+#endif
+#endif
 }
 
 void GLFWView::onMouseClick(GLFWwindow *window, int button, int action, int modifiers) {
@@ -1021,6 +1037,49 @@ void GLFWView::onWindowFocus(GLFWwindow *window, int focused) {
     }
 }
 
+#if defined(__APPLE__) && defined(MLN_RENDER_BACKEND_VULKAN)
+void GLFWView::onWindowRefresh(GLFWwindow *window) {
+    // Untested elsewhere
+    if (auto *view = reinterpret_cast<GLFWView *>(glfwGetWindowUserPointer(window))) {
+        view->invalidate();
+        view->render();
+#if defined(MLN_RENDER_BACKEND_OPENGL)
+        glfwSwapBuffers(window);
+#endif
+    }
+}
+#endif
+
+void GLFWView::render() {
+    if (dirty && rendererFrontend) {
+        MLN_TRACE_ZONE(ReRender);
+
+        dirty = false;
+        const double started = glfwGetTime();
+
+        if (animateRouteCallback) {
+            MLN_TRACE_ZONE(animateRouteCallback);
+
+            animateRouteCallback(map);
+        }
+
+        updateAnimatedAnnotations();
+
+        mbgl::gfx::BackendScope scope{backend->getRendererBackend()};
+
+        rendererFrontend->render();
+
+        if (freeCameraDemoPhase >= 0.0) {
+            updateFreeCameraDemo();
+        }
+
+        report(static_cast<float>(1000 * (glfwGetTime() - started)));
+        if (benchmark) {
+            invalidate();
+        }
+    }
+}
+
 void GLFWView::run() {
     MLN_TRACE_FUNC();
 
@@ -1040,33 +1099,7 @@ void GLFWView::run() {
             glfwPollEvents();
         }
 
-        if (dirty && rendererFrontend) {
-            MLN_TRACE_ZONE(ReRender);
-
-            dirty = false;
-            const double started = glfwGetTime();
-
-            if (animateRouteCallback) {
-                MLN_TRACE_ZONE(animateRouteCallback);
-
-                animateRouteCallback(map);
-            }
-
-            updateAnimatedAnnotations();
-
-            mbgl::gfx::BackendScope scope{backend->getRendererBackend()};
-
-            rendererFrontend->render();
-
-            if (freeCameraDemoPhase >= 0.0) {
-                updateFreeCameraDemo();
-            }
-
-            report(static_cast<float>(1000 * (glfwGetTime() - started)));
-            if (benchmark) {
-                invalidate();
-            }
-        }
+        render();
     };
 
     // Cap frame rate to 60hz if benchmark mode is disabled
@@ -1210,7 +1243,7 @@ void GLFWView::toggleCustomSource() {
 void GLFWView::toggleLocationIndicatorLayer() {
     MLN_TRACE_FUNC();
 
-#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
+#ifdef ENABLE_LOCATION_INDICATOR
     puck = static_cast<mbgl::style::LocationIndicatorLayer *>(map->getStyle().getLayer("puck"));
     static const mbgl::LatLng puckLocation{35.683389, 139.76525}; // A location on the crossing of 4 tiles
     if (puck == nullptr) {
@@ -1275,7 +1308,7 @@ using Nanoseconds = std::chrono::nanoseconds;
 void GLFWView::onWillStartRenderingFrame() {
     MLN_TRACE_FUNC();
 
-#if defined(MLN_RENDER_BACKEND_OPENGL) && !defined(MBGL_LAYER_LOCATION_INDICATOR_DISABLE_ALL)
+#ifdef ENABLE_LOCATION_INDICATOR
     puck = static_cast<mbgl::style::LocationIndicatorLayer *>(map->getStyle().getLayer("puck"));
     if (puck) {
         uint64_t ns = mbgl::Clock::now().time_since_epoch().count();
