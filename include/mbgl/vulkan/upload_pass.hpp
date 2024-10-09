@@ -51,7 +51,9 @@ public:
                                                                         bool persistent) override;
     void updateIndexBufferResource(gfx::IndexBufferResource&, const void* data, std::size_t size) override;
 
-    const gfx::UniqueVertexBufferResource& getBuffer(const gfx::VertexVectorBasePtr&, gfx::BufferUsageType);
+    const gfx::UniqueVertexBufferResource& getBuffer(const gfx::VertexVectorBasePtr&,
+                                                     gfx::BufferUsageType,
+                                                     bool forceUpdate);
 
     gfx::AttributeBindingArray buildAttributeBindings(
         const std::size_t vertexCount,
@@ -61,7 +63,7 @@ public:
         const gfx::VertexAttributeArray& defaults,
         const gfx::VertexAttributeArray& overrides,
         gfx::BufferUsageType,
-        const std::chrono::duration<double> lastUpdate,
+        const std::optional<std::chrono::duration<double>> lastUpdate,
         /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) override;
 
     std::unique_ptr<gfx::TextureResource> createTextureResource(Size,

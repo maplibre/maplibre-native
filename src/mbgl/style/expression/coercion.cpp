@@ -72,6 +72,32 @@ EvaluationResult toColor(const Value& colorValue) {
         });
 }
 
+EvaluationResult toPadding(const Value& paddingValue) {
+    return paddingValue.match(
+        [](const Padding& padding) -> EvaluationResult { return padding; },
+        [&](const std::vector<Value>& components) -> EvaluationResult {
+            const std::size_t len = components.size();
+            const bool isNumeric = std::all_of(components.begin(), components.end(), [](const Value& item) -> bool {
+                return item.template is<double>();
+            });
+            if ((len >= 1 && len <= 4) && isNumeric) {
+                float componentsAsFloats[4] = {0};
+                for (std::size_t i = 0; i < len; i++) {
+                    componentsAsFloats[i] = static_cast<float>(components[i].template get<double>());
+                }
+                return Padding(std::span<float>(componentsAsFloats, len));
+            } else {
+                return EvaluationError{"Invalid padding value " + stringify(paddingValue) +
+                                       ": expected an array containing from one to four "
+                                       "numeric values."};
+            }
+        },
+        [](const double number) -> EvaluationResult { return Padding(static_cast<float>(number)); },
+        [&](const auto&) -> EvaluationResult {
+            return EvaluationError{"Could not parse padding from value '" + stringify(paddingValue) + "'"};
+        });
+}
+
 EvaluationResult toVariableAnchorOffset(const Value& value) {
     return value.match(
         [&](const VariableAnchorOffsetCollection& anchorOffset) -> EvaluationResult { return anchorOffset; },
@@ -130,6 +156,8 @@ CoerceFunction getCoerceFunction(const type::Type& t) {
         return toBoolean;
     } else if (t.is<type::ColorType>()) {
         return toColor;
+    } else if (t.is<type::PaddingType>()) {
+        return toPadding;
     } else if (t.is<type::VariableAnchorOffsetCollectionType>()) {
         return toVariableAnchorOffset;
     } else if (t.is<type::NumberType>()) {
@@ -179,6 +207,7 @@ std::string Coercion::getOperator() const {
     auto s = getType().match(
         [](const type::BooleanType&) -> std::string_view { return "to-boolean"; },
         [](const type::ColorType&) -> std::string_view { return "to-color"; },
+        [](const type::PaddingType&) -> std::string_view { return "to-padding"; },
         [](const type::NumberType&) -> std::string_view { return "to-number"; },
         [](const type::StringType&) -> std::string_view { return "to-string"; },
         [](const type::VariableAnchorOffsetCollectionType&) -> std::string_view { return "to-variableanchoroffset"; },
@@ -194,6 +223,7 @@ ParseResult Coercion::parse(const Convertible& value, ParsingContext& ctx) {
     static std::unordered_map<std::string, type::Type> types{
         {"to-boolean", type::Boolean},
         {"to-color", type::Color},
+        {"to-padding", type::Padding},
         {"to-number", type::Number},
         {"to-string", type::String},
         {"to-variableanchoroffset", type::VariableAnchorOffsetCollection}};
@@ -217,8 +247,9 @@ ParseResult Coercion::parse(const Convertible& value, ParsingContext& ctx) {
 
     /**
      * Special form for error-coalescing coercion expressions "to-number",
-     * "to-color".  Since these coercions can fail at runtime, they accept
-     * multiple arguments, only evaluating one at a time until one succeeds.
+     * "to-color", "to-padding".  Since these coercions can fail at runtime,
+     * they accept multiple arguments, only evaluating one at a time until
+     * one succeeds.
      */
 
     std::vector<std::unique_ptr<Expression>> parsed;

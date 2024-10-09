@@ -191,6 +191,9 @@ public:
 
     /// Returns the current renderability mode of the layer
     bool isLayerRenderable() const noexcept { return isRenderable; }
+
+    /// Remove all the drawables for tiles
+    virtual std::size_t removeAllDrawables();
 #endif
 
     using Dependency = style::expression::Dependency;
@@ -247,9 +250,6 @@ protected:
     /// @return The number of drawables actually removed.
     virtual std::size_t removeTile(RenderPass, const OverscaledTileID&);
 
-    /// Remove all the drawables for tiles
-    virtual std::size_t removeAllDrawables();
-
     /// Update `renderTileIDs` from `renderTiles`
     void updateRenderTileIDs();
 
@@ -275,6 +275,9 @@ protected:
 protected:
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;
+
+    // Retains ownership of tiles
+    Immutable<std::vector<RenderTile>> renderTilesOwner;
 
     // Stores what render passes this layer is currently enabled for. This depends on the
     // evaluated StyleProperties object and is updated accordingly.

@@ -61,6 +61,10 @@ public:
                        const std::optional<std::string>& localFontFamily_);
     ~RenderOrchestrator() override;
 
+#if MLN_RENDER_BACKEND_OPENGL
+    void enableAndroidEmulatorGoldfishMitigation(bool enable) { androidGoldfishMitigationEnabled = enable; }
+#endif
+
     void markContextLost() { contextLost = true; };
     // TODO: Introduce RenderOrchestratorObserver.
     void setObserver(RendererObserver*);
@@ -169,11 +173,13 @@ private:
                                                const std::unordered_map<std::string, const RenderLayer*>&) const;
 
     // GlyphManagerObserver implementation.
+    void onGlyphsLoaded(const FontStack&, const GlyphRange&) override;
     void onGlyphsError(const FontStack&, const GlyphRange&, std::exception_ptr) override;
-
+    void onGlyphsRequested(const FontStack&, const GlyphRange&) override;
     // RenderSourceObserver implementation.
     void onTileChanged(RenderSource&, const OverscaledTileID&) override;
     void onTileError(RenderSource&, const OverscaledTileID&, std::exception_ptr) override;
+    void onTileAction(RenderSource&, TileOperation, const OverscaledTileID&, const std::string&) override;
 
     // ImageManagerObserver implementation
     void onStyleImageMissing(const std::string&, const std::function<void()>&) override;
@@ -209,6 +215,10 @@ private:
     bool contextLost = false;
     bool placedSymbolDataCollected = false;
     bool tileCacheEnabled = true;
+
+#if MLN_RENDER_BACKEND_OPENGL
+    bool androidGoldfishMitigationEnabled{false};
+#endif
 
     // Vectors with reserved capacity of layerImpls->size() to avoid
     // reallocation on each frame.

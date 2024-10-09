@@ -10,6 +10,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/enum.hpp>
 #include <mbgl/util/feature.hpp>
+#include <mbgl/util/padding.hpp>
 #include <mbgl/util/variable_anchor_offset_collection.hpp>
 #include <mbgl/util/variant.hpp>
 
@@ -32,6 +33,7 @@ using ValueBase = variant<NullValue,
                           Collator,
                           Formatted,
                           Image,
+                          Padding,
                           mapbox::util::recursive_wrapper<std::vector<Value>>,
                           mapbox::util::recursive_wrapper<std::unordered_map<std::string, Value>>>;
 struct Value : ValueBase {

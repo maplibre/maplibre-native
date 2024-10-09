@@ -130,6 +130,24 @@ public:
 };
 
 template <>
+struct Interpolator<Padding> {
+public:
+    Padding operator()(const Padding& a, const Padding& b, const float t) const noexcept {
+        return {interpolate(a.top, b.top, t),
+                interpolate(a.right, b.right, t),
+                interpolate(a.bottom, b.bottom, t),
+                interpolate(a.left, b.left, t)};
+    }
+
+    Padding operator()(const Padding& a, const Padding& b, const double t) const noexcept {
+        return {interpolate(a.top, b.top, t),
+                interpolate(a.right, b.right, t),
+                interpolate(a.bottom, b.bottom, t),
+                interpolate(a.left, b.left, t)};
+    }
+};
+
+template <>
 struct Interpolator<VariableAnchorOffsetCollection> {
 public:
     VariableAnchorOffsetCollection operator()(const VariableAnchorOffsetCollection& a,
@@ -139,7 +157,7 @@ public:
             throw std::runtime_error("Cannot interpolate values of different length. from: " + a.toString() +
                                      ", to: " + b.toString());
         }
-        
+
         std::vector<AnchorOffsetPair> offsetMap;
         for (size_t index = 0; index < a.size(); index++) {
             const auto& aPair = a[index];

@@ -48,6 +48,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/style/conversion/geojson_options.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/layer.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/light.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/style/conversion/padding.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/property_value.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/stringify.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/tileset.test.cpp
@@ -96,6 +97,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/memory.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/merge_lines.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/number_conversions.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/padding.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/position.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/projection.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/rotation.test.cpp
@@ -112,6 +114,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/util/token.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/url.test.cpp
     ${PROJECT_SOURCE_DIR}/test/util/tile_server_options.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/util/lru_cache.test.cpp
 )
 
 # MapSnapshotter uses headless backend that is rendering image on a background thread. QT / macOS adaptation for headless backend creates
@@ -136,6 +139,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/test/gl/context.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/gl_functions.test.cpp
             ${PROJECT_SOURCE_DIR}/test/gl/object.test.cpp
+            ${PROJECT_SOURCE_DIR}/test/gl/resource_pool.test.cpp
             ${PROJECT_SOURCE_DIR}/test/renderer/backend_scope.test.cpp
             ${PROJECT_SOURCE_DIR}/test/util/offscreen_texture.test.cpp
     )

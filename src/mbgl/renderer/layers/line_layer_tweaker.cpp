@@ -4,13 +4,14 @@
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/line_drawable_data.hpp>
 #include <mbgl/geometry/line_atlas.hpp>
+#include <mbgl/programs/line_program.hpp>
 #include <mbgl/renderer/image_atlas.hpp>
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/render_tile.hpp>
 #include <mbgl/shaders/line_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/style/layers/line_layer_properties.hpp>
-#include <mbgl/util/convert.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/math.hpp>
 
@@ -35,9 +36,10 @@ constexpr bool diff(Color actual, Color expected, float e = 1.0e-6) {
 
 #if MLN_RENDER_BACKEND_METAL && !defined(NDEBUG)
 template <typename Result>
-std::optional<Result> LineLayerTweaker::gpuEvaluate(const LinePaintProperties::PossiblyEvaluated& evaluated,
-                                                    const PaintParameters& parameters,
-                                                    const std::size_t index) const {
+std::optional<Result> LineLayerTweaker::gpuEvaluate(
+    [[maybe_unused]] const LinePaintProperties::PossiblyEvaluated& evaluated,
+    const PaintParameters& parameters,
+    const std::size_t index) const {
     if (const auto& gpu = gpuExpressions[index]) {
         const float effectiveZoom = (gpu->options & gfx::GPUOptions::IntegerZoom)
                                         ? parameters.state.getIntegerZoom()
@@ -67,6 +69,8 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
     auto& context = parameters.context;
     const auto& evaluated = static_cast<const LineLayerProperties&>(*evaluatedProperties).evaluated;
     const auto& crossfade = static_cast<const LineLayerProperties&>(*evaluatedProperties).crossfade;
+
+    const auto& linePatternValue = evaluated.get<LinePattern>().constantOr(Faded<expression::Image>{"", ""});
 
     const auto zoom = static_cast<float>(parameters.state.getZoom());
     const auto intZoom = parameters.state.getIntegerZoom();
@@ -159,17 +163,27 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
         }
 
         const UnwrappedTileID tileID = drawable.getTileID()->toUnwrapped();
+
+        auto* binders = static_cast<LineProgram::Binders*>(drawable.getBinders());
+        const auto* tile = drawable.getRenderTile();
+        if (!binders || !tile) {
+            assert(false);
+            return;
+        }
+
+        const auto patternPosA = tile->getPattern(linePatternValue.from.id());
+        const auto patternPosB = tile->getPattern(linePatternValue.to.id());
+        binders->setPatternParameters(patternPosA, patternPosB, crossfade);
+
         const auto& translation = evaluated.get<LineTranslate>();
         const auto anchor = evaluated.get<LineTranslateAnchor>();
         constexpr bool nearClipped = false;
         constexpr bool inViewportPixelUnits = false; // from RenderTile::translatedMatrix
-        auto& drawableUniforms = drawable.mutableUniformBuffers();
-
         const auto matrix = getTileMatrix(
             tileID, parameters, translation, anchor, nearClipped, inViewportPixelUnits, drawable);
 
-        const LineType type = static_cast<LineType>(drawable.getType());
-        switch (type) {
+        auto& drawableUniforms = drawable.mutableUniformBuffers();
+        switch (static_cast<LineType>(drawable.getType())) {
             case LineType::Simple: {
                 const LineDrawableUBO drawableUBO = {
                     /*matrix = */ util::cast<float>(matrix),
@@ -178,6 +192,17 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     0,
                     0};
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
+
+                const auto lineInterpolationUBO = LineInterpolationUBO{
+                    /*color_t =*/std::get<0>(binders->get<LineColor>()->interpolationFactor(zoom)),
+                    /*blur_t =*/std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
+                    /*opacity_t =*/std::get<0>(binders->get<LineOpacity>()->interpolationFactor(zoom)),
+                    /*gapwidth_t =*/std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
+                    /*offset_t =*/std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
+                    /*width_t =*/std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
+                    0,
+                    0};
+                drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, context);
             } break;
 
             case LineType::Gradient: {
@@ -188,6 +213,17 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     0,
                     0};
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
+
+                const auto lineGradientInterpolationUBO = LineGradientInterpolationUBO{
+                    /*blur_t =*/std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
+                    /*opacity_t =*/std::get<0>(binders->get<LineOpacity>()->interpolationFactor(zoom)),
+                    /*gapwidth_t =*/std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
+                    /*offset_t =*/std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
+                    /*width_t =*/std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
+                    0,
+                    0,
+                    0};
+                drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineGradientInterpolationUBO, context);
             } break;
 
             case LineType::Pattern: {
@@ -206,6 +242,22 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                     /*ratio =*/1.0f / tileID.pixelsToTileUnits(1.0f, static_cast<float>(zoom)),
                     /*fade =*/crossfade.t};
                 drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
+
+                const auto linePatternInterpolationUBO = LinePatternInterpolationUBO{
+                    /*blur_t =*/std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
+                    /*opacity_t =*/std::get<0>(binders->get<LineOpacity>()->interpolationFactor(zoom)),
+                    /*offset_t =*/std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
+                    /*gapwidth_t =*/std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
+                    /*width_t =*/std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
+                    /*pattern_from_t =*/std::get<0>(binders->get<LinePattern>()->interpolationFactor(zoom)),
+                    /*pattern_to_t =*/std::get<1>(binders->get<LinePattern>()->interpolationFactor(zoom)),
+                    0};
+                drawableUniforms.createOrUpdate(idLineInterpolationUBO, &linePatternInterpolationUBO, context);
+
+                const auto linePatternTilePropertiesUBO = LinePatternTilePropertiesUBO{
+                    /*pattern_from =*/patternPosA ? util::cast<float>(patternPosA->tlbr()) : std::array<float, 4>{0},
+                    /*pattern_to =*/patternPosB ? util::cast<float>(patternPosB->tlbr()) : std::array<float, 4>{0}};
+                drawableUniforms.createOrUpdate(idLineTilePropertiesUBO, &linePatternTilePropertiesUBO, context);
             } break;
 
             case LineType::SDF: {
@@ -245,13 +297,24 @@ void LineLayerTweaker::execute(LayerGroupBase& layerGroup, const PaintParameters
                         0,
                         0};
                     drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, context);
+
+                    const auto lineSDFInterpolationUBO = LineSDFInterpolationUBO{
+                        /*color_t =*/std::get<0>(binders->get<LineColor>()->interpolationFactor(zoom)),
+                        /*blur_t =*/std::get<0>(binders->get<LineBlur>()->interpolationFactor(zoom)),
+                        /*opacity_t =*/std::get<0>(binders->get<LineOpacity>()->interpolationFactor(zoom)),
+                        /*gapwidth_t =*/std::get<0>(binders->get<LineGapWidth>()->interpolationFactor(zoom)),
+                        /*offset_t =*/std::get<0>(binders->get<LineOffset>()->interpolationFactor(zoom)),
+                        /*width_t =*/std::get<0>(binders->get<LineWidth>()->interpolationFactor(zoom)),
+                        /*floorwidth_t =*/
+                        std::get<0>(binders->get<LineFloorWidth>()->interpolationFactor(zoom)),
+                        0};
+                    drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineSDFInterpolationUBO, context);
                 }
             } break;
 
             default: {
-                using namespace std::string_literals;
                 Log::Error(Event::General,
-                           "LineLayerTweaker: unknown line type: "s + std::to_string(mbgl::underlying_type(type)));
+                           "LineLayerTweaker: unknown line type: " + std::to_string(drawable.getType()));
             } break;
         }
     });

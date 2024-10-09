@@ -46,6 +46,7 @@ type::Type parseType(v8::Local<v8::Object> type) {
         {"boolean", type::Boolean},
         {"object", type::Object},
         {"color", type::Color},
+        {"padding", type::Padding},
         {"value", type::Value},
         {"formatted", type::Formatted},
         {"number-format", type::String},
@@ -216,6 +217,13 @@ struct ToValue {
                                              static_cast<double>(color.g),
                                              static_cast<double>(color.b),
                                              static_cast<double>(color.a)});
+    }
+
+    v8::Local<v8::Value> operator()(const mbgl::Padding& padding) {
+        return operator()(std::vector<Value>{static_cast<double>(padding.top),
+                                             static_cast<double>(padding.right),
+                                             static_cast<double>(padding.bottom),
+                                             static_cast<double>(padding.left)});
     }
 
     v8::Local<v8::Value> operator()(const std::unordered_map<std::string, Value>& map) {

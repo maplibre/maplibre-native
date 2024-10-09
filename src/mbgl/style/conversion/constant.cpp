@@ -51,8 +51,9 @@ std::optional<T> Converter<T, typename std::enable_if_t<std::is_enum_v<T>>>::ope
 }
 
 template <class T>
-auto Converter<std::vector<T>, typename std::enable_if_t<std::is_enum_v<T>>>::operator()(
-    const Convertible& value, Error& error) const -> std::optional<std::vector<T>> {
+auto Converter<std::vector<T>, typename std::enable_if_t<std::is_enum_v<T>>>::operator()(const Convertible& value,
+                                                                                         Error& error) const
+    -> std::optional<std::vector<T>> {
     if (!isArray(value)) {
         error.message = "value must be an array";
         return std::nullopt;
@@ -111,6 +112,28 @@ std::optional<Color> Converter<Color>::operator()(const Convertible& value, Erro
     }
 
     return *color;
+}
+
+std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, Error& error) const {
+    std::optional<Padding> result;
+    if (isArray(value)) {
+        if (arrayLength(value) > 0 && arrayLength(value) <= 4) {
+            auto vector = Converter<std::vector<float>>{}(value, error);
+            if (vector) {
+                result = Padding(*vector);
+            }
+        }
+    } else {
+        std::optional<float> number = toNumber(value);
+        if (number) {
+            result = Padding(*number);
+        }
+    }
+
+    if (!result) {
+        error.message = "value must be a number or an array of numbers (between 1 and 4 elements)";
+    }
+    return result;
 }
 
 std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetCollection>::operator()(

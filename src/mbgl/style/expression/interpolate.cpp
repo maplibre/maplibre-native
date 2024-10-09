@@ -232,6 +232,10 @@ ParseResult createInterpolate(type::Type type,
             return ParseResult(
                 std::make_unique<InterpolateImpl<Color>>(type, interpolator, std::move(input), std::move(stops)));
         },
+        [&](const type::PaddingType&) -> ParseResult {
+            return ParseResult(
+                std::make_unique<InterpolateImpl<Padding>>(type, interpolator, std::move(input), std::move(stops)));
+        },
         [&](const type::VariableAnchorOffsetCollectionType&) -> ParseResult {
             return ParseResult(
                 std::make_unique<InterpolateImpl<VariableAnchorOffsetCollection>>(type, interpolator, std::move(input), std::move(stops)));

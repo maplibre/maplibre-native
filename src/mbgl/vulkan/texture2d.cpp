@@ -10,19 +10,22 @@ namespace mbgl {
 namespace vulkan {
 
 bool ImageAllocation::create(const VmaAllocationCreateInfo& allocInfo, const vk::ImageCreateInfo& imageInfo) {
+    VkImage image_;
     VkResult result = vmaCreateImage(
-        allocator, reinterpret_cast<const VkImageCreateInfo*>(&imageInfo), &allocInfo, &image, &allocation, nullptr);
+        allocator, reinterpret_cast<const VkImageCreateInfo*>(&imageInfo), &allocInfo, &image_, &allocation, nullptr);
 
     if (result != VK_SUCCESS) {
         return false;
     }
 
+    image = vk::Image(image_);
     return true;
 }
 
 void ImageAllocation::destroy() {
     imageView.reset();
-    vmaDestroyImage(allocator, image, allocation);
+    vmaDestroyImage(allocator, VkImage(image), allocation);
+    image = nullptr;
 }
 
 void ImageAllocation::setName([[maybe_unused]] const std::string& name) const {
@@ -493,7 +496,7 @@ std::shared_ptr<PremultipliedImage> Texture2D::readImage() {
     if (imageSize == layout.arrayPitch) {
         memcpy(imageData->data.get(), mappedData, imageSize);
     } else {
-        uint32_t rowSize = size.width * getPixelStride();
+        auto rowSize = static_cast<uint32_t>(size.width * getPixelStride());
         for (uint32_t i = 0; i < size.height; ++i) {
             memcpy(imageData->data.get() + rowSize * i, mappedData + layout.rowPitch * i, rowSize);
         }

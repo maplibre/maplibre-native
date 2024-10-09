@@ -54,13 +54,15 @@ public:
 
     void beginFrame() override;
     void endFrame() override;
+    void submitFrame();
     void waitFrame() const;
 
     std::unique_ptr<gfx::CommandEncoder> createCommandEncoder() override;
 
     BufferResource createBuffer(const void* data, std::size_t size, std::uint32_t usage, bool persistent) const;
 
-    UniqueShaderProgram createProgram(std::string name,
+    UniqueShaderProgram createProgram(shaders::BuiltIn shaderID,
+                                      std::string name,
                                       const std::string_view vertex,
                                       const std::string_view fragment,
                                       const ProgramParameters& programParameters,
@@ -144,6 +146,8 @@ public:
     void enqueueDeletion(std::function<void(const Context&)>&& function);
     void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
 
+    void requestSurfaceUpdate() { surfaceUpdateRequested = true; }
+
 private:
     struct FrameResources {
         vk::UniqueCommandBuffer commandBuffer;
@@ -188,6 +192,7 @@ private:
 
     uint8_t frameResourceIndex = 0;
     std::vector<FrameResources> frameResources;
+    bool surfaceUpdateRequested{false};
 
     struct {
         gfx::ShaderProgramBasePtr shader;

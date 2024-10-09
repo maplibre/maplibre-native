@@ -28,9 +28,6 @@ void TileLayerGroupGL::upload(gfx::UploadPass& uploadPass) {
         return;
     }
 
-    MLN_TRACE_FUNC()
-    MLN_ZONE_STR(name)
-
     visitDrawables([&](gfx::Drawable& drawable) {
         if (!drawable.getEnabled()) {
             return;
@@ -56,7 +53,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
         return;
     }
 
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
 
     auto& context = static_cast<gl::Context&>(parameters.context);
 
@@ -69,7 +66,7 @@ void TileLayerGroupGL::render(RenderOrchestrator&, PaintParameters& parameters) 
     gfx::StencilMode stencilMode3d;
 
     if (getDrawableCount()) {
-        MLN_TRACE_ZONE(clip masks)
+        MLN_TRACE_ZONE(clip masks);
 #if !defined(NDEBUG)
         const auto label_clip = getName() + (getName().empty() ? "" : "-") + "tile-clip-masks";
         const auto debugGroupClip = parameters.encoder->createDebugGroup(label_clip.c_str());
@@ -158,7 +155,7 @@ void TileLayerGroupGL::bindUniformBuffers() const {
 }
 
 void TileLayerGroupGL::unbindUniformBuffers() const {
-    MLN_TRACE_FUNC()
+    MLN_TRACE_FUNC();
     for (size_t id = 0; id < uniformBuffers.allocatedSize(); id++) {
         const auto& uniformBuffer = uniformBuffers.get(id);
         if (!uniformBuffer) continue;

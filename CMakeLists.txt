@@ -34,11 +34,11 @@ if (MLN_WITH_QT AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
     set(CMAKE_OSX_DEPLOYMENT_TARGET 13.0)
 endif()
 
-if(WIN32 AND NOT MLN_WITH_QT)
+if(WIN32 AND NOT MLN_WITH_QT AND NOT CMAKE_SYSTEM_NAME STREQUAL Android)
     set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/platform/windows/custom-toolchain.cmake)
 endif()
 
-project("Mapbox GL Native" LANGUAGES CXX C)
+project("MapLibre Native" LANGUAGES CXX C)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER MapLibre)
@@ -252,6 +252,8 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/layer_manager.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/line_layer_factory.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/location_indicator_layer.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/location_indicator_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/raster_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/symbol_layer_factory.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/map/bound_options.hpp
@@ -369,12 +371,16 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/raster_dem_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/raster_source.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/sources/vector_source.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/style/sprite.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/style.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/style_property.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/transition_options.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/types.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/style/undefined.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/text/glyph.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/text/glyph_range.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_id.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_operation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/tile/tile_necessity.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/async_request.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/async_task.hpp
@@ -396,6 +402,7 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/geo.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/geojson.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/geometry.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/hash.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/identity.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/ignore.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/image.hpp
@@ -404,11 +411,14 @@ list(APPEND INCLUDE_FILES
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/instrumentation.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/interpolate.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/logging.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/lru_cache.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/noncopyable.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/padding.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/platform.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/premultiply.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/projection.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/range.hpp
+    ${PROJECT_SOURCE_DIR}/include/mbgl/util/rect.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/run_loop.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/scoped.hpp
     ${PROJECT_SOURCE_DIR}/include/mbgl/util/size.hpp
@@ -497,6 +507,14 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/line_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/raster_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/symbol_layer_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/location_indicator_layer_factory.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_location_indicator_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_location_indicator_layer.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_impl.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layout/circle_layout.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layout/clip_lines.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/layout/clip_lines.hpp
@@ -757,7 +775,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/expression/within.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/filter.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/image.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/style/sprite.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/sprite.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/image_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/image_impl.hpp
@@ -851,6 +868,8 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/custom_layer_factory.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/custom_layer_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_layer.cpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_layer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/bidi.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/check_max_angle.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/check_max_angle.hpp
@@ -863,7 +882,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/get_anchors.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/get_anchors.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph.cpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph_atlas.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph_atlas.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph_manager.cpp
@@ -871,7 +889,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph_manager_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph_pbf.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph_pbf.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/text/glyph_range.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/language_tag.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/language_tag.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/text/local_glyph_rasterizer.hpp
@@ -910,6 +927,7 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_id_io.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_loader.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_loader_impl.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_loader_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_observer.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/tile/vector_tile.hpp
@@ -932,7 +950,6 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/geometry_util.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/grid_index.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/grid_index.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/hash.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/http_header.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/http_header.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/http_timeout.cpp
@@ -957,11 +974,11 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/mat4.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/mat4.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/math.hpp
+    ${PROJECT_SOURCE_DIR}/src/mbgl/util/padding.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/premultiply.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/quaternion.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/rapidjson.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/rapidjson.hpp
-    ${PROJECT_SOURCE_DIR}/src/mbgl/util/rect.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/std.hpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/stopwatch.cpp
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/stopwatch.hpp
@@ -1005,9 +1022,7 @@ if(MLN_WITH_OPENGL)
         INCLUDE_FILES
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderable_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/gl/renderer_backend.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/layermanager/location_indicator_layer_factory.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/platform/gl_functions.hpp
-            ${PROJECT_SOURCE_DIR}/include/mbgl/style/layers/location_indicator_layer.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_source.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/shader_manifest.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/gl/shader_group_gl.hpp
@@ -1089,13 +1104,13 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/offscreen_texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/offscreen_texture.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/program.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_layer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_custom_layer.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_pass.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/render_pass.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderbuffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderbuffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/renderer_backend.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/resource_pool.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/resource_pool.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/state.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/texture.hpp
@@ -1114,15 +1129,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_array.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/vertex_buffer_resource.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/layermanager/location_indicator_layer_factory.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/platform/gl_functions.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_location_indicator_layer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/render_location_indicator_layer.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_impl.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_impl.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.cpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/style/layers/location_indicator_layer_properties.hpp
     )
 
     if(MLN_DRAWABLE_RENDERER)
@@ -1318,6 +1325,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/line.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/raster.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/symbol.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/shaders/vulkan/widevector.hpp
     )
 
     list(APPEND 
@@ -1352,6 +1360,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/line.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/raster.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/symbol.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/vulkan/widevector.cpp
     )
 endif()
 
@@ -1439,20 +1448,10 @@ include(${PROJECT_SOURCE_DIR}/vendor/polylabel.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/protozero.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/tracy.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/unique_resource.cmake)
+include(${PROJECT_SOURCE_DIR}/vendor/unordered_dense.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/vector-tile.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/wagyu.cmake)
 include(${PROJECT_SOURCE_DIR}/vendor/metal-cpp.cmake)
-
-
-add_subdirectory(${PROJECT_SOURCE_DIR}/vendor/unordered_dense)
-set_target_properties(
-    unordered_dense
-    PROPERTIES
-        INTERFACE_MAPBOX_NAME "unordered_dense"
-        INTERFACE_MAPBOX_URL "https://github.com/martinus/unordered_dense"
-        INTERFACE_MAPBOX_AUTHOR "Martin Leitner-Ankerl"
-        INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/vendor/unordered_dense/LICENSE
-)
 
 target_link_libraries(
     mbgl-core
@@ -1535,10 +1534,10 @@ endif()
 set_target_properties(
     mbgl-core
     PROPERTIES
-        INTERFACE_MAPBOX_NAME "Mapbox GL Native"
-        INTERFACE_MAPBOX_URL "https://github.com/maplibre/maplibre-native"
-        INTERFACE_MAPBOX_AUTHOR "Mapbox"
-        INTERFACE_MAPBOX_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.md
+        INTERFACE_MAPLIBRE_NAME "MapLibre Native"
+        INTERFACE_MAPLIBRE_URL "https://github.com/maplibre/maplibre-native"
+        INTERFACE_MAPLIBRE_AUTHOR "MapLibre"
+        INTERFACE_MAPLIBRE_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.md
 )
 
 set_property(TARGET mbgl-core PROPERTY FOLDER MapLibre)

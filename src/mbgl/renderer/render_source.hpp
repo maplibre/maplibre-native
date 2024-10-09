@@ -76,6 +76,7 @@ public:
     // If supported, returns pointer to image data; returns nullptr otherwise.
     virtual const ImageSourceRenderData* getImageRenderData() const { return nullptr; }
     virtual const Tile* getRenderedTile(const UnwrappedTileID&) const { return nullptr; }
+    virtual Immutable<std::vector<RenderTile>> getRawRenderTiles() const;
 
     virtual std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,
@@ -121,6 +122,7 @@ protected:
 
     void onTileChanged(Tile&) override;
     void onTileError(Tile&, std::exception_ptr) final;
+    void onTileAction(OverscaledTileID, std::string, TileOperation) override;
 };
 
 } // namespace mbgl

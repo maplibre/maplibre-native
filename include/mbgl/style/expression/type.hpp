@@ -44,6 +44,12 @@ struct ColorType {
     bool operator==(const ColorType&) const { return true; }
 };
 
+struct PaddingType {
+    constexpr PaddingType() = default;
+    std::string getName() const { return "padding"; }
+    bool operator==(const PaddingType&) const { return true; }
+};
+
 struct VariableAnchorOffsetCollectionType {
     constexpr VariableAnchorOffsetCollectionType() = default;
     std::string getName() const { return "variableAnchorOffsetCollection"; }
@@ -91,6 +97,7 @@ constexpr NumberType Number;
 constexpr StringType String;
 constexpr BooleanType Boolean;
 constexpr ColorType Color;
+constexpr PaddingType Padding;
 constexpr VariableAnchorOffsetCollectionType VariableAnchorOffsetCollection;
 constexpr ValueType Value;
 constexpr ObjectType Object;
@@ -106,6 +113,7 @@ using Type = variant<NullType,
                      BooleanType,
                      StringType,
                      ColorType,
+                     PaddingType,
                      VariableAnchorOffsetCollectionType,
                      ObjectType,
                      ValueType,

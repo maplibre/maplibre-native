@@ -102,6 +102,11 @@ void stringify(Writer& writer, const std::array<double, 3>& v) {
 }
 
 template <class Writer>
+void stringify(Writer& writer, const Padding& v) {
+    stringify(writer, v.toArray());
+}
+
+template <class Writer>
 void stringify(Writer&, const Value&);
 
 template <class Writer, class T>

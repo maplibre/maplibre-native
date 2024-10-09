@@ -422,9 +422,26 @@ public class SymbolLayerTest extends BaseLayerTest {
     assertNull(layer.getIconPadding().getValue());
 
     // Set and Get
-    Float propertyValue = 0.3f;
+    Float[] propertyValue = {2.0f, 2.0f, 2.0f, 2.0f};
     layer.setProperties(iconPadding(propertyValue));
     assertEquals(layer.getIconPadding().getValue(), propertyValue);
+    // Single number value can be used too for backward compatibility
+    Float number = propertyValue[0] + 1.0f;
+    layer.setProperties(iconPadding(number));
+    assertEquals(layer.getIconPadding().getValue(), new Float[]{number, number, number, number});
+  }
+
+  @Test
+  @UiThreadTest
+  public void testIconPaddingAsExpression() {
+    Timber.i("icon-padding-expression");
+    assertNotNull(layer);
+    assertNull(layer.getIconPadding().getExpression());
+
+    // Set and Get
+    Expression expression = toPadding(Expression.get("undefined"));
+    layer.setProperties(iconPadding(expression));
+    assertEquals(layer.getIconPadding().getExpression(), expression);
   }
 
   @Test

@@ -23,13 +23,10 @@ void BufferDeleter::operator()(BufferID id) const {
 
 void TextureDeleter::operator()(TextureID id) const {
     assert(context);
-    if (context->pooledTextures.size() >= TextureMax) {
-        context->abandonedTextures.push_back(id);
-    } else {
-        context->pooledTextures.push_back(id);
-    }
+    context->abandonedTextures.push_back(id);
     context->renderingStats().numActiveTextures--;
     assert(context->renderingStats().numActiveTextures >= 0);
+    assert(context->renderingStats().numActiveTextures < context->renderingStats().numCreatedTextures);
 }
 
 void VertexArrayDeleter::operator()(VertexArrayID id) const {

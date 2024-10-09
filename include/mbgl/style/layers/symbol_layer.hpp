@@ -53,9 +53,9 @@ public:
     const PropertyValue<bool>& getIconOptional() const;
     void setIconOptional(const PropertyValue<bool>&);
 
-    static PropertyValue<float> getDefaultIconPadding();
-    const PropertyValue<float>& getIconPadding() const;
-    void setIconPadding(const PropertyValue<float>&);
+    static PropertyValue<Padding> getDefaultIconPadding();
+    const PropertyValue<Padding>& getIconPadding() const;
+    void setIconPadding(const PropertyValue<Padding>&);
 
     static PropertyValue<AlignmentType> getDefaultIconPitchAlignment();
     const PropertyValue<AlignmentType>& getIconPitchAlignment() const;
