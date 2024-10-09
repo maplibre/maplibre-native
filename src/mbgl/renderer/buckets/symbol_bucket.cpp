@@ -370,10 +370,10 @@ bool SymbolBucket::hasVariableTextAnchors() const {
                 return true;
             }
         }
-        
+
         return false;
     };
-    
+
     return hasTextVariableAnchorOffset() || !layout->get<TextVariableAnchor>().empty();
 }
 

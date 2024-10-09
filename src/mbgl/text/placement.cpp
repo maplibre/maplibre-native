@@ -474,13 +474,9 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                             }
                         }
 
-                        variableOffsets.insert(std::make_pair(symbolInstance.getCrossTileID(),
-                                                              VariableOffset{variableTextOffset,
-                                                                             width,
-                                                                             height,
-                                                                             anchor,
-                                                                             textBoxScale,
-                                                                             prevAnchor}));
+                        variableOffsets.insert(std::make_pair(
+                            symbolInstance.getCrossTileID(),
+                            VariableOffset{variableTextOffset, width, height, anchor, textBoxScale, prevAnchor}));
 
                         if (bucket.allowVerticalPlacement) {
                             placedOrientations.emplace(symbolInstance.getCrossTileID(), orientation);
