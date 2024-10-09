@@ -136,10 +136,9 @@ android {
     }
 
     buildTypes {
-        getByName("debug") {
+        debug {
             isTestCoverageEnabled = false
             isJniDebuggable = true
-//            debuggable = true
         }
     }
 
@@ -183,14 +182,15 @@ fun getGitRevision(shortRev: Boolean = true): String {
     val proc = Runtime.getRuntime().exec(cmd)
     return proc.inputStream.bufferedReader().readText().trim()
 }
-//in gradle kotlin dsl checkstyle is failing due to this
-/*configurations {
-    all {
+
+configurations {
+    getByName("implementation") {
         exclude(group = "commons-logging", module = "commons-logging")
         exclude(group = "commons-collections", module = "commons-collections")
     }
-}*/
+}
+
 apply<DownloadVulkanValidationPlugin>()
 
 // intentionally disabled
-// apply(from = "${rootDir}/gradle/jacoco-report.gradle")
+// apply(plugin = "maplibre.jacoco-report")

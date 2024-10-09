@@ -1,5 +1,22 @@
 import java.net.URL
 
+
+/**
+ * Download validation layer binary release zip file from Khronos github repo
+ *    https://github.com/KhronosGroup/Vulkan-ValidationLayers/releases
+ *
+ * To use this script, add the following to your module's build.gradle:
+ *     ext.vvl_version='your-new-version'
+ *     apply from: "${PATH-TO-THIS}/download_vvl.gradle"
+ * To update to a new version:
+ *   - change the ext.vvl_version to a new version string.
+ *   - delete directory pointed by ${vvlJniLibDir}.
+ *   - sync gradle script in IDE and rebuild project.
+ *
+ * Note: binary release can also be manually downloaded and put it into
+ *       the default jniLibs directory at app/src/main/jniLibs.
+ */
+
 // Define the validation layer version, with a default value.
 var vvlVersion = "1.3.290.0"
 if (extra.has("vvl_version")) {
