@@ -51,7 +51,10 @@ PaintParameters::PaintParameters(gfx::Context& context_,
                                  RenderStaticData& staticData_,
                                  LineAtlas& lineAtlas_,
                                  PatternAtlas& patternAtlas_,
-                                 uint64_t frameCount_)
+                                 uint64_t frameCount_,
+                                 double tileLodMinRadius_,
+                                 double tileLodScale_,
+                                 double tileLodPitchThreshold_)
     : context(context_),
       backend(backend_),
       encoder(context.createCommandEncoder()),
@@ -71,7 +74,10 @@ PaintParameters::PaintParameters(gfx::Context& context_,
       programs(staticData_.programs),
 #endif
       shaders(*staticData_.shaders),
-      frameCount(frameCount_) {
+      frameCount(frameCount_),
+      tileLodMinRadius(tileLodMinRadius_),
+      tileLodScale(tileLodScale_),
+      tileLodPitchThreshold(tileLodPitchThreshold_) {
     pixelsToGLUnits = {{2.0f / state.getSize().width, -2.0f / state.getSize().height}};
 
     if (state.getViewportMode() == ViewportMode::FlippedY) {
