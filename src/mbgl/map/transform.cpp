@@ -60,6 +60,23 @@ void Transform::resize(const Size size) {
     double scale{state.getScale()};
     double x{state.getX()};
     double y{state.getY()};
+
+    double lat;
+    double lon;
+    if (state.constrainScreen(scale, lat, lon)) {
+        // Turns out that if you resize during a transition any changes made to the state will be ignored :(
+        // So if we have to constrain because of a resize and a transition is in progress - cancel the transition!
+        if (inTransition()) {
+            cancelTransitions();
+        }
+
+        // It also turns out that state.setProperties isn't enough if you change the center, you need to set Cc and Bc
+        // too, which setLatLngZoom does.
+        state.setLatLngZoom(mbgl::LatLng{lat, lon}, state.scaleZoom(scale));
+        observer.onCameraDidChange(MapObserver::CameraChangeMode::Immediate);
+
+        return;
+    }
     state.constrain(scale, x, y);
     state.setProperties(TransformStateProperties().withScale(scale).withX(x).withY(y));
 
@@ -86,17 +103,23 @@ void Transform::jumpTo(const CameraOptions& camera) {
  * smooth animation between old and new values. The map will retain the current
  * values for any options not included in `options`.
  */
-void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& animation) {
+void Transform::easeTo(const CameraOptions& inputCamera, const AnimationOptions& animation) {
+    CameraOptions camera = inputCamera;
+
     Duration duration = animation.duration.value_or(Duration::zero());
     if (state.getLatLngBounds() == LatLngBounds() && !isGestureInProgress() && duration != Duration::zero()) {
         // reuse flyTo, without exaggerated animation, to achieve constant ground speed.
         return flyTo(camera, animation, true);
     }
+
+    double zoom = camera.zoom.value_or(getZoom());
+    state.constrainCameraAndZoomToBounds(camera, zoom);
+
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     LatLng startLatLng = getLatLng(LatLng::Unwrapped);
     const LatLng& unwrappedLatLng = camera.center.value_or(startLatLng);
     const LatLng& latLng = state.getLatLngBounds() != LatLngBounds() ? unwrappedLatLng : unwrappedLatLng.wrapped();
-    double zoom = camera.zoom.value_or(getZoom());
+
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
 
@@ -176,10 +199,17 @@ void Transform::easeTo(const CameraOptions& camera, const AnimationOptions& anim
 
     Where applicable, local variable documentation begins with the associated
     variable or function in van Wijk (2003). */
-void Transform::flyTo(const CameraOptions& camera, const AnimationOptions& animation, bool linearZoomInterpolation) {
+void Transform::flyTo(const CameraOptions& inputCamera,
+                      const AnimationOptions& animation,
+                      bool linearZoomInterpolation) {
+    CameraOptions camera = inputCamera;
+
+    double zoom = camera.zoom.value_or(getZoom());
+    state.constrainCameraAndZoomToBounds(camera, zoom);
+
     const EdgeInsets& padding = camera.padding.value_or(state.getEdgeInsets());
     const LatLng& latLng = camera.center.value_or(getLatLng(LatLng::Unwrapped)).wrapped();
-    double zoom = camera.zoom.value_or(getZoom());
+
     double bearing = camera.bearing ? util::deg2rad(-*camera.bearing) : getBearing();
     double pitch = camera.pitch ? util::deg2rad(*camera.pitch) : getPitch();
 
