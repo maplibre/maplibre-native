@@ -362,8 +362,7 @@ bool SymbolBucket::hasVariableTextAnchors() const {
         if (tvao.isConstant()) {
             const auto constValue = tvao.constant();
             return constValue && !constValue->empty();
-        }
-        else if (tvao.isExpression()) {
+        } else if (tvao.isExpression()) {
             return true;
         }
 
