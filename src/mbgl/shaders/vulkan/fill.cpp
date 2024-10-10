@@ -1,4 +1,7 @@
 #include <mbgl/shaders/vulkan/fill.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/shaders/fill_layer_ubo.hpp>
+#include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -78,8 +81,8 @@ const std::array<AttributeInfo, 2>
 const std::array<UniformBlockInfo, 3> ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan>::uniforms =
     {
         UniformBlockInfo{true, false, sizeof(FillExtrusionDrawableUBO), idFillExtrusionDrawableUBO},
-        UniformBlockInfo{true, false, sizeof(FillExtrusionPropsUBO), idFillExtrusionPropsUBO},
         UniformBlockInfo{true, false, sizeof(FillExtrusionInterpolateUBO), idFillExtrusionInterpolateUBO},
+        UniformBlockInfo{true, false, sizeof(FillExtrusionPropsUBO), idFillExtrusionPropsUBO},
 };
 const std::array<AttributeInfo, 5> ShaderSource<BuiltIn::FillExtrusionShader, gfx::Backend::Type::Vulkan>::attributes =
     {
@@ -94,9 +97,9 @@ const std::array<UniformBlockInfo, 5>
     ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan>::uniforms = {
         UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
         UniformBlockInfo{true, true, sizeof(FillExtrusionDrawableUBO), idFillExtrusionDrawableUBO},
-        UniformBlockInfo{true, true, sizeof(FillExtrusionPropsUBO), idFillExtrusionPropsUBO},
         UniformBlockInfo{true, true, sizeof(FillExtrusionTilePropsUBO), idFillExtrusionTilePropsUBO},
         UniformBlockInfo{true, false, sizeof(FillExtrusionInterpolateUBO), idFillExtrusionInterpolateUBO},
+        UniformBlockInfo{true, true, sizeof(FillExtrusionPropsUBO), idFillExtrusionPropsUBO},
 };
 const std::array<AttributeInfo, 6>
     ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Vulkan>::attributes = {

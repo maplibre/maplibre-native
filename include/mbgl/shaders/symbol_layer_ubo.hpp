@@ -65,13 +65,5 @@ struct alignas(16) SymbolEvaluatedPropsUBO {
 };
 static_assert(sizeof(SymbolEvaluatedPropsUBO) == 6 * 16);
 
-enum {
-    idSymbolDrawableUBO = globalUBOCount,
-    idSymbolTilePropsUBO,
-    idSymbolInterpolateUBO,
-    idSymbolEvaluatedPropsUBO,
-    symbolUBOCount
-};
-
 } // namespace shaders
 } // namespace mbgl

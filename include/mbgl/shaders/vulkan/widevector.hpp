@@ -35,7 +35,7 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Vulkan> {
 #define WKSVertexLineCapButt    1
 #define WKSVertexLineCapSquare  2
 
-layout(set = 0, binding = 1) uniform WideVectorUniformsUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform WideVectorUniformsUBO {
     mat4 mvpMatrix;
     mat4 mvpMatrixDiff;
     mat4 mvMatrix;
@@ -45,7 +45,7 @@ layout(set = 0, binding = 1) uniform WideVectorUniformsUBO {
     vec2 frameSize;
 } uniforms;
 
-layout(set = 0, binding = 2) uniform WideVectorUniformWideVecUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform WideVectorUniformWideVecUBO {
     vec4 color;
     float w2;
     float offset;
@@ -153,14 +153,14 @@ void main() {
 layout(location = 0) in vec2 frag_uv;
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform DebugUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform DebugUBO {
     mat4 matrix;
     vec4 color;
     float overlay_scale;
     float pad1, pad2, pad3;
 } debug;
 
-layout(set = 1, binding = 0) uniform sampler2D image_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image_sampler;
 
 void main() {
     vec4 overlay_color = texture(image_sampler, frag_uv);

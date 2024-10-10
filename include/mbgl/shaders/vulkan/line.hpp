@@ -44,13 +44,13 @@ layout(location = 6) in vec2 in_offset;
 layout(location = 7) in vec2 in_width;
 #endif
 
-layout(set = 0, binding = 1) uniform LineDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineDrawableUBO {
     mat4 matrix;
     mediump float ratio;
     float pad1, pad2, pad3;
 } drawable;
 
-layout(set = 0, binding = 2) uniform LineInterpolationUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineInterpolationUBO {
     float color_t;
     float blur_t;
     float opacity_t;
@@ -60,7 +60,7 @@ layout(set = 0, binding = 2) uniform LineInterpolationUBO {
     float pad1, pad2;
 } interp;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -186,7 +186,7 @@ layout(location = 5) in lowp float frag_opacity;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -271,13 +271,13 @@ layout(location = 5) in vec2 in_offset;
 layout(location = 6) in vec2 in_width;
 #endif
 
-layout(set = 0, binding = 1) uniform LineDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineDrawableUBO {
     mat4 matrix;
     mediump float ratio;
     float pad1, pad2, pad3;
 } drawable;
 
-layout(set = 0, binding = 2) uniform LineInterpolationUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineInterpolationUBO {
     float color_t;
     float blur_t;
     float opacity_t;
@@ -287,7 +287,7 @@ layout(set = 0, binding = 2) uniform LineInterpolationUBO {
     float pad1, pad2;
 } interp;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -402,11 +402,11 @@ layout(location = 4) in lowp float frag_blur;
 layout(location = 5) in lowp float frag_opacity;
 #endif
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -497,7 +497,7 @@ layout(location = 7) in uvec4 in_pattern_from;
 layout(location = 8) in uvec4 in_pattern_to;
 #endif
 
-layout(set = 0, binding = 1) uniform LineDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineDrawableUBO {
     mat4 matrix;
     vec4 scale;
     vec2 texsize;
@@ -505,7 +505,7 @@ layout(set = 0, binding = 1) uniform LineDrawableUBO {
     float fade;
 } drawable;
 
-layout(set = 0, binding = 2) uniform LineInterpolationUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineInterpolationUBO {
     float blur_t;
     float opacity_t;
     float offset_t;
@@ -516,12 +516,12 @@ layout(set = 0, binding = 2) uniform LineInterpolationUBO {
     float pad1;
 } interp;
 
-layout(set = 0, binding = 3) uniform LinePatternTilePropertiesUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform LinePatternTilePropertiesUBO {
     vec4 pattern_from;
     vec4 pattern_to;
 } tile;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -663,7 +663,7 @@ layout(location = 7) in mediump vec4 frag_pattern_to;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform LineDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineDrawableUBO {
     mat4 matrix;
     vec4 scale;
     vec2 texsize;
@@ -671,12 +671,12 @@ layout(set = 0, binding = 1) uniform LineDrawableUBO {
     float fade;
 } drawable;
 
-layout(set = 0, binding = 3) uniform LinePatternTilePropertiesUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 2) uniform LinePatternTilePropertiesUBO {
     vec4 pattern_from;
     vec4 pattern_to;
 } tile;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -688,7 +688,7 @@ layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
     float pad1;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 
@@ -808,7 +808,7 @@ layout(location = 7) in vec2 in_width;
 layout(location = 8) in vec2 in_floorwidth;
 #endif
 
-layout(set = 0, binding = 1) uniform LineSDFDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineSDFDrawableUBO {
     mat4 matrix;
     vec2 patternscale_a;
     vec2 patternscale_b;
@@ -820,7 +820,7 @@ layout(set = 0, binding = 1) uniform LineSDFDrawableUBO {
     float pad1, pad2, pad3;
 } drawable;
 
-layout(set = 0, binding = 2) uniform LineSDFInterpolationUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineSDFInterpolationUBO {
     float color_t;
     float blur_t;
     float opacity_t;
@@ -831,7 +831,7 @@ layout(set = 0, binding = 2) uniform LineSDFInterpolationUBO {
     float pad1;
 } interp;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -982,7 +982,7 @@ layout(location = 8) in mediump float frag_floorwidth;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform LineSDFDrawableUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform LineSDFDrawableUBO {
     mat4 matrix;
     vec2 patternscale_a;
     vec2 patternscale_b;
@@ -994,7 +994,7 @@ layout(set = 0, binding = 1) uniform LineSDFDrawableUBO {
     float pad1, pad2, pad3;
 } drawable;
 
-layout(set = 0, binding = 2) uniform LineSDFInterpolationUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 1) uniform LineSDFInterpolationUBO {
     float color_t;
     float blur_t;
     float opacity_t;
@@ -1005,7 +1005,7 @@ layout(set = 0, binding = 2) uniform LineSDFInterpolationUBO {
     float pad1;
 } interp;
 
-layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
+layout(set = LAYER_SET_INDEX, binding = 0) uniform LineEvaluatedPropsUBO {
     vec4 color;
     float blur;
     float opacity;
@@ -1017,7 +1017,7 @@ layout(set = 0, binding = 4) uniform LineEvaluatedPropsUBO {
     float pad1;
 } props;
 
-layout(set = 1, binding = 0) uniform sampler2D image0_sampler;
+layout(set = DRAWABLE_IMAGE_SET_INDEX, binding = 0) uniform sampler2D image0_sampler;
 
 void main() {
 

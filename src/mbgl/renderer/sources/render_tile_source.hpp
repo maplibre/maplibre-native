@@ -91,6 +91,8 @@ private:
     std::optional<Tileset> cachedTileset;
 };
 
+class PolylineLayerTweaker;
+
 class TileSourceRenderItem : public RenderItem {
 public:
     TileSourceRenderItem(Immutable<std::vector<RenderTile>> renderTiles_, std::string name_)
@@ -109,6 +111,8 @@ private:
 
     Immutable<std::vector<RenderTile>> renderTiles;
     std::string name;
+
+    mutable std::shared_ptr<PolylineLayerTweaker> layerTweaker;
 };
 
 } // namespace mbgl

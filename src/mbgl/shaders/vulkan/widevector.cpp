@@ -1,4 +1,6 @@
 #include <mbgl/shaders/vulkan/widevector.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/shaders/widevector_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {

@@ -68,8 +68,8 @@ constant const float ZERO = 1.0 / 255.0 / 16.0;
 
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const HeatmapDrawableUBO& drawable [[buffer(1)]],
-                                device const HeatmapEvaluatedPropsUBO& props [[buffer(2)]],
-                                device const HeatmapInterpolateUBO& interp [[buffer(3)]]) {
+                                device const HeatmapInterpolateUBO& interp [[buffer(2)]],
+                                device const HeatmapEvaluatedPropsUBO& props [[buffer(3)]]) {
 
 #if defined(HAS_UNIFORM_u_weight)
     const auto weight = props.weight;
@@ -117,7 +117,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const HeatmapEvaluatedPropsUBO& props [[buffer(2)]]) {
+                            device const HeatmapEvaluatedPropsUBO& props [[buffer(3)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif

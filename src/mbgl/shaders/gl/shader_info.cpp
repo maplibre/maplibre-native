@@ -47,8 +47,8 @@ const std::vector<TextureInfo> ShaderInfo<BuiltIn::BackgroundPatternShader, gfx:
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::CircleShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
     UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
     UniformBlockInfo{"CircleDrawableUBO", idCircleDrawableUBO},
-    UniformBlockInfo{"CircleEvaluatedPropsUBO", idCircleEvaluatedPropsUBO},
     UniformBlockInfo{"CircleInterpolateUBO", idCircleInterpolateUBO},
+    UniformBlockInfo{"CircleEvaluatedPropsUBO", idCircleEvaluatedPropsUBO},
 };
 const std::vector<AttributeInfo> ShaderInfo<BuiltIn::CircleShader, gfx::Backend::Type::OpenGL>::attributes = {
     AttributeInfo{"a_pos", idCirclePosVertexAttribute},
@@ -200,9 +200,9 @@ const std::vector<TextureInfo>
 const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
         UniformBlockInfo{"FillExtrusionDrawableUBO", idFillExtrusionDrawableUBO},
-        UniformBlockInfo{"FillExtrusionPropsUBO", idFillExtrusionPropsUBO},
         UniformBlockInfo{"FillExtrusionTilePropsUBO", idFillExtrusionTilePropsUBO},
         UniformBlockInfo{"FillExtrusionInterpolateUBO", idFillExtrusionInterpolateUBO},
+        UniformBlockInfo{"FillExtrusionPropsUBO", idFillExtrusionPropsUBO},
 };
 const std::vector<AttributeInfo> ShaderInfo<BuiltIn::FillExtrusionShader, gfx::Backend::Type::OpenGL>::attributes = {
     AttributeInfo{"a_pos", idFillExtrusionPosVertexAttribute},
@@ -218,9 +218,9 @@ const std::vector<UniformBlockInfo>
     ShaderInfo<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
         UniformBlockInfo{"GlobalPaintParamsUBO", idGlobalPaintParamsUBO},
         UniformBlockInfo{"FillExtrusionDrawableUBO", idFillExtrusionDrawableUBO},
-        UniformBlockInfo{"FillExtrusionPropsUBO", idFillExtrusionPropsUBO},
         UniformBlockInfo{"FillExtrusionTilePropsUBO", idFillExtrusionTilePropsUBO},
         UniformBlockInfo{"FillExtrusionInterpolateUBO", idFillExtrusionInterpolateUBO},
+        UniformBlockInfo{"FillExtrusionPropsUBO", idFillExtrusionPropsUBO},
 };
 const std::vector<AttributeInfo>
     ShaderInfo<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::OpenGL>::attributes = {
@@ -238,8 +238,8 @@ const std::vector<TextureInfo> ShaderInfo<BuiltIn::FillExtrusionPatternShader, g
 // Heatmap
 const std::vector<UniformBlockInfo> ShaderInfo<BuiltIn::HeatmapShader, gfx::Backend::Type::OpenGL>::uniformBlocks = {
     UniformBlockInfo{"HeatmapDrawableUBO", idHeatmapDrawableUBO},
-    UniformBlockInfo{"HeatmapEvaluatedPropsUBO", idHeatmapEvaluatedPropsUBO},
     UniformBlockInfo{"HeatmapInterpolateUBO", idHeatmapInterpolateUBO},
+    UniformBlockInfo{"HeatmapEvaluatedPropsUBO", idHeatmapEvaluatedPropsUBO},
 };
 const std::vector<AttributeInfo> ShaderInfo<BuiltIn::HeatmapShader, gfx::Backend::Type::OpenGL>::attributes = {
     AttributeInfo{"a_pos", idHeatmapPosVertexAttribute},

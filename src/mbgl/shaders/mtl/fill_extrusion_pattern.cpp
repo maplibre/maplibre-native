@@ -1,5 +1,6 @@
 #include <mbgl/shaders/mtl/fill_extrusion_pattern.hpp>
 #include <mbgl/shaders/fill_extrusion_layer_ubo.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -8,9 +9,9 @@ const std::array<UniformBlockInfo, 5>
     ShaderSource<BuiltIn::FillExtrusionPatternShader, gfx::Backend::Type::Metal>::uniforms = {
         UniformBlockInfo{true, false, sizeof(GlobalPaintParamsUBO), idGlobalPaintParamsUBO},
         UniformBlockInfo{true, true, sizeof(FillExtrusionDrawableUBO), idFillExtrusionDrawableUBO},
-        UniformBlockInfo{true, true, sizeof(FillExtrusionPropsUBO), idFillExtrusionPropsUBO},
         UniformBlockInfo{true, true, sizeof(FillExtrusionTilePropsUBO), idFillExtrusionTilePropsUBO},
         UniformBlockInfo{true, false, sizeof(FillExtrusionInterpolateUBO), idFillExtrusionInterpolateUBO},
+        UniformBlockInfo{true, true, sizeof(FillExtrusionPropsUBO), idFillExtrusionPropsUBO},
 };
 const std::array<AttributeInfo, 6> ShaderSource<BuiltIn::FillExtrusionPatternShader,
                                                 gfx::Backend::Type::Metal>::attributes = {

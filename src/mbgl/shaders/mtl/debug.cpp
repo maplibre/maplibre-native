@@ -1,4 +1,5 @@
 #include <mbgl/shaders/mtl/debug.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -7,7 +8,7 @@ const std::array<UniformBlockInfo, 1> ShaderSource<BuiltIn::DebugShader, gfx::Ba
     UniformBlockInfo{true, true, sizeof(DebugUBO), idDebugUBO},
 };
 const std::array<AttributeInfo, 1> ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal>::attributes = {
-    AttributeInfo{debugUBOCount + 0, gfx::AttributeDataType::Short2, idDebugPosVertexAttribute},
+    AttributeInfo{debugDrawableUBOCount + 0, gfx::AttributeDataType::Short2, idDebugPosVertexAttribute},
 };
 const std::array<TextureInfo, 1> ShaderSource<BuiltIn::DebugShader, gfx::Backend::Type::Metal>::textures = {
     TextureInfo{0, idDebugOverlayTexture},

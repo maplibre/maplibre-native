@@ -1,4 +1,7 @@
 #include <mbgl/shaders/vulkan/symbol.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/shaders/symbol_layer_ubo.hpp>
+#include <mbgl/shaders/custom_drawable_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {

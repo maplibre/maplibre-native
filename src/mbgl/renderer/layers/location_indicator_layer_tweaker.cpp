@@ -4,6 +4,7 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/layers/render_location_indicator_layer.hpp>
 #include <mbgl/style/layers/location_indicator_layer_properties.hpp>
+#include <mbgl/shaders/common_ubo.hpp>
 
 namespace mbgl {
 

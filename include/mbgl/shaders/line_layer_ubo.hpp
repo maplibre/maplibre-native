@@ -143,14 +143,5 @@ struct alignas(16) LineEvaluatedPropsUBO {
 };
 static_assert(sizeof(LineEvaluatedPropsUBO) % 16 == 0);
 
-enum {
-    idLineDrawableUBO = globalUBOCount,
-    idLineInterpolationUBO,
-    idLineTilePropertiesUBO,
-    idLineEvaluatedPropsUBO,
-    idLineExpressionUBO,
-    lineUBOCount
-};
-
 } // namespace shaders
 } // namespace mbgl

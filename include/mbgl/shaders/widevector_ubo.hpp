@@ -31,12 +31,6 @@ struct alignas(16) WideVectorUniformWideVecUBO {
 };
 static_assert(sizeof(WideVectorUniformWideVecUBO) % 16 == 0);
 
-enum {
-    idWideVectorUniformsUBO = globalUBOCount,
-    idWideVectorUniformWideVecUBO,
-    wideVectorUBOCount
-};
-
 struct VertexTriWideVecB {
     // x, y offset around the center
     std::array<float, 3> screenPos;

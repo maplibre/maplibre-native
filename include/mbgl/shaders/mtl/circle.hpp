@@ -110,8 +110,8 @@ struct alignas(16) CircleInterpolateUBO {
 FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
                                 device const GlobalPaintParamsUBO& paintParams [[buffer(0)]],
                                 device const CircleDrawableUBO& drawable [[buffer(1)]],
-                                device const CircleEvaluatedPropsUBO& props [[buffer(2)]],
-                                device const CircleInterpolateUBO& interp [[buffer(3)]]) {
+                                device const CircleInterpolateUBO& interp [[buffer(2)]],
+                                device const CircleEvaluatedPropsUBO& props [[buffer(3)]]) {
 
 #if defined(HAS_UNIFORM_u_radius)
     const auto radius       = props.radius;
@@ -189,7 +189,7 @@ FragmentStage vertex vertexMain(thread const VertexStage vertx [[stage_in]],
 }
 
 half4 fragment fragmentMain(FragmentStage in [[stage_in]],
-                            device const CircleEvaluatedPropsUBO& props [[buffer(2)]]) {
+                            device const CircleEvaluatedPropsUBO& props [[buffer(3)]]) {
 #if defined(OVERDRAW_INSPECTOR)
     return half4(1.0);
 #endif

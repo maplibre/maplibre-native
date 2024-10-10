@@ -1,4 +1,5 @@
 #include <mbgl/shaders/mtl/symbol_text_and_icon.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace shaders {

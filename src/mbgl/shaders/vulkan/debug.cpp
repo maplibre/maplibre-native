@@ -1,4 +1,6 @@
 #include <mbgl/shaders/vulkan/debug.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
+#include <mbgl/shaders/debug_layer_ubo.hpp>
 
 namespace mbgl {
 namespace shaders {
