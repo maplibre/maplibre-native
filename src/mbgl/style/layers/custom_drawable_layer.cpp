@@ -121,13 +121,21 @@ public:
                                                                  /*width_t =*/0.f,
                                                                  0,
                                                                  0};
+        const shaders::LineExpressionUBO exprUBO = {
+            /* color = */ nullptr,
+            /* blur = */ nullptr,
+            /* opacity = */ nullptr,
+            /* gapwidth = */ nullptr,
+            /* offset = */ nullptr,
+            /* width = */ nullptr,
+            /* floorWidth = */ nullptr,
+        };
+
         auto& drawableUniforms = drawable.mutableUniformBuffers();
         drawableUniforms.createOrUpdate(idLineDrawableUBO, &drawableUBO, parameters.context);
         drawableUniforms.createOrUpdate(idLineInterpolationUBO, &lineInterpolationUBO, parameters.context);
         drawableUniforms.createOrUpdate(idLineEvaluatedPropsUBO, &linePropertiesUBO, parameters.context);
-
-        // We would need to set up `idLineExpressionUBO` if the expression mask isn't empty
-        assert(linePropertiesUBO.expressionMask == LineExpressionMask::None);
+        drawableUniforms.createOrUpdate(idLineExpressionUBO, &exprUBO, parameters.context);
     };
 
 private:
@@ -500,7 +508,7 @@ bool CustomDrawableLayerHost::Interface::addSymbol(const GeometryCoordinate& poi
         builder->setTexture(symbolOptions.texture, idCustomSymbolImageTexture);
     }
 
-    // create fill tweaker
+    // create symbol tweaker
     auto tweaker = std::make_shared<SymbolDrawableTweaker>(symbolOptions);
     builder->addTweaker(tweaker);
 

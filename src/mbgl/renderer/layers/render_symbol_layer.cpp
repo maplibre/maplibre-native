@@ -23,16 +23,17 @@
 #include <mbgl/util/math.hpp>
 
 #if MLN_DRAWABLE_RENDERER
+#include <mbgl/gfx/collision_drawable_data.hpp>
 #include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
 #include <mbgl/gfx/symbol_drawable_data.hpp>
-#include <mbgl/gfx/collision_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/collision_layer_tweaker.hpp>
 #include <mbgl/renderer/layers/symbol_layer_tweaker.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #include <mbgl/shaders/symbol_layer_ubo.hpp>
-#include <mbgl/renderer/layers/collision_layer_tweaker.hpp>
 #endif // MLN_DRAWABLE_RENDERER
 
 #include <cmath>
@@ -687,9 +688,7 @@ style::TextPaintProperties::PossiblyEvaluated RenderSymbolLayer::textPaintProper
 void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
     renderTiles = params.source->getRenderTilesSortedByYPosition();
 
-#if MLN_DRAWABLE_RENDERER
-    updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
+    updateRenderTileIDs(params);
 
     addRenderPassesFromTiles();
 
@@ -903,10 +902,104 @@ std::size_t RenderSymbolLayer::removeAllDrawables() {
     return stats.drawablesRemoved - oldValue;
 }
 
+gfx::DrawableBuilder& RenderSymbolLayer::getCollisionBuilder(gfx::Context& context,
+                                                             std::unique_ptr<gfx::DrawableBuilder>& builder) const {
+    if (!builder) {
+        builder = context.createDrawableBuilder(getID() + "-collision");
+        builder->setSubLayerIndex(0);
+        builder->setEnableDepth(false);
+        builder->setRenderPass(passes);
+        builder->setCullFaceMode(gfx::CullFaceMode::disabled());
+        builder->setColorMode(gfx::ColorMode::alphaBlended());
+    }
+    return *builder;
+}
+
+const std::shared_ptr<TileLayerGroup>& RenderSymbolLayer::getCollisionTileLayerGroup(gfx::Context& context,
+                                                                                     UniqueChangeRequestVec& changes) {
+    if (!collisionTileLayerGroup) {
+        if ((collisionTileLayerGroup = context.createTileLayerGroup(
+                 layerIndex, /*initialCapacity=*/64, getID() + "-collision"))) {
+            activateLayerGroup(collisionTileLayerGroup, true, changes);
+        }
+    }
+    if (!collisionLayerTweaker) {
+        collisionLayerTweaker = std::make_shared<CollisionLayerTweaker>(getID(), evaluatedProperties);
+        collisionTileLayerGroup->addLayerTweaker(collisionLayerTweaker);
+    }
+    return collisionTileLayerGroup;
+}
+
+void RenderSymbolLayer::addCollisionDrawables(gfx::Context& context,
+                                              const SymbolBucket& bucket,
+                                              const SymbolPaintProperties::PossiblyEvaluated& evaluated,
+                                              UniqueChangeRequestVec& changes,
+                                              std::unique_ptr<gfx::DrawableBuilder>& cachedCollisionBuilder,
+                                              std::string_view layerCollisionPrefix,
+                                              const OverscaledTileID& tileID,
+                                              const bool isText,
+                                              const bool hasCollisionBox,
+                                              const bool hasCollisionCircle) {
+    if (!hasCollisionBox && !hasCollisionCircle) return;
+
+    const auto& collisionGroup = getCollisionTileLayerGroup(context, changes);
+    if (!collisionGroup) {
+        return;
+    }
+
+    const auto& layout = *bucket.layout;
+    const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
+    const std::string suffix = isText ? "text/" : "icon/";
+    auto& collisionBuilder = getCollisionBuilder(context, cachedCollisionBuilder);
+
+    if (hasCollisionBox) {
+        const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
+        if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                collisionBoxGroup->getOrCreateShader(context, {}))) {
+            collisionBuilder.setDrawableName(std::string(layerCollisionPrefix) + suffix + "box");
+            collisionBuilder.setShader(shader);
+            collisionBuilder.setRawVertices({}, collisionBox->vertices().elements(), gfx::AttributeDataType::Short2);
+            collisionBuilder.setVertexAttributes(getCollisionVertexAttributes(context, *collisionBox));
+            collisionBuilder.setSegments(gfx::Lines(1.0f),
+                                         collisionBox->sharedLines,
+                                         collisionBox->segments.data(),
+                                         collisionBox->segments.size());
+            collisionBuilder.flush(context);
+        }
+    }
+
+    if (hasCollisionCircle) {
+        const auto& collisionCircle = isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle;
+        if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
+                collisionCircleGroup->getOrCreateShader(context, {}))) {
+            collisionBuilder.setDrawableName(std::string(layerCollisionPrefix) + suffix + "circle");
+            collisionBuilder.setShader(shader);
+            collisionBuilder.setRawVertices({}, collisionCircle->vertices().elements(), gfx::AttributeDataType::Short2);
+            collisionBuilder.setVertexAttributes(getCollisionVertexAttributes(context, *collisionCircle));
+            collisionBuilder.setSegments(gfx::Triangles(),
+                                         collisionCircle->sharedTriangles,
+                                         collisionCircle->segments.data(),
+                                         collisionCircle->segments.size());
+            collisionBuilder.flush(context);
+        }
+    }
+
+    // add drawables to layer group
+    for (auto& drawable : collisionBuilder.clearDrawables()) {
+        drawable->setTileID(tileID);
+        drawable->setLayerTweaker(collisionLayerTweaker);
+
+        auto drawData = std::make_unique<gfx::CollisionDrawableData>(values.translate, values.translateAnchor);
+        drawable->setData(std::move(drawData));
+        collisionGroup->addDrawable(passes, tileID, std::move(drawable));
+        ++stats.drawablesAdded;
+    }
+}
+
 void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& state,
-                               const std::shared_ptr<UpdateParameters>&,
+                               const std::shared_ptr<UpdateParameters>& params,
                                const RenderTree&,
                                UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty() || passes == RenderPass::None) {
@@ -925,20 +1018,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         layerTweaker = std::make_shared<SymbolLayerTweaker>(getID(), evaluatedProperties);
         layerGroup->addLayerTweaker(layerTweaker);
     }
-
-    const auto& getCollisionTileLayerGroup = [&] {
-        if (!collisionTileLayerGroup) {
-            if ((collisionTileLayerGroup = context.createTileLayerGroup(
-                     layerIndex, /*initialCapacity=*/64, getID() + "-collision"))) {
-                activateLayerGroup(collisionTileLayerGroup, true, changes);
-            }
-        }
-        if (!collisionLayerTweaker) {
-            collisionLayerTweaker = std::make_shared<CollisionLayerTweaker>(getID(), evaluatedProperties);
-            collisionTileLayerGroup->addLayerTweaker(collisionLayerTweaker);
-        }
-        return collisionTileLayerGroup;
-    };
 
     if (!symbolIconGroup) {
         symbolIconGroup = shaders.getShaderGroup(std::string(SymbolIconShaderName));
@@ -985,12 +1064,12 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
     const auto layerPrefix = getID() + "/";
     const auto layerCollisionPrefix = getID() + "-collision/";
 
-    std::unique_ptr<gfx::DrawableBuilder> collisionBuilder = context.createDrawableBuilder(layerCollisionPrefix);
-    collisionBuilder->setSubLayerIndex(0);
-    collisionBuilder->setEnableDepth(false);
-    collisionBuilder->setRenderPass(passes);
-    collisionBuilder->setCullFaceMode(gfx::CullFaceMode::disabled());
-    collisionBuilder->setColorMode(gfx::ColorMode::alphaBlended());
+    std::unique_ptr<gfx::DrawableBuilder> collisionBuilder;
+
+    // Remove drawables for removed tiles
+    for (const auto& tileID : renderTileDiff->diff.removed) {
+        removeTile(passes, tileID);
+    }
 
     StringIDSetsPair propertiesAsUniforms;
     for (const RenderTile& tile : *renderTiles) {
@@ -1017,66 +1096,6 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
-        auto addCollisionDrawables = [&](const bool isText, const bool hasCollisionBox, const bool hasCollisionCircle) {
-            if (!hasCollisionBox && !hasCollisionCircle) return;
-
-            const auto& collisionGroup = getCollisionTileLayerGroup();
-            if (!collisionGroup) {
-                return;
-            }
-
-            const auto& layout = *bucket.layout;
-            const auto values = isText ? textPropertyValues(evaluated, layout) : iconPropertyValues(evaluated, layout);
-            const std::string suffix = isText ? "text/" : "icon/";
-
-            const auto addVertices = [&collisionBuilder](const auto& vertices) {
-                collisionBuilder->setRawVertices({}, vertices.size(), gfx::AttributeDataType::Short2);
-            };
-
-            if (hasCollisionBox) {
-                const auto& collisionBox = isText ? bucket.textCollisionBox : bucket.iconCollisionBox;
-                if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                        collisionBoxGroup->getOrCreateShader(context, {}))) {
-                    collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "box");
-                    collisionBuilder->setShader(shader);
-                    addVertices(collisionBox->vertices().vector());
-                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(context, *collisionBox));
-                    collisionBuilder->setSegments(gfx::Lines(1.0f),
-                                                  collisionBox->sharedLines,
-                                                  collisionBox->segments.data(),
-                                                  collisionBox->segments.size());
-                    collisionBuilder->flush(context);
-                }
-            }
-
-            if (hasCollisionCircle) {
-                const auto& collisionCircle = isText ? bucket.textCollisionCircle : bucket.iconCollisionCircle;
-                if (const auto shader = std::static_pointer_cast<gfx::ShaderProgramBase>(
-                        collisionCircleGroup->getOrCreateShader(context, {}))) {
-                    collisionBuilder->setDrawableName(layerCollisionPrefix + suffix + "circle");
-                    collisionBuilder->setShader(shader);
-                    addVertices(collisionCircle->vertices().vector());
-                    collisionBuilder->setVertexAttributes(getCollisionVertexAttributes(context, *collisionCircle));
-                    collisionBuilder->setSegments(gfx::Triangles(),
-                                                  collisionCircle->sharedTriangles,
-                                                  collisionCircle->segments.data(),
-                                                  collisionCircle->segments.size());
-                    collisionBuilder->flush(context);
-                }
-            }
-
-            // add drawables to layer group
-            for (auto& drawable : collisionBuilder->clearDrawables()) {
-                drawable->setTileID(tileID);
-                drawable->setLayerTweaker(collisionLayerTweaker);
-
-                auto drawData = std::make_unique<gfx::CollisionDrawableData>(values.translate, values.translateAnchor);
-                drawable->setData(std::move(drawData));
-                collisionGroup->addDrawable(passes, tileID, std::move(drawable));
-                ++stats.drawablesAdded;
-            }
-        };
-
         // If we already have drawables for this tile, update them.
         // Just update the drawables we already created
         auto updateExisting = [&](gfx::Drawable& drawable) {
@@ -1096,10 +1115,26 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             if (collisionTileLayerGroup) {
                 collisionTileLayerGroup->removeDrawables(passes, tileID);
             }
-            addCollisionDrawables(
-                false /*isText*/, bucket.hasIconCollisionBoxData(), bucket.hasIconCollisionCircleData());
-            addCollisionDrawables(
-                true /*isText*/, bucket.hasTextCollisionBoxData(), bucket.hasTextCollisionCircleData());
+            addCollisionDrawables(context,
+                                  bucket,
+                                  evaluated,
+                                  changes,
+                                  collisionBuilder,
+                                  layerCollisionPrefix,
+                                  tileID,
+                                  false /*isText*/,
+                                  bucket.hasIconCollisionBoxData(),
+                                  bucket.hasIconCollisionCircleData());
+            addCollisionDrawables(context,
+                                  bucket,
+                                  evaluated,
+                                  changes,
+                                  collisionBuilder,
+                                  layerCollisionPrefix,
+                                  tileID,
+                                  true /*isText*/,
+                                  bucket.hasTextCollisionBoxData(),
+                                  bucket.hasTextCollisionCircleData());
 
             continue;
         }
@@ -1137,8 +1172,26 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             addRenderables(bucket.text, SymbolType::Text);
         }
 
-        addCollisionDrawables(false /*isText*/, bucket.hasIconCollisionBoxData(), bucket.hasIconCollisionCircleData());
-        addCollisionDrawables(true /*isText*/, bucket.hasTextCollisionBoxData(), bucket.hasTextCollisionCircleData());
+        addCollisionDrawables(context,
+                              bucket,
+                              evaluated,
+                              changes,
+                              collisionBuilder,
+                              layerCollisionPrefix,
+                              tileID,
+                              false /*isText*/,
+                              bucket.hasIconCollisionBoxData(),
+                              bucket.hasIconCollisionCircleData());
+        addCollisionDrawables(context,
+                              bucket,
+                              evaluated,
+                              changes,
+                              collisionBuilder,
+                              layerCollisionPrefix,
+                              tileID,
+                              true /*isText*/,
+                              bucket.hasTextCollisionBoxData(),
+                              bucket.hasTextCollisionCircleData());
     }
 
     // We'll be processing renderables across tiles, potentially out-of-order, so keep
@@ -1322,6 +1375,8 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
     }
+
+    captureRenderTiles(params->frameCount);
 }
 
 #endif // MLN_DRAWABLE_RENDERER

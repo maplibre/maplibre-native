@@ -99,8 +99,14 @@ public:
 
     void setFeatureState(const LayerFeatureStates&);
 
+    static bool lessByUnwrappedTileID(const RenderTile& a, const RenderTile& b) { return a.id < b.id; }
+    static bool lessByOverscaledTileID(const RenderTile& a, const RenderTile& b) {
+        return a.getOverscaledTileID() < b.getOverscaledTileID();
+    }
+
 private:
     Tile& tile;
+
     // The following members are reset at placement stage.
     std::unique_ptr<TileRenderData> renderData;
     bool needsRendering = false;

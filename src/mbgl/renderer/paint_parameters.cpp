@@ -297,15 +297,18 @@ void PaintParameters::renderTileClippingMasks(const RenderTiles& renderTiles) {
 }
 
 gfx::StencilMode PaintParameters::stencilModeForClipping(const UnwrappedTileID& tileID) const {
-    auto it = tileClippingMaskIDs.find(tileID);
-    assert(it != tileClippingMaskIDs.end());
-    const int32_t id = it != tileClippingMaskIDs.end() ? it->second : 0b00000000;
-    return gfx::StencilMode{gfx::StencilMode::Equal{0b11111111},
-                            id,
-                            0b00000000,
-                            gfx::StencilOpType::Keep,
-                            gfx::StencilOpType::Keep,
-                            gfx::StencilOpType::Replace};
+    const auto it = tileClippingMaskIDs.find(tileID);
+    if (it != tileClippingMaskIDs.end()) {
+        const int32_t id = it != tileClippingMaskIDs.end() ? it->second : 0b00000000;
+        return gfx::StencilMode{gfx::StencilMode::Equal{0b11111111},
+                                id,
+                                0b00000000,
+                                gfx::StencilOpType::Keep,
+                                gfx::StencilOpType::Keep,
+                                gfx::StencilOpType::Replace};
+    }
+    assert(false);
+    return gfx::StencilMode::disabled();
 }
 
 gfx::StencilMode PaintParameters::stencilModeFor3D() {

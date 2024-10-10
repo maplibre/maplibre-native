@@ -212,6 +212,8 @@ if(MLN_DRAWABLE_RENDERER)
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/collision_layer_tweaker.cpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/renderer/layers/collision_layer_tweaker.hpp
         ${PROJECT_SOURCE_DIR}/src/mbgl/shaders/shader_program_base.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_diff.cpp
+        ${PROJECT_SOURCE_DIR}/src/mbgl/tile/tile_diff.hpp
     )
 
     target_compile_definitions(

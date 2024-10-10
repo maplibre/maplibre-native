@@ -32,6 +32,8 @@ void RenderAnnotationSource::update(Immutable<style::Source::Impl> baseImpl_,
 
     enabled = needsRendering;
 
+    onTilePyramidWillUpdate();
+
     tilePyramid.update(layers,
                        needsRendering,
                        needsRelayout,
@@ -45,6 +47,7 @@ void RenderAnnotationSource::update(Immutable<style::Source::Impl> baseImpl_,
                        [&](const OverscaledTileID& tileID, TileObserver* observer_) {
                            return std::make_unique<AnnotationTile>(tileID, parameters, observer_);
                        });
+    onTilePyramidUpdated();
 }
 
 std::unordered_map<std::string, std::vector<Feature>> RenderAnnotationSource::queryRenderedFeatures(

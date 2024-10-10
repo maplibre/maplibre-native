@@ -14,18 +14,19 @@
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/gfx/drawable.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/gfx/drawable_tweaker.hpp>
+#include <mbgl/gfx/polyline_generator.hpp>
 #include <mbgl/gfx/shader_group.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layer_tweaker.hpp>
 #include <mbgl/renderer/render_static_data.hpp>
 #include <mbgl/shaders/debug_layer_ubo.hpp>
-#include <mbgl/shaders/shader_program_base.hpp>
-#include <mbgl/util/convert.hpp>
-#include <mbgl/tile/geojson_tile_data.hpp>
-#include <mbgl/gfx/polyline_generator.hpp>
-#include <mbgl/style/types.hpp>
 #include <mbgl/shaders/line_layer_ubo.hpp>
-#include <mbgl/gfx/drawable_tweaker.hpp>
-#include <mbgl/renderer/layer_tweaker.hpp>
+#include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/style/types.hpp>
+#include <mbgl/tile/geojson_tile_data.hpp>
+#include <mbgl/tile/tile_diff.hpp>
+#include <mbgl/util/convert.hpp>
 
 #include <unordered_set>
 
@@ -408,20 +409,64 @@ std::unique_ptr<RenderItem> RenderTileSource::createRenderItem() {
     return std::make_unique<TileSourceRenderItem>(renderTiles, baseImpl->id);
 }
 
+void RenderTileSource::onTilePyramidWillUpdate() {
+#if MLN_DRAWABLE_RENDERER
+    // The tile pyramid may be updated multiple times between construction of `renderTiles`, and we only want
+    // to do this once as the second one would always start with an empty set.  Specifically, this happens when
+    // `RenderOrchestrator::createRenderTree` returns early because the style is loading.
+    if (renderTilesValid) {
+        // Capture the filtered render tile set before updating the tile pyramid.
+        // Once that happens, the tile references in the `RenderTile`s will be invalid.
+        renderTilesValid = false;
+        previousRenderTiles.clear();
+        renderTileDiff.reset();
+        renderTilesPrevFrame = renderTilesCurFrame;
+        if (auto filtered = getRenderTiles(); !filtered->empty()) {
+            previousRenderTiles.reserve(filtered->size());
+            std::ranges::transform(*filtered, std::back_inserter(previousRenderTiles), [&](const RenderTile& tile) {
+                return tile.getOverscaledTileID();
+            });
+        }
+    }
+#endif
+}
+
+void RenderTileSource::onTilePyramidUpdated() {
+#if MLN_DRAWABLE_RENDERER
+    // The tiles referenced by these `RenderTile` objects may have been destroyed.
+    // Replace with an empty set to ensure that the now-unsafe references are not reachable
+    renderTilesValid = false;
+    renderTiles = makeMutable<std::vector<RenderTile>>();
+    // cached views on `renderTiles` are now invalid
+    filteredRenderTiles.reset();
+    renderTilesSortedByY.reset();
+#endif
+}
+
 void RenderTileSource::prepare(const SourcePrepareParameters& parameters) {
     MLN_TRACE_FUNC();
     MLN_ZONE_STR(baseImpl->id);
     bearing = static_cast<float>(parameters.transform.state.getBearing());
-    filteredRenderTiles = nullptr;
-    renderTilesSortedByY = nullptr;
+
+    // `renderTiles` contains references to `Tile` objects in `RenderTree` which have been deleted by
+    // the recent call to `TilePyramid::update`, which makes it unsafe to call `getRenderTiles()` here.
+    onTilePyramidWillUpdate();
+
     auto tiles = makeMutable<std::vector<RenderTile>>();
     tiles->reserve(tilePyramid.getRenderedTiles().size());
-    for (auto& entry : tilePyramid.getRenderedTiles()) {
-        tiles->emplace_back(entry.first, entry.second);
-        tiles->back().prepare(parameters);
+    for (auto& [tileID, tileRef] : tilePyramid.getRenderedTiles()) {
+        tiles->emplace_back(tileID, tileRef).prepare(parameters);
     }
     featureState.coalesceChanges(*tiles);
+
+    renderTilesSortedByY.reset();
+    filteredRenderTiles.reset();
     renderTiles = std::move(tiles);
+
+#if MLN_DRAWABLE_RENDERER
+    renderTilesValid = true;
+    renderTilesCurFrame = parameters.frameCount;
+#endif
 }
 
 void RenderTileSource::updateFadingTiles() {
@@ -445,6 +490,16 @@ RenderTiles RenderTileSource::getRenderTiles() const {
     }
     return filteredRenderTiles;
 }
+
+#if MLN_DRAWABLE_RENDERER
+std::shared_ptr<FrameTileDifference> RenderTileSource::getRenderTileDiff() const {
+    if (!renderTileDiff) {
+        renderTileDiff = std::make_shared<FrameTileDifference>(
+            renderTilesPrevFrame, renderTilesCurFrame, diffTiles(previousRenderTiles, getRenderTiles()));
+    }
+    return renderTileDiff;
+}
+#endif
 
 RenderTiles RenderTileSource::getRenderTilesSortedByYPosition() const {
     if (!renderTilesSortedByY) {
@@ -537,22 +592,26 @@ void RenderTileSetSource::update(Immutable<style::Source::Impl> baseImpl_,
     enabled = needsRendering;
 
     const auto& implTileset = getTileset();
-    // In Continuous mode, keep the existing tiles if the new cachedTileset is
-    // not yet available, thus providing smart style transitions without
-    // flickering. In other modes, allow clearing the tile pyramid first, before
-    // the early return in order to avoid render tests being flaky.
-    bool canUpdateTileset = implTileset || parameters.mode != MapMode::Continuous;
+    // In Continuous mode, keep the existing tiles if the new `cachedTileset` is not yet available, thus providing smart
+    // style transitions without flickering. In other modes, allow clearing the tile pyramid first, before the early
+    // return in order to avoid render tests being flaky.
+    const bool canUpdateTileset = implTileset || parameters.mode != MapMode::Continuous;
+
+    TilePyramidUpdateHelper helper{*this};
     if (canUpdateTileset && cachedTileset != implTileset) {
         cachedTileset = implTileset;
+
+        helper.start();
 
         // TODO: this removes existing buckets, and will cause flickering.
         // Should instead refresh tile data in place.
         tilePyramid.clearAll();
     }
 
-    if (!cachedTileset) return;
-
-    updateInternal(*cachedTileset, layers, needsRendering, needsRelayout, parameters);
+    if (cachedTileset) {
+        helper.start();
+        updateInternal(*cachedTileset, layers, needsRendering, needsRelayout, parameters);
+    }
 }
 
 } // namespace mbgl

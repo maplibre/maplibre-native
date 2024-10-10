@@ -1637,8 +1637,15 @@ CLLocationCoordinate2D randomWorldCoordinate(void) {
 #if MLN_DRAWABLE_RENDERER
 - (void)addCustomDrawableLayer
 {
+    NSString* layerName = @"custom-drawable-layer";
+
+    //- (MLNStyleLayer *)layerWithIdentifier:(NSString *)identifier
+    if (MLNStyleLayer* layer = [self.mapView.style layerWithIdentifier:layerName]) {
+        [self.mapView.style removeLayer:layer];
+    }
+
     // Create a CustomLayer that uses the Drawable/Builder toolkit to generate and render geometry
-    ExampleCustomDrawableStyleLayer* layer = [[ExampleCustomDrawableStyleLayer alloc] initWithIdentifier:@"custom-drawable-layer"];
+    ExampleCustomDrawableStyleLayer* layer = [[ExampleCustomDrawableStyleLayer alloc] initWithIdentifier:layerName];
 
     if (layer) {
         [self.mapView.style addLayer:layer];

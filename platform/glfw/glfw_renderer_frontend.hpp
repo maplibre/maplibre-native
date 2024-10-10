@@ -23,6 +23,8 @@ public:
 
     mbgl::Renderer* getRenderer();
 
+    std::uint64_t getFrameCount() const override;
+
 private:
     GLFWView& glfwView;
     std::unique_ptr<mbgl::Renderer> renderer;

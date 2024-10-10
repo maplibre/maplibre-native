@@ -1,5 +1,5 @@
 #pragma once
-#include <list>
+
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/layout/layout.hpp>
 #include <mbgl/renderer/bucket_parameters.hpp>

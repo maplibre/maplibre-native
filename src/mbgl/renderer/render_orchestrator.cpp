@@ -446,8 +446,10 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
     for (const auto& entry : renderSources) {
         MLN_TRACE_ZONE(prepare source);
         if (entry.second->isEnabled()) {
-            entry.second->prepare(
-                {renderTreeParameters->transformParams, updateParameters->debugOptions, *imageManager});
+            entry.second->prepare({updateParameters->frameCount,
+                                   renderTreeParameters->transformParams,
+                                   updateParameters->debugOptions,
+                                   *imageManager});
         }
     }
 
@@ -457,8 +459,12 @@ std::unique_ptr<RenderTree> RenderOrchestrator::createRenderTree(
         MLN_TRACE_ZONE(prepare layer);
         MLN_ZONE_STR(renderLayer.getID());
 
-        renderLayer.prepare(
-            {renderItem.source, *imageManager, *patternAtlas, *lineAtlas, updateParameters->transformState});
+        renderLayer.prepare({renderItem.source,
+                             *imageManager,
+                             *patternAtlas,
+                             *lineAtlas,
+                             updateParameters->transformState,
+                             updateParameters->frameCount});
         if (renderLayer.needsPlacement()) {
             layersNeedPlacement.emplace_back(renderLayer);
         }

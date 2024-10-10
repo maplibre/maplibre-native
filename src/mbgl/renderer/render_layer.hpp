@@ -87,6 +87,7 @@ public:
     PatternAtlas& patternAtlas;
     LineAtlas& lineAtlas;
     const TransformState& state;
+    const std::uint64_t frameCount;
 };
 
 class RenderLayer {
@@ -208,6 +209,8 @@ protected:
 
     const LayerRenderData* getRenderDataForPass(const RenderTile&, RenderPass) const;
 
+    std::optional<std::reference_wrapper<const RenderTile>> getRenderTile(const OverscaledTileID& tileID) const;
+
 #if MLN_DRAWABLE_RENDERER
     void setLayerGroup(LayerGroupBasePtr, UniqueChangeRequestVec&);
 
@@ -251,7 +254,7 @@ protected:
     virtual std::size_t removeTile(RenderPass, const OverscaledTileID&);
 
     /// Update `renderTileIDs` from `renderTiles`
-    void updateRenderTileIDs();
+    void updateRenderTileIDs(const LayerPrepareParameters&);
 
     /// Whether a given tile ID is present in the current cover set (`renderTiles`)
     bool hasRenderTile(const OverscaledTileID&) const;
@@ -267,17 +270,22 @@ protected:
     /// @return true if updated, false if the tile ID is not present in the set of tiles to be rendered or the ID is
     /// unchanged
     bool setRenderTileBucketID(const OverscaledTileID&, util::SimpleIdentity bucketID);
-
+#else
+    void updateRenderTileIDs(const LayerPrepareParameters&) {}
 #endif // MLN_DRAWABLE_RENDERER
 
+protected:
     static bool applyColorRamp(const style::ColorRampPropertyValue&, PremultipliedImage&);
 
-protected:
+    using RenderTileRefVec = std::vector<std::reference_wrapper<const RenderTile>>;
+    /// Merge two sets of tile IDs
+    /// @param a Tile IDs from `TileDiff`, ordered by their overscaled tile ID
+    /// @param b Tile IDs from `RenderTiles`, ordered by their unwrapped tile ID
+    /// @return The combined set of IDs, ordered by unwrapped tile ID
+    static RenderTileRefVec combineRenderTiles(const RenderTileRefVec& a, const RenderTileRefVec& b);
+
     // Stores current set of tiles to be rendered for this layer.
     RenderTiles renderTiles;
-
-    // Retains ownership of tiles
-    Immutable<std::vector<RenderTile>> renderTilesOwner;
 
     // Stores what render passes this layer is currently enabled for. This depends on the
     // evaluated StyleProperties object and is updated accordingly.
@@ -286,6 +294,9 @@ protected:
     LayerPlacementData placementData;
 
 #if MLN_DRAWABLE_RENDERER
+    // Retains ownership of tiles
+    Immutable<std::vector<RenderTile>> renderTilesOwner;
+
     // will need to be overriden to handle their activation.
     LayerGroupBasePtr layerGroup;
 
@@ -299,6 +310,12 @@ protected:
     using RenderTileIDMap = util::TinyUnorderedMap<OverscaledTileID, util::SimpleIdentity, LinearTileIDs>;
     RenderTileIDMap renderTileIDs;
     RenderTileIDMap newRenderTileIDs;
+
+    std::vector<OverscaledTileID> previousRenderTiles;
+    std::shared_ptr<FrameTileDifference> renderTileDiff;
+    std::optional<std::uint64_t> prevUpdateFrame;
+
+    void captureRenderTiles(std::uint64_t frameCount);
 #endif
 
     // Current layer index as specified by the layerIndexChanged event

@@ -78,7 +78,7 @@ void Map::Impl::onUpdate() {
         return;
     }
 
-    TimePoint timePoint = mode == MapMode::Continuous ? Clock::now() : Clock::time_point::max();
+    const TimePoint timePoint = mode == MapMode::Continuous ? Clock::now() : Clock::time_point::max();
 
     transform.updateTransitions(timePoint);
 
@@ -87,6 +87,7 @@ void Map::Impl::onUpdate() {
                                pixelRatio,
                                debugOptions,
                                timePoint,
+                               rendererFrontend.getFrameCount(),
                                transform.getState(),
                                style->impl->getGlyphURL(),
                                style->impl->areSpritesLoaded(),

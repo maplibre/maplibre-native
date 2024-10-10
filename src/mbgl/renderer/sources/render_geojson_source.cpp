@@ -83,10 +83,15 @@ void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
 
     enabled = needsRendering;
 
+    TilePyramidUpdateHelper helper{*this};
+
     auto data_ = impl().getData().lock();
     if (data.lock() != data_) {
         data = data_;
         if (parameters.mode != MapMode::Continuous) {
+            onTilePyramidWillUpdate();
+            helper.start();
+
             // Clearing the tile pyramid in order to avoid render tests being flaky.
             tilePyramid.clearAll();
         } else if (data_) {
@@ -100,7 +105,11 @@ void RenderGeoJSONSource::update(Immutable<style::Source::Impl> baseImpl_,
         }
     }
 
-    if (!data_) return;
+    if (!data_) {
+        return;
+    }
+
+    helper.start();
 
     tilePyramid.update(layers,
                        needsRendering,
