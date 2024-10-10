@@ -25,8 +25,8 @@ public:
         : resourceOptions(resourceOptions_.clone()),
           clientOptions(clientOptions_.clone()) {}
 
-    void request(const std::string& url, const ActorRef<FileSourceRequest>& req) {
-        if (!acceptsURL(url)) {
+    void request(const Resource& resource, const ActorRef<FileSourceRequest>& req) {
+        if (!acceptsURL(resource.url)) {
             Response response;
             response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Invalid file URL");
             req.invoke(&FileSourceRequest::setResponse, response);
@@ -34,8 +34,9 @@ public:
         }
 
         // Cut off the protocol and prefix with path.
-        const auto path = mbgl::util::percentDecode(url.substr(std::char_traits<char>::length(util::FILE_PROTOCOL)));
-        requestLocalFile(path, req);
+        const auto path = mbgl::util::percentDecode(
+            resource.url.substr(std::char_traits<char>::length(util::FILE_PROTOCOL)));
+        requestLocalFile(path, req, resource.dataRange);
     }
 
     void setResourceOptions(ResourceOptions options) {
@@ -77,7 +78,7 @@ LocalFileSource::~LocalFileSource() = default;
 std::unique_ptr<AsyncRequest> LocalFileSource::request(const Resource& resource, Callback callback) {
     auto req = std::make_unique<FileSourceRequest>(std::move(callback));
 
-    impl->actor().invoke(&Impl::request, resource.url, req->actor());
+    impl->actor().invoke(&Impl::request, resource, req->actor());
 
     return req;
 }
