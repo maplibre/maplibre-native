@@ -50,6 +50,10 @@ target_include_directories(
 
 set_property(TARGET mbgl-vendor-icu PROPERTY FOLDER Core)
 
+set_target_properties(mbgl-vendor-icu PROPERTIES
+    UNITY_BUILD OFF
+)
+
 export(TARGETS
     mbgl-vendor-icu
     APPEND FILE MapboxCoreTargets.cmake

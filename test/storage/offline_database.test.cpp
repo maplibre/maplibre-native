@@ -7,6 +7,7 @@
 #include <mbgl/storage/response.hpp>
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/string.hpp>
+#include <mbgl/test/util.hpp>
 
 #include <mbgl/storage/sqlite3.hpp>
 #include <mbgl/util/variant.hpp>
@@ -18,18 +19,12 @@ using namespace std::literals::string_literals;
 using namespace mbgl;
 using mapbox::sqlite::ResultCode;
 
-static constexpr const char* filename = "test/fixtures/offline_database/offline.db";
+static constexpr const char* offline_database_filename = "test/fixtures/offline_database/offline.db";
 static constexpr const char* filename_sideload = "test/fixtures/offline_database/offline_sideload.db";
 #ifndef __QT__ // Qt doesn't expose the ability to register virtual file system handlers.
-static constexpr const char* filename_test_fs = "file:test/fixtures/offline_database/offline.db?vfs=test_fs";
+static constexpr const char* filename_offline_database_test_fs =
+    "file:test/fixtures/offline_database/offline.db?vfs=test_fs";
 #endif
-
-static void deleteDatabaseFiles() {
-    // Delete leftover journaling files as well.
-    util::deleteFile(filename);
-    util::deleteFile(filename + "-wal"s);
-    util::deleteFile(filename + "-journal"s);
-}
 
 static std::shared_ptr<std::string> randomString(size_t size) {
     auto result = std::make_shared<std::string>(size, 0);
@@ -46,7 +41,7 @@ static FixtureLog::Message error(ResultCode code, const char* message) {
     return {EventSeverity::Error, Event::Database, static_cast<int64_t>(code), message};
 }
 
-[[maybe_unused]] static FixtureLog::Message warning(ResultCode code, const char* message) {
+[[maybe_unused]] static FixtureLog::Message warningTag(ResultCode code, const char* message) {
     return {EventSeverity::Warning, Event::Database, static_cast<int64_t>(code), message};
 }
 
@@ -118,8 +113,8 @@ const TileServerOptions& tileServerOptions = TileServerOptions::MapTilerConfigur
 
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(Create)) {
     FixtureLog log;
-    deleteDatabaseFiles();
-    OfflineDatabase db(filename, fixture::tileServerOptions);
+    test::deleteDatabaseFiles(offline_database_filename);
+    OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
     EXPECT_FALSE(bool(db.get({Resource::Unknown, "maptiler://test"})));
 
     EXPECT_EQ(0u, log.uncheckedCount());
@@ -128,7 +123,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(Create)) {
 #ifndef __QT__ // Qt doesn't expose the ability to register virtual file system handlers.
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     FixtureLog log;
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
     test::SQLite3TestFS fs;
 
     // Opening the database will fail because our mock VFS returns a
@@ -136,8 +131,8 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     // OfflineDatabase object should handle this gracefully and treat it like an
     // empty cache that can't be written to.
     fs.allowFileCreate(false);
-    OfflineDatabase db(filename_test_fs, fixture::tileServerOptions);
-    EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't open database: unable to open database file")));
+    OfflineDatabase db(filename_offline_database_test_fs, fixture::tileServerOptions);
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::CantOpen, "Can't open database: unable to open database file")));
 
     EXPECT_EQ(0u, log.uncheckedCount());
 
@@ -145,7 +140,8 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     // isn't open, it won't be stored.
     for (const auto& res : {fixture::resource, fixture::tile}) {
         EXPECT_EQ(std::make_pair(false, uint64_t(0)), db.put(res, fixture::response));
-        EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't write resource: unable to open database file")));
+        EXPECT_EQ(1u,
+                  log.count(warningTag(ResultCode::CantOpen, "Can't write resource: unable to open database file")));
         EXPECT_EQ(0u, log.uncheckedCount());
     }
 
@@ -153,8 +149,9 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     // will always get an empty result.
     for (const auto& res : {fixture::resource, fixture::tile}) {
         EXPECT_FALSE(bool(db.get(res)));
-        EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't update timestamp: unable to open database file")));
-        EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't read resource: unable to open database file")));
+        EXPECT_EQ(1u,
+                  log.count(warningTag(ResultCode::CantOpen, "Can't update timestamp: unable to open database file")));
+        EXPECT_EQ(1u, log.count(warningTag(ResultCode::CantOpen, "Can't read resource: unable to open database file")));
         EXPECT_EQ(0u, log.uncheckedCount());
     }
 
@@ -178,7 +175,8 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     fs.setWriteLimit(0);
     for (const auto& res : {fixture::resource, fixture::tile}) {
         auto result = db.get(res);
-        EXPECT_EQ(1u, log.count(warning(ResultCode::CantOpen, "Can't update timestamp: unable to open database file")));
+        EXPECT_EQ(1u,
+                  log.count(warningTag(ResultCode::CantOpen, "Can't update timestamp: unable to open database file")));
         EXPECT_EQ(0u, log.uncheckedCount());
 
         ASSERT_TRUE(result && result->data);
@@ -193,7 +191,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     fs.setWriteLimit(8192);
     for (const auto& res : {fixture::resource, fixture::tile}) {
         auto result = db.get(res);
-        EXPECT_EQ(1u, log.count(warning(ResultCode::Full, "Can't update timestamp: database or disk is full")));
+        EXPECT_EQ(1u, log.count(warningTag(ResultCode::Full, "Can't update timestamp: database or disk is full")));
         EXPECT_EQ(0u, log.uncheckedCount());
         ASSERT_TRUE(result && result->data);
         EXPECT_EQ("first", *result->data);
@@ -206,14 +204,14 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
     for (const auto& res : {fixture::resource, fixture::tile}) {
         // First, try reading.
         auto result = db.get(res);
-        EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't update timestamp: authorization denied")));
-        EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't read resource: authorization denied")));
+        EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't update timestamp: authorization denied")));
+        EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't read resource: authorization denied")));
         EXPECT_EQ(0u, log.uncheckedCount());
         EXPECT_FALSE(result);
 
         // Now try inserting.
         EXPECT_EQ(std::make_pair(false, uint64_t(0)), db.put(res, fixture::response));
-        EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't write resource: authorization denied")));
+        EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't write resource: authorization denied")));
         EXPECT_EQ(0u, log.uncheckedCount());
     }
 
@@ -224,21 +222,22 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(CreateFail)) {
 
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(SchemaVersion)) {
     FixtureLog log;
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
 
     {
-        mapbox::sqlite::Database db = mapbox::sqlite::Database::open(filename, mapbox::sqlite::ReadWriteCreate);
+        mapbox::sqlite::Database db = mapbox::sqlite::Database::open(offline_database_filename,
+                                                                     mapbox::sqlite::ReadWriteCreate);
         db.setBusyTimeout(Milliseconds(1000));
         db.exec("PRAGMA user_version = 1");
     }
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
     }
 
-    EXPECT_EQ(6, databaseUserVersion(filename));
+    EXPECT_EQ(6, databaseUserVersion(offline_database_filename));
 
-    OfflineDatabase db(filename, fixture::tileServerOptions);
+    OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
     // Now try inserting and reading back to make sure we have a valid database.
     for (const auto& res : {fixture::resource, fixture::tile}) {
         EXPECT_EQ(std::make_pair(true, uint64_t(5)), db.put(res, fixture::response));
@@ -254,10 +253,10 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(SchemaVersion)) {
 
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(Invalid)) {
     FixtureLog log;
-    deleteDatabaseFiles();
-    util::write_file(filename, "this is an invalid file");
+    test::deleteDatabaseFiles(offline_database_filename);
+    util::write_file(offline_database_filename, "this is an invalid file");
 
-    OfflineDatabase db(filename, fixture::tileServerOptions);
+    OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
     // Checking two possibilities for the error string because it apparently
     // changes between SQLite versions.
     EXPECT_EQ(
@@ -337,10 +336,10 @@ TEST(OfflineDatabase, PutResource) {
 
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(GetResourceFromOfflineRegion)) {
     FixtureLog log;
-    deleteDatabaseFiles();
-    util::copyFile(filename, "test/fixtures/offline_database/satellite_test.db");
+    test::deleteDatabaseFiles(offline_database_filename);
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/satellite_test.db");
 
-    OfflineDatabase db(filename, fixture::tileServerOptions);
+    OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
 
     Resource resource = Resource::style("maptiler://maps/hybrid");
     ASSERT_TRUE(db.get(resource));
@@ -563,24 +562,24 @@ TEST(OfflineDatabase, GetRegionDefinition) {
 // Disabled due to flakiness: https://github.com/mapbox/mapbox-gl-native/issues/14966
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
     FixtureLog log;
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
 
     auto databaseSize = [] {
-        return util::read_file(filename).size();
+        return util::read_file(offline_database_filename).size();
     };
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
     }
 
-    size_t initialSize = util::read_file(filename).size();
+    size_t initialSize = util::read_file(offline_database_filename).size();
     size_t maximumSize = 50 * 1024 * 1024;
 
     Response response;
     response.data = randomString(100 * 1024);
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(maximumSize); // 50 MB
 
         OfflineTilePyramidRegionDefinition definition{
@@ -617,7 +616,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
     maximumSize = 30 * 1024 * 1024;
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(maximumSize); // 30 MB
     }
 
@@ -627,7 +626,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
     EXPECT_LE(databaseSize(), 60 * 1024 * 1024);
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(maximumSize); // 30 MB
         db.deleteRegion(std::move(db.listRegions().value()[0]));
     }
@@ -638,7 +637,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
     EXPECT_GE(databaseSize(), maximumSize / 2);
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(maximumSize * 2); // 60 MB
     }
 
@@ -649,7 +648,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
     EXPECT_GE(databaseSize(), maximumSize / 2);
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(maximumSize); // 30 MB
 
         // Add ~50 MB in ambient cache data.
@@ -671,7 +670,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
     maximumSize = 20 * 1024 * 1024;
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(maximumSize); // 20 MB
     }
 
@@ -680,7 +679,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
     EXPECT_GE(databaseSize(), initialSize);
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(0);
 
         for (unsigned i = 0; i < 5; ++i) {
@@ -697,7 +696,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DISABLED_MaximumAmbientCacheSize)) {
 
     // Setting the size to zero should effectively
     // clear the cache now.
-    EXPECT_EQ(initialSize, util::read_file(filename).size());
+    EXPECT_EQ(initialSize, util::read_file(offline_database_filename).size());
 }
 
 namespace {
@@ -718,21 +717,21 @@ std::list<std::tuple<Resource, Response>> generateResources(const std::string& t
 
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DeleteRegion)) {
     FixtureLog log;
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
 
     {
-        OfflineDatabase dbCreate(filename, fixture::tileServerOptions);
+        OfflineDatabase dbCreate(offline_database_filename, fixture::tileServerOptions);
     }
 
 #ifndef __QT__ // Qt doesn't decrease the size of the database file.
-    size_t initialSize = util::read_file(filename).size();
+    size_t initialSize = util::read_file(offline_database_filename).size();
 #endif
 
     {
         Response response;
         response.data = randomString(512 * 1024);
 
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
 
         OfflineTilePyramidRegionDefinition definition{
             "maptiler://maps/style", LatLngBounds::hull({1, 2}, {3, 4}), 5, 6, 2.0, true};
@@ -746,18 +745,18 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DeleteRegion)) {
             region1->getID(), generateResources("maptiler://tiles/tiles/tile_1", "maptiler://maps/style_1"), status);
         db.putRegionResources(
             region2->getID(), generateResources("maptiler://tiles/tiles/tile_2", "maptiler://maps/style_2"), status);
-        const size_t sizeWithTwoRegions = util::read_file(filename).size();
+        const size_t sizeWithTwoRegions = util::read_file(offline_database_filename).size();
 
         db.runPackDatabaseAutomatically(false);
         db.deleteRegion(std::move(*region1));
 
         ASSERT_EQ(1u, db.listRegions().value().size());
         // Region is removed but the size of the database is the same.
-        EXPECT_EQ(sizeWithTwoRegions, util::read_file(filename).size());
+        EXPECT_EQ(sizeWithTwoRegions, util::read_file(offline_database_filename).size());
 
         db.pack();
         // The size of the database has shrunk after pack().
-        const size_t sizeWithOneRegion = util::read_file(filename).size();
+        const size_t sizeWithOneRegion = util::read_file(offline_database_filename).size();
         EXPECT_LT(sizeWithOneRegion, sizeWithTwoRegions);
         db.runPackDatabaseAutomatically(true);
         db.deleteRegion(std::move(*region2));
@@ -768,7 +767,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DeleteRegion)) {
 
         // The size of the database has shrunk right away after deleted region
         // is evicted from an ambient cache.
-        const size_t sizeWithoutRegions = util::read_file(filename).size();
+        const size_t sizeWithoutRegions = util::read_file(offline_database_filename).size();
 
         // The tiles from the offline region will migrate to the
         // ambient cache and shrink the database to the maximum
@@ -782,17 +781,17 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DeleteRegion)) {
     }
 
 #ifndef __QT__ // Qt doesn't decrease the size of the database file.
-    EXPECT_EQ(initialSize, util::read_file(filename).size());
+    EXPECT_EQ(initialSize, util::read_file(offline_database_filename).size());
 #endif
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(Pack)) {
     FixtureLog log;
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
 
-    OfflineDatabase db(filename, fixture::tileServerOptions);
-    size_t initialSize = util::read_file(filename).size();
+    OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
+    size_t initialSize = util::read_file(offline_database_filename).size();
     db.runPackDatabaseAutomatically(false);
 
     Response response;
@@ -806,16 +805,16 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(Pack)) {
         const Resource style = Resource::style("maptiler://maps/style_" + std::to_string(i));
         db.put(style, response);
     }
-    size_t populatedSize = util::read_file(filename).size();
+    size_t populatedSize = util::read_file(offline_database_filename).size();
     ASSERT_GT(populatedSize, initialSize);
 
     db.clearAmbientCache();
-    EXPECT_EQ(populatedSize, util::read_file(filename).size());
+    EXPECT_EQ(populatedSize, util::read_file(offline_database_filename).size());
     EXPECT_EQ(0u, log.uncheckedCount());
 
     db.pack();
 #ifndef __QT__ // Qt doesn't decrease the size of the database file.
-    EXPECT_EQ(initialSize, util::read_file(filename).size());
+    EXPECT_EQ(initialSize, util::read_file(offline_database_filename).size());
 #endif
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -1019,21 +1018,21 @@ TEST(OfflineDatabase, Invalidate) {
 
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ClearAmbientCache)) {
     FixtureLog log;
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
 
     {
-        OfflineDatabase dbCreate(filename, fixture::tileServerOptions);
+        OfflineDatabase dbCreate(offline_database_filename, fixture::tileServerOptions);
     }
 
 #ifndef __QT__ // Qt doesn't decrease the size of the database file.
-    size_t initialSize = util::read_file(filename).size();
+    size_t initialSize = util::read_file(offline_database_filename).size();
 #endif
 
     {
         Response response;
         response.data = randomString(512 * 1024);
 
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
 
         for (unsigned i = 0; i < 50; ++i) {
             const Resource tile = Resource::tile(
@@ -1048,7 +1047,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ClearAmbientCache)) {
     }
 
 #ifndef __QT__ // Qt doesn't decrease the size of the database file.
-    EXPECT_EQ(initialSize, util::read_file(filename).size());
+    EXPECT_EQ(initialSize, util::read_file(offline_database_filename).size());
 #endif
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -1074,12 +1073,12 @@ TEST(OfflineDatabase, CreateRegionInfiniteMaxZoom) {
 #ifndef __QT__ // Qt doesn't support concurrent access to the same database.
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(ConcurrentUse)) {
     FixtureLog log;
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
 
-    OfflineDatabase db1(filename, fixture::tileServerOptions);
+    OfflineDatabase db1(offline_database_filename, fixture::tileServerOptions);
     EXPECT_EQ(0u, log.uncheckedCount());
 
-    OfflineDatabase db2(filename, fixture::tileServerOptions);
+    OfflineDatabase db2(offline_database_filename, fixture::tileServerOptions);
 
     std::thread thread1([&] {
         for (auto i = 0; i < 100; i++) {
@@ -1448,11 +1447,11 @@ TEST(OfflineDatabase, BatchInsertionMapboxTileCountExceeded) {
 TEST(OfflineDatabase, MigrateFromV2Schema) {
     // v2.db is a v2 database containing a single offline region with a small number of resources.
     FixtureLog log;
-    deleteDatabaseFiles();
-    util::copyFile(filename, "test/fixtures/offline_database/v2.db");
+    test::deleteDatabaseFiles(offline_database_filename);
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/v2.db");
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(0);
 
         auto regions = db.listRegions();
@@ -1462,8 +1461,8 @@ TEST(OfflineDatabase, MigrateFromV2Schema) {
         }
     }
 
-    EXPECT_EQ(6, databaseUserVersion(filename));
-    EXPECT_LT(databasePageCount(filename), databasePageCount("test/fixtures/offline_database/v2.db"));
+    EXPECT_EQ(6, databaseUserVersion(offline_database_filename));
+    EXPECT_LT(databasePageCount(offline_database_filename), databasePageCount("test/fixtures/offline_database/v2.db"));
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -1471,11 +1470,11 @@ TEST(OfflineDatabase, MigrateFromV2Schema) {
 TEST(OfflineDatabase, MigrateFromV3Schema) {
     // v3.db is a v3 database, migrated from v2.
     FixtureLog log;
-    deleteDatabaseFiles();
-    util::copyFile(filename, "test/fixtures/offline_database/v3.db");
+    test::deleteDatabaseFiles(offline_database_filename);
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/v3.db");
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(0);
 
         auto regions = db.listRegions().value();
@@ -1484,7 +1483,7 @@ TEST(OfflineDatabase, MigrateFromV3Schema) {
         }
     }
 
-    EXPECT_EQ(6, databaseUserVersion(filename));
+    EXPECT_EQ(6, databaseUserVersion(offline_database_filename));
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -1493,11 +1492,11 @@ TEST(OfflineDatabase, MigrateFromV4Schema) {
     // v4.db is a v4 database, migrated from v2 & v3. This database used
     // `journal_mode = WAL` and `synchronous = NORMAL`.
     FixtureLog log;
-    deleteDatabaseFiles();
-    util::copyFile(filename, "test/fixtures/offline_database/v4.db");
+    test::deleteDatabaseFiles(offline_database_filename);
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/v4.db");
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(0);
 
         auto regions = db.listRegions().value();
@@ -1506,13 +1505,13 @@ TEST(OfflineDatabase, MigrateFromV4Schema) {
         }
     }
 
-    EXPECT_EQ(6, databaseUserVersion(filename));
+    EXPECT_EQ(6, databaseUserVersion(offline_database_filename));
 
     // Journal mode should be DELETE after migration to v5.
-    EXPECT_EQ("delete", databaseJournalMode(filename));
+    EXPECT_EQ("delete", databaseJournalMode(offline_database_filename));
 
     // Synchronous setting should be FULL (2) after migration to v5.
-    EXPECT_EQ(2, databaseSyncMode(filename));
+    EXPECT_EQ(2, databaseSyncMode(offline_database_filename));
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -1520,11 +1519,11 @@ TEST(OfflineDatabase, MigrateFromV4Schema) {
 TEST(OfflineDatabase, MigrateFromV5Schema) {
     // v5.db is a v5 database, migrated from v2, v3 & v4.
     FixtureLog log;
-    deleteDatabaseFiles();
-    util::copyFile(filename, "test/fixtures/offline_database/v5.db");
+    test::deleteDatabaseFiles(offline_database_filename);
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/v5.db");
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(0);
 
         auto regions = db.listRegions().value();
@@ -1533,7 +1532,7 @@ TEST(OfflineDatabase, MigrateFromV5Schema) {
         }
     }
 
-    EXPECT_EQ(6, databaseUserVersion(filename));
+    EXPECT_EQ(6, databaseUserVersion(offline_database_filename));
 
     EXPECT_EQ((std::vector<std::string>{"id",
                                         "url_template",
@@ -1548,23 +1547,23 @@ TEST(OfflineDatabase, MigrateFromV5Schema) {
                                         "compressed",
                                         "accessed",
                                         "must_revalidate"}),
-              databaseTableColumns(filename, "tiles"));
+              databaseTableColumns(offline_database_filename, "tiles"));
     EXPECT_EQ(
         (std::vector<std::string>{
             "id", "url", "kind", "expires", "modified", "etag", "data", "compressed", "accessed", "must_revalidate"}),
-        databaseTableColumns(filename, "resources"));
+        databaseTableColumns(offline_database_filename, "resources"));
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
 
 TEST(OfflineDatabase, IncrementalVacuum) {
     FixtureLog log;
-    deleteDatabaseFiles();
-    util::copyFile(filename, "test/fixtures/offline_database/no_auto_vacuum.db");
-    EXPECT_EQ(0, databaseAutoVacuum(filename));
+    test::deleteDatabaseFiles(offline_database_filename);
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/no_auto_vacuum.db");
+    EXPECT_EQ(0, databaseAutoVacuum(offline_database_filename));
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(0);
 
         auto regions = db.listRegions().value();
@@ -1573,7 +1572,7 @@ TEST(OfflineDatabase, IncrementalVacuum) {
         }
     }
 
-    EXPECT_EQ(2, databaseAutoVacuum(filename));
+    EXPECT_EQ(2, databaseAutoVacuum(offline_database_filename));
 
     EXPECT_EQ(0u, log.uncheckedCount());
 }
@@ -1582,15 +1581,15 @@ TEST(OfflineDatabase, DowngradeSchema) {
     // v999.db is a v999 database, it should be deleted
     // and recreated with the current schema.
     FixtureLog log;
-    util::deleteFile(filename);
-    util::copyFile(filename, "test/fixtures/offline_database/v999.db");
+    util::deleteFile(offline_database_filename);
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/v999.db");
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         db.setMaximumAmbientCacheSize(0);
     }
 
-    EXPECT_EQ(6, databaseUserVersion(filename));
+    EXPECT_EQ(6, databaseUserVersion(offline_database_filename));
 
     EXPECT_EQ((std::vector<std::string>{"id",
                                         "url_template",
@@ -1605,11 +1604,11 @@ TEST(OfflineDatabase, DowngradeSchema) {
                                         "compressed",
                                         "accessed",
                                         "must_revalidate"}),
-              databaseTableColumns(filename, "tiles"));
+              databaseTableColumns(offline_database_filename, "tiles"));
     EXPECT_EQ(
         (std::vector<std::string>{
             "id", "url", "kind", "expires", "modified", "etag", "data", "compressed", "accessed", "must_revalidate"}),
-        databaseTableColumns(filename, "resources"));
+        databaseTableColumns(offline_database_filename, "resources"));
 
     EXPECT_EQ(
         1u,
@@ -1619,11 +1618,11 @@ TEST(OfflineDatabase, DowngradeSchema) {
 
 TEST(OfflineDatabase, CorruptDatabaseOnOpen) {
     FixtureLog log;
-    util::deleteFile(filename);
-    util::copyFile(filename, "test/fixtures/offline_database/corrupt-immediate.db");
+    util::deleteFile(offline_database_filename);
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/corrupt-immediate.db");
 
     // This database is corrupt in a way that will prevent opening the database.
-    OfflineDatabase db(filename, fixture::tileServerOptions);
+    OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
     EXPECT_EQ(1u, log.count(error(ResultCode::Corrupt, "Can't open database: database disk image is malformed"), true));
     EXPECT_EQ(
         1u,
@@ -1643,12 +1642,12 @@ TEST(OfflineDatabase, CorruptDatabaseOnOpen) {
 
 TEST(OfflineDatabase, CorruptDatabaseOnQuery) {
     FixtureLog log;
-    util::deleteFile(filename);
-    util::copyFile(filename, "test/fixtures/offline_database/corrupt-delayed.db");
+    util::deleteFile(offline_database_filename);
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/corrupt-delayed.db");
 
     // This database is corrupt in a way that won't manifest itself until we
     // start querying it, so just opening it will not cause an error.
-    OfflineDatabase db(filename, fixture::tileServerOptions);
+    OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
 
     // Just opening this corrupt database should not have produced an error yet,
     // since PRAGMA user_version still succeeds with this database.
@@ -1676,10 +1675,10 @@ TEST(OfflineDatabase, CorruptDatabaseOnQuery) {
 #ifndef __QT__ // Qt doesn't expose the ability to register virtual file system handlers.
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DisallowedIO)) {
     FixtureLog log;
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
     test::SQLite3TestFS fs;
 
-    OfflineDatabase db(filename_test_fs, fixture::tileServerOptions);
+    OfflineDatabase db(filename_offline_database_test_fs, fixture::tileServerOptions);
     EXPECT_EQ(0u, log.uncheckedCount());
 
     // First, create a region object so that we can try deleting it later.
@@ -1692,58 +1691,58 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(DisallowedIO)) {
     fs.allowIO(false);
 
     EXPECT_EQ(std::nullopt, db.get(fixture::resource));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't update timestamp: authorization denied")));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't read resource: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't update timestamp: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't read resource: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_EQ(std::make_pair(false, uint64_t(0)), db.put(fixture::resource, fixture::response));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't write resource: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't write resource: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_FALSE(db.listRegions());
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't list regions: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't list regions: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_FALSE(db.createRegion(definition, {}));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't create region: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't create region: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_FALSE(db.updateMetadata(region->getID(), {}));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't update region metadata: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't update region metadata: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_EQ(std::nullopt, db.getRegionResource(fixture::resource));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't update timestamp: authorization denied")));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't read region resource: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't update timestamp: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't read region resource: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_EQ(std::nullopt, db.hasRegionResource(fixture::resource));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't query region resource: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't query region resource: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_EQ(0u, db.putRegionResource(region->getID(), fixture::resource, fixture::response));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't write region resource: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't write region resource: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     OfflineRegionStatus status;
     db.putRegionResources(region->getID(), {std::make_tuple(fixture::resource, fixture::response)}, status);
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't write region resources: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't write region resources: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_FALSE(db.getRegionDefinition(region->getID()));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't load region: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't load region: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_FALSE(db.getRegionCompletedStatus(region->getID()));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't get region status: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't get region status: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_TRUE(db.deleteRegion(std::move(*region)));
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't delete region: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't delete region: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     EXPECT_EQ(std::numeric_limits<uint64_t>::max(), db.getOfflineMapboxTileCount());
-    EXPECT_EQ(1u, log.count(warning(ResultCode::Auth, "Can't get offline Mapbox tile count: authorization denied")));
+    EXPECT_EQ(1u, log.count(warningTag(ResultCode::Auth, "Can't get offline Mapbox tile count: authorization denied")));
     EXPECT_EQ(0u, log.uncheckedCount());
 
     fs.reset();
@@ -1770,9 +1769,9 @@ TEST(OfflineDatabase, MergeDatabaseWithSingleRegion_New) {
 }
 
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(MergeDatabaseWithSingleRegion_Update)) {
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
     util::deleteFile(filename_sideload);
-    util::copyFile(filename, "test/fixtures/offline_database/satellite_test.db");
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/satellite_test.db");
     util::copyFile(filename_sideload, "test/fixtures/offline_database/sideload_sat.db");
     int64_t regionId;
 
@@ -1782,7 +1781,7 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(MergeDatabaseWithSingleRegion_Update))
         auto originalTile = db1.getRegionResource(Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
         auto originalStamp = originalTile->first.modified;
 
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         auto regions = db.listRegions();
         EXPECT_EQ(1u, db.listRegions()->size());
         regionId = regions->front().getID();
@@ -1803,14 +1802,14 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(MergeDatabaseWithSingleRegion_Update))
 }
 
 TEST(OfflineDatabase, MergeDatabaseWithSingleRegion_NoUpdate) {
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
     util::deleteFile(filename_sideload);
 
     // Swap sideload/main database from update test and ensure that an older tile is not copied over
     util::copyFile(filename_sideload, "test/fixtures/offline_database/satellite_test.db");
-    util::copyFile(filename, "test/fixtures/offline_database/sideload_sat.db");
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/sideload_sat.db");
 
-    OfflineDatabase db(filename, fixture::tileServerOptions);
+    OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
 
     std::string tileURL = "maptiler://tiles/tiles/satellite/{z}/{x}/{y}{ratio}.jpg";
     auto originalTile = db.getRegionResource(Resource::tile(tileURL, 1, 0, 0, 1, Tileset::Scheme::XYZ));
@@ -1867,13 +1866,13 @@ TEST(OfflineDatabase, MergeDatabaseWithMultipleRegions_New) {
 }
 
 TEST(OfflineDatabase, MergeDatabaseWithMultipleRegionsWithOverlap) {
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
     util::deleteFile(filename_sideload);
-    util::copyFile(filename, "test/fixtures/offline_database/sideload_sat.db");
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/sideload_sat.db");
     util::copyFile(filename_sideload, "test/fixtures/offline_database/sideload_sat_multiple.db");
 
     {
-        OfflineDatabase db(filename, fixture::tileServerOptions);
+        OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
         EXPECT_EQ(1u, db.listRegions()->size());
 
         auto result = db.mergeDatabase(filename_sideload);
@@ -1881,7 +1880,7 @@ TEST(OfflineDatabase, MergeDatabaseWithMultipleRegionsWithOverlap) {
         EXPECT_EQ(2u, db.listRegions()->size());
     }
 
-    mapbox::sqlite::Database db = mapbox::sqlite::Database::open(filename, mapbox::sqlite::ReadOnly);
+    mapbox::sqlite::Database db = mapbox::sqlite::Database::open(offline_database_filename, mapbox::sqlite::ReadOnly);
     {
         // clang-format off
         mapbox::sqlite::Statement stmt { db, "SELECT COUNT(*) "
@@ -1924,12 +1923,12 @@ TEST(OfflineDatabase, MergeDatabaseWithSingleRegionTooManyNewTiles) {
 
 TEST(OfflineDatabase, MergeDatabaseWithSingleRegionTooManyExistingTiles) {
     FixtureLog log;
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
     util::deleteFile(filename_sideload);
-    util::copyFile(filename, "test/fixtures/offline_database/sideload_sat_multiple.db");
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/sideload_sat_multiple.db");
     util::copyFile(filename_sideload, "test/fixtures/offline_database/satellite_test.db");
 
-    OfflineDatabase db(filename, fixture::tileServerOptions);
+    OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
     db.setOfflineMapboxTileCountLimit(2);
 
     auto result = db.mergeDatabase(filename_sideload);
@@ -1980,12 +1979,12 @@ TEST(OfflineDatabase, TEST_REQUIRES_WRITE(MergeDatabaseWithDiskFull)) {
     FixtureLog log;
     test::SQLite3TestFS fs;
 
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
     util::deleteFile(filename_sideload);
-    util::copyFile(filename, "test/fixtures/offline_database/satellite_test.db");
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/satellite_test.db");
     util::copyFile(filename_sideload, "test/fixtures/offline_database/sideload_sat.db");
 
-    OfflineDatabase db(filename_test_fs, fixture::tileServerOptions);
+    OfflineDatabase db(filename_offline_database_test_fs, fixture::tileServerOptions);
 
     fs.setWriteLimit(0);
 
@@ -2009,10 +2008,10 @@ TEST(OfflineDatabase, ChangePath) {
 
 TEST(OfflineDatabase, ResetDatabase) {
     FixtureLog log;
-    deleteDatabaseFiles();
-    util::copyFile(filename, "test/fixtures/offline_database/satellite_test.db");
+    test::deleteDatabaseFiles(offline_database_filename);
+    util::copyFile(offline_database_filename, "test/fixtures/offline_database/satellite_test.db");
 
-    OfflineDatabase db(filename, fixture::tileServerOptions);
+    OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
     auto result = db.resetDatabase();
     EXPECT_FALSE(result);
 
@@ -2053,9 +2052,9 @@ TEST(OfflineDatabase, PutResourceReadOnlyMode) {
 
 TEST(OfflineDatabase, TEST_REQUIRES_WRITE(UpdateDatabaseReadOnlyMode)) {
     FixtureLog log;
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(offline_database_filename);
 
-    OfflineDatabase db(filename, fixture::tileServerOptions);
+    OfflineDatabase db(offline_database_filename, fixture::tileServerOptions);
     db.reopenDatabaseReadOnly(true /*readOnly*/);
     db.clearAmbientCache();
     EXPECT_EQ(1u,

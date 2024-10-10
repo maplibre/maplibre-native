@@ -60,5 +60,11 @@ void checkImage(const std::string& base,
 #endif
 }
 
+void deleteDatabaseFiles(const std::string& filename) {
+    util::deleteFile(filename);
+    util::deleteFile(filename + "-wal");
+    util::deleteFile(filename + "-journal");
+}
+
 } // namespace test
 } // namespace mbgl

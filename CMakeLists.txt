@@ -1008,6 +1008,12 @@ list(APPEND SRC_FILES
     ${PROJECT_SOURCE_DIR}/src/mbgl/util/work_request.cpp
 )
 
+set_source_files_properties(
+    ${PROJECT_SOURCE_DIR}/src/mbgl/style/conversion/geojson.cpp
+    PROPERTIES
+        SKIP_UNITY_BUILD_INCLUSION 1
+)
+
 if(MLN_WITH_OPENGL)
     message(STATUS "Configuring GL-Native with OpenGL renderer backend")
     target_compile_definitions(
@@ -1085,6 +1091,7 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/attribute.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/command_encoder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/command_encoder.hpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/enum.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/context.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/fence.cpp
@@ -1093,7 +1100,6 @@ if(MLN_WITH_OPENGL)
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/debugging_extension.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/defines.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/draw_scope_resource.hpp
-            ${PROJECT_SOURCE_DIR}/src/mbgl/gl/enum.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/enum.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/extension.hpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/gl/framebuffer.hpp

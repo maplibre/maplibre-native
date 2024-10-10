@@ -12,6 +12,7 @@
 #include <mbgl/style/conversion/json.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/traits.hpp>
+#include <mbgl/util/enum.hpp>
 
 #include <mapbox/eternal.hpp>
 
@@ -285,9 +286,11 @@ using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 16u;
 
-enum class Property : uint8_t {
+constexpr uint8_t kPaintPropertyCountFillExtrusion = 16u;
+
+
+enum class FillExtrusionProperty : uint8_t {
     FillExtrusionBase,
     FillExtrusionColor,
     FillExtrusionHeight,
@@ -306,73 +309,69 @@ enum class Property : uint8_t {
     FillExtrusionVerticalGradientTransition,
 };
 
-template <typename T>
-constexpr uint8_t toUint8(T t) noexcept {
-    return uint8_t(mbgl::underlying_type(t));
-}
 
-constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
-    {{"fill-extrusion-base", toUint8(Property::FillExtrusionBase)},
-     {"fill-extrusion-color", toUint8(Property::FillExtrusionColor)},
-     {"fill-extrusion-height", toUint8(Property::FillExtrusionHeight)},
-     {"fill-extrusion-opacity", toUint8(Property::FillExtrusionOpacity)},
-     {"fill-extrusion-pattern", toUint8(Property::FillExtrusionPattern)},
-     {"fill-extrusion-translate", toUint8(Property::FillExtrusionTranslate)},
-     {"fill-extrusion-translate-anchor", toUint8(Property::FillExtrusionTranslateAnchor)},
-     {"fill-extrusion-vertical-gradient", toUint8(Property::FillExtrusionVerticalGradient)},
-     {"fill-extrusion-base-transition", toUint8(Property::FillExtrusionBaseTransition)},
-     {"fill-extrusion-color-transition", toUint8(Property::FillExtrusionColorTransition)},
-     {"fill-extrusion-height-transition", toUint8(Property::FillExtrusionHeightTransition)},
-     {"fill-extrusion-opacity-transition", toUint8(Property::FillExtrusionOpacityTransition)},
-     {"fill-extrusion-pattern-transition", toUint8(Property::FillExtrusionPatternTransition)},
-     {"fill-extrusion-translate-transition", toUint8(Property::FillExtrusionTranslateTransition)},
-     {"fill-extrusion-translate-anchor-transition", toUint8(Property::FillExtrusionTranslateAnchorTransition)},
-     {"fill-extrusion-vertical-gradient-transition", toUint8(Property::FillExtrusionVerticalGradientTransition)}});
+constexpr const auto fillExtrusionLayerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
+    {{"fill-extrusion-base", toUint8(FillExtrusionProperty::FillExtrusionBase)},
+     {"fill-extrusion-color", toUint8(FillExtrusionProperty::FillExtrusionColor)},
+     {"fill-extrusion-height", toUint8(FillExtrusionProperty::FillExtrusionHeight)},
+     {"fill-extrusion-opacity", toUint8(FillExtrusionProperty::FillExtrusionOpacity)},
+     {"fill-extrusion-pattern", toUint8(FillExtrusionProperty::FillExtrusionPattern)},
+     {"fill-extrusion-translate", toUint8(FillExtrusionProperty::FillExtrusionTranslate)},
+     {"fill-extrusion-translate-anchor", toUint8(FillExtrusionProperty::FillExtrusionTranslateAnchor)},
+     {"fill-extrusion-vertical-gradient", toUint8(FillExtrusionProperty::FillExtrusionVerticalGradient)},
+     {"fill-extrusion-base-transition", toUint8(FillExtrusionProperty::FillExtrusionBaseTransition)},
+     {"fill-extrusion-color-transition", toUint8(FillExtrusionProperty::FillExtrusionColorTransition)},
+     {"fill-extrusion-height-transition", toUint8(FillExtrusionProperty::FillExtrusionHeightTransition)},
+     {"fill-extrusion-opacity-transition", toUint8(FillExtrusionProperty::FillExtrusionOpacityTransition)},
+     {"fill-extrusion-pattern-transition", toUint8(FillExtrusionProperty::FillExtrusionPatternTransition)},
+     {"fill-extrusion-translate-transition", toUint8(FillExtrusionProperty::FillExtrusionTranslateTransition)},
+     {"fill-extrusion-translate-anchor-transition", toUint8(FillExtrusionProperty::FillExtrusionTranslateAnchorTransition)},
+     {"fill-extrusion-vertical-gradient-transition", toUint8(FillExtrusionProperty::FillExtrusionVerticalGradientTransition)}});
 
-StyleProperty getLayerProperty(const FillExtrusionLayer& layer, Property property) {
+StyleProperty getLayerProperty(const FillExtrusionLayer& layer, FillExtrusionProperty property) {
     switch (property) {
-        case Property::FillExtrusionBase:
+        case FillExtrusionProperty::FillExtrusionBase:
             return makeStyleProperty(layer.getFillExtrusionBase());
-        case Property::FillExtrusionColor:
+        case FillExtrusionProperty::FillExtrusionColor:
             return makeStyleProperty(layer.getFillExtrusionColor());
-        case Property::FillExtrusionHeight:
+        case FillExtrusionProperty::FillExtrusionHeight:
             return makeStyleProperty(layer.getFillExtrusionHeight());
-        case Property::FillExtrusionOpacity:
+        case FillExtrusionProperty::FillExtrusionOpacity:
             return makeStyleProperty(layer.getFillExtrusionOpacity());
-        case Property::FillExtrusionPattern:
+        case FillExtrusionProperty::FillExtrusionPattern:
             return makeStyleProperty(layer.getFillExtrusionPattern());
-        case Property::FillExtrusionTranslate:
+        case FillExtrusionProperty::FillExtrusionTranslate:
             return makeStyleProperty(layer.getFillExtrusionTranslate());
-        case Property::FillExtrusionTranslateAnchor:
+        case FillExtrusionProperty::FillExtrusionTranslateAnchor:
             return makeStyleProperty(layer.getFillExtrusionTranslateAnchor());
-        case Property::FillExtrusionVerticalGradient:
+        case FillExtrusionProperty::FillExtrusionVerticalGradient:
             return makeStyleProperty(layer.getFillExtrusionVerticalGradient());
-        case Property::FillExtrusionBaseTransition:
+        case FillExtrusionProperty::FillExtrusionBaseTransition:
             return makeStyleProperty(layer.getFillExtrusionBaseTransition());
-        case Property::FillExtrusionColorTransition:
+        case FillExtrusionProperty::FillExtrusionColorTransition:
             return makeStyleProperty(layer.getFillExtrusionColorTransition());
-        case Property::FillExtrusionHeightTransition:
+        case FillExtrusionProperty::FillExtrusionHeightTransition:
             return makeStyleProperty(layer.getFillExtrusionHeightTransition());
-        case Property::FillExtrusionOpacityTransition:
+        case FillExtrusionProperty::FillExtrusionOpacityTransition:
             return makeStyleProperty(layer.getFillExtrusionOpacityTransition());
-        case Property::FillExtrusionPatternTransition:
+        case FillExtrusionProperty::FillExtrusionPatternTransition:
             return makeStyleProperty(layer.getFillExtrusionPatternTransition());
-        case Property::FillExtrusionTranslateTransition:
+        case FillExtrusionProperty::FillExtrusionTranslateTransition:
             return makeStyleProperty(layer.getFillExtrusionTranslateTransition());
-        case Property::FillExtrusionTranslateAnchorTransition:
+        case FillExtrusionProperty::FillExtrusionTranslateAnchorTransition:
             return makeStyleProperty(layer.getFillExtrusionTranslateAnchorTransition());
-        case Property::FillExtrusionVerticalGradientTransition:
+        case FillExtrusionProperty::FillExtrusionVerticalGradientTransition:
             return makeStyleProperty(layer.getFillExtrusionVerticalGradientTransition());
     }
     return {};
 }
 
 StyleProperty getLayerProperty(const FillExtrusionLayer& layer, const std::string& name) {
-    const auto it = layerProperties.find(name.c_str());
-    if (it == layerProperties.end()) {
+    const auto it = fillExtrusionLayerProperties.find(name.c_str());
+    if (it == fillExtrusionLayerProperties.end()) {
         return {};
     }
-    return getLayerProperty(layer, static_cast<Property>(it->second));
+    return getLayerProperty(layer, static_cast<FillExtrusionProperty>(it->second));
 }
 
 } // namespace
@@ -380,38 +379,39 @@ StyleProperty getLayerProperty(const FillExtrusionLayer& layer, const std::strin
 Value FillExtrusionLayer::serialize() const {
     auto result = Layer::serialize();
     assert(result.getObject());
-    for (const auto& property : layerProperties) {
-        auto styleProperty = getLayerProperty(*this, static_cast<Property>(property.second));
+    for (const auto& property : fillExtrusionLayerProperties) {
+        auto styleProperty = getLayerProperty(*this, static_cast<FillExtrusionProperty>(property.second));
         if (styleProperty.getKind() == StyleProperty::Kind::Undefined) continue;
-        serializeProperty(result, styleProperty, property.first.c_str(), property.second < kPaintPropertyCount);
+        serializeProperty(result, styleProperty, property.first.c_str(), property.second < kPaintPropertyCountFillExtrusion);
     }
     return result;
 }
 
 std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
-    const auto it = layerProperties.find(name.c_str());
-    if (it == layerProperties.end()) return Error{"layer doesn't support this property"};
+    const auto it = fillExtrusionLayerProperties.find(name.c_str());
+    if (it == fillExtrusionLayerProperties.end()) return Error{"layer doesn't support this property"};
 
-    auto property = static_cast<Property>(it->second);
+    auto property = static_cast<FillExtrusionProperty>(it->second);
 
-    if (property == Property::FillExtrusionBase || property == Property::FillExtrusionHeight) {
+    if (property == FillExtrusionProperty::FillExtrusionBase ||
+        property == FillExtrusionProperty::FillExtrusionHeight) {
         Error error;
         const auto& typedValue = convert<PropertyValue<float>>(value, error, true, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::FillExtrusionBase) {
+        if (property == FillExtrusionProperty::FillExtrusionBase) {
             setFillExtrusionBase(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::FillExtrusionHeight) {
+        if (property == FillExtrusionProperty::FillExtrusionHeight) {
             setFillExtrusionHeight(*typedValue);
             return std::nullopt;
         }
     }
-    if (property == Property::FillExtrusionColor) {
+    if (property == FillExtrusionProperty::FillExtrusionColor) {
         Error error;
         const auto& typedValue = convert<PropertyValue<Color>>(value, error, true, false);
         if (!typedValue) {
@@ -421,7 +421,7 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
         setFillExtrusionColor(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::FillExtrusionOpacity) {
+    if (property == FillExtrusionProperty::FillExtrusionOpacity) {
         Error error;
         const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
         if (!typedValue) {
@@ -431,7 +431,7 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
         setFillExtrusionOpacity(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::FillExtrusionPattern) {
+    if (property == FillExtrusionProperty::FillExtrusionPattern) {
         Error error;
         const auto& typedValue = convert<PropertyValue<expression::Image>>(value, error, true, false);
         if (!typedValue) {
@@ -441,7 +441,7 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
         setFillExtrusionPattern(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::FillExtrusionTranslate) {
+    if (property == FillExtrusionProperty::FillExtrusionTranslate) {
         Error error;
         const auto& typedValue = convert<PropertyValue<std::array<float, 2>>>(value, error, false, false);
         if (!typedValue) {
@@ -451,7 +451,7 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
         setFillExtrusionTranslate(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::FillExtrusionTranslateAnchor) {
+    if (property == FillExtrusionProperty::FillExtrusionTranslateAnchor) {
         Error error;
         const auto& typedValue = convert<PropertyValue<TranslateAnchorType>>(value, error, false, false);
         if (!typedValue) {
@@ -461,7 +461,7 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
         setFillExtrusionTranslateAnchor(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::FillExtrusionVerticalGradient) {
+    if (property == FillExtrusionProperty::FillExtrusionVerticalGradient) {
         Error error;
         const auto& typedValue = convert<PropertyValue<bool>>(value, error, false, false);
         if (!typedValue) {
@@ -478,42 +478,42 @@ std::optional<Error> FillExtrusionLayer::setPropertyInternal(const std::string& 
         return error;
     }
 
-    if (property == Property::FillExtrusionBaseTransition) {
+    if (property == FillExtrusionProperty::FillExtrusionBaseTransition) {
         setFillExtrusionBaseTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::FillExtrusionColorTransition) {
+    if (property == FillExtrusionProperty::FillExtrusionColorTransition) {
         setFillExtrusionColorTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::FillExtrusionHeightTransition) {
+    if (property == FillExtrusionProperty::FillExtrusionHeightTransition) {
         setFillExtrusionHeightTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::FillExtrusionOpacityTransition) {
+    if (property == FillExtrusionProperty::FillExtrusionOpacityTransition) {
         setFillExtrusionOpacityTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::FillExtrusionPatternTransition) {
+    if (property == FillExtrusionProperty::FillExtrusionPatternTransition) {
         setFillExtrusionPatternTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::FillExtrusionTranslateTransition) {
+    if (property == FillExtrusionProperty::FillExtrusionTranslateTransition) {
         setFillExtrusionTranslateTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::FillExtrusionTranslateAnchorTransition) {
+    if (property == FillExtrusionProperty::FillExtrusionTranslateAnchorTransition) {
         setFillExtrusionTranslateAnchorTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::FillExtrusionVerticalGradientTransition) {
+    if (property == FillExtrusionProperty::FillExtrusionVerticalGradientTransition) {
         setFillExtrusionVerticalGradientTransition(*transition);
         return std::nullopt;
     }

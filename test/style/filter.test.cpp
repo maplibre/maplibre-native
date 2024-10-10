@@ -43,7 +43,7 @@ void invalidFilter(const char* json) {
     EXPECT_NE(error.message, "");
 }
 
-void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& value) {
+void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const mbgl::Value& value) {
     value.match([&](const NullValue&) { writer.Null(); },
                 [&](bool b) { writer.Bool(b); },
                 [&](uint64_t t) { writer.Uint64(t); },
@@ -53,7 +53,7 @@ void writeJSON(rapidjson::Writer<rapidjson::StringBuffer>& writer, const Value& 
                     f == std::floor(f) ? writer.Int(static_cast<int>(f)) : writer.Double(f);
                 },
                 [&](const std::string& s) { writer.String(s); },
-                [&](const std::vector<Value>& arr) {
+                [&](const std::vector<mbgl::Value>& arr) {
                     writer.StartArray();
                     for (const auto& item : arr) {
                         writeJSON(writer, item);

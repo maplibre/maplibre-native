@@ -131,14 +131,14 @@ CoerceFunction getCoerceFunction(const type::Type& t) {
 }
 
 /// `isRuntimeConstant` does not consider values coerced to `Type` image to be of `Kind` image, so we don't either.
-constexpr Dependency extraDependency(const type::Type& /*t*/) {
+constexpr Dependency getExtraDependency(const type::Type& /*t*/) {
     return /*t.is<type::ImageType>() ? Dependency::Image :*/ Dependency::None;
 }
 
 } // namespace
 
 Coercion::Coercion(const type::Type& type_, std::vector<std::unique_ptr<Expression>> inputs_)
-    : Expression(Kind::Coercion, type_, collectDependencies(inputs_) | extraDependency(type_)),
+    : Expression(Kind::Coercion, type_, collectDependencies(inputs_) | getExtraDependency(type_)),
       coerceSingleValue(getCoerceFunction(getType())),
       inputs(std::move(inputs_)) {
     assert(!inputs.empty());

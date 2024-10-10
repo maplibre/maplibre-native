@@ -345,7 +345,7 @@ void drawText(const RenderSymbolLayer::Programs& programs,
 
 #endif // MLN_LEGACY_RENDERER
 
-inline const SymbolLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
+inline const SymbolLayer::Impl& symbol_layer_impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == SymbolLayer::Impl::staticTypeInfo());
     return static_cast<const SymbolLayer::Impl&>(*impl);
 }
@@ -354,16 +354,16 @@ inline const SymbolLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& i
 
 RenderSymbolLayer::RenderSymbolLayer(Immutable<style::SymbolLayer::Impl> _impl)
     : RenderLayer(makeMutable<SymbolLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+      unevaluated(symbol_layer_impl_cast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
 }
 
 RenderSymbolLayer::~RenderSymbolLayer() = default;
 
 void RenderSymbolLayer::transition(const TransitionParameters& parameters) {
-    unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    unevaluated = symbol_layer_impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     hasFormatSectionOverrides = SymbolLayerPaintPropertyOverrides::hasOverrides(
-        impl_cast(baseImpl).layout.get<TextField>());
+        symbol_layer_impl_cast(baseImpl).layout.get<TextField>());
 }
 
 void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters) {
@@ -373,7 +373,7 @@ void RenderSymbolLayer::evaluate(const PropertyEvaluationParameters& parameters)
         unevaluated.evaluate(parameters, previousProperties->evaluated));
 
     auto& evaluated = properties->evaluated;
-    const auto& layout = impl_cast(baseImpl).layout;
+    const auto& layout = symbol_layer_impl_cast(baseImpl).layout;
 
     if (hasFormatSectionOverrides) {
         SymbolLayerPaintPropertyOverrides::setOverrides(layout, evaluated);
@@ -423,7 +423,7 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
     if (!parameters.shaders.getLegacyGroup().populate(programs.collisionBoxProgram)) return;
     if (!parameters.shaders.getLegacyGroup().populate(programs.collisionCircleProgram)) return;
 
-    const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
+    const bool sortFeaturesByKey = !symbol_layer_impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
     std::multiset<RenderableSegment> renderableSegments;
 
     const auto draw = [&parameters, this](auto& programInstance,
@@ -977,7 +977,7 @@ void RenderSymbolLayer::update(gfx::ShaderRegistry& shaders,
         });
     }
 
-    const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
+    const bool sortFeaturesByKey = !symbol_layer_impl_cast(baseImpl).layout.get<SymbolSortKey>().isUndefined();
     std::multiset<SegmentGroup> renderableSegments;
     std::unique_ptr<gfx::DrawableBuilder> builder;
 

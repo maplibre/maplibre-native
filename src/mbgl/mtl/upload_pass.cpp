@@ -230,16 +230,9 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     return bindings;
 }
 
-namespace {
-constexpr auto missing = "<none>";
-NS::String* toNSString(const char* str) {
-    return NS::String::string(str ? str : missing, NS::UTF8StringEncoding);
-}
-} // namespace
-
 void UploadPass::pushDebugGroup(const char* name) {
     if (encoder) {
-        encoder->pushDebugGroup(toNSString(name));
+        encoder->pushDebugGroup(NS::String::string(name ? name : "<none>", NS::UTF8StringEncoding));
     }
 }
 

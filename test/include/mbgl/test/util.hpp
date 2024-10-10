@@ -74,5 +74,7 @@ void checkImage(const std::string& base,
                 double imageThreshold = 0,
                 double pixelThreshold = 0);
 
+void deleteDatabaseFiles(const std::string& filename);
+
 } // namespace test
 } // namespace mbgl

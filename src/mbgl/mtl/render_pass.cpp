@@ -73,9 +73,8 @@ void RenderPass::endEncoding() {
 }
 
 namespace {
-constexpr auto missing = "<none>";
 NS::String* toNSString(const char* str) {
-    return NS::String::string(str ? str : missing, NS::UTF8StringEncoding);
+    return NS::String::string(str ? str : "<none>", NS::UTF8StringEncoding);
 }
 } // namespace
 

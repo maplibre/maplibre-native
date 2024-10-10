@@ -20,11 +20,6 @@
 #include <mbgl/renderer/layer_group.hpp>
 #include <mbgl/gfx/drawable_custom_layer_host_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
-
-#if !MLN_LEGACY_RENDERER
-// TODO: platform agnostic error checks
-#define MBGL_CHECK_ERROR(cmd) (cmd)
-#endif
 #endif
 
 namespace mbgl {
@@ -44,7 +39,7 @@ RenderCustomLayer::RenderCustomLayer(Immutable<style::CustomLayer::Impl> _impl)
     : RenderLayer(makeMutable<CustomLayerProperties>(std::move(_impl))),
       host(impl(baseImpl).host) {
     assert(gfx::BackendScope::exists());
-    MBGL_CHECK_ERROR(host->initialize());
+    host->initialize();
 }
 
 RenderCustomLayer::~RenderCustomLayer() {
@@ -52,7 +47,7 @@ RenderCustomLayer::~RenderCustomLayer() {
     if (contextDestroyed) {
         host->contextLost();
     } else {
-        MBGL_CHECK_ERROR(host->deinitialize());
+        host->deinitialize();
     }
 }
 
@@ -79,10 +74,10 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
     if (host != impl(baseImpl).host) {
         // If the context changed, deinitialize the previous one before initializing the new one.
         if (host && !contextDestroyed) {
-            MBGL_CHECK_ERROR(host->deinitialize());
+            host->deinitialize();
         }
         host = impl(baseImpl).host;
-        MBGL_CHECK_ERROR(host->initialize());
+        host->initialize();
     }
 
     // TODO: remove cast
@@ -95,7 +90,7 @@ void RenderCustomLayer::render(PaintParameters& paintParameters) {
     glContext.setColorMode(paintParameters.colorModeForRenderPass());
     glContext.setCullFaceMode(gfx::CullFaceMode::disabled());
 
-    MBGL_CHECK_ERROR(host->render(CustomLayerRenderParameters(paintParameters)));
+    host->render(CustomLayerRenderParameters(paintParameters));
 
     // Reset the view back to our original one, just in case the CustomLayer
     // changed the viewport or Framebuffer.
@@ -125,10 +120,10 @@ void RenderCustomLayer::update([[maybe_unused]] gfx::ShaderRegistry& shaders,
     if (hostChanged) {
         // If the context changed, deinitialize the previous one before initializing the new one.
         if (host && !contextDestroyed) {
-            MBGL_CHECK_ERROR(host->deinitialize());
+            host->deinitialize();
         }
         host = impl(baseImpl).host;
-        MBGL_CHECK_ERROR(host->initialize());
+        host->initialize();
     }
 
     // create drawable

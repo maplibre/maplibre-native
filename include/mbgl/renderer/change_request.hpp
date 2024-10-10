@@ -116,4 +116,9 @@ protected:
     RenderTargetPtr renderTarget;
 };
 
+#if MLN_DRAWABLE_RENDERER
+
+void activateRenderTarget(const RenderTargetPtr &renderTarget_, bool activate, UniqueChangeRequestVec &changes);
+#endif
+
 } // namespace mbgl

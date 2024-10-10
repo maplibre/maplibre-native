@@ -11,7 +11,7 @@
 
 namespace {
 
-std::string toAbsoluteURL(const std::string &fileName) {
+std::string absoluteMBTilesURL(const std::string &fileName) {
     auto path = std::filesystem::current_path() / "test/fixtures/storage/mbtiles" / fileName;
     return "mbtiles://" + path.string();
 }
@@ -54,7 +54,7 @@ TEST(MBTilesFileSource, NonExistentFile) {
     MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
-        {Resource::Unknown, toAbsoluteURL("does_not_exist")}, [&](Response res) {
+        {Resource::Unknown, absoluteMBTilesURL("does_not_exist")}, [&](Response res) {
             req.reset();
             ASSERT_NE(nullptr, res.error);
             EXPECT_EQ(Response::Error::Reason::NotFound, res.error->reason);
@@ -73,7 +73,7 @@ TEST(MBTilesFileSource, TileJSON) {
     MBTilesFileSource mbtiles(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
-        {Resource::Unknown, toAbsoluteURL("geography-class-png.mbtiles")}, [&](Response res) {
+        {Resource::Unknown, absoluteMBTilesURL("geography-class-png.mbtiles")}, [&](Response res) {
             req.reset();
             EXPECT_EQ(nullptr, res.error);
             ASSERT_TRUE(res.data.get());
@@ -93,7 +93,7 @@ TEST(MBTilesFileSource, Tile) {
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
         Resource::tile(
-            toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+            absoluteMBTilesURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
         [&](Response res) {
             req.reset();
             EXPECT_EQ(nullptr, res.error);
@@ -113,7 +113,7 @@ TEST(MBTilesFileSource, NonExistentTile) {
 
     std::unique_ptr<AsyncRequest> req = mbtiles.request(
         Resource::tile(
-            toAbsoluteURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 4, Tileset::Scheme::XYZ),
+            absoluteMBTilesURL("geography-class-png.mbtiles?file={z}/{x}/{y}.png"), 1.0, 0, 0, 4, Tileset::Scheme::XYZ),
         [&](Response res) {
             req.reset();
             EXPECT_EQ(nullptr, res.error);

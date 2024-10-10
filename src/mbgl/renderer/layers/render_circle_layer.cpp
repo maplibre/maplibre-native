@@ -53,7 +53,7 @@ struct RenderableSegment {
 };
 #endif
 
-inline const style::CircleLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
+inline const style::CircleLayer::Impl& circle_layer_impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == CircleLayer::Impl::staticTypeInfo());
     return static_cast<const style::CircleLayer::Impl&>(*impl);
 }
@@ -62,12 +62,12 @@ inline const style::CircleLayer::Impl& impl_cast(const Immutable<style::Layer::I
 
 RenderCircleLayer::RenderCircleLayer(Immutable<style::CircleLayer::Impl> _impl)
     : RenderLayer(makeMutable<CircleLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+      unevaluated(circle_layer_impl_cast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
 }
 
 void RenderCircleLayer::transition(const TransitionParameters& parameters) {
-    unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    unevaluated = circle_layer_impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
 }
 
 void RenderCircleLayer::evaluate(const PropertyEvaluationParameters& parameters) {
@@ -159,7 +159,7 @@ void RenderCircleLayer::render(PaintParameters& parameters) {
                             getID());
     };
 
-    const bool sortFeaturesByKey = !impl_cast(baseImpl).layout.get<CircleSortKey>().isUndefined();
+    const bool sortFeaturesByKey = !circle_layer_impl_cast(baseImpl).layout.get<CircleSortKey>().isUndefined();
     std::multiset<RenderableSegment> renderableSegments;
 
     for (const RenderTile& renderTile : *renderTiles) {

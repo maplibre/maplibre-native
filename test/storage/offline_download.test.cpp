@@ -14,6 +14,7 @@
 #include <mbgl/util/io.hpp>
 #include <mbgl/util/compression.hpp>
 #include <mbgl/util/string.hpp>
+#include <mbgl/test/util.hpp>
 
 #include <mbgl/storage/sqlite3.hpp>
 #include <gtest/gtest.h>
@@ -23,15 +24,9 @@ using namespace std::literals::string_literals;
 using mapbox::sqlite::ResultCode;
 
 #ifndef __QT__ // Qt doesn't expose the ability to register virtual file system handlers.
-static constexpr const char* filename = "test/fixtures/offline_download/offline.db";
-static constexpr const char* filename_test_fs = "file:test/fixtures/offline_download/offline.db?vfs=test_fs";
-
-static void deleteDatabaseFiles() {
-    // Delete leftover journaling files as well.
-    util::deleteFile(filename);
-    util::deleteFile(filename + "-wal"s);
-    util::deleteFile(filename + "-journal"s);
-}
+static constexpr const char* filename_offline_download_test = "test/fixtures/offline_download/offline.db";
+static constexpr const char* filename_offline_download_test_fs =
+    "file:test/fixtures/offline_download/offline.db?vfs=test_fs";
 
 static FixtureLog::Message warning(ResultCode code, const char* message) {
     return {EventSeverity::Warning, Event::Database, static_cast<int64_t>(code), message};
@@ -842,10 +837,10 @@ TEST(OfflineDownload, AllOfflineRequestsHaveLowPriorityAndOfflineUsage) {
 #ifndef __QT__ // Qt doesn't expose the ability to register virtual file system handlers.
 TEST(OfflineDownload, DiskFull) {
     FixtureLog log;
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(filename_offline_download_test);
     test::SQLite3TestFS fs;
 
-    OfflineTest test{filename_test_fs};
+    OfflineTest test{filename_offline_download_test_fs};
     EXPECT_EQ(0u, log.uncheckedCount());
 
     auto region = test.createRegion();
@@ -896,10 +891,10 @@ TEST(OfflineDownload, DiskFull) {
 // Test verifies that resource requests for invalidated region don't
 // have Resource::Usage::Offline tag set.
 TEST(OfflineDownload, ResourceOfflineUsageUnset) {
-    deleteDatabaseFiles();
+    test::deleteDatabaseFiles(filename_offline_download_test);
     test::SQLite3TestFS fs;
 
-    OfflineTest test{filename_test_fs};
+    OfflineTest test{filename_offline_download_test_fs};
     auto region = test.createRegion();
     ASSERT_TRUE(region);
 

@@ -17,7 +17,7 @@
 
 namespace mbgl {
 
-static SpriteLoaderObserver nullObserver;
+static SpriteLoaderObserver nullSpriteLoaderObserver;
 
 struct SpriteLoader::Data {
     std::shared_ptr<const std::string> image;
@@ -28,7 +28,7 @@ struct SpriteLoader::Data {
 
 SpriteLoader::SpriteLoader(float pixelRatio_, const TaggedScheduler& threadPool_)
     : pixelRatio(pixelRatio_),
-      observer(&nullObserver),
+      observer(&nullSpriteLoaderObserver),
       threadPool(threadPool_) {}
 
 SpriteLoader::~SpriteLoader() = default;

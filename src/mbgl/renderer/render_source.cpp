@@ -58,11 +58,11 @@ std::unique_ptr<RenderSource> RenderSource::create(const Immutable<Source::Impl>
     return nullptr;
 }
 
-static RenderSourceObserver nullObserver;
+static RenderSourceObserver nullRenderSourceObserver;
 
 RenderSource::RenderSource(Immutable<style::Source::Impl> impl)
     : baseImpl(std::move(impl)),
-      observer(&nullObserver) {}
+      observer(&nullRenderSourceObserver) {}
 
 RenderSource::~RenderSource() = default;
 

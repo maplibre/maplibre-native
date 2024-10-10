@@ -50,9 +50,9 @@ void Drawable::setIndexData(std::vector<std::uint16_t> indexes, std::vector<Uniq
     setIndexData(std::make_shared<gfx::IndexVectorBase>(std::move(indexes)), std::move(segments));
 }
 
-static const gfx::Texture2DPtr noTexture;
-
 const gfx::Texture2DPtr& Drawable::getTexture(size_t id) const {
+    static const gfx::Texture2DPtr noTexture;
+
     return (id < textures.size()) ? textures[id] : noTexture;
 }
 

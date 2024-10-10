@@ -39,7 +39,7 @@ using namespace shaders;
 
 namespace {
 
-inline const LineLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
+inline const LineLayer::Impl& line_layer_impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == LineLayer::Impl::staticTypeInfo());
     return static_cast<const LineLayer::Impl&>(*impl);
 }
@@ -54,7 +54,7 @@ const auto posNormalAttribName = "a_pos_normal";
 
 RenderLineLayer::RenderLineLayer(Immutable<style::LineLayer::Impl> _impl)
     : RenderLayer(makeMutable<LineLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()),
+      unevaluated(line_layer_impl_cast(baseImpl).paint.untransitioned()),
       colorRamp(std::make_shared<PremultipliedImage>(Size(256, 1))) {
     styleDependencies = unevaluated.getDependencies();
 }
@@ -62,7 +62,7 @@ RenderLineLayer::RenderLineLayer(Immutable<style::LineLayer::Impl> _impl)
 RenderLineLayer::~RenderLineLayer() = default;
 
 void RenderLineLayer::transition(const TransitionParameters& parameters) {
-    unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    unevaluated = line_layer_impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     updateColorRamp();
 
 #if MLN_RENDER_BACKEND_METAL

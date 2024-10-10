@@ -25,9 +25,6 @@
 
 using namespace mbgl;
 
-using Message = std::pair<uint32_t, std::string>;
-using Messages = std::vector<Message>;
-
 class StyleParserTest : public ::testing::TestWithParam<std::string> {};
 
 TEST_P(StyleParserTest, ParseStyle) {
