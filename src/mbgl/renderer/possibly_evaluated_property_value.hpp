@@ -22,6 +22,8 @@ public:
         : value(std::move(v)) {}
 
     bool isConstant() const noexcept { return value.template is<T>(); }
+    
+    bool isExpression() const noexcept { return value.template is<style::PropertyExpression<T>>(); }
 
     std::optional<T> constant() const {
         return value.match([&](const T& t) { return std::optional<T>(t); }, [&](const auto&) { return std::nullopt; });

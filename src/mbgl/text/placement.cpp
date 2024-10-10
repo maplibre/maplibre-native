@@ -406,7 +406,7 @@ JointPlacement Placement::placeSymbol(const SymbolInstance& symbolInstance, cons
                     // so this code would not be reached
                     // NOLINTNEXTLINE(clang-analyzer-core.DivideZero)
                     auto anchor = variableTextAnchors[i % anchorsSize];
-                    auto variableTextOffset = symbolInstance.getTextVariableTextOffset()->getOffsetByAnchor(anchor);
+                    auto variableTextOffset = symbolInstance.getTextVariableAnchorOffset()->getOffsetByAnchor(anchor);
                     const bool allowOverlap = (i >= anchorsSize);
                     shift = calculateVariableLayoutOffset(anchor,
                                                           width,
@@ -1542,7 +1542,7 @@ void TilePlacement::placeSymbolBucket(const BucketPlacementData& params, std::se
                                          const SymbolInstance& symbol) noexcept -> IntersectStatus {
         IntersectStatus result;
         std::optional<style::TextVariableAnchorType> variableAnchor;
-        auto textVariableAnchorOffset = symbol.getTextVariableTextOffset();
+        auto textVariableAnchorOffset = symbol.getTextVariableAnchorOffset();
         if (textVariableAnchorOffset && !textVariableAnchorOffset->empty()) {
             variableAnchor = textVariableAnchorOffset->begin()->anchorType;
         }

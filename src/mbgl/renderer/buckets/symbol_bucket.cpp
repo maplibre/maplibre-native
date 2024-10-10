@@ -359,16 +359,12 @@ bool SymbolBucket::hasFormatSectionOverrides() const {
 bool SymbolBucket::hasVariableTextAnchors() const {
     auto hasTextVariableAnchorOffset = [&]() -> bool {
         auto tvao = layout->get<TextVariableAnchorOffset>();
-        const bool hasAnchorOffset = tvao.match([](const auto&) { return true; });
-        if (hasAnchorOffset) {
-            if (tvao.isConstant()) {
-                const auto constValue = tvao.constant();
-                return constValue && !constValue->empty();
-            }
-            // return true for expression
-            else {
-                return true;
-            }
+        if (tvao.isConstant()) {
+            const auto constValue = tvao.constant();
+            return constValue && !constValue->empty();
+        }
+        else if (tvao.isExpression()) {
+            return true;
         }
         
         return false;

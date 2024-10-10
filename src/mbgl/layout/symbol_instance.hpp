@@ -184,7 +184,9 @@ public:
     std::optional<size_t> getPlacedIconIndex() const { return placedIconIndex; }
     std::optional<size_t> getPlacedVerticalIconIndex() const { return placedVerticalIconIndex; }
     float getTextBoxScale() const { return textBoxScale; }
-    std::optional<VariableAnchorOffsetCollection> getTextVariableTextOffset() const { return textVariableAnchorOffset; }
+    std::optional<VariableAnchorOffsetCollection> getTextVariableAnchorOffset() const {
+        return textVariableAnchorOffset;
+    }
     bool getSingleLine() const { return singleLine; }
 
     uint32_t getCrossTileID() const { return crossTileID; }

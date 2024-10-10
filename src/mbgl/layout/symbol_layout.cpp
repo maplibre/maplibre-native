@@ -367,6 +367,7 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
         std::vector<AnchorOffsetPair> anchorOffsets;
         auto variableAnchorOffset = layout->evaluate<TextVariableAnchorOffset>(zoom, feature, canonicalID);
         if (!variableAnchorOffset.empty()) {
+            anchorOffsets.reserve(variableAnchorOffset.size());
             // Convert offsets from EM to PX, and apply baseline shift
             for (const auto& anchorOffset : variableAnchorOffset) {
                 std::array<float, 2> variableTextOffset = {
@@ -407,6 +408,7 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
             }
 
             std::vector<AnchorOffsetPair> anchorOffsets;
+            anchorOffsets.reserve(variableTextAnchor.size());
             for (auto anchor : variableTextAnchor) {
                 auto offset = variableTextOffset;
                 offset = SymbolLayout::evaluateVariableOffset(anchor, offset);
