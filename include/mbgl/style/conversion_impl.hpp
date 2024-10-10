@@ -322,7 +322,9 @@ struct ValueFactory<Padding> {
 
 template <>
 struct ValueFactory<VariableAnchorOffsetCollection> {
-    static Value make(const VariableAnchorOffsetCollection& variableAnchorOffset) { return variableAnchorOffset.serialize(); }
+    static Value make(const VariableAnchorOffsetCollection& variableAnchorOffset) {
+        return variableAnchorOffset.serialize();
+    }
 };
 
 template <typename T>
@@ -375,7 +377,9 @@ StyleProperty makeStyleProperty(const PropertyValue<T>& value) {
         [](const Undefined&) -> StyleProperty { return {}; },
         [](const Color& c) -> StyleProperty { return {makeValue(c), StyleProperty::Kind::Expression}; },
         [](const Padding& p) -> StyleProperty { return {makeValue(p), StyleProperty::Kind::Expression}; },
-        [](const VariableAnchorOffsetCollection& v) -> StyleProperty { return {makeValue(v), StyleProperty::Kind::Expression}; },
+        [](const VariableAnchorOffsetCollection& v) -> StyleProperty {
+            return {makeValue(v), StyleProperty::Kind::Expression};
+        },
         [](const PropertyExpression<T>& fn) -> StyleProperty {
             return {fn.getExpression().serialize(), StyleProperty::Kind::Expression};
         },

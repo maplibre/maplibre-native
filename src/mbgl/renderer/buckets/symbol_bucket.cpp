@@ -366,10 +366,10 @@ bool SymbolBucket::hasVariableTextAnchors() const {
         else if (tvao.isExpression()) {
             return true;
         }
-        
+
         return false;
     };
-    
+
     return hasTextVariableAnchorOffset() || !layout->get<TextVariableAnchor>().empty();
 }
 
