@@ -193,8 +193,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::VertexAttributeArray& defaults,
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
-    const std::optional<std::chrono::duration<double>> lastUpdate,
-    /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) {
+    const std::optional<std::chrono::duration<double>> lastUpdate) {
     MLN_TRACE_FUNC();
     AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
@@ -301,8 +300,6 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                     b->vertexBufferResource = vertBuf.get();
                 }
             });
-
-            outBuffers.emplace_back(std::move(vertBuf));
         } else {
             assert(false);
             return {};

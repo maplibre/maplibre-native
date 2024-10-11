@@ -579,7 +579,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         }
 
         // Apply drawable values to shader defaults
-        std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
         auto attributeBindings_ = uploadPass.buildAttributeBindings(impl->vertexCount,
                                                                     impl->vertexType,
                                                                     /*vertexAttributeIndex=*/-1,
@@ -587,9 +586,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                     shader->getVertexAttributes(),
                                                                     *vertexAttributes,
                                                                     usage,
-                                                                    attributeUpdateTime,
-                                                                    vertexBuffers);
-        impl->attributeBuffers = std::move(vertexBuffers);
+                                                                    attributeUpdateTime);
 
         vertexAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
@@ -653,7 +650,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
     if (buildInstanceBuffer) {
         // Build instance attribute buffers
-        std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
         auto instanceBindings_ = uploadPass.buildAttributeBindings(instanceAttributes->getMaxCount(),
                                                                    /*vertexType*/ gfx::AttributeDataType::Byte,
                                                                    /*vertexAttributeIndex=*/-1,
@@ -661,8 +657,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                    shader->getInstanceAttributes(),
                                                                    *instanceAttributes,
                                                                    usage,
-                                                                   attributeUpdateTime,
-                                                                   instanceBuffers);
+                                                                   attributeUpdateTime);
         impl->instanceBuffers = std::move(instanceBuffers);
 
         // clear dirty flag

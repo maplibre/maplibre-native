@@ -63,8 +63,7 @@ public:
         const gfx::VertexAttributeArray& defaults,
         const gfx::VertexAttributeArray& overrides,
         gfx::BufferUsageType,
-        const std::optional<std::chrono::duration<double>> lastUpdate,
-        /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) override;
+        const std::optional<std::chrono::duration<double>> lastUpdate) override;
 
     std::unique_ptr<gfx::TextureResource> createTextureResource(Size,
                                                                 const void* data,
