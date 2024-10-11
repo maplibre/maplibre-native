@@ -341,7 +341,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             // The bucket may later add, remove, or change masking.  In that case, the tile's
             // shared data and segments are not updated, and it needs to be re-created.
             if (drawable && (bucket.sharedVertices->isModifiedAfter(drawable->createTime) ||
-                             bucket.sharedTriangles->isModifiedAfter(drawable->createTime))) {
+                             bucket.sharedTriangles->getDirty())) {
                 return false;
             }
 
@@ -465,7 +465,7 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                 });
 
                 if (tileUpdateTime && (bucket.vertices.isModifiedAfter(*tileUpdateTime) ||
-                                       bucket.indices.isModifiedAfter(*tileUpdateTime))) {
+                                       bucket.indices.getDirty())) {
                     removeTile(renderPass, tileID);
                     cleared = true;
                 }
