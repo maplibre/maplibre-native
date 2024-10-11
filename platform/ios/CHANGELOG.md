@@ -4,6 +4,10 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ## main
 
+## 6.7.1
+
+- Fix line atlas, which was causing an issue with `line-pattern`s ([#2908](https://github.com/maplibre/maplibre-native/pull/2908)).
+
 ## 6.7.0
 
 - Add array support for icon-padding ([#2845](https://github.com/maplibre/maplibre-native/pull/2845)).

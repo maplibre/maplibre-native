@@ -432,7 +432,7 @@ bool Drawable::bindDescriptors(CommandEncoder& encoder) const noexcept {
                 const auto& bufferResource = uniformBufferImpl.getBufferResource();
                 descriptorBufferInfo.setBuffer(bufferResource.getVulkanBuffer())
                     .setOffset(bufferResource.getVulkanBufferOffset())
-                    .setRange(bufferResource.getVulkanBufferSize());
+                    .setRange(bufferResource.getSizeInBytes());
             } else if (fillGaps) {
                 descriptorBufferInfo.setBuffer(context.getDummyUniformBuffer()->getVulkanBuffer())
                     .setOffset(0)
