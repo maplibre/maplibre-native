@@ -192,7 +192,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
     constexpr auto usage = gfx::BufferUsageType::StaticDraw;
 
     // Create an index buffer if necessary}
-    if (impl->indexes && impl->indexes->getDirty()) {
+    if (impl->indexes && (!impl->indexes->getBuffer() || impl->indexes->getDirty())) {
         MLN_TRACE_ZONE(build indexes);
         auto indexBufferResource{
             uploadPass.createIndexBufferResource(impl->indexes->data(), impl->indexes->bytes(), usage)};
