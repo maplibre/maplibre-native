@@ -658,7 +658,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                    *instanceAttributes,
                                                                    usage,
                                                                    attributeUpdateTime);
-        impl->instanceBuffers = std::move(instanceBuffers);
 
         // clear dirty flag
         instanceAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
