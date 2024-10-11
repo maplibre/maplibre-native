@@ -257,7 +257,7 @@ void MapRenderer::onSurfaceCreated(JNIEnv& env, const jni::Object<AndroidSurface
     // If we're running the emulator with the OpenGL backend, we're going to crash eventually,
     // unless we enable this mitigation.
     if (inEmulator()) {
-        renderer->enableAndroidEmulatorGoldfishMitigation(true);
+        renderer->enableAndroidEmulatorGoldfishMitigation(false);
     }
 #endif
 
