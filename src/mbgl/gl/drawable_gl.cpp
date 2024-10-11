@@ -17,8 +17,7 @@ DrawableGL::DrawableGL(std::string name_)
     : Drawable(std::move(name_)),
       impl(std::make_unique<Impl>()) {}
 
-DrawableGL::~DrawableGL() {
-}
+DrawableGL::~DrawableGL() {}
 
 void DrawableGL::draw(PaintParameters& parameters) const {
     MLN_TRACE_FUNC();
