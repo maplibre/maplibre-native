@@ -159,6 +159,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         auto buffer = std::make_unique<IndexBuffer>(std::move(indexBuffer));
 
         impl->indexes->setBuffer(std::move(buffer));
+        impl->indexes->setDirty(false);
     }
 
     const bool buildAttribs = !vertexAttributes || !attributeUpdateTime ||
