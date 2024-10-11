@@ -114,13 +114,14 @@ global.propertyType = function propertyType(property) {
         return 'Formatted';
       case 'string':
       case 'resolvedImage':
+	    case 'variableAnchorOffsetCollection':
         return 'String';
       case 'enum':
         return 'String';
       case 'color':
         return 'String';
       case 'padding':
-        return 'Float[]'
+        return 'Float[]';
       case 'array':
         return `${propertyType({type:property.value, name: property.name})}[]`;
       default:
@@ -197,6 +198,8 @@ global.propertyNativeType = function (property) {
     return `Color`;
   case 'padding':
     return 'Padding';
+  case 'variableAnchorOffsetCollection':
+    return 'VariableAnchorOffsetCollection';
   case 'array':
     if (property.length) {
       return `std::array<${propertyType({type: property.value})}, ${property.length}>`;
@@ -269,6 +272,8 @@ global.defaultValueJava = function(property) {
         return '"rgba(255,128,0,0.7)"';
       case 'padding':
         return '{2.0f, 2.0f, 2.0f, 2.0f}';
+      case 'variableAnchorOffsetCollection':
+        return `@"{"top": [1, 2]}"`;
       case 'array':
              switch (property.value) {
               case 'string':
