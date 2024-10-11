@@ -22,7 +22,12 @@ public:
 
 private:
     gfx::UniformBufferPtr evaluatedPropsUniformBuffer;
+    gfx::UniformBufferPtr drawableBuffer;
 
+#if MLN_RENDER_BACKEND_METAL || MLN_RENDER_BACKEND_VULKAN
+    gfx::UniformBufferPtr tilePropsBuffer;
+    gfx::UniformBufferPtr interpolateBuffer;
+#else
     // Interpolation UBOs are shared by drawables of the same type (text/icon) in each tile
     struct InterpUBOKey {
         UnwrappedTileID tileID;
@@ -38,6 +43,7 @@ private:
         size_t operator()(const InterpUBOKey& k) const { return util::hash(k.tileID, k.isText); }
     };
     mbgl::unordered_map<InterpUBOKey, InterpUBOValue, InterpUBOHash> interpUBOs;
+#endif
 };
 
 } // namespace mbgl
