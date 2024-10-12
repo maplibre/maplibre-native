@@ -25,7 +25,7 @@ const float ZERO = 1.0 / 255.0 / 16.0;
 // Gaussian kernel coefficient: 1 / sqrt(2 * PI)
 #define GAUSS_COEF 0.3989422804014327
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 #if !defined(HAS_UNIFORM_u_weight)
 layout(location = 1) in vec2 in_weight;
@@ -149,7 +149,7 @@ struct ShaderSource<BuiltIn::HeatmapTextureShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
+layout(location = 0) in ivec2 in_position;
 
 layout(set = 0, binding = 1) uniform HeatmapTexturePropsUBO {
     mat4 matrix;

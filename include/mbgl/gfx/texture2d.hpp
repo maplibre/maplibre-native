@@ -24,6 +24,9 @@ public:
         TextureWrapType wrapU{TextureWrapType::Clamp};
         /// Wrapping behavior along V coordinate
         TextureWrapType wrapV{TextureWrapType::Clamp};
+
+        uint8_t maxAnisotropy{1};
+        bool mipmapped{false};
     };
 
 public:

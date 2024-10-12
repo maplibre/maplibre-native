@@ -34,7 +34,7 @@ class MemoryTest {
 public:
     MemoryTest() {
         fileSource->styleResponse = [&](const Resource& res) {
-            auto resName = "style_" + getType(res) + ".json";
+            auto resName = std::string("style_") + getType(res) + ".json";
             return response(resName);
         };
         fileSource->tileResponse = [&](const Resource& res) {
@@ -42,7 +42,7 @@ public:
             return response(resName);
         };
         fileSource->sourceResponse = [&](const Resource& res) {
-            auto resName = "source_" + getType(res) + ".json";
+            auto resName = std::string("source_") + getType(res) + ".json";
             return response(resName);
         };
         fileSource->glyphsResponse = [&](const Resource&) {

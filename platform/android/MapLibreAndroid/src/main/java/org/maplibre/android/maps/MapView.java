@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.TextureView;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -30,9 +29,6 @@ import org.maplibre.android.constants.MapLibreConstants;
 import org.maplibre.android.exceptions.MapLibreConfigurationException;
 import org.maplibre.android.location.LocationComponent;
 import org.maplibre.android.maps.renderer.MapRenderer;
-import org.maplibre.android.maps.renderer.glsurfaceview.GLSurfaceViewMapRenderer;
-import org.maplibre.android.maps.renderer.glsurfaceview.MapLibreGLSurfaceView;
-import org.maplibre.android.maps.renderer.textureview.TextureViewMapRenderer;
 import org.maplibre.android.maps.widgets.CompassView;
 import org.maplibre.android.net.ConnectivityReceiver;
 import org.maplibre.android.storage.FileSource;
@@ -42,9 +38,6 @@ import org.maplibre.android.tile.TileOperation;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
 
 import static org.maplibre.android.maps.widgets.CompassView.TIME_MAP_NORTH_ANIMATION;
 import static org.maplibre.android.maps.widgets.CompassView.TIME_WAIT_IDLE;
@@ -147,10 +140,10 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     // add accessibility support
     setContentDescription(context.getString(R.string.maplibre_mapActionDescription));
     setWillNotDraw(false);
-    initialiseDrawingSurface(options);
+    initializeDrawingSurface(options);
   }
 
-  private void initialiseMap() {
+  private void initializeMap() {
     Context context = getContext();
 
     // callback for focal point invalidation
@@ -312,38 +305,13 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     }
   }
 
-  private void initialiseDrawingSurface(MapLibreMapOptions options) {
-    String localFontFamily = options.getLocalIdeographFontFamily();
-    if (options.getTextureMode()) {
-      TextureView textureView = new TextureView(getContext());
-      boolean translucentSurface = options.getTranslucentTextureSurface();
-      mapRenderer = new TextureViewMapRenderer(getContext(),
-              textureView, localFontFamily, translucentSurface) {
-        @Override
-        protected void onSurfaceCreated(GL10 gl, EGLConfig config) {
-          MapView.this.onSurfaceCreated();
-          super.onSurfaceCreated(gl, config);
-        }
-      };
+  private void initializeDrawingSurface(MapLibreMapOptions options) {
+    mapRenderer = MapRenderer.create(options, getContext(), () -> MapView.this.onSurfaceCreated());
+    renderView = mapRenderer.getView();
 
-      addView(textureView, 0);
-      renderView = textureView;
-    } else {
-      MapLibreGLSurfaceView glSurfaceView = new MapLibreGLSurfaceView(getContext());
-      glSurfaceView.setZOrderMediaOverlay(maplibreMapOptions.getRenderSurfaceOnTop());
-      mapRenderer = new GLSurfaceViewMapRenderer(getContext(), glSurfaceView, localFontFamily) {
-        @Override
-        public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-          MapView.this.onSurfaceCreated();
-          super.onSurfaceCreated(gl, config);
-        }
-      };
+    addView(renderView, 0);
 
-      addView(glSurfaceView, 0);
-      renderView = glSurfaceView;
-    }
-
-    boolean crossSourceCollisions = maplibreMapOptions.getCrossSourceCollisions();
+    boolean crossSourceCollisions = options.getCrossSourceCollisions();
     nativeMapView = new NativeMapView(
             getContext(), getPixelRatio(), crossSourceCollisions, this, mapChangeReceiver, mapRenderer
     );
@@ -353,9 +321,9 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     post(new Runnable() {
       @Override
       public void run() {
-        // Initialise only when not destroyed and only once
+        // Initialize only when not destroyed and only once
         if (!destroyed && maplibreMap == null) {
-          MapView.this.initialiseMap();
+          MapView.this.initializeMap();
           maplibreMap.onStart();
         }
       }
@@ -495,6 +463,34 @@ public class MapView extends FrameLayout implements NativeMapView.ViewCallback {
     } else {
       throw new IllegalStateException("Calling MapView#setMaximumFps before mapRenderer is created.");
     }
+  }
+
+  /**
+   * Set the rendering refresh mode and wake up the render thread if it is sleeping.
+   *
+   * @param mode can be:
+   * {@link MapRenderer.RenderingRefreshMode#CONTINUOUS} or {@link MapRenderer.RenderingRefreshMode#WHEN_DIRTY}
+   * default is {@link MapRenderer.RenderingRefreshMode#WHEN_DIRTY}
+   */
+  public void setRenderingRefreshMode(MapRenderer.RenderingRefreshMode mode) {
+    if (mapRenderer != null) {
+      mapRenderer.setRenderingRefreshMode(mode);
+    } else {
+      throw new IllegalStateException("Calling MapView#setRenderingRefreshMode before mapRenderer is created.");
+    }
+  }
+
+  /**
+   * Get the rendering refresh mode
+   *
+   * @return one of the MapRenderer.RenderingRefreshMode modes
+   * @see #setRenderingRefreshMode
+   */
+  public MapRenderer.RenderingRefreshMode getRenderingRefreshMode() {
+    if (mapRenderer == null) {
+      throw new IllegalStateException("Calling MapView#getRenderingRefreshMode before mapRenderer is created.");
+    }
+    return mapRenderer.getRenderingRefreshMode();
   }
 
   /**

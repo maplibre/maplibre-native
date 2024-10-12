@@ -54,7 +54,7 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
 
         const auto preamble = defineStr + "\n" + prelude;
         const char* shaderData = data.data();
-        const int shaderDataSize = data.size();
+        const int shaderDataSize = static_cast<int>(data.size());
 
         glslShader.setPreamble(preamble.c_str());
         glslShader.setStringsWithLengths(&shaderData, &shaderDataSize, 1);
@@ -185,7 +185,7 @@ const vk::UniquePipeline& ShaderProgram::getPipeline(const PipelineInfo& pipelin
     // vk::DynamicState::eDepthBias,
     // vk::DynamicState::eDepthBounds,
 
-    const auto& dynamicValues = pipelineInfo.getDynamicStates();
+    const auto& dynamicValues = pipelineInfo.getDynamicStates(backend);
     const vk::PipelineDynamicStateCreateInfo dynamicState({}, dynamicValues);
 
     const auto& device = backend.getDevice();

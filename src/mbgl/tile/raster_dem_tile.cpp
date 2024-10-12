@@ -66,13 +66,13 @@ void RasterDEMTile::setMetadata(std::optional<Timestamp> modified_, std::optiona
 
 void RasterDEMTile::setData(const std::shared_ptr<const std::string>& data) {
     if (!obsolete) {
-        pending = true;
         ++correlationID;
 
-        if (data) {
+        if (!pending) {
             observer->onTileAction(id, sourceID, TileOperation::StartParse);
         }
 
+        pending = true;
         worker.self().invoke(&RasterDEMTileWorker::parse, data, correlationID, encoding);
     }
 }
@@ -83,10 +83,10 @@ void RasterDEMTile::onParsed(std::unique_ptr<HillshadeBucket> result, const uint
         loaded = true;
         if (resultCorrelationID == correlationID) {
             pending = false;
+            observer->onTileAction(id, sourceID, TileOperation::EndParse);
         }
         renderable = static_cast<bool>(bucket);
         observer->onTileChanged(*this);
-        observer->onTileAction(id, sourceID, TileOperation::EndParse);
     }
 }
 
@@ -94,6 +94,7 @@ void RasterDEMTile::onError(std::exception_ptr err, const uint64_t resultCorrela
     loaded = true;
     if (resultCorrelationID == correlationID) {
         pending = false;
+        observer->onTileAction(id, sourceID, TileOperation::Error);
     }
     observer->onTileError(*this, std::move(err));
 }
@@ -158,6 +159,9 @@ void RasterDEMTile::cancel() {
 
 void RasterDEMTile::markObsolete() {
     obsolete = true;
+    if (pending) {
+        observer->onTileAction(id, sourceID, TileOperation::Cancelled);
+    }
     pending = false;
     mailbox->abandon();
 }

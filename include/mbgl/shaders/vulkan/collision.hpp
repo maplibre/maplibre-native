@@ -17,10 +17,10 @@ struct ShaderSource<BuiltIn::CollisionBoxShader, gfx::Backend::Type::Vulkan> {
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_anchor_position;
-layout(location = 2) in vec2 in_extrude;
-layout(location = 3) in vec2 in_placed;
+layout(location = 0) in ivec2 in_position;
+layout(location = 1) in ivec2 in_anchor_position;
+layout(location = 2) in ivec2 in_extrude;
+layout(location = 3) in uvec2 in_placed;
 layout(location = 4) in vec2 in_shift;
 
 layout(set = 0, binding = 1) uniform CollisionBoxUBO {
@@ -98,10 +98,10 @@ struct ShaderSource<BuiltIn::CollisionCircleShader, gfx::Backend::Type::Vulkan> 
 
     static constexpr auto vertex = R"(
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_anchor_position;
-layout(location = 2) in vec2 in_extrude;
-layout(location = 3) in vec2 in_placed;
+layout(location = 0) in ivec2 in_position;
+layout(location = 1) in ivec2 in_anchor_position;
+layout(location = 2) in ivec2 in_extrude;
+layout(location = 3) in uvec2 in_placed;
 
 layout(set = 0, binding = 1) uniform CollisionCircleUBO {
     mat4 matrix;

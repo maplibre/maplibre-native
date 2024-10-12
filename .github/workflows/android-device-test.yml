@@ -16,12 +16,23 @@ jobs:
       matrix:
         test: [
           {
-            artifactName: android-render-tests,
-            testFile: RenderTests.apk,
-            appFile: RenderTestsApp.apk,
-            name: "Android Render Tests",
+            artifactName: android-render-tests-opengl,
+            testFile: RenderTests-opengl.apk,
+            appFile: RenderTestsApp-opengl.apk,
+            name: "Android Render Tests (OpenGL)",
             # Google Pixel 7 Pro
             devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564"
+          },
+          {
+            artifactName: android-render-tests-vulkan,
+            testFile: RenderTests-vulkan.apk,
+            appFile: RenderTestsApp-vulkan.apk,
+            name: "Android Render Tests (Vulkan)",
+            # Google Pixel 7 Pro
+            devicePool: "arn:aws:devicefarm:us-west-2:373521797162:devicepool:20687d72-0e46-403e-8f03-0941850665bc/9692fe7f-86a9-4ecc-908f-175600968564",
+            # android-render-test.yml
+            # see https://github.com/maplibre/ci-runners/tree/main/aws-device-farm/custom-test-envs
+            testSpecArn: "arn:aws:devicefarm:us-west-2:373521797162:upload:20687d72-0e46-403e-8f03-0941850665bc/c1fc7d3e-dfe3-4a31-9ee0-7b0f71b08872"
           },
           {
             artifactName: benchmarkAPKs,
@@ -147,17 +158,20 @@ jobs:
           externalData: ${{ env.external_data_arn }}
           testSpecArn: ${{ matrix.test.testSpecArn }}
 
-      - name: Upload benchmark results to S3
-        if: always() && env.run_device_test == 'true' && matrix.test.name == 'Android Benchmark'
+      - name: Store Test Artifacts
+        if: (matrix.test.name == 'Android Benchmark' || failure()) && env.run_device_test == 'true'
         run: |
           npm install
-          node scripts/aws-device-farm/download-benchmark-results.mjs ${{ steps.aws_device_farm_run.outputs.runArn }}
+          temp_dir="$(mktemp -d)"
+          node scripts/aws-device-farm/store-test-artifacts.mjs ${{ steps.aws_device_farm_run.outputs.runArn }} "$temp_dir"
+          zip -r test_artifacts.zip "$temp_dir"
 
-      - name: Log Test Spec Output
-        if: failure() && env.run_device_test == 'true'
-        run: |
-          npm install
-          node scripts/aws-device-farm/log-test-spec-output.mjs ${{ steps.aws_device_farm_run.outputs.runArn }}
+      - name: Upload Test Artifacts
+        if: (matrix.test.name == 'Android Benchmark' || failure()) && env.run_device_test == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: "Test Artifacts ${{ matrix.test.name }}"
+          path: test_artifacts.zip
 
       - name: Generate another token (previous one could have expired)
         if: always()

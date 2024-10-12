@@ -84,7 +84,8 @@ struct VertexBuffer : public gfx::VertexBufferBase {
 static const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 
 const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec,
-                                                             const gfx::BufferUsageType usage) {
+                                                             const gfx::BufferUsageType usage,
+                                                             bool forceUpdate) {
     if (vec) {
         const auto* rawBufPtr = vec->getRawData();
         const auto rawBufSize = vec->getRawCount() * vec->getRawSize();
@@ -95,7 +96,7 @@ const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVe
 
             // If it's changed, update it
             if (rawBufSize <= resource.getSizeInBytes()) {
-                if (vec->isModifiedAfter(resource.getLastUpdated())) {
+                if (forceUpdate || vec->isModifiedAfter(resource.getLastUpdated())) {
                     updateVertexBufferResource(resource, rawBufPtr, rawBufSize);
                     resource.setLastUpdated(vec->getLastModified());
                 }
@@ -121,7 +122,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::VertexAttributeArray& defaults,
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
-    const std::chrono::duration<double> /*lastUpdate*/,
+    const std::optional<std::chrono::duration<double>> lastUpdate,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>&) {
     gfx::AttributeBindingArray bindings;
 
@@ -147,7 +148,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         }
 
         // If the attribute references data shared with a bucket, get the corresponding buffer.
-        if (const auto& buffer = getBuffer(effectiveAttr.getSharedRawData(), usage)) {
+        if (const auto& buffer = getBuffer(effectiveAttr.getSharedRawData(), usage, !lastUpdate)) {
             assert(effectiveAttr.getSharedStride() * effectiveAttr.getSharedVertexOffset() <
                    effectiveAttr.getSharedRawData()->getRawSize() * effectiveAttr.getSharedRawData()->getRawCount());
 
@@ -163,7 +164,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
         assert(effectiveAttr.getStride() > 0);
 
         // Otherwise, turn the data managed by the attribute into a buffer.
-        if (const auto& buffer = VertexAttribute::getBuffer(effectiveAttr, *this, gfx::BufferUsageType::StaticDraw)) {
+        if (const auto& buffer = VertexAttribute::getBuffer(
+                effectiveAttr, *this, gfx::BufferUsageType::StaticDraw, !lastUpdate)) {
             bindings[index] = {
                 /*.attribute = */ {effectiveAttr.getDataType(), /*offset=*/0},
                 /*.vertexStride = */ static_cast<uint32_t>(effectiveAttr.getStride()),
