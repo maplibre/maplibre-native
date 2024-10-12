@@ -20,6 +20,8 @@ import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.layers.SymbolLayer;
 import org.maplibre.android.style.types.Formatted;
 import org.maplibre.android.style.types.FormattedSection;
+import org.maplibre.android.style.types.AnchorOffset;
+import org.maplibre.android.style.types.VariableAnchorOffset;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -720,6 +722,19 @@ public class SymbolLayerTest extends BaseLayerTest {
     String[] propertyValue = new String[0];
     layer.setProperties(textVariableAnchor(propertyValue));
     assertEquals(layer.getTextVariableAnchor().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
+  public void testTextVariableAnchorOffsetAsConstant() {
+    Timber.i("text-variable-anchor-offset");
+    assertNotNull(layer);
+    assertNull(layer.getTextVariableAnchorOffset().getValue());
+
+    // Set and Get
+    VariableAnchorOffset propertyValue = new VariableAnchorOffset(new AnchorOffset[]{new AnchorOffset("top", new Float[]{1f, 2f})});
+    layer.setProperties(textVariableAnchorOffset(propertyValue));
+    assertEquals(layer.getTextVariableAnchorOffset().getValue(), propertyValue);
   }
 
   @Test

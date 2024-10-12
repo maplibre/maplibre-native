@@ -1,6 +1,7 @@
 #include "constant.hpp"
 #include "collection.hpp"
 #include "../style/formatted.hpp"
+#include "../style/variable_anchor_offset.hpp"
 
 #include <mbgl/style/conversion/stringify.hpp>
 #include <mbgl/util/string.hpp>
@@ -46,7 +47,7 @@ Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, Padding>:
 
 Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, VariableAnchorOffsetCollection>::operator()(
     jni::JNIEnv& env, const VariableAnchorOffsetCollection& value) const {
-    return jni::Make<jni::String>(env, value.toString());
+    return VariableAnchorOffset::New(env, value);
 }
 
 Result<jni::Local<jni::Object<>>> Converter<jni::Local<jni::Object<>>, style::expression::Formatted>::operator()(

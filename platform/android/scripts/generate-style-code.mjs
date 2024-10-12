@@ -114,7 +114,6 @@ global.propertyType = function propertyType(property) {
         return 'Formatted';
       case 'string':
       case 'resolvedImage':
-	    case 'variableAnchorOffsetCollection':
         return 'String';
       case 'enum':
         return 'String';
@@ -122,6 +121,8 @@ global.propertyType = function propertyType(property) {
         return 'String';
       case 'padding':
         return 'Float[]';
+      case 'variableAnchorOffsetCollection':
+        return 'VariableAnchorOffset';
       case 'array':
         return `${propertyType({type:property.value, name: property.name})}[]`;
       default:
@@ -144,6 +145,8 @@ global.propertyJavaType = function propertyType(property) {
          return 'String';
        case 'color':
          return 'String';
+       case 'variableAnchorOffsetCollection':
+         return 'VariableAnchorOffset';
        case 'array':
          return `${propertyJavaType({type:property.value})}[]`;
        default:
@@ -273,7 +276,7 @@ global.defaultValueJava = function(property) {
       case 'padding':
         return '{2.0f, 2.0f, 2.0f, 2.0f}';
       case 'variableAnchorOffsetCollection':
-        return `@"{"top": [1, 2]}"`;
+        return 'new VariableAnchorOffset(new AnchorOffset[]{new AnchorOffset("top", new Float[]{1f, 2f})})';
       case 'array':
              switch (property.value) {
               case 'string':
