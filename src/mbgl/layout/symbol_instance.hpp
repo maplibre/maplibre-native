@@ -6,7 +6,9 @@
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
 #include <mbgl/util/bitmask_operations.hpp>
 
+#if __cplusplus >= 202002L  // C++20
 #include <source_location>
+#endif
 
 #if !defined(MLN_SYMBOL_GUARDS)
 #define MLN_SYMBOL_GUARDS 1
@@ -231,9 +233,9 @@ private:
     SYM_GUARD_VALUE(09)
     CollisionFeature iconCollisionFeature;
     SYM_GUARD_VALUE(10)
-    optional<CollisionFeature> verticalTextCollisionFeature = std::nullopt;
+    optional<CollisionFeature> verticalTextCollisionFeature = nullopt;
     SYM_GUARD_VALUE(11)
-    optional<CollisionFeature> verticalIconCollisionFeature = std::nullopt;
+    optional<CollisionFeature> verticalIconCollisionFeature = nullopt;
     SYM_GUARD_VALUE(12)
     WritingModeType writingModes;
     SYM_GUARD_VALUE(13)

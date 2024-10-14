@@ -23,7 +23,7 @@ TileLayerIndex::TileLayerIndex(OverscaledTileID coord_,
     }
 }
 
-Point<int64_t> TileLayerIndex::getScaledCoordinates(SymbolInstance& symbolInstance,
+Point<int64_t> TileLayerIndex::getScaledCoordinates(const SymbolInstance& symbolInstance,
                                                     const OverscaledTileID& childTileCoord) const {
     // Round anchor positions to roughly 4 pixel grid
     const double roundingFactor = 512.0 / util::EXTENT / 2.0;

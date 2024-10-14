@@ -251,7 +251,7 @@ std::array<float, 2> evaluateRadialOffset(style::SymbolAnchorType anchor, float 
     std::array<float, 2> result{{0.0f, 0.0f}};
     radialOffset = std::max(radialOffset, 0.0f); // Ignore negative offset.
     // solve for r where r^2 + r^2 = radialOffset^2
-    const float hypotenuse = radialOffset / std::numbers::sqrt2_v<float>;
+    const float hypotenuse = static_cast<float>(radialOffset / M_SQRT2);
 
     switch (anchor) {
     case SymbolAnchorType::TopRight:
@@ -804,7 +804,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
                 index = iconBuffer.placedSymbols.size() - 1;
                 PlacedSymbol& iconSymbol = iconBuffer.placedSymbols.back();
                 iconSymbol.angle = (allowVerticalPlacement && writingMode == WritingModeType::Vertical)
-                                       ? pi_v<float> / 2
+                                       ? static_cast<float>(M_PI_2)
                                        : 0.0f;
                 iconSymbol.vertexStartIndex = addSymbols(
                     iconBuffer, sizeData, iconQuads, symbolInstance.getAnchor(), iconSymbol, feature.sortKey);
@@ -821,7 +821,7 @@ void SymbolLayout::createBucket(const ImagePositions&,
 
             for (auto& pair : bucket->paintProperties) {
                 pair.second.iconBinders.populateVertexVectors(
-                    feature, iconBuffer.vertices().elements(), symbolInstance.getDataFeatureIndex(), {}, {}, canonical);
+                    feature, iconBuffer.vertices.elements(), symbolInstance.getDataFeatureIndex(), {}, {}, canonical);
             }
         }
 
@@ -1029,16 +1029,16 @@ size_t SymbolLayout::addSymbol(SymbolBucket::Buffer& buffer,
     // Dynamic/Opacity vertices are initialized so that the vertex count always agrees with
     // the layout vertex buffer, but they will always be updated before rendering happens
     auto dynamicVertex = SymbolSDFIconProgram::dynamicLayoutVertex(labelAnchor.point, 0);
-    buffer.dynamicVertices().emplace_back(dynamicVertex);
-    buffer.dynamicVertices().emplace_back(dynamicVertex);
-    buffer.dynamicVertices().emplace_back(dynamicVertex);
-    buffer.dynamicVertices().emplace_back(dynamicVertex);
+    buffer.dynamicVertices.emplace_back(dynamicVertex);
+    buffer.dynamicVertices.emplace_back(dynamicVertex);
+    buffer.dynamicVertices.emplace_back(dynamicVertex);
+    buffer.dynamicVertices.emplace_back(dynamicVertex);
 
     auto opacityVertex = SymbolSDFIconProgram::opacityVertex(true, 1.0);
-    buffer.opacityVertices().emplace_back(opacityVertex);
-    buffer.opacityVertices().emplace_back(opacityVertex);
-    buffer.opacityVertices().emplace_back(opacityVertex);
-    buffer.opacityVertices().emplace_back(opacityVertex);
+    buffer.opacityVertices.emplace_back(opacityVertex);
+    buffer.opacityVertices.emplace_back(opacityVertex);
+    buffer.opacityVertices.emplace_back(opacityVertex);
+    buffer.opacityVertices.emplace_back(opacityVertex);
 
     // add the two triangles, referencing the four coordinates we just inserted.
     buffer.triangles.emplace_back(index + 0, index + 1, index + 2);
@@ -1106,13 +1106,13 @@ void SymbolLayout::addToDebugBuffers(SymbolBucket& bucket) {
                 auto& segment = collisionBuffer.segments.back();
                 auto index = static_cast<uint16_t>(segment.vertexLength);
 
-                collisionBuffer.vertices().emplace_back(
+                collisionBuffer.vertices.emplace_back(
                     CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, tl));
-                collisionBuffer.vertices().emplace_back(
+                collisionBuffer.vertices.emplace_back(
                     CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, tr));
-                collisionBuffer.vertices().emplace_back(
+                collisionBuffer.vertices.emplace_back(
                     CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, br));
-                collisionBuffer.vertices().emplace_back(
+                collisionBuffer.vertices.emplace_back(
                     CollisionBoxProgram::layoutVertex(anchor, symbolInstance.getAnchor().point, bl));
 
                 // Dynamic vertices are initialized so that the vertex count always agrees with

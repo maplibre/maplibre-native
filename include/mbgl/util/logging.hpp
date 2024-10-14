@@ -44,7 +44,7 @@ public:
     ///
     /// In a crash or other unexpected termination, pending asynchronous log entries will be lost.
     /// The default is true (asynchronous) for all levels except `Error`.
-    static void useLogThread(bool enable, std::optional<EventSeverity> = {});
+    static void useLogThread(bool enable, optional<EventSeverity> = {});
 
     template <typename ...Args>
     static void Debug(Event event, Args&& ...args) {

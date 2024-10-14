@@ -3,6 +3,7 @@
 #include <mbgl/util/enum.hpp>
 #include <mbgl/util/logging.hpp>
 #include <mbgl/util/platform.hpp>
+#include <mbgl/util/traits.hpp>
 
 #include <cstdio>
 #include <cstdarg>
@@ -13,7 +14,8 @@ namespace mbgl {
 namespace {
 
 std::unique_ptr<Log::Observer> currentObserver;
-std::atomic<bool> useThread(true);
+constexpr auto SeverityCount = underlying_type(EventSeverity::SeverityCount);
+std::atomic<bool> useThread[SeverityCount] = {true, true, true, false};
 std::mutex mutex;
 
 } // namespace
@@ -23,11 +25,20 @@ public:
     Impl() : scheduler(Scheduler::GetSequenced()) {}
 
     void record(EventSeverity severity, Event event, int64_t code, const std::string& msg) {
-        if (useThread) {
-            auto threadName = platform::getCurrentThreadName();
-            scheduler->schedule([=]() { Log::record(severity, event, code, msg, threadName); });
-        } else {
-            Log::record(severity, event, code, msg, {});
+        try {
+            if (useThread[underlying_type(severity)]) {
+                auto threadName = platform::getCurrentThreadName();
+                scheduler->schedule([=]() { Log::record(severity, event, code, msg, threadName); });
+            } else {
+                Log::record(severity, event, code, msg, {});
+            }
+        } catch (...) {
+            // ignore exceptions during logging
+            // What would we do, log them?
+#if !defined(NDEBUG)
+            [[maybe_unused]] auto ex = std::current_exception();
+            assert(!"unhandled exception while logging");
+#endif
         }
     }
 

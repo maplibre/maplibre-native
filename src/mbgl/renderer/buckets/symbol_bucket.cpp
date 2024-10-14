@@ -313,12 +313,12 @@ SymbolInstanceReferences SymbolBucket::getSymbols(const optional<SortKeyRange>& 
 
 #if MLN_SYMBOL_GUARDS
 bool SymbolBucket::check(std::source_location source) {
-    if (text.vertices().elements() != text.dynamicVertices().elements() ||
-        text.vertices().elements() != text.opacityVertices().elements() ||
-        icon.vertices().elements() != icon.dynamicVertices().elements() ||
-        icon.vertices().elements() != icon.opacityVertices().elements() ||
-        sdfIcon.vertices().elements() != sdfIcon.dynamicVertices().elements() ||
-        sdfIcon.vertices().elements() != sdfIcon.opacityVertices().elements()) {
+    if (text.vertices.elements() != text.dynamicVertices.elements() ||
+        text.vertices.elements() != text.opacityVertices.elements() ||
+        icon.vertices.elements() != icon.dynamicVertices.elements() ||
+        icon.vertices.elements() != icon.opacityVertices.elements() ||
+        sdfIcon.vertices.elements() != sdfIcon.dynamicVertices.elements() ||
+        sdfIcon.vertices.elements() != sdfIcon.opacityVertices.elements()) {
         // This bucket was left in a partial state and it cannot be used
         return false;
     }
