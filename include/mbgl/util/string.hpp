@@ -76,6 +76,7 @@ inline std::string toString(long double t, bool decimal = false) {
     return toString(static_cast<double>(t), decimal);
 }
 
+inline std::string toString(std::thread::id threadId) {
 std::string toString(const std::exception_ptr &);
 
 template <class T>

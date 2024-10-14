@@ -44,8 +44,15 @@ Log* Log::get() noexcept {
     return &instance;
 }
 
-void Log::useLogThread(bool enable) {
-    useThread = enable;
+void Log::useLogThread(bool enable, optional<EventSeverity> severity) {
+    if (severity) {
+        useThread[underlying_type(*severity)] = enable;
+    } else {
+        useLogThread(enable, EventSeverity::Debug);
+        useLogThread(enable, EventSeverity::Info);
+        useLogThread(enable, EventSeverity::Warning);
+        useLogThread(enable, EventSeverity::Error);
+    }
 }
 
 void Log::setObserver(std::unique_ptr<Observer> observer) {

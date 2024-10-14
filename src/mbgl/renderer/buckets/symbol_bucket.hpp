@@ -103,6 +103,10 @@ public:
     // returns references to all the symbols if |sortKeyRange| is `nullopt`.
     SymbolInstanceReferences getSymbols(const optional<SortKeyRange>& sortKeyRange = nullopt) const;
 
+#if MLN_SYMBOL_GUARDS
+    bool check(std::source_location) override;
+#endif
+
     Immutable<style::SymbolLayoutProperties::PossiblyEvaluated> layout;
     const std::string bucketLeaderID;
     float sortedAngle = std::numeric_limits<float>::max();
