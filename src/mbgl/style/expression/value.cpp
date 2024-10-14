@@ -40,7 +40,7 @@ type::Type typeOf(const Value& value) {
 
 std::string toString(const Value& value) {
     return value.match([](const NullValue&) { return std::string(); },
-                       [](const Color& c) { return c.stringify(); }, // avoid quoting
+                       [](const Color& c) { return c.stringify(); },                         // avoid quoting
                        [](const VariableAnchorOffsetCollection& v) { return v.toString(); }, // avoid quoting
                        [](const Formatted& f) { return f.toString(); },
                        [](const Image& i) { return i.id(); },

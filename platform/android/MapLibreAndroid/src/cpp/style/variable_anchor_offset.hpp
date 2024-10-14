@@ -13,7 +13,8 @@ class VariableAnchorOffset : private mbgl::util::noncopyable {
 public:
     static constexpr auto Name() { return "org/maplibre/android/style/types/VariableAnchorOffset"; };
 
-    static jni::Local<jni::Object<VariableAnchorOffset>> New(jni::JNIEnv &, const VariableAnchorOffsetCollection &value);
+    static jni::Local<jni::Object<VariableAnchorOffset>> New(jni::JNIEnv &,
+                                                             const VariableAnchorOffsetCollection &value);
 
     static void registerNative(jni::JNIEnv &);
 };
