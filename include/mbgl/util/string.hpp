@@ -1,9 +1,10 @@
 #pragma once
 
-#include <string>
 #include <cstdlib>
-#include <type_traits>
 #include <exception>
+#include <thread>
+#include <type_traits>
+#include <string>
 
 // Polyfill needed by Qt when building for Android with GCC
 #if defined(__ANDROID__) && defined(__GLIBCXX__)
@@ -75,6 +76,8 @@ inline std::string toString(float t, bool decimal = false) {
 inline std::string toString(long double t, bool decimal = false) {
     return toString(static_cast<double>(t), decimal);
 }
+
+std::string toString(std::thread::id);
 
 std::string toString(const std::exception_ptr &);
 

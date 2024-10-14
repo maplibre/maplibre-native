@@ -424,6 +424,10 @@ void RenderSymbolLayer::render(PaintParameters& parameters) {
         assert(bucket.paintProperties.find(getID()) != bucket.paintProperties.end());
         const auto& bucketPaintProperties = bucket.paintProperties.at(getID());
 
+        if (!static_cast<Bucket&>(bucket).check(SYM_GUARD_LOC)) {
+            continue;
+        }
+
         // Prevent a flickering issue when a symbol is moved.
         // bucket.justReloaded = false;
 
@@ -579,7 +583,7 @@ void RenderSymbolLayer::prepare(const LayerPrepareParameters& params) {
 
     for (const RenderTile& renderTile : *renderTiles) {
         auto* bucket = static_cast<SymbolBucket*>(renderTile.getBucket(*baseImpl));
-        if (bucket && bucket->bucketLeaderID == getID()) {
+        if (bucket && bucket->bucketLeaderID == getID() && static_cast<Bucket*>(bucket)->check(SYM_GUARD_LOC)) {
             // Only place this layer if it's the "group leader" for the bucket
             const Tile* tile = params.source->getRenderedTile(renderTile.id);
             assert(tile);

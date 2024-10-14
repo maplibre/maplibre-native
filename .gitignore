@@ -19,6 +19,7 @@
 *.code-workspace
 
 .DS_Store
+/.cache
 /build
 **/.idea
 /platform/android/MapboxGLAndroidSDKTestApp/local.properties
