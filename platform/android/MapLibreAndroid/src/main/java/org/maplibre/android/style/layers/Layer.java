@@ -155,8 +155,7 @@ public abstract class Layer {
       return ((Expression) value).toArray();
     } else if (value instanceof Formatted) {
       return ((Formatted) value).toArray();
-    }
-    else {
+    } else {
       return value;
     }
   }
