@@ -17,7 +17,9 @@ DrawableGL::DrawableGL(std::string name_)
     : Drawable(std::move(name_)),
       impl(std::make_unique<Impl>()) {}
 
-DrawableGL::~DrawableGL() {}
+DrawableGL::~DrawableGL() {
+    impl->attributeBuffers.clear();
+}
 
 void DrawableGL::draw(PaintParameters& parameters) const {
     MLN_TRACE_FUNC();
@@ -213,6 +215,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
         const auto& indexAttribute = defaults.get(impl->vertexAttrId);
         const auto vertexAttributeIndex = static_cast<std::size_t>(indexAttribute ? indexAttribute->getIndex() : -1);
 
+        std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
         impl->attributeBindings = uploadPass.buildAttributeBindings(impl->vertexCount,
                                                                     impl->vertexType,
                                                                     vertexAttributeIndex,
@@ -220,7 +223,10 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                                                                     defaults,
                                                                     overrides,
                                                                     usage,
-                                                                    attributeUpdateTime);
+                                                                    attributeUpdateTime,
+                                                                    vertexBuffers);
+        
+        impl->attributeBuffers = std::move(vertexBuffers);
     }
 
     // Bind a VAO for each group of vertexes described by a segment

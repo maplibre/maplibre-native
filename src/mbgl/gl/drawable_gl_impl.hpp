@@ -39,7 +39,8 @@ public:
     gfx::AttributeDataType vertexType = static_cast<gfx::AttributeDataType>(-1);
 
     AttributeBindingArray attributeBindings;
-
+    std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
+    
     UniformBufferArrayGL uniformBuffers;
 
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();

@@ -122,7 +122,8 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const gfx::VertexAttributeArray& defaults,
     const gfx::VertexAttributeArray& overrides,
     const gfx::BufferUsageType usage,
-    const std::optional<std::chrono::duration<double>> lastUpdate) {
+    const std::optional<std::chrono::duration<double>> lastUpdate,
+    /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>&)) {
     gfx::AttributeBindingArray bindings;
 
     // For each attribute in the program, with the corresponding default and optional override...

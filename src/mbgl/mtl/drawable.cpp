@@ -44,7 +44,10 @@ Drawable::Drawable(std::string name_)
     : gfx::Drawable(std::move(name_)),
       impl(std::make_unique<Impl>()) {}
 
-Drawable::~Drawable() {}
+Drawable::~Drawable() {
+    impl->attributeBuffers.clear();
+    impl->instanceBuffers.clear();
+}
 
 namespace {
 #if !defined(NDEBUG)
@@ -579,6 +582,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
         }
 
         // Apply drawable values to shader defaults
+        std::vector<std::unique_ptr<gfx::VertexBufferResource>> vertexBuffers;
         auto attributeBindings_ = uploadPass.buildAttributeBindings(impl->vertexCount,
                                                                     impl->vertexType,
                                                                     /*vertexAttributeIndex=*/-1,
@@ -586,7 +590,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                     shader->getVertexAttributes(),
                                                                     *vertexAttributes,
                                                                     usage,
-                                                                    attributeUpdateTime);
+                                                                    attributeUpdateTime,
+                                                                    vertexBuffers);
+        impl->attributeBuffers = std::move(vertexBuffers);
 
         vertexAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
@@ -650,6 +656,7 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
 
     if (buildInstanceBuffer) {
         // Build instance attribute buffers
+        std::vector<std::unique_ptr<gfx::VertexBufferResource>> instanceBuffers;
         auto instanceBindings_ = uploadPass.buildAttributeBindings(instanceAttributes->getMaxCount(),
                                                                    /*vertexType*/ gfx::AttributeDataType::Byte,
                                                                    /*vertexAttributeIndex=*/-1,
@@ -657,7 +664,9 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                    shader->getInstanceAttributes(),
                                                                    *instanceAttributes,
                                                                    usage,
-                                                                   attributeUpdateTime);
+                                                                   attributeUpdateTime,
+                                                                   instanceBuffers);
+        impl->instanceBuffers = std::move(instanceBuffers);
 
         // clear dirty flag
         instanceAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
