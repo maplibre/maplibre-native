@@ -8,6 +8,15 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### 🐞 Bug fixes
 
+## 10.3.3
+
+### 🐞 Bug fixes
+
+- Fix null-pointer dereference MapRenderer Android ([#2938](https://github.com/maplibre/maplibre-native/pull/2938))
+- Fix inappropriate `WeakPtrFactory` use ([#2936](https://github.com/maplibre/maplibre-native/pull/2936))
+- Make sure `Scheduler::GetCurrent()` cannot return a nullptr ([#2937](https://github.com/maplibre/maplibre-native/pull/2937))
+- Add guard blocks and checks to SymbolInstance ([#2933](https://github.com/maplibre/maplibre-native/pull/2933))
+
 ## 10.3.2
 
 ### 🐞 Bug fixes
