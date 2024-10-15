@@ -114,7 +114,7 @@ private:
     float pixelRatio;
     optional<std::string> localIdeographFontFamily;
 
-    std::shared_ptr<ThreadPool> threadPool;
+    std::shared_ptr<Scheduler> threadPool;
     const MailboxData mailboxData;
 
     std::mutex initialisationMutex;
