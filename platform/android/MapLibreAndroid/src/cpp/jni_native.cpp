@@ -48,8 +48,6 @@
 #include "style/light.hpp"
 #include "style/formatted.hpp"
 #include "style/formatted_section.hpp"
-#include "style/anchor_offset.hpp"
-#include "style/variable_anchor_offset.hpp"
 #ifndef MBGL_MODULE_SNAPSHOT_DISABLE
 #include "snapshotter/map_snapshotter.hpp"
 #include "snapshotter/map_snapshot.hpp"
@@ -127,8 +125,6 @@ void registerNatives(JavaVM* vm) {
     Position::registerNative(env);
     Formatted::registerNative(env);
     FormattedSection::registerNative(env);
-    AnchorOffset::registerNative(env);
-    VariableAnchorOffset::registerNative(env);
 
     // Map
     CameraPosition::registerNative(env);

@@ -7,7 +7,6 @@ import androidx.annotation.ColorInt;
 import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.types.Formatted;
 import static org.maplibre.android.utils.ColorUtils.colorToRgbaString;
-import org.maplibre.android.style.types.VariableAnchorOffset;
 
 /**
  * Constructs paint/layout properties for Layers
@@ -2403,10 +2402,10 @@ The unit is in density-independent pixels only for SDF sprites that were created
 
  When the renderer chooses the `left` anchor, `[3, 0]` will be used for {@link PropertyFactory#textOffset}; the text will be shifted right by 3 ems.
    *
-   * @param value a VariableAnchorOffset value
-   * @return property wrapper around VariableAnchorOffset
+   * @param value a Object[] value
+   * @return property wrapper around Object[]
    */
-  public static PropertyValue<VariableAnchorOffset> textVariableAnchorOffset(VariableAnchorOffset value) {
+  public static PropertyValue<Object[]> textVariableAnchorOffset(Object[] value) {
     return new LayoutPropertyValue<>("text-variable-anchor-offset", value);
   }
 
@@ -2425,8 +2424,8 @@ The unit is in density-independent pixels only for SDF sprites that were created
 
  When the renderer chooses the `left` anchor, `[3, 0]` will be used for {@link PropertyFactory#textOffset}; the text will be shifted right by 3 ems.
    *
-   * @param value a VariableAnchorOffset value
-   * @return property wrapper around VariableAnchorOffset
+   * @param value a Object[] value
+   * @return property wrapper around Object[]
    */
   public static PropertyValue<Expression> textVariableAnchorOffset(Expression value) {
     return new LayoutPropertyValue<>("text-variable-anchor-offset", value);

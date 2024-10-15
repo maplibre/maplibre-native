@@ -16,7 +16,6 @@ import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.layers.TransitionOptions;
 import org.maplibre.android.style.types.Formatted;
 import org.maplibre.android.style.types.FormattedSection;
-import org.maplibre.android.style.types.VariableAnchorOffset;
 
 /**
  * An icon or a text label.
@@ -509,13 +508,13 @@ public class SymbolLayer extends Layer {
   /**
    * Get the TextVariableAnchorOffset property
    *
-   * @return property wrapper value around VariableAnchorOffset
+   * @return property wrapper value around Object[]
    */
   @NonNull
   @SuppressWarnings("unchecked")
-  public PropertyValue<VariableAnchorOffset> getTextVariableAnchorOffset() {
+  public PropertyValue<Object[]> getTextVariableAnchorOffset() {
     checkThread();
-    return (PropertyValue<VariableAnchorOffset>) new PropertyValue("text-variable-anchor-offset", nativeGetTextVariableAnchorOffset());
+    return (PropertyValue<Object[]>) new PropertyValue("text-variable-anchor-offset", nativeGetTextVariableAnchorOffset());
   }
 
   /**

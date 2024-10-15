@@ -139,10 +139,6 @@ add_library(maplibre SHARED
             ${PROJECT_SOURCE_DIR}/style/formatted.hpp
             ${PROJECT_SOURCE_DIR}/style/formatted_section.cpp
             ${PROJECT_SOURCE_DIR}/style/formatted_section.hpp
-            ${PROJECT_SOURCE_DIR}/style/anchor_offset.cpp
-            ${PROJECT_SOURCE_DIR}/style/anchor_offset.hpp
-            ${PROJECT_SOURCE_DIR}/style/variable_anchor_offset.cpp
-            ${PROJECT_SOURCE_DIR}/style/variable_anchor_offset.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/background_layer.cpp
             ${PROJECT_SOURCE_DIR}/style/layers/background_layer.hpp
             ${PROJECT_SOURCE_DIR}/style/layers/circle_layer.cpp

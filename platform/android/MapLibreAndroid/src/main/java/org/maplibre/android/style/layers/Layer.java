@@ -8,7 +8,6 @@ import com.google.gson.JsonElement;
 import org.maplibre.android.LibraryLoader;
 import org.maplibre.android.style.expressions.Expression;
 import org.maplibre.android.style.types.Formatted;
-import org.maplibre.android.style.types.VariableAnchorOffset;
 import org.maplibre.android.utils.ThreadUtils;
 import org.maplibre.android.style.types.Formatted;
 
@@ -156,8 +155,6 @@ public abstract class Layer {
       return ((Expression) value).toArray();
     } else if (value instanceof Formatted) {
       return ((Formatted) value).toArray();
-    } else if (value instanceof VariableAnchorOffset) {
-      return ((VariableAnchorOffset) value).toArray();
     }
     else {
       return value;
