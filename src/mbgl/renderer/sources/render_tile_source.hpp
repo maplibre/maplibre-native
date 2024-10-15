@@ -1,16 +1,31 @@
 #pragma once
 
 #include <mbgl/renderer/render_source.hpp>
+#include <mbgl/renderer/render_tree.hpp>
 #include <mbgl/renderer/source_state.hpp>
 #include <mbgl/renderer/tile_pyramid.hpp>
 #include <mbgl/style/sources/vector_source_impl.hpp>
-#include <mbgl/renderer/render_tree.hpp>
+#include <mbgl/util/noncopyable.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/context.hpp>
+#include <mbgl/tile/tile_diff.hpp>
 #endif
 
 namespace mbgl {
+
+#if MLN_DRAWABLE_RENDERER
+struct FrameTileDifference {
+    FrameTileDifference(std::uint64_t prevFrame_, std::uint64_t curFrame_, TileDifference diff_)
+        : prevFrame(prevFrame_),
+          curFrame(curFrame_),
+          diff(std::move(diff_)) {}
+
+    std::uint64_t prevFrame;
+    std::uint64_t curFrame;
+    TileDifference diff;
+};
+#endif
 
 /**
  * @brief Base class for render sources that provide render tiles.
@@ -30,6 +45,10 @@ public:
     RenderTiles getRenderTilesSortedByYPosition() const override;
     const Tile* getRenderedTile(const UnwrappedTileID&) const override;
     Immutable<std::vector<RenderTile>> getRawRenderTiles() const override { return renderTiles; }
+
+#if MLN_DRAWABLE_RENDERER
+    std::shared_ptr<FrameTileDifference> getRenderTileDiff() const override;
+#endif
 
     std::unordered_map<std::string, std::vector<Feature>> queryRenderedFeatures(
         const ScreenLineString& geometry,
@@ -53,15 +72,60 @@ public:
     void dumpDebugLogs() const override;
 
 protected:
+    /// Must be called before updating the tile pyramid by derived classes overriding `update`
+    void onTilePyramidWillUpdate();
+
+    /// Must be called after updating the tile pyramid by derived classes overriding `update`
+    void onTilePyramidUpdated();
+
+    struct TilePyramidUpdateHelper;
+
     RenderTileSource(Immutable<style::Source::Impl>, const TaggedScheduler&);
     TilePyramid tilePyramid;
+
+    // Note that while `renderTiles` is owned by a `shared_ptr`, its elements
+    // contain bare references to `Tile` objects owned by `tilePyramid`.
     Immutable<std::vector<RenderTile>> renderTiles;
+#if MLN_DRAWABLE_RENDERER
+    bool renderTilesValid = false;
+    std::uint64_t renderTilesPrevFrame = 0;
+    std::uint64_t renderTilesCurFrame = 0;
+
+    // The IDs of tiles in the previous state of `renderTiles`, and the differences with the current state
+    std::vector<OverscaledTileID> previousRenderTiles;
+    mutable std::shared_ptr<FrameTileDifference> renderTileDiff;
+#endif
+
+    // cached view of `renderTiles`, excluding those held for fading
     mutable RenderTiles filteredRenderTiles;
+    // cached view of `renderTiles`, sorted by the Y tile coordinate
     mutable RenderTiles renderTilesSortedByY;
 
 private:
     float bearing = 0.0F;
     SourceFeatureState featureState;
+};
+
+/// Eases the use of notification methods when updates are conditional
+struct RenderTileSource::TilePyramidUpdateHelper : public util::noncopyable {
+    TilePyramidUpdateHelper(RenderTileSource& src)
+        : renderTileSource(src) {}
+
+    void start() {
+        if (!started) {
+            started = true;
+            renderTileSource.onTilePyramidWillUpdate();
+        }
+    }
+    ~TilePyramidUpdateHelper() {
+        if (started) {
+            renderTileSource.onTilePyramidUpdated();
+        }
+    }
+
+private:
+    RenderTileSource& renderTileSource;
+    bool started = false;
 };
 
 /**
@@ -82,6 +146,7 @@ protected:
 
 private:
     uint8_t getMaxZoom() const final;
+
     void update(Immutable<style::Source::Impl>,
                 const std::vector<Immutable<style::LayerProperties>>&,
                 bool needsRendering,

@@ -4,15 +4,20 @@
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/style/color_ramp_property_value.hpp>
 #include <mbgl/style/layer.hpp>
 #include <mbgl/style/layer_properties.hpp>
 #include <mbgl/style/types.hpp>
 #include <mbgl/tile/tile.hpp>
+#include <mbgl/util/instrumentation.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/std.hpp>
+#include <mbgl/util/util.hpp>
 
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/tile/tile_diff.hpp>
 #endif
 
 namespace mbgl {
@@ -21,8 +26,13 @@ using namespace style;
 
 RenderLayer::RenderLayer(Immutable<style::LayerProperties> properties)
     : evaluatedProperties(std::move(properties)),
-      baseImpl(evaluatedProperties->baseImpl),
-      renderTilesOwner(makeMutable<std::vector<RenderTile>>()) {}
+      baseImpl(evaluatedProperties->baseImpl)
+#if MLN_DRAWABLE_RENDERER
+      ,
+      renderTilesOwner(makeMutable<std::vector<RenderTile>>())
+#endif
+{
+}
 
 void RenderLayer::transition(const TransitionParameters& parameters, Immutable<style::Layer::Impl> newImpl) {
     baseImpl = std::move(newImpl);
@@ -59,12 +69,8 @@ void RenderLayer::prepare(const LayerPrepareParameters& params) {
     assert(params.source);
     assert(params.source->isEnabled());
     renderTiles = params.source->getRenderTiles();
-    renderTilesOwner = params.source->getRawRenderTiles();
     addRenderPassesFromTiles();
-
-#if MLN_DRAWABLE_RENDERER
-    updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
+    updateRenderTileIDs(params);
 }
 
 std::optional<Color> RenderLayer::getSolidBackground() const {
@@ -72,6 +78,16 @@ std::optional<Color> RenderLayer::getSolidBackground() const {
 }
 
 #if MLN_DRAWABLE_RENDERER
+void RenderLayer::captureRenderTiles(std::uint64_t frameCount) {
+    previousRenderTiles.clear();
+    if (renderTiles) {
+        std::ranges::transform(*renderTiles, std::back_inserter(previousRenderTiles), [&](const RenderTile& tile) {
+            return tile.getOverscaledTileID();
+        });
+        prevUpdateFrame = frameCount;
+    }
+}
+
 void RenderLayer::layerChanged(const TransitionParameters&,
                                const Immutable<style::Layer::Impl>&,
                                UniqueChangeRequestVec&) {
@@ -142,6 +158,24 @@ const LayerRenderData* RenderLayer::getRenderDataForPass(const RenderTile& tile,
     return nullptr;
 }
 
+std::optional<std::reference_wrapper<const RenderTile>> RenderLayer::getRenderTile(
+    const OverscaledTileID& tileID) const {
+    // Search `RenderTiles` for a tile ID without creating a "key" instance of `RenderTile`
+    struct Comp {
+        bool operator()(const std::reference_wrapper<const RenderTile>& tile, const OverscaledTileID& id) const {
+            return tile.get().getOverscaledTileID() < id;
+        }
+        bool operator()(const OverscaledTileID& id, const std::reference_wrapper<const RenderTile>& tile) const {
+            return id < tile.get().getOverscaledTileID();
+        }
+    };
+    const auto result = std::lower_bound(renderTiles->begin(), renderTiles->end(), tileID, Comp());
+    if (result != renderTiles->end() && result->get().getOverscaledTileID() == tileID) {
+        return *result;
+    }
+    return std::nullopt;
+}
+
 #if MLN_DRAWABLE_RENDERER
 std::size_t RenderLayer::removeTile(RenderPass renderPass, const OverscaledTileID& tileID) {
     if (const auto tileGroup = static_cast<TileLayerGroup*>(layerGroup.get())) {
@@ -162,7 +196,9 @@ std::size_t RenderLayer::removeAllDrawables() {
     return 0;
 }
 
-void RenderLayer::updateRenderTileIDs() {
+void RenderLayer::updateRenderTileIDs(const LayerPrepareParameters& params) {
+    MLN_TRACE_FUNC();
+
     if (!renderTiles || renderTiles->empty()) {
         renderTileIDs.clear();
         return;
@@ -175,6 +211,18 @@ void RenderLayer::updateRenderTileIDs() {
 
     renderTileIDs.swap(newRenderTileIDs);
     newRenderTileIDs.clear();
+
+    renderTilesOwner = params.source->getRawRenderTiles();
+    renderTileDiff = params.source->getRenderTileDiff();
+
+    // In some circumstances, the tiles can be updated multiple times between layer updates, in which case
+    // the source's last change isn't sufficient to catch up.  This is treated the same as when this layer
+    // has just been added, and the changes are calculated from the last time this layer was updated, if any.
+    if (!renderTileDiff || !prevUpdateFrame || renderTileDiff->curFrame != params.frameCount ||
+        renderTileDiff->prevFrame != *prevUpdateFrame) {
+        renderTileDiff = std::make_shared<FrameTileDifference>(
+            prevUpdateFrame ? *prevUpdateFrame : 0, params.frameCount, diffTiles(previousRenderTiles, renderTiles));
+    }
 }
 
 bool RenderLayer::hasRenderTile(const OverscaledTileID& tileID) const {
@@ -255,6 +303,17 @@ bool RenderLayer::applyColorRamp(const style::ColorRampPropertyValue& colorValue
         image.data[i + 3] = static_cast<uint8_t>(std::floor(color.a * 255.f));
     }
     return true;
+}
+
+RenderLayer::RenderTileRefVec RenderLayer::combineRenderTiles(const RenderTileRefVec& a, const RenderTileRefVec& b) {
+    // Do these actually need to be in order?  If not we can just loop over `std::ranges::join_view(...)`
+    RenderTileRefVec result;
+    result.reserve(a.size() + b.size());
+    assert(std::ranges::is_sorted(a, &RenderTile::lessByOverscaledTileID));
+    assert(std::ranges::is_sorted(b, &RenderTile::lessByUnwrappedTileID));
+    std::ranges::copy(b, std::back_inserter(result));
+    std::ranges::copy(a, util::make_ordered_inserter(result, &RenderTile::lessByUnwrappedTileID));
+    return result;
 }
 
 } // namespace mbgl

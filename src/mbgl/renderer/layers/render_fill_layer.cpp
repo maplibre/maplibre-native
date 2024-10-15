@@ -1,3 +1,5 @@
+#include <mbgl/renderer/layers/render_fill_layer.hpp>
+
 #include <mbgl/geometry/feature_index.hpp>
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
@@ -7,7 +9,6 @@
 #include <mbgl/programs/programs.hpp>
 #include <mbgl/renderer/buckets/fill_bucket.hpp>
 #include <mbgl/renderer/image_manager.hpp>
-#include <mbgl/renderer/layers/render_fill_layer.hpp>
 #include <mbgl/renderer/paint_parameters.hpp>
 #include <mbgl/renderer/render_source.hpp>
 #include <mbgl/renderer/render_tile.hpp>
@@ -25,12 +26,16 @@
 #if MLN_DRAWABLE_RENDERER
 #include <mbgl/gfx/drawable_atlases_tweaker.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
-#include <mbgl/renderer/layers/fill_layer_tweaker.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/fill_layer_tweaker.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/fill_layer_ubo.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
+#include <mbgl/tile/tile_diff.hpp>
 #endif
+
+#include <ranges>
 
 namespace mbgl {
 
@@ -295,10 +300,38 @@ bool RenderFillLayer::queryIntersectsFeature(const GeometryCoordinates& queryGeo
 
 #if MLN_DRAWABLE_RENDERER
 
+namespace {
+
+// Setup that's the same for all drawables
+void commonInit(gfx::DrawableBuilder& builder) {
+    builder.setRenderPass(RenderPass::Translucent);
+    builder.setColorMode(gfx::ColorMode::alphaBlended());
+    builder.setCullFaceMode(gfx::CullFaceMode::disabled());
+    builder.setEnableStencil(true);
+}
+
+gfx::DrawableTweakerPtr& getAtlasTweaker(gfx::DrawableTweakerPtr& atlasTweaker, const RenderTile& tile) {
+    if (!atlasTweaker) {
+        if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
+            atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(atlases,
+                                                                         std::nullopt,
+                                                                         idFillImageTexture,
+                                                                         /*isText*/ false,
+                                                                         /*sdfIcons*/ true, // to force linear filter
+                                                                         /*rotationAlignment_*/ AlignmentType::Auto,
+                                                                         /*iconScaled*/ false,
+                                                                         /*textSizeIsZoomConstant_*/ false);
+        }
+    }
+    return atlasTweaker;
+}
+
+} // namespace
+
 void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                              gfx::Context& context,
                              const TransformState&,
-                             const std::shared_ptr<UpdateParameters>&,
+                             const std::shared_ptr<UpdateParameters>& params,
                              const RenderTree&,
                              UniqueChangeRequestVec& changes) {
     if (!renderTiles || renderTiles->empty()) {
@@ -311,10 +344,11 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         if (auto layerGroup_ = context.createTileLayerGroup(layerIndex, /*initialCapacity=*/64, getID())) {
             setLayerGroup(std::move(layerGroup_), changes);
         } else {
+            assert(false);
             return;
         }
     }
-    auto* fillTileLayerGroup = static_cast<TileLayerGroup*>(layerGroup.get());
+    auto& fillTileLayerGroup = static_cast<TileLayerGroup&>(*layerGroup);
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
     if (!outlineTriangulatedShaderGroup) {
@@ -353,59 +387,18 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
     constexpr auto renderPass = RenderPass::Translucent;
     constexpr auto lineWidth = 2.0f;
 
-    const auto commonInit = [&](gfx::DrawableBuilder& builder) {
-        builder.setCullFaceMode(gfx::CullFaceMode::disabled());
-        builder.setEnableStencil(true);
-    };
+    // Remove drawables for removed tiles
+    for (const auto& tileID : renderTileDiff->diff.removed) {
+        removeTile(renderPass, tileID);
+    }
 
-    stats.drawablesRemoved += fillTileLayerGroup->removeDrawablesIf([&](gfx::Drawable& drawable) {
-        // If the render pass has changed or the tile has dropped out of the cover set, remove it.
-        const auto& tileID = drawable.getTileID();
-        return tileID && !hasRenderTile(*tileID);
-    });
-
-    fillTileLayerGroup->setStencilTiles(renderTiles);
+    fillTileLayerGroup.setStencilTiles(renderTiles);
 
     StringIDSetsPair propertiesAsUniforms;
-    for (const RenderTile& tile : *renderTiles) {
-        const auto& tileID = tile.getOverscaledTileID();
 
-        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
-        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
-            removeTile(renderPass, tileID);
-            continue;
-        }
-
-        auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
-        auto& binders = bucket.paintPropertyBinders.at(getID());
-
-        const auto prevBucketID = getRenderTileBucketID(tileID);
-        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
-            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
-            removeTile(renderPass, tileID);
-        }
-        setRenderTileBucketID(tileID, bucket.getID());
-
-        const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
-
-        gfx::DrawableTweakerPtr atlasTweaker;
-        auto getAtlasTweaker = [&]() {
-            if (!atlasTweaker) {
-                if (const auto& atlases = tile.getAtlasTextures(); atlases && atlases->icon) {
-                    atlasTweaker = std::make_shared<gfx::DrawableAtlasesTweaker>(
-                        atlases,
-                        std::nullopt,
-                        idFillImageTexture,
-                        /*isText*/ false,
-                        /*sdfIcons*/ true, // to force linear filter
-                        /*rotationAlignment_*/ AlignmentType::Auto,
-                        /*iconScaled*/ false,
-                        /*textSizeIsZoomConstant_*/ false);
-                }
-            }
-            return atlasTweaker;
-        };
-
+    const auto buildVertexAttrs = [&](FillBucket& bucket,
+                                      const FillProgram::Binders& binders,
+                                      const FillPaintProperties::PossiblyEvaluated& evaluated) {
         propertiesAsUniforms.first.clear();
         propertiesAsUniforms.second.clear();
 
@@ -416,7 +409,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
         vertexAttrs->readDataDrivenPaintProperties<FillColor, FillOpacity, FillOutlineColor, FillPattern>(
             binders, evaluated, propertiesAsUniforms, idFillColorVertexAttribute);
 
-        const auto fillVertexCount = bucket.vertices.elements();
         if (const auto& attr = vertexAttrs->set(idFillPosVertexAttribute)) {
             attr->setSharedRawData(bucket.sharedVertices,
                                    offsetof(FillLayoutVertex, a1),
@@ -424,18 +416,18 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                    sizeof(FillLayoutVertex),
                                    gfx::AttributeDataType::Short2);
         }
+        return vertexAttrs;
+    };
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
-        const auto lineVertexCount = bucket.lineVertices.elements();
-        const auto getTriangulatedAttributes = [&]() {
-            auto attrs = context.createVertexAttributeArray();
-            if (const auto& attr = attrs->set(idLinePosNormalVertexAttribute)) {
-                attr->setSharedRawData(bucket.sharedLineVertices,
-                                       offsetof(LineLayoutVertex, a1),
-                                       /*vertexOffset=*/0,
-                                       sizeof(LineLayoutVertex),
-                                       gfx::AttributeDataType::Short2);
-            }
+    const auto getTriangulatedAttributes = [&](FillBucket& bucket) {
+        auto attrs = context.createVertexAttributeArray();
+        if (const auto& attr = attrs->set(idLinePosNormalVertexAttribute)) {
+            attr->setSharedRawData(bucket.sharedLineVertices,
+                                   offsetof(LineLayoutVertex, a1),
+                                   /*vertexOffset=*/0,
+                                   sizeof(LineLayoutVertex),
+                                   gfx::AttributeDataType::Short2);
             if (const auto& attr = attrs->set(idLineDataVertexAttribute)) {
                 attr->setSharedRawData(bucket.sharedLineVertices,
                                        offsetof(LineLayoutVertex, a2),
@@ -443,21 +435,47 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                                        sizeof(LineLayoutVertex),
                                        gfx::AttributeDataType::UByte4);
             }
-            return attrs;
-        };
+        }
+        return attrs;
+    };
 #endif
 
-        // If we already have drawables for this tile, update them.
+    // Update tiles that weren't added or removed
+    RenderTileRefVec resetTiles;
+    for (const RenderTile& tile : renderTileDiff->diff.remainder) {
+        const auto& tileID = tile.getOverscaledTileID();
+        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
+        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
+            removeTile(renderPass, tileID);
+            continue;
+        }
+
+        auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
+
+        const auto prevBucketID = getRenderTileBucketID(tileID);
+        if (prevBucketID != util::SimpleIdentity::Empty && prevBucketID != bucket.getID()) {
+            // This tile was previously set up from a different bucket, drop and re-create any drawables for it.
+            removeTile(renderPass, tileID);
+
+            // We'll need to treat this tile as an add
+            resetTiles.push_back(tile);
+            continue;
+        }
+        setRenderTileBucketID(tileID, bucket.getID());
+
+        const auto fillVertexCount = bucket.vertices.elements();
         auto updateExisting = [&](gfx::Drawable& drawable) {
             if (drawable.getLayerTweaker() != layerTweaker) {
                 // This drawable was produced on a previous style/bucket, and should not be updated.
                 return false;
             }
+            auto& binders = bucket.paintPropertyBinders.at(getID());
+            const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
 
             switch (static_cast<FillVariant>(drawable.getType())) {
                 case FillVariant::Fill:
                 case FillVariant::FillPattern:
-                    drawable.updateVertexAttributes(vertexAttrs,
+                    drawable.updateVertexAttributes(buildVertexAttrs(bucket, binders, evaluated),
                                                     fillVertexCount,
                                                     gfx::Triangles(),
                                                     bucket.sharedTriangles,
@@ -466,7 +484,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     break;
                 case FillVariant::FillOutline:
                 case FillVariant::FillOutlinePattern:
-                    drawable.updateVertexAttributes(vertexAttrs,
+                    drawable.updateVertexAttributes(buildVertexAttrs(bucket, binders, evaluated),
                                                     fillVertexCount,
                                                     gfx::Lines(lineWidth),
                                                     bucket.sharedBasicLineIndexes,
@@ -477,8 +495,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 case FillVariant::FillOutlineTriangulated:
                     if (const auto updated = drawable.getAttributeUpdateTime();
                         !updated || bucket.lineVertices.getLastModified() > *updated) {
-                        drawable.updateVertexAttributes(getTriangulatedAttributes(),
-                                                        lineVertexCount,
+                        drawable.updateVertexAttributes(getTriangulatedAttributes(bucket),
+                                                        bucket.lineVertices.elements(),
                                                         gfx::Triangles(),
                                                         bucket.sharedLineIndexes,
                                                         bucket.lineSegments.data(),
@@ -495,8 +513,30 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             return true;
         };
         if (updateTile(renderPass, tileID, std::move(updateExisting))) {
+            // Existing drawable was updated
+        } else {
+            // Existing drawable is obsolete, build a new one
+            resetTiles.push_back(tile);
+        }
+    }
+
+    // Create drawables for tiles that are new or need to be re-created
+    for (const RenderTile& tile : combineRenderTiles(renderTileDiff->diff.added, resetTiles)) {
+        const auto& tileID = tile.getOverscaledTileID();
+        const LayerRenderData* renderData = getRenderDataForPass(tile, renderPass);
+        if (!renderData || !renderData->bucket || !renderData->bucket->hasData()) {
             continue;
         }
+
+        const auto& evaluated = getEvaluated<FillLayerProperties>(renderData->layerProperties);
+        auto& bucket = static_cast<FillBucket&>(*renderData->bucket);
+        auto& binders = bucket.paintPropertyBinders.at(getID());
+        setRenderTileBucketID(tileID, bucket.getID());
+
+        gfx::DrawableTweakerPtr atlasTweaker;
+
+        const auto fillVertexCount = bucket.vertices.elements();
+        auto vertexAttrs = buildVertexAttrs(bucket, binders, evaluated);
 
         const auto finish = [&](gfx::DrawableBuilder& builder, FillVariant type) {
             builder.flush(context);
@@ -507,7 +547,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 drawable->setLayerTweaker(layerTweaker);
                 drawable->setBinders(renderData->bucket, &binders);
                 drawable->setRenderTile(renderTilesOwner, &tile);
-                fillTileLayerGroup->addDrawable(renderPass, tileID, std::move(drawable));
+                fillTileLayerGroup.addDrawable(renderPass, tileID, std::move(drawable));
                 ++stats.drawablesAdded;
             }
         };
@@ -530,6 +570,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 fillShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
 
 #if MLN_TRIANGULATE_FILL_OUTLINES
+            const auto lineVertexCount = bucket.lineVertices.elements();
             const auto outlineTriangulatedShader = doOutline && !dataDrivenOutline ? [&]() -> auto {
                 static const StringIDSetsPair outlinePropertiesAsUniforms{
                     {"a_color", "a_opacity", "a_width"},
@@ -543,7 +584,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 if (doOutline && builder && lineVertexCount) {
                     builder->setShader(outlineTriangulatedShader);
                     builder->setRawVertices({}, lineVertexCount, gfx::AttributeDataType::Short2);
-                    builder->setVertexAttributes(getTriangulatedAttributes());
+                    builder->setVertexAttributes(getTriangulatedAttributes(bucket));
                     builder->setSegments(gfx::Triangles(),
                                          bucket.sharedLineIndexes,
                                          bucket.lineSegments.data(),
@@ -565,9 +606,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
 
                     commonInit(*builder);
                     builder->setDepthType(opaque ? gfx::DepthMaskType::ReadWrite : gfx::DepthMaskType::ReadOnly);
-                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
-                    builder->setRenderPass(renderPass);
                     fillBuilder = std::move(builder);
                 }
             }
@@ -577,8 +616,6 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
                     builder->setLineWidth(lineWidth);
                     builder->setSubLayerIndex(unevaluated.get<FillOutlineColor>().isUndefined() ? 2 : 0);
-                    builder->setColorMode(gfx::ColorMode::alphaBlended());
-                    builder->setRenderPass(RenderPass::Translucent);
                     outlineBuilder = std::move(builder);
                 }
             }
@@ -632,16 +669,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                 finish(*outlineBuilder, FillVariant::FillOutline);
             }
 #endif
-        } else {
+        } else if (patternShaderGroup && (!doOutline || outlinePatternShaderGroup)) {
             // Fill with pattern
-            if ((renderPass & RenderPass::Translucent) == 0) {
-                continue;
-            }
-
-            if (!patternShaderGroup || (doOutline && !outlinePatternShaderGroup)) {
-                continue;
-            }
-
             const auto fillShader = std::static_pointer_cast<gfx::ShaderProgramBase>(
                 patternShaderGroup->getOrCreateShader(context, propertiesAsUniforms));
             const auto outlineShader = doOutline ? std::static_pointer_cast<gfx::ShaderProgramBase>(
@@ -654,9 +683,7 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     commonInit(*builder);
                     builder->setShader(fillShader);
                     builder->setDepthType(gfx::DepthMaskType::ReadWrite);
-                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(1);
-                    builder->setRenderPass(RenderPass::Translucent);
                     patternBuilder = std::move(builder);
                 }
             }
@@ -666,20 +693,18 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
                     builder->setShader(outlineShader);
                     builder->setLineWidth(lineWidth);
                     builder->setDepthType(gfx::DepthMaskType::ReadOnly);
-                    builder->setColorMode(gfx::ColorMode::alphaBlended());
                     builder->setSubLayerIndex(2);
-                    builder->setRenderPass(RenderPass::Translucent);
                     outlinePatternBuilder = std::move(builder);
                 }
             }
 
             if (patternBuilder) {
                 patternBuilder->clearTweakers();
-                patternBuilder->addTweaker(getAtlasTweaker());
+                patternBuilder->addTweaker(getAtlasTweaker(atlasTweaker, tile));
             }
             if (doOutline && outlinePatternBuilder) {
                 outlinePatternBuilder->clearTweakers();
-                outlinePatternBuilder->addTweaker(getAtlasTweaker());
+                outlinePatternBuilder->addTweaker(getAtlasTweaker(atlasTweaker, tile));
             }
 
             if (patternBuilder && bucket.sharedTriangles->elements()) {
@@ -711,6 +736,8 @@ void RenderFillLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
     }
+
+    captureRenderTiles(params->frameCount);
 }
 #endif
 

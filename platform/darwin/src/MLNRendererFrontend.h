@@ -73,6 +73,8 @@ class MLNRenderFrontend : public mbgl::RendererFrontend {
     renderer->reduceMemoryUse();
   }
 
+  std::uint64_t getFrameCount() const override { return renderer ? renderer->getFrameCount() : 0; }
+
  private:
   std::unique_ptr<mbgl::Renderer> renderer;
   __weak MLNMapView* nativeView = nullptr;

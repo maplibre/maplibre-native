@@ -3,6 +3,7 @@
 #include <mbgl/gfx/headless_backend.hpp>
 #include <mbgl/gfx/rendering_stats.hpp>
 #include <mbgl/map/camera.hpp>
+#include <mbgl/renderer/renderer.hpp>
 #include <mbgl/renderer/renderer_frontend.hpp>
 #include <mbgl/util/async_task.hpp>
 
@@ -61,6 +62,8 @@ public:
     void renderFrame();
 
     std::optional<TransformState> getTransformState() const;
+
+    std::uint64_t getFrameCount() const override { return renderer ? renderer->getFrameCount() : 0; }
 
 private:
     Size size;

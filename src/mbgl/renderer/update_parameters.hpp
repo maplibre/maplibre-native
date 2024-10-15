@@ -25,6 +25,7 @@ public:
     const float pixelRatio;
     const MapDebugOptions debugOptions;
     const TimePoint timePoint;
+    const std::uint64_t frameCount;
     const TransformState transformState;
 
     const std::string glyphURL;

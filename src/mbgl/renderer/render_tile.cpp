@@ -77,6 +77,7 @@ mat4 RenderTile::translatedClipMatrix(const std::array<float, 2>& translation,
 const OverscaledTileID& RenderTile::getOverscaledTileID() const {
     return tile.id;
 }
+
 bool RenderTile::holdForFade() const {
     return tile.holdForFade();
 }
@@ -168,9 +169,8 @@ void RenderTile::prepare(const SourcePrepareParameters& parameters) {
         debugBucket.reset();
     }
 
-    // Calculate two matrices for this tile: matrix is the standard tile matrix;
-    // nearClippedMatrix has near plane moved further, to enhance depth buffer
-    // precision
+    // Calculate two matrices for this tile: `matrix` is the standard tile matrix;
+    // `nearClippedMatrix` has near plane moved further, to enhance depth buffer precision
     const auto& transform = parameters.transform;
     transform.state.matrixFor(matrix, id);
     transform.state.matrixFor(nearClippedMatrix, id);

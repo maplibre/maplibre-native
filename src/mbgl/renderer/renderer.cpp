@@ -152,6 +152,10 @@ void Renderer::clearData() {
     impl->orchestrator.clearData();
 }
 
+std::uint64_t Renderer::getFrameCount() const {
+    return impl->frameCount;
+}
+
 #if MLN_RENDER_BACKEND_OPENGL
 void Renderer::enableAndroidEmulatorGoldfishMitigation(bool enable) {
     impl->orchestrator.enableAndroidEmulatorGoldfishMitigation(enable);

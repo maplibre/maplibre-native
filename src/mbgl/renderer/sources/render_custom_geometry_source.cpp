@@ -22,6 +22,8 @@ void RenderCustomGeometrySource::update(Immutable<style::Source::Impl> baseImpl_
                                         const bool needsRendering,
                                         const bool needsRelayout,
                                         const TileParameters& parameters) {
+    TilePyramidUpdateHelper helper{*this};
+
     if (baseImpl != baseImpl_) {
         std::swap(baseImpl, baseImpl_);
 
@@ -30,6 +32,7 @@ void RenderCustomGeometrySource::update(Immutable<style::Source::Impl> baseImpl_
         auto newImpl = staticImmutableCast<style::CustomGeometrySource::Impl>(baseImpl);
         auto currentImpl = staticImmutableCast<style::CustomGeometrySource::Impl>(baseImpl_);
         if (*newImpl != *currentImpl) {
+            helper.start();
             tilePyramid.clearAll();
         }
     }
@@ -41,6 +44,7 @@ void RenderCustomGeometrySource::update(Immutable<style::Source::Impl> baseImpl_
         return;
     }
 
+    helper.start();
     tilePyramid.update(layers,
                        needsRendering,
                        needsRelayout,

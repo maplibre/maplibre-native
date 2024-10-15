@@ -1,24 +1,26 @@
 #include <mbgl/renderer/layers/render_raster_layer.hpp>
-#include <mbgl/renderer/buckets/raster_bucket.hpp>
-#include <mbgl/renderer/render_tile.hpp>
-#include <mbgl/renderer/paint_parameters.hpp>
-#include <mbgl/renderer/render_static_data.hpp>
-#include <mbgl/renderer/sources/render_image_source.hpp>
-#include <mbgl/programs/programs.hpp>
-#include <mbgl/programs/raster_program.hpp>
-#include <mbgl/tile/tile.hpp>
+
 #include <mbgl/gfx/context.hpp>
 #include <mbgl/gfx/cull_face_mode.hpp>
 #include <mbgl/math/angles.hpp>
+#include <mbgl/programs/programs.hpp>
+#include <mbgl/programs/raster_program.hpp>
+#include <mbgl/renderer/buckets/raster_bucket.hpp>
+#include <mbgl/renderer/paint_parameters.hpp>
+#include <mbgl/renderer/render_static_data.hpp>
+#include <mbgl/renderer/render_tile.hpp>
+#include <mbgl/renderer/sources/render_image_source.hpp>
+#include <mbgl/renderer/sources/render_tile_source.hpp>
 #include <mbgl/style/layers/raster_layer_impl.hpp>
+#include <mbgl/tile/tile.hpp>
 #include <mbgl/util/logging.hpp>
 
 #if MLN_DRAWABLE_RENDERER
-#include <mbgl/renderer/layers/raster_layer_tweaker.hpp>
-#include <mbgl/gfx/image_drawable_data.hpp>
-#include <mbgl/gfx/drawable_impl.hpp>
 #include <mbgl/gfx/drawable_builder.hpp>
+#include <mbgl/gfx/drawable_impl.hpp>
+#include <mbgl/gfx/image_drawable_data.hpp>
 #include <mbgl/renderer/layer_group.hpp>
+#include <mbgl/renderer/layers/raster_layer_tweaker.hpp>
 #include <mbgl/renderer/update_parameters.hpp>
 #include <mbgl/shaders/shader_program_base.hpp>
 #endif
@@ -106,10 +108,7 @@ void RenderRasterLayer::prepare(const LayerPrepareParameters& params) {
     imageData = params.source->getImageRenderData();
     // It is possible image data is not available until the source loads it.
     assert(renderTiles || imageData || !params.source->isEnabled());
-
-#if MLN_DRAWABLE_RENDERER
-    updateRenderTileIDs();
-#endif // MLN_DRAWABLE_RENDERER
+    updateRenderTileIDs(params);
 }
 
 #if MLN_LEGACY_RENDERER
@@ -254,7 +253,7 @@ void RenderRasterLayer::layerIndexChanged(int32_t newLayerIndex, UniqueChangeReq
 void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
                                gfx::Context& context,
                                const TransformState& /*state*/,
-                               const std::shared_ptr<UpdateParameters>&,
+                               const std::shared_ptr<UpdateParameters>& params,
                                [[maybe_unused]] const RenderTree& renderTree,
                                [[maybe_unused]] UniqueChangeRequestVec& changes) {
     if ((!renderTiles || renderTiles->empty()) && !imageData) {
@@ -519,6 +518,8 @@ void RenderRasterLayer::update(gfx::ShaderRegistry& shaders,
             }
         }
     }
+
+    captureRenderTiles(params->frameCount);
 }
 #endif // MLN_DRAWABLE_RENDERER
 
