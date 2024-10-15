@@ -36,9 +36,9 @@ protected:
 private:
     const variant<std::string, Tileset> urlOrTileset;
     std::unique_ptr<AsyncRequest> req;
-    mapbox::base::WeakPtrFactory<Source> weakFactory {this};
     optional<float> maxZoom;
     optional<float> minZoom;
+    mapbox::base::WeakPtrFactory<Source> weakFactory {this};
 };
 
 template <>
