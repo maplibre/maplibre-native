@@ -225,7 +225,7 @@ void DrawableGL::upload(gfx::UploadPass& uploadPass) {
                                                                     usage,
                                                                     attributeUpdateTime,
                                                                     vertexBuffers);
-        
+
         impl->attributeBuffers = std::move(vertexBuffers);
     }
 

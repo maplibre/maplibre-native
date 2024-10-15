@@ -40,7 +40,7 @@ public:
 
     AttributeBindingArray attributeBindings;
     std::vector<gfx::UniqueVertexBufferResource> attributeBuffers;
-    
+
     UniformBufferArrayGL uniformBuffers;
 
     gfx::DepthMode depthMode = gfx::DepthMode::disabled();

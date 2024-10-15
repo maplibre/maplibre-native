@@ -301,7 +301,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
                     b->vertexBufferResource = vertBuf.get();
                 }
             });
-            
+
             outBuffers.emplace_back(std::move(vertBuf));
         } else {
             assert(false);
