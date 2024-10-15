@@ -113,10 +113,6 @@ public:
     void reduceMemoryUse();
     void clearData();
 
-#if MLN_RENDER_BACKEND_OPENGL
-    void enableAndroidEmulatorGoldfishMitigation(bool enable);
-#endif
-
 private:
     class Impl;
     std::unique_ptr<Impl> impl;
