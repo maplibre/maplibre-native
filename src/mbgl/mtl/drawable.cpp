@@ -44,10 +44,7 @@ Drawable::Drawable(std::string name_)
     : gfx::Drawable(std::move(name_)),
       impl(std::make_unique<Impl>()) {}
 
-Drawable::~Drawable() {
-    impl->attributeBuffers.clear();
-    impl->instanceBuffers.clear();
-}
+Drawable::~Drawable() {}
 
 namespace {
 #if !defined(NDEBUG)
@@ -592,7 +589,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                     usage,
                                                                     attributeUpdateTime,
                                                                     vertexBuffers);
-        impl->attributeBuffers = std::move(vertexBuffers);
 
         vertexAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
 
@@ -666,7 +662,6 @@ void Drawable::upload(gfx::UploadPass& uploadPass_) {
                                                                    usage,
                                                                    attributeUpdateTime,
                                                                    instanceBuffers);
-        impl->instanceBuffers = std::move(instanceBuffers);
 
         // clear dirty flag
         instanceAttributes->visitAttributes([](gfx::VertexAttribute& attrib) { attrib.setDirty(false); });
