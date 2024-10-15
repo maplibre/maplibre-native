@@ -19,7 +19,7 @@ RunLoop* RunLoop::Get() {
 
 RunLoop::RunLoop(Type)
   : impl(std::make_unique<Impl>()) {
-    assert(!Scheduler::GetCurrent());
+    assert(!Scheduler::GetCurrent(false));
     Scheduler::SetCurrent(this);
     impl->async = std::make_unique<AsyncTask>(std::bind(&RunLoop::process, this));
 }
