@@ -195,33 +195,16 @@ public class FileSource {
   @UiThread
   public static void initializeFileDirsPaths(Context context) {
     ThreadUtils.checkThread(TAG);
-    lockPathLoaders();
-    if (resourcesCachePath == null || internalCachePath == null) {
-      new FileDirsPathsTask().execute(context);
-    }
+    new FileDirsPathsTask().execute(context);
   }
 
-  private static class FileDirsPathsTask extends AsyncTask<Context, Void, String[]> {
+  private static class FileDirsPathsTask extends AsyncTask<Context, Void, Void> {
 
     @Override
-    protected void onCancelled() {
-      unlockPathLoaders();
-    }
-
-    @NonNull
-    @Override
-    protected String[] doInBackground(Context... contexts) {
-      return new String[] {
-        getCachePath(contexts[0]),
-        contexts[0].getCacheDir().getAbsolutePath()
-      };
-    }
-
-    @Override
-    protected void onPostExecute(String[] paths) {
-      resourcesCachePath = paths[0];
-      internalCachePath = paths[1];
-      unlockPathLoaders();
+    protected Void doInBackground(Context... contexts) {
+      getResourcesCachePath(contexts[0]);
+      getInternalCachePath(contexts[0]);
+      return null;
     }
   }
 
@@ -356,16 +339,6 @@ public class FileSource {
       return false;
     }
     return new File(path).canWrite();
-  }
-
-  private static void lockPathLoaders() {
-    internalCachePathLoaderLock.lock();
-    resourcesCachePathLoaderLock.lock();
-  }
-
-  private static void unlockPathLoaders() {
-    resourcesCachePathLoaderLock.unlock();
-    internalCachePathLoaderLock.unlock();
   }
 
   @Keep
