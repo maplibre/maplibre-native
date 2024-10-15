@@ -60,7 +60,6 @@ public:
                                                      gfx::BufferUsageType,
                                                      bool forceUpdate);
 
-    static std::vector<std::unique_ptr<gfx::VertexBufferResource>>& unusedBuffers;
     gfx::AttributeBindingArray buildAttributeBindings(
         const std::size_t vertexCount,
         const gfx::AttributeDataType vertexType,
