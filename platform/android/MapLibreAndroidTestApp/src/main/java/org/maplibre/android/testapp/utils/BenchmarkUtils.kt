@@ -72,4 +72,8 @@ data class BenchmarkResults(
         )
         resultsPerStyle[styleName] = newResults
     }
+
+    fun clear() {
+        resultsPerStyle.clear()
+    }
 }

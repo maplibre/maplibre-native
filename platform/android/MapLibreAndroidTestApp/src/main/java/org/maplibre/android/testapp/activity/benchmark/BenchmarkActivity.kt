@@ -23,12 +23,13 @@ import org.maplibre.android.camera.CameraUpdateFactory
 import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.log.Logger
 import org.maplibre.android.log.Logger.INFO
-import org.maplibre.android.maps.*
+import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapLibreMap.CancelableCallback
+import org.maplibre.android.maps.MapView
 import org.maplibre.android.testapp.BuildConfig
 import org.maplibre.android.testapp.R
-import org.maplibre.android.testapp.utils.FpsStore
 import org.maplibre.android.testapp.utils.BenchmarkResults
+import org.maplibre.android.testapp.utils.FpsStore
 import org.maplibre.android.testapp.utils.FrameTimeStore
 import java.io.File
 
@@ -84,6 +85,7 @@ fun jsonPayload(styleNames: List<String>, fpsResults: BenchmarkResults, encoding
  */
 class BenchmarkActivity : AppCompatActivity() {
     private val TAG = "BenchmarkActivity"
+    private val RUNS = 5
 
     private lateinit var mapView: MapView
     private var handler: Handler? = null
@@ -94,8 +96,10 @@ class BenchmarkActivity : AppCompatActivity() {
     private var fpsResults = BenchmarkResults()
     private var encodingTimeResults = BenchmarkResults()
     private var renderingTimeResults = BenchmarkResults()
-    private var runsLeft = 5
-    private var measureFrameTime = true
+    private var runsLeft = RUNS
+    private var measureRenderingTime = true
+    private var startTime: Long = 0
+    private var numFrames = 0
 
     // the styles used for the benchmark
     // can be overridden adding with developer-config.xml
@@ -195,20 +199,18 @@ class BenchmarkActivity : AppCompatActivity() {
 
     private fun setupMapView() {
         mapView = findViewById<View>(R.id.mapView) as MapView
-        if (measureFrameTime) {
-            mapView.addOnDidFinishRenderingFrameListener { _: Boolean, frameEncodingTime: Double, frameRenderingTime: Double ->
-                encodingTimeStore.add(frameEncodingTime * 1e3)
-                renderingTimeStore.add(frameRenderingTime * 1e3)
-            }
+        mapView.addOnDidFinishRenderingFrameListener { _: Boolean, frameEncodingTime: Double, frameRenderingTime: Double ->
+            encodingTimeStore.add(frameEncodingTime * 1e3)
+            renderingTimeStore.add(frameRenderingTime * 1e3)
+            numFrames++;
+        }
+        mapView.addOnDidFinishLoadingStyleListener {
+            numFrames = 0;
+            startTime = System.nanoTime();
         }
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             maplibreMap.setStyle(inputData.styleURLs[0])
-            maplibreMap.setSwapBehaviorFlush(measureFrameTime)
-            if (!measureFrameTime) {
-                maplibreMap.setOnFpsChangedListener { fps: Double ->
-                    fpsStore.add(fps)
-                }
-            }
+            maplibreMap.setSwapBehaviorFlush(measureRenderingTime)
 
             // Start an animation on the map as well
             flyTo(maplibreMap, 0, 0,14.0)
@@ -232,39 +234,57 @@ class BenchmarkActivity : AppCompatActivity() {
 
                 override fun onFinish() {
                     if (place == PLACES.size - 1) {  // done with tour
-                        if (measureFrameTime) {
-                            encodingTimeResults.addResult(
-                                inputData.styleNames[style],
-                                encodingTimeStore
-                            )
-                            encodingTimeStore.reset()
+                        val endTime = System.nanoTime();
+                        val fps = (numFrames * 1E9) / (endTime - startTime);
+                        fpsStore.add(fps)
 
-                            println("Encoding time results $encodingTimeResults")
+                        fpsResults.addResult(inputData.styleNames[style], fpsStore)
+                        fpsStore.reset()
 
-                            renderingTimeResults.addResult(
-                                inputData.styleNames[style],
-                                renderingTimeStore
-                            )
-                            renderingTimeStore.reset()
+                        println("FPS results $fpsResults")
 
-                            println("Rendering time results $renderingTimeResults")
-                        } else {
-                            fpsResults.addResult(inputData.styleNames[style], fpsStore)
-                            fpsStore.reset()
+                        encodingTimeResults.addResult(
+                            inputData.styleNames[style],
+                            encodingTimeStore
+                        )
+                        encodingTimeStore.reset()
 
-                            println("FPS results $fpsResults")
-                        }
+                        println("Encoding time results $encodingTimeResults")
+
+                        renderingTimeResults.addResult(
+                            inputData.styleNames[style],
+                            renderingTimeStore
+                        )
+                        renderingTimeStore.reset()
+
+                        println("Rendering time results $renderingTimeResults")
+
                         println("Benchmark ${jsonPayload(inputData.styleNames, fpsResults, encodingTimeResults, renderingTimeResults)}")
 
                         if (style < inputData.styleURLs.size - 1) {  // continue with next style
                             maplibreMap.setStyle(inputData.styleURLs[style + 1])
                             flyTo(maplibreMap, 0, style + 1, zoom)
-                        } else if (runsLeft > 0) {  // start over
-                            --runsLeft
+                        } else if (--runsLeft > 0) {  // start over
                             maplibreMap.setStyle(inputData.styleURLs[0])
                             flyTo(maplibreMap, 0, 0, zoom)
                         } else {
-                            benchmarkDone()
+                            if (measureRenderingTime) {
+                                storeResults()
+
+                                fpsResults.clear()
+                                encodingTimeResults.clear()
+                                renderingTimeResults.clear()
+                                runsLeft = RUNS
+
+                                measureRenderingTime = false
+                                maplibreMap.setSwapBehaviorFlush(measureRenderingTime)
+
+                                maplibreMap.setStyle(inputData.styleURLs[0])
+                                flyTo(maplibreMap, 0, 0, zoom)
+                            } else {
+                                storeResults()
+                                benchmarkDone()
+                            }
                         }
                         return
                     }
@@ -318,12 +338,11 @@ class BenchmarkActivity : AppCompatActivity() {
         val payload = jsonPayload(inputData.styleNames, fpsResults, encodingTimeResults, renderingTimeResults)
 
         val dataDir = this.filesDir
-        val benchmarkResultsFile = File(dataDir, "benchmark_results.json")
+        val benchmarkResultsFile = File(dataDir, if (measureRenderingTime) "benchmark_results_sync_rendering.json" else "benchmark_results_async_rendering.json")
         benchmarkResultsFile.writeText(Json.encodeToString(payload))
     }
 
     private fun benchmarkDone() {
-        storeResults()
         setResult(Activity.RESULT_OK)
         finish()
     }
