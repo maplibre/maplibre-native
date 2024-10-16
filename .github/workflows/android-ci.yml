@@ -119,7 +119,7 @@ jobs:
           cache-name: gradle-v1
         with:
           path: ~/.gradle
-          key: ${{ env.cache-name }}-${{ hashFiles('platform/android/gradle/dependencies.gradle') }}-${{ hashFiles('platform/android/build.gradle') }}-${{ hashFiles('platform/android/local.properties') }}-${{ hashFiles('platform/android/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ env.cache-name }}-${{ hashFiles('platform/android/buildSrc/src/main/kotlin/maplibre.dependencies.gradle.kts') }}-${{ hashFiles('platform/android/build.gradle.kts') }}-${{ hashFiles('platform/android/local.properties') }}-${{ hashFiles('platform/android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             - ${{ env.cache-name }}
 
