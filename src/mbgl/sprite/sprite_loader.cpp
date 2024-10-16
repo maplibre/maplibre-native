@@ -77,8 +77,9 @@ void SpriteLoader::load(const std::optional<style::Sprite> sprite, FileSource& f
                 data->image = std::make_shared<std::string>();
                 emitSpriteLoadedIfComplete(*sprite);
             } else {
-                if (data->image != std::move(res.data)) {
-                    data->image = std::move(res.data);
+                auto movedData = std::move(res.data);
+                if (data->image != movedData) {
+                    data->image = movedData;
                     emitSpriteLoadedIfComplete(*sprite);
                 }
             }

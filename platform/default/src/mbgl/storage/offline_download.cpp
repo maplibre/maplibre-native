@@ -469,10 +469,9 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
     auto workRequestsIt = requests.insert(requests.begin(), nullptr);
     *workRequestsIt = util::RunLoop::Get()->invokeCancellable([=, this]() {
         requests.erase(workRequestsIt);
-        auto res = resource;
-        const auto resourceKind = res.kind;
+        const auto resourceKind = resource.kind;
         auto getResourceSizeInDatabase = [&]() -> std::optional<int64_t> {
-            std::optional<int64_t> result = std::nullopt;
+            std::optional<int64_t> result;
             std::optional<std::pair<Response, uint64_t>> response = offlineDatabase.getRegionResource(resource);
 
             bool isUsable = response && response->first.isUsable();
@@ -482,14 +481,14 @@ void OfflineDownload::ensureResource(Resource&& resource, std::function<void(Res
                     callback(response->first);
                 }
                 result = response->second;
-                if (result) resourcesToBeMarkedAsUsed.emplace_back(res);
+                if (result) resourcesToBeMarkedAsUsed.emplace_back(resource);
             } else {
                 if (response) {
                     auto resp = response->first;
-                    res.priorEtag = resp.etag;
-                    res.priorData = resp.data;
-                    res.priorExpires = resp.expires;
-                    res.priorModified = resp.modified;
+                    resource.priorEtag = resp.etag;
+                    resource.priorData = resp.data;
+                    resource.priorExpires = resp.expires;
+                    resource.priorModified = resp.modified;
                 }
             }
 
