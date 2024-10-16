@@ -18,7 +18,7 @@ LayerGroup::LayerGroup(int32_t layerIndex_, std::size_t initialCapacity, std::st
     : mbgl::LayerGroup(layerIndex_, initialCapacity, std::move(name_)),
       uniformBuffers(DescriptorSetType::Layer, shaders::layerUBOStartId, shaders::maxUBOCountPerLayer) {}
 
-void LayerGroup::upload(gfx::UploadPass& uploadPass) {
+void LayerGroup::issueUpload(gfx::UploadPass& uploadPass) {
     if (!enabled) {
         return;
     }

@@ -21,8 +21,9 @@ public class SurfaceViewMapRenderer extends MapRenderer {
 
   public SurfaceViewMapRenderer(Context context,
                                 MapLibreSurfaceView surfaceView,
-                                String localIdeographFontFamily) {
-    super(context, localIdeographFontFamily);
+                                String localIdeographFontFamily,
+                                boolean multiThreadedGpuResourceUpload) {
+    super(context, localIdeographFontFamily, multiThreadedGpuResourceUpload);
     this.surfaceView = surfaceView;
 
     surfaceView.setDetachedListener(new MapLibreSurfaceView.OnSurfaceViewDetachedListener() {

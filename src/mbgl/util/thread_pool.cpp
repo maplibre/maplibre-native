@@ -21,18 +21,26 @@ void ThreadedSchedulerBase::terminate() {
     cvAvailable.notify_all();
 }
 
-std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
-    return std::thread([this, index] {
+std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index,
+                                                       bool gatherTasks,
+                                                       std::function<ThreadCallbacks()> callbacksGenerator,
+                                                       const char* threadNamePrefix) {
+    return std::thread([this, index, gatherTasks, callbacksGen = std::move(callbacksGenerator), threadNamePrefix] {
         auto& settings = platform::Settings::getInstance();
         auto value = settings.get(platform::EXPERIMENTAL_THREAD_PRIORITY_WORKER);
         if (auto* priority = value.getDouble()) {
             platform::setCurrentThreadPriority(*priority);
         }
 
-        platform::setCurrentThreadName("Worker " + util::toString(index + 1));
+        platform::setCurrentThreadName(threadNamePrefix + util::toString(index + 1));
         platform::attachThread();
 
         owningThreadPool.set(this);
+
+        auto callbacks = callbacksGen();
+        if (callbacks.onThreadBegin) {
+            callbacks.onThreadBegin();
+        }
 
         while (true) {
             std::unique_lock<std::mutex> conditionLock(workerMutex);
@@ -54,6 +62,9 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                 std::lock_guard<std::mutex> lock(taggedQueueLock);
                 for (const auto& [tag, queue] : taggedQueue) {
                     pending.push_back(queue);
+                    if (!gatherTasks) {
+                        break;
+                    }
                 }
             }
 
@@ -74,7 +85,16 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                 taskCount--;
 
                 try {
+                    if (callbacks.onTaskBegin) {
+                        callbacks.onTaskBegin();
+                    }
+
                     tasklet();
+
+                    if (callbacks.onTaskEnd) {
+                        callbacks.onTaskEnd();
+                    }
+
                     tasklet = {}; // destroy the function and release its captures before unblocking `waitForEmpty`
 
                     if (!--q->runningCount) {
@@ -101,6 +121,10 @@ std::thread ThreadedSchedulerBase::makeSchedulerThread(size_t index) {
                     throw;
                 }
             }
+        }
+
+        if (callbacks.onThreadEnd) {
+            callbacks.onThreadEnd();
         }
     });
 }
@@ -166,7 +190,11 @@ void ThreadedSchedulerBase::waitForEmpty(const util::SimpleIdentity tag) {
         // After waiting for the queue to empty, go ahead and erase it from the map.
         {
             std::lock_guard<std::mutex> lock(taggedQueueLock);
-            taggedQueue.erase(tagToFind);
+            auto it = taggedQueue.find(tagToFind);
+            assert(it != taggedQueue.end());
+            if (it->second->queue.empty()) {
+                taggedQueue.erase(it);
+            }
         }
     }
 }
