@@ -1299,6 +1299,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/command_encoder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/context.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable.hpp
+            ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/descriptor_set.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/drawable_builder.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/index_buffer_resource.hpp
             ${PROJECT_SOURCE_DIR}/include/mbgl/vulkan/layer_group.hpp
@@ -1334,6 +1335,7 @@ if(MLN_WITH_VULKAN)
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/buffer_resource.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/command_encoder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/context.cpp
+            ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/descriptor_set.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_builder.cpp
             ${PROJECT_SOURCE_DIR}/src/mbgl/vulkan/drawable_impl.hpp
