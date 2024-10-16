@@ -250,6 +250,7 @@ class MLNStyleValueTransformer {
       }
 
       std::vector<mbgl::AnchorOffsetPair> anchorOffsets;
+      anchorOffsets.reserve(array.count / 2);
       for (NSUInteger i = 0; i < array.count; i += 2) {
         mbgl::style::SymbolAnchorType anchor{0};
         getMBGLValue<mbgl::style::SymbolAnchorType, MLNTextAnchor>(array[i], anchor);

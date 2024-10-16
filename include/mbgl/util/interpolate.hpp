@@ -152,7 +152,7 @@ struct Interpolator<VariableAnchorOffsetCollection> {
 public:
     VariableAnchorOffsetCollection operator()(const VariableAnchorOffsetCollection& a,
                                               const VariableAnchorOffsetCollection& b,
-                                              const float t) {
+                                              const float t) const noexcept {
         if (a.size() != b.size()) {
             throw std::runtime_error("Cannot interpolate values of different length. from: " + a.toString() +
                                      ", to: " + b.toString());

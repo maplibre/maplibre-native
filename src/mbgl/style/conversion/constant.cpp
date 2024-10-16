@@ -149,6 +149,7 @@ std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetColl
     }
 
     std::vector<AnchorOffsetPair> collection;
+    collection.reserve(arraySize / 2);
     for (size_t index = 0; index < arraySize; index += 2) {
         Convertible offsetValue = arrayMember(value, index + 1);
         std::optional<SymbolAnchorType> anchor = Converter<SymbolAnchorType>{}(arrayMember(value, index), error);
