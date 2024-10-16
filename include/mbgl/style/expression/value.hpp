@@ -11,6 +11,7 @@
 #include <mbgl/util/enum.hpp>
 #include <mbgl/util/feature.hpp>
 #include <mbgl/util/padding.hpp>
+#include <mbgl/util/variable_anchor_offset_collection.hpp>
 #include <mbgl/util/variant.hpp>
 
 #include <array>
@@ -28,6 +29,7 @@ using ValueBase = variant<NullValue,
                           double,
                           std::string,
                           Color,
+                          VariableAnchorOffsetCollection,
                           Collator,
                           Formatted,
                           Image,

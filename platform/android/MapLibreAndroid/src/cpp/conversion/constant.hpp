@@ -5,6 +5,7 @@
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/padding.hpp>
 #include <mbgl/util/enum.hpp>
+#include <mbgl/util/variable_anchor_offset_collection.hpp>
 
 #include <mbgl/style/expression/formatted.hpp>
 #include <mbgl/style/expression/image.hpp>
@@ -61,6 +62,11 @@ struct Converter<jni::Local<jni::Object<>>, Color> {
 template <>
 struct Converter<jni::Local<jni::Object<>>, Padding> {
     Result<jni::Local<jni::Object<>>> operator()(jni::JNIEnv& env, const Padding& value) const;
+};
+
+template <>
+struct Converter<jni::Local<jni::Object<>>, VariableAnchorOffsetCollection> {
+    Result<jni::Local<jni::Object<>>> operator()(jni::JNIEnv& env, const VariableAnchorOffsetCollection& value) const;
 };
 
 template <>

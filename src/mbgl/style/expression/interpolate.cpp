@@ -236,6 +236,10 @@ ParseResult createInterpolate(type::Type type,
             return ParseResult(
                 std::make_unique<InterpolateImpl<Padding>>(type, interpolator, std::move(input), std::move(stops)));
         },
+        [&](const type::VariableAnchorOffsetCollectionType&) -> ParseResult {
+            return ParseResult(std::make_unique<InterpolateImpl<VariableAnchorOffsetCollection>>(
+                type, interpolator, std::move(input), std::move(stops)));
+        },
         [&](const type::Array& arrayType) -> ParseResult {
             if (arrayType.itemType != type::Number || !arrayType.N) {
                 ctx.error("Type " + toString(type) + " is not interpolatable.");

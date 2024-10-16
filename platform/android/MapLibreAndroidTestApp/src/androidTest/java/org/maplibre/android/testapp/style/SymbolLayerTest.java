@@ -724,6 +724,19 @@ public class SymbolLayerTest extends BaseLayerTest {
 
   @Test
   @UiThreadTest
+  public void testTextVariableAnchorOffsetAsConstant() {
+    Timber.i("text-variable-anchor-offset");
+    assertNotNull(layer);
+    assertNull(layer.getTextVariableAnchorOffset().getValue());
+
+    // Set and Get
+    Object[] propertyValue = new Object[] {"top", new Float[]{1f, 2f}};
+    layer.setProperties(textVariableAnchorOffset(propertyValue));
+    assertEquals(layer.getTextVariableAnchorOffset().getValue(), propertyValue);
+  }
+
+  @Test
+  @UiThreadTest
   public void testTextAnchorAsConstant() {
     Timber.i("text-anchor");
     assertNotNull(layer);

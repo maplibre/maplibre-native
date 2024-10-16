@@ -6,6 +6,7 @@
 #include <mbgl/util/enum.hpp>
 #include <mbgl/util/padding.hpp>
 #include <mbgl/util/string.hpp>
+#include <mbgl/util/variable_anchor_offset_collection.hpp>
 
 #include <array>
 #include <string>
@@ -48,6 +49,11 @@ struct Converter<Color> {
 template <>
 struct Converter<Padding> {
     std::optional<Padding> operator()(const Convertible& value, Error& error) const;
+};
+
+template <>
+struct Converter<VariableAnchorOffsetCollection> {
+    std::optional<VariableAnchorOffsetCollection> operator()(const Convertible& value, Error& error) const;
 };
 
 template <size_t N>
