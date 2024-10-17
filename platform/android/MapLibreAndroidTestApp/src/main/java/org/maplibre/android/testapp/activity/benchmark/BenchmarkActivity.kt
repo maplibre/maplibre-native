@@ -97,7 +97,7 @@ class BenchmarkActivity : AppCompatActivity() {
     private var encodingTimeResults = BenchmarkResults()
     private var renderingTimeResults = BenchmarkResults()
     private var runsLeft = RUNS
-    private var measureRenderingTime = true
+    private var syncRendering = true
     private var startTime: Long = 0
     private var numFrames = 0
 
@@ -210,7 +210,7 @@ class BenchmarkActivity : AppCompatActivity() {
         }
         mapView.getMapAsync { maplibreMap: MapLibreMap ->
             maplibreMap.setStyle(inputData.styleURLs[0])
-            maplibreMap.setSwapBehaviorFlush(measureRenderingTime)
+            maplibreMap.setSwapBehaviorFlush(syncRendering)
 
             // Start an animation on the map as well
             flyTo(maplibreMap, 0, 0,14.0)
@@ -268,7 +268,7 @@ class BenchmarkActivity : AppCompatActivity() {
                             maplibreMap.setStyle(inputData.styleURLs[0])
                             flyTo(maplibreMap, 0, 0, zoom)
                         } else {
-                            if (measureRenderingTime) {
+                            if (syncRendering) {
                                 storeResults()
 
                                 fpsResults.clear()
@@ -276,8 +276,8 @@ class BenchmarkActivity : AppCompatActivity() {
                                 renderingTimeResults.clear()
                                 runsLeft = RUNS
 
-                                measureRenderingTime = false
-                                maplibreMap.setSwapBehaviorFlush(measureRenderingTime)
+                                syncRendering = false
+                                maplibreMap.setSwapBehaviorFlush(syncRendering)
 
                                 maplibreMap.setStyle(inputData.styleURLs[0])
                                 flyTo(maplibreMap, 0, 0, zoom)
@@ -338,7 +338,7 @@ class BenchmarkActivity : AppCompatActivity() {
         val payload = jsonPayload(inputData.styleNames, fpsResults, encodingTimeResults, renderingTimeResults)
 
         val dataDir = this.filesDir
-        val benchmarkResultsFile = File(dataDir, if (measureRenderingTime) "benchmark_results_sync_rendering.json" else "benchmark_results_async_rendering.json")
+        val benchmarkResultsFile = File(dataDir, if (syncRendering) "benchmark_results_sync_rendering.json" else "benchmark_results_async_rendering.json")
         benchmarkResultsFile.writeText(Json.encodeToString(payload))
     }
 
