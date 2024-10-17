@@ -11,6 +11,8 @@
 ### ✨ Features and improvements
 
 - Use Kotlin instead of Groovy for Android build configuration ([#2902](https://github.com/maplibre/maplibre-native/pull/2902)).
+- Performance improvements ([#2892](https://github.com/maplibre/maplibre-native/pull/2892)).
+- Remove workaround for emulator crashes, and apply proper fix: revert index buffers to dirty flag instead of timestamps ([#2927](https://github.com/maplibre/maplibre-native/pull/2927)).
 
 ### 🐞 Bug fixes
 
