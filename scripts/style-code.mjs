@@ -16,12 +16,14 @@ export function iff(condition, val) {
 
 /**
  * @param {string} str 
+ * @param {boolean=} pascalCase
  * @returns {string}
  */
-export function camelize(str) {
-  return str.replace(/(?:^|-)(.)/g, function (_, x) {
+export function camelize(str, pascalCase = true) {
+  const pascalCaseStr = str.replace(/(?:^|-)(.)/g, function (_, x) {
     return x.toUpperCase();
   });
+  return pascalCase ? pascalCaseStr : pascalCaseStr.charAt(0).toLowerCase() + pascalCaseStr.slice(1);
 };
 
 /**

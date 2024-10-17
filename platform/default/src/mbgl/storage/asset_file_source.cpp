@@ -12,8 +12,8 @@
 #include <mbgl/util/url.hpp>
 
 namespace {
-bool acceptsURL(const std::string& url) {
-    return 0 == url.rfind(mbgl::util::ASSET_PROTOCOL, 0);
+bool isAssetURL(const std::string& url) {
+    return url.starts_with(mbgl::util::ASSET_PROTOCOL);
 }
 } // namespace
 
@@ -27,7 +27,7 @@ public:
           clientOptions(clientOptions_.clone()) {}
 
     void request(const std::string& url, const ActorRef<FileSourceRequest>& req) {
-        if (!acceptsURL(url)) {
+        if (!isAssetURL(url)) {
             Response response;
             response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other, "Invalid asset URL");
             req.invoke(&FileSourceRequest::setResponse, response);
@@ -86,7 +86,7 @@ std::unique_ptr<AsyncRequest> AssetFileSource::request(const Resource& resource,
 }
 
 bool AssetFileSource::canRequest(const Resource& resource) const {
-    return acceptsURL(resource.url);
+    return isAssetURL(resource.url);
 }
 
 void AssetFileSource::pause() {

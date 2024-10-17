@@ -36,4 +36,9 @@ public:
         return it == std::end(T##_names) ? std::optional<T>() : it->first;                             \
     }
 
+template <typename T>
+constexpr uint8_t toUint8(T t) noexcept {
+    return uint8_t(mbgl::underlying_type(t));
+}
+
 } // namespace mbgl

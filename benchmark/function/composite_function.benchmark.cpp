@@ -10,7 +10,7 @@
 using namespace mbgl;
 using namespace mbgl::style;
 
-static std::string createFunctionJSON(size_t stopCount) {
+static std::string createCompositeFunctionJSON(size_t stopCount) {
     std::string stops = "[";
     for (size_t outerStop = 0; outerStop < stopCount; outerStop++) {
         for (size_t innerStop = 0; innerStop < stopCount; innerStop++) {
@@ -31,7 +31,7 @@ static void Parse_CompositeFunction(benchmark::State& state) {
     while (state.KeepRunning()) {
         conversion::Error error;
         state.PauseTiming();
-        auto doc = createFunctionJSON(stopCount);
+        auto doc = createCompositeFunctionJSON(stopCount);
         state.ResumeTiming();
         std::optional<PropertyValue<float>> result = conversion::convertJSON<PropertyValue<float>>(
             doc, error, true, false);
@@ -44,7 +44,7 @@ static void Parse_CompositeFunction(benchmark::State& state) {
 
 static void Evaluate_CompositeFunction(benchmark::State& state) {
     size_t stopCount = state.range(0);
-    auto doc = createFunctionJSON(stopCount);
+    auto doc = createCompositeFunctionJSON(stopCount);
     conversion::Error error;
     std::optional<PropertyValue<float>> function = conversion::convertJSON<PropertyValue<float>>(
         doc, error, true, false);

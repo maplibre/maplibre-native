@@ -8,7 +8,7 @@
 using namespace mbgl;
 using namespace mbgl::style;
 
-static std::string createFunctionJSON(size_t stopCount) {
+static std::string createCameraFunctionJSON(size_t stopCount) {
     std::string stops = "[";
     for (size_t i = 0; i < stopCount; i++) {
         std::string value = std::to_string(24.0f / stopCount * i);
@@ -25,7 +25,7 @@ static void Parse_CameraFunction(benchmark::State& state) {
     while (state.KeepRunning()) {
         conversion::Error error;
         state.PauseTiming();
-        auto doc = createFunctionJSON(stopCount);
+        auto doc = createCameraFunctionJSON(stopCount);
         state.ResumeTiming();
         std::optional<PropertyValue<float>> result = conversion::convertJSON<PropertyValue<float>>(
             doc, error, false, false);
@@ -38,7 +38,7 @@ static void Parse_CameraFunction(benchmark::State& state) {
 
 static void Evaluate_CameraFunction(benchmark::State& state) {
     size_t stopCount = state.range(0);
-    auto doc = createFunctionJSON(stopCount);
+    auto doc = createCameraFunctionJSON(stopCount);
     conversion::Error error;
     std::optional<PropertyValue<float>> function = conversion::convertJSON<PropertyValue<float>>(
         doc, error, false, false);

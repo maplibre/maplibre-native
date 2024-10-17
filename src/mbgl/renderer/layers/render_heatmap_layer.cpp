@@ -32,7 +32,7 @@ using namespace style;
 
 namespace {
 
-inline const HeatmapLayer::Impl& impl_cast(const Immutable<Layer::Impl>& impl) {
+inline const HeatmapLayer::Impl& heatmap_layer_impl_cast(const Immutable<Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == HeatmapLayer::Impl::staticTypeInfo());
     return static_cast<const HeatmapLayer::Impl&>(*impl);
 }
@@ -41,7 +41,7 @@ inline const HeatmapLayer::Impl& impl_cast(const Immutable<Layer::Impl>& impl) {
 
 RenderHeatmapLayer::RenderHeatmapLayer(Immutable<HeatmapLayer::Impl> _impl)
     : RenderLayer(makeMutable<HeatmapLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+      unevaluated(heatmap_layer_impl_cast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
     colorRamp = std::make_shared<PremultipliedImage>(Size(256, 1));
 }
@@ -49,7 +49,7 @@ RenderHeatmapLayer::RenderHeatmapLayer(Immutable<HeatmapLayer::Impl> _impl)
 RenderHeatmapLayer::~RenderHeatmapLayer() = default;
 
 void RenderHeatmapLayer::transition(const TransitionParameters& parameters) {
-    unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    unevaluated = heatmap_layer_impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
     updateColorRamp();
 }
 
@@ -236,19 +236,6 @@ bool RenderHeatmapLayer::queryIntersectsFeature(const GeometryCoordinates& query
 }
 
 #if MLN_DRAWABLE_RENDERER
-namespace {
-void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
-    if (renderTarget_) {
-        if (activate) {
-            // The RenderTree has determined this render target should be included in the renderable set for a frame
-            changes.emplace_back(std::make_unique<AddRenderTargetRequest>(renderTarget_));
-        } else {
-            // The RenderTree is informing us we should not render anything
-            changes.emplace_back(std::make_unique<RemoveRenderTargetRequest>(renderTarget_));
-        }
-    }
-}
-} // namespace
 
 void RenderHeatmapLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);
