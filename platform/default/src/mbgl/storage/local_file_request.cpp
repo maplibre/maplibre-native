@@ -11,7 +11,9 @@
 
 namespace mbgl {
 
-void requestLocalFile(const std::string& path, const ActorRef<FileSourceRequest>& req) {
+void requestLocalFile(const std::string& path,
+                      const ActorRef<FileSourceRequest>& req,
+                      const std::optional<std::pair<uint64_t, uint64_t>>& dataRange) {
     Response response;
     struct stat buf;
     int result = stat(path.c_str(), &buf);
@@ -21,7 +23,7 @@ void requestLocalFile(const std::string& path, const ActorRef<FileSourceRequest>
     } else if (result == -1 && errno == ENOENT) {
         response.error = std::make_unique<Response::Error>(Response::Error::Reason::NotFound);
     } else {
-        auto data = util::readFile(path);
+        auto data = util::readFile(path, dataRange);
         if (!data) {
             response.error = std::make_unique<Response::Error>(Response::Error::Reason::Other,
                                                                std::string("Cannot read file ") + path);
