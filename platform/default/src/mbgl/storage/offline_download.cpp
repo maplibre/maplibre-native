@@ -157,14 +157,15 @@ OfflineRegionStatus OfflineDownload::getStatus() const {
     for (const auto& source : parser.sources) {
         SourceType type = source->getType();
 
-        auto handleTiledSource = [&](const variant<std::string, Tileset>& urlOrTileset, const uint16_t tileSize) {
-            if (urlOrTileset.is<Tileset>()) {
-                uint64_t tileSourceCount = tileCount(definition, type, tileSize, urlOrTileset.get<Tileset>().zoomRange);
+        auto handleTiledSource = [&](const std::variant<std::string, Tileset>& urlOrTileset, const uint16_t tileSize) {
+            if (std::holds_alternative<Tileset>(urlOrTileset)) {
+                uint64_t tileSourceCount = tileCount(
+                    definition, type, tileSize, std::get<Tileset>(urlOrTileset).zoomRange);
                 result->requiredTileCount += tileSourceCount;
                 result->requiredResourceCount += tileSourceCount;
             } else {
                 result->requiredResourceCount += 1;
-                const auto& url = urlOrTileset.get<std::string>();
+                const auto& url = std::get<std::string>(urlOrTileset);
                 std::optional<Response> sourceResponse = offlineDatabase.get(Resource::source(url));
                 if (sourceResponse) {
                     style::conversion::Error error;
@@ -258,11 +259,12 @@ void OfflineDownload::activateDownload() {
         for (const auto& source : parser.sources) {
             SourceType type = source->getType();
 
-            auto handleTiledSource = [&](const variant<std::string, Tileset>& urlOrTileset, const uint16_t tileSize) {
-                if (urlOrTileset.is<Tileset>()) {
-                    queueTiles(type, tileSize, urlOrTileset.get<Tileset>());
+            auto handleTiledSource = [&](const std::variant<std::string, Tileset>& urlOrTileset,
+                                         const uint16_t tileSize) {
+                if (std::holds_alternative<Tileset>(urlOrTileset)) {
+                    queueTiles(type, tileSize, std::get<Tileset>(urlOrTileset));
                 } else {
-                    const auto& rawUrl = urlOrTileset.get<std::string>();
+                    const auto& rawUrl = std::get<std::string>(urlOrTileset);
                     const auto& url = util::mapbox::canonicalizeSourceURL(tileServerOptions, rawUrl);
 
                     status.requiredResourceCountIsPrecise = false;

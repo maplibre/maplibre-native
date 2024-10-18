@@ -14,7 +14,7 @@ namespace {
 
 using namespace expression;
 bool checkGPUCapable(const Expression& expression, const ZoomCurvePtr& zoomCurve) {
-    return (expression.dependencies == Dependency::Zoom) && !zoomCurve.is<std::nullptr_t>() &&
+    return (expression.dependencies == Dependency::Zoom) && !std::holds_alternative<std::nullptr_t>(zoomCurve) &&
            (expression.getType().is<type::NumberType>() || expression.getType().is<type::ColorType>());
 }
 } // namespace
@@ -81,24 +81,29 @@ gfx::UniqueGPUExpression PropertyExpressionBase::getGPUExpression(bool intZoom) 
 
 float PropertyExpressionBase::interpolationFactor(const Range<float>& inputLevels,
                                                   const float inputValue) const noexcept {
-    return zoomCurve.match(
-        [](std::nullptr_t) {
-            assert(false);
-            return 0.0f;
-        },
-        [&](const expression::Interpolate* z) {
-            return z->interpolationFactor(Range<double>{inputLevels.min, inputLevels.max}, inputValue);
-        },
-        [](const expression::Step*) { return 0.0f; });
+    return std::visit(overloaded{[](std::nullptr_t) {
+                                     assert(false);
+                                     return 0.0f;
+                                 },
+                                 [&](const expression::Interpolate* z) -> float {
+                                     return z->interpolationFactor(Range<double>{inputLevels.min, inputLevels.max},
+                                                                   inputValue);
+                                 },
+                                 [](const expression::Step*) {
+                                     return 0.0f;
+                                 }},
+                      zoomCurve);
 }
 
 Range<float> PropertyExpressionBase::getCoveringStops(const float lower, const float upper) const noexcept {
-    return zoomCurve.match(
-        [](std::nullptr_t) -> Range<float> {
-            assert(false);
-            return {0.0f, 0.0f};
-        },
-        [&](auto z) { return z->getCoveringStops(lower, upper); });
+    return std::visit(overloaded{[](std::nullptr_t) -> Range<float> {
+                                     assert(false);
+                                     return {0.0f, 0.0f};
+                                 },
+                                 [&](auto z) {
+                                     return z->getCoveringStops(lower, upper);
+                                 }},
+                      zoomCurve);
 }
 
 const expression::Expression& PropertyExpressionBase::getExpression() const noexcept {
