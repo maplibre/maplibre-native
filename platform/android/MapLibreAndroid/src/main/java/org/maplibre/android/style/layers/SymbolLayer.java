@@ -506,6 +506,18 @@ public class SymbolLayer extends Layer {
   }
 
   /**
+   * Get the TextVariableAnchorOffset property
+   *
+   * @return property wrapper value around Object[]
+   */
+  @NonNull
+  @SuppressWarnings("unchecked")
+  public PropertyValue<Object[]> getTextVariableAnchorOffset() {
+    checkThread();
+    return (PropertyValue<Object[]>) new PropertyValue("text-variable-anchor-offset", nativeGetTextVariableAnchorOffset());
+  }
+
+  /**
    * Get the TextAnchor property
    *
    * @return property wrapper value around String
@@ -1244,6 +1256,10 @@ public class SymbolLayer extends Layer {
   @NonNull
   @Keep
   private native Object nativeGetTextVariableAnchor();
+
+  @NonNull
+  @Keep
+  private native Object nativeGetTextVariableAnchorOffset();
 
   @NonNull
   @Keep
