@@ -130,7 +130,7 @@ TEST(StyleConversion, VariableAnchorOffsetCollection) {
 
     auto jsonToPropertyValue = [&](const std::string& json) {
         return conversion::convertJSON<PropertyValue<VariableAnchorOffsetCollection>>(
-                json, error, /*allowDataExpressions*/ true, /*convertTokens*/ false);
+            json, error, /*allowDataExpressions*/ true, /*convertTokens*/ false);
     };
 
     // invalid expressions
