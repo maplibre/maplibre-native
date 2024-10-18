@@ -162,9 +162,6 @@ public:
             if (sharedOpacityVertices) {
                 sharedOpacityVertices->updateModified();
             }
-            if (sharedTriangles) {
-                sharedTriangles->updateModified();
-            }
         }
 
         std::shared_ptr<VertexVector> sharedVertices = std::make_shared<VertexVector>();

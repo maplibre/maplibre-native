@@ -4,6 +4,7 @@
 #include <mbgl/shaders/mtl/common.hpp>
 #include <mbgl/shaders/mtl/shader_program.hpp>
 #include <mbgl/shaders/widevector_ubo.hpp>
+#include <mbgl/shaders/shader_defines.hpp>
 
 namespace mbgl {
 namespace shaders {
@@ -19,14 +20,14 @@ struct ShaderSource<BuiltIn::WideVectorShader, gfx::Backend::Type::Metal> {
         UniformBlockInfo{true, false, sizeof(WideVectorUniformWideVecUBO), idWideVectorUniformWideVecUBO},
     };
     static constexpr std::array<AttributeInfo, 3> attributes{
-        AttributeInfo{wideVectorUBOCount + 0, gfx::AttributeDataType::Float3, idWideVectorScreenPos},
-        AttributeInfo{wideVectorUBOCount + 1, gfx::AttributeDataType::Float4, idWideVectorColor},
-        AttributeInfo{wideVectorUBOCount + 2, gfx::AttributeDataType::Int, idWideVectorIndex}};
+        AttributeInfo{wideVectorDrawableUBOCount + 0, gfx::AttributeDataType::Float3, idWideVectorScreenPos},
+        AttributeInfo{wideVectorDrawableUBOCount + 1, gfx::AttributeDataType::Float4, idWideVectorColor},
+        AttributeInfo{wideVectorDrawableUBOCount + 2, gfx::AttributeDataType::Int, idWideVectorIndex}};
     static constexpr std::array<AttributeInfo, 4> instanceAttributes{
-        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Float3, idWideVectorInstanceCenter},
-        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Float4, idWideVectorInstanceColor},
-        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Int, idWideVectorInstancePrevious},
-        AttributeInfo{wideVectorUBOCount + 3, gfx::AttributeDataType::Int, idWideVectorInstanceNext}};
+        AttributeInfo{wideVectorDrawableUBOCount + 3, gfx::AttributeDataType::Float3, idWideVectorInstanceCenter},
+        AttributeInfo{wideVectorDrawableUBOCount + 3, gfx::AttributeDataType::Float4, idWideVectorInstanceColor},
+        AttributeInfo{wideVectorDrawableUBOCount + 3, gfx::AttributeDataType::Int, idWideVectorInstancePrevious},
+        AttributeInfo{wideVectorDrawableUBOCount + 3, gfx::AttributeDataType::Int, idWideVectorInstanceNext}};
     static constexpr std::array<TextureInfo, 0> textures{};
 
     static constexpr auto source = R"(

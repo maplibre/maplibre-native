@@ -135,23 +135,28 @@ public:
     const std::unique_ptr<BufferResource>& getDummyVertexBuffer();
     const std::unique_ptr<BufferResource>& getDummyUniformBuffer();
     const std::unique_ptr<Texture2D>& getDummyTexture();
-    const vk::UniqueDescriptorSetLayout& getUniformDescriptorSetLayout();
     const vk::UniqueDescriptorSetLayout& getImageDescriptorSetLayout();
+    const vk::UniqueDescriptorSetLayout& buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
+                                                                         size_t uniformCount,
+                                                                         const std::string& name);
+
     const std::vector<vk::DescriptorSetLayout>& getDescriptorSetLayouts();
+    const vk::DescriptorSetLayout& getDescriptorSetLayout(DescriptorSetType type);
     const vk::UniquePipelineLayout& getGeneralPipelineLayout();
     const vk::UniquePipelineLayout& getPushConstantPipelineLayout();
 
+    void bindDescriptorSet(DescriptorSetType type, const vk::DescriptorSet& descriptorSet);
+
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
-    const vk::UniqueDescriptorPool& getCurrentDescriptorPool() const;
+    const vk::UniqueDescriptorPool& getGlobalDescriptorPool() const;
     void enqueueDeletion(std::function<void(const Context&)>&& function);
-    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function);
+    void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const;
 
     void requestSurfaceUpdate() { surfaceUpdateRequested = true; }
 
 private:
     struct FrameResources {
         vk::UniqueCommandBuffer commandBuffer;
-        vk::UniqueDescriptorPool descriptorPool;
 
         vk::UniqueSemaphore surfaceSemaphore;
         vk::UniqueSemaphore frameSemaphore;
@@ -160,12 +165,10 @@ private:
         std::vector<std::function<void(const Context&)>> deletionQueue;
 
         FrameResources(vk::UniqueCommandBuffer& cb,
-                       vk::UniqueDescriptorPool&& dp,
                        vk::UniqueSemaphore&& surf,
                        vk::UniqueSemaphore&& frame,
                        vk::UniqueFence&& flight)
             : commandBuffer(std::move(cb)),
-              descriptorPool(std::move(dp)),
               surfaceSemaphore(std::move(surf)),
               frameSemaphore(std::move(frame)),
               flightFrameFence(std::move(flight)) {}
@@ -180,11 +183,14 @@ private:
     RendererBackend& backend;
 
     vulkan::UniformBufferArray globalUniformBuffers;
+    vk::UniqueDescriptorPool globalDescriptorPool;
 
     std::unique_ptr<BufferResource> dummyVertexBuffer;
     std::unique_ptr<BufferResource> dummyUniformBuffer;
     std::unique_ptr<Texture2D> dummyTexture2D;
-    vk::UniqueDescriptorSetLayout uniformDescriptorSetLayout;
+    vk::UniqueDescriptorSetLayout globalUniformDescriptorSetLayout;
+    vk::UniqueDescriptorSetLayout layerUniformDescriptorSetLayout;
+    vk::UniqueDescriptorSetLayout drawableUniformDescriptorSetLayout;
     vk::UniqueDescriptorSetLayout imageDescriptorSetLayout;
     std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
     vk::UniquePipelineLayout generalPipelineLayout;
