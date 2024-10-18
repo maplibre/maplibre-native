@@ -10,6 +10,7 @@
 #include <mbgl/util/feature.hpp>
 #include <mbgl/util/geojson.hpp>
 #include <mbgl/util/traits.hpp>
+#include <mbgl/util/variant.hpp>
 
 #include <mapbox/compatibility/value.hpp>
 

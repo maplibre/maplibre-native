@@ -9,7 +9,7 @@ using namespace style;
 
 LineAnnotationImpl::LineAnnotationImpl(AnnotationID id_, LineAnnotation annotation_)
     : ShapeAnnotationImpl(id_),
-      annotation(ShapeAnnotationGeometry::visit(annotation_.geometry, CloseShapeAnnotation{}),
+      annotation(std::visit(CloseShapeAnnotation{}, annotation_.geometry),
                  annotation_.opacity,
                  annotation_.width,
                  annotation_.color) {}

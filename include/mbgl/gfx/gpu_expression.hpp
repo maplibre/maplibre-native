@@ -14,7 +14,7 @@ class Expression;
 class Interpolate;
 class Step;
 } // namespace expression
-using ZoomCurvePtr = variant<std::nullptr_t, const expression::Interpolate*, const expression::Step*>;
+using ZoomCurvePtr = std::variant<std::nullptr_t, const expression::Interpolate*, const expression::Step*>;
 } // namespace style
 namespace gfx {
 

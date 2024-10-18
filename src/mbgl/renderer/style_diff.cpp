@@ -1,7 +1,6 @@
 #include <mbgl/renderer/style_diff.hpp>
 #include <mbgl/style/layer_impl.hpp>
 #include <mbgl/util/immutable.hpp>
-#include <mbgl/util/variant.hpp>
 #include <mbgl/util/longest_common_subsequence.hpp>
 
 namespace mbgl {

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mbgl/util/variant.hpp>
 #include <mbgl/util/feature.hpp>
 #include <mbgl/util/geometry.hpp>
 #include <mbgl/style/expression/expression.hpp>

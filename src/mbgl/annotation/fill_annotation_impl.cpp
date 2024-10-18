@@ -3,13 +3,15 @@
 #include <mbgl/style/style_impl.hpp>
 #include <mbgl/style/layers/fill_layer.hpp>
 
+#include <mbgl/util/variant.hpp>
+
 namespace mbgl {
 
 using namespace style;
 
 FillAnnotationImpl::FillAnnotationImpl(AnnotationID id_, FillAnnotation annotation_)
     : ShapeAnnotationImpl(id_),
-      annotation(ShapeAnnotationGeometry::visit(annotation_.geometry, CloseShapeAnnotation{}),
+      annotation(std::visit(CloseShapeAnnotation{}, annotation_.geometry),
                  annotation_.opacity,
                  annotation_.color,
                  annotation_.outlineColor) {}
