@@ -11,6 +11,8 @@
 #pragma warning(pop)
 #endif
 
+#include <variant>
+
 namespace mbgl {
 
 template <typename... T>
