@@ -18,12 +18,13 @@ public interface HttpRequest {
    * @param httpRequest  callback to be invoked when we receive a response
    * @param nativePtr    the pointer associated to the request
    * @param resourceUrl  the resource url to download
+   * @param dataRange    http header, used to indicate the part of a resource that the server should return
    * @param etag         http header, identifier for a specific version of a resource
    * @param modified     http header, used to determine if a resource hasn't been modified since
    * @param offlineUsage flag to indicate a resource will be used for offline, appends offline=true as a query parameter
    */
   void executeRequest(HttpResponder httpRequest, long nativePtr, String resourceUrl,
-                      String etag, String modified, boolean offlineUsage);
+                      String dataRange, String etag, String modified, boolean offlineUsage);
 
   /**
    * Cancels the request.
