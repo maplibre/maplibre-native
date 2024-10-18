@@ -118,7 +118,7 @@ BufferResource::~BufferResource() noexcept {
 
     if (!bufferAllocation) return;
 
-    context.enqueueDeletion([allocation = std::move(bufferAllocation)](const auto&) mutable { allocation.reset(); });
+    context.enqueueDeletion([allocation = std::move(bufferAllocation)](auto&) mutable { allocation.reset(); });
 }
 
 BufferResource BufferResource::clone() const {
