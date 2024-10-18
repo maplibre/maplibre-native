@@ -136,11 +136,6 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
-# workaround for CMake passing wrong flag to MSVC
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++20")
-endif()
-
 if(MLN_WITH_QT)
     add_library(mbgl-core OBJECT)
 else()

@@ -76,3 +76,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL Linux AND NOT MLN_WITH_SANITIZER)
     add_test(NAME mbgl-node-memory COMMAND npm run test-memory WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
     add_test(NAME mbgl-node-test COMMAND npm run test WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()
+
+# needed because v8config.h uses __cplusplus
+# https://learn.microsoft.com/en-us/cpp/build/reference/zc-cplusplus?view=msvc-170
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:__cplusplus")
+endif()
