@@ -10,7 +10,7 @@
 namespace mbgl {
 namespace android {
 
-variant<std::string, Tileset> convertURLOrTileset(mbgl::android::Value&& value);
+std::variant<std::string, Tileset> convertURLOrTileset(mbgl::android::Value&& value);
 
 }
 } // namespace mbgl
