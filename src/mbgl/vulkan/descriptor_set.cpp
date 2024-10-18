@@ -15,7 +15,6 @@ DescriptorSet::DescriptorSet(Context& context_, DescriptorSetType type_)
       type(type_) {}
 
 DescriptorSet::~DescriptorSet() {
-
     context.enqueueDeletion(
         [type_ = type, poolIndex = descriptorPoolIndex, sets = std::move(descriptorSets)](auto& context_) mutable {
             auto& poolInfo = context_.getDescriptorPool(type_).pools[poolIndex];

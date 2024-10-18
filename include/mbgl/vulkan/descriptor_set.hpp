@@ -40,8 +40,7 @@ struct DescriptorPoolGrowable {
     DescriptorPoolGrowable(uint32_t maxSets_, uint32_t descriptorsPerSet_, float growFactor_)
         : maxSets(maxSets_),
           descriptorsPerSet(descriptorsPerSet_),
-          growFactor(growFactor_)
-    {}
+          growFactor(growFactor_) {}
 };
 
 class DescriptorSet {
@@ -58,7 +57,6 @@ protected:
     void createDescriptorPool(DescriptorPoolGrowable& growablePool);
 
 protected:
-    
     Context& context;
     DescriptorSetType type;
 
