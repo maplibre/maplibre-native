@@ -145,6 +145,7 @@ std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetColl
 
     const auto arraySize = arrayLength(value);
     if (arraySize < 1 || arraySize % 2 != 0) {
+        error.message = "array must containing an even number";
         return std::nullopt;
     }
 
