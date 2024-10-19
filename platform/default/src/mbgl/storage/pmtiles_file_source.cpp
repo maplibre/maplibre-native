@@ -235,8 +235,10 @@ private:
             try {
                 pmtiles::headerv3 header = pmtiles::deserialize_header(response.data->substr(0, 127));
 
-                if (header.tile_compression != pmtiles::COMPRESSION_NONE &&
-                    header.tile_compression != pmtiles::COMPRESSION_GZIP) {
+                if ((header.internal_compression != pmtiles::COMPRESSION_NONE &&
+                     header.internal_compression != pmtiles::COMPRESSION_GZIP) ||
+                    (header.tile_compression != pmtiles::COMPRESSION_NONE &&
+                     header.tile_compression != pmtiles::COMPRESSION_GZIP)) {
                     throw std::runtime_error("Compression method not supported");
                 }
 
@@ -265,6 +267,7 @@ private:
 
             auto parse_callback = [=, this](const std::string& data) {
                 Document doc;
+
                 auto& allocator = doc.GetAllocator();
 
                 if (!data.empty()) {
@@ -276,51 +279,76 @@ private:
                 }
 
                 doc.AddMember("tilejson", "3.0.0", allocator);
-                doc.AddMember("scheme", "xyz", allocator);
 
-                std::string format;
-
-                switch (header.tile_type) {
-                    case pmtiles::TILETYPE_MVT:
-                        format = "pbf";
-                        break;
-                    case pmtiles::TILETYPE_PNG:
-                        format = "png";
-                        break;
-                    case pmtiles::TILETYPE_JPEG:
-                        format = "jpg";
-                        break;
-                    case pmtiles::TILETYPE_WEBP:
-                        format = "webp";
-                        break;
-                    case pmtiles::TILETYPE_AVIF:
-                        format = "avif";
-                        break;
-                    default:
-                        break;
+                if (!doc.HasMember("scheme")) {
+                    doc.AddMember("scheme", rapidjson::Value().SetString("xyz"), allocator);
                 }
 
-                rapidjson::Value arr(kArrayType);
-                rapidjson::Value tile_url_val(util::PMTILES_PROTOCOL + url, allocator);
-                arr.PushBack(tile_url_val, allocator);
-                doc.AddMember("tiles", arr, allocator);
+                if (!doc.HasMember("tiles")) {
+                    doc.AddMember("tiles", rapidjson::Value(), allocator);
+                }
 
-                rapidjson::Value bounds_arr(kArrayType);
-                bounds_arr.PushBack(static_cast<double>(header.min_lon_e7) / 1e7, allocator);
-                bounds_arr.PushBack(static_cast<double>(header.min_lat_e7) / 1e7, allocator);
-                bounds_arr.PushBack(static_cast<double>(header.max_lon_e7) / 1e7, allocator);
-                bounds_arr.PushBack(static_cast<double>(header.max_lat_e7) / 1e7, allocator);
+                if (!doc["tiles"].IsArray()) {
+                    doc["tiles"] = rapidjson::Value().SetArray().PushBack(
+                        rapidjson::Value().SetString(std::string(util::PMTILES_PROTOCOL + url), allocator), allocator);
+                }
 
-                doc.AddMember("bounds", bounds_arr, allocator);
+                if (!doc.HasMember("bounds")) {
+                    doc.AddMember("bounds", rapidjson::Value(), allocator);
+                }
 
-                rapidjson::Value center_arr(kArrayType);
-                center_arr.PushBack(static_cast<double>(header.center_lon_e7) / 1e7, allocator);
-                center_arr.PushBack(static_cast<double>(header.center_lat_e7) / 1e7, allocator);
-                center_arr.PushBack(header.center_zoom, allocator);
-                doc.AddMember("center", center_arr, allocator);
+                if (!doc["bounds"].IsArray()) {
+                    doc["bounds"] = rapidjson::Value()
+                                        .SetArray()
+                                        .PushBack(static_cast<double>(header.min_lon_e7) / 1e7, allocator)
+                                        .PushBack(static_cast<double>(header.min_lat_e7) / 1e7, allocator)
+                                        .PushBack(static_cast<double>(header.max_lon_e7) / 1e7, allocator)
+                                        .PushBack(static_cast<double>(header.max_lat_e7) / 1e7, allocator);
+                }
 
-                doc.AddMember("minzoom", header.min_zoom, allocator);
-                doc.AddMember("maxzoom", header.max_zoom, allocator);
+                if (!doc.HasMember("center")) {
+                    doc.AddMember("center", rapidjson::Value(), allocator);
+                }
+
+                if (!doc["center"].IsArray()) {
+                    doc["center"] = rapidjson::Value()
+                                        .SetArray()
+                                        .PushBack(static_cast<double>(header.center_lon_e7) / 1e7, allocator)
+                                        .PushBack(static_cast<double>(header.center_lat_e7) / 1e7, allocator)
+                                        .PushBack(header.center_zoom, allocator);
+                }
+
+                if (!doc.HasMember("minzoom")) {
+                    doc.AddMember("minzoom", rapidjson::Value(), allocator);
+                }
+
+                auto& minzoom = doc["minzoom"];
+
+                if (minzoom.IsString()) {
+                    minzoom.SetInt(std::atoi(minzoom.GetString()));
+                }
+
+                if (!minzoom.IsNumber()) {
+                    minzoom = rapidjson::Value().SetUint(header.min_zoom);
+                }
+
+                doc["minzoom"] = minzoom;
+
+                if (!doc.HasMember("maxzoom")) {
+                    doc.AddMember("maxzoom", rapidjson::Value(), allocator);
+                }
+
+                auto& maxzoom = doc["maxzoom"];
+
+                if (maxzoom.IsString()) {
+                    maxzoom.SetInt(std::atoi(maxzoom.GetString()));
+                }
+
+                if (!maxzoom.IsNumber()) {
+                    maxzoom = rapidjson::Value().SetUint(header.max_zoom);
+                }
+
+                doc["maxzoom"] = maxzoom;
 
                 std::string metadata = serialize(doc);
                 metadata_cache.emplace(url, metadata);
@@ -429,7 +457,7 @@ private:
                 try {
                     std::string directoryData = *response.data;
 
-                    if (header.tile_compression == pmtiles::COMPRESSION_GZIP) {
+                    if (header.internal_compression == pmtiles::COMPRESSION_GZIP) {
                         directoryData = util::decompress(directoryData);
                     }
 
