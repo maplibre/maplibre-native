@@ -2,9 +2,10 @@
 #include <map>
 
 #include <mbgl/platform/settings.hpp>
-#include <mbgl/storage/pmtiles_file_source.hpp>
 #include <mbgl/storage/file_source_manager.hpp>
 #include <mbgl/storage/file_source_request.hpp>
+#include <mbgl/storage/pmtiles_file_source.hpp>
+#include <mbgl/storage/resource.hpp>
 
 #include <rapidjson/document.h>
 #include <rapidjson/rapidjson.h>
