@@ -73,8 +73,7 @@ TEST(PMTilesFileSource, Tile) {
     PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = pmtiles.request(
-        Resource::tile(
-            toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
+        Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 0, Tileset::Scheme::XYZ),
         [&](Response res) {
             req.reset();
             EXPECT_EQ(nullptr, res.error);
@@ -93,8 +92,7 @@ TEST(PMTilesFileSource, NonExistentTile) {
     PMTilesFileSource pmtiles(ResourceOptions::Default(), ClientOptions());
 
     std::unique_ptr<AsyncRequest> req = pmtiles.request(
-        Resource::tile(
-            toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 4, Tileset::Scheme::XYZ),
+        Resource::tile(toAbsoluteURL("geography-class-png.pmtiles"), 1.0, 0, 0, 4, Tileset::Scheme::XYZ),
         [&](Response res) {
             req.reset();
             EXPECT_EQ(nullptr, res.error);

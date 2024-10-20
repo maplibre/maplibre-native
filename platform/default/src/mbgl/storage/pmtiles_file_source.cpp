@@ -230,14 +230,14 @@ private:
 
                 if (response.error->message.empty() && response.error->reason == Response::Error::Reason::NotFound) {
                     if (url.starts_with(mbgl::util::FILE_PROTOCOL)) {
-                        message += "path not found: " + url.substr(std::char_traits<char>::length(mbgl::util::FILE_PROTOCOL));
+                        message += "path not found: " +
+                                   url.substr(std::char_traits<char>::length(mbgl::util::FILE_PROTOCOL));
                     } else {
                         message += "url not found: " + url;
                     }
                 }
 
-                callback(std::make_unique<Response::Error>(
-                    response.error->reason, message));
+                callback(std::make_unique<Response::Error>(response.error->reason, message));
 
                 return;
             }
