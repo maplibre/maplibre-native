@@ -204,9 +204,7 @@ target_link_libraries(
     mbgl-test-runner
     PRIVATE
         mbgl-compiler-options
-        -Wl,--whole-archive
-        mbgl-test
-        -Wl,--no-whole-archive
+        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-test>
 )
 
 add_executable(
@@ -218,9 +216,7 @@ target_link_libraries(
     mbgl-benchmark-runner
     PRIVATE
         mbgl-compiler-options
-        -Wl,--whole-archive
-        mbgl-benchmark
-        -Wl,--no-whole-archive
+        $<LINK_LIBRARY:WHOLE_ARCHIVE,mbgl-benchmark>
 )
 
 add_executable(
