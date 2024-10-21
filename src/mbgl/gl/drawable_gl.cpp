@@ -71,6 +71,8 @@ void DrawableGL::draw(PaintParameters& parameters) const {
             context.draw(glSeg.getMode(), mlSeg.indexOffset, mlSeg.indexLength);
         }
     }
+    // Unbind the VAO so that future buffer commands outside Drawable do not change the current VAO state
+    glBindVertexArray(0);
 
 #ifndef NDEBUG
     context.bindVertexArray = value::BindVertexArray::Default;
