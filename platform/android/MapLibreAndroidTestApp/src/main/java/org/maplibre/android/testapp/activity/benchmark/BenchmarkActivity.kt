@@ -226,6 +226,7 @@ class BenchmarkActivity : AppCompatActivity() {
             numFrames++;
         }
         mapView.setStyleSuspend(benchmarkRun.styleURL)
+        numFrames = 0
 
         val startTime = System.nanoTime()
 
@@ -237,6 +238,7 @@ class BenchmarkActivity : AppCompatActivity() {
         }
         val endTime = System.nanoTime()
         val fps = (numFrames * 1E9) / (endTime - startTime)
+        println("fps $fps")
 
         return BenchmarkRunResult(fps, encodingTimeStore, renderingTimeStore)
     }
