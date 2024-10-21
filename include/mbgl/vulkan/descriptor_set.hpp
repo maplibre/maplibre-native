@@ -37,7 +37,7 @@ struct DescriptorPoolGrowable {
     PoolInfo& current() { return pools[currentPoolIndex]; }
 
     DescriptorPoolGrowable() = default;
-    DescriptorPoolGrowable(uint32_t maxSets_, uint32_t descriptorsPerSet_, float growFactor_)
+    DescriptorPoolGrowable(uint32_t maxSets_, uint32_t descriptorsPerSet_, float growFactor_ = 1.5f)
         : maxSets(maxSets_),
           descriptorsPerSet(descriptorsPerSet_),
           growFactor(growFactor_) {}

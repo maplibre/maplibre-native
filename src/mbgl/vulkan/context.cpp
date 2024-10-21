@@ -28,11 +28,11 @@
 #include <cstring>
 
 #ifndef MLN_VULKAN_GLOBAL_DESCRIPTOR_POOL_SIZE
-#define MLN_VULKAN_GLOBAL_DESCRIPTOR_POOL_SIZE 3 * 8
+#define MLN_VULKAN_GLOBAL_DESCRIPTOR_POOL_SIZE 3 * 4
 #endif
 
 #ifndef MLN_VULKAN_LAYER_DESCRIPTOR_POOL_SIZE
-#define MLN_VULKAN_LAYER_DESCRIPTOR_POOL_SIZE 3 * 128
+#define MLN_VULKAN_LAYER_DESCRIPTOR_POOL_SIZE 3 * 256
 #endif
 
 #ifndef MLN_VULKAN_DRAWABLE_UNIFORM_DESCRIPTOR_POOL_SIZE
@@ -40,7 +40,7 @@
 #endif
 
 #ifndef MLN_VULKAN_DRAWABLE_IMAGE_DESCRIPTOR_POOL_SIZE
-#define MLN_VULKAN_DRAWABLE_IMAGE_DESCRIPTOR_POOL_SIZE 3 * 512
+#define MLN_VULKAN_DRAWABLE_IMAGE_DESCRIPTOR_POOL_SIZE MLN_VULKAN_DRAWABLE_UNIFORM_DESCRIPTOR_POOL_SIZE / 2
 #endif
 
 namespace mbgl {
@@ -83,23 +83,20 @@ void Context::initFrameResources() {
     const auto& device = backend.getDevice();
     const auto frameCount = backend.getMaxFrames();
 
-    descriptorPoolMap.emplace(
-        std::make_pair(DescriptorSetType::Global,
-                       DescriptorPoolGrowable(MLN_VULKAN_GLOBAL_DESCRIPTOR_POOL_SIZE, shaders::globalUBOCount, 1.5f)));
+    descriptorPoolMap.emplace(DescriptorSetType::Global,
+                              DescriptorPoolGrowable(MLN_VULKAN_GLOBAL_DESCRIPTOR_POOL_SIZE, shaders::globalUBOCount));
 
-    descriptorPoolMap.emplace(std::make_pair(
+    descriptorPoolMap.emplace(
         DescriptorSetType::Layer,
-        DescriptorPoolGrowable(MLN_VULKAN_LAYER_DESCRIPTOR_POOL_SIZE, shaders::maxUBOCountPerLayer, 1.5f)));
+        DescriptorPoolGrowable(MLN_VULKAN_LAYER_DESCRIPTOR_POOL_SIZE, shaders::maxUBOCountPerLayer));
 
     descriptorPoolMap.emplace(
-        std::make_pair(DescriptorSetType::DrawableUniform,
-                       DescriptorPoolGrowable(
-                           MLN_VULKAN_DRAWABLE_UNIFORM_DESCRIPTOR_POOL_SIZE, shaders::maxUBOCountPerDrawable, 1.5f)));
+        DescriptorSetType::DrawableUniform,
+        DescriptorPoolGrowable(MLN_VULKAN_DRAWABLE_UNIFORM_DESCRIPTOR_POOL_SIZE, shaders::maxUBOCountPerDrawable));
 
     descriptorPoolMap.emplace(
-        std::make_pair(DescriptorSetType::DrawableImage,
-                       DescriptorPoolGrowable(
-                           MLN_VULKAN_DRAWABLE_IMAGE_DESCRIPTOR_POOL_SIZE, shaders::maxTextureCountPerShader, 1.5f)));
+        DescriptorSetType::DrawableImage,
+        DescriptorPoolGrowable(MLN_VULKAN_DRAWABLE_IMAGE_DESCRIPTOR_POOL_SIZE, shaders::maxTextureCountPerShader));
 
     // command buffers
     const vk::CommandBufferAllocateInfo allocateInfo(

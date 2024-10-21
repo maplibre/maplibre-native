@@ -6,6 +6,7 @@
 #include <mbgl/util/logging.hpp>
 
 #include <cassert>
+#include <math.h>
 
 namespace mbgl {
 namespace vulkan {
@@ -27,7 +28,7 @@ void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
     const auto& device = context.getBackend().getDevice();
 
     const uint32_t maxSets = static_cast<uint32_t>(growablePool.maxSets *
-                                                   (1 + growablePool.pools.size() * growablePool.growFactor));
+                                                   std::pow(growablePool.growFactor, growablePool.pools.size()));
     const vk::DescriptorPoolSize size = {type != DescriptorSetType::DrawableImage
                                              ? vk::DescriptorType::eUniformBuffer
                                              : vk::DescriptorType::eCombinedImageSampler,
