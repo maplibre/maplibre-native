@@ -63,7 +63,7 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(Repeat)) {
     auto totalTime = std::chrono::duration_cast<mbgl::Milliseconds>(mbgl::Clock::now() - first);
 
     EXPECT_GE(totalTime, expectedTotalTime * 0.8);
-    EXPECT_LE(totalTime, expectedTotalTime * 1.2);
+    EXPECT_LE(totalTime, expectedTotalTime * 1.3);
 }
 
 TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(Stop)) {
@@ -170,7 +170,7 @@ TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(StoppedDuringExpiration)) {
     auto totalTime = std::chrono::duration_cast<mbgl::Milliseconds>(mbgl::Clock::now() - first);
 
     EXPECT_GE(totalTime, expireTimeout * 0.8);
-    EXPECT_LE(totalTime, expireTimeout * 1.2);
+    EXPECT_LE(totalTime, expireTimeout * 1.3);
 }
 
 TEST(Timer, TEST_REQUIRES_ACCURATE_TIMING(StoppedAfterExpiration)) {

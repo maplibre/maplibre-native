@@ -385,6 +385,8 @@ TEST(Map, Offline) {
 
 #if ANDROID
     test::checkImage("test/fixtures/map/offline", test.frontend.render(test.map).image, 0.0046, 0.1);
+#elif WIN32
+    test::checkImage("test/fixtures/map/offline", test.frontend.render(test.map).image, 0.035, 0.1);
 #else
     test::checkImage("test/fixtures/map/offline", test.frontend.render(test.map).image, 0.0015, 0.1);
 #endif

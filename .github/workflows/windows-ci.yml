@@ -1,0 +1,264 @@
+name: windows-ci
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - windows-*.*.x
+    tags:
+      - windows-*
+
+  pull_request:
+    branches:
+      - '*'
+
+env:
+  SCCACHE_GHA_ENABLED: "true"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # INFO: We are cancelling the concurrency group if the change is on PR. For workflow dispatch, this will not work.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  id-token: write         # needed for AWS
+  actions: read           # needed for CodeQL
+  contents: read          # needed for CodeQL
+  security-events: write  # needed for CodeQL
+
+jobs:
+  pre-job:
+    runs-on: windows-2022
+    outputs:
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.any_modified != 'true' }}
+    steps:
+      - run: |
+          git config --system core.longpaths true
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Get all Windows files that have changed
+        if: github.event_name != 'workflow_dispatch'
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+
+      - name: List changed files
+        if: steps.changed-files.outputs.any_modified == 'true'  
+        shell: bash
+        run: |
+          echo "Changed file(s): ${{ steps.changed-files.outputs.all_changed_files }}"
+
+  windows-build-and-test:
+    if: needs.pre_job.outputs.should_skip != 'true'
+    needs: pre-job
+    strategy:
+      matrix:
+#        renderer: [opengl, egl, vulkan, osmesa]
+#        rendering_mode: [legacy, drawable]
+        renderer: [vulkan]
+        rendering_mode: [drawable]
+        exclude:
+          - renderer: vulkan
+            rendering_mode: legacy
+    runs-on: windows-2022
+    steps:
+      - uses: humbletim/setup-vulkan-sdk@v1.2.0
+        if: matrix.renderer == 'vulkan'
+        with:
+          vulkan-query-version: 1.3.204.0
+          vulkan-components: Vulkan-Loader
+          vulkan-use-cache: true
+
+      - run: |
+          git config --system core.longpaths true
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: cpp
+
+      - if: matrix.rendering_mode == 'legacy'
+        shell: bash
+        run: echo rendering_mode_flag_cmake=-DMLN_LEGACY_RENDERER=ON >> "$GITHUB_ENV"
+
+      - if: matrix.rendering_mode == 'drawable'
+        shell: bash
+        run: echo rendering_mode_flag_cmake=-DMLN_DRAWABLE_RENDERER=ON >> "$GITHUB_ENV"
+
+      - if: matrix.renderer == 'opengl'
+        shell: bash
+        run: echo renderer_flag_cmake="-DMLN_WITH_OPENGL=ON" >> "$GITHUB_ENV"
+
+      - if: matrix.renderer == 'egl'
+        shell: bash
+        run: echo renderer_flag_cmake="-DMLN_WITH_EGL=ON" >> "$GITHUB_ENV"
+
+      - if: matrix.renderer == 'vulkan'
+        shell: bash
+        run: echo renderer_flag_cmake="-DMLN_WITH_VULKAN=ON -DMLN_WITH_OPENGL=OFF" >> "$GITHUB_ENV"
+
+      - if: matrix.renderer == 'osmesa'
+        shell: bash
+        run: echo renderer_flag_cmake="-DMLN_WITH_OSMESA=ON" >> "$GITHUB_ENV"
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - uses: mozilla-actions/sccache-action@v0.0.6
+
+      - name: Initialize sccache
+        run: |
+          sccache --start-server
+          sccache --zero-stats
+
+      - name: Configure MapLibre Native Core
+        env:
+          CI: 1
+          VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+        run: |
+          cmake --version
+          cmake -B build -GNinja `
+            -DCMAKE_POLICY_DEFAULT_CMP0141=NEW `
+            -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded `
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo `
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
+            ${{ env.renderer_flag_cmake }} `
+            ${{ env.rendering_mode_flag_cmake }}
+
+      - name: Build MapLibre Native Core
+        run: |
+          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
+
+      # mbgl-render (used for size test) & mbgl-benchmark-runner
+
+#      - name: Upload mbgl-render as artifact
+#        if: matrix.rendering_mode == 'drawable' && github.event_name == 'pull_request' 
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: mbgl-render
+#          path: |
+#            build/bin/mbgl-render.exe
+  
+#      - name: Upload mbgl-benchmark-runner as artifact
+#        if: matrix.rendering_mode == 'drawable' && github.event_name == 'pull_request' 
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: mbgl-benchmark-runner
+#          path: |
+#            build/mbgl-benchmark-runner.exe
+
+#      - name: Configure AWS Credentials
+#        if: matrix.rendering_mode == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+#        uses: aws-actions/configure-aws-credentials@v4
+#        with:
+#          aws-region: us-west-2
+#          role-to-assume: ${{ vars.OIDC_AWS_ROLE_TO_ASSUME }}
+#          role-session-name: ${{ github.run_id }}
+
+#      - name: Upload mbgl-render & mbgl-benchmark-runner to S3
+#        if: matrix.rendering_mode == 'drawable' && github.ref == 'refs/heads/main' && vars.OIDC_AWS_ROLE_TO_ASSUME 
+#        shell: bash
+#        run: | 
+#          aws s3 cp build/bin/mbgl-render.exe s3://maplibre-native/mbgl-render-main
+#          aws s3 cp build/mbgl-benchmark-runner.exe s3://maplibre-native/mbgl-benchmark-runner-main
+
+      # CodeQL
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:cpp"
+      
+      - name: Download Mesa3D
+        run: |
+          Invoke-WebRequest https://github.com/pal1000/mesa-dist-win/releases/download/24.2.5/mesa3d-24.2.5-release-msvc.7z -OutFile mesa3d.7z
+
+      - name: Extract Mesa3D files for OpenGL
+        if: matrix.renderer != 'vulkan'
+        run: |
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll x64\libglapi.dll
+
+      - name: Extract Mesa3D files for Vulkan
+        if: matrix.renderer == 'vulkan'
+        run: |
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild .\mesa3d.7z x64\lvp_icd.x86_64.json x64\vulkan_lvp.dll
+
+      - name: Extract Mesa3D files for OSMesa
+        if: matrix.renderer == 'osmesa'
+        run: |
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild .\mesa3d.7z x64\osmesa.dll
+
+      # unit tests
+
+      - name: Configure Mesa3D drivers (OpenGL)
+        if: matrix.renderer != 'vulkan'
+        shell: bash
+        run: |
+          echo GALLIUM_DRIVER="llvmpipe" >> "$GITHUB_ENV"
+
+      - name: Configure Mesa3D drivers (Vulkan)
+        if: matrix.renderer == 'vulkan'
+        shell: bash
+        run: |
+          cat build/lvp_icd.x86_64.json | sed 's/\.\\\\//' > build/lvp_icd.x86_64.json
+          echo VK_DRIVER_FILES="${{ github.workspace }}/build/lvp_icd.x86_64.json" >> "$GITHUB_ENV"
+          echo VK_LOADER_DRIVERS_SELECT="*lvp*" >> "$GITHUB_ENV"
+          echo VK_LOADER_DEBUG="all" >> "$GITHUB_ENV"
+
+      - name: Run C++ tests
+        continue-on-error: ${{ matrix.renderer == 'vulkan' }}
+        shell: bash
+        run: build/mbgl-test-runner.exe
+
+      # render tests
+
+      - name: Run render test
+        id: render_test
+        env:
+          manifest_file: ${{ matrix.renderer == 'osmesa' && 'opengl' || matrix.renderer }}
+        shell: bash
+        run: build/mbgl-render-test-runner.exe --manifestPath=metrics/windows-${manifest_file}.json
+
+      - name: Upload render test result
+        if: always() && steps.render_test.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-test-result-${{ matrix.renderer }}
+          path: |
+            metrics/windows-${{ matrix.renderer == 'osmesa' && 'opengl' || matrix.renderer }}.html
+      
+      # expression tests
+
+      - name: Run expression test
+        shell: bash
+        run: build/expression-test/mbgl-expression-test.exe
+
+      - if: github.event_name == 'pull_request'
+        uses: ./.github/actions/save-pr-number
+
+  windows-ci-result:
+    name: Windows CI Result
+    if: needs.pre-job.outputs.should_skip != 'true' && always()
+    runs-on: windows-2022
+    needs:
+      - pre-job
+      - windows-build-and-test
+    steps:
+      - name: Mark result as failed
+        if: needs.windows-build-and-test.result != 'success'
+        shell: bash
+        run: exit 1

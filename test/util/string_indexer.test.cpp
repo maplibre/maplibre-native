@@ -85,11 +85,11 @@ TEST(StringIndexer, GetOOBIdentity) {
 
     std::string str;
 #ifndef NDEBUG
-    EXPECT_DEATH_IF_SUPPORTED(str = strIndexer.get(42), "id < identityToString.size()");
+    EXPECT_DEATH_IF_SUPPORTED(str = strIndexer.get(42), "id < identityToString.size\\(\\)");
 #endif
     EXPECT_TRUE(str.empty());
 #ifndef NDEBUG
-    EXPECT_DEATH_IF_SUPPORTED(str = strIndexer.get(-1), "id < identityToString.size()");
+    EXPECT_DEATH_IF_SUPPORTED(str = strIndexer.get(-1), "id < identityToString.size\\(\\)");
 #endif
     EXPECT_TRUE(str.empty());
 }

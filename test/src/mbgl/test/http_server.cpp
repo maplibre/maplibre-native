@@ -42,6 +42,7 @@ void runServer(std::unique_ptr<httplib::Server>& server) {
             uint64_t start = std::strtoull(str.substr(0, str.find("-")).c_str(), nullptr, 10);
             uint64_t end = std::strtoull(str.substr(str.find("-") + 1).c_str(), nullptr, 10);
             content = content.substr(start, end - start + 1);
+            res.status = 206;
         }
         res.set_content(content, "text/plain");
     });
