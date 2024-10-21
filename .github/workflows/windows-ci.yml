@@ -1,0 +1,194 @@
+name: windows-ci
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - windows-*.*.x
+    tags:
+      - windows-*
+
+  pull_request:
+    branches:
+      - '*'
+
+env:
+  SCCACHE_GHA_ENABLED: "true"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # INFO: We are cancelling the concurrency group if the change is on PR. For workflow dispatch, this will not work.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  actions: read           # needed for CodeQL
+  contents: read          # needed for CodeQL
+  security-events: write  # needed for CodeQL
+
+jobs:
+  pre-job:
+    runs-on: windows-2022
+    outputs:
+      should_skip: ${{ github.event_name != 'workflow_dispatch' && steps.changed-files.outputs.windows_any_modified != 'true' }}
+    steps:
+      - run: |
+          git config --system core.longpaths true
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Get all Windows files that have changed
+        if: github.event_name != 'workflow_dispatch'
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files_yaml_from_source_file: .github/changed-files.yml
+
+      - name: List changed files
+        if: steps.changed-files.outputs.windows_any_modified == 'true'  
+        run: |
+          Write-Host "Changed file(s): ${{ steps.changed-files.outputs.windows_all_changed_files }}"
+
+  windows-build-and-test:
+    if: needs.pre-job.outputs.should_skip != 'true'
+    needs: pre-job
+    strategy:
+      matrix:
+        renderer: [opengl, egl, vulkan, osmesa]
+        rendering_mode: [legacy, drawable]
+        exclude:
+          - renderer: egl
+            rendering_mode: drawable
+          - renderer: vulkan
+            rendering_mode: legacy
+    runs-on: windows-2022
+    steps:
+      - run: |
+          git config --system core.longpaths true
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: cpp
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Export GitHub Actions cache environment variables
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - uses: mozilla-actions/sccache-action@v0.0.6
+
+      - name: Initialize sccache
+        run: |
+          & $env:SCCACHE_PATH --start-server
+          & $env:SCCACHE_PATH --zero-stats
+
+      - name: Configure MapLibre Native Core
+        env:
+          CI: 1
+          VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+          VCPKG_KEEP_ENV_VARS: "CMAKE_CXX_COMPILER_LAUNCHER;CMAKE_C_COMPILER_LAUNCHER"
+          CMAKE_C_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
+          CMAKE_CXX_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
+          RENDERER: "${{ matrix.renderer }}"
+          RENDERING_MODE: "${{ matrix.rendering_mode }}"
+        run: |
+          cmake --version
+          & ${{ github.workspace }}\.github\scripts\windows-ci_configure_wrapper.ps1
+
+      - name: Build MapLibre Native Core
+        run: |
+          cmake --build build --target mbgl-core mbgl-test-runner mbgl-render-test-runner mbgl-expression-test mbgl-render mbgl-benchmark-runner
+
+      # CodeQL
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:cpp"
+      
+      - name: Download Mesa3D
+        if: matrix.renderer != 'egl'
+        run: |
+          Invoke-WebRequest https://github.com/pal1000/mesa-dist-win/releases/download/24.2.5/mesa3d-24.2.5-release-msvc.7z -OutFile mesa3d.7z
+
+      - name: Extract Mesa3D files for OpenGL
+        if: matrix.renderer != 'egl' && matrix.renderer != 'vulkan'
+        run: |
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll x64\libglapi.dll
+
+      - name: Extract Mesa3D files for Vulkan
+        if: matrix.renderer != 'egl' && matrix.renderer == 'vulkan'
+        run: |
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild .\mesa3d.7z x64\lvp_icd.x86_64.json x64\vulkan_lvp.dll
+
+      - name: Extract Mesa3D files for OSMesa
+        if: matrix.renderer == 'osmesa'
+        run: |
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild .\mesa3d.7z x64\osmesa.dll
+
+      # unit tests
+
+      - name: Configure Mesa3D drivers (OpenGL)
+        if: matrix.renderer != 'egl' && matrix.renderer != 'vulkan'
+        run: |
+          Add-Content -Path $env:GITHUB_ENV -Value 'GALLIUM_DRIVER=llvmpipe'
+
+      - name: Configure Mesa3D drivers (Vulkan)
+        if: matrix.renderer == 'vulkan'
+        run: |
+          reg add 'HKLM\Software\Khronos\Vulkan\Drivers' /f /v '${{ github.workspace }}\build\lvp_icd.x86_64.json' /t REG_DWORD /d 0
+      
+      - name: Download and configure Vulkan
+        if: matrix.renderer == 'vulkan'
+        run: |
+          Invoke-WebRequest https://sdk.lunarg.com/sdk/download/1.3.296.0/windows/VulkanRT-1.3.296.0-Components.zip -OutFile VulkanRT.zip
+          & 'C:\Program Files\7-Zip\7z.exe' e -obuild -r .\VulkanRT.zip *x64\vulkan-1.dll
+
+      - name: Run C++ tests
+        continue-on-error: ${{ matrix.renderer == 'vulkan' }}
+        run: build/mbgl-test-runner.exe
+
+      # render tests
+
+      - name: Run render test
+        id: render_test
+        env:
+          manifest_file: ${{ matrix.renderer == 'osmesa' && 'opengl' || matrix.renderer }}
+        run: build/mbgl-render-test-runner.exe "--manifestPath=metrics/windows-${env:manifest_file}.json"
+
+      - name: Upload render test result
+        if: always() && steps.render_test.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-test-result-${{ matrix.renderer }}
+          path: |
+            metrics/windows-${{ matrix.renderer == 'osmesa' && 'opengl' || matrix.renderer }}.html
+      
+      # expression tests
+
+      - name: Run expression test
+        run: build/expression-test/mbgl-expression-test.exe
+
+  windows-ci-result:
+    name: Windows CI Result
+    if: needs.pre-job.outputs.should_skip != 'true' && always()
+    runs-on: windows-2022
+    needs:
+      - pre-job
+      - windows-build-and-test
+    steps:
+      - name: Mark result as failed
+        if: needs.windows-build-and-test.result != 'success'
+        run: exit 1

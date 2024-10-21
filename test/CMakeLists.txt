@@ -186,7 +186,7 @@ else()
         ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
         PROPERTIES
         COMPILE_FLAGS
-        $<$<NOT:$<BOOL:${WIN32}>>:-Wno-shadow>
+        $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wno-shadow>
     )
     set_source_files_properties(
         ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
