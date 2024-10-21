@@ -227,7 +227,7 @@ class BenchmarkActivity : AppCompatActivity() {
         }
         mapView.setStyleSuspend(benchmarkRun.styleURL)
 
-        val startTime = 0
+        val startTime = System.nanoTime()
 
         for (place in PLACES) {
             maplibreMap.animateCameraSuspend(
