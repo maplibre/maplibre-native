@@ -58,12 +58,17 @@ public:
     void setAcquiredImageIndex(uint32_t index) { acquiredImageIndex = index; };
     const vk::Image getAcquiredImage() const;
 
+    bool hasOrientationSupport() const;
+    // rotation needed to align framebuffer contents with device surface
+    float getRotation();
+
     void init(uint32_t w, uint32_t h);
     void recreateSwapchain();
 
 protected:
     vk::UniqueSurfaceKHR surface;
     vk::UniqueSwapchainKHR swapchain;
+    vk::SurfaceCapabilitiesKHR capabilities;
 
     uint32_t acquiredImageIndex{0};
 

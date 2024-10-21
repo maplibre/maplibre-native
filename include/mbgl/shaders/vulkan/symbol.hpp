@@ -117,7 +117,7 @@ void main() {
     const vec2 pos0 = projected_pos.xy / projected_pos.w;
     const vec2 posOffset = a_offset * max(a_minFontScale, fontScale) / 32.0 + a_pxoffset / 16.0;
     gl_Position = drawable.coord_matrix * vec4(pos0 + rotation_matrix * posOffset, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
     
     const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? global.symbol_fade_change : -global.symbol_fade_change;
@@ -339,8 +339,8 @@ void main() {
     const vec2 pos_rot = a_offset / 32.0 * fontScale + a_pxoffset;
     const vec2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     gl_Position = drawable.coord_matrix * vec4(pos0, 0.0, 1.0);
-    gl_Position.y *= -1.0;
-    
+    applySurfaceTransform();
+
     const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? global.symbol_fade_change : -global.symbol_fade_change;
 
@@ -640,7 +640,7 @@ void main() {
     const vec2 pos_rot = a_offset / 32.0 * fontScale;
     const vec2 pos0 = projected_pos.xy / projected_pos.w + rotation_matrix * pos_rot;
     gl_Position = drawable.coord_matrix * vec4(pos0, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
     
     const vec2 raw_fade_opacity = unpack_opacity(in_fade_opacity);
     const float fade_change = raw_fade_opacity[1] > 0.5 ? global.symbol_fade_change : -global.symbol_fade_change;
@@ -862,7 +862,7 @@ void main() {
     }
 
     gl_Position = position;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_tex = in_tex;
 }

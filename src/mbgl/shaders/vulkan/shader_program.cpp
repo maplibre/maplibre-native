@@ -41,6 +41,11 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
     for (const auto& define : additionalDefines) {
         defineStr += "#define " + define.first + " " + define.second + "\n";
     }
+
+#ifdef __ANDROID__
+    defineStr += "#define USE_PRE_ROTATION";
+#endif
+
     observer.onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 
     constexpr auto targetClientVersion = glslang::EShTargetVulkan_1_0;

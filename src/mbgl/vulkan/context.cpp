@@ -207,13 +207,13 @@ void Context::beginFrame() {
             if (acquireImageResult.result == vk::Result::eSuccess) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
             } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
-                renderableResource.setAcquiredImageIndex(acquireImageResult.value);
-                // TODO implement pre-rotation transform for surface orientation
-#if defined(__APPLE__)
-                requestSurfaceUpdate();
-                beginFrame();
-                return;
-#endif
+                if (renderableResource.hasOrientationSupport()) {
+                    requestSurfaceUpdate();
+                    beginFrame();
+                    return;
+                } else {
+                    renderableResource.setAcquiredImageIndex(acquireImageResult.value);
+                }
             }
 
         } catch (const vk::OutOfDateKHRError& e) {
@@ -273,11 +273,8 @@ void Context::submitFrame() {
         try {
             const auto& presentQueue = backend.getPresentQueue();
             const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
-            if (presentResult == vk::Result::eSuboptimalKHR) {
-                // TODO implement pre-rotation transform for surface orientation
-#if defined(__APPLE__)
+            if (presentResult == vk::Result::eSuboptimalKHR && renderableResource.hasOrientationSupport()) {
                 requestSurfaceUpdate();
-#endif
             }
         } catch (const vk::OutOfDateKHRError& e) {
             requestSurfaceUpdate();
@@ -394,7 +391,22 @@ void Context::clearStencilBuffer(int32_t) {
 
 void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexcept {
     auto& renderPassImpl = static_cast<RenderPass&>(renderPass);
-    const_cast<Context*>(this)->globalUniformBuffers.bindDescriptorSets(renderPassImpl.getEncoder());
+    auto& context = const_cast<Context&>(*this);
+
+    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
+    if (renderableResource.hasOrientationSupport()) {
+        float surfaceRotation = renderableResource.getRotation();
+
+        struct alignas(16) {
+            alignas(16) std::array<float, 2> rotation0;
+            alignas(16) std::array<float, 2> rotation1;
+        } data;
+
+        data = {{cosf(surfaceRotation), -sinf(surfaceRotation)}, {sinf(surfaceRotation), cosf(surfaceRotation)}};
+        context.globalUniformBuffers.createOrUpdate(shaders::PlatformParamsUBO, &data, sizeof(data), context);
+    }
+
+    context.globalUniformBuffers.bindDescriptorSets(renderPassImpl.getEncoder());
 }
 
 bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
@@ -474,15 +486,23 @@ bool Context::renderTileClippingMasks(gfx::RenderPass& renderPass,
     commandBuffer->bindVertexBuffers(0, vertexBuffers, offset);
     commandBuffer->bindIndexBuffer(clipping.indexBuffer->getVulkanBuffer(), 0, vk::IndexType::eUint16);
 
+    auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
+    const float rad = renderableResource.getRotation();
+    const mat4 rotationMat = {cos(rad), -sin(rad), 0, 0, sin(rad), cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+
     for (const auto& tileInfo : tileUBOs) {
         commandBuffer->setStencilReference(vk::StencilFaceFlagBits::eFrontAndBack, tileInfo.stencil_ref);
+
+        mat4 matrix;
+        matrix::multiply(matrix, rotationMat, tileInfo.matrix);
+        const auto& matrixf = util::cast<float>(matrix);
 
         commandBuffer->pushConstants(
             getPushConstantPipelineLayout().get(),
             vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex | vk::ShaderStageFlagBits::eFragment,
             0,
-            sizeof(tileInfo.matrix),
-            &tileInfo.matrix);
+            sizeof(matrixf),
+            &matrixf);
         commandBuffer->drawIndexed(clipping.indexCount, 1, 0, 0, 0);
     }
 
