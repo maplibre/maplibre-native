@@ -220,11 +220,13 @@ class BenchmarkActivity : AppCompatActivity() {
         val renderingTimeStore = FrameTimeStore()
 
         maplibreMap.setSwapBehaviorFlush(benchmarkRun.syncRendering)
-        mapView.addOnDidFinishRenderingFrameListener { _: Boolean, frameEncodingTime: Double, frameRenderingTime: Double ->
+
+        val listener = MapView.OnDidFinishRenderingFrameListener { _: Boolean, frameEncodingTime: Double, frameRenderingTime: Double ->
             encodingTimeStore.add(frameEncodingTime * 1e3)
             renderingTimeStore.add(frameRenderingTime * 1e3)
             numFrames++;
         }
+        mapView.addOnDidFinishRenderingFrameListener(listener)
         mapView.setStyleSuspend(benchmarkRun.styleURL)
         numFrames = 0
 
@@ -238,7 +240,8 @@ class BenchmarkActivity : AppCompatActivity() {
         }
         val endTime = System.nanoTime()
         val fps = (numFrames * 1E9) / (endTime - startTime)
-        println("fps $fps")
+
+        mapView.removeOnDidFinishRenderingFrameListener(listener)
 
         return BenchmarkRunResult(fps, encodingTimeStore, renderingTimeStore)
     }
