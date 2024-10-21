@@ -44,12 +44,12 @@ fun jsonPayload(benchmarkResult: BenchmarkResult): JsonObject {
             for (run in benchmarkResult.runs) {
                 addJsonObject {
                     put("styleName", JsonPrimitive(run.first.styleName))
+                    put("syncRendering", JsonPrimitive(run.first.syncRendering))
                     put("fps", JsonPrimitive(run.second.fps))
                     put("avgEncodingTime", JsonPrimitive(run.second.encodingTimeStore.average()))
-                    put("low1pEncodingTime", JsonPrimitive(run.second.encodingTimeStore.low1p()))
                     put("avgRenderingTime", JsonPrimitive(run.second.renderingTimeStore.average()))
+                    put("low1pEncodingTime", JsonPrimitive(run.second.encodingTimeStore.low1p()))
                     put("low1pRenderingTime", JsonPrimitive(run.second.renderingTimeStore.low1p()))
-                    put("syncRendering", JsonPrimitive(run.first.syncRendering))
                 }
             }
         }

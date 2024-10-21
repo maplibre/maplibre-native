@@ -33,6 +33,7 @@ import org.maplibre.android.testapp.utils.BenchmarkRunResult
 import org.maplibre.android.testapp.utils.FrameTimeStore
 import org.maplibre.android.testapp.utils.jsonPayload
 import java.io.File
+import java.util.ArrayList
 import kotlin.collections.flatMap
 import kotlin.collections.toTypedArray
 import kotlin.coroutines.resume
@@ -202,7 +203,9 @@ class BenchmarkActivity : AppCompatActivity() {
                 for (i in 0 until benchmarkIterations) {
                     for (benchmarkRun in benchmarkRuns) {
                         val benchmarkRunResult = doBenchmarkRun(maplibreMap, benchmarkRun)
-                        benchmarkResult.runs.add(Pair(benchmarkRun, benchmarkRunResult))
+                        val benchmarkPair = Pair(benchmarkRun, benchmarkRunResult)
+                        benchmarkResult.runs.add(benchmarkPair)
+                        println(jsonPayload(BenchmarkResult(arrayListOf(benchmarkPair))))
                     }
                 }
 
