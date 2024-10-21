@@ -27,22 +27,6 @@
 #include <algorithm>
 #include <cstring>
 
-#ifndef MLN_VULKAN_GLOBAL_DESCRIPTOR_POOL_SIZE
-#define MLN_VULKAN_GLOBAL_DESCRIPTOR_POOL_SIZE 3 * 4
-#endif
-
-#ifndef MLN_VULKAN_LAYER_DESCRIPTOR_POOL_SIZE
-#define MLN_VULKAN_LAYER_DESCRIPTOR_POOL_SIZE 3 * 256
-#endif
-
-#ifndef MLN_VULKAN_DRAWABLE_UNIFORM_DESCRIPTOR_POOL_SIZE
-#define MLN_VULKAN_DRAWABLE_UNIFORM_DESCRIPTOR_POOL_SIZE 3 * 1024
-#endif
-
-#ifndef MLN_VULKAN_DRAWABLE_IMAGE_DESCRIPTOR_POOL_SIZE
-#define MLN_VULKAN_DRAWABLE_IMAGE_DESCRIPTOR_POOL_SIZE MLN_VULKAN_DRAWABLE_UNIFORM_DESCRIPTOR_POOL_SIZE / 2
-#endif
-
 namespace mbgl {
 namespace vulkan {
 
@@ -51,6 +35,12 @@ namespace vulkan {
 // per https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxVertexInputBindings
 // this can be queried at runtime (VkPhysicalDeviceLimits.maxVertexInputBindings)
 constexpr uint32_t maximumVertexBindingCount = 16;
+
+constexpr uint32_t globalDescriptorPoolSize = 3 * 4;
+constexpr uint32_t layerDescriptorPoolSize = 3 * 256;
+constexpr uint32_t drawableUniformDescriptorPoolSize = 3 * 1024;
+constexpr uint32_t drawableImageDescriptorPoolSize = drawableUniformDescriptorPoolSize / 2;
+
 static uint32_t glslangRefCount = 0;
 
 class RenderbufferResource : public gfx::RenderbufferResource {
@@ -84,19 +74,18 @@ void Context::initFrameResources() {
     const auto frameCount = backend.getMaxFrames();
 
     descriptorPoolMap.emplace(DescriptorSetType::Global,
-                              DescriptorPoolGrowable(MLN_VULKAN_GLOBAL_DESCRIPTOR_POOL_SIZE, shaders::globalUBOCount));
+                              DescriptorPoolGrowable(globalDescriptorPoolSize, shaders::globalUBOCount));
 
-    descriptorPoolMap.emplace(
-        DescriptorSetType::Layer,
-        DescriptorPoolGrowable(MLN_VULKAN_LAYER_DESCRIPTOR_POOL_SIZE, shaders::maxUBOCountPerLayer));
+    descriptorPoolMap.emplace(DescriptorSetType::Layer,
+                              DescriptorPoolGrowable(layerDescriptorPoolSize, shaders::maxUBOCountPerLayer));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableUniform,
-        DescriptorPoolGrowable(MLN_VULKAN_DRAWABLE_UNIFORM_DESCRIPTOR_POOL_SIZE, shaders::maxUBOCountPerDrawable));
+        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, shaders::maxUBOCountPerDrawable));
 
     descriptorPoolMap.emplace(
         DescriptorSetType::DrawableImage,
-        DescriptorPoolGrowable(MLN_VULKAN_DRAWABLE_IMAGE_DESCRIPTOR_POOL_SIZE, shaders::maxTextureCountPerShader));
+        DescriptorPoolGrowable(drawableImageDescriptorPoolSize, shaders::maxTextureCountPerShader));
 
     // command buffers
     const vk::CommandBufferAllocateInfo allocateInfo(
