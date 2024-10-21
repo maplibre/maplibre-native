@@ -5,7 +5,7 @@
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/style/conversion/layer.hpp>
 #include <mbgl/style/conversion/property_value.hpp>
-#include <mbgl/util/variable_anchor_offset_collection.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
 
 #include <array>
 
@@ -42,7 +42,7 @@ TEST(StyleConversion, VariableAnchorOffsetCollection) {
         ASSERT_EQ(error.message, expectedError);
 
         // empty array
-        expectedError = "array must containing an even number";
+        expectedError = "array must containing an even number of elements";
         variableAnchorOffset = parseVariableAnchorOffsetCollection("[]");
         ASSERT_FALSE(variableAnchorOffset.has_value());
         ASSERT_EQ(error.message, expectedError);
@@ -100,8 +100,7 @@ TEST(StyleConversion, VariableAnchorOffsetCollection) {
         EXPECT_EQ(7u, value.getObject()->size());
     }
 
-    auto jsonToExpression = [](const std::string& json) {
-        conversion::Error error;
+    auto jsonToExpression = [&](const std::string& json) {
         auto propertyValue = conversion::convertJSON<PropertyValue<VariableAnchorOffsetCollection>>(
             json, error, /*allowDataExpressions*/ true, /*convertTokens*/ false);
         return propertyValue->asExpression();

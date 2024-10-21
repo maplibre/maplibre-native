@@ -1,4 +1,4 @@
-#include <mbgl/util/variable_anchor_offset_collection.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
 #include <mbgl/style/conversion/stringify.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/util/enum.hpp>

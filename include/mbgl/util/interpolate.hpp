@@ -4,11 +4,11 @@
 #include <mbgl/style/position.hpp>
 #include <mbgl/style/rotation.hpp>
 #include <mbgl/style/types.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
 #include <mbgl/util/enum.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/range.hpp>
 #include <mbgl/util/string.hpp>
-#include <mbgl/util/variable_anchor_offset_collection.hpp>
 
 #include <array>
 #include <vector>

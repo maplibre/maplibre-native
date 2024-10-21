@@ -4,12 +4,12 @@
 #include <mbgl/style/property_value.hpp>
 #include <mbgl/style/expression/value.hpp>
 #include <mbgl/style/expression/formatted.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
 #include <mbgl/util/enum.hpp>
 #include <mbgl/util/color.hpp>
 #include <mbgl/util/feature.hpp>
 #include <mbgl/util/ignore.hpp>
 #include <mbgl/util/rapidjson.hpp>
-#include <mbgl/util/variable_anchor_offset_collection.hpp>
 
 #include <array>
 #include <vector>

@@ -3,12 +3,12 @@
 #include <mbgl/layout/layout.hpp>
 #include <mbgl/map/mode.hpp>
 #include <mbgl/style/layers/symbol_layer_properties.hpp>
+#include <mbgl/style/variable_anchor_offset_collection.hpp>
 #include <mbgl/layout/symbol_feature.hpp>
 #include <mbgl/layout/symbol_instance.hpp>
 #include <mbgl/text/bidi.hpp>
 #include <mbgl/renderer/buckets/symbol_bucket.hpp>
 #include <mbgl/util/containers.hpp>
-#include <mbgl/util/variable_anchor_offset_collection.hpp>
 
 #include <memory>
 #include <map>

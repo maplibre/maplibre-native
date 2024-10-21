@@ -245,8 +245,9 @@ class MLNStyleValueTransformer {
     if ([rawValue isKindOfClass:[NSArray class]]) {
       NSArray *array = (NSArray *)rawValue;
       if (array.count % 2 != 0) {
-        [NSException raise:NSInvalidArgumentException
-                    format:@"VariableTextAnchorOffset array should have even number of elements."];
+        [NSException
+             raise:NSInvalidArgumentException
+            format:@"VariableTextAnchorOffset array should have an even number of elements."];
       }
 
       std::vector<mbgl::AnchorOffsetPair> anchorOffsets;
