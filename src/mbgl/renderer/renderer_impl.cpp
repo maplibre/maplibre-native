@@ -252,8 +252,11 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #endif
 
         // Tweakers are run in the upload pass so they can set up uniforms.
-        orchestrator.visitLayerGroups(
-            [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
+        int32_t i = static_cast<int32_t>(orchestrator.numLayerGroups()) - 1;
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            parameters.currentLayer = i++;
+            layerGroup.runTweakers(renderTree, parameters);
+        });
         orchestrator.visitDebugLayerGroups(
             [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
 
@@ -315,7 +318,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         assert(parameters.pass == RenderPass::Pass3D);
 
         // draw layer groups, 3D pass
-        int32_t i = orchestrator.numLayerGroups() - 1;
+        int32_t i = static_cast<int32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             parameters.currentLayer = i++;
             layerGroup.render(orchestrator, parameters);
@@ -373,7 +376,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
-        int32_t i = orchestrator.numLayerGroups() - 1;
+        int32_t i = static_cast<int32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             parameters.currentLayer = i--;
             layerGroup.render(orchestrator, parameters);
@@ -387,7 +390,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
                                             PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
-        int32_t i = orchestrator.numLayerGroups() - 1;
+        int32_t i = static_cast<int32_t>(orchestrator.numLayerGroups()) - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
             parameters.currentLayer = i--;
             layerGroup.render(orchestrator, parameters);
