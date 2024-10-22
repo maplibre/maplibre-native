@@ -171,9 +171,6 @@ public:
 
     void updateLayerIndex(int32_t value) override {
         layerIndex = value;
-        for (auto* drawable : sortedDrawables) {
-            drawable->setLayerIndex(value);
-        }
     }
 
 protected:
@@ -247,9 +244,6 @@ public:
 
     void updateLayerIndex(int32_t value) override {
         layerIndex = value;
-        for (auto& drawable : drawables) {
-            drawable->setLayerIndex(value);
-        }
     }
 
 protected:

@@ -106,7 +106,6 @@ public:
     bool addLayerGroup(LayerGroupBasePtr);
     bool removeLayerGroup(const LayerGroupBasePtr&);
     size_t numLayerGroups() const noexcept;
-    int32_t maxLayerIndex() const;
     void updateLayerIndex(LayerGroupBasePtr, int32_t newIndex);
 
     template <typename Func /* void(LayerGroupBase&) */>

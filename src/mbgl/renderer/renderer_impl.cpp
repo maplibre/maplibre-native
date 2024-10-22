@@ -315,10 +315,10 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         assert(parameters.pass == RenderPass::Pass3D);
 
         // draw layer groups, 3D pass
-        const auto maxLayerIndex = orchestrator.maxLayerIndex();
+        int32_t i = orchestrator.numLayerGroups() - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
+            parameters.currentLayer = i++;
             layerGroup.render(orchestrator, parameters);
-            parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
         });
     };
 #endif // MLN_DRAWABLE_RENDERER
@@ -368,29 +368,28 @@ void Renderer::Impl::render(const RenderTree& renderTree,
     // Drawables
     const auto drawableOpaquePass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-opaque"));
-        const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Opaque;
-        parameters.currentLayer = 0;
         parameters.depthRangeSize = 1 -
-                                    (maxLayerIndex + 3) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
+                                    (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
 
         // draw layer groups, opaque pass
+        int32_t i = orchestrator.numLayerGroups() - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            parameters.currentLayer = layerGroup.getLayerIndex();
+            parameters.currentLayer = i--;
             layerGroup.render(orchestrator, parameters);
         });
     };
 
     const auto drawableTranslucentPass = [&] {
         const auto debugGroup(parameters.renderPass->createDebugGroup("drawables-translucent"));
-        const auto maxLayerIndex = orchestrator.maxLayerIndex();
         parameters.pass = RenderPass::Translucent;
         parameters.depthRangeSize = 1 -
-                                    (maxLayerIndex + 3) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
+                                    (orchestrator.numLayerGroups() + 2) * PaintParameters::numSublayers * PaintParameters::depthEpsilon;
 
         // draw layer groups, translucent pass
+        int32_t i = orchestrator.numLayerGroups() - 1;
         orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) {
-            parameters.currentLayer = maxLayerIndex - layerGroup.getLayerIndex();
+            parameters.currentLayer = i--;
             layerGroup.render(orchestrator, parameters);
         });
 
@@ -398,7 +397,7 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         // Note that they may be out of order, this is just a temporary fix for `RenderLocationIndicatorLayer` (#2216)
         parameters.depthRangeSize = 1 - (layerRenderItems.size() + 2) * PaintParameters::numSublayers *
                                             PaintParameters::depthEpsilon;
-        int32_t i = static_cast<int32_t>(layerRenderItems.size()) - 1;
+        i = static_cast<int32_t>(layerRenderItems.size()) - 1;
         for (auto it = layerRenderItems.begin(); it != layerRenderItems.end() && i >= 0; ++it, --i) {
             parameters.currentLayer = i;
             const RenderItem& item = *it;
