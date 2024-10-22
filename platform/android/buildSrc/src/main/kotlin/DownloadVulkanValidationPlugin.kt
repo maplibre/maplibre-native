@@ -13,9 +13,7 @@ open class DownloadVulkanValidationPlugin : Plugin<Project> {
 internal fun Project.configureVulkanJniLibs() = this.extensions.getByType<BaseExtension>().run {
     sourceSets {
         getByName("vulkan") {
-            getByName("debug") {
-                jniLibs.srcDir(tasks.named("unzip").get().outputs.files.asFileTree)
-            }
+            jniLibs.srcDir(tasks.named("unzip").get().outputs.files.asFileTree)
         }
     }
 }
