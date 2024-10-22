@@ -106,7 +106,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::Presen
         extent.height = std::min(std::max(h, capabilities.minImageExtent.height), capabilities.maxImageExtent.height);
     }
 
-    if (hasOrientationSupport()) {
+    if (hasSurfaceTransformSupport()) {
         if (capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate90 ||
             capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate270) {
             std::swap(extent.width, extent.height);
@@ -141,8 +141,8 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::Presen
         swapchainCreateInfo.setImageSharingMode(vk::SharingMode::eExclusive);
     }
 
-    swapchainCreateInfo.setPreTransform(hasOrientationSupport() ? capabilities.currentTransform
-                                                                : vk::SurfaceTransformFlagBitsKHR::eIdentity);
+    swapchainCreateInfo.setPreTransform(hasSurfaceTransformSupport() ? capabilities.currentTransform
+                                                                     : vk::SurfaceTransformFlagBitsKHR::eIdentity);
     swapchainCreateInfo.setClipped(VK_TRUE);
 
     if (capabilities.supportedCompositeAlpha & vk::CompositeAlphaFlagBitsKHR::eInherit) {
@@ -240,8 +240,19 @@ const vk::Image SurfaceRenderableResource::getAcquiredImage() const {
     return colorAllocations[acquiredImageIndex]->image;
 }
 
-bool SurfaceRenderableResource::hasOrientationSupport() const {
+bool SurfaceRenderableResource::hasSurfaceTransformSupport() const {
+#ifdef __ANDROID__
     return surface && capabilities.supportedTransforms != vk::SurfaceTransformFlagBitsKHR::eIdentity;
+#else
+    return false;
+#endif
+}
+
+bool SurfaceRenderableResource::didSurfaceTransformUpdate() const {
+    const auto& physicalDevice = backend.getPhysicalDevice();
+    const auto& updatedCapabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get());
+
+    return capabilities.currentTransform != updatedCapabilities.currentTransform;
 }
 
 float SurfaceRenderableResource::getRotation() {

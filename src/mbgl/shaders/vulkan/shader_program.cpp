@@ -42,9 +42,10 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
         defineStr += "#define " + define.first + " " + define.second + "\n";
     }
 
-#ifdef __ANDROID__
-    defineStr += "#define USE_PRE_ROTATION";
-#endif
+    const auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
+    if (renderableResource.hasSurfaceTransformSupport()) {
+        defineStr += "#define USE_SURFACE_TRANSFORM";
+    }
 
     observer.onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 

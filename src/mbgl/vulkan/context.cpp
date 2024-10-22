@@ -176,6 +176,20 @@ void Context::beginFrame() {
     auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
     const auto& platformSurface = renderableResource.getPlatformSurface();
 
+    // poll for surface transform updates if enabled
+    const int32_t surfaceTransformPollingInterval = renderableResource.getSurfaceTransformPollingInterval();
+    if (surfaceTransformPollingInterval >= 0 && !surfaceUpdateRequested) {
+        if (currentFrameCount > surfaceTransformPollingInterval) {
+            if (renderableResource.didSurfaceTransformUpdate()) {
+                requestSurfaceUpdate();
+            }
+
+            currentFrameCount = 0;
+        } else {
+            ++currentFrameCount;
+        }
+    }
+
     if (platformSurface && surfaceUpdateRequested) {
         renderableResource.recreateSwapchain();
 
@@ -188,6 +202,14 @@ void Context::beginFrame() {
         // sync resources with swapchain
         frameResourceIndex = 0;
         surfaceUpdateRequested = false;
+
+        // update renderable size
+        if (renderableResource.hasSurfaceTransformSupport()) {
+            const auto& extent = renderableResource.getExtent();
+
+            auto& renderable = static_cast<Renderable&>(backend.getDefaultRenderable());
+            renderable.setSize({extent.width, extent.height});
+        }
     }
 
     backend.startFrameCapture();
@@ -207,13 +229,9 @@ void Context::beginFrame() {
             if (acquireImageResult.result == vk::Result::eSuccess) {
                 renderableResource.setAcquiredImageIndex(acquireImageResult.value);
             } else if (acquireImageResult.result == vk::Result::eSuboptimalKHR) {
-                if (renderableResource.hasOrientationSupport()) {
-                    requestSurfaceUpdate();
-                    beginFrame();
-                    return;
-                } else {
-                    renderableResource.setAcquiredImageIndex(acquireImageResult.value);
-                }
+                requestSurfaceUpdate();
+                beginFrame();
+                return;
             }
 
         } catch (const vk::OutOfDateKHRError& e) {
@@ -273,7 +291,7 @@ void Context::submitFrame() {
         try {
             const auto& presentQueue = backend.getPresentQueue();
             const vk::Result presentResult = presentQueue.presentKHR(presentInfo);
-            if (presentResult == vk::Result::eSuboptimalKHR && renderableResource.hasOrientationSupport()) {
+            if (presentResult == vk::Result::eSuboptimalKHR) {
                 requestSurfaceUpdate();
             }
         } catch (const vk::OutOfDateKHRError& e) {
@@ -394,7 +412,7 @@ void Context::bindGlobalUniformBuffers(gfx::RenderPass& renderPass) const noexce
     auto& context = const_cast<Context&>(*this);
 
     auto& renderableResource = renderPassImpl.getDescriptor().renderable.getResource<SurfaceRenderableResource>();
-    if (renderableResource.hasOrientationSupport()) {
+    if (renderableResource.hasSurfaceTransformSupport()) {
         float surfaceRotation = renderableResource.getRotation();
 
         struct alignas(16) {
