@@ -92,7 +92,6 @@ protected:
 };
 
 class Renderable : public gfx::Renderable {
-
 protected:
     Renderable(const Size size_, std::unique_ptr<gfx::RenderableResource> resource_)
         : gfx::Renderable(size_, std::move(resource_)) {}

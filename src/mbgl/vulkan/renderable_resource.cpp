@@ -256,7 +256,6 @@ bool SurfaceRenderableResource::didSurfaceTransformUpdate() const {
 }
 
 float SurfaceRenderableResource::getRotation() {
-
     switch (capabilities.currentTransform) {
         default:
         case vk::SurfaceTransformFlagBitsKHR::eIdentity:
