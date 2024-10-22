@@ -12,6 +12,7 @@
 #include <mbgl/vulkan/uniform_buffer.hpp>
 #include <mbgl/vulkan/renderer_backend.hpp>
 #include <mbgl/vulkan/pipeline.hpp>
+#include <mbgl/vulkan/descriptor_set.hpp>
 
 #include <memory>
 #include <optional>
@@ -135,21 +136,14 @@ public:
     const std::unique_ptr<BufferResource>& getDummyVertexBuffer();
     const std::unique_ptr<BufferResource>& getDummyUniformBuffer();
     const std::unique_ptr<Texture2D>& getDummyTexture();
-    const vk::UniqueDescriptorSetLayout& getImageDescriptorSetLayout();
-    const vk::UniqueDescriptorSetLayout& buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
-                                                                         size_t uniformCount,
-                                                                         const std::string& name);
 
-    const std::vector<vk::DescriptorSetLayout>& getDescriptorSetLayouts();
     const vk::DescriptorSetLayout& getDescriptorSetLayout(DescriptorSetType type);
+    DescriptorPoolGrowable& getDescriptorPool(DescriptorSetType type);
     const vk::UniquePipelineLayout& getGeneralPipelineLayout();
     const vk::UniquePipelineLayout& getPushConstantPipelineLayout();
 
-    void bindDescriptorSet(DescriptorSetType type, const vk::DescriptorSet& descriptorSet);
-
     uint8_t getCurrentFrameResourceIndex() const { return frameResourceIndex; }
-    const vk::UniqueDescriptorPool& getGlobalDescriptorPool() const;
-    void enqueueDeletion(std::function<void(const Context&)>&& function);
+    void enqueueDeletion(std::function<void(Context&)>&& function);
     void submitOneTimeCommand(const std::function<void(const vk::UniqueCommandBuffer&)>& function) const;
 
     void requestSurfaceUpdate() { surfaceUpdateRequested = true; }
@@ -162,7 +156,7 @@ private:
         vk::UniqueSemaphore frameSemaphore;
         vk::UniqueFence flightFrameFence;
 
-        std::vector<std::function<void(const Context&)>> deletionQueue;
+        std::vector<std::function<void(Context&)>> deletionQueue;
 
         FrameResources(vk::UniqueCommandBuffer& cb,
                        vk::UniqueSemaphore&& surf,
@@ -173,17 +167,22 @@ private:
               frameSemaphore(std::move(frame)),
               flightFrameFence(std::move(flight)) {}
 
-        void runDeletionQueue(const Context&);
+        void runDeletionQueue(Context&);
     };
 
     void initFrameResources();
     void destroyResources();
 
+    void buildImageDescriptorSetLayout();
+    void buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
+                                         size_t uniformCount,
+                                         const std::string& name);
+
 private:
     RendererBackend& backend;
 
     vulkan::UniformBufferArray globalUniformBuffers;
-    vk::UniqueDescriptorPool globalDescriptorPool;
+    std::unordered_map<DescriptorSetType, DescriptorPoolGrowable> descriptorPoolMap;
 
     std::unique_ptr<BufferResource> dummyVertexBuffer;
     std::unique_ptr<BufferResource> dummyUniformBuffer;
@@ -191,8 +190,7 @@ private:
     vk::UniqueDescriptorSetLayout globalUniformDescriptorSetLayout;
     vk::UniqueDescriptorSetLayout layerUniformDescriptorSetLayout;
     vk::UniqueDescriptorSetLayout drawableUniformDescriptorSetLayout;
-    vk::UniqueDescriptorSetLayout imageDescriptorSetLayout;
-    std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
+    vk::UniqueDescriptorSetLayout drawableImageDescriptorSetLayout;
     vk::UniquePipelineLayout generalPipelineLayout;
     vk::UniquePipelineLayout pushConstantPipelineLayout;
 
