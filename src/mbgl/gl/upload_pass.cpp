@@ -6,6 +6,7 @@
 #include <mbgl/gl/enum.hpp>
 #include <mbgl/gl/defines.hpp>
 #include <mbgl/gl/command_encoder.hpp>
+#include <mbgl/gl/renderer_backend.hpp>
 #include <mbgl/gl/vertex_buffer_resource.hpp>
 #include <mbgl/gl/index_buffer_resource.hpp>
 #include <mbgl/gl/texture_resource.hpp>
@@ -24,6 +25,41 @@ namespace gl {
 
 using namespace platform;
 
+namespace {
+
+UniqueBuffer createUniqueBuffer(
+    gl::Context& mainContext, const void* data, std::size_t size, gfx::BufferUsageType usage, GLenum bufferGlTarget) {
+    MLN_TRACE_FUNC();
+
+    // mainContext is the main render thread context and is passed to UniqueBuffer deleter.
+    // only the main context deletes resources. Shared contexts only upload resources.
+
+    // Note that we call glBindBuffer instead of setting commandEncoder.context.vertexBuffer
+    // This is because this function can be used in shared contexts, e.g. shared EGL contexts.
+    // States aren't tracked in shared contexts. When this function is called in the main
+    // render thread context then the caller must set commandEncoder.context.vertexBuffer
+
+    BufferID id = 0;
+    MBGL_CHECK_ERROR(glGenBuffers(1, &id));
+    MBGL_CHECK_ERROR(glBindBuffer(bufferGlTarget, id));
+    MBGL_CHECK_ERROR(glBufferData(bufferGlTarget, size, data, Enum<gfx::BufferUsageType>::to(usage)));
+
+    // NOLINTNEXTLINE(performance-move-const-arg)
+    return UniqueBuffer{std::move(id), {mainContext}};
+}
+
+void updateUniqueBuffer(const UniqueBuffer& buffer, const void* data, std::size_t size, GLenum bufferGlTarget) {
+    MLN_TRACE_FUNC();
+
+    // Similar to createUniqueBuffer the caller must set commandEncoder.context.vertexBuffer when
+    // it is run in the main render thread context
+
+    MBGL_CHECK_ERROR(glBindBuffer(bufferGlTarget, buffer.get()));
+    MBGL_CHECK_ERROR(glBufferSubData(bufferGlTarget, 0, size, data));
+}
+
+} // namespace
+
 UploadPass::UploadPass(gl::CommandEncoder& commandEncoder_, const char* name)
     : commandEncoder(commandEncoder_),
       debugGroup(commandEncoder.createDebugGroup(name)) {}
@@ -32,44 +68,115 @@ std::unique_ptr<gfx::VertexBufferResource> UploadPass::createVertexBufferResourc
                                                                                   const std::size_t size,
                                                                                   const gfx::BufferUsageType usage,
                                                                                   bool /*persistent*/) {
-    BufferID id = 0;
-    MBGL_CHECK_ERROR(glGenBuffers(1, &id));
-    commandEncoder.context.renderingStats().numBuffers++;
-    commandEncoder.context.renderingStats().memVertexBuffers += static_cast<int>(size);
-    // NOLINTNEXTLINE(performance-move-const-arg)
-    UniqueBuffer result{std::move(id), {commandEncoder.context}};
-    commandEncoder.context.vertexBuffer = result;
-    MBGL_CHECK_ERROR(glBufferData(GL_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
-    return std::make_unique<gl::VertexBufferResource>(std::move(result), static_cast<int>(size));
+    MLN_TRACE_FUNC();
+
+    constexpr GLenum bufferGlTarget = GL_ARRAY_BUFFER;
+    auto& ctx = commandEncoder.context;
+    auto& backend = ctx.getBackend();
+
+    ctx.renderingStats().numBuffers++;
+    ctx.renderingStats().memVertexBuffers += static_cast<int>(size);
+
+    if (backend.supportFreeThreadedUpload()) {
+        auto result = std::make_unique<gl::VertexBufferResource>(
+            [&](int size_, gfx::BufferUsageType usage_, const void* data_) {
+                return createUniqueBuffer(ctx, data_, size_, usage_, bufferGlTarget);
+            },
+            [&](const UniqueBuffer& buffer, int size_, const void* data_) {
+                updateUniqueBuffer(buffer, data_, size_, bufferGlTarget);
+            },
+            static_cast<int>(size));
+        result->asyncAlloc(backend.getResourceUploadThreadPool(), static_cast<int>(size), usage, data);
+        return result;
+
+    } else {
+        UniqueBuffer result = createUniqueBuffer(ctx, data, size, usage, bufferGlTarget);
+        ctx.vertexBuffer = result;
+        return std::make_unique<gl::VertexBufferResource>(std::move(result), static_cast<int>(size));
+    }
 }
 
 void UploadPass::updateVertexBufferResource(gfx::VertexBufferResource& resource, const void* data, std::size_t size) {
-    commandEncoder.context.vertexBuffer = static_cast<gl::VertexBufferResource&>(resource).getBuffer();
-    MBGL_CHECK_ERROR(glBufferSubData(GL_ARRAY_BUFFER, 0, size, data));
+    MLN_TRACE_FUNC();
+
+    constexpr GLenum bufferGlTarget = GL_ARRAY_BUFFER;
+    auto& ctx = commandEncoder.context;
+    auto& backend = ctx.getBackend();
+    auto& glResource = static_cast<gl::VertexBufferResource&>(resource);
+    assert(static_cast<int>(size) <= glResource.getByteSize());
+
+    if (backend.supportFreeThreadedUpload()) {
+        if (glResource.isAsyncPending()) {
+            // This happens if an allocation is allocated and then followed with an update
+            // This also happens is an uploaded resource in a previous frame has not been used
+            glResource.wait();
+        }
+        glResource.asyncUpdate(backend.getResourceUploadThreadPool(), static_cast<int>(size), data);
+    } else {
+        const UniqueBuffer& buffer = glResource.pickBuffer();
+        ctx.vertexBuffer = buffer;
+        updateUniqueBuffer(buffer, data, size, bufferGlTarget);
+    }
 }
 
 std::unique_ptr<gfx::IndexBufferResource> UploadPass::createIndexBufferResource(const void* data,
                                                                                 std::size_t size,
                                                                                 const gfx::BufferUsageType usage,
                                                                                 bool /*persistent*/) {
-    BufferID id = 0;
-    MBGL_CHECK_ERROR(glGenBuffers(1, &id));
-    commandEncoder.context.renderingStats().numBuffers++;
-    commandEncoder.context.renderingStats().memIndexBuffers += static_cast<int>(size);
-    // NOLINTNEXTLINE(performance-move-const-arg)
-    UniqueBuffer result{std::move(id), {commandEncoder.context}};
-    commandEncoder.context.bindVertexArray = 0;
-    commandEncoder.context.globalVertexArrayState.indexBuffer = result;
-    MBGL_CHECK_ERROR(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, Enum<gfx::BufferUsageType>::to(usage)));
-    return std::make_unique<gl::IndexBufferResource>(std::move(result), static_cast<int>(size));
+    MLN_TRACE_FUNC();
+
+    constexpr GLenum bufferGlTarget = GL_ELEMENT_ARRAY_BUFFER;
+    auto& ctx = commandEncoder.context;
+    auto& backend = ctx.getBackend();
+
+    ctx.renderingStats().numBuffers++;
+    ctx.renderingStats().memIndexBuffers += static_cast<int>(size);
+
+    if (backend.supportFreeThreadedUpload()) {
+        auto result = std::make_unique<gl::IndexBufferResource>(
+            [&](int size_, gfx::BufferUsageType usage_, const void* data_) {
+                return createUniqueBuffer(ctx, data_, size_, usage_, bufferGlTarget);
+            },
+            [&](const UniqueBuffer& buffer, int size_, const void* data_) {
+                updateUniqueBuffer(buffer, data_, size_, bufferGlTarget);
+            },
+            static_cast<int>(size));
+        result->asyncAlloc(backend.getResourceUploadThreadPool(), static_cast<int>(size), usage, data);
+        return result;
+
+    } else {
+        ctx.bindVertexArray = 0;
+        ctx.globalVertexArrayState.indexBuffer = 0;
+        UniqueBuffer result = createUniqueBuffer(ctx, data, size, usage, bufferGlTarget);
+        ctx.globalVertexArrayState.indexBuffer = result;
+        return std::make_unique<gl::IndexBufferResource>(std::move(result), static_cast<int>(size));
+    }
 }
 
 void UploadPass::updateIndexBufferResource(gfx::IndexBufferResource& resource, const void* data, std::size_t size) {
-    // Be sure to unbind any existing vertex array object before binding the
-    // index buffer so that we don't mess up another VAO
-    commandEncoder.context.bindVertexArray = 0;
-    commandEncoder.context.globalVertexArrayState.indexBuffer = static_cast<gl::IndexBufferResource&>(resource).buffer;
-    MBGL_CHECK_ERROR(glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, size, data));
+    MLN_TRACE_FUNC();
+
+    constexpr GLenum bufferGlTarget = GL_ELEMENT_ARRAY_BUFFER;
+    auto& ctx = commandEncoder.context;
+    auto& backend = ctx.getBackend();
+    auto& glResource = static_cast<gl::IndexBufferResource&>(resource);
+    assert(static_cast<int>(size) <= glResource.getByteSize());
+
+    if (backend.supportFreeThreadedUpload()) {
+        if (glResource.isAsyncPending()) {
+            // This happens if an allocation is allocated and then followed with an update
+            // This also happens is an uploaded resource in a previous frame has not been used
+            glResource.wait();
+        }
+        glResource.asyncUpdate(backend.getResourceUploadThreadPool(), static_cast<int>(size), data);
+    } else {
+        const UniqueBuffer& buffer = glResource.pickBuffer();
+        // Be sure to unbind any existing vertex array object before binding the
+        // index buffer so that we don't mess up another VAO
+        ctx.bindVertexArray = 0;
+        ctx.globalVertexArrayState.indexBuffer = buffer;
+        updateUniqueBuffer(buffer, data, size, bufferGlTarget);
+    }
 }
 
 std::unique_ptr<gfx::TextureResource> UploadPass::createTextureResource(const Size size,
@@ -146,6 +253,8 @@ const std::unique_ptr<gfx::VertexBufferResource> noBuffer;
 }
 const gfx::UniqueVertexBufferResource& UploadPass::getBuffer(const gfx::VertexVectorBasePtr& vec,
                                                              const gfx::BufferUsageType usage) {
+    MLN_TRACE_FUNC();
+
     if (vec) {
         const auto* rawBufPtr = vec->getRawData();
         const auto rawBufSize = static_cast<int>(vec->getRawCount() * vec->getRawSize());
@@ -196,6 +305,7 @@ gfx::AttributeBindingArray UploadPass::buildAttributeBindings(
     const std::optional<std::chrono::duration<double>> lastUpdate,
     /*out*/ std::vector<std::unique_ptr<gfx::VertexBufferResource>>& outBuffers) {
     MLN_TRACE_FUNC();
+
     AttributeBindingArray bindings;
     bindings.resize(defaults.allocatedSize());
 

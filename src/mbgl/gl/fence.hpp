@@ -11,8 +11,11 @@ public:
     Fence();
     ~Fence();
 
-    void insert() noexcept;
+    void insert();
     bool isSignaled() const;
+    void cpuWait() const;
+    void gpuWait() const;
+    void reset() noexcept;
 
 private:
     platform::GLsync fence{nullptr};

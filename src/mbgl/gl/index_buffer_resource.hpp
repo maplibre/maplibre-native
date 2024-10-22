@@ -1,18 +1,23 @@
 #pragma once
 
 #include <mbgl/gfx/index_buffer.hpp>
-#include <mbgl/gl/object.hpp>
+#include <mbgl/gl/buffer_resource.hpp>
 
 namespace mbgl {
 namespace gl {
 
-class IndexBufferResource : public gfx::IndexBufferResource {
+class IndexBufferResource : public BufferResource, public gfx::IndexBufferResource {
 public:
-    IndexBufferResource(UniqueBuffer&& buffer_, int byteSize_);
-    ~IndexBufferResource() noexcept override;
+    using BufferResource::AsyncAllocCallback;
+    using BufferResource::AsyncUpdateCallback;
 
-    UniqueBuffer buffer;
-    int byteSize;
+    // Create a buffer resource that takes ownership of buffer_
+    IndexBufferResource(UniqueBuffer&& buffer_, int byteSize_);
+
+    // Create a non-owning buffer resource
+    IndexBufferResource(AsyncAllocCallback alloc, AsyncUpdateCallback update, int byteSize_);
+
+    ~IndexBufferResource() noexcept override;
 };
 
 } // namespace gl

@@ -610,7 +610,7 @@ void VertexAttribute::Set(const Type& binding, Context& context, AttributeLocati
     MLN_TRACE_FUNC_GL();
     if (binding && binding->vertexBufferResource) {
         context.vertexBuffer =
-            reinterpret_cast<const gl::VertexBufferResource&>(*binding->vertexBufferResource).getBuffer();
+            static_cast<gl::VertexBufferResource&>(*binding->vertexBufferResource).waitAndGetBuffer();
         MBGL_CHECK_ERROR(glEnableVertexAttribArray(location));
         MBGL_CHECK_ERROR(glVertexAttribPointer(
             location,

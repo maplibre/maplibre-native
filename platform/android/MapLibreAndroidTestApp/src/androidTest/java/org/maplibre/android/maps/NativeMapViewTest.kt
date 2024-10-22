@@ -435,7 +435,7 @@ class NativeMapViewTest : AppCenter() {
         assertEquals(transitionOptions, nativeMapView.transitionOptions)
     }
 
-    class DummyRenderer(context: Context) : MapRenderer(context, null) {
+    class DummyRenderer(context: Context) : MapRenderer(context, null, false) {
 
         private var renderingRefreshMode: RenderingRefreshMode = RenderingRefreshMode.WHEN_DIRTY
 

@@ -250,7 +250,6 @@ void Renderer::Impl::render(const RenderTree& renderTree,
 #if !defined(NDEBUG)
         const auto debugGroup = uploadPass->createDebugGroup("layerGroup-upload");
 #endif
-
         // Tweakers are run in the upload pass so they can set up uniforms.
         orchestrator.visitLayerGroups(
             [&](LayerGroupBase& layerGroup) { layerGroup.runTweakers(renderTree, parameters); });
@@ -261,13 +260,13 @@ void Renderer::Impl::render(const RenderTree& renderTree,
         orchestrator.updateDebugLayerGroups(renderTree, parameters);
 
         // Give the layers a chance to upload
-        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
+        orchestrator.visitLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.issueUpload(*uploadPass); });
 
         // Give the render targets a chance to upload
-        orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) { renderTarget.upload(*uploadPass); });
+        orchestrator.visitRenderTargets([&](RenderTarget& renderTarget) { renderTarget.issueUpload(*uploadPass); });
 
         // Upload the Debug layer group
-        orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.upload(*uploadPass); });
+        orchestrator.visitDebugLayerGroups([&](LayerGroupBase& layerGroup) { layerGroup.issueUpload(*uploadPass); });
     }
 
     const Size atlasSize = parameters.patternAtlas.getPixelSize();

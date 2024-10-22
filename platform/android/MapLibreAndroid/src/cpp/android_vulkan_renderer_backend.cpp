@@ -1,6 +1,7 @@
 #include "android_vulkan_renderer_backend.hpp"
 
 #include <mbgl/gfx/backend_scope.hpp>
+#include <mbgl/util/logging.hpp>
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/vulkan/renderable_resource.hpp>
 
@@ -71,7 +72,11 @@ namespace gfx {
 
 template <>
 std::unique_ptr<android::AndroidRendererBackend> Backend::Create<mbgl::gfx::Backend::Type::Vulkan>(
-    ANativeWindow* window) {
+    ANativeWindow* window, bool multiThreadedGpuResourceUpload) {
+    if (multiThreadedGpuResourceUpload) {
+        mbgl::Log::Error(mbgl::Event::Render,
+                         "Multi-threaded GPU resource upload flag has no effect in a Vulkan backend");
+    }
     return std::make_unique<android::AndroidVulkanRendererBackend>(window);
 }
 

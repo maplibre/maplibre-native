@@ -8,7 +8,7 @@
 namespace mbgl {
 namespace gl {
 
-class HeadlessBackend final : public gl::RendererBackend, public gfx::HeadlessBackend {
+class HeadlessBackend : public gl::RendererBackend, public gfx::HeadlessBackend {
 public:
     HeadlessBackend(Size = {256, 256},
                     SwapBehaviour = SwapBehaviour::NoFlush,
