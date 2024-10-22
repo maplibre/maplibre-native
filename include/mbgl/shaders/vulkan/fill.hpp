@@ -55,7 +55,7 @@ void main() {
 #endif
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 }
 )";
 
@@ -150,7 +150,7 @@ void main() {
 #endif
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_position = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * global.world_size;
 }
@@ -309,7 +309,7 @@ void main() {
     frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, in_position),
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 }
 )";
 
@@ -502,14 +502,12 @@ void main() {
     const vec2 display_size_b = vec2((pattern_br_b.x - pattern_tl_b.x) / pixelRatio, (pattern_br_b.y - pattern_tl_b.y) / pixelRatio);
 
     const vec2 position2 = in_position.xy;
-    vec4 position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    position.y *= -1.0;
+    gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
+    applySurfaceTransform();
 
     frag_pos_a = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, fromScale * display_size_a, tileZoomRatio, position2),
     frag_pos_b = get_pattern_pos(drawable.pixel_coord_upper, drawable.pixel_coord_lower, toScale * display_size_b, tileZoomRatio, position2),
-    frag_pos = (position.xy / position.w + 1.0) / 2.0 * global.world_size;
-    
-    gl_Position = position;
+    frag_pos = (gl_Position.xy / gl_Position.w + 1.0) / 2.0 * global.world_size;
 }
 )";
 
@@ -655,7 +653,7 @@ void main() {
 
     vec4 projected_extrude = drawable.matrix * vec4(dist / drawable.ratio, 0.0, 0.0);
     gl_Position = drawable.matrix * vec4(pos, 0.0, 1.0) + projected_extrude;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // calculate how much the perspective view squishes or stretches the extrude
     float extrude_length_without_perspective = length(dist);
@@ -788,7 +786,7 @@ void main() {
     const float z = t != 0.0 ? height : base;
 
     gl_Position = drawable.matrix * vec4(in_position, z, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
     frag_color = vec4(1.0);
@@ -944,7 +942,7 @@ void main() {
     const float z = t != 0.0 ? height : base;
 
     gl_Position = drawable.matrix * vec4(in_position, z, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
 #if defined(OVERDRAW_INSPECTOR)
     frag_color = vec4(1.0);

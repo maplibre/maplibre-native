@@ -44,7 +44,7 @@ void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
     gl_Position.xy += (in_extrude + in_shift) * drawable.extrude_scale * gl_Position.w * collision_perspective_ratio;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_placed = in_placed.x;
     frag_notUsed = in_placed.y;
@@ -128,7 +128,7 @@ void main() {
     float padding_factor = 1.2; // Pad the vertices slightly to make room for anti-alias blur
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
     gl_Position.xy += in_extrude * drawable.extrude_scale * padding_factor * gl_Position.w * collision_perspective_ratio;
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_placed = in_placed.x;
     frag_notUsed = in_placed.y;

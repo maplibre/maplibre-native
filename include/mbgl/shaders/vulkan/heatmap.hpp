@@ -98,7 +98,7 @@ void main() {
     // multiply a_pos by 0.5, since we had it * 2 in order to sneak
     // in extrusion data
     gl_Position = drawable.matrix * vec4(floor(in_position * 0.5) + scaled_extrude, 0, 1);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_weight = weight;
     frag_extrude = extrude;
@@ -162,7 +162,7 @@ layout(location = 0) out vec2 frag_position;
 void main() {
 
     gl_Position = props.matrix * vec4(in_position * global.world_size, 0, 1);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     frag_position = in_position;
 }

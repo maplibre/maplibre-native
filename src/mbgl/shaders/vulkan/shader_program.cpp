@@ -41,6 +41,12 @@ ShaderProgram::ShaderProgram(shaders::BuiltIn shaderID,
     for (const auto& define : additionalDefines) {
         defineStr += "#define " + define.first + " " + define.second + "\n";
     }
+
+    const auto& renderableResource = backend.getDefaultRenderable().getResource<SurfaceRenderableResource>();
+    if (renderableResource.hasSurfaceTransformSupport()) {
+        defineStr += "#define USE_SURFACE_TRANSFORM";
+    }
+
     observer.onPreCompileShader(shaderID, gfx::Backend::Type::Metal, defineStr);
 
     constexpr auto targetClientVersion = glslang::EShTargetVulkan_1_0;

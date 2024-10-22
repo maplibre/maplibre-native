@@ -25,7 +25,7 @@ layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform BackgroundDrawableUBO 
 
 void main() {
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 }
 )";
 
@@ -101,7 +101,7 @@ void main() {
                                  in_position);
 
     gl_Position = drawable.matrix * vec4(in_position, 0.0, 1.0);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 }
 )";
 

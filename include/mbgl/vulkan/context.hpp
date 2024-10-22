@@ -197,6 +197,7 @@ private:
     uint8_t frameResourceIndex = 0;
     std::vector<FrameResources> frameResources;
     bool surfaceUpdateRequested{false};
+    int32_t currentFrameCount{0};
 
     struct {
         gfx::ShaderProgramBasePtr shader;

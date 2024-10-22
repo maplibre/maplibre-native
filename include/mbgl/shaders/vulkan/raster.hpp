@@ -44,7 +44,7 @@ layout(location = 1) out vec2 frag_position1;
 void main() {
 
     gl_Position = drawable.matrix * vec4(in_position, 0, 1);
-    gl_Position.y *= -1.0;
+    applySurfaceTransform();
 
     // We are using Int16 for texture position coordinates to give us enough precision for
     // fractional coordinates. We use 8192 to scale the texture coordinates in the buffer

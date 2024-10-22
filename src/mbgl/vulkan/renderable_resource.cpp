@@ -1,6 +1,7 @@
 #include <mbgl/vulkan/renderable_resource.hpp>
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/util/logging.hpp>
+#include <mbgl/util/constants.hpp>
 
 namespace mbgl {
 namespace vulkan {
@@ -95,7 +96,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::Presen
     }
 
     // pick surface size
-    const vk::SurfaceCapabilitiesKHR& capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get());
+    capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get());
 
     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
         extent = capabilities.currentExtent;
@@ -103,6 +104,13 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::Presen
         // update values based on surface limits
         extent.width = std::min(std::max(w, capabilities.minImageExtent.width), capabilities.maxImageExtent.width);
         extent.height = std::min(std::max(h, capabilities.minImageExtent.height), capabilities.maxImageExtent.height);
+    }
+
+    if (hasSurfaceTransformSupport()) {
+        if (capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate90 ||
+            capabilities.currentTransform & vk::SurfaceTransformFlagBitsKHR::eRotate270) {
+            std::swap(extent.width, extent.height);
+        }
     }
 
     uint32_t swapchainImageCount = capabilities.minImageCount + 1;
@@ -133,7 +141,8 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::Presen
         swapchainCreateInfo.setImageSharingMode(vk::SharingMode::eExclusive);
     }
 
-    swapchainCreateInfo.setPreTransform(vk::SurfaceTransformFlagBitsKHR::eIdentity);
+    swapchainCreateInfo.setPreTransform(hasSurfaceTransformSupport() ? capabilities.currentTransform
+                                                                     : vk::SurfaceTransformFlagBitsKHR::eIdentity);
     swapchainCreateInfo.setClipped(VK_TRUE);
 
     if (capabilities.supportedCompositeAlpha & vk::CompositeAlphaFlagBitsKHR::eInherit) {
@@ -143,7 +152,7 @@ void SurfaceRenderableResource::initSwapchain(uint32_t w, uint32_t h, vk::Presen
     }
 
     // update this when recreating
-    swapchainCreateInfo.setOldSwapchain(vk::SwapchainKHR(swapchain.get()));
+    swapchainCreateInfo.setOldSwapchain(swapchain.get());
 
     swapchain = device->createSwapchainKHRUnique(swapchainCreateInfo);
     swapchainImages = device->getSwapchainImagesKHR(swapchain.get());
@@ -229,6 +238,41 @@ const vk::Image SurfaceRenderableResource::getAcquiredImage() const {
     }
 
     return colorAllocations[acquiredImageIndex]->image;
+}
+
+bool SurfaceRenderableResource::hasSurfaceTransformSupport() const {
+#ifdef __ANDROID__
+    return surface && capabilities.supportedTransforms != vk::SurfaceTransformFlagBitsKHR::eIdentity;
+#else
+    return false;
+#endif
+}
+
+bool SurfaceRenderableResource::didSurfaceTransformUpdate() const {
+    const auto& physicalDevice = backend.getPhysicalDevice();
+    const auto& updatedCapabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface.get());
+
+    return capabilities.currentTransform != updatedCapabilities.currentTransform;
+}
+
+float SurfaceRenderableResource::getRotation() {
+    switch (capabilities.currentTransform) {
+        default:
+        case vk::SurfaceTransformFlagBitsKHR::eIdentity:
+            return 0.0f * M_PI / 180.0f;
+
+        case vk::SurfaceTransformFlagBitsKHR::eRotate90:
+        case vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate90:
+            return 90.0f * M_PI / 180.0f;
+
+        case vk::SurfaceTransformFlagBitsKHR::eRotate180:
+        case vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate180:
+            return 180.0f * M_PI / 180.0f;
+
+        case vk::SurfaceTransformFlagBitsKHR::eRotate270:
+        case vk::SurfaceTransformFlagBitsKHR::eHorizontalMirrorRotate270:
+            return 270.0f * M_PI / 180.0f;
+    }
 }
 
 void SurfaceRenderableResource::init(uint32_t w, uint32_t h) {
