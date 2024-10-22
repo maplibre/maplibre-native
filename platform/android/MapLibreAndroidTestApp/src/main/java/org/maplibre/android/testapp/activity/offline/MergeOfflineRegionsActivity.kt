@@ -117,7 +117,7 @@ class MergeOfflineRegionsActivity : AppCompatActivity() {
     }
 
     private fun mergeDb() {
-        OfflineManager.getInstance(this).mergeOfflineRegions(
+        OfflineManager.getInstance(this, lifecycleScope).mergeOfflineRegions(
             FileSource.getResourcesCachePath(this) + "/" + TEST_DB_FILE_NAME,
             mergeCallback
         )

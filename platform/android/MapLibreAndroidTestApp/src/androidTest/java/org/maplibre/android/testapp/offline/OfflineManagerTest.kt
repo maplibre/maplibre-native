@@ -1,6 +1,7 @@
 package org.maplibre.android.testapp.offline
 
 import android.content.Context
+import androidx.lifecycle.lifecycleScope
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.rule.ActivityTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,7 +41,7 @@ class OfflineManagerTest : AppCenter() {
     @After
     fun resetDatabase() {
         val latch = CountDownLatch(1)
-        OfflineManager.getInstance(context).resetDatabase(object : OfflineManager.FileSourceCallback {
+        OfflineManager.getInstance(context, rule.activity.lifecycleScope).resetDatabase(object : OfflineManager.FileSourceCallback {
             override fun onSuccess() {
                 latch.countDown()
             }
@@ -82,7 +83,7 @@ class OfflineManagerTest : AppCenter() {
 
         val latch2 = CountDownLatch(1)
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).mergeOfflineRegions(
+            OfflineManager.getInstance(context, rule.activity.lifecycleScope).mergeOfflineRegions(
                 FileSource.getResourcesCachePath(rule.activity) + "/" + TEST_DB_FILE_NAME,
                 object : OfflineManager.MergeOfflineRegionsCallback {
                     override fun onMerge(offlineRegions: Array<OfflineRegion>?) {
@@ -102,7 +103,9 @@ class OfflineManagerTest : AppCenter() {
 
         val latch3 = CountDownLatch(2)
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).listOfflineRegions(object : OfflineManager.ListOfflineRegionsCallback {
+            OfflineManager.getInstance(
+                context, rule.activity.lifecycleScope
+            ).listOfflineRegions(object : OfflineManager.ListOfflineRegionsCallback {
                 override fun onList(offlineRegions: Array<OfflineRegion>?) {
                     Assert.assertEquals(1, offlineRegions?.size)
                     mergedRegion = offlineRegions!![0]
@@ -117,12 +120,12 @@ class OfflineManagerTest : AppCenter() {
 
         val regionID = 1L
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).getOfflineRegion(
+            OfflineManager.getInstance(context, rule.activity.lifecycleScope).getOfflineRegion(
                 regionID,
                 object: OfflineManager.GetOfflineRegionCallback {
                     override fun onRegion(offlineRegion: OfflineRegion) {
                         Assert.assertNotNull(offlineRegion)
-                        Assert.assertEquals(regionID, offlineRegion!!.id)
+                        Assert.assertEquals(regionID, offlineRegion.id)
                         Assert.assertNotNull(offlineRegion.definition)
                         latch3.countDown()
                     }
@@ -175,7 +178,9 @@ class OfflineManagerTest : AppCenter() {
 
         val latch6 = CountDownLatch(2)
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).listOfflineRegions(object : OfflineManager.ListOfflineRegionsCallback {
+            OfflineManager.getInstance(
+                context, rule.activity.lifecycleScope
+            ).listOfflineRegions(object : OfflineManager.ListOfflineRegionsCallback {
                 override fun onList(offlineRegions: Array<OfflineRegion>?) {
                     Assert.assertEquals(0, offlineRegions?.size)
                     latch6.countDown()
@@ -188,7 +193,7 @@ class OfflineManagerTest : AppCenter() {
         }
 
         rule.activity.runOnUiThread {
-            OfflineManager.getInstance(context).getOfflineRegion(
+            OfflineManager.getInstance(context, rule.activity.lifecycleScope).getOfflineRegion(
                 regionID,
                 object: OfflineManager.GetOfflineRegionCallback {
                     override fun onRegion(offlineRegion: OfflineRegion) {
