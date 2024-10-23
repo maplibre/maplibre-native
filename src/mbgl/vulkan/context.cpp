@@ -14,6 +14,7 @@
 #include <mbgl/vulkan/render_pass.hpp>
 #include <mbgl/vulkan/texture2d.hpp>
 #include <mbgl/vulkan/vertex_attribute.hpp>
+#include <mbgl/vulkan/upload_pass.hpp>
 #include <mbgl/shaders/vulkan/shader_program.hpp>
 #include <mbgl/shaders/vulkan/clipping_mask.hpp>
 #include <mbgl/util/traits.hpp>
@@ -42,11 +43,6 @@ constexpr uint32_t drawableUniformDescriptorPoolSize = 3 * 1024;
 constexpr uint32_t drawableImageDescriptorPoolSize = drawableUniformDescriptorPoolSize / 2;
 
 static uint32_t glslangRefCount = 0;
-
-class RenderbufferResource : public gfx::RenderbufferResource {
-public:
-    RenderbufferResource() = default;
-};
 
 Context::Context(RendererBackend& backend_)
     : gfx::Context(vulkan::maximumVertexBindingCount),
@@ -377,7 +373,7 @@ std::unique_ptr<gfx::TextureResource> Context::createTextureResource(Size,
 }
 
 std::unique_ptr<gfx::RenderbufferResource> Context::createRenderbufferResource(gfx::RenderbufferPixelType, Size) {
-    return std::make_unique<RenderbufferResource>();
+    return std::make_unique<vulkan::RenderbufferResource>();
 }
 
 std::unique_ptr<gfx::DrawScopeResource> Context::createDrawScopeResource() {

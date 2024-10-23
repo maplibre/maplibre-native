@@ -12,6 +12,7 @@
 #include <mbgl/style/conversion/json.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/traits.hpp>
+#include <mbgl/util/enum.hpp>
 
 #include <mapbox/eternal.hpp>
 
@@ -382,9 +383,11 @@ using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 22u;
 
-enum class Property : uint8_t {
+constexpr uint8_t kPaintPropertyCountCircle = 22u;
+
+
+enum class CircleProperty : uint8_t {
     CircleBlur,
     CircleColor,
     CircleOpacity,
@@ -407,97 +410,93 @@ enum class Property : uint8_t {
     CircleStrokeWidthTransition,
     CircleTranslateTransition,
     CircleTranslateAnchorTransition,
-    CircleSortKey = kPaintPropertyCount,
+    CircleSortKey = kPaintPropertyCountCircle,
 };
 
-template <typename T>
-constexpr uint8_t toUint8(T t) noexcept {
-    return uint8_t(mbgl::underlying_type(t));
-}
 
-constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
-    {{"circle-blur", toUint8(Property::CircleBlur)},
-     {"circle-color", toUint8(Property::CircleColor)},
-     {"circle-opacity", toUint8(Property::CircleOpacity)},
-     {"circle-pitch-alignment", toUint8(Property::CirclePitchAlignment)},
-     {"circle-pitch-scale", toUint8(Property::CirclePitchScale)},
-     {"circle-radius", toUint8(Property::CircleRadius)},
-     {"circle-stroke-color", toUint8(Property::CircleStrokeColor)},
-     {"circle-stroke-opacity", toUint8(Property::CircleStrokeOpacity)},
-     {"circle-stroke-width", toUint8(Property::CircleStrokeWidth)},
-     {"circle-translate", toUint8(Property::CircleTranslate)},
-     {"circle-translate-anchor", toUint8(Property::CircleTranslateAnchor)},
-     {"circle-blur-transition", toUint8(Property::CircleBlurTransition)},
-     {"circle-color-transition", toUint8(Property::CircleColorTransition)},
-     {"circle-opacity-transition", toUint8(Property::CircleOpacityTransition)},
-     {"circle-pitch-alignment-transition", toUint8(Property::CirclePitchAlignmentTransition)},
-     {"circle-pitch-scale-transition", toUint8(Property::CirclePitchScaleTransition)},
-     {"circle-radius-transition", toUint8(Property::CircleRadiusTransition)},
-     {"circle-stroke-color-transition", toUint8(Property::CircleStrokeColorTransition)},
-     {"circle-stroke-opacity-transition", toUint8(Property::CircleStrokeOpacityTransition)},
-     {"circle-stroke-width-transition", toUint8(Property::CircleStrokeWidthTransition)},
-     {"circle-translate-transition", toUint8(Property::CircleTranslateTransition)},
-     {"circle-translate-anchor-transition", toUint8(Property::CircleTranslateAnchorTransition)},
-     {"circle-sort-key", toUint8(Property::CircleSortKey)}});
+constexpr const auto circleLayerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
+    {{"circle-blur", toUint8(CircleProperty::CircleBlur)},
+     {"circle-color", toUint8(CircleProperty::CircleColor)},
+     {"circle-opacity", toUint8(CircleProperty::CircleOpacity)},
+     {"circle-pitch-alignment", toUint8(CircleProperty::CirclePitchAlignment)},
+     {"circle-pitch-scale", toUint8(CircleProperty::CirclePitchScale)},
+     {"circle-radius", toUint8(CircleProperty::CircleRadius)},
+     {"circle-stroke-color", toUint8(CircleProperty::CircleStrokeColor)},
+     {"circle-stroke-opacity", toUint8(CircleProperty::CircleStrokeOpacity)},
+     {"circle-stroke-width", toUint8(CircleProperty::CircleStrokeWidth)},
+     {"circle-translate", toUint8(CircleProperty::CircleTranslate)},
+     {"circle-translate-anchor", toUint8(CircleProperty::CircleTranslateAnchor)},
+     {"circle-blur-transition", toUint8(CircleProperty::CircleBlurTransition)},
+     {"circle-color-transition", toUint8(CircleProperty::CircleColorTransition)},
+     {"circle-opacity-transition", toUint8(CircleProperty::CircleOpacityTransition)},
+     {"circle-pitch-alignment-transition", toUint8(CircleProperty::CirclePitchAlignmentTransition)},
+     {"circle-pitch-scale-transition", toUint8(CircleProperty::CirclePitchScaleTransition)},
+     {"circle-radius-transition", toUint8(CircleProperty::CircleRadiusTransition)},
+     {"circle-stroke-color-transition", toUint8(CircleProperty::CircleStrokeColorTransition)},
+     {"circle-stroke-opacity-transition", toUint8(CircleProperty::CircleStrokeOpacityTransition)},
+     {"circle-stroke-width-transition", toUint8(CircleProperty::CircleStrokeWidthTransition)},
+     {"circle-translate-transition", toUint8(CircleProperty::CircleTranslateTransition)},
+     {"circle-translate-anchor-transition", toUint8(CircleProperty::CircleTranslateAnchorTransition)},
+     {"circle-sort-key", toUint8(CircleProperty::CircleSortKey)}});
 
-StyleProperty getLayerProperty(const CircleLayer& layer, Property property) {
+StyleProperty getLayerProperty(const CircleLayer& layer, CircleProperty property) {
     switch (property) {
-        case Property::CircleBlur:
+        case CircleProperty::CircleBlur:
             return makeStyleProperty(layer.getCircleBlur());
-        case Property::CircleColor:
+        case CircleProperty::CircleColor:
             return makeStyleProperty(layer.getCircleColor());
-        case Property::CircleOpacity:
+        case CircleProperty::CircleOpacity:
             return makeStyleProperty(layer.getCircleOpacity());
-        case Property::CirclePitchAlignment:
+        case CircleProperty::CirclePitchAlignment:
             return makeStyleProperty(layer.getCirclePitchAlignment());
-        case Property::CirclePitchScale:
+        case CircleProperty::CirclePitchScale:
             return makeStyleProperty(layer.getCirclePitchScale());
-        case Property::CircleRadius:
+        case CircleProperty::CircleRadius:
             return makeStyleProperty(layer.getCircleRadius());
-        case Property::CircleStrokeColor:
+        case CircleProperty::CircleStrokeColor:
             return makeStyleProperty(layer.getCircleStrokeColor());
-        case Property::CircleStrokeOpacity:
+        case CircleProperty::CircleStrokeOpacity:
             return makeStyleProperty(layer.getCircleStrokeOpacity());
-        case Property::CircleStrokeWidth:
+        case CircleProperty::CircleStrokeWidth:
             return makeStyleProperty(layer.getCircleStrokeWidth());
-        case Property::CircleTranslate:
+        case CircleProperty::CircleTranslate:
             return makeStyleProperty(layer.getCircleTranslate());
-        case Property::CircleTranslateAnchor:
+        case CircleProperty::CircleTranslateAnchor:
             return makeStyleProperty(layer.getCircleTranslateAnchor());
-        case Property::CircleBlurTransition:
+        case CircleProperty::CircleBlurTransition:
             return makeStyleProperty(layer.getCircleBlurTransition());
-        case Property::CircleColorTransition:
+        case CircleProperty::CircleColorTransition:
             return makeStyleProperty(layer.getCircleColorTransition());
-        case Property::CircleOpacityTransition:
+        case CircleProperty::CircleOpacityTransition:
             return makeStyleProperty(layer.getCircleOpacityTransition());
-        case Property::CirclePitchAlignmentTransition:
+        case CircleProperty::CirclePitchAlignmentTransition:
             return makeStyleProperty(layer.getCirclePitchAlignmentTransition());
-        case Property::CirclePitchScaleTransition:
+        case CircleProperty::CirclePitchScaleTransition:
             return makeStyleProperty(layer.getCirclePitchScaleTransition());
-        case Property::CircleRadiusTransition:
+        case CircleProperty::CircleRadiusTransition:
             return makeStyleProperty(layer.getCircleRadiusTransition());
-        case Property::CircleStrokeColorTransition:
+        case CircleProperty::CircleStrokeColorTransition:
             return makeStyleProperty(layer.getCircleStrokeColorTransition());
-        case Property::CircleStrokeOpacityTransition:
+        case CircleProperty::CircleStrokeOpacityTransition:
             return makeStyleProperty(layer.getCircleStrokeOpacityTransition());
-        case Property::CircleStrokeWidthTransition:
+        case CircleProperty::CircleStrokeWidthTransition:
             return makeStyleProperty(layer.getCircleStrokeWidthTransition());
-        case Property::CircleTranslateTransition:
+        case CircleProperty::CircleTranslateTransition:
             return makeStyleProperty(layer.getCircleTranslateTransition());
-        case Property::CircleTranslateAnchorTransition:
+        case CircleProperty::CircleTranslateAnchorTransition:
             return makeStyleProperty(layer.getCircleTranslateAnchorTransition());
-        case Property::CircleSortKey:
+        case CircleProperty::CircleSortKey:
             return makeStyleProperty(layer.getCircleSortKey());
     }
     return {};
 }
 
 StyleProperty getLayerProperty(const CircleLayer& layer, const std::string& name) {
-    const auto it = layerProperties.find(name.c_str());
-    if (it == layerProperties.end()) {
+    const auto it = circleLayerProperties.find(name.c_str());
+    if (it == circleLayerProperties.end()) {
         return {};
     }
-    return getLayerProperty(layer, static_cast<Property>(it->second));
+    return getLayerProperty(layer, static_cast<CircleProperty>(it->second));
 }
 
 } // namespace
@@ -505,77 +504,77 @@ StyleProperty getLayerProperty(const CircleLayer& layer, const std::string& name
 Value CircleLayer::serialize() const {
     auto result = Layer::serialize();
     assert(result.getObject());
-    for (const auto& property : layerProperties) {
-        auto styleProperty = getLayerProperty(*this, static_cast<Property>(property.second));
+    for (const auto& property : circleLayerProperties) {
+        auto styleProperty = getLayerProperty(*this, static_cast<CircleProperty>(property.second));
         if (styleProperty.getKind() == StyleProperty::Kind::Undefined) continue;
-        serializeProperty(result, styleProperty, property.first.c_str(), property.second < kPaintPropertyCount);
+        serializeProperty(result, styleProperty, property.first.c_str(), property.second < kPaintPropertyCountCircle);
     }
     return result;
 }
 
 std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
-    const auto it = layerProperties.find(name.c_str());
-    if (it == layerProperties.end()) return Error{"layer doesn't support this property"};
+    const auto it = circleLayerProperties.find(name.c_str());
+    if (it == circleLayerProperties.end()) return Error{"layer doesn't support this property"};
 
-    auto property = static_cast<Property>(it->second);
+    auto property = static_cast<CircleProperty>(it->second);
 
-    if (property == Property::CircleBlur || property == Property::CircleOpacity || property == Property::CircleRadius ||
-        property == Property::CircleStrokeOpacity || property == Property::CircleStrokeWidth ||
-        property == Property::CircleSortKey) {
+    if (property == CircleProperty::CircleBlur || property == CircleProperty::CircleOpacity ||
+        property == CircleProperty::CircleRadius || property == CircleProperty::CircleStrokeOpacity ||
+        property == CircleProperty::CircleStrokeWidth || property == CircleProperty::CircleSortKey) {
         Error error;
         const auto& typedValue = convert<PropertyValue<float>>(value, error, true, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::CircleBlur) {
+        if (property == CircleProperty::CircleBlur) {
             setCircleBlur(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::CircleOpacity) {
+        if (property == CircleProperty::CircleOpacity) {
             setCircleOpacity(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::CircleRadius) {
+        if (property == CircleProperty::CircleRadius) {
             setCircleRadius(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::CircleStrokeOpacity) {
+        if (property == CircleProperty::CircleStrokeOpacity) {
             setCircleStrokeOpacity(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::CircleStrokeWidth) {
+        if (property == CircleProperty::CircleStrokeWidth) {
             setCircleStrokeWidth(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::CircleSortKey) {
+        if (property == CircleProperty::CircleSortKey) {
             setCircleSortKey(*typedValue);
             return std::nullopt;
         }
     }
-    if (property == Property::CircleColor || property == Property::CircleStrokeColor) {
+    if (property == CircleProperty::CircleColor || property == CircleProperty::CircleStrokeColor) {
         Error error;
         const auto& typedValue = convert<PropertyValue<Color>>(value, error, true, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::CircleColor) {
+        if (property == CircleProperty::CircleColor) {
             setCircleColor(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::CircleStrokeColor) {
+        if (property == CircleProperty::CircleStrokeColor) {
             setCircleStrokeColor(*typedValue);
             return std::nullopt;
         }
     }
-    if (property == Property::CirclePitchAlignment) {
+    if (property == CircleProperty::CirclePitchAlignment) {
         Error error;
         const auto& typedValue = convert<PropertyValue<AlignmentType>>(value, error, false, false);
         if (!typedValue) {
@@ -585,7 +584,7 @@ std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, c
         setCirclePitchAlignment(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::CirclePitchScale) {
+    if (property == CircleProperty::CirclePitchScale) {
         Error error;
         const auto& typedValue = convert<PropertyValue<CirclePitchScaleType>>(value, error, false, false);
         if (!typedValue) {
@@ -595,7 +594,7 @@ std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, c
         setCirclePitchScale(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::CircleTranslate) {
+    if (property == CircleProperty::CircleTranslate) {
         Error error;
         const auto& typedValue = convert<PropertyValue<std::array<float, 2>>>(value, error, false, false);
         if (!typedValue) {
@@ -605,7 +604,7 @@ std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, c
         setCircleTranslate(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::CircleTranslateAnchor) {
+    if (property == CircleProperty::CircleTranslateAnchor) {
         Error error;
         const auto& typedValue = convert<PropertyValue<TranslateAnchorType>>(value, error, false, false);
         if (!typedValue) {
@@ -622,57 +621,57 @@ std::optional<Error> CircleLayer::setPropertyInternal(const std::string& name, c
         return error;
     }
 
-    if (property == Property::CircleBlurTransition) {
+    if (property == CircleProperty::CircleBlurTransition) {
         setCircleBlurTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::CircleColorTransition) {
+    if (property == CircleProperty::CircleColorTransition) {
         setCircleColorTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::CircleOpacityTransition) {
+    if (property == CircleProperty::CircleOpacityTransition) {
         setCircleOpacityTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::CirclePitchAlignmentTransition) {
+    if (property == CircleProperty::CirclePitchAlignmentTransition) {
         setCirclePitchAlignmentTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::CirclePitchScaleTransition) {
+    if (property == CircleProperty::CirclePitchScaleTransition) {
         setCirclePitchScaleTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::CircleRadiusTransition) {
+    if (property == CircleProperty::CircleRadiusTransition) {
         setCircleRadiusTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::CircleStrokeColorTransition) {
+    if (property == CircleProperty::CircleStrokeColorTransition) {
         setCircleStrokeColorTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::CircleStrokeOpacityTransition) {
+    if (property == CircleProperty::CircleStrokeOpacityTransition) {
         setCircleStrokeOpacityTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::CircleStrokeWidthTransition) {
+    if (property == CircleProperty::CircleStrokeWidthTransition) {
         setCircleStrokeWidthTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::CircleTranslateTransition) {
+    if (property == CircleProperty::CircleTranslateTransition) {
         setCircleTranslateTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::CircleTranslateAnchorTransition) {
+    if (property == CircleProperty::CircleTranslateAnchorTransition) {
         setCircleTranslateAnchorTransition(*transition);
         return std::nullopt;
     }

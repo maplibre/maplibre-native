@@ -34,7 +34,7 @@ using namespace shaders;
 
 namespace {
 
-inline const HillshadeLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>& impl) {
+inline const HillshadeLayer::Impl& hillshade_layer_impl_cast(const Immutable<style::Layer::Impl>& impl) {
     assert(impl->getTypeInfo() == HillshadeLayer::Impl::staticTypeInfo());
     return static_cast<const HillshadeLayer::Impl&>(*impl);
 }
@@ -43,7 +43,7 @@ inline const HillshadeLayer::Impl& impl_cast(const Immutable<style::Layer::Impl>
 
 RenderHillshadeLayer::RenderHillshadeLayer(Immutable<style::HillshadeLayer::Impl> _impl)
     : RenderLayer(makeMutable<HillshadeLayerProperties>(std::move(_impl))),
-      unevaluated(impl_cast(baseImpl).paint.untransitioned()) {
+      unevaluated(hillshade_layer_impl_cast(baseImpl).paint.untransitioned()) {
     styleDependencies = unevaluated.getDependencies();
 }
 
@@ -64,7 +64,7 @@ std::array<float, 2> RenderHillshadeLayer::getLight(const PaintParameters& param
 }
 
 void RenderHillshadeLayer::transition(const TransitionParameters& parameters) {
-    unevaluated = impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
+    unevaluated = hillshade_layer_impl_cast(baseImpl).paint.transitioned(parameters, std::move(unevaluated));
 }
 
 #if MLN_DRAWABLE_RENDERER
@@ -261,19 +261,6 @@ void RenderHillshadeLayer::render(PaintParameters& parameters) {
 #endif // MLN_LEGACY_RENDERER
 
 #if MLN_DRAWABLE_RENDERER
-namespace {
-void activateRenderTarget(const RenderTargetPtr& renderTarget_, bool activate, UniqueChangeRequestVec& changes) {
-    if (renderTarget_) {
-        if (activate) {
-            // The RenderTree has determined this render target should be included in the renderable set for a frame
-            changes.emplace_back(std::make_unique<AddRenderTargetRequest>(renderTarget_));
-        } else {
-            // The RenderTree is informing us we should not render anything
-            changes.emplace_back(std::make_unique<RemoveRenderTargetRequest>(renderTarget_));
-        }
-    }
-}
-} // namespace
 
 void RenderHillshadeLayer::markLayerRenderable(bool willRender, UniqueChangeRequestVec& changes) {
     RenderLayer::markLayerRenderable(willRender, changes);

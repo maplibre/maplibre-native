@@ -12,6 +12,7 @@
 #include <mbgl/style/conversion/json.hpp>
 #include <mbgl/style/conversion_impl.hpp>
 #include <mbgl/util/traits.hpp>
+#include <mbgl/util/enum.hpp>
 
 #include <mapbox/eternal.hpp>
 
@@ -1063,9 +1064,11 @@ using namespace conversion;
 
 namespace {
 
-constexpr uint8_t kPaintPropertyCount = 28u;
 
-enum class Property : uint8_t {
+constexpr uint8_t kPaintPropertyCountSymbol = 28u;
+
+
+enum class SymbolProperty : uint8_t {
     IconColor,
     IconHaloBlur,
     IconHaloColor,
@@ -1094,7 +1097,7 @@ enum class Property : uint8_t {
     TextOpacityTransition,
     TextTranslateTransition,
     TextTranslateAnchorTransition,
-    IconAllowOverlap = kPaintPropertyCount,
+    IconAllowOverlap = kPaintPropertyCountSymbol,
     IconAnchor,
     IconIgnorePlacement,
     IconImage,
@@ -1137,232 +1140,228 @@ enum class Property : uint8_t {
     TextWritingMode,
 };
 
-template <typename T>
-constexpr uint8_t toUint8(T t) noexcept {
-    return uint8_t(mbgl::underlying_type(t));
-}
 
-constexpr const auto layerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
-    {{"icon-color", toUint8(Property::IconColor)},
-     {"icon-halo-blur", toUint8(Property::IconHaloBlur)},
-     {"icon-halo-color", toUint8(Property::IconHaloColor)},
-     {"icon-halo-width", toUint8(Property::IconHaloWidth)},
-     {"icon-opacity", toUint8(Property::IconOpacity)},
-     {"icon-translate", toUint8(Property::IconTranslate)},
-     {"icon-translate-anchor", toUint8(Property::IconTranslateAnchor)},
-     {"text-color", toUint8(Property::TextColor)},
-     {"text-halo-blur", toUint8(Property::TextHaloBlur)},
-     {"text-halo-color", toUint8(Property::TextHaloColor)},
-     {"text-halo-width", toUint8(Property::TextHaloWidth)},
-     {"text-opacity", toUint8(Property::TextOpacity)},
-     {"text-translate", toUint8(Property::TextTranslate)},
-     {"text-translate-anchor", toUint8(Property::TextTranslateAnchor)},
-     {"icon-color-transition", toUint8(Property::IconColorTransition)},
-     {"icon-halo-blur-transition", toUint8(Property::IconHaloBlurTransition)},
-     {"icon-halo-color-transition", toUint8(Property::IconHaloColorTransition)},
-     {"icon-halo-width-transition", toUint8(Property::IconHaloWidthTransition)},
-     {"icon-opacity-transition", toUint8(Property::IconOpacityTransition)},
-     {"icon-translate-transition", toUint8(Property::IconTranslateTransition)},
-     {"icon-translate-anchor-transition", toUint8(Property::IconTranslateAnchorTransition)},
-     {"text-color-transition", toUint8(Property::TextColorTransition)},
-     {"text-halo-blur-transition", toUint8(Property::TextHaloBlurTransition)},
-     {"text-halo-color-transition", toUint8(Property::TextHaloColorTransition)},
-     {"text-halo-width-transition", toUint8(Property::TextHaloWidthTransition)},
-     {"text-opacity-transition", toUint8(Property::TextOpacityTransition)},
-     {"text-translate-transition", toUint8(Property::TextTranslateTransition)},
-     {"text-translate-anchor-transition", toUint8(Property::TextTranslateAnchorTransition)},
-     {"icon-allow-overlap", toUint8(Property::IconAllowOverlap)},
-     {"icon-anchor", toUint8(Property::IconAnchor)},
-     {"icon-ignore-placement", toUint8(Property::IconIgnorePlacement)},
-     {"icon-image", toUint8(Property::IconImage)},
-     {"icon-keep-upright", toUint8(Property::IconKeepUpright)},
-     {"icon-offset", toUint8(Property::IconOffset)},
-     {"icon-optional", toUint8(Property::IconOptional)},
-     {"icon-padding", toUint8(Property::IconPadding)},
-     {"icon-pitch-alignment", toUint8(Property::IconPitchAlignment)},
-     {"icon-rotate", toUint8(Property::IconRotate)},
-     {"icon-rotation-alignment", toUint8(Property::IconRotationAlignment)},
-     {"icon-size", toUint8(Property::IconSize)},
-     {"icon-text-fit", toUint8(Property::IconTextFit)},
-     {"icon-text-fit-padding", toUint8(Property::IconTextFitPadding)},
-     {"symbol-avoid-edges", toUint8(Property::SymbolAvoidEdges)},
-     {"symbol-placement", toUint8(Property::SymbolPlacement)},
-     {"symbol-sort-key", toUint8(Property::SymbolSortKey)},
-     {"symbol-spacing", toUint8(Property::SymbolSpacing)},
-     {"symbol-z-order", toUint8(Property::SymbolZOrder)},
-     {"text-allow-overlap", toUint8(Property::TextAllowOverlap)},
-     {"text-anchor", toUint8(Property::TextAnchor)},
-     {"text-field", toUint8(Property::TextField)},
-     {"text-font", toUint8(Property::TextFont)},
-     {"text-ignore-placement", toUint8(Property::TextIgnorePlacement)},
-     {"text-justify", toUint8(Property::TextJustify)},
-     {"text-keep-upright", toUint8(Property::TextKeepUpright)},
-     {"text-letter-spacing", toUint8(Property::TextLetterSpacing)},
-     {"text-line-height", toUint8(Property::TextLineHeight)},
-     {"text-max-angle", toUint8(Property::TextMaxAngle)},
-     {"text-max-width", toUint8(Property::TextMaxWidth)},
-     {"text-offset", toUint8(Property::TextOffset)},
-     {"text-optional", toUint8(Property::TextOptional)},
-     {"text-padding", toUint8(Property::TextPadding)},
-     {"text-pitch-alignment", toUint8(Property::TextPitchAlignment)},
-     {"text-radial-offset", toUint8(Property::TextRadialOffset)},
-     {"text-rotate", toUint8(Property::TextRotate)},
-     {"text-rotation-alignment", toUint8(Property::TextRotationAlignment)},
-     {"text-size", toUint8(Property::TextSize)},
-     {"text-transform", toUint8(Property::TextTransform)},
-     {"text-variable-anchor", toUint8(Property::TextVariableAnchor)},
-     {"text-writing-mode", toUint8(Property::TextWritingMode)}});
+constexpr const auto symbolLayerProperties = mapbox::eternal::hash_map<mapbox::eternal::string, uint8_t>(
+    {{"icon-color", toUint8(SymbolProperty::IconColor)},
+     {"icon-halo-blur", toUint8(SymbolProperty::IconHaloBlur)},
+     {"icon-halo-color", toUint8(SymbolProperty::IconHaloColor)},
+     {"icon-halo-width", toUint8(SymbolProperty::IconHaloWidth)},
+     {"icon-opacity", toUint8(SymbolProperty::IconOpacity)},
+     {"icon-translate", toUint8(SymbolProperty::IconTranslate)},
+     {"icon-translate-anchor", toUint8(SymbolProperty::IconTranslateAnchor)},
+     {"text-color", toUint8(SymbolProperty::TextColor)},
+     {"text-halo-blur", toUint8(SymbolProperty::TextHaloBlur)},
+     {"text-halo-color", toUint8(SymbolProperty::TextHaloColor)},
+     {"text-halo-width", toUint8(SymbolProperty::TextHaloWidth)},
+     {"text-opacity", toUint8(SymbolProperty::TextOpacity)},
+     {"text-translate", toUint8(SymbolProperty::TextTranslate)},
+     {"text-translate-anchor", toUint8(SymbolProperty::TextTranslateAnchor)},
+     {"icon-color-transition", toUint8(SymbolProperty::IconColorTransition)},
+     {"icon-halo-blur-transition", toUint8(SymbolProperty::IconHaloBlurTransition)},
+     {"icon-halo-color-transition", toUint8(SymbolProperty::IconHaloColorTransition)},
+     {"icon-halo-width-transition", toUint8(SymbolProperty::IconHaloWidthTransition)},
+     {"icon-opacity-transition", toUint8(SymbolProperty::IconOpacityTransition)},
+     {"icon-translate-transition", toUint8(SymbolProperty::IconTranslateTransition)},
+     {"icon-translate-anchor-transition", toUint8(SymbolProperty::IconTranslateAnchorTransition)},
+     {"text-color-transition", toUint8(SymbolProperty::TextColorTransition)},
+     {"text-halo-blur-transition", toUint8(SymbolProperty::TextHaloBlurTransition)},
+     {"text-halo-color-transition", toUint8(SymbolProperty::TextHaloColorTransition)},
+     {"text-halo-width-transition", toUint8(SymbolProperty::TextHaloWidthTransition)},
+     {"text-opacity-transition", toUint8(SymbolProperty::TextOpacityTransition)},
+     {"text-translate-transition", toUint8(SymbolProperty::TextTranslateTransition)},
+     {"text-translate-anchor-transition", toUint8(SymbolProperty::TextTranslateAnchorTransition)},
+     {"icon-allow-overlap", toUint8(SymbolProperty::IconAllowOverlap)},
+     {"icon-anchor", toUint8(SymbolProperty::IconAnchor)},
+     {"icon-ignore-placement", toUint8(SymbolProperty::IconIgnorePlacement)},
+     {"icon-image", toUint8(SymbolProperty::IconImage)},
+     {"icon-keep-upright", toUint8(SymbolProperty::IconKeepUpright)},
+     {"icon-offset", toUint8(SymbolProperty::IconOffset)},
+     {"icon-optional", toUint8(SymbolProperty::IconOptional)},
+     {"icon-padding", toUint8(SymbolProperty::IconPadding)},
+     {"icon-pitch-alignment", toUint8(SymbolProperty::IconPitchAlignment)},
+     {"icon-rotate", toUint8(SymbolProperty::IconRotate)},
+     {"icon-rotation-alignment", toUint8(SymbolProperty::IconRotationAlignment)},
+     {"icon-size", toUint8(SymbolProperty::IconSize)},
+     {"icon-text-fit", toUint8(SymbolProperty::IconTextFit)},
+     {"icon-text-fit-padding", toUint8(SymbolProperty::IconTextFitPadding)},
+     {"symbol-avoid-edges", toUint8(SymbolProperty::SymbolAvoidEdges)},
+     {"symbol-placement", toUint8(SymbolProperty::SymbolPlacement)},
+     {"symbol-sort-key", toUint8(SymbolProperty::SymbolSortKey)},
+     {"symbol-spacing", toUint8(SymbolProperty::SymbolSpacing)},
+     {"symbol-z-order", toUint8(SymbolProperty::SymbolZOrder)},
+     {"text-allow-overlap", toUint8(SymbolProperty::TextAllowOverlap)},
+     {"text-anchor", toUint8(SymbolProperty::TextAnchor)},
+     {"text-field", toUint8(SymbolProperty::TextField)},
+     {"text-font", toUint8(SymbolProperty::TextFont)},
+     {"text-ignore-placement", toUint8(SymbolProperty::TextIgnorePlacement)},
+     {"text-justify", toUint8(SymbolProperty::TextJustify)},
+     {"text-keep-upright", toUint8(SymbolProperty::TextKeepUpright)},
+     {"text-letter-spacing", toUint8(SymbolProperty::TextLetterSpacing)},
+     {"text-line-height", toUint8(SymbolProperty::TextLineHeight)},
+     {"text-max-angle", toUint8(SymbolProperty::TextMaxAngle)},
+     {"text-max-width", toUint8(SymbolProperty::TextMaxWidth)},
+     {"text-offset", toUint8(SymbolProperty::TextOffset)},
+     {"text-optional", toUint8(SymbolProperty::TextOptional)},
+     {"text-padding", toUint8(SymbolProperty::TextPadding)},
+     {"text-pitch-alignment", toUint8(SymbolProperty::TextPitchAlignment)},
+     {"text-radial-offset", toUint8(SymbolProperty::TextRadialOffset)},
+     {"text-rotate", toUint8(SymbolProperty::TextRotate)},
+     {"text-rotation-alignment", toUint8(SymbolProperty::TextRotationAlignment)},
+     {"text-size", toUint8(SymbolProperty::TextSize)},
+     {"text-transform", toUint8(SymbolProperty::TextTransform)},
+     {"text-variable-anchor", toUint8(SymbolProperty::TextVariableAnchor)},
+     {"text-writing-mode", toUint8(SymbolProperty::TextWritingMode)}});
 
-StyleProperty getLayerProperty(const SymbolLayer& layer, Property property) {
+StyleProperty getLayerProperty(const SymbolLayer& layer, SymbolProperty property) {
     switch (property) {
-        case Property::IconColor:
+        case SymbolProperty::IconColor:
             return makeStyleProperty(layer.getIconColor());
-        case Property::IconHaloBlur:
+        case SymbolProperty::IconHaloBlur:
             return makeStyleProperty(layer.getIconHaloBlur());
-        case Property::IconHaloColor:
+        case SymbolProperty::IconHaloColor:
             return makeStyleProperty(layer.getIconHaloColor());
-        case Property::IconHaloWidth:
+        case SymbolProperty::IconHaloWidth:
             return makeStyleProperty(layer.getIconHaloWidth());
-        case Property::IconOpacity:
+        case SymbolProperty::IconOpacity:
             return makeStyleProperty(layer.getIconOpacity());
-        case Property::IconTranslate:
+        case SymbolProperty::IconTranslate:
             return makeStyleProperty(layer.getIconTranslate());
-        case Property::IconTranslateAnchor:
+        case SymbolProperty::IconTranslateAnchor:
             return makeStyleProperty(layer.getIconTranslateAnchor());
-        case Property::TextColor:
+        case SymbolProperty::TextColor:
             return makeStyleProperty(layer.getTextColor());
-        case Property::TextHaloBlur:
+        case SymbolProperty::TextHaloBlur:
             return makeStyleProperty(layer.getTextHaloBlur());
-        case Property::TextHaloColor:
+        case SymbolProperty::TextHaloColor:
             return makeStyleProperty(layer.getTextHaloColor());
-        case Property::TextHaloWidth:
+        case SymbolProperty::TextHaloWidth:
             return makeStyleProperty(layer.getTextHaloWidth());
-        case Property::TextOpacity:
+        case SymbolProperty::TextOpacity:
             return makeStyleProperty(layer.getTextOpacity());
-        case Property::TextTranslate:
+        case SymbolProperty::TextTranslate:
             return makeStyleProperty(layer.getTextTranslate());
-        case Property::TextTranslateAnchor:
+        case SymbolProperty::TextTranslateAnchor:
             return makeStyleProperty(layer.getTextTranslateAnchor());
-        case Property::IconColorTransition:
+        case SymbolProperty::IconColorTransition:
             return makeStyleProperty(layer.getIconColorTransition());
-        case Property::IconHaloBlurTransition:
+        case SymbolProperty::IconHaloBlurTransition:
             return makeStyleProperty(layer.getIconHaloBlurTransition());
-        case Property::IconHaloColorTransition:
+        case SymbolProperty::IconHaloColorTransition:
             return makeStyleProperty(layer.getIconHaloColorTransition());
-        case Property::IconHaloWidthTransition:
+        case SymbolProperty::IconHaloWidthTransition:
             return makeStyleProperty(layer.getIconHaloWidthTransition());
-        case Property::IconOpacityTransition:
+        case SymbolProperty::IconOpacityTransition:
             return makeStyleProperty(layer.getIconOpacityTransition());
-        case Property::IconTranslateTransition:
+        case SymbolProperty::IconTranslateTransition:
             return makeStyleProperty(layer.getIconTranslateTransition());
-        case Property::IconTranslateAnchorTransition:
+        case SymbolProperty::IconTranslateAnchorTransition:
             return makeStyleProperty(layer.getIconTranslateAnchorTransition());
-        case Property::TextColorTransition:
+        case SymbolProperty::TextColorTransition:
             return makeStyleProperty(layer.getTextColorTransition());
-        case Property::TextHaloBlurTransition:
+        case SymbolProperty::TextHaloBlurTransition:
             return makeStyleProperty(layer.getTextHaloBlurTransition());
-        case Property::TextHaloColorTransition:
+        case SymbolProperty::TextHaloColorTransition:
             return makeStyleProperty(layer.getTextHaloColorTransition());
-        case Property::TextHaloWidthTransition:
+        case SymbolProperty::TextHaloWidthTransition:
             return makeStyleProperty(layer.getTextHaloWidthTransition());
-        case Property::TextOpacityTransition:
+        case SymbolProperty::TextOpacityTransition:
             return makeStyleProperty(layer.getTextOpacityTransition());
-        case Property::TextTranslateTransition:
+        case SymbolProperty::TextTranslateTransition:
             return makeStyleProperty(layer.getTextTranslateTransition());
-        case Property::TextTranslateAnchorTransition:
+        case SymbolProperty::TextTranslateAnchorTransition:
             return makeStyleProperty(layer.getTextTranslateAnchorTransition());
-        case Property::IconAllowOverlap:
+        case SymbolProperty::IconAllowOverlap:
             return makeStyleProperty(layer.getIconAllowOverlap());
-        case Property::IconAnchor:
+        case SymbolProperty::IconAnchor:
             return makeStyleProperty(layer.getIconAnchor());
-        case Property::IconIgnorePlacement:
+        case SymbolProperty::IconIgnorePlacement:
             return makeStyleProperty(layer.getIconIgnorePlacement());
-        case Property::IconImage:
+        case SymbolProperty::IconImage:
             return makeStyleProperty(layer.getIconImage());
-        case Property::IconKeepUpright:
+        case SymbolProperty::IconKeepUpright:
             return makeStyleProperty(layer.getIconKeepUpright());
-        case Property::IconOffset:
+        case SymbolProperty::IconOffset:
             return makeStyleProperty(layer.getIconOffset());
-        case Property::IconOptional:
+        case SymbolProperty::IconOptional:
             return makeStyleProperty(layer.getIconOptional());
-        case Property::IconPadding:
+        case SymbolProperty::IconPadding:
             return makeStyleProperty(layer.getIconPadding());
-        case Property::IconPitchAlignment:
+        case SymbolProperty::IconPitchAlignment:
             return makeStyleProperty(layer.getIconPitchAlignment());
-        case Property::IconRotate:
+        case SymbolProperty::IconRotate:
             return makeStyleProperty(layer.getIconRotate());
-        case Property::IconRotationAlignment:
+        case SymbolProperty::IconRotationAlignment:
             return makeStyleProperty(layer.getIconRotationAlignment());
-        case Property::IconSize:
+        case SymbolProperty::IconSize:
             return makeStyleProperty(layer.getIconSize());
-        case Property::IconTextFit:
+        case SymbolProperty::IconTextFit:
             return makeStyleProperty(layer.getIconTextFit());
-        case Property::IconTextFitPadding:
+        case SymbolProperty::IconTextFitPadding:
             return makeStyleProperty(layer.getIconTextFitPadding());
-        case Property::SymbolAvoidEdges:
+        case SymbolProperty::SymbolAvoidEdges:
             return makeStyleProperty(layer.getSymbolAvoidEdges());
-        case Property::SymbolPlacement:
+        case SymbolProperty::SymbolPlacement:
             return makeStyleProperty(layer.getSymbolPlacement());
-        case Property::SymbolSortKey:
+        case SymbolProperty::SymbolSortKey:
             return makeStyleProperty(layer.getSymbolSortKey());
-        case Property::SymbolSpacing:
+        case SymbolProperty::SymbolSpacing:
             return makeStyleProperty(layer.getSymbolSpacing());
-        case Property::SymbolZOrder:
+        case SymbolProperty::SymbolZOrder:
             return makeStyleProperty(layer.getSymbolZOrder());
-        case Property::TextAllowOverlap:
+        case SymbolProperty::TextAllowOverlap:
             return makeStyleProperty(layer.getTextAllowOverlap());
-        case Property::TextAnchor:
+        case SymbolProperty::TextAnchor:
             return makeStyleProperty(layer.getTextAnchor());
-        case Property::TextField:
+        case SymbolProperty::TextField:
             return makeStyleProperty(layer.getTextField());
-        case Property::TextFont:
+        case SymbolProperty::TextFont:
             return makeStyleProperty(layer.getTextFont());
-        case Property::TextIgnorePlacement:
+        case SymbolProperty::TextIgnorePlacement:
             return makeStyleProperty(layer.getTextIgnorePlacement());
-        case Property::TextJustify:
+        case SymbolProperty::TextJustify:
             return makeStyleProperty(layer.getTextJustify());
-        case Property::TextKeepUpright:
+        case SymbolProperty::TextKeepUpright:
             return makeStyleProperty(layer.getTextKeepUpright());
-        case Property::TextLetterSpacing:
+        case SymbolProperty::TextLetterSpacing:
             return makeStyleProperty(layer.getTextLetterSpacing());
-        case Property::TextLineHeight:
+        case SymbolProperty::TextLineHeight:
             return makeStyleProperty(layer.getTextLineHeight());
-        case Property::TextMaxAngle:
+        case SymbolProperty::TextMaxAngle:
             return makeStyleProperty(layer.getTextMaxAngle());
-        case Property::TextMaxWidth:
+        case SymbolProperty::TextMaxWidth:
             return makeStyleProperty(layer.getTextMaxWidth());
-        case Property::TextOffset:
+        case SymbolProperty::TextOffset:
             return makeStyleProperty(layer.getTextOffset());
-        case Property::TextOptional:
+        case SymbolProperty::TextOptional:
             return makeStyleProperty(layer.getTextOptional());
-        case Property::TextPadding:
+        case SymbolProperty::TextPadding:
             return makeStyleProperty(layer.getTextPadding());
-        case Property::TextPitchAlignment:
+        case SymbolProperty::TextPitchAlignment:
             return makeStyleProperty(layer.getTextPitchAlignment());
-        case Property::TextRadialOffset:
+        case SymbolProperty::TextRadialOffset:
             return makeStyleProperty(layer.getTextRadialOffset());
-        case Property::TextRotate:
+        case SymbolProperty::TextRotate:
             return makeStyleProperty(layer.getTextRotate());
-        case Property::TextRotationAlignment:
+        case SymbolProperty::TextRotationAlignment:
             return makeStyleProperty(layer.getTextRotationAlignment());
-        case Property::TextSize:
+        case SymbolProperty::TextSize:
             return makeStyleProperty(layer.getTextSize());
-        case Property::TextTransform:
+        case SymbolProperty::TextTransform:
             return makeStyleProperty(layer.getTextTransform());
-        case Property::TextVariableAnchor:
+        case SymbolProperty::TextVariableAnchor:
             return makeStyleProperty(layer.getTextVariableAnchor());
-        case Property::TextWritingMode:
+        case SymbolProperty::TextWritingMode:
             return makeStyleProperty(layer.getTextWritingMode());
     }
     return {};
 }
 
 StyleProperty getLayerProperty(const SymbolLayer& layer, const std::string& name) {
-    const auto it = layerProperties.find(name.c_str());
-    if (it == layerProperties.end()) {
+    const auto it = symbolLayerProperties.find(name.c_str());
+    if (it == symbolLayerProperties.end()) {
         return {};
     }
-    return getLayerProperty(layer, static_cast<Property>(it->second));
+    return getLayerProperty(layer, static_cast<SymbolProperty>(it->second));
 }
 
 } // namespace
@@ -1370,238 +1369,239 @@ StyleProperty getLayerProperty(const SymbolLayer& layer, const std::string& name
 Value SymbolLayer::serialize() const {
     auto result = Layer::serialize();
     assert(result.getObject());
-    for (const auto& property : layerProperties) {
-        auto styleProperty = getLayerProperty(*this, static_cast<Property>(property.second));
+    for (const auto& property : symbolLayerProperties) {
+        auto styleProperty = getLayerProperty(*this, static_cast<SymbolProperty>(property.second));
         if (styleProperty.getKind() == StyleProperty::Kind::Undefined) continue;
-        serializeProperty(result, styleProperty, property.first.c_str(), property.second < kPaintPropertyCount);
+        serializeProperty(result, styleProperty, property.first.c_str(), property.second < kPaintPropertyCountSymbol);
     }
     return result;
 }
 
 std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, const Convertible& value) {
-    const auto it = layerProperties.find(name.c_str());
-    if (it == layerProperties.end()) return Error{"layer doesn't support this property"};
+    const auto it = symbolLayerProperties.find(name.c_str());
+    if (it == symbolLayerProperties.end()) return Error{"layer doesn't support this property"};
 
-    auto property = static_cast<Property>(it->second);
+    auto property = static_cast<SymbolProperty>(it->second);
 
-    if (property == Property::IconColor || property == Property::IconHaloColor || property == Property::TextColor ||
-        property == Property::TextHaloColor) {
+    if (property == SymbolProperty::IconColor || property == SymbolProperty::IconHaloColor ||
+        property == SymbolProperty::TextColor || property == SymbolProperty::TextHaloColor) {
         Error error;
         const auto& typedValue = convert<PropertyValue<Color>>(value, error, true, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::IconColor) {
+        if (property == SymbolProperty::IconColor) {
             setIconColor(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::IconHaloColor) {
+        if (property == SymbolProperty::IconHaloColor) {
             setIconHaloColor(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextColor) {
+        if (property == SymbolProperty::TextColor) {
             setTextColor(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextHaloColor) {
+        if (property == SymbolProperty::TextHaloColor) {
             setTextHaloColor(*typedValue);
             return std::nullopt;
         }
     }
-    if (property == Property::IconHaloBlur || property == Property::IconHaloWidth ||
-        property == Property::IconOpacity || property == Property::TextHaloBlur ||
-        property == Property::TextHaloWidth || property == Property::TextOpacity || property == Property::IconRotate ||
-        property == Property::IconSize || property == Property::SymbolSortKey ||
-        property == Property::TextLetterSpacing || property == Property::TextMaxWidth ||
-        property == Property::TextRadialOffset || property == Property::TextRotate || property == Property::TextSize) {
+    if (property == SymbolProperty::IconHaloBlur || property == SymbolProperty::IconHaloWidth ||
+        property == SymbolProperty::IconOpacity || property == SymbolProperty::TextHaloBlur ||
+        property == SymbolProperty::TextHaloWidth || property == SymbolProperty::TextOpacity ||
+        property == SymbolProperty::IconRotate || property == SymbolProperty::IconSize ||
+        property == SymbolProperty::SymbolSortKey || property == SymbolProperty::TextLetterSpacing ||
+        property == SymbolProperty::TextMaxWidth || property == SymbolProperty::TextRadialOffset ||
+        property == SymbolProperty::TextRotate || property == SymbolProperty::TextSize) {
         Error error;
         const auto& typedValue = convert<PropertyValue<float>>(value, error, true, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::IconHaloBlur) {
+        if (property == SymbolProperty::IconHaloBlur) {
             setIconHaloBlur(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::IconHaloWidth) {
+        if (property == SymbolProperty::IconHaloWidth) {
             setIconHaloWidth(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::IconOpacity) {
+        if (property == SymbolProperty::IconOpacity) {
             setIconOpacity(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextHaloBlur) {
+        if (property == SymbolProperty::TextHaloBlur) {
             setTextHaloBlur(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextHaloWidth) {
+        if (property == SymbolProperty::TextHaloWidth) {
             setTextHaloWidth(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextOpacity) {
+        if (property == SymbolProperty::TextOpacity) {
             setTextOpacity(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::IconRotate) {
+        if (property == SymbolProperty::IconRotate) {
             setIconRotate(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::IconSize) {
+        if (property == SymbolProperty::IconSize) {
             setIconSize(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::SymbolSortKey) {
+        if (property == SymbolProperty::SymbolSortKey) {
             setSymbolSortKey(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextLetterSpacing) {
+        if (property == SymbolProperty::TextLetterSpacing) {
             setTextLetterSpacing(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextMaxWidth) {
+        if (property == SymbolProperty::TextMaxWidth) {
             setTextMaxWidth(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextRadialOffset) {
+        if (property == SymbolProperty::TextRadialOffset) {
             setTextRadialOffset(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextRotate) {
+        if (property == SymbolProperty::TextRotate) {
             setTextRotate(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextSize) {
+        if (property == SymbolProperty::TextSize) {
             setTextSize(*typedValue);
             return std::nullopt;
         }
     }
-    if (property == Property::IconTranslate || property == Property::TextTranslate) {
+    if (property == SymbolProperty::IconTranslate || property == SymbolProperty::TextTranslate) {
         Error error;
         const auto& typedValue = convert<PropertyValue<std::array<float, 2>>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::IconTranslate) {
+        if (property == SymbolProperty::IconTranslate) {
             setIconTranslate(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextTranslate) {
+        if (property == SymbolProperty::TextTranslate) {
             setTextTranslate(*typedValue);
             return std::nullopt;
         }
     }
-    if (property == Property::IconTranslateAnchor || property == Property::TextTranslateAnchor) {
+    if (property == SymbolProperty::IconTranslateAnchor || property == SymbolProperty::TextTranslateAnchor) {
         Error error;
         const auto& typedValue = convert<PropertyValue<TranslateAnchorType>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::IconTranslateAnchor) {
+        if (property == SymbolProperty::IconTranslateAnchor) {
             setIconTranslateAnchor(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextTranslateAnchor) {
+        if (property == SymbolProperty::TextTranslateAnchor) {
             setTextTranslateAnchor(*typedValue);
             return std::nullopt;
         }
     }
-    if (property == Property::IconAllowOverlap || property == Property::IconIgnorePlacement ||
-        property == Property::IconKeepUpright || property == Property::IconOptional ||
-        property == Property::SymbolAvoidEdges || property == Property::TextAllowOverlap ||
-        property == Property::TextIgnorePlacement || property == Property::TextKeepUpright ||
-        property == Property::TextOptional) {
+    if (property == SymbolProperty::IconAllowOverlap || property == SymbolProperty::IconIgnorePlacement ||
+        property == SymbolProperty::IconKeepUpright || property == SymbolProperty::IconOptional ||
+        property == SymbolProperty::SymbolAvoidEdges || property == SymbolProperty::TextAllowOverlap ||
+        property == SymbolProperty::TextIgnorePlacement || property == SymbolProperty::TextKeepUpright ||
+        property == SymbolProperty::TextOptional) {
         Error error;
         const auto& typedValue = convert<PropertyValue<bool>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::IconAllowOverlap) {
+        if (property == SymbolProperty::IconAllowOverlap) {
             setIconAllowOverlap(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::IconIgnorePlacement) {
+        if (property == SymbolProperty::IconIgnorePlacement) {
             setIconIgnorePlacement(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::IconKeepUpright) {
+        if (property == SymbolProperty::IconKeepUpright) {
             setIconKeepUpright(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::IconOptional) {
+        if (property == SymbolProperty::IconOptional) {
             setIconOptional(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::SymbolAvoidEdges) {
+        if (property == SymbolProperty::SymbolAvoidEdges) {
             setSymbolAvoidEdges(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextAllowOverlap) {
+        if (property == SymbolProperty::TextAllowOverlap) {
             setTextAllowOverlap(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextIgnorePlacement) {
+        if (property == SymbolProperty::TextIgnorePlacement) {
             setTextIgnorePlacement(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextKeepUpright) {
+        if (property == SymbolProperty::TextKeepUpright) {
             setTextKeepUpright(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextOptional) {
+        if (property == SymbolProperty::TextOptional) {
             setTextOptional(*typedValue);
             return std::nullopt;
         }
     }
-    if (property == Property::IconAnchor || property == Property::TextAnchor) {
+    if (property == SymbolProperty::IconAnchor || property == SymbolProperty::TextAnchor) {
         Error error;
         const auto& typedValue = convert<PropertyValue<SymbolAnchorType>>(value, error, true, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::IconAnchor) {
+        if (property == SymbolProperty::IconAnchor) {
             setIconAnchor(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextAnchor) {
+        if (property == SymbolProperty::TextAnchor) {
             setTextAnchor(*typedValue);
             return std::nullopt;
         }
     }
-    if (property == Property::IconImage) {
+    if (property == SymbolProperty::IconImage) {
         Error error;
         const auto& typedValue = convert<PropertyValue<expression::Image>>(value, error, true, true);
         if (!typedValue) {
@@ -1611,24 +1611,24 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         setIconImage(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::IconOffset || property == Property::TextOffset) {
+    if (property == SymbolProperty::IconOffset || property == SymbolProperty::TextOffset) {
         Error error;
         const auto& typedValue = convert<PropertyValue<std::array<float, 2>>>(value, error, true, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::IconOffset) {
+        if (property == SymbolProperty::IconOffset) {
             setIconOffset(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextOffset) {
+        if (property == SymbolProperty::TextOffset) {
             setTextOffset(*typedValue);
             return std::nullopt;
         }
     }
-    if (property == Property::IconPadding) {
+    if (property == SymbolProperty::IconPadding) {
         Error error;
         const auto& typedValue = convert<PropertyValue<Padding>>(value, error, true, false);
         if (!typedValue) {
@@ -1638,35 +1638,35 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         setIconPadding(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::IconPitchAlignment || property == Property::IconRotationAlignment ||
-        property == Property::TextPitchAlignment || property == Property::TextRotationAlignment) {
+    if (property == SymbolProperty::IconPitchAlignment || property == SymbolProperty::IconRotationAlignment ||
+        property == SymbolProperty::TextPitchAlignment || property == SymbolProperty::TextRotationAlignment) {
         Error error;
         const auto& typedValue = convert<PropertyValue<AlignmentType>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::IconPitchAlignment) {
+        if (property == SymbolProperty::IconPitchAlignment) {
             setIconPitchAlignment(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::IconRotationAlignment) {
+        if (property == SymbolProperty::IconRotationAlignment) {
             setIconRotationAlignment(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextPitchAlignment) {
+        if (property == SymbolProperty::TextPitchAlignment) {
             setTextPitchAlignment(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextRotationAlignment) {
+        if (property == SymbolProperty::TextRotationAlignment) {
             setTextRotationAlignment(*typedValue);
             return std::nullopt;
         }
     }
-    if (property == Property::IconTextFit) {
+    if (property == SymbolProperty::IconTextFit) {
         Error error;
         const auto& typedValue = convert<PropertyValue<IconTextFitType>>(value, error, false, false);
         if (!typedValue) {
@@ -1676,7 +1676,7 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         setIconTextFit(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::IconTextFitPadding) {
+    if (property == SymbolProperty::IconTextFitPadding) {
         Error error;
         const auto& typedValue = convert<PropertyValue<std::array<float, 4>>>(value, error, false, false);
         if (!typedValue) {
@@ -1686,7 +1686,7 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         setIconTextFitPadding(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::SymbolPlacement) {
+    if (property == SymbolProperty::SymbolPlacement) {
         Error error;
         const auto& typedValue = convert<PropertyValue<SymbolPlacementType>>(value, error, false, false);
         if (!typedValue) {
@@ -1696,35 +1696,35 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         setSymbolPlacement(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::SymbolSpacing || property == Property::TextLineHeight ||
-        property == Property::TextMaxAngle || property == Property::TextPadding) {
+    if (property == SymbolProperty::SymbolSpacing || property == SymbolProperty::TextLineHeight ||
+        property == SymbolProperty::TextMaxAngle || property == SymbolProperty::TextPadding) {
         Error error;
         const auto& typedValue = convert<PropertyValue<float>>(value, error, false, false);
         if (!typedValue) {
             return error;
         }
 
-        if (property == Property::SymbolSpacing) {
+        if (property == SymbolProperty::SymbolSpacing) {
             setSymbolSpacing(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextLineHeight) {
+        if (property == SymbolProperty::TextLineHeight) {
             setTextLineHeight(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextMaxAngle) {
+        if (property == SymbolProperty::TextMaxAngle) {
             setTextMaxAngle(*typedValue);
             return std::nullopt;
         }
 
-        if (property == Property::TextPadding) {
+        if (property == SymbolProperty::TextPadding) {
             setTextPadding(*typedValue);
             return std::nullopt;
         }
     }
-    if (property == Property::SymbolZOrder) {
+    if (property == SymbolProperty::SymbolZOrder) {
         Error error;
         const auto& typedValue = convert<PropertyValue<SymbolZOrderType>>(value, error, false, false);
         if (!typedValue) {
@@ -1734,7 +1734,7 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         setSymbolZOrder(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::TextField) {
+    if (property == SymbolProperty::TextField) {
         Error error;
         const auto& typedValue = convert<PropertyValue<expression::Formatted>>(value, error, true, true);
         if (!typedValue) {
@@ -1744,7 +1744,7 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         setTextField(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::TextFont) {
+    if (property == SymbolProperty::TextFont) {
         Error error;
         const auto& typedValue = convert<PropertyValue<std::vector<std::string>>>(value, error, true, false);
         if (!typedValue) {
@@ -1754,7 +1754,7 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         setTextFont(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::TextJustify) {
+    if (property == SymbolProperty::TextJustify) {
         Error error;
         const auto& typedValue = convert<PropertyValue<TextJustifyType>>(value, error, true, false);
         if (!typedValue) {
@@ -1764,7 +1764,7 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         setTextJustify(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::TextTransform) {
+    if (property == SymbolProperty::TextTransform) {
         Error error;
         const auto& typedValue = convert<PropertyValue<TextTransformType>>(value, error, true, false);
         if (!typedValue) {
@@ -1774,7 +1774,7 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         setTextTransform(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::TextVariableAnchor) {
+    if (property == SymbolProperty::TextVariableAnchor) {
         Error error;
         const auto& typedValue =
             convert<PropertyValue<std::vector<TextVariableAnchorType>>>(value, error, false, false);
@@ -1785,7 +1785,7 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         setTextVariableAnchor(*typedValue);
         return std::nullopt;
     }
-    if (property == Property::TextWritingMode) {
+    if (property == SymbolProperty::TextWritingMode) {
         Error error;
         const auto& typedValue = convert<PropertyValue<std::vector<TextWritingModeType>>>(value, error, false, false);
         if (!typedValue) {
@@ -1802,72 +1802,72 @@ std::optional<Error> SymbolLayer::setPropertyInternal(const std::string& name, c
         return error;
     }
 
-    if (property == Property::IconColorTransition) {
+    if (property == SymbolProperty::IconColorTransition) {
         setIconColorTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::IconHaloBlurTransition) {
+    if (property == SymbolProperty::IconHaloBlurTransition) {
         setIconHaloBlurTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::IconHaloColorTransition) {
+    if (property == SymbolProperty::IconHaloColorTransition) {
         setIconHaloColorTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::IconHaloWidthTransition) {
+    if (property == SymbolProperty::IconHaloWidthTransition) {
         setIconHaloWidthTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::IconOpacityTransition) {
+    if (property == SymbolProperty::IconOpacityTransition) {
         setIconOpacityTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::IconTranslateTransition) {
+    if (property == SymbolProperty::IconTranslateTransition) {
         setIconTranslateTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::IconTranslateAnchorTransition) {
+    if (property == SymbolProperty::IconTranslateAnchorTransition) {
         setIconTranslateAnchorTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::TextColorTransition) {
+    if (property == SymbolProperty::TextColorTransition) {
         setTextColorTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::TextHaloBlurTransition) {
+    if (property == SymbolProperty::TextHaloBlurTransition) {
         setTextHaloBlurTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::TextHaloColorTransition) {
+    if (property == SymbolProperty::TextHaloColorTransition) {
         setTextHaloColorTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::TextHaloWidthTransition) {
+    if (property == SymbolProperty::TextHaloWidthTransition) {
         setTextHaloWidthTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::TextOpacityTransition) {
+    if (property == SymbolProperty::TextOpacityTransition) {
         setTextOpacityTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::TextTranslateTransition) {
+    if (property == SymbolProperty::TextTranslateTransition) {
         setTextTranslateTransition(*transition);
         return std::nullopt;
     }
 
-    if (property == Property::TextTranslateAnchorTransition) {
+    if (property == SymbolProperty::TextTranslateAnchorTransition) {
         setTextTranslateAnchorTransition(*transition);
         return std::nullopt;
     }

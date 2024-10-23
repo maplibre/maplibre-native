@@ -39,4 +39,20 @@ void RemoveRenderTargetRequest::execute(RenderOrchestrator &orchestrator) {
     orchestrator.removeRenderTarget(renderTarget);
 }
 
+#if MLN_DRAWABLE_RENDERER
+
+void activateRenderTarget(const RenderTargetPtr &renderTarget_, bool activate, UniqueChangeRequestVec &changes) {
+    if (renderTarget_) {
+        if (activate) {
+            // The RenderTree has determined this render target should be included in the renderable set for a frame
+            changes.emplace_back(std::make_unique<AddRenderTargetRequest>(renderTarget_));
+        } else {
+            // The RenderTree is informing us we should not render anything
+            changes.emplace_back(std::make_unique<RemoveRenderTargetRequest>(renderTarget_));
+        }
+    }
+}
+
+#endif
+
 } // namespace mbgl

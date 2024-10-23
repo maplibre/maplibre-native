@@ -7,9 +7,9 @@
 using mbgl::stringIndexer;
 
 // Allow public default construction
-class StringIndexer : public mbgl::StringIndexer {
+class PublicStringIndexer : public mbgl::StringIndexer {
 public:
-    StringIndexer() {}
+    PublicStringIndexer() {}
 };
 
 TEST(StringIndexer, SingletonStringIndexer) {
@@ -17,7 +17,7 @@ TEST(StringIndexer, SingletonStringIndexer) {
 }
 
 TEST(StringIndexer, AddStrings) {
-    StringIndexer strIndexer;
+    PublicStringIndexer strIndexer;
     EXPECT_EQ(strIndexer.size(), 0);
 
     const auto id1 = strIndexer.get("test string1");
@@ -31,7 +31,7 @@ TEST(StringIndexer, AddStrings) {
 }
 
 TEST(StringIndexer, GetString) {
-    StringIndexer strIndexer;
+    PublicStringIndexer strIndexer;
     EXPECT_EQ(strIndexer.size(), 0);
 
     constexpr auto str = "test string1";
@@ -49,7 +49,7 @@ TEST(StringIndexer, GetString) {
 }
 
 TEST(StringIndexer, Reallocate) {
-    StringIndexer strIndexer;
+    PublicStringIndexer strIndexer;
     EXPECT_EQ(strIndexer.size(), 0);
 
     constexpr auto str = "reallocate test string1";
@@ -80,7 +80,7 @@ TEST(StringIndexer, Reallocate) {
 }
 
 TEST(StringIndexer, GetOOBIdentity) {
-    StringIndexer strIndexer;
+    PublicStringIndexer strIndexer;
     EXPECT_EQ(strIndexer.size(), 0);
 
     std::string str;

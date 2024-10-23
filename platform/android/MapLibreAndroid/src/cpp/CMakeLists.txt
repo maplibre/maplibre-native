@@ -243,4 +243,8 @@ target_link_libraries(maplibre
                               mbgl-core
                               mbgl-vendor-unique_resource)
 
+set_target_properties(maplibre PROPERTIES
+    UNITY_BUILD OFF
+)
+
 install(TARGETS maplibre LIBRARY DESTINATION lib)
