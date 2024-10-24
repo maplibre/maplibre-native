@@ -269,6 +269,12 @@ HTTPRequest::HTTPRequest(HTTPFileSource::Impl *context_, Resource resource_, Fil
       resource(std::move(resource_)),
       callback(std::move(callback_)),
       handle(context->getHandle()) {
+    if (resource.dataRange) {
+        const std::string header = std::string("Range: bytes=") + std::to_string(resource.dataRange->first) +
+                                   std::string("-") + std::to_string(resource.dataRange->second);
+        headers = curl_slist_append(headers, header.c_str());
+    }
+
     // If there's already a response, set the correct etags/modified headers to
     // make sure we are getting a 304 response if possible. This avoids
     // redownloading unchanged data.
@@ -417,7 +423,7 @@ void HTTPRequest::handleResult(CURLcode code) {
         long responseCode = 0;
         curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, &responseCode);
 
-        if (responseCode == 200) {
+        if (responseCode == 200 || responseCode == 206) {
             if (data) {
                 response->data = std::move(data);
             } else {

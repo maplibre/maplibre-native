@@ -41,6 +41,7 @@ add_library(
     ${PROJECT_SOURCE_DIR}/test/storage/offline_database.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/offline_download.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/online_file_source.test.cpp
+    ${PROJECT_SOURCE_DIR}/test/storage/pmtiles_file_source.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/resource.test.cpp
     ${PROJECT_SOURCE_DIR}/test/storage/sqlite.test.cpp
     ${PROJECT_SOURCE_DIR}/test/style/conversion/conversion_impl.test.cpp
@@ -171,7 +172,7 @@ if(MLN_WITH_METAL)
     )
 endif()
 
-if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Android)
+if(CMAKE_SYSTEM_NAME STREQUAL Android)
     message("Target platform does not support HTTP tests or dependencies not found.")
 
     set(MLN_TEST_HAS_TEST_SERVER 0)
@@ -185,7 +186,7 @@ else()
         ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
         PROPERTIES
         COMPILE_FLAGS
-        -Wno-shadow
+        $<$<NOT:$<BOOL:${WIN32}>>:-Wno-shadow>
     )
     set_source_files_properties(
         ${PROJECT_SOURCE_DIR}/test/src/mbgl/test/http_server.cpp
@@ -262,7 +263,7 @@ if (MLN_WITH_CLANG_TIDY)
     set_target_properties(mbgl-test PROPERTIES CXX_CLANG_TIDY "${CLANG_TIDY_COMMAND}")
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL Linux)
+if (WIN32 OR CMAKE_SYSTEM_NAME STREQUAL Linux)
     target_compile_definitions(
         mbgl-test
         PRIVATE USE_CPP_TEST_SERVER

@@ -38,7 +38,7 @@ int main(int argc, char** argv) try {
 
         bool shouldIgnore = false;
         std::string ignoreReason;
-        const std::string ignoreName = "expression-tests/" + id;
+        const std::filesystem::path ignoreName("expression-tests/" + id);
         const auto it = std::find_if(
             ignores.cbegin(), ignores.cend(), [&ignoreName](const auto& ignore) { return ignore.id == ignoreName; });
         if (it != ignores.end()) {
