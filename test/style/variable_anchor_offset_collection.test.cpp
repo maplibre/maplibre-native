@@ -13,7 +13,43 @@ using namespace mbgl;
 using namespace mbgl::style;
 using namespace mbgl::style::conversion;
 
-TEST(StyleConversion, VariableAnchorOffsetCollection) {
+TEST(VariableAnchorOffsetCollection, Calculations) {
+    auto parseJson = [&](const std::string& src) {
+        Error error;
+        return convertJSON<VariableAnchorOffsetCollection>(src, error);
+    };
+
+    mbgl::util::Interpolator<VariableAnchorOffsetCollection> interpolator;
+
+    // valid value
+    {
+        auto a = parseJson(R"(["top", [0, 0], "bottom", [2, 2]])");
+        auto b = parseJson(R"(["top", [1, 1], "bottom", [4, 4]])");
+        ASSERT_TRUE(a.has_value());
+        ASSERT_TRUE(b.has_value());
+        auto c = interpolator(*a, *b, 0.5);
+        EXPECT_EQ(
+            VariableAnchorOffsetCollection({{SymbolAnchorType::Top, {0.5, 0.5}}, {SymbolAnchorType::Bottom, {3, 3}}}),
+            c);
+    }
+
+    // should thorw with mismatched endpoints
+    {
+        auto a = parseJson(R"(["top", [0, 0]])");
+        auto b = parseJson(R"(["bottom", [1, 1]])");
+        ASSERT_TRUE(a.has_value());
+        ASSERT_TRUE(b.has_value());
+        EXPECT_THROW(interpolator(*a, *b, 0.5), std::runtime_error);
+
+        a = parseJson(R"(["top", [0, 0]])");
+        b = parseJson(R"(["top", [1, 1], "bottom", [2, 2]])");
+        ASSERT_TRUE(a.has_value());
+        ASSERT_TRUE(b.has_value());
+        EXPECT_THROW(interpolator(*a, *b, 0.5), std::runtime_error);
+    }
+}
+
+TEST(VariableAnchorOffsetCollection, StyleConversion) {
     Error error;
 
     auto parseVariableAnchorOffsetCollection = [&](const std::string& src) {
@@ -42,7 +78,7 @@ TEST(StyleConversion, VariableAnchorOffsetCollection) {
         ASSERT_EQ(error.message, expectedError);
 
         // empty array
-        expectedError = "array must containing an even number of elements";
+        expectedError = "array must contain an even number of elements";
         variableAnchorOffset = parseVariableAnchorOffsetCollection("[]");
         ASSERT_FALSE(variableAnchorOffset.has_value());
         ASSERT_EQ(error.message, expectedError);
@@ -99,7 +135,10 @@ TEST(StyleConversion, VariableAnchorOffsetCollection) {
         EXPECT_NE(nullptr, value.getObject());
         EXPECT_EQ(7u, value.getObject()->size());
     }
+}
 
+TEST(VariableAnchorOffsetCollection, Expression) {
+    Error error;
     auto jsonToExpression = [&](const std::string& json) {
         auto propertyValue = conversion::convertJSON<PropertyValue<VariableAnchorOffsetCollection>>(
             json, error, /*allowDataExpressions*/ true, /*convertTokens*/ false);
