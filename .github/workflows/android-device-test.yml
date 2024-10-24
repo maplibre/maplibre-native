@@ -162,9 +162,20 @@ jobs:
         if: (matrix.test.name == 'Android Benchmark' || failure()) && env.run_device_test == 'true'
         run: |
           npm install
-          temp_dir="$(mktemp -d)"
-          node scripts/aws-device-farm/store-test-artifacts.mjs ${{ steps.aws_device_farm_run.outputs.runArn }} "$temp_dir"
-          zip -r test_artifacts.zip "$temp_dir"
+          echo results_dir="$(mktemp -d)" >> "$GITHUB_ENV"
+          node scripts/aws-device-farm/store-test-artifacts.mjs --runArn ${{ steps.aws_device_farm_run.outputs.runArn }} --outputDir ${{ env.results_dir }}
+          zip -r test_artifacts.zip ${{ env.results_dir }}
+      
+      - name: Store Benchmark Results
+        if: matrix.test.name == 'Android Benchmark' && env.run_device_test == 'true'
+        run: |
+          for zipfile in ${{ env.results_dir }}/*.zip; do
+            unzip "$zipfile" -d "${zipfile%.zip}"
+          done
+
+          find "${{ env.results_dir }}" -name 'benchmark_results.json' | while read -r benchmark_json; do
+            aws s3 cp "$benchmark_json" "s3://maplibre-native/android-benchmark-render/$(uuidgen).json"
+          done
 
       - name: Upload Test Artifacts
         if: (matrix.test.name == 'Android Benchmark' || failure()) && env.run_device_test == 'true'
