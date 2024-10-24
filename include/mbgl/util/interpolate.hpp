@@ -152,13 +152,22 @@ struct Interpolator<VariableAnchorOffsetCollection> {
 public:
     VariableAnchorOffsetCollection operator()(const VariableAnchorOffsetCollection& a,
                                               const VariableAnchorOffsetCollection& b,
-                                              const float t) const noexcept {
-        assert(a.size() == b.size());
+                                              const float t) const {
+        if (a.size() != b.size()) {
+            throw std::runtime_error("Cannot interpolate values of different length. from: " + a.toString() +
+                                     ", to: " + b.toString());
+        }
         std::vector<AnchorOffsetPair> offsetMap;
+        offsetMap.reserve(a.size());
         for (size_t index = 0; index < a.size(); index++) {
             const auto& aPair = a[index];
             const auto& bPair = b[index];
-            assert(aPair.anchorType == bPair.anchorType);
+            if (aPair.anchorType != bPair.anchorType) {
+                throw std::runtime_error(
+                    "Cannot interpolate values containing mismatched anchors. index: " + util::toString(index) +
+                    "from: " + Enum<style::SymbolAnchorType>::toString(aPair.anchorType) +
+                    ", to: " + Enum<style::SymbolAnchorType>::toString(bPair.anchorType));
+            }
             auto offset = std::array<float, 2>{interpolate(aPair.offset[0], bPair.offset[0], t),
                                                interpolate(aPair.offset[1], bPair.offset[1], t)};
             offsetMap.emplace_back(aPair.anchorType, offset);

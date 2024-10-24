@@ -145,7 +145,7 @@ std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetColl
 
     const auto arraySize = arrayLength(value);
     if (arraySize < 1 || arraySize % 2 != 0) {
-        error.message = "array must containing an even number of elements";
+        error.message = "array must contain an even number of elements";
         return std::nullopt;
     }
 
@@ -179,7 +179,7 @@ std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetColl
 
         auto anchorType = anchor.value();
         auto offset = std::array<float, 2>{xOffset.value(), yOffset.value()};
-        collection.emplace_back(AnchorOffsetPair{anchorType, offset});
+        collection.push_back(AnchorOffsetPair{anchorType, offset});
     }
 
     return VariableAnchorOffsetCollection(std::move(collection));

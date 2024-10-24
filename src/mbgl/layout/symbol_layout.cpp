@@ -364,9 +364,9 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
 
     // If style specifies text-variable-anchor-offset, just return it
     if (!textVariableAnchorOffset.isUndefined()) {
-        std::vector<AnchorOffsetPair> anchorOffsets;
         auto variableAnchorOffset = layout->evaluate<TextVariableAnchorOffset>(zoom, feature, canonicalID);
         if (!variableAnchorOffset.empty()) {
+            std::vector<AnchorOffsetPair> anchorOffsets;
             anchorOffsets.reserve(variableAnchorOffset.size());
             // Convert offsets from EM to PX, and apply baseline shift
             for (const auto& anchorOffset : variableAnchorOffset) {
@@ -389,7 +389,7 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
                         break;
                 }
 
-                anchorOffsets.emplace_back(AnchorOffsetPair{anchorOffset.anchorType, variableTextOffset});
+                anchorOffsets.push_back(AnchorOffsetPair{anchorOffset.anchorType, variableTextOffset});
             }
 
             result = VariableAnchorOffsetCollection(std::move(anchorOffsets));
@@ -407,15 +407,15 @@ std::optional<VariableAnchorOffsetCollection> SymbolLayout::getTextVariableAncho
                                        layout->evaluate<TextOffset>(zoom, feature, canonicalID)[1] * util::ONE_EM}};
             }
 
-            std::vector<AnchorOffsetPair> anchorOffsets;
-            anchorOffsets.reserve(variableTextAnchor.size());
+            std::vector<AnchorOffsetPair> anchorOffsetPairs;
+            anchorOffsetPairs.reserve(variableTextAnchor.size());
             for (auto anchor : variableTextAnchor) {
                 auto offset = variableTextOffset;
                 offset = SymbolLayout::evaluateVariableOffset(anchor, offset);
-                anchorOffsets.emplace_back(AnchorOffsetPair{anchor, offset});
+                anchorOffsetPairs.push_back(AnchorOffsetPair{anchor, offset});
             }
 
-            result = VariableAnchorOffsetCollection(std::move(anchorOffsets));
+            result = VariableAnchorOffsetCollection(std::move(anchorOffsetPairs));
         }
     }
 
