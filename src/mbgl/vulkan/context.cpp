@@ -27,10 +27,6 @@
 #include <algorithm>
 #include <cstring>
 
-#ifndef MLN_VULKAN_DESCRIPTOR_POOL_SIZE
-#define MLN_VULKAN_DESCRIPTOR_POOL_SIZE 30000
-#endif
-
 namespace mbgl {
 namespace vulkan {
 
@@ -39,6 +35,12 @@ namespace vulkan {
 // per https://vulkan.gpuinfo.org/displaydevicelimit.php?name=maxVertexInputBindings
 // this can be queried at runtime (VkPhysicalDeviceLimits.maxVertexInputBindings)
 constexpr uint32_t maximumVertexBindingCount = 16;
+
+constexpr uint32_t globalDescriptorPoolSize = 3 * 4;
+constexpr uint32_t layerDescriptorPoolSize = 3 * 256;
+constexpr uint32_t drawableUniformDescriptorPoolSize = 3 * 1024;
+constexpr uint32_t drawableImageDescriptorPoolSize = drawableUniformDescriptorPoolSize / 2;
+
 static uint32_t glslangRefCount = 0;
 
 class RenderbufferResource : public gfx::RenderbufferResource {
@@ -71,17 +73,19 @@ void Context::initFrameResources() {
     const auto& device = backend.getDevice();
     const auto frameCount = backend.getMaxFrames();
 
-    // descriptor pool info
-    const std::vector<vk::DescriptorPoolSize> poolSizes = {
-        {vk::DescriptorType::eUniformBuffer, MLN_VULKAN_DESCRIPTOR_POOL_SIZE},
-        {vk::DescriptorType::eCombinedImageSampler, MLN_VULKAN_DESCRIPTOR_POOL_SIZE},
-    };
+    descriptorPoolMap.emplace(DescriptorSetType::Global,
+                              DescriptorPoolGrowable(globalDescriptorPoolSize, shaders::globalUBOCount));
 
-    const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
-                                        .setPoolSizes(poolSizes)
-                                        .setMaxSets(MLN_VULKAN_DESCRIPTOR_POOL_SIZE);
+    descriptorPoolMap.emplace(DescriptorSetType::Layer,
+                              DescriptorPoolGrowable(layerDescriptorPoolSize, shaders::maxUBOCountPerLayer));
 
-    globalDescriptorPool = device->createDescriptorPoolUnique(descriptorPoolInfo);
+    descriptorPoolMap.emplace(
+        DescriptorSetType::DrawableUniform,
+        DescriptorPoolGrowable(drawableUniformDescriptorPoolSize, shaders::maxUBOCountPerDrawable));
+
+    descriptorPoolMap.emplace(
+        DescriptorSetType::DrawableImage,
+        DescriptorPoolGrowable(drawableImageDescriptorPoolSize, shaders::maxTextureCountPerShader));
 
     // command buffers
     const vk::CommandBufferAllocateInfo allocateInfo(
@@ -107,6 +111,14 @@ void Context::initFrameResources() {
 
     // force placeholder texture upload before any descriptor sets
     (void)getDummyTexture();
+
+    buildUniformDescriptorSetLayout(
+        globalUniformDescriptorSetLayout, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout");
+    buildUniformDescriptorSetLayout(
+        layerUniformDescriptorSetLayout, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout");
+    buildUniformDescriptorSetLayout(
+        drawableUniformDescriptorSetLayout, shaders::maxUBOCountPerDrawable, "DrawableUniformDescriptorSetLayout");
+    buildImageDescriptorSetLayout();
 }
 
 void Context::destroyResources() {
@@ -122,11 +134,7 @@ void Context::destroyResources() {
     frameResources.clear();
 }
 
-const vk::UniqueDescriptorPool& Context::getGlobalDescriptorPool() const {
-    return globalDescriptorPool;
-}
-
-void Context::enqueueDeletion(std::function<void(const Context&)>&& function) {
+void Context::enqueueDeletion(std::function<void(Context&)>&& function) {
     if (frameResources.empty()) {
         function(*this);
         return;
@@ -522,13 +530,9 @@ const std::unique_ptr<Texture2D>& Context::getDummyTexture() {
     return dummyTexture2D;
 }
 
-const vk::UniqueDescriptorSetLayout& Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
-                                                                              size_t uniformCount,
-                                                                              const std::string& name) {
-    if (layout) {
-        return layout;
-    }
-
+void Context::buildUniformDescriptorSetLayout(vk::UniqueDescriptorSetLayout& layout,
+                                              size_t uniformCount,
+                                              const std::string& name) {
     std::vector<vk::DescriptorSetLayoutBinding> bindings;
     const auto stageFlags = vk::ShaderStageFlags() | vk::ShaderStageFlagBits::eVertex |
                             vk::ShaderStageFlagBits::eFragment;
@@ -544,62 +548,63 @@ const vk::UniqueDescriptorSetLayout& Context::buildUniformDescriptorSetLayout(vk
     const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
     layout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
     backend.setDebugName(layout.get(), name);
-
-    return layout;
 }
 
-const vk::UniqueDescriptorSetLayout& Context::getImageDescriptorSetLayout() {
-    if (!imageDescriptorSetLayout) {
-        std::vector<vk::DescriptorSetLayoutBinding> bindings;
+void Context::buildImageDescriptorSetLayout() {
+    std::vector<vk::DescriptorSetLayoutBinding> bindings;
 
-        for (size_t i = 0; i < shaders::maxTextureCountPerShader; ++i) {
-            bindings.push_back(vk::DescriptorSetLayoutBinding()
-                                   .setBinding(static_cast<uint32_t>(i))
-                                   .setStageFlags(vk::ShaderStageFlagBits::eFragment)
-                                   .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
-                                   .setDescriptorCount(1));
-        }
-
-        const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
-        imageDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(descriptorSetLayoutCreateInfo);
-        backend.setDebugName(imageDescriptorSetLayout.get(), "ImageDescriptorSetLayout");
+    for (size_t i = 0; i < shaders::maxTextureCountPerShader; ++i) {
+        bindings.push_back(vk::DescriptorSetLayoutBinding()
+                               .setBinding(static_cast<uint32_t>(i))
+                               .setStageFlags(vk::ShaderStageFlagBits::eFragment)
+                               .setDescriptorType(vk::DescriptorType::eCombinedImageSampler)
+                               .setDescriptorCount(1));
     }
 
-    return imageDescriptorSetLayout;
-}
-
-const std::vector<vk::DescriptorSetLayout>& Context::getDescriptorSetLayouts() {
-    if (descriptorSetLayouts.empty()) {
-        descriptorSetLayouts = {
-            buildUniformDescriptorSetLayout(
-                globalUniformDescriptorSetLayout, shaders::globalUBOCount, "GlobalUniformDescriptorSetLayout")
-                .get(),
-            buildUniformDescriptorSetLayout(
-                layerUniformDescriptorSetLayout, shaders::maxUBOCountPerLayer, "LayerUniformDescriptorSetLayout")
-                .get(),
-            buildUniformDescriptorSetLayout(drawableUniformDescriptorSetLayout,
-                                            shaders::maxUBOCountPerDrawable,
-                                            "DrawableUniformDescriptorSetLayout")
-                .get(),
-            getImageDescriptorSetLayout().get()};
-    }
-
-    return descriptorSetLayouts;
+    const auto descriptorSetLayoutCreateInfo = vk::DescriptorSetLayoutCreateInfo().setBindings(bindings);
+    drawableImageDescriptorSetLayout = backend.getDevice()->createDescriptorSetLayoutUnique(
+        descriptorSetLayoutCreateInfo);
+    backend.setDebugName(drawableImageDescriptorSetLayout.get(), "ImageDescriptorSetLayout");
 }
 
 const vk::DescriptorSetLayout& Context::getDescriptorSetLayout(DescriptorSetType type) {
-    uint32_t index = static_cast<uint32_t>(type);
-    assert(index < static_cast<uint32_t>(DescriptorSetType::Count));
-    return getDescriptorSetLayouts()[index];
+    switch (type) {
+        case DescriptorSetType::Global:
+            return globalUniformDescriptorSetLayout.get();
+
+        case DescriptorSetType::Layer:
+            return layerUniformDescriptorSetLayout.get();
+
+        case DescriptorSetType::DrawableUniform:
+            return drawableUniformDescriptorSetLayout.get();
+
+        case DescriptorSetType::DrawableImage:
+            return drawableImageDescriptorSetLayout.get();
+
+        default:
+            assert(static_cast<uint32_t>(type) < static_cast<uint32_t>(DescriptorSetType::Count));
+            return globalUniformDescriptorSetLayout.get();
+            break;
+    }
+}
+
+DescriptorPoolGrowable& Context::getDescriptorPool(DescriptorSetType type) {
+    assert(static_cast<uint32_t>(type) < static_cast<uint32_t>(DescriptorSetType::Count));
+    return descriptorPoolMap[type];
 }
 
 const vk::UniquePipelineLayout& Context::getGeneralPipelineLayout() {
     if (generalPipelineLayout) return generalPipelineLayout;
 
-    const auto& descriptorLayouts = getDescriptorSetLayouts();
+    const std::vector<vk::DescriptorSetLayout> layouts = {
+        globalUniformDescriptorSetLayout.get(),
+        layerUniformDescriptorSetLayout.get(),
+        drawableUniformDescriptorSetLayout.get(),
+        drawableImageDescriptorSetLayout.get(),
+    };
 
     generalPipelineLayout = backend.getDevice()->createPipelineLayoutUnique(
-        vk::PipelineLayoutCreateInfo().setSetLayouts(descriptorLayouts));
+        vk::PipelineLayoutCreateInfo().setSetLayouts(layouts));
 
     backend.setDebugName(generalPipelineLayout.get(), "PipelineLayout_general");
 
@@ -620,7 +625,7 @@ const vk::UniquePipelineLayout& Context::getPushConstantPipelineLayout() {
     return pushConstantPipelineLayout;
 }
 
-void Context::FrameResources::runDeletionQueue(const Context& context) {
+void Context::FrameResources::runDeletionQueue(Context& context) {
     for (const auto& function : deletionQueue) function(context);
 
     deletionQueue.clear();

@@ -190,7 +190,7 @@ configurations {
     }
 }
 
-apply<DownloadVulkanValidationPlugin>()
+// apply<DownloadVulkanValidationPlugin>()
 
 // intentionally disabled
 // apply(plugin = "maplibre.jacoco-report")
