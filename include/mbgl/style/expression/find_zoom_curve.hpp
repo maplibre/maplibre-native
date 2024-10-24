@@ -12,7 +12,7 @@ namespace style {
 namespace expression {
 
 using ZoomCurveOrError = std::optional<variant<const Interpolate*, const Step*, ParsingError>>;
-using ZoomCurvePtr = variant<std::nullptr_t, const Interpolate*, const Step*>;
+using ZoomCurvePtr = std::variant<std::nullptr_t, const Interpolate*, const Step*>;
 
 /// Find a zoom curve in the expression tree.
 /// @param expr Expression root

@@ -13,12 +13,12 @@ namespace style {
 class VectorSource final : public Source {
 public:
     VectorSource(std::string id,
-                 variant<std::string, Tileset> urlOrTileset,
+                 std::variant<std::string, Tileset> urlOrTileset,
                  std::optional<float> maxZoom = std::nullopt,
                  std::optional<float> minZoom = std::nullopt);
     ~VectorSource() final;
 
-    const variant<std::string, Tileset>& getURLOrTileset() const;
+    const std::variant<std::string, Tileset>& getURLOrTileset() const;
     std::optional<std::string> getURL() const;
 
     class Impl;
@@ -42,7 +42,7 @@ protected:
     Mutable<Source::Impl> createMutable() const noexcept final;
 
 private:
-    const variant<std::string, Tileset> urlOrTileset;
+    const std::variant<std::string, Tileset> urlOrTileset;
     std::unique_ptr<AsyncRequest> req;
     std::optional<float> maxZoom;
     std::optional<float> minZoom;
