@@ -17,6 +17,32 @@ enum class DescriptorSetType : uint8_t {
     Count,
 };
 
+struct DescriptorPoolGrowable {
+    struct PoolInfo {
+        vk::UniqueDescriptorPool pool;
+        uint32_t remainingSets{0};
+
+        PoolInfo(vk::UniqueDescriptorPool&& pool_, uint32_t remainingSets_)
+            : pool(std::move(pool_)),
+              remainingSets(remainingSets_) {}
+    };
+
+    const uint32_t maxSets{0};
+    const uint32_t descriptorsPerSet{0};
+    const float growFactor{1.5f};
+
+    std::vector<PoolInfo> pools;
+    int32_t currentPoolIndex{-1};
+
+    PoolInfo& current() { return pools[currentPoolIndex]; }
+
+    DescriptorPoolGrowable() = default;
+    DescriptorPoolGrowable(uint32_t maxSets_, uint32_t descriptorsPerSet_, float growFactor_ = 1.5f)
+        : maxSets(maxSets_),
+          descriptorsPerSet(descriptorsPerSet_),
+          growFactor(growFactor_) {}
+};
+
 class DescriptorSet {
 public:
     DescriptorSet(Context& context_, DescriptorSetType type_);
@@ -28,11 +54,15 @@ public:
     void bind(CommandEncoder& encoder);
 
 protected:
+    void createDescriptorPool(DescriptorPoolGrowable& growablePool);
+
+protected:
     Context& context;
     DescriptorSetType type;
 
     std::vector<bool> dirty;
     std::vector<vk::DescriptorSet> descriptorSets;
+    int32_t descriptorPoolIndex{-1};
 };
 
 class UniformDescriptorSet : public DescriptorSet {

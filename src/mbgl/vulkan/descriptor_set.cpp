@@ -3,8 +3,10 @@
 #include <mbgl/vulkan/context.hpp>
 #include <mbgl/vulkan/command_encoder.hpp>
 #include <mbgl/vulkan/texture2d.hpp>
+#include <mbgl/util/logging.hpp>
 
 #include <cassert>
+#include <math.h>
 
 namespace mbgl {
 namespace vulkan {
@@ -14,10 +16,31 @@ DescriptorSet::DescriptorSet(Context& context_, DescriptorSetType type_)
       type(type_) {}
 
 DescriptorSet::~DescriptorSet() {
-    context.enqueueDeletion([sets = std::move(descriptorSets)](const auto& context_) mutable {
-        context_.getBackend().getDevice()->freeDescriptorSets(context_.getGlobalDescriptorPool().get(), sets);
-    });
+    context.enqueueDeletion(
+        [type_ = type, poolIndex = descriptorPoolIndex, sets = std::move(descriptorSets)](auto& context_) mutable {
+            auto& poolInfo = context_.getDescriptorPool(type_).pools[poolIndex];
+            context_.getBackend().getDevice()->freeDescriptorSets(poolInfo.pool.get(), sets);
+            poolInfo.remainingSets += sets.size();
+        });
 }
+
+void DescriptorSet::createDescriptorPool(DescriptorPoolGrowable& growablePool) {
+    const auto& device = context.getBackend().getDevice();
+
+    const uint32_t maxSets = static_cast<uint32_t>(growablePool.maxSets *
+                                                   std::pow(growablePool.growFactor, growablePool.pools.size()));
+    const vk::DescriptorPoolSize size = {type != DescriptorSetType::DrawableImage
+                                             ? vk::DescriptorType::eUniformBuffer
+                                             : vk::DescriptorType::eCombinedImageSampler,
+                                         maxSets * growablePool.descriptorsPerSet};
+
+    const auto descriptorPoolInfo = vk::DescriptorPoolCreateInfo(vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet)
+                                        .setPoolSizes(size)
+                                        .setMaxSets(maxSets);
+
+    growablePool.pools.emplace_back(device->createDescriptorPoolUnique(descriptorPoolInfo), maxSets);
+    growablePool.currentPoolIndex = growablePool.pools.size() - 1;
+};
 
 void DescriptorSet::allocate() {
     if (!descriptorSets.empty()) {
@@ -25,14 +48,26 @@ void DescriptorSet::allocate() {
     }
 
     const auto& device = context.getBackend().getDevice();
-    const auto& descriptorPool = context.getGlobalDescriptorPool();
     const auto& descriptorSetLayout = context.getDescriptorSetLayout(type);
+    auto& growablePool = context.getDescriptorPool(type);
     const std::vector<vk::DescriptorSetLayout> layouts(context.getBackend().getMaxFrames(), descriptorSetLayout);
 
-    const auto descriptorAllocInfo =
-        vk::DescriptorSetAllocateInfo().setDescriptorPool(*descriptorPool).setSetLayouts(layouts);
+    if (growablePool.currentPoolIndex == -1 || growablePool.current().remainingSets < layouts.size()) {
+        const auto& poolIt = std::find_if(growablePool.pools.begin(), growablePool.pools.end(), [&](const auto& p) {
+            return p.remainingSets >= layouts.size();
+        });
 
-    descriptorSets = device->allocateDescriptorSets(descriptorAllocInfo);
+        if (poolIt != growablePool.pools.end()) {
+            growablePool.currentPoolIndex = std::distance(growablePool.pools.begin(), poolIt);
+        } else {
+            createDescriptorPool(growablePool);
+        }
+    }
+
+    descriptorPoolIndex = growablePool.currentPoolIndex;
+    descriptorSets = device->allocateDescriptorSets(
+        vk::DescriptorSetAllocateInfo().setDescriptorPool(growablePool.current().pool.get()).setSetLayouts(layouts));
+    growablePool.current().remainingSets -= descriptorSets.size();
 
     markDirty(true);
 }
