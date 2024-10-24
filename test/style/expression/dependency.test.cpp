@@ -39,6 +39,7 @@ TEST(ExpressionDependencies, Convert) {
     EXPECT_EQ(Dependency::Feature, toString(number(string(get("color"))))->dependencies);
     EXPECT_EQ(Dependency::Feature, boolean(string(get("color")))->dependencies);
     EXPECT_EQ(Dependency::Feature, toFormatted(toColor(string(get("color"))))->dependencies);
+    EXPECT_EQ(Dependency::Feature, toVariableAnchorOffset(string(get("color")))->dependencies);
 
     /// See `coercion.cpp`, `extraDependency`
     EXPECT_EQ(Dependency::Feature, toImage(string(get("color")))->dependencies);

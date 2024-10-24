@@ -136,6 +136,55 @@ std::optional<Padding> Converter<Padding>::operator()(const Convertible& value, 
     return result;
 }
 
+std::optional<VariableAnchorOffsetCollection> Converter<VariableAnchorOffsetCollection>::operator()(
+    const Convertible& value, Error& error) const {
+    if (!isArray(value)) {
+        error.message = "value must be an array";
+        return std::nullopt;
+    }
+
+    const auto arraySize = arrayLength(value);
+    if (arraySize < 1 || arraySize % 2 != 0) {
+        error.message = "array must contain an even number of elements";
+        return std::nullopt;
+    }
+
+    std::vector<AnchorOffsetPair> collection;
+    collection.reserve(arraySize / 2);
+    for (size_t index = 0; index < arraySize; index += 2) {
+        Convertible offsetValue = arrayMember(value, index + 1);
+        std::optional<SymbolAnchorType> anchor = Converter<SymbolAnchorType>{}(arrayMember(value, index), error);
+
+        if (!anchor) {
+            error.message = "anchor must be a valid anchor value";
+            return std::nullopt;
+        }
+
+        if (!isArray(offsetValue)) {
+            error.message = "anchor offset must be an array";
+            return std::nullopt;
+        }
+
+        if (arrayLength(offsetValue) != 2) {
+            error.message = "anchor offset must have two elements";
+            return std::nullopt;
+        }
+
+        std::optional<float> xOffset = toNumber(arrayMember(offsetValue, 0));
+        std::optional<float> yOffset = toNumber(arrayMember(offsetValue, 1));
+        if (!xOffset || !yOffset) {
+            error.message = "anchor offset must have two numbers";
+            return std::nullopt;
+        }
+
+        auto anchorType = anchor.value();
+        auto offset = std::array<float, 2>{xOffset.value(), yOffset.value()};
+        collection.push_back(AnchorOffsetPair{anchorType, offset});
+    }
+
+    return VariableAnchorOffsetCollection(std::move(collection));
+}
+
 template <size_t N>
 std::optional<std::array<float, N>> Converter<std::array<float, N>>::operator()(const Convertible& value,
                                                                                 Error& error) const {

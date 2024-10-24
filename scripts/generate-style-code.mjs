@@ -33,7 +33,7 @@ function isLightProperty(property) {
 };
 
 /**
- * @param {any} property 
+ * @param {any} property
  */
 function isOverridable(property) {
     return ['text-color'].includes(property.name);
@@ -58,6 +58,8 @@ function expressionType(property) {
             return `ColorType`;
         case 'padding':
             return `PaddingType`;
+        case 'variableAnchorOffsetCollection':
+            return `VariableAnchorOffsetCollectionType`;
         case 'formatted':
             return `FormattedType`;
         case 'array':
@@ -72,6 +74,9 @@ function expressionType(property) {
  * @returns {string}
  */
 function evaluatedType(property) {
+  if (/text-variable-anchor-offset/.test(property.name)) {
+    return 'VariableAnchorOffsetCollection';
+  }
   if (/-translate-anchor$/.test(property.name)) {
     return 'TranslateAnchorType';
   }
@@ -232,6 +237,7 @@ function defaultValue(property) {
   case 'formatted':
   case 'string':
   case 'resolvedImage':
+  case 'variableAnchorOffsetCollection':
     return property.default ? `{${JSON.stringify(property.default)}}` : '{}';
   case 'enum':
     if (property.default === undefined) {

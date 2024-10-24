@@ -40,16 +40,18 @@ void NodeExpression::Init(v8::Local<v8::Object> target) {
 }
 
 type::Type parseType(v8::Local<v8::Object> type) {
-    static std::unordered_map<std::string, type::Type> types = {{"string", type::String},
-                                                                {"number", type::Number},
-                                                                {"boolean", type::Boolean},
-                                                                {"object", type::Object},
-                                                                {"color", type::Color},
-                                                                {"padding", type::Padding},
-                                                                {"value", type::Value},
-                                                                {"formatted", type::Formatted},
-                                                                {"number-format", type::String},
-                                                                {"resolvedImage", type::Image}};
+    static std::unordered_map<std::string, type::Type> types = {
+        {"string", type::String},
+        {"number", type::Number},
+        {"boolean", type::Boolean},
+        {"object", type::Object},
+        {"color", type::Color},
+        {"padding", type::Padding},
+        {"value", type::Value},
+        {"formatted", type::Formatted},
+        {"number-format", type::String},
+        {"resolvedImage", type::Image},
+        {"variableAnchorOffsetCollection", type::VariableAnchorOffsetCollection}};
 
     v8::Local<v8::Value> v8kind = Nan::Get(type, Nan::New("kind").ToLocalChecked()).ToLocalChecked();
     std::string kind(*v8::String::Utf8Value(v8::Isolate::GetCurrent(), v8kind));
@@ -235,6 +237,18 @@ struct ToValue {
     }
 
     v8::Local<v8::Value> operator()(const Image& image) { return toJS(image.toValue()); }
+
+    v8::Local<v8::Value> operator()(const mbgl::VariableAnchorOffsetCollection& variableAnchorOffsets) {
+        std::vector<Value> components;
+        components.reserve(variableAnchorOffsets.size() * 2);
+        for (const auto& variableAnchorOffset : variableAnchorOffsets) {
+            components.emplace_back(
+                std::string(mbgl::Enum<mbgl::style::SymbolAnchorType>::toString(variableAnchorOffset.anchorType)));
+            components.emplace_back(std::vector<Value>{static_cast<double>(variableAnchorOffset.offset[0]),
+                                                       static_cast<double>(variableAnchorOffset.offset[1])});
+        }
+        return operator()(components);
+    }
 };
 
 v8::Local<v8::Value> toJS(const Value& value) {
