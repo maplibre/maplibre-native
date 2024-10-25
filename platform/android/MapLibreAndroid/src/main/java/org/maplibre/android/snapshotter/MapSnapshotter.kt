@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.annotation.Keep
 import androidx.annotation.UiThread
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.drawable.toBitmap
 import org.maplibre.android.R
 import org.maplibre.android.attribution.AttributionLayout
 import org.maplibre.android.attribution.AttributionMeasure
