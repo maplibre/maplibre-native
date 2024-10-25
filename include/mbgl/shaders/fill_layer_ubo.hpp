@@ -116,13 +116,5 @@ struct alignas(16) FillEvaluatedPropsUBO {
 };
 static_assert(sizeof(FillEvaluatedPropsUBO) == 3 * 16);
 
-enum {
-    idFillDrawableUBO = globalUBOCount,
-    idFillTilePropsUBO,
-    idFillInterpolateUBO,
-    idFillEvaluatedPropsUBO,
-    fillUBOCount
-};
-
 } // namespace shaders
 } // namespace mbgl
