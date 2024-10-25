@@ -10,6 +10,8 @@
 /platform/android/MapLibreAndroidTestApp/.cxx
 /platform/android/MapLibreAndroidTestApp/build
 /platform/android/.gradle
+/platform/android/buildSrc/.gradle
+/platform/android/buildSrc/build
 /platform/android/x86
 /platform/android/x86_64
 /cmake-build-debug
@@ -58,3 +60,5 @@ cache.sqlite-journal
 out.png
 /test/android/app/.cxx
 /test/android/app/build
+/test/android/local.properties
+/render-test/android/local.properties
