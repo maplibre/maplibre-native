@@ -25,11 +25,5 @@ struct alignas(16) RasterEvaluatedPropsUBO {
 };
 static_assert(sizeof(RasterEvaluatedPropsUBO) == 64);
 
-enum {
-    idRasterDrawableUBO = globalUBOCount,
-    idRasterEvaluatedPropsUBO,
-    rasterUBOCount
-};
-
 } // namespace shaders
 } // namespace mbgl

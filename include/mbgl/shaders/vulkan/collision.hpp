@@ -23,7 +23,7 @@ layout(location = 2) in ivec2 in_extrude;
 layout(location = 3) in uvec2 in_placed;
 layout(location = 4) in vec2 in_shift;
 
-layout(set = 0, binding = 1) uniform CollisionBoxUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CollisionBoxUBO {
     mat4 matrix;
     vec2 extrude_scale;
     float overscale_factor;
@@ -58,7 +58,7 @@ layout(location = 1) in float frag_notUsed;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform CollisionBoxUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CollisionBoxUBO {
     mat4 matrix;
     vec2 extrude_scale;
     float overscale_factor;
@@ -103,7 +103,7 @@ layout(location = 1) in ivec2 in_anchor_position;
 layout(location = 2) in ivec2 in_extrude;
 layout(location = 3) in uvec2 in_placed;
 
-layout(set = 0, binding = 1) uniform CollisionCircleUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CollisionCircleUBO {
     mat4 matrix;
     vec2 extrude_scale;
     float overscale_factor;
@@ -148,7 +148,7 @@ layout(location = 4) in vec2 frag_extrude_scale;
 
 layout(location = 0) out vec4 out_color;
 
-layout(set = 0, binding = 1) uniform CollisionCircleUBO {
+layout(set = DRAWABLE_UBO_SET_INDEX, binding = 0) uniform CollisionCircleUBO {
     mat4 matrix;
     vec2 extrude_scale;
     float overscale_factor;

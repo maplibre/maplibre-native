@@ -57,13 +57,5 @@ struct alignas(16) FillExtrusionInterpolateUBO {
 };
 static_assert(sizeof(FillExtrusionInterpolateUBO) == 2 * 16);
 
-enum {
-    idFillExtrusionDrawableUBO = globalUBOCount,
-    idFillExtrusionPropsUBO,
-    idFillExtrusionTilePropsUBO,
-    idFillExtrusionInterpolateUBO,
-    fillExtrusionUBOCount
-};
-
 } // namespace shaders
 } // namespace mbgl
