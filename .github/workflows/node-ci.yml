@@ -67,6 +67,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
+env:
+  SCCACHE_GHA_ENABLED: "true"
+
 jobs:
   test:
     runs-on: ${{ matrix.runs-on }}
@@ -88,23 +91,17 @@ jobs:
     env:
       BUILDTYPE: "Release"
 
-    defaults:
-      run:
-        working-directory: ./
-        shell: bash
-
     steps:
+      - name: Configure long filenames in Windows
+        if: runner.os == 'Windows'
+        run: |
+          git config --system core.longpaths true
+
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          submodules: recursive
           fetch-depth: 0
-
-      - name: Setup submodules
-        shell: bash
-        run: |
-          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-          git submodule sync --recursive
-          git -c core.longpaths=true -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive || true
 
       - name: Get OS Architecture
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -155,24 +152,6 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
 
-      # Fixes an issue with the image causing builds to fail - https://github.com/actions/runner-images/issues/8598
-      - name: Remove Strawberry Perl from PATH (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $env:PATH = $env:PATH -replace "C:\\Strawberry\\c\\bin;", ""
-          "PATH=$env:PATH" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Setup cmake
-        if: ${{contains(runner.name, 'GitHub Actions')}}
-        uses: jwlawson/actions-setup-cmake@v2
-        with:
-          cmake-version: '3.29.2'
- 
-      - name: cmake version
-        run: |
-          cmake --version
-
       - name: Set up ccache (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         uses: hendrikmuhs/ccache-action@v1
@@ -183,16 +162,23 @@ jobs:
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
             ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
 
-      - name: Set up ccache (Windows)
+      - name: Export GitHub Actions cache environment variables for sccache and vcpkg (Windows)
         if: runner.os == 'Windows'
-        uses: hendrikmuhs/ccache-action@v1
+        uses: actions/github-script@v7
         with:
-          variant: "sccache"
-          key: ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ github.ref }}
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Set up sccache (Windows)
+        if: runner.os == 'Windows'
+        uses: mozilla-actions/sccache-action@v0.0.6
+
+      - name: Initialize sccache (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          ${{ env.SCCACHE_PATH }} --start-server
+          ${{ env.SCCACHE_PATH }} --zero-stats
 
       - name: Cache cmake-node-module deps
         uses: actions/cache@v4
@@ -226,32 +212,21 @@ jobs:
             -DCMAKE_CXX_COMPILER=g++-12 \
             -DMLN_WITH_NODE=ON
 
-      - name: "Create directory '${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache' (Windows)"
-        if: runner.os == 'Windows'
-        run: mkdir -p ${{ github.workspace }}/platform/windows/vendor/vcpkg/bincache
-        shell: bash
-
-      - name: Restore vcpkg cache (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ github.workspace }}/platform/windows/vendor/vcpkg
-            !${{ github.workspace }}/platform/windows/vendor/vcpkg/buildtrees
-            !${{ github.workspace }}/platform/windows/vendor/vcpkg/packages
-            !${{ github.workspace }}/platform/windows/vendor/vcpkg/downloads
-            !${{ github.workspace }}/platform/windows/vendor/vcpkg/installed
-          key: |
-            ${{ matrix.runs-on }}-${{ env.BUILDTYPE }}-${{ github.job }}-${{ hashFiles( '.git/modules/platform/windows/vendor/vcpkg/HEAD' ) }}-${{ hashFiles( 'platform/windows/Get-VendorPackages.ps1' ) }}
-
       - name: Configure maplibre-native (Windows)
         if: runner.os == 'Windows'
+        env:
+          VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+          VCPKG_KEEP_ENV_VARS: "CMAKE_C_COMPILER_LAUNCHER;CMAKE_CXX_COMPILER_LAUNCHER"
+          CMAKE_C_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
+          CMAKE_CXX_COMPILER_LAUNCHER: "${{ env.SCCACHE_PATH }}"
         shell: pwsh
         run: |
+          cmake --version
           cmake . -B build `
             -G Ninja `
+            -DCMAKE_POLICY_DEFAULT_CMP0141=NEW `
+            -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=Embedded `
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} `
-            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
             -DMLN_WITH_NODE=ON
 
       - name: Build maplibre-native (MacOS/Linux)
@@ -290,14 +265,13 @@ jobs:
 
       - name: Test (Windows)
         if: runner.os == 'Windows'
-        shell: pwsh
         working-directory: platform/node
         env:
-          LIBGL_ALWAYS_SOFTWARE: true
-          GALLIUM_DRIVER: softpipe
+          GALLIUM_DRIVER: "llvmpipe"
+        shell: pwsh
         run: |
-          Invoke-WebRequest https://github.com/pal1000/mesa-dist-win/releases/download/22.3.5/mesa3d-22.3.5-release-msvc.7z -OutFile mesa3d.7z
-          & 'C:\Program Files\7-Zip\7z.exe' e -olib\node-v115 .\mesa3d.7z x64\opengl32.dll x64\libgallium_wgl.dll x64\libGLESv2.dll x64\libglapi.dll
+          Invoke-WebRequest 'https://github.com/pal1000/mesa-dist-win/releases/download/24.2.5/mesa3d-24.2.5-release-msvc.7z' -OutFile mesa3d.7z
+          & 'C:\Program Files\7-Zip\7z.exe' e '-olib\node-v115' mesa3d.7z 'x64\opengl32.dll' 'x64\libgallium_wgl.dll' 'x64\libGLESv2.dll' 'x64\libglapi.dll'
           npm test
 
       # On PRs make sure that the npm package can be packaged.
