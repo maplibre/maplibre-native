@@ -31,8 +31,8 @@
 
 namespace {
 // https://github.com/protomaps/PMTiles/blob/main/spec/v3/spec.md#3-header
-constexpr int PMTILES_HEADER_OFFSET = 0;
-constexpr int PMTILES_HEADER_LENGTH = 127;
+constexpr int pmtilesHeaderOffset = 0;
+constexpr int pmtilesHeaderLength = 127;
 
 // To avoid allocating lots of memory with PMTiles directory caching,
 // set a limit so it doesn't grow unlimited
@@ -221,8 +221,8 @@ private:
         Resource resource(Resource::Kind::Source, url);
         resource.loadingMethod = Resource::LoadingMethod::Network;
 
-        resource.dataRange = std::make_pair<uint64_t, uint64_t>(PMTILES_HEADER_OFFSET,
-                                                                PMTILES_HEADER_OFFSET + PMTILES_HEADER_LENGTH - 1);
+        resource.dataRange = std::make_pair<uint64_t, uint64_t>(pmtilesHeaderOffset,
+                                                                pmtilesHeaderOffset + pmtilesHeaderLength - 1);
 
         tasks[req] = getFileSource()->request(resource, [=, this](const Response& response) {
             if (response.error) {
