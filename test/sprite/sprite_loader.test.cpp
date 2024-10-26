@@ -29,6 +29,8 @@ public:
     std::function<void(std::exception_ptr)> spriteError;
 };
 
+std::string defaultSpritePath = "test/fixtures/resources/sprite";
+
 class SpriteLoaderTest {
 public:
     SpriteLoaderTest()
@@ -46,6 +48,7 @@ public:
     StubSpriteLoaderObserver observer;
     TaggedScheduler threadPool;
     SpriteLoader spriteLoader;
+    std::string spritePath = defaultSpritePath; // default
 
     void run() {
         // Squelch logging.
@@ -53,7 +56,7 @@ public:
 
         spriteLoader.setObserver(&observer);
 
-        Sprite sprite = Sprite("default", "test/fixtures/resources/sprite");
+        Sprite sprite = Sprite("default", spritePath);
         spriteLoader.load(sprite, fileSource);
 
         loop.run();
@@ -62,18 +65,22 @@ public:
     void end() { loop.stop(); }
 };
 
-Response successfulSpriteImageResponse(const Resource& resource) {
-    EXPECT_EQ("test/fixtures/resources/sprite.png", resource.url);
-    Response response;
-    response.data = std::make_unique<std::string>(util::read_file(resource.url));
-    return response;
+auto successfulSpriteImageResponse(const std::string& spritePath = defaultSpritePath) {
+    return [spritePath](const Resource& resource) {
+        EXPECT_EQ(spritePath + ".png", resource.url);
+        Response response;
+        response.data = std::make_unique<std::string>(util::read_file(resource.url));
+        return response;
+    };
 }
 
-Response successfulSpriteJSONResponse(const Resource& resource) {
-    EXPECT_EQ("test/fixtures/resources/sprite.json", resource.url);
-    Response response;
-    response.data = std::make_unique<std::string>(util::read_file(resource.url));
-    return response;
+auto successfulSpriteJSONResponse(const std::string& spritePath = defaultSpritePath) {
+    return [spritePath](const Resource& resource) {
+        EXPECT_EQ(spritePath + ".json", resource.url);
+        Response response;
+        response.data = std::make_unique<std::string>(util::read_file(resource.url));
+        return response;
+    };
 }
 
 Response failedSpriteResponse(const Resource&) {
@@ -88,11 +95,15 @@ Response corruptSpriteResponse(const Resource&) {
     return response;
 }
 
-TEST(SpriteLoader, LoadingSuccess) {
-    SpriteLoaderTest test;
+class SpriteLoaderParametrized : public testing::TestWithParam<std::tuple<std::string, size_t>> {};
 
-    test.fileSource.spriteImageResponse = successfulSpriteImageResponse;
-    test.fileSource.spriteJSONResponse = successfulSpriteJSONResponse;
+TEST_P(SpriteLoaderParametrized, LoadingSuccess) {
+    SpriteLoaderTest test;
+    auto [spritePath, expectedImages] = GetParam();
+    test.spritePath = spritePath;
+
+    test.fileSource.spriteImageResponse = successfulSpriteImageResponse(spritePath);
+    test.fileSource.spriteJSONResponse = successfulSpriteJSONResponse(spritePath);
 
     test.observer.spriteError = [&](std::exception_ptr error) {
         FAIL() << util::toString(error);
@@ -100,17 +111,22 @@ TEST(SpriteLoader, LoadingSuccess) {
     };
 
     test.observer.spriteLoaded = [&](std::vector<Immutable<style::Image::Impl>> images) {
-        EXPECT_EQ(images.size(), 418u);
+        EXPECT_EQ(images.size(), expectedImages);
         test.end();
     };
 
     test.run();
 }
 
+INSTANTIATE_TEST_SUITE_P(SpriteLoaderSprites,
+                         SpriteLoaderParametrized,
+                         ::testing::Values(std::make_tuple("test/fixtures/resources/sprite", 418),
+                                           std::make_tuple("test/fixtures/resources/versatiles-sprite/sprite", 112)));
+
 TEST(SpriteLoader, JSONLoadingFail) {
     SpriteLoaderTest test;
 
-    test.fileSource.spriteImageResponse = successfulSpriteImageResponse;
+    test.fileSource.spriteImageResponse = successfulSpriteImageResponse();
     test.fileSource.spriteJSONResponse = failedSpriteResponse;
 
     test.observer.spriteError = [&](std::exception_ptr error) {
@@ -126,7 +142,7 @@ TEST(SpriteLoader, ImageLoadingFail) {
     SpriteLoaderTest test;
 
     test.fileSource.spriteImageResponse = failedSpriteResponse;
-    test.fileSource.spriteJSONResponse = successfulSpriteJSONResponse;
+    test.fileSource.spriteJSONResponse = successfulSpriteJSONResponse();
 
     test.observer.spriteError = [&](std::exception_ptr error) {
         EXPECT_TRUE(error != nullptr);
@@ -140,7 +156,7 @@ TEST(SpriteLoader, ImageLoadingFail) {
 TEST(SpriteLoader, JSONLoadingCorrupted) {
     SpriteLoaderTest test;
 
-    test.fileSource.spriteImageResponse = successfulSpriteImageResponse;
+    test.fileSource.spriteImageResponse = successfulSpriteImageResponse();
     test.fileSource.spriteJSONResponse = corruptSpriteResponse;
 
     test.observer.spriteError = [&](std::exception_ptr error) {
@@ -156,7 +172,7 @@ TEST(SpriteLoader, ImageLoadingCorrupted) {
     SpriteLoaderTest test;
 
     test.fileSource.spriteImageResponse = corruptSpriteResponse;
-    test.fileSource.spriteJSONResponse = successfulSpriteJSONResponse;
+    test.fileSource.spriteJSONResponse = successfulSpriteJSONResponse();
 
     test.observer.spriteError = [&](std::exception_ptr error) {
         EXPECT_TRUE(error != nullptr);
