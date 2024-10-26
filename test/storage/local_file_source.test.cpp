@@ -5,6 +5,7 @@
 #include <mbgl/util/run_loop.hpp>
 
 #include <climits>
+#include <cstdint>
 #include <gtest/gtest.h>
 
 #if defined(WIN32)
@@ -25,7 +26,7 @@ std::string toAbsoluteURL(const std::string& fileName) {
 #else
     char* cwd = getcwd(buff, PATH_MAX + 1);
 #endif
-    std::string url = {"file://" + std::string(cwd) + "/test/fixtures/storage/assets/" + fileName};
+    std::string url = {mbgl::util::FILE_PROTOCOL + std::string(cwd) + "/test/fixtures/storage/assets/" + fileName};
     assert(url.size() <= PATH_MAX);
     return url;
 }
@@ -70,6 +71,25 @@ TEST(LocalFileSource, NonEmptyFile) {
         EXPECT_EQ(nullptr, res.error);
         ASSERT_TRUE(res.data.get());
         EXPECT_EQ("content is here\n", *res.data);
+        loop.stop();
+    });
+
+    loop.run();
+}
+
+TEST(LocalFileSource, PartialFile) {
+    util::RunLoop loop;
+
+    LocalFileSource fs(ResourceOptions::Default(), ClientOptions());
+
+    Resource resource(Resource::Unknown, toAbsoluteURL("nonempty"));
+    resource.dataRange = std::make_pair<uint64_t, uint64_t>(4, 12);
+
+    std::unique_ptr<AsyncRequest> req = fs.request(resource, [&](Response res) {
+        req.reset();
+        EXPECT_EQ(nullptr, res.error);
+        ASSERT_TRUE(res.data.get());
+        EXPECT_EQ("ent is he", *res.data);
         loop.stop();
     });
 
