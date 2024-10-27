@@ -111,7 +111,7 @@ TEST_P(SpriteLoaderParametrized, LoadingSuccess) {
         test.end();
     };
 
-    test.observer.spriteLoaded = [&](std::vector<Immutable<style::Image::Impl>> images) {
+    test.observer.spriteLoaded = [&, expectedImages](std::vector<Immutable<style::Image::Impl>> images) {
         EXPECT_EQ(images.size(), expectedImages);
         test.end();
     };
