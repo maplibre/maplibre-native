@@ -123,7 +123,7 @@ TEST_P(SpriteLoaderParametrized, LoadingSuccess) {
 INSTANTIATE_TEST_SUITE_P(
     SpriteLoaderSprites,
     SpriteLoaderParametrized,
-    ::testing::Values(std::make_tuple("test/fixtures/resources/sprite", 418, 1.0),
+    ::testing::Values(std::make_tuple("test/fixtures/resources/sprite", 418, 1.0f),
                       std::make_tuple("test/fixtures/resources/versatiles-sprite/sprite", 112, 1.0f),
                       std::make_tuple("test/fixtures/resources/versatiles-sprite/sprite", 112, 2.0f)));
 
