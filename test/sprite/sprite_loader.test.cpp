@@ -65,7 +65,7 @@ public:
     void end() { loop.stop(); }
 };
 
-auto successfulSpriteImageResponse(const std::string& spritePath = defaultSpritePath, float pixelRatio = 1) {
+auto successfulSpriteImageResponse(const std::string& spritePath = defaultSpritePath, float pixelRatio = 1.0f) {
     return [spritePath, pixelRatio](const Resource& resource) {
         EXPECT_EQ(spritePath + (pixelRatio == 2.0 ? "@2x" : "") + ".png", resource.url);
         Response response;
@@ -74,7 +74,7 @@ auto successfulSpriteImageResponse(const std::string& spritePath = defaultSprite
     };
 }
 
-auto successfulSpriteJSONResponse(const std::string& spritePath = defaultSpritePath, float pixelRatio = 1) {
+auto successfulSpriteJSONResponse(const std::string& spritePath = defaultSpritePath, float pixelRatio = 1.0f) {
     return [spritePath, pixelRatio](const Resource& resource) {
         EXPECT_EQ(spritePath + (pixelRatio == 2.0 ? "@2x" : "") + ".json", resource.url);
         Response response;
@@ -122,10 +122,9 @@ TEST_P(SpriteLoaderParametrized, LoadingSuccess) {
 INSTANTIATE_TEST_SUITE_P(
     SpriteLoaderSprites,
     SpriteLoaderParametrized,
-    ::testing::Values(
-        std::make_tuple<std::string, size_t>("test/fixtures/resources/sprite", 418, 1.0),
-        std::make_tuple<std::string, size_t>("test/fixtures/resources/versatiles-sprite/sprite", 112, 1.0),
-        std::make_tuple<std::string, size_t>("test/fixtures/resources/versatiles-sprite/sprite", 112, 2.0)));
+    ::testing::Values(std::make_tuple("test/fixtures/resources/sprite", 418, 1.0),
+                      std::make_tuple("test/fixtures/resources/versatiles-sprite/sprite", 112, 1.0f),
+                      std::make_tuple("test/fixtures/resources/versatiles-sprite/sprite", 112, 2.0f)));
 
 TEST(SpriteLoader, JSONLoadingFail) {
     SpriteLoaderTest test;
