@@ -1,9 +1,9 @@
 repos:
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-    -   id: check-yaml
-        args: [--allow-multiple-documents]
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: check-yaml
+    args: [--allow-multiple-documents]
 - repo: https://github.com/pre-commit/mirrors-clang-format
   rev: v19.1.2
   hooks:
@@ -13,18 +13,16 @@ repos:
 - repo: https://github.com/keith/pre-commit-buildifier
   rev: 7.3.1
   hooks:
-    - id: buildifier
-- repo: https://github.com/Mateusz-Grzelinski/actionlint-py
-  rev: v1.7.3.17
+  - id: buildifier
+- repo: https://github.com/rhysd/actionlint
+  rev: v1.7.3
   hooks:
-    - id: actionlint
-      additional_dependencies: [shellcheck-py]
+  - id: actionlint
 - repo: https://github.com/nicklockwood/SwiftFormat
   rev: "0.54.6"
   hooks:
-    - id: swiftformat
-      args: [--swiftversion, "5.8"]
+  - id: swiftformat
+    args: [--swiftversion, "5.8"]
 ci:
   # sometimes fails https://github.com/keith/pre-commit-buildifier/issues/13
   skip: [buildifier]
-  
