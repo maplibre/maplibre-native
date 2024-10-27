@@ -98,7 +98,8 @@ Response corruptSpriteResponse(const Resource&) {
 class SpriteLoaderParametrized : public testing::TestWithParam<std::tuple<std::string, size_t, float>> {};
 
 TEST_P(SpriteLoaderParametrized, LoadingSuccess) {
-    auto [spritePath, expectedImages, pixelRatio] = GetParam();
+    const auto [spritePath, expectedImages, pixelRatio_] = GetParam();
+    const auto pixelRatio = pixelRatio_; // lambda cannot capture structured binding yet
 
     SpriteLoaderTest test{pixelRatio};
     test.spritePath = spritePath;
